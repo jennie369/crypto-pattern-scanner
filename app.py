@@ -67,7 +67,7 @@ def run_scan(coins, timeframe, sensitivity):
     st.subheader("🔄 Scanning...")
     progress = st.progress(0)
     status = st.empty()
-    exchange = ccxt.binance({'enableRateLimit': True})
+    exchange = ccxt.bybit({'enableRateLimit': True})
     detector = PatternDetector(sensitivity=sensitivity)
     results = []
     
