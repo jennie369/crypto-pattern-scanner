@@ -115,7 +115,7 @@ def display_results(res):
             
             # Show first 5 patterns with charts
             import ccxt
-            exchange = ccxt.binance({'enableRateLimit': True})
+            exchange = ccxt.bybit({'enableRateLimit': True})
             
             shown = 0
             for result in res['data']:
