@@ -67,7 +67,7 @@ def run_scan(coins, timeframe, sensitivity):
     st.subheader("🔄 Scanning...")
     progress = st.progress(0)
     status = st.empty()
-    exchange = ccxt.bybit({'enableRateLimit': True})
+    exchange = ccxt.okx({'enableRateLimit': True})
     detector = PatternDetector(sensitivity=sensitivity)
     results = []
     
@@ -115,7 +115,7 @@ def display_results(res):
             
             # Show first 5 patterns with charts
             import ccxt
-            exchange = ccxt.bybit({'enableRateLimit': True})
+            exchange = ccxt.okx({'enableRateLimit': True})
             
             shown = 0
             for result in res['data']:
