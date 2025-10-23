@@ -85,10 +85,10 @@ def run_scan(coins, timeframe, sensitivity):
             progress.progress((idx+1)/len(coins))
             time.sleep(0.1)
         except Exception as e:
-        st.error(f"❌ {coin}: Error - {str(e)}")
-        st.error(f"Error type: {type(e).__name__}")
-        import traceback
-        st.code(traceback.format_exc())
+        	st.error(f"❌ {coin}: Error - {str(e)}")
+        	st.error(f"Error type: {type(e).__name__}")
+        	import traceback
+        	st.code(traceback.format_exc())
     
     status.text("✅ Done!")
     st.session_state.scan_results = {'data': results, 'timestamp': datetime.now().strftime('%H:%M:%S'), 'total': len(coins), 'found': len(results)}
