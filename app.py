@@ -283,11 +283,21 @@ def main():
             st.info("💡 Tip: Thử tăng sensitivity hoặc đổi timeframe")
 
 def run_scan(coins, timeframe, sensitivity):
-    """Run pattern scan"""
+    """Run pattern scan with proper timeframe mapping"""
     st.subheader("🔄 Scanning...")
-    
     progress = st.progress(0)
     status = st.empty()
+    
+    # TIMEFRAME MAPPING
+    tf_mapping = {
+        "15 phút": "15m",
+        "1 giờ": "1h",
+        "4 giờ": "4h",
+        "1 ngày": "1d"
+    }
+    
+    # Convert to actual timeframe
+    actual_tf = tf_mapping.get(timeframe, "15m")
     
     try:
         exchange = ccxt.okx({'enableRateLimit': True})
@@ -302,15 +312,8 @@ def run_scan(coins, timeframe, sensitivity):
         try:
             status.text(f"🔍 {coin} ({idx+1}/{len(coins)})")
             
-# Convert display name to actual timeframe
-tf_mapping = {
-    "15 phút": "15m",
-    "1 giờ": "1h", 
-    "4 giờ": "4h",
-    "1 ngày": "1d"
-}
-actual_timeframe = tf_mapping.get(timeframe, "15m")
-ohlcv = exchange.fetch_ohlcv(coin, actual_timeframe, limit=200)
+            # Use actual_tf instead of timeframe
+            ohlcv = exchange.fetch_ohlcv(coin, actual_tf, limit=200)
             st.info(f"✅ {coin}: Fetched {len(ohlcv)} candles")
             
             df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
@@ -328,17 +331,15 @@ ohlcv = exchange.fetch_ohlcv(coin, actual_timeframe, limit=200)
                         'entry': p.get('entry', 0),
                         'stop_loss': p.get('stop_loss', 0),
                         'take_profits': p.get('take_profits', []),
-                        'description': p.get('description', ''),
                         'df': df
                     })
             
             progress.progress((idx + 1) / len(coins))
             
         except Exception as e:
-            st.error(f"❌ {coin}: Error - {str(e)}")
-            st.error(f"Error type: {type(e).__name__}")
+            st.error(f"❌ {coin}: {str(e)}")
     
-    status.text(f"✅ Done!")
+    status.text(f"✅ Done! Found {len(results)} patterns")
     progress.progress(1.0)
     
     return results
