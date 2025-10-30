@@ -149,8 +149,6 @@ def check_password():
     return False
 
 def main():
-def main():
-    # ============ HEADER GEM HOLDING ============
     st.markdown("""
     <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
                 padding: 25px; border-radius: 12px; margin-bottom: 25px; text-align: center;'>
@@ -161,15 +159,15 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
-    # ============ WATERMARK ============
     st.markdown("""
     <div style='position: fixed; bottom: 15px; right: 15px; opacity: 0.4; 
-                font-size: 11px; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 5px;'>
+                font-size: 11px; background: rgba(0,0,0,0.5); 
+                padding: 5px 10px; border-radius: 5px;'>
         Gem Holding © 2025
     </div>
     """, unsafe_allow_html=True)
     
-    # Phần code cũ tiếp tục bên dưới...
+    # Code cũ tiếp tục...
     """Main app"""
     
     # Check for admin panel
