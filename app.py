@@ -302,7 +302,15 @@ def run_scan(coins, timeframe, sensitivity):
         try:
             status.text(f"🔍 {coin} ({idx+1}/{len(coins)})")
             
-            ohlcv = exchange.fetch_ohlcv(coin, timeframe, limit=200)
+# Convert display name to actual timeframe
+tf_mapping = {
+    "15 phút": "15m",
+    "1 giờ": "1h", 
+    "4 giờ": "4h",
+    "1 ngày": "1d"
+}
+actual_timeframe = tf_mapping.get(timeframe, "15m")
+ohlcv = exchange.fetch_ohlcv(coin, actual_timeframe, limit=200)
             st.info(f"✅ {coin}: Fetched {len(ohlcv)} candles")
             
             df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
