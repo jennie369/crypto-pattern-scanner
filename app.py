@@ -194,7 +194,9 @@ def run_scan(coins, timeframe, sensitivity):
     actual_tf = tf_mapping.get(timeframe, "15m")
     
     try:
-        exchange = ccxt.okx({'enableRateLimit': True})
+        # SWITCH TO BINANCE - more stable than OKX
+        exchange = ccxt.binance({'enableRateLimit': True})
+        st.success("✅ Connected to Binance exchange")
     except Exception as e:
         st.error(f"❌ Exchange error: {e}")
         return []
