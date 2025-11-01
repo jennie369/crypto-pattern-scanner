@@ -145,10 +145,9 @@ def check_password():
     
     with st.expander("🔑 Demo"):
         st.info("**demo** / **demo123**")
-    
+
     return False
 
-def main():
 def main():
     # ============ HEADER GEM HOLDING ============
     st.markdown("""
@@ -344,10 +343,14 @@ def display_results(results):
     st.markdown("### 🎯 Pattern Details with Charts")
     
     for result in results:
+        # FIX: Ensure 'type' key exists for chart_utils (was causing KeyError)
+        if 'type' not in result:
+            result['type'] = result.get('signal', 'Neutral')
+
         # Get Vietnamese names
         pattern_name = get_pattern_name_vi(result['pattern'])
         action_text = get_action_text(result['signal'])
-        
+
         # Icon based on signal
         if result['signal'] == 'Bullish':
             action_class = 'action-buy'
@@ -355,20 +358,19 @@ def display_results(results):
         else:
             action_class = 'action-sell'
             action_color = '#ef5350'
-        
+
         with st.expander(f"{action_text} {result['coin']} - {pattern_name}", expanded=False):
             col1, col2 = st.columns([2, 1])
-            
+
             with col1:
-                # Chart
+                # Chart - FIX: capture signals and pass correct dict structure
                 chart_gen = ChartGenerator()
-                fig = chart_gen.create_pattern_chart(
+                fig, signals = chart_gen.create_pattern_chart(
                     result['df'],
                     {
                         'pattern': result['pattern'],
-                        'entry': result['entry'],
-                        'stop_loss': result['stop_loss'],
-                        'take_profits': result['take_profits']
+                        'type': result['type'],
+                        'confidence': result['confidence']
                     },
                     result['coin']
                 )
@@ -384,38 +386,43 @@ def display_results(results):
                     <p><strong>Độ Tin Cậy:</strong> {result['confidence']:.0%}</p>
                 </div>
                 """, unsafe_allow_html=True)
-                
+
+                # FIX: Use calculated signals instead of placeholder zeros
+                entry_price = signals['entry']['price']
+                stop_loss = signals['stop_loss']
+                take_profits = signals['take_profit']
+
                 st.markdown(f"### 🎯 Entry")
-                st.metric("Vào Lệnh", f"${result['entry']:,.2f}")
-                
+                st.metric("Vào Lệnh", f"${entry_price:,.2f}")
+
                 st.markdown(f"### 🛑 Stop Loss")
-                st.metric("Cắt Lỗ", f"${result['stop_loss']:,.2f}", 
-                         delta=f"-${abs(result['entry'] - result['stop_loss']):,.2f}")
-                
-                risk_percent = abs((result['entry'] - result['stop_loss']) / result['entry'] * 100)
+                st.metric("Cắt Lỗ", f"${stop_loss:,.2f}",
+                         delta=f"-${abs(entry_price - stop_loss):,.2f}")
+
+                risk_percent = abs((entry_price - stop_loss) / entry_price * 100)
                 st.metric("Rủi Ro", f"{risk_percent:.2f}%")
-                
+
                 st.markdown("### 💰 Take Profit")
-                for i, tp in enumerate(result.get('take_profits', [])[:3], 1):
-                    st.metric(f"TP{i}", f"${tp:,.2f}", 
-                             delta=f"+${abs(tp - result['entry']):,.2f}")
-                
+                for i, tp in enumerate(take_profits[:3], 1):
+                    st.metric(f"TP{i}", f"${tp:,.2f}",
+                             delta=f"+${abs(tp - entry_price):,.2f}")
+
                 # R/R ratio
-                if result.get('take_profits'):
-                    avg_tp = sum(result['take_profits'][:3]) / len(result['take_profits'][:3])
-                    reward = abs(avg_tp - result['entry'])
-                    risk = abs(result['entry'] - result['stop_loss'])
+                if take_profits:
+                    avg_tp = sum(take_profits[:3]) / len(take_profits[:3])
+                    reward = abs(avg_tp - entry_price)
+                    risk = abs(entry_price - stop_loss)
                     rr_ratio = reward / risk if risk > 0 else 0
                     st.metric("R/R Ratio", f"1:{rr_ratio:.1f}")
-                
+
                 # Action
                 st.markdown(f"""
                 <div class='action-box {action_class}'>
                     <h3 style='margin: 0; color: {action_color};'>📢 ACTION</h3>
                     <h2 style='margin: 10px 0;'>{action_text}</h2>
                     <ol style='margin: 10px 0; padding-left: 20px;'>
-                        <li>Entry at ${result['entry']:,.2f}</li>
-                        <li>Set SL at ${result['stop_loss']:,.2f}</li>
+                        <li>Entry at ${entry_price:,.2f}</li>
+                        <li>Set SL at ${stop_loss:,.2f}</li>
                         <li>Close 50% at TP1</li>
                         <li>Trail remaining</li>
                     </ol>
