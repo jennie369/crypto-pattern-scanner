@@ -345,38 +345,34 @@ def run_scan(coins, timeframe, sensitivity):
     return results
 
 def display_results(results):
-    """Display scan results với UI đẹp"""
-    
+    """Display scan results with Vietnamese translation"""
     st.markdown("---")
     st.markdown("### 🎯 Pattern Details with Charts")
     
     for result in results:
+        # FIX: Ensure type key exists
+        if 'type' not in result:
+            result['type'] = result.get('signal', 'Neutral')
+        
         # Get Vietnamese names
         pattern_name = get_pattern_name_vi(result['pattern'])
         action_text = get_action_text(result['signal'])
         
-        # Icon based on signal
+        # Determine color
         if result['signal'] == 'Bullish':
-            action_class = 'action-buy'
             action_color = '#26a69a'
         else:
-            action_class = 'action-sell'
             action_color = '#ef5350'
         
         with st.expander(f"{action_text} {result['coin']} - {pattern_name}", expanded=False):
             col1, col2 = st.columns([2, 1])
             
             with col1:
-                # Chart
+                # Create chart
                 chart_gen = ChartGenerator()
                 fig = chart_gen.create_pattern_chart(
                     result['df'],
-                    {
-                        'pattern': result['pattern'],
-                        'entry': result['entry'],
-                        'stop_loss': result['stop_loss'],
-                        'take_profits': result['take_profits']
-                    },
+                    result,  # Pass entire result dict
                     result['coin']
                 )
                 st.plotly_chart(fig, use_container_width=True)
@@ -384,47 +380,46 @@ def display_results(results):
             with col2:
                 # Trading Plan
                 st.markdown(f"""
-                <div class='trading-plan'>
-                    <h3 style='margin: 0 0 15px 0; color: {action_color};'>📋 TRADING PLAN</h3>
+                <div style='background: rgba(102, 126, 234, 0.15); 
+                            padding: 20px; border-radius: 12px; 
+                            border-left: 4px solid {action_color};'>
+                    <h3 style='margin: 0 0 15px 0; color: {action_color};'>
+                        📋 KẾ HOẠCH GIAO DỊCH
+                    </h3>
                     <p><strong>Mẫu Hình:</strong> {pattern_name}</p>
-                    <p><strong>Xu Hướng:</strong> {get_action_text(result['signal'])}</p>
+                    <p><strong>Tín Hiệu:</strong> {action_text}</p>
                     <p><strong>Độ Tin Cậy:</strong> {result['confidence']:.0%}</p>
                 </div>
                 """, unsafe_allow_html=True)
                 
-                st.markdown(f"### 🎯 Entry")
-                st.metric("Vào Lệnh", f"${result['entry']:,.2f}")
+                st.markdown("### 🎯 Điểm Vào")
+                st.metric("Entry", f"${result['entry']:,.2f}")
                 
-                st.markdown(f"### 🛑 Stop Loss")
-                st.metric("Cắt Lỗ", f"${result['stop_loss']:,.2f}", 
-                         delta=f"-${abs(result['entry'] - result['stop_loss']):,.2f}")
+                st.markdown("### 🛑 Cắt Lỗ")
+                st.metric("Stop Loss", f"${result['stop_loss']:,.2f}")
                 
-                risk_percent = abs((result['entry'] - result['stop_loss']) / result['entry'] * 100)
-                st.metric("Rủi Ro", f"{risk_percent:.2f}%")
+                risk = abs(result['entry'] - result['stop_loss'])
+                risk_pct = (risk / result['entry']) * 100
+                st.metric("Rủi Ro", f"{risk_pct:.2f}%")
                 
-                st.markdown("### 💰 Take Profit")
+                st.markdown("### 💰 Chốt Lời")
                 for i, tp in enumerate(result.get('take_profits', [])[:3], 1):
+                    reward = abs(tp - result['entry'])
                     st.metric(f"TP{i}", f"${tp:,.2f}", 
-                             delta=f"+${abs(tp - result['entry']):,.2f}")
+                             delta=f"+{reward:,.2f}")
                 
-                # R/R ratio
-                if result.get('take_profits'):
-                    avg_tp = sum(result['take_profits'][:3]) / len(result['take_profits'][:3])
-                    reward = abs(avg_tp - result['entry'])
-                    risk = abs(result['entry'] - result['stop_loss'])
-                    rr_ratio = reward / risk if risk > 0 else 0
-                    st.metric("R/R Ratio", f"1:{rr_ratio:.1f}")
-                
-                # Action
+                # Action box
                 st.markdown(f"""
-                <div class='action-box {action_class}'>
-                    <h3 style='margin: 0; color: {action_color};'>📢 ACTION</h3>
+                <div style='background: rgba({action_color}, 0.1); 
+                            padding: 15px; border-radius: 10px; 
+                            border-left: 4px solid {action_color}; margin-top: 15px;'>
+                    <h3 style='color: {action_color}; margin: 0;'>📢 HÀNH ĐỘNG</h3>
                     <h2 style='margin: 10px 0;'>{action_text}</h2>
                     <ol style='margin: 10px 0; padding-left: 20px;'>
-                        <li>Entry at ${result['entry']:,.2f}</li>
-                        <li>Set SL at ${result['stop_loss']:,.2f}</li>
-                        <li>Close 50% at TP1</li>
-                        <li>Trail remaining</li>
+                        <li>Entry tại ${result['entry']:,.2f}</li>
+                        <li>Đặt SL tại ${result['stop_loss']:,.2f}</li>
+                        <li>Chốt 50% tại TP1</li>
+                        <li>Trail remaining positions</li>
                     </ol>
                 </div>
                 """, unsafe_allow_html=True)
