@@ -19,95 +19,25 @@ st.set_page_config(**PAGE_CONFIG)
 # Custom CSS
 st.markdown("""
 <style>
-    /* Main header styling */
     .main-header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         padding: 25px;
         border-radius: 12px;
         margin-bottom: 25px;
         text-align: center;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
-    
-    /* Metric cards */
     .metric-card {
         background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
         padding: 20px;
         border-radius: 10px;
-        border: 1px solid rgba(102, 126, 234, 0.3);
         text-align: center;
     }
-    
-    /* Button styling */
-    .stButton > button {
-        width: 100%;
-        border-radius: 8px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        border: none;
-    }
-    
-    .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-    }
-    
-    /* Expander header */
-    .streamlit-expanderHeader {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 8px;
-        font-weight: 600;
-        padding: 12px;
-    }
-    
-    /* Trading plan box */
-    .trading-plan {
-        background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
-        padding: 20px;
-        border-radius: 12px;
-        border-left: 4px solid #667eea;
-        margin: 15px 0;
-    }
-    
-    /* Action box */
-    .action-box {
-        background: rgba(255, 255, 255, 0.05);
-        padding: 15px;
-        border-radius: 10px;
-        border-left: 4px solid;
-        margin: 10px 0;
-    }
-    
-    .action-buy {
-        border-left-color: #26a69a;
-    }
-    
-    .action-sell {
-        border-left-color: #ef5350;
-    }
-    
-    /* Watermark */
     .watermark {
         position: fixed;
         bottom: 15px;
         right: 15px;
         opacity: 0.4;
         font-size: 11px;
-        color: #888;
-        background: rgba(0,0,0,0.5);
-        padding: 5px 10px;
-        border-radius: 5px;
-    }
-    
-    /* Section divider */
-    .section-divider {
-        margin: 30px 0;
-        border-top: 2px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    /* Sidebar styling */
-    .css-1d391kg {
-        background: linear-gradient(180deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -119,8 +49,8 @@ def check_password():
     
     st.markdown("""
     <div class='main-header'>
-        <h1 style='color: white; margin: 0;'>🔐 Login</h1>
-        <p style='color: white; margin: 0; opacity: 0.9;'>Crypto Pattern Scanner</p>
+        <h1 style='color: white;'>🔐 Login</h1>
+        <p style='color: white;'>Crypto Pattern Scanner</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -130,9 +60,7 @@ def check_password():
         submit = st.form_submit_button("🚀 Login")
         
         if submit:
-            # Load users from file or use default
             users = load_users()
-            
             if username in users and users[username]["password"] == password:
                 st.session_state.authenticated = True
                 st.session_state.username = username
@@ -145,33 +73,12 @@ def check_password():
     
     with st.expander("🔑 Demo"):
         st.info("**demo** / **demo123**")
-
+    
     return False
 
 def main():
-    # ============ HEADER GEM HOLDING ============
-    st.markdown("""
-    <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                padding: 25px; border-radius: 12px; margin-bottom: 25px; text-align: center;'>
-        <h1 style='color: white; margin: 0; font-size: 2.5em;'>💎 Gem Holding</h1>
-        <p style='color: white; margin: 5px 0 0 0; font-size: 1.1em;'>
-            Crypto Pattern Scanner - Phát Hiện Mẫu Hình Tự Động
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # ============ WATERMARK ============
-    st.markdown("""
-    <div style='position: fixed; bottom: 15px; right: 15px; opacity: 0.4; 
-                font-size: 11px; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 5px;'>
-        Gem Holding © 2025
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Phần code cũ tiếp tục bên dưới...
     """Main app"""
     
-    # Check for admin panel
     if st.session_state.get('show_admin'):
         admin_panel()
         if st.button("🔙 Quay lại Scanner"):
@@ -179,34 +86,30 @@ def main():
             st.rerun()
         return
     
-    # Header với branding
-    st.markdown(f"""
+    st.markdown("""
     <div class='main-header'>
-        <h1 style='color: white; margin: 0; font-size: 2.5em;'>{COMPANY_LOGO} {COMPANY_NAME}</h1>
-        <p style='color: white; margin: 5px 0 0 0; font-size: 1.1em; opacity: 0.95;'>
-            Crypto Pattern Scanner - Phát hiện mẫu hình tự động
+        <h1 style='color: white; font-size: 2.5em;'>💎 Gem Holding</h1>
+        <p style='color: white; font-size: 1.1em;'>
+            Crypto Pattern Scanner - Phát Hiện Mẫu Hình Tự Động
         </p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Watermark
-    st.markdown(f"""
+    st.markdown("""
     <div class='watermark'>
-        {WATERMARK_TEXT}
+        Gem Holding © 2025
     </div>
     """, unsafe_allow_html=True)
     
-    # Sidebar
     with st.sidebar:
         st.markdown(f"""
         <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
                     padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 20px;'>
-            <h3 style='color: white; margin: 0;'>🎯 Scanner</h3>
-            <p style='color: white; margin: 5px 0 0 0; opacity: 0.9;'>👤 {st.session_state.username}</p>
+            <h3 style='color: white;'>🎯 Scanner</h3>
+            <p style='color: white;'>👤 {st.session_state.username}</p>
         </div>
         """, unsafe_allow_html=True)
         
-        # Admin Panel button
         if st.session_state.get('role') == 'admin':
             if st.button("👨‍💼 Admin Panel", use_container_width=True):
                 st.session_state.show_admin = True
@@ -217,8 +120,6 @@ def main():
             st.rerun()
         
         st.markdown("---")
-        
-        # Scan settings
         st.subheader("⚙️ Cài Đặt Scan")
         
         scan_mode = st.radio("Mode:", ["Quick (Top 10)", "Custom"])
@@ -230,43 +131,39 @@ def main():
         
         timeframe = st.selectbox("Timeframe:", list(TIMEFRAMES.keys()))
         sensitivity = st.slider("Sensitivity:", 0.01, 0.05, 0.02, 0.01)
-        
         scan_button = st.button("🔍 SCAN", type="primary", use_container_width=True)
     
-    # Main content
     st.markdown("### 📊 Thống Kê")
     col1, col2, col3 = st.columns(3)
     
     with col1:
         st.markdown(f"""
         <div class='metric-card'>
-            <h2 style='margin: 0; color: #667eea;'>{len(selected_coins)}</h2>
-            <p style='margin: 5px 0 0 0;'>📈 Coins</p>
+            <h2 style='color: #667eea;'>{len(selected_coins)}</h2>
+            <p>📈 Coins</p>
         </div>
         """, unsafe_allow_html=True)
     
     with col2:
         st.markdown(f"""
         <div class='metric-card'>
-            <h2 style='margin: 0; color: #764ba2;'>⏰ TF</h2>
-            <p style='margin: 5px 0 0 0;'>{timeframe}</p>
+            <h2 style='color: #764ba2;'>⏰ TF</h2>
+            <p>{timeframe}</p>
         </div>
         """, unsafe_allow_html=True)
     
     with col3:
         st.markdown(f"""
         <div class='metric-card'>
-            <h2 style='margin: 0; color: #667eea;'>7</h2>
-            <p style='margin: 5px 0 0 0;'>🎯 Patterns</p>
+            <h2 style='color: #667eea;'>7</h2>
+            <p>🎯 Patterns</p>
         </div>
         """, unsafe_allow_html=True)
     
-    st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
+    st.markdown("---")
     
-    # Scan results
     if scan_button:
         st.markdown("### 📊 Scan Results")
-        
         col1, col2 = st.columns(2)
         with col1:
             st.info(f"🕐 {datetime.now().strftime('%H:%M:%S')}")
@@ -274,21 +171,26 @@ def main():
             st.success("✅ Found: 0")
         
         st.markdown("---")
-        
         results = run_scan(selected_coins, timeframe, sensitivity)
         
         if results:
             display_results(results)
         else:
             st.warning("⚠️ No patterns found!")
-            st.info("💡 Tip: Thử tăng sensitivity hoặc đổi timeframe")
 
 def run_scan(coins, timeframe, sensitivity):
     """Run pattern scan"""
     st.subheader("🔄 Scanning...")
-    
     progress = st.progress(0)
     status = st.empty()
+    
+    tf_mapping = {
+        "15 phút": "15m",
+        "1 giờ": "1h",
+        "4 giờ": "4h",
+        "1 ngày": "1d"
+    }
+    actual_tf = tf_mapping.get(timeframe, "15m")
     
     try:
         exchange = ccxt.okx({'enableRateLimit': True})
@@ -302,9 +204,7 @@ def run_scan(coins, timeframe, sensitivity):
     for idx, coin in enumerate(coins):
         try:
             status.text(f"🔍 {coin} ({idx+1}/{len(coins)})")
-            
-            ohlcv = exchange.fetch_ohlcv(coin, timeframe, limit=200)
-            st.info(f"✅ {coin}: Fetched {len(ohlcv)} candles")
+            ohlcv = exchange.fetch_ohlcv(coin, actual_tf, limit=200)
             
             df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
             df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
@@ -315,53 +215,40 @@ def run_scan(coins, timeframe, sensitivity):
                 for p in patterns:
                     results.append({
                         'coin': coin,
-                        'pattern': p['pattern'],
-                        'signal': p['type'],
-                        'confidence': p['confidence'],
+                        'pattern': p.get('pattern', 'Unknown'),
+                        'signal': p.get('type', 'Neutral'),
+                        'confidence': p.get('confidence', 0),
                         'entry': p.get('entry', 0),
                         'stop_loss': p.get('stop_loss', 0),
                         'take_profits': p.get('take_profits', []),
-                        'description': p.get('description', ''),
                         'df': df
                     })
             
             progress.progress((idx + 1) / len(coins))
             
         except Exception as e:
-            st.error(f"❌ {coin}: Error - {str(e)}")
-            st.error(f"Error type: {type(e).__name__}")
+            st.error(f"❌ {coin}: {str(e)}")
     
-    status.text(f"✅ Done!")
+    status.text(f"✅ Done! Found {len(results)} patterns")
     progress.progress(1.0)
-    
     return results
 
 def display_results(results):
-    """Display scan results với UI đẹp"""
-    
+    """Display scan results"""
     st.markdown("---")
     st.markdown("### 🎯 Pattern Details with Charts")
     
     for result in results:
-        # FIX: Ensure 'type' key exists for chart_utils (was causing KeyError)
         if 'type' not in result:
             result['type'] = result.get('signal', 'Neutral')
-
-        # Get Vietnamese names
+        
         pattern_name = get_pattern_name_vi(result['pattern'])
         action_text = get_action_text(result['signal'])
-
-        # Icon based on signal
-        if result['signal'] == 'Bullish':
-            action_class = 'action-buy'
-            action_color = '#26a69a'
-        else:
-            action_class = 'action-sell'
-            action_color = '#ef5350'
-
+        action_color = '#26a69a' if result['signal'] == 'Bullish' else '#ef5350'
+        
         with st.expander(f"{action_text} {result['coin']} - {pattern_name}", expanded=False):
             col1, col2 = st.columns([2, 1])
-
+            
             with col1:
                 # Chart - FIX: capture signals and pass correct dict structure
                 chart_gen = ChartGenerator()
@@ -375,14 +262,15 @@ def display_results(results):
                     result['coin']
                 )
                 st.plotly_chart(fig, use_container_width=True)
-            
+
             with col2:
-                # Trading Plan
                 st.markdown(f"""
-                <div class='trading-plan'>
-                    <h3 style='margin: 0 0 15px 0; color: {action_color};'>📋 TRADING PLAN</h3>
+                <div style='background: rgba(102, 126, 234, 0.15);
+                            padding: 20px; border-radius: 12px;
+                            border-left: 4px solid {action_color};'>
+                    <h3 style='color: {action_color};'>📋 KẾ HOẠCH</h3>
                     <p><strong>Mẫu Hình:</strong> {pattern_name}</p>
-                    <p><strong>Xu Hướng:</strong> {get_action_text(result['signal'])}</p>
+                    <p><strong>Tín Hiệu:</strong> {action_text}</p>
                     <p><strong>Độ Tin Cậy:</strong> {result['confidence']:.0%}</p>
                 </div>
                 """, unsafe_allow_html=True)
@@ -392,44 +280,12 @@ def display_results(results):
                 stop_loss = signals['stop_loss']
                 take_profits = signals['take_profit']
 
-                st.markdown(f"### 🎯 Entry")
-                st.metric("Vào Lệnh", f"${entry_price:,.2f}")
+                st.metric("🎯 Entry", f"${entry_price:,.2f}")
+                st.metric("🛑 Stop Loss", f"${stop_loss:,.2f}")
 
-                st.markdown(f"### 🛑 Stop Loss")
-                st.metric("Cắt Lỗ", f"${stop_loss:,.2f}",
-                         delta=f"-${abs(entry_price - stop_loss):,.2f}")
-
-                risk_percent = abs((entry_price - stop_loss) / entry_price * 100)
-                st.metric("Rủi Ro", f"{risk_percent:.2f}%")
-
-                st.markdown("### 💰 Take Profit")
                 for i, tp in enumerate(take_profits[:3], 1):
-                    st.metric(f"TP{i}", f"${tp:,.2f}",
-                             delta=f"+${abs(tp - entry_price):,.2f}")
+                    st.metric(f"💰 TP{i}", f"${tp:,.2f}")
 
-                # R/R ratio
-                if take_profits:
-                    avg_tp = sum(take_profits[:3]) / len(take_profits[:3])
-                    reward = abs(avg_tp - entry_price)
-                    risk = abs(entry_price - stop_loss)
-                    rr_ratio = reward / risk if risk > 0 else 0
-                    st.metric("R/R Ratio", f"1:{rr_ratio:.1f}")
-
-                # Action
-                st.markdown(f"""
-                <div class='action-box {action_class}'>
-                    <h3 style='margin: 0; color: {action_color};'>📢 ACTION</h3>
-                    <h2 style='margin: 10px 0;'>{action_text}</h2>
-                    <ol style='margin: 10px 0; padding-left: 20px;'>
-                        <li>Entry at ${entry_price:,.2f}</li>
-                        <li>Set SL at ${stop_loss:,.2f}</li>
-                        <li>Close 50% at TP1</li>
-                        <li>Trail remaining</li>
-                    </ol>
-                </div>
-                """, unsafe_allow_html=True)
-
-# Main execution
 if __name__ == "__main__":
     if check_password():
         main()
