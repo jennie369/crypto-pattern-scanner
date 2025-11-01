@@ -309,11 +309,11 @@ def run_scan(coins, timeframe, sensitivity):
     results = []
     
     for idx, coin in enumerate(coins):
-    try:
-        # DEBUG: Check coin value
-        if coin is None or not coin:
-            st.error(f"❌ DEBUG: Invalid coin at index {idx}")
-            continue
+        try:
+            # DEBUG: Check coin value
+            if coin is None or not coin:
+                st.error(f"❌ DEBUG: Invalid coin at index {idx}")
+                continue
         
         st.info(f"🔍 DEBUG: Processing coin: {coin} (type: {type(coin).__name__})")
         
