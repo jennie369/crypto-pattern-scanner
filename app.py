@@ -309,8 +309,15 @@ def run_scan(coins, timeframe, sensitivity):
     results = []
     
     for idx, coin in enumerate(coins):
-        try:
-            status.text(f"🔍 {coin} ({idx+1}/{len(coins)})")
+    try:
+        # DEBUG: Check coin value
+        if coin is None or not coin:
+            st.error(f"❌ DEBUG: Invalid coin at index {idx}")
+            continue
+        
+        st.info(f"🔍 DEBUG: Processing coin: {coin} (type: {type(coin).__name__})")
+        
+        status.text(f"🔍 {coin} ({idx+1}/{len(coins)})")
             
             # Use actual_tf instead of timeframe
             ohlcv = exchange.fetch_ohlcv(coin, actual_tf, limit=200)
