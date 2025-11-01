@@ -315,7 +315,7 @@ def run_scan(coins, timeframe, sensitivity):
                 st.error(f"❌ DEBUG: Invalid coin at index {idx}")
                 continue
         
-        st.info(f"🔍 DEBUG: Processing coin: {coin} (type: {type(coin).__name__})")
+            st.info(f"🔍 DEBUG: Processing coin: {coin} (type: {type(coin).__name__})")
         
         status.text(f"🔍 {coin} ({idx+1}/{len(coins)})")
             
