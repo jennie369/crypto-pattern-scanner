@@ -17,6 +17,8 @@ PATTERN_TRANSLATIONS = {
     'Bear Flag': 'Cờ Giảm (Bear Flag)',
     'Pennant': 'Hình Cờ (Pennant)',
     'Wedge': 'Hình Nêm (Wedge)',
+    'Price Trend': 'Xu Hướng Giá (Price Trend)',
+    'Unknown': 'Không Xác Định (Unknown)',
 }
 
 SIGNAL_TRANSLATIONS = {
