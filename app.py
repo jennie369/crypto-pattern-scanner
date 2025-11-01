@@ -329,33 +329,30 @@ def run_scan(coins, timeframe, sensitivity):
 # Detect patterns with error handling
         try:
             patterns = detector.detect_all_patterns(df)
-            st.write(f"🔍 DEBUG: detect_all_patterns returned: {patterns}")
+            st.write(f"🔍 DEBUG: Found {len(patterns) if patterns else 0} patterns")
         except Exception as e:
             st.error(f"❌ Pattern detection error for {coin}: {str(e)}")
-            patterns = []            
-            if patterns:
-    for p in patterns:
-        try:
-            st.write(f"🔍 DEBUG: Pattern dict: {p}")
-            
-            # Validate pattern dict
-            if not all(k in p for k in ['pattern', 'type', 'confidence']):
-                st.warning(f"⚠️ Invalid pattern dict: {p}")
-                continue
-            
-            results.append({
-                'coin': coin,
-                'pattern': p['pattern'],
-                'signal': p['type'],
-                'confidence': p['confidence'],
-                'entry': p.get('entry', 0),
-                'stop_loss': p.get('stop_loss', 0),
-                'take_profits': p.get('take_profits', []),
-                'df': df
-            })
-        except Exception as e:
-            st.error(f"❌ Error processing pattern: {str(e)}")
-            continue
+            patterns = []
+        
+        # Process patterns
+        if patterns:
+            for p in patterns:
+                try:
+                    st.write(f"🔍 DEBUG: Pattern: {p.get('pattern', 'Unknown')}")
+                    
+                    results.append({
+                        'coin': coin,
+                        'pattern': p.get('pattern', 'Unknown'),
+                        'signal': p.get('type', 'Neutral'),
+                        'confidence': p.get('confidence', 0),
+                        'entry': p.get('entry', 0),
+                        'stop_loss': p.get('stop_loss', 0),
+                        'take_profits': p.get('take_profits', []),
+                        'df': df
+                    })
+                except Exception as e:
+                    st.error(f"❌ Error processing pattern: {str(e)}")
+                    continue
             
             progress.progress((idx + 1) / len(coins))
             
