@@ -117,7 +117,7 @@ class ChartGenerator:
         current_price = df['close'].iloc[-1]
         atr = self._calculate_atr(df)
         
-        if pattern['type'] == 'Bullish':
+        if pattern.get('type', pattern.get('signal', '')) == 'Bullish':
             entry = current_price
             stop_loss = entry - (2 * atr)
             take_profit = [entry + (2*atr), entry + (4*atr), entry + (6*atr)]
