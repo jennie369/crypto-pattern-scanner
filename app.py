@@ -334,17 +334,28 @@ def run_scan(coins, timeframe, sensitivity):
             st.error(f"❌ Pattern detection error for {coin}: {str(e)}")
             patterns = []            
             if patterns:
-                for p in patterns:
-                    results.append({
-                        'coin': coin,
-                        'pattern': p['pattern'],
-                        'signal': p['type'],
-                        'confidence': p['confidence'],
-                        'entry': p.get('entry', 0),
-                        'stop_loss': p.get('stop_loss', 0),
-                        'take_profits': p.get('take_profits', []),
-                        'df': df
-                    })
+    for p in patterns:
+        try:
+            st.write(f"🔍 DEBUG: Pattern dict: {p}")
+            
+            # Validate pattern dict
+            if not all(k in p for k in ['pattern', 'type', 'confidence']):
+                st.warning(f"⚠️ Invalid pattern dict: {p}")
+                continue
+            
+            results.append({
+                'coin': coin,
+                'pattern': p['pattern'],
+                'signal': p['type'],
+                'confidence': p['confidence'],
+                'entry': p.get('entry', 0),
+                'stop_loss': p.get('stop_loss', 0),
+                'take_profits': p.get('take_profits', []),
+                'df': df
+            })
+        except Exception as e:
+            st.error(f"❌ Error processing pattern: {str(e)}")
+            continue
             
             progress.progress((idx + 1) / len(coins))
             
