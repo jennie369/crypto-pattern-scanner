@@ -237,54 +237,66 @@ def display_results(results):
     """Display scan results"""
     st.markdown("---")
     st.markdown("### 🎯 Pattern Details with Charts")
-    
+
     for result in results:
-        if 'type' not in result:
-            result['type'] = result.get('signal', 'Neutral')
-        
-        pattern_name = get_pattern_name_vi(result['pattern'])
-        action_text = get_action_text(result['signal'])
-        action_color = '#26a69a' if result['signal'] == 'Bullish' else '#ef5350'
-        
-        with st.expander(f"{action_text} {result['coin']} - {pattern_name}", expanded=False):
-            col1, col2 = st.columns([2, 1])
-            
-            with col1:
-                # Chart - FIX: capture signals and pass correct dict structure
-                chart_gen = ChartGenerator()
-                fig, signals = chart_gen.create_pattern_chart(
-                    result['df'],
-                    {
-                        'pattern': result['pattern'],
-                        'type': result['type'],
-                        'confidence': result['confidence']
-                    },
-                    result['coin']
-                )
-                st.plotly_chart(fig, use_container_width=True)
+        try:
+            # SAFETY: Ensure all required fields exist and are not None
+            if 'type' not in result:
+                result['type'] = result.get('signal', 'Neutral')
 
-            with col2:
-                st.markdown(f"""
-                <div style='background: rgba(102, 126, 234, 0.15);
-                            padding: 20px; border-radius: 12px;
-                            border-left: 4px solid {action_color};'>
-                    <h3 style='color: {action_color};'>📋 KẾ HOẠCH</h3>
-                    <p><strong>Mẫu Hình:</strong> {pattern_name}</p>
-                    <p><strong>Tín Hiệu:</strong> {action_text}</p>
-                    <p><strong>Độ Tin Cậy:</strong> {result['confidence']:.0%}</p>
-                </div>
-                """, unsafe_allow_html=True)
+            result['pattern'] = result.get('pattern') or 'Unknown'
+            result['signal'] = result.get('signal') or 'Neutral'
+            result['confidence'] = result.get('confidence') or 0
+            result['coin'] = result.get('coin') or 'UNKNOWN'
 
-                # FIX: Use calculated signals instead of placeholder zeros
-                entry_price = signals['entry']['price']
-                stop_loss = signals['stop_loss']
-                take_profits = signals['take_profit']
+            pattern_name = get_pattern_name_vi(result['pattern'])
+            action_text = get_action_text(result['signal'])
+            action_color = '#26a69a' if result['signal'] == 'Bullish' else '#ef5350'
 
-                st.metric("🎯 Entry", f"${entry_price:,.2f}")
-                st.metric("🛑 Stop Loss", f"${stop_loss:,.2f}")
+            with st.expander(f"{action_text} {result['coin']} - {pattern_name}", expanded=False):
+                col1, col2 = st.columns([2, 1])
 
-                for i, tp in enumerate(take_profits[:3], 1):
-                    st.metric(f"💰 TP{i}", f"${tp:,.2f}")
+                with col1:
+                    # Chart - FIX: capture signals and pass correct dict structure
+                    chart_gen = ChartGenerator()
+                    fig, signals = chart_gen.create_pattern_chart(
+                        result['df'],
+                        {
+                            'pattern': result['pattern'],
+                            'type': result['type'],
+                            'confidence': result['confidence']
+                        },
+                        result['coin']
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+
+                with col2:
+                    st.markdown(f"""
+                    <div style='background: rgba(102, 126, 234, 0.15);
+                                padding: 20px; border-radius: 12px;
+                                border-left: 4px solid {action_color};'>
+                        <h3 style='color: {action_color};'>📋 KẾ HOẠCH</h3>
+                        <p><strong>Mẫu Hình:</strong> {pattern_name}</p>
+                        <p><strong>Tín Hiệu:</strong> {action_text}</p>
+                        <p><strong>Độ Tin Cậy:</strong> {result['confidence']:.0%}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                    # FIX: Use calculated signals instead of placeholder zeros
+                    entry_price = signals['entry']['price']
+                    stop_loss = signals['stop_loss']
+                    take_profits = signals['take_profit']
+
+                    st.metric("🎯 Entry", f"${entry_price:,.2f}")
+                    st.metric("🛑 Stop Loss", f"${stop_loss:,.2f}")
+
+                    for i, tp in enumerate(take_profits[:3], 1):
+                        st.metric(f"💰 TP{i}", f"${tp:,.2f}")
+
+        except Exception as e:
+            st.error(f"❌ Error displaying {result.get('coin', 'UNKNOWN')}: {str(e)}")
+            import traceback
+            st.code(traceback.format_exc())
 
 if __name__ == "__main__":
     if check_password():
