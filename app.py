@@ -183,14 +183,24 @@ def run_scan(coins, timeframe, sensitivity):
     st.subheader("🔄 Scanning...")
     progress = st.progress(0)
     status = st.empty()
-    
+
+    # DEBUG: Show what we received
+    st.info(f"DEBUG: timeframe received = '{timeframe}' (type: {type(timeframe).__name__})")
+
     tf_mapping = {
         "15 phút": "15m",
         "1 giờ": "1h",
         "4 giờ": "4h",
         "1 ngày": "1d"
     }
-    actual_tf = tf_mapping.get(timeframe, "15m")
+
+    # SAFETY: Handle None or empty timeframe
+    if timeframe is None:
+        st.warning("⚠️ Timeframe is None, using default '15m'")
+        actual_tf = "15m"
+    else:
+        actual_tf = tf_mapping.get(timeframe, "15m")
+        st.info(f"DEBUG: mapped to actual_tf = '{actual_tf}'")
     
     try:
         exchange = ccxt.okx({'enableRateLimit': True})
@@ -204,15 +214,21 @@ def run_scan(coins, timeframe, sensitivity):
     for idx, coin in enumerate(coins):
         try:
             status.text(f"🔍 {coin} ({idx+1}/{len(coins)})")
+            st.write(f"DEBUG: Fetching {coin} with timeframe {actual_tf}")
+
             ohlcv = exchange.fetch_ohlcv(coin, actual_tf, limit=200)
-            
+            st.write(f"DEBUG: Got {len(ohlcv)} candles for {coin}")
+
             df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
             df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-            
+
+            st.write(f"DEBUG: Detecting patterns for {coin}...")
             patterns = detector.detect_all_patterns(df)
-            
+            st.write(f"DEBUG: Found {len(patterns)} patterns for {coin}: {[p.get('pattern') for p in patterns]}")
+
             if patterns:
                 for p in patterns:
+                    st.write(f"DEBUG: Processing pattern {p.get('pattern')} for {coin}")
                     results.append({
                         'coin': coin,
                         'pattern': p.get('pattern', 'Unknown'),
@@ -223,11 +239,14 @@ def run_scan(coins, timeframe, sensitivity):
                         'take_profits': p.get('take_profits', []),
                         'df': df
                     })
-            
+                    st.write(f"DEBUG: Added result for {coin}")
+
             progress.progress((idx + 1) / len(coins))
-            
+
         except Exception as e:
             st.error(f"❌ {coin}: {str(e)}")
+            import traceback
+            st.code(traceback.format_exc())
     
     status.text(f"✅ Done! Found {len(results)} patterns")
     progress.progress(1.0)
