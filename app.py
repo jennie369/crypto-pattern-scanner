@@ -184,9 +184,6 @@ def run_scan(coins, timeframe, sensitivity):
     progress = st.progress(0)
     status = st.empty()
 
-    # DEBUG: Show what we received
-    st.info(f"DEBUG: timeframe received = '{timeframe}' (type: {type(timeframe).__name__})")
-
     tf_mapping = {
         "15 phút": "15m",
         "1 giờ": "1h",
@@ -194,13 +191,7 @@ def run_scan(coins, timeframe, sensitivity):
         "1 ngày": "1d"
     }
 
-    # SAFETY: Handle None or empty timeframe
-    if timeframe is None:
-        st.warning("⚠️ Timeframe is None, using default '15m'")
-        actual_tf = "15m"
-    else:
-        actual_tf = tf_mapping.get(timeframe, "15m")
-        st.info(f"DEBUG: mapped to actual_tf = '{actual_tf}'")
+    actual_tf = tf_mapping.get(timeframe, "15m")
     
     try:
         exchange = ccxt.okx({'enableRateLimit': True})
@@ -214,21 +205,25 @@ def run_scan(coins, timeframe, sensitivity):
     for idx, coin in enumerate(coins):
         try:
             status.text(f"🔍 {coin} ({idx+1}/{len(coins)})")
-            st.write(f"DEBUG: Fetching {coin} with timeframe {actual_tf}")
 
-            ohlcv = exchange.fetch_ohlcv(coin, actual_tf, limit=200)
-            st.write(f"DEBUG: Got {len(ohlcv)} candles for {coin}")
+            # FIX: Wrap fetch in try-except to handle CCXT/OKX parsing errors
+            try:
+                ohlcv = exchange.fetch_ohlcv(coin, actual_tf, limit=200)
+            except TypeError as te:
+                if "NoneType" in str(te):
+                    st.warning(f"⚠️ {coin}: OKX API issue - SKIPPING")
+                    progress.progress((idx + 1) / len(coins))
+                    continue
+                else:
+                    raise
 
             df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
             df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
 
-            st.write(f"DEBUG: Detecting patterns for {coin}...")
             patterns = detector.detect_all_patterns(df)
-            st.write(f"DEBUG: Found {len(patterns)} patterns for {coin}: {[p.get('pattern') for p in patterns]}")
 
             if patterns:
                 for p in patterns:
-                    st.write(f"DEBUG: Processing pattern {p.get('pattern')} for {coin}")
                     results.append({
                         'coin': coin,
                         'pattern': p.get('pattern', 'Unknown'),
@@ -239,7 +234,6 @@ def run_scan(coins, timeframe, sensitivity):
                         'take_profits': p.get('take_profits', []),
                         'df': df
                     })
-                    st.write(f"DEBUG: Added result for {coin}")
 
             progress.progress((idx + 1) / len(coins))
 
