@@ -317,7 +317,7 @@ def run_scan(coins, timeframe, sensitivity):
         
             st.info(f"🔍 DEBUG: Processing coin: {coin} (type: {type(coin).__name__})")
         
-        status.text(f"🔍 {coin} ({idx+1}/{len(coins)})")
+            status.text(f"🔍 {coin} ({idx+1}/{len(coins)})")
             
             # Use actual_tf instead of timeframe
             ohlcv = exchange.fetch_ohlcv(coin, actual_tf, limit=200)
