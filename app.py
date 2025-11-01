@@ -327,12 +327,12 @@ def run_scan(coins, timeframe, sensitivity):
             df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
             
 # Detect patterns with error handling
-    try:
-        patterns = detector.detect_all_patterns(df)
-        st.write(f"🔍 DEBUG: detect_all_patterns returned: {patterns}")
-    except Exception as e:
-        st.error(f"❌ Pattern detection error for {coin}: {str(e)}")
-        patterns = []            
+        try:
+            patterns = detector.detect_all_patterns(df)
+            st.write(f"🔍 DEBUG: detect_all_patterns returned: {patterns}")
+        except Exception as e:
+            st.error(f"❌ Pattern detection error for {coin}: {str(e)}")
+            patterns = []            
             if patterns:
                 for p in patterns:
                     results.append({
