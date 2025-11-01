@@ -29,41 +29,46 @@ class PatternDetector:
         return df
     
     def _detect_head_and_shoulders(self, df):
-        if len(df) < 60:
+        # LOWERED: 60->40 candles, 3->2 peaks for easier detection
+        if len(df) < 40:
             return False
-        recent = df.tail(60)
+        recent = df.tail(40)
         highs = recent['high'].values
-        peaks = self._find_peaks(highs)
-        return len(peaks) >= 3
-    
-    def _detect_double_top(self, df):
-        if len(df) < 40:
-            return False
-        highs = df.tail(40)['high'].values
-        peaks = self._find_peaks(highs)
+        peaks = self._find_peaks(highs, distance=3)
         return len(peaks) >= 2
-    
-    def _detect_double_bottom(self, df):
-        if len(df) < 40:
-            return False
-        lows = df.tail(40)['low'].values
-        troughs = self._find_troughs(lows)
-        return len(troughs) >= 2
-    
-    def _detect_ascending_triangle(self, df):
+
+    def _detect_double_top(self, df):
+        # LOWERED: 40->30 candles, 2->1 peak for easier detection
         if len(df) < 30:
             return False
-        recent = df.tail(30)
+        highs = df.tail(30)['high'].values
+        peaks = self._find_peaks(highs, distance=3)
+        return len(peaks) >= 1
+
+    def _detect_double_bottom(self, df):
+        # LOWERED: 40->30 candles, 2->1 trough for easier detection
+        if len(df) < 30:
+            return False
+        lows = df.tail(30)['low'].values
+        troughs = self._find_troughs(lows, distance=3)
+        return len(troughs) >= 1
+
+    def _detect_ascending_triangle(self, df):
+        # LOWERED: 30->20 candles, relaxed slope for easier detection
+        if len(df) < 20:
+            return False
+        recent = df.tail(20)
         highs = recent['high'].values
         high_trend = np.polyfit(range(len(highs)), highs, 1)
-        return abs(high_trend[0]) < 0.5
-    
+        return abs(high_trend[0]) < 1.0  # More relaxed
+
     def _detect_bull_flag(self, df):
-        if len(df) < 40:
+        # LOWERED: 5% -> 2% increase for easier detection
+        if len(df) < 30:
             return False
-        closes = df.tail(40)['close'].values
-        flagpole = closes[-40:-25]
-        return (flagpole[-1] - flagpole[0]) / flagpole[0] > 0.05
+        closes = df.tail(30)['close'].values
+        flagpole = closes[-30:-20]
+        return (flagpole[-1] - flagpole[0]) / flagpole[0] > 0.02
     
     def _find_peaks(self, data, distance=5):
         peaks = []
