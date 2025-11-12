@@ -1,0 +1,203 @@
+/* Root Variables */
+:root {
+  --primary-burgundy: #4A1942;
+  --primary-navy: #112250;
+  --secondary-purple: #2A1B52;
+  --gold-accent: #FFBD59;
+  --gold-light: #debc81;
+  --success-green: #0ECB81;
+  --danger-red: #F6465D;
+  --sidebar-width-left: 20%;
+  --sidebar-width-right: 30%;
+  --main-content-width: 50%;
+}
+
+/* Global Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+
+body {
+  font-family: 'Noto Sans Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* App Container */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  /* ✅ REMOVED: Old gradient that blocked body glow effect */
+  /* background: linear-gradient(180deg, #112250 0%, #2A1B52 50%, #4A1942 100%); */
+  /* ✅ NEW: Transparent to show body's blur glow background */
+  background: transparent;
+}
+
+/* Page Wrapper - wraps all Routes content */
+.page-wrapper {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Footer - always at bottom */
+.app-footer {
+  flex-shrink: 0;
+}
+
+/* Light Theme (if needed) */
+.app.light {
+  background: linear-gradient(180deg, #f0f2f5 0%, #e4e6eb 100%);
+}
+
+.app.light .app-layout {
+  background: #ffffff;
+}
+
+/* Main Layout - 3 Columns */
+.app-layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: var(--sidebar-width-left) var(--main-content-width) var(--sidebar-width-right);
+  gap: 0;
+  height: calc(100vh - 70px);
+  overflow: hidden;
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* Focus Mode - Dim layout when scanner is active */
+.app-layout.focus-mode {
+  opacity: 0.3;
+  pointer-events: none;
+  filter: blur(3px);
+}
+
+/* Sidebars */
+.sidebar-left,
+.sidebar-right {
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Main Content */
+.main-content {
+  height: 100%;
+  padding: 20px;
+  /* ✅ ADJUSTED: More transparent to show glow effect */
+  background: rgba(17, 34, 80, 0.3);
+  border-left: 1px solid rgba(255, 189, 89, 0.1);
+  border-right: 1px solid rgba(255, 189, 89, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Scanning Overlay */
+.scanning-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(17, 34, 80, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+}
+
+.scanning-spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid rgba(255, 189, 89, 0.2);
+  border-top-color: #FFBD59;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.scanning-overlay p {
+  color: #FFBD59;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: 'Montserrat', sans-serif;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1400px) {
+  .app-layout {
+    grid-template-columns: 25% 45% 30%;
+  }
+}
+
+@media (max-width: 1024px) {
+  .app-layout {
+    grid-template-columns: 30% 40% 30%;
+  }
+
+  .main-content {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .sidebar-left {
+    display: none;
+  }
+
+  .sidebar-right {
+    grid-row: 1;
+    height: auto;
+    max-height: 300px;
+  }
+
+  .main-content {
+    grid-row: 2;
+    padding: 10px;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus States */
+button:focus-visible,
+.nav-btn:focus-visible,
+.coin-item:focus-visible {
+  outline: 2px solid #FFBD59;
+  outline-offset: 2px;
+}

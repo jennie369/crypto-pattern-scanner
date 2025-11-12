@@ -1,0 +1,163 @@
+/* ===================================
+   GEM PLATFORM - TYPOGRAPHY UTILITIES
+   Heading và Text Classes
+   Version: 1.0
+   =================================== */
+
+/* ============================================
+   HEADING CLASSES
+   ============================================ */
+
+/* Hero Heading - XL (72px) */
+.heading-xl {
+  font-family: var(--font-display);
+  font-size: var(--text-4xl);
+  font-weight: var(--font-black);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tighter);
+
+  /* White → Gold gradient */
+  background: var(--gradient-gold-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+
+  /* Gold glow effect */
+  text-shadow: var(--glow-gold);
+
+  /* Floating animation */
+  animation: heroFloat 4s ease-in-out infinite;
+}
+
+@keyframes heroFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+/* Large Heading (48px) */
+.heading-lg {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: var(--font-extrabold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+
+  /* White → Gold gradient */
+  background: var(--gradient-gold-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Medium Heading (32px) */
+.heading-md {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  line-height: var(--leading-snug);
+  color: var(--text-primary);
+}
+
+/* Small Heading (24px) */
+.heading-sm {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--font-semibold);
+  line-height: var(--leading-normal);
+  color: var(--text-primary);
+}
+
+/* ============================================
+   TEXT SIZE UTILITIES
+   ============================================ */
+
+.text-xs {
+  font-size: var(--text-xs);
+  line-height: var(--leading-normal);
+}
+
+.text-sm {
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+.text-base {
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+}
+
+.text-lg {
+  font-size: var(--text-lg);
+  line-height: var(--leading-relaxed);
+}
+
+/* ============================================
+   FONT WEIGHT UTILITIES
+   ============================================ */
+
+.font-light { font-weight: var(--font-light); }
+.font-normal { font-weight: var(--font-normal); }
+.font-medium { font-weight: var(--font-medium); }
+.font-semibold { font-weight: var(--font-semibold); }
+.font-bold { font-weight: var(--font-bold); }
+.font-extrabold { font-weight: var(--font-extrabold); }
+.font-black { font-weight: var(--font-black); }
+
+/* ============================================
+   TEXT COLOR UTILITIES
+   ============================================ */
+
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-tertiary { color: var(--text-tertiary); }
+.text-muted { color: var(--text-muted); }
+
+.text-gold { color: var(--brand-gold); }
+.text-cyan { color: var(--brand-cyan); }
+.text-burgundy { color: var(--brand-burgundy); }
+.text-purple { color: var(--brand-purple); }
+
+.text-green { color: var(--accent-green); }
+.text-red { color: var(--accent-red); }
+
+/* ============================================
+   TEXT ALIGNMENT
+   ============================================ */
+
+.text-left { text-align: left; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+/* ============================================
+   TEXT DECORATION
+   ============================================ */
+
+.underline { text-decoration: underline; }
+.no-underline { text-decoration: none; }
+
+/* ============================================
+   TEXT TRANSFORM
+   ============================================ */
+
+.uppercase { text-transform: uppercase; }
+.lowercase { text-transform: lowercase; }
+.capitalize { text-transform: capitalize; }
+
+/* ============================================
+   RESPONSIVE TYPOGRAPHY (Mobile First)
+   ============================================ */
+
+@media (max-width: 768px) {
+  .heading-xl {
+    font-size: 48px; /* 72px → 48px on mobile */
+    letter-spacing: -1px;
+  }
+
+  .heading-lg {
+    font-size: 32px; /* 48px → 32px on mobile */
+  }
+
+  .heading-md {
+    font-size: 24px; /* 32px → 24px on mobile */
+  }
+}

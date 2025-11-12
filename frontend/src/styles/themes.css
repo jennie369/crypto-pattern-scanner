@@ -1,0 +1,36 @@
+/* ===================================
+   GEM PLATFORM - THEMES
+   Dark/Light Mode Support (Future)
+   Version: 1.0
+   =================================== */
+
+/* ============================================
+   DARK MODE (Default)
+   ============================================ */
+
+:root {
+  --current-bg: var(--bg-gradient);
+  --current-text: var(--text-primary);
+  /* ... other theme variables */
+}
+
+/* ============================================
+   LIGHT MODE (Optional - for future)
+   ============================================ */
+
+[data-theme="light"] {
+  /* Light mode colors would go here */
+  /* Currently not implemented */
+}
+
+/* ============================================
+   THEME TOGGLE UTILITIES
+   ============================================ */
+
+.theme-dark {
+  color-scheme: dark;
+}
+
+.theme-light {
+  color-scheme: light;
+}

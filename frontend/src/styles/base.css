@@ -1,0 +1,247 @@
+/* ===================================
+   GEM PLATFORM - BASE STYLES
+   CSS Reset + Body Defaults
+   Version: 1.0
+   =================================== */
+
+/* ============================================
+   CSS RESET - Modern Normalize
+   ============================================ */
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ============================================
+   🌟 GLOW BACKGROUND - BLUR LAYERS VERSION
+   ============================================ */
+
+body {
+  position: relative;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--font-normal);
+  line-height: var(--leading-normal);
+  color: var(--text-secondary);
+
+  /* Base gradient background */
+  background: var(--bg-gradient-base);
+  background-attachment: fixed;
+  background-size: cover;
+
+  /* Prevent horizontal scroll */
+  overflow-x: hidden;
+  min-height: 100vh;
+
+  /* Smooth scrolling */
+  scroll-behavior: smooth;
+
+  /* Font smoothing */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Glow Layer 1 - Top Right (Bright Blue) */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle at 85% 20%,
+    var(--glow-blue-bright) 0%,
+    var(--glow-blue-medium) 20%,
+    transparent 50%
+  );
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+  animation: glowMove1 10s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Glow Layer 2 - Bottom Left (Dark Blue) */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle at 15% 80%,
+    var(--glow-blue-dark) 0%,
+    transparent 40%
+  );
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 0;
+  animation: glowMove2 12s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Glow Animations */
+@keyframes glowMove1 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-20px, 10px) scale(1.1);
+    opacity: 0.95;
+  }
+}
+
+@keyframes glowMove2 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(15px, -20px) scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+/* Ensure content is above glow layers */
+#root,
+.app,
+main,
+.app-container {
+  position: relative;
+  z-index: 1;
+}
+
+/* Headers always on top */
+header,
+nav,
+.header {
+  position: relative;
+  z-index: 100;
+}
+
+/* ============================================
+   TYPOGRAPHY DEFAULTS
+   ============================================ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: var(--font-bold);
+  line-height: var(--leading-tight);
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+p {
+  margin-bottom: var(--space-md);
+}
+
+a {
+  color: var(--brand-cyan);
+  text-decoration: none;
+  transition: color var(--transition-base);
+}
+
+a:hover {
+  color: var(--brand-gold);
+}
+
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ============================================
+   IMAGES & MEDIA
+   ============================================ */
+
+img, svg, video {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+/* Focus visible for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--brand-gold);
+  outline-offset: 4px;
+}
+
+/* Remove outline for mouse users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Screen reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ============================================
+   SCROLLBAR STYLING
+   ============================================ */
+
+/* WebKit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--brand-burgundy);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--brand-burgundy-dark);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--brand-burgundy) var(--bg-secondary);
+}
