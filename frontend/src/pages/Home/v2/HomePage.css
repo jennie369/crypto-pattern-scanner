@@ -1,0 +1,54 @@
+/* ===================================
+   HOME PAGE V2 - STYLES
+   =================================== */
+
+.home-page-v2 {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(180deg,
+    #0A0E27 0%,
+    #112250 50%,
+    #0A0E27 100%);
+}
+
+/* Section spacing */
+.home-page-v2 > section {
+  padding: var(--space-3xl, 80px) 0;
+}
+
+.home-page-v2 > section:first-child {
+  padding-top: calc(80px + var(--space-3xl, 80px)); /* Header height + padding */
+}
+
+/* Container */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg, 32px);
+}
+
+/* Text Gradients */
+.text-gradient-gold {
+  background: linear-gradient(135deg, #FFBD59 0%, #FF8C00 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-purple {
+  background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .home-page-v2 > section {
+    padding: var(--space-2xl, 64px) 0;
+  }
+
+  .container {
+    padding: 0 var(--space-md, 24px);
+  }
+}
