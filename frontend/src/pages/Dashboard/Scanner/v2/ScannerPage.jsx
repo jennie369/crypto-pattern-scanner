@@ -3,7 +3,7 @@ import ControlPanel from './components/ControlPanel';
 import TradingChart from './components/TradingChart';
 import PatternDetails from './components/PatternDetails';
 import SubToolsPanel from './components/SubToolsPanel';
-import { scanPatterns, ScannerWebSocket, exportToCSV, downloadCSV } from '../../../services/scannerAPI';
+import { scanPatterns, ScannerWebSocket, exportToCSV, downloadCSV } from '../../../../services/scannerAPI';
 import './ScannerPage.css';
 
 /**
@@ -15,6 +15,7 @@ export const ScannerPage = () => {
   const [selectedPattern, setSelectedPattern] = useState(null);
   const [scanResults, setScanResults] = useState([]);
   const [isScanning, setIsScanning] = useState(false);
+  const [error, setError] = useState(null);
   const wsRef = useRef(null);
 
   // Initialize WebSocket on mount
@@ -46,22 +47,29 @@ export const ScannerPage = () => {
   }, []);
 
   const handleScan = async (filters) => {
+    console.log('[ScannerPage] Starting scan with filters:', filters);
     setIsScanning(true);
+    setError(null); // Clear previous errors
+
     try {
       // Call actual scan API
       const results = await scanPatterns(filters);
+      console.log('[ScannerPage] Scan results:', results);
+
       setScanResults(results);
       setSelectedPattern(null); // Reset selection on new scan
 
       // Connect WebSocket for real-time updates
-      if (wsRef.current && filters.coins.length > 0) {
+      if (wsRef.current && filters.coins && filters.coins.length > 0) {
         wsRef.current.connect(filters.coins);
       }
     } catch (error) {
-      console.error('Scan error:', error);
-      alert('Failed to scan patterns. Please try again.');
+      console.error('[ScannerPage] Scan error:', error);
+      setError(error.message || 'Failed to scan patterns. Please try again.');
+      alert(`Scan failed: ${error.message || 'Unknown error'}`);
     } finally {
       setIsScanning(false);
+      console.log('[ScannerPage] Scan complete');
     }
   };
 
@@ -82,6 +90,20 @@ export const ScannerPage = () => {
 
   return (
     <div className="scanner-page-v2">
+      {/* Error Display */}
+      {error && (
+        <div style={{
+          padding: '16px',
+          background: 'rgba(246, 70, 93, 0.1)',
+          border: '1px solid #F6465D',
+          borderRadius: '8px',
+          color: '#F6465D',
+          marginBottom: '16px'
+        }}>
+          <strong>Error:</strong> {error}
+        </div>
+      )}
+
       <div className="scanner-layout">
         {/* LEFT - Control Panel */}
         <div className="scanner-left">

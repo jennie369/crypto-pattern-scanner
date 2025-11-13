@@ -3,7 +3,8 @@
  * Handles all backend API calls for Scanner v2
  */
 
-import { supabase } from '../lib/supabaseClient';
+// Import supabase only when needed (commented out for mock implementation)
+// import { supabase } from '../lib/supabaseClient';
 
 /**
  * Scan for patterns across multiple coins and timeframes
@@ -15,20 +16,34 @@ import { supabase } from '../lib/supabaseClient';
  */
 export const scanPatterns = async (filters) => {
   try {
-    const { coins, timeframe, patternFilter } = filters;
+    console.log('[scanPatterns] Starting scan with filters:', filters);
+
+    // Validate filters
+    if (!filters) {
+      throw new Error('No filters provided');
+    }
+
+    // Extract filters with fallback for property name (pattern or patternFilter)
+    const { coins, timeframe, pattern, patternFilter } = filters;
+    const selectedPattern = pattern || patternFilter || 'All';
+
+    if (!coins || coins.length === 0) {
+      throw new Error('No coins selected for scanning');
+    }
+
+    console.log('[scanPatterns] Validated filters:', { coins, timeframe, selectedPattern });
 
     // TODO: Replace with actual backend API call
     // For now, return mock data
-    console.log('Scanning patterns with filters:', filters);
 
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     // Generate mock patterns based on filters
     const mockPatterns = [];
-    const patternTypes = patternFilter === 'All'
+    const patternTypes = selectedPattern === 'All'
       ? ['DPD', 'UPU', 'UPD', 'DPU', 'H&S', 'Double Top', 'Double Bottom', 'Triangle']
-      : [patternFilter];
+      : [selectedPattern];
 
     coins.forEach((coin, index) => {
       if (Math.random() > 0.5) { // 50% chance of finding a pattern
@@ -83,33 +98,29 @@ const getPatternName = (pattern) => {
  */
 export const savePatternAlert = async (pattern) => {
   try {
-    const { user } = await supabase.auth.getUser();
+    console.log('[savePatternAlert] Saving pattern:', pattern);
 
-    if (!user) {
-      throw new Error('User not authenticated');
-    }
+    // TODO: Implement actual Supabase integration
+    // For now, just save to localStorage
+    const savedAlerts = JSON.parse(localStorage.getItem('pattern_alerts') || '[]');
+    const newAlert = {
+      id: Date.now(),
+      coin: pattern.coin,
+      pattern_type: pattern.pattern,
+      timeframe: pattern.timeframe,
+      entry_price: pattern.entry,
+      stop_loss: pattern.stopLoss,
+      take_profit: pattern.takeProfit,
+      confidence: pattern.confidence,
+      detected_at: pattern.detectedAt,
+      saved_at: new Date().toISOString(),
+    };
 
-    const { data, error } = await supabase
-      .from('pattern_alerts')
-      .insert([
-        {
-          user_id: user.id,
-          coin: pattern.coin,
-          pattern_type: pattern.pattern,
-          timeframe: pattern.timeframe,
-          entry_price: pattern.entry,
-          stop_loss: pattern.stopLoss,
-          take_profit: pattern.takeProfit,
-          confidence: pattern.confidence,
-          detected_at: pattern.detectedAt,
-        }
-      ])
-      .select()
-      .single();
+    savedAlerts.push(newAlert);
+    localStorage.setItem('pattern_alerts', JSON.stringify(savedAlerts));
 
-    if (error) throw error;
-
-    return data;
+    console.log('[savePatternAlert] Pattern saved successfully');
+    return newAlert;
   } catch (error) {
     console.error('Error saving pattern alert:', error);
     throw error;
