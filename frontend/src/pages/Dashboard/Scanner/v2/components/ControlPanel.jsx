@@ -11,16 +11,41 @@ export const ControlPanel = ({ onScan, isScanning, results, onSelectPattern, sel
   const timeframes = ['5m', '15m', '1H', '4H', '1D'];
   const patterns = ['All', 'DPD', 'UPU', 'UPD', 'DPU', 'H&S', 'Double Top', 'Double Bottom', 'Triangle'];
 
+  // Tier limits configuration
+  // TODO: Get userTier from AuthContext when available
+  const userTier = 'FREE';
+  const tierLimits = {
+    'FREE': 2,      // Max 2 coins at a time
+    'TIER2': 5,     // Max 5 coins at a time
+    'TIER3': 999,   // Unlimited
+  };
+  const maxCoins = tierLimits[userTier];
+
   const handleCoinToggle = (coin) => {
-    setSelectedCoins(prev =>
-      prev.includes(coin)
-        ? prev.filter(c => c !== coin)
-        : [...prev, coin]
-    );
+    setSelectedCoins(prev => {
+      // If unchecking, always allow
+      if (prev.includes(coin)) {
+        return prev.filter(c => c !== coin);
+      }
+
+      // If checking, verify tier limit
+      if (prev.length >= maxCoins) {
+        alert(`🔒 ${userTier} tier is limited to ${maxCoins} coins at a time.\n\n✅ Upgrade to TIER 2 to scan up to 5 coins!\n✅ Upgrade to TIER 3 for unlimited scanning!`);
+        return prev;
+      }
+
+      return [...prev, coin];
+    });
   };
 
   const handleSelectAll = () => {
-    setSelectedCoins(coins);
+    // Select only up to tier limit
+    if (coins.length > maxCoins) {
+      alert(`🔒 ${userTier} tier is limited to ${maxCoins} coins at a time.\n\nSelecting first ${maxCoins} coins only.\n\n✅ Upgrade to TIER 2 to scan up to 5 coins!\n✅ Upgrade to TIER 3 for unlimited scanning!`);
+      setSelectedCoins(coins.slice(0, maxCoins));
+    } else {
+      setSelectedCoins(coins);
+    }
   };
 
   const handleClearAll = () => {
@@ -28,6 +53,17 @@ export const ControlPanel = ({ onScan, isScanning, results, onSelectPattern, sel
   };
 
   const handleScan = () => {
+    // Validate tier limit before scanning
+    if (selectedCoins.length > maxCoins) {
+      alert(`🔒 ${userTier} tier is limited to ${maxCoins} coins at a time.\n\nYou have selected ${selectedCoins.length} coins.\n\n✅ Upgrade to TIER 2 to scan up to 5 coins!\n✅ Upgrade to TIER 3 for unlimited scanning!`);
+      return;
+    }
+
+    if (selectedCoins.length === 0) {
+      alert('⚠️ Please select at least 1 coin to scan.');
+      return;
+    }
+
     onScan({
       coins: selectedCoins,
       timeframe,
@@ -45,7 +81,7 @@ export const ControlPanel = ({ onScan, isScanning, results, onSelectPattern, sel
 
       {/* Coin Selection */}
       <div className="control-section">
-        <label className="control-label">Select Coins ({selectedCoins.length})</label>
+        <label className="control-label">Select Coins ({selectedCoins.length}/{maxCoins})</label>
 
         <div className="quick-filters">
           <button
@@ -77,6 +113,18 @@ export const ControlPanel = ({ onScan, isScanning, results, onSelectPattern, sel
               <span className="coin-icon">📈</span>
             </label>
           ))}
+        </div>
+
+        {/* Tier Limit Indicator */}
+        <div className={`tier-limit-indicator ${selectedCoins.length >= maxCoins ? 'at-limit' : ''}`}>
+          <span className="tier-badge">{userTier}</span>
+          <span className="limit-text">
+            {selectedCoins.length >= maxCoins ? (
+              <>🔒 Limit reached. Upgrade to select more coins!</>
+            ) : (
+              <>✅ {maxCoins - selectedCoins.length} more coin{maxCoins - selectedCoins.length !== 1 ? 's' : ''} available</>
+            )}
+          </span>
         </div>
       </div>
 
