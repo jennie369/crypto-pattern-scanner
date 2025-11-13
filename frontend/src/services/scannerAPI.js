@@ -61,7 +61,7 @@ export const scanPatterns = async (filters) => {
           entry: basePrice,
           stopLoss: basePrice * (1 + (Math.random() * 0.03)),
           takeProfit: basePrice * (1 - (Math.random() * 0.05)),
-          riskReward: (1 + Math.random() * 2).toFixed(2),
+          riskReward: parseFloat((1 + Math.random() * 2).toFixed(2)),
           detectedAt: new Date().toISOString(),
         });
       }
@@ -150,10 +150,10 @@ export const exportToCSV = (patterns) => {
     p.patternName,
     `${p.confidence}%`,
     p.timeframe,
-    p.entry,
-    p.stopLoss,
-    p.takeProfit,
-    `1:${p.riskReward}`,
+    p.entry.toFixed(2),
+    p.stopLoss.toFixed(2),
+    p.takeProfit.toFixed(2),
+    `1:${typeof p.riskReward === 'number' ? p.riskReward.toFixed(2) : p.riskReward}`,
     new Date(p.detectedAt).toLocaleString()
   ]);
 
