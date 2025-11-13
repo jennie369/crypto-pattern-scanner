@@ -1,51 +1,161 @@
 import React, { useEffect, useRef } from 'react';
+import { createChart } from 'lightweight-charts';
 import './TradingChart.css';
 
 /**
  * Trading Chart Component
  * Integration with TradingView Lightweight Charts
- *
- * NOTE: Lightweight Charts library needs to be installed:
- * npm install lightweight-charts
- *
- * For now, this is a placeholder with mock UI
  */
 export const TradingChart = ({ pattern }) => {
   const chartContainerRef = useRef(null);
   const chartRef = useRef(null);
+  const candlestickSeriesRef = useRef(null);
+  const volumeSeriesRef = useRef(null);
+
+  // Generate mock candlestick data
+  const generateMockData = (basePrice) => {
+    const data = [];
+    let currentPrice = basePrice;
+    const now = Math.floor(Date.now() / 1000);
+
+    for (let i = 100; i >= 0; i--) {
+      const change = (Math.random() - 0.5) * (basePrice * 0.02);
+      const open = currentPrice;
+      const close = currentPrice + change;
+      const high = Math.max(open, close) + Math.random() * (basePrice * 0.01);
+      const low = Math.min(open, close) - Math.random() * (basePrice * 0.01);
+
+      data.push({
+        time: now - (i * 3600),
+        open,
+        high,
+        low,
+        close,
+      });
+
+      currentPrice = close;
+    }
+
+    return data;
+  };
+
+  // Generate mock volume data
+  const generateMockVolumeData = (candleData) => {
+    return candleData.map(candle => ({
+      time: candle.time,
+      value: Math.random() * 1000000 + 500000,
+      color: candle.close >= candle.open ? 'rgba(0, 255, 136, 0.5)' : 'rgba(246, 70, 93, 0.5)',
+    }));
+  };
 
   useEffect(() => {
     if (!chartContainerRef.current || !pattern) return;
 
-    // TODO: Initialize Lightweight Charts
-    // import { createChart } from 'lightweight-charts';
-    // const chart = createChart(chartContainerRef.current, {
-    //   width: chartContainerRef.current.clientWidth,
-    //   height: 500,
-    //   layout: {
-    //     background: { color: 'transparent' },
-    //     textColor: '#D9D9D9',
-    //   },
-    //   grid: {
-    //     vertLines: { color: 'rgba(255, 255, 255, 0.1)' },
-    //     horzLines: { color: 'rgba(255, 255, 255, 0.1)' },
-    //   },
-    // });
+    // Create chart instance
+    const chart = createChart(chartContainerRef.current, {
+      width: chartContainerRef.current.clientWidth,
+      height: 450,
+      layout: {
+        background: { color: 'transparent' },
+        textColor: '#D9D9D9',
+      },
+      grid: {
+        vertLines: { color: 'rgba(255, 255, 255, 0.05)' },
+        horzLines: { color: 'rgba(255, 255, 255, 0.05)' },
+      },
+      crosshair: {
+        mode: 1,
+      },
+      rightPriceScale: {
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+      },
+      timeScale: {
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        timeVisible: true,
+        secondsVisible: false,
+      },
+    });
 
-    // const candlestickSeries = chart.addCandlestickSeries({
-    //   upColor: '#00FF88',
-    //   downColor: '#F6465D',
-    //   borderVisible: false,
-    //   wickUpColor: '#00FF88',
-    //   wickDownColor: '#F6465D',
-    // });
+    chartRef.current = chart;
 
-    // Add volume bars, pattern overlays, etc.
+    // Add candlestick series
+    const candlestickSeries = chart.addCandlestickSeries({
+      upColor: '#00FF88',
+      downColor: '#F6465D',
+      borderVisible: false,
+      wickUpColor: '#00FF88',
+      wickDownColor: '#F6465D',
+    });
+
+    candlestickSeriesRef.current = candlestickSeries;
+
+    // Add volume series
+    const volumeSeries = chart.addHistogramSeries({
+      color: '#26a69a',
+      priceFormat: {
+        type: 'volume',
+      },
+      priceScaleId: '',
+      scaleMargins: {
+        top: 0.8,
+        bottom: 0,
+      },
+    });
+
+    volumeSeriesRef.current = volumeSeries;
+
+    // Set mock data
+    const mockCandleData = generateMockData(pattern.entry);
+    const mockVolumeData = generateMockVolumeData(mockCandleData);
+
+    candlestickSeries.setData(mockCandleData);
+    volumeSeries.setData(mockVolumeData);
+
+    // Add pattern overlay lines
+    const entryLine = candlestickSeries.createPriceLine({
+      price: pattern.entry,
+      color: '#00D9FF',
+      lineWidth: 2,
+      lineStyle: 2,
+      axisLabelVisible: true,
+      title: 'Entry',
+    });
+
+    const stopLossLine = candlestickSeries.createPriceLine({
+      price: pattern.stopLoss,
+      color: '#F6465D',
+      lineWidth: 2,
+      lineStyle: 2,
+      axisLabelVisible: true,
+      title: 'Stop Loss',
+    });
+
+    const takeProfitLine = candlestickSeries.createPriceLine({
+      price: pattern.takeProfit,
+      color: '#00FF88',
+      lineWidth: 2,
+      lineStyle: 2,
+      axisLabelVisible: true,
+      title: 'Take Profit',
+    });
+
+    // Fit content
+    chart.timeScale().fitContent();
+
+    // Handle resize
+    const handleResize = () => {
+      if (chartContainerRef.current) {
+        chart.applyOptions({ width: chartContainerRef.current.clientWidth });
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
 
     return () => {
-      // Cleanup chart
+      window.removeEventListener('resize', handleResize);
       if (chartRef.current) {
-        // chartRef.current.remove();
+        chartRef.current.remove();
+        chartRef.current = null;
       }
     };
   }, [pattern]);
@@ -103,66 +213,9 @@ export const TradingChart = ({ pattern }) => {
         </div>
       </div>
 
-      {/* Chart Area - Placeholder for now */}
+      {/* Chart Area - TradingView Lightweight Charts */}
       <div className="chart-card">
-        <div ref={chartContainerRef} className="chart-canvas">
-          <div className="chart-placeholder-mock">
-            <div className="mock-chart-header">
-              <div className="mock-price-info">
-                <div className="mock-price">${pattern.entry.toLocaleString()}</div>
-                <div className="mock-change">+2.34%</div>
-              </div>
-            </div>
-
-            <div className="mock-chart-area">
-              <div className="mock-candlesticks">
-                {/* Simplified candlestick visualization */}
-                {[...Array(20)].map((_, i) => (
-                  <div
-                    key={i}
-                    className={`mock-candle ${Math.random() > 0.5 ? 'green' : 'red'}`}
-                    style={{
-                      height: `${Math.random() * 60 + 20}%`,
-                      bottom: `${Math.random() * 20}%`
-                    }}
-                  />
-                ))}
-              </div>
-
-              {/* Pattern overlays */}
-              <div className="pattern-overlays">
-                <div className="pattern-line entry-line">
-                  <span className="line-label">Entry: ${pattern.entry.toLocaleString()}</span>
-                </div>
-                <div className="pattern-line stop-loss-line">
-                  <span className="line-label">Stop Loss: ${pattern.stopLoss.toLocaleString()}</span>
-                </div>
-                <div className="pattern-line take-profit-line">
-                  <span className="line-label">Take Profit: ${pattern.takeProfit.toLocaleString()}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="chart-integration-notice">
-              <p>📊 Chart Integration: Install <code>lightweight-charts</code> library</p>
-              <p className="text-xs">npm install lightweight-charts</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Volume Bar (placeholder) */}
-        <div className="volume-bar">
-          <div className="volume-label">Volume</div>
-          <div className="volume-chart">
-            {[...Array(20)].map((_, i) => (
-              <div
-                key={i}
-                className={`volume-bar-item ${Math.random() > 0.5 ? 'vol-green' : 'vol-red'}`}
-                style={{ height: `${Math.random() * 100}%` }}
-              />
-            ))}
-          </div>
-        </div>
+        <div ref={chartContainerRef} className="chart-canvas" />
       </div>
     </div>
   );

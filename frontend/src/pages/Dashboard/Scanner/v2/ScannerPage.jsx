@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ControlPanel from './components/ControlPanel';
 import TradingChart from './components/TradingChart';
 import PatternDetails from './components/PatternDetails';
 import SubToolsPanel from './components/SubToolsPanel';
+import { scanPatterns, ScannerWebSocket, exportToCSV, downloadCSV } from '../../../services/scannerAPI';
 import './ScannerPage.css';
 
 /**
@@ -14,81 +15,69 @@ export const ScannerPage = () => {
   const [selectedPattern, setSelectedPattern] = useState(null);
   const [scanResults, setScanResults] = useState([]);
   const [isScanning, setIsScanning] = useState(false);
+  const wsRef = useRef(null);
+
+  // Initialize WebSocket on mount
+  useEffect(() => {
+    wsRef.current = new ScannerWebSocket();
+
+    // Setup WebSocket callbacks
+    wsRef.current.onPattern((pattern) => {
+      console.log('New pattern detected:', pattern);
+      // Add new pattern to results
+      setScanResults(prev => [pattern, ...prev]);
+    });
+
+    wsRef.current.onPrice((priceUpdate) => {
+      console.log('Price update:', priceUpdate);
+      // Update pattern prices if needed
+    });
+
+    wsRef.current.onError((error) => {
+      console.error('WebSocket error:', error);
+    });
+
+    // Cleanup on unmount
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.disconnect();
+      }
+    };
+  }, []);
 
   const handleScan = async (filters) => {
     setIsScanning(true);
     try {
-      // TODO: Call scan API
-      // const results = await scanPatterns(filters);
-      // setScanResults(results);
+      // Call actual scan API
+      const results = await scanPatterns(filters);
+      setScanResults(results);
+      setSelectedPattern(null); // Reset selection on new scan
 
-      // Mock results for demonstration
-      setTimeout(() => {
-        setScanResults([
-          {
-            id: 1,
-            coin: 'BTC/USDT',
-            pattern: 'DPD',
-            patternName: 'Down-Pause-Down',
-            confidence: 87,
-            timeframe: '1H',
-            entry: 42150,
-            stopLoss: 43200,
-            takeProfit: 40500,
-            riskReward: 1.57,
-            detectedAt: new Date().toISOString(),
-          },
-          {
-            id: 2,
-            coin: 'ETH/USDT',
-            pattern: 'UPU',
-            patternName: 'Up-Pause-Up',
-            confidence: 76,
-            timeframe: '1H',
-            entry: 2150,
-            stopLoss: 2100,
-            takeProfit: 2250,
-            riskReward: 2.0,
-            detectedAt: new Date().toISOString(),
-          },
-          {
-            id: 3,
-            coin: 'SOL/USDT',
-            pattern: 'H&S',
-            patternName: 'Head & Shoulders',
-            confidence: 92,
-            timeframe: '4H',
-            entry: 98.50,
-            stopLoss: 102.00,
-            takeProfit: 92.00,
-            riskReward: 1.86,
-            detectedAt: new Date().toISOString(),
-          },
-          {
-            id: 4,
-            coin: 'BNB/USDT',
-            pattern: 'Double Bottom',
-            patternName: 'Double Bottom',
-            confidence: 68,
-            timeframe: '1D',
-            entry: 310,
-            stopLoss: 295,
-            takeProfit: 340,
-            riskReward: 2.0,
-            detectedAt: new Date().toISOString(),
-          },
-        ]);
-        setSelectedPattern(null); // Reset selection on new scan
-        setIsScanning(false);
-      }, 2000);
+      // Connect WebSocket for real-time updates
+      if (wsRef.current && filters.coins.length > 0) {
+        wsRef.current.connect(filters.coins);
+      }
     } catch (error) {
       console.error('Scan error:', error);
+      alert('Failed to scan patterns. Please try again.');
+    } finally {
       setIsScanning(false);
     }
   };
 
   const handleSelectPattern = (pattern) => {
     setSelectedPattern(pattern);
+  };
+
+  const handleExportResults = () => {
+    if (scanResults.length === 0) {
+      alert('No results to export');
+      return;
+    }
+
+    const csv = exportToCSV(scanResults);
+    const filename = `pattern-scan-${new Date().toISOString().split('T')[0]}.csv`;
+    downloadCSV(csv, filename);
   };
 
   return (
