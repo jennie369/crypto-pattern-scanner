@@ -1,0 +1,102 @@
+/* ===================================
+   SCANNER PAGE V2 - STYLES
+   Week 3, Day 18-21
+   =================================== */
+
+.scanner-page-v2 {
+  min-height: calc(100vh - 80px); /* Subtract header height */
+  padding: var(--space-lg);
+  background: var(--bg-base);
+}
+
+/* 3-Column Layout */
+.scanner-layout {
+  display: grid;
+  grid-template-columns: 20% 50% 30%;
+  gap: var(--space-md);
+  height: calc(100vh - 160px);
+  overflow: hidden;
+}
+
+.scanner-left,
+.scanner-right {
+  overflow-y: auto;
+  padding: var(--space-md);
+  background: rgba(30, 42, 94, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.scanner-center {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  overflow: hidden;
+}
+
+/* Scrollbar styling */
+.scanner-left::-webkit-scrollbar,
+.scanner-right::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scanner-left::-webkit-scrollbar-track,
+.scanner-right::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-full);
+}
+
+.scanner-left::-webkit-scrollbar-thumb,
+.scanner-right::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--brand-burgundy), var(--brand-royal));
+  border-radius: var(--radius-full);
+}
+
+.scanner-left::-webkit-scrollbar-thumb:hover,
+.scanner-right::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #9C0612, #112250);
+}
+
+/* Responsive - Large Tablets */
+@media (max-width: 1400px) {
+  .scanner-layout {
+    grid-template-columns: 25% 50% 25%;
+  }
+}
+
+/* Responsive - Tablets */
+@media (max-width: 1024px) {
+  .scanner-layout {
+    grid-template-columns: 30% 70%;
+    grid-template-rows: auto 1fr;
+  }
+
+  .scanner-right {
+    grid-column: 1 / -1;
+    max-height: 400px;
+  }
+}
+
+/* Responsive - Mobile */
+@media (max-width: 768px) {
+  .scanner-page-v2 {
+    padding: var(--space-sm);
+  }
+
+  .scanner-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    height: auto;
+    gap: var(--space-sm);
+  }
+
+  .scanner-left,
+  .scanner-center,
+  .scanner-right {
+    max-height: none;
+    padding: var(--space-sm);
+  }
+}
