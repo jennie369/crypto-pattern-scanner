@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useAuth } from '../../../../../contexts/AuthContext';
 import ResultsList from './ResultsList';
 import './ControlPanel.css';
 
 export const ControlPanel = ({ onScan, isScanning, results, onSelectPattern, selectedPattern }) => {
+  const { profile, getScannerTier } = useAuth();
   const [selectedCoins, setSelectedCoins] = useState(['BTC', 'ETH']);
   const [timeframe, setTimeframe] = useState('1H');
   const [patternFilter, setPatternFilter] = useState('All');
@@ -12,14 +14,35 @@ export const ControlPanel = ({ onScan, isScanning, results, onSelectPattern, sel
   const patterns = ['All', 'DPD', 'UPU', 'UPD', 'DPU', 'H&S', 'Double Top', 'Double Bottom', 'Triangle'];
 
   // Tier limits configuration
-  // TODO: Get userTier from AuthContext when available
-  const userTier = 'FREE';
+  // Get actual tier from AuthContext
+  const scannerTierRaw = getScannerTier ? getScannerTier() : 'free';
+
+  // Normalize tier format (handle both 'free'/'tier3'/'TIER3'/'vip' formats)
+  const normalizeTier = (tier) => {
+    const tierLower = (tier || 'free').toLowerCase();
+    if (tierLower === 'free') return 'FREE';
+    if (tierLower === 'tier1' || tierLower === 'pro') return 'TIER1';
+    if (tierLower === 'tier2' || tierLower === 'premium') return 'TIER2';
+    if (tierLower === 'tier3' || tierLower === 'vip') return 'TIER3';
+    return 'FREE'; // Default to FREE
+  };
+
+  const userTier = normalizeTier(scannerTierRaw);
   const tierLimits = {
     'FREE': 2,      // Max 2 coins at a time
+    'TIER1': 3,     // Max 3 coins at a time
     'TIER2': 5,     // Max 5 coins at a time
     'TIER3': 999,   // Unlimited
   };
   const maxCoins = tierLimits[userTier];
+
+  // Debug logging
+  console.log('🔍 [ControlPanel] Tier Debug:', {
+    scannerTierRaw,
+    userTier,
+    maxCoins,
+    profile: profile ? { email: profile.email, scanner_tier: profile.scanner_tier } : null
+  });
 
   const handleCoinToggle = (coin) => {
     setSelectedCoins(prev => {
