@@ -1,0 +1,153 @@
+/* ===================================
+   CARD COMPONENT - GEM PLATFORM
+   Glassmorphism Cards with Variants
+   Version: 1.0
+   =================================== */
+
+/* ============================================
+   BASE CARD STYLES
+   ============================================ */
+
+.card {
+  /* Layout */
+  display: flex;
+  flex-direction: column;
+
+  /* Spacing */
+  padding: var(--space-lg);
+
+  /* Visual */
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+
+  /* Animation */
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+/* ============================================
+   CARD SIZES
+   ============================================ */
+
+.card-sm {
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+}
+
+.card-md {
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
+}
+
+.card-lg {
+  padding: var(--space-2xl);
+  border-radius: var(--radius-xl);
+}
+
+/* ============================================
+   CARD VARIANTS
+   ============================================ */
+
+/* Default Card - Glassmorphism */
+.card-default {
+  background: rgba(30, 42, 94, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Glass Card - More transparent */
+.card-glass {
+  background: rgba(30, 42, 94, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(30px);
+}
+
+/* Stat Card - Purple/Burgundy gradient background */
+.card-stat {
+  background: linear-gradient(
+    180deg,
+    rgba(74, 26, 79, 0.35) 0%,
+    rgba(107, 15, 26, 0.25) 100%
+  );
+  border: 1px solid rgba(255, 189, 89, 0.22);
+  box-shadow: 0 0 18px rgba(255, 189, 89, 0.18);
+}
+
+/* Gradient Card - Gold accent */
+.card-gradient {
+  background: linear-gradient(
+    135deg,
+    rgba(156, 6, 18, 0.3) 0%,
+    rgba(30, 42, 94, 0.3) 100%
+  );
+  border: 1px solid var(--brand-gold);
+  box-shadow: 0 0 30px rgba(255, 189, 89, 0.2);
+}
+
+/* Compact Card - Minimal padding for lists */
+.card-compact {
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+}
+
+/* ============================================
+   CARD STATES
+   ============================================ */
+
+/* Hoverable - Lift on hover */
+.card-hoverable:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: var(--shadow-lg);
+}
+
+.card-stat.card-hoverable:hover {
+  box-shadow: 0 0 30px rgba(255, 189, 89, 0.3);
+}
+
+/* Clickable - Cursor pointer */
+.card-clickable {
+  cursor: pointer;
+}
+
+.card-clickable:active {
+  transform: scale(0.98);
+}
+
+/* ============================================
+   CARD SECTIONS
+   ============================================ */
+
+.card-header {
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.card-body {
+  flex: 1;
+}
+
+.card-footer {
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .card {
+    padding: var(--space-md);
+  }
+
+  .card-lg {
+    padding: var(--space-lg);
+  }
+}
