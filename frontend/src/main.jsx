@@ -8,6 +8,7 @@ import './styles/base.css'
 import './styles/typography.css'
 import './styles/layout.css'
 import './styles/animations.css'
+import './styles/components.css'
 import './styles/themes.css'
 
 import App from './App.jsx'

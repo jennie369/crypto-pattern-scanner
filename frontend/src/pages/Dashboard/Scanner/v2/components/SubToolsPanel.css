@@ -1,0 +1,141 @@
+/* ===================================
+   SUB-TOOLS PANEL - STYLES
+   =================================== */
+
+.sub-tools-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-top: var(--space-lg);
+  padding-top: var(--space-lg);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sub-tools-header {
+  margin-bottom: var(--space-sm);
+}
+
+.sub-tools-header .heading-sm {
+  margin-bottom: var(--space-xs);
+}
+
+.sub-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-sm);
+}
+
+.sub-tool-btn {
+  padding: var(--space-sm);
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  text-align: center;
+}
+
+.sub-tool-btn:hover:not(:disabled):not(.locked) {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--brand-cyan);
+  transform: translateY(-2px);
+}
+
+.sub-tool-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sub-tool-btn.locked {
+  opacity: 0.7;
+}
+
+.sub-tool-btn.locked:hover {
+  border-color: var(--brand-gold);
+  transform: translateY(-2px);
+}
+
+.tool-icon {
+  font-size: 24px;
+  margin-bottom: var(--space-xs);
+}
+
+.tool-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tool-name {
+  font-size: 11px;
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.tool-tier {
+  font-size: 9px;
+  font-weight: var(--font-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.tool-tier.tier-free {
+  background: rgba(0, 255, 136, 0.15);
+  color: #00FF88;
+}
+
+.tool-tier.tier-2 {
+  background: rgba(139, 92, 246, 0.15);
+  color: #8B5CF6;
+}
+
+.tool-tier.tier-3 {
+  background: rgba(255, 189, 89, 0.15);
+  color: #FFBD59;
+}
+
+.sub-tools-notice {
+  padding: var(--space-md);
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 1400px) {
+  .sub-tools-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .sub-tools-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .sub-tools-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .tool-icon {
+    font-size: 20px;
+  }
+
+  .tool-name {
+    font-size: 10px;
+  }
+
+  .tool-tier {
+    font-size: 8px;
+  }
+}
