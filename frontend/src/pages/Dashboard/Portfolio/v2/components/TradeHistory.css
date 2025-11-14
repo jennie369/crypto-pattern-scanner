@@ -16,9 +16,14 @@
   align-items: flex-end;
 }
 
-.filters-bar > * {
+.filters-bar > *:not(.filter-actions) {
   flex: 1;
   min-width: 150px;
+}
+
+.filter-actions {
+  display: flex;
+  gap: var(--space-sm);
 }
 
 /* R:R Cell */
@@ -28,13 +33,89 @@
   color: var(--text-secondary);
 }
 
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: var(--space-2xl) var(--space-md);
+}
+
+.empty-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.empty-message p:first-child {
+  font-size: var(--text-lg);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.empty-hint {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin: 0;
+}
+
 /* Pagination */
 .pagination {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: var(--space-md);
   align-items: center;
-  padding: var(--space-md);
+  padding: var(--space-lg);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pagination-info {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.page-numbers {
+  display: flex;
+  gap: var(--space-xs);
+  align-items: center;
+}
+
+.page-btn {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 var(--space-xs);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.page-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--brand-gold);
+  color: var(--brand-gold);
+}
+
+.page-btn.active {
+  background: var(--brand-gold);
+  border-color: var(--brand-gold);
+  color: var(--bg-base);
+}
+
+.pagination-ellipsis {
+  color: var(--text-muted);
+  padding: 0 var(--space-xs);
 }
 
 /* Responsive */
@@ -43,7 +124,24 @@
     flex-direction: column;
   }
 
-  .filters-bar > * {
+  .filters-bar > *:not(.filter-actions) {
     width: 100%;
+  }
+
+  .filter-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .pagination-controls {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .page-numbers {
+    order: -1;
+    width: 100%;
+    justify-content: center;
+    margin-bottom: var(--space-sm);
   }
 }

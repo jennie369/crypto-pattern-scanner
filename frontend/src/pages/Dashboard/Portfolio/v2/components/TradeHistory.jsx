@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Button } from '../../../../../components-v2/Button';
 import { Input } from '../../../../../components-v2/Input';
 import { Badge } from '../../../../../components-v2/Badge';
 import { exportTradeHistoryToCSV } from '../../../../../utils/csvExport';
 import './TradeHistory.css';
 
-export const TradeHistory = () => {
+export const TradeHistory = ({ transactions = [], onRefresh }) => {
   const [filters, setFilters] = useState({
     dateFrom: '',
     dateTo: '',
@@ -14,73 +14,32 @@ export const TradeHistory = () => {
     status: 'All',
   });
 
-  // Mock data - replace with API call
-  const [trades, setTrades] = useState([
-    {
-      id: 1,
-      date: '2024-11-10',
-      coin: 'BTC/USDT',
-      pattern: 'DPD',
-      entry: 42150,
-      exit: 43200,
-      pnl: 1050,
-      pnlPercent: 2.49,
-      rr: 1.57,
-      status: 'win',
-    },
-    {
-      id: 2,
-      date: '2024-11-09',
-      coin: 'ETH/USDT',
-      pattern: 'UPU',
-      entry: 2300,
-      exit: 2245,
-      pnl: -55,
-      pnlPercent: -2.39,
-      rr: 0.8,
-      status: 'loss',
-    },
-    {
-      id: 3,
-      date: '2024-11-08',
-      coin: 'SOL/USDT',
-      pattern: 'DPD',
-      entry: 95.0,
-      exit: 102.5,
-      pnl: 75,
-      pnlPercent: 7.89,
-      rr: 2.1,
-      status: 'win',
-    },
-    {
-      id: 4,
-      date: '2024-11-07',
-      coin: 'ADA/USDT',
-      pattern: 'UPU',
-      entry: 0.35,
-      exit: 0.38,
-      pnl: 30,
-      pnlPercent: 8.57,
-      rr: 1.9,
-      status: 'win',
-    },
-    {
-      id: 5,
-      date: '2024-11-06',
-      coin: 'AVAX/USDT',
-      pattern: 'DPD',
-      entry: 18.5,
-      exit: 17.8,
-      pnl: -14,
-      pnlPercent: -3.78,
-      rr: 0.7,
-      status: 'loss',
-    },
-  ]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-  const [filteredTrades, setFilteredTrades] = useState(trades);
+  // Transform API data to display format
+  const trades = useMemo(() => {
+    if (!transactions || transactions.length === 0) return [];
 
-  const handleFilter = () => {
+    return transactions
+      .filter(t => t.transaction_type === 'SELL') // Only show closed trades
+      .map(t => ({
+        id: t.id,
+        date: t.transaction_at || t.created_at,
+        coin: t.symbol || 'Unknown',
+        pattern: t.pattern_type || '-',
+        entry: t.price || 0, // For SELL transaction, this is exit price
+        exit: t.price || 0,
+        pnl: t.realized_pnl || 0,
+        pnlPercent: t.realized_pnl_percent || 0,
+        rr: t.risk_reward_ratio || 0,
+        status: (t.realized_pnl || 0) >= 0 ? 'win' : 'loss',
+      }))
+      .sort((a, b) => new Date(b.date) - new Date(a.date)); // Most recent first
+  }, [transactions]);
+
+  // Apply filters
+  const filteredTrades = useMemo(() => {
     let filtered = [...trades];
 
     // Filter by date range
@@ -107,13 +66,23 @@ export const TradeHistory = () => {
       filtered = filtered.filter(t => t.status === filters.status.toLowerCase());
     }
 
-    setFilteredTrades(filtered);
-    console.log('Filtering with:', filters, 'Results:', filtered.length);
-  };
+    return filtered;
+  }, [trades, filters]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredTrades.length / itemsPerPage);
+  const paginatedTrades = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredTrades.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredTrades, currentPage]);
 
   const handleExport = () => {
     const timestamp = new Date().toISOString().split('T')[0];
     exportTradeHistoryToCSV(filteredTrades, `trade-history-${timestamp}`);
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
   return (
@@ -142,12 +111,16 @@ export const TradeHistory = () => {
           value={filters.coin}
           onChange={(e) => setFilters({...filters, coin: e.target.value})}
         />
-        <Button variant="primary" size="sm" icon="🔍" onClick={handleFilter}>
-          Filter
-        </Button>
-        <Button variant="outline" size="sm" icon="📥" onClick={handleExport}>
-          Export CSV
-        </Button>
+        <div className="filter-actions">
+          {onRefresh && (
+            <Button variant="ghost" size="sm" icon="🔄" onClick={onRefresh}>
+              Refresh
+            </Button>
+          )}
+          <Button variant="outline" size="sm" icon="📥" onClick={handleExport}>
+            Export CSV
+          </Button>
+        </div>
       </div>
 
       {/* Table */}
@@ -166,7 +139,21 @@ export const TradeHistory = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredTrades.map(trade => (
+            {paginatedTrades.length === 0 ? (
+              <tr>
+                <td colSpan="8" className="empty-state">
+                  <div className="empty-message">
+                    <p>📜 No trade history</p>
+                    <p className="empty-hint">
+                      {filteredTrades.length === 0 && trades.length > 0
+                        ? 'No trades match your filters'
+                        : 'Your closed trades will appear here'}
+                    </p>
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              paginatedTrades.map(trade => (
               <tr key={trade.id}>
                 <td>{new Date(trade.date).toLocaleDateString()}</td>
                 <td><strong>{trade.coin}</strong></td>
@@ -192,17 +179,70 @@ export const TradeHistory = () => {
                   </Badge>
                 </td>
               </tr>
-            ))}
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
-      {/* Pagination placeholder */}
-      <div className="pagination">
-        <span className="text-muted">
-          Showing {filteredTrades.length} of {trades.length} trades
-        </span>
-      </div>
+      {/* Pagination */}
+      {filteredTrades.length > 0 && (
+        <div className="pagination">
+          <span className="pagination-info">
+            Showing {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, filteredTrades.length)} of {filteredTrades.length} trades
+            {filteredTrades.length !== trades.length && ` (filtered from ${trades.length})`}
+          </span>
+
+          {totalPages > 1 && (
+            <div className="pagination-controls">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                ← Prev
+              </Button>
+
+              <div className="page-numbers">
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(page => {
+                    // Show first, last, current, and adjacent pages
+                    return page === 1 ||
+                      page === totalPages ||
+                      Math.abs(page - currentPage) <= 1;
+                  })
+                  .map((page, index, arr) => {
+                    // Add ellipsis
+                    const prevPage = arr[index - 1];
+                    const showEllipsis = prevPage && page - prevPage > 1;
+
+                    return (
+                      <React.Fragment key={page}>
+                        {showEllipsis && <span className="pagination-ellipsis">...</span>}
+                        <button
+                          className={`page-btn ${currentPage === page ? 'active' : ''}`}
+                          onClick={() => handlePageChange(page)}
+                        >
+                          {page}
+                        </button>
+                      </React.Fragment>
+                    );
+                  })}
+              </div>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Next →
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

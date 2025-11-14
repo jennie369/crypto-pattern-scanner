@@ -188,6 +188,34 @@
   text-align: center;
 }
 
+/* Empty States */
+.empty-journal {
+  text-align: center;
+  padding: var(--space-xl) var(--space-md);
+  color: var(--text-muted);
+}
+
+.empty-hint {
+  font-size: var(--text-xs);
+  margin-top: var(--space-xs);
+}
+
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  min-height: 400px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.error-state p {
+  color: var(--accent-red);
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .trading-journal {
