@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '../../../../../components-v2/Button';
 import { Badge } from '../../../../../components-v2/Badge';
+import { exportPositionsToCSV } from '../../../../../utils/csvExport';
 import './OpenPositionsTable.css';
 
 export const OpenPositionsTable = () => {
@@ -46,7 +47,10 @@ export const OpenPositionsTable = () => {
 
   const handleClose = (id) => {
     // TODO: Close position API call
-    console.log('Close position:', id);
+    if (window.confirm('Are you sure you want to close this position?')) {
+      setPositions(positions.filter(p => p.id !== id));
+      console.log('Close position:', id);
+    }
   };
 
   const handleEdit = (id) => {
@@ -54,11 +58,16 @@ export const OpenPositionsTable = () => {
     console.log('Edit position:', id);
   };
 
+  const handleExport = () => {
+    const timestamp = new Date().toISOString().split('T')[0];
+    exportPositionsToCSV(positions, `open-positions-${timestamp}`);
+  };
+
   return (
     <div className="open-positions-table">
       <div className="table-header">
         <h3 className="heading-sm">Open Positions ({positions.length})</h3>
-        <Button variant="outline" size="sm" icon="📥">
+        <Button variant="outline" size="sm" icon="📥" onClick={handleExport}>
           Export CSV
         </Button>
       </div>
