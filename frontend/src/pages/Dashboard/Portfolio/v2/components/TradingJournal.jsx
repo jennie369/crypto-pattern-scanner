@@ -1,33 +1,28 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { Button } from '../../../../../components-v2/Button';
 import { Input } from '../../../../../components-v2/Input';
 import { Card } from '../../../../../components-v2/Card';
+import {
+  fetchJournalEntries,
+  addJournalEntry,
+  updateJournalEntry,
+  deleteJournalEntry
+} from '../../../../../services/portfolioApi';
 import './TradingJournal.css';
 
 /**
  * Trading Journal Component
  * Rich text editor for trading notes using React Quill
+ * Features: API integration, auto-save
  */
-export const TradingJournal = () => {
+export const TradingJournal = ({ userId }) => {
   const [selectedEntry, setSelectedEntry] = useState(null);
-  const [entries, setEntries] = useState([
-    {
-      id: 1,
-      title: 'BTC Trade Analysis - Nov 10',
-      date: '2024-11-10',
-      content: '<p>Entered BTC/USDT <strong>DPD pattern</strong> at $42,150.</p><p>Strong support at $41,800. Target: $43,500.</p>',
-      tags: ['BTC', 'DPD', 'Win'],
-    },
-    {
-      id: 2,
-      title: 'ETH Setup Review',
-      date: '2024-11-09',
-      content: '<p>UPU pattern on ETH. Entry was <em>premature</em>, stopped out.</p><p><strong>Lesson:</strong> Need to wait for confirmation.</p>',
-      tags: ['ETH', 'UPU', 'Loss', 'Lesson'],
-    },
-  ]);
+  const [entries, setEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -56,6 +51,69 @@ export const TradingJournal = () => {
     'link', 'image'
   ];
 
+  // Load journal entries on mount
+  useEffect(() => {
+    const loadEntries = async () => {
+      if (!userId) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const { data, error } = await fetchJournalEntries(userId);
+
+        if (error) throw error;
+
+        // Transform API data to component format
+        const transformedEntries = (data || []).map(entry => ({
+          id: entry.id,
+          title: entry.title,
+          date: entry.entry_date?.split('T')[0] || entry.created_at?.split('T')[0],
+          content: entry.content,
+          tags: entry.tags || [],
+        }));
+
+        setEntries(transformedEntries);
+        setError(null);
+      } catch (err) {
+        console.error('Failed to load journal entries:', err);
+        setError(err.message || 'Failed to load journal entries');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadEntries();
+  }, [userId]);
+
+  // Auto-save functionality with debouncing
+  useEffect(() => {
+    if (!selectedEntry || !userId) return;
+    if (!formData.title && !formData.content) return;
+
+    const autoSaveTimer = setTimeout(async () => {
+      try {
+        setSaving(true);
+        const tags = formData.tags.split(',').map(t => t.trim()).filter(Boolean);
+
+        await updateJournalEntry(selectedEntry.id, {
+          title: formData.title,
+          content: formData.content,
+          tags,
+        });
+
+        console.log('Entry auto-saved');
+      } catch (err) {
+        console.error('Auto-save failed:', err);
+      } finally {
+        setSaving(false);
+      }
+    }, 2000); // 2 second debounce
+
+    return () => clearTimeout(autoSaveTimer);
+  }, [formData.title, formData.content, formData.tags, selectedEntry, userId]);
+
   const handleNewEntry = () => {
     setSelectedEntry(null);
     setFormData({
@@ -72,36 +130,113 @@ export const TradingJournal = () => {
       title: entry.title,
       date: entry.date,
       content: entry.content,
-      tags: entry.tags.join(', '),
+      tags: Array.isArray(entry.tags) ? entry.tags.join(', ') : '',
     });
   };
 
-  const handleSave = () => {
-    if (selectedEntry) {
-      // Update existing entry
-      setEntries(entries.map(e =>
-        e.id === selectedEntry.id
-          ? { ...selectedEntry, ...formData, tags: formData.tags.split(',').map(t => t.trim()) }
-          : e
-      ));
-    } else {
-      // Create new entry
-      const newEntry = {
-        id: entries.length + 1,
-        ...formData,
-        tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
-      };
-      setEntries([newEntry, ...entries]);
+  const handleSave = async () => {
+    if (!userId) {
+      alert('User not authenticated');
+      return;
     }
-    console.log('Entry saved!');
+
+    try {
+      setSaving(true);
+      const tags = formData.tags.split(',').map(t => t.trim()).filter(Boolean);
+
+      if (selectedEntry) {
+        // Update existing entry
+        const { data, error } = await updateJournalEntry(selectedEntry.id, {
+          title: formData.title,
+          content: formData.content,
+          tags,
+        });
+
+        if (error) throw error;
+
+        setEntries(entries.map(e =>
+          e.id === selectedEntry.id
+            ? { ...e, title: formData.title, content: formData.content, tags }
+            : e
+        ));
+
+        console.log('Entry updated successfully');
+      } else {
+        // Create new entry
+        const { data, error } = await addJournalEntry(userId, {
+          title: formData.title,
+          content: formData.content,
+          tags,
+          date: formData.date,
+        });
+
+        if (error) throw error;
+
+        const newEntry = {
+          id: data.id,
+          title: formData.title,
+          date: formData.date,
+          content: formData.content,
+          tags,
+        };
+
+        setEntries([newEntry, ...entries]);
+        setSelectedEntry(newEntry);
+        console.log('Entry created successfully');
+      }
+    } catch (err) {
+      console.error('Failed to save entry:', err);
+      alert('Failed to save entry. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleDelete = () => {
-    if (selectedEntry && window.confirm('Delete this journal entry?')) {
+  const handleDelete = async () => {
+    if (!selectedEntry || !window.confirm('Delete this journal entry?')) {
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const { error } = await deleteJournalEntry(selectedEntry.id);
+
+      if (error) throw error;
+
       setEntries(entries.filter(e => e.id !== selectedEntry.id));
       handleNewEntry();
+      console.log('Entry deleted successfully');
+    } catch (err) {
+      console.error('Failed to delete entry:', err);
+      alert('Failed to delete entry. Please try again.');
+    } finally {
+      setSaving(false);
     }
   };
+
+  // Handle loading and error states
+  if (loading) {
+    return (
+      <div className="trading-journal">
+        <div className="loading-state">
+          <p>Loading journal entries...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="trading-journal">
+        <div className="error-state">
+          <p>⚠️ {error}</p>
+          <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="trading-journal">
@@ -118,22 +253,29 @@ export const TradingJournal = () => {
         </Button>
 
         <div className="entry-list">
-          {entries.map(entry => (
-            <Card
-              key={entry.id}
-              variant={selectedEntry?.id === entry.id ? 'outlined' : 'default'}
-              className="entry-card"
-              onClick={() => handleSelectEntry(entry)}
-            >
-              <div className="entry-date">{new Date(entry.date).toLocaleDateString()}</div>
-              <div className="entry-title">{entry.title}</div>
-              <div className="entry-tags">
-                {entry.tags.map(tag => (
-                  <span key={tag} className="tag">{tag}</span>
-                ))}
-              </div>
-            </Card>
-          ))}
+          {entries.length === 0 ? (
+            <div className="empty-journal">
+              <p className="text-muted">📓 No journal entries yet</p>
+              <p className="empty-hint">Click "New Entry" to start</p>
+            </div>
+          ) : (
+            entries.map(entry => (
+              <Card
+                key={entry.id}
+                variant={selectedEntry?.id === entry.id ? 'outlined' : 'default'}
+                className="entry-card"
+                onClick={() => handleSelectEntry(entry)}
+              >
+                <div className="entry-date">{new Date(entry.date).toLocaleDateString()}</div>
+                <div className="entry-title">{entry.title || 'Untitled'}</div>
+                <div className="entry-tags">
+                  {(entry.tags || []).map((tag, idx) => (
+                    <span key={`${tag}-${idx}`} className="tag">{tag}</span>
+                  ))}
+                </div>
+              </Card>
+            ))
+          )}
         </div>
       </div>
 
@@ -145,12 +287,12 @@ export const TradingJournal = () => {
           </h3>
           <div className="editor-actions">
             {selectedEntry && (
-              <Button variant="outline" size="sm" onClick={handleDelete}>
+              <Button variant="outline" size="sm" onClick={handleDelete} disabled={saving}>
                 Delete
               </Button>
             )}
-            <Button variant="primary" size="sm" onClick={handleSave}>
-              Save
+            <Button variant="primary" size="sm" onClick={handleSave} disabled={saving}>
+              {saving ? 'Saving...' : 'Save'}
             </Button>
           </div>
         </div>
@@ -194,7 +336,11 @@ export const TradingJournal = () => {
           />
 
           <div className="auto-save-indicator">
-            <span className="text-muted">✅ Auto-save enabled (placeholder)</span>
+            {selectedEntry && (
+              <span className="text-muted">
+                {saving ? '💾 Saving...' : '✅ Auto-save enabled (2s delay)'}
+              </span>
+            )}
           </div>
         </div>
       </div>

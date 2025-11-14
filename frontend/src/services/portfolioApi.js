@@ -487,6 +487,108 @@ export async function getEntryTypeDistribution(userId) {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// TRADING JOURNAL
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Fetch all journal entries for user
+ * @param {string} userId - User ID
+ * @returns {Promise<Object>} Journal entries
+ */
+export async function fetchJournalEntries(userId) {
+  try {
+    const { data, error } = await supabase
+      .from('trading_journal')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error fetching journal entries:', error);
+    return { data: null, error };
+  }
+}
+
+/**
+ * Add new journal entry
+ * @param {string} userId - User ID
+ * @param {Object} entry - Entry data
+ * @returns {Promise<Object>} Created entry
+ */
+export async function addJournalEntry(userId, entry) {
+  try {
+    const { data, error } = await supabase
+      .from('trading_journal')
+      .insert([{
+        user_id: userId,
+        title: entry.title,
+        content: entry.content,
+        tags: entry.tags || [],
+        entry_date: entry.date || new Date().toISOString(),
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error adding journal entry:', error);
+    return { data: null, error };
+  }
+}
+
+/**
+ * Update journal entry
+ * @param {string} entryId - Entry ID
+ * @param {Object} updates - Fields to update
+ * @returns {Promise<Object>} Updated entry
+ */
+export async function updateJournalEntry(entryId, updates) {
+  try {
+    const { data, error } = await supabase
+      .from('trading_journal')
+      .update({
+        title: updates.title,
+        content: updates.content,
+        tags: updates.tags,
+        entry_date: updates.date,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', entryId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Error updating journal entry:', error);
+    return { data: null, error };
+  }
+}
+
+/**
+ * Delete journal entry
+ * @param {string} entryId - Entry ID
+ * @returns {Promise<Object>} Success status
+ */
+export async function deleteJournalEntry(entryId) {
+  try {
+    const { error } = await supabase
+      .from('trading_journal')
+      .delete()
+      .eq('id', entryId);
+
+    if (error) throw error;
+    return { success: true, error: null };
+  } catch (error) {
+    console.error('Error deleting journal entry:', error);
+    return { success: false, error };
+  }
+}
+
 export default {
   // Holdings
   fetchHoldings,
@@ -500,5 +602,10 @@ export default {
   // Stats
   getPortfolioStats,
   getEntryTypeAnalytics,
-  getEntryTypeDistribution
+  getEntryTypeDistribution,
+  // Journal
+  fetchJournalEntries,
+  addJournalEntry,
+  updateJournalEntry,
+  deleteJournalEntry,
 };
