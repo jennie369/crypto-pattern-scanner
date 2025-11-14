@@ -1,10 +1,13 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Button } from '../../../../../components-v2/Button';
 import { Badge } from '../../../../../components-v2/Badge';
 import { exportPositionsToCSV } from '../../../../../utils/csvExport';
+import EditPositionModal from './EditPositionModal';
 import './OpenPositionsTable.css';
 
 export const OpenPositionsTable = ({ positions = [], onClose, onUpdate, onRefresh }) => {
+  const [editingPosition, setEditingPosition] = useState(null);
+
   // Transform API data to match export format
   const exportData = useMemo(() => {
     return positions.map(pos => ({
@@ -36,9 +39,20 @@ export const OpenPositionsTable = ({ positions = [], onClose, onUpdate, onRefres
     }
   };
 
-  const handleEdit = (id) => {
-    // TODO: Open SL/TP edit modal
-    console.log('Edit position:', id);
+  const handleEdit = (position) => {
+    setEditingPosition(position);
+  };
+
+  const handleSaveEdit = async (positionId, updates) => {
+    if (onUpdate) {
+      const result = await onUpdate(positionId, updates);
+      if (result?.success) {
+        console.log('Position updated successfully');
+        setEditingPosition(null);
+      } else {
+        throw new Error(result?.error || 'Failed to update position');
+      }
+    }
   };
 
   const handleExport = () => {
@@ -123,7 +137,7 @@ export const OpenPositionsTable = ({ positions = [], onClose, onUpdate, onRefres
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleEdit(position.id)}
+                          onClick={() => handleEdit(position)}
                         >
                           Edit
                         </Button>
@@ -143,6 +157,15 @@ export const OpenPositionsTable = ({ positions = [], onClose, onUpdate, onRefres
           </tbody>
         </table>
       </div>
+
+      {/* Edit Position Modal */}
+      {editingPosition && (
+        <EditPositionModal
+          position={editingPosition}
+          onClose={() => setEditingPosition(null)}
+          onSave={handleSaveEdit}
+        />
+      )}
     </div>
   );
 };
