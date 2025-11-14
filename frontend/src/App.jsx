@@ -22,7 +22,7 @@ import { useAuth } from './contexts/AuthContext';
 
 // TIER 2 Components
 import TierGuard from './components/TierGuard/TierGuard';
-import Portfolio from './pages/Portfolio';
+import { PortfolioPage as Portfolio } from './pages/Dashboard/Portfolio/v2/PortfolioPage';
 import MTFAnalysis from './pages/MTFAnalysis';
 import Sentiment from './pages/Sentiment';
 import NewsCalendar from './pages/NewsCalendar';
