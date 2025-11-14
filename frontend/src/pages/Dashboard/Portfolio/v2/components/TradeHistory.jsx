@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '../../../../../components-v2/Button';
 import { Input } from '../../../../../components-v2/Input';
 import { Badge } from '../../../../../components-v2/Badge';
+import { exportTradeHistoryToCSV } from '../../../../../utils/csvExport';
 import './TradeHistory.css';
 
 export const TradeHistory = () => {
@@ -77,14 +78,42 @@ export const TradeHistory = () => {
     },
   ]);
 
+  const [filteredTrades, setFilteredTrades] = useState(trades);
+
   const handleFilter = () => {
-    // TODO: Implement filter logic
-    console.log('Filtering with:', filters);
+    let filtered = [...trades];
+
+    // Filter by date range
+    if (filters.dateFrom) {
+      filtered = filtered.filter(t => new Date(t.date) >= new Date(filters.dateFrom));
+    }
+    if (filters.dateTo) {
+      filtered = filtered.filter(t => new Date(t.date) <= new Date(filters.dateTo));
+    }
+
+    // Filter by coin
+    if (filters.coin) {
+      const coinLower = filters.coin.toLowerCase();
+      filtered = filtered.filter(t => t.coin.toLowerCase().includes(coinLower));
+    }
+
+    // Filter by pattern
+    if (filters.pattern && filters.pattern !== 'All') {
+      filtered = filtered.filter(t => t.pattern === filters.pattern);
+    }
+
+    // Filter by status
+    if (filters.status && filters.status !== 'All') {
+      filtered = filtered.filter(t => t.status === filters.status.toLowerCase());
+    }
+
+    setFilteredTrades(filtered);
+    console.log('Filtering with:', filters, 'Results:', filtered.length);
   };
 
   const handleExport = () => {
-    // TODO: Export to CSV
-    console.log('Exporting trade history...');
+    const timestamp = new Date().toISOString().split('T')[0];
+    exportTradeHistoryToCSV(filteredTrades, `trade-history-${timestamp}`);
   };
 
   return (
@@ -137,7 +166,7 @@ export const TradeHistory = () => {
             </tr>
           </thead>
           <tbody>
-            {trades.map(trade => (
+            {filteredTrades.map(trade => (
               <tr key={trade.id}>
                 <td>{new Date(trade.date).toLocaleDateString()}</td>
                 <td><strong>{trade.coin}</strong></td>
@@ -170,7 +199,9 @@ export const TradeHistory = () => {
 
       {/* Pagination placeholder */}
       <div className="pagination">
-        <span className="text-muted">Showing {trades.length} trades</span>
+        <span className="text-muted">
+          Showing {filteredTrades.length} of {trades.length} trades
+        </span>
       </div>
     </div>
   );

@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import { Button } from '../../../../../components-v2/Button';
 import { Input } from '../../../../../components-v2/Input';
 import { Card } from '../../../../../components-v2/Card';
@@ -6,15 +8,7 @@ import './TradingJournal.css';
 
 /**
  * Trading Journal Component
- * Rich text editor for trading notes
- *
- * NOTE: For production, use a rich text editor library:
- * - Draft.js (Facebook)
- * - Quill
- * - TipTap
- * - Slate
- *
- * npm install react-quill
+ * Rich text editor for trading notes using React Quill
  */
 export const TradingJournal = () => {
   const [selectedEntry, setSelectedEntry] = useState(null);
@@ -23,14 +17,14 @@ export const TradingJournal = () => {
       id: 1,
       title: 'BTC Trade Analysis - Nov 10',
       date: '2024-11-10',
-      content: 'Entered BTC/USDT DPD pattern at $42,150. Strong support at $41,800. Target: $43,500.',
+      content: '<p>Entered BTC/USDT <strong>DPD pattern</strong> at $42,150.</p><p>Strong support at $41,800. Target: $43,500.</p>',
       tags: ['BTC', 'DPD', 'Win'],
     },
     {
       id: 2,
       title: 'ETH Setup Review',
       date: '2024-11-09',
-      content: 'UPU pattern on ETH. Entry was premature, stopped out. Need to wait for confirmation.',
+      content: '<p>UPU pattern on ETH. Entry was <em>premature</em>, stopped out.</p><p><strong>Lesson:</strong> Need to wait for confirmation.</p>',
       tags: ['ETH', 'UPU', 'Loss', 'Lesson'],
     },
   ]);
@@ -41,6 +35,26 @@ export const TradingJournal = () => {
     content: '',
     tags: '',
   });
+
+  // Quill toolbar configuration
+  const quillModules = useMemo(() => ({
+    toolbar: [
+      [{ 'header': [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ 'color': [] }, { 'background': [] }],
+      ['link', 'image'],
+      ['clean']
+    ],
+  }), []);
+
+  const quillFormats = [
+    'header',
+    'bold', 'italic', 'underline', 'strike',
+    'list', 'bullet',
+    'color', 'background',
+    'link', 'image'
+  ];
 
   const handleNewEntry = () => {
     setSelectedEntry(null);
@@ -157,32 +171,18 @@ export const TradingJournal = () => {
             onChange={(e) => setFormData({...formData, date: e.target.value})}
           />
 
-          {/* Rich Text Editor Placeholder */}
+          {/* Rich Text Editor */}
           <div className="editor-field">
             <label className="editor-label">Content</label>
-            <div className="rich-text-editor-placeholder">
-              <div className="editor-toolbar">
-                <button className="toolbar-btn" title="Bold">B</button>
-                <button className="toolbar-btn" title="Italic">I</button>
-                <button className="toolbar-btn" title="Underline">U</button>
-                <span className="toolbar-divider">|</span>
-                <button className="toolbar-btn" title="Bullet List">•</button>
-                <button className="toolbar-btn" title="Numbered List">1.</button>
-                <span className="toolbar-divider">|</span>
-                <button className="toolbar-btn" title="Link">🔗</button>
-                <button className="toolbar-btn" title="Image">🖼️</button>
-              </div>
-              <textarea
-                className="editor-textarea"
-                placeholder="Write your trading notes here..."
-                value={formData.content}
-                onChange={(e) => setFormData({...formData, content: e.target.value})}
-                rows={12}
-              />
-              <div className="editor-hint">
-                💡 Integrate a rich text editor library (Quill, Draft.js, TipTap) for full formatting
-              </div>
-            </div>
+            <ReactQuill
+              theme="snow"
+              value={formData.content}
+              onChange={(value) => setFormData({...formData, content: value})}
+              modules={quillModules}
+              formats={quillFormats}
+              placeholder="Write your trading notes here..."
+              className="quill-editor"
+            />
           </div>
 
           <Input
