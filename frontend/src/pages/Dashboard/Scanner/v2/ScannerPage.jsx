@@ -1,21 +1,34 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ControlPanel from './components/ControlPanel';
 import TradingChart from './components/TradingChart';
-import PatternDetails from './components/PatternDetails';
+import PatternInfoUltraCompact from './components/PatternInfoUltraCompact';
 import SubToolsPanel from './components/SubToolsPanel';
+import MarketChatbotSection from './components/MarketChatbotSection';
 import { scanPatterns, ScannerWebSocket, exportToCSV, downloadCSV } from '../../../../services/scannerAPI';
+import { useScannerStore } from '../../../../stores/scannerStore';
 import './ScannerPage.css';
 
 /**
  * Scanner Page v2 - GEM Platform
  * 3-column layout with real-time pattern detection
  * Week 3, Day 18-21
+ *
+ * STATE PERSISTENCE: Uses Zustand store for persistent state across page refreshes
  */
 export const ScannerPage = () => {
-  const [selectedPattern, setSelectedPattern] = useState(null);
-  const [scanResults, setScanResults] = useState([]);
-  const [isScanning, setIsScanning] = useState(false);
+  // Zustand store for persistent state
+  const {
+    scanResults,
+    selectedPattern,
+    isScanning,
+    setScanResults,
+    setSelectedPattern,
+    setIsScanning,
+  } = useScannerStore();
+
+  // Local state for errors (don't persist)
   const [error, setError] = useState(null);
+  const [selectedCoin, setSelectedCoin] = useState('BTCUSDT'); // Coin for chart
   const wsRef = useRef(null);
 
   // Initialize WebSocket on mount
@@ -25,8 +38,10 @@ export const ScannerPage = () => {
     // Setup WebSocket callbacks
     wsRef.current.onPattern((pattern) => {
       console.log('New pattern detected:', pattern);
-      // Add new pattern to results
-      setScanResults(prev => [pattern, ...prev]);
+      // Add new pattern to results (Zustand store)
+      // Access current state directly to avoid stale closure
+      const currentResults = useScannerStore.getState().scanResults;
+      setScanResults([pattern, ...currentResults]);
     });
 
     wsRef.current.onPrice((priceUpdate) => {
@@ -44,7 +59,7 @@ export const ScannerPage = () => {
         wsRef.current.disconnect();
       }
     };
-  }, []);
+  }, [setScanResults]);
 
   const handleScan = async (filters) => {
     console.log('[ScannerPage] Starting scan with filters:', filters);
@@ -75,6 +90,11 @@ export const ScannerPage = () => {
 
   const handleSelectPattern = (pattern) => {
     setSelectedPattern(pattern);
+  };
+
+  const handleCoinSelect = (symbol) => {
+    console.log('[ScannerPage] Updating chart to:', symbol);
+    setSelectedCoin(symbol);
   };
 
   const handleExportResults = () => {
@@ -116,22 +136,30 @@ export const ScannerPage = () => {
           />
         </div>
 
-        {/* CENTER - Trading Chart */}
+        {/* CENTER - Trading Chart + Market/Chatbot */}
         <div className="scanner-center">
           <TradingChart
             pattern={selectedPattern}
+            symbol={selectedCoin}
+          />
+
+          <MarketChatbotSection
+            onSelectCoin={handleCoinSelect}
+            selectedCoin={selectedCoin}
           />
         </div>
 
-        {/* RIGHT - Pattern Details + Sub-Tools */}
+        {/* RIGHT - Sub-Tools (Top) + Pattern Info (Bottom) */}
         <div className="scanner-right">
-          <PatternDetails
-            pattern={selectedPattern}
-          />
+          <div className="right-column-scroll-wrapper">
+            <SubToolsPanel
+              pattern={selectedPattern}
+            />
 
-          <SubToolsPanel
-            pattern={selectedPattern}
-          />
+            <PatternInfoUltraCompact
+              pattern={selectedPattern}
+            />
+          </div>
         </div>
       </div>
     </div>

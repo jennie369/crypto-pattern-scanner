@@ -1,0 +1,91 @@
+.feature-gate {
+  position: relative;
+  overflow: hidden;
+}
+
+.gate-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 27, 53, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  backdrop-filter: blur(4px);
+}
+
+.gate-content {
+  text-align: center;
+  padding: 40px;
+  max-width: 400px;
+}
+
+.gate-icon {
+  font-size: 64px;
+  display: block;
+  margin-bottom: 24px;
+  animation: lock-shake 2s ease-in-out infinite;
+}
+
+@keyframes lock-shake {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-10deg);
+  }
+  75% {
+    transform: rotate(10deg);
+  }
+}
+
+.gate-content h3 {
+  color: #FFBD59;
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0 0 16px 0;
+}
+
+.gate-content p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 0 0 32px 0;
+}
+
+.required-tier {
+  color: #FFBD59;
+  font-weight: 800;
+  background: rgba(255, 189, 89, 0.2);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.btn-upgrade-gate {
+  background: linear-gradient(135deg, #FFBD59, #FFD580);
+  color: #0f1b35;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 48px;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-upgrade-gate:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(255, 189, 89, 0.5);
+}
+
+.gate-blur {
+  filter: blur(8px);
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.3;
+}

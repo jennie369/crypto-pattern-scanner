@@ -1,0 +1,308 @@
+/* ===================================
+   PATTERN INFO ULTRA COMPACT
+   Target: ~160px height (60% reduction)
+   =================================== */
+
+/* Main Container - FLEXIBLE HEIGHT (no more cutting!) */
+.pattern-info-compact {
+  background: linear-gradient(135deg, rgba(17, 34, 80, 0.4) 0%, rgba(17, 34, 80, 0.6) 100%);
+  border: 1px solid rgba(255, 189, 89, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 320px; /* FIXED: Flexible height instead of fixed */
+  max-height: 500px;
+  overflow: visible; /* FIXED: Don't cut content! */
+  min-width: 0; /* FIXED: Allow text truncation */
+}
+
+/* Empty State */
+.pattern-info-compact-empty {
+  background: rgba(17, 34, 80, 0.4);
+  border: 1px solid rgba(255, 189, 89, 0.2);
+  border-radius: 12px;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.empty-icon {
+  /* Icon size now controlled by lucide-react size prop */
+  opacity: 0.5;
+  filter: drop-shadow(0 0 8px rgba(255, 189, 89, 0.3));
+}
+
+.empty-text {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Scrollable Content Wrapper */
+.pattern-info-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0; /* FIXED: Allow text truncation in children */
+  padding-right: 4px; /* Space for scrollbar */
+}
+
+.pattern-info-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.pattern-info-content::-webkit-scrollbar-track {
+  background: rgba(17, 34, 80, 0.4);
+  border-radius: 3px;
+}
+
+.pattern-info-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 189, 89, 0.3);
+  border-radius: 3px;
+}
+
+.pattern-info-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 189, 89, 0.5);
+}
+
+/* Single-Line Header - FIXED at top */
+.compact-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 189, 89, 0.2);
+  flex-shrink: 0; /* FIXED: Don't shrink header */
+  min-width: 0; /* FIXED: Allow text truncation */
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pattern-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #FFFFFF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.confidence-pill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 12px;
+  text-transform: uppercase;
+}
+
+.confidence-pill.high {
+  background: rgba(14, 203, 129, 0.2);
+  color: #0ECB81;
+  border: 1px solid #0ECB81;
+}
+
+.confidence-pill.medium {
+  background: rgba(255, 189, 89, 0.2);
+  color: #FFBD59;
+  border: 1px solid #FFBD59;
+}
+
+.confidence-pill.low {
+  background: rgba(246, 70, 93, 0.2);
+  color: #F6465D;
+  border: 1px solid #F6465D;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.metadata-item {
+  display: flex;
+  gap: 4px;
+}
+
+.metadata-label {
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+}
+
+.metadata-value {
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.metadata-divider {
+  color: rgba(255, 189, 89, 0.3);
+}
+
+/* 2x2 Grid */
+.compact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  flex: 1;
+}
+
+.grid-item {
+  background: rgba(17, 34, 80, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0; /* Important for grid items to allow text-overflow */
+  overflow: hidden;
+}
+
+.grid-item.highlight {
+  background: rgba(255, 189, 89, 0.1);
+  border-color: rgba(255, 189, 89, 0.3);
+}
+
+.item-label {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.item-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-value.entry {
+  color: #00D9FF;
+}
+
+.item-value.stop-loss {
+  color: #F6465D;
+}
+
+.item-value.take-profit {
+  color: #0ECB81;
+}
+
+.item-percent {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Compact Actions - FIXED at bottom */
+.compact-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  flex-shrink: 0; /* FIXED: Don't shrink actions */
+  min-width: 0; /* FIXED: Allow button truncation */
+}
+
+.action-btn-compact {
+  height: 36px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.action-btn-compact.primary {
+  background: linear-gradient(135deg, #9C0612, #6B0F1A);
+  border: 1px solid #FFBD59;
+  color: #FFFFFF;
+}
+
+.action-btn-compact.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 189, 89, 0.3);
+}
+
+.action-btn-compact.secondary {
+  background: rgba(17, 34, 80, 0.6);
+  border: 1px solid rgba(255, 189, 89, 0.3);
+  color: #FFBD59;
+}
+
+.action-btn-compact.secondary:hover {
+  background: rgba(255, 189, 89, 0.1);
+  border-color: #FFBD59;
+}
+
+/* Responsive */
+@media (max-width: 1440px) {
+  .pattern-name {
+    font-size: 14px;
+  }
+
+  .header-right {
+    font-size: 11px;
+  }
+
+  .item-value {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .pattern-info-compact {
+    height: auto;
+    min-height: 160px;
+  }
+
+  .compact-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 768px) {
+  .pattern-info-compact {
+    padding: 12px;
+  }
+
+  .compact-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .compact-actions {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,13 +1,27 @@
 /* ===================================
-   CONTROL PANEL - STYLES
+   CONTROL PANEL - COMPACT REDESIGN
    =================================== */
 
 .control-panel {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  gap: 12px; /* Reduced from var(--space-lg) for compact design */
 }
 
+/* Compact Header - 40px height */
+.panel-header-compact {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.panel-header-compact h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #FFBD59;
+}
+
+/* Legacy header (keeping for backwards compatibility) */
 .panel-header {
   padding-bottom: var(--space-md);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -20,7 +34,7 @@
 .control-section {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: 8px; /* Reduced from var(--space-sm) */
 }
 
 .control-label {
@@ -119,12 +133,13 @@
 }
 
 .timeframe-btn {
-  padding: var(--space-sm);
+  height: 32px; /* Compact: reduced from 48px */
+  padding: 6px 12px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
-  font-size: var(--text-sm);
+  font-size: 14px; /* Slightly reduced */
   font-weight: var(--font-semibold);
   color: var(--text-secondary);
   cursor: pointer;
@@ -148,15 +163,16 @@
   cursor: not-allowed;
 }
 
-/* Pattern Select */
+/* Pattern Select - Compact */
 .pattern-select {
   width: 100%;
-  padding: var(--space-sm) var(--space-md);
+  height: 40px; /* Compact: explicit height */
+  padding: 8px 12px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-md);
   font-family: var(--font-body);
-  font-size: var(--text-sm);
+  font-size: 14px; /* Slightly reduced */
   color: var(--text-primary);
   cursor: pointer;
   transition: all var(--transition-base);
@@ -209,6 +225,42 @@
 }
 
 .scan-button.scanning {
+  background: linear-gradient(135deg, #6B0F1A, var(--brand-burgundy));
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Compact Scan Button - 48px height */
+.scan-button-compact {
+  width: 100%;
+  height: 48px; /* Compact: reduced from 56px */
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--brand-gold), #FFBD59);
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-display);
+  font-size: 16px; /* Slightly reduced */
+  font-weight: var(--font-bold);
+  color: var(--bg-base);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  transition: all var(--transition-base);
+  box-shadow: 0 4px 20px rgba(255, 189, 89, 0.3);
+}
+
+.scan-button-compact:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(255, 189, 89, 0.5);
+}
+
+.scan-button-compact:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.scan-button-compact.scanning {
   background: linear-gradient(135deg, #6B0F1A, var(--brand-burgundy));
   animation: pulse 2s ease-in-out infinite;
 }

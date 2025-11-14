@@ -1,0 +1,315 @@
+/* ============================================
+   QUICK SELECT CONTAINER - COMPACT
+   ============================================ */
+
+.quick-select {
+  padding: 8px 12px;
+  background: linear-gradient(180deg, rgba(17, 34, 80, 0.6) 0%, rgba(26, 42, 94, 0.4) 100%);
+  border-bottom: 1px solid rgba(255, 189, 89, 0.2);
+  backdrop-filter: blur(5px);
+}
+
+.quick-select-header {
+  margin-bottom: 8px;
+}
+
+.quick-select-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #FFBD59;
+  margin: 0 0 4px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.quick-select-subtitle {
+  font-size: 9px;
+  color: rgba(222, 188, 129, 0.6);
+  font-family: 'Noto Sans Display', sans-serif;
+}
+
+/* ============================================
+   HORIZONTAL SCROLL LAYOUT - CRITICAL CHANGE
+   ============================================ */
+
+.quick-select-grid {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  margin-bottom: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 2px;
+  scroll-behavior: smooth;
+
+  /* Custom scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: #FFBD59 transparent;
+}
+
+.quick-select-grid::-webkit-scrollbar {
+  height: 4px;
+}
+
+.quick-select-grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.quick-select-grid::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #FFBD59, #DEBC81);
+  border-radius: 2px;
+}
+
+.quick-select-grid::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #DEBC81, #FFBD59);
+}
+
+/* ============================================
+   COIN BUTTON - DRASTIC SIZE REDUCTION
+   ============================================ */
+
+.quick-select-btn {
+  /* SIZE - GIẢM XUỐNG ~50% */
+  min-width: 52px;
+  width: 52px;
+  height: 38px;
+
+  /* PADDING - COMPACT */
+  padding: 6px 8px;
+
+  /* LAYOUT - ROW (icon bên trái, text bên phải) */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+
+  /* STYLING */
+  background: rgba(42, 27, 82, 0.4);
+  border: 1px solid rgba(255, 189, 89, 0.2);
+  border-radius: 8px;
+  color: rgba(222, 188, 129, 0.7);
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Montserrat', sans-serif;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.quick-select-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 189, 89, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.quick-select-btn:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.quick-select-btn:hover:not(:disabled) {
+  background: rgba(255, 189, 89, 0.15);
+  border-color: #FFBD59;
+  color: #FFBD59;
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 4px 12px rgba(255, 189, 89, 0.3);
+}
+
+.quick-select-btn.active {
+  background: linear-gradient(135deg, rgba(255, 189, 89, 0.3) 0%, rgba(255, 189, 89, 0.15) 100%);
+  border: 2px solid #FFBD59;
+  color: #FFBD59;
+  box-shadow: 0 4px 20px rgba(255, 189, 89, 0.4);
+  transform: scale(1.02);
+}
+
+.quick-select-btn.no-pattern {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background: rgba(42, 27, 82, 0.2);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.quick-select-btn.no-pattern:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* ============================================
+   ICON - SCALED DOWN
+   ============================================ */
+
+.coin-icon {
+  font-size: 16px;
+  font-weight: 700;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  line-height: 1;
+  margin: 0;
+}
+
+/* ============================================
+   LABEL - SCALED DOWN
+   ============================================ */
+
+.coin-label {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+/* ============================================
+   FREE BADGE - SCALED DOWN
+   ============================================ */
+
+.free-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  font-size: 6px;
+  padding: 2px 4px;
+  background: linear-gradient(135deg, #0ECB81 0%, #0ba368 100%);
+  color: white;
+  border-radius: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 6px rgba(14, 203, 129, 0.4);
+  z-index: 2;
+  animation: freeBadgePulse 2s ease-in-out infinite;
+}
+
+@keyframes freeBadgePulse {
+  0%, 100% {
+    box-shadow: 0 2px 6px rgba(14, 203, 129, 0.4);
+  }
+  50% {
+    box-shadow: 0 2px 10px rgba(14, 203, 129, 0.7);
+  }
+}
+
+/* ============================================
+   PATTERN INDICATOR - SCALED DOWN
+   ============================================ */
+
+.pattern-indicator {
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  font-size: 7px;
+  color: #0ECB81;
+  filter: drop-shadow(0 0 4px rgba(14, 203, 129, 0.8));
+  animation: pulse-pattern 2s ease-in-out infinite;
+  z-index: 2;
+}
+
+@keyframes pulse-pattern {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.15);
+  }
+}
+
+/* ============================================
+   LEGEND - SCALED DOWN
+   ============================================ */
+
+.quick-select-legend {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 189, 89, 0.1);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 8px;
+  color: rgba(222, 188, 129, 0.6);
+  font-family: 'Noto Sans Display', sans-serif;
+}
+
+.legend-dot {
+  font-size: 10px;
+}
+
+.legend-dot.active-dot {
+  color: #0ECB81;
+}
+
+.legend-dot.inactive-dot {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+/* ============================================
+   RESPONSIVE - MOBILE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .quick-select-grid {
+    gap: 5px;
+  }
+
+  .quick-select-btn {
+    min-width: 48px;
+    width: 48px;
+    height: 36px;
+    padding: 5px 6px;
+    gap: 4px;
+  }
+
+  .coin-icon {
+    font-size: 14px;
+  }
+
+  .coin-label {
+    font-size: 8px;
+  }
+
+  .free-badge {
+    font-size: 5px;
+    padding: 1px 3px;
+  }
+
+  .pattern-indicator {
+    font-size: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .quick-select {
+    padding: 6px 8px;
+  }
+
+  .quick-select-btn {
+    min-width: 45px;
+    width: 45px;
+    height: 34px;
+    padding: 4px 5px;
+    gap: 3px;
+  }
+
+  .coin-icon {
+    font-size: 13px;
+  }
+
+  .coin-label {
+    font-size: 7px;
+  }
+}

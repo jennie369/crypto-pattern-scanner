@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
+import { Search } from 'lucide-react';
 import { useAuth } from '../../../../../contexts/AuthContext';
 import ResultsList from './ResultsList';
+import CoinSelectorDropdown from './CoinSelectorDropdown';
 import './ControlPanel.css';
 
 export const ControlPanel = ({ onScan, isScanning, results, onSelectPattern, selectedPattern }) => {
   const { profile, getScannerTier } = useAuth();
-  const [selectedCoins, setSelectedCoins] = useState(['BTC', 'ETH']);
+  const [selectedCoins, setSelectedCoins] = useState(['BTCUSDT']); // Multi-coin support
   const [timeframe, setTimeframe] = useState('1H');
   const [patternFilter, setPatternFilter] = useState('All');
 
-  const coins = ['BTC', 'ETH', 'BNB', 'SOL', 'ADA', 'DOT', 'AVAX', 'MATIC', 'LINK', 'UNI'];
   const timeframes = ['5m', '15m', '1H', '4H', '1D'];
   const patterns = ['All', 'DPD', 'UPU', 'UPD', 'DPU', 'H&S', 'Double Top', 'Double Bottom', 'Triangle'];
 
@@ -28,67 +29,23 @@ export const ControlPanel = ({ onScan, isScanning, results, onSelectPattern, sel
   };
 
   const userTier = normalizeTier(scannerTierRaw);
-  const tierLimits = {
-    'FREE': 2,      // Max 2 coins at a time
-    'TIER1': 3,     // Max 3 coins at a time
-    'TIER2': 5,     // Max 5 coins at a time
-    'TIER3': 999,   // Unlimited
-  };
-  const maxCoins = tierLimits[userTier];
 
   // Debug logging
   console.log('🔍 [ControlPanel] Tier Debug:', {
     scannerTierRaw,
     userTier,
-    maxCoins,
+    selectedCoins,
     profile: profile ? { email: profile.email, scanner_tier: profile.scanner_tier } : null
   });
 
-  const handleCoinToggle = (coin) => {
-    setSelectedCoins(prev => {
-      // If unchecking, always allow
-      if (prev.includes(coin)) {
-        return prev.filter(c => c !== coin);
-      }
-
-      // If checking, verify tier limit
-      if (prev.length >= maxCoins) {
-        alert(`🔒 ${userTier} tier is limited to ${maxCoins} coins at a time.\n\n✅ Upgrade to TIER 2 to scan up to 5 coins!\n✅ Upgrade to TIER 3 for unlimited scanning!`);
-        return prev;
-      }
-
-      return [...prev, coin];
-    });
-  };
-
-  const handleSelectAll = () => {
-    // Select only up to tier limit
-    if (coins.length > maxCoins) {
-      alert(`🔒 ${userTier} tier is limited to ${maxCoins} coins at a time.\n\nSelecting first ${maxCoins} coins only.\n\n✅ Upgrade to TIER 2 to scan up to 5 coins!\n✅ Upgrade to TIER 3 for unlimited scanning!`);
-      setSelectedCoins(coins.slice(0, maxCoins));
-    } else {
-      setSelectedCoins(coins);
-    }
-  };
-
-  const handleClearAll = () => {
-    setSelectedCoins([]);
-  };
-
   const handleScan = () => {
-    // Validate tier limit before scanning
-    if (selectedCoins.length > maxCoins) {
-      alert(`🔒 ${userTier} tier is limited to ${maxCoins} coins at a time.\n\nYou have selected ${selectedCoins.length} coins.\n\n✅ Upgrade to TIER 2 to scan up to 5 coins!\n✅ Upgrade to TIER 3 for unlimited scanning!`);
-      return;
-    }
-
-    if (selectedCoins.length === 0) {
-      alert('⚠️ Please select at least 1 coin to scan.');
+    if (!selectedCoins || selectedCoins.length === 0) {
+      alert('⚠️ Please select at least one coin to scan.');
       return;
     }
 
     onScan({
-      coins: selectedCoins,
+      coins: selectedCoins, // Multi-coin support
       timeframe,
       pattern: patternFilter,
     });
@@ -96,59 +53,20 @@ export const ControlPanel = ({ onScan, isScanning, results, onSelectPattern, sel
 
   return (
     <div className="control-panel">
-      {/* Header */}
-      <div className="panel-header">
-        <h2 className="heading-sm">Scan Controls</h2>
-        <p className="text-xs text-secondary">Configure scan parameters</p>
+      {/* Header - Compact */}
+      <div className="panel-header-compact">
+        <h2>Scan Controls</h2>
       </div>
 
-      {/* Coin Selection */}
+      {/* Coin Selection - Dropdown Selector with Multi-Select */}
       <div className="control-section">
-        <label className="control-label">Select Coins ({selectedCoins.length}/{maxCoins})</label>
-
-        <div className="quick-filters">
-          <button
-            className="quick-filter-btn"
-            onClick={handleSelectAll}
-            disabled={isScanning}
-          >
-            Select All
-          </button>
-          <button
-            className="quick-filter-btn"
-            onClick={handleClearAll}
-            disabled={isScanning}
-          >
-            Clear All
-          </button>
-        </div>
-
-        <div className="coin-checkboxes">
-          {coins.map(coin => (
-            <label key={coin} className="coin-checkbox">
-              <input
-                type="checkbox"
-                checked={selectedCoins.includes(coin)}
-                onChange={() => handleCoinToggle(coin)}
-                disabled={isScanning}
-              />
-              <span className="coin-label">{coin}/USDT</span>
-              <span className="coin-icon">📈</span>
-            </label>
-          ))}
-        </div>
-
-        {/* Tier Limit Indicator */}
-        <div className={`tier-limit-indicator ${selectedCoins.length >= maxCoins ? 'at-limit' : ''}`}>
-          <span className="tier-badge">{userTier}</span>
-          <span className="limit-text">
-            {selectedCoins.length >= maxCoins ? (
-              <>🔒 Limit reached. Upgrade to select more coins!</>
-            ) : (
-              <>✅ {maxCoins - selectedCoins.length} more coin{maxCoins - selectedCoins.length !== 1 ? 's' : ''} available</>
-            )}
-          </span>
-        </div>
+        <label className="control-label">Select Coins</label>
+        <CoinSelectorDropdown
+          selected={selectedCoins}
+          onChange={setSelectedCoins}
+          maxCoins={userTier === 'FREE' ? 2 : userTier === 'TIER1' ? 5 : userTier === 'TIER2' ? 20 : 997}
+          tier={userTier}
+        />
       </div>
 
       {/* Timeframe Selection */}
@@ -183,11 +101,11 @@ export const ControlPanel = ({ onScan, isScanning, results, onSelectPattern, sel
         </select>
       </div>
 
-      {/* Scan Button */}
+      {/* Scan Button - Compact */}
       <button
-        className={`scan-button ${isScanning ? 'scanning' : ''}`}
+        className={`scan-button-compact ${isScanning ? 'scanning' : ''}`}
         onClick={handleScan}
-        disabled={selectedCoins.length === 0 || isScanning}
+        disabled={!selectedCoins || selectedCoins.length === 0 || isScanning}
       >
         {isScanning ? (
           <>
@@ -196,7 +114,7 @@ export const ControlPanel = ({ onScan, isScanning, results, onSelectPattern, sel
           </>
         ) : (
           <>
-            <span>🔍</span>
+            <Search size={16} />
             <span>Start Scan</span>
           </>
         )}

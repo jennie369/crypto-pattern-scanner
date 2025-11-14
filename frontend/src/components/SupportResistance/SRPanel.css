@@ -1,0 +1,382 @@
+/* ═══════════════════════════════════════════════════ */
+/* SR PANEL - Support/Resistance Display Component     */
+/* ═══════════════════════════════════════════════════ */
+
+.sr-panel {
+  background: rgba(20, 27, 45, 0.95);
+  border: 1px solid rgba(100, 149, 237, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  color: #e0e7ff;
+  max-height: 600px;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.sr-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid rgba(100, 149, 237, 0.2);
+}
+
+.sr-panel-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  color: #6495ED;
+}
+
+.tier-badge {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: #1a1f3a;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* FREE TIER NOTICE                                     */
+/* ═══════════════════════════════════════════════════ */
+
+.sr-free-notice {
+  background: rgba(255, 193, 7, 0.15);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #FFC107;
+}
+
+.lock-icon {
+  font-size: 14px;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* TABS                                                 */
+/* ═══════════════════════════════════════════════════ */
+
+.sr-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.sr-tab {
+  flex: 1;
+  padding: 8px 12px;
+  background: rgba(100, 149, 237, 0.1);
+  border: 1px solid rgba(100, 149, 237, 0.2);
+  border-radius: 8px;
+  color: #8b9dc3;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sr-tab:hover {
+  background: rgba(100, 149, 237, 0.15);
+  border-color: rgba(100, 149, 237, 0.3);
+}
+
+.sr-tab.active {
+  background: rgba(100, 149, 237, 0.25);
+  border-color: #6495ED;
+  color: #6495ED;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* KEY LEVELS SUMMARY                                   */
+/* ═══════════════════════════════════════════════════ */
+
+.sr-key-levels {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.1));
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.key-levels-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  margin-bottom: 10px;
+  color: #FFD700;
+}
+
+.key-level {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 8px;
+}
+
+.key-level:last-child {
+  margin-bottom: 0;
+}
+
+.key-level-type {
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  opacity: 0.8;
+}
+
+.key-level.support .key-level-type {
+  color: #4CAF50;
+}
+
+.key-level.resistance .key-level-type {
+  color: #F44336;
+}
+
+.key-level-price {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: #FFD700;
+}
+
+.key-level-distance {
+  font-size: 11px;
+  color: #8b9dc3;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* LEVELS LIST                                          */
+/* ═══════════════════════════════════════════════════ */
+
+.sr-levels-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sr-level-item {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.sr-level-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateX(4px);
+}
+
+.sr-level-item.support {
+  border-left: 3px solid #4CAF50;
+}
+
+.sr-level-item.resistance {
+  border-left: 3px solid #F44336;
+}
+
+/* Level Header */
+.sr-level-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.sr-level-type-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.sr-level-info {
+  flex: 1;
+}
+
+.sr-level-price {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.sr-level-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: #8b9dc3;
+}
+
+.sr-touches {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sr-distance {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sr-level-strength-badge {
+  background: rgba(100, 149, 237, 0.2);
+  color: #6495ED;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Strength Bar */
+.sr-strength-container {
+  margin-bottom: 8px;
+}
+
+.sr-strength-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #8b9dc3;
+  margin-bottom: 6px;
+}
+
+.sr-strength-bar-bg {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.sr-strength-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* Strength Colors - Support */
+.sr-strength-bar.support.strength-very-strong {
+  background: linear-gradient(90deg, #4CAF50, #66BB6A);
+}
+
+.sr-strength-bar.support.strength-strong {
+  background: linear-gradient(90deg, #66BB6A, #81C784);
+}
+
+.sr-strength-bar.support.strength-medium {
+  background: linear-gradient(90deg, #81C784, #A5D6A7);
+}
+
+.sr-strength-bar.support.strength-weak {
+  background: rgba(76, 175, 80, 0.4);
+}
+
+/* Strength Colors - Resistance */
+.sr-strength-bar.resistance.strength-very-strong {
+  background: linear-gradient(90deg, #F44336, #EF5350);
+}
+
+.sr-strength-bar.resistance.strength-strong {
+  background: linear-gradient(90deg, #EF5350, #E57373);
+}
+
+.sr-strength-bar.resistance.strength-medium {
+  background: linear-gradient(90deg, #E57373, #EF9A9A);
+}
+
+.sr-strength-bar.resistance.strength-weak {
+  background: rgba(244, 67, 54, 0.4);
+}
+
+/* Level Footer */
+.sr-level-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: #8b9dc3;
+}
+
+.sr-last-tested {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* EMPTY STATE                                          */
+/* ═══════════════════════════════════════════════════ */
+
+.sr-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #8b9dc3;
+}
+
+.sr-empty p {
+  font-size: 14px;
+  margin: 0 0 8px 0;
+}
+
+.sr-empty small {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* SCROLLBAR STYLING                                    */
+/* ═══════════════════════════════════════════════════ */
+
+.sr-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sr-panel::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.sr-panel::-webkit-scrollbar-thumb {
+  background: rgba(100, 149, 237, 0.3);
+  border-radius: 3px;
+}
+
+.sr-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 149, 237, 0.5);
+}
+
+/* ═══════════════════════════════════════════════════ */
+/* RESPONSIVE                                           */
+/* ═══════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .sr-panel {
+    padding: 12px;
+    max-height: 400px;
+  }
+
+  .sr-panel-header h3 {
+    font-size: 16px;
+  }
+
+  .sr-level-price {
+    font-size: 14px;
+  }
+
+  .sr-tabs {
+    flex-direction: column;
+  }
+
+  .sr-tab {
+    width: 100%;
+  }
+}

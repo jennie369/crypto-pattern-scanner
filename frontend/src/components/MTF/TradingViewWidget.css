@@ -1,0 +1,53 @@
+/* TradingViewWidget.css */
+
+.tradingview-widget-wrapper {
+  width: 100%;
+  position: relative;
+  background: #1a1a2e;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tradingview-widget-container {
+  background: #1a1a2e;
+}
+
+/* Loading State */
+.tradingview-widget-wrapper.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tradingview-widget-wrapper.loading::before {
+  content: "Loading chart...";
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+/* Error State */
+.tradingview-widget-wrapper.error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.tradingview-widget-wrapper.error::before {
+  content: "⚠️ Error loading chart";
+  color: #ef4444;
+  font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tradingview-widget-wrapper {
+    min-height: 350px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tradingview-widget-wrapper {
+    min-height: 300px;
+  }
+}

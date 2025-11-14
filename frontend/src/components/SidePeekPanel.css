@@ -1,0 +1,252 @@
+/* ===================================
+   SIDE PEEK PANEL (NOTION-STYLE)
+   Full-page overlay with RESIZE functionality
+   Uses React Portal - renders to document.body!
+   =================================== */
+
+/* Backdrop */
+.side-peek-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 10000;
+}
+
+/* Panel Container */
+.side-peek-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #0D1B3E 0%, #112250 100%);
+  border-left: 2px solid rgba(255, 189, 89, 0.3);
+  box-shadow: -10px 0 50px rgba(0, 0, 0, 0.5);
+  z-index: 10001;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  will-change: width;
+}
+
+/* Disable transitions during resize */
+.side-peek-panel.resizing {
+  transition: none !important;
+  user-select: none;
+}
+
+/* ===================================
+   RESIZE HANDLE
+   =================================== */
+
+.resize-handle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: ew-resize;
+  background: rgba(255, 189, 89, 0.05);
+  border-right: 1px solid rgba(255, 189, 89, 0.2);
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.resize-handle:hover {
+  background: rgba(255, 189, 89, 0.15);
+  border-right-color: rgba(255, 189, 89, 0.5);
+}
+
+.resize-handle:hover .grip-icon {
+  color: #FFBD59;
+  opacity: 1;
+}
+
+.grip-icon {
+  color: rgba(255, 189, 89, 0.4);
+  opacity: 0.6;
+  transition: all 0.2s;
+}
+
+/* Resize Hint (shows on hover) */
+.resize-hint {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: #FFBD59;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.resize-handle:hover .resize-hint {
+  opacity: 1;
+}
+
+/* ===================================
+   WIDTH INDICATOR
+   =================================== */
+
+.width-indicator {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #FFBD59;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font-mono, monospace);
+  border: 1px solid rgba(255, 189, 89, 0.3);
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* ===================================
+   HEADER
+   =================================== */
+
+/* Header - Padding accounts for resize handle */
+.side-peek-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 32px 24px 44px; /* Extra left padding for resize handle */
+  background: rgba(17, 34, 80, 0.8);
+  border-bottom: 1px solid rgba(255, 189, 89, 0.2);
+  flex-shrink: 0;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.side-peek-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+/* Tier Badges */
+.tier-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tier-badge.tier-tier1 {
+  background: rgba(139, 92, 246, 0.2);
+  color: #8B5CF6;
+  border: 1px solid #8B5CF6;
+}
+
+.tier-badge.tier-tier2 {
+  background: rgba(0, 217, 255, 0.2);
+  color: #00D9FF;
+  border: 1px solid #00D9FF;
+}
+
+.tier-badge.tier-tier3 {
+  background: rgba(255, 189, 89, 0.2);
+  color: #FFBD59;
+  border: 1px solid #FFBD59;
+}
+
+/* Close Button */
+.close-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(246, 70, 93, 0.1);
+  border: 1px solid rgba(246, 70, 93, 0.3);
+  border-radius: 8px;
+  color: #F6465D;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.close-btn:hover {
+  background: rgba(246, 70, 93, 0.2);
+  border-color: #F6465D;
+  transform: scale(1.05);
+}
+
+/* Content - Scrollable with padding for resize handle */
+.side-peek-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 32px 32px 32px 44px; /* Extra left padding for resize handle */
+}
+
+/* Custom Scrollbar */
+.side-peek-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.side-peek-content::-webkit-scrollbar-track {
+  background: rgba(17, 34, 80, 0.4);
+  border-radius: 4px;
+}
+
+.side-peek-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 189, 89, 0.3);
+  border-radius: 4px;
+}
+
+.side-peek-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 189, 89, 0.5);
+}
+
+/* ===================================
+   RESPONSIVE
+   =================================== */
+
+@media (max-width: 768px) {
+  /* On mobile, use full width and hide resize handle */
+  .side-peek-panel {
+    width: 100vw !important;
+  }
+
+  .resize-handle {
+    display: none;
+  }
+
+  .side-peek-header {
+    padding: 16px 20px; /* Reset padding when no resize handle */
+  }
+
+  .side-peek-header h2 {
+    font-size: 20px;
+  }
+
+  .side-peek-content {
+    padding: 20px; /* Reset padding when no resize handle */
+  }
+
+  .width-indicator {
+    display: none; /* Hide on mobile */
+  }
+}

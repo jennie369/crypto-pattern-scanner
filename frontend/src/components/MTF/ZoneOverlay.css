@@ -1,0 +1,228 @@
+/* ZoneOverlay.css */
+
+.zone-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Current Price Line */
+.current-price-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #3b82f6;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  z-index: 15;
+  animation: pricePulse 2s ease-in-out infinite;
+}
+
+@keyframes pricePulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.price-label {
+  position: absolute;
+  right: 10px;
+  top: -10px;
+  padding: 4px 12px;
+  background: #3b82f6;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+  pointer-events: auto;
+}
+
+/* Zone Rectangle */
+.zone-rectangle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: 100%;
+  border-left: 3px solid;
+  border-right: 3px solid;
+  transition: all 0.3s;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.zone-rectangle:hover {
+  opacity: 0.9;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.zone-rectangle.active {
+  animation: zoneHighlight 1.5s ease-in-out infinite;
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+}
+
+@keyframes zoneHighlight {
+  0%, 100% {
+    border-width: 3px;
+  }
+  50% {
+    border-width: 5px;
+  }
+}
+
+/* Zone Borders */
+.zone-border {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: currentColor;
+}
+
+.zone-border.zone-top {
+  top: 0;
+}
+
+.zone-border.zone-bottom {
+  bottom: 0;
+}
+
+/* Zone Label */
+.zone-label {
+  position: absolute;
+  left: 10px;
+  top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  backdrop-filter: blur(4px);
+  pointer-events: auto;
+}
+
+.zone-type {
+  color: #ffffff;
+}
+
+.zone-strength {
+  color: #fbbf24;
+  font-size: 10px;
+}
+
+.zone-age {
+  color: #94a3b8;
+  font-size: 10px;
+}
+
+/* Zone-specific colors */
+.zone-rectangle.hfz {
+  border-color: #ef4444;
+}
+
+.zone-rectangle.lfz {
+  border-color: #10b981;
+}
+
+/* Zone Legend */
+.zone-legend {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  backdrop-filter: blur(8px);
+  pointer-events: auto;
+  z-index: 20;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #ffffff;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 2px solid currentColor;
+}
+
+.legend-item.hfz .legend-color {
+  background: rgba(239, 68, 68, 0.5);
+  border-color: #ef4444;
+}
+
+.legend-item.lfz .legend-color {
+  background: rgba(16, 185, 129, 0.5);
+  border-color: #10b981;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .zone-label {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+
+  .zone-strength,
+  .zone-age {
+    font-size: 9px;
+  }
+
+  .price-label {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+
+  .zone-legend {
+    padding: 8px;
+  }
+
+  .legend-item {
+    font-size: 11px;
+  }
+
+  .legend-color {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+/* Tooltip on hover */
+.zone-rectangle:hover .zone-label {
+  background: rgba(0, 0, 0, 0.95);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  transform: scale(1.05);
+}
+
+/* Accessibility */
+.zone-rectangle:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .zone-overlay {
+    display: none;
+  }
+}

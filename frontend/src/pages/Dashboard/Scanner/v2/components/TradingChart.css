@@ -5,8 +5,10 @@
 .trading-chart-container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
-  height: 100%;
+  gap: 0;
+  height: auto;
+  min-height: 0;
+  position: relative;
 }
 
 /* Chart Placeholder (No pattern selected) */
@@ -136,6 +138,7 @@
 /* Chart Card */
 .chart-card {
   flex: 1;
+  min-height: 0;
   background: rgba(30, 42, 94, 0.4);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -143,12 +146,199 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .chart-canvas {
   flex: 1;
   position: relative;
   min-height: 400px;
+  overflow: hidden;
+}
+
+/* Chart Watermark - GEM TRADING Branding */
+.chart-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 48px;
+  font-weight: 900;
+  letter-spacing: 8px;
+  color: #FFFFFF;
+  opacity: 0.05;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+  white-space: nowrap;
+  font-family: var(--font-heading, 'Inter', sans-serif);
+}
+
+/* Real-time Price Ticker */
+.realtime-price-ticker {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  z-index: 10;
+  animation: ticker-pulse 2s ease-in-out infinite;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid;
+  transition: all 0.3s ease;
+}
+
+.realtime-price-ticker.up {
+  background: rgba(0, 255, 136, 0.15);
+  border-color: rgba(0, 255, 136, 0.4);
+}
+
+.realtime-price-ticker.down {
+  background: rgba(246, 70, 93, 0.15);
+  border-color: rgba(246, 70, 93, 0.4);
+}
+
+.ticker-price {
+  font-size: 20px;
+  font-weight: 700;
+  font-family: var(--font-mono, monospace);
+  letter-spacing: 0.5px;
+}
+
+.realtime-price-ticker.up .ticker-price {
+  color: #00FF88;
+}
+
+.realtime-price-ticker.down .ticker-price {
+  color: #F6465D;
+}
+
+.ticker-change {
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-mono, monospace);
+}
+
+.realtime-price-ticker.up .ticker-change {
+  color: #00FF88;
+}
+
+.realtime-price-ticker.down .ticker-change {
+  color: #F6465D;
+}
+
+.ticker-status {
+  font-size: 11px;
+  font-weight: 700;
+  color: #0ECB81;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  animation: blink 1.5s ease-in-out infinite;
+}
+
+@keyframes ticker-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* Timeline Axis */
+.chart-timeline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(17, 34, 80, 0.4);
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  font-family: var(--font-mono, monospace);
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+  height: 32px;
+  z-index: 5;
+}
+
+.chart-timeline span {
+  min-width: 40px;
+  text-align: center;
+  transition: color 0.2s;
+}
+
+.chart-timeline span:hover {
+  color: #FFBD59;
+}
+
+/* Chart Resize Handle */
+.chart-resize-handle {
+  position: relative;
+  height: 40px;
+  width: 100%;
+  background: rgba(17, 34, 80, 0.8);
+  border: 1px solid rgba(255, 189, 89, 0.3);
+  border-radius: 0 0 12px 12px;
+  cursor: ns-resize !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 100;
+  flex-shrink: 0;
+  user-select: none;
+  pointer-events: auto !important;
+  margin-top: 0;
+}
+
+.chart-resize-handle:hover {
+  background: rgba(255, 189, 89, 0.15);
+}
+
+.chart-resize-handle:active,
+.chart-resize-handle.active {
+  background: rgba(255, 189, 89, 0.25);
+}
+
+.chart-resize-handle .resize-grip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 189, 89, 0.6);
+  font-size: 12px;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.chart-resize-handle:hover .resize-grip {
+  color: #FFBD59;
+}
+
+.chart-resize-handle .resize-hint {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.chart-resize-handle:hover .resize-hint {
+  opacity: 1;
 }
 
 /* Mock Chart (Placeholder) */

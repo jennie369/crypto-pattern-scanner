@@ -4,59 +4,109 @@
    =================================== */
 
 .scanner-page-v2 {
-  min-height: calc(100vh - 80px); /* Subtract header height */
+  min-height: 100vh !important;
+  height: auto;
   padding: var(--space-lg);
   background: var(--bg-base);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-/* 3-Column Layout */
+/* 3-Column Layout - Allow expansion */
 .scanner-layout {
   display: grid;
   grid-template-columns: 20% 50% 30%;
   gap: var(--space-md);
-  height: calc(100vh - 160px);
-  overflow: hidden;
+  min-height: calc(100vh - 260px);
+  height: auto;
+  align-items: start;
+  /* NO max-height! Let it grow! */
 }
 
 .scanner-left,
 .scanner-right {
-  overflow-y: auto;
-  padding: var(--space-md);
   background: rgba(30, 42, 94, 0.4);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-lg);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+}
+
+/* LEFT: Keep scroll on container (simpler structure) */
+.scanner-left {
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--space-md);
+  max-height: calc(100vh - 260px);
+}
+
+/* RIGHT: overflow visible for dropdown modals */
+.scanner-right {
+  overflow: visible;
+}
+
+/* RIGHT: Needs inner scroll wrapper to prevent corner cutting */
+.right-column-scroll-wrapper {
+  overflow-y: auto;
+  overflow-x: visible;
+  padding: var(--space-md);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
 }
 
 .scanner-center {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
-  overflow: hidden;
+  overflow: visible;
+  height: auto;
+  min-height: 0;
+}
+
+/* Chart Container - USER RESIZABLE */
+.scanner-center > .trading-chart-container {
+  /* Height controlled by chartHeight state - NO fixed height! */
+  min-height: 400px;
+  overflow: visible;
+  background: rgba(17, 34, 80, 0.4);
+  border: 1px solid rgba(255, 189, 89, 0.2);
+  border-radius: 12px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Market Section - Natural height based on resize */
+.scanner-center > .market-chatbot-section-resizable {
+  flex-shrink: 0;
+  overflow: visible;
+  /* Height controlled by user resize */
 }
 
 /* Scrollbar styling */
 .scanner-left::-webkit-scrollbar,
-.scanner-right::-webkit-scrollbar {
+.right-column-scroll-wrapper::-webkit-scrollbar {
   width: 8px;
 }
 
 .scanner-left::-webkit-scrollbar-track,
-.scanner-right::-webkit-scrollbar-track {
+.right-column-scroll-wrapper::-webkit-scrollbar-track {
   background: rgba(255, 255, 255, 0.05);
   border-radius: var(--radius-full);
 }
 
 .scanner-left::-webkit-scrollbar-thumb,
-.scanner-right::-webkit-scrollbar-thumb {
+.right-column-scroll-wrapper::-webkit-scrollbar-thumb {
   background: linear-gradient(135deg, var(--brand-burgundy), var(--brand-royal));
   border-radius: var(--radius-full);
 }
 
 .scanner-left::-webkit-scrollbar-thumb:hover,
-.scanner-right::-webkit-scrollbar-thumb:hover {
+.right-column-scroll-wrapper::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, #9C0612, #112250);
 }
 

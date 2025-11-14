@@ -1,96 +1,111 @@
 import React, { useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
+import {
+  BarChart3,
+  Calculator,
+  Target,
+  TrendingUp,
+  Clock,
+  Newspaper,
+  Brain,
+  FlaskConical,
+  Fish
+} from 'lucide-react';
+import SubToolButton from './SubToolButton';
+import SidePeekPanel from '../../../../../components/SidePeekPanel';
+import RiskCalculatorContent from './tools/RiskCalculatorContent';
+import AnalyticsContent from './tools/AnalyticsContent';
 import './SubToolsPanel.css';
 
-// Import all modals
-import AnalyticsModal from './modals/AnalyticsModal';
-import RiskCalculatorModal from './modals/RiskCalculatorModal';
-import PositionSizeModal from './modals/PositionSizeModal';
-import SentimentModal from './modals/SentimentModal';
-import MultiTimeframeModal from './modals/MultiTimeframeModal';
-import NewsEventsModal from './modals/NewsEventsModal';
-import AIPredictionModal from './modals/AIPredictionModal';
-import BacktestingModal from './modals/BacktestingModal';
-import WhaleTrackerModal from './modals/WhaleTrackerModal';
-
 export const SubToolsPanel = ({ pattern }) => {
-  const [activeModal, setActiveModal] = useState(null);
+  const [activePanel, setActivePanel] = useState(null);
 
   const subTools = [
-    { id: 1, icon: '📊', name: 'Analytics', tier: 'FREE', locked: false, component: AnalyticsModal },
-    { id: 2, icon: '🧮', name: 'Risk Calculator', tier: 'TIER 2', locked: false, component: RiskCalculatorModal },
-    { id: 3, icon: '📍', name: 'Position Size', tier: 'TIER 2', locked: false, component: PositionSizeModal },
-    { id: 4, icon: '😊', name: 'Sentiment', tier: 'TIER 2', locked: false, component: SentimentModal },
-    { id: 5, icon: '⏱️', name: 'Multi-Timeframe', tier: 'TIER 2', locked: false, component: MultiTimeframeModal },
-    { id: 6, icon: '📰', name: 'News & Events', tier: 'TIER 2', locked: false, component: NewsEventsModal },
-    { id: 7, icon: '🤖', name: 'AI Prediction', tier: 'TIER 3', locked: false, component: AIPredictionModal },
-    { id: 8, icon: '🧪', name: 'Backtesting', tier: 'TIER 3', locked: false, component: BacktestingModal },
-    { id: 9, icon: '🐋', name: 'Whale Tracker', tier: 'TIER 3', locked: false, component: WhaleTrackerModal },
+    { id: 1, icon: BarChart3, name: 'Analytics', tier: 'FREE', locked: false, width: '800px' },
+    { id: 2, icon: Calculator, name: 'Risk Calculator', tier: 'TIER2', locked: false, width: '700px' },
+    { id: 3, icon: Target, name: 'Position Size', tier: 'TIER2', locked: false, width: '600px' },
+    { id: 4, icon: TrendingUp, name: 'Sentiment', tier: 'TIER2', locked: false, width: '700px' },
+    { id: 5, icon: Clock, name: 'Multi-Timeframe', tier: 'TIER2', locked: false, width: '800px' },
+    { id: 6, icon: Newspaper, name: 'News & Events', tier: 'TIER2', locked: false, width: '700px' },
+    { id: 7, icon: Brain, name: 'AI Prediction', tier: 'TIER3', locked: false, width: '700px' },
+    { id: 8, icon: FlaskConical, name: 'Backtesting', tier: 'TIER3', locked: false, width: '900px' },
+    { id: 9, icon: Fish, name: 'Whale Tracker', tier: 'TIER3', locked: false, width: '700px' },
   ];
 
   const handleToolClick = (tool) => {
     if (tool.locked) {
-      alert(`🔒 ${tool.name} requires ${tool.tier}\n\nUpgrade to unlock this feature!`);
+      alert(`${tool.name} requires ${tool.tier}\n\nUpgrade to unlock this feature!`);
       return;
     }
-    setActiveModal(tool.id);
+    setActivePanel(tool.id);
   };
 
-  const handleCloseModal = () => {
-    setActiveModal(null);
+  const handleClosePanel = () => {
+    setActivePanel(null);
   };
 
-  const getTierColor = (tier) => {
-    if (tier === 'FREE') return 'tier-free';
-    if (tier === 'TIER 2') return 'tier-2';
-    if (tier === 'TIER 3') return 'tier-3';
-    return '';
-  };
+  // Get active tool data
+  const activeTool = subTools.find(tool => tool.id === activePanel);
 
-  // Get active modal component
-  const activeToolData = subTools.find(tool => tool.id === activeModal);
-  const ActiveModalComponent = activeToolData?.component;
+  // Get tool content
+  const getToolContent = (toolId) => {
+    switch (toolId) {
+      case 1:
+        return <AnalyticsContent pattern={pattern} />;
+      case 2:
+        return <RiskCalculatorContent pattern={pattern} />;
+      case 3:
+        return <div style={{ padding: '40px', textAlign: 'center', color: '#999' }}>Position Size Calculator coming soon...</div>;
+      case 4:
+        return <div style={{ padding: '40px', textAlign: 'center', color: '#999' }}>Sentiment Analysis coming soon...</div>;
+      case 5:
+        return <div style={{ padding: '40px', textAlign: 'center', color: '#999' }}>Multi-Timeframe Analysis coming soon...</div>;
+      case 6:
+        return <div style={{ padding: '40px', textAlign: 'center', color: '#999' }}>News & Events coming soon...</div>;
+      case 7:
+        return <div style={{ padding: '40px', textAlign: 'center', color: '#999' }}>AI Prediction coming soon...</div>;
+      case 8:
+        return <div style={{ padding: '40px', textAlign: 'center', color: '#999' }}>Backtesting coming soon...</div>;
+      case 9:
+        return <div style={{ padding: '40px', textAlign: 'center', color: '#999' }}>Whale Tracker coming soon...</div>;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="sub-tools-panel">
-      <div className="sub-tools-header">
-        <h3 className="heading-sm">Sub-Tools</h3>
-        <p className="text-xs text-secondary">Quick access to analysis tools</p>
+      {/* Compact Header */}
+      <div className="sub-tools-header-compact">
+        <h3>Quick Tools</h3>
       </div>
 
-      <div className="sub-tools-grid">
+      {/* 3x3 Grid */}
+      <div className="sub-tools-grid-compact">
         {subTools.map(tool => (
-          <button
+          <SubToolButton
             key={tool.id}
-            className={`sub-tool-btn ${tool.locked ? 'locked' : ''}`}
+            icon={tool.icon}
+            title={tool.name}
+            tier={tool.tier}
             onClick={() => handleToolClick(tool)}
-            disabled={!pattern}
-          >
-            <div className="tool-icon">{tool.icon}</div>
-            <div className="tool-info">
-              <div className="tool-name">{tool.name}</div>
-              <div className={`tool-tier ${getTierColor(tool.tier)}`}>
-                {tool.locked && '🔒 '}
-                {tool.tier}
-              </div>
-            </div>
-          </button>
+            isActive={activePanel === tool.id}
+            isLocked={tool.locked || !pattern}
+          />
         ))}
       </div>
 
-      {!pattern && (
-        <div className="sub-tools-notice">
-          <p className="text-xs text-secondary">
-            Select a pattern to enable sub-tools
-          </p>
-        </div>
-      )}
-
-      {/* Render active modal */}
-      {ActiveModalComponent && pattern && (
-        <ActiveModalComponent
-          pattern={pattern}
-          onClose={handleCloseModal}
-        />
+      {/* Side Peek Panel (Notion-style) */}
+      {activeTool && pattern && (
+        <SidePeekPanel
+          isOpen={!!activePanel}
+          onClose={handleClosePanel}
+          title={activeTool.name}
+          tier={activeTool.tier}
+          width={activeTool.width}
+        >
+          {getToolContent(activeTool.id)}
+        </SidePeekPanel>
       )}
     </div>
   );

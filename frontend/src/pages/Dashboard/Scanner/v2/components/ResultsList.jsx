@@ -1,4 +1,5 @@
 import React from 'react';
+import { Circle } from 'lucide-react';
 import './ResultsList.css';
 
 export const ResultsList = ({ results, onSelect, selectedPattern }) => {
@@ -8,10 +9,9 @@ export const ResultsList = ({ results, onSelect, selectedPattern }) => {
     return 'confidence-low';
   };
 
-  const getConfidenceLabel = (confidence) => {
-    if (confidence >= 80) return '🟢';
-    if (confidence >= 60) return '🟡';
-    return '🔴';
+  const getConfidenceIcon = (confidence) => {
+    const color = confidence >= 80 ? '#0ECB81' : confidence >= 60 ? '#FFBD59' : '#F6465D';
+    return <Circle size={10} fill={color} color={color} />;
   };
 
   return (
@@ -30,7 +30,7 @@ export const ResultsList = ({ results, onSelect, selectedPattern }) => {
             <div className="result-header">
               <span className="result-coin">{result.coin}</span>
               <span className={`result-confidence ${getConfidenceColor(result.confidence)}`}>
-                {getConfidenceLabel(result.confidence)} {result.confidence}%
+                {getConfidenceIcon(result.confidence)} {result.confidence}%
               </span>
             </div>
 
