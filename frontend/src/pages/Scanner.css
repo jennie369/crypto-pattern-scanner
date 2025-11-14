@@ -1,0 +1,475 @@
+/* Scanner Page Styles - WITH SUPABASE INTEGRATION */
+.scanner-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+/* ============================================= */
+/* USER STATUS BAR */
+/* ============================================= */
+.user-status-bar {
+  background: linear-gradient(135deg, rgba(14, 203, 129, 0.1), rgba(255, 189, 89, 0.1));
+  border-bottom: 1px solid rgba(255, 189, 89, 0.3);
+  padding: 12px 20px;
+}
+
+.user-status-container {
+  max-width: 1920px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.user-email {
+  color: #DEBC81;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.user-tier {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.user-tier.free {
+  background: rgba(222, 188, 129, 0.2);
+  border: 1px solid rgba(222, 188, 129, 0.4);
+  color: #DEBC81;
+}
+
+.user-tier.tier1,
+.user-tier.tier2,
+.user-tier.tier3 {
+  background: linear-gradient(135deg, rgba(255, 189, 89, 0.3), rgba(14, 203, 129, 0.3));
+  border: 1px solid #FFBD59;
+  color: #FFBD59;
+  box-shadow: 0 0 10px rgba(255, 189, 89, 0.3);
+}
+
+.quota-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.quota-text {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  font-family: 'Noto Sans Display', sans-serif;
+}
+
+.quota-count {
+  padding: 4px 10px;
+  background: rgba(14, 203, 129, 0.2);
+  border: 1px solid rgba(14, 203, 129, 0.4);
+  border-radius: 6px;
+  color: #0ECB81;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+}
+
+.quota-count.depleted {
+  background: rgba(246, 70, 93, 0.2);
+  border-color: rgba(246, 70, 93, 0.4);
+  color: #F6465D;
+}
+
+.quota-unlimited {
+  padding: 4px 12px;
+  background: linear-gradient(135deg, rgba(255, 189, 89, 0.2), rgba(14, 203, 129, 0.2));
+  border: 1px solid #FFBD59;
+  border-radius: 6px;
+  color: #FFBD59;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.upgrade-hint {
+  color: #FFBD59;
+  font-size: 11px;
+  font-weight: 600;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.quota-loading {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+}
+
+/* ============================================= */
+/* LOGIN PROMPT BAR */
+/* ============================================= */
+.login-prompt-bar {
+  background: linear-gradient(135deg, rgba(246, 70, 93, 0.15), rgba(255, 152, 0, 0.15));
+  border-bottom: 1px solid rgba(246, 70, 93, 0.3);
+  padding: 12px 20px;
+}
+
+.login-prompt-container {
+  max-width: 1920px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.prompt-icon {
+  font-size: 20px;
+}
+
+.prompt-text {
+  color: #DEBC81;
+  font-size: 14px;
+  font-family: 'Noto Sans Display', sans-serif;
+}
+
+.prompt-text strong {
+  color: #FFBD59;
+  font-weight: 700;
+}
+
+/* ============================================= */
+/* SCAN CONTROLS */
+/* ============================================= */
+.scan-controls-bar {
+  padding: 16px 20px;
+  background: rgba(17, 34, 80, 0.5);
+  border-bottom: 1px solid rgba(255, 189, 89, 0.2);
+}
+
+.scan-controls-container {
+  max-width: 1920px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.control-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-scan-filters,
+.btn-start-scan,
+.btn-scan-now {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Montserrat', sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.btn-scan-filters {
+  background: rgba(255, 189, 89, 0.2);
+  border: 1px solid rgba(255, 189, 89, 0.4);
+  color: #FFBD59;
+}
+
+.btn-scan-filters:hover {
+  background: rgba(255, 189, 89, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 189, 89, 0.3);
+}
+
+/* ===== YELLOW SCAN BUTTON - MATCHING SCREENSHOT ===== */
+.btn-scan-now-yellow {
+  background: linear-gradient(135deg, #FFBD59, #FFD580);  /* ✅ Vàng cam ấm như hình */
+  border: none;
+  color: #0f1b35;  /* ✅ Chữ màu xanh đậm */
+  padding: 14px 32px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(255, 189, 89, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.btn-scan-now-yellow:hover {
+  background: linear-gradient(135deg, #FFD580, #FFBD59);  /* ✅ Đảo gradient khi hover */
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 189, 89, 0.5);
+}
+
+.btn-scan-now-yellow:active {
+  transform: translateY(0);
+}
+
+.btn-scan-now-yellow:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-start-scan {
+  background: linear-gradient(135deg, #FFBD59, #FFD580);
+  color: #0f1b35;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(255, 189, 89, 0.3);
+}
+
+.btn-start-scan:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 189, 89, 0.5);
+}
+
+.btn-start-scan:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Direction Filter Buttons */
+.direction-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-direction {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 0.5px;
+}
+
+.btn-direction:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.btn-direction.active {
+  border-color: rgba(255, 189, 89, 0.6);
+  background: rgba(255, 189, 89, 0.15);
+  color: #FFBD59;
+  box-shadow: 0 4px 12px rgba(255, 189, 89, 0.3);
+}
+
+.btn-direction.short.active {
+  border-color: rgba(246, 70, 93, 0.6);
+  background: rgba(246, 70, 93, 0.15);
+  color: #F6465D;
+  box-shadow: 0 4px 12px rgba(246, 70, 93, 0.3);
+}
+
+.btn-direction.long.active {
+  border-color: rgba(14, 203, 129, 0.6);
+  background: rgba(14, 203, 129, 0.15);
+  color: #0ECB81;
+  box-shadow: 0 4px 12px rgba(14, 203, 129, 0.3);
+}
+
+.direction-indicator {
+  font-size: 11px;
+  margin-right: 4px;
+}
+
+.btn-scan-now {
+  background: linear-gradient(135deg, #0ECB81, #089b63);
+  color: white;
+  box-shadow: 0 4px 12px rgba(14, 203, 129, 0.3);
+}
+
+.btn-scan-now:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(14, 203, 129, 0.4);
+}
+
+.btn-scan-now:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.active-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+}
+
+.filter-tag {
+  padding: 4px 10px;
+  background: rgba(255, 189, 89, 0.15);
+  border: 1px solid rgba(255, 189, 89, 0.3);
+  border-radius: 6px;
+  color: #FFBD59;
+  font-size: 12px;
+}
+
+/* ============================================= */
+/* LAYOUT */
+/* ============================================= */
+.scanner-content {
+  display: grid;
+  grid-template-columns: 280px 1fr 320px;
+  grid-template-rows: auto 1fr;
+  gap: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.coin-list-sidebar {
+  grid-column: 1;
+  grid-row: 1 / -1;
+}
+
+.quick-select {
+  grid-column: 2 / 4;
+  grid-row: 1;
+}
+
+.trading-chart {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.trading-info-sidebar {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+/* ============================================= */
+/* ANIMATIONS */
+/* ============================================= */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* ============================================= */
+/* RESPONSIVE */
+/* ============================================= */
+@media (max-width: 1400px) {
+  .scanner-content {
+    grid-template-columns: 250px 1fr 300px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .scanner-content {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr auto;
+  }
+
+  .coin-list-sidebar {
+    grid-column: 1;
+    grid-row: 1;
+    max-height: 300px;
+  }
+
+  .quick-select {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .trading-chart {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .trading-info-sidebar {
+    grid-column: 1;
+    grid-row: 4;
+    max-height: 600px;
+    overflow-y: auto;
+  }
+}
+
+/* ============================================= */
+/* TIER 2 MODE TOGGLE BUTTON */
+/* ============================================= */
+.btn-tier2-mode {
+  padding: 10px 20px;
+  border: 2px solid rgba(102, 126, 234, 0.5);
+  border-radius: 8px;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-tier2-mode:hover {
+  background: rgba(102, 126, 234, 0.2);
+  border-color: rgba(102, 126, 234, 0.8);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-tier2-mode.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.5);
+  animation: tier2Pulse 2s ease-in-out infinite;
+}
+
+@keyframes tier2Pulse {
+  0%, 100% {
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.5);
+  }
+  50% {
+    box-shadow: 0 6px 30px rgba(102, 126, 234, 0.8);
+  }
+}
+
+@media (max-width: 768px) {
+  .user-status-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .scan-controls-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-scan-filters,
+  .btn-scan-now {
+    width: 100%;
+  }
+}

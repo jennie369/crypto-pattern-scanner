@@ -1,0 +1,212 @@
+.analytics-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f1b35 0%, #1a2847 100%);
+  padding: 40px 20px;
+}
+
+.analytics-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.coming-soon-card {
+  background: linear-gradient(135deg, rgba(17, 34, 80, 0.9), rgba(26, 40, 71, 0.9));
+  border: 2px solid rgba(255, 189, 89, 0.3);
+  border-radius: 24px;
+  padding: 60px 40px;
+  text-align: center;
+  animation: fadeIn 0.6s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.coming-soon-icon {
+  font-size: 120px;
+  margin-bottom: 20px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.coming-soon-title {
+  color: #FFBD59;
+  font-size: 48px;
+  font-weight: 800;
+  margin: 0 0 16px 0;
+  text-shadow: 0 4px 20px rgba(255, 189, 89, 0.3);
+}
+
+.coming-soon-subtitle {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 24px 0;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+
+.coming-soon-description {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 18px;
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto 40px;
+}
+
+/* Feature Preview */
+.feature-preview {
+  margin: 40px 0;
+  padding: 32px;
+  background: rgba(15, 27, 53, 0.5);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 189, 89, 0.2);
+}
+
+.feature-preview h3 {
+  color: #FFBD59;
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 24px 0;
+}
+
+.feature-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  text-align: left;
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(17, 34, 80, 0.5);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 189, 89, 0.2);
+  transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 189, 89, 0.4);
+  box-shadow: 0 4px 16px rgba(255, 189, 89, 0.2);
+}
+
+.feature-icon {
+  font-size: 32px;
+  flex-shrink: 0;
+}
+
+.feature-content h4 {
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+}
+
+.feature-content p {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Tier Info Card */
+.tier-info-card {
+  margin: 32px 0;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 189, 89, 0.1));
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 16px;
+}
+
+.tier-badge-large {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 189, 89, 0.3));
+  color: #FFD700;
+  border: 1px solid #FFD700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+.tier-message {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* CTA Section */
+.coming-soon-cta {
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255, 189, 89, 0.2);
+}
+
+.coming-soon-cta p {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 16px;
+  margin: 0 0 20px 0;
+}
+
+.btn-back-home {
+  display: inline-block;
+  padding: 14px 32px;
+  background: linear-gradient(135deg, #FFBD59, #FFD580);
+  color: #0f1b35;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(255, 189, 89, 0.3);
+}
+
+.btn-back-home:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(255, 189, 89, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .coming-soon-card {
+    padding: 40px 24px;
+  }
+
+  .coming-soon-title {
+    font-size: 32px;
+  }
+
+  .coming-soon-subtitle {
+    font-size: 18px;
+  }
+
+  .coming-soon-icon {
+    font-size: 80px;
+  }
+
+  .feature-list {
+    grid-template-columns: 1fr;
+  }
+}

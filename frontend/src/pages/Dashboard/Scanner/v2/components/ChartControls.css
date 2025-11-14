@@ -1,0 +1,450 @@
+/* ===================================
+   CHART CONTROLS BAR
+   =================================== */
+
+.chart-controls-bar {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 48px;
+  padding: 0 16px;
+  background: rgba(17, 34, 80, 0.6);
+  border-bottom: 1px solid rgba(255, 189, 89, 0.2);
+  backdrop-filter: blur(10px);
+  z-index: 100;
+}
+
+/* Left: Chart Info */
+.chart-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.chart-symbol {
+  font-size: 16px;
+  font-weight: 700;
+  color: #FFFFFF;
+  font-family: var(--font-mono);
+}
+
+.chart-timeframe {
+  font-size: 14px;
+  color: #FFBD59;
+  background: rgba(255, 189, 89, 0.1);
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.chart-pattern {
+  font-size: 14px;
+  color: #00D9FF;
+  font-weight: 600;
+}
+
+.confidence {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+
+.confidence.high {
+  color: #0ECB81;
+  background: rgba(14, 203, 129, 0.1);
+}
+
+.confidence.medium {
+  color: #FFBD59;
+  background: rgba(255, 189, 89, 0.1);
+}
+
+.confidence.low {
+  color: #F6465D;
+  background: rgba(246, 70, 93, 0.1);
+}
+
+/* LIVE Status Badge */
+.live-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  transition: all 0.3s;
+}
+
+.live-status.live {
+  background: rgba(14, 203, 129, 0.15);
+  border: 1px solid rgba(14, 203, 129, 0.4);
+  color: #0ECB81;
+}
+
+.live-status.offline {
+  background: rgba(246, 70, 93, 0.15);
+  border: 1px solid rgba(246, 70, 93, 0.3);
+  color: #F6465D;
+}
+
+/* LIVE Pulse Animation */
+.live-pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #0ECB81;
+  position: relative;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(14, 203, 129, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(14, 203, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(14, 203, 129, 0);
+  }
+}
+
+/* Right: Control Buttons */
+.chart-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.control-btn {
+  height: 32px;
+  min-width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 8px;
+  background: rgba(17, 34, 80, 0.8);
+  border: 1px solid rgba(255, 189, 89, 0.3);
+  border-radius: 6px;
+  color: #FFFFFF;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.control-btn:hover {
+  background: rgba(255, 189, 89, 0.1);
+  border-color: #FFBD59;
+  transform: translateY(-1px);
+}
+
+.control-btn.active {
+  background: rgba(255, 189, 89, 0.2);
+  border-color: #FFBD59;
+  color: #FFBD59;
+}
+
+/* Timeframe Dropdown */
+.timeframe-dropdown {
+  position: relative;
+}
+
+.timeframe-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #112250;
+  border: 1px solid rgba(255, 189, 89, 0.3);
+  border-radius: 8px;
+  padding: 8px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  min-width: 280px;
+  z-index: 10000;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  animation: dropdown-appear 0.2s ease-out;
+}
+
+@keyframes dropdown-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.timeframe-dropdown-menu button {
+  height: 32px;
+  padding: 6px 12px;
+  background: rgba(17, 34, 80, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.timeframe-dropdown-menu button:hover {
+  background: rgba(255, 189, 89, 0.1);
+  border-color: #FFBD59;
+}
+
+.timeframe-dropdown-menu button.active {
+  background: rgba(255, 189, 89, 0.2);
+  border-color: #FFBD59;
+  color: #FFBD59;
+}
+
+/* Chart Settings Modal */
+.chart-settings-modal {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 16px;
+  width: 320px;
+  background: #112250;
+  border: 1px solid rgba(255, 189, 89, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  z-index: 10000;
+  animation: dropdown-appear 0.2s ease-out;
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.settings-header h4 {
+  margin: 0;
+  font-size: 16px;
+  color: #FFBD59;
+}
+
+.settings-header button {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 24px;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.settings-header button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+}
+
+.settings-content {
+  padding: 16px;
+}
+
+.settings-content p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+}
+
+/* Calendar Date Range Picker */
+.calendar-dropdown {
+  position: relative;
+}
+
+.calendar-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 320px;
+  background: #112250;
+  border: 1px solid rgba(255, 189, 89, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  z-index: 10000;
+  animation: dropdown-appear 0.2s ease-out;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.calendar-header h4 {
+  margin: 0;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.calendar-header button {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 24px;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.calendar-header button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+}
+
+.calendar-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.date-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.date-input-group label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.date-input-group input[type="date"] {
+  width: 100%;
+  height: 40px;
+  padding: 8px 12px;
+  background: rgba(17, 34, 80, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.date-input-group input[type="date"]:hover {
+  border-color: rgba(255, 189, 89, 0.3);
+}
+
+.date-input-group input[type="date"]:focus {
+  outline: none;
+  border-color: #FFBD59;
+  background: rgba(17, 34, 80, 0.8);
+}
+
+/* Date input calendar icon color */
+.date-input-group input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+.calendar-footer {
+  display: flex;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.calendar-footer button {
+  flex: 1;
+  height: 36px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.reset-btn {
+  background: rgba(246, 70, 93, 0.15);
+  color: #F6465D;
+  border: 1px solid rgba(246, 70, 93, 0.3);
+}
+
+.reset-btn:hover {
+  background: rgba(246, 70, 93, 0.25);
+  border-color: #F6465D;
+}
+
+.apply-btn {
+  background: linear-gradient(135deg, #9C0612, #6B0F1A);
+  color: #FFFFFF;
+  border: 1px solid #FFBD59;
+}
+
+.apply-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 189, 89, 0.3);
+}
+
+.apply-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .chart-info {
+    gap: 12px;
+  }
+
+  .chart-symbol {
+    font-size: 14px;
+  }
+
+  .chart-timeframe,
+  .chart-pattern,
+  .confidence {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 768px) {
+  .chart-controls-bar {
+    flex-direction: column;
+    height: auto;
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .chart-info {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .chart-controls {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

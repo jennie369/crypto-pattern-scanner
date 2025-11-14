@@ -1,0 +1,218 @@
+/* ===================================
+   RISK CALCULATOR CONTENT
+   =================================== */
+
+/* Risk Calculator Content */
+.risk-calculator-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.calculator-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.calculator-inputs,
+.calculator-results {
+  background: rgba(17, 34, 80, 0.4);
+  border: 1px solid rgba(255, 189, 89, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.calculator-inputs h3,
+.calculator-results h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #FFBD59;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.input-group {
+  margin-bottom: 16px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 8px;
+}
+
+.input-group input {
+  width: 100%;
+  height: 44px;
+  padding: 0 16px;
+  background: rgba(17, 34, 80, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #FFFFFF;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #FFBD59;
+  background: rgba(17, 34, 80, 0.8);
+}
+
+.result-item {
+  padding: 16px;
+  background: rgba(17, 34, 80, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.result-item.highlight {
+  background: rgba(255, 189, 89, 0.1);
+  border-color: rgba(255, 189, 89, 0.3);
+}
+
+.result-item label {
+  display: block;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.result-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.result-value.success {
+  color: #0ECB81;
+}
+
+.result-value.danger {
+  color: #F6465D;
+}
+
+.result-value.info {
+  color: #00D9FF;
+}
+
+.calculator-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.btn-calculate,
+.btn-reset {
+  height: 44px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-calculate {
+  background: linear-gradient(135deg, #9C0612, #6B0F1A);
+  border: 1px solid #FFBD59;
+  color: #FFFFFF;
+}
+
+.btn-calculate:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 189, 89, 0.3);
+}
+
+.btn-reset {
+  background: rgba(17, 34, 80, 0.6);
+  border: 1px solid rgba(255, 189, 89, 0.3);
+  color: #FFBD59;
+}
+
+.btn-reset:hover {
+  background: rgba(255, 189, 89, 0.1);
+  border-color: #FFBD59;
+}
+
+/* Trading Scenarios */
+.trading-scenarios {
+  background: rgba(17, 34, 80, 0.4);
+  border: 1px solid rgba(255, 189, 89, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.trading-scenarios h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #FFBD59;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.scenarios-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.scenarios-table thead th {
+  padding: 12px;
+  background: rgba(17, 34, 80, 0.6);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  text-align: left;
+  border-bottom: 2px solid rgba(255, 189, 89, 0.3);
+}
+
+.scenarios-table tbody td {
+  padding: 14px 12px;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.scenarios-table tbody tr:hover {
+  background: rgba(255, 189, 89, 0.05);
+}
+
+.scenarios-table td.success {
+  color: #0ECB81;
+}
+
+.scenarios-table td.danger {
+  color: #F6465D;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .calculator-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .input-group input {
+    height: 40px;
+    font-size: 14px;
+  }
+
+  .result-value {
+    font-size: 18px;
+  }
+
+  .calculator-actions {
+    grid-template-columns: 1fr;
+  }
+}

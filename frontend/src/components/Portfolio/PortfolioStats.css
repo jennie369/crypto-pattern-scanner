@@ -1,0 +1,180 @@
+/* PortfolioStats.css */
+
+.portfolio-stats-summary {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+/* Stat Card */
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+
+.stat-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Stat Icon */
+.stat-icon {
+  font-size: 32px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* Stat Content */
+.stat-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-label {
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  word-break: break-all;
+}
+
+.stat-percent {
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.stat-hint {
+  color: rgba(148, 163, 184, 0.7);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Specific Card Styles */
+.stat-card.total-value {
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.stat-card.total-value:hover {
+  border-color: rgba(59, 130, 246, 0.5);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.stat-card.total-cost {
+  border-color: rgba(148, 163, 184, 0.3);
+}
+
+.stat-card.total-cost:hover {
+  border-color: rgba(148, 163, 184, 0.5);
+  background: rgba(148, 163, 184, 0.05);
+}
+
+.stat-card.total-pnl.positive {
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.stat-card.total-pnl.positive:hover {
+  border-color: rgba(16, 185, 129, 0.5);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.stat-card.total-pnl.positive .stat-value,
+.stat-card.total-pnl.positive .stat-percent {
+  color: #10b981;
+}
+
+.stat-card.total-pnl.negative {
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.stat-card.total-pnl.negative:hover {
+  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.stat-card.total-pnl.negative .stat-value,
+.stat-card.total-pnl.negative .stat-percent {
+  color: #ef4444;
+}
+
+.stat-card.holdings-count {
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.stat-card.holdings-count:hover {
+  border-color: rgba(139, 92, 246, 0.5);
+  background: rgba(139, 92, 246, 0.05);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .portfolio-stats-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .portfolio-stats-summary {
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    padding: 20px;
+  }
+
+  .stat-icon {
+    font-size: 28px;
+  }
+
+  .stat-value {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .portfolio-stats-summary {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    padding: 16px;
+  }
+
+  .stat-icon {
+    font-size: 24px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+  }
+
+  .stat-value {
+    font-size: 18px;
+  }
+
+  .stat-percent,
+  .stat-hint {
+    font-size: 12px;
+  }
+}

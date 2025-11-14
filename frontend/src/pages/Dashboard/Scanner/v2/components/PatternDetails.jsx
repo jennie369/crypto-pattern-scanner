@@ -1,11 +1,14 @@
 import React from 'react';
+import { Target, Clipboard, Save } from 'lucide-react';
 import './PatternDetails.css';
 
 export const PatternDetails = ({ pattern }) => {
   if (!pattern) {
     return (
       <div className="pattern-details-empty">
-        <div className="empty-icon">🎯</div>
+        <div className="empty-icon">
+          <Target size={48} />
+        </div>
         <h3 className="heading-sm">No Pattern Selected</h3>
         <p className="text-sm text-secondary">
           Select a pattern from scan results to view details
@@ -50,7 +53,9 @@ export const PatternDetails = ({ pattern }) => {
       {/* Pattern Header */}
       <div className="pattern-header">
         <div className="pattern-title">
-          <div className="pattern-icon">🎯</div>
+          <div className="pattern-icon">
+            <Target size={24} />
+          </div>
           <div>
             <h3 className="heading-sm">{pattern.patternName}</h3>
             <p className="text-xs text-secondary">{pattern.pattern} Pattern</p>
@@ -133,11 +138,11 @@ export const PatternDetails = ({ pattern }) => {
       {/* Action Buttons */}
       <div className="pattern-actions">
         <button className="action-btn primary">
-          <span>📋</span>
+          <Clipboard size={16} />
           <span>Copy Trade Details</span>
         </button>
         <button className="action-btn secondary">
-          <span>💾</span>
+          <Save size={16} />
           <span>Save to Journal</span>
         </button>
       </div>

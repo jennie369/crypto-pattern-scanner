@@ -1,0 +1,112 @@
+/* ═══════════════════════════════════════════════════════════════
+   PriceDisplay Component Styles
+   ═══════════════════════════════════════════════════════════════ */
+
+.price-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   SMALL SIZE
+   ───────────────────────────────────────────────────────────── */
+
+.price-small {
+  font-size: 14px;
+}
+
+.price-small .price-short {
+  font-weight: 600;
+  color: #667eea;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   MEDIUM SIZE (Default)
+   ───────────────────────────────────────────────────────────── */
+
+.price-medium {
+  font-size: 18px;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.price-medium .price-short {
+  font-weight: 700;
+  color: #667eea;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.price-medium .price-monthly-inline {
+  font-size: 14px;
+  color: #888;
+  font-weight: 400;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   LARGE SIZE
+   ───────────────────────────────────────────────────────────── */
+
+.price-large {
+  gap: 8px;
+}
+
+.price-large .price-main {
+  margin-bottom: 4px;
+}
+
+.price-large .price-short {
+  font-size: 36px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -1px;
+}
+
+.price-large .price-details {
+  margin-bottom: 4px;
+}
+
+.price-large .price-full {
+  font-size: 14px;
+  color: #aaa;
+  font-weight: 400;
+}
+
+.price-large .price-monthly {
+  padding: 6px 12px;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 6px;
+  border: 1px solid rgba(102, 126, 234, 0.3);
+}
+
+.price-large .monthly-label {
+  font-size: 13px;
+  color: #667eea;
+  font-weight: 500;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   RESPONSIVE
+   ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .price-large .price-short {
+    font-size: 28px;
+  }
+
+  .price-medium .price-short {
+    font-size: 16px;
+  }
+
+  .price-small .price-short {
+    font-size: 13px;
+  }
+}

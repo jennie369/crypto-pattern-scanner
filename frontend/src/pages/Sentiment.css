@@ -1,0 +1,551 @@
+/* Sentiment.css */
+
+.sentiment-page {
+  padding: 24px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* Page Header */
+.sentiment-header {
+  margin-bottom: 32px;
+}
+
+.sentiment-header h1 {
+  margin: 0 0 8px 0;
+  font-size: 32px;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.sentiment-header .header-subtitle {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 15px;
+}
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(59, 130, 246, 0.2);
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-state p {
+  color: #94a3b8;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Sentiment Gauge Section */
+.sentiment-gauge-section {
+  padding: 32px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 16px;
+  margin-bottom: 32px;
+}
+
+.sentiment-gauge-section h2 {
+  margin: 0 0 24px 0;
+  font-size: 24px;
+  color: #ffffff;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Gauge Container */
+.gauge-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+
+/* Circular Gauge */
+.circular-gauge {
+  position: relative;
+  width: 280px;
+  height: 280px;
+}
+
+.gauge-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.gauge-arc {
+  transition: all 0.5s ease-out;
+}
+
+.gauge-value {
+  fill: #ffffff;
+  font-size: 48px;
+  font-weight: 700;
+}
+
+.gauge-label {
+  fill: #94a3b8;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.gauge-emoji {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 40px;
+}
+
+/* Sentiment Scale */
+.sentiment-scale {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 600px;
+  padding: 0 20px;
+}
+
+.scale-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.marker-value {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.marker-label {
+  color: #94a3b8;
+  font-size: 10px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.scale-marker.extreme-fear .marker-value { color: #10b981; }
+.scale-marker.fear .marker-value { color: #3b82f6; }
+.scale-marker.neutral .marker-value { color: #94a3b8; }
+.scale-marker.greed .marker-value { color: #f59e0b; }
+.scale-marker.extreme-greed .marker-value { color: #ef4444; }
+
+/* Trading Recommendation */
+.trading-recommendation {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 700px;
+}
+
+.rec-icon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.rec-content {
+  flex: 1;
+}
+
+.rec-title {
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.rec-message {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Market Overview */
+.market-overview {
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  margin-bottom: 32px;
+}
+
+.market-overview h2 {
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.market-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+}
+
+.market-stat {
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.market-stat .stat-label {
+  color: #94a3b8;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.market-stat .stat-value {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.market-stat .stat-value.positive {
+  color: #10b981;
+}
+
+.market-stat .stat-value.negative {
+  color: #ef4444;
+}
+
+/* Two Column Layout */
+.sentiment-two-column {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+/* Trending Coins */
+.trending-coins-section {
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+
+.trending-coins-section h2 {
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.trending-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trending-coin-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.trending-coin-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.coin-rank {
+  color: #f59e0b;
+  font-size: 16px;
+  font-weight: 700;
+  min-width: 40px;
+}
+
+.coin-info {
+  flex: 1;
+}
+
+.coin-symbol {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.coin-name {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.coin-rank-badge {
+  padding: 4px 8px;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 4px;
+  color: #3b82f6;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* Sentiment Chart */
+.sentiment-chart-section {
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+
+.sentiment-chart-section h2 {
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.chart-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sentiment-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 200px;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+.chart-bar {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+}
+
+.bar-fill {
+  width: 100%;
+  transition: height 0.3s ease;
+  border-radius: 4px 4px 0 0;
+  cursor: pointer;
+}
+
+.bar-fill:hover {
+  opacity: 0.8;
+}
+
+.chart-legend {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+/* News Section */
+.news-section {
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+
+.news-section h2 {
+  margin: 0 0 20px 0;
+  font-size: 20px;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.news-card {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+
+.news-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.news-card.positive {
+  border-left: 4px solid #10b981;
+}
+
+.news-card.negative {
+  border-left: 4px solid #ef4444;
+}
+
+.news-header {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.sentiment-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.sentiment-badge.positive {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.sentiment-badge.negative {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.impact-badge {
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  color: #94a3b8;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.news-title {
+  margin: 0 0 12px 0;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.news-summary {
+  margin: 0 0 16px 0;
+  color: #94a3b8;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.news-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.news-source {
+  color: #3b82f6;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.news-time {
+  color: #64748b;
+  font-size: 11px;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .market-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .sentiment-two-column {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .sentiment-page {
+    padding: 16px;
+  }
+
+  .sentiment-gauge-section {
+    padding: 20px;
+  }
+
+  .circular-gauge {
+    width: 220px;
+    height: 220px;
+  }
+
+  .gauge-value {
+    font-size: 40px;
+  }
+
+  .sentiment-scale {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .market-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .news-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sentiment-chart {
+    height: 150px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sentiment-header h1 {
+    font-size: 24px;
+  }
+
+  .circular-gauge {
+    width: 180px;
+    height: 180px;
+  }
+
+  .gauge-value {
+    font-size: 32px;
+  }
+
+  .market-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trading-recommendation {
+    flex-direction: column;
+    text-align: center;
+  }
+}

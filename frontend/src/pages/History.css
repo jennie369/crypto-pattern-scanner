@@ -1,0 +1,284 @@
+.history-page {
+  padding: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: calc(100vh - 80px);
+}
+
+.history-header {
+  margin-bottom: 32px;
+}
+
+.history-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0 0 8px 0;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: rgba(222, 188, 129, 0.7);
+  margin: 0;
+  font-family: 'Noto Sans Display', sans-serif;
+}
+
+/* Filter Buttons */
+.history-filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.filter-btn {
+  padding: 12px 24px;
+  background: rgba(42, 27, 82, 0.4);
+  border: 1px solid rgba(255, 189, 89, 0.2);
+  border-radius: 8px;
+  color: rgba(222, 188, 129, 0.8);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.filter-btn:hover {
+  background: rgba(255, 189, 89, 0.15);
+  border-color: #FFBD59;
+  transform: translateY(-2px);
+}
+
+.filter-btn.active {
+  background: linear-gradient(135deg, #FFBD59 0%, #debc81 100%);
+  border-color: #FFBD59;
+  color: #112250;
+  box-shadow: 0 4px 12px rgba(255, 189, 89, 0.4);
+}
+
+.filter-btn.bullish.active {
+  background: linear-gradient(135deg, #0ECB81 0%, #0ba368 100%);
+  border-color: #0ECB81;
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(14, 203, 129, 0.4);
+}
+
+.filter-btn.bearish.active {
+  background: linear-gradient(135deg, #F6465D 0%, #d43d52 100%);
+  border-color: #F6465D;
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(246, 70, 93, 0.4);
+}
+
+/* History Table */
+.history-table-container {
+  background: rgba(17, 34, 80, 0.6);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 189, 89, 0.2);
+  margin-bottom: 24px;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.history-table thead {
+  background: rgba(42, 27, 82, 0.6);
+}
+
+.history-table th {
+  padding: 16px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 700;
+  color: #FFBD59;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: 'Montserrat', sans-serif;
+  border-bottom: 1px solid rgba(255, 189, 89, 0.2);
+}
+
+.history-table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.history-table tbody tr:hover {
+  background: rgba(255, 189, 89, 0.05);
+}
+
+.history-table td {
+  padding: 16px;
+  font-size: 14px;
+  color: rgba(222, 188, 129, 0.9);
+  font-family: 'Noto Sans Display', sans-serif;
+}
+
+.date-cell {
+  color: rgba(222, 188, 129, 0.6);
+  font-size: 13px;
+}
+
+.symbol-cell {
+  font-weight: 700;
+  color: #FFFFFF;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.pattern-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pattern-icon {
+  font-size: 16px;
+}
+
+.pattern-name {
+  font-weight: 600;
+  color: #FFBD59;
+}
+
+.direction-cell {
+  font-weight: 600;
+}
+
+.direction-cell.bullish {
+  color: #0ECB81;
+}
+
+.direction-cell.bearish {
+  color: #F6465D;
+}
+
+.price-cell {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+}
+
+.result-cell {
+  font-weight: 700;
+}
+
+.result-cell.win {
+  color: #0ECB81;
+}
+
+.result-cell.loss {
+  color: #F6465D;
+}
+
+.profit-cell {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.profit-cell.positive {
+  color: #0ECB81;
+}
+
+.profit-cell.negative {
+  color: #F6465D;
+}
+
+/* Empty State */
+.empty-state {
+  padding: 80px 20px !important;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.3;
+}
+
+.empty-state p {
+  color: rgba(222, 188, 129, 0.5);
+  font-size: 14px;
+}
+
+/* Statistics Cards */
+.history-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, rgba(42, 27, 82, 0.6) 0%, rgba(17, 34, 80, 0.6) 100%);
+  border: 1px solid rgba(255, 189, 89, 0.2);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+}
+
+.stat-card.win {
+  border-color: rgba(14, 203, 129, 0.3);
+}
+
+.stat-card.profit {
+  border-color: rgba(255, 189, 89, 0.3);
+}
+
+.stat-label {
+  font-size: 13px;
+  color: rgba(222, 188, 129, 0.7);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #FFFFFF;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.stat-card.win .stat-value {
+  color: #0ECB81;
+}
+
+.stat-card.profit .stat-value {
+  color: #FFBD59;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .history-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .history-page {
+    padding: 20px;
+  }
+
+  .history-header h1 {
+    font-size: 24px;
+  }
+
+  .history-filters {
+    flex-wrap: wrap;
+  }
+
+  .history-table-container {
+    overflow-x: auto;
+  }
+
+  .history-table {
+    min-width: 800px;
+  }
+
+  .history-stats {
+    grid-template-columns: 1fr;
+  }
+}

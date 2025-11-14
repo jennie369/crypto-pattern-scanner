@@ -1,0 +1,264 @@
+/* HoldingsTable.css */
+
+.holdings-table-wrapper {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Empty State */
+.holdings-table-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.holdings-table-empty .empty-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.holdings-table-empty p {
+  color: #ffffff;
+  font-size: 16px;
+  margin: 0 0 8px 0;
+  font-weight: 500;
+}
+
+.holdings-table-empty small {
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+/* Table */
+.holdings-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.holdings-table thead {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.holdings-table th {
+  padding: 16px 12px;
+  text-align: left;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.holdings-table th:last-child {
+  text-align: center;
+}
+
+.holdings-table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.2s;
+}
+
+.holdings-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.holdings-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.holdings-table td {
+  padding: 16px 12px;
+  color: #ffffff;
+  font-size: 14px;
+}
+
+/* Cell Styles */
+.symbol-cell {
+  font-weight: 600;
+}
+
+.symbol-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quantity-cell,
+.price-cell,
+.value-cell {
+  color: #e5e7eb;
+}
+
+.pnl-cell,
+.pnl-percent-cell {
+  font-weight: 600;
+}
+
+.pnl-cell.positive,
+.pnl-percent-cell.positive {
+  color: #10b981;
+}
+
+.pnl-cell.negative,
+.pnl-percent-cell.negative {
+  color: #ef4444;
+}
+
+.actions-cell {
+  text-align: center;
+}
+
+/* Close Position Button */
+.btn-close-position {
+  padding: 6px 16px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-close-position:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #fca5a5;
+}
+
+/* Mobile Card View (hidden by default) */
+.holdings-mobile {
+  display: none;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .holdings-table th,
+  .holdings-table td {
+    padding: 12px 8px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Hide table, show cards */
+  .holdings-table {
+    display: none;
+  }
+
+  .holdings-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .holding-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 16px;
+    transition: all 0.2s;
+  }
+
+  .holding-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .card-symbol {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .card-pnl {
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .card-pnl.positive {
+    color: #10b981;
+  }
+
+  .card-pnl.negative {
+    color: #ef4444;
+  }
+
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .row-label {
+    color: #94a3b8;
+    font-size: 13px;
+  }
+
+  .row-value {
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .row-value.positive {
+    color: #10b981;
+  }
+
+  .row-value.negative {
+    color: #ef4444;
+  }
+
+  .card-footer {
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .card-footer .btn-close-position {
+    width: 100%;
+    padding: 10px;
+  }
+}
+
+/* Scrollbar for table */
+.holdings-table-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.holdings-table-wrapper::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.holdings-table-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+.holdings-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}

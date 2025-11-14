@@ -1,0 +1,238 @@
+/* PortfolioChart.css */
+
+.portfolio-chart {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+/* Chart Header */
+.chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.chart-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.chart-total {
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.chart-total strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Empty State */
+.chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.chart-empty .empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.chart-empty p {
+  color: #94a3b8;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Pie Chart Container */
+.chart-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.pie-chart {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.chart-segment {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.chart-segment:hover {
+  opacity: 0.8;
+}
+
+/* Center text in pie chart */
+.chart-center-label {
+  fill: #94a3b8;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.chart-center-value {
+  fill: #ffffff;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* Chart Legend */
+.chart-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.legend-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.legend-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.legend-symbol {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  min-width: 60px;
+}
+
+.legend-stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.legend-percent {
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 500;
+  min-width: 50px;
+  text-align: right;
+}
+
+.legend-value {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  min-width: 80px;
+  text-align: right;
+}
+
+.legend-pnl {
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 60px;
+  text-align: right;
+}
+
+.legend-pnl.positive {
+  color: #10b981;
+}
+
+.legend-pnl.negative {
+  color: #ef4444;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .portfolio-chart {
+    padding: 16px;
+  }
+
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .chart-header h3 {
+    font-size: 16px;
+  }
+
+  .pie-chart {
+    max-width: 250px;
+  }
+
+  .legend-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .legend-stats {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .legend-percent,
+  .legend-value,
+  .legend-pnl {
+    text-align: left;
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-container {
+    margin-bottom: 16px;
+  }
+
+  .pie-chart {
+    max-width: 200px;
+  }
+
+  .legend-item {
+    padding: 10px;
+  }
+
+  .legend-symbol {
+    font-size: 13px;
+    min-width: 50px;
+  }
+
+  .legend-percent,
+  .legend-value,
+  .legend-pnl {
+    font-size: 12px;
+  }
+}

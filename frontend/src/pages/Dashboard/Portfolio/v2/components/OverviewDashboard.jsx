@@ -1,9 +1,38 @@
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import { Card } from '../../../../../components-v2/Card';
 import EquityChart from './EquityChart';
 import './OverviewDashboard.css';
 
 export const OverviewDashboard = ({ stats }) => {
+  // Handle both API data structure and mock data
+  const portfolioStats = useMemo(() => {
+    if (!stats) {
+      return {
+        totalValue: 0,
+        totalPnL: 0,
+        totalPnLPercent: 0,
+        activePositions: 0,
+        totalCost: 0,
+      };
+    }
+
+    // API data structure uses different field names
+    return {
+      totalValue: stats.totalValue || 0,
+      totalPnL: stats.totalPnl || stats.totalPnL || 0,
+      totalPnLPercent: stats.totalPnlPercent || stats.totalPnLPercent || 0,
+      activePositions: stats.holdingsCount || stats.activePositions || 0,
+      totalCost: stats.totalCost || 0,
+    };
+  }, [stats]);
+
+  // TODO: Fetch real win rate data from closed trades
+  const winRateStats = {
+    winRate: 0,
+    winTrades: 0,
+    totalTrades: 0,
+  };
+
   return (
     <div className="overview-dashboard">
       {/* Stats Cards Grid */}
@@ -13,11 +42,11 @@ export const OverviewDashboard = ({ stats }) => {
           <div className="stat-icon">💰</div>
           <div className="stat-label">Total Portfolio Value</div>
           <div className="stat-value">
-            ${stats.totalValue.toLocaleString()}
+            ${Math.round(portfolioStats.totalValue).toLocaleString()}
           </div>
-          <div className={`stat-change ${stats.totalPnLPercent >= 0 ? 'positive' : 'negative'}`}>
-            {stats.totalPnLPercent >= 0 ? '+' : ''}
-            ${stats.totalPnL.toLocaleString()} ({stats.totalPnLPercent}%)
+          <div className={`stat-change ${portfolioStats.totalPnL >= 0 ? 'positive' : 'negative'}`}>
+            {portfolioStats.totalPnL >= 0 ? '+' : ''}
+            ${Math.abs(Math.round(portfolioStats.totalPnL)).toLocaleString()} ({portfolioStats.totalPnLPercent.toFixed(2)}%)
           </div>
         </Card>
 
@@ -25,11 +54,11 @@ export const OverviewDashboard = ({ stats }) => {
         <Card variant="stat" hoverable>
           <div className="stat-icon">📈</div>
           <div className="stat-label">Total P&L</div>
-          <div className="stat-value text-gradient-gold">
-            +${stats.totalPnL.toLocaleString()}
+          <div className={`stat-value ${portfolioStats.totalPnL >= 0 ? 'text-gradient-gold' : ''}`}>
+            {portfolioStats.totalPnL >= 0 ? '+' : ''}${Math.abs(Math.round(portfolioStats.totalPnL)).toLocaleString()}
           </div>
-          <div className="stat-change positive">
-            +{stats.totalPnLPercent}% All Time
+          <div className={`stat-change ${portfolioStats.totalPnL >= 0 ? 'positive' : 'negative'}`}>
+            {portfolioStats.totalPnL >= 0 ? '+' : ''}{portfolioStats.totalPnLPercent.toFixed(2)}% All Time
           </div>
         </Card>
 
@@ -38,10 +67,11 @@ export const OverviewDashboard = ({ stats }) => {
           <div className="stat-icon">🎯</div>
           <div className="stat-label">Win Rate</div>
           <div className="stat-value">
-            {stats.winRate}%
+            {winRateStats.winRate}%
           </div>
           <div className="stat-change">
-            {stats.winTrades}/{stats.totalTrades} trades ✅
+            {winRateStats.winTrades}/{winRateStats.totalTrades} trades
+            {winRateStats.totalTrades > 0 && ' ✅'}
           </div>
         </Card>
 
@@ -50,10 +80,10 @@ export const OverviewDashboard = ({ stats }) => {
           <div className="stat-icon">📊</div>
           <div className="stat-label">Active Positions</div>
           <div className="stat-value">
-            {stats.activePositions}
+            {portfolioStats.activePositions}
           </div>
           <div className="stat-change">
-            ${stats.exposure.toLocaleString()} exposure
+            ${Math.round(portfolioStats.totalValue).toLocaleString()} total
           </div>
         </Card>
       </div>

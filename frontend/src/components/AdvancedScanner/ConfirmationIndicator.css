@@ -1,0 +1,361 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ConfirmationIndicator Component Styles
+   Displays confirmation candle signals with strength ratings
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.confirmation-indicator {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 16px;
+  padding: 20px;
+  margin: 16px 0;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   No Confirmation State (Waiting)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.confirmation-indicator.no-confirmation {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+}
+
+.no-conf-icon {
+  font-size: 48px;
+  flex-shrink: 0;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+}
+
+.no-conf-message {
+  flex: 1;
+}
+
+.no-conf-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.no-conf-subtitle {
+  font-size: 14px;
+  color: #666;
+  font-style: italic;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   "READY TO ENTER" Banner (Strong Confirmations)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ready-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.2) 100%);
+  border: 2px solid #10b981;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  animation: readyPulse 2s ease-in-out infinite;
+}
+
+@keyframes readyPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(16, 185, 129, 0.7);
+  }
+}
+
+.ready-icon {
+  font-size: 48px;
+  flex-shrink: 0;
+  animation: bounce 1s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.ready-content {
+  flex: 1;
+}
+
+.ready-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #10b981;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.ready-subtitle {
+  font-size: 14px;
+  color: #fff;
+  font-weight: 500;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Header (Type + Strength)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.conf-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.conf-type {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.conf-type-icon {
+  font-size: 32px;
+}
+
+.conf-type-label {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.conf-strength {
+  display: flex;
+  align-items: center;
+}
+
+.strength-badge {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 2px solid;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Direction Indicator
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.conf-direction {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+}
+
+.direction-label {
+  font-size: 14px;
+  color: #888;
+}
+
+.direction-value {
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Details Section
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.conf-details {
+  margin-bottom: 16px;
+}
+
+.detail-description {
+  font-size: 14px;
+  color: #aaa;
+  margin-bottom: 12px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  border-left: 3px solid rgba(102, 126, 234, 0.5);
+  font-style: italic;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+}
+
+.detail-label {
+  font-size: 13px;
+  color: #888;
+}
+
+.detail-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Visual Candle Diagram
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.candle-visual {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.candle-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #aaa;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.candle-diagram {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+}
+
+.candle-ascii {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.candle-wick {
+  width: 2px;
+  border-left: 2px solid;
+}
+
+.upper-wick {
+  /* Height set inline via style */
+}
+
+.lower-wick {
+  /* Height set inline via style */
+}
+
+.candle-body {
+  width: 20px;
+  height: 30px;
+  border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.bullish-body {
+  /* Background set inline via style */
+}
+
+.bearish-body {
+  /* Background set inline via style */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Strength Color Variants
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.confirmation-indicator.has-confirmation.strength-strong {
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+.confirmation-indicator.has-confirmation.strength-medium {
+  border-color: rgba(245, 158, 11, 0.5);
+}
+
+.confirmation-indicator.has-confirmation.strength-weak {
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Responsive Design
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .confirmation-indicator {
+    padding: 16px;
+  }
+
+  .conf-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .conf-type-icon {
+    font-size: 28px;
+  }
+
+  .conf-type-label {
+    font-size: 16px;
+  }
+
+  .strength-badge {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .ready-icon {
+    font-size: 36px;
+  }
+
+  .ready-title {
+    font-size: 16px;
+  }
+
+  .ready-subtitle {
+    font-size: 12px;
+  }
+
+  .no-conf-icon {
+    font-size: 36px;
+  }
+
+  .no-conf-title {
+    font-size: 16px;
+  }
+
+  .no-conf-subtitle {
+    font-size: 12px;
+  }
+}

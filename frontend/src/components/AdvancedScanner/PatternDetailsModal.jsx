@@ -1,0 +1,362 @@
+import React, { useState } from 'react'
+import { determineEntryStatus, checkConfirmationCandle } from '../../utils/entryWorkflow'
+import EntryStatusDisplay from './EntryStatusDisplay'
+import ZoneRetestTracker from './ZoneRetestTracker'
+import ConfirmationIndicator from './ConfirmationIndicator'
+import './PatternDetailsModal.css'
+
+/**
+ * PatternDetailsModal Component
+ *
+ * Full-screen modal showing comprehensive pattern breakdown
+ *
+ * Features:
+ * - Pattern info (type, confidence, timestamp)
+ * - Zone details with retest tracker
+ * - Entry workflow status
+ * - Confirmation candle analysis
+ * - Action buttons (Set Alert, View Chart, Copy Trade)
+ *
+ * Props:
+ * @param {boolean} isOpen - Modal open state
+ * @param {Function} onClose - Close callback
+ * @param {Object} pattern - Pattern object
+ * @param {number} currentPrice - Current market price
+ * @param {Object} latestCandle - Latest candlestick data
+ * @param {Function} onSetAlert - Alert creation callback
+ * @param {Function} onViewChart - Chart navigation callback
+ */
+export default function PatternDetailsModal({
+  isOpen,
+  onClose,
+  pattern,
+  currentPrice,
+  latestCandle,
+  onSetAlert,
+  onViewChart
+}) {
+
+  const [activeTab, setActiveTab] = useState('overview');
+
+  // Don't render if not open
+  if (!isOpen || !pattern) {
+    return null;
+  }
+
+  // Calculate entry status
+  const entryStatus = determineEntryStatus(pattern, currentPrice, latestCandle);
+
+  // Check confirmation
+  const confirmation = latestCandle && pattern.zone
+    ? checkConfirmationCandle(latestCandle, pattern.zone.type)
+    : null;
+
+  // Pattern type info
+  const patternInfo = getPatternInfo(pattern.pattern);
+
+  // Zone info
+  const zone = pattern.zone || {};
+
+  return (
+    <div className="pattern-modal-overlay" onClick={onClose}>
+      <div className="pattern-modal-content" onClick={(e) => e.stopPropagation()}>
+
+        {/* ═══════════════════════════════════════════════════════════════════
+             Modal Header
+             ═══════════════════════════════════════════════════════════════════ */}
+        <div className="modal-header">
+          <div className="modal-title-section">
+            <div className="pattern-icon">{patternInfo.icon}</div>
+            <div className="pattern-title-info">
+              <h2 className="pattern-title">{patternInfo.label}</h2>
+              <div className="pattern-subtitle">{pattern.symbol} • {pattern.timeframe}</div>
+            </div>
+          </div>
+
+          <button className="modal-close-btn" onClick={onClose}>
+            ✕
+          </button>
+        </div>
+
+        {/* ═══════════════════════════════════════════════════════════════════
+             Tab Navigation
+             ═══════════════════════════════════════════════════════════════════ */}
+        <div className="modal-tabs">
+          <button
+            className={`modal-tab ${activeTab === 'overview' ? 'active' : ''}`}
+            onClick={() => setActiveTab('overview')}
+          >
+            📊 Overview
+          </button>
+          <button
+            className={`modal-tab ${activeTab === 'entry' ? 'active' : ''}`}
+            onClick={() => setActiveTab('entry')}
+          >
+            🎯 Entry Status
+          </button>
+          <button
+            className={`modal-tab ${activeTab === 'zone' ? 'active' : ''}`}
+            onClick={() => setActiveTab('zone')}
+          >
+            ⭐ Zone Quality
+          </button>
+          <button
+            className={`modal-tab ${activeTab === 'confirmation' ? 'active' : ''}`}
+            onClick={() => setActiveTab('confirmation')}
+          >
+            ✅ Confirmation
+          </button>
+        </div>
+
+        {/* ═══════════════════════════════════════════════════════════════════
+             Modal Body (Tabbed Content)
+             ═══════════════════════════════════════════════════════════════════ */}
+        <div className="modal-body">
+
+          {/* OVERVIEW TAB */}
+          {activeTab === 'overview' && (
+            <div className="tab-content">
+              <h3 className="section-title">📊 Pattern Overview</h3>
+
+              {/* Pattern Info Card */}
+              <div className="info-card">
+                <div className="info-row">
+                  <span className="info-label">Pattern Type:</span>
+                  <span className="info-value">{patternInfo.label}</span>
+                </div>
+
+                <div className="info-row">
+                  <span className="info-label">Description:</span>
+                  <span className="info-description">{patternInfo.description}</span>
+                </div>
+
+                <div className="info-row">
+                  <span className="info-label">Confidence:</span>
+                  <span className="info-value confidence-value">
+                    {pattern.confidence}% {getConfidenceBadge(pattern.confidence)}
+                  </span>
+                </div>
+
+                <div className="info-row">
+                  <span className="info-label">Detected At:</span>
+                  <span className="info-value">
+                    {pattern.detectedAt
+                      ? new Date(pattern.detectedAt).toLocaleString('vi-VN')
+                      : 'N/A'
+                    }
+                  </span>
+                </div>
+
+                <div className="info-row">
+                  <span className="info-label">Current Price:</span>
+                  <span className="info-value price-value">
+                    ${currentPrice?.toLocaleString() || 'N/A'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Zone Info Card */}
+              {zone.type && (
+                <div className="info-card zone-info-card">
+                  <h4 className="card-title">
+                    {zone.type === 'HFZ' ? '🔴' : '🟢'} {zone.type} Zone
+                  </h4>
+
+                  <div className="info-row">
+                    <span className="info-label">Zone Range:</span>
+                    <span className="info-value">
+                      ${zone.bottom?.toFixed(2)} - ${zone.top?.toFixed(2)}
+                    </span>
+                  </div>
+
+                  <div className="info-row">
+                    <span className="info-label">Zone Mid:</span>
+                    <span className="info-value">${zone.mid?.toFixed(2)}</span>
+                  </div>
+
+                  <div className="info-row">
+                    <span className="info-label">Zone Type:</span>
+                    <span className="info-value">
+                      {zone.type === 'HFZ' ? 'Resistance (Short)' : 'Support (Long)'}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Trading Recommendation */}
+              <div className={`recommendation-card ${entryStatus.allowEntry ? 'allow-entry' : 'wait-entry'}`}>
+                <div className="recommendation-icon">
+                  {entryStatus.allowEntry ? '✅' : '⚠️'}
+                </div>
+                <div className="recommendation-content">
+                  <div className="recommendation-title">
+                    {entryStatus.allowEntry ? 'ENTRY ALLOWED!' : 'WAIT FOR RETEST'}
+                  </div>
+                  <div className="recommendation-message">
+                    {entryStatus.message}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ENTRY STATUS TAB */}
+          {activeTab === 'entry' && (
+            <div className="tab-content">
+              <h3 className="section-title">🎯 Entry Workflow Status</h3>
+              <EntryStatusDisplay
+                pattern={pattern}
+                currentPrice={currentPrice}
+                currentStatus={entryStatus}
+                onSetAlert={onSetAlert}
+              />
+            </div>
+          )}
+
+          {/* ZONE QUALITY TAB */}
+          {activeTab === 'zone' && (
+            <div className="tab-content">
+              <h3 className="section-title">⭐ Zone Quality & Retest Tracker</h3>
+              {zone.type ? (
+                <ZoneRetestTracker zone={zone} />
+              ) : (
+                <div className="no-data-message">
+                  ⚠️ No zone data available for this pattern
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* CONFIRMATION TAB */}
+          {activeTab === 'confirmation' && (
+            <div className="tab-content">
+              <h3 className="section-title">✅ Confirmation Candle Analysis</h3>
+              <ConfirmationIndicator confirmation={confirmation} />
+            </div>
+          )}
+
+        </div>
+
+        {/* ═══════════════════════════════════════════════════════════════════
+             Modal Footer (Action Buttons)
+             ═══════════════════════════════════════════════════════════════════ */}
+        <div className="modal-footer">
+          <button
+            className="action-btn btn-set-alert"
+            onClick={() => onSetAlert && onSetAlert(pattern)}
+          >
+            🔔 Set Alert
+          </button>
+
+          <button
+            className="action-btn btn-view-chart"
+            onClick={() => onViewChart && onViewChart(pattern)}
+          >
+            📈 View on Chart
+          </button>
+
+          <button
+            className="action-btn btn-copy-trade"
+            onClick={() => copyTradeSetup(pattern, zone, entryStatus)}
+          >
+            📋 Copy Setup
+          </button>
+
+          <button
+            className="action-btn btn-close"
+            onClick={onClose}
+          >
+            Close
+          </button>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Helper Functions
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Get pattern display info
+ */
+function getPatternInfo(patternType) {
+  const patterns = {
+    'DPD': {
+      label: 'DPD (Drop-Pullback-Drop)',
+      icon: '📉',
+      description: 'Bearish continuation pattern - Price drops, pulls back to HFZ resistance, then drops again'
+    },
+    'UPU': {
+      label: 'UPU (Up-Pullback-Up)',
+      icon: '📈',
+      description: 'Bullish continuation pattern - Price rises, pulls back to LFZ support, then rises again'
+    },
+    'UPD': {
+      label: 'UPD (Up-Pullback-Drop)',
+      icon: '🔄',
+      description: 'Reversal pattern - Price rises then reverses at HFZ resistance'
+    },
+    'DPU': {
+      label: 'DPU (Drop-Pullback-Up)',
+      icon: '🔄',
+      description: 'Reversal pattern - Price drops then reverses at LFZ support'
+    },
+    'HFZ': {
+      label: 'HFZ (High Frequency Zone)',
+      icon: '🔴',
+      description: 'Resistance zone where price frequently rejects'
+    },
+    'LFZ': {
+      label: 'LFZ (Low Frequency Zone)',
+      icon: '🟢',
+      description: 'Support zone where price frequently bounces'
+    }
+  };
+
+  return patterns[patternType] || {
+    label: patternType,
+    icon: '📊',
+    description: 'Pattern detected'
+  };
+}
+
+/**
+ * Get confidence badge
+ */
+function getConfidenceBadge(confidence) {
+  if (confidence >= 80) return '🟢 High';
+  if (confidence >= 60) return '🟡 Medium';
+  return '🔴 Low';
+}
+
+/**
+ * Copy trade setup to clipboard
+ */
+function copyTradeSetup(pattern, zone, entryStatus) {
+  const setup = `
+🎯 TRADE SETUP - ${pattern.pattern}
+
+Symbol: ${pattern.symbol}
+Timeframe: ${pattern.timeframe}
+Confidence: ${pattern.confidence}%
+
+${zone.type} Zone: $${zone.bottom?.toFixed(2)} - $${zone.top?.toFixed(2)}
+Zone Mid: $${zone.mid?.toFixed(2)}
+
+Entry Status: ${entryStatus.message}
+
+${entryStatus.allowEntry ? '✅ ENTRY ALLOWED' : '⚠️ WAIT FOR RETEST'}
+
+---
+Generated by GEM Trading Academy
+  `.trim();
+
+  navigator.clipboard.writeText(setup).then(() => {
+    alert('✅ Trade setup copied to clipboard!');
+  }).catch(() => {
+    alert('❌ Failed to copy to clipboard');
+  });
+}
