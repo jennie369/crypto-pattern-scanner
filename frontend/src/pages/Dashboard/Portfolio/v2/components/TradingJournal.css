@@ -100,6 +100,39 @@
   color: var(--text-secondary);
 }
 
+/* Simple Text Editor (temporary replacement for React Quill) */
+.simple-editor {
+  width: 100%;
+  padding: var(--space-md);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: var(--font-base);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  resize: vertical;
+  min-height: 200px;
+  transition: border-color var(--transition-base);
+}
+
+.simple-editor:focus {
+  outline: none;
+  border-color: var(--brand-gold);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.simple-editor::placeholder {
+  color: var(--text-muted);
+}
+
+.editor-note {
+  margin-top: var(--space-xs);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  font-style: italic;
+}
+
 /* React Quill Editor - Dark Theme Customization */
 .quill-editor {
   border-radius: var(--radius-md);

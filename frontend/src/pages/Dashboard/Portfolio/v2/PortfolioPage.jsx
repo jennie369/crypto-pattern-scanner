@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../../contexts/AuthContext';
-import { usePortfolio } from '../../../hooks/usePortfolio';
-import { LoadingSpinner } from '../../../components-v2/LoadingSpinner';
-import { ErrorMessage } from '../../../components-v2/ErrorMessage';
+import { useAuth } from '../../../../contexts/AuthContext';
+import { usePortfolio } from '../../../../hooks/usePortfolio';
+import { LoadingSpinner } from '../../../../components-v2/LoadingSpinner';
+import { ErrorMessage } from '../../../../components-v2/ErrorMessage';
 import OverviewDashboard from './components/OverviewDashboard';
 import OpenPositionsTable from './components/OpenPositionsTable';
 import TradeHistory from './components/TradeHistory';

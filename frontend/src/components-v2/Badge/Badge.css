@@ -1,0 +1,165 @@
+/* ===================================
+   BADGE COMPONENT - GEM PLATFORM
+   Status Indicators & Labels
+   Version: 1.0
+   =================================== */
+
+/* ============================================
+   BASE BADGE STYLES
+   ============================================ */
+
+.badge {
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  /* Typography */
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+
+  /* Spacing */
+  padding: 6px 12px;
+
+  /* Visual */
+  border-radius: 6px;
+  border: 1px solid;
+
+  /* Animation */
+  transition: all var(--transition-base);
+}
+
+/* ============================================
+   BADGE SIZES
+   ============================================ */
+
+.badge-sm {
+  padding: 4px 8px;
+  font-size: 10px;
+  gap: 4px;
+}
+
+.badge-md {
+  padding: 6px 12px;
+  font-size: 12px;
+  gap: 6px;
+}
+
+.badge-lg {
+  padding: 8px 16px;
+  font-size: 14px;
+  gap: 8px;
+}
+
+/* ============================================
+   BADGE VARIANTS
+   ============================================ */
+
+/* Gold Badge - Premium/Featured */
+.badge-gold {
+  background: rgba(255, 189, 89, 0.12);
+  border-color: rgba(255, 189, 89, 0.35);
+  color: var(--brand-gold);
+  box-shadow: 0 0 20px rgba(255, 189, 89, 0.2);
+}
+
+/* Cyan Badge - Active/Selected */
+.badge-cyan {
+  background: rgba(0, 217, 255, 0.1);
+  border-color: rgba(0, 217, 255, 0.3);
+  color: var(--brand-cyan);
+}
+
+/* Purple Badge - Special/Elite */
+.badge-purple {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(139, 92, 246, 0.3);
+  color: var(--brand-purple);
+}
+
+/* Green Badge - Success/Profit */
+.badge-green {
+  background: rgba(0, 255, 136, 0.1);
+  border-color: rgba(0, 255, 136, 0.3);
+  color: var(--accent-green);
+}
+
+/* Red Badge - Error/Loss */
+.badge-red {
+  background: rgba(255, 71, 87, 0.1);
+  border-color: rgba(255, 71, 87, 0.3);
+  color: var(--accent-red);
+}
+
+/* Orange Badge - Warning */
+.badge-orange {
+  background: rgba(255, 159, 67, 0.1);
+  border-color: rgba(255, 159, 67, 0.3);
+  color: var(--accent-orange);
+}
+
+/* Gray Badge - Neutral/Disabled */
+.badge-gray {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--text-muted);
+}
+
+/* ============================================
+   BADGE SHAPES
+   ============================================ */
+
+/* Pill Shape - Fully rounded */
+.badge-pill {
+  border-radius: 50px;
+}
+
+/* ============================================
+   BADGE DOT INDICATOR
+   ============================================ */
+
+.badge-dot {
+  padding-left: 8px;
+}
+
+.badge-dot-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.badge-sm .badge-dot-indicator {
+  width: 4px;
+  height: 4px;
+}
+
+.badge-lg .badge-dot-indicator {
+  width: 8px;
+  height: 8px;
+}
+
+/* ============================================
+   BADGE ICON
+   ============================================ */
+
+.badge-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1em;
+}
+
+/* ============================================
+   HOVER EFFECTS
+   ============================================ */
+
+.badge:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}

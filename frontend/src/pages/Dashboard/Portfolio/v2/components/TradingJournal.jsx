@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+// import ReactQuill from 'react-quill';
+// import 'react-quill/dist/quill.snow.css';
 import { Button } from '../../../../../components-v2/Button';
 import { Input } from '../../../../../components-v2/Input';
 import { Card } from '../../../../../components-v2/Card';
@@ -31,25 +31,25 @@ export const TradingJournal = ({ userId }) => {
     tags: '',
   });
 
-  // Quill toolbar configuration
-  const quillModules = useMemo(() => ({
-    toolbar: [
-      [{ 'header': [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      [{ 'color': [] }, { 'background': [] }],
-      ['link', 'image'],
-      ['clean']
-    ],
-  }), []);
+  // Temporarily disabled React Quill due to React 19 compatibility issues
+  // const quillModules = useMemo(() => ({
+  //   toolbar: [
+  //     [{ 'header': [1, 2, 3, false] }],
+  //     ['bold', 'italic', 'underline', 'strike'],
+  //     [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+  //     [{ 'color': [] }, { 'background': [] }],
+  //     ['link', 'image'],
+  //     ['clean']
+  //   ],
+  // }), []);
 
-  const quillFormats = [
-    'header',
-    'bold', 'italic', 'underline', 'strike',
-    'list', 'bullet',
-    'color', 'background',
-    'link', 'image'
-  ];
+  // const quillFormats = [
+  //   'header',
+  //   'bold', 'italic', 'underline', 'strike',
+  //   'list', 'bullet',
+  //   'color', 'background',
+  //   'link', 'image'
+  // ];
 
   // Load journal entries on mount
   useEffect(() => {
@@ -214,6 +214,18 @@ export const TradingJournal = ({ userId }) => {
     }
   };
 
+  // Handle no userId
+  if (!userId) {
+    return (
+      <div className="trading-journal">
+        <div className="error-state">
+          <p>⚠️ User not authenticated</p>
+          <p className="empty-hint">Please log in to access your trading journal</p>
+        </div>
+      </div>
+    );
+  }
+
   // Handle loading and error states
   if (loading) {
     return (
@@ -313,18 +325,17 @@ export const TradingJournal = ({ userId }) => {
             onChange={(e) => setFormData({...formData, date: e.target.value})}
           />
 
-          {/* Rich Text Editor */}
+          {/* Simple Text Editor (React Quill temporarily disabled due to React 19 incompatibility) */}
           <div className="editor-field">
             <label className="editor-label">Content</label>
-            <ReactQuill
-              theme="snow"
+            <textarea
               value={formData.content}
-              onChange={(value) => setFormData({...formData, content: value})}
-              modules={quillModules}
-              formats={quillFormats}
+              onChange={(e) => setFormData({...formData, content: e.target.value})}
               placeholder="Write your trading notes here..."
-              className="quill-editor"
+              className="simple-editor"
+              rows={10}
             />
+            <p className="editor-note">💡 Rich text editor will be added once React Quill supports React 19</p>
           </div>
 
           <Input
