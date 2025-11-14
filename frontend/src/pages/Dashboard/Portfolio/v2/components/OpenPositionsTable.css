@@ -1,0 +1,61 @@
+/* ===================================
+   OPEN POSITIONS TABLE - STYLES
+   =================================== */
+
+.open-positions-table {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* P&L Cell */
+.pnl-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pnl-amount {
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  font-weight: var(--font-bold);
+}
+
+.pnl-percent {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  opacity: 0.8;
+}
+
+.pnl-cell.positive .pnl-amount,
+.pnl-cell.positive .pnl-percent {
+  color: var(--accent-green);
+}
+
+.pnl-cell.negative .pnl-amount,
+.pnl-cell.negative .pnl-percent {
+  color: var(--accent-red);
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .data-table {
+    font-size: var(--text-xs);
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+}

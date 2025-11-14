@@ -1,0 +1,49 @@
+/* ===================================
+   PORTFOLIO PAGE V2 - STYLES
+   =================================== */
+
+.portfolio-page-v2 {
+  min-height: calc(100vh - 80px);
+  padding: var(--space-xl);
+}
+
+/* Portfolio Tabs */
+.portfolio-tabs {
+  margin-top: var(--space-2xl);
+}
+
+.tab-content {
+  margin-top: var(--space-lg);
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  min-height: 600px;
+}
+
+.tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: var(--brand-gold);
+  color: var(--bg-base);
+  font-size: 11px;
+  font-weight: 800;
+  border-radius: var(--radius-full);
+  margin-left: var(--space-xs);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .portfolio-page-v2 {
+    padding: var(--space-md);
+  }
+
+  .tab-content {
+    padding: var(--space-md);
+  }
+}

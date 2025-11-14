@@ -1,0 +1,56 @@
+/* ===================================
+   EQUITY CHART - STYLES
+   =================================== */
+
+.equity-chart-card {
+  min-height: 400px;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.timeframe-selector {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.timeframe-btn {
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.timeframe-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.timeframe-btn.active {
+  background: var(--brand-gold);
+  border-color: var(--brand-gold);
+  color: var(--bg-base);
+}
+
+.chart-container {
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-placeholder {
+  text-align: center;
+  color: var(--text-muted);
+}
