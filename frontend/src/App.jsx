@@ -10,6 +10,7 @@ import Analytics from './pages/Analytics';
 import History from './pages/History';
 import ScanHistory from './pages/ScanHistory';
 import Settings from './pages/Settings';
+import EnhancedSettings from './pages/EnhancedSettings/EnhancedSettings';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
@@ -31,6 +32,38 @@ import NewsCalendar from './pages/NewsCalendar';
 import Backtesting from './pages/Backtesting';
 import AIPrediction from './pages/AIPrediction';
 import WhaleTracker from './pages/WhaleTracker';
+
+// Shop & E-commerce
+import Shop from './pages/Shop';
+import Cart from './pages/Cart';
+
+// Courses & Education
+import Courses from './pages/Courses';
+import CourseLearning from './pages/CourseLearning';
+
+// Community Forum
+import Forum from './pages/Forum/Forum';
+import CreateThread from './pages/Forum/CreateThread';
+import ThreadDetail from './pages/Forum/ThreadDetail';
+
+// Direct Messaging
+import Messages from './pages/Messages/Messages';
+
+// Events Calendar
+import Events from './pages/Events/Events';
+
+// Community Hub (combines all community features)
+import CommunityHub from './pages/Community/CommunityHub';
+
+// Gem Master Chatbot
+import Chatbot from './pages/Chatbot';
+
+// Affiliate Dashboard
+import AffiliateDashboard from './pages/AffiliateDashboard';
+
+// Toast Notifications
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import './App.css';
 
@@ -96,6 +129,194 @@ function App() {
             }
           />
 
+          {/* Shop & E-commerce Routes */}
+          <Route
+            path="/shop"
+            element={
+              <div className="app-layout-wrapper">
+                <TopNavBar />
+                <div className="page-wrapper">
+                  <Shop />
+                </div>
+                <Footer />
+              </div>
+            }
+          />
+          <Route
+            path="/cart"
+            element={
+              <div className="app-layout-wrapper">
+                <TopNavBar />
+                <div className="page-wrapper">
+                  <Cart />
+                </div>
+                <Footer />
+              </div>
+            }
+          />
+
+          {/* Courses & Education Routes */}
+          <Route
+            path="/courses"
+            element={
+              <div className="app-layout-wrapper">
+                <TopNavBar />
+                <div className="page-wrapper">
+                  <Courses />
+                </div>
+                <Footer />
+              </div>
+            }
+          />
+
+          {/* Course Learning Interface - Fullscreen (No Nav/Footer) */}
+          <Route
+            path="/courses/:courseId/learn"
+            element={
+              <ProtectedRoute>
+                <CourseLearning />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Community Forum Routes */}
+          <Route
+            path="/forum"
+            element={
+              <ProtectedRoute>
+                <div className="app-layout-wrapper">
+                  <TopNavBar />
+                  <div className="page-wrapper">
+                    <Forum />
+                  </div>
+                  <Footer />
+                </div>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/forum/new"
+            element={
+              <ProtectedRoute>
+                <div className="app-layout-wrapper">
+                  <TopNavBar />
+                  <div className="page-wrapper">
+                    <CreateThread />
+                  </div>
+                  <Footer />
+                </div>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/forum/thread/:threadId"
+            element={
+              <ProtectedRoute>
+                <div className="app-layout-wrapper">
+                  <TopNavBar />
+                  <div className="page-wrapper">
+                    <ThreadDetail />
+                  </div>
+                  <Footer />
+                </div>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Direct Messaging Route */}
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute>
+                <div className="app-layout-wrapper">
+                  <TopNavBar />
+                  <div className="page-wrapper">
+                    <Messages />
+                  </div>
+                  <Footer />
+                </div>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Events Calendar Route */}
+          <Route
+            path="/events"
+            element={
+              <ProtectedRoute>
+                <div className="app-layout-wrapper">
+                  <TopNavBar />
+                  <div className="page-wrapper">
+                    <Events />
+                  </div>
+                  <Footer />
+                </div>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Gem Master Chatbot Route */}
+          <Route
+            path="/chatbot"
+            element={
+              <ProtectedRoute>
+                <div className="app-layout-wrapper">
+                  <TopNavBar />
+                  <div className="page-wrapper">
+                    <Chatbot />
+                  </div>
+                  <Footer />
+                </div>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Affiliate Dashboard Route */}
+          <Route
+            path="/affiliate"
+            element={
+              <ProtectedRoute>
+                <div className="app-layout-wrapper">
+                  <TopNavBar />
+                  <div className="page-wrapper">
+                    <AffiliateDashboard />
+                  </div>
+                  <Footer />
+                </div>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Community Hub Routes - 6-in-1 Navigation */}
+          <Route
+            path="/community"
+            element={
+              <ProtectedRoute>
+                <div className="app-layout-wrapper">
+                  <TopNavBar />
+                  <div className="page-wrapper">
+                    <CommunityHub />
+                  </div>
+                  <Footer />
+                </div>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/community/:tab"
+            element={
+              <ProtectedRoute>
+                <div className="app-layout-wrapper">
+                  <TopNavBar />
+                  <div className="page-wrapper">
+                    <CommunityHub />
+                  </div>
+                  <Footer />
+                </div>
+              </ProtectedRoute>
+            }
+          />
+
           {/* Protected Scanner Route */}
           <Route
             path="/scanner"
@@ -155,8 +376,24 @@ function App() {
               </ProtectedRoute>
             }
           />
+          {/* Enhanced Settings - New comprehensive settings page */}
           <Route
             path="/settings"
+            element={
+              <ProtectedRoute>
+                <div className="app-layout-wrapper">
+                  <TopNavBar />
+                  <div className="page-wrapper">
+                    <EnhancedSettings />
+                  </div>
+                  <Footer />
+                </div>
+              </ProtectedRoute>
+            }
+          />
+          {/* Old Settings - Keep as fallback */}
+          <Route
+            path="/settings-old"
             element={
               <ProtectedRoute>
                 <div className="app-layout-wrapper">
@@ -341,6 +578,20 @@ function App() {
           />
 
         </Routes>
+
+        {/* Toast Notifications Container */}
+        <ToastContainer
+          position="bottom-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+        />
       </div>
     </BrowserRouter>
   );
