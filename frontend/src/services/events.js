@@ -160,7 +160,7 @@ class EventsService {
           location: eventData.location || null,
           is_online: eventData.isOnline !== undefined ? eventData.isOnline : true,
           max_participants: eventData.maxParticipants || 50,
-          required_tier: eventData.requiredTier || 'free',
+          required_tier: eventData.requiredTier || 'FREE',
           host_id: user.id,
           is_featured: false, // Hidden in modal, default to false
           tags: eventData.tags || []

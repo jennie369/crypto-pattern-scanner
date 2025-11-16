@@ -20,7 +20,7 @@ const EventCreateModal = ({ isOpen, onClose, onEventCreated }) => {
     endTime: '',
     location: '',
     maxParticipants: 50,
-    requiredTier: 'free',
+    requiredTier: 'FREE',
     isOnline: true
   });
 
@@ -71,7 +71,7 @@ const EventCreateModal = ({ isOpen, onClose, onEventCreated }) => {
         endTime: '',
         location: '',
         maxParticipants: 50,
-        requiredTier: 'free',
+        requiredTier: 'FREE',
         isOnline: true
       });
 
@@ -248,10 +248,10 @@ const EventCreateModal = ({ isOpen, onClose, onEventCreated }) => {
               value={formData.requiredTier}
               onChange={handleChange}
             >
-              <option value="free">🆓 FREE (Tất cả)</option>
-              <option value="basic">🔹 TIER 1 (Basic+)</option>
-              <option value="premium">💎 TIER 2 (Premium+)</option>
-              <option value="vip">👑 TIER 3 (VIP only)</option>
+              <option value="FREE">🆓 FREE (Tất cả)</option>
+              <option value="TIER1">🔹 TIER 1 (Basic+)</option>
+              <option value="TIER2">💎 TIER 2 (Premium+)</option>
+              <option value="TIER3">👑 TIER 3 (VIP only)</option>
             </select>
           </div>
 
