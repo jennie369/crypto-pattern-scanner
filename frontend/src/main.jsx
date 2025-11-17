@@ -2,6 +2,9 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 
+// Vietnamese Font Fix - Load first for proper rendering
+import './styles/vietnamese-fonts.css'
+
 // Design System Foundation
 import './styles/design-tokens.css'
 import './styles/base.css'
@@ -17,7 +20,8 @@ import { PriceProvider } from './contexts/PriceContext'
 import { ScanProvider } from './contexts/ScanContext'
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
+  // TEMPORARILY DISABLED StrictMode for debugging
+  // <StrictMode>
     <AuthProvider>
       <PriceProvider>
         <ScanProvider>
@@ -25,5 +29,5 @@ createRoot(document.getElementById('root')).render(
         </ScanProvider>
       </PriceProvider>
     </AuthProvider>
-  </StrictMode>,
+  // </StrictMode>,
 )
