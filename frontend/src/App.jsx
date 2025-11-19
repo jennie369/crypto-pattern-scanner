@@ -63,6 +63,9 @@ import Leaderboard from './pages/Community/Leaderboard';
 // Gem Master Chatbot
 import Chatbot from './pages/Chatbot';
 
+// Dashboard (Widgets)
+import Dashboard from './pages/Dashboard';
+
 // Affiliate Dashboard
 import AffiliateDashboard from './pages/AffiliateDashboard';
 
@@ -265,6 +268,18 @@ function App() {
               <ProtectedRoute>
                 <AuthenticatedLayout>
                   <Chatbot />
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Dashboard (Widgets) Route */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <Dashboard />
                 </AuthenticatedLayout>
               </ProtectedRoute>
             }
