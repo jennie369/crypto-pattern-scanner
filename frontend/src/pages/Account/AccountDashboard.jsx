@@ -52,6 +52,52 @@ const AccountDashboard = () => {
       navigate('/auth');
       return;
     }
+
+    loadWidgets();
+  }, [user]);
+
+  // Load widgets from database
+  const loadWidgets = async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('user_widgets')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setWidgets(data || []);
+    } catch (error) {
+      console.error('Error loading widgets:', error);
+    }
+  };
+
+  // Remove widget from dashboard
+  const removeWidget = async (widgetId) => {
+    if (!window.confirm('Remove this widget?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('user_widgets')
+        .delete()
+        .eq('id', widgetId);
+
+      if (error) throw error;
+
+      setWidgets(prev => prev.filter(w => w.id !== widgetId));
+    } catch (error) {
+      console.error('Error removing widget:', error);
+      alert('Failed to remove widget');
+    }
+  };
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
     loadDashboardData();
   }, [user, navigate]);
 
@@ -436,6 +482,96 @@ const AccountDashboard = () => {
           </div>
         </aside>
       </div>
+
+      {/* My Widgets Section */}
+      {widgets.length > 0 && (
+        <div className="widgets-section" style={{
+          padding: '24px',
+          marginTop: '24px'
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '20px'
+          }}>
+            <h2 style={{
+              fontSize: '24px',
+              fontWeight: '700',
+              background: 'linear-gradient(135deg, #00D9FF, #8B5CF6)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>
+              💎 My Widgets
+            </h2>
+            <button
+              onClick={() => navigate('/chatbot')}
+              style={{
+                padding: '8px 16px',
+                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(0, 217, 255, 0.2))',
+                border: '1px solid rgba(139, 92, 246, 0.5)',
+                borderRadius: '8px',
+                color: 'white',
+                fontSize: '13px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            >
+              + Create New Widget
+            </button>
+          </div>
+
+          <div className="widgets-grid" style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+            gap: '20px'
+          }}>
+            {widgets.map(widget => (
+              <div key={widget.id} style={{ position: 'relative' }}>
+                <WidgetFactory
+                  widget={{ type: widget.widget_type, data: widget.widget_data }}
+                  size={widget.size}
+                />
+                <button
+                  onClick={() => removeWidget(widget.id)}
+                  style={{
+                    position: 'absolute',
+                    top: '8px',
+                    right: '8px',
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '50%',
+                    background: 'rgba(255, 68, 102, 0.9)',
+                    border: 'none',
+                    color: 'white',
+                    cursor: 'pointer',
+                    opacity: 0,
+                    transition: 'opacity 0.3s ease',
+                    fontSize: '16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: '700',
+                    zIndex: 10
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                  title="Remove widget"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       </div>
     </div>
     </div>

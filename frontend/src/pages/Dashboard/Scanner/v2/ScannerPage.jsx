@@ -231,31 +231,13 @@ export const ScannerPage = () => {
               pattern={selectedPattern}
             />
 
-            {/* Paper Trading Widgets - TEMPORARILY DISABLED FOR DEBUGGING */}
+            {/* Paper Trading Widgets */}
             <div className="paper-trading-widgets-section">
-              {/* 🔍 DEBUG: Test rendering */}
-              <div style={{
-                background: 'rgba(0, 255, 0, 0.2)',
-                border: '2px solid lime',
-                padding: '20px',
-                borderRadius: '8px',
-                color: 'white',
-                fontWeight: 'bold',
-                textAlign: 'center'
-              }}>
-                ✅ Scanner Right Column Renders OK
-                <br />
-                <small style={{ fontSize: '12px', opacity: 0.7 }}>
-                  (Widgets temporarily disabled for debugging)
-                </small>
-              </div>
-
-              {/* COMMENTED OUT TO TEST IF THESE ARE CAUSING THE CRASH */}
-              {/* <OpenPositionsWidget
+              <OpenPositionsWidget
                 onOpenPaperTrading={handleOpenPaperTrading}
               />
 
-              <RecentTradesSection /> */}
+              <RecentTradesSection />
             </div>
           </div>
         </div>

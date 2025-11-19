@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { getOrders } from '../../services/paperTrading';
 import './RecentTradesSection.css';
@@ -6,32 +6,44 @@ import './RecentTradesSection.css';
 export const RecentTradesSection = () => {
   const { user } = useAuth();
   const [trades, setTrades] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // ✅ Start with false
+  const mountedRef = useRef(true);
 
-  useEffect(() => {
-    if (user && user.id) {
-      loadRecentTrades();
-    } else {
-      setLoading(false); // Stop loading if no user
-    }
-  }, [user]);
+  const loadRecentTrades = useCallback(async () => {
+    if (!user?.id || !mountedRef.current) return;
 
-  const loadRecentTrades = async () => {
     setLoading(true);
     try {
-      // Fetch last 10 orders
       const orders = await getOrders(user.id, 10);
 
-      // Filter only SELL orders (closed positions) with P&L
-      const closedTrades = orders.filter(o => o.side === 'sell' && o.pnl !== null && o.pnl !== undefined);
+      if (!mountedRef.current) return;
 
-      setTrades(closedTrades.slice(0, 10)); // Limit to 10
+      // Filter only SELL orders (closed positions) with P&L
+      const closedTrades = (orders || []).filter(
+        o => o.side === 'sell' && o.pnl !== null && o.pnl !== undefined
+      );
+
+      setTrades(closedTrades.slice(0, 10));
     } catch (error) {
-      console.error('Failed to load trades:', error);
+      console.error('[RecentTradesSection] Load error:', error);
     } finally {
-      setLoading(false);
+      if (mountedRef.current) {
+        setLoading(false);
+      }
     }
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    mountedRef.current = true;
+
+    if (user?.id) {
+      loadRecentTrades();
+    }
+
+    return () => {
+      mountedRef.current = false;
+    };
+  }, [user?.id, loadRecentTrades]);
 
   if (loading) {
     return (

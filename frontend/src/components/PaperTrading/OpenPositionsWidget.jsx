@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { getHoldings, closePosition } from '../../services/paperTrading';
 import binanceWS from '../../services/binanceWebSocket';
@@ -8,49 +8,80 @@ import './OpenPositionsWidget.css';
 export const OpenPositionsWidget = ({ onOpenPaperTrading }) => {
   const { user } = useAuth();
   const [positions, setPositions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [prices, setPrices] = useState({});
+  const unsubscribeFnsRef = useRef([]);
+  const mountedRef = useRef(true);
 
-  // 🔍 DEBUG: Log component mount
-  console.log('[OpenPositionsWidget] Component mounted, user:', user ? 'logged in' : 'not logged in');
+  const subscribeToPriceUpdates = useCallback((symbol) => {
+    try {
+      const unsubscribe = binanceWS.subscribe(symbol, (update) => {
+        if (update.price && mountedRef.current) {
+          setPrices(prev => ({
+            ...prev,
+            [symbol]: update.price
+          }));
+        }
+      });
 
-  // Load positions
-  useEffect(() => {
-    if (user && user.id) {
-      loadPositions();
-    } else {
-      setLoading(false); // Stop loading if no user
+      unsubscribeFnsRef.current.push(unsubscribe);
+    } catch (error) {
+      console.error('[OpenPositionsWidget] Subscribe error:', error);
     }
-  }, [user]);
+  }, []);
 
-  const loadPositions = async () => {
+  const loadPositions = useCallback(async () => {
+    if (!user?.id || !mountedRef.current) return;
+
     setLoading(true);
     try {
       const holdings = await getHoldings(user.id);
-      setPositions(holdings);
 
-      // Subscribe to price updates for each symbol
-      holdings.forEach(holding => {
-        subscribeToPriceUpdates(holding.symbol);
-      });
-    } catch (error) {
-      console.error('Failed to load positions:', error);
-      toast.error('Failed to load positions');
-    } finally {
-      setLoading(false);
-    }
-  };
+      if (!mountedRef.current) return;
 
-  const subscribeToPriceUpdates = (symbol) => {
-    binanceWS.subscribe(symbol, (update) => {
-      if (update.price) {
-        setPrices(prev => ({
-          ...prev,
-          [symbol]: update.price
-        }));
+      setPositions(holdings || []);
+
+      if (holdings && holdings.length > 0) {
+        holdings.forEach(holding => {
+          if (holding.symbol) {
+            subscribeToPriceUpdates(holding.symbol);
+          }
+        });
       }
-    });
-  };
+    } catch (error) {
+      console.error('[OpenPositionsWidget] Load error:', error);
+      if (mountedRef.current) {
+        toast.error('Failed to load positions');
+      }
+    } finally {
+      if (mountedRef.current) {
+        setLoading(false);
+      }
+    }
+  }, [user?.id, subscribeToPriceUpdates]);
+
+  useEffect(() => {
+    mountedRef.current = true;
+
+    if (user?.id) {
+      loadPositions();
+    }
+
+    return () => {
+      mountedRef.current = false;
+
+      unsubscribeFnsRef.current.forEach(unsub => {
+        try {
+          if (typeof unsub === 'function') {
+            unsub();
+          }
+        } catch (err) {
+          // Ignore cleanup errors
+        }
+      });
+      unsubscribeFnsRef.current = [];
+    };
+  }, [user?.id, loadPositions]);
 
   const calculatePnL = (position) => {
     const currentPrice = prices[position.symbol] || 0;
@@ -75,15 +106,12 @@ export const OpenPositionsWidget = ({ onOpenPaperTrading }) => {
     try {
       await closePosition(position.id, user.id);
       toast.success(`${position.symbol} position closed successfully!`);
-      loadPositions(); // Reload positions
+      loadPositions();
     } catch (error) {
       console.error('Failed to close position:', error);
       toast.error(`Failed to close position: ${error.message}`);
     }
   };
-
-  // 🔍 DEBUG: Log render state
-  console.log('[OpenPositionsWidget] Rendering, loading:', loading, 'positions:', positions.length);
 
   if (loading) {
     return (
