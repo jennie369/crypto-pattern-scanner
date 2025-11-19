@@ -1,0 +1,572 @@
+/* ============================================
+   🎨 SECTION 8 - SOCIAL PROOF
+   ============================================ */
+
+/* Import GEM Design Tokens */
+.social-proof-section {
+  /* Colors từ GEM */
+  --bg-base-dark: #0A1628;
+  --bg-base-mid: #0D1B2A;
+  --bg-base-light: #0F172A;
+
+  --brand-burgundy: #9C0612;
+  --brand-gold: #FFBD59;
+  --brand-gold-light: #DEBC81;
+
+  --glass-bg: rgba(30, 42, 94, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.12);
+
+  /* Typography từ GEM */
+  --font-display: 'Montserrat', sans-serif;
+  --font-body: 'Noto Sans Display', sans-serif;
+
+  /* Spacing */
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 50px;
+}
+
+/* ============================================
+   SECTION LAYOUT
+   ============================================ */
+.social-proof-section {
+  position: relative;
+  /* Background removed - using page background */
+  padding: 6rem 2rem;
+  overflow: hidden;
+}
+
+.social-proof-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 3rem;
+  position: relative;
+  z-index: 10;
+}
+
+/* ============================================
+   SECTION HEADER
+   ============================================ */
+.social-proof-header {
+  text-align: center;
+  margin-bottom: 4rem;
+  animation: slideUp 0.8s ease-out;
+}
+
+.social-proof-eyebrow {
+  color: var(--brand-gold);
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-bottom: 1.5rem;
+  font-family: var(--font-display);
+}
+
+.social-proof-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+  color: #FFFFFF;
+}
+
+.social-proof-title .gradient-text {
+  background: linear-gradient(135deg, var(--brand-gold) 0%, #FFD700 50%, #FFF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 20px rgba(255, 189, 89, 0.6));
+}
+
+.social-proof-subtitle {
+  font-size: clamp(1.1rem, 2vw, 1.3rem);
+  color: var(--brand-gold-light);
+  font-family: var(--font-body);
+}
+
+/* ============================================
+   STAR RATING
+   ============================================ */
+.star-rating {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 5rem;
+  padding: 32px;
+  background: rgba(30, 42, 94, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  transition: all 0.3s ease;
+}
+
+.star-rating:hover {
+  border-color: rgba(255, 189, 89, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+}
+
+.stars {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.rating-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rating-number {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--brand-gold);
+}
+
+.rating-count {
+  font-size: 1.1rem;
+  color: var(--brand-gold-light);
+  font-family: var(--font-body);
+}
+
+/* ============================================
+   TESTIMONIALS GRID
+   ============================================ */
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  margin-bottom: 5rem;
+}
+
+.testimonial-card {
+  background: rgba(30, 42, 94, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 32px;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.testimonial-card:hover {
+  border-color: rgba(255, 189, 89, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+}
+
+/* Testimonial Header */
+.testimonial-header {
+  display: flex;
+  align-items: start;
+  gap: 1.25rem;
+}
+
+.testimonial-avatar {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, var(--brand-burgundy), var(--brand-gold));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  border: 3px solid var(--brand-gold);
+  flex-shrink: 0;
+}
+
+.testimonial-info {
+  flex: 1;
+}
+
+.testimonial-name {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.verified-badge {
+  width: 24px;
+  height: 24px;
+  background: var(--brand-gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-burgundy);
+}
+
+.testimonial-role {
+  font-size: 1rem;
+  color: var(--brand-gold-light);
+  font-family: var(--font-body);
+}
+
+.testimonial-rating {
+  display: flex;
+  gap: 0.25rem;
+}
+
+/* Testimonial Quote */
+.testimonial-quote {
+  flex: 1;
+}
+
+.quote-text {
+  font-size: 1.1rem;
+  color: #D1D5DB;
+  line-height: 1.8;
+  font-style: italic;
+  font-family: var(--font-body);
+}
+
+/* Testimonial Footer */
+.testimonial-footer {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--glass-border);
+}
+
+.product-tag,
+.verified-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  font-size: 0.9rem;
+  color: var(--brand-gold);
+  font-family: var(--font-body);
+  font-weight: 600;
+}
+
+.product-tag svg,
+.verified-tag svg {
+  color: var(--brand-gold);
+}
+
+/* ============================================
+   STATS SECTION
+   ============================================ */
+.stats-section {
+  margin-bottom: 5rem;
+}
+
+.stats-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 700;
+  color: var(--brand-gold);
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.stat-card {
+  background: rgba(30, 42, 94, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 32px;
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.stat-card:hover {
+  border-color: rgba(255, 189, 89, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+}
+
+.stat-icon {
+  color: var(--brand-gold);
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.stat-number {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  font-weight: 800;
+  color: var(--brand-gold);
+  margin-bottom: 0.75rem;
+}
+
+.stat-label {
+  font-size: 1.1rem;
+  color: var(--brand-gold-light);
+  font-family: var(--font-body);
+}
+
+/* ============================================
+   VIP COMMUNITY
+   ============================================ */
+.vip-community {
+  background: rgba(30, 42, 94, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 32px;
+  margin-bottom: 4rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  transition: all 0.3s ease;
+}
+
+.vip-community:hover {
+  border-color: rgba(255, 189, 89, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+}
+
+.vip-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.vip-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 700;
+  color: var(--brand-gold);
+  margin-bottom: 1rem;
+}
+
+.vip-subtitle {
+  font-size: 1.2rem;
+  color: var(--brand-gold-light);
+  font-family: var(--font-body);
+}
+
+.vip-benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.vip-benefit-card {
+  background: rgba(30, 42, 94, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 32px;
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.vip-benefit-card:hover {
+  border-color: rgba(255, 189, 89, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+}
+
+.benefit-icon {
+  font-size: 3rem;
+  margin-bottom: 1.25rem;
+}
+
+.benefit-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-bottom: 0.75rem;
+}
+
+.benefit-description {
+  font-size: 1rem;
+  color: var(--brand-gold-light);
+  line-height: 1.6;
+  font-family: var(--font-body);
+}
+
+.vip-cta {
+  text-align: center;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--glass-border);
+}
+
+.vip-cta-text {
+  font-size: 1.2rem;
+  color: var(--brand-gold-light);
+  margin-bottom: 1.5rem;
+  font-family: var(--font-body);
+}
+
+.vip-cta-text strong {
+  color: var(--brand-gold);
+  font-weight: 700;
+}
+
+.btn-vip {
+  background: linear-gradient(135deg, var(--brand-burgundy), #6B0F1A);
+  border: 2px solid var(--brand-gold);
+  border-radius: var(--radius-full);
+  padding: 1.1rem 2.5rem;
+  color: #FFFFFF;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 24px rgba(156, 6, 18, 0.4);
+}
+
+.btn-vip:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(156, 6, 18, 0.6);
+}
+
+/* ============================================
+   TRUST BADGES
+   ============================================ */
+.trust-badges {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.trust-badge {
+  background: rgba(30, 42, 94, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 32px;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.trust-badge:hover {
+  border-color: rgba(255, 189, 89, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+}
+
+.badge-icon {
+  color: var(--brand-gold);
+  flex-shrink: 0;
+}
+
+.badge-text {
+  font-size: 1.05rem;
+  color: #FFFFFF;
+  font-weight: 600;
+  font-family: var(--font-body);
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   MOBILE RESPONSIVE
+   ============================================ */
+@media (min-width: 1920px) {
+  .social-proof-container {
+    max-width: 1600px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .social-proof-container {
+    padding: 0 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .social-proof-section {
+    padding: 3rem 1rem;
+  }
+
+  .social-proof-container {
+    padding: 0 1.5rem;
+  }
+
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .testimonial-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .vip-community {
+    padding: 3rem 1.5rem;
+  }
+
+  .vip-benefits-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trust-badges {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .social-proof-container {
+    padding: 0 1rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .testimonial-footer {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .product-tag,
+  .verified-tag {
+    justify-content: center;
+  }
+}
