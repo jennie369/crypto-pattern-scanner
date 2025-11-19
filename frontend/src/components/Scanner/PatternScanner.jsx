@@ -6,6 +6,10 @@ import { useScanHistory } from '../../hooks/useScanHistory'
 import { supabase } from '../../lib/supabaseClient'
 import { patternDetectionService } from '../../services/patternDetection'
 import { telegramService } from '../../services/telegramService'
+import {
+  BellOff, XCircle, Smartphone, Send, CheckCheck, AlertCircle, X,
+  PartyPopper, Info, Unlock, Star, Gem, Trophy, Check, Rocket, Sparkles
+} from 'lucide-react'
 import './PatternScanner.css'
 
 export default function PatternScanner({ filters, onFilterChange, onScanStateChange, onScanComplete, onResultClick, triggerScan }) {
@@ -51,7 +55,7 @@ export default function PatternScanner({ filters, onFilterChange, onScanStateCha
     // Only send for premium scanner users
     const isPremium = profile && profile.scanner_tier && profile.scanner_tier !== 'free'
     if (!isPremium) {
-      console.log('🔕 Telegram alerts only for Scanner PRO+ users')
+      console.log('[BellOff] Telegram alerts only for Scanner PRO+ users')
       return
     }
 
@@ -64,16 +68,16 @@ export default function PatternScanner({ filters, onFilterChange, onScanStateCha
         .single()
 
       if (fetchError) {
-        console.error('❌ Error fetching telegram ID:', fetchError)
+        console.error('[XCircle] Error fetching telegram ID:', fetchError)
         return
       }
 
       if (!userData?.telegram_id) {
-        console.log('📱 User has no Telegram connected - skipping alerts')
+        console.log('[Smartphone] User has no Telegram connected - skipping alerts')
         return
       }
 
-      console.log(`📨 Sending ${patterns.length} Telegram alerts to Chat ID: ${userData.telegram_id}`)
+      console.log(`[Send] Sending ${patterns.length} Telegram alerts to Chat ID: ${userData.telegram_id}`)
 
       // Send alert for each pattern found
       let successCount = 0
@@ -85,15 +89,15 @@ export default function PatternScanner({ filters, onFilterChange, onScanStateCha
           // Small delay between messages to avoid rate limiting
           await new Promise(resolve => setTimeout(resolve, 500))
         } catch (alertError) {
-          console.error(`❌ Failed to send alert for ${pattern.symbol}:`, alertError)
+          console.error(`[XCircle] Failed to send alert for ${pattern.symbol}:`, alertError)
           // Continue with other alerts even if one fails
         }
       }
 
-      console.log(`✅ Successfully sent ${successCount}/${patterns.length} Telegram alerts`)
+      console.log(`[CheckCheck] Successfully sent ${successCount}/${patterns.length} Telegram alerts`)
 
     } catch (error) {
-      console.error('❌ Error sending Telegram alerts:', error)
+      console.error('[XCircle] Error sending Telegram alerts:', error)
       // Don't block scan if Telegram fails - just log the error
     }
   }
@@ -110,8 +114,8 @@ export default function PatternScanner({ filters, onFilterChange, onScanStateCha
     console.log('   Selected coins:', filters?.coins || [])
 
     if (!filters || !filters.coins || filters.coins.length === 0) {
-      console.warn('⚠️ No filters or coins selected')
-      alert('⚠️ Vui lòng chọn coin để quét! Click "⚙️ Scan Filters" để chọn.')
+      console.warn('[AlertCircle] No filters or coins selected')
+      alert('[AlertCircle] Vui lòng chọn coin để quét! Click "Scan Filters" để chọn.')
       if (onFilterChange) onFilterChange()
       return
     }
@@ -122,8 +126,8 @@ export default function PatternScanner({ filters, onFilterChange, onScanStateCha
     console.log('   Email:', user?.email || 'N/A')
 
     if (!user) {
-      console.error('❌ User not authenticated')
-      alert('⚠️ Vui lòng đăng nhập để sử dụng Pattern Scanner!')
+      console.error('[XCircle] User not authenticated')
+      alert('[AlertCircle] Vui lòng đăng nhập để sử dụng Pattern Scanner!')
       return
     }
 
@@ -145,8 +149,8 @@ export default function PatternScanner({ filters, onFilterChange, onScanStateCha
     console.log('   Remaining:', quota.remaining || 0)
 
     if (!isPremium && !quota.canScan) {
-      console.error('❌ Quota exceeded')
-      alert('⚠️ Đã hết lượt scan hôm nay! Vui lòng nâng cấp Scanner PRO hoặc chờ reset.')
+      console.error('[XCircle] Quota exceeded')
+      alert('[AlertCircle] Đã hết lượt scan hôm nay! Vui lòng nâng cấp Scanner PRO hoặc chờ reset.')
       return
     }
 
@@ -169,7 +173,7 @@ export default function PatternScanner({ filters, onFilterChange, onScanStateCha
 
         if (!quotaResult.success) {
           console.error('❌ Quota slot usage failed:', quotaResult.error)
-          alert(`❌ ${quotaResult.error}`)
+          alert(`[XCircle] ${quotaResult.error}`)
           updateScanningState(false)
           return
         }
@@ -280,7 +284,7 @@ export default function PatternScanner({ filters, onFilterChange, onScanStateCha
       }
 
       setError(error.message)
-      alert('❌ Lỗi khi scan: ' + error.message)
+      alert('[XCircle] Lỗi khi scan: ' + error.message)
     } finally {
       console.log('🔚 Cleaning up scan state...')
       updateScanningState(false)
@@ -299,10 +303,10 @@ export default function PatternScanner({ filters, onFilterChange, onScanStateCha
     3 // free
 
   const tierLabel =
-    scannerTier === 'vip' ? '🏆 VIP' :
-    scannerTier === 'premium' ? '💎 PREMIUM' :
-    scannerTier === 'pro' ? '⭐ PRO' :
-    '🆓 FREE'
+    scannerTier === 'vip' ? <><Trophy className="tier-icon" size={16} /> VIP</> :
+    scannerTier === 'premium' ? <><Gem className="tier-icon" size={16} /> PREMIUM</> :
+    scannerTier === 'pro' ? <><Star className="tier-icon" size={16} /> PRO</> :
+    <>FREE</>
 
   return (
     <div className="pattern-scanner-container">
@@ -322,7 +326,7 @@ export default function PatternScanner({ filters, onFilterChange, onScanStateCha
       {/* Show error if any */}
       {error && !isScanning && (
         <div className="scan-error">
-          ❌ {error}
+          <XCircle size={16} className="error-icon" /> {error}
         </div>
       )}
 
@@ -343,11 +347,11 @@ export default function PatternScanner({ filters, onFilterChange, onScanStateCha
       {showResultsModal && (
         <div className="scan-results-modal-overlay" onClick={() => setShowResultsModal(false)}>
           <div className="scan-results-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={() => setShowResultsModal(false)}>✕</button>
+            <button className="modal-close" onClick={() => setShowResultsModal(false)}><X size={20} /></button>
 
             {results.length > 0 ? (
               <>
-                <div className="modal-icon success">🎉</div>
+                <div className="modal-icon success"><PartyPopper size={48} /></div>
                 <h2 className="modal-title">Scan Hoàn Tất!</h2>
                 <p className="modal-message">
                   Tìm thấy <strong>{results.length}</strong> pattern{results.length > 1 ? 's' : ''} trong {filters?.coins?.length || 0} coins
@@ -388,12 +392,12 @@ export default function PatternScanner({ filters, onFilterChange, onScanStateCha
                 </div>
 
                 <button className="modal-action-btn" onClick={() => setShowResultsModal(false)}>
-                  ✨ View Results Below
+                  <Sparkles size={16} className="btn-icon" /> View Results Below
                 </button>
               </>
             ) : (
               <>
-                <div className="modal-icon info">ℹ️</div>
+                <div className="modal-icon info"><Info size={48} /></div>
                 <h2 className="modal-title">Không Tìm Thấy Pattern</h2>
                 <p className="modal-message">
                   Không tìm thấy pattern nào trong {filters?.coins?.length || 0} coins được quét.
@@ -413,31 +417,31 @@ export default function PatternScanner({ filters, onFilterChange, onScanStateCha
       {/* Upgrade Prompt for FREE tier users who have results */}
       {!isPremium && results.length > 0 && (
         <div className="upgrade-prompt">
-          <div className="upgrade-icon">🔓</div>
+          <div className="upgrade-icon"><Unlock size={32} /></div>
           <h3 className="upgrade-title">Mở Khóa Thêm Patterns!</h3>
           <p className="upgrade-description">
             Bạn đang dùng {patternCount} patterns. Nâng cấp để mở khóa nhiều hơn!
           </p>
           <div className="upgrade-features">
             <div className="upgrade-feature">
-              <span className="feature-icon">⭐</span>
+              <Star size={16} className="feature-icon" />
               <span className="feature-text">PRO: 7 patterns - 997.000đ/tháng</span>
             </div>
             <div className="upgrade-feature">
-              <span className="feature-icon">💎</span>
+              <Gem size={16} className="feature-icon" />
               <span className="feature-text">PREMIUM: 15 patterns - 1.997.000đ/tháng</span>
             </div>
             <div className="upgrade-feature">
-              <span className="feature-icon">🏆</span>
+              <Trophy size={16} className="feature-icon" />
               <span className="feature-text">VIP: 24 patterns + AI - 5.997.000đ/tháng</span>
             </div>
             <div className="upgrade-feature">
-              <span className="feature-icon">✅</span>
+              <Check size={16} className="feature-icon" />
               <span className="feature-text">Unlimited scans + Telegram alerts</span>
             </div>
           </div>
           <button className="btn-upgrade-prompt" onClick={() => window.location.href = '/pricing'}>
-            🚀 Xem Bảng Giá Scanner
+            <Rocket size={16} className="btn-icon" /> Xem Bảng Giá Scanner
           </button>
         </div>
       )}

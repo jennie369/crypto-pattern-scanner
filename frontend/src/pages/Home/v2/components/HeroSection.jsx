@@ -1,4 +1,5 @@
 import React from 'react';
+import { Flame, Check, Rocket, Star, Lock, Sparkles, Users } from 'lucide-react';
 import './HeroSection.css';
 
 export const HeroSection = () => {
@@ -25,7 +26,7 @@ export const HeroSection = () => {
           {/* LEFT - Hero Copy */}
           <div className="hero-left">
             <div className="hero-badge">
-              <span className="badge-icon">🔥</span>
+              <span className="badge-icon"><Flame size={20} /></span>
               <span className="badge-text">#1 CRYPTO PATTERN SCANNER</span>
             </div>
 
@@ -40,15 +41,15 @@ export const HeroSection = () => {
             {/* Key Benefits */}
             <ul className="hero-benefits">
               <li>
-                <span className="benefit-icon">✅</span>
+                <span className="benefit-icon"><Check size={20} /></span>
                 <span className="benefit-text">Real-time pattern detection with 24 algorithms</span>
               </li>
               <li>
-                <span className="benefit-icon">✅</span>
+                <span className="benefit-icon"><Check size={20} /></span>
                 <span className="benefit-text">AI-powered trading signals & risk management</span>
               </li>
               <li>
-                <span className="benefit-icon">✅</span>
+                <span className="benefit-icon"><Check size={20} /></span>
                 <span className="benefit-text">Backtesting & portfolio tracking tools</span>
               </li>
             </ul>
@@ -59,7 +60,7 @@ export const HeroSection = () => {
                 className="btn-primary btn-lg"
                 onClick={handleStartFree}
               >
-                <span>🚀</span>
+                <span><Rocket size={20} /></span>
                 Bắt Đầu Miễn Phí
               </button>
 
@@ -74,11 +75,11 @@ export const HeroSection = () => {
             {/* Trust Badges */}
             <div className="hero-trust">
               <div className="trust-item">
-                <span className="trust-icon">⭐</span>
+                <span className="trust-icon"><Star size={20} /></span>
                 <span className="trust-text">4.8/5 từ 1,234 đánh giá</span>
               </div>
               <div className="trust-item">
-                <span className="trust-icon">🔒</span>
+                <span className="trust-icon"><Lock size={20} /></span>
                 <span className="trust-text">Bảo mật SSL 256-bit</span>
               </div>
             </div>
@@ -88,7 +89,7 @@ export const HeroSection = () => {
           <div className="hero-right">
             <div className="chatbot-preview-card">
               <div className="chatbot-header">
-                <div className="chatbot-avatar">🔮</div>
+                <div className="chatbot-avatar"><Sparkles size={24} /></div>
                 <div>
                   <div className="chatbot-title">Gem Master Chatbot</div>
                   <div className="chatbot-subtitle">
@@ -100,13 +101,13 @@ export const HeroSection = () => {
 
               <div className="chatbot-messages">
                 <div className="message message-bot">
-                  <div className="message-avatar">🔮</div>
+                  <div className="message-avatar"><Sparkles size={20} /></div>
                   <div className="message-bubble">
                     Chào bạn! Tôi có thể giúp bạn:
                     <ul>
-                      <li>🎴 Xem vận may I Ching</li>
-                      <li>🔮 Đọc bài Tarot</li>
-                      <li>📊 Tư vấn trading</li>
+                      <li><Sparkles size={16} /> Xem vận may I Ching</li>
+                      <li><Sparkles size={16} /> Đọc bài Tarot</li>
+                      <li><Sparkles size={16} /> Tư vấn trading</li>
                     </ul>
                   </div>
                 </div>
@@ -118,7 +119,7 @@ export const HeroSection = () => {
                 </div>
 
                 <div className="message message-bot">
-                  <div className="message-avatar">🔮</div>
+                  <div className="message-avatar"><Sparkles size={20} /></div>
                   <div className="message-bubble">
                     <div className="hexagram">☰</div>
                     <strong>Quẻ Thiên (Heaven)</strong>
@@ -132,12 +133,12 @@ export const HeroSection = () => {
                 style={{ width: '100%' }}
                 onClick={handleTryChatbot}
               >
-                <span>✨</span>
+                <span><Sparkles size={20} /></span>
                 Thử Ngay Miễn Phí
               </button>
 
               <div className="chatbot-counter">
-                <div className="counter-icon animate-pulse">👥</div>
+                <div className="counter-icon animate-pulse"><Users size={20} /></div>
                 <div className="counter-text">
                   <strong>5,234</strong> traders đang sử dụng
                 </div>

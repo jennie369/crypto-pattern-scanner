@@ -1,4 +1,5 @@
 import React from 'react'
+import { AlertTriangle, RefreshCw } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import UpgradePrompt from '../UpgradePrompt/UpgradePrompt'
 import './TierGuard.css'
@@ -69,13 +70,13 @@ export default function TierGuard({
   if (!profile) {
     return (
       <div className="tier-guard-error">
-        <div className="error-icon">⚠️</div>
+        <div className="error-icon"><AlertTriangle size={48} /></div>
         <p className="error-message">Cannot load account information. Please try logging in again.</p>
         <button
           className="btn-retry"
           onClick={() => window.location.reload()}
         >
-          🔄 Reload Page
+          <RefreshCw size={18} /> Reload Page
         </button>
       </div>
     )

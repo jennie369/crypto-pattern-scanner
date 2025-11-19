@@ -1,0 +1,310 @@
+/* ==========================================
+   Trading Mode Toggle Component Styles
+   ========================================== */
+
+.trading-mode-toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  user-select: none;
+}
+
+.trading-mode-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  transition: color 0.3s ease;
+}
+
+.trading-mode-label .mode-text.active {
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ==========================================
+   Toggle Switch
+   ========================================== */
+
+.trading-mode-toggle {
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.trading-mode-toggle:hover {
+  transform: scale(1.05);
+}
+
+.trading-mode-toggle:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.3);
+  outline-offset: 4px;
+  border-radius: 50px;
+}
+
+/* Toggle Track */
+.toggle-track {
+  position: relative;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50px;
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Toggle Thumb */
+.toggle-thumb {
+  position: absolute;
+  top: 4px;
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4),
+              0 2px 4px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
+}
+
+.thumb-icon {
+  font-size: 1.2em;
+  line-height: 1;
+}
+
+/* Toggle Labels */
+.toggle-labels {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1em;
+  font-size: 0.7em;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  z-index: 1;
+}
+
+.label-real,
+.label-paper {
+  transition: all 0.3s ease;
+  opacity: 0.5;
+}
+
+/* ==========================================
+   Size Variants
+   ========================================== */
+
+/* Small */
+.trading-mode-toggle.small .toggle-track {
+  width: 80px;
+  height: 32px;
+}
+
+.trading-mode-toggle.small .toggle-thumb {
+  width: 24px;
+  height: 24px;
+  left: 4px;
+}
+
+.trading-mode-toggle.small .toggle-labels {
+  font-size: 0.6em;
+  padding: 0 0.8em;
+}
+
+/* Medium (default) */
+.trading-mode-toggle.medium .toggle-track {
+  width: 100px;
+  height: 40px;
+}
+
+.trading-mode-toggle.medium .toggle-thumb {
+  width: 32px;
+  height: 32px;
+  left: 4px;
+}
+
+.trading-mode-toggle.medium .toggle-labels {
+  font-size: 0.7em;
+  padding: 0 1em;
+}
+
+/* Large */
+.trading-mode-toggle.large .toggle-track {
+  width: 120px;
+  height: 50px;
+}
+
+.trading-mode-toggle.large .toggle-thumb {
+  width: 42px;
+  height: 42px;
+  left: 4px;
+}
+
+.trading-mode-toggle.large .toggle-labels {
+  font-size: 0.8em;
+  padding: 0 1.2em;
+}
+
+/* ==========================================
+   Mode States
+   ========================================== */
+
+/* Real Mode (Gold) */
+.trading-mode-toggle.real .toggle-track {
+  border-color: rgba(255, 215, 0, 0.4);
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.1));
+}
+
+.trading-mode-toggle.real .toggle-thumb {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.5),
+              0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.trading-mode-toggle.real .label-real {
+  opacity: 1;
+  color: #FFD700;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+}
+
+/* Paper Mode (Blue) */
+.trading-mode-toggle.paper .toggle-track {
+  border-color: rgba(59, 130, 246, 0.4);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.1));
+}
+
+.trading-mode-toggle.paper .toggle-thumb {
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5),
+              0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.trading-mode-toggle.paper .label-paper {
+  opacity: 1;
+  color: #3B82F6;
+  text-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+}
+
+/* Thumb Position - Small */
+.trading-mode-toggle.small.paper .toggle-thumb {
+  transform: translateX(48px);
+}
+
+/* Thumb Position - Medium */
+.trading-mode-toggle.medium.paper .toggle-thumb {
+  transform: translateX(60px);
+}
+
+/* Thumb Position - Large */
+.trading-mode-toggle.large.paper .toggle-thumb {
+  transform: translateX(70px);
+}
+
+/* ==========================================
+   Mode Badge
+   ========================================== */
+
+.mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.mode-badge.real {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.15));
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  color: #FFD700;
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
+}
+
+.mode-badge.paper {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.15));
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #3B82F6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.badge-icon {
+  font-size: 1.2em;
+  line-height: 1;
+}
+
+.badge-text {
+  font-weight: 700;
+}
+
+/* ==========================================
+   Animations
+   ========================================== */
+
+@keyframes glow-real {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.5),
+                0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(255, 215, 0, 0.7),
+                0 2px 6px rgba(0, 0, 0, 0.3);
+  }
+}
+
+@keyframes glow-paper {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5),
+                0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.7),
+                0 2px 6px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.trading-mode-toggle.real .toggle-thumb {
+  animation: glow-real 2s ease-in-out infinite;
+}
+
+.trading-mode-toggle.paper .toggle-thumb {
+  animation: glow-paper 2s ease-in-out infinite;
+}
+
+/* ==========================================
+   Responsive
+   ========================================== */
+
+@media (max-width: 768px) {
+  .trading-mode-toggle-container {
+    gap: 0.75rem;
+  }
+
+  .trading-mode-label {
+    font-size: 0.75rem;
+  }
+
+  .mode-badge {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .trading-mode-label {
+    display: none;
+  }
+
+  .mode-badge {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
+  }
+}

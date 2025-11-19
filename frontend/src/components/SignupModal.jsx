@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { Gem, AlertTriangle, CheckCircle } from 'lucide-react';
 import './SignupModal.css';
 
 export default function SignupModal({ onClose, quotaRemaining }) {
@@ -48,14 +49,14 @@ export default function SignupModal({ onClose, quotaRemaining }) {
         <button className="modal-close" onClick={onClose}>×</button>
 
         <div className="modal-header">
-          <span className="modal-icon">💎</span>
+          <span className="modal-icon"><Gem size={48} /></span>
           <h2>Đăng Ký FREE</h2>
           <p>Nhận 5 lượt scan miễn phí mỗi ngày!</p>
         </div>
 
         {quotaRemaining !== undefined && quotaRemaining === 0 && (
           <div className="modal-alert">
-            ⚠️ Bạn đã hết lượt scan BTC miễn phí hôm nay. Đăng ký để có thêm 5 lượt scan toàn bộ 20+ coins!
+            <AlertTriangle size={18} /> Bạn đã hết lượt scan BTC miễn phí hôm nay. Đăng ký để có thêm 5 lượt scan toàn bộ 20+ coins!
           </div>
         )}
 
@@ -113,10 +114,10 @@ export default function SignupModal({ onClose, quotaRemaining }) {
         <div className="modal-benefits">
           <h4>Bạn sẽ nhận được:</h4>
           <ul>
-            <li>✅ 5 lượt scan/ngày (20+ coins)</li>
-            <li>✅ 6 basic patterns</li>
-            <li>✅ Trading journal (50 trades)</li>
-            <li>✅ Real-time price alerts</li>
+            <li><CheckCircle size={16} /> 5 lượt scan/ngày (20+ coins)</li>
+            <li><CheckCircle size={16} /> 6 basic patterns</li>
+            <li><CheckCircle size={16} /> Trading journal (50 trades)</li>
+            <li><CheckCircle size={16} /> Real-time price alerts</li>
           </ul>
         </div>
 

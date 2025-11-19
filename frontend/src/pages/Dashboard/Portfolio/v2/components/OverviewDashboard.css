@@ -52,6 +52,41 @@
   color: var(--accent-red);
 }
 
+/* Stat Details (for Win Rate card) */
+.stat-details {
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.stat-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--text-xs);
+}
+
+.detail-label {
+  color: var(--text-muted);
+  font-weight: var(--font-medium);
+}
+
+.detail-value {
+  color: var(--text-secondary);
+  font-weight: var(--font-semibold);
+}
+
+.detail-value.positive {
+  color: var(--accent-green);
+}
+
+.detail-value.negative {
+  color: var(--accent-red);
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .stats-grid {

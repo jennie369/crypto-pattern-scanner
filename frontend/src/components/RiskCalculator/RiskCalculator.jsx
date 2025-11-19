@@ -2,6 +2,24 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { supabase } from '../../lib/supabaseClient'
+import {
+  BarChart3,
+  AlertTriangle,
+  XCircle,
+  CheckCircle,
+  TrendingUp,
+  TrendingDown,
+  Star,
+  Gem,
+  Calculator,
+  Save,
+  LineChart,
+  Lock,
+  Download,
+  Trash2,
+  ClipboardList,
+  Lightbulb
+} from 'lucide-react'
 import './RiskCalculator.css'
 
 /**
@@ -148,7 +166,7 @@ export default function RiskCalculator({ pattern = null }) {
 
   const calculateRisk = () => {
     if (!formData.accountBalance || !formData.entryPrice) {
-      showNotificationModal('⚠️ Vui lòng điền đầy đủ thông tin!', 'warning')
+      showNotificationModal('Vui lòng điền đầy đủ thông tin!', 'warning')
       return
     }
 
@@ -162,7 +180,7 @@ export default function RiskCalculator({ pattern = null }) {
       sl = calculateZoneSL()
     } else {
       if (!formData.stopLoss) {
-        showNotificationModal('⚠️ Vui lòng điền Stop Loss!', 'warning')
+        showNotificationModal('Vui lòng điền Stop Loss!', 'warning')
         return
       }
       sl = parseFloat(formData.stopLoss)
@@ -174,13 +192,13 @@ export default function RiskCalculator({ pattern = null }) {
     if (formData.positionType === 'LONG') {
       slDistance = entry - sl
       if (slDistance <= 0) {
-        showNotificationModal('❌ LONG position: Stop Loss phải thấp hơn Entry!', 'error')
+        showNotificationModal('LONG position: Stop Loss phải thấp hơn Entry!', 'error')
         return
       }
     } else {
       slDistance = sl - entry
       if (slDistance <= 0) {
-        showNotificationModal('❌ SHORT position: Stop Loss phải cao hơn Entry!', 'error')
+        showNotificationModal('SHORT position: Stop Loss phải cao hơn Entry!', 'error')
         return
       }
     }
@@ -252,12 +270,12 @@ export default function RiskCalculator({ pattern = null }) {
       if (formData.positionType === 'LONG') {
         tpDistance = tp - entry
         if (tpDistance <= 0) {
-          showNotificationModal('⚠️ LONG position: Take Profit phải cao hơn Entry!', 'warning')
+          showNotificationModal('LONG position: Take Profit phải cao hơn Entry!', 'warning')
         }
       } else {
         tpDistance = entry - tp
         if (tpDistance <= 0) {
-          showNotificationModal('⚠️ SHORT position: Take Profit phải thấp hơn Entry!', 'warning')
+          showNotificationModal('SHORT position: Take Profit phải thấp hơn Entry!', 'warning')
         }
       }
 
@@ -290,12 +308,12 @@ export default function RiskCalculator({ pattern = null }) {
 
   const saveCalculation = async () => {
     if (userTier === 'free') {
-      showNotificationModal('⚠️ FREE tier không thể lưu calculations. Upgrade để unlock!', 'warning')
+      showNotificationModal('FREE tier không thể lưu calculations. Upgrade để unlock!', 'warning')
       return
     }
 
     if (!results) {
-      showNotificationModal('⚠️ Vui lòng tính toán trước khi lưu!', 'warning')
+      showNotificationModal('Vui lòng tính toán trước khi lưu!', 'warning')
       return
     }
 
@@ -317,11 +335,11 @@ export default function RiskCalculator({ pattern = null }) {
 
       if (error) throw error
 
-      showNotificationModal('✅ Đã lưu calculation!', 'success')
+      showNotificationModal('Đã lưu calculation!', 'success')
       fetchSavedCalculations()
     } catch (error) {
       console.error('Error saving calculation:', error)
-      showNotificationModal('❌ Lỗi khi lưu: ' + error.message, 'error')
+      showNotificationModal('Lỗi khi lưu: ' + error.message, 'error')
     }
   }
 
@@ -342,11 +360,11 @@ export default function RiskCalculator({ pattern = null }) {
 
       if (error) throw error
 
-      showNotificationModal('✅ Đã xóa calculation!', 'success')
+      showNotificationModal('Đã xóa calculation!', 'success')
       fetchSavedCalculations()
     } catch (error) {
       console.error('Error deleting calculation:', error)
-      showNotificationModal('❌ Lỗi khi xóa: ' + error.message, 'error')
+      showNotificationModal('Lỗi khi xóa: ' + error.message, 'error')
     }
   }
 
@@ -359,14 +377,16 @@ export default function RiskCalculator({ pattern = null }) {
       takeProfit: calc.take_profit ? calc.take_profit.toString() : '',
       positionType: calc.position_type
     })
-    showNotificationModal('✅ Đã load calculation!', 'success')
+    showNotificationModal('Đã load calculation!', 'success')
   }
 
   return (
     <div className="risk-calculator">
       <div className="calculator-container">
         <div className="calculator-header">
-          <h2>📊 Máy Tính Rủi Ro</h2>
+          <h2 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+            <BarChart3 size={20} /> Máy Tính Rủi Ro
+          </h2>
           <span className="tier-badge">{userTier.toUpperCase()}</span>
         </div>
 
@@ -405,15 +425,17 @@ export default function RiskCalculator({ pattern = null }) {
                 type="button"
                 className={`type-btn ${formData.positionType === 'LONG' ? 'active long' : ''}`}
                 onClick={() => setFormData(prev => ({ ...prev, positionType: 'LONG' }))}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
               >
-                🟢 LONG
+                <TrendingUp size={16} /> LONG
               </button>
               <button
                 type="button"
                 className={`type-btn ${formData.positionType === 'SHORT' ? 'active short' : ''}`}
                 onClick={() => setFormData(prev => ({ ...prev, positionType: 'SHORT' }))}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
               >
-                🔴 SHORT
+                <TrendingDown size={16} /> SHORT
               </button>
             </div>
           </div>
@@ -443,7 +465,9 @@ export default function RiskCalculator({ pattern = null }) {
                       checked={useZoneSL}
                       onChange={(e) => setUseZoneSL(e.target.checked)}
                     />
-                    <span>⭐ Use Zone SL (Auto)</span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                      <Star size={16} /> Use Zone SL (Auto)
+                    </span>
                   </label>
                   {useZoneSL && (
                     <div className="zone-sl-preview">
@@ -474,7 +498,9 @@ export default function RiskCalculator({ pattern = null }) {
                 checked={useMultipleTP}
                 onChange={(e) => setUseMultipleTP(e.target.checked)}
               />
-              <span>💎 Multiple TPs (1:2, 1:3, 1:5)</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <Gem size={16} /> Multiple TPs (1:2, 1:3, 1:5)
+              </span>
             </label>
             {useMultipleTP && (
               <small className="form-hint">Auto-calculated: 50% @ TP1, 30% @ TP2, 20% @ TP3</small>
@@ -496,12 +522,12 @@ export default function RiskCalculator({ pattern = null }) {
           )}
 
           <div className="form-actions">
-            <button type="button" className="btn-calculate" onClick={calculateRisk}>
-              🧮 Tính Toán
+            <button type="button" className="btn-calculate" onClick={calculateRisk} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              <Calculator size={16} /> Tính Toán
             </button>
             {userTier !== 'free' && results && (
-              <button type="button" className="btn-save" onClick={saveCalculation}>
-                💾 Lưu
+              <button type="button" className="btn-save" onClick={saveCalculation} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <Save size={16} /> Lưu
               </button>
             )}
           </div>
@@ -509,7 +535,9 @@ export default function RiskCalculator({ pattern = null }) {
 
         {results && (
           <div className="calculation-results">
-            <h3>📈 Kết Quả</h3>
+            <h3 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              <LineChart size={20} /> Kết Quả
+            </h3>
 
             <div className="results-grid">
               <div className="result-card primary">
@@ -537,7 +565,9 @@ export default function RiskCalculator({ pattern = null }) {
               {/* Show Zone SL if used */}
               {results.useZoneSL && (
                 <div className="result-card highlight">
-                  <div className="result-label">⭐ Zone SL (Auto)</div>
+                  <div className="result-label" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                    <Star size={16} /> Zone SL (Auto)
+                  </div>
                   <div className="result-value">${results.stopLoss}</div>
                 </div>
               )}
@@ -567,7 +597,9 @@ export default function RiskCalculator({ pattern = null }) {
             {/* 🆕 Multiple TPs Display */}
             {results.multipleTPs && (
               <div className="multiple-tps-section">
-                <h4>💎 Multiple Take Profit Targets</h4>
+                <h4 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                  <Gem size={20} /> Multiple Take Profit Targets
+                </h4>
 
                 <div className="tps-grid">
                   {/* TP1 - 1:2 R:R - 50% */}
@@ -619,7 +651,9 @@ export default function RiskCalculator({ pattern = null }) {
                 </div>
 
                 <div className="trading-plan">
-                  <h5>📋 Trading Plan:</h5>
+                  <h5 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                    <ClipboardList size={20} /> Trading Plan:
+                  </h5>
                   <ol>
                     <li>Close <strong>50%</strong> at TP1 (${results.multipleTPs.tp1.price}) = +${results.multipleTPs.tp1.profit}</li>
                     <li>Close <strong>30%</strong> at TP2 (${results.multipleTPs.tp2.price}) = +${results.multipleTPs.tp2.profit}</li>
@@ -631,11 +665,14 @@ export default function RiskCalculator({ pattern = null }) {
             )}
 
             <div className="results-summary">
-              <p>
-                💡 <strong>Tóm Tắt:</strong> Với tài khoản ${formData.accountBalance},
-                rủi ro {formData.riskPercent}% = ${results.riskAmount}.
-                Bạn nên mua {results.positionSize} đơn vị tại ${formData.entryPrice}.
-                {results.riskReward && ` Tỷ lệ R:R là 1:${results.riskReward}.`}
+              <p style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                <Lightbulb size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
+                <span>
+                  <strong>Tóm Tắt:</strong> Với tài khoản ${formData.accountBalance},
+                  rủi ro {formData.riskPercent}% = ${results.riskAmount}.
+                  Bạn nên mua {results.positionSize} đơn vị tại ${formData.entryPrice}.
+                  {results.riskReward && ` Tỷ lệ R:R là 1:${results.riskReward}.`}
+                </span>
               </p>
             </div>
           </div>
@@ -643,7 +680,9 @@ export default function RiskCalculator({ pattern = null }) {
 
         {userTier === 'free' && (
           <div className="upgrade-prompt">
-            <p>🔒 Nâng cấp lên <strong>GÓI 1</strong> để lưu tính toán!</p>
+            <p style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Lock size={16} /> Nâng cấp lên <strong>GÓI 1</strong> để lưu tính toán!
+            </p>
             <button type="button" className="btn-upgrade" onClick={handleUpgrade}>
               Nâng Cấp Ngay
             </button>
@@ -654,7 +693,9 @@ export default function RiskCalculator({ pattern = null }) {
         {userTier !== 'free' && savedCalculations.length > 0 && (
           <div className="saved-calculations">
             <div className="saved-header">
-              <h3>💾 Lịch Sử Tính Toán ({savedCalculations.length})</h3>
+              <h3 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <Save size={20} /> Lịch Sử Tính Toán ({savedCalculations.length})
+              </h3>
               <small>10 tính toán gần nhất</small>
             </div>
 
@@ -662,8 +703,8 @@ export default function RiskCalculator({ pattern = null }) {
               {savedCalculations.map((calc) => (
                 <div key={calc.id} className="saved-item">
                   <div className="saved-item-header">
-                    <span className={`position-badge ${calc.position_type.toLowerCase()}`}>
-                      {calc.position_type === 'LONG' ? '🟢' : '🔴'} {calc.position_type}
+                    <span className={`position-badge ${calc.position_type.toLowerCase()}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                      {calc.position_type === 'LONG' ? <TrendingUp size={16} /> : <TrendingDown size={16} />} {calc.position_type}
                     </span>
                     <span className="saved-date">
                       {new Date(calc.created_at).toLocaleDateString('vi-VN', {
@@ -713,16 +754,18 @@ export default function RiskCalculator({ pattern = null }) {
                       className="btn-load"
                       onClick={() => loadCalculation(calc)}
                       title="Load vào form"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                     >
-                      📥 Load
+                      <Download size={16} /> Load
                     </button>
                     <button
                       type="button"
                       className="btn-delete"
                       onClick={() => deleteCalculation(calc.id)}
                       title="Xóa"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                     >
-                      🗑️ Xóa
+                      <Trash2 size={16} /> Xóa
                     </button>
                   </div>
                 </div>
@@ -738,9 +781,9 @@ export default function RiskCalculator({ pattern = null }) {
           <div className={`notification-modal ${notificationType}`} onClick={(e) => e.stopPropagation()}>
             <button className="modal-close-btn" onClick={() => setShowNotification(false)}>✕</button>
             <div className="notification-icon">
-              {notificationType === 'success' && '✅'}
-              {notificationType === 'error' && '❌'}
-              {notificationType === 'warning' && '⚠️'}
+              {notificationType === 'success' && <CheckCircle size={48} />}
+              {notificationType === 'error' && <XCircle size={48} />}
+              {notificationType === 'warning' && <AlertTriangle size={48} />}
             </div>
             <p className="notification-message">{notificationMessage}</p>
             <button className="notification-ok-btn" onClick={() => setShowNotification(false)}>

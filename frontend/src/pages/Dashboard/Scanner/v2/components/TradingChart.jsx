@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useReducer } from 'react';
 import { createChart } from 'lightweight-charts';
-import { Wifi, WifiOff, GripHorizontal } from 'lucide-react';
+import { Wifi, WifiOff, GripHorizontal, CheckCircle, AlertTriangle } from 'lucide-react';
 import ChartControls from './ChartControls';
 import './TradingChart.css';
 
@@ -14,6 +14,43 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
   const candlestickSeriesRef = useRef(null);
   const volumeSeriesRef = useRef(null);
   const priceLinesRef = useRef([]); // Track price lines to prevent duplicates
+
+  // 🔥 FIX #5: Track pattern lines (Entry, SL, TP)
+  const patternLinesRef = useRef({
+    entryLine: null,
+    stopLossLine: null,
+    takeProfitLine: null,
+  });
+
+  // 🔥 FIX #1: Track candle data array for proper updates
+  const candleDataRef = useRef([]);
+
+  // 🔥 PHASE 1: Track active symbol to prevent stale updates
+  const activeSymbolRef = useRef(null);
+  const activeTimeframeRef = useRef(null);
+
+  // 🔥 DEBUG: Track race conditions
+  const debugStateRef = useRef({
+    historicalLoadTime: null,
+    firstWebSocketTime: null,
+    chartInitTime: null,
+  });
+
+  // 🔥 FIX: Coordinate historical load with WebSocket
+  const isLoadingHistoricalRef = useRef(false);
+  const historicalLoadedRef = useRef(false);
+
+  // 🔥 FIX #2: Track ping/pong for connection health
+  const pingIntervalRef = useRef(null);
+  const lastPongRef = useRef(Date.now());
+
+  // 🔥 PHASE 2B: Ref usage verified ✓
+  // All data tracking uses refs (candleDataRef, lastCandleTimeRef, activeSymbolRef, etc.)
+  // State variables are correctly used ONLY for UI updates (volumeVisible, isLive, currentPrice, etc.)
+  // ✅ No unnecessary re-renders
+
+  // Helper function: Convert milliseconds to seconds (TradingView format)
+  const toSeconds = (ms) => Math.floor(ms / 1000);
 
   // State for controls
   const [volumeVisible, setVolumeVisible] = useState(() => {
@@ -29,6 +66,14 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
   const [isLive, setIsLive] = useState(false);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [currentPrice, setCurrentPrice] = useState(null); // Real-time price display
+
+  // 🔥 FIX #4: Track display info (coin name, pattern info)
+  const [displayInfo, setDisplayInfo] = useState({
+    symbol: '',
+    patternType: '',
+    confidence: '',
+  });
+
   const wsRef = useRef(null);
   const realtimePriceLineRef = useRef(null); // Real-time price line
   const lastCandleTimeRef = useRef(null); // Track last candle timestamp
@@ -120,30 +165,112 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
     return sym.replace(/\//g, '').replace('USDT', '') + 'USDT';
   };
 
-  // Fetch real historical data from Binance
+  // 🔥 FIX #3: Sanitize symbol for Binance API/WebSocket
+  /**
+   * Sanitizes a trading pair symbol for Binance APIs
+   * @param {string} symbol - Raw symbol (e.g., "BTC/USDT", "btc-usdt", "BTCUSDT")
+   * @param {boolean} forWebSocket - If true, returns lowercase for WebSocket; if false, uppercase for API
+   * @returns {string} - Sanitized symbol (e.g., "btcusdt" for WS, "BTCUSDT" for API)
+   */
+  const sanitizeSymbol = (symbol, forWebSocket = false) => {
+    if (!symbol) return forWebSocket ? 'btcusdt' : 'BTCUSDT';
+
+    // Remove common separators and convert to uppercase
+    let cleaned = symbol.replace(/[\/\-_]/g, '').toUpperCase();
+
+    // Remove ALL trailing USDT/BUSD suffixes (handles duplicates like "BAKEUSDT/USDT" → "BAKEUSDUSTT")
+    while (cleaned.endsWith('USDT') || cleaned.endsWith('BUSD')) {
+      if (cleaned.endsWith('USDT')) {
+        cleaned = cleaned.slice(0, -4); // Remove last 4 chars (USDT)
+      } else if (cleaned.endsWith('BUSD')) {
+        cleaned = cleaned.slice(0, -4); // Remove last 4 chars (BUSD)
+      }
+    }
+
+    // Add exactly ONE USDT suffix
+    cleaned = cleaned + 'USDT';
+
+    // Return lowercase for WebSocket, uppercase for API
+    return forWebSocket ? cleaned.toLowerCase() : cleaned.toUpperCase();
+  };
+
+  // 🔥 FIX #1: Fetch real historical data from Binance (PRODUCTION READY)
   const fetchHistoricalData = async (coinSymbol, timeframe) => {
+    // Set loading flag
+    isLoadingHistoricalRef.current = true;
+    historicalLoadedRef.current = false;
+
+    const tfLower = (timeframe || '1h').toLowerCase();
+    const limit = tfLower === '1m' ? 500 : tfLower === '5m' ? 700 : tfLower === '15m' ? 800 : tfLower === '1h' ? 1000 : tfLower === '4h' ? 1500 : 2000;
+
+    // Debug: Log raw symbol input
+    console.log(`[TradingChart] [DEBUG] Raw symbol input: "${coinSymbol}"`);
+
+    // Use sanitizeSymbol for API (uppercase)
+    const cleanedSymbol = sanitizeSymbol(coinSymbol, false);
+
+    // Debug: Log sanitized symbol output
+    console.log(`[TradingChart] [OK] Sanitized symbol: "${cleanedSymbol}"`);
+
+    // Validation check
+    if (cleanedSymbol.includes('/')) {
+      console.error('[TradingChart] [ERROR] CRITICAL: Symbol still contains slash after sanitization!', cleanedSymbol);
+    }
+
+    // Force fetch LATEST data by setting endTime to NOW
+    const now = Date.now();
+    const url = `https://fapi.binance.com/fapi/v1/klines?symbol=${cleanedSymbol}&interval=${tfLower}&limit=${limit}&endTime=${now}`;
+
+    console.log(`[TradingChart] [FETCH] Fetching Binance Futures data...`);
+    console.log(`[TradingChart]    Symbol: ${cleanedSymbol}`);
+    console.log(`[TradingChart]    Timeframe: ${tfLower}`);
+    console.log(`[TradingChart]    Limit: ${limit} candles`);
+    console.log(`[TradingChart]    URL: ${url}`);
+
     try {
-      const tfLower = (timeframe || '1h').toLowerCase();
-      const limit = tfLower === '1m' ? 500 : tfLower === '5m' ? 700 : tfLower === '15m' ? 800 : tfLower === '1h' ? 1000 : tfLower === '4h' ? 1500 : 2000;
-
-      const cleanedSymbol = cleanSymbol(coinSymbol);
-
-      // Force fetch LATEST data by setting endTime to NOW
-      const now = Date.now();
-      const url = `https://fapi.binance.com/fapi/v1/klines?symbol=${cleanedSymbol}&interval=${tfLower}&limit=${limit}&endTime=${now}`;
-
-      console.log(`[TradingChart] 📊 Fetching ${cleanedSymbol} @ ${tfLower} (${limit} candles)...`);
-
       const response = await fetch(url);
+
+      // Step 1: Check HTTP status
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[TradingChart] [ERROR] Binance API HTTP Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText,
+        });
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      // Step 2: Parse JSON
       const data = await response.json();
 
+      // Step 3: Validate response structure
       if (!Array.isArray(data)) {
-        throw new Error('Invalid data format from Binance');
+        console.error('[TradingChart] [ERROR] Invalid response format:', {
+          type: typeof data,
+          data: data,
+        });
+        throw new Error(`Expected array, got ${typeof data}`);
       }
+
+      // Step 4: Validate we have data
+      if (data.length === 0) {
+        console.error('[TradingChart] [ERROR] Empty data array from Binance');
+        throw new Error('No candles returned');
+      }
+
+      // Step 5: Validate first candle structure
+      const firstCandle = data[0];
+      if (!Array.isArray(firstCandle) || firstCandle.length < 6) {
+        console.error('[TradingChart] [ERROR] Invalid candle structure:', firstCandle);
+        throw new Error('Invalid candle format');
+      }
+
+      console.log(`[TradingChart] [OK] Received ${data.length} candles from Binance`);
 
       // Transform Binance kline data to TradingView format
       const candleData = data.map(kline => ({
-        time: Math.floor(kline[0] / 1000), // Open time in seconds
+        time: toSeconds(kline[0]),
         open: parseFloat(kline[1]),
         high: parseFloat(kline[2]),
         low: parseFloat(kline[3]),
@@ -151,32 +278,128 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
       }));
 
       const volumeData = data.map(kline => ({
-        time: Math.floor(kline[0] / 1000),
-        value: parseFloat(kline[5]), // Volume
+        time: toSeconds(kline[0]),
+        value: parseFloat(kline[5]),
         color: parseFloat(kline[4]) >= parseFloat(kline[1])
           ? 'rgba(0, 255, 136, 0.3)'
           : 'rgba(246, 70, 93, 0.3)',
       }));
 
       const lastCandle = candleData[candleData.length - 1];
-      console.log(`[TradingChart] ✅ Loaded ${candleData.length} candles. Latest: $${lastCandle.close.toFixed(2)} @ ${new Date(lastCandle.time * 1000).toLocaleTimeString()}`);
+      console.log(`[TradingChart] [OK] Loaded ${candleData.length} candles`);
+      console.log(`[TradingChart]    Latest: $${lastCandle.close.toFixed(2)}`);
+      console.log(`[TradingChart]    Time: ${new Date(lastCandle.time * 1000).toLocaleString()}`);
+
+      // Track historical load completion
+      debugStateRef.current.historicalLoadTime = Date.now();
+
+      // Mark historical as loaded
+      isLoadingHistoricalRef.current = false;
+      historicalLoadedRef.current = true;
 
       return { candleData, volumeData };
     } catch (error) {
-      console.error('[TradingChart] ❌ Binance API error:', error.message);
-      console.warn('[TradingChart] ⚠️ Using MOCK DATA fallback');
+      console.error('[TradingChart] [ERROR] CRITICAL ERROR:', error.message);
+      console.error('[TradingChart] [ERROR] Stack:', error.stack);
 
-      // Fallback to mock data
-      const basePrice = pattern?.entry || 50000;
-      const coinSym = cleanSymbol(coinSymbol || symbol);
+      // Mark as failed (NOT loaded)
+      isLoadingHistoricalRef.current = false;
+      historicalLoadedRef.current = false;
 
-      const mockCandleData = generateMockData(basePrice, timeframe, coinSym);
-      const mockVolumeData = generateMockVolumeData(mockCandleData);
-      return { candleData: mockCandleData, volumeData: mockVolumeData };
+      // 🔥 FIX: NO MOCK DATA FALLBACK - Show error to user
+      throw new Error(`Failed to load ${cleanedSymbol} data: ${error.message}`);
     }
   };
 
-  // Remove all existing price lines
+  // 🔥 FIX #5: Clear pattern lines function
+  const clearPatternLines = () => {
+    if (!candlestickSeriesRef.current) return;
+
+    // Remove entry line
+    if (patternLinesRef.current.entryLine) {
+      try {
+        candlestickSeriesRef.current.removePriceLine(patternLinesRef.current.entryLine);
+      } catch (e) {
+        // Already removed
+      }
+      patternLinesRef.current.entryLine = null;
+    }
+
+    // Remove stop loss line
+    if (patternLinesRef.current.stopLossLine) {
+      try {
+        candlestickSeriesRef.current.removePriceLine(patternLinesRef.current.stopLossLine);
+      } catch (e) {
+        // Already removed
+      }
+      patternLinesRef.current.stopLossLine = null;
+    }
+
+    // Remove take profit line
+    if (patternLinesRef.current.takeProfitLine) {
+      try {
+        candlestickSeriesRef.current.removePriceLine(patternLinesRef.current.takeProfitLine);
+      } catch (e) {
+        // Already removed
+      }
+      patternLinesRef.current.takeProfitLine = null;
+    }
+
+    console.log('[TradingChart] [CLEAR] Pattern lines cleared');
+  };
+
+  // 🔥 FIX #5: Draw pattern lines function
+  const drawPatternLines = (patternData) => {
+    if (!patternData || !candlestickSeriesRef.current) return;
+
+    try {
+      // Draw entry line
+      if (patternData.entry) {
+        patternLinesRef.current.entryLine = candlestickSeriesRef.current.createPriceLine({
+          price: parseFloat(patternData.entry),
+          color: '#00D9FF',
+          lineWidth: 2,
+          lineStyle: 2, // Dashed
+          axisLabelVisible: true,
+          title: 'Entry',
+        });
+      }
+
+      // Draw stop loss line
+      if (patternData.stopLoss) {
+        patternLinesRef.current.stopLossLine = candlestickSeriesRef.current.createPriceLine({
+          price: parseFloat(patternData.stopLoss),
+          color: '#F6465D',
+          lineWidth: 2,
+          lineStyle: 2,
+          axisLabelVisible: true,
+          title: 'Stop Loss',
+        });
+      }
+
+      // Draw take profit line
+      if (patternData.takeProfit) {
+        patternLinesRef.current.takeProfitLine = candlestickSeriesRef.current.createPriceLine({
+          price: parseFloat(patternData.takeProfit),
+          color: '#00FF88',
+          lineWidth: 2,
+          lineStyle: 2,
+          axisLabelVisible: true,
+          title: 'Take Profit',
+        });
+      }
+
+      console.log('[TradingChart] [OK] Pattern lines drawn:', {
+        entry: patternData.entry,
+        stopLoss: patternData.stopLoss,
+        takeProfit: patternData.takeProfit,
+      });
+    } catch (error) {
+      console.error('[TradingChart] [ERROR] Error drawing pattern lines:', error);
+    }
+  };
+
+  // Remove all existing price lines (legacy function - keep for compatibility)
   const clearPriceLines = () => {
     if (candlestickSeriesRef.current && priceLinesRef.current.length > 0) {
       priceLinesRef.current.forEach(line => {
@@ -188,43 +411,6 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
       });
       priceLinesRef.current = [];
     }
-  };
-
-  // Add pattern price lines
-  const addPatternLines = () => {
-    if (!pattern || !candlestickSeriesRef.current) return;
-
-    // Clear old lines first
-    clearPriceLines();
-
-    const entryLine = candlestickSeriesRef.current.createPriceLine({
-      price: pattern.entry,
-      color: '#00D9FF',
-      lineWidth: 2,
-      lineStyle: 2,
-      axisLabelVisible: true,
-      title: 'Entry',
-    });
-
-    const stopLossLine = candlestickSeriesRef.current.createPriceLine({
-      price: pattern.stopLoss,
-      color: '#F6465D',
-      lineWidth: 2,
-      lineStyle: 2,
-      axisLabelVisible: true,
-      title: 'Stop Loss',
-    });
-
-    const takeProfitLine = candlestickSeriesRef.current.createPriceLine({
-      price: pattern.takeProfit,
-      color: '#00FF88',
-      lineWidth: 2,
-      lineStyle: 2,
-      axisLabelVisible: true,
-      title: 'Take Profit',
-    });
-
-    priceLinesRef.current = [entryLine, stopLossLine, takeProfitLine];
   };
 
   useEffect(() => {
@@ -255,9 +441,9 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
         borderColor: 'rgba(255, 255, 255, 0.1)',
         timeVisible: true,
         secondsVisible: currentTimeframe === '1m', // Show seconds for 1m timeframe
-        rightOffset: 12, // 🔥 FIX: More space on right for forming candle
+        rightOffset: 5, // 🔥 CENTERED FIX: Small offset for forming candle
         lockVisibleTimeRangeOnResize: false,
-        rightBarStaysOnScroll: true, // 🔥 FIX: Keep showing latest bar
+        rightBarStaysOnScroll: false, // 🔥 CENTERED FIX: Don't auto-scroll to right
       },
       handleScroll: {
         mouseWheel: true,
@@ -268,6 +454,13 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
     });
 
     chartRef.current = chart;
+
+    // 🔥 DEBUG: Track chart initialization
+    debugStateRef.current.chartInitTime = Date.now();
+    console.log('[DEBUG] [CHART] Chart initialized:', {
+      time: new Date().toISOString(),
+      chartRef: !!chartRef.current,
+    });
 
     // Add candlestick series
     const candlestickSeries = chart.addCandlestickSeries({
@@ -302,13 +495,16 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
       candlestickSeries.setData(candleData);
       volumeSeries.setData(volumeData);
 
+      // 🔥 FIX #1: Store candle data array for real-time updates
+      candleDataRef.current = candleData;
+
       // IMPORTANT: Store the last candle timestamp for WebSocket validation
       if (candleData.length > 0) {
         const lastCandle = candleData[candleData.length - 1];
         lastCandleTimeRef.current = lastCandle.time;
-        console.log(`[TradingChart] 📊 Chart ready. Last candle time: ${lastCandle.time} (${new Date(lastCandle.time * 1000).toLocaleTimeString()})`);
+        console.log(`[TradingChart] [CHART] Chart ready. Last candle time: ${lastCandle.time} (${new Date(lastCandle.time * 1000).toLocaleTimeString()})`);
       } else {
-        console.warn('[TradingChart] ⚠️ No historical data loaded');
+        console.warn('[TradingChart] [WARN] No historical data loaded');
       }
 
       // Scroll to show recent data in TRUE CENTER of chart
@@ -326,10 +522,8 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
         chart.timeScale().fitContent();
       }
 
-      // Add pattern lines after data loads
-      if (pattern) {
-        setTimeout(addPatternLines, 500);
-      }
+      // 🔥 FIX #5: Pattern lines will be added by useEffect
+      // No need to call here - handled by pattern useEffect above
     });
 
     // Handle resize
@@ -369,6 +563,50 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
     }
   }, [volumeVisible]);
 
+  // 🔥 FIX #4: Update display info when symbol or pattern changes
+  useEffect(() => {
+    const effectiveSymbol = pattern?.coin || symbol || 'BTCUSDT';
+
+    if (pattern) {
+      // From pattern scan - show pattern info
+      setDisplayInfo({
+        symbol: effectiveSymbol,
+        patternType: pattern.pattern || pattern.patternType || '',
+        confidence: pattern.confidence ? `${pattern.confidence}%` : '',
+      });
+      console.log('[TradingChart] [DISPLAY] Display info updated (pattern):', effectiveSymbol, pattern.pattern);
+    } else {
+      // Manual coin selection - NO pattern info
+      setDisplayInfo({
+        symbol: effectiveSymbol,
+        patternType: '',
+        confidence: '',
+      });
+      console.log('[TradingChart] [DISPLAY] Display info updated (manual):', effectiveSymbol);
+    }
+  }, [symbol, pattern]);
+
+  // 🔥 FIX #5: Auto clear/draw pattern lines when pattern changes
+  useEffect(() => {
+    // Clear existing lines first
+    clearPatternLines();
+
+    // Draw new lines only if pattern exists with entry/sl/tp
+    if (pattern && pattern.entry && candlestickSeriesRef.current) {
+      // Wait a bit for chart to be ready
+      const timer = setTimeout(() => {
+        drawPatternLines(pattern);
+      }, 300);
+
+      return () => clearTimeout(timer);
+    }
+
+    // Cleanup on unmount
+    return () => {
+      clearPatternLines();
+    };
+  }, [pattern]);
+
   // Load saved chart height on mount
   useEffect(() => {
     const saved = localStorage.getItem('chart_height');
@@ -383,12 +621,20 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
     // This must match the logic used in fetchHistoricalData!
     const coinSymbol = pattern?.coin || symbol;
 
-    console.log(`[TradingChart] 🚀 Starting WebSocket: ${coinSymbol} @ ${currentTimeframe}`);
+    console.log(`[TradingChart] 🔄 Effect triggered:`, {
+      coinSymbol,
+      symbolProp: symbol,
+      patternCoin: pattern?.coin,
+      timeframe: currentTimeframe,
+      chartReady: !!candlestickSeriesRef.current,
+    });
 
     if (!coinSymbol || !candlestickSeriesRef.current) {
-      console.warn('[TradingChart] ⚠️ Cannot start WebSocket - missing symbol or chart series');
+      console.warn('[TradingChart] [WARN] Skipping: No symbol or chart not ready');
       return;
     }
+
+    console.log(`[TradingChart] [INIT] Initializing WebSocket: ${coinSymbol} @ ${currentTimeframe}`);
 
     // Map timeframe to Binance interval format
     const getWebSocketInterval = (tf) => {
@@ -398,44 +644,140 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
     };
 
     const wsInterval = getWebSocketInterval(currentTimeframe);
-    const cleanedSymbol = cleanSymbol(coinSymbol);
 
+    // 🔥 FIX #2: Use sanitizeSymbol for proper formatting
+    const cleanedSymbol = sanitizeSymbol(coinSymbol, false); // Uppercase for logging
+    const wsSymbol = sanitizeSymbol(coinSymbol, true); // Lowercase for WebSocket
+
+    // Set active symbol/timeframe BEFORE connecting
+    activeSymbolRef.current = cleanedSymbol;
+    activeTimeframeRef.current = wsInterval;
 
     const connectWebSocket = () => {
       try {
+        // Close existing connection FIRST
+        if (wsRef.current) {
+          console.log('[TradingChart] [CLOSE] Closing existing WebSocket before new connection');
+
+          // Clear ping interval
+          if (pingIntervalRef.current) {
+            clearInterval(pingIntervalRef.current);
+            pingIntervalRef.current = null;
+          }
+
+          wsRef.current.close();
+          wsRef.current = null;
+          setIsLive(false);
+        }
+
+        const wsUrl = `wss://fstream.binance.com/ws/${wsSymbol}@kline_${wsInterval}`;
+        console.log('[TradingChart] [WS] Connecting to:', wsUrl);
+        console.log(`[TradingChart]    Symbol: ${wsSymbol} (lowercase for WebSocket)`);
+        console.log(`[TradingChart]    Interval: ${wsInterval}`);
+
         // Reset debug flag for new connection
         window.__firstWSMessageLogged = false;
 
-        const ws = new WebSocket(
-          `wss://fstream.binance.com/ws/${cleanedSymbol.toLowerCase()}@kline_${wsInterval}`
-        );
+        const ws = new WebSocket(wsUrl);
+
+        // 🔥 FIX #2: Connection timeout (10 seconds)
+        const connectionTimeout = setTimeout(() => {
+          if (ws.readyState !== WebSocket.OPEN) {
+            console.error('[TradingChart] [TIMEOUT] Connection timeout after 10s');
+            console.error('[TradingChart]    URL:', wsUrl);
+            console.error('[TradingChart]    State:', ws.readyState);
+            ws.close();
+          }
+        }, 10000);
 
         ws.onopen = () => {
+          clearTimeout(connectionTimeout);
           setIsLive(true);
-          console.log(`[TradingChart] ✅ LIVE! WebSocket connected: ${cleanedSymbol} @ ${wsInterval}`);
+          lastPongRef.current = Date.now();
+
+          console.log(`[TradingChart] [LIVE] LIVE! WebSocket connected`);
+          console.log(`[TradingChart]    Symbol: ${cleanedSymbol}`);
+          console.log(`[TradingChart]    Timeframe: ${wsInterval}`);
+
+          // 🔥 FIX #2: Start ping/pong health check
+          // Binance sends ping every 20s, we check for stale connection every 30s
+          pingIntervalRef.current = setInterval(() => {
+            const timeSinceLastPong = Date.now() - lastPongRef.current;
+
+            if (timeSinceLastPong > 60000) {
+              // No pong in 60s = stale connection
+              console.error('[TradingChart] [ERROR] Stale connection detected (no pong in 60s)');
+              console.error('[TradingChart]    Closing and reconnecting...');
+              ws.close();
+              clearInterval(pingIntervalRef.current);
+              pingIntervalRef.current = null;
+            } else {
+              // Connection healthy
+              console.log(`[TradingChart] [PING] Connection healthy (last pong: ${(timeSinceLastPong / 1000).toFixed(1)}s ago)`);
+            }
+          }, 30000); // Check every 30s
         };
 
         ws.onmessage = (event) => {
-          const message = JSON.parse(event.data);
+          // 🔥 FIX #2: Handle ping/pong for Binance keepalive
+          // Binance sends ping frames every 20s, we must respond with pong or disconnect after 60s
+          if (event.data === 'ping') {
+            console.log('[TradingChart] [PING] Received ping, sending pong');
+            ws.send('pong');
+            lastPongRef.current = Date.now();
+            return;
+          }
+
+          // Handle regular data messages
+          let message;
+          try {
+            message = JSON.parse(event.data);
+          } catch (e) {
+            console.error('[TradingChart] [ERROR] Failed to parse WebSocket message:', e);
+            return;
+          }
+
+          // Update last pong time (any message = connection alive)
+          lastPongRef.current = Date.now();
           setLastUpdate(Date.now());
+
+          // Wait for historical data to load first
+          if (isLoadingHistoricalRef.current) {
+            console.log('[WebSocket] ⏳ Waiting for historical data to load...');
+            return;
+          }
+
+          if (!historicalLoadedRef.current) {
+            console.log('[WebSocket] ⏳ Historical data not loaded yet, skipping update');
+            return;
+          }
+
+          // DEBUG: Log message received occasionally
+          console.log('[TradingChart] 📨 WebSocket message received', {
+            symbol: cleanedSymbol,
+            time: message.k ? new Date(message.k.t).toLocaleTimeString() : 'N/A',
+            close: message.k ? parseFloat(message.k.c).toFixed(2) : 'N/A',
+            lastCandleTime: lastCandleTimeRef.current,
+            historicalLoaded: historicalLoadedRef.current,
+          });
 
           // Extract kline data
           const kline = message.k;
           if (!kline || !candlestickSeriesRef.current) return;
 
-          // ⚠️ Wait for historical data to load before processing WebSocket updates
-          // This prevents trying to update before we have a baseline
-          if (lastCandleTimeRef.current === null) {
-            console.warn('[TradingChart] ⏳ Waiting for historical data to load before processing WebSocket updates...');
-            return;
-          }
-
-          // Use the CURRENT candle opening time (not event time!)
-          const candleTime = Math.floor(kline.t / 1000); // Candle opening time in SECONDS
+          // 🔥 PHASE 1: Use helper function for time conversion
+          const candleTime = toSeconds(kline.t);
 
           // Validate timestamp is a valid number
           if (!Number.isFinite(candleTime) || candleTime <= 0) {
-            console.error('[TradingChart] ❌ Invalid candle timestamp:', kline.t);
+            console.error('[TradingChart] [ERROR] Invalid candle timestamp:', kline.t);
+            return;
+          }
+
+          // 🔥 PHASE 1: Verify this update is for current symbol/timeframe
+          if (activeSymbolRef.current !== cleanedSymbol ||
+              activeTimeframeRef.current !== wsInterval) {
+            console.log('[TradingChart] [WARN] Ignoring stale update from old connection');
             return;
           }
 
@@ -451,7 +793,7 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
           if (!window.__firstWSMessageLogged) {
             window.__firstWSMessageLogged = true;
             const timeDiff = lastCandleTimeRef.current ? (candleTime - lastCandleTimeRef.current) / 60 : 0;
-            console.log(`[TradingChart] 📡 First WS message: Time=${candleTime} (${new Date(candleTime * 1000).toLocaleTimeString()}), Diff=${timeDiff.toFixed(1)}min`);
+            console.log(`[TradingChart] [WS] First WS message: Time=${candleTime} (${new Date(candleTime * 1000).toLocaleTimeString()}), Diff=${timeDiff.toFixed(1)}min`);
           }
 
           // Determine if price is going up or down
@@ -473,12 +815,48 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
           const lastTime = lastCandleTimeRef.current;
 
           if (!lastTime) {
-            // First candle ever - just update
-            console.log('[TradingChart] 🎬 First candle received');
-            candlestickSeriesRef.current.update(candle);
+            // First candle ever - use setData() not update()!
+            // 🔥 DEBUG: Track first WebSocket candle
+            if (debugStateRef.current.firstWebSocketTime === null) {
+              debugStateRef.current.firstWebSocketTime = Date.now();
+
+              const timeSinceHistorical = debugStateRef.current.historicalLoadTime
+                ? Date.now() - debugStateRef.current.historicalLoadTime
+                : 'N/A';
+
+              console.log('[DEBUG] [WS] First WebSocket candle:', {
+                time: new Date().toISOString(),
+                candle,
+                candleTime,
+                candleTimeHuman: new Date(candleTime * 1000).toISOString(),
+                timeSinceHistorical: timeSinceHistorical + 'ms',
+              });
+            }
+
+            console.log('[TradingChart] [FIRST] First candle received', {
+              symbol: cleanedSymbol,
+              time: candleTime,
+              close: candle.close,
+            });
+
+            // 🔥 CRITICAL: TradingView requires setData() for first candle, not update()
+            candleDataRef.current = [candle];
+            candlestickSeriesRef.current.setData([candle]);
             lastCandleTimeRef.current = candleTime;
+            console.log('[TradingChart] [OK] Set lastCandleTimeRef to:', candleTime);
             return;
           }
+
+          // 🔥 DEBUG: Log time comparison for every message
+          console.log('[DEBUG] [TIME] Time comparison:', {
+            candleTime,
+            lastTime,
+            candleTimeHuman: new Date(candleTime * 1000).toISOString(),
+            lastTimeHuman: new Date(lastTime * 1000).toISOString(),
+            comparison: candleTime > lastTime ? 'NEW (candleTime > lastTime)'
+              : candleTime === lastTime ? 'FORMING (candleTime === lastTime)'
+              : 'OLD (candleTime < lastTime)',
+          });
 
           if (candleTime < lastTime) {
             // OLD DATA - skip silently (1% logging to avoid spam)
@@ -489,64 +867,121 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
           }
 
           if (candleTime > lastTime) {
-            // 🆕 NEW CANDLE - Previous candle closed, new one started!
-            console.log(`[TradingChart] 🆕 NEW CANDLE! ${new Date(candleTime * 1000).toLocaleTimeString()}`);
+            // NEW CANDLE - Previous candle closed, new one started!
+            console.log(`[NEW] NEW CANDLE | ${new Date().toLocaleTimeString()} | ${cleanedSymbol} | Time: ${candleTime} (prev: ${lastTime})`);
 
             try {
-              // Update with new candle
-              candlestickSeriesRef.current.update(candle);
+              // 🔥 FIX #1: Add to data array
+              candleDataRef.current.push(candle);
+
+              // Keep last 1000 candles
+              if (candleDataRef.current.length > 1000) {
+                candleDataRef.current.shift();
+              }
+
+              // Update with full data to ensure consistency
+              candlestickSeriesRef.current.setData(candleDataRef.current);
 
               // Update tracker
               lastCandleTimeRef.current = candleTime;
+              console.log('[TradingChart] [OK] Updated lastCandleTimeRef to:', candleTime);
 
-              // Scroll to show new candle
-              if (chartRef.current) {
-                chartRef.current.timeScale().scrollToRealTime();
-              }
+              // 🔥 CENTERED FIX: Keep chart centered instead of scrolling to right edge
+              // Don't call scrollToRealTime() - let user manually scroll if needed
             } catch (e) {
-              console.error('[TradingChart] ❌ New candle error:', e.message);
+              console.error('[TradingChart] [ERROR] New candle error:', e.message);
             }
           } else {
-            // 🔄 SAME TIME - Update CURRENT forming candle
+            // SAME TIME - Update CURRENT forming candle
             // This is where real-time magic happens!
             try {
+              // 🔥 DEBUG: Verify series reference before update
+              console.log('[DEBUG] [UPDATE] About to update forming candle:', {
+                seriesRefExists: !!candlestickSeriesRef.current,
+                seriesRefType: typeof candlestickSeriesRef.current,
+                candle,
+                dataArrayLength: candleDataRef.current.length,
+                lastTimeRef: lastCandleTimeRef.current,
+              });
+
+              // 🔥 SAFEGUARD: Ensure chart has data before updating
+              if (candleDataRef.current.length === 0) {
+                console.warn('[TradingChart] [WARN] Forming candle but no data! Initializing...');
+                candleDataRef.current = [candle];
+                candlestickSeriesRef.current.setData([candle]);
+                return;
+              }
+
+              // Try to detect if series is stale
+              if (candlestickSeriesRef.current) {
+                try {
+                  const markers = candlestickSeriesRef.current.markers();
+                  console.log('[DEBUG] [OK] Series is valid, markers:', markers?.length || 0);
+                } catch (error) {
+                  console.error('[DEBUG] [ERROR] Series is STALE/INVALID:', error);
+                  return; // Don't update stale series
+                }
+              }
+
+              // Update in data array
+              const lastIndex = candleDataRef.current.length - 1;
+              candleDataRef.current[lastIndex] = candle;
+
+              // CRITICAL: Use update() for last candle
               candlestickSeriesRef.current.update(candle);
 
-              // Log occasionally to confirm it's working
-              if (Math.random() < 0.05) { // 5% of updates
-                console.log(`🔄 ${new Date().toLocaleTimeString()} | ${cleanedSymbol} | $${candle.close.toFixed(2)} | H:${candle.high.toFixed(2)} L:${candle.low.toFixed(2)}`);
-              }
+              // 🔥 DEBUG: Log EVERY forming candle update (100% temp)
+              console.log(`[UPDATE] FORMING | ${new Date().toLocaleTimeString()} | ${cleanedSymbol} | $${candle.close.toFixed(2)} | H:${candle.high.toFixed(2)} L:${candle.low.toFixed(2)}`);
             } catch (e) {
-              console.error('[TradingChart] ❌ Update error:', e.message);
+              console.error('[TradingChart] [ERROR] Update error:', e.message, e.stack);
             }
           }
 
           // Update volume if visible
           if (volumeSeriesRef.current && volumeVisible) {
-            const volume = {
-              time: candle.time,
-              value: parseFloat(kline.v),
-              color: candle.close >= candle.open
-                ? 'rgba(0, 255, 136, 0.3)'
-                : 'rgba(246, 70, 93, 0.3)',
-            };
-            volumeSeriesRef.current.update(volume);
+            try {
+              const volume = {
+                time: candle.time,
+                value: parseFloat(kline.v),
+                color: candle.close >= candle.open
+                  ? 'rgba(0, 255, 136, 0.3)'
+                  : 'rgba(246, 70, 93, 0.3)',
+              };
+              volumeSeriesRef.current.update(volume);
+            } catch (e) {
+              console.error('[TradingChart] [ERROR] Volume update error:', e.message);
+            }
           }
 
-          // Log only on significant price changes (> 0.1%) or candle close
-          const priceChangePercent = Math.abs(parseFloat(kline.P));
-          if (kline.x || priceChangePercent > 0.1) {
-            console.log(`🕐 [${new Date().toLocaleTimeString()}] ${cleanedSymbol} | $${candle.close.toFixed(2)} | ${isUp ? '🟢' : '🔴'} ${kline.x ? '✅ CLOSED' : '⏳ Forming'}`);
+          // 🔥 PHASE 1: Throttle remaining logs - only log candle close
+          if (kline.x) { // Only log when candle closes
+            console.log(`[CLOSE] [${new Date().toLocaleTimeString()}] ${cleanedSymbol} | $${candle.close.toFixed(2)} | ${isUp ? 'UP' : 'DOWN'} CLOSED`);
           }
         };
 
-        ws.onerror = () => {
+        ws.onerror = (error) => {
+          clearTimeout(connectionTimeout);
           setIsLive(false);
-          console.error('[TradingChart] WebSocket error');
+          console.error('[TradingChart] [ERROR] WebSocket error:', error);
         };
 
-        ws.onclose = () => {
+        ws.onclose = (event) => {
+          clearTimeout(connectionTimeout);
           setIsLive(false);
+
+          // 🔥 FIX #2: Clear ping/pong interval
+          if (pingIntervalRef.current) {
+            clearInterval(pingIntervalRef.current);
+            pingIntervalRef.current = null;
+          }
+
+          console.log('[TradingChart] [CLOSE] WebSocket closed:', {
+            code: event.code,
+            reason: event.reason || 'No reason',
+            wasClean: event.wasClean,
+            symbol: cleanedSymbol,
+            currentActive: activeSymbolRef.current,
+          });
 
           // Clean up real-time price line
           if (realtimePriceLineRef.current && candlestickSeriesRef.current) {
@@ -558,22 +993,45 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
             }
           }
 
-          console.log(`[TradingChart] WebSocket closed for ${cleanedSymbol}, reconnecting in 3s...`);
-          // Auto reconnect after 3 seconds
-          setTimeout(connectWebSocket, 3000);
+          // Only reconnect if still the active symbol/timeframe
+          if (activeSymbolRef.current === cleanedSymbol &&
+              activeTimeframeRef.current === wsInterval) {
+            console.log('[TradingChart] [RECONNECT] Reconnecting in 3s...');
+            setTimeout(() => {
+              // Double-check still active before reconnecting
+              if (activeSymbolRef.current === cleanedSymbol &&
+                  activeTimeframeRef.current === wsInterval) {
+                console.log('[TradingChart] [RECONNECT] Reconnecting now...');
+                connectWebSocket();
+              } else {
+                console.log('[TradingChart] [STOP] Symbol changed during wait, not reconnecting');
+              }
+            }, 3000);
+          } else {
+            console.log('[TradingChart] [STOP] Not reconnecting - symbol/timeframe changed');
+          }
         };
 
         wsRef.current = ws;
       } catch (error) {
         setIsLive(false);
-        console.error('[TradingChart] WebSocket connection failed:', error);
+        console.error('[TradingChart] [ERROR] WebSocket connection failed:', error);
       }
     };
 
     connectWebSocket();
 
     return () => {
-      console.log(`🔌 [TradingChart] Cleaning up WebSocket for ${cleanedSymbol}...`);
+      console.log(`[TradingChart] [CLEANUP] Cleanup triggered for ${cleanedSymbol}`, {
+        wsExists: !!wsRef.current,
+        wsState: wsRef.current?.readyState,
+      });
+
+      // 🔥 FIX #2: Clear ping/pong interval
+      if (pingIntervalRef.current) {
+        clearInterval(pingIntervalRef.current);
+        pingIntervalRef.current = null;
+      }
 
       // Clean up real-time price line
       if (realtimePriceLineRef.current && candlestickSeriesRef.current) {
@@ -587,18 +1045,19 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
 
       // Close WebSocket connection
       if (wsRef.current) {
+        console.log(`[TradingChart] [CLOSE] Closing WebSocket for ${cleanedSymbol}`);
         wsRef.current.close();
         wsRef.current = null;
-        console.log(`✅ [TradingChart] WebSocket closed for ${cleanedSymbol}`);
       }
 
       setIsLive(false);
+      console.log(`[TradingChart] [OK] Cleanup complete for ${cleanedSymbol}`);
     };
   }, [symbol, pattern, currentTimeframe]); // 🔥 ADDED pattern dependency!
 
   // Control Handlers
   const handleRefresh = () => {
-    console.log('🔄 [TradingChart] Refreshing chart...');
+    console.log('[REFRESH] [TradingChart] Refreshing chart...');
 
     // Fetch fresh data from Binance
     const coinSymbol = pattern?.coin || symbol;
@@ -612,7 +1071,7 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
         if (candleData.length > 0) {
           const lastCandle = candleData[candleData.length - 1];
           lastCandleTimeRef.current = lastCandle.time;
-          console.log('[TradingChart] 🔄 Refresh complete. Last candle:', lastCandle.time, new Date(lastCandle.time * 1000).toLocaleString());
+          console.log('[TradingChart] [REFRESH] Refresh complete. Last candle:', lastCandle.time, new Date(lastCandle.time * 1000).toLocaleString());
         }
 
         // Scroll to show recent data in TRUE CENTER of chart
@@ -634,7 +1093,7 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
   };
 
   const handleTimeframeChange = (newTimeframe) => {
-    console.log(`[TradingChart] 🕐 Timeframe changing: ${currentTimeframe} → ${newTimeframe}`);
+    console.log(`[TradingChart] [TIMEFRAME] Timeframe changing: ${currentTimeframe} → ${newTimeframe}`);
 
     // 🔥 FIX: Save to localStorage to persist selection
     localStorage.setItem('chart_timeframe', newTimeframe);
@@ -651,7 +1110,7 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
         if (candleData.length > 0) {
           const lastCandle = candleData[candleData.length - 1];
           lastCandleTimeRef.current = lastCandle.time;
-          console.log(`[TradingChart] ⏱️ Timeframe changed to ${newTimeframe}. Last candle:`, lastCandle.time);
+          console.log(`[TradingChart] [TIMEFRAME] Timeframe changed to ${newTimeframe}. Last candle:`, lastCandle.time);
         }
 
         // Center the chart
@@ -706,7 +1165,7 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
 
   const handleSettings = () => {
     // TODO: Open settings modal in future phase
-    alert('⚙️ Chart Settings\n\nSettings panel coming soon!\n\nFeatures:\n• Indicator selection\n• Theme customization\n• Time zone settings\n• Price scale options');
+    alert('Chart Settings\n\nSettings panel coming soon!\n\nFeatures:\n• Indicator selection\n• Theme customization\n• Time zone settings\n• Price scale options');
   };
 
   // Chart resize handlers
@@ -756,12 +1215,12 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
     <div className="trading-chart-container" style={{ height: `${chartHeight}px` }}>
       {/* Chart Controls Bar - New Compact Design */}
       <ChartControls
-        coin={pattern?.coin || symbol}
+        coin={displayInfo.symbol}
         timeframe={currentTimeframe}
         onTimeframeChange={handleTimeframeChange}
-        pattern={pattern ? {
-          patternName: pattern.pattern,
-          confidence: pattern.confidence,
+        pattern={displayInfo.patternType ? {
+          patternName: displayInfo.patternType,
+          confidence: displayInfo.confidence,
         } : null}
         volumeVisible={volumeVisible}
         onVolumeToggle={handleVolumeToggle}

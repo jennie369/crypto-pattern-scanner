@@ -5,10 +5,7 @@
 .home-page-v2 {
   min-height: 100vh;
   width: 100%;
-  background: linear-gradient(180deg,
-    #0A0E27 0%,
-    #112250 50%,
-    #0A0E27 100%);
+  background: transparent;
 }
 
 /* Section spacing */

@@ -1,0 +1,5 @@
+# Shopify Webhook Function Configuration
+# This disables JWT verification because Shopify webhooks don't send JWT tokens
+# Instead, they use HMAC-SHA256 signature verification
+
+verify_jwt: false

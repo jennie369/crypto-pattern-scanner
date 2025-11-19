@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Lock, Sparkles, BarChart3, Gem } from 'lucide-react';
 import './AuthPromptModal.css';
 
 /**
@@ -27,7 +28,7 @@ function AuthPromptModal({ onClose }) {
         </button>
 
         {/* Icon */}
-        <div className="modal-icon">🔐</div>
+        <div className="modal-icon"><Lock size={48} /></div>
 
         {/* Title */}
         <h2 className="modal-title">Đăng Ký Để Quét Pattern</h2>
@@ -42,15 +43,15 @@ function AuthPromptModal({ onClose }) {
         {/* Benefits */}
         <div className="modal-benefits">
           <div className="benefit-item">
-            <span className="benefit-icon">✨</span>
+            <span className="benefit-icon"><Sparkles size={20} /></span>
             <span className="benefit-text">5 lượt quét miễn phí mỗi ngày</span>
           </div>
           <div className="benefit-item">
-            <span className="benefit-icon">📊</span>
+            <span className="benefit-icon"><BarChart3 size={20} /></span>
             <span className="benefit-text">Lưu lịch sử quét</span>
           </div>
           <div className="benefit-item">
-            <span className="benefit-icon">💎</span>
+            <span className="benefit-icon"><Gem size={20} /></span>
             <span className="benefit-text">Nâng cấp để quét không giới hạn</span>
           </div>
         </div>
@@ -58,7 +59,7 @@ function AuthPromptModal({ onClose }) {
         {/* Action Buttons */}
         <div className="modal-actions">
           <button className="btn-signup" onClick={handleSignup}>
-            ✨ Tạo Tài Khoản Miễn Phí
+            <Sparkles size={20} /> Tạo Tài Khoản Miễn Phí
           </button>
           <button className="btn-login" onClick={handleLogin}>
             Đã có tài khoản? Đăng nhập

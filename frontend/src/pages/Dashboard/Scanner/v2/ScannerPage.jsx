@@ -4,6 +4,9 @@ import TradingChart from './components/TradingChart';
 import PatternInfoUltraCompact from './components/PatternInfoUltraCompact';
 import SubToolsPanel from './components/SubToolsPanel';
 import MarketChatbotSection from './components/MarketChatbotSection';
+import PaperTradingPanel from '../../../../components/PaperTradingPanel/PaperTradingPanel';
+import OpenPositionsWidget from '../../../../components/PaperTrading/OpenPositionsWidget';
+import RecentTradesSection from '../../../../components/PaperTrading/RecentTradesSection';
 import { scanPatterns, ScannerWebSocket, exportToCSV, downloadCSV } from '../../../../services/scannerAPI';
 import { useScannerStore } from '../../../../stores/scannerStore';
 import './ScannerPage.css';
@@ -30,6 +33,10 @@ export const ScannerPage = () => {
   const [error, setError] = useState(null);
   const [selectedCoin, setSelectedCoin] = useState('BTCUSDT'); // Coin for chart
   const wsRef = useRef(null);
+
+  // Paper trading panel state
+  const [showPaperTradingPanel, setShowPaperTradingPanel] = useState(false);
+  const [paperTradingSymbol, setPaperTradingSymbol] = useState(null);
 
   // Initialize WebSocket on mount
   useEffect(() => {
@@ -72,7 +79,38 @@ export const ScannerPage = () => {
       console.log('[ScannerPage] Scan results:', results);
 
       setScanResults(results);
-      setSelectedPattern(null); // Reset selection on new scan
+
+      // Auto-select best pattern (highest confidence + BTC tiebreaker)
+      if (results.length > 0) {
+        const sorted = [...results].sort((a, b) => {
+          // Primary: Highest confidence
+          if (Math.abs(b.confidence - a.confidence) > 0.1) {
+            return b.confidence - a.confidence;
+          }
+          // Secondary: Prefer BTC if confidence equal
+          const aIsBTC = a.coin.toUpperCase().includes('BTC');
+          const bIsBTC = b.coin.toUpperCase().includes('BTC');
+          if (bIsBTC && !aIsBTC) return 1;
+          if (aIsBTC && !bIsBTC) return -1;
+          // Tertiary: Alphabetical
+          return a.coin.localeCompare(b.coin);
+        });
+
+        const bestPattern = sorted[0];
+
+        // Validate best pattern before selecting
+        if (bestPattern && bestPattern.coin) {
+          console.log('[Scanner] [OK] Auto-selected best pattern:', bestPattern.coin, `(${bestPattern.confidence}% confidence)`);
+          setSelectedPattern(bestPattern);
+          setSelectedCoin(bestPattern.coin);
+        } else {
+          console.warn('[Scanner] [WARN] Best pattern missing coin property:', bestPattern);
+        }
+      } else {
+        // No results: clear selection
+        setSelectedPattern(null);
+        console.log('[Scanner] [WARN] No patterns found');
+      }
 
       // Connect WebSocket for real-time updates
       if (wsRef.current && filters.coins && filters.coins.length > 0) {
@@ -89,11 +127,31 @@ export const ScannerPage = () => {
   };
 
   const handleSelectPattern = (pattern) => {
-    setSelectedPattern(pattern);
+    try {
+      // Validate pattern object
+      if (!pattern) {
+        console.error('[Scanner] [ERROR] Pattern is null/undefined');
+        return;
+      }
+
+      if (!pattern.coin) {
+        console.error('[Scanner] [ERROR] Pattern missing coin property:', pattern);
+        return;
+      }
+
+      console.log('[Scanner] [SELECT] Pattern selected:', pattern.coin, pattern.pattern);
+      setSelectedPattern(pattern);
+      setSelectedCoin(pattern.coin);
+
+    } catch (error) {
+      console.error('[Scanner] [ERROR] Error in handleSelectPattern:', error);
+      console.error('[Scanner] Pattern data:', pattern);
+    }
   };
 
   const handleCoinSelect = (symbol) => {
-    console.log('[ScannerPage] Updating chart to:', symbol);
+    console.log('[Scanner] [COIN] Market coin selected:', symbol);
+    setSelectedPattern(null); // Clear pattern lines when manually selecting coin
     setSelectedCoin(symbol);
   };
 
@@ -106,6 +164,18 @@ export const ScannerPage = () => {
     const csv = exportToCSV(scanResults);
     const filename = `pattern-scan-${new Date().toISOString().split('T')[0]}.csv`;
     downloadCSV(csv, filename);
+  };
+
+  const handleOpenPaperTrading = (symbol) => {
+    console.log('[ScannerPage] Opening paper trading panel for:', symbol);
+    setPaperTradingSymbol(symbol);
+    setShowPaperTradingPanel(true);
+  };
+
+  const handleClosePaperTrading = () => {
+    console.log('[ScannerPage] Closing paper trading panel');
+    setShowPaperTradingPanel(false);
+    setPaperTradingSymbol(null);
   };
 
   return (
@@ -133,6 +203,7 @@ export const ScannerPage = () => {
             results={scanResults}
             onSelectPattern={handleSelectPattern}
             selectedPattern={selectedPattern}
+            onOpenPaperTrading={handleOpenPaperTrading}
           />
         </div>
 
@@ -149,7 +220,7 @@ export const ScannerPage = () => {
           />
         </div>
 
-        {/* RIGHT - Sub-Tools (Top) + Pattern Info (Bottom) */}
+        {/* RIGHT - Sub-Tools (Top) + Pattern Info (Bottom) + Paper Trading Widgets */}
         <div className="scanner-right">
           <div className="right-column-scroll-wrapper">
             <SubToolsPanel
@@ -159,9 +230,44 @@ export const ScannerPage = () => {
             <PatternInfoUltraCompact
               pattern={selectedPattern}
             />
+
+            {/* Paper Trading Widgets - TEMPORARILY DISABLED FOR DEBUGGING */}
+            <div className="paper-trading-widgets-section">
+              {/* 🔍 DEBUG: Test rendering */}
+              <div style={{
+                background: 'rgba(0, 255, 0, 0.2)',
+                border: '2px solid lime',
+                padding: '20px',
+                borderRadius: '8px',
+                color: 'white',
+                fontWeight: 'bold',
+                textAlign: 'center'
+              }}>
+                ✅ Scanner Right Column Renders OK
+                <br />
+                <small style={{ fontSize: '12px', opacity: 0.7 }}>
+                  (Widgets temporarily disabled for debugging)
+                </small>
+              </div>
+
+              {/* COMMENTED OUT TO TEST IF THESE ARE CAUSING THE CRASH */}
+              {/* <OpenPositionsWidget
+                onOpenPaperTrading={handleOpenPaperTrading}
+              />
+
+              <RecentTradesSection /> */}
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Paper Trading Side Panel - Renders outside scanner-layout for proper overlay */}
+      <PaperTradingPanel
+        isOpen={showPaperTradingPanel}
+        symbol={paperTradingSymbol}
+        onClose={handleClosePaperTrading}
+        prefilledSide="buy"
+      />
     </div>
   );
 };

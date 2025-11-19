@@ -1,4 +1,5 @@
 import React from 'react';
+import { AlertTriangle, Gem, RefreshCw, Target, CheckCircle, Rocket, Sparkles } from 'lucide-react';
 import { useQuota } from '../../hooks/useQuota';
 import './QuotaDisplay.css';
 
@@ -18,7 +19,7 @@ export default function QuotaDisplay() {
     return (
       <div className="quota-display error">
         <div className="error-content">
-          <span className="error-icon">⚠️</span>
+          <span className="error-icon"><AlertTriangle size={24} /></span>
           <div className="error-text">
             <h4>Không thể tải thông tin quota</h4>
             <p>Có thể bạn đã hết lượt scan hôm nay hoặc cần nâng cấp tài khoản.</p>
@@ -26,10 +27,10 @@ export default function QuotaDisplay() {
         </div>
         <div className="error-actions">
           <button className="btn-upgrade" onClick={() => window.location.href = '/settings'}>
-            💎 Nâng cấp Premium
+            <Gem size={18} /> Nâng cấp Premium
           </button>
           <button className="btn-retry" onClick={() => window.location.reload()}>
-            🔄 Thử lại
+            <RefreshCw size={18} /> Thử lại
           </button>
         </div>
         {/* Technical error for debugging (hidden by default) */}
@@ -62,7 +63,7 @@ export default function QuotaDisplay() {
   return (
     <div className="quota-display">
       <div className="quota-header">
-        <span className="quota-icon">🎯</span>
+        <span className="quota-icon"><Target size={24} /></span>
         <div className="quota-text">
           <h4>Lượt Scan Hôm Nay</h4>
           <p className="quota-subtitle">FREE Tier - Nâng cấp để unlimited</p>
@@ -91,11 +92,11 @@ export default function QuotaDisplay() {
         <div className="quota-info">
           {quota.canScan ? (
             <span className="quota-status available">
-              ✅ Còn {quota.remaining} lượt scan
+              <CheckCircle size={16} /> Còn {quota.remaining} lượt scan
             </span>
           ) : (
             <span className="quota-status depleted">
-              ⚠️ Đã hết lượt scan hôm nay
+              <AlertTriangle size={16} /> Đã hết lượt scan hôm nay
             </span>
           )}
           <span className="quota-reset">
@@ -106,12 +107,12 @@ export default function QuotaDisplay() {
 
       {!quota.canScan && (
         <div className="quota-upgrade">
-          <p>🚀 Đã hết lượt scan miễn phí hôm nay!</p>
+          <p><Rocket size={18} /> Đã hết lượt scan miễn phí hôm nay!</p>
           <button className="btn-upgrade">
             Nâng cấp lên Tier 1
           </button>
           <span className="upgrade-benefit">
-            ✨ Unlimited scans + 7 patterns chỉ 10M VND
+            <Sparkles size={16} /> Unlimited scans + 7 patterns chỉ 10M VND
           </span>
         </div>
       )}

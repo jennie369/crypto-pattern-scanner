@@ -3,6 +3,10 @@ import { determineEntryStatus, checkConfirmationCandle } from '../../utils/entry
 import EntryStatusDisplay from './EntryStatusDisplay'
 import ZoneRetestTracker from './ZoneRetestTracker'
 import ConfirmationIndicator from './ConfirmationIndicator'
+import {
+  X, BarChart3, Target, Star, CheckCircle, Circle, TrendingUp,
+  TrendingDown, RefreshCw, AlertCircle, Bell, LineChart, Copy
+} from 'lucide-react'
 import './PatternDetailsModal.css'
 
 /**
@@ -74,7 +78,7 @@ export default function PatternDetailsModal({
           </div>
 
           <button className="modal-close-btn" onClick={onClose}>
-            ✕
+            <X size={20} />
           </button>
         </div>
 
@@ -86,25 +90,25 @@ export default function PatternDetailsModal({
             className={`modal-tab ${activeTab === 'overview' ? 'active' : ''}`}
             onClick={() => setActiveTab('overview')}
           >
-            📊 Overview
+            <BarChart3 size={16} /> Overview
           </button>
           <button
             className={`modal-tab ${activeTab === 'entry' ? 'active' : ''}`}
             onClick={() => setActiveTab('entry')}
           >
-            🎯 Entry Status
+            <Target size={16} /> Entry Status
           </button>
           <button
             className={`modal-tab ${activeTab === 'zone' ? 'active' : ''}`}
             onClick={() => setActiveTab('zone')}
           >
-            ⭐ Zone Quality
+            <Star size={16} /> Zone Quality
           </button>
           <button
             className={`modal-tab ${activeTab === 'confirmation' ? 'active' : ''}`}
             onClick={() => setActiveTab('confirmation')}
           >
-            ✅ Confirmation
+            <CheckCircle size={16} /> Confirmation
           </button>
         </div>
 
@@ -116,7 +120,7 @@ export default function PatternDetailsModal({
           {/* OVERVIEW TAB */}
           {activeTab === 'overview' && (
             <div className="tab-content">
-              <h3 className="section-title">📊 Pattern Overview</h3>
+              <h3 className="section-title"><BarChart3 size={20} /> Pattern Overview</h3>
 
               {/* Pattern Info Card */}
               <div className="info-card">
@@ -159,7 +163,7 @@ export default function PatternDetailsModal({
               {zone.type && (
                 <div className="info-card zone-info-card">
                   <h4 className="card-title">
-                    {zone.type === 'HFZ' ? '🔴' : '🟢'} {zone.type} Zone
+                    {zone.type === 'HFZ' ? <Circle className="zone-icon hfz" size={16} fill="currentColor" /> : <Circle className="zone-icon lfz" size={16} fill="currentColor" />} {zone.type} Zone
                   </h4>
 
                   <div className="info-row">
@@ -186,7 +190,7 @@ export default function PatternDetailsModal({
               {/* Trading Recommendation */}
               <div className={`recommendation-card ${entryStatus.allowEntry ? 'allow-entry' : 'wait-entry'}`}>
                 <div className="recommendation-icon">
-                  {entryStatus.allowEntry ? '✅' : '⚠️'}
+                  {entryStatus.allowEntry ? <CheckCircle size={32} /> : <AlertCircle size={32} />}
                 </div>
                 <div className="recommendation-content">
                   <div className="recommendation-title">
@@ -203,7 +207,7 @@ export default function PatternDetailsModal({
           {/* ENTRY STATUS TAB */}
           {activeTab === 'entry' && (
             <div className="tab-content">
-              <h3 className="section-title">🎯 Entry Workflow Status</h3>
+              <h3 className="section-title"><Target size={20} /> Entry Workflow Status</h3>
               <EntryStatusDisplay
                 pattern={pattern}
                 currentPrice={currentPrice}
@@ -216,12 +220,12 @@ export default function PatternDetailsModal({
           {/* ZONE QUALITY TAB */}
           {activeTab === 'zone' && (
             <div className="tab-content">
-              <h3 className="section-title">⭐ Zone Quality & Retest Tracker</h3>
+              <h3 className="section-title"><Star size={20} /> Zone Quality & Retest Tracker</h3>
               {zone.type ? (
                 <ZoneRetestTracker zone={zone} />
               ) : (
                 <div className="no-data-message">
-                  ⚠️ No zone data available for this pattern
+                  <AlertCircle size={20} /> No zone data available for this pattern
                 </div>
               )}
             </div>
@@ -230,7 +234,7 @@ export default function PatternDetailsModal({
           {/* CONFIRMATION TAB */}
           {activeTab === 'confirmation' && (
             <div className="tab-content">
-              <h3 className="section-title">✅ Confirmation Candle Analysis</h3>
+              <h3 className="section-title"><CheckCircle size={20} /> Confirmation Candle Analysis</h3>
               <ConfirmationIndicator confirmation={confirmation} />
             </div>
           )}
@@ -245,21 +249,21 @@ export default function PatternDetailsModal({
             className="action-btn btn-set-alert"
             onClick={() => onSetAlert && onSetAlert(pattern)}
           >
-            🔔 Set Alert
+            <Bell size={16} /> Set Alert
           </button>
 
           <button
             className="action-btn btn-view-chart"
             onClick={() => onViewChart && onViewChart(pattern)}
           >
-            📈 View on Chart
+            <LineChart size={16} /> View on Chart
           </button>
 
           <button
             className="action-btn btn-copy-trade"
             onClick={() => copyTradeSetup(pattern, zone, entryStatus)}
           >
-            📋 Copy Setup
+            <Copy size={16} /> Copy Setup
           </button>
 
           <button
@@ -286,39 +290,39 @@ function getPatternInfo(patternType) {
   const patterns = {
     'DPD': {
       label: 'DPD (Drop-Pullback-Drop)',
-      icon: '📉',
+      icon: <TrendingDown size={24} />,
       description: 'Bearish continuation pattern - Price drops, pulls back to HFZ resistance, then drops again'
     },
     'UPU': {
       label: 'UPU (Up-Pullback-Up)',
-      icon: '📈',
+      icon: <TrendingUp size={24} />,
       description: 'Bullish continuation pattern - Price rises, pulls back to LFZ support, then rises again'
     },
     'UPD': {
       label: 'UPD (Up-Pullback-Drop)',
-      icon: '🔄',
+      icon: <RefreshCw size={24} />,
       description: 'Reversal pattern - Price rises then reverses at HFZ resistance'
     },
     'DPU': {
       label: 'DPU (Drop-Pullback-Up)',
-      icon: '🔄',
+      icon: <RefreshCw size={24} />,
       description: 'Reversal pattern - Price drops then reverses at LFZ support'
     },
     'HFZ': {
       label: 'HFZ (High Frequency Zone)',
-      icon: '🔴',
+      icon: <Circle size={24} className="hfz-icon" fill="currentColor" />,
       description: 'Resistance zone where price frequently rejects'
     },
     'LFZ': {
       label: 'LFZ (Low Frequency Zone)',
-      icon: '🟢',
+      icon: <Circle size={24} className="lfz-icon" fill="currentColor" />,
       description: 'Support zone where price frequently bounces'
     }
   };
 
   return patterns[patternType] || {
     label: patternType,
-    icon: '📊',
+    icon: <BarChart3 size={24} />,
     description: 'Pattern detected'
   };
 }
@@ -327,9 +331,9 @@ function getPatternInfo(patternType) {
  * Get confidence badge
  */
 function getConfidenceBadge(confidence) {
-  if (confidence >= 80) return '🟢 High';
-  if (confidence >= 60) return '🟡 Medium';
-  return '🔴 Low';
+  if (confidence >= 80) return <><Circle size={12} fill="currentColor" className="badge-high" /> High</>;
+  if (confidence >= 60) return <><Circle size={12} fill="currentColor" className="badge-medium" /> Medium</>;
+  return <><Circle size={12} fill="currentColor" className="badge-low" /> Low</>;
 }
 
 /**
@@ -355,8 +359,8 @@ Generated by GEM Trading Academy
   `.trim();
 
   navigator.clipboard.writeText(setup).then(() => {
-    alert('✅ Trade setup copied to clipboard!');
+    alert('[CheckCircle] Trade setup copied to clipboard!');
   }).catch(() => {
-    alert('❌ Failed to copy to clipboard');
+    alert('[XCircle] Failed to copy to clipboard');
   });
 }

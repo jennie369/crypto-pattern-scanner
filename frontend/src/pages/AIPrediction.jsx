@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Bot, AlertTriangle, Loader, TrendingUp, TrendingDown, ArrowUpDown, BarChart3, Lightbulb, ChevronUp, ChevronDown } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { binanceService } from '../services/binanceService';
 import { patternDetectionService } from '../services/patternDetection';
@@ -124,7 +125,7 @@ const AIPrediction = () => {
         <div style={{ padding: '40px 20px', maxWidth: '1400px', margin: '0 auto' }}>
           <div className="page-header">
             <h1 className="heading-gold" style={{ marginBottom: '32px' }}>
-              🤖 AI Prediction Tool
+              <Bot size={40} style={{ marginRight: '12px', display: 'inline-block', verticalAlign: 'middle' }} /> AI Prediction Tool
             </h1>
             <p className="text-muted" style={{ fontSize: '18px', marginBottom: '32px' }}>AI-powered market analysis with Gemini 2.5 Flash • Zone Retest Strategy • Free Tier: 15 predictions/min</p>
           </div>
@@ -162,7 +163,7 @@ const AIPrediction = () => {
 
         {error && (
           <div className="error-message">
-            <span className="error-icon">⚠️</span>
+            <span className="error-icon"><AlertTriangle size={18} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /></span>
             <span>{error}</span>
           </div>
         )}
@@ -173,18 +174,60 @@ const AIPrediction = () => {
           onClick={runPrediction}
           disabled={loading}
         >
-          {loading ? '🔄 Analyzing with AI...' : '🤖 Run AI Prediction'}
+          {loading ? (
+            <>
+              <Loader size={16} className="spin" style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Analyzing with AI...
+            </>
+          ) : (
+            <>
+              <Bot size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Run AI Prediction
+            </>
+          )}
         </button>
       </div>
 
       {/* Prediction Result */}
       {prediction && (
-        <div className="card-glass" style={{
-          borderColor: 'rgba(0, 217, 255, 0.22)',
-          padding: '32px',
-          marginBottom: '24px'
-        }}>
-          <h3>📊 AI Analysis Results</h3>
+        <>
+          {/* DISCLAIMER BANNER */}
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(255, 189, 89, 0.15) 0%, rgba(255, 140, 0, 0.1) 100%)',
+            border: '2px solid rgba(255, 189, 89, 0.3)',
+            borderRadius: '12px',
+            padding: '16px 20px',
+            marginBottom: '24px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px'
+          }}>
+            <AlertTriangle size={24} style={{ color: '#FFBD59', flexShrink: 0 }} />
+            <div style={{ flex: 1 }}>
+              <div style={{
+                color: '#FFBD59',
+                fontWeight: 700,
+                fontSize: '14px',
+                marginBottom: '4px',
+                fontFamily: 'Poppins, sans-serif'
+              }}>
+                ⚠️ NOT FINANCIAL ADVICE
+              </div>
+              <div style={{
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontSize: '13px',
+                lineHeight: '1.5',
+                fontFamily: 'Inter, sans-serif'
+              }}>
+                AI predictions are for educational purposes only. Always conduct your own research and consult with a financial advisor before making any trading decisions.
+              </div>
+            </div>
+          </div>
+
+          <div className="card-glass" style={{
+            borderColor: 'rgba(0, 217, 255, 0.22)',
+            padding: '32px',
+            marginBottom: '24px'
+          }}>
+            <h3><BarChart3 size={24} style={{ marginRight: '8px', display: 'inline-block', verticalAlign: 'middle' }} /> AI Analysis Results</h3>
 
           {/* Confidence Gauge */}
           <div className="confidence-section">
@@ -209,9 +252,9 @@ const AIPrediction = () => {
             <div className="detail-card">
               <div className="detail-label">Prediction</div>
               <div className={`detail-value prediction-${prediction.prediction.toLowerCase()}`}>
-                {prediction.prediction === 'UP' && '📈 BULLISH'}
-                {prediction.prediction === 'DOWN' && '📉 BEARISH'}
-                {prediction.prediction === 'SIDEWAYS' && '↔️ SIDEWAYS'}
+                {prediction.prediction === 'UP' && <><TrendingUp size={20} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> BULLISH</>}
+                {prediction.prediction === 'DOWN' && <><TrendingDown size={20} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> BEARISH</>}
+                {prediction.prediction === 'SIDEWAYS' && <><ArrowUpDown size={20} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> SIDEWAYS</>}
               </div>
             </div>
 
@@ -247,7 +290,7 @@ const AIPrediction = () => {
           {/* Key Levels */}
           <div className="key-levels">
             <div className="levels-column">
-              <h4>🔺 Resistance Levels</h4>
+              <h4><ChevronUp size={20} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Resistance Levels</h4>
               <div className="levels-list">
                 {prediction.keyLevels?.resistance?.map((level, idx) => (
                   <div key={idx} className="level-item resistance">
@@ -258,7 +301,7 @@ const AIPrediction = () => {
             </div>
 
             <div className="levels-column">
-              <h4>🔻 Support Levels</h4>
+              <h4><ChevronDown size={20} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Support Levels</h4>
               <div className="levels-list">
                 {prediction.keyLevels?.support?.map((level, idx) => (
                   <div key={idx} className="level-item support">
@@ -271,12 +314,13 @@ const AIPrediction = () => {
 
           {/* AI Reasoning */}
           <div className="reasoning-section">
-            <h4>💡 AI Reasoning & Strategy</h4>
+            <h4><Lightbulb size={20} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> AI Reasoning & Strategy</h4>
             <div className="reasoning-content">
               {prediction.reasoning}
             </div>
           </div>
         </div>
+        </>
       )}
 
       {/* Prediction History */}
@@ -284,10 +328,10 @@ const AIPrediction = () => {
         borderColor: 'rgba(139, 92, 246, 0.22)',
         padding: '32px'
       }}>
-        <h3>📊 Prediction History</h3>
+        <h3><BarChart3 size={24} style={{ marginRight: '8px', display: 'inline-block', verticalAlign: 'middle' }} /> Prediction History</h3>
         {history.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-icon">📭</div>
+            <div className="empty-icon"><BarChart3 size={48} style={{ opacity: 0.5 }} /></div>
             <div className="empty-title">No predictions yet</div>
             <div className="empty-description">
               Run your first AI prediction to see it here

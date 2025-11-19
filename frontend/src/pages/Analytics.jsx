@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { BarChart3, TrendingUp, Target, DollarSign, Star, Home } from 'lucide-react';
 import './Analytics.css';
 
 /**
@@ -19,7 +20,7 @@ function Analytics() {
       <div className="analytics-container">
         {/* Coming Soon Section */}
         <div className="coming-soon-card">
-          <div className="coming-soon-icon">📊</div>
+          <div className="coming-soon-icon"><BarChart3 size={64} /></div>
           <h1 className="coming-soon-title">Analytics Dashboard</h1>
           <p className="coming-soon-subtitle">Coming Soon</p>
 
@@ -32,7 +33,7 @@ function Analytics() {
             <h3>Upcoming Features:</h3>
             <div className="feature-list">
               <div className="feature-item">
-                <span className="feature-icon">📈</span>
+                <span className="feature-icon"><TrendingUp size={32} /></span>
                 <div className="feature-content">
                   <h4>Scan History</h4>
                   <p>Review all your past scans and detected patterns</p>
@@ -40,7 +41,7 @@ function Analytics() {
               </div>
 
               <div className="feature-item">
-                <span className="feature-icon">🎯</span>
+                <span className="feature-icon"><Target size={32} /></span>
                 <div className="feature-content">
                   <h4>Pattern Success Rate</h4>
                   <p>Analyze which patterns perform best for your strategy</p>
@@ -48,7 +49,7 @@ function Analytics() {
               </div>
 
               <div className="feature-item">
-                <span className="feature-icon">💰</span>
+                <span className="feature-icon"><DollarSign size={32} /></span>
                 <div className="feature-content">
                   <h4>Performance Metrics</h4>
                   <p>Track win/loss ratio, average profit, and more</p>
@@ -56,7 +57,7 @@ function Analytics() {
               </div>
 
               <div className="feature-item">
-                <span className="feature-icon">📊</span>
+                <span className="feature-icon"><BarChart3 size={32} /></span>
                 <div className="feature-content">
                   <h4>Custom Reports</h4>
                   <p>Generate detailed reports for your trading activity</p>
@@ -69,7 +70,7 @@ function Analytics() {
           {user && (
             <div className="tier-info-card">
               <div className="tier-badge-large">
-                {isPremium ? '⭐ TIER 1+' : '🆓 FREE'}
+                {isPremium ? <><Star size={20} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />TIER 1+</> : 'FREE'}
               </div>
               <p className="tier-message">
                 {isPremium
@@ -83,7 +84,7 @@ function Analytics() {
           <div className="coming-soon-cta">
             <p>Want to be notified when Analytics launches?</p>
             <a href="/" className="btn-back-home">
-              🏠 Back to Scanner
+              <Home size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />Back to Scanner
             </a>
           </div>
         </div>

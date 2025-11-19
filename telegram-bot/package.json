@@ -1,0 +1,25 @@
+{
+  "name": "gem-trading-telegram-bot",
+  "version": "1.0.0",
+  "description": "Telegram bot for GEM Trading Academy pattern alerts",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js",
+    "dev": "nodemon bot.js"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "crypto",
+    "trading",
+    "alerts"
+  ],
+  "author": "GEM Trading Academy",
+  "license": "ISC",
+  "dependencies": {
+    "node-telegram-bot-api": "^0.65.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

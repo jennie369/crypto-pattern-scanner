@@ -38,6 +38,10 @@ body {
   background-attachment: fixed;
   background-size: cover;
 
+  /* Force font rendering for Vietnamese */
+  -webkit-font-feature-settings: "liga", "kern";
+  font-feature-settings: "liga", "kern";
+
   /* Prevent horizontal scroll */
   overflow-x: hidden;
   min-height: 100vh;

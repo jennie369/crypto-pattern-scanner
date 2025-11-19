@@ -1,6 +1,19 @@
 import React, { useState } from 'react';
 import { useScanHistory } from '../hooks/useScanHistory';
 import { useAuth } from '../contexts/AuthContext';
+import {
+  BarChart3,
+  Search,
+  TrendingUp,
+  Clock,
+  Target,
+  Trash2,
+  AlertTriangle,
+  XCircle,
+  Lock,
+  Mail,
+  Lightbulb
+} from 'lucide-react';
 import './ScanHistory.css';
 
 /**
@@ -29,11 +42,11 @@ function ScanHistory() {
   });
 
   const handleDeleteScan = async (scanId) => {
-    if (window.confirm('🗑️ Xóa scan này khỏi lịch sử?')) {
+    if (window.confirm('Xóa scan này khỏi lịch sử?')) {
       try {
         await deleteScan(scanId);
       } catch (err) {
-        alert('❌ Lỗi khi xóa: ' + err.message);
+        alert('Lỗi khi xóa: ' + err.message);
       }
     }
   };
@@ -43,9 +56,9 @@ function ScanHistory() {
       try {
         await clearHistory();
         setShowDeleteConfirm(false);
-        alert('✅ Đã xóa toàn bộ lịch sử!');
+        alert('Đã xóa toàn bộ lịch sử!');
       } catch (err) {
-        alert('❌ Lỗi khi xóa: ' + err.message);
+        alert('Lỗi khi xóa: ' + err.message);
       }
     } else {
       setShowDeleteConfirm(true);
@@ -76,7 +89,7 @@ function ScanHistory() {
     return (
       <div className="scan-history-page">
         <div className="auth-required">
-          <h2>🔒 Đăng nhập để xem lịch sử</h2>
+          <h2><Lock size={32} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '8px' }} />Đăng nhập để xem lịch sử</h2>
           <p>Vui lòng đăng nhập để xem lịch sử quét pattern của bạn</p>
         </div>
       </div>
@@ -98,7 +111,7 @@ function ScanHistory() {
     return (
       <div className="scan-history-page">
         <div className="error-state">
-          <h2>❌ Lỗi</h2>
+          <h2><XCircle size={32} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '8px' }} />Lỗi</h2>
           <p>{error}</p>
         </div>
       </div>
@@ -108,14 +121,14 @@ function ScanHistory() {
   return (
     <div className="scan-history-page">
       <div className="history-header">
-        <h1>📊 Lịch Sử Quét Pattern</h1>
+        <h1><BarChart3 size={28} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '8px' }} />Lịch Sử Quét Pattern</h1>
         <p className="subtitle">Theo dõi các lần quét và patterns đã tìm thấy</p>
       </div>
 
       {/* Statistics Cards */}
       <div className="stats-grid">
         <div className="stat-card">
-          <div className="stat-icon">🔍</div>
+          <div className="stat-icon"><Search size={32} /></div>
           <div className="stat-content">
             <div className="stat-label">Tổng Số Lần Quét</div>
             <div className="stat-value">{stats.totalScans}</div>
@@ -123,7 +136,7 @@ function ScanHistory() {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon">📈</div>
+          <div className="stat-icon"><TrendingUp size={32} /></div>
           <div className="stat-content">
             <div className="stat-label">Patterns Tìm Thấy</div>
             <div className="stat-value">{stats.totalPatterns}</div>
@@ -131,7 +144,7 @@ function ScanHistory() {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon">⏱️</div>
+          <div className="stat-icon"><Clock size={32} /></div>
           <div className="stat-content">
             <div className="stat-label">Timeframe Thường Dùng</div>
             <div className="stat-value">{stats.mostCommonTimeframe || 'N/A'}</div>
@@ -139,7 +152,7 @@ function ScanHistory() {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon">🎯</div>
+          <div className="stat-icon"><Target size={32} /></div>
           <div className="stat-content">
             <div className="stat-label">Coin Hay Quét</div>
             <div className="stat-value">{stats.mostScannedSymbol || 'N/A'}</div>
@@ -160,13 +173,13 @@ function ScanHistory() {
             className={`filter-btn ${filter === 'has-patterns' ? 'active' : ''}`}
             onClick={() => setFilter('has-patterns')}
           >
-            🎯 Có Patterns
+            <Target size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />Có Patterns
           </button>
           <button
             className={`filter-btn ${filter === 'no-patterns' ? 'active' : ''}`}
             onClick={() => setFilter('no-patterns')}
           >
-            ⚪ Không Pattern
+            Không Pattern
           </button>
         </div>
 
@@ -175,7 +188,7 @@ function ScanHistory() {
             className={`clear-all-btn ${showDeleteConfirm ? 'confirm' : ''}`}
             onClick={handleClearAll}
           >
-            {showDeleteConfirm ? '⚠️ Click lại để xác nhận xóa' : '🗑️ Xóa Tất Cả'}
+            {showDeleteConfirm ? <><AlertTriangle size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />Click lại để xác nhận xóa</> : <><Trash2 size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />Xóa Tất Cả</>}
           </button>
         )}
       </div>
@@ -199,7 +212,7 @@ function ScanHistory() {
                     onClick={() => handleDeleteScan(scan.id)}
                     title="Xóa scan này"
                   >
-                    🗑️
+                    <Trash2 size={16} />
                   </button>
                 </div>
 
@@ -251,7 +264,7 @@ function ScanHistory() {
           })
         ) : (
           <div className="empty-state">
-            <div className="empty-icon">📭</div>
+            <div className="empty-icon"><Mail size={48} /></div>
             <h3>Chưa Có Lịch Sử</h3>
             <p>
               {filter === 'all'
@@ -265,7 +278,7 @@ function ScanHistory() {
       {/* Tier Notice */}
       {profile?.tier === 'free' && (
         <div className="tier-notice">
-          <div className="notice-icon">💡</div>
+          <div className="notice-icon"><Lightbulb size={32} /></div>
           <div className="notice-content">
             <h4>Ghi Chú FREE Tier</h4>
             <p>Lịch sử quét được lưu trong 30 ngày. Nâng cấp lên TIER 1+ để lưu vô thời hạn!</p>

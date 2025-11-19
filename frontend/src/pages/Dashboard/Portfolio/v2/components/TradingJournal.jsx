@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 // import ReactQuill from 'react-quill';
 // import 'react-quill/dist/quill.snow.css';
+import { AlertCircle, BookOpen, Save, Lightbulb, CheckCircle } from 'lucide-react';
 import { Button } from '../../../../../components-v2/Button';
 import { Input } from '../../../../../components-v2/Input';
 import { Card } from '../../../../../components-v2/Card';
@@ -219,7 +220,10 @@ export const TradingJournal = ({ userId }) => {
     return (
       <div className="trading-journal">
         <div className="error-state">
-          <p>⚠️ User not authenticated</p>
+          <p>
+            <AlertCircle size={20} style={{ display: 'inline', marginRight: '6px' }} />
+            User not authenticated
+          </p>
           <p className="empty-hint">Please log in to access your trading journal</p>
         </div>
       </div>
@@ -241,7 +245,10 @@ export const TradingJournal = ({ userId }) => {
     return (
       <div className="trading-journal">
         <div className="error-state">
-          <p>⚠️ {error}</p>
+          <p>
+            <AlertCircle size={20} style={{ display: 'inline', marginRight: '6px' }} />
+            {error}
+          </p>
           <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
             Retry
           </Button>
@@ -267,7 +274,8 @@ export const TradingJournal = ({ userId }) => {
         <div className="entry-list">
           {entries.length === 0 ? (
             <div className="empty-journal">
-              <p className="text-muted">📓 No journal entries yet</p>
+              <BookOpen size={32} style={{ margin: '0 auto 8px', opacity: 0.5 }} />
+              <p className="text-muted">No journal entries yet</p>
               <p className="empty-hint">Click "New Entry" to start</p>
             </div>
           ) : (
@@ -304,7 +312,12 @@ export const TradingJournal = ({ userId }) => {
               </Button>
             )}
             <Button variant="primary" size="sm" onClick={handleSave} disabled={saving}>
-              {saving ? 'Saving...' : 'Save'}
+              {saving ? 'Saving...' : (
+                <>
+                  <Save size={14} style={{ display: 'inline', marginRight: '4px' }} />
+                  Save
+                </>
+              )}
             </Button>
           </div>
         </div>
@@ -335,7 +348,10 @@ export const TradingJournal = ({ userId }) => {
               className="simple-editor"
               rows={10}
             />
-            <p className="editor-note">💡 Rich text editor will be added once React Quill supports React 19</p>
+            <p className="editor-note">
+              <Lightbulb size={14} style={{ display: 'inline', marginRight: '4px' }} />
+              Rich text editor will be added once React Quill supports React 19
+            </p>
           </div>
 
           <Input
@@ -349,7 +365,17 @@ export const TradingJournal = ({ userId }) => {
           <div className="auto-save-indicator">
             {selectedEntry && (
               <span className="text-muted">
-                {saving ? '💾 Saving...' : '✅ Auto-save enabled (2s delay)'}
+                {saving ? (
+                  <>
+                    <Save size={14} style={{ display: 'inline', marginRight: '4px' }} />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle size={14} style={{ display: 'inline', marginRight: '4px' }} />
+                    Auto-save enabled (2s delay)
+                  </>
+                )}
               </span>
             )}
           </div>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Newspaper, BarChart3 } from 'lucide-react';
 import './Modal.css';
 
 export const NewsEventsModal = ({ pattern, onClose }) => {
@@ -21,7 +22,7 @@ export const NewsEventsModal = ({ pattern, onClose }) => {
       <div className="modal-container" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div className="modal-title">
-            <span className="modal-icon">📰</span>
+            <span className="modal-icon"><Newspaper size={24} /></span>
             <div>
               <h2>News & Events Calendar</h2>
               <span className="modal-tier-badge tier-2">TIER 2</span>
@@ -128,7 +129,7 @@ export const NewsEventsModal = ({ pattern, onClose }) => {
             <h3 className="modal-section-title">Market Impact Analysis</h3>
             <div className="modal-card">
               <div style={{ textAlign: 'center', padding: 'var(--space-xl)', color: 'var(--text-secondary)' }}>
-                <div style={{ fontSize: '48px', marginBottom: 'var(--space-sm)' }}>📊</div>
+                <div style={{ marginBottom: 'var(--space-sm)', display: 'flex', justifyContent: 'center' }}><BarChart3 size={48} /></div>
                 <p>AI-powered news sentiment analysis</p>
                 <p style={{ fontSize: 'var(--text-xs)', marginTop: 'var(--space-xs)' }}>
                   Real-time impact assessment on {pattern.coin}

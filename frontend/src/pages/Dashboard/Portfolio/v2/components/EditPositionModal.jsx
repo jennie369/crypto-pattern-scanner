@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { X, AlertCircle } from 'lucide-react';
 import { Button } from '../../../../../components-v2/Button';
 import { Input } from '../../../../../components-v2/Input';
 import './EditPositionModal.css';
@@ -100,7 +101,9 @@ export const EditPositionModal = ({ position, onClose, onSave }) => {
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h3 className="heading-sm">Edit Position</h3>
-          <button className="modal-close" onClick={onClose}>✕</button>
+          <button className="modal-close" onClick={onClose}>
+            <X size={20} />
+          </button>
         </div>
 
         <div className="modal-body">
@@ -156,7 +159,10 @@ export const EditPositionModal = ({ position, onClose, onSave }) => {
 
             {errors.submit && (
               <div className="error-message">
-                <p>⚠️ {errors.submit}</p>
+                <p>
+                  <AlertCircle size={16} style={{ display: 'inline', marginRight: '4px' }} />
+                  {errors.submit}
+                </p>
               </div>
             )}
           </div>

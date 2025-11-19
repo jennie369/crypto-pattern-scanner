@@ -1,4 +1,5 @@
 import React from 'react';
+import { Zap, Circle } from 'lucide-react';
 import './QuickSelect.css';
 
 const QUICK_SELECT_COINS = [
@@ -29,7 +30,7 @@ function QuickSelect({ selectedCoin, onSelectCoin, patterns }) {
   return (
     <div className="quick-select">
       <div className="quick-select-header">
-        <h4 className="quick-select-title">⚡ Quick Select</h4>
+        <h4 className="quick-select-title"><Zap className="w-4 h-4 inline mr-1" /> Quick Select</h4>
         <span className="quick-select-subtitle">Coins with patterns detected</span>
       </div>
 
@@ -55,7 +56,7 @@ function QuickSelect({ selectedCoin, onSelectCoin, patterns }) {
               <span className="coin-icon">{coin.icon}</span>
               <span className="coin-label">{coin.label}</span>
               {coin.free && <span className="free-badge">FREE</span>}
-              {coinHasPattern && <span className="pattern-indicator">●</span>}
+              {coinHasPattern && <span className="pattern-indicator"><Circle className="w-2 h-2 fill-current" /></span>}
             </button>
           );
         })}
@@ -63,10 +64,10 @@ function QuickSelect({ selectedCoin, onSelectCoin, patterns }) {
 
       <div className="quick-select-legend">
         <span className="legend-item">
-          <span className="legend-dot active-dot">●</span> Pattern Found
+          <span className="legend-dot active-dot"><Circle className="w-2 h-2 fill-current" /></span> Pattern Found
         </span>
         <span className="legend-item">
-          <span className="legend-dot inactive-dot">●</span> No Pattern
+          <span className="legend-dot inactive-dot"><Circle className="w-2 h-2 fill-current" /></span> No Pattern
         </span>
       </div>
     </div>

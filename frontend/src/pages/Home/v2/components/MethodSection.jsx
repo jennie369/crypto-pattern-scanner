@@ -1,10 +1,11 @@
 import React from 'react';
+import { TrendingDown, TrendingUp, AlertTriangle, Download } from 'lucide-react';
 import './MethodSection.css';
 
 export const MethodSection = () => {
   const patterns = [
     {
-      icon: '🔴📉⏸️📉',
+      icon: <TrendingDown size={32} />,
       code: 'DPD',
       name: 'Down-Pause-Down',
       description: 'Pattern tiếp diễn xu hướng giảm với độ tin cậy cao',
@@ -13,7 +14,7 @@ export const MethodSection = () => {
       color: '#F6465D'
     },
     {
-      icon: '🟢📈⏸️📈',
+      icon: <TrendingUp size={32} />,
       code: 'UPU',
       name: 'Up-Pause-Up',
       description: 'Pattern tiếp diễn xu hướng tăng mạnh mẽ',
@@ -22,7 +23,7 @@ export const MethodSection = () => {
       color: '#00FF88'
     },
     {
-      icon: '🔺🔴',
+      icon: <AlertTriangle size={32} />,
       code: 'HFZ',
       name: 'High Frequency Zone',
       description: 'Vùng kháng cự chính với tần suất chạm cao',
@@ -73,7 +74,7 @@ export const MethodSection = () => {
 
         <div className="method-cta">
           <button className="btn-primary btn-lg">
-            <span>📥</span>
+            <span><Download size={20} /></span>
             Download Pattern Guide (PDF)
           </button>
         </div>

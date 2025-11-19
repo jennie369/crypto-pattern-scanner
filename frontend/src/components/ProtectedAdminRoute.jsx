@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { AlertTriangle, ShieldOff } from 'lucide-react';
 
 /**
  * ProtectedAdminRoute - Route protection for admin-only pages
@@ -38,12 +39,14 @@ export default function ProtectedAdminRoute({ children }) {
 
   // Not authenticated
   if (!user) {
+    const WarningIcon = () => <AlertTriangle size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />;
     alert('⚠️ Vui lòng đăng nhập để truy cập trang Admin!');
     return <Navigate to="/" replace />;
   }
 
   // Not admin
   if (!isAdmin()) {
+    const BlockIcon = () => <ShieldOff size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />;
     alert('🚫 Bạn không có quyền truy cập trang Admin!');
     return <Navigate to="/" replace />;
   }

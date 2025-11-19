@@ -1,23 +1,6 @@
-/* Root Variables */
-:root {
-  --primary-burgundy: #4A1942;
-  --primary-navy: #112250;
-  --secondary-purple: #2A1B52;
-  --gold-accent: #FFBD59;
-  --gold-light: #debc81;
-  --success-green: #0ECB81;
-  --danger-red: #F6465D;
-  --sidebar-width-left: 20%;
-  --sidebar-width-right: 30%;
-  --main-content-width: 50%;
-}
-
-/* Global Reset */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+/* ===================================
+   APP CONTAINER - Uses CSS variables from index.css
+   =================================== */
 
 html, body {
   width: 100%;
@@ -31,23 +14,22 @@ html, body {
   flex-direction: column;
   min-height: 100vh;
   width: 100%;
+  position: relative;
+  /* No z-index - let glow layers show through from behind */
 }
 
-body {
-  font-family: 'Noto Sans Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+/* ===================================
+   🎨 APP CONTAINER - Transparent for glow effect
+   =================================== */
 
-/* App Container */
 .app {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   width: 100%;
-  /* ✅ REMOVED: Old gradient that blocked body glow effect */
-  /* background: linear-gradient(180deg, #112250 0%, #2A1B52 50%, #4A1942 100%); */
-  /* ✅ NEW: Transparent to show body's blur glow background */
+  position: relative;
+
+  /* ✅ Transparent to show body's animated glow background */
   background: transparent;
 }
 
@@ -56,6 +38,18 @@ body {
   flex: 1 0 auto;
   display: flex;
   flex-direction: column;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Offset for CompactSidebar on authenticated pages */
+.page-wrapper.compact-sidebar-offset {
+  margin-left: 80px; /* Match collapsed sidebar width */
+}
+
+@media (max-width: 968px) {
+  .page-wrapper.compact-sidebar-offset {
+    margin-left: 0;
+  }
 }
 
 /* Footer - always at bottom */
@@ -63,7 +57,10 @@ body {
   flex-shrink: 0;
 }
 
-/* Light Theme (if needed) */
+/* ===================================
+   ☀️ LIGHT THEME (Optional)
+   =================================== */
+
 .app.light {
   background: linear-gradient(180deg, #f0f2f5 0%, #e4e6eb 100%);
 }
@@ -100,46 +97,51 @@ body {
 /* Main Content */
 .main-content {
   height: 100%;
-  padding: 20px;
-  /* ✅ ADJUSTED: More transparent to show glow effect */
-  background: rgba(17, 34, 80, 0.3);
-  border-left: 1px solid rgba(255, 189, 89, 0.1);
-  border-right: 1px solid rgba(255, 189, 89, 0.1);
+  padding: var(--space-lg);
+  background: var(--bg-elevated);
+  border-left: var(--border-thin) solid var(--glass-border);
+  border-right: var(--border-thin) solid var(--glass-border);
   position: relative;
   overflow: hidden;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
-/* Scanning Overlay */
+/* ===================================
+   🔄 SCANNING OVERLAY
+   =================================== */
+
 .scanning-overlay {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(17, 34, 80, 0.95);
+  background: var(--bg-overlay);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 20px;
-  z-index: 1000;
-  backdrop-filter: blur(10px);
+  gap: var(--space-lg);
+  z-index: var(--z-dropdown);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
 }
 
 .scanning-spinner {
   width: 60px;
   height: 60px;
-  border: 4px solid rgba(255, 189, 89, 0.2);
-  border-top-color: #FFBD59;
-  border-radius: 50%;
+  border: 4px solid var(--warning-bg);
+  border-top-color: var(--brand-gold);
+  border-radius: var(--radius-full);
   animation: spin 1s linear infinite;
 }
 
 .scanning-overlay p {
-  color: #FFBD59;
-  font-size: 16px;
-  font-weight: 600;
-  font-family: 'Montserrat', sans-serif;
+  color: var(--brand-gold);
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  font-family: var(--font-heading);
 }
 
 @keyframes spin {
@@ -194,10 +196,14 @@ body {
   }
 }
 
-/* Focus States */
+/* ===================================
+   ♿ FOCUS STATES (Accessibility)
+   =================================== */
+
 button:focus-visible,
 .nav-btn:focus-visible,
 .coin-item:focus-visible {
-  outline: 2px solid #FFBD59;
+  outline: var(--border-medium) solid var(--brand-gold);
   outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }

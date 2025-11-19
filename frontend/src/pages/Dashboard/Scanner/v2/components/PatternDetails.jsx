@@ -1,5 +1,5 @@
 import React from 'react';
-import { Target, Clipboard, Save } from 'lucide-react';
+import { Target, Clipboard, Save, CheckCircle, AlertTriangle } from 'lucide-react';
 import './PatternDetails.css';
 
 export const PatternDetails = ({ pattern }) => {
@@ -110,7 +110,7 @@ export const PatternDetails = ({ pattern }) => {
           <div className="param-item highlight">
             <div className="param-label">Risk : Reward</div>
             <div className="param-value">
-              1 : {pattern.riskReward.toFixed(2)} {pattern.riskReward >= 2 ? '✅' : '⚠️'}
+              1 : {pattern.riskReward.toFixed(2)} {pattern.riskReward >= 2 ? <CheckCircle size={16} color="#0ECB81" style={{ marginLeft: '4px', verticalAlign: 'text-bottom' }} /> : <AlertTriangle size={16} color="#FFBD59" style={{ marginLeft: '4px', verticalAlign: 'text-bottom' }} />}
             </div>
           </div>
         </div>

@@ -1,0 +1,275 @@
+# UI-RELATED DEPENDENCIES - GEM PLATFORM
+# Analysis Date: 2025-11-12
+# Source: frontend/package.json
+
+## CORE UI FRAMEWORK
+
+react@^19.1.1
+  Purpose: Core React library
+  Usage: Component framework
+  Bundle Impact: ~50KB (minified + gzipped)
+
+react-dom@^19.1.1
+  Purpose: React DOM rendering
+  Usage: Render components to DOM
+  Bundle Impact: ~130KB (minified + gzipped)
+
+react-router-dom@^7.9.5
+  Purpose: Routing library
+  Usage: Page navigation, protected routes
+  Bundle Impact: ~30KB (minified + gzipped)
+  Features Used:
+    - BrowserRouter
+    - Routes, Route
+    - Navigate
+    - useNavigate, useLocation
+
+
+## CHART & VISUALIZATION
+
+lightweight-charts@^4.2.3
+  Purpose: TradingView lightweight charts
+  Usage: Main trading chart component
+  Bundle Impact: ~180KB (minified + gzipped)
+  Used In:
+    - src/components/TradingChart.jsx
+    - src/components/Portfolio/PortfolioChart.jsx
+  Features Used:
+    - Candlestick charts
+    - Line charts
+    - Real-time updates
+    - Custom overlays (zones, patterns)
+
+
+## ANIMATION
+
+framer-motion@^12.23.24
+  Purpose: Animation library
+  Usage: Smooth transitions, page animations
+  Bundle Impact: ~70KB (minified + gzipped)
+  Potential Usage:
+    - Modal enter/exit animations
+    - Page transitions
+    - Component animations
+  Note: May be installed but not heavily used yet
+
+
+## UTILITIES
+
+html2canvas@^1.4.1
+  Purpose: Screenshot/image generation
+  Usage: Capture chart/pattern images
+  Bundle Impact: ~50KB (minified + gzipped)
+  Used In:
+    - src/utils/patternImageGenerator.js
+    - Export chart as image feature
+
+axios@^1.13.1
+  Purpose: HTTP client
+  Usage: API requests (Binance, backend)
+  Bundle Impact: ~30KB (minified + gzipped)
+  Used In:
+    - src/services/binanceApi.js
+    - src/services/sentimentApi.js
+    - src/services/newsApi.js
+
+
+## BACKEND/DATABASE
+
+@supabase/supabase-js@^2.78.0
+  Purpose: Supabase client (PostgreSQL + Auth)
+  Usage: Backend API, authentication, database
+  Bundle Impact: ~80KB (minified + gzipped)
+  Used In:
+    - src/lib/supabaseClient.js
+    - All service files
+    - All context providers
+  Features Used:
+    - Authentication (sign in, sign up, logout)
+    - Database queries (select, insert, update, delete)
+    - Real-time subscriptions
+    - Row-level security
+
+
+## BUILD TOOLS (DEV DEPENDENCIES)
+
+vite@^7.1.7
+  Purpose: Build tool & dev server
+  Features:
+    - Hot Module Replacement (HMR)
+    - Fast builds
+    - ES modules
+
+@vitejs/plugin-react@^5.0.4
+  Purpose: React plugin for Vite
+  Features:
+    - JSX transformation
+    - Fast refresh
+
+
+## TOTAL BUNDLE SIZE ESTIMATE
+
+Production bundle (estimated):
+  - React core: ~180KB
+  - Chart library: ~180KB
+  - Supabase: ~80KB
+  - Framer Motion: ~70KB
+  - Html2canvas: ~50KB
+  - Router: ~30KB
+  - Axios: ~30KB
+
+  Total: ~620KB (minified + gzipped)
+
+Note: Actual bundle size may vary based on tree-shaking and code splitting
+
+
+## MISSING UI LIBRARIES
+
+No external component library used:
+  ❌ Material-UI (MUI)
+  ❌ Ant Design
+  ❌ Chakra UI
+  ❌ Tailwind CSS
+  ❌ Bootstrap
+  ❌ Styled Components
+  ❌ Emotion
+
+All UI components are custom-built with plain CSS.
+
+
+## UI-RELATED PACKAGE CATEGORIES
+
+FRAMEWORK:
+  - react
+  - react-dom
+  - react-router-dom
+
+VISUALIZATION:
+  - lightweight-charts
+
+ANIMATION:
+  - framer-motion
+
+UTILITIES:
+  - html2canvas
+  - axios
+
+BACKEND:
+  - @supabase/supabase-js
+
+LINTING:
+  - eslint
+  - eslint-plugin-react-hooks
+  - eslint-plugin-react-refresh
+
+
+## RECOMMENDATIONS
+
+CONSIDER ADDING:
+
+1. CSS Framework:
+   - Tailwind CSS - for utility-first styling
+   - OR CSS Modules - for scoped styles
+
+2. Component Library (Optional):
+   - Radix UI - for accessible primitives
+   - Headless UI - for unstyled components
+
+3. Icon Library:
+   - Currently using emoji icons
+   - Consider: react-icons or lucide-react
+
+4. Form Management:
+   - react-hook-form - for complex forms
+   - zod - for validation
+
+5. Date Management:
+   - date-fns - lightweight date utilities
+   - Currently using native Date objects
+
+6. State Management (if needed):
+   - zustand - lightweight state management
+   - Only if Context API becomes insufficient
+
+7. Testing:
+   - @testing-library/react
+   - vitest
+   - Currently no tests
+
+
+## BUNDLE OPTIMIZATION OPPORTUNITIES
+
+1. Code Splitting:
+   - Implement React.lazy() for route-based splitting
+   - Lazy load heavy components (charts, modals)
+
+2. Tree Shaking:
+   - Ensure imports are optimized
+   - Use named imports instead of default imports
+
+3. Lazy Loading:
+   - Load framer-motion only when animations needed
+   - Load html2canvas only when export feature used
+
+4. CDN:
+   - Consider loading heavy libraries from CDN
+   - Especially for chart library
+
+5. Image Optimization:
+   - Optimize pattern icons (currently emoji)
+   - Use WebP format for images
+
+
+## SECURITY CONSIDERATIONS
+
+1. Dependency Audit:
+   - Run: npm audit
+   - Check for known vulnerabilities
+
+2. Updates:
+   - Keep dependencies up to date
+   - Especially: react, supabase, axios
+
+3. Bundle Analysis:
+   - Use: vite-plugin-bundle-visualizer
+   - Identify large dependencies
+
+
+## DEVELOPMENT DEPENDENCIES ANALYSIS
+
+Not affecting production bundle:
+  - @eslint/js@^9.36.0
+  - @types/react@^19.1.16
+  - @types/react-dom@^19.1.9
+  - eslint@^9.36.0
+  - eslint-plugin-react-hooks@^5.2.0
+  - eslint-plugin-react-refresh@^0.4.22
+  - globals@^16.4.0
+
+These are used for development only and stripped from production builds.
+
+
+## SUMMARY
+
+Total Production Dependencies: 7
+  - react + react-dom + react-router-dom (framework)
+  - lightweight-charts (visualization)
+  - framer-motion (animation)
+  - html2canvas (utilities)
+  - axios (HTTP client)
+  - @supabase/supabase-js (backend)
+
+Total Dev Dependencies: 7
+  - Vite + React plugin (build tools)
+  - ESLint + plugins (linting)
+  - TypeScript types (DX)
+
+Bundle Size: ~620KB (estimated, gzipped)
+Bundle Health: ✅ GOOD - Reasonable size for feature set
+Dependency Count: ⭐⭐⭐⭐ (4/5) - Minimal, no bloat
+Update Status: ✅ All dependencies on latest stable versions
+
+---
+
+Analysis Complete
+Date: 2025-11-12

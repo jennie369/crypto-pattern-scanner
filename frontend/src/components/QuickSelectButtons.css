@@ -1,0 +1,68 @@
+.quick-select-container {
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.quick-title {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 12px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.quick-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.quick-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 12px;
+
+  background: rgba(30, 42, 94, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.quick-btn:hover {
+  background: rgba(255, 189, 89, 0.15);
+  border-color: rgba(255, 189, 89, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 189, 89, 0.3);
+}
+
+.quick-btn .icon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.quick-btn .text {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .quick-buttons-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .quick-btn .icon {
+    font-size: 28px;
+  }
+
+  .quick-btn .text {
+    font-size: 12px;
+  }
+}

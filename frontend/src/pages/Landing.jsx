@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useIpQuota } from '../hooks/useIpQuota';
 import SignupModal from '../components/SignupModal';
 import { binanceApi } from '../services/binanceApi';
+import { Home, Gem, Lock, Search, CheckCircle, Star, Zap, BarChart3, GraduationCap, Rocket, AlertTriangle, Target, XCircle } from 'lucide-react';
 import './Landing.css';
 
 export default function Landing() {
@@ -63,7 +64,7 @@ export default function Landing() {
         if (quotaResult.needsSignup) {
           setShowSignupModal(true);
         } else {
-          alert(`❌ ${quotaResult.error}`);
+          alert(quotaResult.error);
         }
         return;
       }
@@ -82,13 +83,13 @@ export default function Landing() {
       };
 
       setBtcResult(mockPattern);
-      alert(`✅ Tìm thấy pattern! Còn ${quotaResult.remaining} lượt scan BTC miễn phí.`);
+      alert(`Tìm thấy pattern! Còn ${quotaResult.remaining} lượt scan BTC miễn phí.`);
 
       await refreshIPQuota();
 
     } catch (error) {
       console.error('Bitcoin scan error:', error);
-      alert('❌ Lỗi khi scan: ' + error.message);
+      alert('Lỗi khi scan: ' + error.message);
     } finally {
       setScanningBTC(false);
     }
@@ -105,19 +106,20 @@ export default function Landing() {
 
   return (
     <div className="landing-page">
-      {/* ⚡ NÚT VỀ TRANG CHỦ */}
+      {/* NÚT VỀ TRANG CHỦ */}
       <button
-        onClick={() => navigate('/')}
+        onClick={() => navigate('/scanner-v2')}
         className="btn btn-ghost back-to-home-btn"
+        style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
       >
-        🏠 Về Trang Chủ
+        <Home size={16} /> Về Trang Chủ
       </button>
 
       {/* Hero Section */}
       <section className="hero">
         <div className="hero-content">
           <h1 className="hero-title">
-            <span className="gem-icon">💎</span>
+            <span className="gem-icon"><Gem size={48} /></span>
             GEM Trading Academy
           </h1>
           <p className="hero-subtitle">
@@ -146,11 +148,12 @@ export default function Landing() {
           {!user && (
             <div className="blur-overlay">
               <div className="blur-message">
-                <span className="lock-icon">🔒</span>
+                <span className="lock-icon"><Lock size={32} /></span>
                 <p>Đăng ký để xem giá chi tiết</p>
                 <button
                   className="btn btn-primary btn-sm"
                   onClick={() => setShowSignupModal(true)}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                 >
                   Mở Khóa Ngay
                 </button>
@@ -180,9 +183,9 @@ export default function Landing() {
               </p>
 
               <div className="scan-features">
-                <div className="feature">✅ 3 basic patterns</div>
-                <div className="feature">✅ 1 hour timeframe</div>
-                <div className="feature">✅ Entry/SL/TP levels</div>
+                <div className="feature" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><CheckCircle size={16} /> 3 basic patterns</div>
+                <div className="feature" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><CheckCircle size={16} /> 1 hour timeframe</div>
+                <div className="feature" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><CheckCircle size={16} /> Entry/SL/TP levels</div>
               </div>
 
               {!user && (
@@ -209,6 +212,7 @@ export default function Landing() {
               onClick={handleBitcoinScan}
               disabled={scanningBTC || (!user && !ipQuota.canScan)}
               className="btn btn-secondary btn-lg"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
             >
               {scanningBTC ? (
                 <>
@@ -217,15 +221,15 @@ export default function Landing() {
                 </>
               ) : (
                 <>
-                  <span>🔍</span>
+                  <Search size={20} />
                   {user ? 'Quét Bitcoin' : 'Quét BTC Miễn Phí'}
                 </>
               )}
             </button>
 
             {!user && !ipQuota.canScan && (
-              <p className="scan-limit-text">
-                ⚠️ Đã hết lượt scan. <a href="#" onClick={(e) => { e.preventDefault(); setShowSignupModal(true); }}>Đăng ký</a> để có thêm quota!
+              <p className="scan-limit-text" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <AlertTriangle size={16} /> Đã hết lượt scan. <a href="#" onClick={(e) => { e.preventDefault(); setShowSignupModal(true); }}>Đăng ký</a> để có thêm quota!
               </p>
             )}
           </div>
@@ -233,7 +237,7 @@ export default function Landing() {
           {/* Full Scan (Requires Signup) */}
           <div className="scan-card full">
             <div className="scan-card-header">
-              <span className="scan-icon">🎯</span>
+              <span className="scan-icon"><Target size={24} /></span>
               <h3>Full Scan</h3>
               <span className="scan-badge premium">ĐĂNG KÝ</span>
             </div>
@@ -244,16 +248,16 @@ export default function Landing() {
               </p>
 
               <div className="scan-features">
-                <div className="feature">✅ 20+ coins (BTC, ETH, BNB...)</div>
-                <div className="feature">✅ 6 patterns (FREE)</div>
-                <div className="feature">✅ Real-time alerts</div>
-                <div className="feature">⭐ 5 scans/day (FREE account)</div>
+                <div className="feature" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><CheckCircle size={16} /> 20+ coins (BTC, ETH, BNB...)</div>
+                <div className="feature" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><CheckCircle size={16} /> 6 patterns (FREE)</div>
+                <div className="feature" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><CheckCircle size={16} /> Real-time alerts</div>
+                <div className="feature" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><Star size={16} /> 5 scans/day (FREE account)</div>
               </div>
 
               {user && (
                 <div className="scan-quota-info authenticated">
-                  <span className="user-badge">
-                    ✅ Đã đăng nhập
+                  <span className="user-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    <CheckCircle size={16} /> Đã đăng nhập
                   </span>
                 </div>
               )}
@@ -262,23 +266,24 @@ export default function Landing() {
             <button
               onClick={handleFullScan}
               className="btn btn-primary btn-lg"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
             >
               {user ? (
                 <>
-                  <span>🚀</span>
+                  <Rocket size={20} />
                   Vào Scanner
                 </>
               ) : (
                 <>
-                  <span>📝</span>
+                  <Rocket size={20} />
                   Đăng Ký Miễn Phí
                 </>
               )}
             </button>
 
             {!user && (
-              <p className="scan-benefit-text">
-                💎 Đăng ký FREE → 5 scans/day + Trading Journal
+              <p className="scan-benefit-text" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                <Gem size={16} /> Đăng ký FREE → 5 scans/day + Trading Journal
               </p>
             )}
           </div>
@@ -289,7 +294,7 @@ export default function Landing() {
       {/* Bitcoin Scan Result */}
       {btcResult && (
         <section className="btc-result">
-          <h3>📊 Kết Quả Scan Bitcoin</h3>
+          <h3 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><BarChart3 size={24} /> Kết Quả Scan Bitcoin</h3>
 
           <div className="result-card">
             <div className="result-header">
@@ -332,10 +337,11 @@ export default function Landing() {
             </div>
 
             <div className="result-cta">
-              <p>🎉 Muốn scan thêm 20+ coins nữa?</p>
+              <p style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><Star size={18} /> Muốn scan thêm 20+ coins nữa?</p>
               <button
                 className="btn btn-primary"
                 onClick={() => setShowSignupModal(true)}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
               >
                 Đăng Ký FREE → 5 Scans/Day
               </button>
@@ -350,25 +356,25 @@ export default function Landing() {
 
         <div className="features-grid">
           <div className="feature-card">
-            <span className="feature-icon">🤖</span>
+            <span className="feature-icon"><Search size={40} /></span>
             <h4>AI Pattern Detection</h4>
             <p>Tự động phát hiện 6+ patterns kinh điển</p>
           </div>
 
           <div className="feature-card">
-            <span className="feature-icon">⚡</span>
+            <span className="feature-icon"><Zap size={40} /></span>
             <h4>Real-time Alerts</h4>
             <p>Nhận thông báo ngay khi có cơ hội</p>
           </div>
 
           <div className="feature-card">
-            <span className="feature-icon">📊</span>
+            <span className="feature-icon"><BarChart3 size={40} /></span>
             <h4>Trading Journal</h4>
             <p>Theo dõi và phân tích giao dịch</p>
           </div>
 
           <div className="feature-card">
-            <span className="feature-icon">🎓</span>
+            <span className="feature-icon"><GraduationCap size={40} /></span>
             <h4>Educational Content</h4>
             <p>Học GEM Frequency Method</p>
           </div>
@@ -384,14 +390,15 @@ export default function Landing() {
             <h3>FREE</h3>
             <div className="price">0đ</div>
             <ul>
-              <li>✅ 5 scans/day</li>
-              <li>✅ 3 basic patterns</li>
-              <li>✅ 20+ coins</li>
-              <li>✅ Trading journal (50 trades)</li>
+              <li style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={16} /> 5 scans/day</li>
+              <li style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={16} /> 3 basic patterns</li>
+              <li style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={16} /> 20+ coins</li>
+              <li style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={16} /> Trading journal (50 trades)</li>
             </ul>
             <button
               className="btn btn-outline"
               onClick={() => setShowSignupModal(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
             >
               Đăng Ký Miễn Phí
             </button>
@@ -402,15 +409,16 @@ export default function Landing() {
             <h3>TIER 1</h3>
             <div className="price">10M VND</div>
             <ul>
-              <li>✅ Unlimited scans</li>
-              <li>✅ 6 patterns</li>
-              <li>✅ 20+ coins</li>
-              <li>✅ Telegram alerts</li>
-              <li>✅ Unlimited journal</li>
+              <li style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={16} /> Unlimited scans</li>
+              <li style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={16} /> 6 patterns</li>
+              <li style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={16} /> 20+ coins</li>
+              <li style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={16} /> Telegram alerts</li>
+              <li style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={16} /> Unlimited journal</li>
             </ul>
             <button
               className="btn btn-primary"
               onClick={() => setShowSignupModal(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
             >
               Nâng Cấp Ngay
             </button>
@@ -420,15 +428,16 @@ export default function Landing() {
             <h3>TIER 2</h3>
             <div className="price">38M VND</div>
             <ul>
-              <li>✅ All Tier 1 features</li>
-              <li>✅ 6+ patterns</li>
-              <li>✅ 50+ coins</li>
-              <li>✅ Multi-timeframe</li>
-              <li>✅ Portfolio tracker</li>
+              <li style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={16} /> All Tier 1 features</li>
+              <li style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={16} /> 6+ patterns</li>
+              <li style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={16} /> 50+ coins</li>
+              <li style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={16} /> Multi-timeframe</li>
+              <li style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><CheckCircle size={16} /> Portfolio tracker</li>
             </ul>
             <button
               className="btn btn-outline"
               onClick={() => setShowSignupModal(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
             >
               Tìm Hiểu Thêm
             </button>

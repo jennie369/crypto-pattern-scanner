@@ -1,0 +1,394 @@
+{
+  "config": {
+    "adminPassword": "gem2025",
+    "chatbotTitle": "GEM Platform AI Assistant",
+    "chatbotSubtitle": "Chuyên gia tư vấn Trading & Manifestation - Jennie Chu",
+    "chatbotLogo": "💎",
+    "dataSourceURL": "",
+    "shopifyDomain": "gemcapitalholding.myshopify.com",
+    "shopifyToken": "YOUR_SHOPIFY_TOKEN"
+  },
+  
+  "welcomeMessage": "🙏 <strong>Xin chào! Tôi là AI Assistant của GEM Platform</strong><br><br>💎 <strong>Frequency Trading Method - Phương Pháp Độc Quyền</strong><br><br>Tôi có thể giúp bạn:<br>📈 Tư vấn trading patterns<br>🔍 Hướng dẫn sử dụng Scanner<br>📚 Giới thiệu khóa học phù hợp<br>💎 Tư vấn crystal cho trader<br>🎯 Manifestation cho mục tiêu tài chính<br><br>Bạn muốn tôi hỗ trợ gì hôm nay? 😊",
+
+  "knowledge": {
+    "philosophy": "💎 **GEM FREQUENCY TRADING METHOD**\n\nFounder: **Jennie Chu**\n\n**TRIẾT LÝ CỐT LÕI:**\n• Market có tần số riêng, giống như năng lượng vũ trụ\n• Zone retest > Breakout (68% win rate proven)\n• Confirmation signals trước khi entry\n• Kỷ luật + Psychology = 80% thành công\n• Trading là marathon, không phải sprint\n• Kết hợp technical analysis với spiritual mindset\n• Every loss is a lesson, every win is confirmation",
+
+    "frequency_formulas": "**11 CÔNG THỨC FREQUENCY ĐỘC QUYỀN:**\n\n🔥 **6 CORE (TIER 2):**\n1. DPD - Down-Pause-Down\n2. UPU - Up-Pause-Up\n3. UPD - Up-Pause-Down\n4. DPU - Down-Pause-Up\n5. HFZ - High Frequency Zones\n6. LFZ - Low Frequency Zones\n\n⭐ **5 NÂNG CAO (TIER 3):**\n7-11. Advanced formulas (chỉ TIER 3)\n\n💎 **ĐỘC QUYỀN:**\n• Nghiên cứu 10+ năm\n• Chỉ có ở GEM Platform\n• Win rate 68-90% (backtest 5 năm)\n• KHÔNG có ở đâu khác",
+
+    "tier_system": "**3 TIERS - COURSE BUNDLES:**\n\n💎 **TIER 1: NỀN TẢNG TRADER** - 11 triệu\n• Khóa học cơ bản\n• 7 patterns\n• 2 tools\n• Win rate: 50-55%\n• ROI: 20-30%/năm\n\n🚀 **TIER 2: TẦN SỐ TRADER THỊNH VƯỢNG** - 21 triệu ⭐ BEST\n• 6 công thức Frequency độc quyền\n• 15 patterns\n• 8 tools chuyên nghiệp\n• Win rate: 70-75%\n• ROI: 80-150%/năm\n\n👑 **TIER 3: ĐẾ CHẾ TRADER BẬC THẦY** - 68 triệu\n• 11 công thức FULL system\n• 24 patterns\n• 11 tools elite + AI\n• Win rate: 80-90%\n• Professional level",
+
+    "consulting_style": "**CÁCH TƯ VẤN TỰ NHIÊN:**\n\n1. 🎯 Hỏi về tình huống trading\n2. 📊 Phân tích issue (technical hay psychology?)\n3. 💡 Đề xuất giải pháp:\n   • Công thức nào phù hợp\n   • TIER nào phù hợp với level\n   • Crystal nào giúp focus/calm\n   • Tools nào cần thiết\n4. ❌ KHÔNG hard sell, chỉ đề xuất tự nhiên\n5. ✅ Luôn kết nối với context của trader"
+  },
+
+  "faq": {
+    "tier bundles": {
+      "keywords": ["tier", "bundle", "khóa học", "package", "gói học"],
+      "answer": "💎 **3 TIERS - COURSE BUNDLES:**\n\n**TIER 1: NỀN TẢNG TRADER - 11 TRIỆU**\n🎁 Bao gồm:\n• Khóa học Nền Tảng (15M)\n• Scanner PRO 12 tháng (11.964K)\n• Chatbot PRO 12 tháng MIỄN PHÍ (468K)\n• Telegram Bot (2M)\n• Community 12 tháng (5M)\n• 7 patterns, 2 tools\n\nValue: 36.432M → Giá: 11M\n**TIẾT KIỆM: 25.432M (70%)**\nWin rate: 50-55% | Vốn: $1K-$3K\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n**TIER 2: TẦN SỐ THỊNH VƯỢNG - 21 TRIỆU** ⭐ BEST\n🔥 Bao gồm:\n• Khóa học Tần Số Trader (18M)\n• **6 Công thức Frequency độc quyền (15M)**\n• Scanner PREMIUM 12 tháng (23.964K)\n• Chatbot PREMIUM 12 tháng MIỄN PHÍ (1.188K)\n• 8 Tools chuyên nghiệp (8M)\n• Community 12 tháng (5M)\n• 15 patterns, 8 tools\n\nValue: 73.152M → Giá: 21M\n**TIẾT KIỆM: 52.152M (71%)**\nWin rate: 70-75% | Vốn: $3K-$10K\nROI: 80-150%/năm\n\n💡 **78% học viên chọn TIER 2**\n💡 **92% profitable sau 6 tháng**\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n**TIER 3: ĐẾ CHẾ BẬC THẦY - 68 TRIỆU** 👑\n⭐ Bao gồm:\n• Khóa học Đế Chế Trader (35M)\n• **11 Công thức FULL system (30M)**\n• Scanner VIP 24 tháng (143.928K)\n• Chatbot PREMIUM 24 tháng MIỄN PHÍ (2.376K)\n• 11 Tools elite + AI (25M)\n• Signals 365 ngày (36M)\n• Data Feeds (12M)\n• Mastermind Elite (20M)\n• Community 24 tháng (10M)\n• 24 patterns, 11 tools\n\nValue: 322.304M → Giá: 68M\n**TIẾT KIỆM: 254.304M (79%)**\nWin rate: 80-90% | Professional\n\nBạn đang ở level nào? 😊",
+      "images": ["", "", "", ""],
+      "url": "",
+      "recommendedProducts": ["TIER 2 Bundle", "TIER 3 VIP"]
+    },
+
+    "6 cong thuc frequency": {
+      "keywords": ["6 công thức", "frequency", "dpd", "upu", "upd", "dpu", "hfz", "lfz", "độc quyền"],
+      "answer": "🔥 **6 CÔNG THỨC FREQUENCY ĐỘC QUYỀN:**\n\n**CHỈ CÓ Ở GEM - TIER 2+**\n\n1️⃣ **DPD** - Down-Pause-Down\n• Downtrend continuation\n• Zone retest confirmation\n• Win rate: 72%\n\n2️⃣ **UPU** - Up-Pause-Up\n• Uptrend continuation\n• Bullish zone retest\n• Win rate: 69%\n\n3️⃣ **UPD** - Up-Pause-Down\n• Reversal pattern\n• Top formation\n• Win rate: 65%\n\n4️⃣ **DPU** - Down-Pause-Up\n• Reversal pattern\n• Bottom formation\n• Win rate: 67%\n\n5️⃣ **HFZ** - High Frequency Zones\n• Supply zones tracking\n• Institutional selling\n• Win rate: 68%\n\n6️⃣ **LFZ** - Low Frequency Zones\n• Demand zones tracking\n• Institutional buying\n• Win rate: 70%\n\n💎 **ĐẶC ĐIỂM:**\n• Nghiên cứu 10+ năm\n• Backtest 5 năm data\n• Win rate: 68-85%\n• KHÔNG có ở đâu khác\n• Chỉ học được trong TIER 2/3\n\n📚 Muốn học? Upgrade TIER 2: 21 triệu (tiết kiệm 52M)",
+      "images": ["", "", "", ""],
+      "url": "",
+      "recommendedProducts": ["TIER 2 Bundle"]
+    },
+
+    "scanner": {
+      "keywords": ["scanner", "scan", "tool", "dashboard"],
+      "answer": "🔍 **GEM SCANNER + TOOLS:**\n\n**STANDALONE SCANNER:**\n• FREE: 5 scans/day, 3 patterns - Miễn phí\n• PRO: Unlimited, 7 patterns - 997K/tháng\n• PREMIUM: 15 patterns - 1.997K/tháng\n• VIP: 24 patterns + AI - 5.997K/tháng\n\n**TOOLS BY TIER:**\n\n💎 **TIER 1 (2 tools):**\n1. Basic Pattern Scanner (7 patterns)\n2. Telegram Alert Bot\n\n🚀 **TIER 2 (8 tools):**\n1-2. All from Tier 1\n3. Advanced Scanner (15 patterns + 6 HFZ zones)\n4. Position Size Calculator\n5. Portfolio Tracker\n6. Multi-Timeframe Analysis\n7. Sentiment Analyzer\n8. News & Events Calendar\n\n👑 **TIER 3 (11 tools):**\n1-8. All from Tier 2\n9. Professional Backtesting Engine\n10. AI Prediction Tool (73% accuracy)\n11. Whale Tracker & Dashboard\n\n🎁 **BEST DEAL:**\nMua TIER bundle = Có scanner + tools + khóa học!\nTIER 2: 21M (có 8 tools + 6 công thức độc quyền)\n\nBạn cần tools nào? 😊",
+      "images": ["", "", "", ""],
+      "url": "",
+      "recommendedProducts": ["TIER 2 Bundle"]
+    },
+
+    "chatbot pricing": {
+      "keywords": ["chatbot", "ai assistant", "giá chatbot"],
+      "answer": "🤖 **CHATBOT AI PRICING:**\n\n**STANDALONE:**\n• FREE: 5 câu hỏi/ngày\n• PRO: 15 câu hỏi/ngày - 39K/tháng\n• PREMIUM: UNLIMITED - 99K/tháng\n\n**TRONG TIER BUNDLES:**\n💎 TIER 1: Chatbot PRO 12 tháng MIỄN PHÍ\n🚀 TIER 2: Chatbot PREMIUM 12 tháng MIỄN PHÍ\n👑 TIER 3: Chatbot PREMIUM 24 tháng MIỄN PHÍ\n\n💡 **TIP:**\nMua TIER bundle = Chatbot miễn phí + Khóa học + Scanner + Tools!\n\nBạn muốn standalone hay bundle? 😊",
+      "images": ["", "", "", ""],
+      "url": "",
+      "recommendedProducts": ["TIER 2 Bundle"]
+    },
+
+    "win rate": {
+      "keywords": ["win rate", "tỷ lệ thắng", "hiệu quả", "backtest"],
+      "answer": "📈 **WIN RATE THEO TIER:**\n\n💎 **TIER 1: 50-55%**\n• 7 patterns cơ bản\n• Phù hợp beginner\n• ROI: 20-30%/năm\n\n🚀 **TIER 2: 70-75%** ⭐\n• 15 patterns + 6 công thức Frequency\n• Proven: 686 trades backtest\n• ROI: 80-150%/năm\n• 78% học viên chọn tier này\n• 92% profitable sau 6 tháng\n\n👑 **TIER 3: 80-90%**\n• 24 patterns + 11 công thức FULL\n• Professional level\n• AI prediction 73% accuracy\n• Empire builder level\n\n**TẠI SAO TIER 2 CAO HƠN?**\n✅ 6 công thức Frequency độc quyền\n✅ Zone retest (không phải breakout)\n✅ Confirmation signals\n✅ 8 tools tự động hóa\n✅ Advanced patterns\n\nBạn muốn đạt win rate nào? 😊",
+      "images": ["", "", "", ""],
+      "url": "",
+      "recommendedProducts": ["TIER 2 Bundle"]
+    },
+
+    "loss streak": {
+      "keywords": ["loss", "thua", "lỗ", "streak", "revenge trading"],
+      "answer": "😔 **ĐANG LOSS STREAK?**\n\n**NGUYÊN NHÂN:**\n1. 🎯 Chưa học đủ patterns (chỉ dùng FREE/TIER 1)\n2. ⚠️ Không biết 6 công thức Frequency\n3. 📊 Trade zones yếu (tested 2x+)\n4. 💔 Psychology: FOMO, revenge trading\n5. 🔧 Thiếu tools hỗ trợ\n\n**GIẢI PHÁP:**\n\n✅ **Technical:**\n• Upgrade lên TIER 2 (6 công thức độc quyền)\n• Học đủ 15 patterns\n• Dùng 8 tools tự động\n• Backtest với AI engine\n• Win rate tăng từ 38% → 70-75%\n\n✅ **Psychology:**\n• Nghỉ 2-3 ngày\n• Meditation với Amethyst (350K-2.5M)\n• Review journal\n• Reset mindset với khóa Tư Duy Triệu Phú (499K)\n\n💡 **THỰC TẾ:**\n• FREE users: 38% win rate (chưa học đủ)\n• TIER 2 users: 70-75% win rate\n• Chênh lệch: Có hay không có 6 công thức Frequency\n\n🚀 **UPGRADE TIER 2:**\n• Giá: 21M (tiết kiệm 52M)\n• 92% profitable sau 6 tháng\n• ROI 80-150%/năm\n\nBạn sẵn sàng thay đổi chưa? 💪",
+      "images": ["", "", "", ""],
+      "url": "",
+      "recommendedProducts": ["TIER 2 Bundle", "Amethyst", "Khóa Tư Duy"]
+    },
+
+    "crystals": {
+      "keywords": ["crystal", "đá", "thạch anh", "năng lượng"],
+      "answer": "💎 **CRYSTALS CHO TRADERS:**\n\n**FOCUS & CLARITY:**\n🔮 Clear Quartz (300K-2M) - Master healer\n💜 Amethyst (350K-2.5M) - Tâm linh, focus\n🟤 Tiger's Eye (350K-2M) - Confidence\n\n**STRESS RELIEF:**\n💜 Lepidolite (400K-2.3M) - Anxiety relief\n💗 Rose Quartz (350K-2.5M) - Emotional healing\n🖤 Obsidian (380K-2.2M) - Protection\n\n**ABUNDANCE:**\n💛 Citrine (450K-2.8M) - Money magnet\n✨ Pyrite (400K-2.5M) - Business success\n💚 Green Aventurine (350K-2M) - Luck\n\n**GROUNDING:**\n🖤 Black Tourmaline (400K-2.2M) - Protection từ FOMO\n🟤 Smoky Quartz (400K-2.2M) - Grounding\n\n**SETS CHUYÊN DỤNG:**\n💖 Set Tình Yêu: 2.450.000đ\n💰 Set Tài Lộc: 6.990.000 - 7.530.000đ\n🎯 Set Sự Nghiệp: 3.250.000đ\n\n🛍️ Shop YinYangMasters:\nhttps://yinyangmasters.com\n\nBạn cần crystal cho vấn đề gì? 😊",
+      "images": ["", "", "", ""],
+      "url": "https://yinyangmasters.com",
+      "recommendedProducts": ["Amethyst", "Citrine", "Black Tourmaline"]
+    },
+
+    "courses": {
+      "keywords": ["khóa học", "course", "training", "manifestation"],
+      "answer": "📚 **KHÓA HỌC GEM:**\n\n🔥 **TRADING (Trong TIER Bundles):**\n💎 TIER 1: Nền Tảng Trader (15M) - Trong bundle 11M\n🚀 TIER 2: Tần Số Trader (18M) - Trong bundle 21M\n👑 TIER 3: Đế Chế Trader (35M) - Trong bundle 68M\n\n✨ **MANIFESTATION & MINDSET (Standalone):**\n🌟 7 Ngày Khai Mở Tần Số Gốc: 1.990.000đ\n💖 Kích Hoạt Tần Số Tình Yêu: 399.000đ\n💰 Tái Tạo Tư Duy Triệu Phú: 499.000đ\n\n💡 **KHÁC BIỆT:**\nTrong TIER bundles có:\n✅ Khóa học trading chuyên sâu\n✅ Công thức Frequency độc quyền\n✅ Scanner + Tools + Community\n✅ Support + Materials\n✅ Tiết kiệm 70-79%\n\nBạn quan tâm trading hay manifestation? 😊",
+      "images": ["", "", "", ""],
+      "url": "",
+      "recommendedProducts": ["TIER 2 Bundle", "Khóa Tư Duy"]
+    },
+
+    "affiliate": {
+      "keywords": ["affiliate", "đối tác", "hoa hồng", "ctv", "passive income"],
+      "answer": "🤝 **CHƯƠNG TRÌNH ĐỐI TÁC GEM:**\n\n💰 **HOA HỒNG 4 CẤP:**\n• Cấp 1 (Beginner): 10%\n• Cấp 2 (Growing): 15%\n• Cấp 3 (Master): 20%\n• Cấp 4 (Grand): 30%\n\n📊 **SẢN PHẨM HOT:**\n• TIER 1 bundle: 11M (hoa hồng 1.1M-3.3M)\n• TIER 2 bundle: 21M (hoa hồng 2.1M-6.3M) ⭐\n• TIER 3 bundle: 68M (hoa hồng 6.8M-20.4M)\n• Courses: 399K-1.990K\n• Crystals: 350K-7.530K\n• Scanner: 997K-5.997K/tháng (recurring!)\n\n✨ **LỢI ÍCH:**\n• Passive income recurring\n• Hoa hồng tích lũy\n• Support 24/7\n• Marketing materials miễn phí\n\n💡 **EXAMPLE:**\nGiới thiệu 10 người mua TIER 2:\n→ 10 × 21M × 10-30% = 21M-63M!\n\n🚀 **ĐĂNG KÝ:**\nhttps://gemcapitalholding.com/pages/affiliate\n\nBạn có network để share không? 💎",
+      "images": ["", "", "", ""],
+      "url": "https://gemcapitalholding.com/pages/affiliate",
+      "recommendedProducts": []
+    }
+  },
+
+  "suggestions": [
+    {
+      "emoji": "💎",
+      "text": "Xem 3 TIER Bundles",
+      "keywords": ["tier", "bundle", "khóa học"],
+      "answer": "💎 **3 TIERS:**\n\nTIER 1: 11M (tiết kiệm 25M)\nTIER 2: 21M (tiết kiệm 52M) ⭐ BEST\nTIER 3: 68M (tiết kiệm 254M)\n\nBạn muốn xem chi tiết tier nào? 😊",
+      "images": ["", "", "", ""],
+      "url": "",
+      "recommendedProducts": ["TIER 2 Bundle"]
+    },
+    {
+      "emoji": "🔥",
+      "text": "6 Công thức Frequency độc quyền",
+      "keywords": ["frequency", "công thức", "độc quyền"],
+      "answer": "🔥 **6 CÔNG THỨC FREQUENCY:**\n\nDPD, UPU, UPD, DPU, HFZ, LFZ\n\n💎 Độc quyền GEM\n💎 Win rate 68-85%\n💎 Chỉ có trong TIER 2/3\n\nMuốn tìm hiểu? 😊",
+      "images": ["", "", "", ""],
+      "url": "",
+      "recommendedProducts": ["TIER 2 Bundle"]
+    },
+    {
+      "emoji": "🔍",
+      "text": "Scanner & Tools",
+      "keywords": ["scanner", "tools"],
+      "answer": "🔍 **SCANNER + TOOLS:**\n\n💎 TIER 1: 2 tools\n🚀 TIER 2: 8 tools\n👑 TIER 3: 11 tools + AI\n\nXem chi tiết? 😊",
+      "images": ["", "", "", ""],
+      "url": "",
+      "recommendedProducts": []
+    },
+    {
+      "emoji": "💎",
+      "text": "Crystal cho Trader",
+      "keywords": ["crystal", "đá"],
+      "answer": "💎 **CRYSTALS:**\n\n💜 Amethyst - Focus\n💛 Citrine - Abundance\n🖤 Black Tourmaline - Protection\n\nShop: yinyangmasters.com 😊",
+      "images": ["", "", "", ""],
+      "url": "https://yinyangmasters.com",
+      "recommendedProducts": ["Amethyst"]
+    },
+    {
+      "emoji": "🤝",
+      "text": "Affiliate Program",
+      "keywords": ["affiliate", "đối tác"],
+      "answer": "🤝 **AFFILIATE:**\n\nHoa hồng 10-30%\nPassive income\n\nĐăng ký: gemcapitalholding.com/pages/affiliate",
+      "images": ["", "", "", ""],
+      "url": "https://gemcapitalholding.com/pages/affiliate",
+      "recommendedProducts": []
+    }
+  ],
+
+  "contactButtons": {
+    "facebook": {
+      "enabled": true,
+      "icon": "💬",
+      "text": "Chat Facebook",
+      "url": "https://www.facebook.com/gemcapitalholding"
+    },
+    "zalo": {
+      "enabled": true,
+      "icon": "📱",
+      "text": "Zalo Support",
+      "url": "https://zalo.me/GEMPLATFORM"
+    },
+    "telegram": {
+      "enabled": true,
+      "icon": "✈️",
+      "text": "Telegram",
+      "url": "https://t.me/gemholdinggroup"
+    }
+  },
+
+  "products": {
+    "tier 1 bundle": {
+      "name": "TIER 1: NỀN TẢNG TRADER",
+      "description": "Bundle khóa học + Scanner PRO + Chatbot PRO + 2 Tools + Community - Tiết kiệm 70%",
+      "price": "11.000.000đ",
+      "images": ["", "", "", ""],
+      "url": "https://gemcapitalholding.com/products/tier-1-bundle",
+      "benefits": [
+        "Khóa học Nền Tảng Trader (15M)",
+        "Scanner PRO 12 tháng (11.964K)",
+        "Chatbot PRO 12 tháng MIỄN PHÍ (468K)",
+        "Telegram Bot (2M)",
+        "Community 12 tháng (5M)",
+        "7 patterns, 2 tools",
+        "Win rate: 50-55%",
+        "ROI: 20-30%/năm",
+        "Tiết kiệm: 25.432.000đ (70%)"
+      ],
+      "ctaButtons": [
+        {
+          "enabled": true,
+          "text": "Đăng Ký TIER 1",
+          "url": "https://gemcapitalholding.com/products/tier-1-bundle",
+          "style": "primary"
+        }
+      ]
+    },
+
+    "tier 2 bundle": {
+      "name": "TIER 2: TẦN SỐ TRADER THỊNH VƯỢNG",
+      "description": "Bundle khóa học + 6 Công thức Frequency độc quyền + Scanner PREMIUM + 8 Tools - Tiết kiệm 71%",
+      "price": "21.000.000đ",
+      "images": ["", "", "", ""],
+      "url": "https://gemcapitalholding.com/products/tier-2-bundle",
+      "benefits": [
+        "Khóa học Tần Số Trader (18M)",
+        "6 Công thức Frequency độc quyền (15M) 🔥",
+        "Scanner PREMIUM 12 tháng (23.964K)",
+        "Chatbot PREMIUM 12 tháng MIỄN PHÍ (1.188K)",
+        "8 Tools chuyên nghiệp (8M)",
+        "Community 12 tháng (5M)",
+        "15 patterns, 8 tools",
+        "Win rate: 70-75%",
+        "ROI: 80-150%/năm",
+        "78% học viên chọn tier này",
+        "92% profitable sau 6 tháng",
+        "Tiết kiệm: 52.152.000đ (71%)"
+      ],
+      "ctaButtons": [
+        {
+          "enabled": true,
+          "text": "Đăng Ký TIER 2 ⭐",
+          "url": "https://gemcapitalholding.com/products/tier-2-bundle",
+          "style": "primary"
+        }
+      ]
+    },
+
+    "tier 3 vip": {
+      "name": "TIER 3: ĐẾ CHẾ TRADER BẬC THẦY",
+      "description": "Bundle khóa học + 11 Công thức FULL + Scanner VIP 24 tháng + 11 Tools Elite + AI - Tiết kiệm 79%",
+      "price": "68.000.000đ",
+      "images": ["", "", "", ""],
+      "url": "https://gemcapitalholding.com/products/tier-3-vip-bundle",
+      "benefits": [
+        "Khóa học Đế Chế Trader (35M)",
+        "11 Công thức FULL system (30M) 🔥",
+        "Scanner VIP 24 tháng (143.928K)",
+        "Chatbot PREMIUM 24 tháng MIỄN PHÍ (2.376K)",
+        "11 Tools elite + AI (25M)",
+        "Signals 365 ngày (36M)",
+        "Data Feeds 1 năm (12M)",
+        "Mastermind Elite Group (20M)",
+        "Community 24 tháng (10M)",
+        "24 patterns, 11 tools",
+        "Win rate: 80-90%",
+        "Professional level",
+        "Tiết kiệm: 254.304.000đ (79%)"
+      ],
+      "ctaButtons": [
+        {
+          "enabled": true,
+          "text": "Đăng Ký TIER 3 👑",
+          "url": "https://gemcapitalholding.com/products/tier-3-vip-bundle",
+          "style": "primary"
+        }
+      ]
+    },
+
+    "amethyst": {
+      "name": "Thạch Anh Tím (Amethyst)",
+      "description": "Viên đá tâm linh cho trader - Tăng focus, calm mind, trực giác",
+      "price": "350.000đ - 2.500.000đ",
+      "images": ["", "", "", ""],
+      "url": "https://yinyangmasters.com/products/thach-anh-tim",
+      "benefits": [
+        "Tăng focus & clarity trong trading",
+        "Calm emotions khi market volatility",
+        "Giảm stress, anxiety",
+        "Tăng intuition trong quyết định",
+        "Chakra đỉnh đầu (963Hz)"
+      ],
+      "ctaButtons": [
+        {
+          "enabled": true,
+          "text": "Mua Ngay",
+          "url": "https://yinyangmasters.com/products/thach-anh-tim",
+          "style": "primary"
+        }
+      ]
+    },
+
+    "citrine": {
+      "name": "Thạch Anh Vàng (Citrine)",
+      "description": "Viên đá tài lộc số 1 - Thu hút profit, abundance trong trading",
+      "price": "450.000đ - 2.800.000đ",
+      "images": ["", "", "", ""],
+      "url": "https://yinyangmasters.com/products/thach-anh-vang",
+      "benefits": [
+        "Thu hút profit dồi dào",
+        "Manifest winning trades",
+        "Tăng confidence",
+        "Năng lượng tích cực",
+        "Chakra rốn (Solar Plexus)"
+      ],
+      "ctaButtons": [
+        {
+          "enabled": true,
+          "text": "Đặt Mua",
+          "url": "https://yinyangmasters.com/products/thach-anh-vang",
+          "style": "primary"
+        }
+      ]
+    },
+
+    "black tourmaline": {
+      "name": "Black Tourmaline",
+      "description": "Bảo vệ khỏi FOMO, revenge trading - Grounding cho trader",
+      "price": "400.000đ - 2.200.000đ",
+      "images": ["", "", "", ""],
+      "url": "https://yinyangmasters.com/products/black-tourmaline",
+      "benefits": [
+        "Bảo vệ khỏi emotional trading",
+        "Grounding - Neo căn bản",
+        "Block negative energy",
+        "Tăng discipline",
+        "Chakra gốc"
+      ],
+      "ctaButtons": [
+        {
+          "enabled": true,
+          "text": "Mua Ngay",
+          "url": "https://yinyangmasters.com/products/black-tourmaline",
+          "style": "primary"
+        }
+      ]
+    },
+
+    "khoa tan so goc": {
+      "name": "7 Ngày Khai Mở Tần Số Gốc",
+      "description": "Chuyển hóa năng lượng cốt lõi, nâng cao tần số cho trader & manifester",
+      "price": "1.990.000đ",
+      "images": ["", "", "", ""],
+      "url": "https://gemcapitalholding.com/products/7-ngay-tan-so-goc",
+      "benefits": [
+        "Chuyển hóa năng lượng cốt lõi",
+        "Nâng cao tần số cá nhân",
+        "Giải phóng blockages",
+        "Tăng manifestation power",
+        "7 ngày intensive training"
+      ],
+      "ctaButtons": [
+        {
+          "enabled": true,
+          "text": "Đăng Ký",
+          "url": "https://gemcapitalholding.com/products/7-ngay-tan-so-goc",
+          "style": "primary"
+        }
+      ]
+    },
+
+    "khoa tinh yeu": {
+      "name": "Kích Hoạt Tần Số Tình Yêu",
+      "description": "21 ngày thu hút tình yêu đích thực, chữa lành trauma",
+      "price": "399.000đ",
+      "images": ["", "", "", ""],
+      "url": "https://gemcapitalholding.com/products/tan-so-tinh-yeu",
+      "benefits": [
+        "Thu hút tình yêu đích thực",
+        "Chữa lành tổn thương",
+        "Tăng self-love",
+        "21 ngày transformation",
+        "Exercises + meditations"
+      ],
+      "ctaButtons": [
+        {
+          "enabled": true,
+          "text": "Tham Gia",
+          "url": "https://gemcapitalholding.com/products/tan-so-tinh-yeu",
+          "style": "primary"
+        }
+      ]
+    },
+
+    "khoa tu duy": {
+      "name": "Tái Tạo Tư Duy Triệu Phú",
+      "description": "30 ngày thay đổi Money Mindset, manifest tài chính",
+      "price": "499.000đ",
+      "images": ["", "", "", ""],
+      "url": "https://gemcapitalholding.com/products/tu-duy-trieu-phu",
+      "benefits": [
+        "Money mindset transformation",
+        "Giải phóng limiting beliefs",
+        "Manifest wealth hiệu quả",
+        "30 ngày intensive",
+        "Daily exercises + tracking"
+      ],
+      "ctaButtons": [
+        {
+          "enabled": true,
+          "text": "Bắt Đầu",
+          "url": "https://gemcapitalholding.com/products/tu-duy-trieu-phu",
+          "style": "primary"
+        }
+      ]
+    }
+  }
+}

@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import TopNavBar from './components/TopNavBar';
 import Footer from './components/Footer';
+import AuthenticatedLayout from './components/AuthenticatedLayout';
 import Landing from './pages/Landing';
 import HomePage from './pages/Home/v2'; // Home Page v2 with AIDA funnel
 import Scanner from './pages/Scanner';
@@ -20,6 +21,7 @@ import SupabaseTest from './components/SupabaseTest';
 import ProtectedRoute from './components/ProtectedRoute';
 import ProtectedAdminRoute from './components/ProtectedAdminRoute';
 import { useAuth } from './contexts/AuthContext';
+import { TradingModeProvider } from './contexts/TradingModeContext';
 
 // TIER 2 Components
 import TierGuard from './components/TierGuard/TierGuard';
@@ -42,7 +44,7 @@ import Courses from './pages/Courses';
 import CourseLearning from './pages/CourseLearning';
 
 // Community Forum
-import Forum from './pages/Forum/Forum';
+import Forum from './pages/Forum/Forum3Column'; // Updated to 3-column layout
 import CreateThread from './pages/Forum/CreateThread';
 import ThreadDetail from './pages/Forum/ThreadDetail';
 
@@ -55,15 +57,23 @@ import Events from './pages/Events/Events';
 // Community Hub (combines all community features)
 import CommunityHub from './pages/Community/CommunityHub';
 
+// Leaderboard
+import Leaderboard from './pages/Community/Leaderboard';
+
 // Gem Master Chatbot
 import Chatbot from './pages/Chatbot';
 
 // Affiliate Dashboard
 import AffiliateDashboard from './pages/AffiliateDashboard';
 
+// Account Dashboard & Profile
+import AccountDashboard from './pages/Account/AccountDashboard';
+import ProfilePage from './pages/Account/ProfilePage';
+
 // Toast Notifications
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Toaster } from 'react-hot-toast'; // For Paper Trading notifications
 
 import './App.css';
 
@@ -77,12 +87,13 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="app dark">
-        <Routes>
+      <TradingModeProvider>
+        <div className="app dark">
+          <Routes>
           {/* Public Landing Page - Homepage */}
           <Route
             path="/"
-            element={user ? <Navigate to="/scanner" /> : <Landing />}
+            element={user ? <Navigate to="/scanner-v2" /> : <Landing />}
           />
 
           {/* Home Page v2 - AIDA Conversion Funnel (Week 3, Day 15-17) */}
@@ -108,11 +119,11 @@ function App() {
           {/* Public Auth Routes */}
           <Route
             path="/login"
-            element={user ? <Navigate to="/scanner" /> : <Login />}
+            element={user ? <Navigate to="/scanner-v2" /> : <Login />}
           />
           <Route
             path="/signup"
-            element={user ? <Navigate to="/scanner" /> : <Signup />}
+            element={user ? <Navigate to="/scanner-v2" /> : <Signup />}
           />
 
           {/* Public Pricing Page */}
@@ -184,13 +195,9 @@ function App() {
             path="/forum"
             element={
               <ProtectedRoute>
-                <div className="app-layout-wrapper">
-                  <TopNavBar />
-                  <div className="page-wrapper">
-                    <Forum />
-                  </div>
-                  <Footer />
-                </div>
+                <AuthenticatedLayout>
+                  <Forum />
+                </AuthenticatedLayout>
               </ProtectedRoute>
             }
           />
@@ -198,13 +205,9 @@ function App() {
             path="/forum/new"
             element={
               <ProtectedRoute>
-                <div className="app-layout-wrapper">
-                  <TopNavBar />
-                  <div className="page-wrapper">
-                    <CreateThread />
-                  </div>
-                  <Footer />
-                </div>
+                <AuthenticatedLayout>
+                  <CreateThread />
+                </AuthenticatedLayout>
               </ProtectedRoute>
             }
           />
@@ -212,13 +215,9 @@ function App() {
             path="/forum/thread/:threadId"
             element={
               <ProtectedRoute>
-                <div className="app-layout-wrapper">
-                  <TopNavBar />
-                  <div className="page-wrapper">
-                    <ThreadDetail />
-                  </div>
-                  <Footer />
-                </div>
+                <AuthenticatedLayout>
+                  <ThreadDetail />
+                </AuthenticatedLayout>
               </ProtectedRoute>
             }
           />
@@ -228,13 +227,9 @@ function App() {
             path="/messages"
             element={
               <ProtectedRoute>
-                <div className="app-layout-wrapper">
-                  <TopNavBar />
-                  <div className="page-wrapper">
-                    <Messages />
-                  </div>
-                  <Footer />
-                </div>
+                <AuthenticatedLayout>
+                  <Messages />
+                </AuthenticatedLayout>
               </ProtectedRoute>
             }
           />
@@ -244,13 +239,21 @@ function App() {
             path="/events"
             element={
               <ProtectedRoute>
-                <div className="app-layout-wrapper">
-                  <TopNavBar />
-                  <div className="page-wrapper">
-                    <Events />
-                  </div>
-                  <Footer />
-                </div>
+                <AuthenticatedLayout>
+                  <Events />
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Leaderboard Route */}
+          <Route
+            path="/leaderboard"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <Leaderboard />
+                </AuthenticatedLayout>
               </ProtectedRoute>
             }
           />
@@ -260,13 +263,9 @@ function App() {
             path="/chatbot"
             element={
               <ProtectedRoute>
-                <div className="app-layout-wrapper">
-                  <TopNavBar />
-                  <div className="page-wrapper">
-                    <Chatbot />
-                  </div>
-                  <Footer />
-                </div>
+                <AuthenticatedLayout>
+                  <Chatbot />
+                </AuthenticatedLayout>
               </ProtectedRoute>
             }
           />
@@ -276,13 +275,33 @@ function App() {
             path="/affiliate"
             element={
               <ProtectedRoute>
-                <div className="app-layout-wrapper">
-                  <TopNavBar />
-                  <div className="page-wrapper">
-                    <AffiliateDashboard />
-                  </div>
-                  <Footer />
-                </div>
+                <AuthenticatedLayout>
+                  <AffiliateDashboard />
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Account Dashboard Route */}
+          <Route
+            path="/account"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <AccountDashboard />
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Profile Page Route */}
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <ProfilePage />
+                </AuthenticatedLayout>
               </ProtectedRoute>
             }
           />
@@ -292,13 +311,9 @@ function App() {
             path="/community"
             element={
               <ProtectedRoute>
-                <div className="app-layout-wrapper">
-                  <TopNavBar />
-                  <div className="page-wrapper">
-                    <CommunityHub />
-                  </div>
-                  <Footer />
-                </div>
+                <AuthenticatedLayout>
+                  <CommunityHub />
+                </AuthenticatedLayout>
               </ProtectedRoute>
             }
           />
@@ -306,13 +321,9 @@ function App() {
             path="/community/:tab"
             element={
               <ProtectedRoute>
-                <div className="app-layout-wrapper">
-                  <TopNavBar />
-                  <div className="page-wrapper">
-                    <CommunityHub />
-                  </div>
-                  <Footer />
-                </div>
+                <AuthenticatedLayout>
+                  <CommunityHub />
+                </AuthenticatedLayout>
               </ProtectedRoute>
             }
           />
@@ -322,13 +333,9 @@ function App() {
             path="/scanner"
             element={
               <ProtectedRoute>
-                <div className="app-layout-wrapper">
-                  <TopNavBar />
-                  <div className="page-wrapper">
-                    <Scanner />
-                  </div>
-                  <Footer />
-                </div>
+                <AuthenticatedLayout>
+                  <Scanner />
+                </AuthenticatedLayout>
               </ProtectedRoute>
             }
           />
@@ -338,13 +345,9 @@ function App() {
             path="/analytics"
             element={
               <ProtectedRoute>
-                <div className="app-layout-wrapper">
-                  <TopNavBar />
-                  <div className="page-wrapper">
-                    <Analytics />
-                  </div>
-                  <Footer />
-                </div>
+                <AuthenticatedLayout>
+                  <Analytics />
+                </AuthenticatedLayout>
               </ProtectedRoute>
             }
           />
@@ -352,13 +355,9 @@ function App() {
             path="/history"
             element={
               <ProtectedRoute>
-                <div className="app-layout-wrapper">
-                  <TopNavBar />
-                  <div className="page-wrapper">
-                    <History />
-                  </div>
-                  <Footer />
-                </div>
+                <AuthenticatedLayout>
+                  <History />
+                </AuthenticatedLayout>
               </ProtectedRoute>
             }
           />
@@ -366,13 +365,9 @@ function App() {
             path="/scan-history"
             element={
               <ProtectedRoute>
-                <div className="app-layout-wrapper">
-                  <TopNavBar />
-                  <div className="page-wrapper">
-                    <ScanHistory />
-                  </div>
-                  <Footer />
-                </div>
+                <AuthenticatedLayout>
+                  <ScanHistory />
+                </AuthenticatedLayout>
               </ProtectedRoute>
             }
           />
@@ -381,13 +376,9 @@ function App() {
             path="/settings"
             element={
               <ProtectedRoute>
-                <div className="app-layout-wrapper">
-                  <TopNavBar />
-                  <div className="page-wrapper">
-                    <EnhancedSettings />
-                  </div>
-                  <Footer />
-                </div>
+                <AuthenticatedLayout>
+                  <EnhancedSettings />
+                </AuthenticatedLayout>
               </ProtectedRoute>
             }
           />
@@ -396,13 +387,9 @@ function App() {
             path="/settings-old"
             element={
               <ProtectedRoute>
-                <div className="app-layout-wrapper">
-                  <TopNavBar />
-                  <div className="page-wrapper">
-                    <Settings />
-                  </div>
-                  <Footer />
-                </div>
+                <AuthenticatedLayout>
+                  <Settings />
+                </AuthenticatedLayout>
               </ProtectedRoute>
             }
           />
@@ -410,13 +397,9 @@ function App() {
             path="/risk-calculator"
             element={
               <ProtectedRoute>
-                <div className="app-layout-wrapper">
-                  <TopNavBar />
-                  <div className="page-wrapper">
-                    <RiskCalculator />
-                  </div>
-                  <Footer />
-                </div>
+                <AuthenticatedLayout>
+                  <RiskCalculator />
+                </AuthenticatedLayout>
               </ProtectedRoute>
             }
           />
@@ -424,13 +407,9 @@ function App() {
             path="/admin"
             element={
               <ProtectedAdminRoute>
-                <div className="app-layout-wrapper">
-                  <TopNavBar />
-                  <div className="page-wrapper">
-                    <Admin />
-                  </div>
-                  <Footer />
-                </div>
+                <AuthenticatedLayout>
+                  <Admin />
+                </AuthenticatedLayout>
               </ProtectedAdminRoute>
             }
           />
@@ -438,13 +417,9 @@ function App() {
             path="/test"
             element={
               <ProtectedRoute>
-                <div className="app-layout-wrapper">
-                  <TopNavBar />
-                  <div className="page-wrapper">
-                    <SupabaseTest />
-                  </div>
-                  <Footer />
-                </div>
+                <AuthenticatedLayout>
+                  <SupabaseTest />
+                </AuthenticatedLayout>
               </ProtectedRoute>
             }
           />
@@ -459,13 +434,9 @@ function App() {
             path="/portfolio"
             element={
               <ProtectedRoute>
-                <div className="app-layout-wrapper">
-                  <TopNavBar />
-                  <div className="page-wrapper">
-                    <Portfolio />
-                  </div>
-                  <Footer />
-                </div>
+                <AuthenticatedLayout>
+                  <Portfolio />
+                </AuthenticatedLayout>
               </ProtectedRoute>
             }
           />
@@ -475,13 +446,9 @@ function App() {
             path="/mtf-analysis"
             element={
               <ProtectedRoute>
-                <div className="app-layout-wrapper">
-                  <TopNavBar />
-                  <div className="page-wrapper">
-                    <MTFAnalysis />
-                  </div>
-                  <Footer />
-                </div>
+                <AuthenticatedLayout>
+                  <MTFAnalysis />
+                </AuthenticatedLayout>
               </ProtectedRoute>
             }
           />
@@ -491,13 +458,9 @@ function App() {
             path="/sentiment"
             element={
               <ProtectedRoute>
-                <div className="app-layout-wrapper">
-                  <TopNavBar />
-                  <div className="page-wrapper">
-                    <Sentiment />
-                  </div>
-                  <Footer />
-                </div>
+                <AuthenticatedLayout>
+                  <Sentiment />
+                </AuthenticatedLayout>
               </ProtectedRoute>
             }
           />
@@ -507,13 +470,9 @@ function App() {
             path="/news-calendar"
             element={
               <ProtectedRoute>
-                <div className="app-layout-wrapper">
-                  <TopNavBar />
-                  <div className="page-wrapper">
-                    <NewsCalendar />
-                  </div>
-                  <Footer />
-                </div>
+                <AuthenticatedLayout>
+                  <NewsCalendar />
+                </AuthenticatedLayout>
               </ProtectedRoute>
             }
           />
@@ -529,13 +488,9 @@ function App() {
             element={
               <ProtectedRoute>
                 <TierGuard requiredTier="TIER3">
-                  <div className="app-layout-wrapper">
-                    <TopNavBar />
-                    <div className="page-wrapper">
-                      <Backtesting />
-                    </div>
-                    <Footer />
-                  </div>
+                  <AuthenticatedLayout>
+                    <Backtesting />
+                  </AuthenticatedLayout>
                 </TierGuard>
               </ProtectedRoute>
             }
@@ -547,13 +502,9 @@ function App() {
             element={
               <ProtectedRoute>
                 <TierGuard requiredTier="TIER3">
-                  <div className="app-layout-wrapper">
-                    <TopNavBar />
-                    <div className="page-wrapper">
-                      <AIPrediction />
-                    </div>
-                    <Footer />
-                  </div>
+                  <AuthenticatedLayout>
+                    <AIPrediction />
+                  </AuthenticatedLayout>
                 </TierGuard>
               </ProtectedRoute>
             }
@@ -565,13 +516,9 @@ function App() {
             element={
               <ProtectedRoute>
                 <TierGuard requiredTier="TIER3">
-                  <div className="app-layout-wrapper">
-                    <TopNavBar />
-                    <div className="page-wrapper">
-                      <WhaleTracker />
-                    </div>
-                    <Footer />
-                  </div>
+                  <AuthenticatedLayout>
+                    <WhaleTracker />
+                  </AuthenticatedLayout>
                 </TierGuard>
               </ProtectedRoute>
             }
@@ -592,7 +539,33 @@ function App() {
           pauseOnHover
           theme="dark"
         />
-      </div>
+
+        {/* React Hot Toast for Paper Trading */}
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: '#1a1a2e',
+              color: '#fff',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+            },
+            success: {
+              iconTheme: {
+                primary: '#00FF88',
+                secondary: '#1a1a2e',
+              },
+            },
+            error: {
+              iconTheme: {
+                primary: '#F6465D',
+                secondary: '#1a1a2e',
+              },
+            },
+          }}
+        />
+        </div>
+      </TradingModeProvider>
     </BrowserRouter>
   );
 }

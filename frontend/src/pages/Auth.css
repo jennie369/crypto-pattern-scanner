@@ -1,23 +1,32 @@
 /* ============================================= */
 /* AUTHENTICATION PAGES */
 /* ============================================= */
+
+/* Box-sizing fix for all auth elements */
+.auth-container *,
+.auth-card *,
+.auth-form * {
+  box-sizing: border-box;
+}
+
 .auth-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 40px 20px;
-  background: linear-gradient(135deg, #0a1628 0%, #1a2642 100%);
+  background: transparent;
 }
 
 .auth-card {
   width: 100%;
-  max-width: 450px;
+  max-width: 420px;
   background: linear-gradient(135deg, rgba(42, 27, 82, 0.9) 0%, rgba(17, 34, 80, 0.9) 100%);
   border: 1px solid rgba(255, 189, 89, 0.3);
   border-radius: 16px;
-  padding: 40px;
+  padding: 32px 28px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
 }
 
 .auth-header {
@@ -59,16 +68,17 @@
 .alert-error {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
+  gap: 10px;
+  padding: 12px 14px;
   background: rgba(246, 70, 93, 0.15);
   border: 1px solid rgba(246, 70, 93, 0.4);
   border-radius: 8px;
   color: #F6465D;
-  font-size: 14px;
-  margin-bottom: 24px;
+  font-size: 13px;
+  margin-bottom: 20px;
   font-family: 'Noto Sans Display', sans-serif;
   animation: slideIn 0.3s ease;
+  box-sizing: border-box;
 }
 
 @keyframes slideIn {
@@ -86,17 +96,111 @@
   font-size: 20px;
 }
 
+/* Referral Badge */
+.referral-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #9C0612 0%, #6B0F1A 100%);
+  border: 2px solid #FFBD59;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  animation: fadeInSlide 0.5s ease-out;
+  box-shadow: 0 4px 16px rgba(156, 6, 18, 0.4);
+  box-sizing: border-box;
+}
+
+.referral-badge.validating {
+  background: linear-gradient(135deg, rgba(156, 6, 18, 0.5) 0%, rgba(107, 15, 26, 0.5) 100%);
+  border-color: rgba(255, 189, 89, 0.5);
+}
+
+.referral-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFBD59;
+  animation: pulse 2s infinite;
+}
+
+.referral-badge.validating .referral-icon {
+  animation: spin 1s linear infinite;
+}
+
+.referral-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.referral-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.referral-code {
+  font-size: 18px;
+  font-weight: 700;
+  color: #FFBD59;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1px;
+}
+
+.referral-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #00FF88;
+}
+
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Auth Form */
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .form-group label {
@@ -108,7 +212,7 @@
 
 .auth-input {
   width: 100%;
-  padding: 14px 16px;
+  padding: 12px 14px;
   background: rgba(17, 34, 80, 0.6);
   border: 1px solid rgba(255, 189, 89, 0.3);
   border-radius: 8px;
@@ -116,6 +220,7 @@
   font-size: 14px;
   font-family: 'Noto Sans Display', sans-serif;
   transition: all 0.3s ease;
+  box-sizing: border-box;
 }
 
 .auth-input:focus {
@@ -142,18 +247,19 @@
 
 .auth-submit-btn {
   width: 100%;
-  padding: 14px 24px;
+  padding: 12px 20px;
   background: linear-gradient(135deg, #FFBD59 0%, #DEBC81 100%);
   color: #112250;
   border: none;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   font-family: 'Montserrat', sans-serif;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(255, 189, 89, 0.3);
-  margin-top: 8px;
+  margin-top: 6px;
+  box-sizing: border-box;
 }
 
 .auth-submit-btn:hover:not(:disabled) {
@@ -200,11 +306,12 @@
 /* Responsive */
 @media (max-width: 768px) {
   .auth-container {
-    padding: 20px;
+    padding: 16px;
   }
 
   .auth-card {
-    padding: 32px 24px;
+    padding: 24px 20px;
+    max-width: 100%;
   }
 
   .auth-logo {
@@ -212,6 +319,6 @@
   }
 
   .auth-header h1 {
-    font-size: 24px;
+    font-size: 22px;
   }
 }

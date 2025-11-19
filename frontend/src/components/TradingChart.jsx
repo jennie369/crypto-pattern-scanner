@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createChart } from 'lightweight-charts';
+import { BarChart3, RefreshCw, Circle, Coins, TrendingUp, TrendingDown, ChevronDown, BarChart, Maximize2, Minimize2 } from 'lucide-react';
 import { detectSupportResistance, formatSRForChart, filterSRByTier } from '../services/supportResistance';
 import { useAuth } from '../contexts/AuthContext';
 import './TradingChart.css';
@@ -489,7 +490,7 @@ export default function TradingChart({ symbol, interval = '1h', patterns = [], o
     <div className={`trading-chart-wrapper ${isFullscreen ? 'fullscreen' : ''}`}>
       {!symbol ? (
         <div className="chart-empty">
-          <div className="empty-icon">📊</div>
+          <div className="empty-icon"><BarChart3 className="w-16 h-16" /></div>
           <h3>Select a coin to view chart</h3>
           <p>Click on a scan result from the left sidebar</p>
         </div>
@@ -500,7 +501,7 @@ export default function TradingChart({ symbol, interval = '1h', patterns = [], o
             {/* Row 1: Coin info & price */}
             <div className="header-row-1">
               <div className="coin-info-left">
-                <span className="coin-icon">🪙</span>
+                <span className="coin-icon"><Coins className="w-6 h-6" /></span>
                 <span className="coin-name-large">
                   {symbol.replace('USDT', '')}USDT
                 </span>
@@ -511,7 +512,7 @@ export default function TradingChart({ symbol, interval = '1h', patterns = [], o
                 <div className="coin-price-info">
                   <span className="coin-price-large">${currentPrice.toFixed(2)}</span>
                   <span className={`coin-change ${priceChange >= 0 ? 'positive' : 'negative'}`}>
-                    {priceChange >= 0 ? '▲' : '▼'}
+                    {priceChange >= 0 ? <TrendingUp className="w-4 h-4 inline" /> : <TrendingDown className="w-4 h-4 inline" />}
                     {Math.abs(priceChange).toFixed(2)}%
                   </span>
                 </div>
@@ -522,14 +523,14 @@ export default function TradingChart({ symbol, interval = '1h', patterns = [], o
             <div className="header-row-2">
               <div className="live-status-group">
                 <div className="live-indicator">
-                  <span className="live-dot">🟢</span>
+                  <span className="live-dot"><Circle className="w-3 h-3 fill-green-500 text-green-500" /></span>
                   <span className="live-text">Live</span>
                 </div>
                 <span className="last-update">Last update: {timeSinceUpdate}</span>
               </div>
 
               <button className="btn-refresh-new" onClick={handleRefresh}>
-                🔄 Refresh
+                <RefreshCw className="w-4 h-4 inline mr-1" /> Refresh
               </button>
             </div>
 
@@ -552,13 +553,13 @@ export default function TradingChart({ symbol, interval = '1h', patterns = [], o
                   className={`btn-volume ${showVolume ? 'active' : ''}`}
                   onClick={handleVolumeToggle}
                 >
-                  📊 Volume
+                  <BarChart className="w-4 h-4 inline mr-1" /> Volume
                 </button>
                 <button
                   className="btn-fullscreen"
                   onClick={handleFullscreenToggle}
                 >
-                  {isFullscreen ? '⬇️ Exit' : '⛶ Full'}
+                  {isFullscreen ? <><Minimize2 className="w-4 h-4 inline mr-1" /> Exit</> : <><Maximize2 className="w-4 h-4 inline mr-1" /> Full</>}
                 </button>
               </div>
             </div>
@@ -568,7 +569,7 @@ export default function TradingChart({ symbol, interval = '1h', patterns = [], o
           {patterns && patterns[0] && patterns[0].patternType && (
             <div className="pattern-indicator-floating">
               <span className="pattern-badge-large">
-                {patterns[0].patternIcon || '🔹'} {patterns[0].patternType}
+                {patterns[0].patternIcon || <BarChart3 className="w-4 h-4 inline" />} {patterns[0].patternType}
               </span>
             </div>
           )}
@@ -589,7 +590,7 @@ export default function TradingChart({ symbol, interval = '1h', patterns = [], o
 
             {error && (
               <div className="chart-overlay error">
-                <div className="error-icon">⚠️</div>
+                <div className="error-icon"><ChevronDown className="w-8 h-8" /></div>
                 <p>{error}</p>
                 <button onClick={handleRefresh}>
                   Retry

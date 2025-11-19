@@ -1,4 +1,5 @@
 import React from 'react';
+import { Gem } from 'lucide-react';
 import './HoldingsTable.css';
 
 /**
@@ -18,7 +19,7 @@ export default function HoldingsTable({ holdings, onDelete }) {
   if (holdings.length === 0) {
     return (
       <div className="holdings-table-empty">
-        <div className="empty-icon">💎</div>
+        <div className="empty-icon"><Gem size={48} /></div>
         <p>No holdings to display</p>
         <small>Add a position to start tracking</small>
       </div>

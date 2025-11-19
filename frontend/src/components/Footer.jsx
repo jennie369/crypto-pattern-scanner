@@ -1,4 +1,5 @@
 import { useTranslation } from '../hooks/useTranslation';
+import { Gem, Smartphone, Youtube, Users, Twitter, AlertTriangle } from 'lucide-react';
 import './Footer.css';
 
 /**
@@ -16,7 +17,7 @@ function Footer() {
         {/* Brand Section */}
         <div className="footer-section brand">
           <div className="footer-logo">
-            <span className="footer-icon">💎</span>
+            <span className="footer-icon"><Gem size={32} /></span>
             <div className="footer-brand-text">
               <div className="footer-brand-name">GEM TRADING ACADEMY</div>
               <div className="footer-tagline">{t('footerTagline')}</div>
@@ -54,16 +55,16 @@ function Footer() {
           <h4>{t('followUs')}</h4>
           <div className="social-links">
             <a href="https://t.me/gemtrading" className="social-btn telegram" target="_blank" rel="noopener noreferrer">
-              <span>📱</span> Telegram
+              <span><Smartphone size={18} /></span> Telegram
             </a>
             <a href="https://youtube.com/@gemtrading" className="social-btn youtube" target="_blank" rel="noopener noreferrer">
-              <span>📺</span> YouTube
+              <span><Youtube size={18} /></span> YouTube
             </a>
             <a href="https://facebook.com/gemtrading" className="social-btn facebook" target="_blank" rel="noopener noreferrer">
-              <span>👥</span> Facebook
+              <span><Users size={18} /></span> Facebook
             </a>
             <a href="https://twitter.com/gemtrading" className="social-btn twitter" target="_blank" rel="noopener noreferrer">
-              <span>🐦</span> Twitter
+              <span><Twitter size={18} /></span> Twitter
             </a>
           </div>
         </div>
@@ -88,7 +89,7 @@ function Footer() {
 
       {/* Warning Notice */}
       <div className="footer-notice">
-        <span className="notice-icon">⚠️</span>
+        <span className="notice-icon"><AlertTriangle size={18} /></span>
         <span>{t('tradingWarning')}</span>
       </div>
 

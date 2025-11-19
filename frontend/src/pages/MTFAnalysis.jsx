@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BarChart3, Search, Grid3x3, Layers, CheckSquare, Square, TrendingUp, Calendar } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import TierGuard from '../components/TierGuard/TierGuard';
 // import './MTFAnalysis.css'; // Commented out to use global styles from components.css
@@ -122,7 +123,7 @@ export default function MTFAnalysis() {
         {/* Page Header */}
         <div className="mtf-header">
           <div className="header-content">
-            <h1>📊 Multi-Timeframe Analysis</h1>
+            <h1><BarChart3 size={32} style={{ marginRight: '12px', display: 'inline-block', verticalAlign: 'middle' }} /> Multi-Timeframe Analysis</h1>
             <p className="header-subtitle">Analyze patterns across 4 timeframes simultaneously</p>
           </div>
 
@@ -136,7 +137,7 @@ export default function MTFAnalysis() {
               className="symbol-input"
             />
             <button type="submit" className="btn-search">
-              🔍 Load
+              <Search size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Load
             </button>
           </form>
         </div>
@@ -152,13 +153,13 @@ export default function MTFAnalysis() {
                 className={`btn-toggle ${layout === 'grid' ? 'active' : ''}`}
                 onClick={() => setLayout('grid')}
               >
-                📊 Grid (2x2)
+                <Grid3x3 size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Grid (2x2)
               </button>
               <button
                 className={`btn-toggle ${layout === 'stacked' ? 'active' : ''}`}
                 onClick={() => setLayout('stacked')}
               >
-                📈 Stacked
+                <Layers size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Stacked
               </button>
             </div>
           </div>
@@ -170,7 +171,7 @@ export default function MTFAnalysis() {
               className={`btn-toggle ${showZones ? 'active' : ''}`}
               onClick={() => setShowZones(!showZones)}
             >
-              {showZones ? '✅' : '⬜'} Show MA + RSI
+              {showZones ? <CheckSquare size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> : <Square size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} />} Show MA + RSI
             </button>
           </div>
 
@@ -202,7 +203,7 @@ export default function MTFAnalysis() {
           {/* 15m Chart */}
           <div className="chart-wrapper">
             <div className="chart-header">
-              <span className="chart-title">📈 15 Minutes</span>
+              <span className="chart-title"><TrendingUp size={18} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> 15 Minutes</span>
               <span className="chart-desc">Short-term scalping</span>
             </div>
             <div id="tradingview_15" className="tradingview-widget"></div>
@@ -211,7 +212,7 @@ export default function MTFAnalysis() {
           {/* 1h Chart */}
           <div className="chart-wrapper">
             <div className="chart-header">
-              <span className="chart-title">📊 1 Hour</span>
+              <span className="chart-title"><BarChart3 size={18} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> 1 Hour</span>
               <span className="chart-desc">Intraday trends</span>
             </div>
             <div id="tradingview_60" className="tradingview-widget"></div>
@@ -220,7 +221,7 @@ export default function MTFAnalysis() {
           {/* 4h Chart */}
           <div className="chart-wrapper">
             <div className="chart-header">
-              <span className="chart-title">📉 4 Hours</span>
+              <span className="chart-title"><BarChart3 size={18} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> 4 Hours</span>
               <span className="chart-desc">Swing trading</span>
             </div>
             <div id="tradingview_240" className="tradingview-widget"></div>
@@ -229,7 +230,7 @@ export default function MTFAnalysis() {
           {/* 1d Chart */}
           <div className="chart-wrapper">
             <div className="chart-header">
-              <span className="chart-title">📅 Daily</span>
+              <span className="chart-title"><Calendar size={18} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Daily</span>
               <span className="chart-desc">Long-term position</span>
             </div>
             <div id="tradingview_D" className="tradingview-widget"></div>
@@ -239,10 +240,10 @@ export default function MTFAnalysis() {
 
         {/* Usage Tips */}
         <div className="mtf-tips">
-          <h3>💡 How to Use Multi-Timeframe Analysis</h3>
+          <h3><TrendingUp size={24} style={{ marginRight: '8px', display: 'inline-block', verticalAlign: 'middle' }} /> How to Use Multi-Timeframe Analysis</h3>
           <div className="tips-grid">
             <div className="tip-card">
-              <div className="tip-icon">1️⃣</div>
+              <div className="tip-icon">1</div>
               <div className="tip-content">
                 <div className="tip-title">Top-Down Analysis</div>
                 <div className="tip-text">
@@ -252,7 +253,7 @@ export default function MTFAnalysis() {
             </div>
 
             <div className="tip-card">
-              <div className="tip-icon">2️⃣</div>
+              <div className="tip-icon">2</div>
               <div className="tip-content">
                 <div className="tip-title">Confirm with Higher Timeframes</div>
                 <div className="tip-text">
@@ -262,7 +263,7 @@ export default function MTFAnalysis() {
             </div>
 
             <div className="tip-card">
-              <div className="tip-icon">3️⃣</div>
+              <div className="tip-icon">3</div>
               <div className="tip-content">
                 <div className="tip-title">Find Confluences</div>
                 <div className="tip-text">
@@ -272,7 +273,7 @@ export default function MTFAnalysis() {
             </div>
 
             <div className="tip-card">
-              <div className="tip-icon">4️⃣</div>
+              <div className="tip-icon">4</div>
               <div className="tip-content">
                 <div className="tip-title">RETEST Strategy</div>
                 <div className="tip-text">

@@ -1,5 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Lock, Search, DollarSign, Briefcase, BarChart3, TrendingUp, Calendar, Star, CheckCircle } from 'lucide-react'
 import PriceDisplay from '../PriceDisplay/PriceDisplay'
 import './UpgradePrompt.css'
 
@@ -38,32 +39,32 @@ export default function UpgradePrompt({
   // TIER 2 Features list (all 6 tools)
   const tier2Features = [
     {
-      icon: '🔍',
+      icon: Search,
       title: 'Advanced Pattern Scanner',
       description: '15 patterns + 6 Frequency Zones với retest tracking'
     },
     {
-      icon: '💰',
+      icon: DollarSign,
       title: 'Enhanced Risk & Position Calculator',
       description: 'Zone-based SL, Multiple TPs (1:2, 1:3, 1:5), Liquidation calculator'
     },
     {
-      icon: '💼',
+      icon: Briefcase,
       title: 'Portfolio Tracker với Entry Type Analytics',
       description: 'Track holdings, P&L, phân tích RETEST vs BREAKOUT performance'
     },
     {
-      icon: '📊',
+      icon: BarChart3,
       title: 'Multi-Timeframe Analysis',
       description: '4 charts đồng thời (15m, 1h, 4h, 1d) với auto HFZ/LFZ detection'
     },
     {
-      icon: '📈',
+      icon: TrendingUp,
       title: 'Sentiment Analyzer',
       description: 'Fear & Greed Index, Trending coins, Social metrics, News aggregation'
     },
     {
-      icon: '📅',
+      icon: Calendar,
       title: 'News & Events Calendar',
       description: 'Economic events, Crypto events, Impact filtering, Alerts'
     }
@@ -73,7 +74,7 @@ export default function UpgradePrompt({
     <div className="upgrade-prompt-overlay">
       <div className="upgrade-prompt">
         {/* Lock Icon */}
-        <div className="lock-icon">🔒</div>
+        <div className="lock-icon"><Lock size={48} /></div>
 
         {/* Heading */}
         <h2 className="upgrade-title">Tính Năng TIER 2</h2>
@@ -102,30 +103,33 @@ export default function UpgradePrompt({
         <div className="features-section">
           <h3 className="features-heading">Bạn sẽ được sử dụng:</h3>
           <ul className="features-list">
-            {tier2Features.map((feature, index) => (
-              <li key={index} className="feature-item">
-                <div className="feature-icon">{feature.icon}</div>
-                <div className="feature-content">
-                  <div className="feature-title">{feature.title}</div>
-                  <div className="feature-description">{feature.description}</div>
-                </div>
-              </li>
-            ))}
+            {tier2Features.map((feature, index) => {
+              const IconComponent = feature.icon;
+              return (
+                <li key={index} className="feature-item">
+                  <div className="feature-icon"><IconComponent size={24} /></div>
+                  <div className="feature-content">
+                    <div className="feature-title">{feature.title}</div>
+                    <div className="feature-description">{feature.description}</div>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </div>
 
         {/* CTA Buttons */}
         <div className="upgrade-actions">
-          <button 
+          <button
             className="btn-upgrade-primary"
             onClick={() => navigate('/pricing')}
           >
-            ⭐ Nâng Cấp TIER 2 Ngay
+            <Star size={20} /> Nâng Cấp TIER 2 Ngay
           </button>
           
-          <button 
+          <button
             className="btn-upgrade-secondary"
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/scanner-v2')}
           >
             ← Về Trang Chủ
           </button>
@@ -133,7 +137,7 @@ export default function UpgradePrompt({
 
         {/* Money-back guarantee */}
         <div className="guarantee-badge">
-          <span className="guarantee-icon">✅</span>
+          <span className="guarantee-icon"><CheckCircle size={20} /></span>
           <span className="guarantee-text">Đảm bảo hoàn tiền trong 7 ngày</span>
         </div>
       </div>

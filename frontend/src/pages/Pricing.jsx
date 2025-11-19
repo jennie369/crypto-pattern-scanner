@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabaseClient'
+import { Check, Star, Clock, Home, Gem, GraduationCap, Search, Bot, HelpCircle, Package, Calendar, RefreshCw, DollarSign, Gift, Smartphone, Mail, CheckCircle, XCircle } from 'lucide-react'
 // import './Pricing.css' // Commented out to use global styles from components.css
 
 export default function Pricing() {
@@ -282,8 +283,8 @@ export default function Pricing() {
         return (
           <div key={tier.id} className="card-pricing card-pricing-free">
             {/* Top Badge */}
-            <div className="badge badge-free mb-16">
-              📚 Khóa học FREQUENCY TRADING
+            <div className="badge badge-free mb-16" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              <GraduationCap size={12} /> FREQUENCY TRADING
             </div>
 
             {/* Title */}
@@ -303,7 +304,7 @@ export default function Pricing() {
             <div className="mb-24">
               {tier.features.filter(f => f.included).map((feature, idx) => (
                 <div key={idx} className="feature-box feature-box-green">
-                  <span>✅</span>
+                  <span><CheckCircle size={16} /></span>
                   <span>{feature.text}</span>
                 </div>
               ))}
@@ -322,8 +323,8 @@ export default function Pricing() {
         return (
           <div key={tier.id} className="card-pricing card-pricing-pro">
             {/* Top Badge */}
-            <div className="badge badge-pro mb-16">
-              📚 Khóa học FREQUENCY TRADING - GÓI 1
+            <div className="badge badge-pro mb-16" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              <GraduationCap size={12} /> FREQUENCY TRADING
             </div>
 
             {/* Title */}
@@ -341,7 +342,7 @@ export default function Pricing() {
             {bundleInfo && (
               <div className="combo-badge combo-badge-gold">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>⭐</span>
+                  <Star size={16} />
                   <span className="fw-600 text-gold">Combo: Khóa học + Scanner + Chatbot</span>
                 </div>
               </div>
@@ -352,19 +353,19 @@ export default function Pricing() {
               {bundleInfo && (
                 <>
                   <div className="feature-box feature-box-gold">
-                    <span>✓</span>
+                    <span><Check size={16} /></span>
                     <span>Khóa học GÓI 1</span>
                   </div>
                   <div className="feature-box feature-box-gold">
-                    <span>✓</span>
+                    <span><Check size={16} /></span>
                     <span>{bundleInfo.scanner}</span>
                   </div>
                   <div className="feature-box feature-box-gold">
-                    <span>✓</span>
+                    <span><Check size={16} /></span>
                     <span>{bundleInfo.chatbot}</span>
                   </div>
                   <div className="feature-box feature-box-gold">
-                    <span>⏱️</span>
+                    <span><Clock size={16} /></span>
                     <span>{bundleInfo.duration}</span>
                   </div>
                 </>
@@ -374,7 +375,7 @@ export default function Pricing() {
             {/* Bottom Feature */}
             <div className="combo-badge combo-badge-green mb-24">
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span>✅</span>
+                <CheckCircle size={16} />
                 <span className="fw-600 text-green">Truy cập đầy đủ 17 chương</span>
               </div>
             </div>
@@ -384,9 +385,9 @@ export default function Pricing() {
               className={`btn-warning btn-full ${isCurrent ? 'disabled' : ''}`}
               onClick={() => handleUpgrade(productType, tier)}
               disabled={isCurrent}
-              style={{ opacity: isCurrent ? 0.6 : 1 }}
+              style={{ opacity: isCurrent ? 0.6 : 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
             >
-              {isCurrent ? '✓ Đang Dùng' : 'Mua Ngay'}
+              {isCurrent ? <><Check size={16} /> Đang Dùng</> : 'Mua Ngay'}
             </button>
           </div>
         )
@@ -397,13 +398,13 @@ export default function Pricing() {
         return (
           <div key={tier.id} className="card-pricing card-pricing-premium">
             {/* POPULAR Badge */}
-            <div className="badge badge-popular">
-              🔥 POPULAR
+            <div className="badge badge-popular" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              <Star size={16} /> POPULAR
             </div>
 
             {/* Top Badge */}
-            <div className="badge badge-premium mb-16" style={{ marginTop: '8px' }}>
-              📚 Khóa học FREQUENCY TRADING
+            <div className="badge badge-premium mb-16" style={{ marginTop: '8px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              <GraduationCap size={12} /> FREQUENCY TRADING
             </div>
 
             {/* Title */}
@@ -421,7 +422,7 @@ export default function Pricing() {
             {bundleInfo && (
               <div className="combo-badge combo-badge-purple">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>⭐</span>
+                  <Star size={16} />
                   <span className="fw-600 text-purple">Combo: Khóa học + Scanner + Chatbot</span>
                 </div>
               </div>
@@ -432,19 +433,19 @@ export default function Pricing() {
               {bundleInfo && (
                 <>
                   <div className="feature-box feature-box-purple">
-                    <span>✓</span>
+                    <span><Check size={16} /></span>
                     <span>Khóa học GÓI 2</span>
                   </div>
                   <div className="feature-box feature-box-purple">
-                    <span>✓</span>
+                    <span><Check size={16} /></span>
                     <span>{bundleInfo.scanner}</span>
                   </div>
                   <div className="feature-box feature-box-purple">
-                    <span>✓</span>
+                    <span><Check size={16} /></span>
                     <span>{bundleInfo.chatbot}</span>
                   </div>
                   <div className="feature-box feature-box-purple">
-                    <span>⏱️</span>
+                    <span><Clock size={16} /></span>
                     <span>{bundleInfo.duration}</span>
                   </div>
                 </>
@@ -454,7 +455,7 @@ export default function Pricing() {
             {/* Bottom Feature */}
             <div className="combo-badge combo-badge-green mb-24">
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span>✅</span>
+                <CheckCircle size={16} />
                 <span className="fw-600 text-green">Tất cả tính năng Gói 1</span>
               </div>
             </div>
@@ -464,9 +465,9 @@ export default function Pricing() {
               className={`btn-premium btn-full ${isCurrent ? 'disabled' : ''}`}
               onClick={() => handleUpgrade(productType, tier)}
               disabled={isCurrent}
-              style={{ opacity: isCurrent ? 0.6 : 1 }}
+              style={{ opacity: isCurrent ? 0.6 : 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
             >
-              {isCurrent ? '✓ Đang Dùng' : 'Mua Ngay'}
+              {isCurrent ? <><Check size={16} /> Đang Dùng</> : 'Mua Ngay'}
             </button>
           </div>
         )
@@ -477,8 +478,8 @@ export default function Pricing() {
         return (
           <div key={tier.id} className="card-pricing card-pricing-vip">
             {/* Top Badge */}
-            <div className="badge badge-vip mb-16">
-              📚 Khóa học FREQUENCY TRADING
+            <div className="badge badge-vip mb-16" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              <GraduationCap size={12} /> FREQUENCY TRADING
             </div>
 
             {/* Title with VIP styling */}
@@ -496,7 +497,7 @@ export default function Pricing() {
             {bundleInfo && (
               <div className="combo-badge combo-badge-gold">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>⭐</span>
+                  <Star size={16} />
                   <span className="fw-600 text-gold">Combo: Khóa học + Scanner + Chatbot</span>
                 </div>
               </div>
@@ -507,19 +508,19 @@ export default function Pricing() {
               {bundleInfo && (
                 <>
                   <div className="feature-box feature-box-gold">
-                    <span>✓</span>
+                    <span><Check size={16} /></span>
                     <span>Khóa học GÓI 3 - VIP</span>
                   </div>
                   <div className="feature-box feature-box-gold">
-                    <span>✓</span>
+                    <span><Check size={16} /></span>
                     <span>{bundleInfo.scanner}</span>
                   </div>
                   <div className="feature-box feature-box-gold">
-                    <span>✓</span>
+                    <span><Check size={16} /></span>
                     <span>{bundleInfo.chatbot}</span>
                   </div>
                   <div className="feature-box feature-box-gold">
-                    <span>⏱️</span>
+                    <span><Clock size={16} /></span>
                     <span>{bundleInfo.duration}</span>
                   </div>
                 </>
@@ -529,7 +530,7 @@ export default function Pricing() {
             {/* Bottom Feature */}
             <div className="combo-badge combo-badge-green mb-24">
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span>✅</span>
+                <CheckCircle size={16} />
                 <span className="fw-600 text-green">Tất cả tính năng Gói 1 + 2</span>
               </div>
             </div>
@@ -539,9 +540,9 @@ export default function Pricing() {
               className={`btn-vip btn-full ${isCurrent ? 'disabled' : ''}`}
               onClick={() => handleUpgrade(productType, tier)}
               disabled={isCurrent}
-              style={{ opacity: isCurrent ? 0.6 : 1 }}
+              style={{ opacity: isCurrent ? 0.6 : 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
             >
-              {isCurrent ? '✓ Đang Dùng' : 'Mua Ngay - VIP'}
+              {isCurrent ? <><Check size={16} /> Đang Dùng</> : 'Mua Ngay - VIP'}
             </button>
           </div>
         )
@@ -561,37 +562,37 @@ export default function Pricing() {
     }
 
     const tierClasses = tierClassMap[tier.id] || tierClassMap['free']
-    const productIcon = productType === 'scanner' ? '🔍' : '🤖'
+    const ProductIcon = productType === 'scanner' ? Search : Bot
     const productName = productType === 'scanner' ? 'Scanner Dashboard' : 'YinYang Chatbot AI'
 
     return (
       <div key={tier.id} className={`card-pricing ${tierClasses.card}`}>
         {/* POPULAR Badge */}
         {tier.popular && (
-          <div className="badge badge-popular">
-            🔥 POPULAR
+          <div className="badge badge-popular" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+            <Star size={16} /> POPULAR
           </div>
         )}
 
         {/* Current Tier Badge */}
         {isCurrent && (
-          <div className="badge badge-current">
-            ✓ Đang Dùng
+          <div className="badge badge-current" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+            <Check size={16} /> Đang Dùng
           </div>
         )}
 
         {/* Product Badge */}
-        <div className={`badge ${tierClasses.badge} mb-16`} style={tier.popular ? { marginTop: '8px' } : {}}>
-          {productIcon} {productName} - {tier.name}
+        <div className={`badge ${tierClasses.badge} mb-16`} style={tier.popular ? { marginTop: '8px', display: 'inline-flex', alignItems: 'center', gap: '8px' } : { display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+          <ProductIcon size={12} /> {productType === 'scanner' ? 'SCANNER' : 'CHATBOT'}
         </div>
 
         {/* Title */}
-        <h3 className={`${tierClasses.text} fw-900`} style={{ fontSize: '32px', marginBottom: '16px' }}>
+        <h3 className={`${tierClasses.text} fw-900`} style={{ fontSize: '20px', marginBottom: '12px' }}>
           {tier.name}
         </h3>
 
         {/* Price */}
-        <div className="fw-900 text-white" style={{ fontSize: '48px', lineHeight: 1, marginBottom: '4px' }}>
+        <div className="fw-900 text-white" style={{ fontSize: '28px', lineHeight: 1, marginBottom: '4px' }}>
           {tier.price}
         </div>
         {tier.period && <div className="text-muted mb-24">{tier.period}</div>}
@@ -602,7 +603,7 @@ export default function Pricing() {
             if (!feature.included) return null
             return (
               <div key={index} className={`feature-box ${tierClasses.featureBox}`}>
-                <span>{feature.bold ? '✅' : '✓'}</span>
+                <span>{feature.bold ? <CheckCircle size={16} /> : <Check size={16} />}</span>
                 <span style={feature.bold ? { fontWeight: 700 } : {}}>{feature.text}</span>
               </div>
             )
@@ -614,9 +615,9 @@ export default function Pricing() {
           className={`${tierClasses.btn} btn-full ${isCurrent || tier.id === 'free' ? 'disabled' : ''}`}
           onClick={() => handleUpgrade(productType, tier)}
           disabled={isCurrent || tier.id === 'free'}
-          style={{ opacity: isCurrent || tier.id === 'free' ? 0.6 : 1 }}
+          style={{ opacity: isCurrent || tier.id === 'free' ? 0.6 : 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
         >
-          {isCurrent ? '✓ Đang Dùng' : (tier.id === 'free' ? 'Miễn Phí' : 'Mua Ngay')}
+          {isCurrent ? <><Check size={16} /> Đang Dùng</> : (tier.id === 'free' ? 'Miễn Phí' : 'Mua Ngay')}
         </button>
       </div>
     )
@@ -624,24 +625,27 @@ export default function Pricing() {
 
   return (
     <div className="page-container">
-      <div className="page-content">
-      {/* Back to Home button - fixed top-right */}
+      {/* Back to Home button - fixed top-right (OUTSIDE page-content to avoid clipping) */}
       <button
-        className="btn-primary"
-        onClick={() => navigate('/')}
+        className="btn-primary btn-sm"
+        onClick={() => navigate('/scanner-v2')}
         style={{
           position: 'fixed',
-          top: '20px',
+          top: '80px',
           right: '20px',
-          zIndex: 1000
+          zIndex: 100,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '8px'
         }}
       >
-        🏠 Về Trang Chủ
+        <Home size={14} /> Về Trang Chủ
       </button>
 
+      <div className="page-content">
       <div className="pricing-header">
-        <h1 className="heading-gold heading-gold-lg">
-          💎 Bảng Giá - GEM Trading Academy
+        <h1 className="heading-gold heading-gold-lg" style={{ display: 'inline-flex', alignItems: 'center', gap: '12px' }}>
+          <Gem size={40} /> Bảng Giá - GEM Trading Academy
         </h1>
         <p className="text-muted" style={{ fontSize: '18px' }}>Chọn gói phù hợp với nhu cầu của bạn - Mua riêng lẻ hoặc combo</p>
       </div>
@@ -651,7 +655,7 @@ export default function Pricing() {
       ======================================== */}
       <div className="pricing-section">
         <div className="section-header">
-          <h2>🎓 Khóa Học FREQUENCY TRADING</h2>
+          <h2 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><GraduationCap size={24} /> Khóa Học FREQUENCY TRADING</h2>
           <p>Học cách trading chuyên nghiệp với 17 chương chi tiết</p>
           {user && (
             <div className="current-tier-badge">
@@ -662,8 +666,11 @@ export default function Pricing() {
           )}
         </div>
 
-        <div className="pricing-grid">
-          {courseTiers.map(tier => renderTierCard('course', tier))}
+        {/* Container Card - like Quick Tools section */}
+        <div className="card-glass" style={{ padding: '32px', marginBottom: '24px' }}>
+          <div className="pricing-grid">
+            {courseTiers.map(tier => renderTierCard('course', tier))}
+          </div>
         </div>
       </div>
 
@@ -672,7 +679,7 @@ export default function Pricing() {
       ======================================== */}
       <div className="pricing-section">
         <div className="section-header">
-          <h2>🔍 Scanner Dashboard</h2>
+          <h2 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><Search size={24} /> Scanner Dashboard</h2>
           <p>Công cụ quét pattern tự động cho crypto trading</p>
           {user && (
             <div className="current-tier-badge">
@@ -683,8 +690,11 @@ export default function Pricing() {
           )}
         </div>
 
-        <div className="pricing-grid">
-          {scannerTiers.map(tier => renderTierCard('scanner', tier))}
+        {/* Container Card - like Quick Tools section */}
+        <div className="card-glass" style={{ padding: '32px', marginBottom: '24px' }}>
+          <div className="pricing-grid">
+            {scannerTiers.map(tier => renderTierCard('scanner', tier))}
+          </div>
         </div>
       </div>
 
@@ -693,7 +703,7 @@ export default function Pricing() {
       ======================================== */}
       <div className="pricing-section">
         <div className="section-header">
-          <h2>🤖 YinYang Chatbot AI</h2>
+          <h2 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><Bot size={24} /> YinYang Chatbot AI</h2>
           <p>Trợ lý AI giúp phân tích thị trường và giải đáp thắc mắc</p>
           {user && (
             <div className="current-tier-badge">
@@ -704,44 +714,50 @@ export default function Pricing() {
           )}
         </div>
 
-        <div className="pricing-grid chatbot-grid">
-          {chatbotTiers.map(tier => renderTierCard('chatbot', tier))}
+        {/* Container Card - like Quick Tools section */}
+        <div className="card-glass" style={{ padding: '32px', marginBottom: '24px' }}>
+          <div className="pricing-grid chatbot-grid">
+            {chatbotTiers.map(tier => renderTierCard('chatbot', tier))}
+          </div>
         </div>
       </div>
 
       {/* FAQ Section */}
       <div className="pricing-faq">
-        <h2 className="heading-gold mb-24">❓ Câu Hỏi Thường Gặp</h2>
+        <h2 className="heading-gold mb-24" style={{ display: 'inline-flex', alignItems: 'center', gap: '12px' }}><HelpCircle size={28} /> Câu Hỏi Thường Gặp</h2>
 
-        <div className="faq-grid">
-          <div className="card-faq">
-            <h4>📦 Tôi có thể mua riêng lẻ không?</h4>
-            <p>Có! Bạn có thể mua từng sản phẩm riêng biệt hoặc mua combo để được giảm giá.</p>
-          </div>
+        {/* Container Card - like Quick Tools section */}
+        <div className="card-glass" style={{ padding: '16px' }}>
+          <div className="faq-grid">
+            <div className="card-faq">
+              <h4 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><Package size={18} /> Tôi có thể mua riêng lẻ không?</h4>
+              <p>Có! Bạn có thể mua từng sản phẩm riêng biệt hoặc mua combo để được giảm giá.</p>
+            </div>
 
-          <div className="card-faq">
-            <h4>📅 Có phải thanh toán hàng tháng?</h4>
-            <p>Đúng rồi! Tất cả các gói đều thanh toán theo tháng. Hủy bất cứ lúc nào.</p>
-          </div>
+            <div className="card-faq">
+              <h4 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><Calendar size={18} /> Có phải thanh toán hàng tháng?</h4>
+              <p>Đúng rồi! Tất cả các gói đều thanh toán theo tháng. Hủy bất cứ lúc nào.</p>
+            </div>
 
-          <div className="card-faq">
-            <h4>🔄 Tôi có thể nâng cấp sau không?</h4>
-            <p>Có! Nâng cấp bất cứ lúc nào. Bạn chỉ trả phần chênh lệch.</p>
-          </div>
+            <div className="card-faq">
+              <h4 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><RefreshCw size={18} /> Tôi có thể nâng cấp sau không?</h4>
+              <p>Có! Nâng cấp bất cứ lúc nào. Bạn chỉ trả phần chênh lệch.</p>
+            </div>
 
-          <div className="card-faq">
-            <h4>💰 Có chính sách hoàn tiền không?</h4>
-            <p>Bảo đảm hoàn tiền trong 30 ngày nếu bạn không hài lòng.</p>
-          </div>
+            <div className="card-faq">
+              <h4 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><DollarSign size={18} /> Có chính sách hoàn tiền không?</h4>
+              <p>Bảo đảm hoàn tiền trong 30 ngày nếu bạn không hài lòng.</p>
+            </div>
 
-          <div className="card-faq">
-            <h4>🎁 Có combo ưu đãi không?</h4>
-            <p>Có! Mua combo Course + Scanner + Chatbot để được giảm giá đến 20%.</p>
-          </div>
+            <div className="card-faq">
+              <h4 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><Gift size={18} /> Có combo ưu đãi không?</h4>
+              <p>Có! Mua combo Course + Scanner + Chatbot để được giảm giá đến 20%.</p>
+            </div>
 
-          <div className="card-faq">
-            <h4>📱 Có ứng dụng di động không?</h4>
-            <p>Scanner Dashboard đã có responsive mobile web. App iOS đang phát triển.</p>
+            <div className="card-faq">
+              <h4 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><Smartphone size={18} /> Có ứng dụng di động không?</h4>
+              <p>Scanner Dashboard đã có responsive mobile web. App iOS đang phát triển.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -753,8 +769,9 @@ export default function Pricing() {
         <button
           className="btn-primary"
           onClick={() => window.location.href = 'mailto:support@gemtrading.academy'}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
         >
-          📧 Liên Hệ Hỗ Trợ
+          <Mail size={16} /> Liên Hệ Hỗ Trợ
         </button>
       </div>
     </div>

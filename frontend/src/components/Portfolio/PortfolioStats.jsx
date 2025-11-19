@@ -1,4 +1,5 @@
 import React from 'react';
+import { DollarSign, Wallet, TrendingUp, TrendingDown, Gem } from 'lucide-react';
 import './PortfolioStats.css';
 
 /**
@@ -23,7 +24,7 @@ export default function PortfolioStats({ stats }) {
 
       {/* Total Value */}
       <div className="stat-card total-value">
-        <div className="stat-icon">💰</div>
+        <div className="stat-icon"><DollarSign size={24} /></div>
         <div className="stat-content">
           <div className="stat-label">Total Value</div>
           <div className="stat-value">${stats.totalValue?.toLocaleString() || 0}</div>
@@ -33,7 +34,7 @@ export default function PortfolioStats({ stats }) {
 
       {/* Total Cost */}
       <div className="stat-card total-cost">
-        <div className="stat-icon">💵</div>
+        <div className="stat-icon"><Wallet size={24} /></div>
         <div className="stat-content">
           <div className="stat-label">Total Cost</div>
           <div className="stat-value">${stats.totalCost?.toLocaleString() || 0}</div>
@@ -43,7 +44,7 @@ export default function PortfolioStats({ stats }) {
 
       {/* Total P&L */}
       <div className={`stat-card total-pnl ${stats.totalPnl >= 0 ? 'positive' : 'negative'}`}>
-        <div className="stat-icon">{stats.totalPnl >= 0 ? '📈' : '📉'}</div>
+        <div className="stat-icon">{stats.totalPnl >= 0 ? <TrendingUp size={24} /> : <TrendingDown size={24} />}</div>
         <div className="stat-content">
           <div className="stat-label">Total P&L</div>
           <div className="stat-value">
@@ -57,7 +58,7 @@ export default function PortfolioStats({ stats }) {
 
       {/* Holdings Count */}
       <div className="stat-card holdings-count">
-        <div className="stat-icon">💎</div>
+        <div className="stat-icon"><Gem size={24} /></div>
         <div className="stat-content">
           <div className="stat-label">Holdings</div>
           <div className="stat-value">{stats.holdingsCount || 0}</div>

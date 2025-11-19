@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Clock, CheckCircle, AlertTriangle } from 'lucide-react';
 import './Modal.css';
 
 export const MultiTimeframeModal = ({ pattern, onClose }) => {
@@ -21,7 +22,7 @@ export const MultiTimeframeModal = ({ pattern, onClose }) => {
       <div className="modal-container" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div className="modal-title">
-            <span className="modal-icon">⏱️</span>
+            <span className="modal-icon"><Clock size={24} /></span>
             <div>
               <h2>Multi-Timeframe Analysis</h2>
               <span className="modal-tier-badge tier-2">TIER 2</span>
@@ -109,8 +110,8 @@ export const MultiTimeframeModal = ({ pattern, onClose }) => {
             <h3 className="modal-section-title">Timeframe Confluence</h3>
             <div className="modal-card">
               <div style={{ padding: 'var(--space-md)', textAlign: 'center' }}>
-                <div style={{ fontSize: '48px', marginBottom: 'var(--space-sm)' }}>
-                  {Object.values(mtfData).filter(d => d.trend === 'Bullish').length >= 4 ? '✅' : '⚠️'}
+                <div style={{ marginBottom: 'var(--space-sm)', display: 'flex', justifyContent: 'center' }}>
+                  {Object.values(mtfData).filter(d => d.trend === 'Bullish').length >= 4 ? <CheckCircle size={48} color="#00FF88" /> : <AlertTriangle size={48} color="#FFBD59" />}
                 </div>
                 <div style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--font-bold)' }}>
                   {Object.values(mtfData).filter(d => d.trend === 'Bullish').length} out of 6 timeframes bullish

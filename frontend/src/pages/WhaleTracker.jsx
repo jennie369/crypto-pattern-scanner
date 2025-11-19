@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Fish, Info, DollarSign, BarChart3, Trophy, RefreshCw, AlertTriangle } from 'lucide-react';
 import { whaleTrackerService } from '../services/whaleTrackerService';
 import { supabase } from '../lib/supabaseClient';
 // import './WhaleTracker.css'; // Commented out to use global styles from components.css
@@ -86,7 +87,7 @@ const WhaleTracker = () => {
           textShadow: '0 0 80px rgba(255, 189, 89, 0.5)',
           marginBottom: '16px'
         }}>
-          🐋 Whale Tracker
+          <Fish size={40} style={{ marginRight: '12px', display: 'inline-block', verticalAlign: 'middle' }} /> Whale Tracker
         </h1>
         <p>Track smart money movements • Free Tier: ETH & BTC only • Updates every 5-10 minutes</p>
       </div>
@@ -102,7 +103,7 @@ const WhaleTracker = () => {
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.35)',
         transition: 'all 0.3s ease'
       }}>
-        <span className="notice-icon">ℹ️</span>
+        <span className="notice-icon"><Info size={20} style={{ marginRight: '8px' }} /></span>
         <div className="notice-content">
           <strong>Using FREE APIs:</strong> Data from Etherscan (ETH) and Blockchain.info (BTC).
           Updates every 5-10 minutes. For real-time alerts, upgrade to paid whale API.
@@ -115,19 +116,19 @@ const WhaleTracker = () => {
           className={`tab ${activeTab === 'transactions' ? 'active' : ''}`}
           onClick={() => setActiveTab('transactions')}
         >
-          💸 Transactions
+          <DollarSign size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Transactions
         </button>
         <button
           className={`tab ${activeTab === 'flows' ? 'active' : ''}`}
           onClick={() => setActiveTab('flows')}
         >
-          📊 Exchange Flows
+          <BarChart3 size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Exchange Flows
         </button>
         <button
           className={`tab ${activeTab === 'whales' ? 'active' : ''}`}
           onClick={() => setActiveTab('whales')}
         >
-          🏆 Top Whales
+          <Trophy size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Top Whales
         </button>
       </div>
 
@@ -193,13 +194,21 @@ const WhaleTracker = () => {
             </div>
 
             <button className="refresh-btn" onClick={refreshData} disabled={loading}>
-              {loading ? '🔄 Loading...' : '🔄 Refresh'}
+              {loading ? (
+                <>
+                  <RefreshCw size={16} className="spin" style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Loading...
+                </>
+              ) : (
+                <>
+                  <RefreshCw size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Refresh
+                </>
+              )}
             </button>
           </div>
 
           {error && (
             <div className="error-message">
-              <span className="error-icon">⚠️</span>
+              <span className="error-icon"><AlertTriangle size={18} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /></span>
               <span>{error}</span>
             </div>
           )}
@@ -222,7 +231,7 @@ const WhaleTracker = () => {
               </div>
             ) : transactions.length === 0 ? (
               <div className="empty-state">
-                <div className="empty-icon">📭</div>
+                <div className="empty-icon"><DollarSign size={48} style={{ opacity: 0.5 }} /></div>
                 <div className="empty-title">No transactions found</div>
                 <div className="empty-description">
                   Click "Refresh" to fetch latest whale movements
@@ -317,7 +326,7 @@ const WhaleTracker = () => {
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.35)',
             transition: 'all 0.3s ease'
           }}>
-            <span className="notice-icon">ℹ️</span>
+            <span className="notice-icon"><Info size={20} style={{ marginRight: '8px' }} /></span>
             <span>Exchange flow data is mock data. Paid APIs (CryptoQuant/Glassnode) required for real data.</span>
           </div>
 
@@ -368,11 +377,11 @@ const WhaleTracker = () => {
                 <div className="flow-indicator">
                   {flow.netflow_24h > 0 ? (
                     <div className="indicator-bullish">
-                      📈 Outflow (Bullish)
+                      <BarChart3 size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Outflow (Bullish)
                     </div>
                   ) : (
                     <div className="indicator-bearish">
-                      📉 Inflow (Bearish)
+                      <BarChart3 size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Inflow (Bearish)
                     </div>
                   )}
                 </div>
@@ -387,7 +396,7 @@ const WhaleTracker = () => {
         <div className="whales-tab">
           {topWhales.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-icon">🐋</div>
+              <div className="empty-icon"><Fish size={48} style={{ opacity: 0.5 }} /></div>
               <div className="empty-title">No whale wallets tracked yet</div>
               <div className="empty-description">
                 Whale wallet tracking requires manual input or paid API

@@ -1,0 +1,62 @@
+.hexagram-visual {
+  margin: 16px 0;
+  padding: 20px;
+  background: rgba(156, 6, 18, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 189, 89, 0.2);
+}
+
+.hexagram-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.hex-line {
+  width: 120px;
+  height: 5px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.hex-line.solid {
+  background: linear-gradient(90deg, #FFBD59, #FFD700);
+  box-shadow: 0 0 10px rgba(255, 189, 89, 0.5);
+  border-radius: 2px;
+}
+
+.seg-left,
+.seg-right {
+  width: 48%;
+  height: 100%;
+  background: linear-gradient(90deg, #FFBD59, #FFD700);
+  box-shadow: 0 0 10px rgba(255, 189, 89, 0.5);
+  border-radius: 2px;
+}
+
+.hexagram-info {
+  text-align: center;
+}
+
+.hexagram-info h4 {
+  color: #FFBD59;
+  margin-bottom: 8px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.hexagram-info p {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.chinese {
+  font-family: 'Noto Sans SC', sans-serif;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 24px;
+  margin-top: 8px;
+}

@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
+import {
+  Search, X, BarChart3, User, Mountain, Triangle, Flag, Coffee,
+  TrendingUp, Circle, Gem, Clock, Target, Settings, RefreshCw, CheckCircle, Star
+} from 'lucide-react';
 import './ScanFilters.css';
 
 /**
@@ -54,20 +58,20 @@ function ScanFilters({ onApplyFilters, onClose }) {
   ];
 
   const patternTypes = [
-    { id: 'head_shoulders', name: 'Head & Shoulders', icon: '👤' },
-    { id: 'double_top', name: 'Double Top', icon: '⛰️' },
-    { id: 'double_bottom', name: 'Double Bottom', icon: '⛰️' },
-    { id: 'ascending_triangle', name: 'Ascending Triangle', icon: '📐' },
-    { id: 'descending_triangle', name: 'Descending Triangle', icon: '📐' },
-    { id: 'symmetrical_triangle', name: 'Symmetrical Triangle', icon: '📐' },
-    { id: 'flag', name: 'Flag', icon: '🚩' },
-    { id: 'pennant', name: 'Pennant', icon: '🚩' },
-    { id: 'cup_handle', name: 'Cup & Handle', icon: '☕' },
-    { id: 'wedge', name: 'Wedge', icon: '📊' },
-    { id: 'channel', name: 'Channel', icon: '📊' },
-    { id: 'supply_zone', name: 'Supply Zone', icon: '🔴' },
-    { id: 'demand_zone', name: 'Demand Zone', icon: '🟢' },
-    { id: 'gem_frequency', name: 'GEM Frequency Pattern', icon: '💎' },
+    { id: 'head_shoulders', name: 'Head & Shoulders', icon: <User size={16} /> },
+    { id: 'double_top', name: 'Double Top', icon: <Mountain size={16} /> },
+    { id: 'double_bottom', name: 'Double Bottom', icon: <Mountain size={16} /> },
+    { id: 'ascending_triangle', name: 'Ascending Triangle', icon: <Triangle size={16} /> },
+    { id: 'descending_triangle', name: 'Descending Triangle', icon: <Triangle size={16} /> },
+    { id: 'symmetrical_triangle', name: 'Symmetrical Triangle', icon: <Triangle size={16} /> },
+    { id: 'flag', name: 'Flag', icon: <Flag size={16} /> },
+    { id: 'pennant', name: 'Pennant', icon: <Flag size={16} /> },
+    { id: 'cup_handle', name: 'Cup & Handle', icon: <Coffee size={16} /> },
+    { id: 'wedge', name: 'Wedge', icon: <TrendingUp size={16} /> },
+    { id: 'channel', name: 'Channel', icon: <BarChart3 size={16} /> },
+    { id: 'supply_zone', name: 'Supply Zone', icon: <Circle size={16} className="supply-icon" fill="currentColor" /> },
+    { id: 'demand_zone', name: 'Demand Zone', icon: <Circle size={16} className="demand-icon" fill="currentColor" /> },
+    { id: 'gem_frequency', name: 'GEM Frequency Pattern', icon: <Gem size={16} /> },
   ];
 
   const coinCategories = [
@@ -177,10 +181,10 @@ function ScanFilters({ onApplyFilters, onClose }) {
         {/* Header */}
         <div className="filters-header">
           <div>
-            <h2>🔍 {t('scanFilters')}</h2>
+            <h2><Search size={24} /> {t('scanFilters')}</h2>
             <p className="filters-subtitle">{t('customizeScan')}</p>
           </div>
-          <button className="close-btn" onClick={onClose}>✕</button>
+          <button className="close-btn" onClick={onClose}><X size={20} /></button>
         </div>
 
         <div className="filters-content">
@@ -188,7 +192,7 @@ function ScanFilters({ onApplyFilters, onClose }) {
           {/* COIN SELECTION */}
           <div className="filter-section">
             <div className="section-header">
-              <h3>💎 {t('selectCoins')}</h3>
+              <h3><Gem size={20} /> {t('selectCoins')}</h3>
               <div className="section-actions">
                 <button
                   className="btn-small"
@@ -207,7 +211,7 @@ function ScanFilters({ onApplyFilters, onClose }) {
                 value={coinSearchQuery}
                 onChange={(e) => setCoinSearchQuery(e.target.value)}
               />
-              <span className="search-icon">🔍</span>
+              <span className="search-icon"><Search size={16} /></span>
             </div>
 
             {/* Category Quick Select */}
@@ -250,7 +254,7 @@ function ScanFilters({ onApplyFilters, onClose }) {
           {/* TIMEFRAME SELECTION */}
           <div className="filter-section">
             <div className="section-header">
-              <h3>⏰ {t('selectTimeframes')}</h3>
+              <h3><Clock size={20} /> {t('selectTimeframes')}</h3>
             </div>
 
             <div className="timeframe-grid">
@@ -261,7 +265,7 @@ function ScanFilters({ onApplyFilters, onClose }) {
                   onClick={() => toggleTimeframe(tf.value)}
                 >
                   {tf.label}
-                  {tf.recommended && <span className="badge">⭐</span>}
+                  {tf.recommended && <span className="badge"><Star size={12} /></span>}
                 </button>
               ))}
             </div>
@@ -274,7 +278,7 @@ function ScanFilters({ onApplyFilters, onClose }) {
           {/* PATTERN TYPE SELECTION */}
           <div className="filter-section">
             <div className="section-header">
-              <h3>📊 {t('selectPatterns')}</h3>
+              <h3><BarChart3 size={20} /> {t('selectPatterns')}</h3>
               <button
                 className="btn-small"
                 onClick={toggleAllPatterns}
@@ -309,7 +313,7 @@ function ScanFilters({ onApplyFilters, onClose }) {
           {/* ADVANCED FILTERS */}
           <div className="filter-section">
             <div className="section-header">
-              <h3>⚙️ {t('advancedFilters')}</h3>
+              <h3><Settings size={20} /> {t('advancedFilters')}</h3>
             </div>
 
             {/* Direction Filter */}
@@ -334,7 +338,7 @@ function ScanFilters({ onApplyFilters, onClose }) {
                     checked={selectedDirection === 'bullish'}
                     onChange={(e) => setSelectedDirection(e.target.value)}
                   />
-                  <span>🟢 {t('bullish')}</span>
+                  <span><Circle size={12} fill="currentColor" className="bullish-icon" /> {t('bullish')}</span>
                 </label>
                 <label className="radio-label">
                   <input
@@ -344,7 +348,7 @@ function ScanFilters({ onApplyFilters, onClose }) {
                     checked={selectedDirection === 'bearish'}
                     onChange={(e) => setSelectedDirection(e.target.value)}
                   />
-                  <span>🔴 {t('bearish')}</span>
+                  <span><Circle size={12} fill="currentColor" className="bearish-icon" /> {t('bearish')}</span>
                 </label>
               </div>
             </div>
@@ -400,7 +404,7 @@ function ScanFilters({ onApplyFilters, onClose }) {
                 className="select-input"
               >
                 <option value="all">{t('all')}</option>
-                <option value="fresh">{t('fresh')} (⭐ {t('best')})</option>
+                <option value="fresh">{t('fresh')} (★ {t('best')})</option>
                 <option value="retested">{t('retested')}</option>
               </select>
             </div>
@@ -412,10 +416,10 @@ function ScanFilters({ onApplyFilters, onClose }) {
         {/* Footer Actions */}
         <div className="filters-footer">
           <button className="btn-reset" onClick={handleReset}>
-            🔄 {t('resetFilters')}
+            <RefreshCw size={16} /> {t('resetFilters')}
           </button>
           <button className="btn-apply" onClick={handleApply}>
-            ✓ {t('applyFilters')} & {t('scanNow')}
+            <CheckCircle size={16} /> {t('applyFilters')} & {t('scanNow')}
           </button>
         </div>
 

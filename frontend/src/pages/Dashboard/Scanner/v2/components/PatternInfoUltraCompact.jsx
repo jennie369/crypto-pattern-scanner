@@ -1,5 +1,5 @@
 import React from 'react';
-import { Copy, Save, Target } from 'lucide-react';
+import { Copy, Save, Target, CheckCircle, AlertTriangle } from 'lucide-react';
 import './PatternInfoUltraCompact.css';
 
 /**
@@ -122,7 +122,7 @@ Risk:Reward: 1:${pattern.riskReward.toFixed(2)}
             <div className="item-label">Risk : Reward</div>
             <div className="item-value">
               1:{pattern.riskReward.toFixed(2)}
-              {pattern.riskReward >= 2 ? ' ✅' : ' ⚠️'}
+              {pattern.riskReward >= 2 ? <CheckCircle size={14} color="#0ECB81" style={{ marginLeft: '4px', verticalAlign: 'text-bottom' }} /> : <AlertTriangle size={14} color="#FFBD59" style={{ marginLeft: '4px', verticalAlign: 'text-bottom' }} />}
             </div>
           </div>
         </div>

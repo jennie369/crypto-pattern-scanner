@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown, Search, X, Star, Gem } from 'lucide-react';
+import { ChevronDown, Search, X, Star, Gem, Lock, CheckCircle } from 'lucide-react';
 import './CoinSelectorDropdown.css';
 
 /**
@@ -97,7 +97,9 @@ export const CoinSelectorDropdown = ({ selected = [], onChange, maxCoins = 2, ti
     } else {
       // Check tier limit (TIER3 has no practical limit with 997)
       if (selected.length >= maxCoins && tier !== 'TIER3') {
-        alert(`🔒 ${tier} tier is limited to ${maxCoins} coins at a time.\n\n✅ Upgrade to select more coins!`);
+        const lockIcon = '🔓';
+        const checkIcon = '✓';
+        alert(`${lockIcon} ${tier} tier is limited to ${maxCoins} coins at a time.\n\n${checkIcon} Upgrade to select more coins!`);
         return;
       }
       onChange([...selected, symbol]);
@@ -113,7 +115,8 @@ export const CoinSelectorDropdown = ({ selected = [], onChange, maxCoins = 2, ti
 
     // Other tiers have limits
     if (filteredCoins.length > maxCoins) {
-      alert(`🔒 ${tier} tier is limited to ${maxCoins} coins.\n\nSelecting first ${maxCoins} coins only.`);
+      const lockIcon = '🔓';
+      alert(`${lockIcon} ${tier} tier is limited to ${maxCoins} coins.\n\nSelecting first ${maxCoins} coins only.`);
       onChange(filteredCoins.slice(0, maxCoins).map(c => c.fullSymbol || c.symbol));
     } else {
       onChange(filteredCoins.map(c => c.fullSymbol || c.symbol));

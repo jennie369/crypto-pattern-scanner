@@ -5,14 +5,13 @@ import ResultsList from './ResultsList';
 import CoinSelectorDropdown from './CoinSelectorDropdown';
 import './ControlPanel.css';
 
-export const ControlPanel = ({ onScan, isScanning, results, onSelectPattern, selectedPattern }) => {
+export const ControlPanel = ({ onScan, isScanning, results, onSelectPattern, selectedPattern, onOpenPaperTrading }) => {
   const { profile, getScannerTier } = useAuth();
   const [selectedCoins, setSelectedCoins] = useState(['BTCUSDT']); // Multi-coin support
   const [timeframe, setTimeframe] = useState('1H');
   const [patternFilter, setPatternFilter] = useState('All');
 
   const timeframes = ['5m', '15m', '1H', '4H', '1D'];
-  const patterns = ['All', 'DPD', 'UPU', 'UPD', 'DPU', 'H&S', 'Double Top', 'Double Bottom', 'Triangle'];
 
   // Tier limits configuration
   // Get actual tier from AuthContext
@@ -30,17 +29,66 @@ export const ControlPanel = ({ onScan, isScanning, results, onSelectPattern, sel
 
   const userTier = normalizeTier(scannerTierRaw);
 
+  // ✅ TIER-BASED PATTERN FILTERING (per TIER_ACCESS_CHINH_XAC.md)
+  const getAvailablePatterns = (tier) => {
+    // Pattern definitions by tier
+    const tierPatterns = {
+      // FREE: 3 basic patterns
+      'FREE': ['All', 'DPD', 'UPU', 'H&S'],
+
+      // TIER 1: 7 patterns (✅ ALL IMPLEMENTED)
+      'TIER1': [
+        'All',
+        'DPD',
+        'UPU',
+        'UPD',
+        'DPU',
+        'Double Top',
+        'Double Bottom',
+        'H&S'
+      ],
+
+      // TIER 2: 15 patterns (TIER 1 + 8 new)
+      'TIER2': [
+        'All',
+        // TIER 1 patterns (7)
+        'DPD', 'UPU', 'UPD', 'DPU', 'Double Top', 'Double Bottom', 'H&S',
+        // TIER 2 new patterns (8) - ⚠️ NOT YET IMPLEMENTED
+        'HFZ', 'LFZ', 'Inverse H&S', 'Rounding Bottom', 'Rounding Top',
+        'Symmetrical Triangle', 'Ascending Triangle', 'Descending Triangle'
+      ],
+
+      // TIER 3: 24 patterns (TIER 2 + 9 new)
+      'TIER3': [
+        'All',
+        // TIER 1 patterns (7)
+        'DPD', 'UPU', 'UPD', 'DPU', 'Double Top', 'Double Bottom', 'H&S',
+        // TIER 2 patterns (8)
+        'HFZ', 'LFZ', 'Inverse H&S', 'Rounding Bottom', 'Rounding Top',
+        'Symmetrical Triangle', 'Ascending Triangle', 'Descending Triangle',
+        // TIER 3 new patterns (9) - ⚠️ NOT YET IMPLEMENTED
+        'Bull Flag', 'Bear Flag', 'Flag', 'Wedge', 'Engulfing',
+        'Morning/Evening Star', 'Cup & Handle', '3 Methods', 'Hammer'
+      ]
+    };
+
+    return tierPatterns[tier] || tierPatterns['FREE'];
+  };
+
+  const patterns = getAvailablePatterns(userTier);
+
   // Debug logging
-  console.log('🔍 [ControlPanel] Tier Debug:', {
+  console.log('[DEBUG] [ControlPanel] Tier Debug:', {
     scannerTierRaw,
     userTier,
     selectedCoins,
+    availablePatterns: patterns.length,
     profile: profile ? { email: profile.email, scanner_tier: profile.scanner_tier } : null
   });
 
   const handleScan = () => {
     if (!selectedCoins || selectedCoins.length === 0) {
-      alert('⚠️ Please select at least one coin to scan.');
+      alert('Please select at least one coin to scan.');
       return;
     }
 
@@ -126,6 +174,7 @@ export const ControlPanel = ({ onScan, isScanning, results, onSelectPattern, sel
           results={results}
           onSelect={onSelectPattern}
           selectedPattern={selectedPattern}
+          onOpenPaperTrading={onOpenPaperTrading}
         />
       )}
     </div>

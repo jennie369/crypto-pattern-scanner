@@ -1,0 +1,67 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Define gradients -->
+  <defs>
+    <!-- Main gradient from dark blue to cyan/white -->
+    <linearGradient id="blueGradient" x1="256" y1="0" x2="256" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1E3A8A"/>
+      <stop offset="50%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#93C5FD"/>
+    </linearGradient>
+
+    <!-- Light cyan gradient for highlights -->
+    <linearGradient id="cyanGradient" x1="256" y1="0" x2="256" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="50%" stop-color="#67E8F9"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+
+    <!-- Radial glow effect -->
+    <radialGradient id="glowGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#60A5FA" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#1E3A8A" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Center glow -->
+  <circle cx="256" cy="256" r="120" fill="url(#glowGradient)" opacity="0.6"/>
+
+  <!-- 8-pointed star design -->
+  <!-- Main vertical point (top) -->
+  <path d="M 256 20 L 280 200 L 256 256 L 232 200 Z" fill="url(#blueGradient)" opacity="0.9"/>
+
+  <!-- Main vertical point (bottom) -->
+  <path d="M 256 492 L 280 312 L 256 256 L 232 312 Z" fill="url(#blueGradient)" opacity="0.9"/>
+
+  <!-- Main horizontal point (right) -->
+  <path d="M 492 256 L 312 280 L 256 256 L 312 232 Z" fill="url(#blueGradient)" opacity="0.9"/>
+
+  <!-- Main horizontal point (left) -->
+  <path d="M 20 256 L 200 280 L 256 256 L 200 232 Z" fill="url(#blueGradient)" opacity="0.9"/>
+
+  <!-- Diagonal point (top-right) -->
+  <path d="M 420 92 L 312 232 L 256 256 L 280 200 Z" fill="url(#cyanGradient)" opacity="0.85"/>
+
+  <!-- Diagonal point (top-left) -->
+  <path d="M 92 92 L 200 232 L 256 256 L 232 200 Z" fill="url(#cyanGradient)" opacity="0.85"/>
+
+  <!-- Diagonal point (bottom-right) -->
+  <path d="M 420 420 L 312 280 L 256 256 L 280 312 Z" fill="url(#cyanGradient)" opacity="0.85"/>
+
+  <!-- Diagonal point (bottom-left) -->
+  <path d="M 92 420 L 200 280 L 256 256 L 232 312 Z" fill="url(#cyanGradient)" opacity="0.85"/>
+
+  <!-- Center highlight points -->
+  <path d="M 256 140 L 270 230 L 256 256 L 242 230 Z" fill="#FFFFFF" opacity="0.6"/>
+  <path d="M 256 372 L 270 282 L 256 256 L 242 282 Z" fill="#FFFFFF" opacity="0.6"/>
+  <path d="M 372 256 L 282 270 L 256 256 L 282 242 Z" fill="#FFFFFF" opacity="0.6"/>
+  <path d="M 140 256 L 230 270 L 256 256 L 230 242 Z" fill="#FFFFFF" opacity="0.6"/>
+
+  <!-- Center gem/diamond -->
+  <circle cx="256" cy="256" r="40" fill="url(#glowGradient)"/>
+  <circle cx="256" cy="256" r="30" fill="#FFFFFF" opacity="0.8"/>
+  <circle cx="256" cy="256" r="20" fill="url(#cyanGradient)"/>
+
+  <!-- Subtle outer glow -->
+  <circle cx="256" cy="256" r="200" fill="none" stroke="url(#cyanGradient)" stroke-width="2" opacity="0.3"/>
+</svg>

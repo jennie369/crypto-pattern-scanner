@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { User, Diamond, Infinity, Coins, TrendingUp, TrendingDown, Circle, Zap, Sparkles, ChevronRight } from 'lucide-react';
 import CoinListSidebar from '../components/CoinListSidebar';
 import QuickSelect from '../components/QuickSelect';
 import TradingChart from '../components/TradingChart';
@@ -207,7 +208,7 @@ function Scanner() {
       pattern: result.pattern,
       patternType: result.pattern,
       patternCode: result.pattern.split(' ')[0].toUpperCase(),
-      patternIcon: isBuySignal ? '🟢' : '🔴',
+      patternIcon: isBuySignal ? 'bullish' : 'bearish',
       patternCategory: 'scanned',
       entry: result.entry,
       stopLoss: result.stopLoss,
@@ -291,14 +292,14 @@ function Scanner() {
         <div className="user-status-bar">
           <div className="user-status-container">
             <div className="user-info">
-              <span className="user-email">👤 {user.email}</span>
+              <span className="user-email"><User size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> {user.email}</span>
               <span className={`user-tier ${profile?.tier}`}>
-                {isPremium ? '💎' : '🆓'} {profile?.tier?.toUpperCase() || 'FREE'}
+                {isPremium ? <Diamond size={16} style={{ marginRight: '4px', display: 'inline-block', verticalAlign: 'middle' }} /> : <Circle size={16} style={{ marginRight: '4px', display: 'inline-block', verticalAlign: 'middle' }} />} {profile?.tier?.toUpperCase() || 'FREE'}
               </span>
             </div>
             <div className="quota-info">
               {isPremium ? (
-                <span className="quota-unlimited">♾️ Unlimited Scans</span>
+                <span className="quota-unlimited"><Infinity size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Unlimited Scans</span>
               ) : quotaSummary ? (
                 <>
                   <span className="quota-text">Daily Scans:</span>
@@ -306,7 +307,7 @@ function Scanner() {
                     {quotaSummary.remaining} / {quotaSummary.total}
                   </span>
                   {quotaSummary.remaining === 0 && (
-                    <span className="upgrade-hint">💎 Upgrade for unlimited!</span>
+                    <span className="upgrade-hint"><Diamond size={16} style={{ marginRight: '4px', display: 'inline-block', verticalAlign: 'middle' }} /> Upgrade for unlimited!</span>
                   )}
                 </>
               ) : (
@@ -324,7 +325,7 @@ function Scanner() {
       {!user && (
         <div className="login-prompt-bar">
           <div className="login-prompt-container">
-            <span className="prompt-icon">🪙</span>
+            <span className="prompt-icon"><Coins size={20} /></span>
             <span className="prompt-text">
               Bitcoin quét miễn phí!
               {ipQuotaSummary && (
@@ -373,7 +374,7 @@ function Scanner() {
                 e.currentTarget.style.boxShadow = '0 4px 16px rgba(156, 6, 18, 0.3)';
               }}
             >
-              ⚡ Bắt Đầu Scan
+              <Zap size={16} style={{ display: 'inline-block', verticalAlign: 'middle' }} /> Bắt Đầu Scan
             </button>
 
             {/* Direction Filter Buttons */}
@@ -388,24 +389,24 @@ function Scanner() {
                 className={`btn-direction short ${directionFilter === 'short' ? 'active' : ''}`}
                 onClick={() => setDirectionFilter('short')}
               >
-                <span className="direction-indicator">🔴</span> SHORT
+                <span className="direction-indicator"><TrendingDown size={16} style={{ color: '#ef4444' }} /></span> SHORT
               </button>
               <button
                 className={`btn-direction long ${directionFilter === 'long' ? 'active' : ''}`}
                 onClick={() => setDirectionFilter('long')}
               >
-                <span className="direction-indicator">🟢</span> LONG
+                <span className="direction-indicator"><TrendingUp size={16} style={{ color: '#10b981' }} /></span> LONG
               </button>
             </div>
 
-            {/* 🆕 TIER 2 Mode Toggle (Only for premium+ users) */}
+            {/* TIER 2 Mode Toggle (Only for premium+ users) */}
             {hasTier2Access && (
               <button
                 className={`btn-tier2-mode ${tier2Mode ? 'active' : ''}`}
                 onClick={() => setTier2Mode(!tier2Mode)}
                 title="TIER 2 Advanced Pattern Analysis"
               >
-                {tier2Mode ? '💎 TIER 2 ON' : '💎 TIER 2 OFF'}
+                <Diamond size={16} style={{ marginRight: '4px', display: 'inline-block', verticalAlign: 'middle' }} /> TIER 2 {tier2Mode ? 'ON' : 'OFF'}
               </button>
             )}
           </div>
@@ -414,20 +415,20 @@ function Scanner() {
           {currentFilters && (
             <div className="active-filters">
               <span className="filter-tag">
-                💎 {currentFilters.coins?.length || 0} coins
+                <Coins size={14} style={{ marginRight: '4px', display: 'inline-block', verticalAlign: 'middle' }} /> {currentFilters.coins?.length || 0} coins
               </span>
               <span className="filter-tag">
-                ⏰ {currentFilters.timeframes?.join(', ') || '1h'}
+                <ChevronRight size={14} style={{ marginRight: '4px', display: 'inline-block', verticalAlign: 'middle' }} /> {currentFilters.timeframes?.join(', ') || '1h'}
               </span>
               <span className="filter-tag">
-                📊 {currentFilters.patterns?.length || 3} patterns
+                <TrendingUp size={14} style={{ marginRight: '4px', display: 'inline-block', verticalAlign: 'middle' }} /> {currentFilters.patterns?.length || 3} patterns
               </span>
               <span className="filter-tag">
-                ✨ {Math.round((currentFilters.confidenceThreshold || 0.6) * 100)}% confidence
+                <Sparkles size={14} style={{ marginRight: '4px', display: 'inline-block', verticalAlign: 'middle' }} /> {Math.round((currentFilters.confidenceThreshold || 0.6) * 100)}% confidence
               </span>
               {currentFilters.direction && currentFilters.direction !== 'all' && (
                 <span className="filter-tag">
-                  {currentFilters.direction === 'bullish' ? '🟢' : '🔴'} {t(currentFilters.direction)}
+                  {currentFilters.direction === 'bullish' ? <TrendingUp size={14} style={{ marginRight: '4px', display: 'inline-block', verticalAlign: 'middle', color: '#10b981' }} /> : <TrendingDown size={14} style={{ marginRight: '4px', display: 'inline-block', verticalAlign: 'middle', color: '#ef4444' }} />} {t(currentFilters.direction)}
                 </span>
               )}
             </div>

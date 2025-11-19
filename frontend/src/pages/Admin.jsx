@@ -2,6 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
+import {
+  Search,
+  UserPlus,
+  Users,
+  BarChart3,
+  Settings,
+  Lock,
+  Shield,
+  XCircle,
+  Clock,
+  RefreshCw,
+  Trash2,
+  Infinity,
+  Crown,
+  User,
+  Gem,
+  CircleDollarSign,
+  TrendingUp,
+  Activity
+} from 'lucide-react';
 import './Admin.css';
 
 /**
@@ -42,7 +62,7 @@ function Admin() {
       setDataLoading(true);
       setDataError(null); // Clear any previous errors
 
-      console.log('🔍 Loading users from Supabase...');
+      console.log('Loading users from Supabase...');
 
       // ✅ Add timeout protection (10 seconds)
       const timeoutPromise = new Promise((_, reject) =>
@@ -57,14 +77,14 @@ function Admin() {
       const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
 
       if (error) {
-        console.error('❌ Supabase error:', error);
+        console.error('Supabase error:', error);
         throw error;
       }
 
       setUsers(data || []);
-      console.log('✅ Loaded', data?.length, 'users from database');
+      console.log('Loaded', data?.length, 'users from database');
     } catch (error) {
-      console.error('❌ Error loading users:', error);
+      console.error('Error loading users:', error);
       setDataError(error.message || 'Failed to load users from database');
     } finally {
       setDataLoading(false);
@@ -78,10 +98,10 @@ function Admin() {
         setTimeout(() => reject(new Error('Analytics request timeout')), 10000)
       );
 
-      // Count users by tier
+      // Count users by scanner_tier
       const usersQuery = supabase
         .from('users')
-        .select('tier, role');
+        .select('scanner_tier, role');
 
       const { data: usersData, error: usersError } = await Promise.race([usersQuery, timeoutPromise]);
 
@@ -90,7 +110,7 @@ function Admin() {
       const tierCounts = usersData.reduce((acc, user) => {
         if (user.role === 'admin') {
           acc.adminUsers++;
-        } else if (user.tier === 'free') {
+        } else if (!user.scanner_tier || user.scanner_tier === 'FREE') {
           acc.freeUsers++;
         } else {
           acc.premiumUsers++;
@@ -111,28 +131,28 @@ function Admin() {
         totalScans: scansData || 0,
       });
 
-      console.log('✅ Analytics loaded:', tierCounts);
+      console.log('Analytics loaded:', tierCounts);
     } catch (error) {
-      console.error('❌ Error loading analytics:', error);
+      console.error('Error loading analytics:', error);
       // Don't block the page if analytics fail - just log the error
     }
   };
 
   // Handler functions
   const handleAddUser = () => {
-    console.log('➕ Opening modal to add new user');
+    console.log('Opening modal to add new user');
     setEditingUser(null);
     setShowUserModal(true);
   };
 
   const handleEditUser = (user) => {
-    console.log('✏️ Editing user:', user.email);
+    console.log('Editing user:', user.email);
     setEditingUser(user);
     setShowUserModal(true);
   };
 
   const handleDeleteUser = async (userId, userEmail) => {
-    if (!confirm(`⚠️ Bạn có chắc muốn xóa user "${userEmail}"?\n\nHành động này KHÔNG THỂ HOÀN TÁC!`)) {
+    if (!confirm(`Bạn có chắc muốn xóa user "${userEmail}"?\n\nHành động này KHÔNG THỂ HOÀN TÁC!`)) {
       return;
     }
 
@@ -145,26 +165,26 @@ function Admin() {
 
       if (error) throw error;
 
-      console.log('✅ User deleted:', userEmail);
-      alert(`✅ Đã xóa user: ${userEmail}`);
+      console.log('User deleted:', userEmail);
+      alert(`Đã xóa user: ${userEmail}`);
 
       // Reload users list
       await loadUsers();
       await loadAnalytics();
     } catch (error) {
-      console.error('❌ Error deleting user:', error);
+      console.error('Error deleting user:', error);
       alert('Failed to delete user: ' + error.message);
     }
   };
 
   const handleCloseModal = () => {
-    console.log('❌ Closing modal');
+    console.log('Closing modal');
     setShowUserModal(false);
     setEditingUser(null);
   };
 
   const handleSaveUser = async (userData) => {
-    console.log('💾 Saving user:', userData);
+    console.log('Saving user:', userData);
 
     try {
       if (editingUser) {
@@ -173,19 +193,19 @@ function Admin() {
           .from('users')
           .update({
             full_name: userData.full_name,
-            tier: userData.tier,
+            scanner_tier: userData.scanner_tier,
             role: userData.role,
-            tier_expires_at: userData.tier_expires_at || null,
+            scanner_tier_expires_at: userData.scanner_tier_expires_at || null,
             updated_at: new Date().toISOString(),
           })
           .eq('id', editingUser.id);
 
         if (error) throw error;
 
-        console.log('✅ User updated successfully');
-        alert(`✅ Đã cập nhật user: ${userData.email}`);
+        console.log('User updated successfully');
+        alert(`Đã cập nhật user: ${userData.email}`);
       } else {
-        alert('❌ Chức năng tạo user mới chưa được implement.\n\nVui lòng tạo user qua trang Settings.');
+        alert('Chức năng tạo user mới chưa được implement.\n\nVui lòng tạo user qua trang Settings.');
         return;
       }
 
@@ -194,7 +214,7 @@ function Admin() {
       await loadAnalytics();
       handleCloseModal();
     } catch (error) {
-      console.error('❌ Error saving user:', error);
+      console.error('Error saving user:', error);
       alert('Failed to save user: ' + error.message);
     }
   };
@@ -204,7 +224,7 @@ function Admin() {
     return (
       <div className="admin-page">
         <div className="auth-required">
-          <div className="auth-icon">⏳</div>
+          <div className="auth-icon"><Clock size={48} /></div>
           <h2>{t('loading') || 'Loading...'}</h2>
         </div>
       </div>
@@ -216,10 +236,10 @@ function Admin() {
     return (
       <div className="admin-page">
         <div className="auth-required">
-          <div className="auth-icon">🔐</div>
+          <div className="auth-icon"><Lock size={48} /></div>
           <h2>Yêu Cầu Đăng Nhập</h2>
           <p>Bạn cần đăng nhập để truy cập Bảng Quản Trị.</p>
-          <p>Vui lòng vào <strong>⚙️ Cài Đặt</strong> để đăng nhập hoặc tạo tài khoản.</p>
+          <p>Vui lòng vào <strong><Settings size={16} style={{ display: 'inline', verticalAlign: 'middle' }} /> Cài Đặt</strong> để đăng nhập hoặc tạo tài khoản.</p>
         </div>
       </div>
     );
@@ -230,7 +250,7 @@ function Admin() {
     return (
       <div className="admin-page">
         <div className="auth-required">
-          <div className="auth-icon">🚫</div>
+          <div className="auth-icon"><XCircle size={48} /></div>
           <h2>Không Có Quyền Truy Cập</h2>
           <p>Bạn cần quyền ADMIN để truy cập trang này.</p>
           <p>Hiện tại bạn là: <strong>{profile?.role || 'user'}</strong></p>
@@ -243,14 +263,14 @@ function Admin() {
   const filteredUsers = users.filter(u =>
     u.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     u.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    u.tier?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    u.scanner_tier?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     u.role?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <div className="admin-page">
       <div className="admin-header">
-        <h1>🔐 {t('adminDashboard')}</h1>
+        <h1><Shield size={24} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '8px' }} />{t('adminDashboard')}</h1>
         <p className="subtitle">Welcome, Admin {profile?.email}!</p>
       </div>
 
@@ -260,19 +280,19 @@ function Admin() {
           className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`}
           onClick={() => setActiveTab('users')}
         >
-          👥 Users ({users.length})
+          <Users size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />Users ({users.length})
         </button>
         <button
           className={`tab-btn ${activeTab === 'analytics' ? 'active' : ''}`}
           onClick={() => setActiveTab('analytics')}
         >
-          📊 Analytics
+          <BarChart3 size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />Analytics
         </button>
         <button
           className={`tab-btn ${activeTab === 'system' ? 'active' : ''}`}
           onClick={() => setActiveTab('system')}
         >
-          ⚙️ System
+          <Settings size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />System
         </button>
       </div>
 
@@ -282,23 +302,26 @@ function Admin() {
           <div className="content-header">
             <h2>User Management</h2>
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <input
-                type="text"
-                placeholder="🔍 Search users..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{
-                  padding: '10px 16px',
-                  background: 'rgba(17, 34, 80, 0.6)',
-                  border: '1px solid rgba(255, 189, 89, 0.3)',
-                  borderRadius: '8px',
-                  color: '#FFFFFF',
-                  fontSize: '14px',
-                  width: '300px',
-                }}
-              />
+              <div style={{ position: 'relative', width: '300px' }}>
+                <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255, 189, 89, 0.5)' }} />
+                <input
+                  type="text"
+                  placeholder="Search users..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{
+                    padding: '10px 16px 10px 36px',
+                    background: 'rgba(17, 34, 80, 0.6)',
+                    border: '1px solid rgba(255, 189, 89, 0.3)',
+                    borderRadius: '8px',
+                    color: '#FFFFFF',
+                    fontSize: '14px',
+                    width: '100%',
+                  }}
+                />
+              </div>
               <button className="add-user-btn" onClick={handleAddUser}>
-                + Add User
+                <UserPlus size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />Add User
               </button>
             </div>
           </div>
@@ -314,11 +337,11 @@ function Admin() {
           {/* ERROR STATE */}
           {!dataLoading && dataError && (
             <div className="admin-error-state">
-              <div className="error-icon">❌</div>
+              <div className="error-icon"><XCircle size={48} /></div>
               <h3>Failed to Load Users</h3>
               <p className="error-message">{dataError}</p>
               <button className="btn-retry" onClick={loadUsers}>
-                🔄 Try Again
+                <RefreshCw size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />Try Again
               </button>
             </div>
           )}
@@ -328,14 +351,14 @@ function Admin() {
             <>
               {users.length === 0 ? (
                 <div className="admin-empty-state">
-                  <div className="empty-icon">👥</div>
+                  <div className="empty-icon"><Users size={48} /></div>
                   <h3>No Users Yet</h3>
                   <p>No users found in the database.</p>
                   <p className="empty-hint">Users will appear here once they create accounts.</p>
                 </div>
               ) : filteredUsers.length === 0 ? (
                 <div className="admin-empty-state">
-                  <div className="empty-icon">🔍</div>
+                  <div className="empty-icon"><Search size={48} /></div>
                   <h3>No Results Found</h3>
                   <p>No users match your search: "{searchQuery}"</p>
                   <button className="btn-clear-search" onClick={() => setSearchQuery('')}>
@@ -362,19 +385,19 @@ function Admin() {
                           <td className="email-cell">{user.email}</td>
                           <td className="name-cell">{user.full_name || '-'}</td>
                           <td>
-                            <span className={`tier-badge ${user.tier?.toLowerCase()}`}>
-                              {user.tier?.toUpperCase()}
+                            <span className={`tier-badge ${user.scanner_tier?.toLowerCase() || 'free'}`}>
+                              {user.scanner_tier?.toUpperCase() || 'FREE'}
                             </span>
                           </td>
                           <td>
                             <span className={`role-badge ${user.role === 'admin' ? 'admin' : 'user'}`}>
-                              {user.role === 'admin' ? '👑 ADMIN' : '👤 USER'}
+                              {user.role === 'admin' ? <><Crown size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />ADMIN</> : <><User size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />USER</>}
                             </span>
                           </td>
                           <td className="date-cell">
-                            {user.tier_expires_at
-                              ? new Date(user.tier_expires_at).toLocaleDateString('vi-VN')
-                              : '♾️ Never'}
+                            {user.scanner_tier_expires_at
+                              ? new Date(user.scanner_tier_expires_at).toLocaleDateString('vi-VN')
+                              : <><Infinity size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />Never</>}
                           </td>
                           <td className="date-cell">
                             {new Date(user.created_at).toLocaleDateString('vi-VN')}
@@ -412,7 +435,7 @@ function Admin() {
 
           <div className="analytics-grid">
             <div className="analytics-card">
-              <div className="card-icon">👥</div>
+              <div className="card-icon"><Users size={32} /></div>
               <div className="card-content">
                 <div className="card-label">Total Users</div>
                 <div className="card-value">{analytics.totalUsers.toLocaleString()}</div>
@@ -420,7 +443,7 @@ function Admin() {
             </div>
 
             <div className="analytics-card">
-              <div className="card-icon">🆓</div>
+              <div className="card-icon"><CircleDollarSign size={32} /></div>
               <div className="card-content">
                 <div className="card-label">Free Tier</div>
                 <div className="card-value">{analytics.freeUsers.toLocaleString()}</div>
@@ -428,7 +451,7 @@ function Admin() {
             </div>
 
             <div className="analytics-card">
-              <div className="card-icon">💎</div>
+              <div className="card-icon"><Gem size={32} /></div>
               <div className="card-content">
                 <div className="card-label">Premium Users</div>
                 <div className="card-value">{analytics.premiumUsers.toLocaleString()}</div>
@@ -436,7 +459,7 @@ function Admin() {
             </div>
 
             <div className="analytics-card">
-              <div className="card-icon">👑</div>
+              <div className="card-icon"><Crown size={32} /></div>
               <div className="card-content">
                 <div className="card-label">Admin Users</div>
                 <div className="card-value">{analytics.adminUsers.toLocaleString()}</div>
@@ -444,7 +467,7 @@ function Admin() {
             </div>
 
             <div className="analytics-card">
-              <div className="card-icon">🔍</div>
+              <div className="card-icon"><Search size={32} /></div>
               <div className="card-content">
                 <div className="card-label">Total Scans</div>
                 <div className="card-value">{analytics.totalScans.toLocaleString()}</div>
@@ -453,7 +476,7 @@ function Admin() {
           </div>
 
           <div className="chart-placeholder">
-            <div className="placeholder-icon">📊</div>
+            <div className="placeholder-icon"><BarChart3 size={64} /></div>
             <div className="placeholder-text">Real-time Analytics Dashboard</div>
           </div>
         </div>
@@ -467,11 +490,11 @@ function Admin() {
           <div className="system-info">
             <div className="info-row">
               <span className="info-label">Supabase Status:</span>
-              <span className="info-value status-online">🟢 Connected</span>
+              <span className="info-value status-online"><Activity size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px', color: '#0ECB81' }} />Connected</span>
             </div>
             <div className="info-row">
               <span className="info-label">Database:</span>
-              <span className="info-value status-online">🟢 PostgreSQL</span>
+              <span className="info-value status-online"><Activity size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px', color: '#0ECB81' }} />PostgreSQL</span>
             </div>
             <div className="info-row">
               <span className="info-label">Environment:</span>
@@ -507,23 +530,23 @@ function UserModal({ user, onClose, onSave }) {
   const [formData, setFormData] = useState({
     email: user?.email || '',
     full_name: user?.full_name || '',
-    tier: user?.tier || 'free',
+    scanner_tier: user?.scanner_tier || 'FREE',
     role: user?.role || 'user',
-    tier_expires_at: user?.tier_expires_at
-      ? new Date(user.tier_expires_at).toISOString().split('T')[0]
+    scanner_tier_expires_at: user?.scanner_tier_expires_at
+      ? new Date(user.scanner_tier_expires_at).toISOString().split('T')[0]
       : '',
   });
 
-  console.log('🎨 UserModal RENDERING - user:', user?.email, 'formData:', formData);
+  console.log('UserModal RENDERING - user:', user?.email, 'formData:', formData);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('📤 Form submitted with data:', formData);
+    console.log('Form submitted with data:', formData);
 
     // Convert empty expiration to null
     const dataToSave = {
       ...formData,
-      tier_expires_at: formData.tier_expires_at || null,
+      scanner_tier_expires_at: formData.scanner_tier_expires_at || null,
     };
 
     onSave(dataToSave);
@@ -562,8 +585,8 @@ function UserModal({ user, onClose, onSave }) {
         }}
       >
         <div style={{ marginBottom: '24px', borderBottom: '1px solid rgba(255, 189, 89, 0.2)', paddingBottom: '16px' }}>
-          <h2 style={{ color: '#FFBD59', margin: 0, fontSize: '24px' }}>
-            {user ? `✏️ Edit User: ${user.email}` : `➕ Add New User`}
+          <h2 style={{ color: '#FFBD59', margin: 0, fontSize: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {user ? <><User size={24} />Edit User: {user.email}</> : <><UserPlus size={24} />Add New User</>}
           </h2>
         </div>
 
@@ -614,23 +637,23 @@ function UserModal({ user, onClose, onSave }) {
               Tier
             </label>
             <select
-              value={formData.tier}
-              onChange={(e) => setFormData({ ...formData, tier: e.target.value })}
+              value={formData.scanner_tier}
+              onChange={(e) => setFormData({ ...formData, scanner_tier: e.target.value })}
               style={{
                 width: '100%',
                 padding: '12px',
-                background: 'rgba(17, 34, 80, 0.6)',
+                background: 'rgba(17, 34, 80, 0.9)',
                 border: '1px solid rgba(255, 189, 89, 0.3)',
                 borderRadius: '8px',
                 color: '#FFFFFF',
                 fontSize: '14px',
+                cursor: 'pointer',
               }}
             >
-              <option value="free">🆓 FREE</option>
-              <option value="tier1">💎 TIER 1</option>
-              <option value="tier2">💎 TIER 2</option>
-              <option value="tier3">💎 TIER 3</option>
-              <option value="admin">👑 ADMIN</option>
+              <option value="FREE" style={{ background: '#112250', color: '#FFFFFF', padding: '8px' }}>FREE</option>
+              <option value="TIER1" style={{ background: '#112250', color: '#FFFFFF', padding: '8px' }}>TIER 1</option>
+              <option value="TIER2" style={{ background: '#112250', color: '#FFFFFF', padding: '8px' }}>TIER 2</option>
+              <option value="TIER3" style={{ background: '#112250', color: '#FFFFFF', padding: '8px' }}>TIER 3</option>
             </select>
           </div>
 
@@ -644,15 +667,16 @@ function UserModal({ user, onClose, onSave }) {
               style={{
                 width: '100%',
                 padding: '12px',
-                background: 'rgba(17, 34, 80, 0.6)',
+                background: 'rgba(17, 34, 80, 0.9)',
                 border: '1px solid rgba(255, 189, 89, 0.3)',
                 borderRadius: '8px',
                 color: '#FFFFFF',
                 fontSize: '14px',
+                cursor: 'pointer',
               }}
             >
-              <option value="user">👤 USER</option>
-              <option value="admin">👑 ADMIN</option>
+              <option value="user" style={{ background: '#112250', color: '#FFFFFF', padding: '8px' }}>USER</option>
+              <option value="admin" style={{ background: '#112250', color: '#FFFFFF', padding: '8px' }}>ADMIN</option>
             </select>
           </div>
 
@@ -662,16 +686,17 @@ function UserModal({ user, onClose, onSave }) {
             </label>
             <input
               type="date"
-              value={formData.tier_expires_at}
-              onChange={(e) => setFormData({ ...formData, tier_expires_at: e.target.value })}
+              value={formData.scanner_tier_expires_at}
+              onChange={(e) => setFormData({ ...formData, scanner_tier_expires_at: e.target.value })}
               style={{
                 width: '100%',
                 padding: '12px',
-                background: 'rgba(17, 34, 80, 0.6)',
+                background: 'rgba(17, 34, 80, 0.9)',
                 border: '1px solid rgba(255, 189, 89, 0.3)',
                 borderRadius: '8px',
                 color: '#FFFFFF',
                 fontSize: '14px',
+                colorScheme: 'dark',
               }}
             />
             <small style={{ color: 'rgba(255, 189, 89, 0.6)', fontSize: '12px' }}>
@@ -707,9 +732,13 @@ function UserModal({ user, onClose, onSave }) {
                 fontSize: '14px',
                 fontWeight: '600',
                 cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                justifyContent: 'center',
               }}
             >
-              {user ? '💾 Save Changes' : '➕ Create User'}
+              {user ? <><TrendingUp size={16} />Save Changes</> : <><UserPlus size={16} />Create User</>}
             </button>
           </div>
         </form>

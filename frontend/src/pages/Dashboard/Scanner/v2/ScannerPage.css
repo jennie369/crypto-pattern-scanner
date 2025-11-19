@@ -1,18 +1,26 @@
 /* ===================================
-   SCANNER PAGE V2 - STYLES
-   Week 3, Day 18-21
+   🎨 SCANNER PAGE V2 - ENHANCED STYLING
+   Uses CSS variables from index.css
    =================================== */
 
 .scanner-page-v2 {
   min-height: 100vh !important;
   height: auto;
   padding: var(--space-lg);
-  background: var(--bg-base);
+
+  /* ✅ Transparent to show animated glow background from body */
+  background: transparent;
+
   overflow-y: auto;
   overflow-x: hidden;
+  position: relative;
+  z-index: var(--z-base);
 }
 
-/* 3-Column Layout - Allow expansion */
+/* ===================================
+   📐 3-COLUMN LAYOUT - Glassmorphism
+   =================================== */
+
 .scanner-layout {
   display: grid;
   grid-template-columns: 20% 50% 30%;
@@ -20,19 +28,30 @@
   min-height: calc(100vh - 260px);
   height: auto;
   align-items: start;
+
+  /* ✅ Transparent to show animated glow */
+  background: transparent;
+
   /* NO max-height! Let it grow! */
 }
 
 .scanner-left,
 .scanner-right {
-  background: rgba(30, 42, 94, 0.4);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--bg-card);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--border-thin) solid var(--glass-border);
   border-radius: var(--radius-lg);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
+  transition: var(--transition-base);
+}
+
+.scanner-left:hover,
+.scanner-right:hover {
+  border-color: rgba(255, 189, 89, 0.2);
+  box-shadow: var(--shadow-xl), var(--shadow-gold);
 }
 
 /* LEFT: Keep scroll on container (simpler structure) */
@@ -68,16 +87,28 @@
   min-height: 0;
 }
 
-/* Chart Container - USER RESIZABLE */
+/* ===================================
+   📊 CHART CONTAINER - USER RESIZABLE
+   =================================== */
+
 .scanner-center > .trading-chart-container {
   /* Height controlled by chartHeight state - NO fixed height! */
   min-height: 400px;
   overflow: visible;
-  background: rgba(17, 34, 80, 0.4);
-  border: 1px solid rgba(255, 189, 89, 0.2);
-  border-radius: 12px;
+  background: var(--bg-elevated);
+  border: var(--border-thin) solid rgba(255, 189, 89, 0.2);
+  border-radius: var(--radius-lg);
   position: relative;
   flex-shrink: 0;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-base);
+}
+
+.scanner-center > .trading-chart-container:hover {
+  border-color: var(--brand-gold);
+  box-shadow: var(--shadow-lg), var(--shadow-gold);
 }
 
 /* Market Section - Natural height based on resize */
@@ -87,7 +118,10 @@
   /* Height controlled by user resize */
 }
 
-/* Scrollbar styling */
+/* ===================================
+   📱 SCROLLBAR STYLING
+   =================================== */
+
 .scanner-left::-webkit-scrollbar,
 .right-column-scroll-wrapper::-webkit-scrollbar {
   width: 8px;
@@ -101,13 +135,25 @@
 
 .scanner-left::-webkit-scrollbar-thumb,
 .right-column-scroll-wrapper::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, var(--brand-burgundy), var(--brand-royal));
+  background: var(--gradient-primary);
   border-radius: var(--radius-full);
 }
 
 .scanner-left::-webkit-scrollbar-thumb:hover,
 .right-column-scroll-wrapper::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #9C0612, #112250);
+  background: linear-gradient(135deg, var(--brand-burgundy), var(--brand-royal));
+  box-shadow: var(--shadow-gold);
+}
+
+/* ===================================
+   📊 PAPER TRADING WIDGETS SECTION
+   =================================== */
+
+.paper-trading-widgets-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
 }
 
 /* Responsive - Large Tablets */

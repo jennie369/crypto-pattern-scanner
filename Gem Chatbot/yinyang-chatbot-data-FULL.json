@@ -1,0 +1,420 @@
+{
+  "config": {
+    "adminPassword": "yinyang2025",
+    "chatbotTitle": "YinYang Masters AI Assistant",
+    "chatbotSubtitle": "Chuyên gia tư vấn tần số & năng lượng - Jennie Uyen Chu",
+    "chatbotLogo": "🔮",
+    "dataSourceURL": "",
+    "shopifyDomain": "yinyang-masters.myshopify.com",
+    "shopifyToken": "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"
+  },
+  "welcomeMessage": "🙏 <strong>Xin chào! Tôi là AI Assistant của YinYang Masters</strong><br><br>✨ <strong>Học thuyết chuyển hóa nội tâm</strong> - Jennie Uyen Chu<br><br>Tôi có thể giúp bạn:<br>💎 Tư vấn đá thạch anh phù hợp<br>🔮 Giải đáp về tần số & năng lượng<br>📚 Giới thiệu khóa học<br>📦 Kiểm tra đơn hàng<br><br>Bạn muốn tôi hỗ trợ gì hôm nay? 😊",
+
+  "knowledge": {
+    "philosophy": "🔮 **HỌC THUYẾT CHUYỂN HÓA NỘI TÂM - YINYANG MASTERS**\n\nFounder: **Jennie Uyen Chu**\n\n**TRIẾT LÝ CỐT LÕI:**\n• Vạn vật đều là năng lượng rung động ở các tần số khác nhau\n• Luật Hấp Dẫn (Law of Attraction): Like attracts like\n• Manifestation: Hiện hóa ước muốn qua ý thức, cảm xúc và hành động\n• Vũ trụ luôn hỗ trợ những ai sống đúng với bản chất cao nhất của mình\n• Mọi sự kiện đều có ý nghĩa, không có gì là ngẫu nhiên",
+
+    "frequency": "**TẦN SỐ & NĂNG LƯỢNG:**\n\n🌟 **Tần số cao:**\n• Tình yêu: 528Hz (Heart Chakra)\n• Tự do: 639Hz (Throat Chakra)\n• Giác ngộ: 963Hz (Crown Chakra)\n• Vui vẻ, biết ơn, yêu thương: 500Hz+\n\n⚡ **Tần số thấp:**\n• Sợ hãi: <100Hz\n• Tức giận: 150Hz\n• Buồn bã: 200Hz\n\n💎 **Đá thạch anh:**\n• Giúp cân bằng và nâng cao tần số cá nhân\n• Kết nối với Chakra (luân xa năng lượng)\n• Hỗ trợ manifest ước muốn hiệu quả hơn",
+
+    "manifestation": "**MANIFEST (HIỆN HÓA ƯỚC MUỐN):**\n\n💰 **Tiền Bạc:**\n1. Abundance Mindset - Tư duy dồi dào\n2. Giải phóng niềm tin hạn chế về tiền\n3. Align với tần số giàu có (528Hz)\n4. Affirmation: \"Tôi xứng đáng với sự giàu có\"\n5. Cho đi để nhận (luật tuần hoàn)\n\n💖 **Tình Yêu:**\n1. Self-love trước (yêu bản thân)\n2. Định rõ partner lý tưởng\n3. Cảm nhận như đã có tình yêu đó\n4. Giải phóng trauma quá khứ\n5. Tần số 528Hz - Chữa lành trái tim\n\n🎯 **Sự Nghiệp:**\n1. Làm việc bạn yêu thích\n2. Visualize thành công hàng ngày\n3. Kỷ luật + Hành động liên tục\n4. Network với đúng người\n5. Tin vào giá trị bản thân",
+
+    "consulting_style": "**CÁCH TƯ VẤN TỰ NHIÊN:**\n\n1. 🎯 Hỏi về tình huống của khách\n2. 📊 Phân tích tần số hiện tại\n3. 💡 Đề xuất giải pháp phù hợp:\n   • Đá thạch anh nào phù hợp\n   • Set nào giải quyết vấn đề\n   • Khóa học nào hỗ trợ\n   • Tham gia cộng đồng để học thêm\n4. ❌ KHÔNG hard sell, chỉ đề xuất tự nhiên\n5. ✅ Luôn kết nối với ngữ cảnh của khách"
+  },
+
+  "faq": {
+    "học thuyết": {
+      "keywords": ["học thuyết", "triết lý", "yinyang masters", "jennie uyen chu", "founder", "cốt lõi"],
+      "answer": "🔮 **HỌC THUYẾT CHUYỂN HÓA NỘI TÂM**\n\nFounder: **Jennie Uyen Chu**\n\n**TRIẾT LÝ CỐT LÕI:**\n✨ Vạn vật đều là năng lượng rung động\n✨ Luật Hấp Dẫn: Like attracts like\n✨ Manifestation qua ý thức & cảm xúc\n✨ Vũ trụ hỗ trợ bản chất cao nhất\n✨ Không có gì là ngẫu nhiên\n\n📚 **Tìm hiểu thêm:**\nhttps://gemcapitalholding.com/pages/hocthuyetchuyenhoanoitam",
+      "images": ["", "", "", ""],
+      "url": "https://gemcapitalholding.com/pages/hocthuyetchuyenhoanoitam",
+      "recommendedProducts": []
+    },
+    "tần số": {
+      "keywords": ["tần số", "năng lượng", "rung động", "frequency", "vibration", "528hz", "chakra"],
+      "answer": "🌟 **TẦN SỐ & NĂNG LƯỢNG:**\n\n**Tần số cao (+):**\n• 528Hz - Tình yêu, chữa lành\n• 639Hz - Kết nối, giao tiếp\n• 963Hz - Giác ngộ, tâm linh\n• Vui vẻ, biết ơn: 500Hz+\n\n**Tần số thấp (-):**\n• Sợ hãi: <100Hz\n• Tức giận: 150Hz\n• Buồn bã: 200Hz\n\n💎 **Đá thạch anh giúp:**\n✅ Cân bằng tần số cá nhân\n✅ Kết nối Chakra (luân xa)\n✅ Nâng cao năng lượng\n✅ Hỗ trợ manifest\n\nBạn muốn nâng tần số nào? 😊",
+      "images": ["", "", "", ""],
+      "url": "",
+      "recommendedProducts": []
+    },
+    "manifest": {
+      "keywords": ["manifest", "hiện hóa", "ước muốn", "law of attraction", "hấp dẫn"],
+      "answer": "✨ **MANIFEST - HIỆN HÓA ƯỚC MUỐN:**\n\n**4 BƯỚC CƠ BẢN:**\n1. 🎯 **Visualize** - Hình dung rõ ràng\n2. 💖 **Feel** - Cảm nhận như đã có\n3. 🙏 **Believe** - Tin tưởng tuyệt đối\n4. 🎁 **Receive** - Đón nhận với biết ơn\n\n**MANIFEST HIỆU QUẢ:**\n💰 Tiền bạc → Thạch Anh Vàng + Khóa Manifest\n💖 Tình yêu → Thạch Anh Hồng + Khóa Tình Yêu\n🎯 Sự nghiệp → Set Tam Bảo Thạch\n\nBạn muốn manifest điều gì? 😊",
+      "images": ["", "", "", ""],
+      "url": "",
+      "recommendedProducts": ["thạch anh vàng", "thạch anh hồng", "set sự nghiệp"]
+    },
+    "giao hàng": {
+      "keywords": ["giao hàng", "ship", "vận chuyển", "bao lâu", "thời gian giao", "delivery"],
+      "answer": "⏱️ **THỜI GIAN GIAO HÀNG:**\n\n📍 **Việt Nam:**\n• Nội thành HCM: 1-2 ngày\n• Nội thành Hà Nội: 1-2 ngày\n• Tỉnh thành khác: 3-5 ngày\n• Vùng xa: 5-7 ngày\n\n🌍 **Quốc tế:**\n• USA: 3-4 ngày\n• Các nước khác: 1-2 tuần\n\n🚚 **Đơn vị vận chuyển:**\n• Nội địa: GHTK, GHN, Viettel Post\n• Quốc tế: DHL, FedEx\n\n📱 Bạn sẽ nhận mã tracking qua Zalo/SMS!",
+      "images": ["", "", "", ""],
+      "url": "",
+      "recommendedProducts": []
+    },
+    "thanh toán": {
+      "keywords": ["thanh toán", "payment", "trả tiền", "chuyển khoản", "cod", "zelle"],
+      "answer": "💳 **PHƯƠNG THỨC THANH TOÁN:**\n\n🇻🇳 **Việt Nam:**\n1️⃣ COD - Tiền mặt khi nhận (phí 20K)\n2️⃣ Chuyển khoản:\n   • Vietcombank: 1074286868\n   • ACB: 1234567890\n   • Tên: CT TNHH GEM CAPITAL HOLDING\n3️⃣ Ví điện tử: Momo, ZaloPay\n\n🇺🇸 **USA:**\n4️⃣ Zelle: yinyangmastersofficial@gmail.com\n5️⃣ PayPal (phí 4.4%)\n6️⃣ Credit Card\n\n💡 Đơn >2M: Đặt cọc 50%",
+      "images": ["", "", "", ""],
+      "url": "",
+      "recommendedProducts": []
+    },
+    "cách dùng": {
+      "keywords": ["cách dùng", "sử dụng", "hướng dẫn", "thanh tẩy", "sạc năng lượng", "lập trình"],
+      "answer": "📖 **CÁCH DÙNG ĐÁ THẠCH ANH:**\n\n1️⃣ **Làm sạch:**\n   • Rửa dưới nước sạch\n   • Để khô tự nhiên\n\n2️⃣ **Sạc năng lượng:**\n   • Phơi nắng trước 9h (30 phút)\n   • Hoặc dưới trăng rằm\n\n3️⃣ **Lập trình:**\n   • Thiền định 10-15 phút/ngày\n   • Nói rõ ý định với viên đá\n\n4️⃣ **Sử dụng:**\n   • Mang theo người\n   • Đặt không gian sống/làm việc\n\n🔄 Làm sạch & sạc lại mỗi 1-2 tuần!\n\n📺 Video: Youtube Jennie Uyen Chu",
+      "images": ["", "", "", ""],
+      "url": "https://drive.google.com/file/d/1A2INNgmdTas7pH60fiHxw336o3HMH4jk/view?usp=sharing",
+      "recommendedProducts": []
+    },
+    "đổi trả": {
+      "keywords": ["đổi trả", "hoàn tiền", "return", "refund"],
+      "answer": "🔄 **CHÍNH SÁCH ĐỔI TRẢ:**\n\n✅ **Đổi trả 100%** nếu:\n• Không ưng ý\n• Sản phẩm lỗi\n• Không đúng mô tả\n\n✅ **Hỗ trợ:**\n• Đến khi bạn hài lòng\n• Tư vấn đổi sản phẩm phù hợp\n\n❌ **Không áp dụng:**\n• Đã qua sử dụng\n• Đá bị vỡ do người dùng\n\n📞 **Liên hệ:**\n• Zalo: 0787238002\n• Facebook: fb.com/yinyangmasterscrystals",
+      "images": ["", "", "", ""],
+      "url": "",
+      "recommendedProducts": []
+    },
+    "chất lượng": {
+      "keywords": ["chất lượng", "thật giả", "fake", "nguồn gốc", "xuất xứ"],
+      "answer": "💎 **CHẤT LƯỢNG ĐÁ:**\n\n✅ **Cam kết:**\n• Thạch anh tự nhiên 100%\n• Khai thác tại Brazil\n• Gia công bởi thợ 10+ năm kinh nghiệm\n• Thanh tẩy tại Sacred Blessing\n• Đổi trả 100% lần đầu\n\n🔬 **Kiểm định:**\n• Certificate of Authenticity\n• Lab test (theo yêu cầu)\n\n💯 **Giá trị:**\n• Tăng theo thời gian\n• Năng lượng nguyên bản\n• Không xử lý hóa chất",
+      "images": ["", "", "", ""],
+      "url": "",
+      "recommendedProducts": []
+    }
+  },
+
+  "suggestions": [
+    {
+      "emoji": "🔮",
+      "text": "Tìm hiểu học thuyết",
+      "keywords": ["học thuyết", "yinyang", "jennie"],
+      "answer": "🔮 **HỌC THUYẾT YINYANG MASTERS**\n\nFounder: Jennie Uyen Chu\n\n✨ Vạn vật là năng lượng rung động\n✨ Law of Attraction: Like attracts like\n✨ Manifest qua ý thức & hành động\n✨ Không có gì là ngẫu nhiên\n\n📚 Tìm hiểu đầy đủ:\nhttps://gemcapitalholding.com/pages/hocthuyetchuyenhoanoitam",
+      "images": ["", "", "", ""],
+      "url": "https://gemcapitalholding.com/pages/hocthuyetchuyenhoanoitam",
+      "recommendedProducts": []
+    },
+    {
+      "emoji": "💎",
+      "text": "Tìm hiểu về đá thạch anh",
+      "keywords": ["đá thạch anh", "crystal", "loại đá"],
+      "answer": "💎 **5 LOẠI ĐÁ THẠCH ANH:**\n\n💜 **Thạch Anh Tím** (Amethyst)\n• Tâm linh, trực giác, chakra đỉnh đầu\n• 963Hz - Giác ngộ\n\n💗 **Thạch Anh Hồng** (Rose Quartz)\n• Tình yêu, quan hệ, chakra tim\n• 528Hz - Chữa lành\n\n🤍 **Thạch Anh Trắng** (Clear Quartz)\n• Khuếch đại năng lượng, master healer\n• Lập trình theo ý muốn\n\n🟤 **Thạch Anh Khói** (Smoky Quartz)\n• Grounding, bảo vệ, tự tin\n• Chakra gốc\n\n💛 **Thạch Anh Vàng** (Citrine)\n• Tài lộc, abundance, may mắn\n• Chakra rốn\n\nBạn quan tâm loại nào? 😊",
+      "images": ["https://cdn.shopify.com/s/files/1/0611/9741/8673/files/3_85fd220b-56fc-4cb6-8cac-648e67546669.png?v=1761857782", "", "", ""],
+      "url": "",
+      "recommendedProducts": []
+    },
+    {
+      "emoji": "💖",
+      "text": "Tăng tần số tình yêu",
+      "keywords": ["tình yêu", "manifest love", "partner"],
+      "answer": "💖 **MANIFEST TÌNH YÊU:**\n\n**Bước 1: Self-love**\n• Yêu bản thân trước\n• Chữa lành tổn thương\n\n**Bước 2: Clarity**\n• Viết list partner lý tưởng\n• Càng chi tiết càng tốt\n\n**Bước 3: Feel it real**\n• Cảm nhận như đã có\n• Meditate với 528Hz\n\n**Bước 4: Raise vibration**\n• Vui vẻ, biết ơn, yêu thương\n• Mở lòng đón nhận\n\n💎 **Hỗ trợ:**\n• Thạch Anh Hồng\n• Set Mộng Hồi Thanh\n• Khóa Tình Yêu (497K)\n\nBạn muốn tìm hiểu thêm không? 💕",
+      "images": ["https://cdn.shopify.com/s/files/1/0611/9741/8673/files/12_de2500ea-ed86-4727-8f46-dae02176ce25.jpg?v=1761857931", "", "", ""],
+      "url": "",
+      "recommendedProducts": ["thạch anh hồng", "set tình yêu"]
+    },
+    {
+      "emoji": "💰",
+      "text": "Tư vấn tài lộc",
+      "keywords": ["tiền bạc", "tài lộc", "giàu có", "abundance"],
+      "answer": "💰 **MANIFEST TIỀN BẠC:**\n\n**Bước 1: Mindset shift**\n• Abundance mindset\n• Giải phóng niềm tin hạn chế\n\n**Bước 2: Clarity**\n• Xác định số tiền cụ thể\n• Mục đích sử dụng\n\n**Bước 3: Align frequency**\n• Cảm giác giàu có\n• Hành động như người giàu\n\n**Bước 4: Give to receive**\n• Cho đi để nhận\n• Biết ơn những gì có\n\n💎 **Hỗ trợ:**\n• Thạch Anh Vàng (Citrine)\n• Set Ẩn Long Thạch (6.99-7.53M)\n• Khóa Manifest (997K)\n\nBạn sẵn sàng thay đổi chưa? 💎",
+      "images": ["", "", "", ""],
+      "url": "",
+      "recommendedProducts": ["thạch anh vàng", "set tài lộc"]
+    },
+    {
+      "emoji": "📦",
+      "text": "Kiểm tra đơn hàng",
+      "keywords": ["kiểm tra", "đơn hàng", "tracking"],
+      "answer": "📦 **KIỂM TRA ĐƠN HÀNG:**\n\nVui lòng cung cấp một trong các thông tin:\n• Mã đơn hàng (#12345)\n• Số điện thoại đặt hàng\n• Email đặt hàng\n\nHoặc liên hệ trực tiếp:\n📱 Zalo: 0787238002\n💬 Facebook: fb.com/yinyangmasterscrystals",
+      "images": ["", "", "", ""],
+      "url": "",
+      "recommendedProducts": []
+    },
+    {
+      "emoji": "📚",
+      "text": "Khóa học phù hợp",
+      "keywords": ["khóa học", "course", "training"],
+      "answer": "📚 **CÁC KHÓA HỌC:**\n\n🌟 **Khóa 7 Ngày Khai Mở Tần Số Gốc** - 1.997K\n• Chuyển hóa năng lượng cốt lõi\n• Nâng cao tần số toàn diện\n\n💖 **Kích Hoạt Tần Số Tình Yêu** - 497K\n• 21 ngày thu hút tình yêu\n• Chữa lành trauma\n\n💰 **Manifest Tiền Bạc** - 997K\n• 30 ngày thay đổi Money Mindset\n• Công thức hiện hóa tài chính\n\n📈 **Trading Phương Pháp Độc Quyền** - 1.997M\n• Master Trading độc quyền\n• Phương pháp riêng biệt\n\nBạn quan tâm khía cạnh nào? 😊",
+      "images": ["", "", "", ""],
+      "url": "",
+      "recommendedProducts": []
+    }
+  ],
+
+  "contactButtons": {
+    "facebook": {
+      "enabled": true,
+      "icon": "💬",
+      "text": "Chat Facebook",
+      "url": "https://www.facebook.com/yinyangmasterscrystals"
+    },
+    "zalo": {
+      "enabled": true,
+      "icon": "📱",
+      "text": "Zalo CSKH",
+      "url": "https://zalo.me/0787238002"
+    },
+    "telegram": {
+      "enabled": true,
+      "icon": "✈️",
+      "text": "Telegram",
+      "url": "https://t.me/gemholdinggroup"
+    }
+  },
+
+  "products": {
+    "thạch anh tím": {
+      "name": "Thạch Anh Tím (Amethyst)",
+      "description": "Viên đá tâm linh mạnh mẽ nhất, kết nối chakra đỉnh đầu, tăng trực giác và giác ngộ",
+      "price": "350.000đ - 2.500.000đ",
+      "images": [
+        "",
+        "",
+        "",
+        ""
+      ],
+      "url": "https://gemcapitalholding.com/products/thach-anh-tim",
+      "benefits": [
+        "Tăng cường tâm linh, trực giác",
+        "Chakra đỉnh đầu (963Hz)",
+        "Chữa lành cảm xúc sâu",
+        "Bảo vệ khỏi năng lượng tiêu cực",
+        "Hỗ trợ thiền định và giấc ngủ sâu"
+      ],
+      "ctaButtons": [
+        {
+          "enabled": true,
+          "text": "Mua Ngay",
+          "url": "https://gemcapitalholding.com/products/thach-anh-tim",
+          "style": "primary"
+        },
+        {
+          "enabled": true,
+          "text": "Tư Vấn",
+          "url": "https://zalo.me/0787238002",
+          "style": "secondary"
+        }
+      ]
+    },
+    "thạch anh hồng": {
+      "name": "Thạch Anh Hồng (Rose Quartz)",
+      "description": "Đá tình yêu mạnh mẽ nhất, chữa lành trái tim, thu hút tình yêu đích thực",
+      "price": "350.000đ - 2.500.000đ",
+      "images": [
+        "https://cdn.shopify.com/s/files/1/0611/9741/8673/files/12_de2500ea-ed86-4727-8f46-dae02176ce25.jpg?v=1761857931",
+        "",
+        "",
+        ""
+      ],
+      "url": "https://gemcapitalholding.com/products/thach-anh-hong",
+      "benefits": [
+        "Thu hút tình yêu và quan hệ",
+        "Chữa lành trái tim tổn thương",
+        "Tăng self-love (yêu bản thân)",
+        "Chakra tim (528Hz)",
+        "Mở rộng khả năng yêu thương"
+      ],
+      "ctaButtons": [
+        {
+          "enabled": true,
+          "text": "Đặt Hàng Ngay",
+          "url": "https://gemcapitalholding.com/products/thach-anh-hong",
+          "style": "primary"
+        },
+        {
+          "enabled": true,
+          "text": "Chat Zalo",
+          "url": "https://zalo.me/0787238002",
+          "style": "secondary"
+        }
+      ]
+    },
+    "thạch anh trắng": {
+      "name": "Thạch Anh Trắng (Clear Quartz)",
+      "description": "Master healer - Khuếch đại năng lượng, chữa lành toàn diện, lập trình theo ý muốn",
+      "price": "300.000đ - 2.000.000đ",
+      "images": [
+        "",
+        "",
+        "",
+        ""
+      ],
+      "url": "https://gemcapitalholding.com/products/thach-anh-trang",
+      "benefits": [
+        "Khuếch đại mọi năng lượng",
+        "Master healer - Chữa lành toàn diện",
+        "Lập trình theo ý muốn",
+        "Cân bằng tất cả chakra",
+        "Tăng cường manifest"
+      ],
+      "ctaButtons": [
+        {
+          "enabled": true,
+          "text": "Xem Chi Tiết",
+          "url": "https://gemcapitalholding.com/products/thach-anh-trang",
+          "style": "primary"
+        }
+      ]
+    },
+    "thạch anh khói": {
+      "name": "Thạch Anh Khói (Smoky Quartz)",
+      "description": "Viên đá grounding mạnh mẽ, neo căn bản, bảo vệ và tăng tự tin",
+      "price": "400.000đ - 2.200.000đ",
+      "images": [
+        "",
+        "",
+        "",
+        ""
+      ],
+      "url": "https://gemcapitalholding.com/products/thach-anh-khoi",
+      "benefits": [
+        "Grounding - Neo căn bản",
+        "Giải phóng căng thẳng, lo âu",
+        "Bảo vệ khỏi năng lượng tiêu cực",
+        "Chakra gốc",
+        "Tăng sự tự tin và tập trung"
+      ],
+      "ctaButtons": [
+        {
+          "enabled": true,
+          "text": "Mua Ngay",
+          "url": "https://gemcapitalholding.com/products/thach-anh-khoi",
+          "style": "primary"
+        },
+        {
+          "enabled": true,
+          "text": "Liên Hệ",
+          "url": "https://zalo.me/0787238002",
+          "style": "secondary"
+        }
+      ]
+    },
+    "thạch anh vàng": {
+      "name": "Thạch Anh Vàng (Citrine)",
+      "description": "Viên đá tài lộc số 1, thu hút abundance, thịnh vượng và may mắn",
+      "price": "450.000đ - 2.800.000đ",
+      "images": [
+        "",
+        "",
+        "",
+        ""
+      ],
+      "url": "https://gemcapitalholding.com/products/thach-anh-vang",
+      "benefits": [
+        "Thu hút tài lộc dồi dào",
+        "Manifest tiền bạc hiệu quả",
+        "Tăng sự tự tin",
+        "Chakra rốn (Solar Plexus)",
+        "Năng lượng mặt trời tích cực"
+      ],
+      "ctaButtons": [
+        {
+          "enabled": true,
+          "text": "Đặt Mua",
+          "url": "https://gemcapitalholding.com/products/thach-anh-vang",
+          "style": "primary"
+        },
+        {
+          "enabled": true,
+          "text": "Tư Vấn Miễn Phí",
+          "url": "https://zalo.me/0787238002",
+          "style": "secondary"
+        }
+      ]
+    },
+    "set tình yêu": {
+      "name": "Set Mộng Hồi Thanh",
+      "description": "Set đá chuyên về tình yêu, quan hệ, hôn nhân - Chữa lành và thu hút tình yêu đích thực",
+      "price": "2.450.000đ",
+      "images": [
+        "",
+        "",
+        "",
+        ""
+      ],
+      "url": "https://gemcapitalholding.com/products/set-tinh-yeu",
+      "benefits": [
+        "Thu hút tình yêu đích thực",
+        "Chữa lành tổn thương tình cảm",
+        "Tăng sức hấp dẫn cá nhân",
+        "Cải thiện quan hệ hiện tại",
+        "Mở rộng khả năng yêu thương"
+      ],
+      "ctaButtons": [
+        {
+          "enabled": true,
+          "text": "Sở Hữu Ngay",
+          "url": "https://gemcapitalholding.com/products/set-tinh-yeu",
+          "style": "primary"
+        },
+        {
+          "enabled": true,
+          "text": "Tìm Hiểu Thêm",
+          "url": "https://zalo.me/0787238002",
+          "style": "secondary"
+        }
+      ]
+    },
+    "set tài lộc": {
+      "name": "Set Ẩn Long Thạch",
+      "description": "Set đá chuyên về tài lộc, thịnh vượng - Thu hút tiền bạc và cơ hội kinh doanh",
+      "price": "6.990.000đ - 7.530.000đ",
+      "images": [
+        "",
+        "",
+        "",
+        ""
+      ],
+      "url": "https://gemcapitalholding.com/products/set-tai-loc",
+      "benefits": [
+        "Thu hút tài lộc dồi dào",
+        "Mở rộng cơ hội kinh doanh",
+        "Tăng may mắn trong đầu tư",
+        "Manifest tiền bạc hiệu quả",
+        "Bảo vệ và gia tăng tài sản"
+      ],
+      "ctaButtons": [
+        {
+          "enabled": true,
+          "text": "Đặt Hàng",
+          "url": "https://gemcapitalholding.com/products/set-tai-loc",
+          "style": "primary"
+        },
+        {
+          "enabled": true,
+          "text": "Chat Tư Vấn",
+          "url": "https://zalo.me/0787238002",
+          "style": "secondary"
+        }
+      ]
+    },
+    "set sự nghiệp": {
+      "name": "Set Tam Bảo Thạch",
+      "description": "Set đá chuyên về sự nghiệp - Tăng quyền lực, thăng tiến và thành công",
+      "price": "3.250.000đ",
+      "images": [
+        "",
+        "",
+        "",
+        ""
+      ],
+      "url": "https://gemcapitalholding.com/products/set-su-nghiep",
+      "benefits": [
+        "Tăng sự tự tin trong công việc",
+        "Bảo vệ khỏi kẻ xấu, ghen ghét",
+        "Tăng khả năng lãnh đạo",
+        "Focus và năng suất cao",
+        "Thăng tiến nhanh chóng"
+      ],
+      "ctaButtons": [
+        {
+          "enabled": true,
+          "text": "Mua Ngay",
+          "url": "https://gemcapitalholding.com/products/set-su-nghiep",
+          "style": "primary"
+        },
+        {
+          "enabled": true,
+          "text": "Hỗ Trợ",
+          "url": "https://zalo.me/0787238002",
+          "style": "secondary"
+        }
+      ]
+    }
+  }
+}

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Fish, Circle, Bell } from 'lucide-react';
 import './Modal.css';
 
 export const WhaleTrackerModal = ({ pattern, onClose }) => {
@@ -30,7 +31,7 @@ export const WhaleTrackerModal = ({ pattern, onClose }) => {
       <div className="modal-container" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div className="modal-title">
-            <span className="modal-icon">🐋</span>
+            <span className="modal-icon"><Fish size={24} /></span>
             <div>
               <h2>Whale Tracker</h2>
               <span className="modal-tier-badge tier-3">TIER 3</span>
@@ -73,8 +74,9 @@ export const WhaleTrackerModal = ({ pattern, onClose }) => {
                 borderRadius: 'var(--radius-md)',
                 textAlign: 'center'
               }}>
-                <div style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-bold)', color: whaleMetrics.netFlow > 0 ? '#00FF88' : '#F6465D' }}>
-                  {whaleMetrics.netFlow > 0 ? '🟢 Whales are accumulating' : '🔴 Whales are distributing'}
+                <div style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-bold)', color: whaleMetrics.netFlow > 0 ? '#00FF88' : '#F6465D', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-xs)' }}>
+                  <Circle size={16} fill={whaleMetrics.netFlow > 0 ? '#00FF88' : '#F6465D'} stroke="none" />
+                  {whaleMetrics.netFlow > 0 ? 'Whales are accumulating' : 'Whales are distributing'}
                 </div>
               </div>
             </div>
@@ -158,7 +160,7 @@ export const WhaleTrackerModal = ({ pattern, onClose }) => {
           {/* Whale Alerts */}
           <div style={{ padding: 'var(--space-md)', background: 'rgba(0, 217, 255, 0.1)', border: '1px solid rgba(0, 217, 255, 0.3)', borderRadius: 'var(--radius-md)' }}>
             <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
-              <span style={{ fontSize: '24px' }}>🔔</span>
+              <Bell size={24} color="var(--brand-cyan)" />
               <div>
                 <div style={{ fontWeight: 'var(--font-bold)', color: 'var(--brand-cyan)' }}>Whale Alert Enabled</div>
                 <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', marginTop: '2px' }}>

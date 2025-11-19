@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Target, AlertTriangle } from 'lucide-react';
 import './Modal.css';
 
 export const PositionSizeModal = ({ pattern, onClose }) => {
@@ -30,7 +31,7 @@ export const PositionSizeModal = ({ pattern, onClose }) => {
       <div className="modal-container" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div className="modal-title">
-            <span className="modal-icon">📍</span>
+            <span className="modal-icon"><Target size={24} /></span>
             <div>
               <h2>Position Size Calculator</h2>
               <span className="modal-tier-badge tier-2">TIER 2</span>
@@ -110,7 +111,7 @@ export const PositionSizeModal = ({ pattern, onClose }) => {
           {leverage > 10 && (
             <div style={{ padding: 'var(--space-md)', background: 'rgba(246, 70, 93, 0.1)', border: '1px solid rgba(246, 70, 93, 0.3)', borderRadius: 'var(--radius-md)' }}>
               <div style={{ display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
-                <span style={{ fontSize: '24px' }}>⚠️</span>
+                <AlertTriangle size={24} color="#F6465D" />
                 <div>
                   <div style={{ fontWeight: 'var(--font-bold)', color: '#F6465D' }}>High Leverage Warning</div>
                   <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)', marginTop: 'var(--space-xs)' }}>

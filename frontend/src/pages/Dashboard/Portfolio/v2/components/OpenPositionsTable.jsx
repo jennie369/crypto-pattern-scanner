@@ -1,12 +1,17 @@
 import React, { useMemo, useState } from 'react';
+import { Download, Edit2, XCircle, BarChart3, CheckCircle } from 'lucide-react';
 import { Button } from '../../../../../components-v2/Button';
 import { Badge } from '../../../../../components-v2/Badge';
 import { exportPositionsToCSV } from '../../../../../utils/csvExport';
 import EditPositionModal from './EditPositionModal';
+import AddPositionModal from './AddPositionModal';
+import ClosePositionModal from './ClosePositionModal';
 import './OpenPositionsTable.css';
 
-export const OpenPositionsTable = ({ positions = [], onClose, onUpdate, onRefresh }) => {
+export const OpenPositionsTable = ({ positions = [], onClose, onUpdate, onRefresh, onAddPosition, onCreateTransaction }) => {
   const [editingPosition, setEditingPosition] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [closingPosition, setClosingPosition] = useState(null);
 
   // Transform API data to match export format
   const exportData = useMemo(() => {
@@ -23,18 +28,58 @@ export const OpenPositionsTable = ({ positions = [], onClose, onUpdate, onRefres
     }));
   }, [positions]);
 
-  const handleClose = async (id) => {
-    if (!window.confirm('Are you sure you want to close this position?')) {
-      return;
-    }
+  const handleOpenCloseModal = (position) => {
+    setClosingPosition(position);
+  };
 
-    if (onClose) {
-      const result = await onClose(id);
+  const handleConfirmClose = async (positionId, exitPrice, pnlData) => {
+    try {
+      // 1. Create SELL transaction
+      if (onCreateTransaction) {
+        const position = positions.find(p => p.id === positionId);
+        if (position) {
+          const transaction = {
+            symbol: position.symbol,
+            transaction_type: 'SELL',
+            quantity: position.quantity,
+            price: exitPrice,
+            total_value: pnlData.totalValue,
+            realized_pnl: pnlData.pnl,
+            pattern_type: position.pattern_type || 'Manual Entry',
+            transaction_at: new Date().toISOString(),
+          };
+
+          await onCreateTransaction(transaction);
+        }
+      }
+
+      // 2. Remove position from holdings
+      if (onClose) {
+        await onClose(positionId);
+      }
+
+      // 3. Refresh data
+      if (onRefresh) {
+        onRefresh();
+      }
+
+      alert(`Position closed successfully!\nP&L: ${pnlData.pnl >= 0 ? '+' : ''}$${Math.abs(Math.round(pnlData.pnl)).toLocaleString()}`);
+    } catch (error) {
+      console.error('Error closing position:', error);
+      throw error; // Re-throw to be handled by modal
+    }
+  };
+
+  const handleAddPosition = async (positionData) => {
+    if (onAddPosition) {
+      const result = await onAddPosition(positionData);
       if (result?.success) {
-        console.log('Position closed successfully');
+        console.log('Position added successfully');
+        if (onRefresh) {
+          onRefresh();
+        }
       } else {
-        console.error('Failed to close position:', result?.error);
-        alert('Failed to close position. Please try again.');
+        throw new Error(result?.error || 'Failed to add position');
       }
     }
   };
@@ -64,9 +109,15 @@ export const OpenPositionsTable = ({ positions = [], onClose, onUpdate, onRefres
     <div className="open-positions-table">
       <div className="table-header">
         <h3 className="heading-sm">Open Positions ({positions.length})</h3>
-        <Button variant="outline" size="sm" icon="📥" onClick={handleExport}>
-          Export CSV
-        </Button>
+        <div className="header-actions">
+          <Button variant="primary" size="sm" onClick={() => setShowAddModal(true)}>
+            + Add Position
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExport}>
+            <Download size={16} />
+            Export CSV
+          </Button>
+        </div>
       </div>
 
       <div className="table-wrapper">
@@ -88,7 +139,8 @@ export const OpenPositionsTable = ({ positions = [], onClose, onUpdate, onRefres
               <tr>
                 <td colSpan="8" className="empty-state">
                   <div className="empty-message">
-                    <p>📊 No open positions</p>
+                    <BarChart3 size={48} style={{ margin: '0 auto 8px', opacity: 0.5 }} />
+                    <p>No open positions</p>
                     <p className="empty-hint">Your open positions will appear here</p>
                   </div>
                 </td>
@@ -138,14 +190,18 @@ export const OpenPositionsTable = ({ positions = [], onClose, onUpdate, onRefres
                           variant="ghost"
                           size="sm"
                           onClick={() => handleEdit(position)}
+                          title="Edit SL/TP"
                         >
+                          <Edit2 size={14} />
                           Edit
                         </Button>
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleClose(position.id)}
+                          onClick={() => handleOpenCloseModal(position)}
+                          title="Close position"
                         >
+                          <XCircle size={14} />
                           Close
                         </Button>
                       </div>
@@ -158,12 +214,29 @@ export const OpenPositionsTable = ({ positions = [], onClose, onUpdate, onRefres
         </table>
       </div>
 
+      {/* Add Position Modal */}
+      {showAddModal && (
+        <AddPositionModal
+          onClose={() => setShowAddModal(false)}
+          onSave={handleAddPosition}
+        />
+      )}
+
       {/* Edit Position Modal */}
       {editingPosition && (
         <EditPositionModal
           position={editingPosition}
           onClose={() => setEditingPosition(null)}
           onSave={handleSaveEdit}
+        />
+      )}
+
+      {/* Close Position Modal */}
+      {closingPosition && (
+        <ClosePositionModal
+          position={closingPosition}
+          onClose={() => setClosingPosition(null)}
+          onConfirm={handleConfirmClose}
         />
       )}
     </div>

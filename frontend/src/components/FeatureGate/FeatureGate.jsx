@@ -1,5 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Lock, Rocket } from 'lucide-react'
 import './FeatureGate.css'
 
 export default function FeatureGate({
@@ -27,7 +28,7 @@ export default function FeatureGate({
     <div className="feature-gate">
       <div className="gate-overlay">
         <div className="gate-content">
-          <span className="gate-icon">🔒</span>
+          <span className="gate-icon"><Lock size={48} /></span>
           <h3>Premium Feature</h3>
           <p>
             <strong>{featureName}</strong> requires{' '}
@@ -36,8 +37,9 @@ export default function FeatureGate({
           <button
             className="btn-upgrade-gate"
             onClick={() => navigate('/pricing')}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
           >
-            🚀 Upgrade Now
+            <Rocket size={16} /> Upgrade Now
           </button>
         </div>
       </div>

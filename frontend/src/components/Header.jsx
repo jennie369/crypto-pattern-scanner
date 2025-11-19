@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from '../hooks/useTranslation';
+import { Gem, Search, BarChart3, Settings, Sun, Moon, User, DoorOpen } from 'lucide-react';
 import './Header.css';
 
 /**
@@ -24,8 +25,8 @@ export default function Header({ onThemeToggle, theme = 'dark' }) {
   return (
     <header className="app-header">
       <div className="header-left">
-        <div className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-          <span className="logo-icon">💎</span>
+        <div className="logo" onClick={() => navigate('/scanner-v2')} style={{ cursor: 'pointer' }}>
+          <span className="logo-icon"><Gem size={28} /></span>
           <span
             className="logo-text heading-xl"
             style={{
@@ -47,24 +48,24 @@ export default function Header({ onThemeToggle, theme = 'dark' }) {
       <div className="header-center">
         <nav className="nav-buttons">
           <button
-            className={`nav-btn ${isActive('/') ? 'active' : ''}`}
-            onClick={() => navigate('/')}
+            className={`nav-btn ${isActive('/scanner-v2') ? 'active' : ''}`}
+            onClick={() => navigate('/scanner-v2')}
           >
-            <span className="btn-icon">🔍</span>
+            <span className="btn-icon"><Search size={18} /></span>
             <span>{t('scanPatterns')}</span>
           </button>
           <button
             className={`nav-btn ${isActive('/history') ? 'active' : ''}`}
             onClick={() => navigate('/history')}
           >
-            <span className="btn-icon">📊</span>
+            <span className="btn-icon"><BarChart3 size={18} /></span>
             <span>{t('history')}</span>
           </button>
           <button
             className={`nav-btn ${isActive('/settings') ? 'active' : ''}`}
             onClick={() => navigate('/settings')}
           >
-            <span className="btn-icon">⚙️</span>
+            <span className="btn-icon"><Settings size={18} /></span>
             <span>{t('settings')}</span>
           </button>
         </nav>
@@ -77,7 +78,7 @@ export default function Header({ onThemeToggle, theme = 'dark' }) {
           title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
         >
           <span className="theme-icon">
-            {theme === 'dark' ? '☀️' : '🌙'}
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
           </span>
           <span className="theme-text">
             {theme === 'dark' ? 'Light' : 'Dark'}
@@ -88,7 +89,7 @@ export default function Header({ onThemeToggle, theme = 'dark' }) {
           className={`header-btn admin ${isActive('/admin') ? 'active' : ''}`}
           onClick={() => navigate('/admin')}
         >
-          <span>👤 {t('admin')}</span>
+          <span><User size={18} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> {t('admin')}</span>
         </button>
 
         <button
@@ -99,7 +100,7 @@ export default function Header({ onThemeToggle, theme = 'dark' }) {
             }
           }}
         >
-          <span>🚪 {t('exit')}</span>
+          <span><DoorOpen size={18} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> {t('exit')}</span>
         </button>
       </div>
     </header>

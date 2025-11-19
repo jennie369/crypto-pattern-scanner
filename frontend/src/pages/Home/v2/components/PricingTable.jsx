@@ -1,4 +1,5 @@
 import React from 'react';
+import { Check, CreditCard, ShieldCheck } from 'lucide-react';
 import './PricingTable.css';
 
 export const PricingTable = () => {
@@ -92,7 +93,7 @@ export const PricingTable = () => {
               <ul className="pricing-features">
                 {tier.features.map((feature, idx) => (
                   <li key={idx}>
-                    <span className="feature-icon">✅</span>
+                    <span className="feature-icon"><Check size={20} /></span>
                     <span className="feature-text">{feature}</span>
                   </li>
                 ))}
@@ -106,8 +107,8 @@ export const PricingTable = () => {
         </div>
 
         <div className="pricing-footer">
-          <p>💳 Chấp nhận thanh toán: Chuyển khoản, Momo, ZaloPay</p>
-          <p>🔒 Hoàn tiền 100% trong 30 ngày nếu không hài lòng</p>
+          <p><CreditCard size={20} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '8px' }} /> Chấp nhận thanh toán: Chuyển khoản, Momo, ZaloPay</p>
+          <p><ShieldCheck size={20} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '8px' }} /> Hoàn tiền 100% trong 30 ngày nếu không hài lòng</p>
         </div>
       </div>
     </section>

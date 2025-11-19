@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import { Gem, Lock, Clock, AlertTriangle } from 'lucide-react';
 import './Auth.css';
 
 /**
@@ -51,7 +52,7 @@ function Login() {
       <div className="auth-card">
         {/* Logo and Title */}
         <div className="auth-header">
-          <div className="auth-logo">💎</div>
+          <div className="auth-logo"><Gem size={48} /></div>
           <h1>GEM Pattern Scanner</h1>
           <p className="auth-subtitle">Đăng nhập vào tài khoản của bạn</p>
         </div>
@@ -59,7 +60,7 @@ function Login() {
         {/* Error Message */}
         {error && (
           <div className="alert-error">
-            <span className="alert-icon">⚠️</span>
+            <span className="alert-icon"><AlertTriangle size={20} /></span>
             <span>{error}</span>
           </div>
         )}
@@ -90,8 +91,8 @@ function Login() {
             />
           </div>
 
-          <button type="submit" disabled={loading} className="auth-submit-btn">
-            {loading ? '⏳ Đang đăng nhập...' : '🔐 Đăng Nhập'}
+          <button type="submit" disabled={loading} className="auth-submit-btn" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+            {loading ? <><Clock size={16} /> Đang đăng nhập...</> : <><Lock size={16} /> Đăng Nhập</>}
           </button>
         </form>
 

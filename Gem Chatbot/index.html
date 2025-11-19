@@ -1,0 +1,2151 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">YinYang Masters - AI Chatbot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Noto+Sans+Display:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #0a0118;
+            min-height: 100vh;
+            color: #e5e7eb;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow:
+                    0 0 20px rgba(251, 191, 36, 0.6),
+                    0 0 40px rgba(251, 191, 36, 0.4);
+            }
+            50% {
+                box-shadow:
+                    0 0 30px rgba(251, 191, 36, 0.8),
+                    0 0 60px rgba(251, 191, 36, 0.6);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        
+        .particle {
+            position: absolute;
+            background: #fbbf24;
+            border-radius: 50%;
+            opacity: 0;
+            animation: particleFloat 8s ease-in infinite;
+            box-shadow: 0 0 10px #fbbf24;
+        }
+        
+        @keyframes particleFloat {
+            0% { transform: translateY(100vh); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100px) translateX(var(--drift)); opacity: 0; }
+        }
+        
+        .particle:nth-child(1) { left: 10%; width: 4px; height: 4px; animation-delay: 0s; --drift: 50px; }
+        .particle:nth-child(2) { left: 30%; width: 6px; height: 6px; animation-delay: 1.5s; --drift: -30px; }
+        .particle:nth-child(3) { left: 50%; width: 8px; height: 8px; animation-delay: 3s; --drift: 70px; }
+        .particle:nth-child(4) { left: 70%; width: 5px; height: 5px; animation-delay: 4.5s; --drift: -50px; }
+        .particle:nth-child(5) { left: 90%; width: 7px; height: 7px; animation-delay: 6s; --drift: 30px; }
+        
+        .glow-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.2;
+            animation: orbFloat 15s ease-in-out infinite;
+        }
+        
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(30px, -40px); }
+        }
+        
+        .glow-orb.gold { width: 200px; height: 200px; background: #fbbf24; top: 20%; left: 10%; }
+        .glow-orb.burgundy { width: 250px; height: 250px; background: #a855f7; bottom: 15%; right: 15%; animation-delay: 5s; }
+        .glow-orb.purple { width: 180px; height: 180px; background: #ec4899; top: 50%; left: 50%; animation-delay: 10s; }
+        
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-header {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            padding: 1.25rem 1.5rem;
+            border-radius: 24px 24px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid rgba(251, 191, 36, 0.5);
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .bot-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            border: 3px solid white;
+        }
+
+        .header-text h1 {
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin: 0 0 0.25rem 0;
+        }
+
+        .header-text p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.875rem;
+            margin: 0;
+        }
+        
+        .admin-btn {
+            width: 35px;
+            height: 35px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .admin-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .chat-container {
+            background: rgba(20, 10, 40, 0.98);
+            backdrop-filter: blur(30px);
+            border: 3px solid rgba(251, 191, 36, 0.6);
+            border-radius: 0 0 24px 24px;
+            box-shadow:
+                0 0 60px rgba(251, 191, 36, 0.4),
+                0 20px 80px rgba(0, 0, 0, 0.8);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: rgba(168, 85, 247, 0.1);
+            border-radius: 10px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(251, 191, 36, 0.5);
+            border-radius: 10px;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 1rem;
+            border-radius: 16px;
+            animation: scaleIn 0.3s ease-out;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            word-wrap: break-word;
+        }
+
+        .message.bot {
+            background: rgba(168, 85, 247, 0.2);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            align-self: flex-start;
+            color: #e5e7eb;
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(245, 158, 11, 0.3));
+            border: 1px solid rgba(251, 191, 36, 0.5);
+            align-self: flex-end;
+            color: white;
+        }
+
+        .message-avatar {
+            display: none;
+        }
+
+        .message-content {
+            width: 100%;
+        }
+        
+        .product-card {
+            background: rgba(20, 10, 40, 0.6);
+            border: 2px solid rgba(251, 191, 36, 0.6);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 5px 20px rgba(251, 191, 36, 0.3);
+        }
+
+        .product-card h3 {
+            color: #fbbf24;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .product-price {
+            color: #ec4899;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        
+        .product-images {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        
+        .product-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 2px solid rgba(251, 191, 36, 0.6);
+        }
+        
+        .product-image:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .product-benefits {
+            margin: 15px 0;
+        }
+        
+        .product-benefits ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .product-benefits li {
+            padding: 5px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .product-benefits li:before {
+            content: '✨';
+            position: absolute;
+            left: 0;
+        }
+
+        .product-cta-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .product-cta-btn {
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .product-cta-btn.primary {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            color: white;
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+        }
+
+        .product-cta-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(168, 85, 247, 0.4);
+        }
+
+        .product-cta-btn.secondary {
+            background: rgba(168, 85, 247, 0.1);
+            color: #fbbf24;
+            border: 2px solid rgba(251, 191, 36, 0.6);
+        }
+
+        .product-cta-btn.secondary:hover {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            color: white;
+            border-color: #ec4899;
+        }
+        
+        .quick-suggestions {
+            padding: 1rem 1.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            border-top: 1px solid rgba(168, 85, 247, 0.2);
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .quick-suggestions::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .quick-suggestions::-webkit-scrollbar-track {
+            background: rgba(168, 85, 247, 0.1);
+            border-radius: 10px;
+        }
+
+        .quick-suggestions::-webkit-scrollbar-thumb {
+            background: rgba(251, 191, 36, 0.5);
+            border-radius: 10px;
+        }
+
+        .suggestion-btn {
+            background: rgba(168, 85, 247, 0.2);
+            border: 2px solid rgba(168, 85, 247, 0.4);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            color: #e5e7eb;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .suggestion-btn:hover {
+            background: rgba(251, 191, 36, 0.3);
+            border-color: rgba(251, 191, 36, 0.6);
+            transform: translateY(-2px);
+        }
+        
+        .chat-input-area {
+            padding: 0.875rem 1rem;
+            border-top: 2px solid rgba(168, 85, 247, 0.3);
+            background: rgba(10, 1, 24, 0.8);
+            display: flex;
+            gap: 0.625rem;
+            align-items: center;
+        }
+
+        #userInput {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background: rgba(20, 10, 40, 0.8);
+            border: 2px solid rgba(168, 85, 247, 0.5);
+            border-radius: 10px;
+            color: white;
+            font-size: 0.9rem;
+            font-family: 'Montserrat', sans-serif;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        #userInput::placeholder {
+            color: #9ca3af;
+        }
+
+        #userInput:focus {
+            border-color: rgba(251, 191, 36, 0.8);
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+        }
+
+        #sendBtn {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border: none;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0a0118;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+            flex-shrink: 0;
+        }
+
+        #sendBtn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.6);
+        }
+        
+        .contact-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .contact-btn {
+            background: rgba(168, 85, 247, 0.2);
+            color: #fbbf24;
+            border: 2px solid rgba(251, 191, 36, 0.6);
+            padding: 0.5rem 1rem;
+            border-radius: 16px;
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .contact-btn:hover {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            color: white;
+            border-color: #ec4899;
+            transform: translateY(-2px);
+        }
+
+        /* Image Modal Styles */
+        .image-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 90%;
+            max-height: 90%;
+            animation: zoomIn 0.3s ease;
+        }
+
+        @keyframes zoomIn {
+            from { transform: translate(-50%, -50%) scale(0.5); }
+            to { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .modal-content img {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close-modal:hover {
+            color: #fbbf24;
+            transform: scale(1.2);
+        }
+        
+        /* Admin Panel Styles */
+        .admin-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .admin-content {
+            background: white;
+            max-width: 1100px;
+            margin: 20px auto;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #a855f7;
+        }
+        
+        .admin-header h2 {
+            color: #a855f7;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 28px;
+        }
+
+        .close-admin {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .admin-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #E2E8F0;
+            flex-wrap: wrap;
+        }
+
+        .admin-tab {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #718096;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+        }
+
+        .admin-tab.active {
+            color: #a855f7;
+            border-bottom-color: #a855f7;
+        }
+
+        .admin-tab:hover {
+            color: #a855f7;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+        
+        .admin-section {
+            margin-bottom: 30px;
+        }
+        
+        .admin-section h3 {
+            color: #ec4899;
+            font-family: 'Montserrat', sans-serif;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2D3748;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #E2E8F0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #a855f7;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(168, 85, 247, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #a855f7;
+            border: 2px solid #a855f7;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'Montserrat', sans-serif;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #a855f7;
+            color: white;
+        }
+        
+        .item-list {
+            margin-top: 20px;
+        }
+
+        .item-card {
+            background: #F7FAFC;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #E2E8F0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-card h4 {
+            color: #a855f7;
+            font-size: 16px;
+            margin: 0;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-icon {
+            background: white;
+            border: 1px solid #E2E8F0;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-icon:hover {
+            background: #fbbf24;
+            transform: translateY(-2px);
+        }
+
+        .image-preview {
+            width: 150px;
+            height: 150px;
+            border: 2px dashed #E2E8F0;
+            border-radius: 10px;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: #F7FAFC;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+
+        .image-preview.empty::after {
+            content: '📷';
+            font-size: 40px;
+            opacity: 0.3;
+        }
+
+        .edit-panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+            border: 2px solid #fbbf24;
+        }
+
+        .cta-buttons-section {
+            background: #F7FAFC;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .cta-button-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #E2E8F0;
+        }
+
+        .cta-button-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .chat-header {
+                padding: 15px 20px;
+            }
+            
+            .header-text h1 {
+                font-size: 18px;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+            
+            .quick-suggestions {
+                padding: 10px 15px;
+            }
+            
+            .product-images {
+                justify-content: center;
+            }
+
+            .admin-content {
+                margin: 10px;
+                padding: 20px;
+            }
+
+            .admin-tabs {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="glow-orb gold"></div>
+        <div class="glow-orb burgundy"></div>
+        <div class="glow-orb purple"></div>
+    </div>
+
+    <div class="container">
+        <div class="chat-header">
+            <div class="header-content">
+                <div class="bot-avatar" id="botAvatar">🔮</div>
+                <div class="header-text">
+                    <h1 id="headerTitle">YinYang Masters AI Assistant</h1>
+                    <p id="headerSubtitle">Chuyên gia tư vấn tần số & năng lượng</p>
+                </div>
+            </div>
+            <button class="admin-btn" onclick="openAdminPanel()">⚙️ Quản Trị</button>
+        </div>
+
+        <div class="chat-container">
+            <div class="chat-messages" id="chatMessages"></div>
+            
+            <div class="quick-suggestions" id="quickSuggestions"></div>
+            
+            <div class="chat-input-area">
+                <input type="text" id="userInput" placeholder="Nhập câu hỏi của bạn..." onkeypress="handleKeyPress(event)">
+                <button id="sendBtn" onclick="sendMessage()">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <span class="close-modal">&times;</span>
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <img id="modalImage" src="" alt="Zoomed Image">
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div class="admin-panel" id="adminPanel">
+        <div class="admin-content">
+            <div class="admin-header">
+                <h2>🔧 Bảng Quản Trị YinYang Chatbot</h2>
+                <button class="close-admin" onclick="closeAdminPanel()">✖ Đóng</button>
+            </div>
+
+            <div class="admin-tabs">
+                <button class="admin-tab active" onclick="switchTab('config')">⚙️ Cấu Hình Chung</button>
+                <button class="admin-tab" onclick="switchTab('welcome')">👋 Tin Nhắn Chào</button>
+                <button class="admin-tab" onclick="switchTab('suggestions')">💡 Gợi Ý Nhanh</button>
+                <button class="admin-tab" onclick="switchTab('faq')">❓ FAQ</button>
+                <button class="admin-tab" onclick="switchTab('products')">📦 Sản Phẩm</button>
+                <button class="admin-tab" onclick="switchTab('contact')">📞 Nút Liên Hệ</button>
+                <button class="admin-tab" onclick="switchTab('export')">💾 Xuất/Nhập Dữ Liệu</button>
+            </div>
+
+            <!-- Config Tab -->
+            <div id="tab-config" class="tab-content active">
+                <div class="admin-section">
+                    <h3>⚙️ Cấu Hình Chung</h3>
+                    <div class="form-group">
+                        <label>Mật khẩu Admin:</label>
+                        <input type="password" id="adminPassword" placeholder="Nhập mật khẩu mới (để trống nếu không đổi)">
+                    </div>
+                    <div class="form-group">
+                        <label>Tiêu đề Chatbot:</label>
+                        <input type="text" id="chatbotTitle">
+                    </div>
+                    <div class="form-group">
+                        <label>Phụ đề Chatbot:</label>
+                        <input type="text" id="chatbotSubtitle">
+                    </div>
+                    <div class="form-group">
+                        <label>Logo Chatbot (Emoji):</label>
+                        <input type="text" id="chatbotLogo">
+                    </div>
+                    <div class="form-group">
+                        <label>Shopify Domain:</label>
+                        <input type="text" id="shopifyDomain" placeholder="yourstore.myshopify.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Shopify Access Token:</label>
+                        <input type="password" id="shopifyToken" placeholder="shpat_...">
+                    </div>
+                    <div class="form-group">
+                        <label>URL File JSON (tự động đồng bộ):</label>
+                        <input type="text" id="dataSourceURL" placeholder="https://yoursite.com/data.json">
+                    </div>
+                    <button class="btn-primary" onclick="saveConfig()">💾 Lưu Cấu Hình</button>
+                    <button class="btn-secondary" onclick="syncFromJSON()">🔄 Đồng Bộ Từ JSON</button>
+                </div>
+            </div>
+
+            <!-- Welcome Tab -->
+            <div id="tab-welcome" class="tab-content">
+                <div class="admin-section">
+                    <h3>👋 Tin Nhắn Chào Mừng</h3>
+                    <div class="form-group">
+                        <label>Nội dung (hỗ trợ HTML):</label>
+                        <textarea id="welcomeMessage" rows="10"></textarea>
+                    </div>
+                    <button class="btn-primary" onclick="saveWelcomeMessage()">💾 Lưu Tin Nhắn</button>
+                </div>
+            </div>
+
+            <!-- Suggestions Tab -->
+            <div id="tab-suggestions" class="tab-content">
+                <div class="admin-section">
+                    <h3>💡 Gợi Ý Nhanh</h3>
+                    <button class="btn-primary" onclick="addNewSuggestion()">➕ Thêm Gợi Ý Mới</button>
+                    <div id="suggestionsList" class="item-list"></div>
+                </div>
+            </div>
+
+            <!-- FAQ Tab -->
+            <div id="tab-faq" class="tab-content">
+                <div class="admin-section">
+                    <h3>❓ Câu Hỏi Thường Gặp</h3>
+                    <button class="btn-primary" onclick="addNewFAQ()">➕ Thêm FAQ Mới</button>
+                    <div id="faqList" class="item-list"></div>
+                </div>
+            </div>
+
+            <!-- Products Tab -->
+            <div id="tab-products" class="tab-content">
+                <div class="admin-section">
+                    <h3>📦 Quản Lý Sản Phẩm</h3>
+                    <button class="btn-primary" onclick="addNewProduct()">➕ Thêm Sản Phẩm Mới</button>
+                    <div id="productsList" class="item-list"></div>
+                </div>
+            </div>
+
+            <!-- Contact Tab -->
+            <div id="tab-contact" class="tab-content">
+                <div class="admin-section">
+                    <h3>📞 Nút Liên Hệ</h3>
+                    <div id="contactButtonsList" class="item-list"></div>
+                </div>
+            </div>
+
+            <!-- Export Tab -->
+            <div id="tab-export" class="tab-content">
+                <div class="admin-section">
+                    <h3>💾 Xuất/Nhập Dữ Liệu</h3>
+                    <p style="margin-bottom: 15px;">Xuất dữ liệu ra file JSON để backup hoặc upload lên server:</p>
+                    <button class="btn-primary" onclick="exportData()">📥 Tải Xuống JSON</button>
+                    <br><br>
+                    <p style="margin-bottom: 15px;">Nhập dữ liệu từ file JSON:</p>
+                    <input type="file" id="importFile" accept=".json" onchange="importData(event)">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== DATA STRUCTURE ====================
+        let chatbotData = {
+            config: {
+                adminPassword: 'yinyang2025',
+                chatbotTitle: 'YinYang Masters AI Assistant',
+                chatbotSubtitle: 'Chuyên gia tư vấn tần số & năng lượng',
+                chatbotLogo: '🔮',
+                // HARD-CODE JSON URL để luôn sync khi load (fix iframe/embed issue)
+                dataSourceURL: 'https://ubiquitous-rolypoly-4b60ee.netlify.app/yinyang-chatbot-data-FULL.json',
+                shopifyDomain: '',
+                shopifyToken: ''
+            },
+            welcomeMessage: '🙏 <strong>Xin chào! Tôi là AI Assistant của YinYang Masters</strong><br><br>Tôi có thể giúp bạn:<br>💎 Tư vấn đá thạch anh phù hợp<br>🔮 Giải đáp về tần số & năng lượng<br>📚 Giới thiệu khóa học<br>📦 Kiểm tra đơn hàng<br><br>Bạn muốn tôi hỗ trợ gì hôm nay? 😊',
+            knowledge: {},
+            faq: {},
+            suggestions: [],
+            contactButtons: {},
+            products: {}
+        };
+
+        let editingItemId = null;
+
+        // ==================== INITIALIZATION ====================
+        function initChatbot() {
+            loadData();
+            updateUI();
+            sendWelcomeMessage();
+            renderQuickSuggestions();
+            renderContactButtons();
+            syncFromJSONIfConfigured();
+        }
+
+        function loadData() {
+            const savedData = localStorage.getItem('yinyangChatbotData');
+            if (savedData) {
+                try {
+                    chatbotData = JSON.parse(savedData);
+                } catch (error) {
+                    console.error('Lỗi khi tải dữ liệu:', error);
+                }
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('yinyangChatbotData', JSON.stringify(chatbotData));
+            console.log('✅ Đã lưu dữ liệu vào LocalStorage');
+        }
+
+        function updateUI() {
+            document.getElementById('pageTitle').textContent = chatbotData.config.chatbotTitle;
+            document.getElementById('headerTitle').textContent = chatbotData.config.chatbotTitle;
+            document.getElementById('headerSubtitle').textContent = chatbotData.config.chatbotSubtitle;
+            document.getElementById('botAvatar').textContent = chatbotData.config.chatbotLogo;
+        }
+
+        async function syncFromJSONIfConfigured() {
+            if (chatbotData.config.dataSourceURL) {
+                try {
+                    const response = await fetch(chatbotData.config.dataSourceURL);
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        // Giữ lại credentials hiện tại
+                        const currentPassword = chatbotData.config.adminPassword;
+                        const currentShopifyDomain = chatbotData.config.shopifyDomain;
+                        const currentShopifyToken = chatbotData.config.shopifyToken;
+                        const currentDataSourceURL = chatbotData.config.dataSourceURL;
+                        
+                        chatbotData = data;
+                        chatbotData.config.adminPassword = currentPassword;
+                        chatbotData.config.shopifyDomain = currentShopifyDomain;
+                        chatbotData.config.shopifyToken = currentShopifyToken;
+                        chatbotData.config.dataSourceURL = currentDataSourceURL;
+                        
+                        saveData();
+                        updateUI();
+                        renderQuickSuggestions();
+                        renderContactButtons();
+                        console.log('✅ Đã đồng bộ dữ liệu từ JSON');
+                    }
+                } catch (error) {
+                    console.error('Lỗi khi đồng bộ JSON:', error);
+                }
+            }
+        }
+
+        // ==================== CHAT FUNCTIONS ====================
+        function sendWelcomeMessage() {
+            addMessage(chatbotData.welcomeMessage, 'bot');
+        }
+
+        function addMessage(content, sender) {
+            const messagesDiv = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = 'message-avatar';
+            avatarDiv.textContent = sender === 'bot' ? chatbotData.config.chatbotLogo : '👤';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = content;
+            
+            messageDiv.appendChild(avatarDiv);
+            messageDiv.appendChild(contentDiv);
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            
+            if (message === '') return;
+            
+            addMessage(message, 'user');
+            input.value = '';
+            
+            setTimeout(() => {
+                processMessage(message);
+            }, 500);
+        }
+
+        function processMessage(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            // Kiểm tra đơn hàng
+            if (lowerMessage.includes('kiểm tra') || lowerMessage.includes('đơn hàng') || lowerMessage.includes('tracking')) {
+                handleOrderCheck(message);
+                return;
+            }
+            
+            // Tìm trong FAQ
+            for (const [key, faqItem] of Object.entries(chatbotData.faq)) {
+                if (faqItem.keywords && faqItem.keywords.some(keyword => lowerMessage.includes(keyword.toLowerCase()))) {
+                    displayFAQAnswer(faqItem);
+                    return;
+                }
+            }
+            
+            // Tìm trong suggestions
+            for (const suggestion of chatbotData.suggestions) {
+                if (suggestion.keywords && suggestion.keywords.some(keyword => lowerMessage.includes(keyword.toLowerCase()))) {
+                    displaySuggestionAnswer(suggestion);
+                    return;
+                }
+            }
+            
+            // Tìm sản phẩm
+            for (const [key, product] of Object.entries(chatbotData.products)) {
+                if (lowerMessage.includes(key) || lowerMessage.includes(product.name.toLowerCase())) {
+                    displayProduct(product);
+                    return;
+                }
+            }
+            
+            // Phản hồi mặc định
+            addMessage('Xin lỗi, tôi chưa hiểu câu hỏi của bạn. Bạn có thể chọn một trong các gợi ý bên dưới hoặc liên hệ trực tiếp với chúng tôi! 😊', 'bot');
+            renderContactButtons();
+        }
+
+        function displayFAQAnswer(faqItem) {
+            let response = faqItem.answer;
+            
+            if (faqItem.image || faqItem.image2 || faqItem.image3) {
+                response += '<div class="product-images">';
+                if (faqItem.image) response += `<img src="${faqItem.image}" class="product-image" onclick="openImageModal('${faqItem.image}', '${faqItem.url || ''}')">`;
+                if (faqItem.image2) response += `<img src="${faqItem.image2}" class="product-image" onclick="openImageModal('${faqItem.image2}', '${faqItem.url || ''}')">`;
+                if (faqItem.image3) response += `<img src="${faqItem.image3}" class="product-image" onclick="openImageModal('${faqItem.image3}', '${faqItem.url || ''}')">`;
+                response += '</div>';
+            }
+            
+            addMessage(response, 'bot');
+            renderContactButtons();
+        }
+
+        function displaySuggestionAnswer(suggestion) {
+            let response = suggestion.answer;
+            
+            if (suggestion.image || suggestion.image2) {
+                response += '<div class="product-images">';
+                if (suggestion.image) response += `<img src="${suggestion.image}" class="product-image" onclick="openImageModal('${suggestion.image}', '${suggestion.url || ''}')">`;
+                if (suggestion.image2) response += `<img src="${suggestion.image2}" class="product-image" onclick="openImageModal('${suggestion.image2}', '${suggestion.url || ''}')">`;
+                response += '</div>';
+            }
+            
+            addMessage(response, 'bot');
+            
+            if (suggestion.recommendedProducts && suggestion.recommendedProducts.length > 0) {
+                setTimeout(() => {
+                    suggestion.recommendedProducts.forEach(productKey => {
+                        const product = chatbotData.products[productKey];
+                        if (product) {
+                            displayProduct(product);
+                        }
+                    });
+                }, 500);
+            }
+            
+            renderContactButtons();
+        }
+
+        function displayProduct(product) {
+            let productHTML = `
+                <div class="product-card">
+                    <h3>${product.name}</h3>
+                    <p>${product.description}</p>
+                    <p class="product-price">${product.price}</p>
+            `;
+            
+            if (product.images && product.images.length > 0) {
+                productHTML += '<div class="product-images">';
+                product.images.forEach(img => {
+                    if (img) {
+                        productHTML += `<img src="${img}" class="product-image" onclick="openImageModal('${img}', '${product.url || ''}')">`;
+                    }
+                });
+                productHTML += '</div>';
+            }
+            
+            if (product.benefits && product.benefits.length > 0) {
+                productHTML += '<div class="product-benefits"><strong>Lợi ích:</strong><ul>';
+                product.benefits.forEach(benefit => {
+                    productHTML += `<li>${benefit}</li>`;
+                });
+                productHTML += '</ul></div>';
+            }
+            
+            if (product.ctaButtons && product.ctaButtons.length > 0) {
+                productHTML += '<div class="product-cta-buttons">';
+                product.ctaButtons.forEach(cta => {
+                    if (cta.enabled) {
+                        const buttonClass = cta.style || 'primary';
+                        productHTML += `<a href="${cta.url}" target="_blank" class="product-cta-btn ${buttonClass}">${cta.text}</a>`;
+                    }
+                });
+                productHTML += '</div>';
+            }
+            
+            productHTML += '</div>';
+            
+            addMessage(productHTML, 'bot');
+        }
+
+        // ==================== ORDER CHECKING WITH SHOPIFY API ====================
+        async function handleOrderCheck(message) {
+            addMessage('🔍 Đang tìm kiếm đơn hàng...', 'bot');
+            
+            const orderIdMatch = message.match(/#?(\d{4,})/);
+            const phoneMatch = message.match(/(\d{10,})/);
+            const emailMatch = message.match(/[\w.-]+@[\w.-]+\.\w+/);
+            
+            if (!chatbotData.config.shopifyDomain || !chatbotData.config.shopifyToken) {
+                addMessage('❌ Vui lòng cấu hình Shopify API trong Admin Panel<br><br>📞 <strong>Liên hệ trực tiếp:</strong>', 'bot');
+                renderContactButtons();
+                return;
+            }
+            
+            try {
+                let orders = [];
+                
+                if (orderIdMatch) {
+                    const orderId = orderIdMatch[1];
+                    orders = await searchShopifyOrderByNumber(orderId);
+                } else if (emailMatch) {
+                    const email = emailMatch[0];
+                    orders = await searchShopifyOrderByEmail(email);
+                } else if (phoneMatch) {
+                    const phone = phoneMatch[1];
+                    orders = await searchShopifyOrderByPhone(phone);
+                } else {
+                    addMessage('📦 <strong>KIỂM TRA ĐƠN HÀNG:</strong><br><br>Vui lòng cung cấp:<br>• Mã đơn hàng (#12345)<br>• Email đặt hàng<br>• Số điện thoại<br><br>📞 Hoặc liên hệ:', 'bot');
+                    renderContactButtons();
+                    return;
+                }
+                
+                if (orders && orders.length > 0) {
+                    displayOrderInfo(orders[0]);
+                } else {
+                    addMessage('❌ Không tìm thấy đơn hàng.<br><br>📞 <strong>Vui lòng liên hệ CSKH:</strong>', 'bot');
+                    renderContactButtons();
+                }
+            } catch (error) {
+                console.error('Lỗi kiểm tra đơn hàng:', error);
+                addMessage('❌ Có lỗi khi kiểm tra đơn hàng.<br><br>📞 <strong>Liên hệ:</strong>', 'bot');
+                renderContactButtons();
+            }
+        }
+
+        async function searchShopifyOrderByNumber(orderNumber) {
+            const url = `https://${chatbotData.config.shopifyDomain}/admin/api/2024-10/orders.json?status=any&name=%23${orderNumber}`;
+            
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'X-Shopify-Access-Token': chatbotData.config.shopifyToken,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Lỗi API Shopify: ' + response.status);
+            }
+            
+            const data = await response.json();
+            return data.orders || [];
+        }
+
+        async function searchShopifyOrderByEmail(email) {
+            const url = `https://${chatbotData.config.shopifyDomain}/admin/api/2024-10/orders.json?status=any&email=${encodeURIComponent(email)}&limit=5`;
+            
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'X-Shopify-Access-Token': chatbotData.config.shopifyToken,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Lỗi API Shopify: ' + response.status);
+            }
+            
+            const data = await response.json();
+            return data.orders || [];
+        }
+
+        async function searchShopifyOrderByPhone(phone) {
+            const cleanPhone = phone.replace(/\D/g, '');
+            const url = `https://${chatbotData.config.shopifyDomain}/admin/api/2024-10/orders.json?status=any&phone=${cleanPhone}&limit=5`;
+            
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'X-Shopify-Access-Token': chatbotData.config.shopifyToken,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Lỗi API Shopify: ' + response.status);
+            }
+            
+            const data = await response.json();
+            return data.orders || [];
+        }
+
+        function displayOrderInfo(order) {
+            const fulfillmentStatus = order.fulfillment_status || 'unfulfilled';
+            const financialStatus = order.financial_status || 'pending';
+            
+            let statusText = '';
+            if (fulfillmentStatus === 'fulfilled') {
+                statusText = '✅ Đã giao hàng';
+            } else if (fulfillmentStatus === 'partial') {
+                statusText = '🚚 Đang giao một phần';
+            } else {
+                statusText = '📦 Đang xử lý';
+            }
+            
+            let paymentText = '';
+            if (financialStatus === 'paid') {
+                paymentText = '✅ Đã thanh toán';
+            } else if (financialStatus === 'pending') {
+                paymentText = '⏳ Chờ thanh toán';
+            } else {
+                paymentText = '❌ Chưa thanh toán';
+            }
+            
+            let orderHTML = `
+                <strong>📦 THÔNG TIN ĐƠN HÀNG:</strong><br><br>
+                • Mã đơn hàng: #${order.order_number || order.name || 'N/A'}<br>
+                • Email: ${order.email || 'N/A'}<br>
+                • Số điện thoại: ${order.phone || order.customer?.phone || 'N/A'}<br>
+                <br>
+                <strong>Trạng thái:</strong><br>
+                📱 Đơn hàng: ${statusText}<br>
+                💳 Thanh toán: ${paymentText}<br>
+                <br>
+            `;
+            
+            if (order.fulfillments && order.fulfillments.length > 0) {
+                const fulfillment = order.fulfillments[0];
+                if (fulfillment.tracking_number) {
+                    orderHTML += `<strong>🚚 Mã vận đơn:</strong> ${fulfillment.tracking_number}<br>`;
+                }
+                if (fulfillment.tracking_url) {
+                    orderHTML += `<a href="${fulfillment.tracking_url}" target="_blank" style="color: #a855f7;">🔗 Theo dõi vận chuyển</a><br>`;
+                }
+            }
+            
+            orderHTML += '<br>📞 <strong>Liên hệ nếu cần hỗ trợ:</strong>';
+            
+            addMessage(orderHTML, 'bot');
+            renderContactButtons();
+        }
+
+        // ==================== UI COMPONENTS ====================
+        function renderQuickSuggestions() {
+            const container = document.getElementById('quickSuggestions');
+            container.innerHTML = '';
+            
+            chatbotData.suggestions.forEach(suggestion => {
+                const btn = document.createElement('button');
+                btn.className = 'suggestion-btn';
+                btn.textContent = `${suggestion.emoji} ${suggestion.text}`;
+                btn.onclick = () => {
+                    addMessage(suggestion.text, 'user');
+                    setTimeout(() => displaySuggestionAnswer(suggestion), 500);
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function renderContactButtons() {
+            const lastMessage = document.querySelector('.message.bot:last-child .message-content');
+            if (!lastMessage) return;
+            
+            const existingButtons = lastMessage.querySelector('.contact-buttons');
+            if (existingButtons) existingButtons.remove();
+            
+            const buttonsDiv = document.createElement('div');
+            buttonsDiv.className = 'contact-buttons';
+            
+            Object.entries(chatbotData.contactButtons).forEach(([key, button]) => {
+                if (button.enabled) {
+                    const link = document.createElement('a');
+                    link.className = 'contact-btn';
+                    link.href = button.url;
+                    link.target = '_blank';
+                    link.textContent = `${button.icon} ${button.text}`;
+                    buttonsDiv.appendChild(link);
+                }
+            });
+            
+            if (buttonsDiv.children.length > 0) {
+                lastMessage.appendChild(buttonsDiv);
+            }
+        }
+
+        // ==================== IMAGE MODAL ====================
+        function openImageModal(imageUrl, productUrl) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            
+            modal.style.display = 'block';
+            modalImg.src = imageUrl;
+            
+            if (productUrl) {
+                modalImg.onclick = () => {
+                    window.open(productUrl, '_blank');
+                };
+                modalImg.style.cursor = 'pointer';
+            } else {
+                modalImg.onclick = null;
+                modalImg.style.cursor = 'default';
+            }
+        }
+
+        function closeImageModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        // ==================== ADMIN PANEL ====================
+        function openAdminPanel() {
+            const password = prompt('Nhập mật khẩu admin:');
+            if (password === chatbotData.config.adminPassword) {
+                document.getElementById('adminPanel').style.display = 'block';
+                loadAdminData();
+            } else {
+                alert('❌ Sai mật khẩu!');
+            }
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('adminPanel').style.display = 'none';
+            editingItemId = null;
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.admin-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        }
+
+        function loadAdminData() {
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('chatbotTitle').value = chatbotData.config.chatbotTitle;
+            document.getElementById('chatbotSubtitle').value = chatbotData.config.chatbotSubtitle;
+            document.getElementById('chatbotLogo').value = chatbotData.config.chatbotLogo;
+            document.getElementById('shopifyDomain').value = chatbotData.config.shopifyDomain || '';
+            document.getElementById('shopifyToken').value = chatbotData.config.shopifyToken || '';
+            document.getElementById('dataSourceURL').value = chatbotData.config.dataSourceURL || '';
+            document.getElementById('welcomeMessage').value = chatbotData.welcomeMessage;
+            
+            renderSuggestionsList();
+            renderFAQList();
+            renderProductsList();
+            renderContactButtonsList();
+        }
+
+        function saveConfig() {
+            const newPassword = document.getElementById('adminPassword').value;
+            if (newPassword) {
+                chatbotData.config.adminPassword = newPassword;
+            }
+            
+            chatbotData.config.chatbotTitle = document.getElementById('chatbotTitle').value;
+            chatbotData.config.chatbotSubtitle = document.getElementById('chatbotSubtitle').value;
+            chatbotData.config.chatbotLogo = document.getElementById('chatbotLogo').value;
+            chatbotData.config.shopifyDomain = document.getElementById('shopifyDomain').value;
+            chatbotData.config.shopifyToken = document.getElementById('shopifyToken').value;
+            chatbotData.config.dataSourceURL = document.getElementById('dataSourceURL').value;
+            
+            saveData();
+            updateUI();
+            alert('✅ Đã lưu cấu hình!');
+        }
+
+        function syncFromJSON() {
+            if (!chatbotData.config.dataSourceURL) {
+                alert('❌ Vui lòng nhập URL File JSON trước!');
+                return;
+            }
+            
+            if (confirm('Đồng bộ dữ liệu từ JSON? Dữ liệu hiện tại sẽ bị ghi đè!')) {
+                syncFromJSONIfConfigured();
+                setTimeout(() => {
+                    loadAdminData();
+                    alert('✅ Đã đồng bộ từ JSON!');
+                    location.reload();
+                }, 1000);
+            }
+        }
+
+        function saveWelcomeMessage() {
+            chatbotData.welcomeMessage = document.getElementById('welcomeMessage').value;
+            saveData();
+            alert('✅ Đã lưu tin nhắn chào mừng!');
+        }
+
+        // ==================== SUGGESTIONS MANAGEMENT ====================
+        function renderSuggestionsList() {
+            const container = document.getElementById('suggestionsList');
+            container.innerHTML = '';
+            
+            chatbotData.suggestions.forEach((suggestion, index) => {
+                const itemCard = document.createElement('div');
+                itemCard.className = 'item-card';
+                itemCard.innerHTML = `
+                    <h4>${suggestion.emoji} ${suggestion.text}</h4>
+                    <div class="item-actions">
+                        <button class="btn-icon" onclick="editSuggestion(${index})">✏️</button>
+                        <button class="btn-icon" onclick="deleteSuggestion(${index})">🗑️</button>
+                    </div>
+                `;
+                container.appendChild(itemCard);
+                
+                if (editingItemId === `suggestion-${index}`) {
+                    const editPanel = createSuggestionEditPanel(suggestion, index);
+                    container.appendChild(editPanel);
+                }
+            });
+        }
+
+        function createSuggestionEditPanel(suggestion, index) {
+            const panel = document.createElement('div');
+            panel.className = 'edit-panel';
+            panel.id = `edit-suggestion-${index}`;
+            panel.innerHTML = `
+                <div class="form-group">
+                    <label>Emoji:</label>
+                    <input type="text" value="${suggestion.emoji}" id="suggestion-emoji-${index}">
+                </div>
+                <div class="form-group">
+                    <label>Text hiển thị:</label>
+                    <input type="text" value="${suggestion.text}" id="suggestion-text-${index}">
+                </div>
+                <div class="form-group">
+                    <label>Từ khóa (phân cách bằng dấu phẩy):</label>
+                    <textarea id="suggestion-keywords-${index}">${(suggestion.keywords || []).join(', ')}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Câu trả lời:</label>
+                    <textarea id="suggestion-answer-${index}" rows="6">${suggestion.answer || ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Link hình ảnh 1:</label>
+                    <input type="text" value="${suggestion.image || ''}" id="suggestion-image-${index}" placeholder="https://example.com/image.jpg">
+                    ${suggestion.image ? `<div class="image-preview"><img src="${suggestion.image}"></div>` : '<div class="image-preview empty"></div>'}
+                </div>
+                <div class="form-group">
+                    <label>Link hình ảnh 2:</label>
+                    <input type="text" value="${suggestion.image2 || ''}" id="suggestion-image2-${index}" placeholder="https://example.com/image2.jpg">
+                    ${suggestion.image2 ? `<div class="image-preview"><img src="${suggestion.image2}"></div>` : '<div class="image-preview empty"></div>'}
+                </div>
+                <div class="form-group">
+                    <label>Link URL:</label>
+                    <input type="text" value="${suggestion.url || ''}" id="suggestion-url-${index}" placeholder="https://yoursite.com/page">
+                </div>
+                <div class="form-group">
+                    <label>Sản phẩm đề xuất (key sản phẩm, phân cách bằng dấu phẩy):</label>
+                    <textarea id="suggestion-products-${index}">${(suggestion.recommendedProducts || []).join(', ')}</textarea>
+                    <small style="color: #718096;">Ví dụ: thạch anh hồng, set tình yêu</small>
+                </div>
+                <button class="btn-primary" onclick="saveSuggestion(${index})">💾 Lưu</button>
+                <button class="btn-secondary" onclick="cancelEdit()">❌ Hủy</button>
+            `;
+            return panel;
+        }
+
+        function editSuggestion(index) {
+            editingItemId = `suggestion-${index}`;
+            renderSuggestionsList();
+        }
+
+        function saveSuggestion(index) {
+            const keywords = document.getElementById(`suggestion-keywords-${index}`).value.split(',').map(k => k.trim()).filter(k => k);
+            const products = document.getElementById(`suggestion-products-${index}`).value.split(',').map(p => p.trim()).filter(p => p);
+            
+            chatbotData.suggestions[index] = {
+                emoji: document.getElementById(`suggestion-emoji-${index}`).value,
+                text: document.getElementById(`suggestion-text-${index}`).value,
+                keywords: keywords,
+                answer: document.getElementById(`suggestion-answer-${index}`).value,
+                image: document.getElementById(`suggestion-image-${index}`).value,
+                image2: document.getElementById(`suggestion-image2-${index}`).value,
+                url: document.getElementById(`suggestion-url-${index}`).value,
+                recommendedProducts: products
+            };
+            
+            saveData();
+            editingItemId = null;
+            renderSuggestionsList();
+            renderQuickSuggestions();
+            alert('✅ Đã lưu gợi ý!');
+        }
+
+        function deleteSuggestion(index) {
+            if (confirm('Xóa gợi ý này?')) {
+                chatbotData.suggestions.splice(index, 1);
+                saveData();
+                renderSuggestionsList();
+                renderQuickSuggestions();
+                alert('✅ Đã xóa!');
+            }
+        }
+
+        function addNewSuggestion() {
+            chatbotData.suggestions.push({
+                emoji: '💡',
+                text: 'Gợi ý mới',
+                keywords: [],
+                answer: '',
+                image: '',
+                image2: '',
+                url: '',
+                recommendedProducts: []
+            });
+            saveData();
+            editingItemId = `suggestion-${chatbotData.suggestions.length - 1}`;
+            renderSuggestionsList();
+        }
+
+        // ==================== FAQ MANAGEMENT ====================
+        function renderFAQList() {
+            const container = document.getElementById('faqList');
+            container.innerHTML = '';
+            
+            Object.entries(chatbotData.faq).forEach(([key, faq]) => {
+                const itemCard = document.createElement('div');
+                itemCard.className = 'item-card';
+                itemCard.innerHTML = `
+                    <h4>❓ ${key}</h4>
+                    <div class="item-actions">
+                        <button class="btn-icon" onclick="editFAQ('${key}')">✏️</button>
+                        <button class="btn-icon" onclick="deleteFAQ('${key}')">🗑️</button>
+                    </div>
+                `;
+                container.appendChild(itemCard);
+                
+                if (editingItemId === `faq-${key}`) {
+                    const editPanel = createFAQEditPanel(key, faq);
+                    container.appendChild(editPanel);
+                }
+            });
+        }
+
+        function createFAQEditPanel(key, faq) {
+            const panel = document.createElement('div');
+            panel.className = 'edit-panel';
+            panel.id = `edit-faq-${key}`;
+            panel.innerHTML = `
+                <div class="form-group">
+                    <label>Key (ID):</label>
+                    <input type="text" value="${key}" disabled style="background: #F7FAFC;">
+                </div>
+                <div class="form-group">
+                    <label>Từ khóa (phân cách bằng dấu phẩy):</label>
+                    <textarea id="faq-keywords-${key}">${(faq.keywords || []).join(', ')}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Câu trả lời:</label>
+                    <textarea id="faq-answer-${key}" rows="8">${faq.answer || ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Link hình ảnh 1:</label>
+                    <input type="text" value="${faq.image || ''}" id="faq-image-${key}">
+                    ${faq.image ? `<div class="image-preview"><img src="${faq.image}"></div>` : '<div class="image-preview empty"></div>'}
+                </div>
+                <div class="form-group">
+                    <label>Link hình ảnh 2:</label>
+                    <input type="text" value="${faq.image2 || ''}" id="faq-image2-${key}">
+                    ${faq.image2 ? `<div class="image-preview"><img src="${faq.image2}"></div>` : '<div class="image-preview empty"></div>'}
+                </div>
+                <div class="form-group">
+                    <label>Link hình ảnh 3:</label>
+                    <input type="text" value="${faq.image3 || ''}" id="faq-image3-${key}">
+                    ${faq.image3 ? `<div class="image-preview"><img src="${faq.image3}"></div>` : '<div class="image-preview empty"></div>'}
+                </div>
+                <div class="form-group">
+                    <label>Link URL:</label>
+                    <input type="text" value="${faq.url || ''}" id="faq-url-${key}">
+                </div>
+                <button class="btn-primary" onclick="saveFAQ('${key}')">💾 Lưu</button>
+                <button class="btn-secondary" onclick="cancelEdit()">❌ Hủy</button>
+            `;
+            return panel;
+        }
+
+        function editFAQ(key) {
+            editingItemId = `faq-${key}`;
+            renderFAQList();
+        }
+
+        function saveFAQ(key) {
+            const keywords = document.getElementById(`faq-keywords-${key}`).value.split(',').map(k => k.trim()).filter(k => k);
+            
+            chatbotData.faq[key] = {
+                keywords: keywords,
+                answer: document.getElementById(`faq-answer-${key}`).value,
+                image: document.getElementById(`faq-image-${key}`).value,
+                image2: document.getElementById(`faq-image2-${key}`).value,
+                image3: document.getElementById(`faq-image3-${key}`).value,
+                url: document.getElementById(`faq-url-${key}`).value
+            };
+            
+            saveData();
+            editingItemId = null;
+            renderFAQList();
+            alert('✅ Đã lưu FAQ!');
+        }
+
+        function deleteFAQ(key) {
+            if (confirm('Xóa FAQ này?')) {
+                delete chatbotData.faq[key];
+                saveData();
+                renderFAQList();
+                alert('✅ Đã xóa!');
+            }
+        }
+
+        function addNewFAQ() {
+            const key = prompt('Nhập key cho FAQ mới (ví dụ: ten-faq):');
+            if (!key) return;
+            
+            if (chatbotData.faq[key]) {
+                alert('❌ Key này đã tồn tại!');
+                return;
+            }
+            
+            chatbotData.faq[key] = {
+                keywords: [],
+                answer: '',
+                image: '',
+                image2: '',
+                image3: '',
+                url: ''
+            };
+            
+            saveData();
+            editingItemId = `faq-${key}`;
+            renderFAQList();
+        }
+
+        // ==================== CONTACT BUTTONS MANAGEMENT ====================
+        function renderContactButtonsList() {
+            const container = document.getElementById('contactButtonsList');
+            container.innerHTML = '';
+            
+            Object.entries(chatbotData.contactButtons).forEach(([key, button]) => {
+                const itemCard = document.createElement('div');
+                itemCard.className = 'item-card';
+                itemCard.innerHTML = `
+                    <h4>📞 ${button.icon} ${button.text}</h4>
+                    <div class="item-actions">
+                        <button class="btn-icon" onclick="editContactButton('${key}')">✏️</button>
+                    </div>
+                `;
+                container.appendChild(itemCard);
+                
+                if (editingItemId === `contact-${key}`) {
+                    const editPanel = createContactEditPanel(key, button);
+                    container.appendChild(editPanel);
+                }
+            });
+        }
+
+        function createContactEditPanel(key, button) {
+            const panel = document.createElement('div');
+            panel.className = 'edit-panel';
+            panel.id = `edit-contact-${key}`;
+            panel.innerHTML = `
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="contact-enabled-${key}" ${button.enabled ? 'checked' : ''}>
+                        Kích hoạt nút này
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>Icon:</label>
+                    <input type="text" value="${button.icon}" id="contact-icon-${key}">
+                </div>
+                <div class="form-group">
+                    <label>Văn bản:</label>
+                    <input type="text" value="${button.text}" id="contact-text-${key}">
+                </div>
+                <div class="form-group">
+                    <label>URL:</label>
+                    <input type="text" value="${button.url}" id="contact-url-${key}">
+                </div>
+                <button class="btn-primary" onclick="saveContactButton('${key}')">💾 Lưu</button>
+                <button class="btn-secondary" onclick="cancelEdit()">❌ Hủy</button>
+            `;
+            return panel;
+        }
+
+        function editContactButton(key) {
+            editingItemId = `contact-${key}`;
+            renderContactButtonsList();
+        }
+
+        function saveContactButton(key) {
+            chatbotData.contactButtons[key] = {
+                enabled: document.getElementById(`contact-enabled-${key}`).checked,
+                icon: document.getElementById(`contact-icon-${key}`).value,
+                text: document.getElementById(`contact-text-${key}`).value,
+                url: document.getElementById(`contact-url-${key}`).value
+            };
+            
+            saveData();
+            editingItemId = null;
+            renderContactButtonsList();
+            renderContactButtons();
+            alert('✅ Đã lưu nút liên hệ!');
+        }
+
+        // ==================== PRODUCTS MANAGEMENT ====================
+        function renderProductsList() {
+            const container = document.getElementById('productsList');
+            container.innerHTML = '';
+            
+            Object.entries(chatbotData.products).forEach(([key, product]) => {
+                const itemCard = document.createElement('div');
+                itemCard.className = 'item-card';
+                itemCard.innerHTML = `
+                    <h4>📦 ${product.name}</h4>
+                    <div class="item-actions">
+                        <button class="btn-icon" onclick="editProduct('${key}')">✏️</button>
+                        <button class="btn-icon" onclick="deleteProduct('${key}')">🗑️</button>
+                    </div>
+                `;
+                container.appendChild(itemCard);
+                
+                if (editingItemId === `product-${key}`) {
+                    const editPanel = createProductEditPanel(key, product);
+                    container.appendChild(editPanel);
+                }
+            });
+        }
+
+        function createProductEditPanel(key, product) {
+            const panel = document.createElement('div');
+            panel.className = 'edit-panel';
+            panel.id = `edit-product-${key}`;
+            
+            let ctaButtonsHTML = '<div class="cta-buttons-section"><h4>Nút CTA:</h4>';
+            if (product.ctaButtons && product.ctaButtons.length > 0) {
+                product.ctaButtons.forEach((cta, ctaIndex) => {
+                    ctaButtonsHTML += `
+                        <div class="cta-button-item">
+                            <div class="cta-button-header">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" ${cta.enabled ? 'checked' : ''} id="cta-enabled-${key}-${ctaIndex}">
+                                    <strong>${cta.text}</strong>
+                                </label>
+                                <button class="btn-icon" onclick="deleteCTA('${key}', ${ctaIndex})">🗑️</button>
+                            </div>
+                            <div class="form-group">
+                                <label>Văn bản nút:</label>
+                                <input type="text" value="${cta.text}" id="cta-text-${key}-${ctaIndex}">
+                            </div>
+                            <div class="form-group">
+                                <label>URL:</label>
+                                <input type="text" value="${cta.url}" id="cta-url-${key}-${ctaIndex}">
+                            </div>
+                            <div class="form-group">
+                                <label>Kiểu nút:</label>
+                                <select id="cta-style-${key}-${ctaIndex}">
+                                    <option value="primary" ${cta.style === 'primary' ? 'selected' : ''}>Primary (Đỏ)</option>
+                                    <option value="secondary" ${cta.style === 'secondary' ? 'selected' : ''}>Secondary (Trắng viền đỏ)</option>
+                                </select>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            ctaButtonsHTML += '<button class="btn-secondary" onclick="addCTA(\'' + key + '\')">➕ Thêm Nút CTA</button></div>';
+            
+            panel.innerHTML = `
+                <div class="form-group">
+                    <label>Key (ID):</label>
+                    <input type="text" value="${key}" disabled style="background: #F7FAFC;">
+                </div>
+                <div class="form-group">
+                    <label>Tên sản phẩm:</label>
+                    <input type="text" value="${product.name}" id="product-name-${key}">
+                </div>
+                <div class="form-group">
+                    <label>Mô tả:</label>
+                    <textarea id="product-desc-${key}" rows="3">${product.description || ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>Giá:</label>
+                    <input type="text" value="${product.price}" id="product-price-${key}">
+                </div>
+                <div class="form-group">
+                    <label>Link hình ảnh 1:</label>
+                    <input type="text" value="${product.images[0] || ''}" id="product-img1-${key}">
+                    ${product.images[0] ? `<div class="image-preview"><img src="${product.images[0]}"></div>` : '<div class="image-preview empty"></div>'}
+                </div>
+                <div class="form-group">
+                    <label>Link hình ảnh 2:</label>
+                    <input type="text" value="${product.images[1] || ''}" id="product-img2-${key}">
+                    ${product.images[1] ? `<div class="image-preview"><img src="${product.images[1]}"></div>` : '<div class="image-preview empty"></div>'}
+                </div>
+                <div class="form-group">
+                    <label>Link hình ảnh 3:</label>
+                    <input type="text" value="${product.images[2] || ''}" id="product-img3-${key}">
+                    ${product.images[2] ? `<div class="image-preview"><img src="${product.images[2]}"></div>` : '<div class="image-preview empty"></div>'}
+                </div>
+                <div class="form-group">
+                    <label>Link URL sản phẩm:</label>
+                    <input type="text" value="${product.url || ''}" id="product-url-${key}">
+                </div>
+                <div class="form-group">
+                    <label>Lợi ích (mỗi dòng 1 lợi ích):</label>
+                    <textarea id="product-benefits-${key}" rows="6">${(product.benefits || []).join('\n')}</textarea>
+                </div>
+                ${ctaButtonsHTML}
+                <button class="btn-primary" onclick="saveProduct('${key}')">💾 Lưu Sản Phẩm</button>
+                <button class="btn-secondary" onclick="cancelEdit()">❌ Hủy</button>
+            `;
+            return panel;
+        }
+
+        function editProduct(key) {
+            editingItemId = `product-${key}`;
+            renderProductsList();
+        }
+
+        function saveProduct(key) {
+            const benefits = document.getElementById(`product-benefits-${key}`).value.split('\n').map(b => b.trim()).filter(b => b);
+            
+            // Lưu CTA buttons
+            const ctaButtons = [];
+            const product = chatbotData.products[key];
+            if (product.ctaButtons) {
+                product.ctaButtons.forEach((cta, ctaIndex) => {
+                    const enabledEl = document.getElementById(`cta-enabled-${key}-${ctaIndex}`);
+                    const textEl = document.getElementById(`cta-text-${key}-${ctaIndex}`);
+                    const urlEl = document.getElementById(`cta-url-${key}-${ctaIndex}`);
+                    const styleEl = document.getElementById(`cta-style-${key}-${ctaIndex}`);
+                    
+                    if (enabledEl && textEl && urlEl && styleEl) {
+                        ctaButtons.push({
+                            enabled: enabledEl.checked,
+                            text: textEl.value,
+                            url: urlEl.value,
+                            style: styleEl.value
+                        });
+                    }
+                });
+            }
+            
+            chatbotData.products[key] = {
+                name: document.getElementById(`product-name-${key}`).value,
+                description: document.getElementById(`product-desc-${key}`).value,
+                price: document.getElementById(`product-price-${key}`).value,
+                images: [
+                    document.getElementById(`product-img1-${key}`).value,
+                    document.getElementById(`product-img2-${key}`).value,
+                    document.getElementById(`product-img3-${key}`).value
+                ],
+                url: document.getElementById(`product-url-${key}`).value,
+                benefits: benefits,
+                ctaButtons: ctaButtons
+            };
+            
+            saveData();
+            editingItemId = null;
+            renderProductsList();
+            alert('✅ Đã lưu sản phẩm!');
+        }
+
+        function deleteProduct(key) {
+            if (confirm('Xóa sản phẩm này?')) {
+                delete chatbotData.products[key];
+                saveData();
+                renderProductsList();
+                alert('✅ Đã xóa!');
+            }
+        }
+
+        function addNewProduct() {
+            const key = prompt('Nhập key cho sản phẩm mới (ví dụ: ten-san-pham):');
+            if (!key) return;
+            
+            if (chatbotData.products[key]) {
+                alert('❌ Key này đã tồn tại!');
+                return;
+            }
+            
+            chatbotData.products[key] = {
+                name: 'Sản phẩm mới',
+                description: '',
+                price: '',
+                images: ['', '', ''],
+                url: '',
+                benefits: [],
+                ctaButtons: []
+            };
+            
+            saveData();
+            editingItemId = `product-${key}`;
+            renderProductsList();
+        }
+
+        function addCTA(productKey) {
+            if (!chatbotData.products[productKey].ctaButtons) {
+                chatbotData.products[productKey].ctaButtons = [];
+            }
+            
+            chatbotData.products[productKey].ctaButtons.push({
+                enabled: true,
+                text: 'Mua Ngay',
+                url: '',
+                style: 'primary'
+            });
+            
+            saveData();
+            renderProductsList();
+            editingItemId = `product-${productKey}`;
+            renderProductsList();
+        }
+
+        function deleteCTA(productKey, ctaIndex) {
+            if (confirm('Xóa nút CTA này?')) {
+                chatbotData.products[productKey].ctaButtons.splice(ctaIndex, 1);
+                saveData();
+                renderProductsList();
+                editingItemId = `product-${productKey}`;
+                renderProductsList();
+            }
+        }
+
+        function cancelEdit() {
+            editingItemId = null;
+            renderSuggestionsList();
+            renderFAQList();
+            renderProductsList();
+            renderContactButtonsList();
+        }
+
+        // ==================== EXPORT/IMPORT ====================
+        function exportData() {
+            const dataStr = JSON.stringify(chatbotData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'yinyang-chatbot-data.json';
+            link.click();
+            URL.revokeObjectURL(url);
+            alert('✅ Đã tải xuống file JSON!\n\n💡 Upload file lên server và điền URL vào "Cấu Hình Chung" để tự động đồng bộ.');
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    // Giữ lại credentials hiện tại
+                    data.config = data.config || {};
+                    data.config.adminPassword = chatbotData.config.adminPassword;
+                    data.config.shopifyDomain = chatbotData.config.shopifyDomain;
+                    data.config.shopifyToken = chatbotData.config.shopifyToken;
+                    
+                    chatbotData = data;
+                    saveData();
+                    loadAdminData();
+                    updateUI();
+                    renderQuickSuggestions();
+                    renderContactButtons();
+                    alert('✅ Đã nhập dữ liệu thành công!');
+                    location.reload();
+                } catch (error) {
+                    alert('❌ File không hợp lệ!');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // ==================== INIT ====================
+        window.onload = initChatbot;
+    </script>
+     <script src="chatbot-fixes.js?v=3"></script>
+</body>
+</html>

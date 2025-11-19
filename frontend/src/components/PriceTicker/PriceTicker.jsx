@@ -1,5 +1,6 @@
 import React from 'react'
 import { usePrice } from '../../contexts/PriceContext'
+import { XCircle, RefreshCw, TrendingUp, TrendingDown } from 'lucide-react'
 import './PriceTicker.css'
 
 export default function PriceTicker() {
@@ -8,7 +9,7 @@ export default function PriceTicker() {
   if (error) {
     return (
       <div className="price-ticker error">
-        <span>❌ Lỗi kết nối: {error}</span>
+        <span><XCircle size={16} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> Lỗi kết nối: {error}</span>
       </div>
     )
   }
@@ -16,7 +17,7 @@ export default function PriceTicker() {
   if (!connected) {
     return (
       <div className="price-ticker connecting">
-        <span>🔄 Đang kết nối Binance...</span>
+        <span><RefreshCw size={16} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> Đang kết nối Binance...</span>
       </div>
     )
   }
@@ -43,7 +44,7 @@ export default function PriceTicker() {
               <span className="symbol">{symbol.replace('USDT', '')}</span>
               <span className="price">${priceData.price.toLocaleString()}</span>
               <span className={`change ${isPositive ? 'positive' : 'negative'}`}>
-                {isPositive ? '▲' : '▼'} {Math.abs(priceData.priceChangePercent).toFixed(2)}%
+                {isPositive ? <TrendingUp size={14} style={{ verticalAlign: 'middle' }} /> : <TrendingDown size={14} style={{ verticalAlign: 'middle' }} />} {Math.abs(priceData.priceChangePercent).toFixed(2)}%
               </span>
             </div>
           )
@@ -68,7 +69,7 @@ export default function PriceTicker() {
               <span className="symbol">{symbol.replace('USDT', '')}</span>
               <span className="price">${priceData.price.toLocaleString()}</span>
               <span className={`change ${isPositive ? 'positive' : 'negative'}`}>
-                {isPositive ? '▲' : '▼'} {Math.abs(priceData.priceChangePercent).toFixed(2)}%
+                {isPositive ? <TrendingUp size={14} style={{ verticalAlign: 'middle' }} /> : <TrendingDown size={14} style={{ verticalAlign: 'middle' }} />} {Math.abs(priceData.priceChangePercent).toFixed(2)}%
               </span>
             </div>
           )

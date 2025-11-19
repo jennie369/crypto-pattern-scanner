@@ -1,6 +1,10 @@
 import React from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import { formatPrice } from '../utils/currencyConverter';
+import {
+  X, BarChart3, Target, Circle, TrendingUp, AlertTriangle, Ruler,
+  Edit3, CheckCircle, AlertCircle, Lightbulb, Copy, ExternalLink
+} from 'lucide-react';
 import './PatternAnalysisModal.css';
 
 /**
@@ -56,15 +60,15 @@ Risk/Reward: 1:${calculateRR()}`;
         {/* Header */}
         <div className="analysis-header">
           <div className="header-left">
-            <h2>📊 {t('fullAnalysis')}</h2>
+            <h2><BarChart3 size={24} /> {t('fullAnalysis')}</h2>
             <p className="pattern-name">{pattern.patternType}</p>
           </div>
-          <button className="close-btn" onClick={onClose}>✕</button>
+          <button className="close-btn" onClick={onClose}><X size={20} /></button>
         </div>
 
         {/* Pattern Info */}
         <div className="analysis-section">
-          <h3>🎯 {t('patternDetails')}</h3>
+          <h3><Target size={20} /> {t('patternDetails')}</h3>
           <div className="info-grid">
             <div className="info-item">
               <label>{t('symbol')}:</label>
@@ -73,7 +77,8 @@ Risk/Reward: 1:${calculateRR()}`;
             <div className="info-item">
               <label>{t('direction')}:</label>
               <span className={`direction ${pattern.direction}`}>
-                {pattern.direction === 'bullish' ? '🟢 ' : '🔴 '}
+                {pattern.direction === 'bullish' ? <Circle size={12} fill="currentColor" className="bullish-icon" /> : <Circle size={12} fill="currentColor" className="bearish-icon" />}
+                {' '}
                 {t(pattern.direction)}
               </span>
             </div>
@@ -90,7 +95,7 @@ Risk/Reward: 1:${calculateRR()}`;
 
         {/* Price Levels */}
         <div className="analysis-section">
-          <h3>💰 {t('priceLevels')}</h3>
+          <h3><TrendingUp size={20} /> {t('priceLevels')}</h3>
           <div className="price-levels">
             <div className="price-level entry">
               <label>{t('entry')}:</label>
@@ -114,7 +119,7 @@ Risk/Reward: 1:${calculateRR()}`;
 
         {/* Risk Analysis */}
         <div className="analysis-section">
-          <h3>⚠️ {t('riskAnalysis')}</h3>
+          <h3><AlertTriangle size={20} /> {t('riskAnalysis')}</h3>
           <div className="risk-metrics">
             <div className="metric-card">
               <div className="metric-label">{t('riskRewardRatio')}</div>
@@ -137,7 +142,7 @@ Risk/Reward: 1:${calculateRR()}`;
 
         {/* Position Sizing */}
         <div className="analysis-section">
-          <h3>📐 {t('positionSizing')}</h3>
+          <h3><Ruler size={20} /> {t('positionSizing')}</h3>
           <div className="position-suggestions">
             <div className="position-row">
               <span>{t('risk1Percent')}:</span>
@@ -159,24 +164,24 @@ Risk/Reward: 1:${calculateRR()}`;
             </div>
           </div>
           <p className="position-note">
-            💡 {t('positionSizeNote')}
+            <Lightbulb size={16} className="note-icon" /> {t('positionSizeNote')}
           </p>
         </div>
 
         {/* Trading Notes */}
         <div className="analysis-section">
-          <h3>📝 {t('tradingNotes')}</h3>
+          <h3><Edit3 size={20} /> {t('tradingNotes')}</h3>
           <div className="trading-notes">
             <div className="note-item">
-              <span className="note-icon">✅</span>
+              <CheckCircle size={16} className="note-icon" />
               <span>{t('waitForConfirmation')}</span>
             </div>
             <div className="note-item">
-              <span className="note-icon">⚠️</span>
+              <AlertCircle size={16} className="note-icon" />
               <span>{t('setStopLossImmediately')}</span>
             </div>
             <div className="note-item">
-              <span className="note-icon">💡</span>
+              <Lightbulb size={16} className="note-icon" />
               <span>{t('considerMarketConditions')}</span>
             </div>
           </div>
@@ -185,10 +190,10 @@ Risk/Reward: 1:${calculateRR()}`;
         {/* Action Buttons */}
         <div className="analysis-actions">
           <button className="btn-copy-all" onClick={handleCopyAll}>
-            📋 {t('copyAllLevels')}
+            <Copy size={16} /> {t('copyAllLevels')}
           </button>
           <button className="btn-open-binance" onClick={handleOpenBinance}>
-            🔗 {t('openInBinance')}
+            <ExternalLink size={16} /> {t('openInBinance')}
           </button>
         </div>
 

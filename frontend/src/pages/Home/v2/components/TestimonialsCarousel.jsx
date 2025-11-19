@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { User, Star } from 'lucide-react';
 import './TestimonialsCarousel.css';
 
 export const TestimonialsCarousel = () => {
@@ -8,7 +9,7 @@ export const TestimonialsCarousel = () => {
     {
       name: 'Nguyễn Văn A',
       tier: 'TIER 2',
-      avatar: '👨‍💼',
+      avatar: <User size={32} />,
       rating: 5,
       text: 'GEM Platform đã giúp tôi tăng win rate từ 45% lên 68% chỉ sau 3 tháng. DPD và UPU patterns cực kỳ chính xác!',
       date: '2025-10-15'
@@ -16,7 +17,7 @@ export const TestimonialsCarousel = () => {
     {
       name: 'Trần Thị B',
       tier: 'TIER 3',
-      avatar: '👩‍💼',
+      avatar: <User size={32} />,
       rating: 5,
       text: 'Backtesting engine và AI prediction tool rất mạnh. Tôi đã kiếm được 150% ROI trong 6 tháng qua.',
       date: '2025-09-20'
@@ -24,7 +25,7 @@ export const TestimonialsCarousel = () => {
     {
       name: 'Lê Minh C',
       tier: 'TIER 1',
-      avatar: '👨‍🎓',
+      avatar: <User size={32} />,
       rating: 5,
       text: 'Support team cực kỳ nhiệt tình. Telegram alerts giúp tôi không bỏ lỡ cơ hội nào!',
       date: '2025-11-05'
@@ -65,7 +66,7 @@ export const TestimonialsCarousel = () => {
 
             <div className="testimonial-rating">
               {Array.from({ length: currentTestimonial.rating }).map((_, idx) => (
-                <span key={idx} className="star">⭐</span>
+                <span key={idx} className="star"><Star size={20} fill="currentColor" /></span>
               ))}
             </div>
 

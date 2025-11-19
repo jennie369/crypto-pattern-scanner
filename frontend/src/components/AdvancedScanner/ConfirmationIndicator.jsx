@@ -1,4 +1,5 @@
 import React from 'react'
+import { Clock, Circle, Target, Hammer, Star, RefreshCw, Plus, TrendingUp, TrendingDown, ArrowRight } from 'lucide-react'
 import './ConfirmationIndicator.css'
 
 /**
@@ -29,13 +30,13 @@ export default function ConfirmationIndicator({ confirmation }) {
   if (!confirmation || !confirmation.hasConfirmation) {
     return (
       <div className="confirmation-indicator no-confirmation">
-        <div className="no-conf-icon">⏳</div>
+        <div className="no-conf-icon"><Clock size={32} /></div>
         <div className="no-conf-message">
           <div className="no-conf-title">Chờ Nến Xác Nhận</div>
           <div className="no-conf-subtitle">
             {confirmation?.type === 'DOJI'
-              ? '🔴 Doji phát hiện - Chờ nến tiếp theo'
-              : '⏳ Pin Bar / Hammer / Shooting Star'
+              ? <><Circle size={16} fill="currentColor" className="doji-icon" /> Doji phát hiện - Chờ nến tiếp theo</>
+              : <><Clock size={16} /> Pin Bar / Hammer / Shooting Star</>
             }
           </div>
         </div>
@@ -61,15 +62,15 @@ export default function ConfirmationIndicator({ confirmation }) {
 
   // Get direction color
   const directionColor = direction === 'bullish' ? '#10B981' : direction === 'bearish' ? '#EF4444' : '#888';
-  const directionIcon = direction === 'bullish' ? '📈' : direction === 'bearish' ? '📉' : '➡️';
+  const directionIcon = direction === 'bullish' ? <TrendingUp size={16} /> : direction === 'bearish' ? <TrendingDown size={16} /> : <ArrowRight size={16} />;
 
   return (
     <div className="confirmation-indicator has-confirmation">
 
-      {/* 🎯 READY TO ENTER Banner (only for Strong confirmations) */}
+      {/* READY TO ENTER Banner (only for Strong confirmations) */}
       {strength === 'Strong' && (
         <div className="ready-banner">
-          <div className="ready-icon">🎯</div>
+          <div className="ready-icon"><Target size={32} /></div>
           <div className="ready-content">
             <div className="ready-title">READY TO ENTER!</div>
             <div className="ready-subtitle">
@@ -171,32 +172,32 @@ function getConfirmationTypeInfo(type) {
   const types = {
     'PIN_BAR': {
       label: 'Pin Bar',
-      icon: '📍',
+      icon: <Target size={20} />,
       description: 'Long wick showing rejection'
     },
     'HAMMER': {
       label: 'Hammer',
-      icon: '🔨',
+      icon: <Hammer size={20} />,
       description: 'Bullish reversal pattern'
     },
     'SHOOTING_STAR': {
       label: 'Shooting Star',
-      icon: '⭐',
+      icon: <Star size={20} />,
       description: 'Bearish reversal pattern'
     },
     'ENGULFING': {
       label: 'Engulfing',
-      icon: '🔄',
+      icon: <RefreshCw size={20} />,
       description: 'Full body engulfing'
     },
     'DOJI': {
       label: 'Doji',
-      icon: '➕',
+      icon: <Plus size={20} />,
       description: 'Indecision candle'
     }
   };
 
-  return types[type] || { label: type, icon: '📊', description: 'Confirmation detected' };
+  return types[type] || { label: type, icon: <Circle size={20} />, description: 'Confirmation detected' };
 }
 
 /**

@@ -1,0 +1,368 @@
+/* ============================================
+   📚 COURSE HERO SECTION - BLUE THEME
+   ============================================ */
+
+.course-hero {
+  position: relative;
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 80px 32px;
+  background: linear-gradient(135deg, #0a1628 0%, #0d1b2a 100%);
+}
+
+/* Background Glow Layers - Blue */
+.hero-glow-container {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.glow-orb {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.glow-orb-blue-1 {
+  width: 700px;
+  height: 700px;
+  top: -250px;
+  right: -250px;
+  background: radial-gradient(
+    circle,
+    rgba(0, 217, 255, 0.4) 0%,
+    rgba(74, 144, 226, 0.2) 50%,
+    transparent 100%
+  );
+  filter: blur(120px);
+  animation: glowPulseBlue 5s ease-in-out infinite;
+}
+
+.glow-orb-blue-2 {
+  width: 500px;
+  height: 500px;
+  bottom: -150px;
+  left: -150px;
+  background: radial-gradient(
+    circle,
+    rgba(74, 144, 226, 0.3) 0%,
+    rgba(0, 180, 216, 0.2) 60%,
+    transparent 100%
+  );
+  filter: blur(100px);
+  animation: glowPulseBlue 6s ease-in-out infinite;
+  animation-delay: -3s;
+}
+
+/* Particles Background */
+.particles-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(0, 217, 255, 0.1) 1px, transparent 1px),
+    radial-gradient(circle at 70% 60%, rgba(74, 144, 226, 0.1) 1px, transparent 1px),
+    radial-gradient(circle at 40% 80%, rgba(0, 217, 255, 0.1) 1px, transparent 1px);
+  background-size: 50px 50px, 80px 80px, 60px 60px;
+  opacity: 0.5;
+  animation: particlesDrift 20s linear infinite;
+}
+
+@keyframes particlesDrift {
+  from {
+    background-position: 0 0, 0 0, 0 0;
+  }
+  to {
+    background-position: 50px 50px, -80px 80px, 60px -60px;
+  }
+}
+
+@keyframes glowPulseBlue {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.15);
+  }
+}
+
+/* Floating Crystal - Blue */
+.crystal-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 280px;
+  height: 280px;
+  z-index: 1;
+}
+
+.crystal-glow-blue {
+  position: absolute;
+  inset: -60%;
+  background: radial-gradient(
+    circle,
+    rgba(0, 217, 255, 0.6) 0%,
+    rgba(74, 144, 226, 0.4) 30%,
+    transparent 70%
+  );
+  filter: blur(90px);
+  animation: crystalGlowFloat 4s ease-in-out infinite;
+}
+
+.crystal-core-blue {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  animation: crystalFloat 6s ease-in-out infinite;
+}
+
+.crystal-svg {
+  width: 100%;
+  height: 100%;
+  filter:
+    drop-shadow(0 0 40px rgba(0, 217, 255, 0.8))
+    drop-shadow(0 0 20px rgba(74, 144, 226, 0.6));
+}
+
+.crystal-facet-blue {
+  animation: facetShineBlue 3s ease-in-out infinite;
+  filter: url(#innerGlow);
+}
+
+@keyframes crystalGlowFloat {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes crystalFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-20px) rotate(120deg);
+  }
+  66% {
+    transform: translateY(-10px) rotate(240deg);
+  }
+}
+
+@keyframes facetShineBlue {
+  0%, 100% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 1;
+    filter: brightness(1.3);
+  }
+}
+
+/* Hero Content */
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 900px;
+  text-align: center;
+}
+
+.hero-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 64px;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 24px;
+  color: var(--text-primary);
+  text-shadow: 0 4px 30px rgba(0, 217, 255, 0.3);
+}
+
+.title-highlight-blue {
+  background: linear-gradient(135deg, var(--course-primary) 0%, var(--course-accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-size: 20px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 40px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* CTA Buttons - Blue Theme */
+.hero-cta-group {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 60px;
+}
+
+.btn-hero-primary-blue,
+.btn-hero-secondary-blue {
+  padding: 18px 40px;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-hero-primary-blue {
+  background: linear-gradient(135deg, var(--course-primary) 0%, var(--course-accent) 100%);
+  color: #000;
+  box-shadow: 0 10px 30px rgba(0, 217, 255, 0.4);
+}
+
+.btn-hero-primary-blue:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 40px rgba(0, 217, 255, 0.6);
+}
+
+.btn-hero-primary-blue .btn-icon {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s ease;
+}
+
+.btn-hero-primary-blue:hover .btn-icon {
+  transform: translateX(4px);
+}
+
+.btn-hero-secondary-blue {
+  background: transparent;
+  color: var(--course-primary);
+  border: 2px solid var(--course-primary);
+}
+
+.btn-hero-secondary-blue:hover {
+  background: var(--course-primary);
+  color: #000;
+  transform: translateY(-3px);
+}
+
+/* Stats Row - Blue Theme */
+.hero-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  padding: 30px;
+  background: rgba(17, 34, 80, 0.4);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 217, 255, 0.2);
+  border-radius: 20px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(0, 217, 255, 0.1);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-value-blue {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--course-primary);
+  line-height: 1;
+  margin-bottom: 8px;
+  text-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+}
+
+.stat-label {
+  font-size: 14px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.stat-divider-blue {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(0, 217, 255, 0.4) 50%,
+    transparent 100%
+  );
+}
+
+.stat-icon {
+  margin-top: 4px;
+  font-size: 18px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .hero-title {
+    font-size: 48px;
+  }
+
+  .crystal-container {
+    width: 220px;
+    height: 220px;
+  }
+}
+
+@media (max-width: 768px) {
+  .course-hero {
+    min-height: auto;
+    padding: 60px 24px;
+  }
+
+  .hero-title {
+    font-size: 36px;
+  }
+
+  .hero-subtitle {
+    font-size: 16px;
+  }
+
+  .hero-cta-group {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .btn-hero-primary-blue,
+  .btn-hero-secondary-blue {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .hero-stats {
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .stat-divider-blue {
+    width: 60%;
+    height: 1px;
+  }
+
+  .crystal-container {
+    width: 160px;
+    height: 160px;
+    opacity: 0.6;
+  }
+}

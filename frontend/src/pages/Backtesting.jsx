@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Microscope, Settings, BarChart3, DollarSign, FolderOpen, AlertTriangle, Loader, Rocket, X } from 'lucide-react';
 import { backtestingService } from '../services/backtestingService';
 import { supabase } from '../lib/supabaseClient';
 // import './Backtesting.css'; // Commented out to use global styles from components.css
@@ -214,7 +215,7 @@ const Backtesting = () => {
         <div style={{ padding: '40px 20px', maxWidth: '1400px', margin: '0 auto' }}>
           <div className="page-header">
             <h1 className="heading-gold" style={{ marginBottom: '32px' }}>
-              🔬 Professional Backtesting Engine
+              <Microscope size={40} style={{ marginRight: '12px', display: 'inline-block', verticalAlign: 'middle' }} /> Professional Backtesting Engine
             </h1>
         <p className="text-muted" style={{ fontSize: '18px', marginBottom: '32px' }}>Test your trading strategies with historical data • Zone Retest Method • 68%+ Win Rate Target</p>
       </div>
@@ -225,27 +226,27 @@ const Backtesting = () => {
           className={`tab ${activeTab === 'config' ? 'active' : ''}`}
           onClick={() => setActiveTab('config')}
         >
-          ⚙️ Configuration
+          <Settings size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Configuration
         </button>
         <button
           className={`tab ${activeTab === 'results' ? 'active' : ''}`}
           onClick={() => setActiveTab('results')}
           disabled={!results}
         >
-          📊 Results
+          <BarChart3 size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Results
         </button>
         <button
           className={`tab ${activeTab === 'trades' ? 'active' : ''}`}
           onClick={() => setActiveTab('trades')}
           disabled={!results || !results.trades || results.trades.length === 0}
         >
-          💰 Trades ({results?.trades?.length || 0})
+          <DollarSign size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Trades ({results?.trades?.length || 0})
         </button>
         <button
           className={`tab ${activeTab === 'history' ? 'active' : ''}`}
           onClick={() => setActiveTab('history')}
         >
-          📁 History
+          <FolderOpen size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> History
         </button>
       </div>
 
@@ -406,7 +407,7 @@ const Backtesting = () => {
 
           {error && (
             <div className="error-message">
-              <span className="error-icon">⚠️</span>
+              <span className="error-icon"><AlertTriangle size={18} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /></span>
               <span>{error}</span>
             </div>
           )}
@@ -446,12 +447,20 @@ const Backtesting = () => {
               }
             }}
           >
-            {isRunning ? `🔄 Running... ${progress}%` : '🚀 Run Backtest'}
+            {isRunning ? (
+              <>
+                <Loader size={16} className="spin" style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Running... {progress}%
+              </>
+            ) : (
+              <>
+                <Rocket size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Run Backtest
+              </>
+            )}
           </button>
 
           {isRunning && (
             <button className="btn-secondary" onClick={cancelBacktest}>
-              ❌ Cancel
+              <X size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Cancel
             </button>
           )}
         </div>
@@ -464,7 +473,7 @@ const Backtesting = () => {
           padding: '32px',
           marginBottom: '24px'
         }}>
-          <h3>📊 Backtest Results</h3>
+          <h3><BarChart3 size={24} style={{ marginRight: '8px', display: 'inline-block', verticalAlign: 'middle' }} /> Backtest Results</h3>
 
           <div className="metrics-grid">
             <div className="metric-card">
@@ -594,7 +603,7 @@ const Backtesting = () => {
           marginBottom: '24px',
           overflow: 'hidden'
         }}>
-          <h3>💰 All Trades ({results.trades.length})</h3>
+          <h3><DollarSign size={24} style={{ marginRight: '8px', display: 'inline-block', verticalAlign: 'middle' }} /> All Trades ({results.trades.length})</h3>
           <div className="table-container">
             <table className="trades-table">
               <thead>
@@ -655,10 +664,10 @@ const Backtesting = () => {
           padding: '32px',
           marginBottom: '24px'
         }}>
-          <h3>📁 Saved Backtests</h3>
+          <h3><FolderOpen size={24} style={{ marginRight: '8px', display: 'inline-block', verticalAlign: 'middle' }} /> Saved Backtests</h3>
           {configs.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-icon">📭</div>
+              <div className="empty-icon"><FolderOpen size={48} style={{ opacity: 0.5 }} /></div>
               <div className="empty-title">No backtests yet</div>
               <div className="empty-description">Run your first backtest to see it here</div>
             </div>
@@ -714,7 +723,7 @@ const Backtesting = () => {
                     className="btn-secondary"
                     onClick={() => loadConfig(config)}
                   >
-                    📋 Load Config
+                    <Settings size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Load Config
                   </button>
                 </div>
               ))}

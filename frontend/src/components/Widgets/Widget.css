@@ -1,0 +1,356 @@
+/* Widget Base Styles */
+.widget {
+  background: linear-gradient(135deg,
+    rgba(139, 92, 246, 0.1) 0%,
+    rgba(0, 217, 255, 0.1) 100%);
+  backdrop-filter: blur(20px);
+  border: 2px solid transparent;
+  border-image: linear-gradient(135deg, #8B5CF6, #00D9FF) 1;
+  border-radius: 16px;
+  padding: 20px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.widget::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg,
+    rgba(139, 92, 246, 0.05) 0%,
+    rgba(0, 217, 255, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.widget:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 48px rgba(139, 92, 246, 0.3);
+}
+
+.widget:hover::before {
+  opacity: 1;
+}
+
+/* Widget Header */
+.widget-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.widget-icon {
+  font-size: 28px;
+  filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.5));
+}
+
+.widget-header h4 {
+  font-size: 16px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #00D9FF, #8B5CF6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+  flex: 1;
+}
+
+.widget-header .widget-status {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: rgba(0, 255, 136, 0.2);
+  color: #00ff88;
+  font-weight: 500;
+}
+
+/* Widget Body */
+.widget-body {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Price Display */
+.current-price,
+.target-price {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 12px 0;
+  padding: 8px 0;
+}
+
+.current-price .label,
+.target-price .label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+}
+
+.current-price .value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #00D9FF;
+  text-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+}
+
+.target-price .value {
+  font-size: 20px;
+  font-weight: 600;
+  color: #8B5CF6;
+}
+
+.change {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.change.positive {
+  color: #00ff88;
+  background: rgba(0, 255, 136, 0.1);
+}
+
+.change.negative {
+  color: #ff4466;
+  background: rgba(255, 68, 102, 0.1);
+}
+
+.condition {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(139, 92, 246, 0.2);
+  color: #8B5CF6;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* Progress Bar */
+.progress-bar {
+  height: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 16px;
+  position: relative;
+}
+
+.progress {
+  height: 100%;
+  background: linear-gradient(90deg, #8B5CF6, #00D9FF);
+  transition: width 0.5s ease;
+  border-radius: 6px;
+  position: relative;
+}
+
+.progress::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Widget Sizes */
+.widget.small {
+  min-width: 200px;
+  max-width: 250px;
+  padding: 16px;
+}
+
+.widget.small .widget-header h4 {
+  font-size: 14px;
+}
+
+.widget.small .current-price .value {
+  font-size: 20px;
+}
+
+.widget.medium {
+  min-width: 300px;
+  max-width: 350px;
+}
+
+.widget.large {
+  min-width: 400px;
+  max-width: 500px;
+}
+
+/* Pattern Widget Specific */
+.pattern-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.pattern-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.pattern-row .label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.pattern-row .value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #00D9FF;
+}
+
+.confidence-bar {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.confidence-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00ff88, #00D9FF);
+  transition: width 0.5s ease;
+  border-radius: 3px;
+}
+
+/* Portfolio Widget Specific */
+.holdings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.holding-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.holding-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateX(4px);
+}
+
+.holding-coin {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.coin-symbol {
+  font-weight: 700;
+  color: #00D9FF;
+  font-size: 14px;
+}
+
+.coin-amount {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.holding-value {
+  font-weight: 600;
+  color: #fff;
+}
+
+.portfolio-summary {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.total-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #00D9FF;
+}
+
+/* Daily Reading Widget Specific */
+.reading-content {
+  margin-top: 12px;
+}
+
+.hexagram-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #8B5CF6;
+  margin-bottom: 12px;
+}
+
+.interpretation {
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 12px;
+}
+
+.trading-advice {
+  padding: 12px;
+  background: rgba(139, 92, 246, 0.1);
+  border-left: 3px solid #8B5CF6;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+  font-style: italic;
+}
+
+.valid-until {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 12px;
+  text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .widget {
+    min-width: 100%;
+    max-width: 100%;
+  }
+
+  .widget.small,
+  .widget.medium,
+  .widget.large {
+    min-width: 100%;
+    max-width: 100%;
+  }
+
+  .current-price .value {
+    font-size: 24px;
+  }
+}

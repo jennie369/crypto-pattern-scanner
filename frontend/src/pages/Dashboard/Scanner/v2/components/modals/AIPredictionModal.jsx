@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Bot, TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react';
 import './Modal.css';
 
 export const AIPredictionModal = ({ pattern, onClose }) => {
@@ -19,7 +20,7 @@ export const AIPredictionModal = ({ pattern, onClose }) => {
       <div className="modal-container" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div className="modal-title">
-            <span className="modal-icon">🤖</span>
+            <span className="modal-icon"><Bot size={24} /></span>
             <div>
               <h2>AI Prediction (Gemini 2.5 Flash)</h2>
               <span className="modal-tier-badge tier-3">TIER 3</span>
@@ -62,8 +63,8 @@ export const AIPredictionModal = ({ pattern, onClose }) => {
             <h3 className="modal-section-title">AI Forecast</h3>
             <div className="modal-card">
               <div style={{ textAlign: 'center', padding: 'var(--space-lg)' }}>
-                <div style={{ fontSize: '64px', marginBottom: 'var(--space-md)' }}>
-                  {currentPrediction.direction === 'Up' ? '📈' : '📉'}
+                <div style={{ marginBottom: 'var(--space-md)', display: 'flex', justifyContent: 'center' }}>
+                  {currentPrediction.direction === 'Up' ? <TrendingUp size={64} color="#00FF88" /> : <TrendingDown size={64} color="#F6465D" />}
                 </div>
                 <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', marginBottom: 'var(--space-xs)' }}>
                   Predicted Price ({predictionHorizon})
@@ -133,8 +134,8 @@ export const AIPredictionModal = ({ pattern, onClose }) => {
 
           {/* Disclaimer */}
           <div style={{ padding: 'var(--space-sm)', background: 'rgba(255, 189, 89, 0.1)', border: '1px solid rgba(255, 189, 89, 0.3)', borderRadius: 'var(--radius-sm)' }}>
-            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', textAlign: 'center' }}>
-              ⚠️ AI predictions are for educational purposes only. Not financial advice.
+            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-xs)' }}>
+              <AlertTriangle size={14} color="#FFBD59" /> AI predictions are for educational purposes only. Not financial advice.
             </div>
           </div>
         </div>

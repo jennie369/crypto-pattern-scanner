@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Coins, Calendar, Search, TrendingUp, TrendingDown } from 'lucide-react';
 import './ChartHeader.css';
 
 const TIMEFRAMES = [
@@ -94,7 +95,7 @@ function ChartHeader({ selectedCoin, currentPrice, priceChange, onTimeframeChang
       {/* Coin Info Row */}
       <div className="coin-info-row">
         <div className="coin-name">
-          <span className="coin-icon">🪙</span>
+          <span className="coin-icon"><Coins className="w-5 h-5" /></span>
           <span className="coin-symbol">{selectedCoin || 'BTCUSDT'}</span>
           <span className="coin-type">Perpetual</span>
         </div>
@@ -102,12 +103,12 @@ function ChartHeader({ selectedCoin, currentPrice, priceChange, onTimeframeChang
         <div className="coin-price">
           <span className="price-value">{formatPrice(currentPrice)}</span>
           <span className={`price-change ${priceChange >= 0 ? 'positive' : 'negative'}`}>
-            {priceChange >= 0 ? '▲' : '▼'} {Math.abs(priceChange || 0).toFixed(2)}%
+            {priceChange >= 0 ? <TrendingUp className="w-4 h-4 inline" /> : <TrendingDown className="w-4 h-4 inline" />} {Math.abs(priceChange || 0).toFixed(2)}%
           </span>
         </div>
 
         <div className="coin-time">
-          <span className="time-icon">📅</span>
+          <span className="time-icon"><Calendar className="w-4 h-4" /></span>
           <span className="time-text">{formatTime(currentTime)}</span>
         </div>
       </div>
@@ -129,7 +130,7 @@ function ChartHeader({ selectedCoin, currentPrice, priceChange, onTimeframeChang
           onClick={toggleFullscreen}
           title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
         >
-          🔍 {isFullscreen ? 'Exit' : 'Fullscreen'}
+          <Search className="w-4 h-4 inline mr-1" /> {isFullscreen ? 'Exit' : 'Fullscreen'}
         </button>
       </div>
 
@@ -145,13 +146,13 @@ function ChartHeader({ selectedCoin, currentPrice, priceChange, onTimeframeChang
           className={`direction-btn short ${direction === 'short' ? 'active' : ''}`}
           onClick={() => handleDirectionChange('short')}
         >
-          SHORT 🔴
+          SHORT <TrendingDown className="w-4 h-4 inline ml-1 text-red-500" />
         </button>
         <button
           className={`direction-btn long ${direction === 'long' ? 'active' : ''}`}
           onClick={() => handleDirectionChange('long')}
         >
-          LONG 🟢
+          LONG <TrendingUp className="w-4 h-4 inline ml-1 text-green-500" />
         </button>
       </div>
     </div>

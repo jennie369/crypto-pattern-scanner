@@ -4,8 +4,16 @@
 
 .portfolio-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #0a1628, #0f1b35, #1a2847);
+  background: transparent;
   padding: 80px 24px 40px;
+  margin-left: 80px; /* Account for CompactSidebar */
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (max-width: 968px) {
+  .portfolio-page {
+    margin-left: 0;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -37,20 +45,20 @@
 
 .btn-add-holding {
   padding: 14px 28px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, #FFBD59 0%, #F59E0B 100%);
+  color: #1a1a2e;
   border: none;
   border-radius: 10px;
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 15px rgba(255, 189, 89, 0.4);
 }
 
 .btn-add-holding:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+  box-shadow: 0 6px 20px rgba(255, 189, 89, 0.6);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -66,11 +74,19 @@
 }
 
 .stat-card {
-  background: linear-gradient(135deg, rgba(17, 34, 80, 0.95), rgba(26, 40, 71, 0.95));
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 189, 89, 0.3);
   border-radius: 16px;
   padding: 24px;
   text-align: center;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  background: rgba(15, 23, 42, 0.8);
+  border-color: rgba(255, 189, 89, 0.5);
+  transform: translateY(-2px);
 }
 
 .stat-card .stat-label {
@@ -94,7 +110,7 @@
 }
 
 .stat-card.total-value .stat-value {
-  color: #667eea;
+  color: #FFBD59;
 }
 
 .stat-card.total-pnl.positive .stat-value,
@@ -151,7 +167,8 @@
 .portfolio-content {
   max-width: 1400px;
   margin: 0 auto;
-  background: linear-gradient(135deg, rgba(17, 34, 80, 0.95), rgba(26, 40, 71, 0.95));
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 189, 89, 0.3);
   border-radius: 16px;
   padding: 32px;
@@ -221,11 +238,19 @@
 }
 
 .overview-card {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   padding: 24px;
   text-align: center;
+  transition: all 0.3s ease;
+}
+
+.overview-card:hover {
+  background: rgba(15, 23, 42, 0.8);
+  border-color: rgba(255, 189, 89, 0.3);
+  transform: translateY(-2px);
 }
 
 .overview-card .card-label {
@@ -261,8 +286,8 @@
   width: 100%;
   padding: 12px;
   margin-top: 12px;
-  background: rgba(102, 126, 234, 0.2);
-  border: 1px solid rgba(102, 126, 234, 0.3);
+  background: rgba(255, 189, 89, 0.2);
+  border: 1px solid rgba(255, 189, 89, 0.3);
   border-radius: 8px;
   color: #fff;
   font-size: 14px;
@@ -272,7 +297,8 @@
 }
 
 .overview-card.quick-actions button:hover {
-  background: rgba(102, 126, 234, 0.3);
+  background: rgba(255, 189, 89, 0.3);
+  border-color: rgba(255, 189, 89, 0.5);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -289,7 +315,8 @@
 }
 
 .holdings-table thead {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(10px);
 }
 
 .holdings-table th {
@@ -312,7 +339,7 @@
 
 .holdings-table .symbol-cell {
   font-weight: 700;
-  color: #667eea;
+  color: #FFBD59;
   font-size: 16px;
 }
 
@@ -356,7 +383,8 @@
 }
 
 .transactions-table thead {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(10px);
 }
 
 .transactions-table th {
@@ -472,10 +500,17 @@
 }
 
 .entry-type-card {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(20px);
   border: 2px solid;
   border-radius: 12px;
   padding: 24px;
+  transition: all 0.3s ease;
+}
+
+.entry-type-card:hover {
+  background: rgba(15, 23, 42, 0.8);
+  transform: translateY(-2px);
 }
 
 .entry-type-card.retest {
@@ -542,14 +577,15 @@
 
 /* Overall Stats */
 .overall-stats {
-  background: rgba(102, 126, 234, 0.1);
-  border: 1px solid rgba(102, 126, 234, 0.3);
+  background: rgba(255, 189, 89, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 189, 89, 0.3);
   border-radius: 12px;
   padding: 24px;
 }
 
 .overall-stats h3 {
-  color: #667eea;
+  color: #FFBD59;
   font-size: 20px;
   font-weight: 700;
   margin: 0 0 20px 0;
@@ -564,8 +600,16 @@
 .overall-stat {
   text-align: center;
   padding: 16px;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.overall-stat:hover {
+  background: rgba(15, 23, 42, 0.8);
+  border-color: rgba(255, 189, 89, 0.3);
 }
 
 .overall-stat .stat-label {
@@ -598,7 +642,9 @@
 }
 
 .modal-content {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 189, 89, 0.3);
   border-radius: 16px;
   padding: 32px;
   max-width: 600px;

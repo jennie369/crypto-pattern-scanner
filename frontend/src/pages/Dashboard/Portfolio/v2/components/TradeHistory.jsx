@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { RefreshCw, Download, ScrollText } from 'lucide-react';
 import { Button } from '../../../../../components-v2/Button';
 import { Input } from '../../../../../components-v2/Input';
 import { Badge } from '../../../../../components-v2/Badge';
@@ -113,11 +114,13 @@ export const TradeHistory = ({ transactions = [], onRefresh }) => {
         />
         <div className="filter-actions">
           {onRefresh && (
-            <Button variant="ghost" size="sm" icon="🔄" onClick={onRefresh}>
+            <Button variant="ghost" size="sm" onClick={onRefresh}>
+              <RefreshCw size={16} />
               Refresh
             </Button>
           )}
-          <Button variant="outline" size="sm" icon="📥" onClick={handleExport}>
+          <Button variant="outline" size="sm" onClick={handleExport}>
+            <Download size={16} />
             Export CSV
           </Button>
         </div>
@@ -143,7 +146,8 @@ export const TradeHistory = ({ transactions = [], onRefresh }) => {
               <tr>
                 <td colSpan="8" className="empty-state">
                   <div className="empty-message">
-                    <p>📜 No trade history</p>
+                    <ScrollText size={48} style={{ margin: '0 auto 8px', opacity: 0.5 }} />
+                    <p>No trade history</p>
                     <p className="empty-hint">
                       {filteredTrades.length === 0 && trades.length > 0
                         ? 'No trades match your filters'

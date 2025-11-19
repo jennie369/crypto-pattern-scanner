@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lock } from 'lucide-react';
+import { Lock, CheckCircle } from 'lucide-react';
 
 /**
  * Sub Tool Button Component
@@ -22,7 +22,9 @@ export const SubToolButton = ({
 }) => {
   const handleClick = () => {
     if (isLocked) {
-      alert(`🔒 ${title} requires ${tier}\n\n✅ Upgrade to unlock this feature!`);
+      const lockIcon = '🔓';
+      const checkIcon = '✓';
+      alert(`${lockIcon} ${title} requires ${tier}\n\n${checkIcon} Upgrade to unlock this feature!`);
       return;
     }
     onClick && onClick();

@@ -1,0 +1,34 @@
+/* ===================================
+   VIETNAMESE FONT FIX
+   Explicit font loading for better Vietnamese support
+   =================================== */
+
+/* Preload Poppins with Vietnamese subset */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap&subset=vietnamese');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap&subset=vietnamese');
+
+/* Force Vietnamese character rendering */
+* {
+  -webkit-font-feature-settings: "liga" 1, "kern" 1;
+  font-feature-settings: "liga" 1, "kern" 1;
+}
+
+/* Improve Vietnamese text rendering for headings */
+h1, h2, h3, h4, h5, h6,
+.hero-title,
+.section-title,
+.category-card-title {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-synthesis: none;
+}
+
+/* Use Inter for better Vietnamese rendering (Poppins heavy weights don't render Vietnamese well) */
+.hero-title,
+.section-title,
+.category-card-title,
+h1, h2, h3 {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+  font-weight: 700 !important; /* Use 700 instead of 900 for better Vietnamese rendering */
+}

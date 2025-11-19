@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>💎 Gem Pattern Card Component - Package Index</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(180deg, #112250 0%, #2A1B52 50%, #4A1A4F 100%);
+      color: #FFFFFF;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 60px;
+      padding-bottom: 30px;
+      border-bottom: 2px solid rgba(255, 189, 89, 0.3);
+    }
+
+    .header h1 {
+      font-size: 48px;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #FFBD59, #DEBC81);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header p {
+      font-size: 18px;
+      color: #DEBC81;
+      margin-bottom: 8px;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 20px;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: bold;
+      color: #FFBD59;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .section {
+      background: rgba(42, 27, 82, 0.6);
+      border: 1px solid rgba(222, 188, 129, 0.2);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+      backdrop-filter: blur(10px);
+    }
+
+    .section h2 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: #FFBD59;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .file-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .file-card {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .file-card:hover {
+      border-color: #FFBD59;
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(255, 189, 89, 0.2);
+    }
+
+    .file-icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
+
+    .file-name {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #FFFFFF;
+    }
+
+    .file-size {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 8px;
+    }
+
+    .file-desc {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.5;
+    }
+
+    .quick-links {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #FFBD59, #DEBC81);
+      color: #2D3748;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 20px rgba(255, 189, 89, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #FFFFFF;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .feature {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 20px;
+      border-radius: 12px;
+      border-left: 4px solid #FFBD59;
+    }
+
+    .feature h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+      color: #FFBD59;
+    }
+
+    .feature p {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.5;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: rgba(255, 189, 89, 0.2);
+      border: 1px solid #FFBD59;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #FFBD59;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 32px;
+      }
+
+      .stats {
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .file-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .quick-links {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>💎 Gem Pattern Card Component</h1>
+      <p>Animated React Component với Gem Holding Brand Identity</p>
+      <p style="font-size: 14px; margin-top: 8px;">Complete Package - Production Ready</p>
+      
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-value">11</div>
+          <div class="stat-label">Files</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">90KB</div>
+          <div class="stat-label">Total Size</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">4,018</div>
+          <div class="stat-label">Lines of Code</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Start -->
+    <div class="section">
+      <h2>🚀 Quick Start</h2>
+      <div class="quick-links">
+        <a href="demo.html" class="btn" target="_blank">
+          🌐 Open Demo (No Setup Required)
+        </a>
+        <a href="QUICKSTART.md" class="btn btn-secondary" target="_blank">
+          📖 5-Minute Setup Guide
+        </a>
+        <a href="PACKAGE_README.md" class="btn btn-secondary" target="_blank">
+          📦 Package Overview
+        </a>
+      </div>
+    </div>
+
+    <!-- Features -->
+    <div class="section">
+      <h2>✨ Key Features</h2>
+      <div class="features">
+        <div class="feature">
+          <h3>🎨 10+ Animations</h3>
+          <p>Particles, glows, floats, hover effects - tất cả 60 FPS smooth</p>
+        </div>
+        <div class="feature">
+          <h3>💎 Gem Brand</h3>
+          <p>Burgundy (#9C0612) + Gold (#FFBD59) professional design</p>
+        </div>
+        <div class="feature">
+          <h3>📱 Responsive</h3>
+          <p>Perfect trên desktop, tablet, và mobile devices</p>
+        </div>
+        <div class="feature">
+          <h3>📋 Copy Feature</h3>
+          <p>One-click copy với visual feedback animation</p>
+        </div>
+        <div class="feature">
+          <h3>🎯 Pattern Support</h3>
+          <p>15+ pattern types: H&S, Double Top/Bottom, Triangles...</p>
+        </div>
+        <div class="feature">
+          <h3>🚀 Production Ready</h3>
+          <p>Clean code, well documented, performance optimized</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Core Component Files -->
+    <div class="section">
+      <h2>🎯 Core Component Files</h2>
+      <div class="file-grid">
+        <div class="file-card" onclick="window.open('PatternCard.jsx')">
+          <div class="file-icon">⚛️</div>
+          <div class="file-name">PatternCard.jsx</div>
+          <div class="file-size">11KB • 343 lines</div>
+          <div class="file-desc">Main React component với Framer Motion animations</div>
+        </div>
+        <div class="file-card" onclick="window.open('PatternCard.css')">
+          <div class="file-icon">🎨</div>
+          <div class="file-name">PatternCard.css</div>
+          <div class="file-size">13KB • 626 lines</div>
+          <div class="file-desc">Complete styling + 10+ keyframe animations</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Demo Application -->
+    <div class="section">
+      <h2>📱 Demo Application</h2>
+      <div class="file-grid">
+        <div class="file-card" onclick="window.open('App.jsx')">
+          <div class="file-icon">📄</div>
+          <div class="file-name">App.jsx</div>
+          <div class="file-size">4.5KB • 153 lines</div>
+          <div class="file-desc">Demo app với 6 sample pattern cards</div>
+        </div>
+        <div class="file-card" onclick="window.open('App.css')">
+          <div class="file-icon">🎨</div>
+          <div class="file-name">App.css</div>
+          <div class="file-size">8.8KB • 403 lines</div>
+          <div class="file-desc">Demo app styling với gradients</div>
+        </div>
+        <div class="file-card" onclick="window.open('demo.html')">
+          <div class="file-icon">🌐</div>
+          <div class="file-name">demo.html</div>
+          <div class="file-size">14KB • 486 lines</div>
+          <div class="file-desc">Standalone demo - Mở trực tiếp trong browser</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Documentation -->
+    <div class="section">
+      <h2>📚 Documentation (5 Files)</h2>
+      <div class="file-grid">
+        <div class="file-card" onclick="window.open('PACKAGE_README.md')">
+          <div class="file-icon">📦</div>
+          <div class="file-name">PACKAGE_README.md</div>
+          <div class="file-size">10KB</div>
+          <div class="file-desc">Main overview - Package contents & quick start</div>
+        </div>
+        <div class="file-card" onclick="window.open('README.md')">
+          <div class="file-icon">📖</div>
+          <div class="file-name">README.md</div>
+          <div class="file-size">7.4KB</div>
+          <div class="file-desc">Complete documentation - API reference & features</div>
+        </div>
+        <div class="file-card" onclick="window.open('QUICKSTART.md')">
+          <div class="file-icon">🚀</div>
+          <div class="file-name">QUICKSTART.md</div>
+          <div class="file-size">6.1KB</div>
+          <div class="file-desc">5-minute step-by-step setup guide</div>
+        </div>
+        <div class="file-card" onclick="window.open('PROJECT_STRUCTURE.md')">
+          <div class="file-icon">📁</div>
+          <div class="file-name">PROJECT_STRUCTURE.md</div>
+          <div class="file-size">8.9KB</div>
+          <div class="file-desc">Detailed file structure & purposes</div>
+        </div>
+        <div class="file-card" onclick="window.open('IMPLEMENTATION_GUIDE.md')">
+          <div class="file-icon">🔧</div>
+          <div class="file-name">IMPLEMENTATION_GUIDE.md</div>
+          <div class="file-size">15KB</div>
+          <div class="file-desc">Real app integration với Binance API</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Configuration -->
+    <div class="section">
+      <h2>⚙️ Configuration</h2>
+      <div class="file-grid">
+        <div class="file-card" onclick="window.open('package.json')">
+          <div class="file-icon">📦</div>
+          <div class="file-name">package.json</div>
+          <div class="file-size">835B</div>
+          <div class="file-desc">NPM dependencies & scripts</div>
+        </div>
+        <div class="file-card" onclick="window.open('FILE_TREE.txt')">
+          <div class="file-icon">🌳</div>
+          <div class="file-name">FILE_TREE.txt</div>
+          <div class="file-size">3.8KB</div>
+          <div class="file-desc">Visual file tree documentation</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Technologies -->
+    <div class="section">
+      <h2>🛠️ Technologies Used</h2>
+      <div style="margin-top: 16px;">
+        <span class="badge">React 18</span>
+        <span class="badge">Framer Motion 11</span>
+        <span class="badge">CSS Variables</span>
+        <span class="badge">Keyframe Animations</span>
+        <span class="badge">Responsive Design</span>
+        <span class="badge">Accessibility</span>
+        <span class="badge">60 FPS</span>
+        <span class="badge">MIT License</span>
+      </div>
+    </div>
+
+    <!-- Usage Scenarios -->
+    <div class="section">
+      <h2>🎯 Usage Scenarios</h2>
+      <div class="features">
+        <div class="feature">
+          <h3>1️⃣ Test Demo (1 second)</h3>
+          <p>Open demo.html để xem animations ngay</p>
+        </div>
+        <div class="feature">
+          <h3>2️⃣ React App (5 minutes)</h3>
+          <p>Follow QUICKSTART.md để setup full app</p>
+        </div>
+        <div class="feature">
+          <h3>3️⃣ Integrate (2 minutes)</h3>
+          <p>Copy component vào app hiện tại</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align: center; margin-top: 60px; padding-top: 30px; border-top: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.5);">
+      <p>💎 Built for Gem Trading Academy</p>
+      <p style="margin-top: 8px; font-size: 14px;">Pattern Card Component v1.0.0 - November 2025</p>
+    </div>
+  </div>
+</body>
+</html>

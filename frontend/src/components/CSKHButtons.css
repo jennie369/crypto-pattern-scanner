@@ -1,0 +1,57 @@
+.cskh-buttons {
+  margin: 16px 0;
+}
+
+.cskh-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.cskh-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  background: rgba(30, 42, 94, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.cskh-btn:hover {
+  background: var(--cskh-color);
+  transform: translateX(4px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  border-color: var(--cskh-color);
+}
+
+.cskh-icon {
+  flex-shrink: 0;
+  color: currentColor;
+}
+
+.cskh-text {
+  flex: 1;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .cskh-btn {
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+
+  .cskh-icon {
+    font-size: 18px;
+  }
+}

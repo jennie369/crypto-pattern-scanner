@@ -1,0 +1,116 @@
+.recent-trades-section {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.section-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.btn-view-all {
+  padding: 6px 12px;
+  background: rgba(14, 203, 129, 0.1);
+  border: 1px solid rgba(14, 203, 129, 0.3);
+  border-radius: 6px;
+  color: #0ECB81;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-view-all:hover {
+  background: rgba(14, 203, 129, 0.2);
+}
+
+.trades-table {
+  overflow-x: auto;
+}
+
+.trades-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.trades-table th {
+  text-align: left;
+  padding: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #8d8d8d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.trades-table td {
+  padding: 10px 8px;
+  font-size: 13px;
+  color: #fff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.time-cell {
+  color: #8d8d8d;
+  font-size: 12px;
+}
+
+.symbol-cell {
+  font-weight: 700;
+}
+
+.trades-table td.profit {
+  color: #0ECB81;
+  font-weight: 700;
+}
+
+.trades-table td.loss {
+  color: #F6465D;
+  font-weight: 700;
+}
+
+.pnl-percentage {
+  font-size: 11px;
+  margin-left: 4px;
+}
+
+/* Empty state styling */
+.recent-trades-section .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.recent-trades-section .empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.recent-trades-section .empty-state p {
+  font-size: 15px;
+  color: #8d8d8d;
+  margin: 0;
+}
+
+.recent-trades-section .loading-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #8d8d8d;
+  font-size: 14px;
+}

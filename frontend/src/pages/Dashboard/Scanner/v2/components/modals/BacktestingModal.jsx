@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FlaskConical, RotateCw, Play, BarChart3 } from 'lucide-react';
 import './Modal.css';
 
 export const BacktestingModal = ({ pattern, onClose }) => {
@@ -25,7 +26,7 @@ export const BacktestingModal = ({ pattern, onClose }) => {
       <div className="modal-container" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div className="modal-title">
-            <span className="modal-icon">🧪</span>
+            <span className="modal-icon"><FlaskConical size={24} /></span>
             <div>
               <h2>Professional Backtesting</h2>
               <span className="modal-tier-badge tier-3">TIER 3</span>
@@ -76,9 +77,13 @@ export const BacktestingModal = ({ pattern, onClose }) => {
                   fontWeight: 'var(--font-bold)',
                   cursor: isRunning ? 'not-allowed' : 'pointer',
                   transition: 'all var(--transition-base)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 'var(--space-xs)',
                 }}
               >
-                {isRunning ? '🔄 Running Backtest...' : '▶️ Run Backtest'}
+                {isRunning ? <><RotateCw size={16} className="spin" /> Running Backtest...</> : <><Play size={16} /> Run Backtest</>}
               </button>
             </div>
           </div>
@@ -135,7 +140,7 @@ export const BacktestingModal = ({ pattern, onClose }) => {
             <h3 className="modal-section-title">Equity Curve</h3>
             <div className="modal-card">
               <div style={{ textAlign: 'center', padding: 'var(--space-2xl)', color: 'var(--text-secondary)' }}>
-                <div style={{ fontSize: '64px', marginBottom: 'var(--space-md)' }}>📊</div>
+                <div style={{ marginBottom: 'var(--space-md)', display: 'flex', justifyContent: 'center' }}><BarChart3 size={64} /></div>
                 <p>Equity curve visualization</p>
                 <p style={{ fontSize: 'var(--text-xs)', marginTop: 'var(--space-xs)' }}>
                   Shows portfolio value over time using {pattern.pattern} pattern

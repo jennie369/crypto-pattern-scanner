@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from '../hooks/useTranslation';
 import { useAuth } from '../contexts/AuthContext';
+import { Home, Gem, ShoppingBag, Handshake, BarChart3, TrendingUp, ScrollText, Zap, Bot, Fish, Settings, Lock, User, ChevronDown, LogOut, UserCircle } from 'lucide-react';
 import './TopNavBar.css';
 
 /**
@@ -12,28 +13,31 @@ function TopNavBar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
-  const { isAdmin } = useAuth();
+  const { user, profile, isAdmin, signOut } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
 
   const isActive = (path) => location.pathname === path;
 
   const menuItems = [
-    { id: 'home', path: '/', label: t('home'), icon: '🏠' },
-    { id: 'pricing', path: '/pricing', label: 'Pricing', icon: '💎' },
-    { id: 'risk-calculator', path: '/risk-calculator', label: 'Risk Calc', icon: '📊' },
-    { id: 'analytics', path: '/analytics', label: t('analytics'), icon: '📈', badge: 'SOON' },
-    { id: 'history', path: '/history', label: t('history'), icon: '📜' },
+    { id: 'home', path: '/scanner-v2', label: t('home'), icon: <Home size={18} /> },
+    { id: 'pricing', path: '/pricing', label: 'Pricing', icon: <Gem size={18} /> },
+    { id: 'shop', path: '/shop', label: 'Shop', icon: <ShoppingBag size={18} />, badge: 'NEW' },
+    { id: 'affiliate', path: '/affiliate', label: 'Đối Tác', icon: <Handshake size={18} />, badge: 'HOT' },
+    { id: 'risk-calculator', path: '/risk-calculator', label: 'Risk Calc', icon: <BarChart3 size={18} /> },
+    { id: 'analytics', path: '/analytics', label: t('analytics'), icon: <TrendingUp size={18} />, badge: 'SOON' },
+    { id: 'history', path: '/history', label: t('history'), icon: <ScrollText size={18} /> },
 
     // TIER 3 Elite Tools
-    { id: 'backtesting', path: '/tier3/backtesting', label: 'Backtesting', icon: '⚡', badge: 'VIP' },
-    { id: 'ai-prediction', path: '/tier3/ai-prediction', label: 'AI Predict', icon: '🤖', badge: 'VIP' },
-    { id: 'whale-tracker', path: '/tier3/whale-tracker', label: 'Whales', icon: '🐋', badge: 'VIP' },
+    { id: 'backtesting', path: '/tier3/backtesting', label: 'Backtesting', icon: <Zap size={18} />, badge: 'VIP' },
+    { id: 'ai-prediction', path: '/tier3/ai-prediction', label: 'AI Predict', icon: <Bot size={18} />, badge: 'VIP' },
+    { id: 'whale-tracker', path: '/tier3/whale-tracker', label: 'Whales', icon: <Fish size={18} />, badge: 'VIP' },
   ];
 
   // Right menu items - Admin item only shown for admin users
   const rightMenuItems = [
-    { id: 'settings', path: '/settings', label: t('settings'), icon: '⚙️' },
-    ...(isAdmin() ? [{ id: 'admin', path: '/admin', label: t('admin'), icon: '🔒' }] : []),
+    { id: 'settings', path: '/settings', label: t('settings'), icon: <Settings size={18} /> },
+    ...(isAdmin() ? [{ id: 'admin', path: '/admin', label: t('admin'), icon: <Lock size={18} /> }] : []),
   ];
 
   const handleNavigation = (path) => {
@@ -46,8 +50,8 @@ function TopNavBar() {
       <div className="nav-container">
 
         {/* Logo */}
-        <div className="nav-logo" onClick={() => handleNavigation('/')}>
-          <div className="logo-icon">💎</div>
+        <div className="nav-logo" onClick={() => handleNavigation('/scanner-v2')}>
+          <div className="logo-icon"><Gem size={32} /></div>
           <div className="logo-text">
             <div
               className="logo-title heading-lg"
@@ -95,6 +99,83 @@ function TopNavBar() {
               <span className="nav-label-desktop">{item.label}</span>
             </button>
           ))}
+
+          {/* User Account Dropdown */}
+          {user && (
+            <div className="account-dropdown-wrapper">
+              <button
+                className="account-dropdown-trigger"
+                onClick={() => setIsAccountDropdownOpen(!isAccountDropdownOpen)}
+                onBlur={() => setTimeout(() => setIsAccountDropdownOpen(false), 200)}
+              >
+                <div className="account-avatar">
+                  {profile?.avatar_url ? (
+                    <img src={profile.avatar_url} alt="Profile" />
+                  ) : (
+                    <User size={18} />
+                  )}
+                </div>
+                <span className="account-name">{profile?.full_name || user?.email?.split('@')[0] || 'User'}</span>
+                <ChevronDown size={16} className={`dropdown-arrow ${isAccountDropdownOpen ? 'open' : ''}`} />
+              </button>
+
+              {isAccountDropdownOpen && (
+                <div className="account-dropdown-menu">
+                  <button
+                    className="dropdown-item"
+                    onClick={() => {
+                      handleNavigation('/account');
+                      setIsAccountDropdownOpen(false);
+                    }}
+                  >
+                    <User size={16} />
+                    <span>Account Dashboard</span>
+                  </button>
+                  <button
+                    className="dropdown-item"
+                    onClick={() => {
+                      handleNavigation('/profile');
+                      setIsAccountDropdownOpen(false);
+                    }}
+                  >
+                    <UserCircle size={16} />
+                    <span>Profile</span>
+                  </button>
+                  <button
+                    className="dropdown-item"
+                    onClick={() => {
+                      handleNavigation('/affiliate');
+                      setIsAccountDropdownOpen(false);
+                    }}
+                  >
+                    <Handshake size={16} />
+                    <span>Affiliate</span>
+                  </button>
+                  <button
+                    className="dropdown-item"
+                    onClick={() => {
+                      handleNavigation('/settings');
+                      setIsAccountDropdownOpen(false);
+                    }}
+                  >
+                    <Settings size={16} />
+                    <span>Settings</span>
+                  </button>
+                  <div className="dropdown-divider"></div>
+                  <button
+                    className="dropdown-item logout"
+                    onClick={() => {
+                      setIsAccountDropdownOpen(false);
+                      signOut();
+                    }}
+                  >
+                    <LogOut size={16} />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Mobile Menu Toggle */}
           <button

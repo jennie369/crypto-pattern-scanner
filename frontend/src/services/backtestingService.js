@@ -250,13 +250,19 @@ class BacktestingService {
             pattern = patternDetector.detectUPU(window);
             break;
           case 'UPD':
-            // UPD not in basic service, would need frequency patterns
+            pattern = patternDetector.detectUPD(window);
             break;
           case 'DPU':
-            // DPU not in basic service, would need frequency patterns
+            pattern = patternDetector.detectDPU(window);
             break;
           case 'HEAD_AND_SHOULDERS':
             pattern = patternDetector.detectHeadAndShoulders(window);
+            break;
+          case 'DOUBLE_TOP':
+            pattern = patternDetector.detectDoubleTop(window);
+            break;
+          case 'DOUBLE_BOTTOM':
+            pattern = patternDetector.detectDoubleBottom(window);
             break;
           default:
             break;

@@ -1,0 +1,498 @@
+/* ==========================================
+   Performance Charts Component Styles
+   ========================================== */
+
+.performance-charts-container {
+  padding: 2rem;
+  background: linear-gradient(135deg, rgba(30, 30, 40, 0.95), rgba(20, 20, 30, 0.95));
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ==========================================
+   Header
+   ========================================== */
+
+.charts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.charts-header h2 {
+  margin: 0;
+  font-size: 1.75rem;
+  color: #fff;
+  font-weight: 700;
+}
+
+.period-selector {
+  display: flex;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.25rem;
+  border-radius: 12px;
+}
+
+.period-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.period-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.period-btn.active {
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+/* ==========================================
+   Key Metrics
+   ========================================== */
+
+.key-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.metric-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.metric-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.metric-label {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+
+.metric-value.positive {
+  color: #10B981;
+}
+
+.metric-value.negative {
+  color: #EF4444;
+}
+
+.metric-subtitle {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* ==========================================
+   Chart Section
+   ========================================== */
+
+.chart-section {
+  margin-bottom: 2rem;
+}
+
+.chart-section h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  color: #fff;
+  font-weight: 600;
+}
+
+.simple-chart {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.chart-bar-container {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.chart-bar-container:last-child {
+  margin-bottom: 0;
+}
+
+.chart-label {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  text-align: right;
+}
+
+.chart-bar {
+  position: relative;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  overflow: visible;
+}
+
+.bar {
+  height: 100%;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  padding: 0 0.75rem;
+  transition: width 0.5s ease;
+}
+
+.bar.positive {
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.3), rgba(16, 185, 129, 0.6));
+  border-left: 3px solid #10B981;
+}
+
+.bar.negative {
+  background: linear-gradient(90deg, rgba(239, 68, 68, 0.3), rgba(239, 68, 68, 0.6));
+  border-left: 3px solid #EF4444;
+}
+
+.bar-value {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+}
+
+/* ==========================================
+   Recent Trades Table
+   ========================================== */
+
+.recent-trades {
+  margin-top: 2rem;
+}
+
+.recent-trades h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.25rem;
+  color: #fff;
+  font-weight: 600;
+}
+
+.trades-table {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.trades-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.trades-table thead tr {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.trades-table th {
+  padding: 1rem;
+  text-align: left;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.trades-table td {
+  padding: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.875rem;
+}
+
+.symbol-cell {
+  font-weight: 600;
+  color: #fff;
+}
+
+.date-cell {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+}
+
+.trades-table td.positive {
+  color: #10B981;
+  font-weight: 600;
+}
+
+.trades-table td.negative {
+  color: #EF4444;
+  font-weight: 600;
+}
+
+/* ==========================================
+   Upgrade Wall (FREE/TIER1)
+   ========================================== */
+
+.upgrade-wall {
+  position: relative;
+  min-height: 500px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.blur-content {
+  filter: blur(8px);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.chart-placeholder {
+  padding: 2rem;
+}
+
+.placeholder-line {
+  height: 60px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.upgrade-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+}
+
+.upgrade-card {
+  background: linear-gradient(135deg, rgba(40, 40, 50, 0.98), rgba(30, 30, 40, 0.98));
+  border: 2px solid rgba(255, 165, 0, 0.3);
+  border-radius: 16px;
+  padding: 3rem;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.lock-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.upgrade-card h3 {
+  margin: 0 0 1rem 0;
+  font-size: 2rem;
+  color: #FFA500;
+  font-weight: 700;
+}
+
+.upgrade-card p {
+  margin: 0 0 2rem 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+
+.features-list {
+  background: rgba(255, 165, 0, 0.1);
+  border: 1px solid rgba(255, 165, 0, 0.2);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.features-list h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  color: #FFA500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+.features-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.features-list li {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.875rem;
+  padding-left: 0.5rem;
+}
+
+.btn-upgrade {
+  width: 100%;
+  padding: 1.25rem;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #FFA500, #FF8C00);
+  color: #1a1a1a;
+  font-size: 1.125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 12px rgba(255, 165, 0, 0.3);
+}
+
+.btn-upgrade:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 165, 0, 0.4);
+}
+
+.current-tier {
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.tier-badge {
+  padding: 0.25rem 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50px;
+  color: #fff;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+/* ==========================================
+   Loading & Error States
+   ========================================== */
+
+.loading-spinner,
+.error-message,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(59, 130, 246, 0.2);
+  border-top-color: #3B82F6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-spinner p,
+.error-message p,
+.empty-state p {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1rem;
+  margin: 0.5rem 0;
+}
+
+.error-icon,
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  margin: 0 0 0.5rem 0;
+  color: #fff;
+  font-size: 1.5rem;
+}
+
+.btn-retry {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-retry:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+/* ==========================================
+   Responsive
+   ========================================== */
+
+@media (max-width: 768px) {
+  .performance-charts-container {
+    padding: 1.5rem;
+  }
+
+  .charts-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .key-metrics {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+
+  .chart-bar-container {
+    grid-template-columns: 80px 1fr;
+    gap: 0.5rem;
+  }
+
+  .trades-table {
+    overflow-x: auto;
+  }
+
+  .upgrade-card {
+    padding: 2rem 1.5rem;
+  }
+}

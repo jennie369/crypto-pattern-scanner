@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BarChart3, TrendingUp, Flame, Newspaper, Lightbulb, Circle, Loader } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import TierGuard from '../components/TierGuard/TierGuard';
 import * as sentimentApi from '../services/sentimentApi';
@@ -73,14 +74,14 @@ export default function Sentiment() {
     return '#10b981'; // Extreme Fear - Green
   };
 
-  // Get sentiment emoji
-  const getSentimentEmoji = (classification) => {
-    if (classification?.includes('Extreme Greed')) return '🔴';
-    if (classification?.includes('Greed')) return '🟠';
-    if (classification?.includes('Neutral')) return '⚪';
-    if (classification?.includes('Fear')) return '🔵';
-    if (classification?.includes('Extreme Fear')) return '🟢';
-    return '⚪';
+  // Get sentiment icon color
+  const getSentimentIconColor = (classification) => {
+    if (classification?.includes('Extreme Greed')) return '#ef4444';
+    if (classification?.includes('Greed')) return '#f59e0b';
+    if (classification?.includes('Neutral')) return '#94a3b8';
+    if (classification?.includes('Fear')) return '#3b82f6';
+    if (classification?.includes('Extreme Fear')) return '#10b981';
+    return '#94a3b8';
   };
 
   return (
@@ -89,13 +90,13 @@ export default function Sentiment() {
 
         {/* Page Header */}
         <div className="sentiment-header">
-          <h1>📊 Market Sentiment Analyzer</h1>
+          <h1><BarChart3 size={32} style={{ marginRight: '12px', display: 'inline-block', verticalAlign: 'middle' }} /> Market Sentiment Analyzer</h1>
           <p className="header-subtitle">Real-time crypto market sentiment and trading signals</p>
         </div>
 
         {loading && (
           <div className="loading-state">
-            <div className="spinner"></div>
+            <div className="spinner"><Loader size={48} className="spin" /></div>
             <p>Loading sentiment data...</p>
           </div>
         )}
@@ -105,7 +106,7 @@ export default function Sentiment() {
 
             {/* Main Sentiment Gauge */}
             <div className="sentiment-gauge-section">
-              <h2>😱 Fear & Greed Index</h2>
+              <h2><Circle size={24} style={{ marginRight: '8px', display: 'inline-block', verticalAlign: 'middle', color: getSentimentIconColor(sentiment.classification) }} /> Fear & Greed Index</h2>
 
               <div className="gauge-container">
                 {/* Circular Gauge */}
@@ -140,7 +141,7 @@ export default function Sentiment() {
                   </svg>
 
                   <div className="gauge-emoji">
-                    {getSentimentEmoji(sentiment.classification)}
+                    <Circle size={32} style={{ color: getSentimentIconColor(sentiment.classification) }} />
                   </div>
                 </div>
 
@@ -170,7 +171,7 @@ export default function Sentiment() {
 
                 {/* Trading Recommendation */}
                 <div className="trading-recommendation">
-                  <div className="rec-icon">💡</div>
+                  <div className="rec-icon"><Lightbulb size={24} /></div>
                   <div className="rec-content">
                     <div className="rec-title">Trading Signal</div>
                     <div className="rec-message">{sentiment.recommendation}</div>
@@ -182,7 +183,7 @@ export default function Sentiment() {
             {/* Market Overview Stats */}
             {market && (
               <div className="market-overview">
-                <h2>📈 Market Overview</h2>
+                <h2><TrendingUp size={24} style={{ marginRight: '8px', display: 'inline-block', verticalAlign: 'middle' }} /> Market Overview</h2>
 
                 <div className="market-stats-grid">
                   <div className="market-stat">
@@ -229,7 +230,7 @@ export default function Sentiment() {
 
               {/* Trending Coins */}
               <div className="trending-coins-section">
-                <h2>🔥 Trending Coins</h2>
+                <h2><Flame size={24} style={{ marginRight: '8px', display: 'inline-block', verticalAlign: 'middle' }} /> Trending Coins</h2>
 
                 <div className="trending-list">
                   {trending.slice(0, 10).map((coin, index) => (
@@ -249,7 +250,7 @@ export default function Sentiment() {
 
               {/* Sentiment History Chart */}
               <div className="sentiment-chart-section">
-                <h2>📊 30-Day Sentiment Trend</h2>
+                <h2><BarChart3 size={24} style={{ marginRight: '8px', display: 'inline-block', verticalAlign: 'middle' }} /> 30-Day Sentiment Trend</h2>
 
                 <div className="chart-wrapper">
                   <div className="sentiment-chart">
@@ -284,14 +285,14 @@ export default function Sentiment() {
 
             {/* News Aggregator */}
             <div className="news-section">
-              <h2>📰 Sentiment-Driving News</h2>
+              <h2><Newspaper size={24} style={{ marginRight: '8px', display: 'inline-block', verticalAlign: 'middle' }} /> Sentiment-Driving News</h2>
 
               <div className="news-grid">
                 {news.map((article) => (
                   <div key={article.id} className={`news-card ${article.sentiment}`}>
                     <div className="news-header">
                       <span className={`sentiment-badge ${article.sentiment}`}>
-                        {article.sentiment === 'positive' ? '🟢' : '🔴'} {article.sentiment.toUpperCase()}
+                        <Circle size={14} style={{ marginRight: '4px', display: 'inline-block', verticalAlign: 'middle', color: article.sentiment === 'positive' ? '#10b981' : '#ef4444' }} /> {article.sentiment.toUpperCase()}
                       </span>
                       <span className="impact-badge">{article.impact.toUpperCase()} IMPACT</span>
                     </div>

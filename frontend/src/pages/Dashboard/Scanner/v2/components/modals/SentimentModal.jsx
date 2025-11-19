@@ -1,4 +1,5 @@
 import React from 'react';
+import { Smile, Circle } from 'lucide-react';
 import './Modal.css';
 
 export const SentimentModal = ({ pattern, onClose }) => {
@@ -16,7 +17,7 @@ export const SentimentModal = ({ pattern, onClose }) => {
       <div className="modal-container" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div className="modal-title">
-            <span className="modal-icon">😊</span>
+            <span className="modal-icon"><Smile size={24} /></span>
             <div>
               <h2>Sentiment Analysis</h2>
               <span className="modal-tier-badge tier-2">TIER 2</span>
@@ -31,8 +32,8 @@ export const SentimentModal = ({ pattern, onClose }) => {
             <h3 className="modal-section-title">Overall Market Sentiment</h3>
             <div className="modal-card">
               <div style={{ textAlign: 'center', padding: 'var(--space-lg)' }}>
-                <div style={{ fontSize: '64px', marginBottom: 'var(--space-md)' }}>
-                  {sentimentData.overall >= 70 ? '🟢' : sentimentData.overall >= 40 ? '🟡' : '🔴'}
+                <div style={{ marginBottom: 'var(--space-md)', display: 'flex', justifyContent: 'center' }}>
+                  <Circle size={64} fill={sentimentData.overall >= 70 ? '#00FF88' : sentimentData.overall >= 40 ? '#FFBD59' : '#F6465D'} stroke="none" />
                 </div>
                 <div style={{ fontSize: 'var(--text-2xl)', fontWeight: 'var(--font-bold)', color: 'var(--brand-gold)' }}>
                   {sentimentData.overall}% Bullish

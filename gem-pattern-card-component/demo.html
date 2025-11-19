@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pattern Card Demo - Gem Trading Academy</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Noto+Sans+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Simplified inline CSS for demo */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary-burgundy: #9C0612;
+      --primary-dark: #640A0C;
+      --gold-accent: #FFBD59;
+      --gold-light: #DEBC81;
+      --bg-navy: #112250;
+      --color-buy: #0ECB81;
+      --color-sell: #F6465D;
+      --card-bg: rgba(42, 27, 82, 0.6);
+      --card-border: rgba(222, 188, 129, 0.2);
+    }
+
+    body {
+      font-family: 'Noto Sans Display', sans-serif;
+      background: linear-gradient(180deg, #112250 0%, #2A1B52 50%, #4A1A4F 100%);
+      color: #FFFFFF;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .demo-container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .demo-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .demo-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #FFFFFF;
+    }
+
+    .demo-subtitle {
+      font-size: 20px;
+      color: #DEBC81;
+      margin-bottom: 32px;
+    }
+
+    .feature-badges {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      padding: 8px 16px;
+      background: rgba(255, 189, 89, 0.2);
+      border: 1px solid var(--gold-accent);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gold-accent);
+    }
+
+    .pattern-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+      gap: 32px;
+      margin-bottom: 60px;
+    }
+
+    /* Pattern Card Styles */
+    .pattern-card {
+      position: relative;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      backdrop-filter: blur(20px);
+      transition: all 0.4s ease;
+      overflow: hidden;
+    }
+
+    .pattern-card:hover {
+      border-color: var(--gold-accent);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 40px rgba(255, 189, 89, 0.2);
+    }
+
+    /* Glow Effects */
+    .glow-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      pointer-events: none;
+      opacity: 0.3;
+    }
+
+    .glow-orb-1 {
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, var(--gold-accent) 0%, transparent 70%);
+      top: -50px;
+      right: -50px;
+      animation: float1 4s ease-in-out infinite;
+    }
+
+    .glow-orb-2 {
+      width: 150px;
+      height: 150px;
+      background: radial-gradient(circle, var(--primary-burgundy) 0%, transparent 70%);
+      bottom: -30px;
+      left: -30px;
+      animation: float2 5s ease-in-out infinite;
+    }
+
+    @keyframes float1 {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(20px, -20px); }
+    }
+
+    @keyframes float2 {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(-15px, 15px); }
+    }
+
+    /* Header */
+    .pattern-header {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(222, 188, 129, 0.1);
+    }
+
+    .pattern-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .pattern-icon {
+      font-size: 24px;
+    }
+
+    .pattern-name {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: #FFFFFF;
+    }
+
+    .pattern-direction {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 20px;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .bearish { color: var(--color-sell); }
+    .bullish { color: var(--color-buy); }
+
+    /* Price Rows */
+    .pattern-prices {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .price-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .price-row:hover {
+      background: rgba(0, 0, 0, 0.3);
+      transform: translateX(4px);
+    }
+
+    .price-label {
+      font-weight: 600;
+      font-size: 13px;
+      min-width: 80px;
+    }
+
+    .price-value {
+      font-family: 'Courier New', monospace;
+      font-size: 15px;
+      font-weight: 600;
+      color: #FFFFFF;
+      flex: 1;
+      text-align: right;
+      margin-right: 12px;
+    }
+
+    .copy-btn {
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--gold-light);
+      background: rgba(42, 27, 82, 0.6);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255, 189, 89, 0.2);
+      border-color: var(--gold-accent);
+      color: var(--gold-accent);
+    }
+
+    .copy-btn.copied {
+      background: var(--color-buy);
+      color: white;
+    }
+
+    /* Chart Thumbnail */
+    .pattern-chart-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(222, 188, 129, 0.2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chart-highlight-box {
+      width: 60%;
+      height: 50%;
+      border: 3px dashed var(--gold-accent);
+      border-radius: 8px;
+      background: rgba(255, 189, 89, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.05); }
+    }
+
+    .highlight-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--gold-accent);
+      text-transform: uppercase;
+    }
+
+    /* Metadata */
+    .pattern-meta {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+      font-size: 12px;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .confidence-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .confidence-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold-accent) 0%, var(--gold-light) 100%);
+      border-radius: 3px;
+      box-shadow: 0 0 10px rgba(255, 189, 89, 0.5);
+    }
+
+    /* Button */
+    .view-chart-btn {
+      width: 100%;
+      padding: 14px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'Montserrat', sans-serif;
+      color: #2D3748;
+      background: linear-gradient(135deg, var(--gold-accent) 0%, var(--gold-light) 100%);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .view-chart-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 20px rgba(255, 189, 89, 0.4);
+    }
+
+    .demo-footer {
+      text-align: center;
+      padding: 40px 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    @media (max-width: 768px) {
+      .pattern-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      
+      .demo-title {
+        font-size: 32px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-container">
+    <!-- Header -->
+    <div class="demo-header">
+      <h1 class="demo-title">💎 Pattern Card Component</h1>
+      <p class="demo-subtitle">Gem Trading Academy - Full Animations Demo</p>
+      <div class="feature-badges">
+        <span class="badge">✨ Particles Animation</span>
+        <span class="badge">💫 Glow Effects</span>
+        <span class="badge">🎪 Float Animations</span>
+        <span class="badge">⚡ Hover Effects</span>
+        <span class="badge">📋 Copy Functionality</span>
+      </div>
+    </div>
+
+    <!-- Pattern Cards Grid -->
+    <div class="pattern-grid" id="patternGrid">
+      <!-- Cards will be generated by JavaScript -->
+    </div>
+
+    <!-- Footer -->
+    <div class="demo-footer">
+      <p>© 2025 Gem Trading Academy - Pattern Card Component Demo</p>
+      <p style="margin-top: 8px; font-size: 12px;">
+        Built with React, Framer Motion, and Gem Holding Brand Colors
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // Sample pattern data
+    const samplePatterns = [
+      {
+        symbol: 'BTCUSDT Perp',
+        patternType: 'Head and Shoulders',
+        entry: 110598.33,
+        stopLoss: 110999.07,
+        takeProfit: [110197.59, 109796.84, 109396.10],
+        confidence: 0.90,
+        timestamp: '2025-11-02T12:00:00Z',
+        direction: 'bearish'
+      },
+      {
+        symbol: 'ETHUSDT Perp',
+        patternType: 'Double Bottom',
+        entry: 3876.50,
+        stopLoss: 3820.00,
+        takeProfit: [3920.00, 3965.00, 4010.00],
+        confidence: 0.85,
+        timestamp: '2025-11-02T11:45:00Z',
+        direction: 'bullish'
+      },
+      {
+        symbol: 'BNBUSDT Perp',
+        patternType: 'Ascending Triangle',
+        entry: 1091.20,
+        stopLoss: 1075.00,
+        takeProfit: [1105.00, 1118.50],
+        confidence: 0.78,
+        timestamp: '2025-11-02T11:30:00Z',
+        direction: 'bullish'
+      }
+    ];
+
+    // Format time
+    function formatTime(isoString) {
+      const date = new Date(isoString);
+      return date.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    // Format price
+    function formatPrice(price) {
+      return price.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    // Copy to clipboard
+    function copyToClipboard(button, value) {
+      navigator.clipboard.writeText(value.toString());
+      button.classList.add('copied');
+      button.textContent = '✓ Copied!';
+      
+      setTimeout(() => {
+        button.classList.remove('copied');
+        button.textContent = '📋 Copy';
+      }, 2000);
+    }
+
+    // Generate pattern card HTML
+    function generatePatternCard(pattern) {
+      const directionClass = pattern.direction;
+      const directionIcon = pattern.direction === 'bullish' ? '🟢' : '🔴';
+      const directionLabel = pattern.direction.toUpperCase();
+
+      return `
+        <div class="pattern-card">
+          <!-- Glow Orbs -->
+          <div class="glow-orb glow-orb-1"></div>
+          <div class="glow-orb glow-orb-2"></div>
+
+          <!-- Header -->
+          <div class="pattern-header">
+            <div class="pattern-title">
+              <span class="pattern-icon">📐</span>
+              <h3 class="pattern-name">${pattern.symbol} - ${pattern.patternType}</h3>
+            </div>
+            <div class="pattern-direction ${directionClass}">
+              <span>${directionIcon}</span>
+              <span>${directionLabel}</span>
+            </div>
+          </div>
+
+          <!-- Prices -->
+          <div class="pattern-prices">
+            <div class="price-row">
+              <span class="price-label ${directionClass}">Entry:</span>
+              <span class="price-value">$${formatPrice(pattern.entry)}</span>
+              <button class="copy-btn" onclick="copyToClipboard(this, ${pattern.entry})">📋 Copy</button>
+            </div>
+            <div class="price-row">
+              <span class="price-label" style="color: #F6465D">Stop Loss:</span>
+              <span class="price-value">$${formatPrice(pattern.stopLoss)}</span>
+              <button class="copy-btn" onclick="copyToClipboard(this, ${pattern.stopLoss})">📋 Copy</button>
+            </div>
+            ${pattern.takeProfit.map((tp, i) => `
+              <div class="price-row">
+                <span class="price-label" style="color: #0ECB81">TP${i + 1}:</span>
+                <span class="price-value">$${formatPrice(tp)}</span>
+                <button class="copy-btn" onclick="copyToClipboard(this, ${tp})">📋 Copy</button>
+              </div>
+            `).join('')}
+          </div>
+
+          <!-- Chart Thumbnail -->
+          <div class="pattern-chart-container">
+            <div class="chart-highlight-box">
+              <span class="highlight-label">${pattern.patternType}</span>
+            </div>
+          </div>
+
+          <!-- Metadata -->
+          <div class="pattern-meta">
+            <div class="meta-item">
+              <span>📅</span>
+              <span>${formatTime(pattern.timestamp)}</span>
+            </div>
+            <div class="meta-item">
+              <span>🎯</span>
+              <span>Confidence: ${(pattern.confidence * 100).toFixed(0)}%</span>
+            </div>
+            <div class="confidence-bar">
+              <div class="confidence-fill" style="width: ${pattern.confidence * 100}%"></div>
+            </div>
+          </div>
+
+          <!-- Button -->
+          <button class="view-chart-btn">
+            View on Main Chart →
+          </button>
+        </div>
+      `;
+    }
+
+    // Render all pattern cards
+    const patternGrid = document.getElementById('patternGrid');
+    samplePatterns.forEach(pattern => {
+      patternGrid.innerHTML += generatePatternCard(pattern);
+    });
+  </script>
+</body>
+</html>

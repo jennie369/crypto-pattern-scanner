@@ -9,22 +9,22 @@
      🌟 BACKGROUND - GLOW EFFECT (Blur Layers Version)
      ============================================ */
 
-  /* Base Colors */
-  --bg-base-dark: #0A1628;
-  --bg-base-mid: #0D1B2A;
-  --bg-base-light: #0F172A;
-  --bg-gradient-base: linear-gradient(135deg, #0A1628 0%, #0D1B2A 50%, #0F172A 100%);
+  /* Base Colors - NEW GRADIENT */
+  --bg-base-dark: #0A0E27;
+  --bg-base-mid: #141B3D;
+  --bg-base-light: #1E2A5E;
+  --bg-gradient-base: linear-gradient(135deg, #0A0E27 0%, #141B3D 50%, #1E2A5E 100%);
 
   /* Glow Colors */
   --glow-blue-bright: rgba(59, 130, 246, 0.5);
   --glow-blue-medium: rgba(37, 99, 235, 0.25);
   --glow-blue-dark: rgba(30, 64, 175, 0.3);
 
-  /* Legacy support (for backward compatibility) */
-  --bg-primary: #0A1628;
-  --bg-secondary: #0D1B2A;
-  --bg-tertiary: #0F172A;
-  --bg-gradient: linear-gradient(135deg, #0A1628 0%, #0D1B2A 50%, #0F172A 100%);
+  /* Legacy support (for backward compatibility) - NEW GRADIENT */
+  --bg-primary: #0A0E27;
+  --bg-secondary: #141B3D;
+  --bg-tertiary: #1E2A5E;
+  --bg-gradient: linear-gradient(135deg, #0A0E27 0%, #141B3D 50%, #1E2A5E 100%);
 
   /* Card backgrounds với glassmorphism */
   --bg-card: rgba(30, 42, 94, 0.4);
@@ -83,10 +83,10 @@
   /* ============================================
      TYPOGRAPHY
      ============================================ */
-  /* Font Families */
-  --font-display: 'Poppins', sans-serif;
-  --font-body: 'Inter', sans-serif;
-  --font-mono: 'Fira Code', monospace;
+  /* Font Families - With Vietnamese fallbacks */
+  --font-display: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+  --font-mono: 'Fira Code', 'Courier New', Courier, monospace;
 
   /* Font Sizes - Mobile First */
   --text-xs: 12px;
@@ -188,4 +188,32 @@
   --breakpoint-lg: 1024px;
   --breakpoint-xl: 1400px;
   --breakpoint-2xl: 1920px;
+
+  /* ============================================
+     📚 COURSE THEME - BLUE GLOW
+     ============================================ */
+  --course-primary: #00D9FF;
+  --course-accent: #4A90E2;
+  --course-glow: rgba(0, 217, 255, 0.3);
+  --course-bg: rgba(0, 180, 216, 0.05);
+
+  /* Tier Colors (UPPERCASE system) */
+  --tier-free-color: #888888;
+  --tier-free-bg: rgba(136, 136, 136, 0.1);
+
+  --tier1-color: #FFD700;
+  --tier1-bg: rgba(255, 215, 0, 0.1);
+  --tier1-border: rgba(255, 215, 0, 0.3);
+
+  --tier2-color: #E8C4FF;
+  --tier2-bg: rgba(232, 196, 255, 0.1);
+  --tier2-border: rgba(139, 92, 246, 0.3);
+
+  --tier3-color: #FF6B9D;
+  --tier3-bg: rgba(255, 107, 157, 0.1);
+  --tier3-border: rgba(255, 107, 157, 0.3);
+
+  /* Course Gradients */
+  --gradient-course-hero: linear-gradient(135deg, var(--course-primary) 0%, var(--course-accent) 100%);
+  --gradient-course-card: linear-gradient(135deg, rgba(0, 217, 255, 0.1) 0%, rgba(74, 144, 226, 0.1) 100%);
 }

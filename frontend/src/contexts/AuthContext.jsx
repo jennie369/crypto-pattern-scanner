@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { orderMonitor } from '../services/orderMonitor';
 
 const AuthContext = createContext({});
 
@@ -41,6 +42,69 @@ export const AuthProvider = ({ children }) => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // ===== START ORDER MONITORING WHEN USER LOGS IN =====
+  useEffect(() => {
+    if (user && profile?.id) {
+      // Get or create paper trading account
+      const initializeAndMonitor = async () => {
+        try {
+          // Get account
+          const { data: account, error } = await supabase
+            .from('paper_trading_accounts')
+            .select('id')
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+          if (error && error.code !== 'PGRST116') {
+            console.error('❌ [AuthContext] Error fetching paper trading account:', error);
+            return;
+          }
+
+          let accountId;
+
+          if (!account) {
+            // Create account if doesn't exist
+            const { data: newAccount, error: createError } = await supabase
+              .from('paper_trading_accounts')
+              .insert({
+                user_id: user.id,
+                balance: 100000,
+                initial_balance: 100000,
+              })
+              .select('id')
+              .single();
+
+            if (createError) {
+              console.error('❌ [AuthContext] Error creating paper trading account:', createError);
+              return;
+            }
+
+            accountId = newAccount.id;
+            console.log('✅ [AuthContext] Paper trading account created:', accountId);
+          } else {
+            accountId = account.id;
+          }
+
+          // Start monitoring pending orders
+          console.log('🔍 [AuthContext] Starting order monitor for user:', user.id);
+          await orderMonitor.startMonitoring(user.id, accountId);
+        } catch (error) {
+          console.error('❌ [AuthContext] Error initializing order monitor:', error);
+        }
+      };
+
+      initializeAndMonitor();
+    } else {
+      // User logged out - stop monitoring
+      orderMonitor.stopMonitoring();
+    }
+
+    return () => {
+      // Cleanup: stop monitoring when component unmounts
+      orderMonitor.stopMonitoring();
+    };
+  }, [user, profile]);
+
   // ===== LOAD USER PROFILE =====
   const loadUserProfile = async (userId) => {
     console.log('📊 Loading profile for user:', userId);
@@ -55,6 +119,11 @@ export const AuthProvider = ({ children }) => {
           id,
           email,
           full_name,
+          display_name,
+          bio,
+          avatar_url,
+          twitter_handle,
+          telegram_handle,
           scan_count,
           last_scan_at,
           created_at,
@@ -64,7 +133,13 @@ export const AuthProvider = ({ children }) => {
           chatbot_tier,
           course_tier_expires_at,
           scanner_tier_expires_at,
-          chatbot_tier_expires_at
+          chatbot_tier_expires_at,
+          verified_seller,
+          verified_trader,
+          level_badge,
+          role_badge,
+          achievement_badges,
+          role
         `)
         .eq('id', userId)
         .maybeSingle();
@@ -234,6 +309,11 @@ export const AuthProvider = ({ children }) => {
           id,
           email,
           full_name,
+          display_name,
+          bio,
+          avatar_url,
+          twitter_handle,
+          telegram_handle,
           scan_count,
           last_scan_at,
           created_at,
@@ -409,6 +489,11 @@ export const AuthProvider = ({ children }) => {
           id,
           email,
           full_name,
+          display_name,
+          bio,
+          avatar_url,
+          twitter_handle,
+          telegram_handle,
           scan_count,
           last_scan_at,
           created_at,

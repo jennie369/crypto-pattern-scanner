@@ -1,0 +1,34 @@
+/* =====================================================
+   USER BADGES CONTAINER
+   ===================================================== */
+
+.user-badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.user-badges.vertical {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Spacing adjustments for different contexts */
+.user-badges.compact {
+  gap: 4px;
+}
+
+.user-badges.spacious {
+  gap: 8px;
+}
+
+/* =====================================================
+   RESPONSIVE
+   ===================================================== */
+
+@media (max-width: 768px) {
+  .user-badges {
+    gap: 4px;
+  }
+}

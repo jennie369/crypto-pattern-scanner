@@ -1,4 +1,5 @@
 import React from 'react';
+import { BarChart3, TrendingUp, Target, CheckCircle, AlertTriangle, HelpCircle, FileText, DollarSign, Lightbulb } from 'lucide-react';
 import './EntryTypeAnalytics.css';
 
 /**
@@ -21,7 +22,7 @@ export default function EntryTypeAnalytics({ analytics }) {
     return (
       <div className="entry-type-analytics">
         <div className="analytics-empty">
-          <div className="empty-icon">📊</div>
+          <div className="empty-icon"><BarChart3 size={48} /></div>
           <p>No analytics data available</p>
           <small>Complete some trades to see entry type performance</small>
         </div>
@@ -46,7 +47,7 @@ export default function EntryTypeAnalytics({ analytics }) {
 
       {/* Page Header */}
       <div className="analytics-header">
-        <h2>📈 Entry Type Performance Analysis</h2>
+        <h2><TrendingUp size={24} style={{ display: 'inline', marginRight: '8px' }} /> Entry Type Performance Analysis</h2>
         <p className="analytics-subtitle">
           Compare RETEST vs BREAKOUT entries to optimize your trading strategy
         </p>
@@ -54,7 +55,7 @@ export default function EntryTypeAnalytics({ analytics }) {
 
       {/* Recommendation Banner */}
       <div className={`recommendation-banner ${getRecommendationStyle()}`}>
-        <div className="banner-icon">🎯</div>
+        <div className="banner-icon"><Target size={32} /></div>
         <div className="banner-content">
           <div className="banner-title">Trading Recommendation</div>
           <div className="banner-message">{recommendation}</div>
@@ -67,7 +68,7 @@ export default function EntryTypeAnalytics({ analytics }) {
         {/* RETEST Card */}
         <div className="entry-type-card retest">
           <div className="card-header">
-            <span className="card-icon">✅</span>
+            <span className="card-icon"><CheckCircle size={28} /></span>
             <div className="card-title-group">
               <span className="card-title">RETEST Entries</span>
               <span className="card-subtitle">Recommended Strategy</span>
@@ -106,14 +107,14 @@ export default function EntryTypeAnalytics({ analytics }) {
           </div>
 
           <div className="card-footer">
-            <div className="footer-badge success">✅ Preferred Strategy</div>
+            <div className="footer-badge success"><CheckCircle size={16} style={{ display: 'inline', marginRight: '6px' }} /> Preferred Strategy</div>
           </div>
         </div>
 
         {/* BREAKOUT Card */}
         <div className="entry-type-card breakout">
           <div className="card-header">
-            <span className="card-icon">⚠️</span>
+            <span className="card-icon"><AlertTriangle size={28} /></span>
             <div className="card-title-group">
               <span className="card-title">BREAKOUT Entries</span>
               <span className="card-subtitle">High Risk Strategy</span>
@@ -152,14 +153,14 @@ export default function EntryTypeAnalytics({ analytics }) {
           </div>
 
           <div className="card-footer">
-            <div className="footer-badge warning">⚠️ Not Recommended</div>
+            <div className="footer-badge warning"><AlertTriangle size={16} style={{ display: 'inline', marginRight: '6px' }} /> Not Recommended</div>
           </div>
         </div>
 
         {/* OTHER Card */}
         <div className="entry-type-card other">
           <div className="card-header">
-            <span className="card-icon">❓</span>
+            <span className="card-icon"><HelpCircle size={28} /></span>
             <div className="card-title-group">
               <span className="card-title">OTHER Entries</span>
               <span className="card-subtitle">Unclassified Trades</span>
@@ -198,7 +199,7 @@ export default function EntryTypeAnalytics({ analytics }) {
           </div>
 
           <div className="card-footer">
-            <div className="footer-badge info">❓ Review Strategy</div>
+            <div className="footer-badge info"><HelpCircle size={16} style={{ display: 'inline', marginRight: '6px' }} /> Review Strategy</div>
           </div>
         </div>
 
@@ -206,11 +207,11 @@ export default function EntryTypeAnalytics({ analytics }) {
 
       {/* Overall Performance Summary */}
       <div className="overall-performance">
-        <h3>📊 Overall Trading Performance</h3>
+        <h3><BarChart3 size={20} style={{ display: 'inline', marginRight: '8px' }} /> Overall Trading Performance</h3>
 
         <div className="overall-grid">
           <div className="overall-stat">
-            <div className="stat-icon">📝</div>
+            <div className="stat-icon"><FileText size={24} /></div>
             <div className="stat-content">
               <div className="stat-label">Total Trades</div>
               <div className="stat-value">{overall.trades}</div>
@@ -218,7 +219,7 @@ export default function EntryTypeAnalytics({ analytics }) {
           </div>
 
           <div className="overall-stat">
-            <div className="stat-icon">🎯</div>
+            <div className="stat-icon"><Target size={24} /></div>
             <div className="stat-content">
               <div className="stat-label">Overall Win Rate</div>
               <div className="stat-value">{overall.winRate.toFixed(1)}%</div>
@@ -226,7 +227,7 @@ export default function EntryTypeAnalytics({ analytics }) {
           </div>
 
           <div className="overall-stat">
-            <div className="stat-icon">💰</div>
+            <div className="stat-icon"><DollarSign size={24} /></div>
             <div className="stat-content">
               <div className="stat-label">Avg P&L per Trade</div>
               <div className={`stat-value ${overall.avgPnl >= 0 ? 'positive' : 'negative'}`}>
@@ -236,7 +237,7 @@ export default function EntryTypeAnalytics({ analytics }) {
           </div>
 
           <div className="overall-stat">
-            <div className="stat-icon">📈</div>
+            <div className="stat-icon"><TrendingUp size={24} /></div>
             <div className="stat-content">
               <div className="stat-label">Total Profit</div>
               <div className={`stat-value ${overall.totalProfit >= 0 ? 'positive' : 'negative'}`}>
@@ -249,13 +250,13 @@ export default function EntryTypeAnalytics({ analytics }) {
 
       {/* Performance Insights */}
       <div className="performance-insights">
-        <h3>💡 Key Insights</h3>
+        <h3><Lightbulb size={20} style={{ display: 'inline', marginRight: '8px' }} /> Key Insights</h3>
 
         <div className="insights-grid">
           {/* Win Rate Comparison */}
           {retest.winRate > breakout.winRate && (
             <div className="insight-card">
-              <div className="insight-icon">✅</div>
+              <div className="insight-icon"><CheckCircle size={28} /></div>
               <div className="insight-content">
                 <div className="insight-title">RETEST Win Rate Advantage</div>
                 <div className="insight-message">
@@ -269,7 +270,7 @@ export default function EntryTypeAnalytics({ analytics }) {
           {/* Profit Comparison */}
           {retest.totalProfit > breakout.totalProfit && (
             <div className="insight-card">
-              <div className="insight-icon">💰</div>
+              <div className="insight-icon"><DollarSign size={28} /></div>
               <div className="insight-content">
                 <div className="insight-title">Higher Profit with RETEST</div>
                 <div className="insight-message">
@@ -283,7 +284,7 @@ export default function EntryTypeAnalytics({ analytics }) {
           {/* Sample Size Warning */}
           {(retest.trades < 10 || breakout.trades < 10) && (
             <div className="insight-card warning">
-              <div className="insight-icon">⚠️</div>
+              <div className="insight-icon"><AlertTriangle size={28} /></div>
               <div className="insight-content">
                 <div className="insight-title">Small Sample Size</div>
                 <div className="insight-message">
@@ -296,7 +297,7 @@ export default function EntryTypeAnalytics({ analytics }) {
           {/* Strategy Recommendation */}
           {retest.winRate >= 60 && (
             <div className="insight-card success">
-              <div className="insight-icon">🎯</div>
+              <div className="insight-icon"><Target size={28} /></div>
               <div className="insight-content">
                 <div className="insight-title">Excellent RETEST Performance</div>
                 <div className="insight-message">

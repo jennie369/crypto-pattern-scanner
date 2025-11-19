@@ -1,4 +1,5 @@
 import React from 'react';
+import { BarChart3 } from 'lucide-react';
 import './PortfolioChart.css';
 
 /**
@@ -74,7 +75,7 @@ export default function PortfolioChart({ holdings }) {
     return (
       <div className="portfolio-chart">
         <div className="chart-empty">
-          <div className="empty-icon">📊</div>
+          <div className="empty-icon"><BarChart3 size={48} /></div>
           <p>No holdings to display</p>
         </div>
       </div>
@@ -86,7 +87,7 @@ export default function PortfolioChart({ holdings }) {
 
       {/* Chart Header */}
       <div className="chart-header">
-        <h3>📊 Portfolio Allocation</h3>
+        <h3><BarChart3 size={20} style={{ display: 'inline', marginRight: '8px' }} /> Portfolio Allocation</h3>
         <div className="chart-total">
           Total: <strong>${totalValue.toLocaleString()}</strong>
         </div>

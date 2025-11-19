@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Calendar, List, Clock, Search, Circle, AlertCircle, FileText, Newspaper } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import TierGuard from '../components/TierGuard/TierGuard';
 import * as newsApi from '../services/newsApi';
@@ -133,7 +134,7 @@ export default function NewsCalendar() {
         {/* Page Header */}
         <div className="news-header">
           <div className="header-content">
-            <h1>📅 News & Events Calendar</h1>
+            <h1><Calendar size={32} style={{ marginRight: '12px', display: 'inline-block', verticalAlign: 'middle' }} /> News & Events Calendar</h1>
             <p className="header-subtitle">Stay ahead with upcoming crypto events and news</p>
           </div>
 
@@ -143,13 +144,13 @@ export default function NewsCalendar() {
               className={`btn-view ${view === 'list' ? 'active' : ''}`}
               onClick={() => setView('list')}
             >
-              📋 List View
+              <List size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> List View
             </button>
             <button
               className={`btn-view ${view === 'timeline' ? 'active' : ''}`}
               onClick={() => setView('timeline')}
             >
-              ⏱️ Timeline View
+              <Clock size={16} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} /> Timeline View
             </button>
           </div>
         </div>
@@ -166,7 +167,7 @@ export default function NewsCalendar() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
             />
-            🔍
+            <Search size={20} />
           </div>
 
           {/* Category Filter */}
@@ -223,7 +224,7 @@ export default function NewsCalendar() {
             {/* High Impact Events Banner */}
             {filteredEvents.filter(e => e.impact === 'high').length > 0 && (
               <div className="high-impact-banner">
-                <div className="banner-icon">🔴</div>
+                <div className="banner-icon"><AlertCircle size={24} style={{ color: '#ef4444' }} /></div>
                 <div className="banner-content">
                   <div className="banner-title">
                     {filteredEvents.filter(e => e.impact === 'high').length} High-Impact Events Coming
@@ -240,7 +241,7 @@ export default function NewsCalendar() {
               <div className="events-list">
                 {filteredEvents.length === 0 ? (
                   <div className="empty-state">
-                    <div className="empty-icon">📭</div>
+                    <div className="empty-icon"><Calendar size={48} style={{ opacity: 0.5 }} /></div>
                     <p>No events found</p>
                     <small>Try adjusting your filters</small>
                   </div>
@@ -286,7 +287,7 @@ export default function NewsCalendar() {
                               {/* Event Footer */}
                               <div className="event-footer">
                                 <div className="event-date">
-                                  📅 {new Date(event.date).toLocaleDateString('en-US', {
+                                  <Calendar size={16} style={{ marginRight: '4px', display: 'inline-block', verticalAlign: 'middle' }} /> {new Date(event.date).toLocaleDateString('en-US', {
                                     month: 'short',
                                     day: 'numeric',
                                     year: 'numeric'
@@ -294,11 +295,11 @@ export default function NewsCalendar() {
                                 </div>
 
                                 <div className="event-time-until">
-                                  ⏱️ {getTimeUntil(event.date)}
+                                  <Clock size={16} style={{ marginRight: '4px', display: 'inline-block', verticalAlign: 'middle' }} /> {getTimeUntil(event.date)}
                                 </div>
 
                                 <div className="event-source">
-                                  📰 {event.source}
+                                  <Newspaper size={16} style={{ marginRight: '4px', display: 'inline-block', verticalAlign: 'middle' }} /> {event.source}
                                 </div>
                               </div>
 
@@ -317,7 +318,7 @@ export default function NewsCalendar() {
               <div className="timeline-view">
                 {filteredEvents.length === 0 ? (
                   <div className="empty-state">
-                    <div className="empty-icon">📭</div>
+                    <div className="empty-icon"><Clock size={48} style={{ opacity: 0.5 }} /></div>
                     <p>No events found</p>
                   </div>
                 ) : (

@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { testSupabaseConnection, testSignUp, testSignIn } from '../utils/testSupabase';
 import { useAuth } from '../hooks/useAuth';
 import { useQuota } from '../hooks/useQuota';
+import { FlaskConical, CheckCircle, BarChart3, XCircle } from 'lucide-react';
 
 export default function SupabaseTest() {
   const [testResult, setTestResult] = useState(null);
@@ -43,8 +44,9 @@ export default function SupabaseTest() {
       borderRadius: '12px',
       border: '1px solid rgba(255, 189, 89, 0.3)'
     }}>
-      <h2 style={{ color: '#FFBD59', marginBottom: '20px' }}>
-        🧪 Supabase Test Dashboard
+      <h2 style={{ color: '#FFBD59', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <FlaskConical size={24} />
+        Supabase Test Dashboard
       </h2>
 
       {/* Connection Test */}
@@ -115,8 +117,9 @@ export default function SupabaseTest() {
           border: '1px solid rgba(14, 203, 129, 0.3)',
           borderRadius: '6px'
         }}>
-          <h3 style={{ color: '#0ECB81', fontSize: '16px', marginBottom: '10px' }}>
-            ✅ Logged In
+          <h3 style={{ color: '#0ECB81', fontSize: '16px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <CheckCircle size={20} />
+            Logged In
           </h3>
           <p style={{ color: '#DEBC81', fontSize: '14px', margin: '5px 0' }}>
             Email: {user.email}
@@ -136,8 +139,9 @@ export default function SupabaseTest() {
           border: '1px solid rgba(255, 189, 89, 0.3)',
           borderRadius: '6px'
         }}>
-          <h3 style={{ color: '#FFBD59', fontSize: '16px', marginBottom: '10px' }}>
-            📊 Quota Status
+          <h3 style={{ color: '#FFBD59', fontSize: '16px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <BarChart3 size={20} />
+            Quota Status
           </h3>
           <p style={{ color: '#DEBC81', fontSize: '14px', margin: '5px 0' }}>
             Used: {quotaSummary.used} / {quotaSummary.total} scans
@@ -145,8 +149,16 @@ export default function SupabaseTest() {
           <p style={{ color: '#DEBC81', fontSize: '14px', margin: '5px 0' }}>
             Remaining: {quotaSummary.remaining}
           </p>
-          <p style={{ color: '#DEBC81', fontSize: '14px', margin: '5px 0' }}>
-            Can Scan: {quotaCheck.canScan ? '✅ Yes' : '❌ No'}
+          <p style={{ color: '#DEBC81', fontSize: '14px', margin: '5px 0', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            Can Scan: {quotaCheck.canScan ? (
+              <>
+                <CheckCircle size={16} style={{ color: '#0ECB81' }} /> Yes
+              </>
+            ) : (
+              <>
+                <XCircle size={16} style={{ color: '#F6465D' }} /> No
+              </>
+            )}
           </p>
           {!quotaCheck.canScan && (
             <p style={{ color: '#F6465D', fontSize: '12px', marginTop: '10px' }}>
@@ -170,9 +182,20 @@ export default function SupabaseTest() {
           <h3 style={{
             color: testResult.success ? '#0ECB81' : '#F6465D',
             fontSize: '16px',
-            marginBottom: '10px'
+            marginBottom: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
           }}>
-            {testResult.success ? '✅ Success' : '❌ Error'}
+            {testResult.success ? (
+              <>
+                <CheckCircle size={20} /> Success
+              </>
+            ) : (
+              <>
+                <XCircle size={20} /> Error
+              </>
+            )}
           </h3>
           <pre style={{
             color: '#DEBC81',

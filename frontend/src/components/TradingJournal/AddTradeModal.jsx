@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Edit, Plus, CheckCircle, AlertTriangle } from 'lucide-react'
 import './AddTradeModal.css'
 
 export default function AddTradeModal({ onClose, onSubmit, initialData = null, isEdit = false }) {
@@ -14,7 +15,7 @@ export default function AddTradeModal({ onClose, onSubmit, initialData = null, i
           take_profit: initialData.take_profit || '',
           pattern_used: initialData.pattern_used || '',
           notes: initialData.notes || '',
-          entry_at: initialData.entry_at ? new Date(initialData.entry_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+          entry_date: initialData.entry_date ? new Date(initialData.entry_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
         }
       : {
           symbol: '',
@@ -26,7 +27,7 @@ export default function AddTradeModal({ onClose, onSubmit, initialData = null, i
           take_profit: '',
           pattern_used: '',
           notes: '',
-          entry_at: new Date().toISOString().split('T')[0]
+          entry_date: new Date().toISOString().split('T')[0]
         }
   )
 
@@ -66,7 +67,7 @@ export default function AddTradeModal({ onClose, onSubmit, initialData = null, i
 
     // Validate
     if (!formData.symbol || !formData.entry_price || !formData.quantity) {
-      alert('⚠️ Vui lòng điền đủ thông tin bắt buộc')
+      alert('Vui lòng điền đủ thông tin bắt buộc')
       return
     }
 
@@ -84,8 +85,8 @@ export default function AddTradeModal({ onClose, onSubmit, initialData = null, i
       take_profit: formData.take_profit ? parseFloat(formData.take_profit) : null,
       pattern_used: formData.pattern_used || null,
       notes: formData.notes || null,
-      entry_at: new Date(formData.entry_at).toISOString(),
-      exit_at: formData.exit_price ? new Date().toISOString() : null,
+      entry_date: formData.entry_date,
+      exit_date: formData.exit_price ? new Date().toISOString().split('T')[0] : null,
       ...plData
     }
 
@@ -100,7 +101,13 @@ export default function AddTradeModal({ onClose, onSubmit, initialData = null, i
       <div className="add-trade-modal" onClick={(e) => e.stopPropagation()}>
         <button className="modal-close" onClick={onClose}>×</button>
 
-        <h2>{isEdit ? '✏️ Sửa Trade' : '➕ Thêm Trade Mới'}</h2>
+        <h2 style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          {isEdit ? <><Edit size={20} /> Sửa Trade</> : <><Plus size={20} /> Thêm Trade Mới</>}
+        </h2>
 
         <form onSubmit={handleSubmit} className="trade-form">
           <div className="form-row">
@@ -174,8 +181,8 @@ export default function AddTradeModal({ onClose, onSubmit, initialData = null, i
               <label>Entry Date <span className="required">*</span></label>
               <input
                 type="date"
-                name="entry_at"
-                value={formData.entry_at}
+                name="entry_date"
+                value={formData.entry_date}
                 onChange={handleChange}
                 required
               />
@@ -257,8 +264,15 @@ export default function AddTradeModal({ onClose, onSubmit, initialData = null, i
             <button
               type="submit"
               className="btn-submit"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                justifyContent: 'center'
+              }}
             >
-              {isEdit ? '✅ Cập Nhật' : '✅ Thêm Trade'}
+              <CheckCircle size={16} />
+              {isEdit ? 'Cập Nhật' : 'Thêm Trade'}
             </button>
           </div>
         </form>

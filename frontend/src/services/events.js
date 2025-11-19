@@ -163,7 +163,8 @@ class EventsService {
           required_tier: eventData.requiredTier || 'FREE',
           host_id: user.id,
           is_featured: false, // Hidden in modal, default to false
-          tags: eventData.tags || []
+          tags: eventData.tags || [],
+          image_url: eventData.imageUrl || null
         })
         .select()
         .single();

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import { useAuth } from '../../contexts/AuthContext'
 import AddTradeModal from './AddTradeModal'
+import { BarChart3, XCircle, CheckCircle, AlertTriangle, FileText, Trash2, Download, Sparkles } from 'lucide-react'
 import './TradingJournal.css'
 
 export default function TradingJournal() {
@@ -70,7 +71,7 @@ export default function TradingJournal() {
         .from('trading_journal')
         .select('*')
         .eq('user_id', user.id)
-        .order('entry_at', { ascending: false })
+        .order('entry_date', { ascending: false })
 
       // FREE tier: limit to 50 trades
       if (userTier === 'free') {
@@ -85,7 +86,7 @@ export default function TradingJournal() {
       calculateStats(data || [])
     } catch (error) {
       console.error('Error fetching trades:', error)
-      showNotificationModal('❌ Lỗi khi tải trades: ' + error.message, 'error')
+      showNotificationModal('Lỗi khi tải trades: ' + error.message, 'error')
     } finally {
       setLoading(false)
     }
@@ -152,7 +153,7 @@ export default function TradingJournal() {
     try {
       // Check tier limits
       if (userTier === 'free' && trades.length >= 50) {
-        showNotificationModal('⚠️ FREE tier chỉ lưu được 50 trades. Nâng cấp để unlimited!', 'warning')
+        showNotificationModal('FREE tier chỉ lưu được 50 trades. Nâng cấp để unlimited!', 'warning')
         return
       }
 
@@ -169,12 +170,12 @@ export default function TradingJournal() {
 
       if (error) throw error
 
-      showNotificationModal('✅ Đã thêm trade!', 'success')
+      showNotificationModal('Đã thêm trade!', 'success')
       setShowAddModal(false)
       fetchTrades()
     } catch (error) {
       console.error('Error adding trade:', error)
-      showNotificationModal('❌ Lỗi khi thêm trade: ' + error.message, 'error')
+      showNotificationModal('Lỗi khi thêm trade: ' + error.message, 'error')
     }
   }
 
@@ -188,13 +189,13 @@ export default function TradingJournal() {
 
       if (error) throw error
 
-      showNotificationModal('✅ Đã cập nhật trade!', 'success')
+      showNotificationModal('Đã cập nhật trade!', 'success')
       setShowEditModal(false)
       setEditingTrade(null)
       fetchTrades()
     } catch (error) {
       console.error('Error updating trade:', error)
-      showNotificationModal('❌ Lỗi khi cập nhật: ' + error.message, 'error')
+      showNotificationModal('Lỗi khi cập nhật: ' + error.message, 'error')
     }
   }
 
@@ -211,11 +212,11 @@ export default function TradingJournal() {
 
           if (error) throw error
 
-          showNotificationModal('✅ Đã xóa trade!', 'success')
+          showNotificationModal('Đã xóa trade!', 'success')
           fetchTrades()
         } catch (error) {
           console.error('Error deleting trade:', error)
-          showNotificationModal('❌ Lỗi khi xóa: ' + error.message, 'error')
+          showNotificationModal('Lỗi khi xóa: ' + error.message, 'error')
         }
       }
     )
@@ -223,7 +224,7 @@ export default function TradingJournal() {
 
   const handleExportCSV = () => {
     if (trades.length === 0) {
-      showNotificationModal('⚠️ Không có trades để export', 'warning')
+      showNotificationModal('Không có trades để export', 'warning')
       return
     }
 
@@ -231,7 +232,7 @@ export default function TradingJournal() {
     const headers = ['Date', 'Symbol', 'Type', 'Entry', 'Exit', 'Quantity', 'P&L', 'P&L %', 'Pattern', 'Notes']
 
     const rows = trades.map(t => [
-      new Date(t.entry_at).toLocaleDateString('vi-VN'),
+      new Date(t.entry_date).toLocaleDateString('vi-VN'),
       t.symbol,
       t.position_type?.toUpperCase(),
       t.entry_price,
@@ -255,7 +256,7 @@ export default function TradingJournal() {
     link.download = `trading_journal_${new Date().toISOString().split('T')[0]}.csv`
     link.click()
 
-    showNotificationModal('✅ Đã export CSV thành công!', 'success')
+    showNotificationModal('Đã export CSV thành công!', 'success')
   }
 
   if (loading) {
@@ -282,9 +283,13 @@ export default function TradingJournal() {
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
             textShadow: '0 0 60px rgba(255, 189, 89, 0.4)',
-            marginBottom: '8px'
+            marginBottom: '8px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px'
           }}>
-            📊 Trading Journal
+            <BarChart3 size={20} />
+            Trading Journal
           </h2>
           <span className="tier-badge">{userTier.toUpperCase()}</span>
         </div>
@@ -325,7 +330,8 @@ export default function TradingJournal() {
               }
             }}
           >
-            📥 Export CSV
+            <Download size={16} />
+            Export CSV
           </button>
 
           <button
@@ -359,7 +365,8 @@ export default function TradingJournal() {
               e.currentTarget.style.boxShadow = '0 4px 16px rgba(156, 6, 18, 0.3)';
             }}
           >
-            ✨ Thêm Trade
+            <Sparkles size={16} />
+            Thêm Trade
           </button>
         </div>
       </div>
@@ -494,7 +501,9 @@ export default function TradingJournal() {
       {/* Trades Table */}
       {trades.length === 0 ? (
         <div className="journal-empty">
-          <span className="empty-icon">📝</span>
+          <div className="empty-icon">
+            <FileText size={48} style={{ color: 'rgba(255, 189, 89, 0.5)' }} />
+          </div>
           <h3>Chưa có trades nào</h3>
           <p>Thêm trade đầu tiên để bắt đầu tracking!</p>
           <button
@@ -528,7 +537,8 @@ export default function TradingJournal() {
               e.currentTarget.style.boxShadow = '0 4px 16px rgba(156, 6, 18, 0.3)';
             }}
           >
-            ✨ Thêm Trade Đầu Tiên
+            <Sparkles size={16} />
+            Thêm Trade Đầu Tiên
           </button>
         </div>
       ) : (
@@ -551,7 +561,7 @@ export default function TradingJournal() {
             <tbody>
               {trades.map(trade => (
                 <tr key={trade.id} className={trade.exit_price ? 'closed' : 'open'}>
-                  <td>{new Date(trade.entry_at).toLocaleDateString('vi-VN')}</td>
+                  <td>{new Date(trade.entry_date).toLocaleDateString('vi-VN')}</td>
                   <td className="symbol">{trade.symbol}</td>
                   <td>
                     <span className={`type-badge ${trade.position_type}`}>
@@ -600,15 +610,25 @@ export default function TradingJournal() {
                           setShowEditModal(true)
                         }}
                         title="Sửa trade"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
                       >
-                        ✏️
+                        <FileText size={16} />
                       </button>
                       <button
                         className="btn-delete"
                         onClick={() => handleDeleteTrade(trade.id)}
                         title="Xóa trade"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}
                       >
-                        🗑️
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </td>
@@ -621,8 +641,13 @@ export default function TradingJournal() {
 
       {/* Tier Limit Warning */}
       {userTier === 'free' && trades.length >= 45 && (
-        <div className="tier-warning">
-          ⚠️ Bạn đã dùng {trades.length}/50 trades. <a href="#upgrade">Nâng cấp</a> để unlimited!
+        <div className="tier-warning" style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <AlertTriangle size={16} />
+          Bạn đã dùng {trades.length}/50 trades. <a href="#upgrade">Nâng cấp</a> để unlimited!
         </div>
       )}
 
@@ -653,9 +678,9 @@ export default function TradingJournal() {
           <div className={`notification-modal ${notificationType}`} onClick={(e) => e.stopPropagation()}>
             <button className="modal-close-btn" onClick={() => setShowNotification(false)}>✕</button>
             <div className="notification-icon">
-              {notificationType === 'success' && '✅'}
-              {notificationType === 'error' && '❌'}
-              {notificationType === 'warning' && '⚠️'}
+              {notificationType === 'success' && <CheckCircle size={48} />}
+              {notificationType === 'error' && <XCircle size={48} />}
+              {notificationType === 'warning' && <AlertTriangle size={48} />}
             </div>
             <p className="notification-message">{notificationMessage}</p>
             <button className="notification-ok-btn" onClick={() => setShowNotification(false)}>
@@ -670,7 +695,9 @@ export default function TradingJournal() {
         <div className="notification-modal-overlay" onClick={() => setShowConfirmation(false)}>
           <div className="notification-modal warning" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close-btn" onClick={() => setShowConfirmation(false)}>✕</button>
-            <div className="notification-icon">⚠️</div>
+            <div className="notification-icon">
+              <AlertTriangle size={48} />
+            </div>
             <p className="notification-message">{confirmationMessage}</p>
             <div className="confirmation-buttons">
               <button className="confirmation-cancel-btn" onClick={() => setShowConfirmation(false)}>

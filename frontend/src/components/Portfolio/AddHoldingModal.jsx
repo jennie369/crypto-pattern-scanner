@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Plus, CheckCircle, AlertTriangle, HelpCircle, BarChart3 } from 'lucide-react';
 import './AddHoldingModal.css';
 
 /**
@@ -125,7 +126,7 @@ export default function AddHoldingModal({ isOpen, onClose, onSubmit }) {
 
         {/* Modal Header */}
         <div className="modal-header">
-          <h2>➕ Add New Position</h2>
+          <h2><Plus size={20} style={{ display: 'inline', marginRight: '8px' }} /> Add New Position</h2>
           <button className="btn-close" onClick={onClose}>×</button>
         </div>
 
@@ -206,9 +207,9 @@ export default function AddHoldingModal({ isOpen, onClose, onSubmit }) {
                 onChange={handleChange}
                 className={errors.entryType ? 'error' : ''}
               >
-                <option value="RETEST">✅ RETEST (Recommended)</option>
-                <option value="BREAKOUT">⚠️ BREAKOUT (Not Recommended)</option>
-                <option value="OTHER">❓ OTHER</option>
+                <option value="RETEST">RETEST (Recommended)</option>
+                <option value="BREAKOUT">BREAKOUT (Not Recommended)</option>
+                <option value="OTHER">OTHER</option>
               </select>
               {errors.entryType && <span className="error-message">{errors.entryType}</span>}
             </div>
@@ -231,7 +232,7 @@ export default function AddHoldingModal({ isOpen, onClose, onSubmit }) {
           {/* Entry Type Warning for BREAKOUT */}
           {formData.entryType === 'BREAKOUT' && (
             <div className="warning-banner">
-              <div className="warning-icon">⚠️</div>
+              <div className="warning-icon"><AlertTriangle size={24} /></div>
               <div className="warning-content">
                 <div className="warning-title">BREAKOUT Entry Detected</div>
                 <div className="warning-message">
@@ -244,7 +245,7 @@ export default function AddHoldingModal({ isOpen, onClose, onSubmit }) {
           {/* Calculation Preview */}
           {totalCost > 0 && (
             <div className="calculation-preview">
-              <h3>📊 Position Preview</h3>
+              <h3><BarChart3 size={18} style={{ display: 'inline', marginRight: '8px' }} /> Position Preview</h3>
 
               <div className="preview-row">
                 <span className="preview-label">Total Cost:</span>
@@ -278,7 +279,7 @@ export default function AddHoldingModal({ isOpen, onClose, onSubmit }) {
               Cancel
             </button>
             <button type="submit" className="btn-submit">
-              ➕ Add Position
+              <Plus size={18} style={{ display: 'inline', marginRight: '6px' }} /> Add Position
             </button>
           </div>
 

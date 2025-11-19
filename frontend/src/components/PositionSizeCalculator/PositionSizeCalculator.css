@@ -1,0 +1,350 @@
+/* ========================================
+   POSITION SIZE CALCULATOR - TIER 1 TOOL
+   Simplified position sizing with glassmorphism design
+   ======================================== */
+
+.position-size-calculator {
+  width: 100%;
+  padding: 2rem;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+/* =====================================================
+   CALCULATOR CONTAINER
+   ===================================================== */
+.calculator-container {
+  max-width: 900px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Header */
+.calculator-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.calculator-header h2 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  font-size: 1.8rem;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.calculator-header p {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.95rem;
+}
+
+/* =====================================================
+   FORM STYLES
+   ===================================================== */
+.calculator-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.form-group input {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  color: #fff;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.12);
+  border-color: #FFBD59;
+  box-shadow: 0 0 0 3px rgba(255, 189, 89, 0.1);
+}
+
+.form-group input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.form-group small {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
+}
+
+/* Form Row (side by side inputs) */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* =====================================================
+   POSITION TYPE BUTTONS
+   ===================================================== */
+.position-type-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.type-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.type-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.type-btn.active {
+  border-width: 2px;
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.type-btn.active.long {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: #22c55e;
+  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+}
+
+.type-btn.active.short {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: #ef4444;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+/* =====================================================
+   CALCULATE BUTTON
+   ===================================================== */
+.btn-calculate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #FFBD59 0%, #ff9a3c 100%);
+  border: none;
+  border-radius: 12px;
+  color: #1a1a2e;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 189, 89, 0.4);
+  margin-top: 1rem;
+}
+
+.btn-calculate:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 189, 89, 0.6);
+}
+
+.btn-calculate:active {
+  transform: translateY(0);
+}
+
+/* =====================================================
+   RESULTS SECTION
+   ===================================================== */
+.calculation-results {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.calculation-results h3 {
+  color: #fff;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* Results Grid */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.result-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.25rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.result-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+/* Primary result card (Position Size) */
+.result-card.primary {
+  background: rgba(255, 189, 89, 0.1);
+  border-color: #FFBD59;
+}
+
+/* Positive result card */
+.result-card.positive {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: #22c55e;
+}
+
+/* Highlight result card (R:R) */
+.result-card.highlight {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: #3b82f6;
+}
+
+/* Result Icon */
+.result-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+  color: #FFBD59;
+}
+
+/* Result Label */
+.result-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Result Value */
+.result-value {
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.result-value.profit {
+  color: #22c55e;
+}
+
+.result-value.negative {
+  color: #ef4444;
+}
+
+/* Result Unit */
+.result-unit {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8rem;
+}
+
+/* Result Percent */
+.result-percent {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+}
+
+/* =====================================================
+   RESULTS SUMMARY
+   ===================================================== */
+.results-summary {
+  background: rgba(255, 189, 89, 0.05);
+  border: 1px solid rgba(255, 189, 89, 0.2);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.results-summary p {
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.results-summary strong {
+  color: #FFBD59;
+  font-weight: 600;
+}
+
+/* =====================================================
+   RESPONSIVE DESIGN
+   ===================================================== */
+@media (max-width: 768px) {
+  .position-size-calculator {
+    padding: 1rem;
+  }
+
+  .calculator-container {
+    padding: 1.5rem;
+  }
+
+  .calculator-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .position-type-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .results-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .result-value {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .calculator-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .btn-calculate {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+}

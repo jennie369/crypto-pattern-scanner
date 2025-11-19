@@ -196,7 +196,8 @@
 
 /* Coin List */
 .coin-list-scrollable {
-  max-height: 280px;
+  /* 🔥 FIX #3: Increase height to show more coins (10-12 visible) */
+  max-height: 450px;
   overflow-y: auto;
   padding: 8px;
 }
@@ -363,6 +364,7 @@
   }
 
   .coin-list-scrollable {
-    max-height: 200px;
+    /* Responsive: Still tall on mobile */
+    max-height: 350px;
   }
 }

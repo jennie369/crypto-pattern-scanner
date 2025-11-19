@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BarChart3, TrendingUp, TrendingDown, CircleDot, CheckCircle, XCircle, Mail } from 'lucide-react';
 import './History.css';
 
 /**
@@ -56,7 +57,7 @@ function History() {
   return (
     <div className="history-page">
       <div className="history-header">
-        <h1>📊 Pattern Detection History</h1>
+        <h1><BarChart3 size={28} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '8px' }} />Pattern Detection History</h1>
         <p className="subtitle">Track your past pattern detections and trading performance</p>
       </div>
 
@@ -72,13 +73,13 @@ function History() {
           className={`filter-btn bullish ${filter === 'bullish' ? 'active' : ''}`}
           onClick={() => setFilter('bullish')}
         >
-          🟢 Bullish
+          <TrendingUp size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />Bullish
         </button>
         <button
           className={`filter-btn bearish ${filter === 'bearish' ? 'active' : ''}`}
           onClick={() => setFilter('bearish')}
         >
-          🔴 Bearish
+          <TrendingDown size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />Bearish
         </button>
       </div>
 
@@ -108,12 +109,12 @@ function History() {
                     <span className="pattern-name">{item.pattern}</span>
                   </td>
                   <td className={`direction-cell ${item.direction}`}>
-                    {item.direction === 'bullish' ? '🟢 LONG' : '🔴 SHORT'}
+                    {item.direction === 'bullish' ? <><TrendingUp size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />LONG</> : <><TrendingDown size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />SHORT</>}
                   </td>
                   <td className="price-cell">${item.entry.toLocaleString()}</td>
                   <td className="price-cell">${item.exit.toLocaleString()}</td>
                   <td className={`result-cell ${item.result}`}>
-                    {item.result === 'win' ? '✅ Win' : '❌ Loss'}
+                    {item.result === 'win' ? <><CheckCircle size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />Win</> : <><XCircle size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />Loss</>}
                   </td>
                   <td className={`profit-cell ${item.profit >= 0 ? 'positive' : 'negative'}`}>
                     {item.profit >= 0 ? '+' : ''}{item.profit}%
@@ -123,7 +124,7 @@ function History() {
             ) : (
               <tr>
                 <td colSpan="8" className="empty-state">
-                  <div className="empty-icon">📭</div>
+                  <div className="empty-icon"><Mail size={48} /></div>
                   <p>No history found for this filter</p>
                 </td>
               </tr>

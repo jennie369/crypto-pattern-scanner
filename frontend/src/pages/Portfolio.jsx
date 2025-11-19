@@ -7,6 +7,7 @@ import HoldingsTable from '../components/Portfolio/HoldingsTable';
 import PortfolioStats from '../components/Portfolio/PortfolioStats';
 import EntryTypeAnalytics from '../components/Portfolio/EntryTypeAnalytics';
 import * as portfolioApi from '../services/portfolioApi';
+import { Briefcase, BarChart3, Gem, Scroll, TrendingUp, Mail } from 'lucide-react';
 // import './Portfolio.css'; // Commented out to use global styles from components.css
 
 /**
@@ -103,7 +104,7 @@ export default function Portfolio() {
         {/* Page Header */}
         <div className="portfolio-header">
           <div className="header-content">
-            <h1>💼 Portfolio Tracker</h1>
+            <h1><Briefcase size={28} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '8px' }} />Portfolio Tracker</h1>
             <p className="header-subtitle">Track your holdings and analyze entry type performance</p>
           </div>
 
@@ -121,25 +122,25 @@ export default function Portfolio() {
             className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
             onClick={() => setActiveTab('overview')}
           >
-            📊 Overview
+            <BarChart3 size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />Overview
           </button>
           <button
             className={`tab ${activeTab === 'holdings' ? 'active' : ''}`}
             onClick={() => setActiveTab('holdings')}
           >
-            💎 Holdings ({holdings.length})
+            <Gem size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />Holdings ({holdings.length})
           </button>
           <button
             className={`tab ${activeTab === 'history' ? 'active' : ''}`}
             onClick={() => setActiveTab('history')}
           >
-            📜 History ({transactions.length})
+            <Scroll size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />History ({transactions.length})
           </button>
           <button
             className={`tab ${activeTab === 'analytics' ? 'active' : ''}`}
             onClick={() => setActiveTab('analytics')}
           >
-            📈 Entry Analytics
+            <TrendingUp size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />Entry Analytics
           </button>
         </div>
 
@@ -155,11 +156,11 @@ export default function Portfolio() {
 
           {!loading && activeTab === 'overview' && (
             <div className="overview-tab">
-              <h2>📊 Portfolio Overview</h2>
+              <h2><BarChart3 size={24} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '8px' }} />Portfolio Overview</h2>
 
               {holdings.length === 0 ? (
                 <div className="empty-state">
-                  <div className="empty-icon">📭</div>
+                  <div className="empty-icon"><Mail size={48} /></div>
                   <h3>No Holdings Yet</h3>
                   <p>Click "Add Position" to start tracking your portfolio</p>
                   <button className="btn-primary" onClick={() => setShowAddModal(true)}>
@@ -172,7 +173,7 @@ export default function Portfolio() {
                     {/* Top Gainer */}
                     {stats?.topGainer && stats.topGainer.unrealized_pnl_percent > 0 && (
                       <div className="overview-card top-gainer">
-                        <div className="card-label">🔥 Top Gainer</div>
+                        <div className="card-label"><TrendingUp size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />Top Gainer</div>
                         <div className="card-symbol">{stats.topGainer.symbol}</div>
                         <div className="card-value positive">
                           +{stats.topGainer.unrealized_pnl_percent?.toFixed(2)}%
@@ -183,7 +184,7 @@ export default function Portfolio() {
                     {/* Top Loser */}
                     {stats?.topLoser && stats.topLoser.unrealized_pnl_percent < 0 && (
                       <div className="overview-card top-loser">
-                        <div className="card-label">📉 Top Loser</div>
+                        <div className="card-label">Top Loser</div>
                         <div className="card-symbol">{stats.topLoser.symbol}</div>
                         <div className="card-value negative">
                           {stats.topLoser.unrealized_pnl_percent?.toFixed(2)}%
@@ -193,7 +194,7 @@ export default function Portfolio() {
 
                     {/* Quick Actions */}
                     <div className="overview-card quick-actions">
-                      <div className="card-label">⚡ Quick Actions</div>
+                      <div className="card-label">Quick Actions</div>
                       <button onClick={() => setActiveTab('analytics')}>
                         View Entry Analytics
                       </button>
@@ -212,14 +213,14 @@ export default function Portfolio() {
 
           {!loading && activeTab === 'holdings' && (
             <div className="holdings-tab">
-              <h2>💎 Current Holdings ({holdings.length})</h2>
+              <h2><Gem size={24} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '8px' }} />Current Holdings ({holdings.length})</h2>
               <HoldingsTable holdings={holdings} onDelete={handleDeleteHolding} />
             </div>
           )}
 
           {!loading && activeTab === 'history' && (
             <div className="history-tab">
-              <h2>📜 Transaction History ({transactions.length})</h2>
+              <h2><Scroll size={24} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '8px' }} />Transaction History ({transactions.length})</h2>
 
               {transactions.length === 0 ? (
                 <div className="empty-state">

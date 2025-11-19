@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Star, TrendingUp, TrendingDown, X, RefreshCw } from 'lucide-react';
+import { Search, Star, TrendingUp, TrendingDown, X, RefreshCw, Globe, DollarSign, Link2, Gamepad2, Bot, Dog, Gem, BarChart3 } from 'lucide-react';
 import {
   fetchBinanceCoins,
   getCoinsForTier,
@@ -13,7 +13,7 @@ import {
 import './CoinSelectorAdvanced.css';
 
 /**
- * 💎 COIN SELECTOR ADVANCED
+ * COIN SELECTOR ADVANCED
  * Full Binance integration with 3-tier access system
  * Features: Search, Filters, Categories, Favorites, Real-time prices
  */
@@ -131,13 +131,13 @@ export const CoinSelectorAdvanced = ({ selectedCoin, onSelectCoin, userTier = 'F
   const tierInfo = getTierInfo();
 
   const categories = [
-    { id: 'all', name: 'All', icon: '🌐' },
-    { id: 'defi', name: 'DeFi', icon: '💰' },
-    { id: 'layer1', name: 'Layer 1', icon: '⛓️' },
-    { id: 'layer2', name: 'Layer 2', icon: '🔗' },
-    { id: 'meme', name: 'Meme', icon: '🐶' },
-    { id: 'gaming', name: 'Gaming', icon: '🎮' },
-    { id: 'ai', name: 'AI', icon: '🤖' },
+    { id: 'all', name: 'All', icon: Globe },
+    { id: 'defi', name: 'DeFi', icon: DollarSign },
+    { id: 'layer1', name: 'Layer 1', icon: Link2 },
+    { id: 'layer2', name: 'Layer 2', icon: Link2 },
+    { id: 'meme', name: 'Meme', icon: Dog },
+    { id: 'gaming', name: 'Gaming', icon: Gamepad2 },
+    { id: 'ai', name: 'AI', icon: Bot },
   ];
 
   return (
@@ -224,16 +224,19 @@ export const CoinSelectorAdvanced = ({ selectedCoin, onSelectCoin, userTier = 'F
 
               {/* Category Filters */}
               <div className="panel-categories">
-                {categories.map(category => (
-                  <button
-                    key={category.id}
-                    className={`category-btn ${activeCategory === category.id ? 'active' : ''}`}
-                    onClick={() => setActiveCategory(category.id)}
-                  >
-                    <span className="category-icon">{category.icon}</span>
-                    <span className="category-name">{category.name}</span>
-                  </button>
-                ))}
+                {categories.map(category => {
+                  const IconComponent = category.icon;
+                  return (
+                    <button
+                      key={category.id}
+                      className={`category-btn ${activeCategory === category.id ? 'active' : ''}`}
+                      onClick={() => setActiveCategory(category.id)}
+                    >
+                      <span className="category-icon"><IconComponent size={16} /></span>
+                      <span className="category-name">{category.name}</span>
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Sort Controls */}
@@ -244,7 +247,7 @@ export const CoinSelectorAdvanced = ({ selectedCoin, onSelectCoin, userTier = 'F
                     className={`sort-btn ${sortBy === 'volume' ? 'active' : ''}`}
                     onClick={() => setSortBy('volume')}
                   >
-                    📊 Volume
+                    <BarChart3 size={14} /> Volume
                   </button>
                   <button
                     className={`sort-btn ${sortBy === 'gainers' ? 'active' : ''}`}
@@ -348,7 +351,7 @@ export const CoinSelectorAdvanced = ({ selectedCoin, onSelectCoin, userTier = 'F
                 </div>
                 {userTier === 'FREE' && (
                   <div className="upgrade-hint">
-                    💎 Upgrade to <strong>TIER 2</strong> for 100 coins or <strong>TIER 3</strong> for 300+ coins
+                    <Gem size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} /> Upgrade to <strong>TIER 2</strong> for 100 coins or <strong>TIER 3</strong> for 300+ coins
                   </div>
                 )}
               </div>

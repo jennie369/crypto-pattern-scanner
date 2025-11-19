@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from '../hooks/useTranslation';
 import { useAuth } from '../contexts/AuthContext';
 import TelegramConnect from '../components/TelegramConnect/TelegramConnect';
+import { Settings as SettingsIcon, User, Lock, Globe, DollarSign, Bell, Save, RotateCcw, LogOut, RefreshCw, Smartphone, Mail, CheckCircle, XCircle, AlertTriangle, Gem, Crown, Clock } from 'lucide-react';
 // import './Settings.css'; // Commented out to use global styles from components.css
 
 /**
@@ -235,7 +236,7 @@ function Settings() {
     try {
       const result = await refreshProfile();
       if (result.success) {
-        showToast('✅ Profile refreshed successfully!', 'success');
+        showToast('Profile refreshed successfully!', 'success');
       } else {
         showToast(result.error || 'Failed to refresh profile', 'error');
       }
@@ -249,8 +250,8 @@ function Settings() {
       <div className="page-content narrow">
         <div style={{ padding: '40px 20px', maxWidth: '1400px', margin: '0 auto' }}>
           <div className="settings-header">
-            <h1 className="heading-gold" style={{ marginBottom: '32px' }}>
-              ⚙️ {t('settingsTitle')}
+            <h1 className="heading-gold" style={{ marginBottom: '32px', display: 'inline-flex', alignItems: 'center', gap: '12px' }}>
+              <SettingsIcon size={32} /> {t('settingsTitle')}
             </h1>
             <p className="text-muted" style={{ fontSize: '18px', marginBottom: '32px' }}>{t('configurePreferences')}</p>
           </div>
@@ -263,7 +264,7 @@ function Settings() {
               marginBottom: '24px'
             }}>
           <div className="section-header">
-            <h2>👤 {t('account')}</h2>
+            <h2 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><User size={20} /> {t('account')}</h2>
             <p>{user ? t('profile') : t('signInToAccount')}</p>
           </div>
 
@@ -297,8 +298,8 @@ function Settings() {
                     />
                   </div>
 
-                  <button type="submit" className="auth-submit-btn" disabled={authLoading}>
-                    {authLoading ? '⏳ Loading...' : `🔐 ${t('signIn')}`}
+                  <button type="submit" className="auth-submit-btn" disabled={authLoading} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    {authLoading ? <><Clock size={16} /> Loading...</> : <><Lock size={16} /> {t('signIn')}</>}
                   </button>
 
                   <div className="auth-switch">
@@ -363,8 +364,8 @@ function Settings() {
                     />
                   </div>
 
-                  <button type="submit" className="auth-submit-btn" disabled={authLoading}>
-                    {authLoading ? '⏳ Loading...' : `✨ ${t('createAccount')}`}
+                  <button type="submit" className="auth-submit-btn" disabled={authLoading} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    {authLoading ? <><Clock size={16} /> Loading...</> : <><User size={16} /> {t('createAccount')}</>}
                   </button>
 
                   <div className="auth-switch">
@@ -396,15 +397,15 @@ function Settings() {
 
                 <div className="profile-item">
                   <span className="profile-label">{t('accountTier')}:</span>
-                  <span className={`profile-tier ${profile?.tier || 'free'}`}>
-                    {profile?.tier === 'free' ? '🆓' : '💎'} {profile?.tier?.toUpperCase() || 'FREE'}
+                  <span className={`profile-tier ${profile?.tier || 'free'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    {profile?.tier === 'free' ? <CheckCircle size={16} /> : <Gem size={16} />} {profile?.tier?.toUpperCase() || 'FREE'}
                   </span>
                 </div>
 
                 <div className="profile-item">
                   <span className="profile-label">{t('role') || 'Role'}:</span>
-                  <span className={`profile-role ${profile?.role || 'user'}`}>
-                    {profile?.role === 'admin' ? '👑' : '👤'} {profile?.role?.toUpperCase() || 'USER'}
+                  <span className={`profile-role ${profile?.role || 'user'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    {profile?.role === 'admin' ? <Crown size={16} /> : <User size={16} />} {profile?.role?.toUpperCase() || 'USER'}
                   </span>
                 </div>
 
@@ -452,7 +453,7 @@ function Settings() {
                     e.target.style.boxShadow = '0 4px 20px rgba(255, 189, 89, 0.3)';
                   }}
                 >
-                  🔄 Refresh Profile
+                  <RefreshCw size={16} /> Refresh Profile
                 </button>
 
                 <button
@@ -480,7 +481,7 @@ function Settings() {
                     e.target.style.background = 'rgba(239, 68, 68, 0.1)';
                   }}
                 >
-                  🚪 {t('signOut')}
+                  <LogOut size={16} /> {t('signOut')}
                 </button>
               </div>
             </div>
@@ -505,7 +506,7 @@ function Settings() {
               marginBottom: '24px'
             }}>
           <div className="section-header">
-            <h2>🌐 {t('language')}</h2>
+            <h2 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><Globe size={20} /> {t('language')}</h2>
             <p>{t('chooseLanguage')}</p>
           </div>
 
@@ -518,7 +519,6 @@ function Settings() {
                 checked={language === 'en'}
                 onChange={(e) => setLanguage(e.target.value)}
               />
-              <span className="option-icon">🇺🇸</span>
               <span className="option-label">English</span>
             </label>
 
@@ -530,7 +530,6 @@ function Settings() {
                 checked={language === 'vi'}
                 onChange={(e) => setLanguage(e.target.value)}
               />
-              <span className="option-icon">🇻🇳</span>
               <span className="option-label">Tiếng Việt</span>
             </label>
 
@@ -542,7 +541,6 @@ function Settings() {
                 checked={language === 'zh'}
                 onChange={(e) => setLanguage(e.target.value)}
               />
-              <span className="option-icon">🇨🇳</span>
               <span className="option-label">中文</span>
             </label>
           </div>
@@ -555,7 +553,7 @@ function Settings() {
               marginBottom: '24px'
             }}>
           <div className="section-header">
-            <h2>💰 {t('currency')}</h2>
+            <h2 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><DollarSign size={20} /> {t('currency')}</h2>
             <p>{t('displayCurrency')}</p>
           </div>
 
@@ -605,14 +603,14 @@ function Settings() {
               marginBottom: '24px'
             }}>
           <div className="section-header">
-            <h2>🔔 {t('notifications')}</h2>
+            <h2 style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><Bell size={20} /> {t('notifications')}</h2>
             <p>{t('getAlerts')}</p>
           </div>
 
           <div className="notification-settings">
             <div className="notification-item">
               <div className="notification-info">
-                <div className="notification-icon">📱</div>
+                <div className="notification-icon"><Smartphone size={24} /></div>
                 <div className="notification-text">
                   <div className="notification-title">{t('telegramNotifications')}</div>
                   <div className="notification-desc">{t('receiveOnTelegram')}</div>
@@ -648,7 +646,7 @@ function Settings() {
 
             <div className="notification-item">
               <div className="notification-info">
-                <div className="notification-icon">📧</div>
+                <div className="notification-icon"><Mail size={24} /></div>
                 <div className="notification-text">
                   <div className="notification-title">{t('emailNotifications')}</div>
                   <div className="notification-desc">{t('receiveViaEmail')}</div>
@@ -668,7 +666,7 @@ function Settings() {
 
             <div className="notification-item">
               <div className="notification-info">
-                <div className="notification-icon">🌐</div>
+                <div className="notification-icon"><Globe size={24} /></div>
                 <div className="notification-text">
                   <div className="notification-title">{t('browserNotifications')}</div>
                   <div className="notification-desc">{t('showDesktopNotifications')}</div>
@@ -690,11 +688,11 @@ function Settings() {
 
             {/* Save Button */}
             <div className="settings-actions">
-              <button className="btn-primary" onClick={handleSave}>
-                💾 {t('saveSettings')}
+              <button className="btn-primary" onClick={handleSave} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <Save size={16} /> {t('saveSettings')}
               </button>
-              <button className="btn-secondary" onClick={handleReset}>
-                ↺ {t('resetDefault')}
+              <button className="btn-secondary" onClick={handleReset} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                <RotateCcw size={16} /> {t('resetDefault')}
               </button>
             </div>
           </div>
@@ -703,7 +701,7 @@ function Settings() {
           {toast && (
             <div className={`toast-notification ${toast.type === 'error' ? 'error' : ''}`}>
               <span className="toast-icon">
-                {toast.type === 'success' ? '✅' : '❌'}
+                {toast.type === 'success' ? <CheckCircle size={20} /> : <XCircle size={20} />}
               </span>
               <span>{toast.message}</span>
             </div>

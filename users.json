@@ -1,0 +1,27 @@
+{
+  "admin": {
+    "password": "admin123",
+    "role": "admin",
+    "tier": 3
+  },
+  "demo": {
+    "password": "demo123",
+    "role": "user",
+    "tier": 1
+  },
+  "premium": {
+    "password": "premium123",
+    "role": "user",
+    "tier": 2
+  },
+  "vip": {
+    "password": "vip123",
+    "role": "user",
+    "tier": 3
+  },
+  "customer1": {
+    "password": "pass123",
+    "role": "user",
+    "tier": 1
+  }
+}

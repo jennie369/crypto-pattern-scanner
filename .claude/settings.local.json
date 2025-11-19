@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Select-String -Pattern \"error\" -Context 2,2)",
+      "Bash(Select-Object -First 20)",
+      "Bash(supabase db push:*)",
+      "Bash(npx supabase:*)",
+      "Bash(npm install:*)",
+      "Bash(powershell -Command \"(Get-Content ''C:\\Users\\Jennie Chu\\Desktop\\Projects\\crypto-pattern-scanner\\frontend\\src\\pages\\Chatbot.jsx'').Count\")",
+      "Bash(powershell -Command \"(Get-Content ''C:\\Users\\Jennie Chu\\Desktop\\Projects\\crypto-pattern-scanner\\frontend\\src\\pages\\Account\\AccountDashboard.jsx'').Count\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

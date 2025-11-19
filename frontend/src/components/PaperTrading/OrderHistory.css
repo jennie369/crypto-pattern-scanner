@@ -1,0 +1,408 @@
+/* ==========================================
+   Order History Component Styles
+   ========================================== */
+
+.order-history-container {
+  padding: 2rem;
+  background: linear-gradient(135deg, rgba(30, 30, 40, 0.95), rgba(20, 20, 30, 0.95));
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ==========================================
+   Header
+   ========================================== */
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.history-header h2 {
+  margin: 0;
+  font-size: 1.75rem;
+  color: #fff;
+  font-weight: 700;
+}
+
+.btn-export {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-export:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.btn-export.disabled,
+.btn-export:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.4);
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ==========================================
+   Filters Section
+   ========================================== */
+
+.filters-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+
+.filters-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filter-group label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.filter-group input,
+.filter-group select {
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+  outline: none;
+  border-color: #3B82F6;
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.btn-clear-filters {
+  padding: 0.75rem 1.5rem;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.1);
+  color: #EF4444;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-clear-filters:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #EF4444;
+}
+
+.filters-locked {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(255, 165, 0, 0.1);
+  border: 1px solid rgba(255, 165, 0, 0.2);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.875rem;
+}
+
+.filters-locked .lock-icon {
+  font-size: 1.25rem;
+}
+
+.btn-upgrade-small {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #FFA500, #FF8C00);
+  color: #1a1a1a;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-upgrade-small:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(255, 165, 0, 0.3);
+}
+
+/* ==========================================
+   Orders Table
+   ========================================== */
+
+.orders-table-container {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow-x: auto;
+  margin-bottom: 1.5rem;
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1000px;
+}
+
+.orders-table thead tr {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.orders-table th {
+  padding: 1rem;
+  text-align: left;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.orders-table td {
+  padding: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.875rem;
+}
+
+.order-row {
+  transition: background 0.2s ease;
+}
+
+.order-row:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.date-cell {
+  white-space: nowrap;
+}
+
+.date-primary {
+  color: #fff;
+  font-weight: 600;
+}
+
+.date-secondary {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.symbol-cell {
+  font-weight: 700;
+  color: #fff;
+  font-family: monospace;
+}
+
+.side-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.side-badge.buy {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10B981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.side-badge.sell {
+  background: rgba(239, 68, 68, 0.2);
+  color: #EF4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.fee-cell {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+}
+
+.orders-table td.positive {
+  color: #10B981;
+  font-weight: 600;
+}
+
+.orders-table td.negative {
+  color: #EF4444;
+  font-weight: 600;
+}
+
+.orders-table td .na {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.filled {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10B981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-badge.cancelled {
+  background: rgba(255, 165, 0, 0.2);
+  color: #FFA500;
+  border: 1px solid rgba(255, 165, 0, 0.3);
+}
+
+.status-badge.rejected {
+  background: rgba(239, 68, 68, 0.2);
+  color: #EF4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* ==========================================
+   Orders Summary
+   ========================================== */
+
+.orders-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.summary-label {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+}
+
+.summary-value {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.summary-value.positive {
+  color: #10B981;
+}
+
+.summary-value.negative {
+  color: #EF4444;
+}
+
+/* ==========================================
+   Loading & Empty States
+   ========================================== */
+
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(59, 130, 246, 0.2);
+  border-top-color: #3B82F6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-state p,
+.empty-state p {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1rem;
+  margin: 0.5rem 0;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  margin: 0 0 0.5rem 0;
+  color: #fff;
+  font-size: 1.5rem;
+}
+
+/* ==========================================
+   Responsive
+   ========================================== */
+
+@media (max-width: 768px) {
+  .order-history-container {
+    padding: 1.5rem;
+  }
+
+  .history-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .filters-row {
+    grid-template-columns: 1fr;
+  }
+
+  .orders-summary {
+    grid-template-columns: 1fr;
+  }
+}

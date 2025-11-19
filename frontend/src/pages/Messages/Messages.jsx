@@ -135,7 +135,11 @@ export default function Messages() {
   }, [showActionsMenu]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'nearest'
+    });
   };
 
   const loadConversations = async () => {

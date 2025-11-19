@@ -1,9 +1,312 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, MapPin, Users, Clock, Plus, X, Filter, TrendingUp, Video, BookOpen, MessageSquare, Tag } from 'lucide-react';
+import { Calendar, MapPin, Users, Clock, Plus, X, Filter, TrendingUp, Video, BookOpen, MessageSquare, Tag, Edit2, Trash2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import eventsService from '../../services/events';
 import { useAuth } from '../../contexts/AuthContext';
+import ImageUpload from '../../components/ImageUpload/ImageUpload';
 import './Events.css';
+
+// =====================================================
+// EVENT EDIT MODAL COMPONENT
+// =====================================================
+const EventEditModal = ({ isOpen, onClose, event, onEventUpdated }) => {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    eventType: 'webinar',
+    startTime: '',
+    endTime: '',
+    location: '',
+    maxParticipants: 50,
+    requiredTier: 'FREE',
+    isOnline: true,
+    imageUrl: ''
+  });
+
+  // Pre-fill form when event changes
+  useEffect(() => {
+    if (event) {
+      setFormData({
+        title: event.title || '',
+        description: event.description || '',
+        eventType: event.event_type || 'webinar',
+        startTime: event.start_time ? new Date(event.start_time).toISOString().slice(0, 16) : '',
+        endTime: event.end_time ? new Date(event.end_time).toISOString().slice(0, 16) : '',
+        location: event.location || '',
+        maxParticipants: event.max_participants || 50,
+        requiredTier: event.required_tier || 'FREE',
+        isOnline: event.is_online !== undefined ? event.is_online : true,
+        imageUrl: event.image_url || ''
+      });
+    }
+  }, [event]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Validate times
+      const startTime = new Date(formData.startTime);
+      const endTime = new Date(formData.endTime);
+
+      if (endTime <= startTime) {
+        throw new Error('Thời gian kết thúc phải sau thời gian bắt đầu');
+      }
+
+      // Update event
+      const data = await eventsService.updateEvent(event.id, {
+        title: formData.title,
+        description: formData.description,
+        event_type: formData.eventType,
+        start_time: startTime.toISOString(),
+        end_time: endTime.toISOString(),
+        location: formData.location || null,
+        max_participants: parseInt(formData.maxParticipants),
+        required_tier: formData.requiredTier,
+        is_online: formData.isOnline,
+        image_url: formData.imageUrl || null
+      });
+
+      toast.success('Sự kiện đã được cập nhật!');
+
+      if (onEventUpdated) {
+        onEventUpdated(data);
+      }
+
+      onClose();
+
+    } catch (err) {
+      console.error('Event update error:', err);
+      const errorMessage = err.message || 'Có lỗi xảy ra khi cập nhật sự kiện';
+      setError(errorMessage);
+      toast.error('Lỗi: ' + errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content event-create-modal" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div className="modal-header">
+          <h2>Chỉnh Sửa Sự Kiện</h2>
+          <button className="modal-close" onClick={onClose} type="button">
+            <X size={24} />
+          </button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="event-create-form">
+
+          {/* Title */}
+          <div className="form-group">
+            <label htmlFor="title">
+              <Tag size={16} />
+              Tiêu Đề Sự Kiện *
+            </label>
+            <input
+              id="title"
+              name="title"
+              type="text"
+              value={formData.title}
+              onChange={handleChange}
+              placeholder="VD: Workshop Trading Pattern"
+              required
+              maxLength={100}
+            />
+          </div>
+
+          {/* Description */}
+          <div className="form-group">
+            <label htmlFor="description">Mô Tả *</label>
+            <textarea
+              id="description"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              placeholder="Nội dung chi tiết về sự kiện..."
+              rows={4}
+              required
+            />
+          </div>
+
+          {/* Cover Image */}
+          <div className="form-group">
+            <label>
+              <Tag size={16} />
+              Cover Image
+            </label>
+            <ImageUpload
+              currentImageUrl={formData.imageUrl}
+              onUploadComplete={(url) => {
+                setFormData(prev => ({ ...prev, imageUrl: url }));
+              }}
+              onRemove={() => {
+                setFormData(prev => ({ ...prev, imageUrl: '' }));
+              }}
+              bucket="event-covers"
+              folder="covers"
+            />
+          </div>
+
+          {/* Event Type */}
+          <div className="form-group">
+            <label htmlFor="eventType">Loại Sự Kiện *</label>
+            <select
+              id="eventType"
+              name="eventType"
+              value={formData.eventType}
+              onChange={handleChange}
+              required
+            >
+              <option value="webinar">🎥 Webinar Online</option>
+              <option value="workshop">🛠️ Workshop</option>
+              <option value="trading_session">📈 Trading Session</option>
+              <option value="meetup">🤝 Meetup Offline</option>
+            </select>
+          </div>
+
+          {/* Time Range */}
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="startTime">
+                <Calendar size={16} />
+                Thời Gian Bắt Đầu *
+              </label>
+              <input
+                id="startTime"
+                name="startTime"
+                type="datetime-local"
+                value={formData.startTime}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="endTime">
+                <Calendar size={16} />
+                Thời Gian Kết Thúc *
+              </label>
+              <input
+                id="endTime"
+                name="endTime"
+                type="datetime-local"
+                value={formData.endTime}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+
+          {/* Is Online Checkbox */}
+          <div className="form-group checkbox-group">
+            <label>
+              <input
+                type="checkbox"
+                name="isOnline"
+                checked={formData.isOnline}
+                onChange={handleChange}
+              />
+              <span>🌐 Sự kiện trực tuyến (Online)</span>
+            </label>
+          </div>
+
+          {/* Location & Capacity */}
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="location">
+                <MapPin size={16} />
+                Địa Điểm {formData.isOnline ? '(Link Zoom)' : '(Địa chỉ)'}
+              </label>
+              <input
+                id="location"
+                name="location"
+                type="text"
+                value={formData.location}
+                onChange={handleChange}
+                placeholder={formData.isOnline ? "https://zoom.us/j/..." : "123 Đường ABC, Quận 1, TP.HCM"}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="maxParticipants">
+                <Users size={16} />
+                Số Người Tối Đa
+              </label>
+              <input
+                id="maxParticipants"
+                name="maxParticipants"
+                type="number"
+                value={formData.maxParticipants}
+                onChange={handleChange}
+                min="1"
+                max="1000"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Tier Requirement */}
+          <div className="form-group">
+            <label htmlFor="requiredTier">Yêu Cầu Tier</label>
+            <select
+              id="requiredTier"
+              name="requiredTier"
+              value={formData.requiredTier}
+              onChange={handleChange}
+            >
+              <option value="FREE">🆓 FREE (Tất cả)</option>
+              <option value="TIER1">🔹 TIER 1 (Basic+)</option>
+              <option value="TIER2">💎 TIER 2 (Premium+)</option>
+              <option value="TIER3">👑 TIER 3 (VIP only)</option>
+            </select>
+          </div>
+
+          {/* Error Display */}
+          {error && (
+            <div className="error-message">
+              ⚠️ {error}
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="modal-actions">
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn-secondary"
+              disabled={loading}
+            >
+              Hủy
+            </button>
+            <button
+              type="submit"
+              className="btn-primary"
+              disabled={loading}
+            >
+              {loading ? 'Đang Cập Nhật...' : 'Lưu Thay Đổi'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
 
 // =====================================================
 // EVENT CREATE MODAL COMPONENT
@@ -21,7 +324,8 @@ const EventCreateModal = ({ isOpen, onClose, onEventCreated }) => {
     location: '',
     maxParticipants: 50,
     requiredTier: 'FREE',
-    isOnline: true
+    isOnline: true,
+    imageUrl: ''
   });
 
   const handleSubmit = async (e) => {
@@ -53,7 +357,8 @@ const EventCreateModal = ({ isOpen, onClose, onEventCreated }) => {
         location: formData.location || null,
         maxParticipants: parseInt(formData.maxParticipants),
         requiredTier: formData.requiredTier,
-        isOnline: formData.isOnline
+        isOnline: formData.isOnline,
+        imageUrl: formData.imageUrl || null
       });
 
       toast.success('Sự kiện đã được tạo thành công!');
@@ -140,6 +445,25 @@ const EventCreateModal = ({ isOpen, onClose, onEventCreated }) => {
               placeholder="Nội dung chi tiết về sự kiện..."
               rows={4}
               required
+            />
+          </div>
+
+          {/* Cover Image */}
+          <div className="form-group">
+            <label>
+              <Tag size={16} />
+              Cover Image
+            </label>
+            <ImageUpload
+              currentImageUrl={formData.imageUrl}
+              onUploadComplete={(url) => {
+                setFormData(prev => ({ ...prev, imageUrl: url }));
+              }}
+              onRemove={() => {
+                setFormData(prev => ({ ...prev, imageUrl: '' }));
+              }}
+              bucket="event-covers"
+              folder="covers"
             />
           </div>
 
@@ -297,6 +621,9 @@ export default function Events() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('upcoming'); // upcoming, past, my-events
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [eventToEdit, setEventToEdit] = useState(null);
+  const [eventToDelete, setEventToDelete] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [filters, setFilters] = useState({
     eventType: '',
@@ -359,6 +686,39 @@ export default function Events() {
     setEvents(prev => [newEvent, ...prev]);
     // Reload to get updated data
     loadEvents();
+  };
+
+  const handleEditEvent = (event, e) => {
+    e.stopPropagation();
+    setEventToEdit(event);
+    setShowEditModal(true);
+  };
+
+  const handleEventUpdated = (updatedEvent) => {
+    // Update event in the list
+    setEvents(prev => prev.map(e => e.id === updatedEvent.id ? updatedEvent : e));
+    setPastEvents(prev => prev.map(e => e.id === updatedEvent.id ? updatedEvent : e));
+    // Reload to get fresh data
+    loadEvents();
+  };
+
+  const handleDeleteEvent = async (eventId, e) => {
+    e.stopPropagation();
+
+    if (window.confirm('Bạn có chắc chắn muốn xóa sự kiện này?')) {
+      try {
+        await eventsService.deleteEvent(eventId);
+        toast.success('Sự kiện đã được xóa!');
+        // Remove from state
+        setEvents(prev => prev.filter(e => e.id !== eventId));
+        setPastEvents(prev => prev.filter(e => e.id !== eventId));
+        // Reload to get fresh data
+        loadEvents();
+      } catch (error) {
+        console.error('Error deleting event:', error);
+        toast.error('Không thể xóa sự kiện');
+      }
+    }
   };
 
   const getUserRsvpStatus = (eventId) => {
@@ -430,10 +790,31 @@ export default function Events() {
     const rsvpStatus = getUserRsvpStatus(event.id);
     const isFull = eventsService.isEventFull(event);
     const hasAccess = eventsService.hasEventAccess(event, profile?.scanner_tier || 'TIER1');
+    const isHost = user && event.host_id === user.id;
 
     return (
       <div key={event.id} className="event-card" onClick={() => setSelectedEvent(event)}>
         {event.is_featured && <div className="featured-badge"><TrendingUp size={16} style={{ marginRight: '6px' }} /> Featured</div>}
+
+        {/* Host Actions */}
+        {isHost && (
+          <div className="event-host-actions">
+            <button
+              className="btn-icon-action edit"
+              onClick={(e) => handleEditEvent(event, e)}
+              title="Chỉnh sửa"
+            >
+              <Edit2 size={18} />
+            </button>
+            <button
+              className="btn-icon-action delete"
+              onClick={(e) => handleDeleteEvent(event.id, e)}
+              title="Xóa"
+            >
+              <Trash2 size={18} />
+            </button>
+          </div>
+        )}
 
         <div className="event-image" style={{
           backgroundImage: event.image_url ? `url(${event.image_url})` : 'linear-gradient(135deg, #00D9FF 0%, #7B68EE 100%)'
@@ -703,6 +1084,17 @@ export default function Events() {
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onEventCreated={handleEventCreated}
+      />
+
+      {/* Edit Event Modal */}
+      <EventEditModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setEventToEdit(null);
+        }}
+        event={eventToEdit}
+        onEventUpdated={handleEventUpdated}
       />
     </div>
   );

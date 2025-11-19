@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { BarChart3, Lock, Clock, Star, TrendingUp, TrendingDown, ArrowUp, ArrowDown } from 'lucide-react'
 import './SRPanel.css'
 
 /**
@@ -12,11 +13,11 @@ export default function SRPanel({ srData, currentPrice, userTier, onLevelClick }
     return (
       <div className="sr-panel">
         <div className="sr-panel-header">
-          <h3>📊 Hỗ Trợ / Kháng Cự</h3>
+          <h3><BarChart3 className="w-5 h-5 inline mr-1" /> Hỗ Trợ / Kháng Cự</h3>
           <span className="tier-badge">{userTier?.toUpperCase() || 'FREE'}</span>
         </div>
         <div className="sr-empty">
-          <p>⏳ Đang phân tích dữ liệu...</p>
+          <p><Clock className="w-4 h-4 inline mr-1" /> Đang phân tích dữ liệu...</p>
           <small>Cần ít nhất 20 nến để phát hiện S/R</small>
         </div>
       </div>
@@ -39,13 +40,13 @@ export default function SRPanel({ srData, currentPrice, userTier, onLevelClick }
   return (
     <div className="sr-panel">
       <div className="sr-panel-header">
-        <h3>📊 Hỗ Trợ / Kháng Cự</h3>
+        <h3><BarChart3 className="w-5 h-5 inline mr-1" /> Hỗ Trợ / Kháng Cự</h3>
         <span className="tier-badge">{userTier?.toUpperCase() || 'FREE'}</span>
       </div>
 
       {isFree && (
         <div className="sr-free-notice">
-          <span className="lock-icon">🔒</span>
+          <span className="lock-icon"><Lock className="w-4 h-4" /></span>
           <span>FREE: Chỉ hiển thị 3 levels gần nhất</span>
         </div>
       )}
@@ -76,13 +77,13 @@ export default function SRPanel({ srData, currentPrice, userTier, onLevelClick }
       {srData.keyLevels && srData.keyLevels.length > 0 && (
         <div className="sr-key-levels">
           <div className="key-levels-title">
-            <span>⭐</span>
+            <span><Star className="w-4 h-4" /></span>
             <strong>Vùng Quan Trọng</strong>
           </div>
           {srData.keyLevels.map((level, index) => (
             <div key={index} className={`key-level ${level.type}`}>
               <div className="key-level-type">
-                {level.type === 'support' ? '🟢 HỖ TRỢ' : '🔴 KHÁNG CỰ'}
+                {level.type === 'support' ? <><TrendingUp className="w-4 h-4 inline mr-1 text-green-500" /> HỖ TRỢ</> : <><TrendingDown className="w-4 h-4 inline mr-1 text-red-500" /> KHÁNG CỰ</>}
               </div>
               <div className="key-level-price">
                 ${level.price.toFixed(2)}
@@ -116,7 +117,7 @@ export default function SRPanel({ srData, currentPrice, userTier, onLevelClick }
               >
                 <div className="sr-level-header">
                   <div className="sr-level-type-icon">
-                    {level.type === 'support' ? '🟢' : '🔴'}
+                    {level.type === 'support' ? <TrendingUp className="w-5 h-5 text-green-500" /> : <TrendingDown className="w-5 h-5 text-red-500" />}
                   </div>
                   <div className="sr-level-info">
                     <div className="sr-level-price">
@@ -125,7 +126,7 @@ export default function SRPanel({ srData, currentPrice, userTier, onLevelClick }
                     <div className="sr-level-meta">
                       <span className="sr-touches">{level.touches}x chạm</span>
                       <span className="sr-distance">
-                        {distance}% {direction === 'above' ? '↑' : '↓'}
+                        {distance}% {direction === 'above' ? <ArrowUp className="w-3 h-3 inline" /> : <ArrowDown className="w-3 h-3 inline" />}
                       </span>
                     </div>
                   </div>
@@ -151,7 +152,7 @@ export default function SRPanel({ srData, currentPrice, userTier, onLevelClick }
                 {/* Last Tested */}
                 <div className="sr-level-footer">
                   <span className="sr-last-tested">
-                    ⏱️ Lần cuối: {formatTime(level.lastTested)}
+                    <Clock className="w-3 h-3 inline mr-1" /> Lần cuối: {formatTime(level.lastTested)}
                   </span>
                 </div>
               </div>
