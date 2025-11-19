@@ -42,11 +42,23 @@ export default function MagicCardExport({
 
   const cardColor = getCardColor(cardType);
 
+  // Clean text - remove markdown symbols
+  const cleanText = (text) => {
+    if (!text) return '';
+    return text
+      .replace(/\*\*/g, '')  // Remove **
+      .replace(/\*/g, '')    // Remove *
+      .replace(/##/g, '')    // Remove ##
+      .replace(/###/g, '')   // Remove ###
+      .trim();
+  };
+
   // Extract title from response text (first line or first 50 chars)
   const extractTitle = (text) => {
     if (!text) return 'GEM Master Card';
 
-    const lines = text.split('\n');
+    const cleanedText = cleanText(text);
+    const lines = cleanedText.split('\n');
     const firstLine = lines[0];
 
     if (firstLine.length > 50) {
@@ -112,7 +124,7 @@ export default function MagicCardExport({
   if (!isOpen || !response) return null;
 
   const title = extractTitle(response.title || response.text);
-  const description = response.text;
+  const description = cleanText(response.text);
   const collectionType = response.type || 'Manifestation';
 
   return (

@@ -5,6 +5,8 @@
   backdrop-filter: blur(10px);
   border-radius: 12px;
   border: 1px solid rgba(255, 189, 89, 0.2);
+  transform: scale(0.6);
+  transform-origin: left top;
 }
 
 .hexagram-lines {

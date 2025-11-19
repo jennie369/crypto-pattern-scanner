@@ -277,12 +277,10 @@
   left: -2px;
   right: -2px;
   bottom: -2px;
-  background: linear-gradient(135deg, #00D9FF, #FFBD59, #8B5CF6, #00FF88, #00D9FF);
-  background-size: 400% 400%;
+  background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(139, 92, 246, 0.1));
   border-radius: 24px;
   z-index: -1;
   opacity: 0.3;
-  animation: gradientShift 8s ease infinite;
   filter: blur(6px);
 }
 

@@ -7,11 +7,13 @@
   margin: 12px 0;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   animation: slideInUp 0.5s ease-out;
-  max-width: 380px;
+  max-width: 228px;
+  transform: scale(0.6);
+  transform-origin: left top;
 }
 
 .product-card:hover {
-  transform: translateY(-4px) scale(1.02);
+  transform: translateY(-4px) scale(0.63);
   box-shadow:
     0 20px 40px rgba(0, 0, 0, 0.4),
     0 0 60px rgba(255, 189, 89, 0.2);
