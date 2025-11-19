@@ -1050,8 +1050,8 @@ export default function Chatbot() {
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            gap: '0',
-            padding: '24px 20px',
+            gap: '10px',
+            padding: '16px',
             overflowY: 'auto',
             overflowX: 'hidden',
             width: '100%'
@@ -1063,18 +1063,18 @@ export default function Chatbot() {
             {/* Widget Suggestions */}
             {detectedWidgets.length > 0 && (
               <div style={{
-                padding: '16px',
+                padding: '12px',
                 background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(0, 217, 255, 0.1))',
                 backdropFilter: 'blur(10px)',
                 borderRadius: '12px',
                 border: '1px solid rgba(139, 92, 246, 0.3)',
-                marginTop: '16px'
+                marginTop: '12px'
               }}>
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  marginBottom: '12px'
+                  marginBottom: '8px'
                 }}>
                   <Lightbulb size={20} color="#8B5CF6" />
                   <span style={{ fontSize: '14px', fontWeight: '600', color: '#8B5CF6' }}>
