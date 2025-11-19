@@ -1,0 +1,692 @@
+/* ============================================
+   🎨 SECTION 4 - LIFESTYLE (Instagram Aesthetic)
+   ============================================ */
+
+/* Import GEM Design Tokens */
+.lifestyle-section {
+  /* Colors từ GEM */
+  --bg-base-dark: #0A1628;
+  --bg-base-mid: #0D1B2A;
+  --bg-base-light: #0F172A;
+
+  --glow-blue-bright: rgba(59, 130, 246, 0.5);
+  --glow-blue-medium: rgba(37, 99, 235, 0.25);
+
+  --brand-burgundy: #9C0612;
+  --brand-gold: #FFBD59;
+  --brand-gold-light: #DEBC81;
+
+  --glass-bg: rgba(30, 42, 94, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.12);
+
+  /* Typography từ GEM */
+  --font-display: 'Montserrat', sans-serif;
+  --font-body: 'Noto Sans Display', sans-serif;
+
+  /* Spacing */
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 50px;
+}
+
+/* ============================================
+   SECTION LAYOUT
+   ============================================ */
+.lifestyle-section {
+  position: relative;
+  /* Background removed - using page background */
+  padding: 6rem 2rem;
+  overflow: hidden;
+}
+
+.lifestyle-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 3rem;
+  position: relative;
+  z-index: 10;
+}
+
+/* ============================================
+   SECTION HEADER
+   ============================================ */
+.lifestyle-header {
+  text-align: center;
+  margin-bottom: 4rem;
+  animation: slideUp 0.8s ease-out;
+}
+
+.lifestyle-eyebrow {
+  color: var(--brand-gold);
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-bottom: 1.5rem;
+  font-family: var(--font-display);
+}
+
+.lifestyle-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+  color: #FFFFFF;
+}
+
+.lifestyle-title .gradient-text {
+  background: linear-gradient(135deg, var(--brand-gold) 0%, #FFD700 50%, #FFF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 20px rgba(255, 189, 89, 0.6));
+}
+
+.lifestyle-subtitle {
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  color: var(--brand-gold-light);
+  font-family: var(--font-body);
+  line-height: 1.6;
+}
+
+/* ============================================
+   SOCIAL PROOF BADGES
+   ============================================ */
+.social-proof-badges {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 4rem;
+}
+
+.badge-item {
+  background: rgba(30, 42, 94, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 32px;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.badge-item:hover {
+  border-color: rgba(255, 189, 89, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+}
+
+.badge-icon {
+  font-size: 2.5rem;
+}
+
+.badge-content {
+  flex: 1;
+}
+
+.badge-count {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--brand-gold);
+  margin-bottom: 0.25rem;
+}
+
+.badge-label {
+  font-size: 0.95rem;
+  color: var(--brand-gold-light);
+  font-family: var(--font-body);
+}
+
+/* ============================================
+   LIFESTYLE CARDS GRID
+   ============================================ */
+.lifestyle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  margin-bottom: 5rem;
+}
+
+.lifestyle-card {
+  background: rgba(30, 42, 94, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.lifestyle-card:hover {
+  border-color: rgba(255, 189, 89, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+}
+
+/* Badge */
+.lifestyle-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: var(--brand-burgundy);
+  border: 1px solid var(--brand-gold);
+  border-radius: var(--radius-full);
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--brand-gold);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Image */
+.lifestyle-image {
+  position: relative;
+  width: 100%;
+  height: 250px;
+  background: linear-gradient(135deg, rgba(156, 6, 18, 0.3), rgba(255, 189, 89, 0.2));
+  overflow: hidden;
+}
+
+.image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 5rem;
+  opacity: 0.3;
+}
+
+.image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.7) 100%);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.lifestyle-icon {
+  font-size: 3rem;
+}
+
+/* Content */
+.lifestyle-content {
+  padding: 2rem;
+}
+
+.lifestyle-card-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-bottom: 1rem;
+}
+
+.lifestyle-description {
+  font-size: 1.05rem;
+  color: var(--brand-gold-light);
+  line-height: 1.7;
+  margin-bottom: 1.5rem;
+  font-family: var(--font-body);
+}
+
+/* Features */
+.lifestyle-features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.feature-check {
+  width: 20px;
+  height: 20px;
+  background: var(--brand-gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-burgundy);
+  font-size: 0.85rem;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.feature-text {
+  font-size: 0.95rem;
+  color: #D1D5DB;
+  font-family: var(--font-body);
+}
+
+/* Hashtags */
+.lifestyle-hashtags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.hashtag {
+  background: rgba(255, 189, 89, 0.15);
+  border: 1px solid rgba(255, 189, 89, 0.3);
+  border-radius: var(--radius-full);
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
+  color: var(--brand-gold);
+  font-family: var(--font-body);
+  font-weight: 600;
+}
+
+/* Engagement Stats */
+.engagement-stats {
+  display: flex;
+  gap: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--glass-border);
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--brand-gold-light);
+  font-family: var(--font-body);
+  font-size: 1rem;
+}
+
+.stat svg {
+  color: var(--brand-gold);
+}
+
+/* ============================================
+   UGC STATS
+   ============================================ */
+.ugc-stats {
+  background: rgba(30, 42, 94, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 32px;
+  margin-bottom: 5rem;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  transition: all 0.3s ease;
+}
+
+.ugc-stats:hover {
+  border-color: rgba(255, 189, 89, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+}
+
+.ugc-header {
+  margin-bottom: 3rem;
+}
+
+.ugc-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 700;
+  color: var(--brand-gold);
+  margin-bottom: 1rem;
+}
+
+.ugc-subtitle {
+  font-size: 1.2rem;
+  color: var(--brand-gold-light);
+  font-family: var(--font-body);
+}
+
+.ugc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.ugc-stat-card {
+  background: rgba(30, 42, 94, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 32px;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.ugc-stat-card:hover {
+  border-color: rgba(255, 189, 89, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+}
+
+.ugc-number {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--brand-gold);
+  margin-bottom: 0.5rem;
+}
+
+.ugc-label {
+  font-size: 1.1rem;
+  color: #FFFFFF;
+  margin-bottom: 0.75rem;
+  font-family: var(--font-body);
+}
+
+.ugc-growth {
+  font-size: 0.95rem;
+  color: var(--brand-gold-light);
+  font-family: var(--font-body);
+}
+
+.ugc-gallery {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+}
+
+.ugc-gallery-text {
+  font-size: 1.2rem;
+  color: var(--brand-gold-light);
+  font-family: var(--font-body);
+}
+
+.ugc-gallery-text strong {
+  color: var(--brand-gold);
+  font-weight: 700;
+}
+
+/* ============================================
+   INFLUENCER SECTION
+   ============================================ */
+.influencer-section {
+  margin-bottom: 5rem;
+}
+
+.influencer-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 700;
+  color: var(--brand-gold);
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.influencer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.influencer-card {
+  background: linear-gradient(135deg,
+    rgba(30, 58, 138, 0.4) 0%,
+    rgba(17, 24, 39, 0.6) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: 20px;
+  padding: 32px;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.influencer-card:hover {
+  border-color: rgba(59, 130, 246, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.45),
+              0 0 40px rgba(59, 130, 246, 0.1);
+}
+
+.influencer-header {
+  display: flex;
+  gap: 1.25rem;
+  align-items: start;
+  margin-bottom: 1.5rem;
+}
+
+.influencer-avatar {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, var(--brand-burgundy), var(--brand-gold));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  border: 3px solid var(--brand-gold);
+}
+
+.influencer-info {
+  flex: 1;
+}
+
+.influencer-name {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.verified-badge {
+  background: var(--brand-gold);
+  color: var(--brand-burgundy);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.influencer-handle {
+  font-size: 0.95rem;
+  color: var(--brand-gold-light);
+  margin-bottom: 0.5rem;
+  font-family: var(--font-body);
+}
+
+.influencer-followers {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--brand-gold);
+  font-family: var(--font-body);
+}
+
+.influencer-quote {
+  margin-bottom: 1.5rem;
+}
+
+.quote-text {
+  font-size: 1.05rem;
+  color: #D1D5DB;
+  font-style: italic;
+  line-height: 1.7;
+  font-family: var(--font-body);
+}
+
+.btn-follow {
+  width: 100%;
+  background: linear-gradient(135deg, var(--brand-burgundy), #6B0F1A);
+  border: 2px solid var(--brand-gold);
+  border-radius: var(--radius-full);
+  padding: 0.9rem 1.5rem;
+  color: #FFFFFF;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.btn-follow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(156, 6, 18, 0.5);
+}
+
+/* ============================================
+   LIFESTYLE CTA
+   ============================================ */
+.lifestyle-cta {
+  text-align: center;
+  background: rgba(30, 42, 94, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  transition: all 0.3s ease;
+}
+
+.lifestyle-cta:hover {
+  border-color: rgba(255, 189, 89, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+}
+
+.cta-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-bottom: 2rem;
+}
+
+.btn-lifestyle-cta {
+  background: linear-gradient(135deg, var(--brand-burgundy), #6B0F1A);
+  border: 2px solid var(--brand-gold);
+  border-radius: var(--radius-full);
+  padding: 1.2rem 3rem;
+  color: #FFFFFF;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 8px 24px rgba(156, 6, 18, 0.4);
+}
+
+.btn-lifestyle-cta:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(156, 6, 18, 0.6);
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   MOBILE RESPONSIVE
+   ============================================ */
+@media (min-width: 1920px) {
+  .lifestyle-container {
+    max-width: 1600px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .lifestyle-container {
+    padding: 0 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .lifestyle-section {
+    padding: 3rem 1rem;
+  }
+
+  .lifestyle-container {
+    padding: 0 1.5rem;
+  }
+
+  .social-proof-badges {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .lifestyle-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ugc-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .influencer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .engagement-stats {
+    gap: 1rem;
+  }
+
+  .lifestyle-cta {
+    padding: 2rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .lifestyle-container {
+    padding: 0 1rem;
+  }
+
+  .social-proof-badges {
+    grid-template-columns: 1fr;
+  }
+
+  .badge-item {
+    padding: 1.25rem;
+  }
+
+  .lifestyle-content {
+    padding: 1.5rem;
+  }
+}
