@@ -171,13 +171,16 @@
    CRYSTAL/HEXAGRAM/TAROT DISPLAY
    ============================================ */
 
+/* Magic card visual container */
+.magic-card-visual,
 .crystal-container {
-  width: 180px;
-  height: 180px;
-  margin-bottom: 25px;
+  width: 140px;
+  height: 140px;
+  margin: 10px auto 15px;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   position: relative;
 }
 
@@ -235,6 +238,38 @@
   animation: floatCrystal 3s ease-in-out infinite;
 }
 
+/* Hexagram trong magic card - FIX OVERFLOW */
+.hexagram-in-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  max-width: 120px;
+  margin: 0 auto;
+}
+
+.hexagram-in-card .hex-line {
+  width: 80px;
+  height: 5px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.hexagram-in-card .hex-line.solid {
+  background: linear-gradient(90deg, #FFBD59, #FFD700);
+  box-shadow: 0 0 10px rgba(255, 189, 89, 0.5);
+  border-radius: 2px;
+}
+
+.hexagram-in-card .seg-left,
+.hexagram-in-card .seg-right {
+  width: 35px;
+  height: 100%;
+  background: linear-gradient(90deg, #FFBD59, #FFD700);
+  box-shadow: 0 0 10px rgba(255, 189, 89, 0.5);
+  border-radius: 2px;
+}
+
 /* ============================================
    CARD TITLE
    ============================================ */
@@ -272,15 +307,15 @@
 
 .card-description {
   font-family: 'Inter', sans-serif;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 400;
   color: rgba(255, 255, 255, 0.85);
   text-align: center;
-  line-height: 1.6;
+  line-height: 1.4;
   margin-bottom: auto;
-  max-height: 200px;
+  max-height: 150px;
   overflow-y: auto;
-  padding: 0 10px;
+  padding: 0 8px;
   position: relative;
   z-index: 2;
 }
