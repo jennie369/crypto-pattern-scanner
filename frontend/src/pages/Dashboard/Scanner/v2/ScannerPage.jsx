@@ -17,6 +17,7 @@ import './ScannerPage.css';
  * Week 3, Day 18-21
  *
  * STATE PERSISTENCE: Uses Zustand store for persistent state across page refreshes
+ * UPDATED: 2025-01-19 - Testing ultra-simple widgets
  */
 export const ScannerPage = () => {
   // Zustand store for persistent state
@@ -231,7 +232,7 @@ export const ScannerPage = () => {
               pattern={selectedPattern}
             />
 
-            {/* Paper Trading Widgets */}
+            {/* Paper Trading Widgets - ULTRA-SIMPLE VERSION (No API calls) */}
             <div className="paper-trading-widgets-section">
               <OpenPositionsWidget
                 onOpenPaperTrading={handleOpenPaperTrading}

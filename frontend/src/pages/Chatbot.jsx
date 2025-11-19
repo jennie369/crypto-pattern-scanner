@@ -313,8 +313,8 @@ export default function Chatbot() {
 
       // Detect widgets in bot response
       const widgets = widgetDetector.detectWidgets(botMessage.content, {
-        coin: extractCoin(currentInput),
-        userInput: currentInput
+        coin: extractCoin(action),
+        userInput: action
       });
       if (widgets.length > 0) {
         console.log('🎯 Detected widgets:', widgets);

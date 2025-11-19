@@ -7,7 +7,8 @@
       "Bash(npx supabase:*)",
       "Bash(npm install:*)",
       "Bash(powershell -Command \"(Get-Content ''C:\\Users\\Jennie Chu\\Desktop\\Projects\\crypto-pattern-scanner\\frontend\\src\\pages\\Chatbot.jsx'').Count\")",
-      "Bash(powershell -Command \"(Get-Content ''C:\\Users\\Jennie Chu\\Desktop\\Projects\\crypto-pattern-scanner\\frontend\\src\\pages\\Account\\AccountDashboard.jsx'').Count\")"
+      "Bash(powershell -Command \"(Get-Content ''C:\\Users\\Jennie Chu\\Desktop\\Projects\\crypto-pattern-scanner\\frontend\\src\\pages\\Account\\AccountDashboard.jsx'').Count\")",
+      "Bash(powershell -Command \"(Get-Content ''C:\\Users\\Jennie Chu\\Desktop\\Projects\\crypto-pattern-scanner\\frontend\\src\\pages\\Account\\AccountDashboard.jsx'') | Select-String -Pattern ''onMouseEnter.*position.*relative'' -Context 0,10\")"
     ],
     "deny": [],
     "ask": []
