@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import html2canvas from 'html2canvas';
 import './MagicCardExport.css';
 
@@ -9,6 +9,12 @@ export default function MagicCardExport({
   onClose
 }) {
   const cardRef = useRef(null);
+
+  // Get random crystal image (1-5)
+  const randomCrystalImage = useMemo(() => {
+    const randomNum = Math.floor(Math.random() * 5) + 1;
+    return `/assets/crystals/crystal-${randomNum}.png`;
+  }, []);
 
   // Map response type to crystal type
   const getCrystalType = (type) => {
@@ -142,15 +148,37 @@ export default function MagicCardExport({
 
             {/* Card content container */}
             <div className="card-inner">
-              {/* Crystal image - using CSS crystal as fallback */}
+              {/* Crystal/Hexagram/Tarot image */}
               <div className="crystal-container">
-                <div className={`css-crystal crystal-${crystal}`}>
-                  <div className="crystal-facet facet-1"></div>
-                  <div className="crystal-facet facet-2"></div>
-                  <div className="crystal-facet facet-3"></div>
-                  <div className="crystal-facet facet-4"></div>
-                  <div className="crystal-glow"></div>
-                </div>
+                {response.hexagram ? (
+                  // Show hexagram visual if available
+                  <div className="card-hexagram-display">
+                    <div className="hexagram-lines-card">
+                      {response.hexagram.lines.map((line, idx) => (
+                        <div key={idx} className={`hex-line-card ${line === 1 ? 'solid' : 'broken'}`}>
+                          {line === 0 && (
+                            <>
+                              <div className="seg-left"></div>
+                              <div className="seg-right"></div>
+                            </>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : response.tarotCard ? (
+                  // Show tarot card info if available
+                  <div className="card-tarot-display">
+                    <div className="tarot-card-name">{response.tarotCard}</div>
+                  </div>
+                ) : (
+                  // Default: show random crystal image
+                  <img
+                    src={randomCrystalImage}
+                    alt="Crystal"
+                    className="crystal-image"
+                  />
+                )}
               </div>
 
               {/* Card title */}

@@ -1,12 +1,13 @@
 .hexagram-visual {
-  margin: 16px 0;
-  padding: 20px;
+  margin: 8px 0;
+  padding: 8px;
   background: rgba(156, 6, 18, 0.1);
   backdrop-filter: blur(10px);
-  border-radius: 12px;
+  border-radius: 6px;
   border: 1px solid rgba(255, 189, 89, 0.2);
-  transform: scale(0.6);
+  transform: scale(0.35);
   transform-origin: left top;
+  max-width: 200px;
 }
 
 .hexagram-lines {
