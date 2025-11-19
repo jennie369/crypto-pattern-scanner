@@ -1372,8 +1372,8 @@ function MessageBubble({ message, onExport }) {
       <div style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '12px',
-        marginBottom: '16px',
+        gap: '8px',
+        marginBottom: '8px',
         width: '100%',
         alignItems: 'flex-start'
       }}>
@@ -1410,7 +1410,7 @@ function MessageBubble({ message, onExport }) {
     boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
     backdropFilter: 'blur(20px)',
     WebkitBackdropFilter: 'blur(20px)',
-    marginBottom: '16px',
+    marginBottom: '8px',
     display: 'block',
     width: 'fit-content'
   };
@@ -1460,10 +1460,10 @@ function MessageBubble({ message, onExport }) {
 
   const tarotSpreadStyle = {
     display: 'flex',
-    gap: '16px',
+    gap: '12px',
     justifyContent: 'center',
     flexWrap: 'wrap',
-    margin: '16px 0'
+    margin: '8px 0'
   };
 
   return (
