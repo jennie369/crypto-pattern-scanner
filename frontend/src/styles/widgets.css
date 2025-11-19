@@ -1,0 +1,332 @@
+/* Widget Glassmorphism Styles */
+
+.widget {
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.1) 0%,
+    rgba(0, 217, 255, 0.1) 100%
+  );
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.widget:hover:not(.preview-mode) {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.widget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.widget-header h3 {
+  font-size: 1.2em;
+  color: #fff;
+  margin: 0;
+}
+
+.widget-menu {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.widget-menu:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.widget-body {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.widget-footer {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.widget-meta {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85em;
+}
+
+/* Goal Card Styles */
+.goal-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-label {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85em;
+}
+
+.stat-value {
+  color: #fff;
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+/* Progress Bar */
+.progress-bar-container {
+  width: 100%;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  overflow: hidden;
+  margin: 16px 0;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8B5CF6, #00D9FF);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: width 0.5s ease;
+  min-width: 50px;
+}
+
+.progress-text {
+  color: white;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+/* Widget Actions */
+.widget-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.85em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #8B5CF6, #00D9FF);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Affirmation Card Styles */
+.affirmation-counter {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9em;
+}
+
+.affirmation-content {
+  text-align: center;
+  padding: 24px;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.affirmation-text {
+  font-size: 1.2em;
+  font-style: italic;
+  color: #FFD700;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.affirmation-navigation {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.nav-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+/* Action Plan Widget Styles */
+.progress-indicator {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9em;
+}
+
+.week-section {
+  margin-bottom: 20px;
+}
+
+.week-section h4 {
+  color: #8B5CF6;
+  font-size: 1em;
+  margin-bottom: 12px;
+}
+
+.task-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.task-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+}
+
+.task-list li:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.task-list li.completed {
+  opacity: 0.6;
+}
+
+.task-list li.completed span {
+  text-decoration: line-through;
+}
+
+.task-list input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #8B5CF6;
+}
+
+.task-list span {
+  flex: 1;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Crystal Grid Widget Styles */
+.crystal-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.crystal-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.crystal-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+.crystal-icon {
+  font-size: 2em;
+}
+
+.crystal-name {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9em;
+  text-align: center;
+}
+
+/* Preview Mode */
+.widget.preview-mode {
+  pointer-events: none;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .widget {
+    padding: 16px;
+  }
+
+  .widget-header h3 {
+    font-size: 1.1em;
+  }
+
+  .goal-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .widget-actions {
+    flex-direction: column;
+  }
+
+  .widget-actions button {
+    width: 100%;
+  }
+
+  .affirmation-text {
+    font-size: 1em;
+  }
+
+  .crystal-list {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+}
