@@ -17,6 +17,7 @@ import {
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 import SortableWidget from '../components/SortableWidget';
+import UpdateProgressModal from '../components/UpdateProgressModal';
 import GoalCard from '../components/widgets/GoalCard';
 import AffirmationCard from '../components/widgets/AffirmationCard';
 import ActionPlanWidget from '../components/widgets/ActionPlanWidget';
@@ -30,6 +31,7 @@ export default function Dashboard() {
   const [widgets, setWidgets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showUpdateModal, setShowUpdateModal] = useState(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -105,11 +107,55 @@ export default function Dashboard() {
     }
   };
 
+  const handleDeleteWidget = async (widgetId) => {
+    if (!confirm('Bạn có chắc muốn xóa widget này?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('dashboard_widgets')
+        .update({ is_visible: false })
+        .eq('id', widgetId);
+
+      if (error) throw error;
+
+      // Remove from UI
+      setWidgets(widgets.filter(w => w.id !== widgetId));
+      alert('✅ Widget đã được xóa!');
+    } catch (error) {
+      console.error('Error deleting widget:', error);
+      alert('❌ Có lỗi khi xóa widget!');
+    }
+  };
+
+  const handlePinWidget = async (widgetId) => {
+    try {
+      const widget = widgets.find(w => w.id === widgetId);
+
+      const { error } = await supabase
+        .from('dashboard_widgets')
+        .update({ is_pinned: !widget.is_pinned })
+        .eq('id', widgetId);
+
+      if (error) throw error;
+
+      // Update UI
+      loadWidgets();
+      alert(widget.is_pinned ? '📍 Unpinned!' : '📌 Pinned!');
+    } catch (error) {
+      console.error('Error pinning widget:', error);
+      alert('❌ Có lỗi!');
+    }
+  };
+
   const renderWidget = (widget) => {
     const widgetProps = {
       data: widget.widget_data,
       id: widget.id,
-      preview: false
+      preview: false,
+      onUpdate: widget.widget_type === 'GOAL_CARD' ? () => setShowUpdateModal(widget) : undefined,
+      onDelete: () => handleDeleteWidget(widget.id),
+      onPin: () => handlePinWidget(widget.id),
+      isPinned: widget.is_pinned || false
     };
 
     switch(widget.widget_type) {
@@ -199,6 +245,19 @@ export default function Dashboard() {
             </div>
           </SortableContext>
         </DndContext>
+      )}
+
+      {/* Update Progress Modal */}
+      {showUpdateModal && (
+        <UpdateProgressModal
+          widget={showUpdateModal}
+          goal={showUpdateModal.manifestation_goals}
+          onClose={() => setShowUpdateModal(null)}
+          onSuccess={() => {
+            loadWidgets();
+            setShowUpdateModal(null);
+          }}
+        />
       )}
     </div>
   );
