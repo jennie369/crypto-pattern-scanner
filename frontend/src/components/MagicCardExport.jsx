@@ -150,29 +150,27 @@ export default function MagicCardExport({
             <div className="card-inner">
               {/* Crystal/Hexagram/Tarot image */}
               <div className="crystal-container">
-                {response.hexagram ? (
-                  // Show hexagram visual if available
+                {cardType === 'iching' || cardType === 'hexagram' ? (
+                  // Show hexagram visual
                   <div className="card-hexagram-display">
-                    <div className="hexagram-lines-card">
-                      {response.hexagram.lines.map((line, idx) => (
-                        <div key={idx} className={`hex-line-card ${line === 1 ? 'solid' : 'broken'}`}>
-                          {line === 0 && (
-                            <>
-                              <div className="seg-left"></div>
-                              <div className="seg-right"></div>
-                            </>
-                          )}
-                        </div>
-                      ))}
-                    </div>
+                    <div className="hexagram-symbol">☰☷</div>
                   </div>
-                ) : response.tarotCard ? (
-                  // Show tarot card info if available
+                ) : cardType === 'tarot' ? (
+                  // Show tarot card symbol
                   <div className="card-tarot-display">
-                    <div className="tarot-card-name">{response.tarotCard}</div>
+                    <div className="tarot-symbol">🔮</div>
                   </div>
+                ) : cardType === 'crystal' ? (
+                  // Show crystal icon
+                  <div className="card-icon-display">💎</div>
+                ) : cardType === 'goal' ? (
+                  // Show goal icon
+                  <div className="card-icon-display">🎯</div>
+                ) : cardType === 'affirmation' ? (
+                  // Show affirmation icon
+                  <div className="card-icon-display">✨</div>
                 ) : (
-                  // Default: show random crystal image
+                  // Default: show crystal image
                   <img
                     src={randomCrystalImage}
                     alt="Crystal"

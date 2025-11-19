@@ -202,38 +202,16 @@
 /* Hexagram Display in Card */
 .card-hexagram-display {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
 }
 
-.hexagram-lines-card {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  align-items: center;
-}
-
-.hex-line-card {
-  width: 100px;
-  height: 4px;
-  display: flex;
-  justify-content: space-between;
-}
-
-.hex-line-card.solid {
-  background: linear-gradient(90deg, #FFBD59, #FFD700);
-  box-shadow: 0 0 10px rgba(255, 189, 89, 0.5);
-  border-radius: 2px;
-}
-
-.hex-line-card.broken .seg-left,
-.hex-line-card.broken .seg-right {
-  width: 45%;
-  height: 100%;
-  background: linear-gradient(90deg, #FFBD59, #FFD700);
-  box-shadow: 0 0 10px rgba(255, 189, 89, 0.5);
-  border-radius: 2px;
+.hexagram-symbol {
+  font-size: 100px;
+  color: #FFBD59;
+  text-shadow: 0 0 30px rgba(255, 189, 89, 0.8);
+  filter: drop-shadow(0 0 20px rgba(255, 189, 89, 0.6));
+  animation: floatCrystal 3s ease-in-out infinite;
 }
 
 /* Tarot Display in Card */
@@ -241,16 +219,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
 }
 
-.tarot-card-name {
-  font-family: 'Poppins', sans-serif;
-  font-size: 20px;
-  font-weight: 700;
-  color: #FFBD59;
+.tarot-symbol {
+  font-size: 100px;
+  filter: drop-shadow(0 0 30px rgba(139, 92, 246, 0.8));
+  animation: floatCrystal 3s ease-in-out infinite;
+}
+
+/* Icon Display in Card */
+.card-icon-display {
+  font-size: 100px;
   text-align: center;
-  text-shadow: 0 0 15px rgba(255, 189, 89, 0.5);
+  filter: drop-shadow(0 0 30px rgba(255, 189, 89, 0.6));
+  animation: floatCrystal 3s ease-in-out infinite;
 }
 
 /* ============================================
