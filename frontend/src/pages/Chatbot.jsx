@@ -1369,7 +1369,7 @@ function MessageBubble({ message, onExport }) {
   // Render product cards
   if (isProducts && message.products) {
     return (
-      <div style={{
+      <div className="chatbot-products-container" style={{
         display: 'flex',
         flexDirection: 'column',
         gap: '8px',
