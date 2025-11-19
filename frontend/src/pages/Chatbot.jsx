@@ -24,6 +24,7 @@ import PreferencesPanel from '../components/PreferencesPanel';
 import { ProductCard } from '../components/Chatbot/ProductCard';
 import { VoiceInputButton } from '../components/Chatbot/VoiceInputButton';
 import { WidgetPreviewModal } from '../components/Widgets/WidgetPreviewModal';
+import MagicCardExport from '../components/MagicCardExport';
 import './Chatbot.css';
 import '../styles/widgetPrompt.css';
 
@@ -51,6 +52,8 @@ export default function Chatbot() {
   const [pendingWidget, setPendingWidget] = useState(null);
   const [showWidgetPrompt, setShowWidgetPrompt] = useState(false);
   const [isCreatingWidget, setIsCreatingWidget] = useState(false);
+  const [showMagicCardExport, setShowMagicCardExport] = useState(false);
+  const [exportCardData, setExportCardData] = useState(null);
 
   const messagesEndRef = useRef(null);
   const exportMenuRef = useRef(null);
@@ -118,6 +121,36 @@ export default function Chatbot() {
   const handleShare = async () => {
     await exportService.shareChat(messages);
     setShowExportMenu(false);
+  };
+
+  const handleExportMagicCard = (message) => {
+    // Extract title from message
+    const extractTitle = (text) => {
+      if (!text) return 'GEM Master Card';
+      const lines = text.split('\n');
+      const firstLine = lines[0];
+      if (firstLine.length > 50) {
+        return firstLine.substring(0, 50) + '...';
+      }
+      return firstLine || 'GEM Master Card';
+    };
+
+    // Determine card type based on active mode or message metadata
+    let cardType = 'general';
+    if (activeMode === 'iching') cardType = 'iching';
+    else if (activeMode === 'tarot') cardType = 'tarot';
+    else if (message.metadata?.hexagram) cardType = 'iching';
+    else if (message.metadata?.cards || message.metadata?.card) cardType = 'tarot';
+    else if (message.content.toLowerCase().includes('goal')) cardType = 'goal';
+    else if (message.content.toLowerCase().includes('affirmation')) cardType = 'affirmation';
+    else if (message.content.toLowerCase().includes('crystal')) cardType = 'crystal';
+
+    setExportCardData({
+      title: extractTitle(message.content),
+      text: message.content,
+      type: cardType
+    });
+    setShowMagicCardExport(true);
   };
 
   useEffect(() => {
@@ -1024,7 +1057,7 @@ export default function Chatbot() {
             width: '100%'
           }}>
             {messages.map((msg, idx) => (
-              <MessageBubble key={idx} message={msg} />
+              <MessageBubble key={idx} message={msg} onExport={handleExportMagicCard} />
             ))}
 
             {/* Widget Suggestions */}
@@ -1311,15 +1344,27 @@ export default function Chatbot() {
           </div>
         </div>
       )}
+
+      {/* Magic Card Export Modal */}
+      <MagicCardExport
+        response={exportCardData}
+        cardType={exportCardData?.type}
+        isOpen={showMagicCardExport}
+        onClose={() => {
+          setShowMagicCardExport(false);
+          setExportCardData(null);
+        }}
+      />
     </div>
   );
 }
 
 // Message Bubble Component
-function MessageBubble({ message }) {
+function MessageBubble({ message, onExport }) {
   const isUser = message.type === 'user';
   const isSystem = message.type === 'system';
   const isProducts = message.type === 'products';
+  const isAI = !isUser && !isSystem && !isProducts;
 
   // Render product cards
   if (isProducts && message.products) {
@@ -1442,6 +1487,40 @@ function MessageBubble({ message }) {
       <div style={{ marginBottom: '8px', whiteSpace: 'pre-wrap' }}>
         {cleanText(message.content)}
       </div>
+
+      {/* Export Magic Card Button - Only for AI messages */}
+      {isAI && onExport && (
+        <button
+          onClick={() => onExport(message)}
+          style={{
+            marginTop: '12px',
+            padding: '8px 16px',
+            background: 'linear-gradient(135deg, #8B5CF6, #C084FC)',
+            border: '1px solid rgba(192, 132, 252, 0.3)',
+            borderRadius: '10px',
+            color: '#FFFFFF',
+            fontSize: '13px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            transition: 'all 0.3s ease',
+            boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.transform = 'translateY(-2px)';
+            e.target.style.boxShadow = '0 6px 16px rgba(139, 92, 246, 0.5)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.transform = 'translateY(0)';
+            e.target.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.3)';
+          }}
+        >
+          <span>🎴</span>
+          <span>Export Magic Card</span>
+        </button>
+      )}
 
       <div style={timeStyle}>
         {new Date(message.timestamp).toLocaleTimeString('vi-VN', {

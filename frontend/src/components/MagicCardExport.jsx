@@ -1,0 +1,184 @@
+import React, { useRef } from 'react';
+import html2canvas from 'html2canvas';
+import './MagicCardExport.css';
+
+export default function MagicCardExport({
+  response,
+  cardType = 'goal',
+  isOpen,
+  onClose
+}) {
+  const cardRef = useRef(null);
+
+  // Map response type to crystal type
+  const getCrystalType = (type) => {
+    const crystalMap = {
+      'goal': 'citrine',
+      'affirmation': 'amethyst',
+      'iching': 'clear-quartz',
+      'tarot': 'rose-quartz',
+      'trading': 'tiger-eye',
+      'crystal': 'amethyst',
+      'general': 'citrine'
+    };
+    return crystalMap[type] || 'citrine';
+  };
+
+  const crystal = getCrystalType(cardType);
+
+  // Get card color based on type
+  const getCardColor = (type) => {
+    const colorMap = {
+      'goal': 'blue',
+      'affirmation': 'pink',
+      'iching': 'purple',
+      'tarot': 'pink',
+      'trading': 'blue',
+      'crystal': 'purple',
+      'general': 'blue'
+    };
+    return colorMap[type] || 'blue';
+  };
+
+  const cardColor = getCardColor(cardType);
+
+  // Extract title from response text (first line or first 50 chars)
+  const extractTitle = (text) => {
+    if (!text) return 'GEM Master Card';
+
+    const lines = text.split('\n');
+    const firstLine = lines[0];
+
+    if (firstLine.length > 50) {
+      return firstLine.substring(0, 50) + '...';
+    }
+
+    return firstLine || 'GEM Master Card';
+  };
+
+  // Export as image
+  const handleExportImage = async () => {
+    try {
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: null,
+        scale: 2, // 2x resolution
+        logging: false,
+        useCORS: true
+      });
+
+      const link = document.createElement('a');
+      link.download = `gem-card-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+
+      alert('✅ Card downloaded successfully!');
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('❌ Export failed. Please try again.');
+    }
+  };
+
+  // Share to social
+  const handleShare = async () => {
+    try {
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: null,
+        scale: 2,
+        logging: false,
+        useCORS: true
+      });
+
+      canvas.toBlob(async (blob) => {
+        const file = new File([blob], 'gem-card.png', { type: 'image/png' });
+
+        if (navigator.share && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            title: 'GEM Master Card',
+            text: 'Check out my manifestation from GEM Platform! 💎',
+            files: [file]
+          });
+        } else {
+          // Fallback: download
+          handleExportImage();
+        }
+      });
+    } catch (error) {
+      console.error('Share failed:', error);
+      // Fallback to download
+      handleExportImage();
+    }
+  };
+
+  if (!isOpen || !response) return null;
+
+  const title = extractTitle(response.title || response.text);
+  const description = response.text;
+  const collectionType = response.type || 'Manifestation';
+
+  return (
+    <div className="magic-card-modal" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        {/* Preview */}
+        <div className="card-preview">
+          <div
+            ref={cardRef}
+            className={`magic-card magic-card-${cardColor}`}
+          >
+            {/* Glow circles */}
+            <div className="glow-circle glow-top-left"></div>
+            <div className="glow-circle glow-bottom-right"></div>
+
+            {/* Card content container */}
+            <div className="card-inner">
+              {/* Crystal image - using CSS crystal as fallback */}
+              <div className="crystal-container">
+                <div className={`css-crystal crystal-${crystal}`}>
+                  <div className="crystal-facet facet-1"></div>
+                  <div className="crystal-facet facet-2"></div>
+                  <div className="crystal-facet facet-3"></div>
+                  <div className="crystal-facet facet-4"></div>
+                  <div className="crystal-glow"></div>
+                </div>
+              </div>
+
+              {/* Card title */}
+              <h2 className="card-title">
+                {title}
+              </h2>
+
+              <div className="card-divider"></div>
+
+              {/* Card description */}
+              <div className="card-description">
+                {description}
+              </div>
+
+              {/* Footer */}
+              <div className="card-footer">
+                <div className="collection-tag">
+                  {collectionType} Collection
+                </div>
+                <div className="watermark">
+                  💎 GEM Platform
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="export-actions">
+          <button onClick={handleExportImage} className="btn-export">
+            📥 Download Image
+          </button>
+          <button onClick={handleShare} className="btn-share">
+            📤 Share
+          </button>
+          <button onClick={onClose} className="btn-cancel">
+            ✕ Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
