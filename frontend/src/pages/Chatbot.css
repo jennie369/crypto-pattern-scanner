@@ -329,7 +329,7 @@
   gap: 10px;
   padding: 16px;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: visible; /* FIX: Không cắt product cards */
   height: 100%;
   min-height: 400px;
 }
@@ -341,6 +341,9 @@
 .message-bubble {
   display: flex;
   margin-bottom: 0;
+
+  /* FIX: Không cắt product cards */
+  overflow: visible !important;
 }
 
 .user-message {
@@ -396,6 +399,9 @@
   word-wrap: break-word;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+
+  /* FIX: Không cắt product cards */
+  overflow: visible !important;
 }
 
 .user-message .message-content {
