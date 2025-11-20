@@ -1,5 +1,6 @@
 // PROPS-DRIVEN VERSION - Data managed by parent (ScannerPage)
 import React, { useState, useMemo } from 'react';
+import { BarChart3 } from 'lucide-react';
 import CustomSelect from '../CustomSelect/CustomSelect';
 import './OpenPositionsWidget.css';
 
@@ -99,7 +100,7 @@ export const OpenPositionsWidget = ({
 
       {positions.length === 0 ? (
         <div className="empty-state">
-          <span className="empty-icon">📊</span>
+          <BarChart3 size={48} style={{ margin: '0 auto 8px', opacity: 0.5, color: '#FFBD59' }} />
           <p>No open positions</p>
           <span className="empty-hint">Start paper trading to see positions here</span>
         </div>

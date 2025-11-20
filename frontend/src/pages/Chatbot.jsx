@@ -1374,8 +1374,8 @@ function MessageBubble({ message, onExport }) {
         flexDirection: 'column',
         gap: '8px',
         marginBottom: '8px',
-        width: '100%',
-        maxWidth: '100%',
+        width: 'fit-content', /* FIX: Not constrained by parent 65% max-width */
+        maxWidth: 'none', /* FIX: Allow cards to show fully */
         alignItems: 'flex-start',
         overflow: 'visible' /* FIX: Không cắt cards */
       }}>
