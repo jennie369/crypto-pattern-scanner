@@ -383,6 +383,12 @@
   overflow: visible;
 }
 
+/* FIX: Allow product card messages to be wider - không bị giới hạn 65% */
+.bot-message:has(.chatbot-products-container),
+.ai-message:has(.chatbot-products-container) {
+  max-width: fit-content !important;
+}
+
 .system-message {
   align-self: center;
   max-width: 80%;
