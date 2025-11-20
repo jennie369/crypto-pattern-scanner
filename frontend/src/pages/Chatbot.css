@@ -364,8 +364,8 @@
 .ai-message {
   align-self: flex-start;
   max-width: 65%;
-  padding: 10px 14px;
-  margin-bottom: 10px;
+  padding: 8px 12px; /* GIẢM từ 10px 14px */
+  margin-bottom: 8px; /* GIẢM từ 10px */
 
   background: rgba(30, 42, 94, 0.6);
   backdrop-filter: blur(20px);
@@ -384,8 +384,8 @@
 .message-content {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px 16px;
+  gap: 6px; /* GIẢM từ 8px */
+  padding: 10px 14px; /* GIẢM từ 12px 16px */
   border-radius: 16px;
   font-size: 15px;
   line-height: 1.5;
@@ -450,10 +450,10 @@
   margin: 8px 0;
 }
 
-/* Hexagram Container */
+/* Hexagram Container - COMPACT */
 .hexagram-container {
-  margin: 4px 0;
-  padding: 8px;
+  margin: 2px 0; /* GIẢM từ 4px */
+  padding: 6px; /* GIẢM từ 8px */
   background: rgba(139, 92, 246, 0.1);
   border-radius: 8px;
 }
@@ -532,17 +532,50 @@
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.products-scroll {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding: 4px 0;
+/* CHATBOT PRODUCTS CONTAINER - TIGHTER */
+.chatbot-products-container {
+  margin-top: 6px; /* GIẢM từ 8px */
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Tarot Card Visual */
+.products-scroll {
+  display: flex;
+  gap: 6px; /* GIẢM từ 8px */
+  overflow-x: auto;
+  padding: 4px 0;
+
+  /* Hide scrollbar nhưng vẫn scroll được */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 189, 89, 0.3) transparent;
+}
+
+.products-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.products-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 189, 89, 0.3);
+  border-radius: 2px;
+}
+
+.products-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Tarot Container - COMPACT */
+.tarot-container {
+  margin: 2px 0; /* GIẢM từ 4px */
+  padding: 6px; /* GIẢM từ 8px */
+  background: rgba(236, 72, 153, 0.1);
+  border-radius: 8px;
+}
+
+/* Tarot Card Visual - COMPACT */
 .tarot-card-visual {
-  margin: 8px 0;
-  padding: 12px;
+  max-width: 180px !important; /* GIẢM từ 250px */
+  margin: 4px auto; /* GIẢM từ 8px, center it */
+  padding: 8px; /* GIẢM từ 12px */
   background: rgba(139, 92, 246, 0.1);
   border-radius: 12px;
   border: 1px solid rgba(139, 92, 246, 0.3);
@@ -550,28 +583,38 @@
 }
 
 .tarot-image {
-  width: 150px;
+  width: 100%;
+  max-width: 160px !important; /* GIẢM size */
   height: auto;
   border-radius: 8px;
-  margin-bottom: 16px;
-  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.3);
+  margin: 0 auto 12px; /* GIẢM từ 16px */
+  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);
+  display: block;
 }
 
 .card-info {
   text-align: center;
 }
 
-.card-info h4 {
-  font-size: 18px;
+.card-info h4,
+.tarot-card-name {
+  font-size: 14px; /* GIẢM từ 18px */
   color: #8B5CF6;
-  margin-bottom: 8px;
+  margin-bottom: 6px; /* GIẢM từ 8px */
   font-weight: 700;
 }
 
 .card-vietnamese {
-  font-size: 14px;
+  font-size: 12px; /* GIẢM từ 14px */
   color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 8px;
+  margin-bottom: 6px; /* GIẢM từ 8px */
+}
+
+.tarot-card-description {
+  font-size: 12px; /* NHỎ HƠN */
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.4;
+  margin-top: 4px;
 }
 
 .card-type {
