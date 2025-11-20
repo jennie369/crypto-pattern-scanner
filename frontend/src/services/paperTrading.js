@@ -737,6 +737,31 @@ async function updateHoldings(userId, accountId, symbol, quantity, price, side) 
 }
 
 /**
+ * Update a position (holding)
+ * @param {string} holdingId - Holding ID
+ * @param {Object} updates - Fields to update (stop_loss, take_profit, etc.)
+ * @returns {Promise<Object>} Update result
+ */
+export async function updatePosition(holdingId, updates) {
+  try {
+    const { error } = await supabase
+      .from('paper_trading_holdings')
+      .update(updates)
+      .eq('id', holdingId);
+
+    if (error) {
+      console.error('Error updating position:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating position:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
  * Get user's holdings with real-time prices
  * @param {string} userId - User UUID
  * @returns {Promise<Array>} Holdings array

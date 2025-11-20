@@ -8,7 +8,7 @@ import PaperTradingPanel from '../../../../components/PaperTradingPanel/PaperTra
 import OpenPositionsWidget from '../../../../components/PaperTrading/OpenPositionsWidget';
 import RecentTradesSection from '../../../../components/PaperTrading/RecentTradesSection';
 import { scanPatterns, ScannerWebSocket, exportToCSV, downloadCSV } from '../../../../services/scannerAPI';
-import { getHoldings, getOrders, closePosition } from '../../../../services/paperTrading';
+import { getHoldings, getOrders, closePosition, updatePosition } from '../../../../services/paperTrading';
 import binanceWS from '../../../../services/binanceWebSocket';
 import { useAuth } from '../../../../contexts/AuthContext';
 import toast from 'react-hot-toast';

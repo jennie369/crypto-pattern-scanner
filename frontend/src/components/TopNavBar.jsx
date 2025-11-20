@@ -9,7 +9,7 @@ import {
   Heart, Calendar, Filter, BarChart2, Activity,
   Brain, Waves, Bell, Key, MessageSquare, Mail,
   Trophy, Bot, ShoppingCart, CreditCard, UserCircle,
-  Handshake
+  Handshake, Briefcase
 } from 'lucide-react';
 import './TopNavBar.css';
 
@@ -391,6 +391,12 @@ function TopNavBar() {
           <Link to="/courses" className={`nav-item ${isActive('/courses') ? 'active' : ''}`}>
             <GraduationCap size={20} />
             <span>Khóa Học</span>
+          </Link>
+
+          {/* Tài Sản (Portfolio) - Direct link */}
+          <Link to="/portfolio" className={`nav-item ${isActive('/portfolio') ? 'active' : ''}`}>
+            <Briefcase size={20} />
+            <span>Tài Sản</span>
           </Link>
 
         </div>

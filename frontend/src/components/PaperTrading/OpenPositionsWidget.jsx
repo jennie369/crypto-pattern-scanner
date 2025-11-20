@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { BarChart3 } from 'lucide-react';
 import CustomSelect from '../CustomSelect/CustomSelect';
+import EditPositionModal from '../../pages/Dashboard/Portfolio/v2/components/EditPositionModal';
 import './OpenPositionsWidget.css';
 
 export const OpenPositionsWidget = ({
@@ -10,13 +11,26 @@ export const OpenPositionsWidget = ({
   loading = false,
   onOpenPaperTrading,
   onRefresh,
-  onClosePosition
+  onClosePosition,
+  onUpdatePosition
 }) => {
   const [sortBy, setSortBy] = useState('pnl_desc'); // pnl_desc, pnl_asc, symbol_asc, entry_asc
+  const [editingPosition, setEditingPosition] = useState(null);
+
+  // Handle save edit
+  const handleSaveEdit = async (positionId, updates) => {
+    if (onUpdatePosition) {
+      await onUpdatePosition(positionId, updates);
+    }
+    setEditingPosition(null);
+    if (onRefresh) {
+      onRefresh();
+    }
+  };
 
   // Calculate P&L for a position
   const calculatePnL = (position) => {
-    const entryPrice = position.entry_price || 0;
+    const entryPrice = position.avg_buy_price || 0;
     const currentPrice = prices[position.symbol] || entryPrice;
     const quantity = position.quantity || 0;
 
@@ -48,7 +62,7 @@ export const OpenPositionsWidget = ({
         case 'symbol_asc':
           return (a.symbol || '').localeCompare(b.symbol || ''); // A-Z
         case 'entry_asc':
-          return (a.entry_price || 0) - (b.entry_price || 0); // Lowest entry first
+          return (a.avg_buy_price || 0) - (b.avg_buy_price || 0); // Lowest entry first
         default:
           return 0;
       }
@@ -121,11 +135,11 @@ export const OpenPositionsWidget = ({
                 <div className="position-details">
                   <div className="detail-row">
                     <span>Entry:</span>
-                    <span>${(position.entry_price || 0).toFixed(2)}</span>
+                    <span>${(position.avg_buy_price || 0).toFixed(2)}</span>
                   </div>
                   <div className="detail-row">
                     <span>Current:</span>
-                    <span>${(prices[position.symbol] || position.entry_price || 0).toFixed(2)}</span>
+                    <span>${(prices[position.symbol] || position.avg_buy_price || 0).toFixed(2)}</span>
                   </div>
                   <div className="detail-row">
                     <span>Qty:</span>
@@ -139,6 +153,13 @@ export const OpenPositionsWidget = ({
                   </div>
                 </div>
                 <div className="position-actions">
+                  <button
+                    className="btn-edit"
+                    onClick={() => setEditingPosition(position)}
+                    title="Edit this position"
+                  >
+                    Edit
+                  </button>
                   {onClosePosition && (
                     <button
                       className="btn-close-position"
@@ -148,19 +169,20 @@ export const OpenPositionsWidget = ({
                       Close
                     </button>
                   )}
-                  {onOpenPaperTrading && (
-                    <button
-                      className="btn-manage"
-                      onClick={() => onOpenPaperTrading(position.symbol)}
-                    >
-                      Manage
-                    </button>
-                  )}
                 </div>
               </div>
             );
           })}
         </div>
+      )}
+
+      {/* Edit Position Modal */}
+      {editingPosition && (
+        <EditPositionModal
+          position={editingPosition}
+          onClose={() => setEditingPosition(null)}
+          onSave={handleSaveEdit}
+        />
       )}
     </div>
   );

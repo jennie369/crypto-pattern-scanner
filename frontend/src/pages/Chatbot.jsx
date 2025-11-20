@@ -1053,7 +1053,7 @@ export default function Chatbot() {
             gap: '10px',
             padding: '16px',
             overflowY: 'auto',
-            overflowX: 'hidden',
+            overflowX: 'visible', /* FIX: Không cắt product cards! */
             width: '100%'
           }}>
             {messages.map((msg, idx) => (
