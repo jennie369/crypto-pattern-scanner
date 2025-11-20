@@ -1375,7 +1375,9 @@ function MessageBubble({ message, onExport }) {
         gap: '8px',
         marginBottom: '8px',
         width: '100%',
-        alignItems: 'flex-start'
+        maxWidth: '100%',
+        alignItems: 'flex-start',
+        overflow: 'visible' /* FIX: Không cắt cards */
       }}>
         {message.products.map((product, idx) => (
           <ProductCard key={idx} product={product} source="chatbot" />

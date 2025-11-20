@@ -374,6 +374,9 @@
   color: #FFFFFF;
   font-size: 14px;
   line-height: 1.4;
+
+  /* FIX: Không cắt product cards */
+  overflow: visible;
 }
 
 .system-message {

@@ -171,16 +171,16 @@
    CRYSTAL/HEXAGRAM/TAROT DISPLAY
    ============================================ */
 
-/* Magic card visual container */
+/* Magic card visual container - CENTERED */
 .magic-card-visual,
 .crystal-container {
   width: 140px;
   height: 140px;
   margin: 10px auto 15px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+  align-items: center; /* Vertical center */
+  justify-content: center; /* Horizontal center */
+  overflow: visible; /* FIX: Không cắt content */
   position: relative;
 }
 
@@ -202,11 +202,13 @@
   }
 }
 
-/* Hexagram Display in Card */
+/* Hexagram Display in Card - PERFECTLY CENTERED */
 .card-hexagram-display {
+  width: 100%;
+  height: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: center; /* Vertical center */
+  justify-content: center; /* Horizontal center */
 }
 
 .hexagram-symbol {
@@ -217,11 +219,13 @@
   animation: floatCrystal 3s ease-in-out infinite;
 }
 
-/* Tarot Display in Card */
+/* Tarot Display in Card - PERFECTLY CENTERED */
 .card-tarot-display {
+  width: 100%;
+  height: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: center; /* Vertical center */
+  justify-content: center; /* Horizontal center */
 }
 
 .tarot-symbol {
@@ -230,22 +234,29 @@
   animation: floatCrystal 3s ease-in-out infinite;
 }
 
-/* Icon Display in Card */
+/* Icon Display in Card - CENTERED */
 .card-icon-display {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 100px;
   text-align: center;
   filter: drop-shadow(0 0 30px rgba(255, 189, 89, 0.6));
   animation: floatCrystal 3s ease-in-out infinite;
 }
 
-/* Hexagram trong magic card - FIX OVERFLOW */
+/* Hexagram trong magic card - CENTERED & COMPACT */
 .hexagram-in-card {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  align-items: center;
+  align-items: center; /* Center lines horizontally */
+  justify-content: center; /* Center lines vertically */
   max-width: 120px;
   margin: 0 auto;
+  width: 100%;
 }
 
 .hexagram-in-card .hex-line {
