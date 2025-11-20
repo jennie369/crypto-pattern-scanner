@@ -26,7 +26,7 @@
 }
 
 .widget-header h3 {
-  font-size: 14px; /* Smaller text */
+  font-size: 11px !important; /* Smaller text */
   font-weight: 600;
   color: #fff;
   margin: 0;
@@ -34,7 +34,7 @@
 
 .header-controls {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   align-items: center;
   justify-content: flex-end;
 }
@@ -128,11 +128,23 @@
   cursor: pointer;
   color: #00D9FF;
   transition: all 0.2s;
+  padding: 0;
+}
+
+.btn-refresh svg {
+  color: #00D9FF !important;
+  stroke: #00D9FF !important;
+  fill: none !important;
 }
 
 .btn-refresh:hover {
   background: rgba(17, 34, 80, 0.7);
   border-color: rgba(0, 217, 255, 0.4);
+}
+
+.btn-refresh:hover svg {
+  color: #00D9FF !important;
+  stroke: #00D9FF !important;
 }
 
 .btn-refresh:disabled {
@@ -297,7 +309,8 @@
   background: rgba(246, 70, 93, 0.2);
 }
 
-.btn-manage {
+.btn-manage,
+.btn-edit {
   padding: 8px;
   background: rgba(14, 203, 129, 0.1);
   border: 1px solid rgba(14, 203, 129, 0.3);
@@ -309,6 +322,7 @@
   transition: all 0.2s;
 }
 
-.btn-manage:hover {
+.btn-manage:hover,
+.btn-edit:hover {
   background: rgba(14, 203, 129, 0.2);
 }

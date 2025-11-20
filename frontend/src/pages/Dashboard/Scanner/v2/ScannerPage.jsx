@@ -7,6 +7,7 @@ import MarketChatbotSection from './components/MarketChatbotSection';
 import PaperTradingPanel from '../../../../components/PaperTradingPanel/PaperTradingPanel';
 import OpenPositionsWidget from '../../../../components/PaperTrading/OpenPositionsWidget';
 import RecentTradesSection from '../../../../components/PaperTrading/RecentTradesSection';
+import CompactSidebar from '../../../../components/CompactSidebar/CompactSidebar';
 import { scanPatterns, ScannerWebSocket, exportToCSV, downloadCSV } from '../../../../services/scannerAPI';
 import { getHoldings, getOrders, closePosition, updatePosition } from '../../../../services/paperTrading';
 import binanceWS from '../../../../services/binanceWebSocket';
@@ -296,21 +297,49 @@ export const ScannerPage = () => {
     }
   };
 
+  const handleUpdatePosition = async (positionId, updates) => {
+    if (!user?.id) {
+      toast.error('Please log in to update positions');
+      return;
+    }
+
+    console.log('[ScannerPage] [Paper Trading] Updating position:', positionId, updates);
+    toast.loading('Updating position...', { id: 'update-position' });
+
+    try {
+      const result = await updatePosition(positionId, updates);
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to update position');
+      }
+
+      toast.success('Position updated successfully!', { id: 'update-position' });
+
+      // Refresh data to show updated position
+      await handleRefreshPaperTrading();
+    } catch (error) {
+      console.error('[ScannerPage] [Paper Trading] Error updating position:', error);
+      toast.error(`Failed to update position: ${error.message}`, { id: 'update-position' });
+    }
+  };
+
   return (
-    <div className="scanner-page-v2">
-      {/* Error Display */}
-      {error && (
-        <div style={{
-          padding: '16px',
-          background: 'rgba(246, 70, 93, 0.1)',
-          border: '1px solid #F6465D',
-          borderRadius: '8px',
-          color: '#F6465D',
-          marginBottom: '16px'
-        }}>
-          <strong>Error:</strong> {error}
-        </div>
-      )}
+    <>
+      <CompactSidebar />
+      <div className="scanner-page-v2">
+        {/* Error Display */}
+        {error && (
+          <div style={{
+            padding: '16px',
+            background: 'rgba(246, 70, 93, 0.1)',
+            border: '1px solid #F6465D',
+            borderRadius: '8px',
+            color: '#F6465D',
+            marginBottom: '16px'
+          }}>
+            <strong>Error:</strong> {error}
+          </div>
+        )}
 
       <div className="scanner-layout">
         {/* LEFT - Control Panel */}
@@ -358,6 +387,7 @@ export const ScannerPage = () => {
                 onOpenPaperTrading={handleOpenPaperTrading}
                 onRefresh={handleRefreshPaperTrading}
                 onClosePosition={handleClosePosition}
+                onUpdatePosition={handleUpdatePosition}
               />
 
               <RecentTradesSection
@@ -376,6 +406,7 @@ export const ScannerPage = () => {
         prefilledSide="buy"
       />
     </div>
+    </>
   );
 };
 

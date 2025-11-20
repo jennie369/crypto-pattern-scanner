@@ -75,7 +75,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: 12px; /* Reduced from var(--space-md) to bring cards closer */
 }
 
 .scanner-center {
@@ -152,8 +152,8 @@
 .paper-trading-widgets-section {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
-  margin-top: var(--space-md);
+  gap: 12px; /* Reduced from var(--space-md) to bring widgets closer */
+  margin-top: 8px; /* Reduced from var(--space-md) */
 }
 
 /* Responsive - Large Tablets */

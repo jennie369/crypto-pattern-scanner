@@ -1,6 +1,6 @@
 // PROPS-DRIVEN VERSION - Data managed by parent (ScannerPage)
 import React, { useState, useMemo } from 'react';
-import { BarChart3 } from 'lucide-react';
+import { BarChart3, RefreshCw } from 'lucide-react';
 import CustomSelect from '../CustomSelect/CustomSelect';
 import EditPositionModal from '../../pages/Dashboard/Portfolio/v2/components/EditPositionModal';
 import './OpenPositionsWidget.css';
@@ -77,7 +77,6 @@ export const OpenPositionsWidget = ({
         <h3>Open Positions ({positions.length})</h3>
         <div className="header-controls">
           <CustomSelect
-            className="sort-dropdown"
             value={sortBy}
             onChange={setSortBy}
             options={[
@@ -93,21 +92,7 @@ export const OpenPositionsWidget = ({
             disabled={loading}
             title="Refresh positions"
           >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className={loading ? 'spinning' : ''}
-            >
-              <polyline points="23 4 23 10 17 10"></polyline>
-              <polyline points="1 20 1 14 7 14"></polyline>
-              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-            </svg>
+            <RefreshCw size={16} className={loading ? 'spinning' : ''} />
           </button>
         </div>
       </div>
@@ -179,7 +164,10 @@ export const OpenPositionsWidget = ({
       {/* Edit Position Modal */}
       {editingPosition && (
         <EditPositionModal
-          position={editingPosition}
+          position={{
+            ...editingPosition,
+            current_price: prices[editingPosition.symbol] || editingPosition.avg_buy_price
+          }}
           onClose={() => setEditingPosition(null)}
           onSave={handleSaveEdit}
         />

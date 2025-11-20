@@ -49,7 +49,7 @@ const CompactSidebar = () => {
     localStorage.setItem('sidebar-locked', newState.toString());
   };
 
-  // Main navigation items (NEW ORDER - 9 items)
+  // Main navigation items (NEW ORDER - 8 items, removed Portfolio)
   const navItems = [
     {
       id: 'forum',
@@ -101,13 +101,6 @@ const CompactSidebar = () => {
       description: 'Your profile & achievements'
     },
     {
-      id: 'portfolio',
-      label: 'Portfolio',
-      icon: Briefcase,
-      path: '/portfolio',
-      description: 'Track your investments'
-    },
-    {
       id: 'affiliate',
       label: 'Đối Tác',
       icon: Handshake,
@@ -145,7 +138,7 @@ const CompactSidebar = () => {
   // Animation variants
   const sidebarVariants = {
     collapsed: {
-      width: 80,
+      width: 64, // Compact - reduced from 80px
       transition: {
         type: 'spring',
         damping: 25,
@@ -166,6 +159,8 @@ const CompactSidebar = () => {
     collapsed: {
       opacity: 0,
       x: -10,
+      width: 0,
+      marginLeft: 0,
       transition: {
         duration: 0.15
       }
@@ -173,6 +168,8 @@ const CompactSidebar = () => {
     expanded: {
       opacity: 1,
       x: 0,
+      width: 'auto',
+      marginLeft: 12,
       transition: {
         duration: 0.25,
         delay: 0.1
@@ -184,11 +181,15 @@ const CompactSidebar = () => {
     collapsed: {
       opacity: 0,
       scale: 0.8,
+      width: 0,
+      marginLeft: 0,
       transition: { duration: 0.15 }
     },
     expanded: {
       opacity: 1,
       scale: 1,
+      width: 'auto',
+      marginLeft: 8,
       transition: { duration: 0.25, delay: 0.1 }
     }
   };
@@ -206,7 +207,7 @@ const CompactSidebar = () => {
       <div className="compact-sidebar-header">
         <div className="sidebar-logo">
           <div className="logo-icon-wrapper">
-            <Gem size={28} className="logo-gem" />
+            <Gem size={24} strokeWidth={2.5} className="logo-gem" />
           </div>
           <motion.div
             className="logo-text"
@@ -227,7 +228,7 @@ const CompactSidebar = () => {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
         >
-          {isLocked ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
+          {isLocked ? <ChevronLeft size={16} strokeWidth={2.5} /> : <ChevronRight size={16} strokeWidth={2.5} />}
         </motion.button>
       </div>
 
@@ -246,7 +247,7 @@ const CompactSidebar = () => {
               whileTap={{ scale: 0.98 }}
             >
               <div className="nav-item-icon-wrapper">
-                <Icon size={22} className="nav-item-icon" />
+                <Icon size={20} strokeWidth={2.5} className="nav-item-icon" />
                 {active && <div className="nav-item-indicator" />}
               </div>
 
@@ -264,7 +265,7 @@ const CompactSidebar = () => {
                 variants={arrowVariants}
                 animate={isExpanded ? 'expanded' : 'collapsed'}
               >
-                <ChevronRight size={16} />
+                <ChevronRight size={14} strokeWidth={2.5} />
               </motion.div>
             </motion.button>
           );
@@ -284,7 +285,7 @@ const CompactSidebar = () => {
           whileTap={{ scale: 0.98 }}
         >
           <div className="nav-item-icon-wrapper">
-            <Settings size={22} className="nav-item-icon" />
+            <Settings size={20} strokeWidth={2.5} className="nav-item-icon" />
             {isActive(settingsItem.path) && <div className="nav-item-indicator" />}
           </div>
 
@@ -302,7 +303,7 @@ const CompactSidebar = () => {
             variants={arrowVariants}
             animate={isExpanded ? 'expanded' : 'collapsed'}
           >
-            <ChevronRight size={16} />
+            <ChevronRight size={14} strokeWidth={2.5} />
           </motion.div>
         </motion.button>
 
@@ -315,7 +316,7 @@ const CompactSidebar = () => {
             {profile?.avatar_url ? (
               <img src={profile.avatar_url} alt={profile.display_name || 'User'} />
             ) : (
-              <User size={24} />
+              <User size={16} strokeWidth={2.5} />
             )}
           </div>
 
@@ -341,7 +342,7 @@ const CompactSidebar = () => {
           whileTap={{ scale: 0.98 }}
         >
           <div className="nav-item-icon-wrapper">
-            <LogOut size={22} className="nav-item-icon" />
+            <LogOut size={20} strokeWidth={2.5} className="nav-item-icon" />
           </div>
 
           <motion.div

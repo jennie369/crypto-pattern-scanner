@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, Sparkles, Gift } from 'lucide-react';
+import CompactSidebar from '../components/CompactSidebar/CompactSidebar';
 import TradingCoursesSection from './sections/TradingCoursesSection';
 import SpiritualCoursesSection from './sections/SpiritualCoursesSection';
 import BundlesSection from './sections/BundlesSection';
@@ -70,14 +71,16 @@ export default function Courses() {
   };
 
   return (
-    <div className="page-container">
-      <div className="page-content">
-        {/* Tab Navigation */}
-        <div className="courses-tabs">
-          <div className="tabs-container">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
+    <>
+      <CompactSidebar />
+      <div className="page-container">
+        <div className="page-content">
+          {/* Tab Navigation */}
+          <div className="courses-tabs">
+            <div className="tabs-container">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
                 <button
                   key={tab.id}
                   className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
@@ -191,5 +194,6 @@ export default function Courses() {
         </div>
       </div>
     </div>
+    </>
   );
 }

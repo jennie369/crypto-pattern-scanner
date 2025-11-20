@@ -28,7 +28,7 @@ export const EditPositionModal = ({ position, onClose, onSave }) => {
 
   // Calculate risk/reward ratio
   const calculateRR = () => {
-    const entry = position?.avg_entry_price || 0;
+    const entry = position?.avg_buy_price || 0; // Fixed: changed from avg_entry_price
     const sl = parseFloat(formData.stopLoss) || 0;
     const tp = parseFloat(formData.takeProfit) || 0;
 
@@ -45,7 +45,7 @@ export const EditPositionModal = ({ position, onClose, onSave }) => {
   // Validate form
   const validate = () => {
     const newErrors = {};
-    const entry = position?.avg_entry_price || 0;
+    const entry = position?.avg_buy_price || 0; // Fixed: changed from avg_entry_price
 
     if (formData.stopLoss) {
       const sl = parseFloat(formData.stopLoss);
@@ -110,20 +110,20 @@ export const EditPositionModal = ({ position, onClose, onSave }) => {
           {/* Position Info */}
           <div className="position-info">
             <div className="info-row">
-              <span className="info-label">Coin:</span>
+              <span className="info-label">COIN:</span>
               <span className="info-value crypto-pair">{position.symbol}</span>
             </div>
             <div className="info-row">
-              <span className="info-label">Entry Price:</span>
-              <span className="info-value">${position.avg_entry_price?.toLocaleString()}</span>
+              <span className="info-label">ENTRY PRICE:</span>
+              <span className="info-value">${position.avg_buy_price?.toFixed(2) || '0.00'}</span>
             </div>
             <div className="info-row">
-              <span className="info-label">Current Price:</span>
-              <span className="info-value">${position.current_price?.toLocaleString()}</span>
+              <span className="info-label">CURRENT PRICE:</span>
+              <span className="info-value">${position.current_price?.toFixed(2) || '0.00'}</span>
             </div>
             <div className="info-row">
-              <span className="info-label">Amount:</span>
-              <span className="info-value">{position.quantity} {position.symbol?.split('/')[0]}</span>
+              <span className="info-label">AMOUNT:</span>
+              <span className="info-value">{position.quantity || 0} {position.symbol}</span>
             </div>
           </div>
 
