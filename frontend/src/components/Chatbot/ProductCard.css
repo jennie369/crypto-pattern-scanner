@@ -9,7 +9,7 @@
   /* STYLING */
   background: rgba(30, 42, 94, 0.4);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 189, 89, 0.2);
+  border: 1px solid rgba(255, 189, 89, 0.3) !important; /* Gold border */
   border-radius: 8px;
 
   /* SPACING - COMPACT */
@@ -22,7 +22,7 @@
 
   cursor: pointer;
   transition: all 0.3s ease;
-  overflow: hidden;
+  overflow: visible !important; /* FIX: Không cắt content */
 }
 
 .chatbot-products-container .product-card:hover {
