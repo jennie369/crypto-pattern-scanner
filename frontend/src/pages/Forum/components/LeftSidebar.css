@@ -17,12 +17,12 @@
 .left-sidebar {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px; /* Compact - reduced from 24px */
 
   /* Sticky positioning */
   position: sticky;
-  top: 24px;
-  max-height: calc(100vh - 48px);
+  top: 80px; /* Match right sidebar - account for navbar */
+  max-height: calc(100vh - 100px); /* Match right sidebar */
   overflow-y: auto;
 
   /* Custom scrollbar */
@@ -55,7 +55,7 @@
 .sidebar-nav {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px; /* Compact - reduced from 4px */
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -65,9 +65,9 @@
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border-radius: 12px;
+  gap: 10px; /* Compact - reduced from 12px */
+  padding: 10px 14px; /* Compact - reduced from 12px 16px */
+  border-radius: 10px; /* Compact - reduced from 12px */
 
   /* Transparent background by default */
   background: transparent;
@@ -75,7 +75,7 @@
 
   /* Text styling */
   font-family: 'Poppins', sans-serif;
-  font-size: 15px;
+  font-size: 14px; /* Compact - reduced from 15px */
   font-weight: 500;
   color: rgba(255, 255, 255, 0.8);
 
@@ -137,18 +137,18 @@
 .categories-submenu {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding-left: 32px;
-  margin-top: 4px;
-  margin-bottom: 8px;
+  gap: 0px; /* Compact - removed gap */
+  padding-left: 24px; /* Compact - reduced from 32px */
+  margin-top: 2px; /* Compact - reduced from 4px */
+  margin-bottom: 4px; /* Compact - reduced from 8px */
 }
 
 .category-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 10px;
+  gap: 8px; /* Compact - reduced from 10px */
+  padding: 8px 10px; /* Compact - reduced from 10px 12px */
+  border-radius: 8px; /* Compact - reduced from 10px */
 
   /* Transparent background by default */
   background: transparent;
@@ -156,7 +156,7 @@
 
   /* Text styling */
   font-family: 'Inter', sans-serif;
-  font-size: 14px;
+  font-size: 13px; /* Compact - reduced from 14px */
   font-weight: 500;
   color: rgba(255, 255, 255, 0.7);
 

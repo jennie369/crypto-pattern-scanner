@@ -8,7 +8,13 @@
       "Bash(npm install:*)",
       "Bash(powershell -Command \"(Get-Content ''C:\\Users\\Jennie Chu\\Desktop\\Projects\\crypto-pattern-scanner\\frontend\\src\\pages\\Chatbot.jsx'').Count\")",
       "Bash(powershell -Command \"(Get-Content ''C:\\Users\\Jennie Chu\\Desktop\\Projects\\crypto-pattern-scanner\\frontend\\src\\pages\\Account\\AccountDashboard.jsx'').Count\")",
-      "Bash(powershell -Command \"(Get-Content ''C:\\Users\\Jennie Chu\\Desktop\\Projects\\crypto-pattern-scanner\\frontend\\src\\pages\\Account\\AccountDashboard.jsx'') | Select-String -Pattern ''onMouseEnter.*position.*relative'' -Context 0,10\")"
+      "Bash(powershell -Command \"(Get-Content ''C:\\Users\\Jennie Chu\\Desktop\\Projects\\crypto-pattern-scanner\\frontend\\src\\pages\\Account\\AccountDashboard.jsx'') | Select-String -Pattern ''onMouseEnter.*position.*relative'' -Context 0,10\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git revert:*)",
+      "Bash(copy:*)",
+      "Bash(copy \"C:\\Users\\Jennie Chu\\Downloads\\comet_omENwHENhj.png\" \"C:\\Users\\Jennie Chu\\Desktop\\Projects\\crypto-pattern-scanner\\frontend\\public\\assets\\crystals\\crystal-3.png\")",
+      "Bash(powershell:*)"
     ],
     "deny": [],
     "ask": []

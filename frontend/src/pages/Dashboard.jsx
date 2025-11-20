@@ -87,19 +87,17 @@ export default function Dashboard() {
     // Update state immediately (optimistic UI)
     setWidgets(reorderedWidgets);
 
-    // Update order in database
+    // Update order in database - optimized with Promise.all for parallel updates
     try {
-      const updates = reorderedWidgets.map((widget, index) => ({
-        id: widget.id,
-        position_order: index
-      }));
-
-      for (const update of updates) {
-        await supabase
+      const updates = reorderedWidgets.map((widget, index) =>
+        supabase
           .from('dashboard_widgets')
-          .update({ position_order: update.position_order })
-          .eq('id', update.id);
-      }
+          .update({ position_order: index })
+          .eq('id', widget.id)
+      );
+
+      // Execute all updates in parallel for better performance
+      await Promise.all(updates);
     } catch (err) {
       console.error('Error updating widget order:', err);
       // Revert on error

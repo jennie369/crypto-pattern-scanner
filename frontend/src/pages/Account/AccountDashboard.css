@@ -22,7 +22,7 @@
   gap: 24px;
   max-width: 1920px;
   margin: 0 auto;
-  padding: 16px 8px !important; /* ✅ Reduced: 16px top/bottom, 8px left/right */
+  padding: 100px 8px 80px 8px !important; /* Top padding for nav bar, extra bottom padding for white space */
   min-height: calc(100vh - 160px);
 }
 
@@ -778,14 +778,14 @@
 /* Optional: Adjust for very large screens */
 @media (min-width: 1920px) {
   .account-dashboard {
-    padding: 16px 24px !important; /* Slightly more padding on ultra-wide */
+    padding: 100px 24px 80px 24px !important; /* Top padding for nav bar, extra bottom padding */
   }
 }
 
 /* Tablet */
 @media (max-width: 1200px) {
   .account-dashboard {
-    padding: 16px 12px !important;
+    padding: 100px 12px 80px 12px !important; /* Maintain top/bottom padding on tablet */
   }
 
   .account-layout-3col {
@@ -820,7 +820,7 @@
 /* Mobile */
 @media (max-width: 768px) {
   .account-dashboard {
-    padding: 12px 8px !important;
+    padding: 90px 8px 60px 8px !important; /* Slightly less padding on mobile, but still accounting for nav */
     gap: 16px !important;
   }
 

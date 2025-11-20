@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import TopNavBar from './components/TopNavBar';
 import Footer from './components/Footer';
@@ -63,8 +63,8 @@ import Leaderboard from './pages/Community/Leaderboard';
 // Gem Master Chatbot
 import Chatbot from './pages/Chatbot';
 
-// Dashboard (Widgets)
-import Dashboard from './pages/Dashboard';
+// Dashboard (Widgets) - Lazy loaded for performance
+const Dashboard = lazy(() => import('./pages/Dashboard'));
 
 // Affiliate Dashboard
 import AffiliateDashboard from './pages/AffiliateDashboard';
@@ -279,7 +279,9 @@ function App() {
             element={
               <ProtectedRoute>
                 <AuthenticatedLayout>
-                  <Dashboard />
+                  <Suspense fallback={<div className="dashboard-loading"><div className="loading-spinner"></div><p>Loading dashboard...</p></div>}>
+                    <Dashboard />
+                  </Suspense>
                 </AuthenticatedLayout>
               </ProtectedRoute>
             }

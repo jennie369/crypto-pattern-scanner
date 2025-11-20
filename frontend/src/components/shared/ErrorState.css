@@ -1,0 +1,59 @@
+/* ===================================
+   ⚠️ ERROR STATE - GEM THEME
+   =================================== */
+
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.error-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.8;
+}
+
+.error-message {
+  font-size: 14px;
+  color: #F6465D;
+  margin: 0 0 16px 0;
+  max-width: 300px;
+  line-height: 1.5;
+}
+
+.btn-retry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+
+  /* GEM Green accent */
+  background: rgba(14, 203, 129, 0.1);
+  border: 1px solid rgba(14, 203, 129, 0.3);
+  border-radius: 6px;
+
+  color: #0ECB81;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-retry:hover {
+  background: rgba(14, 203, 129, 0.2);
+  border-color: rgba(14, 203, 129, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn-retry:active {
+  transform: scale(0.98);
+}
+
+.btn-retry svg {
+  width: 16px;
+  height: 16px;
+}

@@ -163,35 +163,74 @@
   cursor: not-allowed;
 }
 
-/* Pattern Select - Compact */
+/* Pattern Select - GEM Platform Consistent Style */
 .pattern-select {
-  width: 100%;
-  height: 40px; /* Compact: explicit height */
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: var(--radius-md);
-  font-family: var(--font-body);
-  font-size: 14px; /* Slightly reduced */
-  color: var(--text-primary);
-  cursor: pointer;
-  transition: all var(--transition-base);
+  width: 100% !important;
+  height: 44px !important;
+  padding: 10px 36px 10px 16px !important;
+  background: linear-gradient(135deg, rgba(26, 40, 71, 0.6), rgba(15, 27, 53, 0.6)) !important;
+  border: 1px solid rgba(255, 189, 89, 0.2) !important;
+  border-radius: 12px !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: white !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image:
+    linear-gradient(135deg, rgba(26, 40, 71, 0.6), rgba(15, 27, 53, 0.6)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23FFBD59' d='M6 9L1 4h10z'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: center, right 12px center !important;
+  background-size: auto, 12px !important;
+}
+
+.pattern-select:hover {
+  background: linear-gradient(135deg, rgba(26, 40, 71, 0.8), rgba(15, 27, 53, 0.8)) !important;
+  border-color: rgba(255, 189, 89, 0.4) !important;
+  box-shadow: 0 0 16px rgba(255, 189, 89, 0.2) !important;
 }
 
 .pattern-select:focus {
-  outline: none;
-  border-color: var(--brand-cyan);
-  box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+  outline: none !important;
+  border-color: #FFBD59 !important;
+  box-shadow: 0 0 24px rgba(255, 189, 89, 0.4) !important;
 }
 
 .pattern-select:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+  background: rgba(15, 27, 53, 0.4) !important;
 }
 
 .pattern-select option {
-  background: var(--bg-base-mid);
-  color: var(--text-primary);
+  background: #0f1b35 !important;
+  color: white !important;
+  padding: 12px !important;
+  font-weight: 600 !important;
+}
+
+/* GEM Pattern Dropdown Custom - FORCE OVERRIDE */
+select.gem-pattern-dropdown-custom {
+  background-color: #1a2847 !important;
+  background: linear-gradient(135deg, rgba(26, 40, 71, 0.8), rgba(15, 27, 53, 0.8)) !important;
+  border: 2px solid rgba(255, 189, 89, 0.3) !important;
+  color: white !important;
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 600 !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+}
+
+select.gem-pattern-dropdown-custom option {
+  background-color: #0f1b35 !important;
+  background: #0f1b35 !important;
+  color: white !important;
+  padding: 12px !important;
 }
 
 /* Scan Button */

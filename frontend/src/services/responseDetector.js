@@ -58,7 +58,7 @@ export class ResponseDetector {
         if (this.hasStructuredData(aiResponse, ['mistake', 'spiritual', 'lesson', 'chakra'])) {
           return {
             type: ResponseTypes.TRADING_ANALYSIS,
-            confidence: 0.88,
+            confidence: 0.90,
             extractedData: null
           };
         }

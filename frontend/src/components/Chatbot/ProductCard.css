@@ -4,7 +4,8 @@
   width: 110px !important;
   min-width: 110px !important;
   max-width: 110px !important;
-  height: auto;
+  height: auto !important;
+  max-height: 160px !important; /* FORCE compact height */
 
   /* STYLING */
   background: rgba(30, 42, 94, 0.4);
@@ -80,7 +81,7 @@
   display: flex;
   flex-direction: column;
   gap: 3px;
-  flex: 1;
+  /* REMOVED flex: 1 to prevent unwanted expansion */
 }
 
 /* NAME - 2 LINES MAX, COMPACT */
@@ -107,7 +108,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  max-height: 30px;
+  max-height: 24px !important; /* GIẢM từ 30px để compact hơn */
   overflow: hidden;
 }
 
@@ -131,19 +132,20 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 4px;
-  margin-top: auto;
-  padding-top: 4px;
+  gap: 3px !important; /* GIẢM từ 4px */
+  margin-top: 0 !important; /* REMOVE auto margin to prevent expansion */
+  padding-top: 3px !important; /* GIẢM từ 4px */
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* PRICE - NỔI BẬT */
 .chatbot-products-container .product-price {
-  font-size: 13px !important;
+  font-size: 12px !important; /* GIẢM từ 13px */
   font-weight: 700;
   color: #FFBD59;
   margin: 0 !important;
   white-space: nowrap;
+  flex-shrink: 0; /* Prevent price from shrinking */
 }
 
 /* TYPE TAG - TINY */
@@ -159,14 +161,15 @@
   display: flex;
   align-items: center;
   gap: 2px;
-  padding: 5px 8px !important;
+  padding: 4px 6px !important; /* GIẢM từ 5px 8px */
   background: linear-gradient(135deg, #FFBD59, #FFD700);
   border: none;
   border-radius: 5px;
 
-  font-size: 10px !important;
+  font-size: 9px !important; /* GIẢM từ 10px */
   font-weight: 600;
   color: #000;
+  white-space: nowrap; /* Prevent text wrapping */
 
   cursor: pointer;
   transition: all 0.3s ease;

@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from '../hooks/useTranslation';
 import { useAuth } from '../contexts/AuthContext';
 import {
-  Home, Search, Tool, Users, GraduationCap, User, Gem,
+  Home, Search, Wrench, Users, GraduationCap, User, Gem,
   ChevronDown, Lock, LogOut, Settings, DollarSign,
   BookOpen, Calculator, Percent, TrendingUp, BarChart,
   Heart, Calendar, Filter, BarChart2, Activity,
@@ -27,6 +27,10 @@ function TopNavBar() {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Auto-hide navbar on scroll
+  const [isNavbarHidden, setIsNavbarHidden] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   const isActive = (path) => location.pathname === path;
 
@@ -62,6 +66,32 @@ function TopNavBar() {
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
+  // Auto-hide navbar on scroll down
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      // Show navbar when at top (within 10px)
+      if (currentScrollY < 10) {
+        setIsNavbarHidden(false);
+      }
+      // Hide navbar when scrolling down, show when scrolling up
+      else if (currentScrollY > lastScrollY && currentScrollY > 80) {
+        // Scrolling down & past threshold
+        setIsNavbarHidden(true);
+        setActiveDropdown(null); // Close any open dropdowns
+      } else if (currentScrollY < lastScrollY) {
+        // Scrolling up
+        setIsNavbarHidden(false);
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
   // Handle logout (PRESERVE existing logic)
   const handleLogout = async () => {
     await signOut();
@@ -75,7 +105,7 @@ function TopNavBar() {
   };
 
   return (
-    <nav className="top-nav-bar">
+    <nav className={`top-nav-bar ${isNavbarHidden ? 'nav-hidden' : ''}`}>
       <div className="nav-container">
 
         {/* Logo - PRESERVE */}
@@ -103,16 +133,10 @@ function TopNavBar() {
         {/* Main Navigation */}
         <div className={`nav-main ${isMenuOpen ? 'open' : ''}`}>
 
-          {/* Dashboard - Always visible */}
+          {/* Home - Always visible */}
           <Link to="/scanner-v2" className={`nav-item ${isActive('/scanner-v2') ? 'active' : ''}`}>
             <Home size={20} />
-            <span>Dashboard</span>
-          </Link>
-
-          {/* Scanner - Always visible */}
-          <Link to="/scanner" className={`nav-item ${isActive('/scanner') ? 'active' : ''}`}>
-            <Search size={20} />
-            <span>Scanner</span>
+            <span>Home</span>
           </Link>
 
           {/* TOOLS DROPDOWN */}
@@ -121,7 +145,7 @@ function TopNavBar() {
               className={`nav-item dropdown-trigger ${activeDropdown === 'tools' ? 'active' : ''}`}
               onClick={() => toggleDropdown('tools')}
             >
-              <Tool size={20} />
+              <Wrench size={20} />
               <span>Tools</span>
               <ChevronDown size={16} className={activeDropdown === 'tools' ? 'rotated' : ''} />
             </button>
@@ -307,14 +331,20 @@ function TopNavBar() {
             )}
           </div>
 
-          {/* COMMUNITY DROPDOWN */}
+          {/* Shop - Direct link */}
+          <Link to="/shop" className={`nav-item ${isActive('/shop') ? 'active' : ''}`}>
+            <ShoppingCart size={20} />
+            <span>Shop</span>
+          </Link>
+
+          {/* NEWS FEED DROPDOWN */}
           <div className="nav-dropdown">
             <button
               className={`nav-item dropdown-trigger ${activeDropdown === 'community' ? 'active' : ''}`}
               onClick={() => toggleDropdown('community')}
             >
               <Users size={20} />
-              <span>Cộng Đồng</span>
+              <span>News Feed</span>
               <ChevronDown size={16} className={activeDropdown === 'community' ? 'rotated' : ''} />
             </button>
 
@@ -351,60 +381,24 @@ function TopNavBar() {
             )}
           </div>
 
-          {/* LEARNING DROPDOWN */}
-          <div className="nav-dropdown">
-            <button
-              className={`nav-item dropdown-trigger ${activeDropdown === 'learning' ? 'active' : ''}`}
-              onClick={() => toggleDropdown('learning')}
-            >
-              <GraduationCap size={20} />
-              <span>Học Tập</span>
-              <ChevronDown size={16} className={activeDropdown === 'learning' ? 'rotated' : ''} />
-            </button>
+          {/* Gem Master - Direct link */}
+          <Link to="/chatbot" className={`nav-item ${isActive('/chatbot') ? 'active' : ''}`}>
+            <Bot size={20} />
+            <span>Gem Master</span>
+          </Link>
 
-            {activeDropdown === 'learning' && (
-              <div className="dropdown-menu">
-                <Link to="/courses" className="dropdown-item" onClick={() => setActiveDropdown(null)}>
-                  <BookOpen size={18} />
-                  <span>Courses</span>
-                </Link>
-
-                <Link to="/shop" className="dropdown-item" onClick={() => setActiveDropdown(null)}>
-                  <ShoppingCart size={18} />
-                  <span>Shop</span>
-                </Link>
-              </div>
-            )}
-          </div>
+          {/* Khóa Học - Direct link */}
+          <Link to="/courses" className={`nav-item ${isActive('/courses') ? 'active' : ''}`}>
+            <GraduationCap size={20} />
+            <span>Khóa Học</span>
+          </Link>
 
         </div>
 
-        {/* Right Navigation - Account & Settings */}
+        {/* Right Navigation - User Account & Admin */}
         <div className="nav-right">
 
-          {/* Settings - Desktop only */}
-          <Link
-            to="/settings"
-            className={`nav-item nav-item-desktop ${isActive('/settings') ? 'active' : ''}`}
-            title={t('settings')}
-          >
-            <Settings size={20} />
-            <span className="nav-label-desktop">{t('settings')}</span>
-          </Link>
-
-          {/* Admin - Desktop only (if admin) */}
-          {isAdmin() && (
-            <Link
-              to="/admin"
-              className={`nav-item nav-item-desktop ${isActive('/admin') ? 'active' : ''}`}
-              title={t('admin')}
-            >
-              <Lock size={20} />
-              <span className="nav-label-desktop">{t('admin')}</span>
-            </Link>
-          )}
-
-          {/* ACCOUNT DROPDOWN */}
+          {/* ACCOUNT DROPDOWN - User menu with avatar */}
           {user && (
             <div className="nav-dropdown account-dropdown">
               <button
@@ -465,6 +459,18 @@ function TopNavBar() {
                 </div>
               )}
             </div>
+          )}
+
+          {/* Admin - Desktop only (if admin) */}
+          {isAdmin() && (
+            <Link
+              to="/admin"
+              className={`nav-item nav-item-desktop ${isActive('/admin') ? 'active' : ''}`}
+              title={t('admin')}
+            >
+              <Lock size={20} />
+              <span className="nav-label-desktop">{t('admin')}</span>
+            </Link>
           )}
 
           {/* Mobile Menu Toggle */}

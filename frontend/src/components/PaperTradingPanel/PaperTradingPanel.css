@@ -276,6 +276,9 @@ button.order-tab:hover {
 
 .price-value {
   margin-bottom: 12px;
+  display: block;
+  position: relative;
+  min-height: 40px;
 }
 
 .loading-text {
@@ -287,10 +290,18 @@ button.order-tab:hover {
 .price-amount {
   font-size: 32px;
   font-weight: 800;
-  background: linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #06B6D4;
+  display: block;
+  line-height: 1.2;
+}
+
+/* 🛡️ Price digit styling - prevents browser extension from wrapping individual chars */
+.price-digit {
+  display: inline;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+  letter-spacing: normal;
 }
 
 .live-indicator {
@@ -361,7 +372,7 @@ button.order-tab:hover {
   color: #FFFFFF;
 }
 
-/* Side Buttons */
+/* Side Buttons - EXACT FORUM STYLE */
 .side-buttons {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -369,96 +380,89 @@ button.order-tab:hover {
 }
 
 .side-button {
-  position: relative;
-  display: flex;
-  flex-direction: column;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 24px 16px;
-  border-radius: 16px;
-  font-weight: 800;
-  font-size: 18px;
+  gap: 6px;
+  padding: 10px 20px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s ease;
+  position: relative;
   overflow: hidden;
-  border: 2px solid transparent;
+  border: 2px solid #FFBD59;
+  border-radius: 50px;
 }
 
-.button-glow {
+/* ::before pseudo-element for glow effect */
+.side-button::before {
+  content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    transparent 100%
-  );
+  background: radial-gradient(circle, rgba(255,189,89,0.15) 0%, transparent 70%);
   opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.side-button:hover .button-glow,
-.side-button.active .button-glow {
-  opacity: 1;
+  transition: opacity 0.4s ease;
 }
 
 .button-icon {
   transition: all 0.3s ease;
+  font-size: 0.9rem;
+  flex-shrink: 0;
 }
 
 .button-text {
   position: relative;
   z-index: 1;
-  letter-spacing: 1px;
+  text-align: center;
+  flex-shrink: 0;
 }
 
-/* Buy Button */
+/* Buy Button - GREEN STYLE */
 .side-button.buy {
-  background: rgba(16, 185, 129, 0.15);
-  border-color: rgba(16, 185, 129, 0.3);
-  color: #10B981;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: #FFFFFF;
+  box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4);
 }
 
-.side-button.buy:hover,
+.side-button.buy:hover:not(:disabled),
 .side-button.buy.active {
-  background: rgba(16, 185, 129, 0.25);
-  border-color: #10B981;
-  box-shadow: 0 0 24px rgba(16, 185, 129, 0.3);
-  transform: scale(1.05);
+  transform: translateY(-3px);
+  border-color: rgba(255, 189, 89, 0.8);
+  box-shadow: 0 12px 48px rgba(16, 185, 129, 0.5), 0 0 30px rgba(255, 189, 89, 0.4);
 }
 
-.side-button.buy:hover .button-icon,
-.side-button.buy.active .button-icon {
-  filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.8));
-  transform: scale(1.1);
+.side-button.buy:hover:not(:disabled)::before {
+  opacity: 1;
 }
 
-.side-button.buy:active {
-  transform: scale(0.98);
+.side-button.buy:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-/* Sell Button */
+/* Sell Button - EXACT FORUM PRIMARY STYLE */
 .side-button.sell {
-  background: rgba(239, 68, 68, 0.15);
-  border-color: rgba(239, 68, 68, 0.3);
-  color: #EF4444;
+  background: linear-gradient(135deg, #9C0612 0%, #6B0F1A 100%);
+  color: #FFFFFF;
+  box-shadow: 0 10px 40px rgba(156, 6, 18, 0.4);
 }
 
-.side-button.sell:hover,
+.side-button.sell:hover:not(:disabled),
 .side-button.sell.active {
-  background: rgba(239, 68, 68, 0.25);
-  border-color: #EF4444;
-  box-shadow: 0 0 24px rgba(239, 68, 68, 0.3);
-  transform: scale(1.05);
+  transform: translateY(-3px);
+  border-color: rgba(255, 189, 89, 0.8);
+  box-shadow: 0 12px 48px rgba(156, 6, 18, 0.5), 0 0 30px rgba(255, 189, 89, 0.4);
 }
 
-.side-button.sell:hover .button-icon,
-.side-button.sell.active .button-icon {
-  filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.8));
-  transform: scale(1.1);
+.side-button.sell:hover:not(:disabled)::before {
+  opacity: 1;
 }
 
-.side-button.sell:active {
-  transform: scale(0.98);
+.side-button.sell:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Order Form */
@@ -947,19 +951,31 @@ button.order-tab:hover {
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
   border: none;
-  color: #8d8d8d;
+  color: #FFBD59;
   font-size: 12px;
   cursor: help;
   transition: all 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+}
+
+.info-tooltip svg {
+  color: #FFBD59;
+  stroke: #FFBD59;
+  fill: none;
 }
 
 .info-tooltip:hover {
-  background: rgba(255, 255, 255, 0.2);
-  color: #0ECB81;
+  background: rgba(255, 189, 89, 0.2);
+  color: #FFBD59;
   transform: scale(1.1);
+}
+
+.info-tooltip:hover svg {
+  color: #FFBD59;
+  stroke: #FFBD59;
 }
 
 .reduce-only-hint {
@@ -994,35 +1010,52 @@ button.order-tab:hover {
 .tif-select {
   width: 100%;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  /* GEM Dark Background with glassmorphism */
+  background: rgba(17, 34, 80, 0.6) !important;
+  backdrop-filter: blur(8px);
+
+  /* Cyan Border */
+  border: 1px solid rgba(0, 217, 255, 0.3) !important;
   border-radius: 8px;
-  color: #fff;
+
+  /* Text */
+  color: white !important;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
+
+  /* Remove default arrow */
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%238d8d8d' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  /* Custom cyan arrow */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2300d9ff' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
   padding-right: 36px;
+
   outline: none;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .tif-select:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(17, 34, 80, 0.8) !important;
+  border-color: #00D9FF !important;
+  box-shadow: 0 0 12px rgba(0, 217, 255, 0.2);
 }
 
 .tif-select:focus {
-  border-color: #0ECB81;
-  background: rgba(255, 255, 255, 0.08);
+  border-color: #00D9FF !important;
+  background: rgba(17, 34, 80, 0.8) !important;
+  box-shadow: 0 0 16px rgba(0, 217, 255, 0.3);
 }
 
 .tif-select option {
-  background: #1e1e1e;
-  color: #fff;
+  background: rgba(17, 34, 80, 0.95) !important;
+  background-color: #112250 !important;
+  color: white !important;
   padding: 8px;
 }
 
@@ -1161,61 +1194,67 @@ button.order-tab:hover {
   color: #10B981;
 }
 
-/* Execute Button */
+/* Execute Button - Scanner v2 Copy Style */
 .execute-button {
   width: 100%;
-  padding: 18px 24px;
-  border-radius: 14px;
-  font-size: 16px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  text-transform: uppercase;
+  max-width: 320px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 10px 16px;
+  margin-top: 120px; /* Space to prevent dropdown from covering it */
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  border: none;
+  border: 2px solid #FFBD59;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .execute-button::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg,
-    rgba(255, 255, 255, 0.2) 0%,
-    transparent 100%
-  );
+  background: radial-gradient(circle, rgba(255,189,89,0.15) 0%, transparent 70%);
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.4s ease;
 }
 
-.execute-button:hover::before {
+.execute-button:hover:not(:disabled)::before {
   opacity: 1;
 }
 
 .execute-button.buy {
   background: linear-gradient(135deg, #10B981 0%, #059669 100%);
   color: #FFFFFF;
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.3);
 }
 
-.execute-button.buy:hover {
-  box-shadow: 0 6px 24px rgba(16, 185, 129, 0.5);
+.execute-button.buy:hover:not(:disabled) {
+  box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4), 0 0 20px rgba(255, 189, 89, 0.3);
   transform: translateY(-2px);
+  border-color: rgba(255, 189, 89, 0.8);
 }
 
 .execute-button.sell {
-  background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+  background: linear-gradient(135deg, #9C0612 0%, #6B0F1A 100%);
   color: #FFFFFF;
-  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 8px 32px rgba(156, 6, 18, 0.3);
 }
 
-.execute-button.sell:hover {
-  box-shadow: 0 6px 24px rgba(239, 68, 68, 0.5);
+.execute-button.sell:hover:not(:disabled) {
+  box-shadow: 0 10px 40px rgba(156, 6, 18, 0.4), 0 0 20px rgba(255, 189, 89, 0.3);
   transform: translateY(-2px);
+  border-color: rgba(255, 189, 89, 0.8);
 }
 
-.execute-button:active {
+.execute-button:active:not(:disabled) {
   transform: translateY(0) scale(0.98);
 }
 
@@ -1249,8 +1288,10 @@ button.order-tab:hover {
 }
 
 .btn-icon {
-  font-size: 18px;
-  margin-right: 6px;
+  font-size: 14px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
 }
 
 /* Upgrade Prompt */

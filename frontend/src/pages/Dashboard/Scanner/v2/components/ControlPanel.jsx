@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { Search } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Search, ChevronDown } from 'lucide-react';
 import { useAuth } from '../../../../../contexts/AuthContext';
 import ResultsList from './ResultsList';
 import CoinSelectorDropdown from './CoinSelectorDropdown';
+import CustomSelect from '../../../../../components/CustomSelect/CustomSelect';
 import './ControlPanel.css';
 
 export const ControlPanel = ({ onScan, isScanning, results, onSelectPattern, selectedPattern, onOpenPaperTrading }) => {
@@ -134,19 +135,16 @@ export const ControlPanel = ({ onScan, isScanning, results, onSelectPattern, sel
         </div>
       </div>
 
-      {/* Pattern Filter */}
+      {/* Pattern Filter - GEM Themed Dropdown */}
       <div className="control-section">
         <label className="control-label">Pattern Filter</label>
-        <select
-          className="pattern-select"
+        <CustomSelect
           value={patternFilter}
-          onChange={(e) => setPatternFilter(e.target.value)}
+          onChange={setPatternFilter}
+          options={patterns.map(pattern => ({ value: pattern, label: pattern }))}
           disabled={isScanning}
-        >
-          {patterns.map(pattern => (
-            <option key={pattern} value={pattern}>{pattern}</option>
-          ))}
-        </select>
+          className="pattern-filter-select"
+        />
       </div>
 
       {/* Scan Button - Compact */}

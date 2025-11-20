@@ -1,8 +1,20 @@
 .recent-trades-section {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  /* GEM Dark Background with glassmorphism */
+  background: rgba(17, 34, 80, 0.4);
+  backdrop-filter: blur(8px);
+
+  /* Cyan Border */
+  border: 1px solid rgba(0, 217, 255, 0.2);
   border-radius: 12px;
   padding: 16px;
+  margin-top: 16px;
+
+  transition: all 0.2s ease;
+}
+
+.recent-trades-section:hover {
+  border-color: rgba(0, 217, 255, 0.3);
+  box-shadow: 0 0 12px rgba(0, 217, 255, 0.1);
 }
 
 .section-header {
@@ -69,6 +81,99 @@
 
 .symbol-cell {
   font-weight: 700;
+}
+
+/* ===================================
+   TRADES LIST (CARD LAYOUT)
+   =================================== */
+
+.trades-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.trade-item {
+  background: rgba(17, 34, 80, 0.3);
+  border: 1px solid rgba(0, 217, 255, 0.15);
+  border-radius: 8px;
+  padding: 12px;
+  transition: all 0.2s ease;
+}
+
+.trade-item:hover {
+  background: rgba(17, 34, 80, 0.5);
+  border-color: rgba(0, 217, 255, 0.3);
+  transform: translateX(2px);
+}
+
+.trade-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+/* Coin symbol in trade card - Brand gold, proper sizing */
+.trade-header .symbol {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  color: #FFBD59 !important; /* Brand gold */
+  letter-spacing: 0.5px;
+  text-shadow: none !important;
+}
+
+/* BUY/SELL badge */
+.trade-header .side {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.trade-header .side.buy {
+  background: rgba(14, 203, 129, 0.15);
+  color: #0ECB81;
+  border: 1px solid rgba(14, 203, 129, 0.3);
+}
+
+.trade-header .side.sell {
+  background: rgba(246, 70, 93, 0.15);
+  color: #F6465D;
+  border: 1px solid rgba(246, 70, 93, 0.3);
+}
+
+.trade-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.detail-row.strong {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.detail-row.time {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 4px;
+}
+
+.detail-row .profit {
+  color: #0ECB81;
+}
+
+.detail-row .loss {
+  color: #F6465D;
 }
 
 .trades-table td.profit {

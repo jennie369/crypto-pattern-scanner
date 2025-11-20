@@ -1,4 +1,7 @@
 /* ===== TOP NAVIGATION BAR - Phase 3 Redesign ===== */
+/* Import Vietnamese-friendly fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
 .top-nav-bar {
   position: sticky;
   top: 0;
@@ -8,6 +11,15 @@
   border-bottom: 2px solid rgba(255, 189, 89, 0.2);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   z-index: 1000;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  transition: transform 0.3s ease-in-out;
+  transform: translateY(0);
+}
+
+/* Auto-hide when scrolling down */
+.top-nav-bar.nav-hidden {
+  transform: translateY(-100%);
+  box-shadow: none;
 }
 
 .nav-container {
@@ -17,7 +29,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 32px;
+  gap: 16px;
 }
 
 /* ===== LOGO ===== */
@@ -60,7 +72,6 @@
   font-weight: 800;
   letter-spacing: 1px;
   line-height: 1;
-  font-family: 'Montserrat', sans-serif;
 }
 
 .logo-subtitle {
@@ -68,7 +79,6 @@
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 2px;
-  font-family: 'Montserrat', sans-serif;
 }
 
 /* ===== MAIN NAVIGATION ===== */
@@ -77,13 +87,18 @@
   align-items: center;
   gap: 8px;
   flex: 1;
+  justify-content: flex-start;
 }
 
 .nav-item {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 6px;
   padding: 10px 20px;
+  min-width: 130px;
+  max-width: 130px;
+  height: 44px;
   background: rgba(17, 34, 80, 0.4);
   border: 1px solid rgba(255, 189, 89, 0.2);
   border-radius: 12px;
@@ -93,8 +108,34 @@
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
-  font-family: 'Montserrat', sans-serif;
   text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  flex-grow: 0;
+  box-sizing: border-box;
+  outline: none; /* Remove browser default outline */
+}
+
+/* Remove browser default focus/active styles */
+.nav-item:focus,
+.nav-item:active,
+.nav-item:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+  border: 1px solid rgba(255, 189, 89, 0.2) !important;
+}
+
+/* For dropdown buttons specifically */
+.nav-item.dropdown-trigger:focus,
+.nav-item.dropdown-trigger:active {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Custom focus style for accessibility (keyboard only) */
+.nav-item:focus-visible {
+  outline: 2px solid rgba(255, 189, 89, 0.5) !important;
+  outline-offset: 2px;
 }
 
 .nav-item:hover {
@@ -181,12 +222,12 @@
 
 /* Tools Menu - Wide dropdown with sections */
 .tools-menu {
-  min-width: 680px;
-  max-width: 720px;
+  min-width: 700px;
+  max-width: 740px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  padding: 12px;
+  gap: 16px;
+  padding: 16px;
 }
 
 /* Dropdown Sections (for tier grouping) */
@@ -198,33 +239,49 @@
   background: rgba(17, 34, 80, 0.3);
   border-radius: 8px;
   border: 1px solid rgba(255, 189, 89, 0.15);
+  overflow: hidden;
+  position: relative;
 }
 
 .section-header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 4px;
-  margin-bottom: 4px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 8px 6px;
+  margin-bottom: 6px;
   border-bottom: 1px solid rgba(255, 189, 89, 0.2);
+  position: relative;
 }
 
 .section-title {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: rgba(255, 255, 255, 0.6);
-  text-transform: uppercase;
-}
-
-/* Tier Badges */
-.tier-badge {
   font-size: 10px;
   font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 6px;
   letter-spacing: 0.5px;
-  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  width: 100%;
+  position: relative;
+}
+
+/* Tier Badges - More specific selector for dropdown menu */
+.dropdown-menu .tier-badge,
+.tools-menu .tier-badge,
+.section-header .tier-badge {
+  font-size: 8px !important;
+  font-weight: 700 !important;
+  padding: 3px 8px !important;
+  border-radius: 4px !important;
+  letter-spacing: 0.3px !important;
+  white-space: nowrap !important;
+  position: relative !important;
+  display: inline-block !important;
+  margin: 0 !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
 }
 
 .tier-badge.tier-1 {
@@ -268,7 +325,6 @@
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
-  font-family: 'Montserrat', sans-serif;
   text-decoration: none;
   position: relative;
 }
