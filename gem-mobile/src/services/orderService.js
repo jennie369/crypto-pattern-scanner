@@ -1,0 +1,416 @@
+/**
+ * GEM Platform - Order Service
+ * Manages orders from Shopify + local storage + Supabase sync
+ */
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from './supabase';
+import { shopifyService } from './shopifyService';
+import { notificationService } from './notificationService';
+
+const ORDERS_STORAGE_KEY = '@gem_orders';
+const ORDER_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+class OrderService {
+  constructor() {
+    this._ordersCache = null;
+    this._cacheTime = 0;
+  }
+
+  /**
+   * Save order locally after checkout
+   */
+  async saveLocalOrder(orderData) {
+    try {
+      console.log('[OrderService] Saving local order:', orderData);
+
+      const orders = await this.getLocalOrders();
+
+      const now = new Date().toISOString();
+      const newOrder = {
+        id: orderData.orderId || `local_${Date.now()}`,
+        shopifyOrderId: orderData.orderId,
+        orderNumber: orderData.orderNumber || orderData.orderId,
+        status: 'processing',
+        totalPrice: orderData.totalPrice || 0,
+        currency: 'VND',
+        items: orderData.items || [],
+        createdAt: now,
+        updatedAt: now,
+        checkoutUrl: orderData.checkoutUrl,
+        synced: false,
+        // Status timestamps for timeline
+        confirmedAt: now,
+        processingAt: now,
+        shippedAt: null,
+        deliveredAt: null,
+        cancelledAt: null,
+        // Status history
+        statusHistory: [
+          { status: 'pending', timestamp: now, note: 'Đơn hàng đã được tạo' },
+          { status: 'confirmed', timestamp: now, note: 'Thanh toán thành công' },
+          { status: 'processing', timestamp: now, note: 'Đang chuẩn bị đơn hàng' },
+        ],
+      };
+
+      // Add to beginning of list
+      orders.unshift(newOrder);
+
+      // Keep only last 50 orders locally
+      const trimmedOrders = orders.slice(0, 50);
+
+      await AsyncStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(trimmedOrders));
+      this._ordersCache = trimmedOrders;
+      this._cacheTime = Date.now();
+
+      console.log('[OrderService] Order saved locally');
+      return newOrder;
+    } catch (error) {
+      console.error('[OrderService] saveLocalOrder error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get orders from local storage
+   */
+  async getLocalOrders() {
+    try {
+      const stored = await AsyncStorage.getItem(ORDERS_STORAGE_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      console.error('[OrderService] getLocalOrders error:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get user orders (combines local + Supabase)
+   */
+  async getUserOrders(userId, options = {}) {
+    const { status = null, limit = 50, forceRefresh = false } = options;
+
+    try {
+      // Check cache
+      if (!forceRefresh && this._ordersCache && Date.now() - this._cacheTime < ORDER_CACHE_DURATION) {
+        console.log('[OrderService] Using cached orders');
+        let orders = this._ordersCache;
+        if (status) {
+          orders = orders.filter((o) => o.status === status);
+        }
+        return orders.slice(0, limit);
+      }
+
+      console.log('[OrderService] Fetching orders for user:', userId);
+
+      // Try to get from Supabase first
+      let supabaseOrders = [];
+      if (userId) {
+        try {
+          const { data, error } = await supabase
+            .from('orders')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+            .limit(limit);
+
+          if (!error && data) {
+            supabaseOrders = data.map(this.transformSupabaseOrder);
+          }
+        } catch (err) {
+          console.warn('[OrderService] Supabase fetch failed:', err);
+        }
+      }
+
+      // Get local orders
+      const localOrders = await this.getLocalOrders();
+
+      // Merge orders (prefer Supabase data, add local-only orders)
+      const mergedOrders = this.mergeOrders(supabaseOrders, localOrders);
+
+      // Filter by status if needed
+      let filteredOrders = mergedOrders;
+      if (status) {
+        filteredOrders = mergedOrders.filter((o) => o.status === status);
+      }
+
+      // Update cache
+      this._ordersCache = mergedOrders;
+      this._cacheTime = Date.now();
+
+      return filteredOrders.slice(0, limit);
+    } catch (error) {
+      console.error('[OrderService] getUserOrders error:', error);
+
+      // Fallback to local orders
+      const localOrders = await this.getLocalOrders();
+      if (status) {
+        return localOrders.filter((o) => o.status === status);
+      }
+      return localOrders;
+    }
+  }
+
+  /**
+   * Get single order detail
+   */
+  async getOrderDetail(orderId, userId) {
+    try {
+      console.log('[OrderService] Getting order detail:', orderId);
+
+      // Try Supabase first
+      if (userId) {
+        try {
+          const { data, error } = await supabase
+            .from('orders')
+            .select('*')
+            .eq('id', orderId)
+            .eq('user_id', userId)
+            .single();
+
+          if (!error && data) {
+            return this.transformSupabaseOrder(data);
+          }
+        } catch (err) {
+          console.warn('[OrderService] Supabase order fetch failed:', err);
+        }
+      }
+
+      // Fallback to local
+      const localOrders = await this.getLocalOrders();
+      const localOrder = localOrders.find(
+        (o) => o.id === orderId || o.shopifyOrderId === orderId || o.orderNumber === orderId
+      );
+
+      return localOrder || null;
+    } catch (error) {
+      console.error('[OrderService] getOrderDetail error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Sync local order to Supabase
+   */
+  async syncOrderToSupabase(order, userId) {
+    if (!userId) {
+      console.warn('[OrderService] Cannot sync - no user ID');
+      return null;
+    }
+
+    try {
+      console.log('[OrderService] Syncing order to Supabase:', order.id);
+
+      const orderData = {
+        user_id: userId,
+        shopify_order_id: order.shopifyOrderId || order.id,
+        shopify_order_number: order.orderNumber,
+        status: order.status || 'processing',
+        total_price: order.totalPrice || 0,
+        currency: order.currency || 'VND',
+        items: order.items || [],
+        shipping_address: order.shippingAddress || null,
+        payment_status: order.paymentStatus || 'paid',
+        created_at: order.createdAt,
+        updated_at: new Date().toISOString(),
+      };
+
+      const { data, error } = await supabase.from('orders').upsert(orderData, {
+        onConflict: 'shopify_order_id',
+      });
+
+      if (error) {
+        console.error('[OrderService] Sync error:', error);
+        return null;
+      }
+
+      // Mark local order as synced
+      await this.markOrderSynced(order.id);
+
+      return data;
+    } catch (error) {
+      console.error('[OrderService] syncOrderToSupabase error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Mark local order as synced
+   */
+  async markOrderSynced(orderId) {
+    try {
+      const orders = await this.getLocalOrders();
+      const updated = orders.map((o) => (o.id === orderId ? { ...o, synced: true } : o));
+      await AsyncStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(updated));
+    } catch (error) {
+      console.error('[OrderService] markOrderSynced error:', error);
+    }
+  }
+
+  /**
+   * Update order status locally with history tracking
+   */
+  async updateOrderStatus(orderId, newStatus, note = null) {
+    try {
+      const now = new Date().toISOString();
+      const orders = await this.getLocalOrders();
+
+      const statusNotes = {
+        pending: 'Đơn hàng đang chờ xử lý',
+        confirmed: 'Đơn hàng đã được xác nhận',
+        processing: 'Đang chuẩn bị đơn hàng',
+        shipped: 'Đơn hàng đang được giao',
+        delivered: 'Đơn hàng đã giao thành công',
+        cancelled: 'Đơn hàng đã bị hủy',
+      };
+
+      const updated = orders.map((o) => {
+        if (o.id === orderId || o.shopifyOrderId === orderId) {
+          // Update status timestamp
+          const timestampKey = `${newStatus}At`;
+          const statusUpdate = {
+            ...o,
+            status: newStatus,
+            updatedAt: now,
+            [timestampKey]: now,
+          };
+
+          // Add to status history
+          const historyEntry = {
+            status: newStatus,
+            timestamp: now,
+            note: note || statusNotes[newStatus] || `Trạng thái: ${newStatus}`,
+          };
+
+          statusUpdate.statusHistory = [
+            ...(o.statusHistory || []),
+            historyEntry,
+          ];
+
+          // Send notification for status change
+          notificationService.sendOrderNotification(statusUpdate, newStatus);
+
+          return statusUpdate;
+        }
+        return o;
+      });
+
+      await AsyncStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(updated));
+      this._ordersCache = updated;
+      return true;
+    } catch (error) {
+      console.error('[OrderService] updateOrderStatus error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Transform Supabase order to app format
+   */
+  transformSupabaseOrder(dbOrder) {
+    return {
+      id: dbOrder.id,
+      shopifyOrderId: dbOrder.shopify_order_id,
+      orderNumber: dbOrder.shopify_order_number,
+      status: dbOrder.status,
+      totalPrice: dbOrder.total_price,
+      currency: dbOrder.currency,
+      items: dbOrder.items || [],
+      shippingAddress: dbOrder.shipping_address,
+      trackingNumber: dbOrder.tracking_number,
+      trackingUrl: dbOrder.tracking_url,
+      paymentStatus: dbOrder.payment_status,
+      createdAt: dbOrder.created_at,
+      updatedAt: dbOrder.updated_at,
+      // Status timestamps
+      confirmedAt: dbOrder.confirmed_at || dbOrder.created_at,
+      processingAt: dbOrder.processing_at,
+      shippedAt: dbOrder.shipped_at,
+      deliveredAt: dbOrder.delivered_at,
+      cancelledAt: dbOrder.cancelled_at,
+      cancelReason: dbOrder.cancel_reason,
+      // Status history
+      statusHistory: dbOrder.status_history || [],
+      synced: true,
+    };
+  }
+
+  /**
+   * Merge Supabase and local orders
+   */
+  mergeOrders(supabaseOrders, localOrders) {
+    const orderMap = new Map();
+
+    // Add Supabase orders first (they take priority)
+    supabaseOrders.forEach((order) => {
+      orderMap.set(order.shopifyOrderId || order.id, order);
+    });
+
+    // Add local orders that aren't in Supabase
+    localOrders.forEach((order) => {
+      const key = order.shopifyOrderId || order.id;
+      if (!orderMap.has(key)) {
+        orderMap.set(key, order);
+      }
+    });
+
+    // Convert to array and sort by date
+    return Array.from(orderMap.values()).sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
+  }
+
+  /**
+   * Get order status display info
+   */
+  getStatusInfo(status) {
+    const statusMap = {
+      pending: {
+        label: 'Cho xu ly',
+        color: '#FFBD59',
+        icon: 'clock',
+      },
+      processing: {
+        label: 'Dang xu ly',
+        color: '#6A5BFF',
+        icon: 'package',
+      },
+      shipped: {
+        label: 'Dang giao',
+        color: '#00F0FF',
+        icon: 'truck',
+      },
+      delivered: {
+        label: 'Da giao',
+        color: '#3AF7A6',
+        icon: 'check-circle',
+      },
+      cancelled: {
+        label: 'Da huy',
+        color: '#FF6B6B',
+        icon: 'x-circle',
+      },
+    };
+
+    return statusMap[status] || statusMap.pending;
+  }
+
+  /**
+   * Clear orders cache
+   */
+  clearCache() {
+    this._ordersCache = null;
+    this._cacheTime = 0;
+  }
+
+  /**
+   * Clear all local orders (for testing)
+   */
+  async clearLocalOrders() {
+    await AsyncStorage.removeItem(ORDERS_STORAGE_KEY);
+    this.clearCache();
+  }
+}
+
+export const orderService = new OrderService();
+export default orderService;
