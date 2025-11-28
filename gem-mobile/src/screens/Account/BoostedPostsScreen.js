@@ -154,11 +154,9 @@ export default function BoostedPostsScreen({ navigation }) {
       </Text>
       <TouchableOpacity
         style={styles.learnMoreBtn}
-        onPress={() => {
-          // Navigate to help or create boost
-        }}
+        onPress={() => navigation.navigate('SelectPostForBoost')}
       >
-        <Text style={styles.learnMoreText}>Tìm hiểu thêm</Text>
+        <Text style={styles.learnMoreText}>Tạo Boost mới</Text>
       </TouchableOpacity>
     </View>
   );

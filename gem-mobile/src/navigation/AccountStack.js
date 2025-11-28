@@ -61,6 +61,7 @@ import SavedPostsScreen from '../screens/Account/SavedPostsScreen';
 import SoundDetailScreen from '../screens/Sounds/SoundDetailScreen';
 import BoostPostScreen from '../screens/Monetization/BoostPostScreen';
 import BoostAnalyticsScreen from '../screens/Monetization/BoostAnalyticsScreen';
+import SelectPostForBoostScreen from '../screens/Monetization/SelectPostForBoostScreen';
 
 // Admin Screens
 import {
@@ -151,6 +152,7 @@ export default function AccountStack() {
       {/* SOUND & MONETIZATION SCREENS */}
       {/* ═══════════════════════════════════════════ */}
       <Stack.Screen name="SoundDetail" component={SoundDetailScreen} />
+      <Stack.Screen name="SelectPostForBoost" component={SelectPostForBoostScreen} />
       <Stack.Screen name="BoostPost" component={BoostPostScreen} />
       <Stack.Screen name="BoostAnalytics" component={BoostAnalyticsScreen} />
 

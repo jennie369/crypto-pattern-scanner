@@ -395,11 +395,18 @@ export const boostService = {
 
   /**
    * Get user's boost campaigns (alias for getBoostHistory)
+   * @param {string} userId - User ID (optional, uses current user if not provided)
    * @param {number} limit - Max results
-   * @returns {Promise<array>}
+   * @returns {Promise<object>}
    */
-  async getUserCampaigns(limit = 20) {
-    return this.getBoostHistory(limit);
+  async getUserCampaigns(userId, limit = 20) {
+    try {
+      const data = await this.getBoostHistory(limit);
+      return { success: true, data };
+    } catch (error) {
+      console.error('[Boost] getUserCampaigns error:', error);
+      return { success: false, data: [] };
+    }
   },
 
   /**
