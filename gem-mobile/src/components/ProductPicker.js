@@ -2,6 +2,7 @@
  * Gemral - Product Picker Modal
  * Modal để chọn sản phẩm gắn vào bài viết
  * Loads REAL products from Shopify store
+ * Supports multi-select mode
  */
 
 import React, { useState, useEffect } from 'react';
@@ -15,6 +16,7 @@ import {
   TextInput,
   ActivityIndicator,
   Image,
+  ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -25,28 +27,61 @@ import {
   Check,
   Package,
   RefreshCw,
+  Minus,
 } from 'lucide-react-native';
 
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../utils/tokens';
 import shopifyService from '../services/shopifyService';
 
-const ProductPicker = ({ visible, onClose, onSelect, currentProduct }) => {
+/**
+ * ProductPicker Component
+ * @param {boolean} visible - Modal visibility
+ * @param {function} onClose - Close handler
+ * @param {function} onSelect - Selection handler (receives array if multiSelect, single product otherwise)
+ * @param {object|array} currentProduct - Current selected product(s)
+ * @param {boolean} multiSelect - Enable multi-select mode (default: false for backwards compatibility)
+ * @param {number} maxSelect - Maximum products to select in multi-select mode (default: 10)
+ */
+const ProductPicker = ({
+  visible,
+  onClose,
+  onSelect,
+  currentProduct,
+  multiSelect = false,
+  maxSelect = 10,
+}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [allProducts, setAllProducts] = useState([]); // All products from Shopify
   const [products, setProducts] = useState([]); // Filtered products to display
   const [loading, setLoading] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(currentProduct);
   const [error, setError] = useState(null);
+
+  // For single select mode
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  // For multi-select mode
+  const [selectedProducts, setSelectedProducts] = useState([]);
 
   useEffect(() => {
     if (visible) {
       loadProducts();
+      // Initialize selected state based on currentProduct
+      if (multiSelect) {
+        const initialProducts = Array.isArray(currentProduct) ? currentProduct : (currentProduct ? [currentProduct] : []);
+        setSelectedProducts(initialProducts);
+      } else {
+        setSelectedProduct(currentProduct || null);
+      }
     }
   }, [visible]);
 
   useEffect(() => {
-    setSelectedProduct(currentProduct);
-  }, [currentProduct]);
+    if (multiSelect) {
+      const initialProducts = Array.isArray(currentProduct) ? currentProduct : (currentProduct ? [currentProduct] : []);
+      setSelectedProducts(initialProducts);
+    } else {
+      setSelectedProduct(currentProduct || null);
+    }
+  }, [currentProduct, multiSelect]);
 
   /**
    * Transform Shopify product to our format
@@ -182,22 +217,86 @@ const ProductPicker = ({ visible, onClose, onSelect, currentProduct }) => {
     setProducts(filtered);
   };
 
-  // Filtered products to display
-  const filteredProducts = products;
-
+  /**
+   * Handle product selection
+   */
   const handleSelect = (product) => {
-    setSelectedProduct(product);
+    if (multiSelect) {
+      // Multi-select mode: toggle selection
+      const isAlreadySelected = selectedProducts.some(p => p.id === product.id);
+
+      if (isAlreadySelected) {
+        // Remove from selection
+        setSelectedProducts(prev => prev.filter(p => p.id !== product.id));
+      } else {
+        // Add to selection (if under max limit)
+        if (selectedProducts.length < maxSelect) {
+          setSelectedProducts(prev => [...prev, product]);
+        }
+      }
+    } else {
+      // Single select mode
+      setSelectedProduct(product);
+    }
   };
 
+  /**
+   * Remove a product from multi-select
+   */
+  const handleRemoveProduct = (productId) => {
+    setSelectedProducts(prev => prev.filter(p => p.id !== productId));
+  };
+
+  /**
+   * Handle confirm button
+   */
   const handleConfirm = () => {
-    if (selectedProduct) {
+    if (multiSelect) {
+      onSelect(selectedProducts);
+    } else if (selectedProduct) {
       onSelect(selectedProduct);
     }
     onClose();
   };
 
+  /**
+   * Check if product is selected
+   */
+  const isProductSelected = (productId) => {
+    if (multiSelect) {
+      return selectedProducts.some(p => p.id === productId);
+    }
+    return selectedProduct?.id === productId;
+  };
+
+  /**
+   * Get selection count for button text
+   */
+  const getSelectionCount = () => {
+    if (multiSelect) {
+      return selectedProducts.length;
+    }
+    return selectedProduct ? 1 : 0;
+  };
+
+  /**
+   * Check if can confirm
+   */
+  const canConfirm = () => {
+    if (multiSelect) {
+      return selectedProducts.length > 0;
+    }
+    return !!selectedProduct;
+  };
+
+  // Filtered products to display
+  const filteredProducts = products;
+
   const renderProduct = ({ item }) => {
-    const isSelected = selectedProduct?.id === item.id;
+    const isSelected = isProductSelected(item.id);
+    const selectionIndex = multiSelect
+      ? selectedProducts.findIndex(p => p.id === item.id) + 1
+      : null;
 
     return (
       <TouchableOpacity
@@ -232,10 +331,55 @@ const ProductPicker = ({ visible, onClose, onSelect, currentProduct }) => {
         </View>
         {isSelected && (
           <View style={styles.selectedIndicator}>
-            <Check size={20} color={COLORS.gold} />
+            {multiSelect ? (
+              <Text style={styles.selectionNumber}>{selectionIndex}</Text>
+            ) : (
+              <Check size={20} color={COLORS.gold} />
+            )}
           </View>
         )}
       </TouchableOpacity>
+    );
+  };
+
+  /**
+   * Render selected products bar for multi-select mode
+   */
+  const renderSelectedBar = () => {
+    if (!multiSelect || selectedProducts.length === 0) return null;
+
+    return (
+      <View style={styles.selectedBar}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.selectedBarContent}
+        >
+          {selectedProducts.map((product, index) => (
+            <View key={product.id} style={styles.selectedChip}>
+              {product.image ? (
+                <Image source={{ uri: product.image }} style={styles.selectedChipImage} />
+              ) : (
+                <View style={styles.selectedChipImagePlaceholder}>
+                  <Package size={12} color={COLORS.textMuted} />
+                </View>
+              )}
+              <Text style={styles.selectedChipText} numberOfLines={1}>
+                {product.title}
+              </Text>
+              <TouchableOpacity
+                onPress={() => handleRemoveProduct(product.id)}
+                style={styles.selectedChipRemove}
+              >
+                <X size={14} color={COLORS.textMuted} />
+              </TouchableOpacity>
+            </View>
+          ))}
+        </ScrollView>
+        <Text style={styles.selectedCount}>
+          {selectedProducts.length}/{maxSelect}
+        </Text>
+      </View>
     );
   };
 
@@ -257,20 +401,27 @@ const ProductPicker = ({ visible, onClose, onSelect, currentProduct }) => {
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <X size={24} color={COLORS.textPrimary} />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Chọn Sản Phẩm</Text>
+            <Text style={styles.headerTitle}>
+              {multiSelect ? 'Chọn Sản Phẩm' : 'Chọn Sản Phẩm'}
+            </Text>
             <TouchableOpacity
               onPress={handleConfirm}
-              style={[styles.confirmButton, !selectedProduct && styles.confirmButtonDisabled]}
-              disabled={!selectedProduct}
+              style={[styles.confirmButton, !canConfirm() && styles.confirmButtonDisabled]}
+              disabled={!canConfirm()}
             >
               <Text style={[
                 styles.confirmText,
-                !selectedProduct && styles.confirmTextDisabled
+                !canConfirm() && styles.confirmTextDisabled
               ]}>
-                Xong
+                {multiSelect && getSelectionCount() > 0
+                  ? `Xong (${getSelectionCount()})`
+                  : 'Xong'}
               </Text>
             </TouchableOpacity>
           </View>
+
+          {/* Selected products bar for multi-select */}
+          {renderSelectedBar()}
 
           {/* Search */}
           <View style={styles.searchContainer}>
@@ -303,6 +454,15 @@ const ProductPicker = ({ visible, onClose, onSelect, currentProduct }) => {
               />
             </TouchableOpacity>
           </View>
+
+          {/* Multi-select hint */}
+          {multiSelect && (
+            <View style={styles.hintContainer}>
+              <Text style={styles.hintText}>
+                Chọn tối đa {maxSelect} sản phẩm. Nhấn vào sản phẩm để chọn/bỏ chọn.
+              </Text>
+            </View>
+          )}
 
           {/* Products List */}
           {loading ? (
@@ -343,8 +503,8 @@ const ProductPicker = ({ visible, onClose, onSelect, currentProduct }) => {
             />
           )}
 
-          {/* Selected Product Summary */}
-          {selectedProduct && (
+          {/* Selected Product Summary (single select mode only) */}
+          {!multiSelect && selectedProduct && (
             <View style={styles.selectedSummary}>
               <ShoppingBag size={18} color={COLORS.gold} />
               <Text style={styles.selectedText} numberOfLines={1}>
@@ -403,6 +563,72 @@ const styles = StyleSheet.create({
   },
   confirmTextDisabled: {
     color: COLORS.textPrimary,
+  },
+  // Selected bar for multi-select
+  selectedBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 189, 89, 0.1)',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(106, 91, 255, 0.2)',
+    paddingVertical: SPACING.sm,
+    paddingRight: SPACING.md,
+  },
+  selectedBarContent: {
+    paddingHorizontal: SPACING.md,
+    gap: SPACING.sm,
+  },
+  selectedChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: GLASS.background,
+    borderRadius: 20,
+    paddingVertical: 4,
+    paddingLeft: 4,
+    paddingRight: SPACING.sm,
+    borderWidth: 1,
+    borderColor: COLORS.gold,
+    maxWidth: 150,
+  },
+  selectedChipImage: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+  },
+  selectedChipImagePlaceholder: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(106, 91, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  selectedChipText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textPrimary,
+    marginLeft: SPACING.xs,
+    flex: 1,
+  },
+  selectedChipRemove: {
+    marginLeft: SPACING.xs,
+    padding: 2,
+  },
+  selectedCount: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.gold,
+    marginLeft: SPACING.sm,
+  },
+  // Hint
+  hintContainer: {
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
+    backgroundColor: 'rgba(106, 91, 255, 0.1)',
+  },
+  hintText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textMuted,
+    textAlign: 'center',
   },
   searchContainer: {
     flexDirection: 'row',
@@ -559,6 +785,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 189, 89, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  selectionNumber: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.gold,
   },
   selectedSummary: {
     flexDirection: 'row',
