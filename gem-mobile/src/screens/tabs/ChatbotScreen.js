@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Chatbot Screen (Gem Master)
+ * Gemral - Chatbot Screen (Gemral)
  * Dark glass theme
  */
 
@@ -7,6 +7,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Bot, MessageCircle, Send } from 'lucide-react-native';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 
 export default function ChatbotScreen() {
@@ -24,10 +25,10 @@ export default function ChatbotScreen() {
               colors={GRADIENTS.avatar}
               style={styles.avatar}
             >
-              <Text style={styles.avatarText}>🤖</Text>
+              <Bot size={20} color={COLORS.textPrimary} />
             </LinearGradient>
             <View>
-              <Text style={styles.title}>Gem Master</Text>
+              <Text style={styles.title}>Gemral</Text>
               <Text style={styles.status}>● Online</Text>
             </View>
           </View>
@@ -45,7 +46,7 @@ export default function ChatbotScreen() {
           </View>
 
           <View style={styles.placeholder}>
-            <Text style={styles.placeholderIcon}>💬</Text>
+            <MessageCircle size={48} color={COLORS.textMuted} strokeWidth={1.5} />
             <Text style={styles.placeholderText}>Chat Interface</Text>
             <Text style={styles.placeholderDesc}>
               Full AI chat with Gemini integration coming in Week 3+
@@ -59,7 +60,7 @@ export default function ChatbotScreen() {
             <Text style={styles.inputPlaceholder}>Nhập tin nhắn...</Text>
           </View>
           <View style={styles.sendButton}>
-            <Text style={styles.sendIcon}>➤</Text>
+            <Send size={16} color={COLORS.textPrimary} />
           </View>
         </View>
       </SafeAreaView>

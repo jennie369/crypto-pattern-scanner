@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Order Success Screen
+ * Gemral - Order Success Screen
  * Displayed after successful checkout with multiple product sections & infinite scroll
  */
 

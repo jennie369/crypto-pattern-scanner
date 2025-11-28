@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Order Service
+ * Gemral - Order Service
  * Manages orders from Shopify + local storage + Supabase sync
  */
 

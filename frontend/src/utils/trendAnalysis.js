@@ -293,3 +293,162 @@ export function assessMarketConditions(candles) {
     tradeable: trendAnalysis.trend !== 'sideways' && trendAnalysis.confidence >= 60
   };
 }
+
+// ====================================
+// PHASE 1: TREND BONUS CALCULATION
+// For improving pattern win rate
+// ====================================
+
+/**
+ * Calculate trend bonus for pattern based on context
+ * @param {String} patternType - Pattern type (DPD, UPU, etc)
+ * @param {Object} trendAnalysis - Result from analyzeTrend()
+ * @param {Object} patternSignal - Pattern signal info {type, direction}
+ * @returns {Number} Bonus score (-20 to +25)
+ */
+export function calculateTrendBonus(patternType, trendAnalysis, patternSignal = {}) {
+  if (!trendAnalysis || trendAnalysis.trend === 'unknown') {
+    return 0;
+  }
+
+  const { type: patternCategory, direction } = patternSignal;
+  const { trend, confidence } = trendAnalysis;
+  const isStrong = confidence >= 70;
+
+  let bonus = 0;
+
+  // ====================================
+  // CONTINUATION PATTERNS
+  // Benefit from trading WITH the trend
+  // ====================================
+  if (patternCategory === 'CONTINUATION') {
+    // LONG continuation in uptrend = GOOD
+    if (direction === 'LONG' || direction === 'BULLISH') {
+      if (trend === 'uptrend' && isStrong) {
+        bonus = 25; // Maximum bonus
+      } else if (trend === 'uptrend') {
+        bonus = 15;
+      } else if (trend === 'sideways') {
+        bonus = -10; // Continuation needs trend
+      } else {
+        bonus = -20; // Counter-trend = high risk
+      }
+    }
+    // SHORT continuation in downtrend = GOOD
+    else if (direction === 'SHORT' || direction === 'BEARISH') {
+      if (trend === 'downtrend' && isStrong) {
+        bonus = 25;
+      } else if (trend === 'downtrend') {
+        bonus = 15;
+      } else if (trend === 'sideways') {
+        bonus = -10;
+      } else {
+        bonus = -20; // Counter-trend
+      }
+    }
+  }
+
+  // ====================================
+  // REVERSAL PATTERNS
+  // Need strong trend TO reverse FROM
+  // ====================================
+  else if (patternCategory === 'REVERSAL') {
+    // SHORT reversal needs uptrend to reverse from
+    if (direction === 'SHORT' || direction === 'BEARISH') {
+      if (trend === 'uptrend' && isStrong) {
+        bonus = 20; // Best reversal setup
+      } else if (trend === 'uptrend') {
+        bonus = 10;
+      } else {
+        bonus = -15; // Reversal in sideways/downtrend = unreliable
+      }
+    }
+    // LONG reversal needs downtrend to reverse from
+    else if (direction === 'LONG' || direction === 'BULLISH') {
+      if (trend === 'downtrend' && isStrong) {
+        bonus = 20;
+      } else if (trend === 'downtrend') {
+        bonus = 10;
+      } else {
+        bonus = -15;
+      }
+    }
+  }
+
+  // ====================================
+  // BREAKOUT PATTERNS
+  // Can work in any direction
+  // ====================================
+  else if (patternCategory === 'BREAKOUT') {
+    if (trend === 'sideways') {
+      bonus = 10; // Breakouts from consolidation are good
+    } else if (isStrong) {
+      bonus = 5; // Strong trend can continue with breakout
+    } else {
+      bonus = 0; // Neutral
+    }
+  }
+
+  // Default for unknown pattern types
+  else {
+    // Generic bonus based on alignment
+    if ((direction === 'LONG' || direction === 'BULLISH') && trend === 'uptrend') {
+      bonus = isStrong ? 15 : 5;
+    } else if ((direction === 'SHORT' || direction === 'BEARISH') && trend === 'downtrend') {
+      bonus = isStrong ? 15 : 5;
+    } else if (trend === 'sideways') {
+      bonus = 0;
+    } else {
+      bonus = -10; // Counter-trend penalty
+    }
+  }
+
+  console.log('[Trend Bonus] Calculated:', {
+    patternType,
+    patternCategory,
+    direction,
+    trend,
+    confidence,
+    bonus
+  });
+
+  return bonus;
+}
+
+/**
+ * Get trend alignment description
+ * @param {String} patternDirection - LONG or SHORT
+ * @param {Object} trendAnalysis - Trend analysis result
+ * @returns {Object} Alignment info
+ */
+export function getTrendAlignment(patternDirection, trendAnalysis) {
+  if (!trendAnalysis || trendAnalysis.trend === 'unknown') {
+    return { alignment: 'UNKNOWN', description: 'Unable to determine trend' };
+  }
+
+  const { trend } = trendAnalysis;
+
+  // LONG pattern alignment
+  if (patternDirection === 'LONG' || patternDirection === 'BULLISH') {
+    if (trend === 'uptrend') {
+      return { alignment: 'WITH_TREND', description: 'Trading with uptrend' };
+    } else if (trend === 'downtrend') {
+      return { alignment: 'COUNTER_TREND', description: 'Counter-trend - Higher risk' };
+    } else {
+      return { alignment: 'NEUTRAL', description: 'Sideways market' };
+    }
+  }
+
+  // SHORT pattern alignment
+  if (patternDirection === 'SHORT' || patternDirection === 'BEARISH') {
+    if (trend === 'downtrend') {
+      return { alignment: 'WITH_TREND', description: 'Trading with downtrend' };
+    } else if (trend === 'uptrend') {
+      return { alignment: 'COUNTER_TREND', description: 'Counter-trend - Higher risk' };
+    } else {
+      return { alignment: 'NEUTRAL', description: 'Sideways market' };
+    }
+  }
+
+  return { alignment: 'NEUTRAL', description: 'Unknown direction' };
+}

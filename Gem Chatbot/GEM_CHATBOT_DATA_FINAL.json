@@ -1,7 +1,7 @@
 {
   "config": {
     "adminPassword": "gem2025",
-    "chatbotTitle": "GEM Platform AI Assistant",
+    "chatbotTitle": "Gemral AI Assistant",
     "chatbotSubtitle": "Chuyên gia tư vấn Trading & Manifestation - Jennie Chu",
     "chatbotLogo": "💎",
     "dataSourceURL": "",
@@ -9,12 +9,12 @@
     "shopifyToken": "YOUR_SHOPIFY_TOKEN"
   },
   
-  "welcomeMessage": "🙏 <strong>Xin chào! Tôi là AI Assistant của GEM Platform</strong><br><br>💎 <strong>Frequency Trading Method - Phương Pháp Độc Quyền</strong><br><br>Tôi có thể giúp bạn:<br>📈 Tư vấn trading patterns<br>🔍 Hướng dẫn sử dụng Scanner<br>📚 Giới thiệu khóa học phù hợp<br>💎 Tư vấn crystal cho trader<br>🎯 Manifestation cho mục tiêu tài chính<br><br>Bạn muốn tôi hỗ trợ gì hôm nay? 😊",
+  "welcomeMessage": "🙏 <strong>Xin chào! Tôi là AI Assistant của Gemral</strong><br><br>💎 <strong>Frequency Trading Method - Phương Pháp Độc Quyền</strong><br><br>Tôi có thể giúp bạn:<br>📈 Tư vấn trading patterns<br>🔍 Hướng dẫn sử dụng Scanner<br>📚 Giới thiệu khóa học phù hợp<br>💎 Tư vấn crystal cho trader<br>🎯 Manifestation cho mục tiêu tài chính<br><br>Bạn muốn tôi hỗ trợ gì hôm nay? 😊",
 
   "knowledge": {
     "philosophy": "💎 **GEM FREQUENCY TRADING METHOD**\n\nFounder: **Jennie Chu**\n\n**TRIẾT LÝ CỐT LÕI:**\n• Market có tần số riêng, giống như năng lượng vũ trụ\n• Zone retest > Breakout (68% win rate proven)\n• Confirmation signals trước khi entry\n• Kỷ luật + Psychology = 80% thành công\n• Trading là marathon, không phải sprint\n• Kết hợp technical analysis với spiritual mindset\n• Every loss is a lesson, every win is confirmation",
 
-    "frequency_formulas": "**11 CÔNG THỨC FREQUENCY ĐỘC QUYỀN:**\n\n🔥 **6 CORE (TIER 2):**\n1. DPD - Down-Pause-Down\n2. UPU - Up-Pause-Up\n3. UPD - Up-Pause-Down\n4. DPU - Down-Pause-Up\n5. HFZ - High Frequency Zones\n6. LFZ - Low Frequency Zones\n\n⭐ **5 NÂNG CAO (TIER 3):**\n7-11. Advanced formulas (chỉ TIER 3)\n\n💎 **ĐỘC QUYỀN:**\n• Nghiên cứu 10+ năm\n• Chỉ có ở GEM Platform\n• Win rate 68-90% (backtest 5 năm)\n• KHÔNG có ở đâu khác",
+    "frequency_formulas": "**11 CÔNG THỨC FREQUENCY ĐỘC QUYỀN:**\n\n🔥 **6 CORE (TIER 2):**\n1. DPD - Down-Pause-Down\n2. UPU - Up-Pause-Up\n3. UPD - Up-Pause-Down\n4. DPU - Down-Pause-Up\n5. HFZ - High Frequency Zones\n6. LFZ - Low Frequency Zones\n\n⭐ **5 NÂNG CAO (TIER 3):**\n7-11. Advanced formulas (chỉ TIER 3)\n\n💎 **ĐỘC QUYỀN:**\n• Nghiên cứu 10+ năm\n• Chỉ có ở Gemral\n• Win rate 68-90% (backtest 5 năm)\n• KHÔNG có ở đâu khác",
 
     "tier_system": "**3 TIERS - COURSE BUNDLES:**\n\n💎 **TIER 1: NỀN TẢNG TRADER** - 11 triệu\n• Khóa học cơ bản\n• 7 patterns\n• 2 tools\n• Win rate: 50-55%\n• ROI: 20-30%/năm\n\n🚀 **TIER 2: TẦN SỐ TRADER THỊNH VƯỢNG** - 21 triệu ⭐ BEST\n• 6 công thức Frequency độc quyền\n• 15 patterns\n• 8 tools chuyên nghiệp\n• Win rate: 70-75%\n• ROI: 80-150%/năm\n\n👑 **TIER 3: ĐẾ CHẾ TRADER BẬC THẦY** - 68 triệu\n• 11 công thức FULL system\n• 24 patterns\n• 11 tools elite + AI\n• Win rate: 80-90%\n• Professional level",
 

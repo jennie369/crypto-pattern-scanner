@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Posts Tab Component
+ * Gemral - Posts Tab Component
  * Displays user's posts in profile
  */
 
@@ -13,7 +13,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
-import { Heart, MessageCircle, Clock } from 'lucide-react-native';
+import { Heart, MessageCircle, Clock, FileText } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../../utils/tokens';
 
 const PostsTab = ({
@@ -95,7 +95,7 @@ const PostsTab = ({
 
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
-      <Text style={styles.emptyIcon}>📝</Text>
+      <FileText size={64} color={COLORS.textMuted} strokeWidth={1.5} />
       <Text style={styles.emptyTitle}>Chưa có bài viết</Text>
       <Text style={styles.emptySubtitle}>
         Các bài viết sẽ xuất hiện ở đây

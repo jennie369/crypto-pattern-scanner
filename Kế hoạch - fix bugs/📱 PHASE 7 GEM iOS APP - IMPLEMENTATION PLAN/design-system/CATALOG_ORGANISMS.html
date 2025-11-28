@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEM iOS - Organisms Components</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: fixed; top: 20px; right: 20px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #9C0612, #6B0F1A);
+            border: 1px solid #FFBD59; border-radius: 24px;
+            color: white; cursor: pointer; z-index: 1000;
+            font-weight: 600; font-size: 14px; font-family: inherit;
+            display: flex; align-items: center; gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(156, 6, 18, 0.3);
+        }
+        .theme-toggle:hover { transform: translateY(-2px); }
+
+        /* DARK THEME - DEFAULT */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            background: linear-gradient(135deg, #05040B 0%, #0D1B2A 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 24px;
+            transition: background 0.3s ease;
+        }
+
+        /* ============================================ */
+        /* LIGHT THEME - SIMPLE & READABLE */
+        /* ============================================ */
+
+        /* Base - Pure White & Black */
+        body.light-theme { background: #FFFFFF !important; color: #000000 !important; }
+
+        /* All Text - BLACK & BOLD */
+        body.light-theme, body.light-theme * { color: #000000 !important; font-weight: 500 !important; }
+
+        /* Headings - Extra Bold */
+        body.light-theme h1, body.light-theme h2, body.light-theme h3, body.light-theme h4, body.light-theme h5, body.light-theme h6,
+        body.light-theme .title, body.light-theme .heading, body.light-theme strong, body.light-theme b {
+            color: #000000 !important; font-weight: 700 !important;
+        }
+
+        /* All Cards - White with Shadow */
+        body.light-theme .card, body.light-theme .component-card, body.light-theme .notification-card,
+        body.light-theme .post-card, body.light-theme .product-card, body.light-theme div[class*="card"] {
+            background: #FFFFFF !important; border: 1px solid #CCCCCC !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important; color: #000000 !important;
+        }
+
+        /* Container Backgrounds */
+        body.light-theme .container, body.light-theme .screen-content { background: #F5F5F5 !important; }
+
+        /* Preview Areas */
+        body.light-theme .preview { background: #F5F5F5 !important; border: 1px solid #CCCCCC !important; }
+
+        /* Buttons */
+        body.light-theme .theme-toggle { background: #000000 !important; color: #FFFFFF !important; font-weight: 600 !important; }
+        body.light-theme .btn-primary { background: #9C0612 !important; color: #FFFFFF !important; font-weight: 600 !important; }
+        body.light-theme .nav-btn { background: #000000 !important; color: #FFFFFF !important; font-weight: 600 !important; }
+        body.light-theme .nav-btn.secondary { background: transparent !important; border: 2px solid #000000 !important; color: #000000 !important; }
+
+        /* Back Link */
+        body.light-theme .back-link { background: #F5F5F5 !important; border: 1px solid #CCCCCC !important; color: #0066CC !important; font-weight: 600 !important; }
+
+        /* Code blocks - keep dark */
+        body.light-theme .code-block, body.light-theme pre, body.light-theme code {
+            background: #1E1E1E !important; color: #00FF00 !important; font-weight: 500 !important;
+        }
+
+        /* Specs */
+        body.light-theme .specs { background: #F5F5F5 !important; color: #000000 !important; font-weight: 500 !important; }
+
+        /* Phone Mockup */
+        body.light-theme .phone-frame { background: #CCCCCC !important; }
+        body.light-theme .phone-screen { background: #F5F5F5 !important; }
+        body.light-theme .phone-notch { background: #000000 !important; }
+
+        /* Header & Tab Bar */
+        body.light-theme .app-header { background: #FFFFFF !important; border-bottom: 2px solid #000000 !important; }
+        body.light-theme .hamburger span { background: #000000 !important; }
+        body.light-theme .tab-bar { background: #FFFFFF !important; border-top: 2px solid #000000 !important; }
+        body.light-theme .tab-label { color: #666666 !important; font-weight: 500 !important; }
+        body.light-theme .tab-item.active .tab-label { color: #000000 !important; font-weight: 700 !important; }
+
+        /* Hamburger Menu */
+        body.light-theme .hamburger-menu { background: #FFFFFF !important; }
+        body.light-theme .menu-name { color: #000000 !important; font-weight: 700 !important; }
+        body.light-theme .menu-item-text { color: #333333 !important; font-weight: 600 !important; }
+        body.light-theme .menu-item { color: #000000 !important; font-weight: 600 !important; }
+        body.light-theme .menu-item:hover { background: #F5F5F5 !important; }
+        body.light-theme .menu-item.active { background: #F5F5F5 !important; color: #9C0612 !important; }
+
+        /* Post Feed */
+        body.light-theme .post-feed { background: #F5F5F5 !important; }
+        body.light-theme .feed-post { background: #FFFFFF !important; border: 1px solid #CCCCCC !important; }
+        body.light-theme .feed-author { color: #000000 !important; font-weight: 700 !important; }
+        body.light-theme .feed-time { color: #666666 !important; }
+        body.light-theme .feed-title { color: #000000 !important; font-weight: 700 !important; }
+        body.light-theme .feed-body { color: #333333 !important; }
+
+        /* Product Grid */
+        body.light-theme .product-grid { background: #F5F5F5 !important; }
+        body.light-theme .grid-product { background: #FFFFFF !important; border: 1px solid #CCCCCC !important; }
+        body.light-theme .grid-name { color: #000000 !important; font-weight: 700 !important; }
+        body.light-theme .grid-price { color: #9C0612 !important; font-weight: 700 !important; }
+
+        /* Chat Interface */
+        body.light-theme .chat-container { background: #FFFFFF !important; }
+        body.light-theme .chat-messages { background: #F5F5F5 !important; }
+        body.light-theme .chat-ai { background: #F5F5F5 !important; color: #000000 !important; border: 1px solid #CCCCCC !important; }
+        body.light-theme .chat-user { background: #9C0612 !important; color: #FFFFFF !important; }
+        body.light-theme .chat-input { background: #FFFFFF !important; border: 2px solid #CCCCCC !important; color: #000000 !important; }
+
+        /* Pattern Scanner */
+        body.light-theme .pattern-item { background: #FFFFFF !important; border: 1px solid #CCCCCC !important; }
+        body.light-theme .pattern-symbol { color: #000000 !important; font-weight: 700 !important; }
+        body.light-theme .tf-btn { background: #F5F5F5 !important; color: #000000 !important; font-weight: 600 !important; }
+        body.light-theme .tf-btn.active { background: #000000 !important; color: #FFFFFF !important; }
+
+        /* Notification List */
+        body.light-theme .notification-list { background: #F5F5F5 !important; }
+        body.light-theme .notification-card.unread { background: #EFF6FF !important; }
+
+        /* Tier Badges */
+        body.light-theme .tier-badge.tier-1 { background: #FFF3CD !important; color: #CC8800 !important; font-weight: 700 !important; }
+        body.light-theme .tier-badge.tier-2 { background: #D1ECF1 !important; color: #0C5460 !important; font-weight: 700 !important; }
+        body.light-theme .tier-badge.tier-3 { background: #F8D7DA !important; color: #9C0612 !important; font-weight: 700 !important; }
+
+        /* Secondary Text - Dark Gray */
+        body.light-theme .secondary-text, body.light-theme .subtitle, body.light-theme small {
+            color: #333333 !important; font-weight: 500 !important;
+        }
+
+        /* Links */
+        body.light-theme a { color: #0066CC !important; font-weight: 600 !important; }
+
+        /* Override ANY remaining light colors */
+        body.light-theme [style*="color: rgba"], body.light-theme [style*="color: rgb"] { color: #000000 !important; }
+        body.light-theme [style*="#112250"], body.light-theme [style*="rgba(15,16,48"], body.light-theme [style*="#05040B"] { background: #FFFFFF !important; }
+
+        .container { max-width: 1400px; margin: 0 auto; }
+        .back-link {
+            display: inline-flex; align-items: center; gap: 8px;
+            color: #FFBD59; text-decoration: none; font-size: 14px;
+            margin-bottom: 24px; padding: 8px 16px;
+            background: rgba(255,189,89,0.1); border-radius: 20px;
+            border: 1px solid rgba(255,189,89,0.2);
+        }
+        .page-title {
+            font-size: 36px; font-weight: 800;
+            background: linear-gradient(135deg, #FFBD59, #9C0612);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .page-subtitle { font-size: 16px; color: rgba(255,255,255,0.6); margin-bottom: 32px; }
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 24px;
+        }
+        .component-card {
+            background: rgba(15,16,48,0.55); backdrop-filter: blur(18px);
+            border: 1px solid rgba(255,189,89,0.15); border-radius: 16px; padding: 20px;
+        }
+        .component-name { font-size: 18px; font-weight: 700; color: #FFBD59; margin-bottom: 4px; }
+        .component-desc { font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 16px; }
+        .specs {
+            background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px;
+            font-size: 11px; font-family: Monaco, monospace; color: #00FF88; margin-bottom: 16px;
+        }
+        .preview { background: #05040B; border-radius: 12px; padding: 0; margin-bottom: 12px; overflow: hidden; }
+        .preview.light { background: #F7F8FA; }
+        .code-block {
+            background: #000; border-radius: 8px; padding: 12px;
+            font-size: 11px; font-family: Monaco, monospace; color: #00FF88;
+            overflow-x: auto; max-height: 150px; overflow-y: auto;
+        }
+        .nav-footer {
+            display: flex; justify-content: space-between; margin-top: 48px;
+            padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .nav-btn {
+            padding: 12px 24px; background: linear-gradient(135deg, #9C0612, #6B0F1A);
+            border: 1px solid #FFBD59; border-radius: 24px; color: white;
+            text-decoration: none; font-weight: 600;
+        }
+        .nav-btn.secondary { background: transparent; border-color: rgba(255,189,89,0.5); }
+
+        /* Phone Mockup */
+        .phone-frame {
+            width: 320px; background: #1a1a1a; border-radius: 40px;
+            padding: 10px; margin: 0 auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .phone-screen { background: #05040B; border-radius: 32px; overflow: hidden; position: relative; }
+        .phone-notch {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 120px; height: 28px; background: #000; border-radius: 0 0 16px 16px; z-index: 10;
+        }
+        .phone-home-indicator {
+            position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+            width: 100px; height: 5px; background: white; border-radius: 3px; opacity: 0.3;
+        }
+
+        /* Header Component */
+        .app-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px; background: #112250; border-bottom: 2px solid #FFBD59;
+        }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .hamburger { width: 24px; height: 18px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; }
+        .hamburger span { width: 100%; height: 2px; background: #FFBD59; border-radius: 1px; }
+        .header-logo { font-size: 20px; font-weight: 800; color: #FFBD59; }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        .header-icon { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 18px; background: rgba(255,189,89,0.1); border-radius: 18px; cursor: pointer; }
+        .header-avatar { width: 36px; height: 36px; background: linear-gradient(135deg, #9C0612, #6B0F1A); border-radius: 50%; border: 2px solid #FFBD59; }
+
+        /* Tab Bar Component */
+        .tab-bar {
+            display: flex; justify-content: space-around; align-items: center;
+            background: #112250; border-top: 2px solid #FFBD59;
+            padding: 8px 0 24px; height: 80px;
+        }
+        .tab-item { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; }
+        .tab-icon { font-size: 22px; opacity: 0.5; }
+        .tab-label { font-size: 10px; color: rgba(255,255,255,0.5); font-weight: 600; }
+        .tab-item.active .tab-icon { opacity: 1; }
+        .tab-item.active .tab-label { color: #FFBD59; }
+        .tab-badge { position: absolute; top: -4px; right: -8px; width: 16px; height: 16px; background: #FF4444; border-radius: 8px; font-size: 9px; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+
+        /* Hamburger Menu */
+        .hamburger-menu {
+            position: absolute; top: 0; left: 0; width: 280px; height: 100%;
+            background: linear-gradient(180deg, #112250 0%, #0a0e27 100%);
+            border-right: 2px solid #FFBD59; z-index: 100;
+        }
+        .menu-header { padding: 60px 20px 20px; border-bottom: 1px solid rgba(255,189,89,0.2); }
+        .menu-user { display: flex; align-items: center; gap: 12px; }
+        .menu-avatar { width: 48px; height: 48px; background: linear-gradient(135deg, #9C0612, #6B0F1A); border-radius: 50%; border: 2px solid #FFBD59; }
+        .menu-name { font-size: 16px; font-weight: 700; color: white; }
+        .menu-tier { font-size: 11px; padding: 3px 8px; background: rgba(255,189,89,0.2); color: #FFBD59; border-radius: 10px; margin-top: 4px; display: inline-block; }
+        .menu-items { padding: 16px 0; }
+        .menu-item { display: flex; align-items: center; gap: 14px; padding: 14px 20px; cursor: pointer; }
+        .menu-item:hover { background: rgba(255,189,89,0.1); }
+        .menu-item-icon { font-size: 20px; width: 28px; text-align: center; }
+        .menu-item-text { font-size: 15px; color: rgba(255,255,255,0.8); }
+        .menu-section { font-size: 11px; color: rgba(255,255,255,0.4); padding: 12px 20px 8px; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Post Feed - DARK THEME DEFAULT */
+        .post-feed { padding: 12px; display: flex; flex-direction: column; gap: 12px; background: #05040B; }
+        .feed-post {
+            background: #112250; border: 1px solid rgba(255,189,89,0.2); border-radius: 12px; padding: 12px; color: white;
+        }
+        .feed-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .feed-avatar { width: 36px; height: 36px; background: linear-gradient(135deg, #9C0612, #6B0F1A); border-radius: 50%; border: 2px solid #FFBD59; }
+        .feed-author { font-size: 14px; font-weight: 600; color: white; }
+        .feed-time { font-size: 12px; color: rgba(255,255,255,0.6); }
+        .feed-title { font-size: 15px; font-weight: 600; color: white; margin-bottom: 6px; }
+        .feed-body { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.4; }
+        .feed-footer { display: flex; gap: 16px; margin-top: 12px; }
+        .feed-stat { font-size: 13px; color: rgba(255,255,255,0.6); }
+
+        /* Product Grid - DARK THEME DEFAULT */
+        .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 12px; background: #05040B; }
+        .grid-product { background: #112250; border: 1px solid rgba(255,189,89,0.2); border-radius: 12px; padding: 10px; }
+        .grid-image { height: 100px; background: linear-gradient(135deg, #9C0612, #6B0F1A); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 32px; margin-bottom: 8px; }
+        .grid-name { font-size: 13px; font-weight: 600; color: white; margin-bottom: 4px; }
+        .grid-price { font-size: 14px; font-weight: 700; color: #FFBD59; }
+
+        /* Chat Interface */
+        .chat-container { display: flex; flex-direction: column; height: 400px; }
+        .chat-messages { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        .chat-bubble { max-width: 80%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.4; }
+        .chat-user { align-self: flex-end; background: #3B82F6; color: white; border-bottom-right-radius: 4px; }
+        .chat-ai { align-self: flex-start; background: rgba(255,189,89,0.2); color: white; border-bottom-left-radius: 4px; }
+        .chat-input-bar { display: flex; gap: 8px; padding: 12px; background: rgba(0,0,0,0.3); }
+        .chat-input { flex: 1; height: 44px; padding: 0 16px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 22px; color: white; font-size: 14px; }
+        .chat-send { width: 44px; height: 44px; background: #FFBD59; border-radius: 22px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
+
+        /* Pattern Scanner */
+        .scanner-panel { padding: 16px; }
+        .scanner-controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+        .scanner-select { height: 40px; padding: 0 12px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; color: white; font-size: 13px; }
+        .tf-buttons { display: flex; gap: 6px; }
+        .tf-btn { padding: 8px 12px; background: rgba(255,255,255,0.1); border-radius: 8px; font-size: 12px; color: rgba(255,255,255,0.7); cursor: pointer; }
+        .tf-btn.active { background: #FFBD59; color: #112250; }
+        .scan-btn { height: 44px; padding: 0 20px; background: linear-gradient(135deg, #9C0612, #6B0F1A); border: 1px solid #FFBD59; border-radius: 22px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; }
+        .pattern-list { display: flex; flex-direction: column; gap: 12px; }
+        .pattern-item { background: rgba(15,16,48,0.55); border: 1px solid rgba(106,91,255,0.3); border-radius: 14px; padding: 14px; }
+        .pattern-row { display: flex; align-items: center; gap: 10px; }
+        .pattern-badge { width: 36px; height: 36px; background: #00FF88; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #000; }
+        .pattern-info { flex: 1; }
+        .pattern-symbol { font-size: 14px; font-weight: 700; }
+        .pattern-tf { font-size: 11px; color: rgba(255,255,255,0.6); }
+        .pattern-conf { font-size: 13px; font-weight: 600; color: #00FF88; }
+    </style>
+</head>
+<body class="dark-theme">
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" onclick="toggleTheme()">
+        🌓 <span id="theme-label">Switch to Light</span>
+    </button>
+
+    <div class="container">
+        <a href="CATALOG_INDEX.html" class="back-link">← Back to Index</a>
+
+        <h1 class="page-title">🦠 Organisms - Complex Components</h1>
+        <p class="page-subtitle">8 complete functional units combining multiple molecules.</p>
+
+        <div class="component-grid">
+            <!-- 1. Header -->
+            <div class="component-card">
+                <h3 class="component-name">1. App Header</h3>
+                <p class="component-desc">Top navigation bar. Hamburger + Logo + Search + Avatar.</p>
+                <div class="specs">Height: 60px | Padding: 12px 16px | BG: #112250 | Border: 2px gold</div>
+                <div class="preview">
+                    <div class="app-header">
+                        <div class="header-left">
+                            <div class="hamburger">
+                                <span></span><span></span><span></span>
+                            </div>
+                            <span class="header-logo">💎 GEM</span>
+                        </div>
+                        <div class="header-right">
+                            <div class="header-icon">🔍</div>
+                            <div class="header-avatar"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="code-block">
+&lt;View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+  padding: 12, paddingHorizontal: 16, backgroundColor: '#112250', borderBottomWidth: 2, borderBottomColor: '#FFBD59'}}&gt;
+  &lt;View style={{flexDirection: 'row', alignItems: 'center', gap: 12}}&gt;
+    &lt;HamburgerIcon onPress={openMenu} /&gt;
+    &lt;Text style={{fontSize: 20, fontWeight: '800', color: '#FFBD59'}}&gt;GEM&lt;/Text&gt;
+  &lt;/View&gt;
+  &lt;View style={{flexDirection: 'row', gap: 12}}&gt;
+    &lt;SearchButton /&gt;
+    &lt;Avatar size={36} /&gt;
+  &lt;/View&gt;
+&lt;/View&gt;
+                </div>
+            </div>
+
+            <!-- 2. Tab Bar -->
+            <div class="component-card">
+                <h3 class="component-name">2. Bottom Tab Bar (6 Tabs)</h3>
+                <p class="component-desc">Main navigation. 6 tabs with icons and badges.</p>
+                <div class="specs">Height: 80px | BG: #112250 | Label: 10px | Icon: 22px</div>
+                <div class="preview">
+                    <div class="tab-bar">
+                        <div class="tab-item active">
+                            <span class="tab-icon">🏠</span>
+                            <span class="tab-label" style="color: #FFBD59;">Home</span>
+                        </div>
+                        <div class="tab-item" style="position: relative;">
+                            <span class="tab-icon">🛒</span>
+                            <span class="tab-label">Shop</span>
+                            <span class="tab-badge" style="background: #FFBD59; color: #112250;">2</span>
+                        </div>
+                        <div class="tab-item">
+                            <span class="tab-icon">📊</span>
+                            <span class="tab-label">Giao Dịch</span>
+                        </div>
+                        <div class="tab-item">
+                            <span class="tab-icon">🤖</span>
+                            <span class="tab-label">Gem Master</span>
+                        </div>
+                        <div class="tab-item" style="position: relative;">
+                            <span class="tab-icon">🔔</span>
+                            <span class="tab-label">Thông Báo</span>
+                            <span class="tab-badge">5</span>
+                        </div>
+                        <div class="tab-item">
+                            <span class="tab-icon">💰</span>
+                            <span class="tab-label">Tài Sản</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="code-block">
+&lt;Tab.Navigator screenOptions={{
+  tabBarStyle: {backgroundColor: '#112250', borderTopColor: '#FFBD59', borderTopWidth: 2, height: 80},
+  tabBarActiveTintColor: '#FFBD59',
+  tabBarInactiveTintColor: 'rgba(255,255,255,0.5)',
+  tabBarLabelStyle: {fontSize: 10, fontWeight: '600'}
+}}&gt;
+  &lt;Tab.Screen name="Home" component={ForumScreen} options={{tabBarIcon: ({color}) =&gt; &lt;Home color={color} /&gt;}} /&gt;
+  &lt;Tab.Screen name="Shop" ... tabBarBadge={cartCount} /&gt;
+  ...
+&lt;/Tab.Navigator&gt;
+                </div>
+            </div>
+
+            <!-- 3. Hamburger Menu -->
+            <div class="component-card">
+                <h3 class="component-name">3. Hamburger Menu (Slide)</h3>
+                <p class="component-desc">Side menu with user info and feed categories.</p>
+                <div class="specs">Width: 280px | Slide from left | BG: Navy gradient</div>
+                <div class="preview" style="height: 500px; position: relative;">
+                    <div class="phone-screen" style="height: 100%; background: rgba(0,0,0,0.5);">
+                        <div class="hamburger-menu">
+                            <div class="menu-header">
+                                <div class="menu-user">
+                                    <div class="menu-avatar"></div>
+                                    <div>
+                                        <div class="menu-name">Jennie Chu</div>
+                                        <span class="menu-tier">TIER 1</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="menu-items">
+                                <div class="menu-section">Feeds</div>
+                                <div class="menu-item" style="background: rgba(255,189,89,0.1);">
+                                    <span class="menu-item-icon">🌟</span>
+                                    <span class="menu-item-text" style="color: #FFBD59;">All Posts</span>
+                                </div>
+                                <div class="menu-item">
+                                    <span class="menu-item-icon">👥</span>
+                                    <span class="menu-item-text">Following</span>
+                                </div>
+                                <div class="menu-item">
+                                    <span class="menu-item-icon">📊</span>
+                                    <span class="menu-item-text">Trading</span>
+                                </div>
+                                <div class="menu-item">
+                                    <span class="menu-item-icon">🔮</span>
+                                    <span class="menu-item-text">Spiritual</span>
+                                </div>
+                                <div class="menu-section">Quick Access</div>
+                                <div class="menu-item">
+                                    <span class="menu-item-icon">⚙️</span>
+                                    <span class="menu-item-text">Settings</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="code-block">
+// Use react-native-drawer or custom Animated slide
+&lt;Animated.View style={{
+  position: 'absolute', left: 0, top: 0, width: 280, height: '100%',
+  backgroundColor: '#112250', transform: [{translateX: slideAnim}]
+}}&gt;
+  &lt;UserHeader /&gt;
+  &lt;FeedCategories /&gt;
+  &lt;QuickLinks /&gt;
+&lt;/Animated.View&gt;
+                </div>
+            </div>
+
+            <!-- 4. Post Feed -->
+            <div class="component-card">
+                <h3 class="component-name">4. Post Feed (Forum)</h3>
+                <p class="component-desc">Scrollable list of posts with pull-to-refresh. Dark theme default.</p>
+                <div class="specs">Gap: 12px | Padding: 12px | Dark theme default</div>
+                <div class="preview" style="height: 400px; overflow: hidden;">
+                    <div class="post-feed">
+                        <div class="feed-post">
+                            <div class="feed-header">
+                                <div class="feed-avatar"></div>
+                                <div><div class="feed-author">Jennie Chu</div><div class="feed-time">2h ago</div></div>
+                            </div>
+                            <div class="feed-title">DPD Pattern on BTCUSDT 4H</div>
+                            <div class="feed-body">Strong setup forming. Entry around $42,500 with R:R of 1:3...</div>
+                            <div class="feed-footer">
+                                <span class="feed-stat">❤️ 24</span>
+                                <span class="feed-stat">💬 8</span>
+                            </div>
+                        </div>
+                        <div class="feed-post">
+                            <div class="feed-header">
+                                <div class="feed-avatar" style="background: linear-gradient(135deg, #6A5BFF, #00F0FF);"></div>
+                                <div><div class="feed-author">Mike Trading</div><div class="feed-time">4h ago</div></div>
+                            </div>
+                            <div class="feed-title">Weekly Market Analysis</div>
+                            <div class="feed-body">Looking at the overall market structure for next week...</div>
+                            <div class="feed-footer">
+                                <span class="feed-stat">❤️ 42</span>
+                                <span class="feed-stat">💬 15</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="code-block">
+&lt;FlatList
+  data={posts}
+  renderItem={({item}) =&gt; &lt;PostCard post={item} /&gt;}
+  keyExtractor={item =&gt; item.id}
+  contentContainerStyle={{padding: 12, gap: 12}}
+  refreshControl={&lt;RefreshControl refreshing={refreshing} onRefresh={onRefresh} /&gt;}
+  onEndReached={loadMore}
+  onEndReachedThreshold={0.5}
+/&gt;
+                </div>
+            </div>
+
+            <!-- 5. Product Grid -->
+            <div class="component-card">
+                <h3 class="component-name">5. Product Grid (Shop)</h3>
+                <p class="component-desc">2-column product grid with scroll. Dark theme default.</p>
+                <div class="specs">Columns: 2 | Gap: 12px | Dark theme default</div>
+                <div class="preview" style="height: 350px; overflow: hidden;">
+                    <div class="product-grid">
+                        <div class="grid-product">
+                            <div class="grid-image">💎</div>
+                            <div class="grid-name">Amethyst Crystal</div>
+                            <div class="grid-price">$45.00</div>
+                        </div>
+                        <div class="grid-product">
+                            <div class="grid-image">📚</div>
+                            <div class="grid-name">Trading Course</div>
+                            <div class="grid-price">$79.00</div>
+                        </div>
+                        <div class="grid-product">
+                            <div class="grid-image">🔮</div>
+                            <div class="grid-name">Oracle Cards</div>
+                            <div class="grid-price">$32.00</div>
+                        </div>
+                        <div class="grid-product">
+                            <div class="grid-image">⭐</div>
+                            <div class="grid-name">TIER 1 Sub</div>
+                            <div class="grid-price">$99/mo</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="code-block">
+&lt;FlatList
+  data={products}
+  renderItem={({item}) =&gt; &lt;ProductCard product={item} /&gt;}
+  numColumns={2}
+  columnWrapperStyle={{gap: 12}}
+  contentContainerStyle={{padding: 12, gap: 12}}
+/&gt;
+                </div>
+            </div>
+
+            <!-- 6. Pattern Scanner Panel -->
+            <div class="component-card">
+                <h3 class="component-name">6. Pattern Scanner Panel</h3>
+                <p class="component-desc">Scanner controls + pattern results list.</p>
+                <div class="specs">Coin selector + TF buttons + Scan button + Results</div>
+                <div class="preview" style="height: 400px; overflow: hidden;">
+                    <div class="scanner-panel">
+                        <div class="scanner-controls">
+                            <select class="scanner-select" style="width: 120px;">
+                                <option>BTCUSDT</option>
+                            </select>
+                            <div class="tf-buttons">
+                                <span class="tf-btn">5m</span>
+                                <span class="tf-btn">15m</span>
+                                <span class="tf-btn active">1H</span>
+                                <span class="tf-btn">4H</span>
+                                <span class="tf-btn">1D</span>
+                            </div>
+                        </div>
+                        <button class="scan-btn" style="width: 100%; margin-bottom: 16px;">🔍 Scan Now</button>
+                        <div class="pattern-list">
+                            <div class="pattern-item">
+                                <div class="pattern-row">
+                                    <div class="pattern-badge">DPD</div>
+                                    <div class="pattern-info">
+                                        <div class="pattern-symbol">BTCUSDT</div>
+                                        <div class="pattern-tf">4H • Entry: $42,500</div>
+                                    </div>
+                                    <div class="pattern-conf">85%</div>
+                                </div>
+                            </div>
+                            <div class="pattern-item">
+                                <div class="pattern-row">
+                                    <div class="pattern-badge" style="background: #FF4444;">UPU</div>
+                                    <div class="pattern-info">
+                                        <div class="pattern-symbol">ETHUSDT</div>
+                                        <div class="pattern-tf">1H • Entry: $2,280</div>
+                                    </div>
+                                    <div class="pattern-conf">72%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="code-block">
+&lt;View style={{padding: 16}}&gt;
+  &lt;View style={{flexDirection: 'row', gap: 8, marginBottom: 16}}&gt;
+    &lt;CoinSelector value={coin} onChange={setCoin} /&gt;
+    &lt;TimeframeButtons value={tf} onChange={setTf} /&gt;
+  &lt;/View&gt;
+  &lt;ScanButton onPress={handleScan} loading={scanning} /&gt;
+  &lt;FlatList data={patterns} renderItem={({item}) =&gt; &lt;PatternCard pattern={item} /&gt;} /&gt;
+&lt;/View&gt;
+                </div>
+            </div>
+
+            <!-- 7. Chat Interface -->
+            <div class="component-card">
+                <h3 class="component-name">7. Chat Interface (Gem Master)</h3>
+                <p class="component-desc">AI chat with message bubbles and input bar.</p>
+                <div class="specs">User: Blue bubble | AI: Gold bubble | Input: 44px</div>
+                <div class="preview" style="height: 400px;">
+                    <div class="chat-container">
+                        <div class="chat-messages">
+                            <div class="chat-bubble chat-ai">
+                                👋 Xin chào! Tôi là GEM Master. Hãy hỏi tôi về giao dịch hoặc tâm linh!
+                            </div>
+                            <div class="chat-bubble chat-user">
+                                Hãy xem quẻ Kinh Dịch cho việc giao dịch BTC tuần này
+                            </div>
+                            <div class="chat-bubble chat-ai">
+                                🎋 Quẻ Kiền (Trời) - Biểu thị sức mạnh và sự sáng tạo...<br><br>
+                                📈 Đây là dấu hiệu tích cực cho giao dịch!
+                            </div>
+                        </div>
+                        <div class="chat-input-bar">
+                            <input type="text" class="chat-input" placeholder="Type a message...">
+                            <div class="chat-send">📤</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="code-block">
+&lt;KeyboardAvoidingView style={{flex: 1}}&gt;
+  &lt;FlatList
+    data={messages}
+    renderItem={({item}) =&gt; &lt;MessageBubble message={item} isUser={item.role === 'user'} /&gt;}
+    inverted
+  /&gt;
+  &lt;View style={{flexDirection: 'row', padding: 12, gap: 8}}&gt;
+    &lt;TextInput style={{flex: 1, height: 44, borderRadius: 22}} /&gt;
+    &lt;SendButton onPress={sendMessage} /&gt;
+  &lt;/View&gt;
+&lt;/KeyboardAvoidingView&gt;
+                </div>
+            </div>
+
+            <!-- 8. Notification List -->
+            <div class="component-card">
+                <h3 class="component-name">8. Notification List</h3>
+                <p class="component-desc">Scrollable notifications with category tabs. Dark theme default.</p>
+                <div class="specs">Tabs: All, Trading, Community | Swipe to delete | Dark theme</div>
+                <div class="preview" style="height: 380px; overflow: hidden; background: #05040B;">
+                    <div style="padding: 12px;">
+                        <!-- Tabs -->
+                        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                            <span style="padding: 8px 16px; background: #9C0612; color: white; border-radius: 20px; font-size: 13px; font-weight: 600;">All</span>
+                            <span style="padding: 8px 16px; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); border-radius: 20px; font-size: 13px;">Trading</span>
+                            <span style="padding: 8px 16px; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); border-radius: 20px; font-size: 13px;">Community</span>
+                        </div>
+                        <!-- Items -->
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <div style="display: flex; gap: 12px; padding: 12px; background: rgba(255,189,89,0.1); border: 1px solid rgba(255,189,89,0.2); border-radius: 12px; align-items: flex-start;">
+                                <div style="width: 40px; height: 40px; background: rgba(0,255,136,0.2); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 18px;">📊</div>
+                                <div style="flex: 1;">
+                                    <div style="font-size: 14px; font-weight: 600; color: white;">Pattern Detected</div>
+                                    <div style="font-size: 13px; color: rgba(255,255,255,0.7);">DPD on BTCUSDT 4H</div>
+                                    <div style="font-size: 11px; color: rgba(255,255,255,0.5);">5 min ago</div>
+                                </div>
+                                <div style="width: 8px; height: 8px; background: #FFBD59; border-radius: 4px;"></div>
+                            </div>
+                            <div style="display: flex; gap: 12px; padding: 12px; background: #112250; border: 1px solid rgba(255,189,89,0.2); border-radius: 12px; align-items: flex-start;">
+                                <div style="width: 40px; height: 40px; background: rgba(255,68,68,0.2); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 18px;">❤️</div>
+                                <div style="flex: 1;">
+                                    <div style="font-size: 14px; font-weight: 600; color: white;">New Like</div>
+                                    <div style="font-size: 13px; color: rgba(255,255,255,0.7);">Mike liked your post</div>
+                                    <div style="font-size: 11px; color: rgba(255,255,255,0.5);">1 hour ago</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="code-block">
+&lt;View&gt;
+  &lt;CategoryTabs categories={['All', 'Trading', 'Community']} selected={tab} onSelect={setTab} /&gt;
+  &lt;FlatList
+    data={notifications.filter(n =&gt; tab === 'All' || n.category === tab)}
+    renderItem={({item}) =&gt; &lt;SwipeableNotificationCard notification={item} onDelete={handleDelete} /&gt;}
+  /&gt;
+&lt;/View&gt;
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-footer">
+            <a href="CATALOG_MOLECULES.html" class="nav-btn secondary">← Previous: Molecules</a>
+            <a href="CATALOG_TEMPLATES.html" class="nav-btn">Next: Templates →</a>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const label = document.getElementById('theme-label');
+
+            if (body.classList.contains('dark-theme')) {
+                body.classList.remove('dark-theme');
+                body.classList.add('light-theme');
+                label.textContent = 'Switch to Dark';
+                localStorage.setItem('gem-theme', 'light');
+            } else {
+                body.classList.remove('light-theme');
+                body.classList.add('dark-theme');
+                label.textContent = 'Switch to Light';
+                localStorage.setItem('gem-theme', 'dark');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('gem-theme') || 'dark';
+            if (savedTheme === 'light') {
+                document.body.classList.remove('dark-theme');
+                document.body.classList.add('light-theme');
+                document.getElementById('theme-label').textContent = 'Switch to Dark';
+            }
+        });
+    </script>
+</body>
+</html>

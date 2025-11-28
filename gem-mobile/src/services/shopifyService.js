@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Shopify Service (Mobile)
+ * Gemral - Shopify Service (Mobile)
  * Uses Supabase Edge Functions as proxy (NO CORS!)
  */
 

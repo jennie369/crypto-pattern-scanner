@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Signup Screen
+ * Gemral - Signup Screen
  */
 
 import React, { useState } from 'react';
@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Gem } from 'lucide-react-native';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, INPUT, BUTTON } from '../../utils/tokens';
 import { signUp } from '../../services/supabase';
 
@@ -74,7 +75,7 @@ export default function SignupScreen({ navigation }) {
             <View style={styles.content}>
               {/* Header */}
               <View style={styles.header}>
-                <Text style={styles.logoIcon}>💎</Text>
+                <Gem size={48} color={COLORS.gold} strokeWidth={1.5} />
                 <Text style={styles.title}>Create Account</Text>
                 <Text style={styles.subtitle}>Join the GEM trading community</Text>
               </View>

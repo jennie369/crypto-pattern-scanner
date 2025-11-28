@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Glass Bottom Tab Bar
+ * Gemral - Glass Bottom Tab Bar
  * Refined floating pill-style tab bar with deep navy glass effect
  * Supports auto-hide on scroll via TabBarContext
  * Dynamic notification badge count

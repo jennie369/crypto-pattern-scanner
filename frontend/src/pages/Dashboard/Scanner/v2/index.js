@@ -1,5 +1,5 @@
 /**
- * Scanner Page v2 - GEM Platform
+ * Scanner Page v2 - Gemral
  * Week 3, Day 18-21: Dashboard Scanner Redesign
  * Export main component
  */

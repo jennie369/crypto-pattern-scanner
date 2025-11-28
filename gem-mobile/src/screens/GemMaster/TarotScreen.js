@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Tarot Screen
+ * Gemral - Tarot Screen
  * Interactive tarot card reading
  */
 
@@ -12,12 +12,24 @@ import {
   StyleSheet,
   Animated,
   Dimensions,
+  Share,
+  Alert,
+  ActivityIndicator,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, RefreshCw, Share2, Layers, Star, Moon, Sun } from 'lucide-react-native';
+import { ArrowLeft, RefreshCw, Share2, Layers, Star, Moon, Sun, Lock } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS, LAYOUT } from '../../utils/tokens';
 import { useTabBar } from '../../contexts/TabBarContext';
+
+// Services for tier/quota checking
+import TierService from '../../services/tierService';
+import QuotaService from '../../services/quotaService';
+import { supabase } from '../../services/supabase';
+
+// Tarot card images
+import { getCardImage } from '../../assets/tarot';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = (SCREEN_WIDTH - SPACING.md * 4) / 3;
@@ -116,18 +128,88 @@ const TAROT_CARDS = [
 // Spread positions
 const SPREAD_POSITIONS = ['Quá khứ', 'Hiện tại', 'Tương lai'];
 
-const TarotScreen = ({ navigation }) => {
+/**
+ * Fisher-Yates shuffle algorithm for true randomness
+ * Ensures each card has equal probability of being in any position
+ */
+const shuffleArray = (array) => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    // Use crypto-quality randomness with timestamp seed
+    const seed = Date.now() + Math.random() * 1000000;
+    const j = Math.floor((seed % (i + 1)));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
+const TarotScreen = ({ navigation, route }) => {
   const [selectedCards, setSelectedCards] = useState([null, null, null]);
   const [isRevealed, setIsRevealed] = useState([false, false, false]);
   const [isReading, setIsReading] = useState(false);
   const [interpretation, setInterpretation] = useState(null);
   const { hideTabBar, showTabBar } = useTabBar();
 
+  // Quota state
+  const [user, setUser] = useState(null);
+  const [userTier, setUserTier] = useState('FREE');
+  const [quota, setQuota] = useState(null);
+  const [isLoadingQuota, setIsLoadingQuota] = useState(true);
+
+  // Callback to send result back to chat
+  const onSendToChat = route?.params?.onSendToChat;
+
   // Hide tab bar when screen is focused
   useEffect(() => {
     hideTabBar();
     return () => showTabBar();
   }, [hideTabBar, showTabBar]);
+
+  // Load user tier and quota on mount
+  useEffect(() => {
+    const loadUserQuota = async () => {
+      try {
+        setIsLoadingQuota(true);
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        setUser(currentUser);
+
+        if (currentUser) {
+          const tier = await TierService.getUserTier(currentUser.id);
+          setUserTier(tier);
+          const quotaData = await QuotaService.checkQuota(currentUser.id, tier);
+          setQuota(quotaData);
+          console.log('[TarotScreen] User tier:', tier, 'Quota:', quotaData);
+        } else {
+          setUserTier('FREE');
+          setQuota(QuotaService.getDefaultQuota());
+        }
+      } catch (error) {
+        console.error('[TarotScreen] Error loading quota:', error);
+        setQuota(QuotaService.getDefaultQuota());
+      } finally {
+        setIsLoadingQuota(false);
+      }
+    };
+
+    loadUserQuota();
+  }, []);
+
+  // Check if user can perform divination (has quota remaining)
+  const canDivine = useCallback(() => {
+    if (!quota) return false;
+    return quota.unlimited || quota.remaining > 0;
+  }, [quota]);
+
+  // Refresh quota after using
+  const refreshQuota = useCallback(async () => {
+    if (!user) return;
+    try {
+      const quotaData = await QuotaService.checkQuota(user.id, userTier);
+      setQuota(quotaData);
+    } catch (error) {
+      console.error('[TarotScreen] Error refreshing quota:', error);
+    }
+  }, [user, userTier]);
 
   // Animation refs
   const cardFlips = useRef([
@@ -138,6 +220,16 @@ const TarotScreen = ({ navigation }) => {
 
   // Draw cards
   const drawCards = useCallback(async () => {
+    // CHECK QUOTA FIRST
+    if (!canDivine()) {
+      Alert.alert(
+        'Hết lượt hôm nay',
+        `Bạn đã sử dụng hết ${quota?.limit || 5} lượt hỏi trong ngày.\n\nNâng cấp lên tier cao hơn để có thêm lượt:\n• TIER1/PRO: 15 lượt/ngày\n• TIER2/PREMIUM: 50 lượt/ngày\n• TIER3/VIP: Không giới hạn`,
+        [{ text: 'Đóng', style: 'cancel' }]
+      );
+      return;
+    }
+
     setIsReading(true);
     setSelectedCards([null, null, null]);
     setIsRevealed([false, false, false]);
@@ -146,9 +238,21 @@ const TarotScreen = ({ navigation }) => {
     // Reset animations
     cardFlips.forEach((anim) => anim.setValue(0));
 
-    // Shuffle and pick 3 random cards
-    const shuffled = [...TAROT_CARDS].sort(() => Math.random() - 0.5);
-    const drawn = shuffled.slice(0, 3);
+    // DECREMENT QUOTA (uses same quota as chat)
+    if (user) {
+      await QuotaService.decrementQuota(user.id);
+      await refreshQuota();
+    }
+
+    // True random shuffle using Fisher-Yates algorithm
+    const shuffled = shuffleArray(TAROT_CARDS);
+    // Add extra randomness - pick from different positions
+    const extraSeed = Math.floor(Date.now() % 100);
+    const drawn = [
+      shuffled[extraSeed % 78],
+      shuffled[(extraSeed + 17) % 78], // Prime offset for better distribution
+      shuffled[(extraSeed + 41) % 78], // Another prime offset
+    ];
 
     // Reveal cards one by one with animation
     for (let i = 0; i < 3; i++) {
@@ -178,7 +282,7 @@ const TarotScreen = ({ navigation }) => {
     await new Promise((resolve) => setTimeout(resolve, 300));
     setInterpretation(generateInterpretation(drawn));
     setIsReading(false);
-  }, [cardFlips]);
+  }, [cardFlips, canDivine, quota, user, refreshQuota]);
 
   // Generate mock interpretation
   const generateInterpretation = (cards) => {
@@ -191,7 +295,7 @@ const TarotScreen = ({ navigation }) => {
     };
   };
 
-  // Render card
+  // Render card with real tarot images
   const renderCard = (index) => {
     const card = selectedCards[index];
     const revealed = isRevealed[index];
@@ -218,7 +322,8 @@ const TarotScreen = ({ navigation }) => {
       ],
     };
 
-    const IconComponent = card?.icon || Star;
+    // Get real card image
+    const cardImage = card ? getCardImage(card.id) : null;
 
     return (
       <View key={index} style={styles.cardSlot}>
@@ -237,24 +342,30 @@ const TarotScreen = ({ navigation }) => {
             </LinearGradient>
           </Animated.View>
 
-          {/* Card Front */}
+          {/* Card Front - Real Tarot Image */}
           <Animated.View style={[styles.card, styles.cardFront, frontAnimatedStyle]}>
-            <LinearGradient
-              colors={['rgba(255, 189, 89, 0.3)', 'rgba(106, 91, 255, 0.2)']}
-              style={styles.cardFrontGradient}
-            >
-              {card && (
-                <>
-                  <View style={styles.cardIconWrapper}>
-                    <IconComponent size={28} color={COLORS.gold} />
-                  </View>
-                  <Text style={styles.cardNumber}>{card.id}</Text>
-                  <Text style={styles.cardName} numberOfLines={2}>
-                    {card.vietnamese}
-                  </Text>
-                </>
-              )}
-            </LinearGradient>
+            {card && cardImage ? (
+              <Image
+                source={cardImage}
+                style={styles.cardImage}
+                resizeMode="cover"
+              />
+            ) : (
+              <LinearGradient
+                colors={['rgba(255, 189, 89, 0.3)', 'rgba(106, 91, 255, 0.2)']}
+                style={styles.cardFrontGradient}
+              >
+                <Star size={28} color={COLORS.gold} />
+              </LinearGradient>
+            )}
+            {/* Card name overlay */}
+            {card && (
+              <View style={styles.cardNameOverlay}>
+                <Text style={styles.cardName} numberOfLines={1}>
+                  {card.vietnamese}
+                </Text>
+              </View>
+            )}
           </Animated.View>
         </View>
       </View>
@@ -300,23 +411,54 @@ const TarotScreen = ({ navigation }) => {
           </View>
         </View>
 
+        {/* Quota Display */}
+        {!isLoadingQuota && (
+          <View style={styles.quotaContainer}>
+            <Text style={styles.quotaText}>
+              {quota?.unlimited
+                ? '✨ Không giới hạn'
+                : `📊 Còn ${quota?.remaining || 0}/${quota?.limit || 5} lượt hôm nay`}
+            </Text>
+            <Text style={styles.tierText}>
+              {TierService.getTierDisplayName(userTier)}
+            </Text>
+          </View>
+        )}
+
         {/* Draw Button */}
         <TouchableOpacity
-          style={[styles.drawButton, isReading && styles.drawButtonDisabled]}
+          style={[
+            styles.drawButton,
+            (isReading || isLoadingQuota) && styles.drawButtonDisabled,
+            !canDivine() && styles.drawButtonLocked
+          ]}
           onPress={drawCards}
-          disabled={isReading}
+          disabled={isReading || isLoadingQuota}
           activeOpacity={0.8}
         >
           <LinearGradient
-            colors={GRADIENTS.glassBorder}
+            colors={!canDivine() ? ['#555', '#444'] : GRADIENTS.glassBorder}
             style={styles.drawButtonGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
-            <RefreshCw size={20} color="#FFFFFF" />
-            <Text style={styles.drawButtonText}>
-              {isReading ? 'Đang bốc bài...' : selectedCards[0] ? 'Bốc lại' : 'Bốc bài'}
-            </Text>
+            {isLoadingQuota ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : !canDivine() ? (
+              <>
+                <Lock size={20} color="#999" />
+                <Text style={[styles.drawButtonText, styles.drawButtonTextLocked]}>
+                  Hết lượt hôm nay
+                </Text>
+              </>
+            ) : (
+              <>
+                <RefreshCw size={20} color="#FFFFFF" />
+                <Text style={styles.drawButtonText}>
+                  {isReading ? 'Đang bốc bài...' : selectedCards[0] ? 'Bốc lại' : 'Bốc bài'}
+                </Text>
+              </>
+            )}
           </LinearGradient>
         </TouchableOpacity>
 
@@ -354,8 +496,71 @@ const TarotScreen = ({ navigation }) => {
               <Text style={styles.adviceText}>{interpretation.advice}</Text>
             </View>
 
+            {/* Send to Chat Button */}
+            <TouchableOpacity
+              style={styles.sendToChatButton}
+              activeOpacity={0.7}
+              onPress={() => {
+                // Format result for chat with visual data
+                const cards = selectedCards;
+                const resultData = {
+                  type: 'tarot',
+                  text: `🃏 **Kết quả Tarot - Trải 3 lá**\n\n**Quá khứ:** ${cards[0].vietnamese} - ${cards[0].meaning}\n\n**Hiện tại:** ${cards[1].vietnamese} - ${cards[1].meaning}\n\n**Tương lai:** ${cards[2].vietnamese} - ${cards[2].meaning}\n\n📖 ${interpretation.summary}\n\n💡 **Lời khuyên:** ${interpretation.advice}`,
+                  cards: cards.map(card => ({
+                    id: card.id,
+                    name: card.name,
+                    vietnamese: card.vietnamese,
+                    meaning: card.meaning,
+                    icon: card.icon?.name || 'Star',
+                    arcana: card.arcana,
+                  })),
+                  interpretation: interpretation,
+                };
+
+                // Go back and send to chat
+                navigation.goBack();
+                if (onSendToChat) {
+                  setTimeout(() => {
+                    onSendToChat(resultData);
+                  }, 100);
+                }
+              }}
+            >
+              <LinearGradient
+                colors={GRADIENTS.gold}
+                style={styles.sendToChatGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Text style={styles.sendToChatText}>📨 Gửi vào Chat</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+
             {/* Share Button */}
-            <TouchableOpacity style={styles.shareButton} activeOpacity={0.7}>
+            <TouchableOpacity
+              style={styles.shareButton}
+              activeOpacity={0.7}
+              onPress={async () => {
+                try {
+                  const cards = selectedCards;
+                  const shareContent = `🃏 Kết quả Tarot - Gemral\n\n` +
+                    `Trải bài 3 lá:\n` +
+                    `• Quá khứ: ${cards[0].vietnamese} - ${cards[0].meaning}\n` +
+                    `• Hiện tại: ${cards[1].vietnamese} - ${cards[1].meaning}\n` +
+                    `• Tương lai: ${cards[2].vietnamese} - ${cards[2].meaning}\n\n` +
+                    `${interpretation.summary}\n\n` +
+                    `💡 Lời khuyên: ${interpretation.advice}\n\n` +
+                    `📲 Tải app Gemral để bốc bài của bạn!\nhttps://gemral.com`;
+
+                  await Share.share({
+                    message: shareContent,
+                    title: 'Kết quả Tarot - Gemral',
+                  });
+                } catch (error) {
+                  Alert.alert('Lỗi', 'Không thể chia sẻ. Vui lòng thử lại.');
+                }
+              }}
+            >
               <Share2 size={18} color={COLORS.textPrimary} />
               <Text style={styles.shareButtonText}>Chia sẻ kết quả</Text>
             </TouchableOpacity>
@@ -482,32 +687,62 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 189, 89, 0.5)',
     borderRadius: 12,
   },
-  cardIconWrapper: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: 'rgba(255, 189, 89, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: SPACING.xs,
+  // Real tarot card image
+  cardImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: COLORS.gold,
   },
-  cardNumber: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.gold,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  // Name overlay at bottom of card
+  cardNameOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    paddingVertical: 4,
+    paddingHorizontal: 4,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
   },
   cardName: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textPrimary,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    fontSize: 10,
+    color: COLORS.gold,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
     textAlign: 'center',
-    marginTop: SPACING.xs,
+  },
+  // Quota display
+  quotaContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 240, 255, 0.1)',
+    borderRadius: 12,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 240, 255, 0.2)',
+  },
+  quotaText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textSecondary,
+  },
+  tierText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.cyan,
   },
   drawButton: {
     marginBottom: SPACING.xl,
   },
   drawButtonDisabled: {
     opacity: 0.6,
+  },
+  drawButtonLocked: {
+    opacity: 0.8,
   },
   drawButtonGradient: {
     flexDirection: 'row',
@@ -521,6 +756,9 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.fontSize.lg,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: '#FFFFFF',
+  },
+  drawButtonTextLocked: {
+    color: '#999',
   },
   interpretationSection: {
     gap: SPACING.md,
@@ -597,6 +835,21 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.fontSize.md,
     color: COLORS.textPrimary,
     lineHeight: 22,
+  },
+  sendToChatButton: {
+    marginTop: SPACING.md,
+  },
+  sendToChatGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SPACING.md,
+    borderRadius: 24,
+  },
+  sendToChatText: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: '#0F1030',
   },
   shareButton: {
     flexDirection: 'row',

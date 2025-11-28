@@ -1,4 +1,4 @@
-# 📊 PHÂN TÍCH TIẾN ĐỘ CHI TIẾT - GEM PLATFORM ECOSYSTEM
+# 📊 PHÂN TÍCH TIẾN ĐỘ CHI TIẾT - Gemral ECOSYSTEM
 ## Cập Nhật: 16 November 2025 - ALIGNED WITH MASTER ROADMAP! 🎯
 
 ---
@@ -456,7 +456,7 @@ Route: /community or /community/:tab
 Status: ⚠️ 66% - 6-tab navigation system (several features broken)
 Tabs:
   - Forum (discussions) ✅ 100% Working
-  - Gem Master (I Ching/Tarot chatbot) ⚠️ 70% Mock AI only
+  - Gemral (I Ching/Tarot chatbot) ⚠️ 70% Mock AI only
   - Messages (direct messaging) ⚠️ 65% Missing safety features
   - Events (calendar) ⚠️ 70% Code complete, needs deployment
   - Leaderboard (rankings) ⚠️ 75% Needs real-time updates
@@ -1346,7 +1346,7 @@ Impact: Eliminates all Invalid Symbol errors from Binance API
 - ⚠️ Events Calendar (Events.jsx - 429 lines) - 70% (code complete, needs deployment)
 - ⚠️ Leaderboard (Leaderboard.jsx - 242 lines) - 75% (needs real-time updates)
 - 🔴 User Profiles (UserProfile.jsx - 256 lines) - 45% (CRITICAL: profiles table missing from DB)
-- ⚠️ Gem Master Chatbot - 70% (mock AI only, no real intelligence)
+- ⚠️ Gemral Chatbot - 70% (mock AI only, no real intelligence)
 - ⚠️ Affiliate System - 70% (UI + backend code + DB complete, but NOT integrated with flows)
 
 **CRITICAL ISSUES:**
@@ -1631,7 +1631,7 @@ Year 1 Potential: $8,100/month ($97K/year)
 
 ### **STATUS: 96% COMPLETE - LAUNCH READY! ✅**
 
-**The GEM Platform is:**
+**The Gemral is:**
 - ✅ Fully functional (32 pages deployed!)
 - ✅ Tested with real data (686 trades!)
 - ✅ Proven to work end-to-end
@@ -1709,7 +1709,7 @@ http://localhost:5175/forum               → Forum (discussions)
 http://localhost:5175/forum/new           → Create Thread
 http://localhost:5175/messages            → Direct Messaging (DM)
 http://localhost:5175/events              → Events Calendar
-http://localhost:5175/chatbot             → Gem Master Chatbot (I Ching/Tarot)
+http://localhost:5175/chatbot             → Gemral Chatbot (I Ching/Tarot)
 
 💰 AFFILIATE:
 http://localhost:5175/affiliate           → Affiliate Dashboard (CTV, 5 tabs)

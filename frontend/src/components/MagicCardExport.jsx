@@ -2,6 +2,7 @@ import React, { useRef, useMemo } from 'react';
 import html2canvas from 'html2canvas';
 import './MagicCardExport.css';
 
+// FIXED: Perfect centering for all visual elements (Issue #5) ✅
 export default function MagicCardExport({
   response,
   cardType = 'goal',
@@ -61,7 +62,7 @@ export default function MagicCardExport({
 
   // Extract title from response text (first line or first 50 chars)
   const extractTitle = (text) => {
-    if (!text) return 'GEM Master Card';
+    if (!text) return 'Gemral Card';
 
     const cleanedText = cleanText(text);
     const lines = cleanedText.split('\n');
@@ -71,7 +72,7 @@ export default function MagicCardExport({
       return firstLine.substring(0, 50) + '...';
     }
 
-    return firstLine || 'GEM Master Card';
+    return firstLine || 'Gemral Card';
   };
 
   // Export as image
@@ -111,8 +112,8 @@ export default function MagicCardExport({
 
         if (navigator.share && navigator.canShare({ files: [file] })) {
           await navigator.share({
-            title: 'GEM Master Card',
-            text: 'Check out my manifestation from GEM Platform! 💎',
+            title: 'Gemral Card',
+            text: 'Check out my manifestation from Gemral! 💎',
             files: [file]
           });
         } else {
@@ -149,32 +150,84 @@ export default function MagicCardExport({
             {/* Card content container */}
             <div className="card-inner">
               {/* Crystal/Hexagram/Tarot image */}
-              <div className="crystal-container">
+              <div className="crystal-container" style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '10px auto 15px'
+              }}>
                 {cardType === 'iching' || cardType === 'hexagram' ? (
-                  // Show hexagram visual
-                  <div className="card-hexagram-display">
-                    <div className="hexagram-symbol">☰☷</div>
+                  // Show hexagram visual - PERFECTLY CENTERED
+                  <div className="card-hexagram-display" style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    textAlign: 'center'
+                  }}>
+                    <div className="hexagram-symbol" style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>☰☷</div>
                   </div>
                 ) : cardType === 'tarot' ? (
-                  // Show tarot card symbol
-                  <div className="card-tarot-display">
-                    <div className="tarot-symbol">🔮</div>
+                  // Show tarot card symbol - PERFECTLY CENTERED
+                  <div className="card-tarot-display" style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    textAlign: 'center'
+                  }}>
+                    <div className="tarot-symbol" style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>🔮</div>
                   </div>
                 ) : cardType === 'crystal' ? (
-                  // Show crystal icon
-                  <div className="card-icon-display">💎</div>
+                  // Show crystal icon - PERFECTLY CENTERED
+                  <div className="card-icon-display" style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    textAlign: 'center'
+                  }}>💎</div>
                 ) : cardType === 'goal' ? (
-                  // Show goal icon
-                  <div className="card-icon-display">🎯</div>
+                  // Show goal icon - PERFECTLY CENTERED
+                  <div className="card-icon-display" style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    textAlign: 'center'
+                  }}>🎯</div>
                 ) : cardType === 'affirmation' ? (
-                  // Show affirmation icon
-                  <div className="card-icon-display">✨</div>
+                  // Show affirmation icon - PERFECTLY CENTERED
+                  <div className="card-icon-display" style={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    textAlign: 'center'
+                  }}>✨</div>
                 ) : (
-                  // Default: show crystal image
+                  // Default: show crystal image - PERFECTLY CENTERED
                   <img
                     src={randomCrystalImage}
                     alt="Crystal"
                     className="crystal-image"
+                    style={{
+                      display: 'block',
+                      margin: '0 auto'
+                    }}
                   />
                 )}
               </div>
@@ -197,7 +250,7 @@ export default function MagicCardExport({
                   {collectionType} Collection
                 </div>
                 <div className="watermark">
-                  💎 GEM Platform
+                  💎 Gemral
                 </div>
               </div>
             </div>

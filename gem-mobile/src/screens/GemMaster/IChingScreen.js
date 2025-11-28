@@ -1,5 +1,5 @@
 /**
- * GEM Platform - I Ching Screen
+ * Gemral - I Ching Screen
  * Interactive hexagram casting and interpretation
  */
 
@@ -11,12 +11,22 @@ import {
   ScrollView,
   StyleSheet,
   Animated,
+  Share,
+  Alert,
+  ActivityIndicator,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, RefreshCw, Share2, Hexagon } from 'lucide-react-native';
+import { ArrowLeft, RefreshCw, Share2, Hexagon, Lock } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS, LAYOUT } from '../../utils/tokens';
 import { useTabBar } from '../../contexts/TabBarContext';
+import { getHexagramImage, getCardBack } from '../../assets/iching';
+
+// Services for tier/quota checking
+import TierService from '../../services/tierService';
+import QuotaService from '../../services/quotaService';
+import { supabase } from '../../services/supabase';
 
 // Complete 64 hexagrams data
 const HEXAGRAMS = [
@@ -86,17 +96,72 @@ const HEXAGRAMS = [
   { id: 64, name: 'Vị Tế', vietnamese: 'Chưa hoàn thành', meaning: 'Sắp hoàn thành', lines: [0, 1, 0, 1, 0, 1] },
 ];
 
-const IChingScreen = ({ navigation }) => {
+const IChingScreen = ({ navigation, route }) => {
   const [hexagram, setHexagram] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [interpretation, setInterpretation] = useState(null);
   const { hideTabBar, showTabBar } = useTabBar();
+
+  // Quota state
+  const [user, setUser] = useState(null);
+  const [userTier, setUserTier] = useState('FREE');
+  const [quota, setQuota] = useState(null);
+  const [isLoadingQuota, setIsLoadingQuota] = useState(true);
+
+  // Callback to send result back to chat
+  const onSendToChat = route?.params?.onSendToChat;
 
   // Hide tab bar when screen is focused
   useEffect(() => {
     hideTabBar();
     return () => showTabBar();
   }, [hideTabBar, showTabBar]);
+
+  // Load user tier and quota on mount
+  useEffect(() => {
+    const loadUserQuota = async () => {
+      try {
+        setIsLoadingQuota(true);
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        setUser(currentUser);
+
+        if (currentUser) {
+          const tier = await TierService.getUserTier(currentUser.id);
+          setUserTier(tier);
+          const quotaData = await QuotaService.checkQuota(currentUser.id, tier);
+          setQuota(quotaData);
+          console.log('[IChingScreen] User tier:', tier, 'Quota:', quotaData);
+        } else {
+          setUserTier('FREE');
+          setQuota(QuotaService.getDefaultQuota());
+        }
+      } catch (error) {
+        console.error('[IChingScreen] Error loading quota:', error);
+        setQuota(QuotaService.getDefaultQuota());
+      } finally {
+        setIsLoadingQuota(false);
+      }
+    };
+
+    loadUserQuota();
+  }, []);
+
+  // Check if user can perform divination (has quota remaining)
+  const canDivine = useCallback(() => {
+    if (!quota) return false;
+    return quota.unlimited || quota.remaining > 0;
+  }, [quota]);
+
+  // Refresh quota after using
+  const refreshQuota = useCallback(async () => {
+    if (!user) return;
+    try {
+      const quotaData = await QuotaService.checkQuota(user.id, userTier);
+      setQuota(quotaData);
+    } catch (error) {
+      console.error('[IChingScreen] Error refreshing quota:', error);
+    }
+  }, [user, userTier]);
 
   // Animation refs
   const lineAnimations = useRef([
@@ -108,8 +173,33 @@ const IChingScreen = ({ navigation }) => {
     new Animated.Value(0),
   ]).current;
 
+  /**
+   * Fisher-Yates shuffle algorithm for true randomness
+   * Ensures each hexagram has equal probability of being selected
+   */
+  const shuffleArray = (array) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      // Use timestamp + Math.random for better entropy
+      const seed = Date.now() + Math.random() * 1000000;
+      const j = Math.floor(seed % (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
   // Cast hexagram
   const castHexagram = useCallback(async () => {
+    // CHECK QUOTA FIRST
+    if (!canDivine()) {
+      Alert.alert(
+        'Hết lượt hôm nay',
+        `Bạn đã sử dụng hết ${quota?.limit || 5} lượt hỏi trong ngày.\n\nNâng cấp lên tier cao hơn để có thêm lượt:\n• TIER1/PRO: 15 lượt/ngày\n• TIER2/PREMIUM: 50 lượt/ngày\n• TIER3/VIP: Không giới hạn`,
+        [{ text: 'Đóng', style: 'cancel' }]
+      );
+      return;
+    }
+
     setIsLoading(true);
     setHexagram(null);
     setInterpretation(null);
@@ -117,9 +207,18 @@ const IChingScreen = ({ navigation }) => {
     // Reset animations
     lineAnimations.forEach((anim) => anim.setValue(0));
 
-    // Random hexagram
-    const randomIndex = Math.floor(Math.random() * HEXAGRAMS.length);
-    const selected = HEXAGRAMS[randomIndex];
+    // DECREMENT QUOTA (uses same quota as chat)
+    if (user) {
+      await QuotaService.decrementQuota(user.id);
+      await refreshQuota();
+    }
+
+    // True random hexagram using Fisher-Yates shuffle
+    const shuffled = shuffleArray(HEXAGRAMS);
+    // Add extra randomness with timestamp-based seed
+    const extraRandom = Math.floor((Date.now() % 1000) * Math.random());
+    const randomIndex = (extraRandom + Math.floor(Math.random() * 64)) % 64;
+    const selected = shuffled[randomIndex];
 
     // Animate lines appearing one by one
     for (let i = 0; i < 6; i++) {
@@ -138,7 +237,7 @@ const IChingScreen = ({ navigation }) => {
     await new Promise((resolve) => setTimeout(resolve, 500));
     setInterpretation(generateInterpretation(selected));
     setIsLoading(false);
-  }, [lineAnimations]);
+  }, [lineAnimations, canDivine, quota, user, refreshQuota]);
 
   // Generate mock interpretation
   const generateInterpretation = (hex) => {
@@ -210,49 +309,87 @@ const IChingScreen = ({ navigation }) => {
       >
         {/* Hexagram Display */}
         <View style={styles.hexagramSection}>
-          <LinearGradient
-            colors={['rgba(255, 189, 89, 0.2)', 'rgba(106, 91, 255, 0.1)']}
-            style={styles.hexagramCard}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
-            {hexagram ? (
-              <>
-                {/* Lines */}
-                <View style={styles.linesContainer}>
-                  {hexagram.lines.map((line, index) => renderLine(line, index))}
-                </View>
-
-                {/* Name */}
+          {hexagram ? (
+            <View style={styles.hexagramCardContainer}>
+              {/* Real Hexagram Card Image */}
+              <View style={styles.hexagramImageWrapper}>
+                <Image
+                  source={getHexagramImage(hexagram.id)}
+                  style={styles.hexagramImage}
+                  resizeMode="contain"
+                />
+              </View>
+              {/* Card name overlay */}
+              <View style={styles.hexagramNameOverlay}>
                 <Text style={styles.hexagramName}>{hexagram.name}</Text>
                 <Text style={styles.hexagramVietnamese}>{hexagram.vietnamese}</Text>
-              </>
-            ) : (
+              </View>
+            </View>
+          ) : (
+            <View style={styles.hexagramCardContainer}>
+              {/* Card Back (before casting) */}
+              <View style={styles.hexagramImageWrapper}>
+                <Image
+                  source={getCardBack()}
+                  style={styles.hexagramImage}
+                  resizeMode="contain"
+                />
+              </View>
               <View style={styles.emptyHexagram}>
-                <Hexagon size={64} color={COLORS.gold} strokeWidth={1} />
                 <Text style={styles.emptyText}>Nhấn để gieo quẻ</Text>
               </View>
-            )}
-          </LinearGradient>
+            </View>
+          )}
         </View>
+
+        {/* Quota Display */}
+        {!isLoadingQuota && (
+          <View style={styles.quotaContainer}>
+            <Text style={styles.quotaText}>
+              {quota?.unlimited
+                ? '✨ Không giới hạn'
+                : `📊 Còn ${quota?.remaining || 0}/${quota?.limit || 5} lượt hôm nay`}
+            </Text>
+            <Text style={styles.tierText}>
+              {TierService.getTierDisplayName(userTier)}
+            </Text>
+          </View>
+        )}
 
         {/* Cast Button */}
         <TouchableOpacity
-          style={[styles.castButton, isLoading && styles.castButtonDisabled]}
+          style={[
+            styles.castButton,
+            (isLoading || isLoadingQuota) && styles.castButtonDisabled,
+            !canDivine() && styles.castButtonLocked
+          ]}
           onPress={castHexagram}
-          disabled={isLoading}
+          disabled={isLoading || isLoadingQuota}
           activeOpacity={0.8}
         >
           <LinearGradient
-            colors={GRADIENTS.gold}
+            colors={!canDivine() ? ['#555', '#444'] : GRADIENTS.gold}
             style={styles.castButtonGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
           >
-            <RefreshCw size={20} color="#0F1030" />
-            <Text style={styles.castButtonText}>
-              {isLoading ? 'Đang gieo quẻ...' : hexagram ? 'Gieo lại' : 'Gieo quẻ'}
-            </Text>
+            {isLoadingQuota ? (
+              <ActivityIndicator size="small" color="#0F1030" />
+            ) : !canDivine() ? (
+              <>
+                <Lock size={20} color="#999" />
+                <Text style={[styles.castButtonText, styles.castButtonTextLocked]}>
+                  Hết lượt hôm nay
+                </Text>
+              </>
+            ) : (
+              <>
+                <RefreshCw size={20} color="#0F1030" />
+                <Text style={styles.castButtonText}>
+                  {isLoading ? 'Đang gieo quẻ...' : hexagram ? 'Gieo lại' : 'Gieo quẻ'}
+                </Text>
+              </>
+            )}
           </LinearGradient>
         </TouchableOpacity>
 
@@ -297,8 +434,68 @@ const IChingScreen = ({ navigation }) => {
               </View>
             </View>
 
+            {/* Send to Chat Button */}
+            <TouchableOpacity
+              style={styles.sendToChatButton}
+              activeOpacity={0.7}
+              onPress={() => {
+                // Format result for chat with visual data
+                const resultData = {
+                  type: 'iching',
+                  text: `🔮 **Kết quả Kinh Dịch**\n\n**Quẻ ${hexagram.name}** (${hexagram.vietnamese})\n\n${interpretation.general}\n\n**Lời khuyên:** ${interpretation.advice}\n\n**Cảnh báo:** ${interpretation.warning}`,
+                  hexagram: {
+                    id: hexagram.id,
+                    name: hexagram.name,
+                    vietnamese: hexagram.vietnamese,
+                    meaning: hexagram.meaning,
+                    lines: hexagram.lines,
+                  },
+                  interpretation: interpretation,
+                };
+
+                // Go back and send to chat
+                navigation.goBack();
+                if (onSendToChat) {
+                  setTimeout(() => {
+                    onSendToChat(resultData);
+                  }, 100);
+                }
+              }}
+            >
+              <LinearGradient
+                colors={GRADIENTS.gold}
+                style={styles.sendToChatGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <Text style={styles.sendToChatText}>📨 Gửi vào Chat</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+
             {/* Share Button */}
-            <TouchableOpacity style={styles.shareButton} activeOpacity={0.7}>
+            <TouchableOpacity
+              style={styles.shareButton}
+              activeOpacity={0.7}
+              onPress={async () => {
+                try {
+                  const shareContent = `🔮 Kết quả Kinh Dịch - Gemral\n\n` +
+                    `Quẻ: ${hexagram.name} (${hexagram.vietnamese})\n` +
+                    `Ý nghĩa: ${hexagram.meaning}\n\n` +
+                    `${interpretation.general}\n\n` +
+                    `💡 Lời khuyên: ${interpretation.advice}\n\n` +
+                    `⚠️ Cảnh báo: ${interpretation.warning}\n\n` +
+                    `⭐ Độ may mắn: ${'★'.repeat(interpretation.fortune)}${'☆'.repeat(5 - interpretation.fortune)}\n\n` +
+                    `📲 Tải app Gemral để xem quẻ của bạn!\nhttps://gemral.com`;
+
+                  await Share.share({
+                    message: shareContent,
+                    title: 'Kết quả Kinh Dịch - Gemral',
+                  });
+                } catch (error) {
+                  Alert.alert('Lỗi', 'Không thể chia sẻ. Vui lòng thử lại.');
+                }
+              }}
+            >
               <Share2 size={18} color={COLORS.textPrimary} />
               <Text style={styles.shareButtonText}>Chia sẻ kết quả</Text>
             </TouchableOpacity>
@@ -351,45 +548,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: SPACING.xl,
   },
-  hexagramCard: {
-    width: '100%',
-    aspectRatio: 1,
-    maxWidth: 280,
-    borderRadius: GLASS.borderRadius,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 189, 89, 0.3)',
-    justifyContent: 'center',
+  hexagramCardContainer: {
     alignItems: 'center',
-    padding: SPACING.xl,
+    width: '100%',
   },
-  linesContainer: {
-    gap: SPACING.md,
-    marginBottom: SPACING.lg,
+  hexagramImageWrapper: {
+    width: 220,
+    height: 340,
+    borderRadius: 16,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: COLORS.gold,
+    backgroundColor: 'rgba(15, 16, 48, 0.8)',
+    shadowColor: COLORS.gold,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
   },
-  lineContainer: {
-    width: 120,
-    height: 12,
+  hexagramImage: {
+    width: '100%',
+    height: '100%',
   },
-  yangLine: {
-    flex: 1,
-    backgroundColor: COLORS.gold,
-    borderRadius: 2,
-  },
-  yinLineContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  yinLine: {
-    width: '42%',
-    backgroundColor: COLORS.gold,
-    borderRadius: 2,
-  },
-  yinGap: {
-    width: '16%',
+  hexagramNameOverlay: {
+    marginTop: SPACING.md,
+    alignItems: 'center',
   },
   hexagramName: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.gold,
     textAlign: 'center',
@@ -402,17 +588,42 @@ const styles = StyleSheet.create({
   },
   emptyHexagram: {
     alignItems: 'center',
-    gap: SPACING.md,
+    marginTop: SPACING.md,
   },
   emptyText: {
     fontSize: TYPOGRAPHY.fontSize.lg,
     color: COLORS.textMuted,
+  },
+  // Quota display
+  quotaContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: 'rgba(106, 91, 255, 0.1)',
+    borderRadius: 12,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
+  },
+  quotaText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textSecondary,
+  },
+  tierText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.gold,
   },
   castButton: {
     marginBottom: SPACING.xl,
   },
   castButtonDisabled: {
     opacity: 0.6,
+  },
+  castButtonLocked: {
+    opacity: 0.8,
   },
   castButtonGradient: {
     flexDirection: 'row',
@@ -426,6 +637,9 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.fontSize.lg,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: '#0F1030',
+  },
+  castButtonTextLocked: {
+    color: '#999',
   },
   interpretationSection: {
     gap: SPACING.md,
@@ -488,6 +702,21 @@ const styles = StyleSheet.create({
   },
   starActive: {
     color: COLORS.gold,
+  },
+  sendToChatButton: {
+    marginTop: SPACING.md,
+  },
+  sendToChatGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SPACING.md,
+    borderRadius: 24,
+  },
+  sendToChatText: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: '#0F1030',
   },
   shareButton: {
     flexDirection: 'row',

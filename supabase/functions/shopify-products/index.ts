@@ -65,7 +65,7 @@ serve(async (req) => {
   try {
     console.log('🛍️ Shopify Products API called');
 
-    const { action, productId, handle, limit = 50, syncToDb = false } = await req.json();
+    const { action, productId, handle, limit = 50, syncToDb = false, query } = await req.json();
 
     let shopifyUrl = '';
     let shopifyData: any;
@@ -220,8 +220,6 @@ serve(async (req) => {
     // ACTION: SEARCH PRODUCTS
     // ==============================================
     else if (action === 'search') {
-      const { query } = await req.json();
-
       console.log(`🔍 Searching products: ${query}`);
 
       const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);

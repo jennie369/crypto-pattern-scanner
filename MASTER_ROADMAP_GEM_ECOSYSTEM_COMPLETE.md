@@ -1,4 +1,4 @@
-# 🚀 MASTER ROADMAP - GEM PLATFORM ECOSYSTEM HOÀN CHỈNH
+# 🚀 MASTER ROADMAP - Gemral ECOSYSTEM HOÀN CHỈNH
 ## Tích Hợp Toàn Diện: Trading + Community + Courses + Affiliate + E-commerce
 
 **Timeline:** 20 tuần (5 tháng)  
@@ -50,7 +50,7 @@
 
 ### **Cấu Trúc 3 Cột Sản Phẩm**
 
-| Sản phẩm | Khóa học Trading | Tool Scanner | Gem Master Chatbot AI |
+| Sản phẩm | Khóa học Trading | Tool Scanner | Gemral Chatbot AI |
 |----------|-----------------|--------------|----------------------|
 | **Mô tả** | Khóa học đầu tư crypto | Pattern detection tool | Gieo quẻ Kinh Dịch & Tarot |
 
@@ -68,7 +68,7 @@
 - **Tier 2:** 21 triệu = Scanner (1.997K × 12) + Chatbot (99K × 12) miễn phí  
 - **Tier 3:** 68 triệu = Scanner (5.997K × 24) + Chatbot UNLIMITED 24 tháng
 
-### **Gem Master Chatbot AI Features**
+### **Gemral Chatbot AI Features**
 ```
 FREE (5 câu/ngày):
 - Gieo quẻ Kinh Dịch cơ bản
@@ -92,7 +92,7 @@ PREMIUM (UNLIMITED - 99K/tháng):
 
 ## 📅 DEVELOPMENT TIMELINE - 20 TUẦN
 
-### **PHASE 0: GEM MASTER CHATBOT - MARKETING HOOK (Tuần 0 - Trước launch)**
+### **PHASE 0: Gemral CHATBOT - MARKETING HOOK (Tuần 0 - Trước launch)**
 
 **Mục tiêu:** Tạo viral marketing tool để thu hút users trước khi launch chính thức
 

@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Create Feed Modal
+ * Gemral - Create Feed Modal
  * Threads-style custom feed creation
  */
 

@@ -1,8 +1,8 @@
 /**
- * GEM Platform - App Constants
+ * Gemral - App Constants
  */
 
-export const APP_NAME = 'GEM Platform';
+export const APP_NAME = 'Gemral';
 export const APP_VERSION = '1.0.0';
 
 // API Endpoints

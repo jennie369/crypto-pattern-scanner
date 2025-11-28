@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Swipe Navigation Hook
+ * Gemral - Swipe Navigation Hook
  * Enables swipe left/right to navigate between tabs
  */
 

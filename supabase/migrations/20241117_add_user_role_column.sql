@@ -16,4 +16,4 @@ COMMENT ON COLUMN public.users.role IS 'User role for access control (admin, mod
 -- (Optional: Add admin-specific policies if needed)
 
 -- Grant admin role to specific users (example)
--- UPDATE public.users SET role = 'admin' WHERE email = 'your-email@example.com';
+-- UPDATE public.users SET role = 'admin' WHERE email = 'maow390@gmail.com';

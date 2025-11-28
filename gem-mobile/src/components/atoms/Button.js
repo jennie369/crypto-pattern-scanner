@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Button Component
+ * Gemral - Button Component
  * Reusable button with primary/secondary variants
  */
 

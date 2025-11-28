@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Paper Trade Service
+ * Gemral - Paper Trade Service
  * Simulated trading with local storage + Supabase sync
  */
 

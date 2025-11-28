@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Product Detail Screen
+ * Gemral - Product Detail Screen
  * Complete product view with dark theme, image gallery, variants, and sticky CTA
  * Includes: Reviews, Best Sellers, FAQ, Best For You sections
  */
@@ -44,9 +44,11 @@ import { useCart } from '../../contexts/CartContext';
 import { useTabBar } from '../../contexts/TabBarContext';
 import { shopifyService } from '../../services/shopifyService';
 import { reviewService } from '../../services/reviewService';
+import affiliateService from '../../services/affiliateService';
+import { ProductAffiliateLinkSheet } from '../../components/Affiliate';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
 import { DARK_THEME } from '../../theme/darkTheme';
-import { TrendingUp, Eye, Layers, Grid3X3 } from 'lucide-react-native';
+import { TrendingUp, Eye, Layers, Grid3X3, Link2 } from 'lucide-react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const TAB_BAR_HEIGHT = 90; // Tab bar (76) + bottom offset (8) + small gap (6)
@@ -56,6 +58,16 @@ const ProductDetailScreen = ({ navigation, route }) => {
   const { addItem, itemCount } = useCart();
   const { handleScroll, translateY } = useTabBar();
   const [quantity, setQuantity] = useState(1);
+
+  // Handle local fallback products from gemKnowledge.json
+  const isLocalFallback = product?.isLocalFallback === true;
+  console.log('[ProductDetail] Product loaded:', {
+    title: product?.title,
+    isLocalFallback,
+    priceDisplay: product?.priceDisplay,
+    rawPrice: product?.rawPrice,
+    price: product?.price,
+  });
 
   // CTA buttons position - SYNC with tab bar animation using transform (not bottom)
   // Native animated module doesn't support 'bottom', use translateY instead
@@ -92,9 +104,20 @@ const ProductDetailScreen = ({ navigation, route }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const imageViewerRef = useRef(null);
 
-  const price = selectedVariant?.price || product.price || 0;
+  // Affiliate link state
+  const [isAffiliate, setIsAffiliate] = useState(false);
+  const [affiliateLinkSheetVisible, setAffiliateLinkSheetVisible] = useState(false);
+
+  // Price handling - support local fallback products with priceDisplay string
+  const rawPrice = selectedVariant?.price || product.rawPrice || product.price || 0;
+  const price = rawPrice;
   const comparePrice = selectedVariant?.compareAtPrice || product.compareAtPrice;
   const isOnSale = comparePrice && parseFloat(comparePrice) > parseFloat(price);
+
+  // For local fallback products, use the priceDisplay string directly (e.g., "350K - 2.5M")
+  const priceDisplayString = isLocalFallback && product.priceDisplay
+    ? product.priceDisplay
+    : null;
 
   // Collect all images
   const allImages = [
@@ -105,6 +128,20 @@ const ProductDetailScreen = ({ navigation, route }) => {
       .map(v => v.image.src || v.image),
   ].filter(Boolean);
   const images = allImages.length > 0 ? allImages : [null];
+
+  // Check affiliate status on mount
+  useEffect(() => {
+    const checkAffiliateStatus = async () => {
+      try {
+        const profile = await affiliateService.getProfile();
+        setIsAffiliate(profile?.is_active || false);
+      } catch (err) {
+        console.log('[ProductDetail] Not an affiliate:', err.message);
+        setIsAffiliate(false);
+      }
+    };
+    checkAffiliateStatus();
+  }, []);
 
   // Load additional sections
   useEffect(() => {
@@ -535,8 +572,10 @@ const ProductDetailScreen = ({ navigation, route }) => {
 
             {/* Price */}
             <View style={styles.priceRow}>
-              <Text style={styles.price}>{formatPrice(price)}</Text>
-              {isOnSale && (
+              <Text style={styles.price}>
+                {priceDisplayString ? priceDisplayString : formatPrice(price)}
+              </Text>
+              {isOnSale && !priceDisplayString && (
                 <>
                   <Text style={styles.comparePrice}>{formatPrice(comparePrice)}</Text>
                   <View style={styles.saleBadge}>
@@ -545,6 +584,15 @@ const ProductDetailScreen = ({ navigation, route }) => {
                 </>
               )}
             </View>
+
+            {/* Local fallback notice */}
+            {isLocalFallback && (
+              <View style={styles.localFallbackNotice}>
+                <Text style={styles.localFallbackText}>
+                  Sản phẩm hiện đang tải từ hệ thống. Vui lòng truy cập tab Shop để xem chi tiết đầy đủ.
+                </Text>
+              </View>
+            )}
 
             {/* Variants */}
             {product.variants && product.variants.length > 1 && (
@@ -651,11 +699,11 @@ const ProductDetailScreen = ({ navigation, route }) => {
                   <View style={styles.reviewsSummary}>
                     <Text style={styles.reviewsRating}>{reviewStats.averageRating || 5}</Text>
                     <View style={styles.reviewsStars}>{renderStars(Math.round(reviewStats.averageRating || 5))}</View>
-                    <Text style={styles.reviewsCount}>({reviewStats.totalReviews} đánh giá)</Text>
+                    <Text style={styles.reviewsCount}>({reviewStats.totalReviews || 0} đánh giá)</Text>
                   </View>
 
-                  {reviewsData.map((review) => (
-                    <View key={review.id} style={styles.reviewCard}>
+                  {reviewsData.map((review, reviewIndex) => (
+                    <View key={review.id || `review-${reviewIndex}`} style={styles.reviewCard}>
                       <View style={styles.reviewHeader}>
                         <View style={styles.reviewUser}>
                           <View style={styles.reviewAvatar}>
@@ -666,13 +714,13 @@ const ProductDetailScreen = ({ navigation, route }) => {
                               {review.author || 'Khách hàng'}
                               {review.verified && <Text style={styles.verifiedBadge}> ✓ Đã mua hàng</Text>}
                             </Text>
-                            <Text style={styles.reviewDate}>{review.date}</Text>
+                            <Text style={styles.reviewDate}>{review.date || ''}</Text>
                           </View>
                         </View>
-                        <View style={styles.reviewStars}>{renderStars(review.rating)}</View>
+                        <View style={styles.reviewStars}>{renderStars(review.rating || 5)}</View>
                       </View>
                       {review.title && <Text style={styles.reviewTitle}>{review.title}</Text>}
-                      <Text style={styles.reviewComment}>{review.body || review.comment}</Text>
+                      <Text style={styles.reviewComment}>{review.body || review.comment || ''}</Text>
                       {review.images && review.images.length > 0 && (
                         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.reviewImagesScroll}>
                           {review.images.map((img, idx) => (
@@ -891,6 +939,17 @@ const ProductDetailScreen = ({ navigation, route }) => {
 
       {/* Sticky Bottom Actions - ANIMATED to sync with tab bar */}
       <Animated.View style={[styles.bottomActions, { transform: [{ translateY: ctaTranslateY }] }]}>
+        {/* Affiliate Link Button - Only show for affiliates */}
+        {isAffiliate && (
+          <TouchableOpacity
+            style={styles.affiliateLinkBtn}
+            onPress={() => setAffiliateLinkSheetVisible(true)}
+            activeOpacity={0.8}
+          >
+            <Link2 size={18} color={COLORS.gold} />
+          </TouchableOpacity>
+        )}
+
         <TouchableOpacity
           style={[styles.addToCartBtn, addedToCart && styles.addedBtn]}
           onPress={handleAddToCart}
@@ -912,6 +971,14 @@ const ProductDetailScreen = ({ navigation, route }) => {
           <Text style={styles.buyNowText}>Mua ngay</Text>
         </TouchableOpacity>
       </Animated.View>
+
+      {/* Product Affiliate Link Sheet */}
+      <ProductAffiliateLinkSheet
+        visible={affiliateLinkSheetVisible}
+        onClose={() => setAffiliateLinkSheetVisible(false)}
+        product={product}
+        productType="crystal"
+      />
 
       {/* Review Image Viewer Modal - Swipe to view multiple images */}
       <Modal
@@ -1152,12 +1219,29 @@ const styles = StyleSheet.create({
 
   // Bottom Actions - Dark glass (uses transform for animation, fixed bottom position)
   bottomActions: { position: 'absolute', left: 0, right: 0, bottom: TAB_BAR_HEIGHT, flexDirection: 'row', padding: SPACING.md, gap: SPACING.md, backgroundColor: 'rgba(5, 4, 11, 0.98)', borderTopWidth: 1.2, borderTopColor: COLORS.gold, shadowColor: '#000000', shadowOffset: { width: 0, height: -4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 10 },
+  affiliateLinkBtn: { width: 48, height: 48, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(255, 189, 89, 0.15)', borderRadius: 12, borderWidth: 1.5, borderColor: COLORS.gold },
   addToCartBtn: { flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: SPACING.sm, paddingVertical: SPACING.md, backgroundColor: 'transparent', borderRadius: 12, borderWidth: 2, borderColor: COLORS.gold },
   addedBtn: { borderColor: COLORS.success },
   addToCartText: { fontSize: TYPOGRAPHY.fontSize.md, fontWeight: TYPOGRAPHY.fontWeight.semibold, color: COLORS.gold },
   addedText: { fontSize: TYPOGRAPHY.fontSize.md, fontWeight: TYPOGRAPHY.fontWeight.semibold, color: COLORS.success },
   buyNowBtn: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: SPACING.md, backgroundColor: COLORS.burgundy, borderRadius: 12, borderWidth: 1, borderColor: COLORS.gold },
   buyNowText: { fontSize: TYPOGRAPHY.fontSize.md, fontWeight: TYPOGRAPHY.fontWeight.bold, color: COLORS.textPrimary },
+
+  // Local fallback notice
+  localFallbackNotice: {
+    backgroundColor: 'rgba(106, 91, 255, 0.15)',
+    borderRadius: 12,
+    padding: SPACING.md,
+    marginBottom: SPACING.lg,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.3)',
+  },
+  localFallbackText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.purple,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
 
   // No Reviews Container
   noReviewsContainer: {

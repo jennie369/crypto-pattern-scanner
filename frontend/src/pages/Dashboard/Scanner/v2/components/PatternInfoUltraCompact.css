@@ -5,17 +5,22 @@
 
 /* Main Container - FLEXIBLE HEIGHT (no more cutting!) */
 .pattern-info-compact {
+  position: relative; /* CRITICAL: For absolute positioned badges */
   background: linear-gradient(135deg, rgba(17, 34, 80, 0.4) 0%, rgba(17, 34, 80, 0.6) 100%);
   border: 1px solid rgba(255, 189, 89, 0.3);
   border-radius: 12px;
-  padding: 16px;
+  padding: 12px;
+  padding-top: 44px; /* Extra space for absolute badges */
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  min-height: 320px; /* FIXED: Flexible height instead of fixed */
-  max-height: 500px;
-  overflow: visible; /* FIXED: Don't cut content! */
+  gap: 10px;
+  min-height: 280px; /* FIXED: Flexible height instead of fixed */
+  max-height: 450px;
+  overflow: hidden; /* FIXED: Prevent horizontal overflow */
   min-width: 0; /* FIXED: Allow text truncation */
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Empty State */
@@ -198,7 +203,7 @@
 }
 
 .item-value.entry {
-  color: #00D9FF;
+  color: #FFBD59;
 }
 
 .item-value.stop-loss {

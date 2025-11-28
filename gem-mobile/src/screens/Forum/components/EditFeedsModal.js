@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Edit Feeds Modal
+ * Gemral - Edit Feeds Modal
  * Threads-style feed management interface
  */
 

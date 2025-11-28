@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Category Filter Component
+ * Gemral - Category Filter Component
  * Dark theme support
  */
 

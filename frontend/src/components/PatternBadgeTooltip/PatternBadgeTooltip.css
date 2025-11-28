@@ -1,0 +1,205 @@
+/* ============================================
+   💡 PATTERN BADGE TOOLTIP STYLES
+   ============================================ */
+
+.badge-tooltip-wrapper {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  margin-left: 4px;
+  cursor: help;
+  pointer-events: auto;
+  z-index: 100;
+}
+
+.badge-tooltip-icon {
+  color: rgba(255, 255, 255, 0.5);
+  cursor: help;
+  transition: all 0.2s ease;
+  opacity: 0.6;
+}
+
+.badge-tooltip-icon:hover {
+  color: #FFBD59;
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* ===== TOOLTIP CONTAINER ===== */
+.badge-tooltip {
+  position: absolute;
+  z-index: 99999 !important;
+  min-width: 220px;
+  max-width: 260px;
+  padding: 10px;
+
+  /* GEM Glassmorphism - BRIGHTER */
+  background: rgba(17, 34, 80, 1) !important;
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(255, 189, 89, 0.8) !important;
+  border-radius: 8px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 189, 89, 0.3) !important;
+
+  /* Animation */
+  animation: tooltipFadeIn 0.2s ease;
+  pointer-events: auto !important;
+
+  /* Prevent overflow */
+  max-width: calc(100vw - 32px); /* Leave 16px padding on each side */
+  word-wrap: break-word;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== POSITIONS ===== */
+.badge-tooltip-top {
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.badge-tooltip-bottom {
+  top: calc(100% + 8px);
+  left: 0; /* Align to left edge of badge instead of center */
+  transform: translateX(0); /* No horizontal centering */
+}
+
+.badge-tooltip-left {
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.badge-tooltip-right {
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* ===== ARROW ===== */
+.badge-tooltip-arrow {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: rgba(17, 34, 80, 0.98);
+  border: 1px solid rgba(255, 189, 89, 0.3);
+  transform: rotate(45deg);
+}
+
+.badge-tooltip-top .badge-tooltip-arrow {
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  border-top: none;
+  border-left: none;
+}
+
+.badge-tooltip-bottom .badge-tooltip-arrow {
+  top: -5px;
+  left: 16px; /* Position arrow near left edge, not center */
+  transform: rotate(45deg);
+  border-bottom: none;
+  border-right: none;
+}
+
+.badge-tooltip-left .badge-tooltip-arrow {
+  right: -5px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+  border-left: none;
+  border-bottom: none;
+}
+
+.badge-tooltip-right .badge-tooltip-arrow {
+  left: -5px;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+  border-right: none;
+  border-top: none;
+}
+
+/* ===== CONTENT ===== */
+.badge-tooltip-content {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.badge-tooltip-content strong {
+  color: #FFBD59;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.badge-tooltip-content p {
+  margin: 4px 0;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.badge-tooltip-content ul {
+  margin: 6px 0;
+  padding-left: 16px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.badge-tooltip-content li {
+  margin: 3px 0;
+}
+
+.badge-tooltip-content .highlight {
+  color: #FFBD59;
+  font-weight: 600;
+}
+
+.badge-tooltip-content .example {
+  margin-top: 8px;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 2px solid #FFBD59;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ===== TYPE VARIANTS ===== */
+.badge-tooltip-state.badge-tooltip {
+  border-color: #00D9FF;
+}
+
+.badge-tooltip-timeframe.badge-tooltip {
+  border-color: #FFBD59;
+}
+
+.badge-tooltip-direction.badge-tooltip {
+  border-color: #9D4EDD;
+}
+
+.badge-tooltip-type.badge-tooltip {
+  border-color: #0ECB81;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .badge-tooltip {
+    min-width: 240px;
+    max-width: 280px;
+    font-size: 11px;
+  }
+
+  .badge-tooltip-icon {
+    width: 12px;
+    height: 12px;
+  }
+}

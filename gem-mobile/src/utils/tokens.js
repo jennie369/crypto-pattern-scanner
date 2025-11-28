@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Design Tokens v3.0
+ * Gemral - Design Tokens v3.0
  * Exact match to GEM_LIQUID_GLASS_COMPONENTS.html
  */
 

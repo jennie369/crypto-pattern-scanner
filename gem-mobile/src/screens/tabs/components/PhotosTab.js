@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Photos Tab Component
+ * Gemral - Photos Tab Component
  * Grid display of user's photos from posts
  */
 

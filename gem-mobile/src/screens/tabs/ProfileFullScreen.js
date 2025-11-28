@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Profile Full Screen
+ * Gemral - Profile Full Screen
  * Full profile view with posts, photos, videos tabs
  */
 

@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEM iOS - Templates & Layouts</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: fixed; top: 20px; right: 20px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #9C0612, #6B0F1A);
+            border: 1px solid #FFBD59; border-radius: 24px;
+            color: white; cursor: pointer; z-index: 1000;
+            font-weight: 600; font-size: 14px; font-family: inherit;
+            display: flex; align-items: center; gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(156, 6, 18, 0.3);
+        }
+        .theme-toggle:hover { transform: translateY(-2px); }
+
+        /* DARK THEME - DEFAULT */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            background: linear-gradient(135deg, #05040B 0%, #0D1B2A 100%);
+            color: white; min-height: 100vh; padding: 24px;
+            transition: background 0.3s ease;
+        }
+
+        /* ============================================ */
+        /* LIGHT THEME - SIMPLE & READABLE */
+        /* ============================================ */
+
+        /* Base - Pure White & Black */
+        body.light-theme { background: #FFFFFF !important; color: #000000 !important; }
+
+        /* All Text - BLACK & BOLD */
+        body.light-theme, body.light-theme * { color: #000000 !important; font-weight: 500 !important; }
+
+        /* Headings - Extra Bold */
+        body.light-theme h1, body.light-theme h2, body.light-theme h3, body.light-theme h4, body.light-theme h5, body.light-theme h6,
+        body.light-theme .title, body.light-theme .heading, body.light-theme strong, body.light-theme b {
+            color: #000000 !important; font-weight: 700 !important;
+        }
+
+        /* All Cards - White with Shadow */
+        body.light-theme .card, body.light-theme .component-card, body.light-theme div[class*="card"] {
+            background: #FFFFFF !important; border: 1px solid #CCCCCC !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important; color: #000000 !important;
+        }
+
+        /* Container Backgrounds */
+        body.light-theme .container, body.light-theme .screen-content { background: #F5F5F5 !important; }
+
+        /* Preview Areas */
+        body.light-theme .preview { background: #F5F5F5 !important; border: 1px solid #CCCCCC !important; }
+
+        /* Buttons */
+        body.light-theme .theme-toggle { background: #000000 !important; color: #FFFFFF !important; font-weight: 600 !important; }
+        body.light-theme .btn-primary { background: #9C0612 !important; color: #FFFFFF !important; font-weight: 600 !important; }
+        body.light-theme .nav-btn { background: #000000 !important; color: #FFFFFF !important; font-weight: 600 !important; }
+        body.light-theme .nav-btn.secondary { background: transparent !important; border: 2px solid #000000 !important; color: #000000 !important; }
+
+        /* Back Link */
+        body.light-theme .back-link { background: #F5F5F5 !important; border: 1px solid #CCCCCC !important; color: #0066CC !important; font-weight: 600 !important; }
+
+        /* Code blocks - keep dark */
+        body.light-theme .code-block, body.light-theme pre, body.light-theme code {
+            background: #1E1E1E !important; color: #00FF00 !important; font-weight: 500 !important;
+        }
+
+        /* Specs */
+        body.light-theme .specs { background: #F5F5F5 !important; color: #000000 !important; font-weight: 500 !important; }
+
+        /* Phone Mockup */
+        body.light-theme .phone-frame { background: #CCCCCC !important; }
+        body.light-theme .phone-screen { background: #F5F5F5 !important; }
+        body.light-theme .phone-notch { background: #000000 !important; }
+
+        /* Glass Cards */
+        body.light-theme .glass-dark, body.light-theme .glass-light, body.light-theme div[class*="glass"] {
+            background: #FFFFFF !important; border: 1px solid #CCCCCC !important; box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+        }
+
+        /* Bottom Sheet */
+        body.light-theme .bottom-sheet { background: #FFFFFF !important; border-top: 1px solid #CCCCCC !important; }
+        body.light-theme .sheet-handle { background: #CCCCCC !important; }
+
+        /* Skeleton Loading */
+        body.light-theme .skeleton { background: linear-gradient(90deg, #CCCCCC 25%, #E5E5E5 50%, #CCCCCC 75%) !important; }
+
+        /* Screen Header */
+        body.light-theme .screen-header { background: #FFFFFF !important; border-bottom: 1px solid #CCCCCC !important; }
+        body.light-theme .screen-title { color: #000000 !important; font-weight: 700 !important; }
+
+        /* Tab Bar */
+        body.light-theme .tab-bar { background: #FFFFFF !important; border-top: 2px solid #000000 !important; }
+        body.light-theme .tab-item.active { color: #000000 !important; font-weight: 700 !important; }
+        body.light-theme .tab-item.inactive { color: #666666 !important; }
+
+        /* Hamburger Menu */
+        body.light-theme .hamburger-menu { background: #FFFFFF !important; }
+        body.light-theme .menu-item { color: #000000 !important; font-weight: 600 !important; }
+        body.light-theme .menu-item:hover { background: #F5F5F5 !important; }
+        body.light-theme .menu-item.active { background: #F5F5F5 !important; color: #9C0612 !important; }
+
+        /* Tier Badges */
+        body.light-theme .tier-badge.tier-1 { background: #FFF3CD !important; color: #CC8800 !important; font-weight: 700 !important; }
+        body.light-theme .tier-badge.tier-2 { background: #D1ECF1 !important; color: #0C5460 !important; font-weight: 700 !important; }
+        body.light-theme .tier-badge.tier-3 { background: #F8D7DA !important; color: #9C0612 !important; font-weight: 700 !important; }
+
+        /* Secondary Text - Dark Gray */
+        body.light-theme .secondary-text, body.light-theme .subtitle, body.light-theme small {
+            color: #333333 !important; font-weight: 500 !important;
+        }
+
+        /* Links */
+        body.light-theme a { color: #0066CC !important; font-weight: 600 !important; }
+
+        /* Override ANY remaining light colors */
+        body.light-theme [style*="color: rgba"], body.light-theme [style*="color: rgb"] { color: #000000 !important; }
+        body.light-theme [style*="#112250"], body.light-theme [style*="rgba(15,16,48"], body.light-theme [style*="#05040B"] { background: #FFFFFF !important; }
+
+        .container { max-width: 1400px; margin: 0 auto; }
+        .back-link {
+            display: inline-flex; align-items: center; gap: 8px;
+            color: #FFBD59; text-decoration: none; font-size: 14px;
+            margin-bottom: 24px; padding: 8px 16px;
+            background: rgba(255,189,89,0.1); border-radius: 20px;
+            border: 1px solid rgba(255,189,89,0.2);
+        }
+        .page-title {
+            font-size: 36px; font-weight: 800;
+            background: linear-gradient(135deg, #FFBD59, #9C0612);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .page-subtitle { font-size: 16px; color: rgba(255,255,255,0.6); margin-bottom: 32px; }
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+            gap: 24px;
+        }
+        .component-card {
+            background: rgba(15,16,48,0.55); backdrop-filter: blur(18px);
+            border: 1px solid rgba(255,189,89,0.15); border-radius: 16px; padding: 20px;
+        }
+        .component-name { font-size: 18px; font-weight: 700; color: #FFBD59; margin-bottom: 4px; }
+        .component-desc { font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 16px; }
+        .specs {
+            background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px;
+            font-size: 11px; font-family: Monaco, monospace; color: #00FF88; margin-bottom: 16px;
+        }
+        .preview { background: #05040B; border-radius: 12px; margin-bottom: 12px; overflow: hidden; }
+        .code-block {
+            background: #000; border-radius: 8px; padding: 12px;
+            font-size: 11px; font-family: Monaco, monospace; color: #00FF88;
+            overflow-x: auto; max-height: 180px; overflow-y: auto;
+        }
+        .nav-footer {
+            display: flex; justify-content: space-between; margin-top: 48px;
+            padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .nav-btn {
+            padding: 12px 24px; background: linear-gradient(135deg, #9C0612, #6B0F1A);
+            border: 1px solid #FFBD59; border-radius: 24px; color: white;
+            text-decoration: none; font-weight: 600;
+        }
+        .nav-btn.secondary { background: transparent; border-color: rgba(255,189,89,0.5); }
+
+        /* Phone Frame */
+        .phone-frame {
+            width: 300px; background: #1a1a1a; border-radius: 36px;
+            padding: 8px; margin: 0 auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .phone-screen {
+            background: #05040B; border-radius: 30px; overflow: hidden;
+            position: relative; min-height: 500px;
+        }
+        .phone-notch {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 100px; height: 24px; background: #000; border-radius: 0 0 12px 12px; z-index: 10;
+        }
+        .phone-status-bar {
+            height: 44px; padding: 12px 20px 0; display: flex;
+            justify-content: space-between; font-size: 12px; font-weight: 600;
+        }
+        .phone-home-indicator {
+            position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+            width: 100px; height: 5px; background: white; border-radius: 3px; opacity: 0.3;
+        }
+
+        /* Glass Card Dark */
+        .glass-dark {
+            background: rgba(15,16,48,0.55);
+            backdrop-filter: blur(18px);
+            border: 1px solid rgba(106,91,255,0.3);
+            border-radius: 18px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .glass-dark::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, #6A5BFF, #00F0FF);
+        }
+        .glass-glow {
+            box-shadow: 0 0 40px rgba(140,100,255,0.2);
+        }
+
+        /* Glass Card Light */
+        .glass-light {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        }
+
+        /* Modal/Bottom Sheet */
+        .modal-overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+        }
+        .bottom-sheet {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: linear-gradient(180deg, #112250 0%, #0a0e27 100%);
+            border-radius: 24px 24px 0 0;
+            padding: 20px;
+        }
+        .sheet-handle {
+            width: 40px; height: 4px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+            margin: 0 auto 16px;
+        }
+
+        /* Skeleton Loading */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body class="dark-theme">
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" onclick="toggleTheme()">
+        🌓 <span id="theme-label">Switch to Light</span>
+    </button>
+
+    <div class="container">
+        <a href="CATALOG_INDEX.html" class="back-link">← Back to Index</a>
+
+        <h1 class="page-title">📐 Templates - Page Layouts</h1>
+        <p class="page-subtitle">5 reusable page structures and layout patterns.</p>
+
+        <div class="component-grid">
+            <!-- 1. Glass Card Dark -->
+            <div class="component-card">
+                <h3 class="component-name">1. Glass Card (Liquid Glass - Dark)</h3>
+                <p class="component-desc">Premium glass effect for Scanner, Gem Master, Account screens.</p>
+                <div class="specs">BG: rgba(15,16,48,0.55) | Blur: 18px | Border: gradient rim | Shadow: purple glow</div>
+                <div class="preview" style="padding: 24px;">
+                    <div class="glass-dark glass-glow">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <span style="font-size: 18px; font-weight: 700;">Dashboard Widget</span>
+                            <span style="font-size: 20px;">📊</span>
+                        </div>
+                        <div style="font-size: 32px; font-weight: 800; color: #00FF88; margin-bottom: 8px;">$12,450</div>
+                        <div style="font-size: 14px; color: rgba(255,255,255,0.6);">Portfolio Value</div>
+                        <div style="display: flex; gap: 8px; margin-top: 16px;">
+                            <span style="padding: 6px 12px; background: rgba(0,255,136,0.2); color: #00FF88; border-radius: 12px; font-size: 12px;">+15.5%</span>
+                            <span style="padding: 6px 12px; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); border-radius: 12px; font-size: 12px;">This Week</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="code-block">
+&lt;View style={{
+  padding: 20,
+  backgroundColor: 'rgba(15,16,48,0.55)',
+  borderRadius: 18,
+  borderWidth: 1,
+  borderColor: 'rgba(106,91,255,0.3)',
+  // Note: backdropFilter not supported in RN, use expo-blur
+}}&gt;
+  &lt;BlurView intensity={18} tint="dark" style={StyleSheet.absoluteFill} /&gt;
+  &lt;View style={{zIndex: 1}}&gt;
+    {/* Content */}
+  &lt;/View&gt;
+&lt;/View&gt;
+
+// Alternative: expo-blur
+import { BlurView } from 'expo-blur';
+                </div>
+            </div>
+
+            <!-- 2. Glass Card Light (OPTIONAL - for theme toggle) -->
+            <div class="component-card">
+                <h3 class="component-name">2. Glass Card (Light Theme - OPTIONAL)</h3>
+                <p class="component-desc">⚠️ Only shown when user toggles to LIGHT THEME. Default is DARK (see #1 above).</p>
+                <div class="specs">BG: rgba(255,255,255,0.85) | Blur: 20px | Shadow: subtle | TOGGLE ONLY</div>
+
+                <!-- Show DARK default first -->
+                <p style="font-size: 11px; color: #00FF88; margin-bottom: 8px;">✅ DARK (DEFAULT):</p>
+                <div class="preview" style="padding: 24px; margin-bottom: 12px;">
+                    <div class="glass-dark">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #9C0612, #6B0F1A); border-radius: 50%; border: 2px solid #FFBD59;"></div>
+                            <div>
+                                <div style="font-size: 15px; font-weight: 600; color: white;">Jennie Chu</div>
+                                <div style="font-size: 12px; color: rgba(255,255,255,0.6);">2 hours ago</div>
+                            </div>
+                        </div>
+                        <div style="font-size: 15px; font-weight: 600; color: white; margin-bottom: 8px;">Pattern Alert! DPD on BTC</div>
+                        <div style="font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.5;">Strong setup forming on the 4H chart. Entry zone looks solid around $42,500...</div>
+                    </div>
+                </div>
+
+                <!-- Show LIGHT toggle option -->
+                <p style="font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 8px;">🌓 LIGHT (when toggled):</p>
+                <div class="preview" style="padding: 24px; background: #F7F8FA;">
+                    <div class="glass-light">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #9C0612, #6B0F1A); border-radius: 50%; border: 2px solid #FFBD59;"></div>
+                            <div>
+                                <div style="font-size: 15px; font-weight: 600; color: #111827;">Jennie Chu</div>
+                                <div style="font-size: 12px; color: #9CA3AF;">2 hours ago</div>
+                            </div>
+                        </div>
+                        <div style="font-size: 15px; font-weight: 600; color: #111827; margin-bottom: 8px;">Pattern Alert! DPD on BTC</div>
+                        <div style="font-size: 14px; color: #6B7280; line-height: 1.5;">Strong setup forming on the 4H chart. Entry zone looks solid around $42,500...</div>
+                    </div>
+                </div>
+                <div class="code-block">
+&lt;View style={{
+  padding: 20,
+  backgroundColor: 'rgba(255,255,255,0.85)',
+  borderRadius: 18,
+  borderWidth: 1,
+  borderColor: 'rgba(0,0,0,0.05)',
+  shadowColor: '#000',
+  shadowOffset: {width: 0, height: 4},
+  shadowOpacity: 0.08,
+  shadowRadius: 24,
+  elevation: 4
+}}&gt;
+  {/* Content */}
+&lt;/View&gt;
+                </div>
+            </div>
+
+            <!-- 3. Screen Layout -->
+            <div class="component-card">
+                <h3 class="component-name">3. Screen Layout (Safe Area)</h3>
+                <p class="component-desc">Full screen layout with safe areas, header, and scroll.</p>
+                <div class="specs">SafeArea: top 50px, bottom 34px | Page padding: 16px</div>
+                <div class="preview" style="padding: 16px;">
+                    <div class="phone-frame">
+                        <div class="phone-screen">
+                            <div class="phone-notch"></div>
+                            <div class="phone-status-bar">
+                                <span>9:41</span>
+                                <span>100%🔋</span>
+                            </div>
+                            <!-- Header -->
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #112250; border-bottom: 2px solid #FFBD59;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <span style="font-size: 18px;">☰</span>
+                                    <span style="font-size: 18px; font-weight: 700; color: #FFBD59;">💎 GEM</span>
+                                </div>
+                                <div style="display: flex; gap: 12px;">
+                                    <span style="font-size: 16px;">🔍</span>
+                                    <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #9C0612, #6B0F1A); border-radius: 50%; border: 2px solid #FFBD59;"></div>
+                                </div>
+                            </div>
+                            <!-- Content -->
+                            <div style="padding: 16px; height: 280px; overflow: auto;">
+                                <div style="font-size: 22px; font-weight: 700; margin-bottom: 16px;">Page Title</div>
+                                <div style="background: rgba(15,16,48,0.55); border-radius: 12px; padding: 16px; margin-bottom: 12px;">
+                                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Card 1</div>
+                                    <div style="font-size: 14px; color: rgba(255,255,255,0.6);">Content here...</div>
+                                </div>
+                                <div style="background: rgba(15,16,48,0.55); border-radius: 12px; padding: 16px;">
+                                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Card 2</div>
+                                    <div style="font-size: 14px; color: rgba(255,255,255,0.6);">More content...</div>
+                                </div>
+                            </div>
+                            <!-- Tab Bar -->
+                            <div style="display: flex; justify-content: space-around; background: #112250; border-top: 2px solid #FFBD59; padding: 10px 0 24px;">
+                                <div style="text-align: center;"><div style="font-size: 20px;">🏠</div><div style="font-size: 9px; color: #FFBD59;">Home</div></div>
+                                <div style="text-align: center;"><div style="font-size: 20px; opacity: 0.5;">🛒</div><div style="font-size: 9px; color: rgba(255,255,255,0.5);">Shop</div></div>
+                                <div style="text-align: center;"><div style="font-size: 20px; opacity: 0.5;">📊</div><div style="font-size: 9px; color: rgba(255,255,255,0.5);">Trade</div></div>
+                                <div style="text-align: center;"><div style="font-size: 20px; opacity: 0.5;">🤖</div><div style="font-size: 9px; color: rgba(255,255,255,0.5);">Chat</div></div>
+                                <div style="text-align: center;"><div style="font-size: 20px; opacity: 0.5;">🔔</div><div style="font-size: 9px; color: rgba(255,255,255,0.5);">Alert</div></div>
+                                <div style="text-align: center;"><div style="font-size: 20px; opacity: 0.5;">💰</div><div style="font-size: 9px; color: rgba(255,255,255,0.5);">Assets</div></div>
+                            </div>
+                            <div class="phone-home-indicator"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="code-block">
+import { SafeAreaView, ScrollView, StatusBar } from 'react-native';
+
+&lt;SafeAreaView style={{flex: 1, backgroundColor: '#05040B'}}&gt;
+  &lt;StatusBar barStyle="light-content" /&gt;
+  &lt;Header /&gt;
+  &lt;ScrollView contentContainerStyle={{padding: 16, paddingBottom: 100}}&gt;
+    {/* Page Content */}
+  &lt;/ScrollView&gt;
+  &lt;TabBar /&gt;
+&lt;/SafeAreaView&gt;
+                </div>
+            </div>
+
+            <!-- 4. Modal / Bottom Sheet -->
+            <div class="component-card">
+                <h3 class="component-name">4. Modal / Bottom Sheet</h3>
+                <p class="component-desc">Slide-up modal for actions, confirmations, forms.</p>
+                <div class="specs">Handle: 40x4px | Radius: 24px top | BG: Navy gradient</div>
+                <div class="preview" style="padding: 16px;">
+                    <div class="phone-frame">
+                        <div class="phone-screen" style="min-height: 450px;">
+                            <!-- Background content (blurred) -->
+                            <div style="padding: 60px 16px 16px; opacity: 0.3;">
+                                <div style="background: rgba(15,16,48,0.55); border-radius: 12px; padding: 16px; margin-bottom: 12px;">Content behind...</div>
+                                <div style="background: rgba(15,16,48,0.55); border-radius: 12px; padding: 16px;">More content...</div>
+                            </div>
+                            <!-- Overlay -->
+                            <div class="modal-overlay"></div>
+                            <!-- Bottom Sheet -->
+                            <div class="bottom-sheet" style="min-height: 250px;">
+                                <div class="sheet-handle"></div>
+                                <div style="font-size: 18px; font-weight: 700; margin-bottom: 16px; text-align: center;">Upgrade to TIER 1</div>
+                                <div style="font-size: 14px; color: rgba(255,255,255,0.7); text-align: center; margin-bottom: 20px; line-height: 1.5;">
+                                    Unlock 7 patterns, trading journal, and risk calculator for just $99/month
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 12px;">
+                                    <button style="height: 48px; background: linear-gradient(135deg, #9C0612, #6B0F1A); border: 1px solid #FFBD59; border-radius: 24px; color: white; font-size: 15px; font-weight: 600; cursor: pointer;">
+                                        Upgrade Now
+                                    </button>
+                                    <button style="height: 48px; background: transparent; border: 1px solid rgba(255,255,255,0.2); border-radius: 24px; color: rgba(255,255,255,0.7); font-size: 15px; cursor: pointer;">
+                                        Maybe Later
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="code-block">
+// Use react-native-bottom-sheet or custom modal
+import BottomSheet from '@gorhom/bottom-sheet';
+
+&lt;BottomSheet
+  ref={bottomSheetRef}
+  index={-1}
+  snapPoints={['25%', '50%', '75%']}
+  backgroundStyle={{backgroundColor: '#112250', borderRadius: 24}}
+  handleIndicatorStyle={{backgroundColor: 'rgba(255,255,255,0.3)', width: 40}}
+&gt;
+  &lt;View style={{padding: 20}}&gt;
+    &lt;Text style={{fontSize: 18, fontWeight: '700'}}&gt;Title&lt;/Text&gt;
+    {/* Content */}
+  &lt;/View&gt;
+&lt;/BottomSheet&gt;
+                </div>
+            </div>
+
+            <!-- 5. Loading State / Skeleton -->
+            <div class="component-card">
+                <h3 class="component-name">5. Loading State (Skeleton)</h3>
+                <p class="component-desc">Placeholder loading state while content fetches.</p>
+                <div class="specs">Animation: shimmer 1.5s | BG: rgba gradients</div>
+                <div class="preview" style="padding: 20px;">
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <!-- Skeleton Post Card -->
+                        <div style="background: rgba(15,16,48,0.55); border-radius: 12px; padding: 16px;">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                                <div class="skeleton" style="width: 40px; height: 40px; border-radius: 50%;"></div>
+                                <div style="flex: 1;">
+                                    <div class="skeleton" style="height: 14px; width: 120px; margin-bottom: 6px;"></div>
+                                    <div class="skeleton" style="height: 10px; width: 80px;"></div>
+                                </div>
+                            </div>
+                            <div class="skeleton" style="height: 16px; width: 90%; margin-bottom: 8px;"></div>
+                            <div class="skeleton" style="height: 14px; width: 100%; margin-bottom: 6px;"></div>
+                            <div class="skeleton" style="height: 14px; width: 70%;"></div>
+                        </div>
+                        <!-- Skeleton Stats -->
+                        <div style="display: flex; gap: 12px;">
+                            <div class="skeleton" style="flex: 1; height: 80px; border-radius: 12px;"></div>
+                            <div class="skeleton" style="flex: 1; height: 80px; border-radius: 12px;"></div>
+                            <div class="skeleton" style="flex: 1; height: 80px; border-radius: 12px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="code-block">
+// Custom Skeleton Component with Reanimated
+import Animated, { useSharedValue, withRepeat, withTiming, useAnimatedStyle } from 'react-native-reanimated';
+
+const Skeleton = ({width, height, borderRadius = 8}) => {
+  const shimmerX = useSharedValue(-200);
+
+  React.useEffect(() => {
+    shimmerX.value = withRepeat(withTiming(200, {duration: 1500}), -1);
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{translateX: shimmerX.value}]
+  }));
+
+  return (
+    &lt;View style={{width, height, borderRadius, backgroundColor: 'rgba(255,255,255,0.05)', overflow: 'hidden'}}&gt;
+      &lt;Animated.View style={[{width: '100%', height: '100%', backgroundColor: 'rgba(255,255,255,0.1)'}, animatedStyle]} /&gt;
+    &lt;/View&gt;
+  );
+};
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-footer">
+            <a href="CATALOG_ORGANISMS.html" class="nav-btn secondary">← Previous: Organisms</a>
+            <a href="CATALOG_NAVIGATION.html" class="nav-btn">Next: Navigation →</a>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const label = document.getElementById('theme-label');
+
+            if (body.classList.contains('dark-theme')) {
+                body.classList.remove('dark-theme');
+                body.classList.add('light-theme');
+                label.textContent = 'Switch to Dark';
+                localStorage.setItem('gem-theme', 'light');
+            } else {
+                body.classList.remove('light-theme');
+                body.classList.add('dark-theme');
+                label.textContent = 'Switch to Light';
+                localStorage.setItem('gem-theme', 'dark');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('gem-theme') || 'dark';
+            if (savedTheme === 'light') {
+                document.body.classList.remove('dark-theme');
+                document.body.classList.add('light-theme');
+                document.getElementById('theme-label').textContent = 'Switch to Dark';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEM iOS - Navigation & Tier Gates</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: fixed; top: 20px; right: 20px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #9C0612, #6B0F1A);
+            border: 1px solid #FFBD59; border-radius: 24px;
+            color: white; cursor: pointer; z-index: 1000;
+            font-weight: 600; font-size: 14px; font-family: inherit;
+            display: flex; align-items: center; gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(156, 6, 18, 0.3);
+        }
+        .theme-toggle:hover { transform: translateY(-2px); }
+
+        /* DARK THEME - DEFAULT */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            background: linear-gradient(135deg, #05040B 0%, #0D1B2A 100%);
+            color: white; min-height: 100vh; padding: 24px;
+            transition: background 0.3s ease;
+        }
+
+        /* ============================================ */
+        /* LIGHT THEME - SIMPLE & READABLE */
+        /* ============================================ */
+
+        /* Base - Pure White & Black */
+        body.light-theme { background: #FFFFFF !important; color: #000000 !important; }
+
+        /* All Text - BLACK & BOLD */
+        body.light-theme, body.light-theme * { color: #000000 !important; font-weight: 500 !important; }
+
+        /* Headings - Extra Bold */
+        body.light-theme h1, body.light-theme h2, body.light-theme h3, body.light-theme h4, body.light-theme h5, body.light-theme h6,
+        body.light-theme .title, body.light-theme .heading, body.light-theme strong, body.light-theme b {
+            color: #000000 !important; font-weight: 700 !important;
+        }
+
+        /* All Cards - White with Shadow */
+        body.light-theme .card, body.light-theme .component-card, body.light-theme div[class*="card"] {
+            background: #FFFFFF !important; border: 1px solid #CCCCCC !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important; color: #000000 !important;
+        }
+
+        /* Container Backgrounds */
+        body.light-theme .container, body.light-theme .screen-content { background: #F5F5F5 !important; }
+
+        /* Preview Areas */
+        body.light-theme .preview { background: #F5F5F5 !important; border: 1px solid #CCCCCC !important; }
+
+        /* Buttons */
+        body.light-theme .theme-toggle { background: #000000 !important; color: #FFFFFF !important; font-weight: 600 !important; }
+        body.light-theme .btn-primary { background: #9C0612 !important; color: #FFFFFF !important; font-weight: 600 !important; }
+        body.light-theme .nav-btn { background: #000000 !important; color: #FFFFFF !important; font-weight: 600 !important; }
+        body.light-theme .nav-btn.secondary { background: transparent !important; border: 2px solid #000000 !important; color: #000000 !important; }
+
+        /* Back Link */
+        body.light-theme .back-link { background: #F5F5F5 !important; border: 1px solid #CCCCCC !important; color: #0066CC !important; font-weight: 600 !important; }
+
+        /* Code blocks - keep dark */
+        body.light-theme .code-block, body.light-theme pre, body.light-theme code {
+            background: #1E1E1E !important; color: #00FF00 !important; font-weight: 500 !important;
+        }
+
+        /* Specs */
+        body.light-theme .specs { background: #F5F5F5 !important; color: #000000 !important; font-weight: 500 !important; }
+
+        /* Phone Mockup */
+        body.light-theme .phone-frame { background: #CCCCCC !important; }
+        body.light-theme .phone-screen { background: #F5F5F5 !important; }
+        body.light-theme .phone-notch { background: #000000 !important; }
+
+        /* Tab Bar */
+        body.light-theme .tab-bar-demo { background: #FFFFFF !important; border-top: 2px solid #000000 !important; }
+        body.light-theme .tab-label { color: #666666 !important; font-weight: 500 !important; }
+        body.light-theme .tab-active .tab-label { color: #000000 !important; font-weight: 700 !important; }
+        body.light-theme .tab-badge { background: #9C0612 !important; color: #FFFFFF !important; font-weight: 700 !important; }
+        body.light-theme .tab-badge.gold { background: #FFBD59 !important; color: #000000 !important; font-weight: 700 !important; }
+
+        /* Tier Gates */
+        body.light-theme .tier-overlay { background: rgba(255,255,255,0.95) !important; }
+        body.light-theme .tier-lock { color: #666666 !important; }
+        body.light-theme .tier-title { color: #000000 !important; font-weight: 700 !important; }
+        body.light-theme .tier-desc { color: #333333 !important; font-weight: 500 !important; }
+        body.light-theme .tier-btn { background: #9C0612 !important; color: #FFFFFF !important; font-weight: 700 !important; }
+
+        /* Lock Badge */
+        body.light-theme .lock-badge { background: #F5F5F5 !important; color: #333333 !important; font-weight: 600 !important; }
+
+        /* Tier Table */
+        body.light-theme .tier-table { color: #000000 !important; }
+        body.light-theme .tier-table th { border-bottom: 1px solid #CCCCCC !important; font-weight: 700 !important; }
+        body.light-theme .tier-table td { border-bottom: 1px solid #CCCCCC !important; }
+        body.light-theme .tier-table .feature { color: #000000 !important; font-weight: 600 !important; }
+        body.light-theme .tier-table .check { color: #155724 !important; font-weight: 700 !important; }
+        body.light-theme .tier-table .cross { color: #999999 !important; }
+        body.light-theme .th-free { color: #333333 !important; font-weight: 700 !important; }
+        body.light-theme .th-tier1 { color: #CC8800 !important; font-weight: 700 !important; }
+        body.light-theme .th-tier2 { color: #0C5460 !important; font-weight: 700 !important; }
+        body.light-theme .th-tier3 { color: #9C0612 !important; font-weight: 700 !important; }
+
+        /* Trial Banner */
+        body.light-theme .trial-banner { background: #FFF3CD !important; border-bottom: 1px solid #CCCCCC !important; }
+        body.light-theme .trial-text { color: #9C0612 !important; font-weight: 700 !important; }
+        body.light-theme .trial-btn { background: #FFBD59 !important; color: #000000 !important; font-weight: 700 !important; }
+
+        /* Hamburger Menu */
+        body.light-theme .hamburger-menu { background: #FFFFFF !important; }
+        body.light-theme .menu-name { color: #000000 !important; font-weight: 700 !important; }
+        body.light-theme .menu-item-text { color: #333333 !important; font-weight: 600 !important; }
+        body.light-theme .menu-item { color: #000000 !important; font-weight: 600 !important; }
+        body.light-theme .menu-item:hover { background: #F5F5F5 !important; }
+        body.light-theme .menu-item.active { background: #F5F5F5 !important; color: #9C0612 !important; }
+
+        /* Tier Badges */
+        body.light-theme .tier-badge.tier-1 { background: #FFF3CD !important; color: #CC8800 !important; font-weight: 700 !important; }
+        body.light-theme .tier-badge.tier-2 { background: #D1ECF1 !important; color: #0C5460 !important; font-weight: 700 !important; }
+        body.light-theme .tier-badge.tier-3 { background: #F8D7DA !important; color: #9C0612 !important; font-weight: 700 !important; }
+
+        /* Secondary Text - Dark Gray */
+        body.light-theme .secondary-text, body.light-theme .subtitle, body.light-theme small {
+            color: #333333 !important; font-weight: 500 !important;
+        }
+
+        /* Links */
+        body.light-theme a { color: #0066CC !important; font-weight: 600 !important; }
+
+        /* Override ANY remaining light colors */
+        body.light-theme [style*="color: rgba"], body.light-theme [style*="color: rgb"] { color: #000000 !important; }
+        body.light-theme [style*="#112250"], body.light-theme [style*="rgba(15,16,48"], body.light-theme [style*="#05040B"] { background: #FFFFFF !important; }
+
+        .container { max-width: 1400px; margin: 0 auto; }
+        .back-link {
+            display: inline-flex; align-items: center; gap: 8px;
+            color: #FFBD59; text-decoration: none; font-size: 14px;
+            margin-bottom: 24px; padding: 8px 16px;
+            background: rgba(255,189,89,0.1); border-radius: 20px;
+            border: 1px solid rgba(255,189,89,0.2);
+        }
+        .page-title {
+            font-size: 36px; font-weight: 800;
+            background: linear-gradient(135deg, #FFBD59, #9C0612);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .page-subtitle { font-size: 16px; color: rgba(255,255,255,0.6); margin-bottom: 32px; }
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 24px;
+        }
+        .component-card {
+            background: rgba(15,16,48,0.55); backdrop-filter: blur(18px);
+            border: 1px solid rgba(255,189,89,0.15); border-radius: 16px; padding: 20px;
+        }
+        .component-name { font-size: 18px; font-weight: 700; color: #FFBD59; margin-bottom: 4px; }
+        .component-desc { font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 16px; }
+        .specs {
+            background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px;
+            font-size: 11px; font-family: Monaco, monospace; color: #00FF88; margin-bottom: 16px;
+        }
+        .preview { background: #05040B; border-radius: 12px; margin-bottom: 12px; overflow: hidden; }
+        .code-block {
+            background: #000; border-radius: 8px; padding: 12px;
+            font-size: 11px; font-family: Monaco, monospace; color: #00FF88;
+            overflow-x: auto; max-height: 180px; overflow-y: auto;
+        }
+        .nav-footer {
+            display: flex; justify-content: space-between; margin-top: 48px;
+            padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .nav-btn {
+            padding: 12px 24px; background: linear-gradient(135deg, #9C0612, #6B0F1A);
+            border: 1px solid #FFBD59; border-radius: 24px; color: white;
+            text-decoration: none; font-weight: 600;
+        }
+        .nav-btn.secondary { background: transparent; border-color: rgba(255,189,89,0.5); }
+
+        /* Phone Frame */
+        .phone-frame {
+            width: 300px; background: #1a1a1a; border-radius: 36px;
+            padding: 8px; margin: 0 auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .phone-screen {
+            background: #05040B; border-radius: 30px; overflow: hidden;
+            position: relative; min-height: 480px;
+        }
+        .phone-notch {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 100px; height: 24px; background: #000; border-radius: 0 0 12px 12px; z-index: 10;
+        }
+
+        /* Tab Bar Styles */
+        .tab-bar-demo {
+            display: flex; justify-content: space-around; align-items: center;
+            background: #112250; border-top: 2px solid #FFBD59;
+            padding: 8px 0 20px; position: absolute; bottom: 0; left: 0; right: 0;
+        }
+        .tab-item { display: flex; flex-direction: column; align-items: center; gap: 3px; position: relative; }
+        .tab-icon { font-size: 20px; }
+        .tab-label { font-size: 9px; font-weight: 600; }
+        .tab-active .tab-icon { opacity: 1; }
+        .tab-active .tab-label { color: #FFBD59; }
+        .tab-inactive .tab-icon { opacity: 0.5; }
+        .tab-inactive .tab-label { color: rgba(255,255,255,0.5); }
+        .tab-badge {
+            position: absolute; top: -4px; right: -8px;
+            min-width: 16px; height: 16px; padding: 0 4px;
+            background: #FF4444; border-radius: 8px;
+            font-size: 9px; font-weight: 700; color: white;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .tab-badge.gold { background: #FFBD59; color: #112250; }
+
+        /* Tier Gate Overlay */
+        .tier-overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 24px; text-align: center;
+        }
+        .tier-lock { font-size: 48px; margin-bottom: 16px; }
+        .tier-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+        .tier-desc { font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 24px; line-height: 1.5; }
+        .tier-btn {
+            height: 48px; padding: 0 32px;
+            background: linear-gradient(135deg, #9C0612, #6B0F1A);
+            border: 1px solid #FFBD59; border-radius: 24px;
+            color: white; font-size: 15px; font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Lock Badge */
+        .lock-badge {
+            position: absolute; top: 8px; right: 8px;
+            padding: 4px 8px; background: rgba(0,0,0,0.7);
+            border-radius: 12px; font-size: 10px; font-weight: 700;
+            display: flex; align-items: center; gap: 4px;
+        }
+
+        /* Comparison Table */
+        .tier-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .tier-table th { padding: 10px 8px; text-align: center; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .tier-table td { padding: 10px 8px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .tier-table .feature { text-align: left; color: rgba(255,255,255,0.8); }
+        .tier-table .check { color: #00FF88; }
+        .tier-table .cross { color: rgba(255,255,255,0.3); }
+        .th-free { color: rgba(255,255,255,0.6); }
+        .th-tier1 { color: #FFBD59; }
+        .th-tier2 { color: #2196F3; }
+        .th-tier3 { color: #FF4444; }
+
+        /* Trial Banner */
+        .trial-banner {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px; background: linear-gradient(90deg, rgba(255,189,89,0.2), rgba(156,6,18,0.2));
+            border-bottom: 1px solid rgba(255,189,89,0.3);
+        }
+        .trial-text { font-size: 13px; font-weight: 600; color: #FFBD59; }
+        .trial-btn { padding: 6px 14px; background: #FFBD59; border-radius: 14px; font-size: 11px; font-weight: 700; color: #112250; cursor: pointer; }
+    </style>
+</head>
+<body class="dark-theme">
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" onclick="toggleTheme()">
+        🌓 <span id="theme-label">Switch to Light</span>
+    </button>
+
+    <div class="container">
+        <a href="CATALOG_INDEX.html" class="back-link">← Back to Index</a>
+
+        <h1 class="page-title">🧭 Navigation + 🔒 Tier Gates</h1>
+        <p class="page-subtitle">8 components for app navigation and tier access control.</p>
+
+        <div class="component-grid">
+            <!-- 1. Bottom Tab Bar Full -->
+            <div class="component-card">
+                <h3 class="component-name">1. Bottom Tab Bar (6 Tabs - Full)</h3>
+                <p class="component-desc">Complete 6-tab navigation with icons, labels, and badges.</p>
+                <div class="specs">Height: 80px | BG: #112250 | Border: 2px gold | Icon: 20px | Label: 9px</div>
+                <div class="preview" style="padding: 16px;">
+                    <div class="phone-frame">
+                        <div class="phone-screen" style="min-height: 160px;">
+                            <div class="tab-bar-demo" style="position: relative;">
+                                <div class="tab-item tab-active">
+                                    <span class="tab-icon">🏠</span>
+                                    <span class="tab-label" style="color: #FFBD59;">Home</span>
+                                </div>
+                                <div class="tab-item tab-inactive">
+                                    <span class="tab-icon">🛒</span>
+                                    <span class="tab-label">Shop</span>
+                                    <span class="tab-badge gold">2</span>
+                                </div>
+                                <div class="tab-item tab-inactive">
+                                    <span class="tab-icon">📊</span>
+                                    <span class="tab-label">Giao Dịch</span>
+                                </div>
+                                <div class="tab-item tab-inactive">
+                                    <span class="tab-icon">🤖</span>
+                                    <span class="tab-label">Gem Master</span>
+                                </div>
+                                <div class="tab-item tab-inactive">
+                                    <span class="tab-icon">🔔</span>
+                                    <span class="tab-label">Thông Báo</span>
+                                    <span class="tab-badge">5</span>
+                                </div>
+                                <div class="tab-item tab-inactive">
+                                    <span class="tab-icon">💰</span>
+                                    <span class="tab-label">Tài Sản</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="code-block">
+const TAB_CONFIG = [
+  {name: 'Home', icon: Home, label: 'Home', route: '/forum'},
+  {name: 'Shop', icon: ShoppingBag, label: 'Shop', badge: 'cart'},
+  {name: 'Trading', icon: TrendingUp, label: 'Giao Dịch', route: '/scannerv2'},
+  {name: 'Gem Master', icon: Bot, label: 'Gem Master'},
+  {name: 'Notifications', icon: Bell, label: 'Thông Báo', badge: 'unread'},
+  {name: 'Account', icon: Wallet, label: 'Tài Sản', route: '/account'}
+];
+
+&lt;Tab.Navigator screenOptions={{
+  tabBarStyle: {backgroundColor: '#112250', borderTopColor: '#FFBD59', borderTopWidth: 2, height: 80, paddingBottom: 20},
+  tabBarActiveTintColor: '#FFBD59',
+  tabBarInactiveTintColor: 'rgba(255,255,255,0.5)'
+}}&gt;
+  {TAB_CONFIG.map(tab => &lt;Tab.Screen key={tab.name} ... /&gt;)}
+&lt;/Tab.Navigator&gt;
+                </div>
+            </div>
+
+            <!-- 2. Stack Navigation Header -->
+            <div class="component-card">
+                <h3 class="component-name">2. Stack Navigation Header</h3>
+                <p class="component-desc">Back button + title + actions for nested screens.</p>
+                <div class="specs">Height: 56px | Back icon: 24px | Title: 18px bold</div>
+                <div class="preview" style="padding: 0;">
+                    <div style="display: flex; align-items: center; padding: 16px; background: #112250; border-bottom: 1px solid rgba(255,189,89,0.3);">
+                        <span style="font-size: 24px; margin-right: 16px; cursor: pointer;">←</span>
+                        <span style="font-size: 18px; font-weight: 700; flex: 1;">Pattern Detail</span>
+                        <span style="font-size: 20px; margin-left: 12px; cursor: pointer;">⋯</span>
+                    </div>
+                </div>
+                <div class="code-block">
+&lt;Stack.Navigator screenOptions={{
+  headerStyle: {backgroundColor: '#112250'},
+  headerTintColor: '#FFBD59',
+  headerTitleStyle: {fontSize: 18, fontWeight: '700'},
+  headerBackTitleVisible: false
+}}&gt;
+  &lt;Stack.Screen name="PatternDetail" component={PatternDetailScreen} options={{title: 'Pattern Detail'}} /&gt;
+&lt;/Stack.Navigator&gt;
+                </div>
+            </div>
+
+            <!-- 3. Tier Upgrade Prompt -->
+            <div class="component-card">
+                <h3 class="component-name">3. Tier Upgrade Prompt (Overlay)</h3>
+                <p class="component-desc">Full screen overlay when accessing locked feature.</p>
+                <div class="specs">BG: rgba(0,0,0,0.85) | Lock: 48px | CTA: 48px button</div>
+                <div class="preview" style="padding: 16px;">
+                    <div class="phone-frame">
+                        <div class="phone-screen" style="min-height: 400px;">
+                            <!-- Background content -->
+                            <div style="padding: 60px 16px; opacity: 0.2;">
+                                <div style="background: rgba(255,255,255,0.1); height: 100px; border-radius: 12px;"></div>
+                            </div>
+                            <!-- Overlay -->
+                            <div class="tier-overlay">
+                                <div class="tier-lock">🔒</div>
+                                <div class="tier-title">TIER 2 Feature</div>
+                                <div class="tier-desc">
+                                    Multi-Timeframe Analysis requires TIER 2 subscription.
+                                    Unlock 15 patterns, 8 tools, and more!
+                                </div>
+                                <button class="tier-btn">Upgrade to TIER 2</button>
+                                <button style="margin-top: 12px; background: transparent; border: none; color: rgba(255,255,255,0.5); font-size: 14px; cursor: pointer;">
+                                    Maybe Later
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="code-block">
+const TierGate = ({requiredTier, children}) => {
+  const {userTier} = useAuth();
+  const [showPrompt, setShowPrompt] = useState(false);
+
+  const tierLevels = {FREE: 0, TIER1: 1, TIER2: 2, TIER3: 3};
+  const hasAccess = tierLevels[userTier] >= tierLevels[requiredTier];
+
+  if (hasAccess) return children;
+
+  return (
+    &lt;View style={{flex: 1}}&gt;
+      {children}
+      &lt;Modal visible={showPrompt} transparent animationType="fade"&gt;
+        &lt;View style={styles.overlay}&gt;
+          &lt;Lock size={48} color="#FFBD59" /&gt;
+          &lt;Text style={styles.title}&gt;{requiredTier} Feature&lt;/Text&gt;
+          &lt;Button onPress={() => navigation.navigate('Upgrade')}&gt;Upgrade&lt;/Button&gt;
+        &lt;/View&gt;
+      &lt;/Modal&gt;
+    &lt;/View&gt;
+  );
+};
+                </div>
+            </div>
+
+            <!-- 4. Feature Lock Badge -->
+            <div class="component-card">
+                <h3 class="component-name">4. Feature Lock Badge</h3>
+                <p class="component-desc">Small badge on cards/tools showing tier requirement.</p>
+                <div class="specs">Padding: 4px 8px | Font: 10px bold | Position: absolute top-right</div>
+                <div class="preview" style="padding: 20px;">
+                    <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                        <!-- Unlocked Card -->
+                        <div style="width: 140px; background: rgba(15,16,48,0.55); border-radius: 14px; padding: 16px; position: relative;">
+                            <div style="font-size: 28px; margin-bottom: 8px;">📊</div>
+                            <div style="font-size: 13px; font-weight: 600;">Scanner</div>
+                            <div style="font-size: 11px; color: rgba(255,255,255,0.5);">7 patterns</div>
+                        </div>
+                        <!-- Locked Card - TIER 2 -->
+                        <div style="width: 140px; background: rgba(15,16,48,0.55); border-radius: 14px; padding: 16px; position: relative; opacity: 0.7;">
+                            <div class="lock-badge" style="color: #2196F3;">🔒 TIER 2</div>
+                            <div style="font-size: 28px; margin-bottom: 8px;">📈</div>
+                            <div style="font-size: 13px; font-weight: 600;">MTF Analysis</div>
+                            <div style="font-size: 11px; color: rgba(255,255,255,0.5);">15 patterns</div>
+                        </div>
+                        <!-- Locked Card - TIER 3 -->
+                        <div style="width: 140px; background: rgba(15,16,48,0.55); border-radius: 14px; padding: 16px; position: relative; opacity: 0.6;">
+                            <div class="lock-badge" style="color: #FF4444;">🔒 TIER 3</div>
+                            <div style="font-size: 28px; margin-bottom: 8px;">🤖</div>
+                            <div style="font-size: 13px; font-weight: 600;">AI Prediction</div>
+                            <div style="font-size: 11px; color: rgba(255,255,255,0.5);">24 patterns</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="code-block">
+const FeatureCard = ({feature, userTier}) => {
+  const isLocked = !hasAccess(userTier, feature.requiredTier);
+
+  return (
+    &lt;TouchableOpacity style={[styles.card, isLocked && styles.locked]} onPress={() => isLocked ? showUpgrade() : navigate(feature.route)}&gt;
+      {isLocked && (
+        &lt;View style={styles.lockBadge}&gt;
+          &lt;Lock size={10} /&gt;
+          &lt;Text&gt;{feature.requiredTier}&lt;/Text&gt;
+        &lt;/View&gt;
+      )}
+      &lt;Text style={styles.icon}&gt;{feature.icon}&lt;/Text&gt;
+      &lt;Text style={styles.name}&gt;{feature.name}&lt;/Text&gt;
+    &lt;/TouchableOpacity&gt;
+  );
+};
+                </div>
+            </div>
+
+            <!-- 5. Tier Comparison Table -->
+            <div class="component-card">
+                <h3 class="component-name">5. Tier Comparison Table</h3>
+                <p class="component-desc">Mobile-optimized comparison of all tier features.</p>
+                <div class="specs">Font: 12px | Padding: 10px | Check: #00FF88</div>
+                <div class="preview" style="padding: 16px; overflow-x: auto;">
+                    <table class="tier-table">
+                        <thead>
+                            <tr>
+                                <th class="feature">Feature</th>
+                                <th class="th-free">FREE</th>
+                                <th class="th-tier1">TIER 1</th>
+                                <th class="th-tier2">TIER 2</th>
+                                <th class="th-tier3">TIER 3</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="feature">Patterns</td>
+                                <td>3</td>
+                                <td>7</td>
+                                <td>15</td>
+                                <td>24</td>
+                            </tr>
+                            <tr>
+                                <td class="feature">Scanner</td>
+                                <td class="check">✓</td>
+                                <td class="check">✓</td>
+                                <td class="check">✓</td>
+                                <td class="check">✓</td>
+                            </tr>
+                            <tr>
+                                <td class="feature">Trading Journal</td>
+                                <td class="cross">✕</td>
+                                <td class="check">✓</td>
+                                <td class="check">✓</td>
+                                <td class="check">✓</td>
+                            </tr>
+                            <tr>
+                                <td class="feature">MTF Analysis</td>
+                                <td class="cross">✕</td>
+                                <td class="cross">✕</td>
+                                <td class="check">✓</td>
+                                <td class="check">✓</td>
+                            </tr>
+                            <tr>
+                                <td class="feature">AI Prediction</td>
+                                <td class="cross">✕</td>
+                                <td class="cross">✕</td>
+                                <td class="cross">✕</td>
+                                <td class="check">✓</td>
+                            </tr>
+                            <tr>
+                                <td class="feature">Price</td>
+                                <td>$0</td>
+                                <td>$99/mo</td>
+                                <td>$199/mo</td>
+                                <td>$499/mo</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="code-block">
+const TIER_FEATURES = [
+  {name: 'Patterns', values: ['3', '7', '15', '24']},
+  {name: 'Scanner', values: [true, true, true, true]},
+  {name: 'Trading Journal', values: [false, true, true, true]},
+  {name: 'MTF Analysis', values: [false, false, true, true]},
+  {name: 'AI Prediction', values: [false, false, false, true]},
+  {name: 'Price', values: ['$0', '$99/mo', '$199/mo', '$499/mo']}
+];
+
+&lt;ScrollView horizontal&gt;
+  &lt;View style={styles.table}&gt;
+    {TIER_FEATURES.map(feature =&gt; (
+      &lt;View style={styles.row} key={feature.name}&gt;
+        &lt;Text style={styles.featureName}&gt;{feature.name}&lt;/Text&gt;
+        {feature.values.map((val, i) =&gt; (
+          &lt;Text style={[styles.cell, typeof val === 'boolean' && (val ? styles.check : styles.cross)]}&gt;
+            {typeof val === 'boolean' ? (val ? '✓' : '✕') : val}
+          &lt;/Text&gt;
+        ))}
+      &lt;/View&gt;
+    ))}
+  &lt;/View&gt;
+&lt;/ScrollView&gt;
+                </div>
+            </div>
+
+            <!-- 6. Trial Banner -->
+            <div class="component-card">
+                <h3 class="component-name">6. Trial Banner</h3>
+                <p class="component-desc">Top banner for trial users showing remaining days.</p>
+                <div class="specs">Height: 44px | BG: gradient gold/burgundy | CTA: 28px button</div>
+                <div class="preview" style="padding: 0;">
+                    <div class="trial-banner">
+                        <div class="trial-text">⏰ 5 days left in your TIER 1 trial</div>
+                        <button class="trial-btn">Upgrade Now</button>
+                    </div>
+                </div>
+                <div class="code-block">
+const TrialBanner = ({daysLeft, tier}) => {
+  if (!daysLeft) return null;
+
+  return (
+    &lt;View style={styles.banner}&gt;
+      &lt;Text style={styles.text}&gt;⏰ {daysLeft} days left in your {tier} trial&lt;/Text&gt;
+      &lt;TouchableOpacity style={styles.btn} onPress={() =&gt; navigate('Upgrade')}&gt;
+        &lt;Text style={styles.btnText}&gt;Upgrade Now&lt;/Text&gt;
+      &lt;/TouchableOpacity&gt;
+    &lt;/View&gt;
+  );
+};
+                </div>
+            </div>
+
+            <!-- 7. Hamburger Menu (Feeds) -->
+            <div class="component-card">
+                <h3 class="component-name">7. Hamburger Menu (Feed Categories)</h3>
+                <p class="component-desc">Slide-in menu for forum feed categories.</p>
+                <div class="specs">Width: 280px | Slide from left | Categories with icons</div>
+                <div class="preview" style="padding: 16px;">
+                    <div class="phone-frame">
+                        <div class="phone-screen" style="min-height: 420px;">
+                            <div style="position: absolute; top: 0; left: 0; width: 220px; height: 100%; background: linear-gradient(180deg, #112250, #0a0e27); border-right: 2px solid #FFBD59; z-index: 100;">
+                                <!-- User Header -->
+                                <div style="padding: 50px 16px 16px; border-bottom: 1px solid rgba(255,189,89,0.2);">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #9C0612, #6B0F1A); border-radius: 50%; border: 2px solid #FFBD59;"></div>
+                                        <div>
+                                            <div style="font-size: 14px; font-weight: 700;">Jennie Chu</div>
+                                            <span style="font-size: 10px; padding: 2px 6px; background: rgba(255,189,89,0.2); color: #FFBD59; border-radius: 8px;">TIER 1</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Categories -->
+                                <div style="padding: 12px 0;">
+                                    <div style="font-size: 10px; color: rgba(255,255,255,0.4); padding: 8px 16px; text-transform: uppercase; letter-spacing: 1px;">Feeds</div>
+                                    <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: rgba(255,189,89,0.1);">
+                                        <span style="font-size: 18px;">🌟</span>
+                                        <span style="font-size: 14px; color: #FFBD59;">All Posts</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px;">
+                                        <span style="font-size: 18px;">👥</span>
+                                        <span style="font-size: 14px; color: rgba(255,255,255,0.7);">Following</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px;">
+                                        <span style="font-size: 18px;">📊</span>
+                                        <span style="font-size: 14px; color: rgba(255,255,255,0.7);">Trading</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px;">
+                                        <span style="font-size: 18px;">🔮</span>
+                                        <span style="font-size: 14px; color: rgba(255,255,255,0.7);">Spiritual</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 12px; padding: 12px 16px;">
+                                        <span style="font-size: 18px;">❓</span>
+                                        <span style="font-size: 14px; color: rgba(255,255,255,0.7);">Q&A</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Overlay -->
+                            <div style="position: absolute; top: 0; left: 220px; right: 0; bottom: 0; background: rgba(0,0,0,0.5);"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="code-block">
+const FEED_CATEGORIES = [
+  {id: 'all', icon: '🌟', label: 'All Posts'},
+  {id: 'following', icon: '👥', label: 'Following'},
+  {id: 'trading', icon: '📊', label: 'Trading'},
+  {id: 'spiritual', icon: '🔮', label: 'Spiritual'},
+  {id: 'qa', icon: '❓', label: 'Q&A'}
+];
+
+// Use react-native-drawer or Animated slide
+&lt;Animated.View style={{
+  position: 'absolute', left: 0, top: 0, width: 280,
+  height: '100%', backgroundColor: '#112250',
+  transform: [{translateX: slideAnim}]
+}}&gt;
+  &lt;UserHeader /&gt;
+  {FEED_CATEGORIES.map(cat =&gt; (
+    &lt;TouchableOpacity key={cat.id} onPress={() =&gt; selectCategory(cat.id)}&gt;
+      &lt;Text&gt;{cat.icon} {cat.label}&lt;/Text&gt;
+    &lt;/TouchableOpacity&gt;
+  ))}
+&lt;/Animated.View&gt;
+                </div>
+            </div>
+
+            <!-- 8. Pattern Tier Badge -->
+            <div class="component-card">
+                <h3 class="component-name">8. Pattern Tier Access</h3>
+                <p class="component-desc">Shows which patterns are available per tier.</p>
+                <div class="specs">FREE: 3 | TIER1: 7 | TIER2: 15 | TIER3: 24 patterns</div>
+                <div class="preview" style="padding: 16px;">
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        <!-- FREE Patterns -->
+                        <div style="padding: 8px 14px; background: rgba(255,255,255,0.1); border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);">
+                            <span style="font-weight: 700; color: #00FF88;">DPD</span>
+                            <span style="font-size: 10px; color: rgba(255,255,255,0.5); margin-left: 4px;">FREE</span>
+                        </div>
+                        <div style="padding: 8px 14px; background: rgba(255,255,255,0.1); border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);">
+                            <span style="font-weight: 700; color: #FF4444;">UPU</span>
+                            <span style="font-size: 10px; color: rgba(255,255,255,0.5); margin-left: 4px;">FREE</span>
+                        </div>
+                        <!-- TIER 1 -->
+                        <div style="padding: 8px 14px; background: rgba(255,189,89,0.1); border-radius: 10px; border: 1px solid rgba(255,189,89,0.3);">
+                            <span style="font-weight: 700; color: #FFBD59;">HFZ</span>
+                            <span style="font-size: 10px; color: #FFBD59; margin-left: 4px;">T1</span>
+                        </div>
+                        <!-- TIER 2 -->
+                        <div style="padding: 8px 14px; background: rgba(33,150,243,0.1); border-radius: 10px; border: 1px solid rgba(33,150,243,0.3);">
+                            <span style="font-weight: 700; color: #2196F3;">W-Pattern</span>
+                            <span style="font-size: 10px; color: #2196F3; margin-left: 4px;">T2</span>
+                        </div>
+                        <!-- TIER 3 -->
+                        <div style="padding: 8px 14px; background: rgba(156,6,18,0.2); border-radius: 10px; border: 1px solid rgba(156,6,18,0.4);">
+                            <span style="font-weight: 700; color: #FF4444;">AI-Predict</span>
+                            <span style="font-size: 10px; color: #FF4444; margin-left: 4px;">T3</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 16px; font-size: 12px; color: rgba(255,255,255,0.5);">
+                        🆓 FREE: 3 patterns | 🎯 TIER1: 7 | ⭐ TIER2: 15 | 💎 TIER3: 24
+                    </div>
+                </div>
+                <div class="code-block">
+const PATTERN_TIERS = {
+  DPD: 'FREE', UPU: 'FREE', DPU: 'FREE',
+  HFZ: 'TIER1', LFZ: 'TIER1', UPD: 'TIER1', DPD_Strong: 'TIER1',
+  'W-Pattern': 'TIER2', 'M-Pattern': 'TIER2', 'Head-Shoulders': 'TIER2',
+  'AI-Predict': 'TIER3', 'Whale-Track': 'TIER3'
+};
+
+const PatternBadge = ({pattern, userTier}) => {
+  const requiredTier = PATTERN_TIERS[pattern];
+  const isLocked = !hasAccess(userTier, requiredTier);
+  const tierColors = {FREE: '#00FF88', TIER1: '#FFBD59', TIER2: '#2196F3', TIER3: '#FF4444'};
+
+  return (
+    &lt;View style={[styles.badge, {borderColor: tierColors[requiredTier]}]}&gt;
+      &lt;Text style={{color: tierColors[requiredTier]}}>{pattern}&lt;/Text&gt;
+      {isLocked && &lt;Lock size={10} /&gt;}
+    &lt;/View&gt;
+  );
+};
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-footer">
+            <a href="CATALOG_TEMPLATES.html" class="nav-btn secondary">← Previous: Templates</a>
+            <a href="CATALOG_INDEX.html" class="nav-btn">Back to Index →</a>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const label = document.getElementById('theme-label');
+
+            if (body.classList.contains('dark-theme')) {
+                body.classList.remove('dark-theme');
+                body.classList.add('light-theme');
+                label.textContent = 'Switch to Dark';
+                localStorage.setItem('gem-theme', 'light');
+            } else {
+                body.classList.remove('light-theme');
+                body.classList.add('dark-theme');
+                label.textContent = 'Switch to Light';
+                localStorage.setItem('gem-theme', 'dark');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('gem-theme') || 'dark';
+            if (savedTheme === 'light') {
+                document.body.classList.remove('dark-theme');
+                document.body.classList.add('light-theme');
+                document.getElementById('theme-label').textContent = 'Switch to Dark';
+            }
+        });
+    </script>
+</body>
+</html>

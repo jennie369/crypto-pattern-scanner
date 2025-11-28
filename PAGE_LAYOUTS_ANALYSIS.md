@@ -1,7 +1,7 @@
-# PHÂN TÍCH LAYOUT CÁC TRANG - GEM PLATFORM
+# PHÂN TÍCH LAYOUT CÁC TRANG - Gemral
 
 **Date:** 2025-11-12
-**Project:** Crypto Pattern Scanner (Gem Platform)
+**Project:** Crypto Pattern Scanner (Gemral)
 **Total Pages:** 13 pages (3 public, 10 protected)
 
 ---

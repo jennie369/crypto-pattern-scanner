@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Profile Tabs Component
+ * Gemral - Profile Tabs Component
  * 3 tabs: Bài Viết, Hình Ảnh, Video
  */
 

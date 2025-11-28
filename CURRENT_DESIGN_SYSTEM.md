@@ -1,7 +1,7 @@
-# HỆ THỐNG THIẾT KẾ HIỆN TẠI - GEM PLATFORM
+# HỆ THỐNG THIẾT KẾ HIỆN TẠI - Gemral
 
 **Date:** 2025-11-12
-**Project:** Crypto Pattern Scanner (Gem Platform)
+**Project:** Crypto Pattern Scanner (Gemral)
 **Theme:** Dark Mode (Primary)
 
 ---

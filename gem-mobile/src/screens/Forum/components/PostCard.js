@@ -1,23 +1,48 @@
 /**
- * GEM Platform - Post Card Component
+ * Gemral - Post Card Component
  * Displays forum post preview with interactive actions
  * Includes AuthGate for like/comment buttons
  * WITH LIKE ANIMATION
  */
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, Share, Animated, Pressable } from 'react-native';
-import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal } from 'lucide-react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet, Share, Animated, Pressable, Modal, Alert, Dimensions } from 'react-native';
+import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Edit2, Flag, EyeOff, UserX, Trash2, X, Repeat2, Gift, Send, Layers } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
+import { BlurView } from 'expo-blur';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../../utils/tokens';
 import { useAuth } from '../../../contexts/AuthContext';
 import AuthGate from '../../../components/AuthGate';
 import { forumService } from '../../../services/forumService';
+import { blockService } from '../../../services/blockService';
+import { trackView } from '../../../services/engagementService';
+import { UserBadges } from '../../../components/UserBadge';
+import PostImageCarousel from '../../../components/PostImageCarousel';
+import ReportModal from '../../../components/ReportModal';
+import { ProgressiveImage } from '../../../components/Image';
+import { getImageDisplayHeight } from '../../../utils/imageUtils';
+import ImageViewer from '../../../components/ImageViewer';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+// NEW: Import sheets and components for feature integration
+import ShareSheet from '../../../components/ShareSheet';
+import RepostSheet from '../../../components/RepostSheet';
+import GiftCatalogSheet from '../../../components/GiftCatalogSheet';
+import ReactionsListSheet from '../../../components/ReactionsListSheet';
+import ReceivedGiftsBar from '../../../components/ReceivedGiftsBar';
+import QuotedPost from '../../../components/QuotedPost';
+
+// Feature components for monetization, sounds, shopping
+import SoundCard from '../../../components/SoundCard';
+import ShoppingTagOverlay from '../../../components/ShoppingTagOverlay';
+import BoostedBadge from '../../../components/BoostedBadge';
 
 // Double tap detection constants
 const DOUBLE_TAP_DELAY = 300; // ms
+const DWELL_TIME_THRESHOLD = 2; // Minimum seconds to count as meaningful view
 
-const PostCard = ({ post, onPress, onLikeChange, onUpdate }) => {
+const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
   const navigation = useNavigation();
   const { user, isAuthenticated } = useAuth();
 
@@ -26,6 +51,21 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate }) => {
   const [likesCount, setLikesCount] = useState(post.likes_count || 0);
   const [isSaved, setIsSaved] = useState(post.user_saved || false);
   const [isLiking, setIsLiking] = useState(false);
+
+  // Menu & Report state
+  const [showMenu, setShowMenu] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
+
+  // NEW: Sheet visibility states for feature integration
+  const [shareSheetVisible, setShareSheetVisible] = useState(false);
+  const [repostSheetVisible, setRepostSheetVisible] = useState(false);
+  const [giftSheetVisible, setGiftSheetVisible] = useState(false);
+  const [reactionsVisible, setReactionsVisible] = useState(false);
+
+  // Image viewer state for tap-to-view full screen
+  const [imageViewerVisible, setImageViewerVisible] = useState(false);
+  const [imageViewerIndex, setImageViewerIndex] = useState(0);
 
   // Animation refs
   const likeScale = useRef(new Animated.Value(1)).current;
@@ -36,6 +76,10 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate }) => {
   const bigHeartScale = useRef(new Animated.Value(0)).current;
   const bigHeartOpacity = useRef(new Animated.Value(0)).current;
 
+  // Dwell time tracking refs
+  const viewStartTime = useRef(null);
+  const hasTrackedView = useRef(false);
+
   // Check if user already liked (from post data)
   useEffect(() => {
     if (user && post.likes) {
@@ -45,6 +89,29 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate }) => {
       setIsLiked(post.user_liked);
     }
   }, [user, post.likes, post.user_liked]);
+
+  // Track dwell time when component mounts/unmounts
+  useEffect(() => {
+    // Start tracking when post card becomes visible
+    viewStartTime.current = Date.now();
+    hasTrackedView.current = false;
+
+    // Cleanup: track view duration when card leaves viewport
+    return () => {
+      if (viewStartTime.current && user?.id && !hasTrackedView.current) {
+        const dwellTime = Math.round((Date.now() - viewStartTime.current) / 1000);
+
+        // Only track if user spent meaningful time (>= 2 seconds)
+        if (dwellTime >= DWELL_TIME_THRESHOLD) {
+          hasTrackedView.current = true;
+          trackView(user.id, post.id, dwellTime, sessionId).catch(err => {
+            console.warn('[PostCard] Failed to track dwell time:', err);
+          });
+          console.log(`[PostCard] Tracked dwell time: ${dwellTime}s for post ${post.id}`);
+        }
+      }
+    };
+  }, [post.id, user?.id, sessionId]);
 
   // Handle like action WITH ANIMATION
   const handleLike = useCallback(async () => {
@@ -183,17 +250,56 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate }) => {
     navigation.navigate('PostDetail', { postId: post.id, focusComment: true });
   };
 
-  // Handle share
-  const handleShare = async () => {
-    try {
-      await Share.share({
-        message: `${post.title}\n\n${post.content?.substring(0, 200)}...\n\nXem thêm tại GEM Platform`,
-        title: post.title,
-      });
-    } catch (error) {
-      console.error('[PostCard] Share error:', error);
-    }
+  // Handle share - NOW OPENS ShareSheet
+  const handleShare = () => {
+    setShareSheetVisible(true);
   };
+
+  // NEW: Handle repost - opens RepostSheet
+  const handleRepost = () => {
+    setRepostSheetVisible(true);
+  };
+
+  // NEW: Handle gift - opens GiftCatalogSheet
+  const handleGift = () => {
+    setGiftSheetVisible(true);
+  };
+
+  // NEW: Handle view reactions - opens ReactionsListSheet
+  const handleViewReactions = () => {
+    setReactionsVisible(true);
+  };
+
+  // Handle tap on image to open full screen viewer
+  const handleImagePress = useCallback((index = 0) => {
+    setImageViewerIndex(index);
+    setImageViewerVisible(true);
+  }, []);
+
+  // Get all images for the viewer
+  const getAllImages = useCallback(() => {
+    if (post.media_urls?.length > 0) {
+      return post.media_urls;
+    }
+    if (post.image_url) {
+      return [post.image_url];
+    }
+    if (post.media_url) {
+      return [post.media_url];
+    }
+    return [];
+  }, [post.media_urls, post.image_url, post.media_url]);
+
+  // Get image count for badge display
+  const getImageCount = useCallback(() => {
+    if (post.media_urls?.length > 0) {
+      return post.media_urls.length;
+    }
+    if (post.image_count) {
+      return post.image_count;
+    }
+    return 1;
+  }, [post.media_urls, post.image_count]);
 
   // Handle save/bookmark
   const handleSave = async () => {
@@ -211,6 +317,88 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate }) => {
       setIsSaved(wasSaved);
     }
   };
+
+  // Handle hide post
+  const handleHidePost = async () => {
+    setShowMenu(false);
+    try {
+      const result = await blockService.hidePost(post.id);
+      if (result.success) {
+        setIsHidden(true);
+        Alert.alert('Đã ẩn', 'Bài viết đã được ẩn khỏi bảng tin của bạn');
+        // Notify parent to remove from list
+        if (onUpdate) {
+          onUpdate(post.id, { hidden: true });
+        }
+      }
+    } catch (error) {
+      console.error('[PostCard] Hide error:', error);
+    }
+  };
+
+  // Handle block user
+  const handleBlockUser = async () => {
+    setShowMenu(false);
+    const authorId = post.author?.id || post.user?.id || post.user_id;
+    const authorName = post.author?.full_name || post.author?.email?.split('@')[0] || 'người dùng này';
+
+    Alert.alert(
+      'Chặn người dùng',
+      `Bạn có chắc muốn chặn ${authorName}? Bạn sẽ không thấy bài viết của họ nữa.`,
+      [
+        { text: 'Hủy', style: 'cancel' },
+        {
+          text: 'Chặn',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const result = await blockService.blockUser(authorId);
+              if (result.success) {
+                Alert.alert('Đã chặn', `${authorName} đã bị chặn`);
+              }
+            } catch (error) {
+              console.error('[PostCard] Block error:', error);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  // Handle report
+  const handleReport = () => {
+    setShowMenu(false);
+    setShowReportModal(true);
+  };
+
+  // Handle delete (own post only)
+  const handleDelete = () => {
+    setShowMenu(false);
+    Alert.alert(
+      'Xóa bài viết',
+      'Bạn có chắc muốn xóa bài viết này? Hành động này không thể hoàn tác.',
+      [
+        { text: 'Hủy', style: 'cancel' },
+        {
+          text: 'Xóa',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await forumService.deletePost(post.id);
+              Alert.alert('Đã xóa', 'Bài viết đã được xóa');
+              if (onUpdate) {
+                onUpdate(post.id, { deleted: true });
+              }
+            } catch (error) {
+              console.error('[PostCard] Delete error:', error);
+              Alert.alert('Lỗi', 'Không thể xóa bài viết');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   // Get author info - supports both 'author' (from join) and 'user' (legacy)
   const authorId = post.author?.id || post.user?.id || post.user_id;
   const authorName = post.author?.full_name
@@ -229,8 +417,73 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate }) => {
     }
   };
 
+  // Render content with clickable hashtags
+  const renderContentWithHashtags = (text, maxLines = 3) => {
+    if (!text) return null;
+
+    // Regex to match hashtags
+    const hashtagRegex = /#([\w\u00C0-\u024F\u1E00-\u1EFF]+)/g;
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = hashtagRegex.exec(text)) !== null) {
+      // Add text before hashtag
+      if (match.index > lastIndex) {
+        parts.push({
+          type: 'text',
+          content: text.slice(lastIndex, match.index),
+        });
+      }
+
+      // Add hashtag
+      parts.push({
+        type: 'hashtag',
+        content: match[0],
+        tag: match[1],
+      });
+
+      lastIndex = match.index + match[0].length;
+    }
+
+    // Add remaining text
+    if (lastIndex < text.length) {
+      parts.push({
+        type: 'text',
+        content: text.slice(lastIndex),
+      });
+    }
+
+    // If no hashtags found, return simple text
+    if (parts.length === 0) {
+      return <Text style={styles.content} numberOfLines={maxLines}>{text}</Text>;
+    }
+
+    return (
+      <Text style={styles.content} numberOfLines={maxLines}>
+        {parts.map((part, index) => {
+          if (part.type === 'hashtag') {
+            return (
+              <Text
+                key={`hashtag-${index}`}
+                style={styles.hashtag}
+                onPress={() => navigation.navigate('HashtagFeed', { hashtag: part.tag })}
+              >
+                {part.content}
+              </Text>
+            );
+          }
+          return <Text key={`text-${index}`}>{part.content}</Text>;
+        })}
+      </Text>
+    );
+  };
+
   return (
     <Pressable style={styles.card} onPress={handleDoubleTap}>
+      {/* Boosted Badge - Shows if post is boosted */}
+      {post.is_boosted && <BoostedBadge />}
+
       {/* Author Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleAuthorPress} activeOpacity={0.7}>
@@ -240,8 +493,20 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate }) => {
           />
         </TouchableOpacity>
         <TouchableOpacity style={styles.headerText} onPress={handleAuthorPress} activeOpacity={0.7}>
-          <Text style={styles.authorName}>{authorName}</Text>
-          <Text style={styles.timestamp}>{formatTimestamp(post.created_at)}</Text>
+          <View style={styles.authorRow}>
+            <Text style={styles.authorName}>{authorName}</Text>
+            <UserBadges user={post.author || post.user} size="tiny" maxBadges={2} />
+          </View>
+          <View style={styles.timestampRow}>
+            <Text style={styles.timestamp}>{formatTimestamp(post.created_at)}</Text>
+            {/* Edited Badge */}
+            {post.edited_at && (
+              <View style={styles.editedBadge}>
+                <Edit2 size={10} color={COLORS.textMuted} />
+                <Text style={styles.editedText}>Đã chỉnh sửa</Text>
+              </View>
+            )}
+          </View>
         </TouchableOpacity>
         {post.category && (
           <View style={[styles.categoryBadge, { borderColor: post.category?.color || COLORS.gold }]}>
@@ -250,20 +515,61 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate }) => {
             </Text>
           </View>
         )}
+
+        {/* More Options Button */}
+        <TouchableOpacity
+          style={styles.moreButton}
+          onPress={() => setShowMenu(true)}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <MoreHorizontal size={20} color={COLORS.textMuted} />
+        </TouchableOpacity>
       </View>
 
-      {/* Title & Content */}
+      {/* Title & Content - with clickable hashtags */}
       <Text style={styles.title} numberOfLines={2}>{post.title}</Text>
-      <Text style={styles.content} numberOfLines={3}>{post.content}</Text>
+      {renderContentWithHashtags(post.content, 3)}
 
-      {/* Post Image/Media (if exists) - with double tap overlay */}
-      {(post.image_url || post.media_url) && (
+      {/* Post Image/Media - Support both single and multiple images with progressive loading */}
+      {(post.media_urls?.length > 0 || post.image_url || post.media_url) && (
         <View style={styles.mediaContainer}>
-          <Image
-            source={{ uri: post.image_url || post.media_url }}
-            style={styles.postImage}
-            resizeMode="cover"
-          />
+          {/* Use carousel for multiple images, progressive image for single */}
+          {post.media_urls?.length > 1 ? (
+            <PostImageCarousel
+              images={post.media_urls}
+              height={getImageDisplayHeight(post, SCREEN_WIDTH - (GLASS.padding * 2))}
+              showCounter={true}
+              showDots={true}
+              onImagePress={handleImagePress}
+            />
+          ) : (
+            <TouchableOpacity
+              activeOpacity={0.95}
+              onPress={() => handleImagePress(0)}
+            >
+              <ProgressiveImage
+                source={{ uri: post.media_urls?.[0] || post.image_url || post.media_url }}
+                thumbnailSource={post.thumbnail_url ? { uri: post.thumbnail_url } : undefined}
+                placeholderSource={post.placeholder_url ? { uri: post.placeholder_url } : undefined}
+                blurhash={post.image_blurhash}
+                style={[
+                  styles.postImage,
+                  {
+                    height: getImageDisplayHeight(post, SCREEN_WIDTH - (GLASS.padding * 2))
+                  }
+                ]}
+                resizeMode="cover"
+              />
+            </TouchableOpacity>
+          )}
+
+          {/* Shopping Tags Overlay - Shows clickable product tags on image */}
+          {post.product_tags && post.product_tags.length > 0 && (
+            <ShoppingTagOverlay
+              tags={post.product_tags}
+              editable={false}
+            />
+          )}
 
           {/* Big Heart Overlay (Instagram style) */}
           <Animated.View
@@ -278,11 +584,27 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate }) => {
           >
             <Heart size={80} color="#FFFFFF" fill="#FF6B6B" strokeWidth={0} />
           </Animated.View>
+
+          {/* Image Count Badge (shows when multiple images) */}
+          {getImageCount() > 1 && (
+            <View style={styles.imageCountBadge}>
+              <Layers size={14} color={COLORS.textPrimary} />
+              <Text style={styles.imageCountText}>{getImageCount()}</Text>
+            </View>
+          )}
         </View>
       )}
 
+      {/* Sound Card - Shows attached sound/music */}
+      {post.sound && (
+        <SoundCard
+          sound={post.sound}
+          onPress={() => navigation.navigate('SoundDetail', { soundId: post.sound.id })}
+        />
+      )}
+
       {/* Big Heart for posts without media */}
-      {!post.image_url && !post.media_url && (
+      {!post.media_urls?.length && !post.image_url && !post.media_url && (
         <Animated.View
           style={[
             styles.bigHeartOverlayNoMedia,
@@ -297,7 +619,21 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate }) => {
         </Animated.View>
       )}
 
-      {/* Action Bar */}
+      {/* NEW: Received Gifts Bar - shows if post has gifts */}
+      {post.gift_summary?.total_count > 0 && (
+        <ReceivedGiftsBar
+          gifts={post.gift_summary?.gifts || []}
+          totalCount={post.gift_summary?.total_count || 0}
+          onPress={() => navigation.navigate('PostGifts', { postId: post.id })}
+        />
+      )}
+
+      {/* NEW: Quoted Post - shows if this is a repost */}
+      {post.original_post_id && post.original_post && (
+        <QuotedPost post={post.original_post} />
+      )}
+
+      {/* Action Bar - UPDATED with Repost, Gift buttons */}
       <View style={styles.footer}>
         {/* Like Button - Wrapped with AuthGate + Animation */}
         <AuthGate action="thích bài viết này">
@@ -316,9 +652,11 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate }) => {
               />
             </Animated.View>
             {likesCount > 0 && (
-              <Text style={[styles.actionText, isLiked && styles.actionTextActive]}>
-                {likesCount}
-              </Text>
+              <TouchableOpacity onPress={handleViewReactions}>
+                <Text style={[styles.actionText, isLiked && styles.actionTextActive]}>
+                  {likesCount}
+                </Text>
+              </TouchableOpacity>
             )}
           </TouchableOpacity>
         </AuthGate>
@@ -335,19 +673,52 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate }) => {
           </TouchableOpacity>
         </AuthGate>
 
-        {/* Share Button - No auth required */}
+        {/* NEW: Repost Button - Wrapped with AuthGate */}
+        <AuthGate action="chia sẻ lại bài viết này">
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={handleRepost}
+            activeOpacity={0.7}
+          >
+            <Repeat2
+              size={18}
+              color={post.user_reposted ? COLORS.success : COLORS.textMuted}
+            />
+            {(post.repost_count || 0) > 0 && (
+              <Text style={[styles.actionText, post.user_reposted && styles.actionTextRepost]}>
+                {post.repost_count}
+              </Text>
+            )}
+          </TouchableOpacity>
+        </AuthGate>
+
+        {/* NEW: Gift Button - Wrapped with AuthGate */}
+        <AuthGate action="tặng quà cho bài viết này">
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={handleGift}
+            activeOpacity={0.7}
+          >
+            <Gift size={18} color={COLORS.gold} />
+          </TouchableOpacity>
+        </AuthGate>
+
+        {/* Share Button - Opens ShareSheet */}
         <TouchableOpacity
           style={styles.actionButton}
           onPress={handleShare}
           activeOpacity={0.7}
         >
-          <Share2 size={18} color={COLORS.textMuted} />
+          <Send size={18} color={COLORS.textMuted} />
         </TouchableOpacity>
+
+        {/* Spacer */}
+        <View style={{ flex: 1 }} />
 
         {/* Save/Bookmark Button - Wrapped with AuthGate */}
         <AuthGate action="lưu bài viết này">
           <TouchableOpacity
-            style={[styles.actionButton, styles.actionButtonRight]}
+            style={styles.actionButton}
             onPress={handleSave}
             activeOpacity={0.7}
           >
@@ -359,6 +730,132 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate }) => {
           </TouchableOpacity>
         </AuthGate>
       </View>
+
+      {/* More Options Menu Modal */}
+      <Modal
+        visible={showMenu}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowMenu(false)}
+      >
+        <TouchableOpacity
+          style={styles.menuOverlay}
+          activeOpacity={1}
+          onPress={() => setShowMenu(false)}
+        >
+          <View style={styles.menuContainer}>
+            <View style={styles.menuHeader}>
+              <Text style={styles.menuTitle}>Tùy chọn</Text>
+              <TouchableOpacity onPress={() => setShowMenu(false)}>
+                <X size={24} color={COLORS.textMuted} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Own post options */}
+            {user?.id === authorId && (
+              <>
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={() => {
+                    setShowMenu(false);
+                    navigation.navigate('EditPost', { post });
+                  }}
+                >
+                  <Edit2 size={20} color={COLORS.textPrimary} />
+                  <Text style={styles.menuItemText}>Chỉnh sửa bài viết</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.menuItem, styles.menuItemDanger]}
+                  onPress={handleDelete}
+                >
+                  <Trash2 size={20} color={COLORS.error} />
+                  <Text style={[styles.menuItemText, styles.menuItemTextDanger]}>Xóa bài viết</Text>
+                </TouchableOpacity>
+              </>
+            )}
+
+            {/* Other user's post options */}
+            {user?.id !== authorId && (
+              <>
+                <TouchableOpacity style={styles.menuItem} onPress={handleHidePost}>
+                  <EyeOff size={20} color={COLORS.textPrimary} />
+                  <Text style={styles.menuItemText}>Ẩn bài viết này</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.menuItem} onPress={handleBlockUser}>
+                  <UserX size={20} color={COLORS.textPrimary} />
+                  <Text style={styles.menuItemText}>Chặn người dùng</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.menuItem, styles.menuItemDanger]}
+                  onPress={handleReport}
+                >
+                  <Flag size={20} color={COLORS.error} />
+                  <Text style={[styles.menuItemText, styles.menuItemTextDanger]}>Báo cáo bài viết</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Report Modal */}
+      <ReportModal
+        visible={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        postId={post.id}
+        onSuccess={() => {
+          console.log('[PostCard] Report submitted successfully');
+        }}
+      />
+
+      {/* NEW: Feature Integration Sheets */}
+      <ShareSheet
+        visible={shareSheetVisible}
+        onClose={() => setShareSheetVisible(false)}
+        post={post}
+      />
+
+      <RepostSheet
+        visible={repostSheetVisible}
+        onClose={() => setRepostSheetVisible(false)}
+        post={post}
+        onSuccess={() => {
+          console.log('[PostCard] Repost successful');
+          if (onUpdate) {
+            onUpdate(post.id, { repost_count: (post.repost_count || 0) + 1, user_reposted: true });
+          }
+        }}
+      />
+
+      <GiftCatalogSheet
+        visible={giftSheetVisible}
+        onClose={() => setGiftSheetVisible(false)}
+        receiverUserId={authorId}
+        contextType="post"
+        contextId={post.id}
+        onGiftSent={() => {
+          console.log('[PostCard] Gift sent successfully');
+        }}
+      />
+
+      <ReactionsListSheet
+        visible={reactionsVisible}
+        onClose={() => setReactionsVisible(false)}
+        postId={post.id}
+      />
+
+      {/* Image Viewer - Full screen tap-to-view */}
+      <ImageViewer
+        visible={imageViewerVisible}
+        images={getAllImages()}
+        initialIndex={imageViewerIndex}
+        onClose={() => setImageViewerVisible(false)}
+        showCounter={true}
+        showActions={false}
+      />
     </Pressable>
   );
 };
@@ -410,6 +907,11 @@ const styles = StyleSheet.create({
   headerText: {
     flex: 1
   },
+  authorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   authorName: {
     fontSize: TYPOGRAPHY.fontSize.lg,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
@@ -417,7 +919,26 @@ const styles = StyleSheet.create({
   },
   timestamp: {
     fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textMuted
+    color: COLORS.textMuted,
+  },
+  timestampRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  editedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  editedText: {
+    fontSize: 9,
+    color: COLORS.textMuted,
+    fontStyle: 'italic',
   },
   categoryBadge: {
     backgroundColor: 'rgba(255, 189, 89, 0.15)',
@@ -443,15 +964,38 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: SPACING.md,
   },
+  hashtag: {
+    color: COLORS.cyan,
+    fontWeight: '600',
+  },
   mediaContainer: {
     position: 'relative',
     marginBottom: SPACING.md,
   },
   postImage: {
     width: '100%',
-    height: 200,
+    // Height is now dynamically calculated via getImageDisplayHeight
     borderRadius: 12,
     backgroundColor: COLORS.glassBg,
+    overflow: 'hidden',
+  },
+  // Image count badge (top-right corner)
+  imageCountBadge: {
+    position: 'absolute',
+    top: SPACING.sm,
+    right: SPACING.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: 12,
+    gap: 4,
+  },
+  imageCountText: {
+    color: COLORS.textPrimary,
+    fontSize: 12,
+    fontWeight: '600',
   },
   bigHeartOverlay: {
     position: 'absolute',
@@ -501,6 +1045,64 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
   },
   actionTextActive: {
+    color: COLORS.error,
+  },
+  actionTextRepost: {
+    color: COLORS.success,
+  },
+  // More button
+  moreButton: {
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: SPACING.sm,
+  },
+  // Menu overlay and container
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'flex-end',
+  },
+  menuContainer: {
+    backgroundColor: GLASS.background,
+    borderTopLeftRadius: GLASS.borderRadius,
+    borderTopRightRadius: GLASS.borderRadius,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.xxl + 20,
+  },
+  menuHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+    paddingBottom: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  menuTitle: {
+    fontSize: TYPOGRAPHY.fontSize.xxl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.md,
+    gap: SPACING.md,
+  },
+  menuItemText: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    color: COLORS.textPrimary,
+  },
+  menuItemDanger: {
+    marginTop: SPACING.sm,
+    paddingTop: SPACING.lg,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  menuItemTextDanger: {
     color: COLORS.error,
   },
 });

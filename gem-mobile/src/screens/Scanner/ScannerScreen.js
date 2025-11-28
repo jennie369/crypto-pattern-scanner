@@ -97,7 +97,13 @@ const ScannerScreen = ({ navigation }) => {
     };
 
     ws.onerror = (error) => {
-      console.error('[Scanner] WebSocket error:', error);
+      // WebSocket errors are common due to network issues - just log quietly
+      console.log('[Scanner] WebSocket connection issue - will retry on next interaction');
+    };
+
+    ws.onclose = () => {
+      // Silently handle close
+      console.log('[Scanner] WebSocket closed');
     };
 
     wsRef.current = ws;

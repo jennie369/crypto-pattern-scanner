@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Post Detail Screen
+ * Gemral - Post Detail Screen
  * Shows full post with comments
  * Fixed: Comment input positioned above tab bar
  */
@@ -22,10 +22,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowLeft, Heart, MessageCircle, Send, Reply, X } from 'lucide-react-native';
+import { ArrowLeft, Heart, MessageCircle, Send, Reply, X, Edit3 } from 'lucide-react-native';
 import { forumService } from '../../services/forumService';
 import { useAuth } from '../../contexts/AuthContext';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS, LAYOUT } from '../../utils/tokens';
+import { UserBadges } from '../../components/UserBadge';
 
 // Tab bar height constant
 const TAB_BAR_HEIGHT = LAYOUT.tabBarHeight || 90;
@@ -244,7 +245,17 @@ const PostDetailScreen = ({ route, navigation }) => {
             <ArrowLeft size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Chi tiết bài viết</Text>
-          <View style={{ width: 40 }} />
+          {/* Edit Button - only show if user is author */}
+          {user && post && (post.user_id === user.id || post.author?.id === user.id) ? (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('EditPost', { post })}
+              style={styles.editButton}
+            >
+              <Edit3 size={22} color={COLORS.gold} />
+            </TouchableOpacity>
+          ) : (
+            <View style={{ width: 40 }} />
+          )}
         </View>
 
         {/* Scrollable Content */}
@@ -268,9 +279,12 @@ const PostDetailScreen = ({ route, navigation }) => {
                 style={styles.avatar}
               />
               <View style={styles.authorInfo}>
-                <Text style={styles.authorName}>
-                  {post.author?.full_name || post.author?.email?.split('@')[0] || post.user?.full_name || 'Anonymous'}
-                </Text>
+                <View style={styles.authorNameRow}>
+                  <Text style={styles.authorName}>
+                    {post.author?.full_name || post.author?.email?.split('@')[0] || post.user?.full_name || 'Anonymous'}
+                  </Text>
+                  <UserBadges user={post.author || post.user} size="small" maxBadges={3} />
+                </View>
                 <Text style={styles.timestamp}>{formatTimestamp(post.created_at)}</Text>
               </View>
             </View>
@@ -324,9 +338,12 @@ const PostDetailScreen = ({ route, navigation }) => {
                       style={styles.commentAvatar}
                     />
                     <View style={styles.commentContent}>
-                      <Text style={styles.commentAuthor}>
-                        {c.author?.full_name || c.author?.email?.split('@')[0] || 'Anonymous'}
-                      </Text>
+                      <View style={styles.commentAuthorRow}>
+                        <Text style={styles.commentAuthor}>
+                          {c.author?.full_name || c.author?.email?.split('@')[0] || 'Anonymous'}
+                        </Text>
+                        <UserBadges user={c.author} size="tiny" maxBadges={2} />
+                      </View>
                       <Text style={styles.commentText}>{c.content}</Text>
                       <View style={styles.commentActions}>
                         <Text style={styles.commentTime}>{formatTimestamp(c.created_at)}</Text>
@@ -354,9 +371,12 @@ const PostDetailScreen = ({ route, navigation }) => {
                             style={styles.replyAvatar}
                           />
                           <View style={styles.commentContent}>
-                            <Text style={styles.commentAuthor}>
-                              {reply.author?.full_name || reply.author?.email?.split('@')[0] || 'Anonymous'}
-                            </Text>
+                            <View style={styles.commentAuthorRow}>
+                              <Text style={styles.commentAuthor}>
+                                {reply.author?.full_name || reply.author?.email?.split('@')[0] || 'Anonymous'}
+                              </Text>
+                              <UserBadges user={reply.author} size="tiny" maxBadges={2} />
+                            </View>
                             <Text style={styles.commentText}>{reply.content}</Text>
                             <Text style={styles.commentTime}>{formatTimestamp(reply.created_at)}</Text>
                           </View>
@@ -447,6 +467,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  editButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   headerTitle: {
     fontSize: TYPOGRAPHY.fontSize.xxl,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
@@ -473,6 +499,11 @@ const styles = StyleSheet.create({
     marginRight: SPACING.md,
   },
   authorInfo: { flex: 1 },
+  authorNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
   authorName: {
     fontSize: TYPOGRAPHY.fontSize.lg,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
@@ -552,6 +583,11 @@ const styles = StyleSheet.create({
     marginRight: SPACING.sm,
   },
   commentContent: { flex: 1 },
+  commentAuthorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
   commentAuthor: {
     fontSize: TYPOGRAPHY.fontSize.md,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,

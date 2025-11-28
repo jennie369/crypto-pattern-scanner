@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Cart Screen
+ * Gemral - Cart Screen
  * With Auth check for checkout
  */
 

@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Shopify Helper Functions
+ * Gemral - Shopify Helper Functions
  * Utilities for handling Shopify Global ID format
  */
 

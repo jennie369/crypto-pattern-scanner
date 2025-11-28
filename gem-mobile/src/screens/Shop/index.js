@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Shop Module Exports
+ * Gemral - Shop Module Exports
  */
 
 export { default as ShopScreen } from './ShopScreen';

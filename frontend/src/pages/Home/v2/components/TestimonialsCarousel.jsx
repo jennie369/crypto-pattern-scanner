@@ -11,7 +11,7 @@ export const TestimonialsCarousel = () => {
       tier: 'TIER 2',
       avatar: <User size={32} />,
       rating: 5,
-      text: 'GEM Platform đã giúp tôi tăng win rate từ 45% lên 68% chỉ sau 3 tháng. DPD và UPU patterns cực kỳ chính xác!',
+      text: 'Gemral đã giúp tôi tăng win rate từ 45% lên 68% chỉ sau 3 tháng. DPD và UPU patterns cực kỳ chính xác!',
       date: '2025-10-15'
     },
     {
@@ -47,7 +47,7 @@ export const TestimonialsCarousel = () => {
       <div className="container">
         <div className="section-header">
           <h2>Khách Hàng Nói Gì</h2>
-          <p>Hơn 5,000 traders đang tin tưởng sử dụng GEM Platform</p>
+          <p>Hơn 5,000 traders đang tin tưởng sử dụng Gemral</p>
         </div>
 
         <div className="testimonial-carousel">

@@ -32,13 +32,23 @@ const CompactSidebar = () => {
 
   // State for hover and locked expanded state
   const [isHovered, setIsHovered] = useState(false);
-  const [isLocked, setIsLocked] = useState(false);
+  const [isLocked, setIsLocked] = useState(false); // Default collapsed
+  const [hoveredItem, setHoveredItem] = useState(null); // Track hovered item for tooltip
 
   // Load locked state from localStorage
+  // One-time fix: Clear the forced 'true' value from previous buggy version
   useEffect(() => {
-    const savedState = localStorage.getItem('sidebar-locked');
-    if (savedState === 'true') {
-      setIsLocked(true);
+    const version = localStorage.getItem('sidebar-version');
+    if (version !== 'v2') {
+      // Reset sidebar state for users affected by previous bug
+      localStorage.removeItem('sidebar-locked');
+      localStorage.setItem('sidebar-version', 'v2');
+      setIsLocked(false);
+    } else {
+      const savedState = localStorage.getItem('sidebar-locked');
+      if (savedState === 'true') {
+        setIsLocked(true);
+      }
     }
   }, []);
 
@@ -67,7 +77,7 @@ const CompactSidebar = () => {
     },
     {
       id: 'chatbot',
-      label: 'Gem Master',
+      label: 'Gemral',
       icon: Sparkles,
       path: '/chatbot',
       description: 'AI trading assistant'
@@ -234,7 +244,7 @@ const CompactSidebar = () => {
 
       {/* Navigation Items */}
       <nav className="compact-sidebar-nav">
-        {navItems.map((item) => {
+        {navItems.map((item, index) => {
           const Icon = item.icon;
           const active = isActive(item.path);
 
@@ -243,6 +253,8 @@ const CompactSidebar = () => {
               key={item.id}
               className={`compact-nav-item ${active ? 'active' : ''}`}
               onClick={() => handleNavigation(item.path)}
+              onMouseEnter={() => setHoveredItem({ ...item, index })}
+              onMouseLeave={() => setHoveredItem(null)}
               whileHover={{ x: 4 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -355,28 +367,23 @@ const CompactSidebar = () => {
         </motion.button>
       </div>
 
-      {/* Tooltip for collapsed state */}
-      {!isExpanded && (
-        <AnimatePresence>
-          {navItems.map((item) => {
-            const active = isActive(item.path);
-            if (active) {
-              return (
-                <motion.div
-                  key={`tooltip-${item.id}`}
-                  className="sidebar-tooltip"
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                >
-                  {item.label}
-                </motion.div>
-              );
-            }
-            return null;
-          })}
-        </AnimatePresence>
-      )}
+      {/* Tooltip for collapsed state - Shows on hover */}
+      <AnimatePresence>
+        {!isExpanded && hoveredItem && (
+          <motion.div
+            key={`tooltip-${hoveredItem.id}`}
+            className="sidebar-tooltip"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
+            style={{
+              top: `${100 + (hoveredItem.index * 48)}px` // Position based on item index
+            }}
+          >
+            {hoveredItem.label}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };

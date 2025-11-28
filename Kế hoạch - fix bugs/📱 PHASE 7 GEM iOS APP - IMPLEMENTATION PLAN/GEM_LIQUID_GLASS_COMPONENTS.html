@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEM iOS - Liquid Glass Component Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #05040B 0%, #0F1030 50%, #1a0b2e 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .header h1 {
+            font-size: 42px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #6A5BFF, #00F0FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 16px;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 40px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* Liquid Glass Card Base */
+        .glass-card {
+            position: relative;
+            width: 340px;
+            margin: 0 auto;
+            border-radius: 18px;
+            padding: 20px;
+            
+            /* Glassmorphism effect */
+            background: rgba(15, 16, 48, 0.55);
+            backdrop-filter: blur(18px) saturate(180%);
+            -webkit-backdrop-filter: blur(18px) saturate(180%);
+            
+            /* Border gradient */
+            border: 1.2px solid transparent;
+            background-clip: padding-box;
+            
+            /* Shadows */
+            box-shadow: 
+                0 10px 20px rgba(0, 0, 0, 0.7),
+                0 6px 30px rgba(140, 100, 255, 0.22),
+                inset 0 1px 0 rgba(255, 255, 255, 0.03);
+            
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 18px;
+            padding: 1.2px;
+            background: linear-gradient(135deg, #6A5BFF, #00F0FF);
+            -webkit-mask: 
+                linear-gradient(#fff 0 0) content-box, 
+                linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .glass-card:after {
+            content: '';
+            position: absolute;
+            top: -60px;
+            right: -40px;
+            width: 220px;
+            height: 120px;
+            background: radial-gradient(circle, #8C64FF 0%, rgba(140, 100, 255, 0) 70%);
+            border-radius: 50%;
+            opacity: 0.22;
+            filter: blur(40px);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 15px 30px rgba(0, 0, 0, 0.8),
+                0 10px 40px rgba(140, 100, 255, 0.35),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+
+        /* Card 1: Balance Card */
+        .balance-card {
+            background: rgba(15, 16, 48, 0.6);
+        }
+
+        .balance-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .balance-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .balance-amount {
+            font-size: 42px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFFFFF, #00F0FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 25px;
+            letter-spacing: -2px;
+        }
+
+        .balance-details {
+            display: flex;
+            gap: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .balance-item {
+            flex: 1;
+        }
+
+        .balance-item-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .balance-item-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: #3AF7A6;
+        }
+
+        /* Card 2: Staking Card */
+        .staking-card {
+            background: rgba(15, 16, 48, 0.55);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .input-wrapper {
+            position: relative;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(106, 91, 255, 0.3);
+            border-radius: 12px;
+            padding: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: #6A5BFF;
+            box-shadow: 0 0 20px rgba(106, 91, 255, 0.3);
+        }
+
+        .amount-input {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 32px;
+            font-weight: 700;
+            width: 100%;
+            outline: none;
+        }
+
+        .input-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 12px;
+        }
+
+        .input-min {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .input-max {
+            color: #FF6B6B;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .staking-period {
+            background: rgba(106, 91, 255, 0.15);
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+
+        .period-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .period-label {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+        }
+
+        .period-apy {
+            font-size: 20px;
+            font-weight: 800;
+            color: #3AF7A6;
+        }
+
+        .auto-renew {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            margin-top: 12px;
+        }
+
+        .auto-renew-text {
+            flex: 1;
+        }
+
+        .auto-renew-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 4px;
+        }
+
+        .auto-renew-desc {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            line-height: 1.4;
+        }
+
+        .toggle-switch {
+            width: 48px;
+            height: 28px;
+            background: linear-gradient(135deg, #3AF7A6, #00F0FF);
+            border-radius: 14px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch:before {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            right: 3px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .deposit-button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #9C0612, #6B0F1A);
+            border: 1px solid #FFBD59;
+            border-radius: 12px;
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 16px;
+            box-shadow: 0 4px 15px rgba(156, 6, 18, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .deposit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(156, 6, 18, 0.6), 0 0 20px rgba(255, 189, 89, 0.3);
+            border-color: #FFD700;
+        }
+        
+        .deposit-button:active {
+            transform: translateY(0);
+        }
+        
+        .button-icon {
+            width: 18px;
+            height: 18px;
+            stroke: white;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        /* Card 3: Control Center */
+        .control-card {
+            background: rgba(15, 16, 48, 0.5);
+            padding: 25px;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .control-button {
+            position: relative;
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(106, 91, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .control-button.active {
+            background: rgba(106, 91, 255, 0.2);
+            border-color: #6A5BFF;
+        }
+
+        .control-icon {
+            font-size: 24px;
+        }
+
+        .control-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .music-player {
+            background: rgba(106, 91, 255, 0.15);
+            border-radius: 16px;
+            padding: 18px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .album-art {
+            width: 70px;
+            height: 70px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #FF6B9D, #FFA06B);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .music-info {
+            flex: 1;
+        }
+
+        .song-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 4px;
+        }
+
+        .artist-name {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 12px;
+        }
+
+        .music-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            font-size: 18px;
+        }
+
+        .control-btn {
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .control-btn:hover {
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .control-btn.play {
+            font-size: 24px;
+            color: white;
+        }
+
+        /* Card 4: Assets List */
+        .assets-card {
+            background: rgba(15, 16, 48, 0.5);
+        }
+
+        .assets-header {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 16px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .asset-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .asset-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(106, 91, 255, 0.3);
+            transform: translateX(5px);
+        }
+
+        .asset-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6A5BFF, #00F0FF);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(106, 91, 255, 0.3);
+        }
+
+        .asset-info {
+            flex: 1;
+        }
+
+        .asset-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 3px;
+        }
+
+        .asset-amount {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .asset-value {
+            text-align: right;
+        }
+
+        .asset-price {
+            font-size: 15px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 3px;
+        }
+
+        .asset-change {
+            font-size: 11px;
+            font-weight: 600;
+            color: #3AF7A6;
+        }
+
+        .asset-change.negative {
+            color: #FF6B6B;
+        }
+
+        /* Info Section */
+        .info-section {
+            margin-top: 60px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            backdrop-filter: blur(20px);
+        }
+
+        .info-section h2 {
+            color: #6A5BFF;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        .info-section p {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .feature-item {
+            padding: 20px;
+            background: rgba(106, 91, 255, 0.1);
+            border: 1px solid rgba(106, 91, 255, 0.2);
+            border-radius: 12px;
+        }
+
+        .feature-item h3 {
+            color: #00F0FF;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .feature-item p {
+            font-size: 14px;
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .glass-card {
+                width: 100%;
+                max-width: 340px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💎 Liquid Glass Components</h1>
+            <p>High-Fidelity Glassmorphism Design for GEM iOS App</p>
+        </div>
+
+        <div class="demo-grid">
+            <!-- Card 1: Balance Display -->
+            <div class="glass-card balance-card">
+                <div class="balance-header">
+                    <span class="balance-label">Total Balance</span>
+                    <span style="color: #3AF7A6; font-size: 20px;">💎</span>
+                </div>
+                <div class="balance-amount">$9,657.00</div>
+                <div class="balance-details">
+                    <div class="balance-item">
+                        <div class="balance-item-label">24H Change</div>
+                        <div class="balance-item-value">+2.5%</div>
+                    </div>
+                    <div class="balance-item">
+                        <div class="balance-item-label">Today P&L</div>
+                        <div class="balance-item-value">+$245</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: Staking Interface -->
+            <div class="glass-card staking-card">
+                <div class="input-group">
+                    <div class="input-label">Deposit amount</div>
+                    <div class="input-wrapper">
+                        <input type="text" class="amount-input" value="100" placeholder="0">
+                        <div class="input-meta">
+                            <span class="input-min">Min. $2</span>
+                            <span class="input-max">Max</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 16px;">
+                    Balance: 110.141 USDT
+                </div>
+
+                <div class="input-label">Staking period</div>
+                <div class="staking-period">
+                    <div class="period-header">
+                        <span class="period-label">1 year</span>
+                        <span class="period-apy">25%<span style="font-size: 11px; margin-left: 4px; color: rgba(255,255,255,0.6);">APY</span></span>
+                    </div>
+                    
+                    <div class="auto-renew">
+                        <div class="auto-renew-text">
+                            <div class="auto-renew-label">Auto-renew</div>
+                            <div class="auto-renew-desc">Your balance will be auto-restaked into the same plan at maturity.</div>
+                        </div>
+                        <div class="toggle-switch"></div>
+                    </div>
+                </div>
+
+                <button class="deposit-button">
+                    <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                    Copy
+                </button>
+            </div>
+
+            <!-- Card 3: Control Center -->
+            <div class="glass-card control-card">
+                <div class="control-row">
+                    <div class="control-button active">
+                        <span class="control-icon">🌙</span>
+                        <span class="control-label">Temps pour soi</span>
+                    </div>
+                    <div class="control-button">
+                        <span class="control-icon">💡</span>
+                    </div>
+                    <div class="control-button">
+                        <span class="control-icon">✈️</span>
+                    </div>
+                </div>
+
+                <div class="music-player">
+                    <div class="album-art">🎵</div>
+                    <div class="music-info">
+                        <div class="song-title">Hold On</div>
+                        <div class="artist-name">Kygo & Emmit Fenn</div>
+                        <div class="music-controls">
+                            <span class="control-btn">⏮️</span>
+                            <span class="control-btn play">▶️</span>
+                            <span class="control-btn">⏭️</span>
+                        </div>
+                    </div>
+                    <div class="control-button" style="width: 48px; height: 48px; flex: none;">
+                        <span class="control-icon" style="font-size: 20px;">📱</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4: Assets List -->
+            <div class="glass-card assets-card">
+                <div class="assets-header">My Assets</div>
+
+                <div class="asset-item">
+                    <div class="asset-icon">₿</div>
+                    <div class="asset-info">
+                        <div class="asset-name">Bitcoin</div>
+                        <div class="asset-amount">0.234 BTC</div>
+                    </div>
+                    <div class="asset-value">
+                        <div class="asset-price">$9,755</div>
+                        <div class="asset-change">+5.2%</div>
+                    </div>
+                </div>
+
+                <div class="asset-item">
+                    <div class="asset-icon" style="background: linear-gradient(135deg, #627EEA, #8C9EFF);">Ξ</div>
+                    <div class="asset-info">
+                        <div class="asset-name">Ethereum</div>
+                        <div class="asset-amount">3.5 ETH</div>
+                    </div>
+                    <div class="asset-value">
+                        <div class="asset-price">$7,854</div>
+                        <div class="asset-change">+3.8%</div>
+                    </div>
+                </div>
+
+                <div class="asset-item">
+                    <div class="asset-icon" style="background: linear-gradient(135deg, #F3BA2F, #FFD700);">◆</div>
+                    <div class="asset-info">
+                        <div class="asset-name">Binance Coin</div>
+                        <div class="asset-amount">12.8 BNB</div>
+                    </div>
+                    <div class="asset-value">
+                        <div class="asset-price">$3,456</div>
+                        <div class="asset-change negative">-1.2%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Info -->
+        <div class="info-section">
+            <h2>🎨 Liquid Glass Design System</h2>
+            <p><strong>Glassmorphism Effect Implementation:</strong></p>
+            <p>This demo showcases the high-fidelity liquid glass components using advanced CSS techniques that will be replicated in React Native using expo-blur and react-native-linear-gradient.</p>
+
+            <div class="features-grid">
+                <div class="feature-item">
+                    <h3>Backdrop Blur</h3>
+                    <p>18px blur with 180% saturation creates the frosted glass effect</p>
+                </div>
+
+                <div class="feature-item">
+                    <h3>Gradient Borders</h3>
+                    <p>Linear gradient (#6A5BFF → #00F0FF) with 1.2px stroke width</p>
+                </div>
+
+                <div class="feature-item">
+                    <h3>Multi-Layer Shadows</h3>
+                    <p>Outer glow (rgba(140,100,255,0.22)) + inner shadow for depth</p>
+                </div>
+
+                <div class="feature-item">
+                    <h3>Semi-Transparent Tint</h3>
+                    <p>rgba(15,16,48,0.55) background with 3% top highlight</p>
+                </div>
+
+                <div class="feature-item">
+                    <h3>Smooth Transitions</h3>
+                    <p>0.4s cubic-bezier easing for premium feel</p>
+                </div>
+
+                <div class="feature-item">
+                    <h3>Perfect Radius</h3>
+                    <p>18px border-radius with consistent spacing tokens</p>
+                </div>
+            </div>
+
+            <p style="margin-top: 30px;"><strong>React Native Implementation:</strong></p>
+            <p>✅ BlurView from expo-blur for backdrop filter<br>
+            ✅ LinearGradient for border strokes<br>
+            ✅ Shadow from react-native-shadow-2 for outer glow<br>
+            ✅ Multiple View layers for inner shadow simulation<br>
+            ✅ Design tokens in config/tokens.js for consistency</p>
+
+            <p style="margin-top: 20px; color: #3AF7A6; font-weight: 600;">
+                💎 Ready to implement in GEM iOS App!
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Add interactive toggle
+        document.querySelectorAll('.toggle-switch').forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                this.style.background = this.style.background.includes('linear-gradient') 
+                    ? 'rgba(255,255,255,0.2)' 
+                    : 'linear-gradient(135deg, #3AF7A6, #00F0FF)';
+                
+                const knob = this.querySelector(':before') || this;
+                const currentRight = this.style.background.includes('linear-gradient');
+                
+                if (currentRight) {
+                    this.style.background = 'rgba(255,255,255,0.2)';
+                } else {
+                    this.style.background = 'linear-gradient(135deg, #3AF7A6, #00F0FF)';
+                }
+            });
+        });
+
+        // Control buttons interaction
+        document.querySelectorAll('.control-button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.control-button').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

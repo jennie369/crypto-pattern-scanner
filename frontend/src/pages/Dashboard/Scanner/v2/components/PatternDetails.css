@@ -150,7 +150,7 @@
 }
 
 .param-value.entry {
-  color: var(--brand-cyan);
+  color: #FFBD59;
 }
 
 .param-value.stop-loss {
@@ -186,8 +186,8 @@
 
 .sizing-result {
   padding: var(--space-sm);
-  background: rgba(0, 217, 255, 0.1);
-  border: 1px solid rgba(0, 217, 255, 0.3);
+  background: rgba(255, 189, 89, 0.1);
+  border: 1px solid rgba(255, 189, 89, 0.3);
   border-radius: var(--radius-sm);
   margin-top: var(--space-xs);
 }
@@ -205,7 +205,7 @@
 }
 
 .sizing-value.highlight {
-  color: var(--brand-cyan);
+  color: #FFBD59;
   font-size: var(--text-base);
 }
 
@@ -250,5 +250,5 @@
 
 .action-btn.secondary:hover {
   background: rgba(255, 255, 255, 0.08);
-  border-color: var(--brand-cyan);
+  border-color: #FFBD59;
 }

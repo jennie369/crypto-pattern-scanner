@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Colors Helper
+ * Gemral - Colors Helper
  * Quick access to colors and gradients
  */
 

@@ -1,10 +1,17 @@
 /**
  * Scanner API Service
  * Handles all backend API calls for Scanner v2
+ *
+ * 🔥 UPDATED: Now uses real patternDetectionService instead of mock data
+ * This ensures correct SL/TP levels based on pattern direction
  */
 
 // Import supabase only when needed (commented out for mock implementation)
 // import { supabase } from '../lib/supabaseClient';
+
+// 🔥 FIX: Import the real pattern detection service
+import { patternDetectionService } from './patternDetection';
+import { getPatternSignal } from '../constants/patternSignals';
 
 /**
  * Scan for patterns across multiple coins and timeframes
@@ -24,7 +31,9 @@ export const scanPatterns = async (filters) => {
     }
 
     // Extract filters with fallback for property name (pattern or patternFilter)
-    const { coins, timeframe, pattern, patternFilter } = filters;
+    const { coins, pattern, patternFilter } = filters;
+    // 🔥 FIX: Normalize timeframe to lowercase (Binance requires lowercase like '1h', not '1H')
+    const timeframe = (filters.timeframe || '1h').toLowerCase();
     const selectedPattern = pattern || patternFilter || 'All';
 
     if (!coins || coins.length === 0) {
@@ -34,40 +43,137 @@ export const scanPatterns = async (filters) => {
     console.log('[scanPatterns] Validated filters:', { coins, timeframe, selectedPattern });
 
     // TODO: Replace with actual backend API call
-    // For now, return mock data
+    // For now, return mock data with REAL prices from Binance
 
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    console.log('[scanPatterns] 🔵 Fetching REAL current prices from Binance for', coins.length, 'coins...');
 
-    // Generate mock patterns based on filters
-    const mockPatterns = [];
-    const patternTypes = selectedPattern === 'All'
-      ? ['DPD', 'UPU', 'UPD', 'DPU', 'H&S', 'Double Top', 'Double Bottom', 'Triangle']
-      : [selectedPattern];
+    // 🔥 FIX: Fetch REAL current prices for all coins from Binance
+    const pricePromises = coins.map(async (coin) => {
+      try {
+        // Clean symbol for Binance API
+        const cleanedSymbol = coin.replace(/[\/\-_]/g, '').toUpperCase().replace(/USDT$/, '') + 'USDT';
+        const url = `https://fapi.binance.com/fapi/v1/ticker/price?symbol=${cleanedSymbol}`;
+        const response = await fetch(url);
 
-    coins.forEach((coin, index) => {
-      if (Math.random() > 0.5) { // 50% chance of finding a pattern
-        const randomPattern = patternTypes[Math.floor(Math.random() * patternTypes.length)];
-        const basePrice = Math.random() * 100000 + 1000;
-        const confidence = Math.floor(Math.random() * 40) + 60; // 60-100%
+        if (!response.ok) {
+          console.warn(`[scanPatterns] ⚠️ Failed to fetch price for ${coin}, using fallback`);
+          return { coin, price: null };
+        }
 
-        mockPatterns.push({
-          id: `${coin}-${Date.now()}-${index}`,
-          coin: `${coin}/USDT`,
-          pattern: randomPattern,
-          patternName: getPatternName(randomPattern),
-          confidence,
-          timeframe,
-          entry: basePrice,
-          stopLoss: basePrice * (1 + (Math.random() * 0.03)),
-          takeProfit: basePrice * (1 - (Math.random() * 0.05)),
-          riskReward: parseFloat((1 + Math.random() * 2).toFixed(2)),
-          detectedAt: new Date().toISOString(),
-        });
+        const data = await response.json();
+        const price = parseFloat(data.price);
+        console.log(`[scanPatterns] ✅ ${coin}: $${price.toFixed(price < 1 ? 6 : 2)}`);
+        return { coin, price };
+      } catch (error) {
+        console.warn(`[scanPatterns] ⚠️ Error fetching price for ${coin}:`, error.message);
+        return { coin, price: null };
       }
     });
 
-    return mockPatterns;
+    const priceResults = await Promise.all(pricePromises);
+    const priceMap = {};
+    priceResults.forEach(({ coin, price }) => {
+      priceMap[coin] = price;
+    });
+
+    console.log('[scanPatterns] 🔵 Price map:', priceMap);
+
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // 🔥 ISSUE #2: Track coins without price data
+    const coinsWithoutData = coins.filter(coin => !priceMap[coin]);
+    const coinsWithData = coins.filter(coin => priceMap[coin]);
+
+    if (coinsWithoutData.length > 0) {
+      console.warn('[scanPatterns] ⚠️ Skipping', coinsWithoutData.length, 'coins without price data:');
+      console.warn('[scanPatterns]   Skipped coins:', coinsWithoutData.join(', '));
+    }
+
+    console.log('[scanPatterns] ✅ Valid coins:', coinsWithData.length, 'out of', coins.length);
+
+    // 🔥 FIX: Use REAL pattern detection instead of mock data
+    // This ensures SL/TP levels are correct for each pattern direction
+    console.log('[scanPatterns] 🔍 Using REAL pattern detection service...');
+
+    // Determine user tier from localStorage or default to 'free'
+    const userTier = localStorage.getItem('user_tier') || 'free';
+    console.log('[scanPatterns] 👤 User tier:', userTier);
+
+    // Build pattern filter for detection service
+    const patternFilters = selectedPattern === 'All' ? [] : [selectedPattern.toLowerCase().replace(/[- &]/g, '_')];
+
+    // Scan each coin with real pattern detection
+    const scanPromises = coinsWithData.map(async (coin) => {
+      try {
+        // Clean symbol for Binance API (e.g., "BTC" -> "BTCUSDT")
+        const cleanedSymbol = coin.replace(/[\/\-_]/g, '').toUpperCase().replace(/USDT$/, '') + 'USDT';
+
+        console.log(`[scanPatterns] 🔍 Scanning ${cleanedSymbol} on ${timeframe}...`);
+
+        // Call REAL pattern detection with filters
+        const pattern = await patternDetectionService.scanSymbol(cleanedSymbol, userTier, {
+          timeframe: timeframe,
+          patterns: patternFilters.length > 0 ? patternFilters : undefined,
+        });
+
+        if (pattern) {
+          console.log(`[scanPatterns] ✅ ${cleanedSymbol}: Found ${pattern.patternType || pattern.pattern}`);
+
+          // Get direction info from PATTERN_SIGNALS
+          const signalInfo = getPatternSignal(pattern.patternType || pattern.pattern);
+
+          return {
+            id: `${coin}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            coin: `${coin}/USDT`,
+            pattern: pattern.patternType || pattern.pattern,
+            patternType: pattern.patternType || pattern.pattern,
+            patternName: pattern.fullLabel || pattern.description || pattern.pattern,
+            confidence: pattern.confidence || 70,
+            timeframe: timeframe,
+            entry: pattern.entry,
+            stopLoss: pattern.stopLoss,
+            takeProfit: pattern.takeProfit || pattern.target,
+            target: pattern.target || pattern.takeProfit,
+            riskReward: pattern.riskReward || 2.0,
+            detectedAt: pattern.detectedAt || new Date().toISOString(),
+            // 🔥 CRITICAL: Include direction from PATTERN_SIGNALS
+            direction: signalInfo?.direction || pattern.direction,
+            signal: signalInfo?.signal || pattern.signal,
+            type: signalInfo?.type || pattern.type,
+            color: signalInfo?.color || pattern.color,
+            icon: signalInfo?.icon || pattern.icon,
+          };
+        }
+
+        return null;
+      } catch (error) {
+        console.warn(`[scanPatterns] ⚠️ Error scanning ${coin}:`, error.message);
+        return null;
+      }
+    });
+
+    // Wait for all scans to complete
+    const results = await Promise.all(scanPromises);
+    const detectedPatterns = results.filter(p => p !== null);
+
+    console.log('[scanPatterns] ✅ REAL scan complete:', detectedPatterns.length, 'patterns found');
+    console.log('[scanPatterns] 📊 Summary:', {
+      totalCoins: coins.length,
+      coinsWithData: coinsWithData.length,
+      coinsSkipped: coinsWithoutData.length,
+      patternsFound: detectedPatterns.length,
+    });
+
+    // 🔥 ISSUE #2: Return patterns with metadata about skipped coins
+    detectedPatterns._metadata = {
+      totalCoinsScanned: coins.length,
+      coinsWithData: coinsWithData.length,
+      coinsSkipped: coinsWithoutData.length,
+      skippedCoins: coinsWithoutData,
+    };
+
+    return detectedPatterns;
   } catch (error) {
     console.error('Error scanning patterns:', error);
     throw error;

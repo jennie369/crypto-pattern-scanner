@@ -251,7 +251,7 @@ export default function RightSidebar() {
       <div className="sidebar-widget chatbot-widget">
         <div className="sidebar-widget-header">
           <Sparkles size={20} />
-          <h3 className="sidebar-widget-title">GEM Master</h3>
+          <h3 className="sidebar-widget-title">Gemral</h3>
         </div>
 
         <div className="chatbot-content">

@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Shop Screen (Main)
+ * Gemral - Shop Screen (Main)
  * Product catalog with categories & recommendation sections - DARK THEME
  * Infinite scroll experience with personalized recommendations
  */
@@ -19,7 +19,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Search, ShoppingCart, ChevronRight, Sparkles, TrendingUp, Clock, Star } from 'lucide-react-native';
+import { Search, ShoppingCart, ShoppingBag, ChevronRight, Sparkles, TrendingUp, Clock, Star } from 'lucide-react-native';
 import { ProductCard, CategoryFilter } from './components';
 import { useSwipeNavigation } from '../../hooks/useSwipeNavigation';
 import { shopifyService } from '../../services/shopifyService';
@@ -329,7 +329,7 @@ const ShopScreen = ({ navigation }) => {
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
-      <Text style={styles.emptyIcon}>🛍️</Text>
+      <ShoppingBag size={64} color={COLORS.textMuted} strokeWidth={1.5} />
       <Text style={styles.emptyTitle}>Chưa có sản phẩm</Text>
       <Text style={styles.emptySubtitle}>Sản phẩm sẽ được cập nhật sớm</Text>
     </View>

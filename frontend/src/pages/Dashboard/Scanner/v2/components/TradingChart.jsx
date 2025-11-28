@@ -357,7 +357,7 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
       if (patternData.entry) {
         patternLinesRef.current.entryLine = candlestickSeriesRef.current.createPriceLine({
           price: parseFloat(patternData.entry),
-          color: '#00D9FF',
+          color: '#FFBD59',
           lineWidth: 2,
           lineStyle: 2, // Dashed
           axisLabelVisible: true,

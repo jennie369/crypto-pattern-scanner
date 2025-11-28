@@ -239,7 +239,7 @@ Founder: **Jennie Uyen Chu**
         includes: [
           "11 Công thức FULL system (30M)",
           "Scanner VIP 24 tháng (143.928K)",
-          "Chatbot PREMIUM 24 tháng MIỄN PHÍ",
+          "Chatbot VIP 24 tháng MIỄN PHÍ",
           "24 patterns, 11 tools + AI",
           "Win rate: 80-90%",
           "Professional level"

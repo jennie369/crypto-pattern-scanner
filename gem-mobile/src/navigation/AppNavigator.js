@@ -1,5 +1,5 @@
 /**
- * GEM Platform - App Navigator
+ * Gemral - App Navigator
  * Main navigation structure with auth flow
  */
 
@@ -15,6 +15,8 @@ import SignupScreen from '../screens/auth/SignupScreen';
 // Main app
 import TabNavigator from './TabNavigator';
 import ProfileFullScreen from '../screens/tabs/ProfileFullScreen';
+import MessagesStack from './MessagesStack';
+import CourseStack from './CourseStack';
 
 // Auth context
 import { useAuth } from '../contexts/AuthContext';
@@ -60,6 +62,22 @@ function MainStack() {
       <Stack.Screen
         name="ProfileFull"
         component={ProfileFullScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+      {/* Messages Stack - TikTok style header icon entry */}
+      <Stack.Screen
+        name="Messages"
+        component={MessagesStack}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+      {/* Courses Stack - LMS feature */}
+      <Stack.Screen
+        name="Courses"
+        component={CourseStack}
         options={{
           animation: 'slide_from_right',
         }}

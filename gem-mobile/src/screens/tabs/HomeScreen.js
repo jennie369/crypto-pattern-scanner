@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Home Screen (Forum)
+ * Gemral - Home Screen (Forum)
  * Dark theme by default (matches other pages)
  */
 
@@ -7,6 +7,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Home } from 'lucide-react-native';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 
 export default function HomeScreen() {
@@ -25,7 +26,7 @@ export default function HomeScreen() {
           </View>
 
           <View style={styles.placeholder}>
-            <Text style={styles.placeholderIcon}>🏠</Text>
+            <Home size={64} color={COLORS.textMuted} strokeWidth={1.5} />
             <Text style={styles.placeholderText}>Home Screen</Text>
             <Text style={styles.placeholderDesc}>Forum & Community features coming in Week 3+</Text>
           </View>
@@ -68,11 +69,8 @@ const styles = StyleSheet.create({
     padding: SPACING.huge,
     marginTop: SPACING.huge,
   },
-  placeholderIcon: {
-    fontSize: 64,
-    marginBottom: SPACING.lg,
-  },
   placeholderText: {
+    marginTop: SPACING.lg,
     fontSize: TYPOGRAPHY.fontSize.xxl,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
     color: COLORS.textPrimary,

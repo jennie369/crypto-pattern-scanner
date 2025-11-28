@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Typing Indicator Component
+ * Gemral - Typing Indicator Component
  * Animated dots showing AI is thinking
  */
 

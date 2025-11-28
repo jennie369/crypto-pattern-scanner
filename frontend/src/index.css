@@ -12,9 +12,9 @@
   --brand-gold: #FFBD59;
   --brand-gold-light: #FFD699;
 
-  /* 🌈 ACCENT COLORS */
-  --accent-cyan: #00D9FF;
-  --accent-cyan-dark: #00A8CC;
+  /* 🌈 ACCENT COLORS - CYAN REPLACED WITH GOLD */
+  --accent-cyan: #FFBD59;
+  --accent-cyan-dark: #E6A64D;
   --accent-green: #00FF88;
   --accent-green-dark: #0ECB81;
   --accent-purple: #8B5CF6;
@@ -27,8 +27,8 @@
   --danger-bg: rgba(246, 70, 93, 0.15);
   --warning: #FFBD59;
   --warning-bg: rgba(255, 189, 89, 0.15);
-  --info: #00D9FF;
-  --info-bg: rgba(0, 217, 255, 0.15);
+  --info: #FFBD59;
+  --info-bg: rgba(255, 189, 89, 0.15);
 
   /* 🎭 BACKGROUND LAYERS */
   --bg-base: #0A1628;
@@ -91,13 +91,13 @@
   --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.45);
 
   --shadow-gold: 0 0 20px rgba(255, 189, 89, 0.3);
-  --shadow-cyan: 0 0 20px rgba(0, 217, 255, 0.3);
+  --shadow-cyan: 0 0 20px rgba(255, 189, 89, 0.3);
   --shadow-burgundy: 0 0 20px rgba(156, 6, 18, 0.4);
 
   /* 🎨 GRADIENTS */
   --gradient-primary: linear-gradient(135deg, var(--brand-burgundy), var(--brand-royal));
   --gradient-gold: linear-gradient(135deg, #FFD699, #FFBD59);
-  --gradient-cyan: linear-gradient(135deg, #00D9FF, #00A8CC);
+  --gradient-cyan: linear-gradient(135deg, #FFBD59, #E6A64D);
   --gradient-purple: linear-gradient(135deg, #8B5CF6, #7C3AED);
 
   /* 📏 LAYOUT */

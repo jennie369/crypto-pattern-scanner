@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEM iOS - TAB 4: Gem Master Wireframes</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            background: linear-gradient(135deg, #05040B 0%, #0D1B2A 50%, #112250 100%);
+            color: white; min-height: 100vh; padding: 40px 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .back-link {
+            display: inline-flex; align-items: center; gap: 8px;
+            color: #FFBD59; text-decoration: none; font-size: 14px;
+            margin-bottom: 24px; padding: 8px 16px;
+            background: rgba(255,189,89,0.1); border-radius: 20px;
+            border: 1px solid rgba(255,189,89,0.2);
+        }
+        .header {
+            text-align: center; margin-bottom: 48px; padding: 32px;
+            background: rgba(15,16,48,0.55); backdrop-filter: blur(18px);
+            border-radius: 24px; border: 1px solid rgba(255,189,89,0.2);
+        }
+        .header-icon { font-size: 48px; margin-bottom: 12px; }
+        .header-title {
+            font-size: 36px; font-weight: 800;
+            background: linear-gradient(135deg, #FFBD59, #9C0612);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .header-sub { color: rgba(255,255,255,0.6); margin-top: 8px; }
+        .screens-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 32px;
+        }
+        .screen-card {
+            background: rgba(15,16,48,0.55); backdrop-filter: blur(18px);
+            border: 1px solid rgba(255,189,89,0.2); border-radius: 20px;
+            padding: 24px;
+        }
+        .screen-header { margin-bottom: 20px; }
+        .screen-number {
+            font-size: 12px; color: #FFBD59; font-weight: 600;
+            background: rgba(255,189,89,0.15); padding: 4px 12px;
+            border-radius: 20px; display: inline-block; margin-bottom: 8px;
+        }
+        .screen-title { font-size: 20px; font-weight: 700; color: white; }
+        .screen-desc { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+        .phone-mockup {
+            width: 280px; height: 580px; margin: 0 auto;
+            background: #0D1B2A; border-radius: 40px;
+            border: 3px solid #333; position: relative;
+            overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .phone-notch {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 120px; height: 28px; background: #000; border-radius: 0 0 20px 20px;
+            z-index: 100;
+        }
+        .phone-screen { padding: 36px 12px 12px; height: 100%; overflow-y: auto; }
+        .phone-screen::-webkit-scrollbar { width: 0; }
+        .status-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 8px 4px; font-size: 11px; font-weight: 600;
+        }
+        .page-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 4px; margin-bottom: 12px;
+        }
+        .page-title { font-size: 18px; font-weight: 700; color: white; }
+        .icon-btn {
+            width: 32px; height: 32px; background: rgba(255,255,255,0.1);
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            font-size: 14px;
+        }
+        .bottom-tabs {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: rgba(13,27,42,0.95); backdrop-filter: blur(10px);
+            padding: 8px 8px 20px; display: flex; justify-content: space-around;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .tab-item { text-align: center; }
+        .tab-icon { font-size: 18px; margin-bottom: 2px; opacity: 0.5; }
+        .tab-label { font-size: 9px; color: rgba(255,255,255,0.5); }
+        .tab-item.active .tab-icon { opacity: 1; }
+        .tab-item.active .tab-label { color: #FFBD59; font-weight: 600; }
+        .spec-notes {
+            margin-top: 20px; padding: 16px;
+            background: rgba(255,255,255,0.05); border-radius: 12px;
+        }
+        .spec-title { font-size: 12px; font-weight: 700; color: #FFBD59; margin-bottom: 8px; }
+        .spec-item { font-size: 11px; color: rgba(255,255,255,0.7); margin-bottom: 4px; padding-left: 12px; position: relative; }
+        .spec-item::before { content: "•"; position: absolute; left: 0; color: #FFBD59; }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed; top: 20px; right: 20px; z-index: 1000;
+            background: rgba(255,189,89,0.2); border: 1px solid #FFBD59;
+            color: #FFBD59; padding: 10px 20px; border-radius: 25px;
+            cursor: pointer; font-weight: 600; font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .theme-toggle:hover { background: #FFBD59; color: #05040B; }
+
+        /* ========================================
+           LIGHT THEME - SIMPLE & READABLE
+           ======================================== */
+        body.light-theme { background: #FFFFFF !important; color: #000000 !important; }
+        body.light-theme, body.light-theme * { color: #000000 !important; font-weight: 500 !important; }
+        body.light-theme h1, body.light-theme h2, body.light-theme h3,
+        body.light-theme .header-title, body.light-theme .screen-title, body.light-theme .page-title {
+            color: #000000 !important; font-weight: 700 !important;
+            -webkit-text-fill-color: #000000 !important; background: none !important;
+        }
+        body.light-theme .header-sub, body.light-theme .screen-desc {
+            color: #333333 !important; font-weight: 500 !important;
+        }
+        body.light-theme .header, body.light-theme .screen-card, body.light-theme .spec-notes {
+            background: #FFFFFF !important; border: 1px solid #CCCCCC !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important; backdrop-filter: none !important;
+        }
+        body.light-theme .phone-mockup { background: #F5F5F5 !important; }
+        body.light-theme .back-link {
+            background: #F5F5F5 !important; border: 1px solid #CCCCCC !important; color: #9C0612 !important;
+        }
+        body.light-theme .screen-number { background: #FFF3CD !important; color: #9C0612 !important; }
+        body.light-theme .spec-title { color: #9C0612 !important; font-weight: 700 !important; }
+        body.light-theme .spec-item { color: #333333 !important; }
+        body.light-theme a { color: #0066CC !important; font-weight: 600 !important; }
+        body.light-theme .footer { border-top: 1px solid #CCCCCC !important; color: #333333 !important; }
+
+        .footer {
+            text-align: center; margin-top: 48px; padding: 24px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.5); font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark / ☀️ Light</button>
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            localStorage.setItem('theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+        }
+        if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-theme');
+    </script>
+    <div class="container">
+        <a href="WIREFRAMES_INDEX.html" class="back-link">← Back to Wireframes Index</a>
+
+        <div class="header">
+            <div class="header-icon">🤖</div>
+            <h1 class="header-title">TAB 4: Gem Master</h1>
+            <p class="header-sub">AI Chat, I Ching, Tarot Readings • 5 Screens</p>
+        </div>
+
+        <div class="screens-grid">
+            <!-- SCREEN 4.1: CHAT MAIN -->
+            <div class="screen-card">
+                <div class="screen-header">
+                    <span class="screen-number">SCREEN 4.1</span>
+                    <h3 class="screen-title">AI Chat Interface</h3>
+                    <p class="screen-desc">Main chat with GEM AI assistant</p>
+                </div>
+                <div class="phone-mockup">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span>9:41</span><span>📶 🔋</span>
+                        </div>
+                        <div class="page-header">
+                            <div class="icon-btn">📜</div>
+                            <span class="page-title">GEM AI</span>
+                            <div class="icon-btn">⚙️</div>
+                        </div>
+                        <!-- Quota Banner -->
+                        <div style="background: rgba(255,189,89,0.15); border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 10px; color: rgba(255,255,255,0.8);">Còn lại: <strong style="color: #FFBD59;">12/15</strong> câu hỏi</span>
+                            <span style="font-size: 9px; color: #FFBD59; font-weight: 600;">TIER 1</span>
+                        </div>
+                        <!-- Chat Messages -->
+                        <div style="margin-bottom: 8px;">
+                            <!-- AI Message -->
+                            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                                <div style="width: 28px; height: 28px; background: linear-gradient(135deg, #FFBD59, #9C0612); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;">🤖</div>
+                                <div style="background: rgba(255,255,255,0.1); border-radius: 12px 12px 12px 4px; padding: 10px; max-width: 85%;">
+                                    <div style="font-size: 11px; color: white; line-height: 1.5;">Xin chào! Tôi là GEM AI. Tôi có thể giúp bạn phân tích pattern, gieo quẻ I Ching, hoặc xem Tarot. Bạn muốn làm gì hôm nay?</div>
+                                </div>
+                            </div>
+                            <!-- User Message -->
+                            <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+                                <div style="background: linear-gradient(135deg, #FFBD59, #9C0612); border-radius: 12px 12px 4px 12px; padding: 10px; max-width: 85%;">
+                                    <div style="font-size: 11px; color: white; line-height: 1.5;">Phân tích BTC pattern hiện tại cho tôi</div>
+                                </div>
+                            </div>
+                            <!-- AI Response -->
+                            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                                <div style="width: 28px; height: 28px; background: linear-gradient(135deg, #FFBD59, #9C0612); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;">🤖</div>
+                                <div style="background: rgba(255,255,255,0.1); border-radius: 12px 12px 12px 4px; padding: 10px; max-width: 85%;">
+                                    <div style="font-size: 11px; color: white; line-height: 1.5;">📊 <strong>BTC/USDT Analysis</strong><br><br>Hiện tại BTC đang hình thành <span style="color: #4CAF50;">Ascending Triangle</span> trên H4 với confidence 85%.<br><br>• Entry: $69,200<br>• TP1: $72,000<br>• SL: $67,500</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Quick Actions -->
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;">
+                            <div style="padding: 6px 10px; background: rgba(255,255,255,0.1); border-radius: 14px; font-size: 9px; color: rgba(255,255,255,0.8);">☯️ Gieo quẻ</div>
+                            <div style="padding: 6px 10px; background: rgba(255,255,255,0.1); border-radius: 14px; font-size: 9px; color: rgba(255,255,255,0.8);">🃏 Tarot</div>
+                            <div style="padding: 6px 10px; background: rgba(255,255,255,0.1); border-radius: 14px; font-size: 9px; color: rgba(255,255,255,0.8);">📊 Pattern</div>
+                        </div>
+                        <!-- Input -->
+                        <div style="position: absolute; bottom: 70px; left: 12px; right: 12px;">
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <div style="flex: 1; background: rgba(255,255,255,0.1); border-radius: 20px; padding: 10px 14px; font-size: 11px; color: rgba(255,255,255,0.5);">Nhập câu hỏi...</div>
+                                <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #FFBD59, #9C0612); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                    <span style="font-size: 14px;">➤</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bottom-tabs">
+                            <div class="tab-item"><div class="tab-icon">🏠</div><div class="tab-label">Home</div></div>
+                            <div class="tab-item"><div class="tab-icon">🛒</div><div class="tab-label">Shop</div></div>
+                            <div class="tab-item"><div class="tab-icon">📊</div><div class="tab-label">Giao Dịch</div></div>
+                            <div class="tab-item active"><div class="tab-icon">🤖</div><div class="tab-label">Gem Master</div></div>
+                            <div class="tab-item"><div class="tab-icon">🔔</div><div class="tab-label">Thông Báo</div></div>
+                            <div class="tab-item"><div class="tab-icon">💰</div><div class="tab-label">Tài Sản</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="spec-notes">
+                    <div class="spec-title">Specifications</div>
+                    <div class="spec-item">Quota counter at top</div>
+                    <div class="spec-item">Chat bubbles with avatar</div>
+                    <div class="spec-item">Quick action chips</div>
+                    <div class="spec-item">FREE: 5/day | T1: 15 | T2: ∞</div>
+                    <div class="spec-item">Markdown support in responses</div>
+                </div>
+            </div>
+
+            <!-- SCREEN 4.2: I CHING -->
+            <div class="screen-card">
+                <div class="screen-header">
+                    <span class="screen-number">SCREEN 4.2</span>
+                    <h3 class="screen-title">I Ching Reading</h3>
+                    <p class="screen-desc">AI-powered hexagram divination</p>
+                </div>
+                <div class="phone-mockup">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span>9:41</span><span>📶 🔋</span>
+                        </div>
+                        <div class="page-header">
+                            <div class="icon-btn">←</div>
+                            <span class="page-title">I Ching</span>
+                            <div class="icon-btn">📜</div>
+                        </div>
+                        <!-- Hexagram Display -->
+                        <div style="text-align: center; padding: 16px; background: rgba(255,189,89,0.1); border-radius: 16px; margin-bottom: 12px;">
+                            <div style="font-size: 48px; margin-bottom: 8px;">☰</div>
+                            <div style="font-size: 18px; font-weight: 700; color: #FFBD59;">Quẻ Càn (乾)</div>
+                            <div style="font-size: 12px; color: rgba(255,255,255,0.7);">The Creative • Heaven</div>
+                        </div>
+                        <!-- Interpretation -->
+                        <div style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 12px; margin-bottom: 10px;">
+                            <div style="font-size: 11px; font-weight: 600; color: #FFBD59; margin-bottom: 8px;">GIẢI NGHĨA</div>
+                            <div style="font-size: 11px; color: rgba(255,255,255,0.9); line-height: 1.6;">Quẻ Càn tượng trưng cho sức mạnh sáng tạo, năng lượng dương. Đây là thời điểm thuận lợi để hành động quyết đoán.</div>
+                        </div>
+                        <!-- Trading Insight -->
+                        <div style="background: rgba(76,175,80,0.15); border: 1px solid rgba(76,175,80,0.3); border-radius: 12px; padding: 12px; margin-bottom: 10px;">
+                            <div style="font-size: 11px; font-weight: 600; color: #4CAF50; margin-bottom: 6px;">💹 TRADING INSIGHT</div>
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.9); line-height: 1.5;">Năng lượng mạnh mẽ ủng hộ các quyết định trading. Tuy nhiên, cần cẩn thận với việc overtrade.</div>
+                        </div>
+                        <!-- Actions -->
+                        <div style="display: flex; gap: 8px; margin-bottom: 50px;">
+                            <div style="flex: 1; background: linear-gradient(135deg, #FFBD59, #9C0612); border-radius: 10px; padding: 10px; text-align: center;">
+                                <span style="font-size: 11px; font-weight: 600; color: white;">Gieo quẻ mới</span>
+                            </div>
+                            <div style="flex: 1; background: rgba(255,255,255,0.1); border-radius: 10px; padding: 10px; text-align: center;">
+                                <span style="font-size: 11px; color: white;">Lưu kết quả</span>
+                            </div>
+                        </div>
+                        <div class="bottom-tabs">
+                            <div class="tab-item"><div class="tab-icon">🏠</div><div class="tab-label">Home</div></div>
+                            <div class="tab-item"><div class="tab-icon">🛒</div><div class="tab-label">Shop</div></div>
+                            <div class="tab-item"><div class="tab-icon">📊</div><div class="tab-label">Giao Dịch</div></div>
+                            <div class="tab-item active"><div class="tab-icon">🤖</div><div class="tab-label">Gem Master</div></div>
+                            <div class="tab-item"><div class="tab-icon">🔔</div><div class="tab-label">Thông Báo</div></div>
+                            <div class="tab-item"><div class="tab-icon">💰</div><div class="tab-label">Tài Sản</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="spec-notes">
+                    <div class="spec-title">Specifications</div>
+                    <div class="spec-item">Animated hexagram reveal</div>
+                    <div class="spec-item">Traditional + trading interpretation</div>
+                    <div class="spec-item">Save to history</div>
+                    <div class="spec-item">Share result option</div>
+                    <div class="spec-item">Uses 1 quota per reading</div>
+                </div>
+            </div>
+
+            <!-- SCREEN 4.3: TAROT -->
+            <div class="screen-card">
+                <div class="screen-header">
+                    <span class="screen-number">SCREEN 4.3</span>
+                    <h3 class="screen-title">Tarot Reading</h3>
+                    <p class="screen-desc">AI-powered tarot card reading</p>
+                </div>
+                <div class="phone-mockup">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span>9:41</span><span>📶 🔋</span>
+                        </div>
+                        <div class="page-header">
+                            <div class="icon-btn">←</div>
+                            <span class="page-title">Tarot</span>
+                            <div class="icon-btn">📜</div>
+                        </div>
+                        <!-- Spread Selection -->
+                        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                            <div style="flex: 1; padding: 8px; background: #FFBD59; border-radius: 8px; text-align: center;">
+                                <span style="font-size: 10px; font-weight: 600; color: #0D1B2A;">1 Card</span>
+                            </div>
+                            <div style="flex: 1; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 8px; text-align: center;">
+                                <span style="font-size: 10px; color: rgba(255,255,255,0.7);">3 Cards</span>
+                            </div>
+                            <div style="flex: 1; padding: 8px; background: rgba(255,255,255,0.1); border-radius: 8px; text-align: center;">
+                                <span style="font-size: 10px; color: rgba(255,255,255,0.7);">Celtic</span>
+                            </div>
+                        </div>
+                        <!-- Card Display -->
+                        <div style="text-align: center; padding: 16px; margin-bottom: 10px;">
+                            <div style="width: 120px; height: 180px; background: linear-gradient(180deg, #FFBD59 0%, #9C0612 100%); border-radius: 12px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(255,189,89,0.3);">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 36px; margin-bottom: 4px;">☀️</div>
+                                    <div style="font-size: 10px; font-weight: 600; color: white;">THE SUN</div>
+                                    <div style="font-size: 8px; color: rgba(255,255,255,0.8);">XIX</div>
+                                </div>
+                            </div>
+                            <div style="font-size: 14px; font-weight: 700; color: #FFBD59;">The Sun</div>
+                            <div style="font-size: 11px; color: rgba(255,255,255,0.6);">Upright Position</div>
+                        </div>
+                        <!-- Interpretation -->
+                        <div style="background: rgba(255,255,255,0.05); border-radius: 10px; padding: 10px; margin-bottom: 8px;">
+                            <div style="font-size: 10px; font-weight: 600; color: #FFBD59; margin-bottom: 6px;">💫 MEANING</div>
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.9); line-height: 1.5;">Thành công, niềm vui, sự lạc quan. Ánh sáng sau bóng tối. Thời điểm tuyệt vời cho những khởi đầu mới.</div>
+                        </div>
+                        <div style="background: rgba(76,175,80,0.15); border-radius: 10px; padding: 10px; margin-bottom: 50px;">
+                            <div style="font-size: 10px; font-weight: 600; color: #4CAF50; margin-bottom: 6px;">💹 TRADING</div>
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.9); line-height: 1.5;">Xu hướng tích cực. Tin tưởng vào phân tích của bạn.</div>
+                        </div>
+                        <div class="bottom-tabs">
+                            <div class="tab-item"><div class="tab-icon">🏠</div><div class="tab-label">Home</div></div>
+                            <div class="tab-item"><div class="tab-icon">🛒</div><div class="tab-label">Shop</div></div>
+                            <div class="tab-item"><div class="tab-icon">📊</div><div class="tab-label">Giao Dịch</div></div>
+                            <div class="tab-item active"><div class="tab-icon">🤖</div><div class="tab-label">Gem Master</div></div>
+                            <div class="tab-item"><div class="tab-icon">🔔</div><div class="tab-label">Thông Báo</div></div>
+                            <div class="tab-item"><div class="tab-icon">💰</div><div class="tab-label">Tài Sản</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="spec-notes">
+                    <div class="spec-title">Specifications</div>
+                    <div class="spec-item">Spread selection (1/3/Celtic)</div>
+                    <div class="spec-item">Card flip animation</div>
+                    <div class="spec-item">Upright/Reversed indicator</div>
+                    <div class="spec-item">Traditional + trading meaning</div>
+                    <div class="spec-item">3 cards = 2 quota | Celtic = 3</div>
+                </div>
+            </div>
+
+            <!-- SCREEN 4.4: CHAT HISTORY -->
+            <div class="screen-card">
+                <div class="screen-header">
+                    <span class="screen-number">SCREEN 4.4</span>
+                    <h3 class="screen-title">Chat History</h3>
+                    <p class="screen-desc">Previous conversations and readings</p>
+                </div>
+                <div class="phone-mockup">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span>9:41</span><span>📶 🔋</span>
+                        </div>
+                        <div class="page-header">
+                            <div class="icon-btn">←</div>
+                            <span class="page-title">History</span>
+                            <div class="icon-btn">🗑️</div>
+                        </div>
+                        <!-- Filter Tabs -->
+                        <div style="display: flex; gap: 6px; margin-bottom: 12px;">
+                            <div style="padding: 6px 12px; background: #FFBD59; border-radius: 14px; font-size: 10px; font-weight: 600; color: #0D1B2A;">Tất cả</div>
+                            <div style="padding: 6px 12px; background: rgba(255,255,255,0.1); border-radius: 14px; font-size: 10px; color: rgba(255,255,255,0.7);">Chat</div>
+                            <div style="padding: 6px 12px; background: rgba(255,255,255,0.1); border-radius: 14px; font-size: 10px; color: rgba(255,255,255,0.7);">I Ching</div>
+                            <div style="padding: 6px 12px; background: rgba(255,255,255,0.1); border-radius: 14px; font-size: 10px; color: rgba(255,255,255,0.7);">Tarot</div>
+                        </div>
+                        <!-- History Items -->
+                        <div style="background: rgba(255,255,255,0.05); border-radius: 10px; padding: 12px; margin-bottom: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 16px;">💬</span>
+                                    <div>
+                                        <div style="font-size: 11px; font-weight: 600; color: white;">BTC Pattern Analysis</div>
+                                        <div style="font-size: 9px; color: rgba(255,255,255,0.5);">Hôm nay, 14:30</div>
+                                    </div>
+                                </div>
+                                <span style="font-size: 12px; color: rgba(255,255,255,0.3);">›</span>
+                            </div>
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.6); line-height: 1.4;">Ascending Triangle detected on H4...</div>
+                        </div>
+                        <div style="background: rgba(255,189,89,0.1); border-radius: 10px; padding: 12px; margin-bottom: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 16px;">☯️</span>
+                                    <div>
+                                        <div style="font-size: 11px; font-weight: 600; color: white;">Quẻ Càn</div>
+                                        <div style="font-size: 9px; color: rgba(255,255,255,0.5);">Hôm qua, 09:15</div>
+                                    </div>
+                                </div>
+                                <span style="font-size: 12px; color: rgba(255,255,255,0.3);">›</span>
+                            </div>
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.6); line-height: 1.4;">The Creative • Heaven...</div>
+                        </div>
+                        <div style="background: rgba(156,6,18,0.15); border-radius: 10px; padding: 12px; margin-bottom: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 16px;">🃏</span>
+                                    <div>
+                                        <div style="font-size: 11px; font-weight: 600; color: white;">The Sun (3 Card)</div>
+                                        <div style="font-size: 9px; color: rgba(255,255,255,0.5);">20/11, 18:45</div>
+                                    </div>
+                                </div>
+                                <span style="font-size: 12px; color: rgba(255,255,255,0.3);">›</span>
+                            </div>
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.6); line-height: 1.4;">Past: The Fool, Present: The Sun...</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.05); border-radius: 10px; padding: 12px; margin-bottom: 50px;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 16px;">💬</span>
+                                    <div>
+                                        <div style="font-size: 11px; font-weight: 600; color: white;">Risk Management Tips</div>
+                                        <div style="font-size: 9px; color: rgba(255,255,255,0.5);">19/11, 10:00</div>
+                                    </div>
+                                </div>
+                                <span style="font-size: 12px; color: rgba(255,255,255,0.3);">›</span>
+                            </div>
+                        </div>
+                        <div class="bottom-tabs">
+                            <div class="tab-item"><div class="tab-icon">🏠</div><div class="tab-label">Home</div></div>
+                            <div class="tab-item"><div class="tab-icon">🛒</div><div class="tab-label">Shop</div></div>
+                            <div class="tab-item"><div class="tab-icon">📊</div><div class="tab-label">Giao Dịch</div></div>
+                            <div class="tab-item active"><div class="tab-icon">🤖</div><div class="tab-label">Gem Master</div></div>
+                            <div class="tab-item"><div class="tab-icon">🔔</div><div class="tab-label">Thông Báo</div></div>
+                            <div class="tab-item"><div class="tab-icon">💰</div><div class="tab-label">Tài Sản</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="spec-notes">
+                    <div class="spec-title">Specifications</div>
+                    <div class="spec-item">Filter by type (Chat/I Ching/Tarot)</div>
+                    <div class="spec-item">Color-coded by reading type</div>
+                    <div class="spec-item">Tap to view full conversation</div>
+                    <div class="spec-item">Delete individual or all</div>
+                    <div class="spec-item">Search within history</div>
+                </div>
+            </div>
+
+            <!-- SCREEN 4.5: QUOTA MANAGEMENT -->
+            <div class="screen-card">
+                <div class="screen-header">
+                    <span class="screen-number">SCREEN 4.5</span>
+                    <h3 class="screen-title">Quota & Upgrade</h3>
+                    <p class="screen-desc">View usage and upgrade options</p>
+                </div>
+                <div class="phone-mockup">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span>9:41</span><span>📶 🔋</span>
+                        </div>
+                        <div class="page-header">
+                            <div class="icon-btn">←</div>
+                            <span class="page-title">Quota</span>
+                            <div style="width: 32px;"></div>
+                        </div>
+                        <!-- Current Usage -->
+                        <div style="background: linear-gradient(135deg, rgba(255,189,89,0.2), rgba(255,189,89,0.05)); border: 1px solid rgba(255,189,89,0.3); border-radius: 14px; padding: 16px; margin-bottom: 12px; text-align: center;">
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.6); margin-bottom: 4px;">Your Tier</div>
+                            <div style="font-size: 22px; font-weight: 800; color: #FFBD59; margin-bottom: 8px;">TIER 1</div>
+                            <!-- Progress Bar -->
+                            <div style="background: rgba(255,255,255,0.1); border-radius: 6px; height: 8px; margin-bottom: 8px; overflow: hidden;">
+                                <div style="background: linear-gradient(90deg, #FFBD59, #9C0612); height: 100%; width: 80%; border-radius: 6px;"></div>
+                            </div>
+                            <div style="font-size: 11px; color: white;"><strong>12</strong> / 15 questions used today</div>
+                            <div style="font-size: 9px; color: rgba(255,255,255,0.5); margin-top: 4px;">Resets in 8 hours</div>
+                        </div>
+                        <!-- Tier Comparison -->
+                        <div style="font-size: 11px; font-weight: 600; color: #FFBD59; margin-bottom: 8px;">UPGRADE FOR MORE</div>
+                        <div style="background: rgba(255,255,255,0.05); border-radius: 10px; padding: 10px; margin-bottom: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.5);">FREE</span>
+                                <span style="font-size: 10px; color: rgba(255,255,255,0.5);">5 Q/day</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 6px; background: rgba(255,189,89,0.1); border-radius: 6px;">
+                                <span style="font-size: 11px; font-weight: 600; color: #FFBD59;">TIER 1 ✓</span>
+                                <span style="font-size: 10px; color: #FFBD59;">15 Q/day</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 11px; font-weight: 600; color: #2196F3;">TIER 2</span>
+                                <span style="font-size: 10px; color: rgba(255,255,255,0.7);">Unlimited</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 11px; font-weight: 600; color: #F44336;">TIER 3</span>
+                                <span style="font-size: 10px; color: rgba(255,255,255,0.7);">Unlimited + Priority</span>
+                            </div>
+                        </div>
+                        <!-- Upgrade CTA -->
+                        <div style="background: linear-gradient(135deg, #2196F3, #1976D2); border-radius: 12px; padding: 14px; text-align: center; margin-bottom: 8px;">
+                            <div style="font-size: 12px; font-weight: 700; color: white;">Upgrade to TIER 2</div>
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.8);">$199/month • Unlimited questions</div>
+                        </div>
+                        <!-- Buy Crystals -->
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; text-align: center; margin-bottom: 50px;">
+                            <div style="font-size: 11px; color: white;">Or buy extra questions with 💎 Crystals</div>
+                        </div>
+                        <div class="bottom-tabs">
+                            <div class="tab-item"><div class="tab-icon">🏠</div><div class="tab-label">Home</div></div>
+                            <div class="tab-item"><div class="tab-icon">🛒</div><div class="tab-label">Shop</div></div>
+                            <div class="tab-item"><div class="tab-icon">📊</div><div class="tab-label">Giao Dịch</div></div>
+                            <div class="tab-item active"><div class="tab-icon">🤖</div><div class="tab-label">Gem Master</div></div>
+                            <div class="tab-item"><div class="tab-icon">🔔</div><div class="tab-label">Thông Báo</div></div>
+                            <div class="tab-item"><div class="tab-icon">💰</div><div class="tab-label">Tài Sản</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="spec-notes">
+                    <div class="spec-title">Specifications</div>
+                    <div class="spec-item">Visual quota progress bar</div>
+                    <div class="spec-item">Reset countdown timer</div>
+                    <div class="spec-item">Tier comparison table</div>
+                    <div class="spec-item">Quick upgrade CTA</div>
+                    <div class="spec-item">Crystal purchase option</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>TAB 4: Gem Master - 5 Screens Complete</p>
+            <p style="margin-top: 8px;">
+                <a href="WIREFRAMES_TAB3_TRADING.html" style="color: rgba(255,255,255,0.5);">← TAB 3 TRADING</a>
+                <span style="margin: 0 16px;">|</span>
+                <a href="WIREFRAMES_TAB5_NOTIFICATIONS.html" style="color: #FFBD59;">Next: TAB 5 NOTIFICATIONS →</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

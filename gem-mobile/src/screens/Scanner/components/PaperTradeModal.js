@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Paper Trade Modal
+ * Gemral - Paper Trade Modal
  * Open simulated trades from pattern detection
  */
 

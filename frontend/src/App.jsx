@@ -60,7 +60,7 @@ import CommunityHub from './pages/Community/CommunityHub';
 // Leaderboard
 import Leaderboard from './pages/Community/Leaderboard';
 
-// Gem Master Chatbot
+// Gemral Chatbot
 import Chatbot from './pages/Chatbot';
 
 // Dashboard (Widgets) - Lazy loaded for performance
@@ -261,7 +261,7 @@ function App() {
             }
           />
 
-          {/* Gem Master Chatbot Route */}
+          {/* Gemral Chatbot Route */}
           <Route
             path="/chatbot"
             element={

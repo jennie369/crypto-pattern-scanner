@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Main Feed Tabs Component
+ * Gemral - Main Feed Tabs Component
  * Horizontal scrollable tabs for main feed types
  * Tabs: Khám phá, Đang theo dõi, Tin tức, Thông báo, Phổ biến
  */

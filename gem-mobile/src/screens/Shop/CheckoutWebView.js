@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Checkout WebView
+ * Gemral - Checkout WebView
  * Handles Shopify checkout with instant success detection
  */
 
@@ -399,30 +399,56 @@ const CheckoutWebView = () => {
 
       setCheckoutCompleted(true);
 
+      // Get params from route to determine product type
+      const { productType, gemAmount, packageName, returnScreen } = route.params || {};
+
       // Close WebView with small delay to ensure smooth transition
       setTimeout(() => {
         console.log('[CheckoutWebView] Navigating to success screen...');
 
-        // Navigate to success screen
-        navigation.replace('OrderSuccess', {
-          orderId: orderData.orderId,
-          orderNumber: orderData.orderNumber,
-          orderUrl: orderData.url,
-        });
+        // Check if this is a GEM purchase
+        if (productType === 'gems') {
+          console.log('[CheckoutWebView] GEM purchase detected!');
 
-        // Clear cart
-        completeCheckout(orderData.orderId, orderData.orderNumber);
+          // Navigate to Gem success screen in Account stack
+          navigation.replace('GemPurchaseSuccess', {
+            orderId: orderData.orderId,
+            orderNumber: orderData.orderNumber,
+            orderUrl: orderData.url,
+            gemAmount: gemAmount,
+            packageName: packageName,
+          });
+        } else {
+          // Regular shop order - navigate to OrderSuccess
+          navigation.replace('OrderSuccess', {
+            orderId: orderData.orderId,
+            orderNumber: orderData.orderNumber,
+            orderUrl: orderData.url,
+          });
 
+          // Clear cart for regular shop orders
+          completeCheckout(orderData.orderId, orderData.orderNumber);
+        }
       }, 300);
 
     } catch (error) {
       console.error('[CheckoutWebView] Error handling success:', error);
 
       // Fallback: just close and show generic success
-      navigation.replace('OrderSuccess', {
-        orderId: null,
-        orderNumber: null,
-      });
+      const { productType, gemAmount } = route.params || {};
+
+      if (productType === 'gems') {
+        navigation.replace('GemPurchaseSuccess', {
+          orderId: null,
+          orderNumber: null,
+          gemAmount: gemAmount,
+        });
+      } else {
+        navigation.replace('OrderSuccess', {
+          orderId: null,
+          orderNumber: null,
+        });
+      }
     }
   };
 

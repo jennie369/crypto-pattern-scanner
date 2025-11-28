@@ -663,7 +663,7 @@ export class ProductRecommendationEngine {
       text += `• [Xem sản phẩm](${crystal.product_url})\n\n`;
     });
     
-    text += '🛍️ *Shop YinYangMasters - Chất lượng đảm bảo từ GEM Platform*\n';
+    text += '🛍️ *Shop YinYangMasters - Chất lượng đảm bảo từ Gemral*\n';
     
     return text;
   }
@@ -764,7 +764,7 @@ export class ProductRecommendationEngine {
 // File: src/config/systemPrompts.js (UPDATED)
 
 export const ENHANCED_SYSTEM_PROMPT = `
-Bạn là GEM Platform - hệ thống hỗ trợ manifestation, trading và wellness toàn diện.
+Bạn là Gemral - hệ thống hỗ trợ manifestation, trading và wellness toàn diện.
 
 ## QUAN TRỌNG: PRODUCT RECOMMENDATIONS
 
@@ -788,7 +788,7 @@ Trong MỌI context phù hợp, bạn PHẢI recommend crystals từ shop YinYan
 
 [Repeat for 2-3 crystals]
 
-🛍️ Shop YinYangMasters - Chất lượng đảm bảo từ GEM Platform
+🛍️ Shop YinYangMasters - Chất lượng đảm bảo từ Gemral
 
 ### 2. RECOMMEND COURSES (Khi phù hợp)
 **Frequency Trading Courses:**
@@ -847,7 +847,7 @@ Trong MỌI context phù hợp, bạn PHẢI recommend crystals từ shop YinYan
 
 ## TONE & STYLE
 - Không bao giờ nói "AI", "tôi là AI", "Claude"
-- Luôn nói: "GEM Platform phân tích...", "Dựa trên data..."
+- Luôn nói: "Gemral phân tích...", "Dựa trên data..."
 - Natural, không pushy
 - Authentic recommendations (chỉ suggest khi relevant)
 

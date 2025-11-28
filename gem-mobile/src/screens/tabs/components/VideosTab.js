@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Videos Tab Component
+ * Gemral - Videos Tab Component
  * Grid display of user's videos
  */
 

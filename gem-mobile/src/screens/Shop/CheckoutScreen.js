@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Checkout Screen
+ * Gemral - Checkout Screen
  * Shopify WebView Checkout - Dark Theme
  */
 
@@ -68,11 +68,11 @@ const CheckoutScreen = ({ navigation, route }) => {
     await completeCheckout(orderId, orderNumber);
 
     Alert.alert(
-      'Dat Hang Thanh Cong!',
-      'Cam on ban da mua hang tai GEM Platform.\nDon hang cua ban dang duoc xu ly.',
+      'Đặt Hàng Thành Công!',
+      'Cảm ơn bạn đã mua hàng tại Gemral.\nĐơn hàng của bạn đang được xử lý.',
       [
         {
-          text: 'Xem Don Hang',
+          text: 'Xem Đơn Hàng',
           onPress: () => {
             navigation.reset({
               index: 0,
@@ -84,7 +84,7 @@ const CheckoutScreen = ({ navigation, route }) => {
           },
         },
         {
-          text: 'Tiep Tuc Mua Sam',
+          text: 'Tiếp Tục Mua Sắm',
           style: 'cancel',
           onPress: () => {
             navigation.navigate('ShopMain');
@@ -96,12 +96,12 @@ const CheckoutScreen = ({ navigation, route }) => {
 
   const handleClose = () => {
     Alert.alert(
-      'Huy thanh toan?',
-      'Ban co chac muon huy thanh toan? Gio hang se duoc giu nguyen.',
+      'Hủy thanh toán?',
+      'Bạn có chắc muốn hủy thanh toán? Giỏ hàng sẽ được giữ nguyên.',
       [
-        { text: 'Tiep tuc thanh toan', style: 'cancel' },
+        { text: 'Tiếp tục thanh toán', style: 'cancel' },
         {
-          text: 'Huy',
+          text: 'Hủy',
           style: 'destructive',
           onPress: () => navigation.goBack(),
         },
@@ -133,7 +133,7 @@ const CheckoutScreen = ({ navigation, route }) => {
           <TouchableOpacity style={styles.headerBtn} onPress={handleGoBack}>
             <ArrowLeft size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Thanh toan</Text>
+          <Text style={styles.headerTitle}>Thanh toán</Text>
           <View style={styles.headerActions}>
             <TouchableOpacity style={styles.headerBtn} onPress={handleRefresh}>
               <RefreshCw size={20} color={COLORS.textPrimary} />
@@ -146,7 +146,7 @@ const CheckoutScreen = ({ navigation, route }) => {
         {loading && (
           <View style={styles.loadingOverlay}>
             <ActivityIndicator size="large" color={COLORS.gold} />
-            <Text style={styles.loadingText}>Dang tai trang thanh toan...</Text>
+            <Text style={styles.loadingText}>Đang tải trang thanh toán...</Text>
           </View>
         )}
         <View style={styles.webViewContainer}>
@@ -168,18 +168,18 @@ const CheckoutScreen = ({ navigation, route }) => {
               const { nativeEvent } = syntheticEvent;
               console.error('WebView error:', nativeEvent);
               Alert.alert(
-                'Loi',
-                'Khong the tai trang thanh toan. Vui long thu lai.',
+                'Lỗi',
+                'Không thể tải trang thanh toán. Vui lòng thử lại.',
                 [
-                  { text: 'Thu lai', onPress: handleRefresh },
-                  { text: 'Dong', onPress: () => navigation.goBack() },
+                  { text: 'Thử lại', onPress: handleRefresh },
+                  { text: 'Đóng', onPress: () => navigation.goBack() },
                 ]
               );
             }}
           />
         </View>
         <View style={styles.securityNotice}>
-          <Text style={styles.securityText}>Thanh toan an toan qua Shopify</Text>
+          <Text style={styles.securityText}>Thanh toán an toàn qua Shopify</Text>
         </View>
       </SafeAreaView>
     </LinearGradient>

@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Enhanced Notifications Screen
+ * Gemral - Enhanced Notifications Screen
  * Features: Category tabs, swipe to delete, trading alerts
  */
 

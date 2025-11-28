@@ -44,7 +44,7 @@ export async function getUserSettings(userId) {
             trading: {
               defaultTimeframe: '1h',
               riskPercentage: 2,
-              enabledPatterns: ['head_and_shoulders', 'double_top', 'double_bottom', 'triangle', 'wedge'],
+              enabledPatterns: ['head_shoulders', 'double_top', 'double_bottom', 'triangle', 'wedge'],
             },
             display: {
               language: 'en',

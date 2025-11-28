@@ -1,9 +1,9 @@
 /**
- * GEM Platform - Forum Screen (Home Tab)
+ * Gemral - Forum Screen (Home Tab)
  * Week 3 Implementation with Burger Menu
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   FlatList,
@@ -17,8 +17,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Menu, Search, Bell } from 'lucide-react-native';
+import { Menu, Search, Bell, FileText, Gem, DollarSign, Music, Zap } from 'lucide-react-native';
 import PostCard from './components/PostCard';
+import AdCard from '../../components/Forum/AdCard';
+import HeaderMessagesIcon from '../../components/HeaderMessagesIcon';
 import CategoryTabs, { MAIN_TABS } from './components/CategoryTabs';
 import { useSwipeNavigation } from '../../hooks/useSwipeNavigation';
 import FABButton from './components/FABButton';
@@ -28,6 +30,8 @@ import EditFeedsModal from './components/EditFeedsModal';
 import AuthGate from '../../components/AuthGate';
 import { forumService } from '../../services/forumService';
 import { forumRecommendationService } from '../../services/forumRecommendationService';
+import { generateFeed, getNextFeedPage } from '../../services/feedService';
+import { trackView } from '../../services/engagementService';
 import { supabase } from '../../services/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
@@ -35,6 +39,8 @@ import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/token
 const ForumScreen = ({ navigation }) => {
   const { user } = useAuth();
   const [posts, setPosts] = useState([]);
+  const [feedItems, setFeedItems] = useState([]); // New: mixed posts + ads
+  const [sessionId, setSessionId] = useState(null); // Feed session ID
   const [selectedFeed, setSelectedFeed] = useState('explore'); // Main tab: explore, following, news, notifications, popular, academy
   const [selectedTopic, setSelectedTopic] = useState(null); // Topic filter: giao-dich, tinh-than, can-bang
   const [loading, setLoading] = useState(true);
@@ -42,18 +48,22 @@ const ForumScreen = ({ navigation }) => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [useHybridFeed, setUseHybridFeed] = useState(true); // Toggle for new feed algorithm
+  const lastPostIdRef = useRef(null);
 
   // Custom Feeds State
   const [createFeedModalOpen, setCreateFeedModalOpen] = useState(false);
   const [editFeedsModalOpen, setEditFeedsModalOpen] = useState(false);
   const [customFeeds, setCustomFeeds] = useState([]);
 
-  // Swipe Navigation Hook
+  // Swipe Navigation Hook - DISABLED to fix conflict with ImageCarousel
+  // When user swipes on image carousel, it was also triggering tab change
+  // Using tab buttons only for navigation (Instagram-style)
   const { panHandlers, canSwipeLeft, canSwipeRight } = useSwipeNavigation({
     tabs: MAIN_TABS,
     currentTab: selectedFeed,
     onTabChange: (tabId) => handleTabChange(tabId),
-    enabled: true,
+    enabled: false, // DISABLED - use tap on tabs instead
   });
 
   // Dedupe function - prevents duplicate posts
@@ -117,10 +127,18 @@ const ForumScreen = ({ navigation }) => {
     loadPosts(true);
   }, [selectedFeed, selectedTopic]);
 
+  // Load posts using hybrid feed algorithm or legacy method
   const loadPosts = async (reset = false) => {
     if (!hasMore && !reset) return;
 
     try {
+      // Use new hybrid feed algorithm for "explore" tab
+      if (useHybridFeed && selectedFeed === 'explore' && user?.id) {
+        await loadHybridFeed(reset);
+        return;
+      }
+
+      // Legacy loading for other feeds
       const currentPage = reset ? 1 : page;
 
       // Get posts from API with feed type and topic filter
@@ -131,9 +149,9 @@ const ForumScreen = ({ navigation }) => {
         limit: 20,
       });
 
-      // Apply recommendation sorting for "explore" feed
+      // Apply recommendation sorting for "explore" feed (legacy fallback)
       let data = rawData;
-      if (selectedFeed === 'explore' && reset) {
+      if (selectedFeed === 'explore' && reset && !useHybridFeed) {
         try {
           data = await forumRecommendationService.getForYouPosts(rawData, { limit: 20 });
           console.log('[ForumScreen] Applied recommendation sorting for "explore" feed');
@@ -142,16 +160,118 @@ const ForumScreen = ({ navigation }) => {
         }
       }
 
+      // Convert to feed items format (posts only, no ads for non-explore)
+      const feedItemsData = data.map(post => ({ type: 'post', data: post }));
+
       if (reset) {
         setPosts(data);
+        setFeedItems(feedItemsData);
+        lastPostIdRef.current = data[data.length - 1]?.id || null;
       } else {
-        setPosts(prev => [...prev, ...data]);
+        // Dedupe before appending
+        setPosts(prev => {
+          const existingIds = new Set(prev.map(p => p.id));
+          const newPosts = data.filter(p => !existingIds.has(p.id));
+          return [...prev, ...newPosts];
+        });
+        setFeedItems(prev => {
+          const existingIds = new Set(prev.map(item => item.data?.id));
+          const newItems = feedItemsData.filter(item => !existingIds.has(item.data?.id));
+          return [...prev, ...newItems];
+        });
+        lastPostIdRef.current = data[data.length - 1]?.id || null;
       }
 
       setHasMore(rawData.length === 20);
       setPage(currentPage + 1);
     } catch (error) {
       console.error('Error loading posts:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // New: Load feed using hybrid algorithm with ads
+  const loadHybridFeed = async (reset = false) => {
+    try {
+      console.log('[ForumScreen] Loading hybrid feed...');
+
+      if (reset) {
+        // Generate new feed with new session
+        const result = await generateFeed(user.id, null, 30);
+
+        setFeedItems(result.feed);
+        setSessionId(result.sessionId);
+        setHasMore(result.hasMore);
+
+        // Extract posts for legacy compatibility
+        const postsOnly = result.feed
+          .filter(item => item.type === 'post')
+          .map(item => item.data);
+        setPosts(postsOnly);
+
+        // Track last post ID for pagination
+        lastPostIdRef.current = postsOnly[postsOnly.length - 1]?.id || null;
+
+        console.log('[ForumScreen] Hybrid feed loaded:', result.feed.length, 'items');
+      } else {
+        // Load next page
+        if (!lastPostIdRef.current) return;
+
+        const result = await getNextFeedPage(user.id, sessionId, lastPostIdRef.current, 30);
+
+        // Dedupe feed items before appending
+        setFeedItems(prev => {
+          const existingIds = new Set(prev.map(item => item.data?.id));
+          const newItems = result.feed.filter(item => !existingIds.has(item.data?.id));
+          return [...prev, ...newItems];
+        });
+        setHasMore(result.hasMore);
+
+        // Extract posts for legacy compatibility with deduplication
+        const postsOnly = result.feed
+          .filter(item => item.type === 'post')
+          .map(item => item.data);
+        setPosts(prev => {
+          const existingIds = new Set(prev.map(p => p.id));
+          const newPosts = postsOnly.filter(p => !existingIds.has(p.id));
+          return [...prev, ...newPosts];
+        });
+
+        // Update last post ID
+        lastPostIdRef.current = postsOnly[postsOnly.length - 1]?.id || null;
+
+        console.log('[ForumScreen] Next page loaded:', result.feed.length, 'items');
+      }
+    } catch (error) {
+      console.error('[ForumScreen] Error loading hybrid feed:', error);
+      // Fallback to legacy loading
+      setUseHybridFeed(false);
+      const currentPage = reset ? 1 : page;
+      const rawData = await forumService.getPosts({
+        feed: selectedFeed,
+        topic: selectedTopic,
+        page: currentPage,
+        limit: 20,
+      });
+      const feedItemsData = rawData.map(post => ({ type: 'post', data: post }));
+      if (reset) {
+        setPosts(rawData);
+        setFeedItems(feedItemsData);
+      } else {
+        // Dedupe before appending
+        setPosts(prev => {
+          const existingIds = new Set(prev.map(p => p.id));
+          const newPosts = rawData.filter(p => !existingIds.has(p.id));
+          return [...prev, ...newPosts];
+        });
+        setFeedItems(prev => {
+          const existingIds = new Set(prev.map(item => item.data?.id));
+          const newItems = feedItemsData.filter(item => !existingIds.has(item.data?.id));
+          return [...prev, ...newItems];
+        });
+      }
+      setHasMore(rawData.length === 20);
     } finally {
       setLoading(false);
     }
@@ -241,12 +361,49 @@ const ForumScreen = ({ navigation }) => {
 
   // Track post view for recommendation algorithm
   const handlePostPress = (post) => {
-    // Track the view asynchronously (non-blocking)
+    // Track the view using new engagement service (non-blocking)
+    if (user?.id) {
+      trackView(user.id, post.id, 0, sessionId).catch(err => {
+        console.warn('[ForumScreen] Failed to track view:', err);
+      });
+    }
+    // Also track with legacy system
     forumRecommendationService.trackView(post).catch(err => {
-      console.warn('[ForumScreen] Failed to track view:', err);
+      console.warn('[ForumScreen] Failed to track view (legacy):', err);
     });
     // Navigate to post detail
-    navigation.navigate('PostDetail', { postId: post.id });
+    navigation.navigate('PostDetail', { postId: post.id, sessionId });
+  };
+
+  // Handle ad press - navigate to appropriate screen
+  const handleAdPress = (ad) => {
+    if (ad.link.startsWith('/upgrade')) {
+      navigation.navigate('Shop', { screen: 'Pricing' });
+    } else if (ad.link.startsWith('/academy')) {
+      navigation.navigate('Courses');
+    }
+  };
+
+  // Render feed item (post or ad)
+  const renderFeedItem = ({ item, index }) => {
+    if (item.type === 'ad') {
+      return (
+        <AdCard
+          ad={item.data}
+          sessionId={sessionId}
+          onPress={handleAdPress}
+        />
+      );
+    }
+
+    // Regular post
+    return (
+      <PostCard
+        post={item.data}
+        onPress={() => handlePostPress(item.data)}
+        sessionId={sessionId}
+      />
+    );
   };
 
   const getFeedTitle = () => {
@@ -273,7 +430,7 @@ const ForumScreen = ({ navigation }) => {
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
-      <Text style={styles.emptyIcon}>📝</Text>
+      <FileText size={64} color={COLORS.textMuted} strokeWidth={1.5} />
       <Text style={styles.emptyTitle}>Chưa có bài viết</Text>
       <Text style={styles.emptySubtitle}>Hãy là người đầu tiên chia sẻ!</Text>
     </View>
@@ -320,14 +477,19 @@ const ForumScreen = ({ navigation }) => {
           </TouchableOpacity>
 
           <View style={styles.headerCenter}>
-            <Text style={styles.headerTitle}>💎 GEM</Text>
+            <Text style={styles.headerTitle}>Gemral</Text>
             <Text style={styles.headerSubtitle}>{getFeedTitle()}</Text>
           </View>
 
           <View style={styles.headerIcons}>
-            <TouchableOpacity style={styles.iconButton}>
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={() => navigation.navigate('Search')}
+            >
               <Search size={22} color={COLORS.textPrimary} />
             </TouchableOpacity>
+            {/* Messages Icon with unread badge */}
+            <HeaderMessagesIcon />
             <TouchableOpacity style={styles.iconButton}>
               <Bell size={22} color={COLORS.textPrimary} />
             </TouchableOpacity>
@@ -345,6 +507,53 @@ const ForumScreen = ({ navigation }) => {
           onEditFeeds={() => setEditFeedsModalOpen(true)}
           customFeeds={customFeeds}
         />
+
+        {/* ═══════════════════════════════════════════ */}
+        {/* HEADER SHORTCUTS - Quick Access to Creator Tools */}
+        {/* ═══════════════════════════════════════════ */}
+        {user && (
+          <View style={styles.headerShortcuts}>
+            <TouchableOpacity
+              style={styles.shortcutBtn}
+              onPress={() => navigation.navigate('Account', { screen: 'Wallet' })}
+            >
+              <View style={[styles.shortcutIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
+                <Gem size={16} color={COLORS.gold} />
+              </View>
+              <Text style={styles.shortcutText}>Ví Gems</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.shortcutBtn}
+              onPress={() => navigation.navigate('Account', { screen: 'Earnings' })}
+            >
+              <View style={[styles.shortcutIcon, { backgroundColor: 'rgba(58, 247, 166, 0.15)' }]}>
+                <DollarSign size={16} color={COLORS.success} />
+              </View>
+              <Text style={styles.shortcutText}>Thu Nhập</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.shortcutBtn}
+              onPress={() => navigation.navigate('Account', { screen: 'SoundLibrary' })}
+            >
+              <View style={[styles.shortcutIcon, { backgroundColor: 'rgba(106, 91, 255, 0.15)' }]}>
+                <Music size={16} color={COLORS.purple} />
+              </View>
+              <Text style={styles.shortcutText}>Âm Thanh</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.shortcutBtn}
+              onPress={() => navigation.navigate('Account', { screen: 'BoostedPosts' })}
+            >
+              <View style={[styles.shortcutIcon, { backgroundColor: 'rgba(255, 140, 0, 0.15)' }]}>
+                <Zap size={16} color="#FF8C00" />
+              </View>
+              <Text style={styles.shortcutText}>Boost</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Create Feed Modal */}
         <CreateFeedModal
@@ -376,14 +585,13 @@ const ForumScreen = ({ navigation }) => {
         {/* Posts Feed - with swipe navigation */}
         <Animated.View style={{ flex: 1 }} {...panHandlers}>
           <FlatList
-            data={posts}
-            renderItem={({ item }) => (
-              <PostCard
-                post={item}
-                onPress={() => handlePostPress(item)}
-              />
-            )}
-            keyExtractor={(item) => item.id?.toString()}
+            data={feedItems.length > 0 ? feedItems : posts.map(p => ({ type: 'post', data: p }))}
+            renderItem={renderFeedItem}
+            keyExtractor={(item, index) =>
+              item.type === 'ad'
+                ? `ad-${item.data?.id || 'unknown'}-${index}`
+                : `post-${item.data?.id || 'unknown'}-${index}`
+            }
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
             refreshControl={
@@ -495,6 +703,38 @@ const styles = StyleSheet.create({
   footer: {
     paddingVertical: SPACING.lg,
     alignItems: 'center',
+  },
+
+  // ═══════════════════════════════════════════
+  // HEADER SHORTCUTS STYLES
+  // ═══════════════════════════════════════════
+  headerShortcuts: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    backgroundColor: GLASS.background,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(106, 91, 255, 0.15)',
+  },
+  shortcutBtn: {
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+  },
+  shortcutIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  shortcutText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textSecondary,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
   },
 });
 

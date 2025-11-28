@@ -1,5 +1,5 @@
 /**
- * Home Page v2 - GEM Platform
+ * Home Page v2 - Gemral
  * Export main component
  */
 export { HomePage as default } from './HomePage';

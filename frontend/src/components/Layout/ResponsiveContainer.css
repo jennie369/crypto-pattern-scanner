@@ -1,0 +1,191 @@
+/* ============================================
+   RESPONSIVE LAYOUT COMPONENTS
+   ============================================ */
+
+/* Base container */
+.responsive-container {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  padding: 0 16px;
+}
+
+@media (min-width: 768px) {
+  .responsive-container {
+    padding: 0 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .responsive-container {
+    padding: 0 32px;
+    max-width: 1920px;
+    margin: 0 auto;
+  }
+}
+
+/* Centered variant */
+.responsive-container.centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* ============================================
+   THREE COLUMN LAYOUT
+   ============================================ */
+
+.three-column-layout {
+  display: grid;
+  gap: 16px;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Mobile: Stack vertically (Center first for UX) */
+@media (max-width: 767px) {
+  .three-column-layout {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "center"
+      "left"
+      "right";
+  }
+
+  .three-column-layout .left-column {
+    grid-area: left;
+  }
+
+  .three-column-layout .center-column {
+    grid-area: center;
+  }
+
+  .three-column-layout .right-column {
+    grid-area: right;
+  }
+}
+
+/* Tablet: 2 columns (Center full width on top) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .three-column-layout {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "center center"
+      "left right";
+    gap: 24px;
+  }
+
+  .three-column-layout .left-column {
+    grid-area: left;
+  }
+
+  .three-column-layout .center-column {
+    grid-area: center;
+  }
+
+  .three-column-layout .right-column {
+    grid-area: right;
+  }
+}
+
+/* Desktop: 3 columns */
+@media (min-width: 1024px) {
+  .three-column-layout {
+    grid-template-columns: 280px 1fr 380px;
+    gap: 24px;
+  }
+}
+
+/* ============================================
+   TWO COLUMN LAYOUT
+   ============================================ */
+
+.two-column-layout {
+  display: grid;
+  gap: 16px;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Mobile: Stack */
+@media (max-width: 767px) {
+  .two-column-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tablet/Desktop: 2 columns */
+@media (min-width: 768px) {
+  .two-column-layout {
+    grid-template-columns: 300px 1fr;
+    gap: 24px;
+  }
+}
+
+/* ============================================
+   STACK LAYOUT
+   ============================================ */
+
+.stack-layout {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+}
+
+.stack-layout.gap-sm {
+  gap: 8px;
+}
+
+.stack-layout.gap-md {
+  gap: 16px;
+}
+
+.stack-layout.gap-lg {
+  gap: 24px;
+}
+
+/* ============================================
+   GRID LAYOUT
+   ============================================ */
+
+.grid-layout {
+  display: grid;
+  width: 100%;
+  max-width: 100%;
+}
+
+.grid-layout.gap-sm {
+  gap: 8px;
+}
+
+.grid-layout.gap-md {
+  gap: 16px;
+}
+
+.grid-layout.gap-lg {
+  gap: 24px;
+}
+
+/* Mobile: 1 column */
+@media (max-width: 767px) {
+  .grid-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tablet: 2 columns */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .grid-layout {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop: Dynamic columns based on --grid-cols */
+@media (min-width: 1024px) {
+  .grid-layout {
+    grid-template-columns: repeat(var(--grid-cols, 3), 1fr);
+  }
+}

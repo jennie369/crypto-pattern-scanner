@@ -10,8 +10,9 @@ import './CoinSelectorDropdown.css';
  * @param {Function} onChange - Callback when selection changes
  * @param {Number} maxCoins - Maximum coins allowed (from tier)
  * @param {String} tier - User's current tier (FREE, TIER1, TIER2, TIER3)
+ * @param {Function} onFavoritesChange - Callback when favorites change (for scan result sorting)
  */
-export const CoinSelectorDropdown = ({ selected = [], onChange, maxCoins = 2, tier = 'FREE' }) => {
+export const CoinSelectorDropdown = ({ selected = [], onChange, maxCoins = 2, tier = 'FREE', onFavoritesChange }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [allCoins, setAllCoins] = useState([]);
@@ -29,6 +30,7 @@ export const CoinSelectorDropdown = ({ selected = [], onChange, maxCoins = 2, ti
       const response = await fetch('https://fapi.binance.com/fapi/v1/ticker/24hr');
       const data = await response.json();
 
+      // FIX: Get ALL USDT pairs (500+), not just 100
       const usdtPairs = data
         .filter(item => item.symbol.endsWith('USDT'))
         .map(item => ({
@@ -37,8 +39,8 @@ export const CoinSelectorDropdown = ({ selected = [], onChange, maxCoins = 2, ti
           price: parseFloat(item.lastPrice),
           change: parseFloat(item.priceChangePercent),
         }))
-        .sort((a, b) => Math.abs(b.change) - Math.abs(a.change))
-        .slice(0, 100);
+        .sort((a, b) => Math.abs(b.change) - Math.abs(a.change));
+      // REMOVED: .slice(0, 100) - Now shows ALL coins
 
       setAllCoins(usdtPairs);
     } catch (error) {
@@ -54,7 +56,12 @@ export const CoinSelectorDropdown = ({ selected = [], onChange, maxCoins = 2, ti
 
   const loadFavorites = () => {
     const saved = localStorage.getItem('gem_favorite_coins');
-    if (saved) setFavorites(JSON.parse(saved));
+    if (saved) {
+      const favs = JSON.parse(saved);
+      setFavorites(favs);
+      // Notify parent about favorites for scan result sorting
+      if (onFavoritesChange) onFavoritesChange(favs);
+    }
   };
 
   const toggleFavorite = (symbol, e) => {
@@ -64,12 +71,20 @@ export const CoinSelectorDropdown = ({ selected = [], onChange, maxCoins = 2, ti
       : [...favorites, symbol];
     localStorage.setItem('gem_favorite_coins', JSON.stringify(newFavorites));
     setFavorites(newFavorites);
+    // Notify parent about favorites change
+    if (onFavoritesChange) onFavoritesChange(newFavorites);
   };
 
-  // Filter coins based on search
-  const filteredCoins = allCoins.filter(coin =>
-    coin.symbol.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter coins based on search AND sort favorites to top
+  const filteredCoins = allCoins
+    .filter(coin => coin.symbol.toLowerCase().includes(searchQuery.toLowerCase()))
+    .sort((a, b) => {
+      const aFav = favorites.includes(a.fullSymbol || a.symbol);
+      const bFav = favorites.includes(b.fullSymbol || b.symbol);
+      if (aFav && !bFav) return -1;
+      if (!aFav && bFav) return 1;
+      return 0; // Keep original order for non-favorites
+    });
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -184,6 +199,25 @@ export const CoinSelectorDropdown = ({ selected = [], onChange, maxCoins = 2, ti
             )}
           </div>
 
+          {/* ACTION BUTTONS - MOVED TO TOP */}
+          <div className="dropdown-actions-top">
+            <button className="action-btn-top" onClick={handleSelectAll}>
+              <CheckCircle size={12} />
+              Select All
+            </button>
+            <button className="action-btn-top" onClick={handleClearAll}>
+              <X size={12} />
+              Clear
+            </button>
+            {tier === 'TIER3' && (
+              <div className="tier-badge-top">
+                <Gem size={10} />
+                {allCoins.length}+ coins
+              </div>
+            )}
+            <span className="coin-total-count">{allCoins.length} coins</span>
+          </div>
+
           {/* Coin List */}
           <div className="coin-list-scrollable">
             {filteredCoins.map((coin) => {
@@ -192,7 +226,7 @@ export const CoinSelectorDropdown = ({ selected = [], onChange, maxCoins = 2, ti
               return (
                 <div
                   key={coin.symbol}
-                  className={`coin-item ${isSelected ? 'selected' : ''}`}
+                  className={`coin-item ${isSelected ? 'selected' : ''} ${isFavorite ? 'favorite' : ''}`}
                   onClick={() => toggleCoin(coin.fullSymbol || coin.symbol)}
                 >
                   <input
@@ -201,35 +235,27 @@ export const CoinSelectorDropdown = ({ selected = [], onChange, maxCoins = 2, ti
                     onChange={() => {}} // Handled by onClick
                     onClick={(e) => e.stopPropagation()}
                   />
-                  <span className="coin-symbol">{coin.symbol}/USDT</span>
-                  <span className="coin-price">${coin.price >= 1 ? coin.price.toFixed(2) : coin.price.toFixed(6)}</span>
-                  <span className={`coin-change ${getChangeColor(coin.change)}`}>
-                    {coin.change > 0 ? '+' : ''}{coin.change.toFixed(2)}%
-                  </span>
                   <button
                     className={`favorite-btn ${isFavorite ? 'active' : ''}`}
                     onClick={(e) => toggleFavorite(coin.fullSymbol || coin.symbol, e)}
                   >
-                    <Star size={14} fill={isFavorite ? '#FFBD59' : 'none'} />
+                    <Star size={12} fill={isFavorite ? '#FFBD59' : 'none'} />
                   </button>
+                  <span className="coin-symbol">{coin.symbol}/USDT</span>
+                  <span className="coin-price">${coin.price >= 1 ? coin.price.toFixed(2) : coin.price.toFixed(6)}</span>
+                  <span className={`coin-change ${getChangeColor(coin.change)}`}>
+                    {coin.change > 0 ? '+' : ''}{coin.change.toFixed(1)}%
+                  </span>
                 </div>
               );
             })}
           </div>
 
-          {/* Footer Actions */}
+          {/* Footer - Simplified */}
           <div className="dropdown-footer">
-            <button className="footer-btn" onClick={handleSelectAll}>
-              Select All
-            </button>
-            <button className="footer-btn" onClick={handleClearAll}>
-              Clear All
-            </button>
+            <span className="selected-count">{selected.length} selected</span>
             {tier === 'TIER3' && (
-              <div className="tier-badge-footer">
-                TIER3
-                <span className="unlimited-badge">997+ coins</span>
-              </div>
+              <span className="tier-info">TIER3 Unlimited</span>
             )}
           </div>
         </div>

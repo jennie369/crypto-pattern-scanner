@@ -48,10 +48,10 @@
 
 .count-badge {
   padding: 2px 8px;
-  background: rgba(0, 217, 255, 0.2);
+  background: rgba(255, 189, 89, 0.2);
   border-radius: 12px;
   font-size: 11px;
-  color: #00D9FF;
+  color: #FFBD59;
   font-weight: 700;
 }
 
@@ -97,13 +97,13 @@
 }
 
 .tier-badge.tier-tier1 {
-  background: rgba(0, 217, 255, 0.2);
-  color: #00D9FF;
+  background: rgba(139, 92, 246, 0.2);
+  color: #8B5CF6;
 }
 
 .tier-badge.tier-tier2 {
-  background: rgba(0, 217, 255, 0.2);
-  color: #00D9FF;
+  background: rgba(139, 92, 246, 0.2);
+  color: #8B5CF6;
 }
 
 .tier-badge.tier-tier3 {
@@ -221,17 +221,65 @@
   background: rgba(255, 189, 89, 0.5);
 }
 
-/* Coin Item */
+/* ACTION BUTTONS TOP - NEW */
+.dropdown-actions-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(17, 34, 80, 0.4);
+}
+
+.action-btn-top {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  background: rgba(255, 189, 89, 0.1);
+  border: 1px solid rgba(255, 189, 89, 0.3);
+  border-radius: 4px;
+  color: #FFBD59;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-btn-top:hover {
+  background: rgba(255, 189, 89, 0.2);
+  border-color: #FFBD59;
+}
+
+.tier-badge-top {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 8px;
+  background: rgba(255, 189, 89, 0.2);
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  color: #FFBD59;
+}
+
+.coin-total-count {
+  margin-left: auto;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Coin Item - COMPACT */
 .coin-item {
   display: grid;
-  grid-template-columns: 24px 1.5fr 1fr 1fr 28px;
-  gap: 10px;
+  grid-template-columns: 16px 20px 1fr auto auto;
+  gap: 6px;
   align-items: center;
-  padding: 10px 12px;
+  padding: 6px 8px;
   background: rgba(17, 34, 80, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  margin-bottom: 6px;
+  border-radius: 6px;
+  margin-bottom: 4px;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -246,55 +294,70 @@
   border-color: rgba(255, 189, 89, 0.5);
 }
 
+.coin-item.favorite {
+  border-left: 2px solid #FFBD59;
+}
+
 .coin-item input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   cursor: pointer;
   accent-color: #FFBD59;
 }
 
 .coin-symbol {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
   color: #FFFFFF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .coin-price {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.8);
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.7);
   text-align: right;
+  white-space: nowrap;
 }
 
 .coin-change {
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 600;
   text-align: right;
+  min-width: 45px;
+  padding: 2px 4px;
+  border-radius: 3px;
 }
 
 .coin-change.positive {
   color: #0ECB81;
+  background: rgba(14, 203, 129, 0.1);
 }
 
 .coin-change.negative {
   color: #F6465D;
+  background: rgba(246, 70, 93, 0.1);
 }
 
 .coin-change.neutral {
   color: rgba(255, 255, 255, 0.6);
 }
 
-/* Favorite Button */
+/* Favorite Button - COMPACT */
 .favorite-btn {
   background: transparent;
   border: none;
   color: rgba(255, 255, 255, 0.3);
   cursor: pointer;
-  padding: 4px;
+  padding: 2px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
-  border-radius: 4px;
+  border-radius: 3px;
+  width: 18px;
+  height: 18px;
 }
 
 .favorite-btn:hover {
@@ -307,53 +370,28 @@
   color: #FFBD59;
 }
 
-/* Dropdown Footer */
+/* Dropdown Footer - Simplified */
 .dropdown-footer {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
-  padding: 12px;
+  padding: 8px 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(17, 34, 80, 0.4);
 }
 
-.footer-btn {
-  flex: 1;
-  height: 32px;
-  background: rgba(17, 34, 80, 0.6);
-  border: 1px solid rgba(255, 189, 89, 0.3);
-  border-radius: 6px;
-  color: #FFBD59;
-  font-size: 12px;
+.selected-count {
+  font-size: 11px;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
+  color: #FFBD59;
 }
 
-.footer-btn:hover {
-  background: rgba(255, 189, 89, 0.1);
-  border-color: #FFBD59;
-}
-
-.tier-badge-footer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 4px 12px;
-  background: rgba(255, 189, 89, 0.2);
-  border-radius: 6px;
+.tier-info {
   font-size: 10px;
-  font-weight: 800;
-  color: #FFBD59;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.unlimited-badge {
-  font-size: 9px;
+  font-weight: 700;
   color: rgba(255, 189, 89, 0.8);
-  font-weight: 600;
+  text-transform: uppercase;
 }
 
 /* Responsive */

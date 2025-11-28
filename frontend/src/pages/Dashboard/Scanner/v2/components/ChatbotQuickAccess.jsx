@@ -5,7 +5,7 @@ import './MarketChatbotSection.css';
 
 /**
  * Chatbot Quick Access Component
- * Quick access to Gem Master chatbot with preset questions
+ * Quick access to Gemral chatbot with preset questions
  */
 export const ChatbotQuickAccess = () => {
   const navigate = useNavigate();
@@ -27,7 +27,7 @@ export const ChatbotQuickAccess = () => {
       </div>
 
       <p className="chatbot-intro">
-        Hỏi Gem Master về vận may, quyết định trading, hoặc đọc I Ching
+        Hỏi Gemral về vận may, quyết định trading, hoặc đọc I Ching
       </p>
 
       <div className="quick-questions">

@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Edit Profile Modal Component
+ * Gemral - Edit Profile Modal Component
  * Modal for editing user profile information
  */
 

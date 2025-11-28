@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { X, AlertCircle } from 'lucide-react';
 import { Button } from '../../../../../components-v2/Button';
-import { Input } from '../../../../../components-v2/Input';
+import TPSLInput from '../../../../../components/TPSLInput/TPSLInput';
 import './EditPositionModal.css';
 
 /**
@@ -9,60 +10,26 @@ import './EditPositionModal.css';
  * Allows users to update Stop Loss and Take Profit for open positions
  */
 export const EditPositionModal = ({ position, onClose, onSave }) => {
-  const [formData, setFormData] = useState({
-    stopLoss: '',
-    takeProfit: '',
-  });
+  const [tpData, setTPData] = useState(null);
+  const [slData, setSLData] = useState(null);
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
 
-  // Initialize form with position data
-  useEffect(() => {
-    if (position) {
-      setFormData({
-        stopLoss: position.stop_loss || '',
-        takeProfit: position.take_profit || '',
-      });
-    }
-  }, [position]);
+  // No calculation functions needed - TPSLInput component handles all calculations
 
-  // Calculate risk/reward ratio
-  const calculateRR = () => {
-    const entry = position?.avg_buy_price || 0; // Fixed: changed from avg_entry_price
-    const sl = parseFloat(formData.stopLoss) || 0;
-    const tp = parseFloat(formData.takeProfit) || 0;
-
-    if (!entry || !sl || !tp) return null;
-
-    const risk = Math.abs(entry - sl);
-    const reward = Math.abs(tp - entry);
-
-    if (risk === 0) return null;
-
-    return (reward / risk).toFixed(2);
-  };
-
-  // Validate form
+  // Validate form - using TP/SL data from calculator
   const validate = () => {
     const newErrors = {};
-    const entry = position?.avg_buy_price || 0; // Fixed: changed from avg_entry_price
+    const entry = position?.avg_buy_price || 0;
 
-    if (formData.stopLoss) {
-      const sl = parseFloat(formData.stopLoss);
-      if (isNaN(sl) || sl <= 0) {
-        newErrors.stopLoss = 'Invalid stop loss price';
-      } else if (sl >= entry) {
-        newErrors.stopLoss = 'Stop loss must be below entry price';
-      }
+    // TP/SL calculator handles validation automatically
+    // Just check if values make sense
+    if (tpData?.price && tpData.price <= entry) {
+      newErrors.takeProfit = 'Take profit must be above entry price';
     }
 
-    if (formData.takeProfit) {
-      const tp = parseFloat(formData.takeProfit);
-      if (isNaN(tp) || tp <= 0) {
-        newErrors.takeProfit = 'Invalid take profit price';
-      } else if (tp <= entry) {
-        newErrors.takeProfit = 'Take profit must be above entry price';
-      }
+    if (slData?.price && slData.price >= entry) {
+      newErrors.stopLoss = 'Stop loss must be below entry price';
     }
 
     setErrors(newErrors);
@@ -78,8 +45,8 @@ export const EditPositionModal = ({ position, onClose, onSave }) => {
       setSaving(true);
 
       const updates = {
-        stop_loss: formData.stopLoss ? parseFloat(formData.stopLoss) : null,
-        take_profit: formData.takeProfit ? parseFloat(formData.takeProfit) : null,
+        stop_loss: slData?.price || null,
+        take_profit: tpData?.price || null,
       };
 
       await onSave(position.id, updates);
@@ -94,9 +61,8 @@ export const EditPositionModal = ({ position, onClose, onSave }) => {
 
   if (!position) return null;
 
-  const riskReward = calculateRR();
-
-  return (
+  // Render modal using Portal at document.body level to escape scroll container
+  return ReactDOM.createPortal(
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
@@ -127,35 +93,18 @@ export const EditPositionModal = ({ position, onClose, onSave }) => {
             </div>
           </div>
 
-          {/* Form */}
+          {/* TP/SL Calculator */}
           <div className="modal-form">
-            <Input
-              type="number"
-              label="Stop Loss"
-              placeholder="Enter stop loss price..."
-              value={formData.stopLoss}
-              onChange={(e) => setFormData({ ...formData, stopLoss: e.target.value })}
-              error={errors.stopLoss}
-              step="0.01"
+            <TPSLInput
+              entryPrice={position.avg_buy_price}
+              currentPrice={position.current_price}
+              quantity={position.quantity}
+              side="buy"
+              initialTP={position.take_profit}
+              initialSL={position.stop_loss}
+              onTPChange={setTPData}
+              onSLChange={setSLData}
             />
-
-            <Input
-              type="number"
-              label="Take Profit"
-              placeholder="Enter take profit price..."
-              value={formData.takeProfit}
-              onChange={(e) => setFormData({ ...formData, takeProfit: e.target.value })}
-              error={errors.takeProfit}
-              step="0.01"
-            />
-
-            {/* Risk/Reward Display */}
-            {riskReward && (
-              <div className="rr-display">
-                <span className="rr-label">Risk/Reward Ratio:</span>
-                <span className="rr-value">1:{riskReward}</span>
-              </div>
-            )}
 
             {errors.submit && (
               <div className="error-message">
@@ -163,6 +112,18 @@ export const EditPositionModal = ({ position, onClose, onSave }) => {
                   <AlertCircle size={16} style={{ display: 'inline', marginRight: '4px' }} />
                   {errors.submit}
                 </p>
+              </div>
+            )}
+
+            {errors.takeProfit && (
+              <div className="error-message">
+                <p>{errors.takeProfit}</p>
+              </div>
+            )}
+
+            {errors.stopLoss && (
+              <div className="error-message">
+                <p>{errors.stopLoss}</p>
               </div>
             )}
           </div>
@@ -177,7 +138,8 @@ export const EditPositionModal = ({ position, onClose, onSave }) => {
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

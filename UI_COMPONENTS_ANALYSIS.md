@@ -1,7 +1,7 @@
-# PHÂN TÍCH COMPONENTS - GEM PLATFORM
+# PHÂN TÍCH COMPONENTS - Gemral
 
 **Date:** 2025-11-12
-**Project:** Crypto Pattern Scanner (Gem Platform)
+**Project:** Crypto Pattern Scanner (Gemral)
 **Framework:** React 19.1.1 + Vite 7.1.7
 
 ---

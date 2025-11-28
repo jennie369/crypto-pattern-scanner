@@ -18,10 +18,10 @@ import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 import SortableWidget from '../components/SortableWidget';
 import UpdateProgressModal from '../components/UpdateProgressModal';
-import GoalCard from '../components/widgets/GoalCard';
-import AffirmationCard from '../components/widgets/AffirmationCard';
-import ActionPlanWidget from '../components/widgets/ActionPlanWidget';
-import CrystalGridWidget from '../components/widgets/CrystalGridWidget';
+import GoalCard from '../components/Widgets/GoalCard';
+import AffirmationCard from '../components/Widgets/AffirmationCard';
+import ActionPlanWidget from '../components/Widgets/ActionPlanWidget';
+import CrystalGridWidget from '../components/Widgets/CrystalGridWidget';
 import '../styles/dashboard.css';
 
 export default function Dashboard() {

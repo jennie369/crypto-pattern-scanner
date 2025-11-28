@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Shop Navigation Stack
+ * Gemral - Shop Navigation Stack
  */
 
 import React from 'react';
@@ -14,6 +14,7 @@ import {
   OrdersScreen,
   OrderDetailScreen,
 } from '../screens/Shop';
+import GemPurchaseSuccessScreen from '../screens/Wallet/GemPurchaseSuccessScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -53,6 +54,17 @@ const ShopStack = () => {
       <Stack.Screen
         name="OrderSuccess"
         component={OrderSuccessScreen}
+        options={{
+          headerShown: false,
+          gestureEnabled: false, // Prevent swipe back
+          animation: 'fade',
+        }}
+      />
+
+      {/* Gem Purchase Success Screen - for gem package purchases */}
+      <Stack.Screen
+        name="GemPurchaseSuccess"
+        component={GemPurchaseSuccessScreen}
         options={{
           headerShown: false,
           gestureEnabled: false, // Prevent swipe back

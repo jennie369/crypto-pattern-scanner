@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Scanner Navigation Stack
+ * Gemral - Scanner Navigation Stack
  * Pattern detection scanner with detail view + Paper Trading
  */
 

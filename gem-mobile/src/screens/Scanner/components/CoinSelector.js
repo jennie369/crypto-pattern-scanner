@@ -403,12 +403,12 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: COLORS.bgDark,
+    backgroundColor: COLORS.bgDarkest,
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   modalContent: {
     flex: 1,
-    backgroundColor: COLORS.bgDark,
+    backgroundColor: COLORS.bgDarkest,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.lg,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(106, 91, 255, 0.2)',
-    backgroundColor: COLORS.bgDark,
+    backgroundColor: COLORS.bgDarkest,
   },
   closeButton: {
     padding: SPACING.sm,
@@ -432,7 +432,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: GLASS.background,
+    backgroundColor: 'rgba(20, 18, 35, 0.95)',
     borderRadius: 12,
     marginHorizontal: SPACING.xxl,
     marginTop: SPACING.lg,
@@ -459,7 +459,7 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.md,
     borderRadius: 20,
-    backgroundColor: GLASS.background,
+    backgroundColor: 'rgba(20, 18, 35, 0.9)',
     gap: 6,
   },
   tabActive: {
@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: SPACING.sm,
     borderRadius: 8,
-    backgroundColor: GLASS.background,
+    backgroundColor: 'rgba(20, 18, 35, 0.9)',
     gap: 6,
   },
   selectButtonActive: {
@@ -525,13 +525,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     marginBottom: SPACING.sm,
     borderRadius: 12,
-    backgroundColor: GLASS.background,
+    backgroundColor: 'rgba(20, 18, 35, 0.9)',
     borderWidth: 1.2,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
+    borderColor: 'rgba(106, 91, 255, 0.25)',
   },
   coinItemSelected: {
     borderColor: COLORS.gold,
-    backgroundColor: 'rgba(106, 91, 255, 0.25)',
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
   },
   checkbox: {
     marginRight: SPACING.md,
@@ -595,7 +595,7 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.lg,
     borderTopWidth: 1,
     borderTopColor: 'rgba(106, 91, 255, 0.2)',
-    backgroundColor: COLORS.bgDark,
+    backgroundColor: COLORS.bgDarkest,
   },
   applyButton: {
     backgroundColor: COLORS.burgundy,

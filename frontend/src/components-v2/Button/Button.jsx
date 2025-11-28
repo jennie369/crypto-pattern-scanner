@@ -2,7 +2,7 @@ import React from 'react';
 import './Button.css';
 
 /**
- * Button Component - GEM Platform
+ * Button Component - Gemral
  *
  * @param {Object} props
  * @param {'primary'|'secondary'|'outline'|'ghost'} props.variant - Button style variant

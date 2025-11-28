@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Recommendation Service
+ * Gemral - Recommendation Service
  * Smart product recommendation algorithm based on user behavior
  */
 

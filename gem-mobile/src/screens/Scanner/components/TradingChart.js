@@ -35,7 +35,7 @@ const TradingChart = ({
   height = 350,
   onSymbolPress,
 }) => {
-  const [showVolume, setShowVolume] = useState(true);
+  const [showVolume, setShowVolume] = useState(false);
   const [darkTheme, setDarkTheme] = useState(true);
   const [fullScreen, setFullScreen] = useState(false);
   const webViewRef = useRef(null);

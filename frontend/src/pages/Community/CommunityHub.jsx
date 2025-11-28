@@ -49,7 +49,7 @@ export default function CommunityHub() {
     },
     {
       id: 'chatbot',
-      label: 'Gem Master',
+      label: 'Gemral',
       icon: <Sparkles size={20} />,
       component: Chatbot,
       description: 'I Ching & Tarot'

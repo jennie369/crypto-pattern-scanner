@@ -136,7 +136,7 @@ Find the return statement and add this BEFORE the closing `</div>` of the main c
       </div>
 
       <div className="widget-prompt-text">
-        <h4>✨ GEM Platform có thể tạo dashboard cho bạn!</h4>
+        <h4>✨ Gemral có thể tạo dashboard cho bạn!</h4>
         <p>
           {pendingWidget.detection.type === ResponseTypes.MANIFESTATION_GOAL &&
             'Tự động track progress, nhắc nhở hàng ngày, và nhiều hơn nữa.'}

@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Forum Module Exports
+ * Gemral - Forum Module Exports
  */
 
 export { default as ForumScreen } from './ForumScreen';

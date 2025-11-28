@@ -236,7 +236,7 @@ export default function AddTradeModal({ onClose, onSubmit, initialData = null, i
               <option value="UPU">UPU</option>
               <option value="UPD">UPD</option>
               <option value="DPU">DPU</option>
-              <option value="HEAD_AND_SHOULDERS">Head & Shoulders</option>
+              <option value="HEAD_SHOULDERS">Head & Shoulders</option>
               <option value="DOUBLE_TOP">Double Top</option>
               <option value="DOUBLE_BOTTOM">Double Bottom</option>
             </select>

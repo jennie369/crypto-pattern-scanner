@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Profile Stats Component
+ * Gemral - Profile Stats Component
  * Shows posts count, followers count, following count
  */
 

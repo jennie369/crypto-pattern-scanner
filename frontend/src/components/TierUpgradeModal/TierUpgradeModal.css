@@ -1,0 +1,362 @@
+/* ============================================
+   🔐 TIER UPGRADE MODAL STYLES
+   ============================================ */
+
+.tier-upgrade-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.tier-upgrade-modal {
+  background: linear-gradient(
+    135deg,
+    rgba(17, 34, 80, 0.98) 0%,
+    rgba(30, 42, 94, 0.98) 100%
+  );
+  border: 2px solid rgba(255, 189, 89, 0.3);
+  border-radius: 16px;
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Close Button */
+.tier-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 10;
+}
+
+.tier-modal-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+  transform: scale(1.1);
+}
+
+/* Header */
+.tier-modal-header {
+  text-align: center;
+  padding: 40px 32px 24px;
+  border-bottom: 1px solid rgba(255, 189, 89, 0.2);
+}
+
+.tier-modal-lock-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  background: linear-gradient(135deg, rgba(255, 189, 89, 0.2), rgba(255, 107, 107, 0.2));
+  border: 2px solid rgba(255, 189, 89, 0.4);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFBD59;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 189, 89, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(255, 189, 89, 0);
+  }
+}
+
+.tier-modal-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0 0 12px;
+}
+
+.tier-modal-subtitle {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+/* Current Tier Info */
+.tier-modal-current {
+  padding: 20px 32px;
+  background: rgba(255, 189, 89, 0.05);
+  border-bottom: 1px solid rgba(255, 189, 89, 0.2);
+  text-align: center;
+}
+
+.current-tier-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.current-tier-limit {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+/* Upgrade Options */
+.tier-modal-options {
+  padding: 32px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.tier-option-card {
+  background: rgba(17, 34, 80, 0.6);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 24px;
+  position: relative;
+  transition: all 0.3s;
+}
+
+.tier-option-card:hover {
+  border-color: rgba(255, 189, 89, 0.5);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.tier-option-card.recommended {
+  border-color: #FFC107;
+  box-shadow: 0 0 20px rgba(255, 193, 7, 0.2);
+}
+
+.tier-recommended-badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #FFC107, #FFD54F);
+  color: #000000;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
+}
+
+.tier-card-header {
+  text-align: center;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 20px;
+}
+
+.tier-card-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 12px 0 8px;
+}
+
+.tier-card-price {
+  font-size: 24px;
+  font-weight: 700;
+  color: #FFBD59;
+  margin: 0;
+}
+
+.tier-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tier-highlight {
+  background: rgba(255, 189, 89, 0.1);
+  border: 1px solid rgba(255, 189, 89, 0.3);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.tier-features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tier-features-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.5;
+}
+
+.feature-checkmark {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  background: rgba(14, 203, 129, 0.2);
+  color: #0ECB81;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tier-upgrade-btn {
+  width: 100%;
+  height: 44px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.tier-upgrade-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.tier-upgrade-btn.elite {
+  background: linear-gradient(135deg, #FF6B6B, #EE5A6F);
+}
+
+/* Footer */
+.tier-modal-footer {
+  padding: 24px 32px;
+  border-top: 1px solid rgba(255, 189, 89, 0.2);
+  text-align: center;
+}
+
+.tier-footer-note {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0 0 12px;
+}
+
+.tier-footer-link {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 16px;
+  transition: color 0.2s;
+}
+
+.tier-footer-link:hover {
+  color: #FFBD59;
+}
+
+/* Scrollbar */
+.tier-upgrade-modal::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tier-upgrade-modal::-webkit-scrollbar-track {
+  background: rgba(17, 34, 80, 0.4);
+  border-radius: 4px;
+}
+
+.tier-upgrade-modal::-webkit-scrollbar-thumb {
+  background: rgba(255, 189, 89, 0.3);
+  border-radius: 4px;
+}
+
+.tier-upgrade-modal::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 189, 89, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tier-modal-options {
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+
+  .tier-modal-header {
+    padding: 32px 20px 20px;
+  }
+
+  .tier-modal-title {
+    font-size: 22px;
+  }
+
+  .tier-modal-subtitle {
+    font-size: 14px;
+  }
+
+  .tier-option-card {
+    padding: 20px;
+  }
+}

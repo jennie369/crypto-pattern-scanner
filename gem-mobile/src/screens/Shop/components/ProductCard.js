@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Product Card Component
+ * Gemral - Product Card Component
  * Dark theme support
  */
 

@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Review Service
+ * Gemral - Review Service
  * Handles fetching real Judge.me reviews with EXACT product matching
  * NO random reviews - only show reviews for the specific product
  */

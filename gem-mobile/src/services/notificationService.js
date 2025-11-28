@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Notification Service
+ * Gemral - Notification Service
  * Local push notifications for order updates and alerts
  */
 
@@ -56,6 +56,13 @@ export const TYPE_TO_CATEGORY = {
   system: 'system',
   reminder: 'system',
   account: 'system',
+  // Partnership
+  partnership_approved: 'system',
+  partnership_rejected: 'system',
+  withdrawal_approved: 'system',
+  withdrawal_completed: 'system',
+  withdrawal_rejected: 'system',
+  commission_earned: 'system',
 };
 
 class NotificationService {
@@ -71,6 +78,7 @@ class NotificationService {
       forumComments: true,
       forumFollows: true,
       systemAlerts: true,
+      partnershipAlerts: true, // Partnership notifications
     };
   }
 
@@ -570,6 +578,198 @@ class NotificationService {
    */
   getCategoryForType(type) {
     return TYPE_TO_CATEGORY[type] || 'system';
+  }
+
+  // ==========================================
+  // PARTNERSHIP NOTIFICATIONS
+  // ==========================================
+
+  /**
+   * Send partnership application approved notification
+   */
+  async sendPartnershipApprovedNotification(partnerRole, affiliateCode) {
+    if (!this._settings.partnershipAlerts) return;
+
+    const roleText = partnerRole === 'ctv' ? 'CTV' : 'Affiliate';
+    const tierInfo = partnerRole === 'ctv' ? ' - Tier 1' : '';
+
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: `🎉 Chúc mừng! Bạn đã trở thành ${roleText}${tierInfo}`,
+          body: `Mã giới thiệu của bạn: ${affiliateCode}. Bắt đầu chia sẻ và nhận hoa hồng ngay!`,
+          data: { type: 'partnership_approved', partnerRole, affiliateCode },
+          sound: true,
+        },
+        trigger: null,
+      });
+      console.log('[Notifications] Partnership approved notification sent');
+    } catch (error) {
+      console.error('[Notifications] sendPartnershipApprovedNotification error:', error);
+    }
+  }
+
+  /**
+   * Send partnership application rejected notification
+   */
+  async sendPartnershipRejectedNotification(reason) {
+    if (!this._settings.partnershipAlerts) return;
+
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: '❌ Đơn đăng ký không được duyệt',
+          body: reason || 'Đơn đăng ký của bạn không được chấp thuận. Vui lòng liên hệ hỗ trợ để biết thêm chi tiết.',
+          data: { type: 'partnership_rejected', reason },
+          sound: true,
+        },
+        trigger: null,
+      });
+      console.log('[Notifications] Partnership rejected notification sent');
+    } catch (error) {
+      console.error('[Notifications] sendPartnershipRejectedNotification error:', error);
+    }
+  }
+
+  /**
+   * Send withdrawal approved notification
+   */
+  async sendWithdrawalApprovedNotification(amount) {
+    if (!this._settings.partnershipAlerts) return;
+
+    const formattedAmount = new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      maximumFractionDigits: 0
+    }).format(amount);
+
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: '✅ Yêu cầu rút tiền đã được duyệt',
+          body: `Yêu cầu rút ${formattedAmount} của bạn đã được duyệt và đang chờ xử lý.`,
+          data: { type: 'withdrawal_approved', amount },
+          sound: true,
+        },
+        trigger: null,
+      });
+      console.log('[Notifications] Withdrawal approved notification sent');
+    } catch (error) {
+      console.error('[Notifications] sendWithdrawalApprovedNotification error:', error);
+    }
+  }
+
+  /**
+   * Send withdrawal completed notification
+   */
+  async sendWithdrawalCompletedNotification(amount, transactionId) {
+    if (!this._settings.partnershipAlerts) return;
+
+    const formattedAmount = new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      maximumFractionDigits: 0
+    }).format(amount);
+
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: '💰 Chuyển khoản thành công!',
+          body: `${formattedAmount} đã được chuyển vào tài khoản ngân hàng của bạn. Mã GD: ${transactionId}`,
+          data: { type: 'withdrawal_completed', amount, transactionId },
+          sound: true,
+        },
+        trigger: null,
+      });
+      console.log('[Notifications] Withdrawal completed notification sent');
+    } catch (error) {
+      console.error('[Notifications] sendWithdrawalCompletedNotification error:', error);
+    }
+  }
+
+  /**
+   * Send withdrawal rejected notification
+   */
+  async sendWithdrawalRejectedNotification(amount, reason) {
+    if (!this._settings.partnershipAlerts) return;
+
+    const formattedAmount = new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      maximumFractionDigits: 0
+    }).format(amount);
+
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: '❌ Yêu cầu rút tiền bị từ chối',
+          body: `Yêu cầu rút ${formattedAmount} không được chấp thuận. Lý do: ${reason || 'Không xác định'}`,
+          data: { type: 'withdrawal_rejected', amount, reason },
+          sound: true,
+        },
+        trigger: null,
+      });
+      console.log('[Notifications] Withdrawal rejected notification sent');
+    } catch (error) {
+      console.error('[Notifications] sendWithdrawalRejectedNotification error:', error);
+    }
+  }
+
+  /**
+   * Send commission earned notification
+   */
+  async sendCommissionEarnedNotification(orderNumber, commissionAmount, productName) {
+    if (!this._settings.partnershipAlerts) return;
+
+    const formattedAmount = new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      maximumFractionDigits: 0
+    }).format(commissionAmount);
+
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: '🎊 Bạn vừa nhận hoa hồng!',
+          body: `+${formattedAmount} từ đơn hàng #${orderNumber}${productName ? ` (${productName})` : ''}`,
+          data: { type: 'commission_earned', orderNumber, commissionAmount, productName },
+          sound: true,
+        },
+        trigger: null,
+      });
+      console.log('[Notifications] Commission earned notification sent');
+    } catch (error) {
+      console.error('[Notifications] sendCommissionEarnedNotification error:', error);
+    }
+  }
+
+  /**
+   * Send CTV tier upgrade notification
+   */
+  async sendTierUpgradeNotification(newTier, newCommissionRate) {
+    if (!this._settings.partnershipAlerts) return;
+
+    const tierNames = {
+      1: 'Tier 1 (Cơ bản)',
+      2: 'Tier 2 (Nâng cao)',
+      3: 'Tier 3 (Chuyên nghiệp)',
+      4: 'Tier 4 (VIP)',
+    };
+
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: '🚀 Chúc mừng! Bạn đã lên cấp!',
+          body: `Bạn đã đạt ${tierNames[newTier] || `Tier ${newTier}`}. Hoa hồng mới: ${newCommissionRate}%`,
+          data: { type: 'tier_upgrade', newTier, newCommissionRate },
+          sound: true,
+        },
+        trigger: null,
+      });
+      console.log('[Notifications] Tier upgrade notification sent');
+    } catch (error) {
+      console.error('[Notifications] sendTierUpgradeNotification error:', error);
+    }
   }
 }
 

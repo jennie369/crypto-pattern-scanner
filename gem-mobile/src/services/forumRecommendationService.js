@@ -1,7 +1,7 @@
 /**
- * GEM Platform - Forum Recommendation Service
+ * Gemral - Forum Recommendation Service
  * Smart post recommendation algorithm based on user engagement
- * Matches GEM Platform philosophy: Trading / Tinh Thần / Integration
+ * Matches Gemral philosophy: Trading / Tinh Thần / Integration
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -28,18 +28,18 @@ const WEIGHTS = {
   engagement: 1.2,     // Posts with high engagement
 };
 
-// GEM Platform Tracks for category grouping
+// Gemral Tracks for category grouping
 const TRACK_CATEGORIES = {
   trading: ['trading', 'patterns', 'results', 'Phân Tích Thị Trường', 'Chia Sẻ Tips Hay', 'Kết Quả Giao Dịch', 'Thảo Luận Chiến Lược', 'Hỏi Đáp Giao Dịch'],
   wellness: ['wellness', 'meditation', 'growth', 'Review Đá Crystal', 'Luật Hấp Dẫn', 'Phát Triển Bản Thân', 'Tips Chữa Lành'],
-  integration: ['mindful-trading', 'sieu-giau', 'Giao Dịch Chánh Niệm', 'Tư Duy Thịnh Vượng', 'Tips Trader Thành Công', 'Cân Bằng Cuộc Sống'],
+  integration: ['mindful-trading', 'sieu-giau', 'Giao Dịch Chánh Niệm', 'Tư Duy Thịnh Vượng', 'Tips Trader Thành Công', 'Thịnh Vượng'],
 };
 
 // Keywords that indicate post track
 const TRACK_KEYWORDS = {
   trading: ['btc', 'eth', 'crypto', 'trading', 'giao dịch', 'coin', 'market', 'entry', 'tp', 'sl', 'long', 'short', 'profit', 'loss', 'futures', 'leverage', 'chart', 'pattern'],
   wellness: ['crystal', 'đá', 'năng lượng', 'energy', 'healing', 'thiền', 'meditation', 'chakra', 'thạch anh', 'amethyst', 'citrine'],
-  integration: ['chánh niệm', 'mindful', 'tâm lý', 'psychology', 'thịnh vượng', 'abundance', 'cân bằng', 'balance', 'thành công'],
+  integration: ['chánh niệm', 'mindful', 'tâm lý', 'psychology', 'thịnh vượng', 'abundance', 'thành công', 'success', 'balance'],
 };
 
 class ForumRecommendationService {

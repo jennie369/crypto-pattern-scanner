@@ -1,5 +1,5 @@
 /**
- * GEM Platform - User Profile Screen
+ * Gemral - User Profile Screen
  * View other user's profile with follow functionality
  */
 
@@ -16,11 +16,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowLeft, Users, FileText, Settings, MessageCircle } from 'lucide-react-native';
+import { ArrowLeft, Users, FileText, Settings, MessageCircle, Grid3X3, List } from 'lucide-react-native';
 import PostCard from './components/PostCard';
 import { forumService } from '../../services/forumService';
 import { useAuth } from '../../contexts/AuthContext';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { UserBadges } from '../../components/UserBadge';
+import { ImageGrid } from '../../components/Image';
 
 const UserProfileScreen = ({ route, navigation }) => {
   const { userId } = route.params;
@@ -37,8 +39,12 @@ const UserProfileScreen = ({ route, navigation }) => {
     following: 0,
     posts: 0,
   });
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
 
   const isOwnProfile = currentUser?.id === userId;
+
+  // Filter posts with images for grid view
+  const postsWithImages = posts.filter(post => post.image_url || post.thumbnail_url || post.media_urls?.length > 0);
 
   // Load profile data
   useEffect(() => {
@@ -122,8 +128,11 @@ const UserProfileScreen = ({ route, navigation }) => {
         style={styles.avatar}
       />
 
-      {/* Name */}
-      <Text style={styles.name}>{profile?.full_name || 'Người dùng'}</Text>
+      {/* Name with Badges */}
+      <View style={styles.nameRow}>
+        <Text style={styles.name}>{profile?.full_name || 'Người dùng'}</Text>
+        <UserBadges user={profile} size="medium" maxBadges={3} />
+      </View>
       {profile?.username && (
         <Text style={styles.username}>@{profile.username}</Text>
       )}
@@ -191,10 +200,20 @@ const UserProfileScreen = ({ route, navigation }) => {
         )}
       </View>
 
-      {/* Divider */}
-      <View style={styles.divider}>
-        <FileText size={16} color={COLORS.gold} />
-        <Text style={styles.dividerText}>Bài viết</Text>
+      {/* View Mode Toggle */}
+      <View style={styles.viewToggle}>
+        <TouchableOpacity
+          style={[styles.toggleButton, viewMode === 'grid' && styles.toggleButtonActive]}
+          onPress={() => setViewMode('grid')}
+        >
+          <Grid3X3 size={20} color={viewMode === 'grid' ? COLORS.gold : COLORS.textMuted} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.toggleButton, viewMode === 'list' && styles.toggleButtonActive]}
+          onPress={() => setViewMode('list')}
+        >
+          <List size={20} color={viewMode === 'list' ? COLORS.gold : COLORS.textMuted} />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -236,9 +255,9 @@ const UserProfileScreen = ({ route, navigation }) => {
           <View style={{ width: 40 }} />
         </View>
 
-        {/* Posts List with Profile Header */}
+        {/* Posts with Grid/List Toggle */}
         <FlatList
-          data={posts}
+          data={viewMode === 'grid' ? [] : posts}
           renderItem={({ item }) => (
             <PostCard
               post={item}
@@ -246,8 +265,22 @@ const UserProfileScreen = ({ route, navigation }) => {
             />
           )}
           keyExtractor={(item) => item.id?.toString()}
-          ListHeaderComponent={renderHeader}
-          ListEmptyComponent={renderEmpty}
+          ListHeaderComponent={
+            <>
+              {renderHeader()}
+              {viewMode === 'grid' && (
+                <ImageGrid
+                  posts={postsWithImages}
+                  columns={3}
+                  spacing={2}
+                  onPostPress={handlePostPress}
+                  showEmpty={true}
+                  emptyMessage="Chưa có bài viết có ảnh"
+                />
+              )}
+            </>
+          }
+          ListEmptyComponent={viewMode === 'list' ? renderEmpty : null}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           refreshControl={
@@ -309,11 +342,16 @@ const styles = StyleSheet.create({
     borderColor: COLORS.gold,
     marginBottom: SPACING.md,
   },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: SPACING.xs,
+  },
   name: {
     fontSize: 24,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textPrimary,
-    marginBottom: SPACING.xs,
   },
   username: {
     fontSize: TYPOGRAPHY.fontSize.lg,
@@ -410,21 +448,28 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
   },
 
-  // Divider
-  divider: {
+  // View Toggle
+  viewToggle: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
+    justifyContent: 'center',
+    gap: SPACING.md,
     paddingVertical: SPACING.md,
     borderTopWidth: 1,
     borderTopColor: 'rgba(106, 91, 255, 0.2)',
     width: '100%',
-    justifyContent: 'center',
   },
-  dividerText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.gold,
+  toggleButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  toggleButtonActive: {
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.3)',
   },
 
   // List

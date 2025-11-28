@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Shop Components
+ * Gemral - Shop Components
  */
 
 export { default as ProductCard } from './ProductCard';

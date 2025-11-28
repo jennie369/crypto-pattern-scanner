@@ -1,5 +1,5 @@
 /**
- * GEM Platform - FAB Button Component
+ * Gemral - FAB Button Component
  * Floating action button for creating new posts
  */
 

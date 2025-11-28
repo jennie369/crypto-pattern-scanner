@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Supabase Client
+ * Gemral - Supabase Client
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -124,13 +124,15 @@ export const getSession = async () => {
 };
 
 // User profile helpers
+// NOTE: Using ONLY 'profiles' table (unified)
 export const getUserProfile = async (userId) => {
   try {
     const { data, error } = await supabase
-      .from('users')
+      .from('profiles')
       .select('*')
       .eq('id', userId)
       .single();
+
     return { data, error };
   } catch (error) {
     console.error('GetUserProfile error:', error);
@@ -141,10 +143,12 @@ export const getUserProfile = async (userId) => {
 export const updateUserProfile = async (userId, updates) => {
   try {
     const { data, error } = await supabase
-      .from('users')
+      .from('profiles')
       .update(updates)
       .eq('id', userId)
+      .select()
       .single();
+
     return { data, error };
   } catch (error) {
     console.error('UpdateUserProfile error:', error);

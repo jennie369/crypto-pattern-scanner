@@ -1,5 +1,6 @@
+/* ✅ FIXED: Increased hexagram size for better visibility (Issue #2) */
 .hexagram-visual {
-  transform: scale(0.6); /* TĂNG từ 0.5 */
+  transform: scale(0.8); /* ISSUE #2: TĂNG từ 0.6 → 0.8 cho dễ nhìn hơn */
   transform-origin: center center;
   margin: -40px 0; /* ĐIỀU CHỈNH margin */
   display: flex;
@@ -15,14 +16,14 @@
 .hexagram-lines {
   display: flex;
   flex-direction: column;
-  gap: 6px; /* TĂNG từ 4px cho spacing tốt hơn */
+  gap: 8px; /* ISSUE #2: TĂNG từ 6px cho spacing tốt hơn */
   margin-bottom: 20px;
   align-items: center;
 }
 
 .hex-line {
-  width: 100px; /* TĂNG từ 80px */
-  height: 6px; /* TĂNG từ 5px */
+  width: 120px; /* ISSUE #2: TĂNG từ 100px → 120px */
+  height: 8px; /* ISSUE #2: TĂNG từ 6px → 8px */
   display: flex;
   justify-content: space-between;
   transition: all 0.3s ease;
@@ -36,7 +37,7 @@
 
 .seg-left,
 .seg-right {
-  width: 45px; /* TĂNG từ 35px */
+  width: 54px; /* ISSUE #2: TĂNG từ 45px → 54px (120px - 12px gap) / 2 */
   height: 100%;
   background: linear-gradient(90deg, #FFBD59, #FFD700);
   box-shadow: 0 0 12px rgba(255, 189, 89, 0.6); /* TĂNG glow */

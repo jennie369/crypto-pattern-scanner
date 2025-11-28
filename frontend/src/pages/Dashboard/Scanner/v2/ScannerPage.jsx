@@ -17,7 +17,7 @@ import { useScannerStore } from '../../../../stores/scannerStore';
 import './ScannerPage.css';
 
 /**
- * Scanner Page v2 - GEM Platform
+ * Scanner Page v2 - Gemral
  * 3-column layout with real-time pattern detection
  * Week 3, Day 18-21
  *
@@ -398,14 +398,15 @@ export const ScannerPage = () => {
         </div>
       </div>
 
-      {/* Paper Trading Side Panel - Renders outside scanner-layout for proper overlay */}
+      </div>
+
+      {/* Paper Trading Side Panel - Renders OUTSIDE scanner-page-v2 for proper z-index */}
       <PaperTradingPanel
         isOpen={showPaperTradingPanel}
         symbol={paperTradingSymbol}
         onClose={handleClosePaperTrading}
         prefilledSide="buy"
       />
-    </div>
     </>
   );
 };

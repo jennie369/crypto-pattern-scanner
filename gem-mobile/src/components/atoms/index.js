@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Atoms Index
+ * Gemral - Atoms Index
  * Export all atom components
  */
 

@@ -1,6 +1,6 @@
 /**
  * Portfolio Tracker v2 - Exports
- * GEM Platform
+ * Gemral
  */
 
 export { default as PortfolioPage } from './PortfolioPage';

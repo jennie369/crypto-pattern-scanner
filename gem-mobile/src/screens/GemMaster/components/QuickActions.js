@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Quick Actions Component
+ * Gemral - Quick Actions Component
  * Shortcut buttons for I Ching and Tarot readings
  */
 

@@ -8,7 +8,7 @@ import FinalCTA from './components/FinalCTA';
 import './HomePage.css';
 
 /**
- * Home Page v2 - GEM Platform
+ * Home Page v2 - Gemral
  * Complete redesign with AIDA conversion funnel
  *
  * Structure:

@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Input Component
+ * Gemral - Input Component
  * Reusable text input with label
  */
 

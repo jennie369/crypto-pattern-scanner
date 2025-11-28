@@ -31,7 +31,7 @@ Verify và enforce design consistency across toàn bộ platform. Check colors, 
 ### Mục đích
 Ensure GEM brand colors được sử dụng consistently across all pages.
 
-### GEM Platform Color Palette
+### Gemral Color Palette
 
 ```css
 /* Primary Brand Colors */

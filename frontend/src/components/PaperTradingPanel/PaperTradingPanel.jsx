@@ -218,19 +218,39 @@ const PaperTradingPanel = ({ isOpen, onClose, symbol, prefilledSide = null }) =>
         console.log('⚠️ [Paper Trading Panel] WebSocket timeout - fetching from REST API...');
 
         try {
+          // Use Futures API (fapi.binance.com) to avoid CORS issues
+          // Futures API has better CORS support than spot API (api.binance.com)
           const response = await fetch(
-            `https://api.binance.com/api/v3/ticker/price?symbol=${normalizedSymbol}`
+            `https://fapi.binance.com/fapi/v1/ticker/price?symbol=${normalizedSymbol}`
           );
 
           if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            // Fallback to spot API if futures fails (for non-futures symbols)
+            console.log('⚠️ [Paper Trading Panel] Futures API failed, trying spot API...');
+            const spotResponse = await fetch(
+              `https://api.binance.com/api/v3/ticker/price?symbol=${normalizedSymbol}`
+            );
+            if (!spotResponse.ok) {
+              throw new Error(`HTTP ${spotResponse.status}: ${spotResponse.statusText}`);
+            }
+            const spotData = await spotResponse.json();
+            const spotPrice = parseFloat(spotData.price);
+            if (spotPrice && spotPrice > 0) {
+              console.log('✅ [Paper Trading Panel] Price fetched from Spot API:', spotPrice);
+              setCurrentPrice(spotPrice);
+              setPriceLoading(false);
+              priceReceived = true;
+            } else {
+              throw new Error('Invalid price data from spot API');
+            }
+            return;
           }
 
           const data = await response.json();
           const price = parseFloat(data.price);
 
           if (price && price > 0) {
-            console.log('✅ [Paper Trading Panel] Price fetched from REST API:', price);
+            console.log('✅ [Paper Trading Panel] Price fetched from Futures REST API:', price);
             setCurrentPrice(price);
             setPriceLoading(false);
             priceReceived = true;

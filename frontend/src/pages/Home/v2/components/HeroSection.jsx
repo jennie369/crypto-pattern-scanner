@@ -91,7 +91,7 @@ export const HeroSection = () => {
               <div className="chatbot-header">
                 <div className="chatbot-avatar"><Sparkles size={24} /></div>
                 <div>
-                  <div className="chatbot-title">Gem Master Chatbot</div>
+                  <div className="chatbot-title">Gemral Chatbot</div>
                   <div className="chatbot-subtitle">
                     <span className="status-dot"></span>
                     Online

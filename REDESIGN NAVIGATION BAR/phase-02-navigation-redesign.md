@@ -151,8 +151,8 @@ Create dropdown menus với tier-based organization. Each dropdown có sections 
 
          {/* Logo - ⚠️ PRESERVE */}
          <Link to="/" className="nav-logo">
-           <img src="/logo.png" alt="GEM Platform" />
-           <span>GEM Platform</span>
+           <img src="/logo.png" alt="Gemral" />
+           <span>Gemral</span>
          </Link>
 
          {/* Main Navigation */}

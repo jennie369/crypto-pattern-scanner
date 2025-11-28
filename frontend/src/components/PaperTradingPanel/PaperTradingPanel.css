@@ -72,8 +72,12 @@ button.order-tab:hover {
   inset: 0 !important;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: none !important;  /* ✅ REMOVED BLUR */
-  z-index: 999998 !important;
+  z-index: 999998 !important;  /* ✅ Above all other modals (max 10001), below panel */
   animation: fadeIn 0.2s ease-out;
+
+  /* Force new stacking context */
+  transform: translateZ(0);
+  isolation: isolate;
 }
 
 @keyframes fadeIn {
@@ -100,18 +104,21 @@ button.order-tab:hover {
   -webkit-backdrop-filter: none !important;  /* ✅ REMOVED BLUR! */
   border-right: 4px solid rgba(6, 182, 212, 0.8);
   box-shadow: 8px 0 64px rgba(6, 182, 212, 0.4), 12px 0 96px rgba(0, 0, 0, 0.8);
-  z-index: 999999 !important;
+  z-index: 999999 !important;  /* ✅ Above all other modals and backdrop (999998) */
   display: flex;
   animation: slideInLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transition: width 0.1s ease-out;
+
+  /* Force new stacking context to ensure it's above sidebar */
+  isolation: isolate;
 }
 
 @keyframes slideInLeft {
   from {
-    transform: translateX(-100%);
+    transform: translateX(-100%) translateZ(0);
   }
   to {
-    transform: translateX(0);
+    transform: translateX(0) translateZ(0);
   }
 }
 

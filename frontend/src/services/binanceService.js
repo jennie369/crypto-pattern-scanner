@@ -175,33 +175,53 @@ class BinanceService {
    */
   async getCandlestickData(symbol, interval = '1h', limit = 100) {
     try {
-      const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`
+      // 🔥 FIX: Normalize timeframe to lowercase (Binance requires lowercase)
+      const normalizedInterval = interval.toLowerCase();
 
-      const response = await fetch(url)
+      // 🔥 FIX: Use Futures API (fapi.binance.com) to avoid CORS issues
+      // Futures API has better CORS support than spot API (api.binance.com)
+      const url = `https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=${normalizedInterval}&limit=${limit}`;
+
+      console.log(`[BinanceService] Fetching klines: ${symbol} ${normalizedInterval}`);
+
+      const response = await fetch(url);
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        // Fallback to spot API if futures fails (some coins may not be on futures)
+        console.warn(`[BinanceService] Futures API failed for ${symbol}, trying spot API...`);
+        const spotUrl = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${normalizedInterval}&limit=${limit}`;
+        const spotResponse = await fetch(spotUrl);
+
+        if (!spotResponse.ok) {
+          throw new Error(`HTTP error! status: ${spotResponse.status}`);
+        }
+
+        const spotData = await spotResponse.json();
+        return this._formatCandleData(spotData);
       }
 
-      const data = await response.json()
-
-      // Format candlestick data
-      return data.map(candle => ({
-        openTime: candle[0],
-        open: parseFloat(candle[1]),
-        high: parseFloat(candle[2]),
-        low: parseFloat(candle[3]),
-        close: parseFloat(candle[4]),
-        volume: parseFloat(candle[5]),
-        closeTime: candle[6],
-        quoteVolume: parseFloat(candle[7]),
-        trades: candle[8],
-        timestamp: new Date(candle[0])
-      }))
+      const data = await response.json();
+      return this._formatCandleData(data);
     } catch (error) {
-      console.error('❌ Error fetching candlestick data:', error)
-      throw error
+      console.error('❌ Error fetching candlestick data:', error);
+      throw error;
     }
+  }
+
+  // Helper to format candle data
+  _formatCandleData(data) {
+    return data.map(candle => ({
+      openTime: candle[0],
+      open: parseFloat(candle[1]),
+      high: parseFloat(candle[2]),
+      low: parseFloat(candle[3]),
+      close: parseFloat(candle[4]),
+      volume: parseFloat(candle[5]),
+      closeTime: candle[6],
+      quoteVolume: parseFloat(candle[7]),
+      trades: candle[8],
+      timestamp: new Date(candle[0])
+    }));
   }
 }
 

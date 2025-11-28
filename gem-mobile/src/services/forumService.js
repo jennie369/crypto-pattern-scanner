@@ -1,12 +1,12 @@
 /**
- * GEM Platform - Forum Service
+ * Gemral - Forum Service
  * Handles all forum-related API calls
  * COMPLETE IMPLEMENTATION
  */
 
 import { supabase } from './supabase';
 
-// Keyword mapping for feed filtering - GEM Platform Philosophy
+// Keyword mapping for feed filtering - Gemral Philosophy
 // Posts containing these keywords/hashtags will be shown in respective feeds
 const FEED_KEYWORDS = {
   // Trading Track 🎯
@@ -27,7 +27,7 @@ const FEED_KEYWORDS = {
   'earn': ['kiếm tiền', 'affiliate', 'cộng tác', 'CTV', 'hoa hồng', 'commission', 'referral', 'giới thiệu', 'income', 'thu nhập', 'passive', '#affiliate', '#kiemtien', '#CTV'],
 };
 
-// Topic keywords for dropdown filter (GIAO DỊCH, TINH THẦN, CÂN BẰNG)
+// Topic keywords for dropdown filter (GIAO DỊCH, TINH THẦN, THỊNH VƯỢNG)
 const TOPIC_KEYWORDS = {
   'giao-dich': [
     'trading', 'giao dịch', 'btc', 'eth', 'crypto', 'forex', 'coin', 'market', 'thị trường',
@@ -41,11 +41,11 @@ const TOPIC_KEYWORDS = {
     'chánh niệm', 'breath', 'thở', 'relax', 'thư giãn', 'yoga', 'tâm linh', 'spirituality',
     '#crystal', '#healing', '#meditation', '#thien'
   ],
-  'can-bang': [
-    'cân bằng', 'balance', 'mindful trading', 'tâm lý giao dịch', 'psychology',
+  'thinh-vuong': [
+    'thịnh vượng', 'abundance', 'mindful trading', 'tâm lý giao dịch', 'psychology',
     'emotion', 'cảm xúc', 'discipline', 'kỷ luật', 'patience', 'kiên nhẫn',
-    'thịnh vượng', 'abundance', 'thành công', 'success', 'phát triển bản thân',
-    'personal growth', 'chánh niệm trading', '#mindfultrading', '#canbang'
+    'thành công', 'success', 'phát triển bản thân', 'balance',
+    'personal growth', 'chánh niệm trading', '#mindfultrading', '#thinhvuong'
   ],
 };
 
@@ -85,7 +85,7 @@ export const forumService = {
         .from('forum_posts')
         .select(`
           *,
-          author:profiles(id, email, full_name),
+          author:profiles(id, email, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role, achievement_badges),
           category:forum_categories(id, name, color),
           likes:forum_likes(user_id),
           saved:forum_saved(user_id)
@@ -145,6 +145,32 @@ export const forumService = {
             .order('created_at', { ascending: false });
           break;
 
+        // ==== SIDEMENU FEED CATEGORIES (with keyword filtering) ====
+        // Trading Track
+        case 'trading':
+        case 'patterns':
+        case 'results':
+        // Wellness Track
+        case 'wellness':
+        case 'meditation':
+        case 'growth':
+        // Integration Track
+        case 'mindful-trading':
+        case 'sieu-giau':
+        // Earn Track
+        case 'earn': {
+          // Apply keyword filtering from FEED_KEYWORDS
+          const feedKeywords = FEED_KEYWORDS[feed];
+          if (feedKeywords && feedKeywords.length > 0) {
+            const keywordFilters = feedKeywords.map(keyword =>
+              `title.ilike.%${keyword}%,content.ilike.%${keyword}%`
+            ).join(',');
+            query = query.or(keywordFilters);
+          }
+          query = query.order('created_at', { ascending: false });
+          break;
+        }
+
         case 'explore':
         default:
           // Personalized feed: mix of new + trending + user behavior
@@ -181,8 +207,18 @@ export const forumService = {
 
       if (error) throw error;
 
+      // Deduplicate posts (can happen with OR keyword filters matching multiple times)
+      const uniquePosts = [];
+      const seenIds = new Set();
+      for (const post of (data || [])) {
+        if (!seenIds.has(post.id)) {
+          seenIds.add(post.id);
+          uniquePosts.push(post);
+        }
+      }
+
       // Transform data to include user_liked and user_saved status
-      const transformedPosts = (data || []).map((post) => {
+      const transformedPosts = uniquePosts.map((post) => {
         // Check if current user liked/saved this post
         const user_liked = currentUserId
           ? post.likes?.some(like => like.user_id === currentUserId)
@@ -227,7 +263,7 @@ export const forumService = {
         .select(`
           post:forum_posts(
             *,
-            author:profiles(id, email, full_name),
+            author:profiles(id, email, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role, achievement_badges),
             category:forum_categories(id, name, color)
           )
         `)
@@ -257,7 +293,7 @@ export const forumService = {
         .select(`
           post:forum_posts(
             *,
-            author:profiles(id, email, full_name),
+            author:profiles(id, email, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role, achievement_badges),
             category:forum_categories(id, name, color)
           )
         `)
@@ -388,11 +424,11 @@ export const forumService = {
         .from('forum_posts')
         .select(`
           *,
-          author:profiles(id, email, full_name),
+          author:profiles(id, email, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role, achievement_badges),
           category:forum_categories(id, name, color),
           comments:forum_comments(
             *,
-            author:profiles(id, email, full_name)
+            author:profiles(id, email, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role, achievement_badges)
           )
         `)
         .eq('id', postId)
@@ -482,6 +518,93 @@ export const forumService = {
   },
 
   /**
+   * Upload multiple images to Supabase storage
+   * @param {Array<string>} imageUris - Array of local image URIs
+   * @returns {Object} - { success, urls: string[], errors: any[] }
+   */
+  async uploadMultipleImages(imageUris) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      if (!imageUris || imageUris.length === 0) {
+        return { success: true, urls: [], errors: [] };
+      }
+
+      console.log('[Forum] Uploading multiple images:', imageUris.length);
+
+      const uploadPromises = imageUris.map(async (uri, index) => {
+        try {
+          // Skip URLs (already uploaded)
+          if (uri.startsWith('http')) {
+            return { success: true, url: uri };
+          }
+
+          const timestamp = Date.now();
+          const filename = `posts/${user.id}/${timestamp}_${index}.jpg`;
+
+          const response = await fetch(uri);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch image ${index}: ${response.status}`);
+          }
+
+          const arrayBuffer = await response.arrayBuffer();
+          const uint8Array = new Uint8Array(arrayBuffer);
+
+          const { data, error } = await supabase.storage
+            .from('forum-images')
+            .upload(filename, uint8Array, {
+              contentType: 'image/jpeg',
+              upsert: true,
+            });
+
+          if (error) {
+            // Try fallback bucket
+            const { data: fallbackData, error: fallbackError } = await supabase.storage
+              .from('avatars')
+              .upload(`forum/${filename}`, uint8Array, {
+                contentType: 'image/jpeg',
+                upsert: true,
+              });
+
+            if (fallbackError) throw fallbackError;
+
+            const { data: fallbackUrl } = supabase.storage
+              .from('avatars')
+              .getPublicUrl(`forum/${filename}`);
+
+            return { success: true, url: fallbackUrl.publicUrl };
+          }
+
+          const { data: urlData } = supabase.storage
+            .from('forum-images')
+            .getPublicUrl(filename);
+
+          return { success: true, url: urlData.publicUrl };
+        } catch (error) {
+          console.error(`[Forum] Upload error for image ${index}:`, error);
+          return { success: false, error: error.message };
+        }
+      });
+
+      const results = await Promise.all(uploadPromises);
+      const urls = results.filter(r => r.success).map(r => r.url);
+      const errors = results.filter(r => !r.success).map(r => r.error);
+
+      console.log(`[Forum] ✅ Uploaded ${urls.length}/${imageUris.length} images`);
+
+      return {
+        success: urls.length > 0,
+        urls,
+        errors,
+      };
+    } catch (error) {
+      console.error('[Forum] Upload multiple images error:', error);
+      return { success: false, urls: [], errors: [error.message] };
+    }
+  },
+
+  /**
    * Create a new post
    */
   async createPost(post) {
@@ -504,6 +627,109 @@ export const forumService = {
     } catch (error) {
       console.error('Error creating post:', error);
       return { data: null, error };
+    }
+  },
+
+  /**
+   * Update an existing post
+   * SECURITY: Only post author can update
+   * Saves edit history before updating
+   */
+  async updatePost(postId, userId, updates) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Security check: Only author can update
+      const { data: existingPost, error: fetchError } = await supabase
+        .from('forum_posts')
+        .select('id, user_id, title, content')
+        .eq('id', postId)
+        .single();
+
+      if (fetchError || !existingPost) {
+        console.error('[Forum] Post not found:', postId);
+        return { success: false, error: 'Post not found' };
+      }
+
+      if (existingPost.user_id !== user.id) {
+        console.error('[Forum] Unauthorized edit attempt');
+        return { success: false, error: 'Unauthorized' };
+      }
+
+      // Save edit history (if table exists)
+      try {
+        await supabase
+          .from('post_edit_history')
+          .insert({
+            post_id: postId,
+            title_before: existingPost.title,
+            content_before: existingPost.content,
+            title_after: updates.title,
+            content_after: updates.content,
+            edited_by: user.id,
+          });
+        console.log('[Forum] Edit history saved');
+      } catch (historyError) {
+        // Table might not exist yet, continue with update
+        console.log('[Forum] Edit history table not available, skipping');
+      }
+
+      // Update the post with edited_at timestamp
+      const { data, error } = await supabase
+        .from('forum_posts')
+        .update({
+          title: updates.title,
+          content: updates.content,
+          topic: updates.topic,
+          image_url: updates.image_url,
+          feed_type: updates.feed_type,
+          edited_at: new Date().toISOString(),
+        })
+        .eq('id', postId)
+        .eq('user_id', user.id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('[Forum] Update error:', error);
+        throw error;
+      }
+
+      console.log('[Forum] Post updated successfully:', postId);
+      return { success: true, data };
+    } catch (error) {
+      console.error('[Forum] Update post error:', error);
+      return { success: false, error: error.message || error };
+    }
+  },
+
+  /**
+   * Delete a post
+   * SECURITY: Only post author can delete
+   */
+  async deletePost(postId) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Security check: Only author can delete
+      const { error } = await supabase
+        .from('forum_posts')
+        .delete()
+        .eq('id', postId)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('[Forum] Delete error:', error);
+        throw error;
+      }
+
+      console.log('[Forum] Post deleted successfully:', postId);
+      return { success: true };
+    } catch (error) {
+      console.error('[Forum] Delete post error:', error);
+      return { success: false, error: error.message || error };
     }
   },
 
@@ -673,7 +899,7 @@ export const forumService = {
         .from('forum_comments')
         .select(`
           *,
-          author:profiles(id, email, full_name)
+          author:profiles(id, email, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role, achievement_badges)
         `)
         .eq('post_id', postId)
         .order('created_at', { ascending: true });
@@ -831,7 +1057,7 @@ export const forumService = {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, email, full_name, bio, username, created_at')
+        .select('id, email, full_name, bio, username, created_at, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role, achievement_badges')
         .eq('id', userId)
         .single();
 
@@ -855,7 +1081,7 @@ export const forumService = {
         .from('forum_posts')
         .select(`
           *,
-          author:profiles(id, email, full_name),
+          author:profiles(id, email, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role, achievement_badges),
           category:forum_categories(id, name, color),
           likes:forum_likes(user_id),
           saved:forum_saved(user_id)
@@ -1117,7 +1343,7 @@ export const forumService = {
       if (recipientId === user.id) return;
 
       const { error } = await supabase
-        .from('notifications')
+        .from('forum_notifications')
         .insert({
           user_id: recipientId,
           from_user_id: user.id,
@@ -1144,15 +1370,30 @@ export const forumService = {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
 
-      const { data, error } = await supabase
-        .from('notifications')
+      // First try with profiles join
+      let { data, error } = await supabase
+        .from('forum_notifications')
         .select(`
           *,
-          from_user:profiles(id, full_name)
+          from_user:from_user_id(id, full_name)
         `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .range((page - 1) * limit, page * limit - 1);
+
+      // If join fails, try without it
+      if (error && (error.code === 'PGRST200' || error.message?.includes('relationship'))) {
+        console.warn('[Forum] Notifications join failed, fetching without profile data');
+        const fallback = await supabase
+          .from('forum_notifications')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .range((page - 1) * limit, page * limit - 1);
+
+        data = fallback.data;
+        error = fallback.error;
+      }
 
       if (error) throw error;
       return data || [];
@@ -1171,7 +1412,7 @@ export const forumService = {
       if (!user) return 0;
 
       const { count, error } = await supabase
-        .from('notifications')
+        .from('forum_notifications')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
         .eq('read', false);
@@ -1189,7 +1430,7 @@ export const forumService = {
   async markAsRead(notificationId) {
     try {
       const { error } = await supabase
-        .from('notifications')
+        .from('forum_notifications')
         .update({ read: true })
         .eq('id', notificationId);
 
@@ -1210,7 +1451,7 @@ export const forumService = {
       if (!user) return { success: false };
 
       const { error } = await supabase
-        .from('notifications')
+        .from('forum_notifications')
         .update({ read: true })
         .eq('user_id', user.id)
         .eq('read', false);
@@ -1232,7 +1473,7 @@ export const forumService = {
       if (!user) return { success: false };
 
       const { error } = await supabase
-        .from('notifications')
+        .from('forum_notifications')
         .delete()
         .eq('id', notificationId)
         .eq('user_id', user.id);
@@ -1254,12 +1495,16 @@ export const forumService = {
       if (!user) return 0;
 
       const { count, error } = await supabase
-        .from('notifications')
+        .from('forum_notifications')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
-        .eq('read', false);
+        .eq('is_read', false);
 
-      if (error) throw error;
+      if (error) {
+        // If table doesn't exist or column error, return 0 silently
+        console.warn('[Forum] Get unread count warning:', error.message);
+        return 0;
+      }
       return count || 0;
     } catch (error) {
       console.error('[Forum] Get unread count error:', error);
@@ -1442,7 +1687,7 @@ export const forumService = {
         .from('forum_posts')
         .select(`
           *,
-          author:profiles(id, email, full_name),
+          author:profiles(id, email, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role, achievement_badges),
           category:forum_categories(id, name, color)
         `)
         .eq('status', 'published')

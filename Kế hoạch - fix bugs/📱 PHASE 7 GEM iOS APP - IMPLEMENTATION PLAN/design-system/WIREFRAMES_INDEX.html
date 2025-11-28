@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEM iOS Screen Wireframes - Index</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            background: linear-gradient(135deg, #05040B 0%, #0D1B2A 50%, #112250 100%);
+            color: white; min-height: 100vh; padding: 40px 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header {
+            text-align: center; margin-bottom: 60px; padding: 40px 20px;
+            background: rgba(15,16,48,0.55); backdrop-filter: blur(18px);
+            border-radius: 24px; border: 1px solid rgba(255,189,89,0.2);
+        }
+        .logo { font-size: 72px; margin-bottom: 16px; }
+        .title {
+            font-size: 48px; font-weight: 800;
+            background: linear-gradient(135deg, #FFBD59, #9C0612);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+        .subtitle { font-size: 20px; color: rgba(255,255,255,0.7); margin-bottom: 24px; }
+        .stats-grid { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; }
+        .stat-item {
+            text-align: center; padding: 16px 24px;
+            background: rgba(255,189,89,0.1); border-radius: 12px;
+            border: 1px solid rgba(255,189,89,0.2);
+        }
+        .stat-value { font-size: 28px; font-weight: 800; color: #FFBD59; }
+        .stat-label { font-size: 12px; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 1px; }
+        .section-title {
+            font-size: 24px; font-weight: 700; color: #FFBD59;
+            margin: 48px 0 24px; padding-bottom: 12px;
+            border-bottom: 2px solid rgba(255,189,89,0.2);
+        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+        .card {
+            background: rgba(15,16,48,0.55); backdrop-filter: blur(18px);
+            border: 1px solid rgba(255,189,89,0.2); border-radius: 16px;
+            padding: 24px; cursor: pointer; transition: all 0.3s; text-decoration: none; color: white;
+            display: block; position: relative; overflow: hidden;
+        }
+        .card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, #6A5BFF, #00F0FF); opacity: 0; transition: opacity 0.3s;
+        }
+        .card:hover { transform: translateY(-4px); border-color: #FFBD59; box-shadow: 0 12px 32px rgba(255,189,89,0.2); }
+        .card:hover::before { opacity: 1; }
+        .card-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+        .card-icon {
+            font-size: 36px; width: 60px; height: 60px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,189,89,0.1); border-radius: 14px;
+        }
+        .card-title { font-size: 20px; font-weight: 700; color: #FFBD59; }
+        .card-count { font-size: 12px; color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 20px; margin-top: 4px; }
+        .card-description { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.6; margin-bottom: 16px; }
+        .card-screens { display: flex; flex-wrap: wrap; gap: 6px; }
+        .screen-tag { font-size: 10px; padding: 3px 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: rgba(255,255,255,0.6); }
+        .nav-map {
+            background: rgba(15,16,48,0.55); backdrop-filter: blur(18px);
+            border: 1px solid rgba(255,189,89,0.2); border-radius: 16px;
+            padding: 24px; margin-top: 48px;
+        }
+        .nav-title { font-size: 18px; font-weight: 700; color: #FFBD59; margin-bottom: 20px; }
+        .nav-visual {
+            display: flex; justify-content: space-around; flex-wrap: wrap; gap: 16px;
+            background: #112250; border-radius: 12px; padding: 20px;
+        }
+        .nav-item { text-align: center; }
+        .nav-icon { font-size: 28px; margin-bottom: 6px; }
+        .nav-label { font-size: 11px; color: rgba(255,255,255,0.7); }
+        .nav-item.active .nav-icon { opacity: 1; }
+        .nav-item.active .nav-label { color: #FFBD59; font-weight: 600; }
+        .back-link {
+            display: inline-flex; align-items: center; gap: 8px;
+            color: #FFBD59; text-decoration: none; font-size: 14px;
+            margin-bottom: 24px; padding: 8px 16px;
+            background: rgba(255,189,89,0.1); border-radius: 20px;
+            border: 1px solid rgba(255,189,89,0.2);
+        }
+        .footer {
+            text-align: center; margin-top: 60px; padding: 32px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .footer-text { color: rgba(255,255,255,0.5); font-size: 14px; margin-bottom: 8px; }
+        .footer-brand { font-size: 16px; font-weight: 600; color: #FFBD59; }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed; top: 20px; right: 20px; z-index: 1000;
+            background: rgba(255,189,89,0.2); border: 1px solid #FFBD59;
+            color: #FFBD59; padding: 10px 20px; border-radius: 25px;
+            cursor: pointer; font-weight: 600; font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .theme-toggle:hover { background: #FFBD59; color: #05040B; }
+
+        /* ========================================
+           LIGHT THEME - SIMPLE & READABLE
+           All text: #000000 (pure black)
+           All cards: #FFFFFF with #CCCCCC borders
+           ======================================== */
+        body.light-theme {
+            background: #FFFFFF !important;
+            color: #000000 !important;
+        }
+        body.light-theme, body.light-theme * {
+            color: #000000 !important;
+            font-weight: 500 !important;
+        }
+        body.light-theme h1, body.light-theme h2, body.light-theme h3,
+        body.light-theme h4, body.light-theme h5, body.light-theme h6,
+        body.light-theme .title, body.light-theme .card-title,
+        body.light-theme .section-title, body.light-theme .nav-title {
+            color: #000000 !important;
+            font-weight: 700 !important;
+            -webkit-text-fill-color: #000000 !important;
+            background: none !important;
+        }
+        body.light-theme .subtitle, body.light-theme .card-description,
+        body.light-theme .footer-text, body.light-theme .stat-label,
+        body.light-theme .nav-label, body.light-theme .screen-tag {
+            color: #333333 !important;
+            font-weight: 500 !important;
+        }
+        body.light-theme .stat-value, body.light-theme .card-count {
+            color: #9C0612 !important;
+            font-weight: 700 !important;
+        }
+        body.light-theme .card, body.light-theme .header,
+        body.light-theme .nav-map, body.light-theme .stat-item {
+            background: #FFFFFF !important;
+            border: 1px solid #CCCCCC !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+            backdrop-filter: none !important;
+        }
+        body.light-theme .nav-visual {
+            background: #F5F5F5 !important;
+        }
+        body.light-theme .screen-tag {
+            background: #F0F0F0 !important;
+            border: 1px solid #CCCCCC !important;
+        }
+        body.light-theme .back-link {
+            background: #F5F5F5 !important;
+            border: 1px solid #CCCCCC !important;
+            color: #9C0612 !important;
+        }
+        body.light-theme a { color: #0066CC !important; font-weight: 600 !important; }
+        body.light-theme .footer { border-top: 1px solid #CCCCCC !important; }
+        body.light-theme .footer-brand { color: #9C0612 !important; }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark / ☀️ Light</button>
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            localStorage.setItem('theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+        }
+        if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-theme');
+    </script>
+    <div class="container">
+        <a href="CATALOG_INDEX.html" class="back-link">← Back to Component Catalog</a>
+
+        <div class="header">
+            <div class="logo">📱</div>
+            <h1 class="title">GEM iOS Screen Wireframes</h1>
+            <p class="subtitle">Complete User Flow - 40+ Screens - All 6 Tabs</p>
+            <div class="stats-grid">
+                <div class="stat-item"><div class="stat-value">40+</div><div class="stat-label">Screens</div></div>
+                <div class="stat-item"><div class="stat-value">6</div><div class="stat-label">Main Tabs</div></div>
+                <div class="stat-item"><div class="stat-value">5+</div><div class="stat-label">Modals</div></div>
+                <div class="stat-item"><div class="stat-value">4</div><div class="stat-label">Tier Levels</div></div>
+            </div>
+        </div>
+
+        <!-- Navigation Map -->
+        <div class="nav-map">
+            <h3 class="nav-title">6-Tab Navigation Structure</h3>
+            <div class="nav-visual">
+                <div class="nav-item active"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
+                <div class="nav-item"><div class="nav-icon">🛒</div><div class="nav-label">Shop</div></div>
+                <div class="nav-item"><div class="nav-icon">📊</div><div class="nav-label">Giao Dich</div></div>
+                <div class="nav-item"><div class="nav-icon">🤖</div><div class="nav-label">Gem Master</div></div>
+                <div class="nav-item"><div class="nav-icon">🔔</div><div class="nav-label">Thong Bao</div></div>
+                <div class="nav-item"><div class="nav-icon">💰</div><div class="nav-label">Tai San</div></div>
+            </div>
+        </div>
+
+        <h2 class="section-title">Screen Wireframes by Tab</h2>
+
+        <div class="grid">
+            <!-- TAB 1: HOME -->
+            <a href="WIREFRAMES_TAB1_HOME.html" class="card">
+                <div class="card-header">
+                    <div class="card-icon">🏠</div>
+                    <div><h3 class="card-title">TAB 1: HOME</h3><span class="card-count">6 screens</span></div>
+                </div>
+                <p class="card-description">Forum/Feed with hamburger menu. For You, Following, Earn, Sieu Giau, Trading feeds.</p>
+                <div class="card-screens">
+                    <span class="screen-tag">For You</span>
+                    <span class="screen-tag">Following</span>
+                    <span class="screen-tag">Earn</span>
+                    <span class="screen-tag">Sieu Giau</span>
+                    <span class="screen-tag">Trading</span>
+                    <span class="screen-tag">Saved</span>
+                </div>
+            </a>
+
+            <!-- TAB 2: SHOP -->
+            <a href="WIREFRAMES_TAB2_SHOP.html" class="card">
+                <div class="card-header">
+                    <div class="card-icon">🛒</div>
+                    <div><h3 class="card-title">TAB 2: SHOP</h3><span class="card-count">5 screens</span></div>
+                </div>
+                <p class="card-description">E-commerce with products, cart, checkout. Crystals, courses, subscriptions.</p>
+                <div class="card-screens">
+                    <span class="screen-tag">Product Grid</span>
+                    <span class="screen-tag">Product Detail</span>
+                    <span class="screen-tag">Cart</span>
+                    <span class="screen-tag">Checkout</span>
+                    <span class="screen-tag">Order Success</span>
+                </div>
+            </a>
+
+            <!-- TAB 3: TRADING -->
+            <a href="WIREFRAMES_TAB3_TRADING.html" class="card">
+                <div class="card-header">
+                    <div class="card-icon">📊</div>
+                    <div><h3 class="card-title">TAB 3: GIAO DICH</h3><span class="card-count">8 screens</span></div>
+                </div>
+                <p class="card-description">Pattern scanner, analytics, trading tools. Tier-gated features included.</p>
+                <div class="card-screens">
+                    <span class="screen-tag">Scanner</span>
+                    <span class="screen-tag">Pattern Detail</span>
+                    <span class="screen-tag">Analytics</span>
+                    <span class="screen-tag">Risk Calc</span>
+                    <span class="screen-tag">MTF View</span>
+                    <span class="screen-tag">Backtesting</span>
+                </div>
+            </a>
+
+            <!-- TAB 4: Gem Master -->
+            <a href="WIREFRAMES_TAB4_Gem Master.html" class="card">
+                <div class="card-header">
+                    <div class="card-icon">🤖</div>
+                    <div><h3 class="card-title">TAB 4: Gem Master</h3><span class="card-count">5 screens</span></div>
+                </div>
+                <p class="card-description">AI chat with I Ching, Tarot readings. Tier-based quota system.</p>
+                <div class="card-screens">
+                    <span class="screen-tag">Chat</span>
+                    <span class="screen-tag">I Ching</span>
+                    <span class="screen-tag">Tarot</span>
+                    <span class="screen-tag">History</span>
+                    <span class="screen-tag">Quota</span>
+                </div>
+            </a>
+
+            <!-- TAB 5: NOTIFICATIONS -->
+            <a href="WIREFRAMES_TAB5_NOTIFICATIONS.html" class="card">
+                <div class="card-header">
+                    <div class="card-icon">🔔</div>
+                    <div><h3 class="card-title">TAB 5: THONG BAO</h3><span class="card-count">4 screens</span></div>
+                </div>
+                <p class="card-description">Notifications center with pattern alerts, social, system messages.</p>
+                <div class="card-screens">
+                    <span class="screen-tag">All</span>
+                    <span class="screen-tag">Pattern Alerts</span>
+                    <span class="screen-tag">Social</span>
+                    <span class="screen-tag">Settings</span>
+                </div>
+            </a>
+
+            <!-- TAB 6: ACCOUNT -->
+            <a href="WIREFRAMES_TAB6_ACCOUNT.html" class="card">
+                <div class="card-header">
+                    <div class="card-icon">💰</div>
+                    <div><h3 class="card-title">TAB 6: TAI SAN</h3><span class="card-count">7 screens</span></div>
+                </div>
+                <p class="card-description">Portfolio, journal, tools, affiliate, settings. Tier management.</p>
+                <div class="card-screens">
+                    <span class="screen-tag">Portfolio</span>
+                    <span class="screen-tag">Journal</span>
+                    <span class="screen-tag">Tools</span>
+                    <span class="screen-tag">Affiliate</span>
+                    <span class="screen-tag">Settings</span>
+                    <span class="screen-tag">Tier</span>
+                </div>
+            </a>
+
+            <!-- MODALS -->
+            <a href="WIREFRAMES_MODALS.html" class="card">
+                <div class="card-header">
+                    <div class="card-icon">🎭</div>
+                    <div><h3 class="card-title">MODALS & SHEETS</h3><span class="card-count">5+ modals</span></div>
+                </div>
+                <p class="card-description">Overlay modals, bottom sheets, confirmation dialogs, tier prompts.</p>
+                <div class="card-screens">
+                    <span class="screen-tag">Tier Upgrade</span>
+                    <span class="screen-tag">Login</span>
+                    <span class="screen-tag">Add Trade</span>
+                    <span class="screen-tag">Confirm</span>
+                    <span class="screen-tag">Success</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Tier Access Reference -->
+        <div class="nav-map" style="margin-top: 48px;">
+            <h3 class="nav-title">Tier Access Reference</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 16px;">
+                <div style="padding: 16px; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                    <div style="font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.7); margin-bottom: 8px;">FREE</div>
+                    <div style="font-size: 12px; color: rgba(255,255,255,0.5);">3 patterns, basic scanner, 5 Q/day</div>
+                </div>
+                <div style="padding: 16px; background: rgba(255,189,89,0.1); border-radius: 12px; border: 1px solid rgba(255,189,89,0.3);">
+                    <div style="font-size: 14px; font-weight: 700; color: #FFBD59; margin-bottom: 8px;">TIER 1 - $99/mo</div>
+                    <div style="font-size: 12px; color: rgba(255,255,255,0.5);">7 patterns, 2 tools, 15 Q/day</div>
+                </div>
+                <div style="padding: 16px; background: rgba(33,150,243,0.1); border-radius: 12px; border: 1px solid rgba(33,150,243,0.3);">
+                    <div style="font-size: 14px; font-weight: 700; color: #2196F3; margin-bottom: 8px;">TIER 2 - $199/mo</div>
+                    <div style="font-size: 12px; color: rgba(255,255,255,0.5);">15 patterns, 8 tools, unlimited</div>
+                </div>
+                <div style="padding: 16px; background: rgba(156,6,18,0.2); border-radius: 12px; border: 1px solid rgba(156,6,18,0.4);">
+                    <div style="font-size: 14px; font-weight: 700; color: #FF4444; margin-bottom: 8px;">TIER 3 - $499/mo</div>
+                    <div style="font-size: 12px; color: rgba(255,255,255,0.5);">24 patterns, 11 tools, priority</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p class="footer-text">GEM Platform iOS Wireframes v1.0</p>
+            <p class="footer-brand">React Native + Expo | 6 Tabs Navigation</p>
+            <p class="footer-text" style="margin-top: 16px;">Based on approved DESIGN_TOKENS.md + COMPONENT_CATALOG</p>
+        </div>
+    </div>
+</body>
+</html>

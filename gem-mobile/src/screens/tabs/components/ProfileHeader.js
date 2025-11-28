@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Profile Header Component
+ * Gemral - Profile Header Component
  * Facebook-style cover photo + avatar + edit button
  */
 
@@ -15,6 +15,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Camera, Edit3, Settings } from 'lucide-react-native';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, TOUCH } from '../../../utils/tokens';
+import { UserBadges } from '../../../components/UserBadge';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const COVER_HEIGHT = 160;
@@ -98,7 +99,10 @@ const ProfileHeader = ({
 
         {/* Name & Username */}
         <View style={styles.nameContainer}>
-          <Text style={styles.displayName}>{displayName}</Text>
+          <View style={styles.displayNameRow}>
+            <Text style={styles.displayName}>{displayName}</Text>
+            <UserBadges user={profile} size="medium" maxBadges={3} />
+          </View>
           <Text style={styles.username}>@{username}</Text>
         </View>
 
@@ -231,6 +235,11 @@ const styles = StyleSheet.create({
   // Name & Username
   nameContainer: {
     marginTop: SPACING.md,
+  },
+  displayNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   displayName: {
     fontSize: TYPOGRAPHY.fontSize.display,

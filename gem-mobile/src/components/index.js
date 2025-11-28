@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Components Index
+ * Gemral - Components Index
  */
 
 export { default as GlassBottomTab } from './GlassBottomTab';

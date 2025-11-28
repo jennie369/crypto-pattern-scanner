@@ -1,6 +1,6 @@
 /**
- * GEM Platform - GEM Master Screens Index
- * Export all GEM Master related screens and components
+ * Gemral - Gemral Screens Index
+ * Export all Gemral related screens and components
  */
 
 // Main screens

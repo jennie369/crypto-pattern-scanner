@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Shop Screen
+ * Gemral - Shop Screen
  * Dark theme by default (matches other pages)
  */
 
@@ -7,6 +7,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { ShoppingBag } from 'lucide-react-native';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 
 export default function ShopScreen() {
@@ -24,7 +25,7 @@ export default function ShopScreen() {
           </View>
 
           <View style={styles.placeholder}>
-            <Text style={styles.placeholderIcon}>🛍️</Text>
+            <ShoppingBag size={64} color={COLORS.textMuted} strokeWidth={1.5} />
             <Text style={styles.placeholderText}>Shop Screen</Text>
             <Text style={styles.placeholderDesc}>Crystal shop & tier upgrades coming in Week 3+</Text>
           </View>

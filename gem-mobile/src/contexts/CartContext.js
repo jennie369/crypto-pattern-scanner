@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Cart Context
+ * Gemral - Cart Context
  * Global cart state management with AsyncStorage persistence
  */
 

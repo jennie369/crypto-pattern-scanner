@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Dark Theme Constants v3.0
+ * Gemral - Dark Theme Constants v3.0
  * EXACT values from DESIGN_TOKENS.md
  *
  * CRITICAL RULES:

@@ -40,7 +40,7 @@ You need:
 **Steps:**
 1. Go to Shopify Admin: `https://yinyangmasters.myshopify.com/admin`
 2. Settings ’ Apps and sales channels ’ Develop apps
-3. Create app: "GEM Platform Backend"
+3. Create app: "Gemral Backend"
 4. Configuration ’ Admin API integration
 5. Select scopes:
    -  `read_products`

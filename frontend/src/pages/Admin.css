@@ -548,6 +548,520 @@
   }
 }
 
+/* ============================================= */
+/* TAB BADGE (Notification Count) */
+/* ============================================= */
+.tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  margin-left: 8px;
+  background: #F6465D;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #FFFFFF;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* ============================================= */
+/* FILTER BUTTONS */
+/* ============================================= */
+.filter-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  background: rgba(17, 34, 80, 0.6);
+  border: 1px solid rgba(255, 189, 89, 0.2);
+  border-radius: 8px;
+  color: rgba(222, 188, 129, 0.7);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.filter-btn:hover {
+  background: rgba(255, 189, 89, 0.1);
+  border-color: rgba(255, 189, 89, 0.4);
+  color: #FFBD59;
+}
+
+.filter-btn.active {
+  background: rgba(255, 189, 89, 0.2);
+  border-color: #FFBD59;
+  color: #FFBD59;
+}
+
+/* ============================================= */
+/* APPLICATIONS LIST */
+/* ============================================= */
+.applications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.application-card {
+  background: linear-gradient(135deg, rgba(42, 27, 82, 0.6) 0%, rgba(17, 34, 80, 0.6) 100%);
+  border: 1px solid rgba(255, 189, 89, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.application-card:hover {
+  border-color: rgba(255, 189, 89, 0.4);
+  box-shadow: 0 4px 20px rgba(255, 189, 89, 0.1);
+}
+
+.application-card.pending {
+  border-left: 4px solid #F0B90B;
+}
+
+.application-card.approved {
+  border-left: 4px solid #0ECB81;
+}
+
+.application-card.rejected {
+  border-left: 4px solid #F6465D;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.app-type {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.type-badge.affiliate {
+  background: rgba(14, 203, 129, 0.2);
+  color: #0ECB81;
+  border: 1px solid rgba(14, 203, 129, 0.4);
+}
+
+.type-badge.ctv {
+  background: rgba(240, 185, 11, 0.2);
+  color: #F0B90B;
+  border: 1px solid rgba(240, 185, 11, 0.4);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.status-badge.pending {
+  background: rgba(240, 185, 11, 0.15);
+  color: #F0B90B;
+}
+
+.status-badge.approved {
+  background: rgba(14, 203, 129, 0.15);
+  color: #0ECB81;
+}
+
+.status-badge.rejected {
+  background: rgba(246, 70, 93, 0.15);
+  color: #F6465D;
+}
+
+.status-badge.processing {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3B82F6;
+}
+
+.status-badge.completed {
+  background: rgba(14, 203, 129, 0.15);
+  color: #0ECB81;
+}
+
+.app-date {
+  color: rgba(222, 188, 129, 0.6);
+  font-size: 12px;
+}
+
+.app-user-info,
+.wd-user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.user-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FFBD59 0%, #F0B90B 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.user-details {
+  flex: 1;
+}
+
+.user-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #FFFFFF;
+  margin-bottom: 4px;
+}
+
+.user-email {
+  font-size: 13px;
+  color: rgba(222, 188, 129, 0.7);
+}
+
+.user-role .role-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.user-role .role-badge.affiliate {
+  background: rgba(14, 203, 129, 0.15);
+  color: #0ECB81;
+}
+
+.user-role .role-badge.ctv {
+  background: rgba(240, 185, 11, 0.15);
+  color: #F0B90B;
+}
+
+.app-extra-info {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.app-extra-info .info-item {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.app-extra-info .info-item:last-child {
+  margin-bottom: 0;
+}
+
+.app-extra-info .label {
+  color: rgba(222, 188, 129, 0.6);
+  min-width: 160px;
+}
+
+.app-extra-info .value {
+  color: #FFFFFF;
+  flex: 1;
+}
+
+.app-reason {
+  margin-bottom: 12px;
+}
+
+.app-reason .label {
+  color: rgba(222, 188, 129, 0.6);
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.app-reason p {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.app-rejection,
+.wd-rejection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(246, 70, 93, 0.1);
+  border: 1px solid rgba(246, 70, 93, 0.3);
+  border-radius: 6px;
+  color: #F6465D;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.app-actions,
+.wd-actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.action-btn.approve {
+  background: rgba(14, 203, 129, 0.2);
+  color: #0ECB81;
+  border: 1px solid rgba(14, 203, 129, 0.4);
+}
+
+.action-btn.approve:hover {
+  background: rgba(14, 203, 129, 0.3);
+}
+
+.action-btn.reject {
+  background: rgba(246, 70, 93, 0.2);
+  color: #F6465D;
+  border: 1px solid rgba(246, 70, 93, 0.4);
+}
+
+.action-btn.reject:hover {
+  background: rgba(246, 70, 93, 0.3);
+}
+
+.action-btn.process {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3B82F6;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+.action-btn.process:hover {
+  background: rgba(59, 130, 246, 0.3);
+}
+
+.action-btn.complete {
+  background: rgba(14, 203, 129, 0.2);
+  color: #0ECB81;
+  border: 1px solid rgba(14, 203, 129, 0.4);
+}
+
+.action-btn.complete:hover {
+  background: rgba(14, 203, 129, 0.3);
+}
+
+.app-result {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(14, 203, 129, 0.1);
+  border: 1px solid rgba(14, 203, 129, 0.3);
+  border-radius: 6px;
+  color: #0ECB81;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ============================================= */
+/* WITHDRAWALS LIST */
+/* ============================================= */
+.withdrawals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.withdrawal-card {
+  background: linear-gradient(135deg, rgba(42, 27, 82, 0.6) 0%, rgba(17, 34, 80, 0.6) 100%);
+  border: 1px solid rgba(255, 189, 89, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.withdrawal-card:hover {
+  border-color: rgba(255, 189, 89, 0.4);
+  box-shadow: 0 4px 20px rgba(255, 189, 89, 0.1);
+}
+
+.withdrawal-card.pending {
+  border-left: 4px solid #F0B90B;
+}
+
+.withdrawal-card.approved {
+  border-left: 4px solid #3B82F6;
+}
+
+.withdrawal-card.processing {
+  border-left: 4px solid #8B5CF6;
+}
+
+.withdrawal-card.completed {
+  border-left: 4px solid #0ECB81;
+}
+
+.withdrawal-card.rejected {
+  border-left: 4px solid #F6465D;
+}
+
+.wd-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.wd-amount {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wd-amount .amount {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0ECB81;
+}
+
+.wd-bank-info {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.bank-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.bank-item:last-child {
+  margin-bottom: 0;
+}
+
+.bank-item svg {
+  color: rgba(255, 189, 89, 0.6);
+}
+
+.bank-item .label {
+  color: rgba(222, 188, 129, 0.6);
+  min-width: 80px;
+}
+
+.bank-item .value {
+  color: #FFFFFF;
+  flex: 1;
+  font-family: 'Monaco', 'Consolas', monospace;
+}
+
+.copy-btn {
+  background: rgba(255, 189, 89, 0.2);
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: #FFBD59;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.copy-btn:hover {
+  background: rgba(255, 189, 89, 0.3);
+}
+
+.wd-dates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 12px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+}
+
+.date-item {
+  display: flex;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.date-item .label {
+  color: rgba(222, 188, 129, 0.5);
+}
+
+.date-item .value {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.wd-transaction {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(14, 203, 129, 0.1);
+  border: 1px solid rgba(14, 203, 129, 0.3);
+  border-radius: 6px;
+  color: #0ECB81;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+/* Role Badge in Table */
+.role-badge.admin {
+  background: linear-gradient(135deg, rgba(138, 43, 226, 0.3) 0%, rgba(138, 43, 226, 0.15) 100%);
+  color: #9D7FEA;
+  border: 1px solid rgba(138, 43, 226, 0.4);
+}
+
+.role-badge.user {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(222, 188, 129, 0.7);
+}
+
+/* ============================================= */
+/* ROLE BADGE IMPROVEMENTS */
+/* ============================================= */
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-family: 'Montserrat', sans-serif;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .admin-page {
@@ -560,6 +1074,13 @@
 
   .admin-tabs {
     overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .tab-btn {
+    white-space: nowrap;
+    padding: 10px 16px;
+    font-size: 13px;
   }
 
   .users-table-container {
@@ -572,5 +1093,50 @@
 
   .analytics-grid {
     grid-template-columns: 1fr;
+  }
+
+  .content-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .filter-buttons {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .filter-btn {
+    white-space: nowrap;
+  }
+
+  .app-header,
+  .wd-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .app-extra-info .info-item {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .app-extra-info .label {
+    min-width: unset;
+  }
+
+  .wd-dates {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .bank-item {
+    flex-wrap: wrap;
+  }
+
+  .bank-item .label {
+    min-width: unset;
   }
 }

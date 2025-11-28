@@ -1,0 +1,264 @@
+/* TP/SL Input Component Styling */
+
+.tpsl-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(17, 34, 80, 0.3);
+  border: 1px solid rgba(0, 217, 255, 0.2);
+  border-radius: 8px;
+}
+
+/* Current PnL Display */
+.current-pnl-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: rgba(17, 34, 80, 0.5);
+  border-radius: 6px;
+  margin-bottom: 4px;
+}
+
+.current-pnl-display .label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 600;
+}
+
+.current-pnl-display .value {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+
+.current-pnl-display .value.profit {
+  color: #0ECB81;
+}
+
+.current-pnl-display .value.loss {
+  color: #F6465D;
+}
+
+/* TP/SL Section */
+.tpsl-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.section-header label {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Mode Toggle */
+.mode-toggle {
+  display: flex;
+  gap: 2px;
+  background: rgba(17, 34, 80, 0.4);
+  border-radius: 4px;
+  padding: 2px;
+}
+
+.mode-toggle button {
+  padding: 3px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mode-toggle button.active {
+  background: rgba(0, 217, 255, 0.2);
+  color: #00D9FF;
+}
+
+/* Input Row - Much brighter background */
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.12); /* Brighter background */
+  border: 2px solid rgba(0, 217, 255, 0.4);
+  border-radius: 8px;
+  padding: 12px 14px;
+  transition: all 0.2s ease;
+}
+
+.input-row:focus-within {
+  background: rgba(255, 255, 255, 0.18); /* Even brighter on focus */
+  border-color: rgba(0, 217, 255, 0.7);
+  box-shadow: 0 0 16px rgba(0, 217, 255, 0.3);
+}
+
+.input-row .prefix {
+  font-size: 16px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.8);
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+
+.input-row input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #FFFFFF;
+  font-size: 16px;
+  font-weight: 700;
+  outline: none;
+  font-family: 'Monaco', 'Courier New', monospace;
+  text-align: left;
+}
+
+.input-row input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.input-row .unit {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 600;
+}
+
+/* Profit Input - Green Border */
+.profit-input {
+  border-color: rgba(14, 203, 129, 0.4);
+}
+
+.profit-input:focus-within {
+  border-color: rgba(14, 203, 129, 0.7);
+  box-shadow: 0 0 12px rgba(14, 203, 129, 0.3);
+}
+
+.profit-input .prefix {
+  color: #0ECB81;
+}
+
+/* Loss Input - Red Border */
+.loss-input {
+  border-color: rgba(246, 70, 93, 0.4);
+}
+
+.loss-input:focus-within {
+  border-color: rgba(246, 70, 93, 0.7);
+  box-shadow: 0 0 12px rgba(246, 70, 93, 0.3);
+}
+
+.loss-input .prefix {
+  color: #F6465D;
+}
+
+/* Calculated Values */
+.calculated-values {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  background: rgba(17, 34, 80, 0.2);
+  border-radius: 6px;
+  margin-top: 2px;
+}
+
+.value-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.value-row .label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+}
+
+.value-row .value {
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+
+.value-row .value.profit {
+  color: #0ECB81;
+}
+
+.value-row .value.loss {
+  color: #F6465D;
+}
+
+.value-row.pnl {
+  margin-top: 2px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Risk:Reward Display */
+.risk-reward-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: rgba(255, 189, 89, 0.1);
+  border: 1px solid rgba(255, 189, 89, 0.3);
+  border-radius: 6px;
+  margin-top: 4px;
+}
+
+.risk-reward-display .label {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.risk-reward-display .value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #FFBD59;
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+
+/* Take Profit Section Styling */
+.take-profit .section-header label {
+  color: #0ECB81;
+}
+
+.take-profit .input-row {
+  border-color: rgba(14, 203, 129, 0.3);
+}
+
+.take-profit .input-row:focus-within {
+  border-color: rgba(14, 203, 129, 0.5);
+  box-shadow: 0 0 8px rgba(14, 203, 129, 0.2);
+}
+
+/* Stop Loss Section Styling */
+.stop-loss .section-header label {
+  color: #F6465D;
+}
+
+.stop-loss .input-row {
+  border-color: rgba(246, 70, 93, 0.3);
+}
+
+.stop-loss .input-row:focus-within {
+  border-color: rgba(246, 70, 93, 0.5);
+  box-shadow: 0 0 8px rgba(246, 70, 93, 0.2);
+}

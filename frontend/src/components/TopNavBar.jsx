@@ -381,10 +381,10 @@ function TopNavBar() {
             )}
           </div>
 
-          {/* Gem Master - Direct link */}
+          {/* Gemral - Direct link */}
           <Link to="/chatbot" className={`nav-item ${isActive('/chatbot') ? 'active' : ''}`}>
             <Bot size={20} />
-            <span>Gem Master</span>
+            <span>Gemral</span>
           </Link>
 
           {/* Khóa Học - Direct link */}

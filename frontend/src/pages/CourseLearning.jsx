@@ -10,7 +10,7 @@ const coursesData = {
   'crypto-basics': {
     id: 'crypto-basics',
     title: 'Crypto Trading Basics',
-    instructor: 'Gem Master',
+    instructor: 'Gemral',
     requiredTier: 'FREE',
     chapters: [
       {
@@ -100,7 +100,7 @@ In this lesson, you'll learn:
   'advanced-patterns': {
     id: 'advanced-patterns',
     title: 'Advanced Pattern Recognition',
-    instructor: 'Gem Master Pro',
+    instructor: 'Gemral Pro',
     requiredTier: 'TIER2',
     chapters: [
       {

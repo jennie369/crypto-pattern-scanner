@@ -1,8 +1,8 @@
 /**
- * GEM Platform - Login Screen
+ * Gemral - Login Screen
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Gem } from 'lucide-react-native';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, INPUT, BUTTON } from '../../utils/tokens';
 import { signIn } from '../../services/supabase';
 
@@ -22,6 +23,9 @@ export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Refs for input focus
+  const passwordRef = useRef(null);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -53,8 +57,8 @@ export default function LoginScreen({ navigation }) {
           <View style={styles.content}>
             {/* Logo */}
             <View style={styles.logoContainer}>
-              <Text style={styles.logoIcon}>💎</Text>
-              <Text style={styles.logoText}>GEM Platform</Text>
+              <Gem size={64} color={COLORS.gold} strokeWidth={1.5} />
+              <Text style={styles.logoText}>Gemral</Text>
               <Text style={styles.tagline}>Pattern Scanner & Trading Tools</Text>
             </View>
 
@@ -70,18 +74,24 @@ export default function LoginScreen({ navigation }) {
                   onChangeText={setEmail}
                   autoCapitalize="none"
                   keyboardType="email-address"
+                  returnKeyType="next"
+                  onSubmitEditing={() => passwordRef.current?.focus()}
+                  blurOnSubmit={false}
                 />
               </View>
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Password</Text>
                 <TextInput
+                  ref={passwordRef}
                   style={styles.input}
                   placeholder="Enter password"
                   placeholderTextColor="rgba(255, 255, 255, 0.4)"
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry
+                  returnKeyType="go"
+                  onSubmitEditing={handleLogin}
                 />
               </View>
 

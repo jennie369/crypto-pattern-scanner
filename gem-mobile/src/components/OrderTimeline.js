@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Order Timeline Component
+ * Gemral - Order Timeline Component
  * Visual timeline for order status tracking
  */
 

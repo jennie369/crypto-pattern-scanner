@@ -2,7 +2,7 @@ import React from 'react';
 import './Badge.css';
 
 /**
- * Badge Component - GEM Platform
+ * Badge Component - Gemral
  * Status indicators and labels
  *
  * @param {Object} props

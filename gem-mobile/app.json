@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "GEM Platform",
+    "name": "Gemral",
     "slug": "gem-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.gemplatform.mobile",
+      "bundleIdentifier": "com.gemral.mobile",
       "buildNumber": "1.0.0"
     },
     "android": {
@@ -22,7 +22,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#05040B"
       },
-      "package": "com.gemplatform.mobile",
+      "package": "com.gemral.mobile",
       "edgeToEdgeEnabled": true
     },
     "web": {

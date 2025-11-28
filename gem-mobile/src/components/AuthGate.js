@@ -1,5 +1,5 @@
 /**
- * GEM Platform - AuthGate Component
+ * Gemral - AuthGate Component
  * Wrap interactive elements to require authentication
  *
  * Usage:

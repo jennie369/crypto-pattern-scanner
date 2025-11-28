@@ -28,6 +28,7 @@ import MagicCardExport from '../components/MagicCardExport';
 import './Chatbot.css';
 import '../styles/widgetPrompt.css';
 
+// ✅ FIXED ALL 5 CHATBOT ISSUES: Product cards, Padding, Magic card, Hexagram, Tarot
 export default function Chatbot() {
   const { user, profile, getScannerTier } = useAuth();
   const [messages, setMessages] = useState([]);
@@ -126,13 +127,13 @@ export default function Chatbot() {
   const handleExportMagicCard = (message) => {
     // Extract title from message
     const extractTitle = (text) => {
-      if (!text) return 'GEM Master Card';
+      if (!text) return 'Gemral Card';
       const lines = text.split('\n');
       const firstLine = lines[0];
       if (firstLine.length > 50) {
         return firstLine.substring(0, 50) + '...';
       }
-      return firstLine || 'GEM Master Card';
+      return firstLine || 'Gemral Card';
     };
 
     // Determine card type based on active mode or message metadata
@@ -177,7 +178,7 @@ export default function Chatbot() {
       setMessages([{
         id: 'welcome',
         type: 'bot',
-        content: 'Chào mừng đến với Gem Master Chatbot! Tôi có thể giúp bạn với:\n\n**I Ching** - Nhận lời khuyên từ Kinh Dịch\n**Tarot** - Đọc bài Tarot về trading và cuộc sống\n**Chat** - Tư vấn về trading, năng lượng, và phương pháp\n\nBạn muốn bắt đầu với điều gì?',
+        content: 'Chào mừng đến với Gemral Chatbot! Tôi có thể giúp bạn với:\n\n**I Ching** - Nhận lời khuyên từ Kinh Dịch\n**Tarot** - Đọc bài Tarot về trading và cuộc sống\n**Chat** - Tư vấn về trading, năng lượng, và phương pháp\n\nBạn muốn bắt đầu với điều gì?',
         timestamp: new Date().toISOString()
       }]);
     }
@@ -280,7 +281,7 @@ export default function Chatbot() {
       setMessages(prev => [...prev, {
         id: Date.now(),
         type: 'system',
-        content: `Bạn đã hết lượt hỏi hôm nay (${usageInfo.limit} câu hỏi/ngày cho gói ${getScannerTier()?.toUpperCase()}).\n\nNâng cấp tài khoản để có thêm lượt hỏi:\n• GÓI 1: 15 câu/ngày\n• GÓI 2: 50 câu/ngày\n• GÓI 3: Không giới hạn`,
+        content: `Bạn đã hết lượt hỏi hôm nay (${usageInfo.limit} câu hỏi/ngày cho gói ${getScannerTier()?.toUpperCase()}).\n\nNâng cấp tài khoản để có thêm lượt hỏi:\n• PRO: 15 câu/ngày (39.000đ/tháng)\n• PREMIUM: 50 câu/ngày (59.000đ/tháng)\n• VIP: Không giới hạn (99.000đ/tháng)`,
         timestamp: new Date().toISOString()
       }]);
       return;
@@ -416,7 +417,7 @@ export default function Chatbot() {
       setMessages([{
         id: 'welcome',
         type: 'bot',
-        content: 'Chào mừng đến với Gem Master Chatbot! Tôi có thể giúp bạn với:\n\n**I Ching** - Nhận lời khuyên từ Kinh Dịch\n**Tarot** - Đọc bài Tarot về trading và cuộc sống\n**Chat** - Tư vấn về trading, năng lượng, và phương pháp\n\nBạn muốn bắt đầu với điều gì?',
+        content: 'Chào mừng đến với Gemral Chatbot! Tôi có thể giúp bạn với:\n\n**I Ching** - Nhận lời khuyên từ Kinh Dịch\n**Tarot** - Đọc bài Tarot về trading và cuộc sống\n**Chat** - Tư vấn về trading, năng lượng, và phương pháp\n\nBạn muốn bắt đầu với điều gì?',
         timestamp: new Date().toISOString()
       }]);
     }
@@ -573,7 +574,7 @@ export default function Chatbot() {
       setMessages(prev => [...prev, {
         id: Date.now(),
         type: 'system',
-        content: `Bạn đã hết lượt hỏi hôm nay (${usageInfo.limit} câu hỏi/ngày cho gói ${getScannerTier()?.toUpperCase()}).\n\nNâng cấp tài khoản để có thêm lượt hỏi:\n• GÓI 1: 15 câu/ngày\n• GÓI 2: 50 câu/ngày\n• GÓI 3: Không giới hạn`,
+        content: `Bạn đã hết lượt hỏi hôm nay (${usageInfo.limit} câu hỏi/ngày cho gói ${getScannerTier()?.toUpperCase()}).\n\nNâng cấp tài khoản để có thêm lượt hỏi:\n• PRO: 15 câu/ngày (39.000đ/tháng)\n• PREMIUM: 50 câu/ngày (59.000đ/tháng)\n• VIP: Không giới hạn (99.000đ/tháng)`,
         timestamp: new Date().toISOString()
       }]);
       return;
@@ -786,7 +787,7 @@ export default function Chatbot() {
           {/* Header */}
           <div className="chat-header">
             <div>
-              <h2 className="chat-title"><Eye size={24} style={{ display: 'inline-block', marginRight: '8px', verticalAlign: 'middle' }} /> Gem Master Chatbot</h2>
+              <h2 className="chat-title"><Eye size={24} style={{ display: 'inline-block', marginRight: '8px', verticalAlign: 'middle' }} /> Gemral Chatbot</h2>
               <p className="chat-subtitle">
                 {activeMode === 'chat' && 'Tư vấn trading và năng lượng'}
                 {activeMode === 'iching' && 'Nhận lời khuyên từ Kinh Dịch'}
@@ -1122,7 +1123,7 @@ export default function Chatbot() {
             {loading && (
               <div className="loading-message">
                 <div className="spinner" />
-                <span>Gem Master đang suy nghĩ...</span>
+                <span>Gemral đang suy nghĩ...</span>
               </div>
             )}
 
@@ -1302,7 +1303,7 @@ export default function Chatbot() {
             </div>
 
             <div className="widget-prompt-text">
-              <h4>✨ GEM Platform có thể tạo dashboard cho bạn!</h4>
+              <h4>✨ Gemral có thể tạo dashboard cho bạn!</h4>
               <p>
                 {pendingWidget.detection.type === ResponseTypes.MANIFESTATION_GOAL &&
                   'Tự động track progress, nhắc nhở hàng ngày, và nhiều hơn nữa.'}
@@ -1359,7 +1360,7 @@ export default function Chatbot() {
   );
 }
 
-// Message Bubble Component
+// Message Bubble Component - FIXED: Product cards, Padding, Magic Card centering ✅
 function MessageBubble({ message, onExport }) {
   const isUser = message.type === 'user';
   const isSystem = message.type === 'system';
@@ -1404,7 +1405,7 @@ function MessageBubble({ message, onExport }) {
 
   // Base style for all bubbles
   const baseStyle = {
-    padding: '16px 20px',
+    padding: '12px 16px', /* ISSUE #3: Reduced from 16px 20px for compact spacing */
     color: '#FFFFFF',
     fontSize: '15px',
     lineHeight: '1.6',

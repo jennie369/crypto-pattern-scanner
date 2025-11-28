@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Open Positions Screen
+ * Gemral - Open Positions Screen
  * View and manage paper trade positions
  */
 

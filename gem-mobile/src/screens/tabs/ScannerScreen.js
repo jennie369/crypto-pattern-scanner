@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Scanner Screen (Giao Dich)
+ * Gemral - Scanner Screen (Giao Dich)
  * Dark glass theme - Main feature screen
  */
 
@@ -7,6 +7,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BarChart2, TrendingUp } from 'lucide-react-native';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 
 export default function ScannerScreen() {
@@ -26,7 +27,7 @@ export default function ScannerScreen() {
         <ScrollView style={styles.scrollView}>
           {/* Glass Card Placeholder */}
           <View style={styles.glassCard}>
-            <Text style={styles.cardIcon}>📊</Text>
+            <BarChart2 size={48} color={COLORS.gold} strokeWidth={1.5} />
             <Text style={styles.cardTitle}>Scanner Screen</Text>
             <Text style={styles.cardDesc}>
               Pattern scanning with Liquid Glass UI coming in Week 3+
@@ -37,7 +38,7 @@ export default function ScannerScreen() {
           <View style={styles.featuresGrid}>
             {['DPD', 'UPU', 'HPD', 'LPU'].map((pattern) => (
               <View key={pattern} style={styles.featureItem}>
-                <Text style={styles.featureIcon}>🔮</Text>
+                <TrendingUp size={24} color={COLORS.purple} strokeWidth={2} />
                 <Text style={styles.featureName}>{pattern}</Text>
               </View>
             ))}

@@ -43,8 +43,8 @@
   --brand-gold-muted: #D4A574;
   --brand-gold-light: #DEBC81;
 
-  /* Secondary Colors */
-  --brand-cyan: #00D9FF;
+  /* Secondary Colors - CYAN REPLACED WITH GOLD */
+  --brand-cyan: #FFBD59;
   --brand-blue: #4D9DE0;
   --brand-purple: #8B5CF6;
   --brand-pink: #FF6B9D;
@@ -73,12 +73,12 @@
 
   /* Button Gradients */
   --gradient-burgundy: linear-gradient(135deg, #9C0612 0%, #6B0F1A 100%);
-  --gradient-cyan: linear-gradient(135deg, #00D9FF 0%, #4D9DE0 100%);
+  --gradient-cyan: linear-gradient(135deg, #FFBD59 0%, #E6A64D 100%);
   --gradient-purple: linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%);
 
   /* Text Gradients */
   --gradient-gold-text: linear-gradient(135deg, #FFFFFF 0%, #FFBD59 100%);
-  --gradient-rainbow: linear-gradient(135deg, #00D9FF 0%, #8B5CF6 50%, #FF6B9D 100%);
+  --gradient-rainbow: linear-gradient(135deg, #FFBD59 0%, #8B5CF6 50%, #FF6B9D 100%);
 
   /* ============================================
      TYPOGRAPHY
@@ -154,7 +154,7 @@
   /* Glows */
   --glow-gold: 0 0 30px rgba(255, 189, 89, 0.5);
   --glow-burgundy: 0 10px 40px rgba(156, 6, 18, 0.4);
-  --glow-cyan: 0 0 30px rgba(0, 217, 255, 0.4);
+  --glow-cyan: 0 0 30px rgba(255, 189, 89, 0.4);
   --glow-purple: 0 0 30px rgba(139, 92, 246, 0.4);
 
   /* ============================================

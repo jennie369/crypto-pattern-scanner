@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Tab Navigator
+ * Gemral - Tab Navigator
  * 6-tab bottom navigation with Glass Bottom Tab
  *
  * Sources:
@@ -16,7 +16,7 @@ import ShopStack from './ShopStack';
 import ScannerStack from './ScannerStack';
 import GemMasterStack from './GemMasterStack';
 import NotificationsScreen from '../screens/tabs/NotificationsScreen';
-import AccountScreen from '../screens/tabs/AccountScreen';
+import AccountStack from './AccountStack';
 
 // Custom Tab Bar
 import GlassBottomTab from '../components/GlassBottomTab';
@@ -40,14 +40,14 @@ export default function TabNavigator() {
       {/* TAB 3: GIAO DỊCH */}
       <Tab.Screen name="Trading" component={ScannerStack} />
 
-      {/* TAB 4: GEM MASTER */}
+      {/* TAB 4: Gemral */}
       <Tab.Screen name="GemMaster" component={GemMasterStack} />
 
       {/* TAB 5: THÔNG BÁO */}
       <Tab.Screen name="Notifications" component={NotificationsScreen} />
 
       {/* TAB 6: TÀI SẢN */}
-      <Tab.Screen name="Account" component={AccountScreen} />
+      <Tab.Screen name="Account" component={AccountStack} />
     </Tab.Navigator>
   );
 }

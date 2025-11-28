@@ -5,12 +5,16 @@
 .sub-tools-panel {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  /* Remove margin and padding for top placement */
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .sub-tools-header {
-  margin-bottom: var(--space-sm);
+  margin-bottom: 4px;
 }
 
 .sub-tools-header .heading-sm {
@@ -20,7 +24,7 @@
 .sub-tools-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-sm);
+  gap: 6px;
 }
 
 .sub-tool-btn {
@@ -38,8 +42,8 @@
 }
 
 .sub-tool-btn:hover:not(:disabled):not(.locked) {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: var(--brand-cyan);
+  background: rgba(17, 34, 80, 0.6);
+  border-color: #FFBD59;
   transform: translateY(-2px);
 }
 
@@ -109,7 +113,8 @@
 
 /* Compact Header */
 .sub-tools-header-compact {
-  padding: 8px 0;
+  padding: 0;
+  margin-bottom: 8px;
 }
 
 .sub-tools-header-compact h3 {
@@ -124,10 +129,15 @@
 .sub-tools-grid-compact {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
-/* Sub Tool Button Styles (from SubToolButton.jsx) */
+/* Sub Tool Button Styles - Compact */
 .sub-tool-btn {
   position: relative;
   display: flex;
@@ -135,13 +145,17 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 8px;
+  padding: 8px 4px;
   background: rgba(17, 34, 80, 0.4);
   border: 1px solid rgba(255, 189, 89, 0.2);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
-  min-height: 72px;
+  min-height: 60px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .sub-tool-btn:hover:not(:disabled):not(.locked) {
@@ -176,11 +190,11 @@
 }
 
 .sub-tool-title {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 600;
   color: #FFFFFF;
   text-align: center;
-  line-height: 1.2;
+  line-height: 1.1;
 }
 
 .sub-tool-tier {
@@ -261,4 +275,92 @@
   .sub-tool-title {
     font-size: 9px;
   }
+}
+
+/* ===================================
+   MULTI-TF AUTO-SCAN SECTION - COMPACT
+   =================================== */
+
+.multi-tf-section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 189, 89, 0.15);
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.multi-tf-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.multi-tf-header svg {
+  color: #FFBD59;
+}
+
+.multi-tf-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #FFBD59;
+  font-family: var(--font-display);
+}
+
+.multi-tf-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.multi-tf-loading,
+.multi-tf-empty {
+  padding: 20px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  background: rgba(17, 34, 80, 0.3);
+  border: 1px dashed rgba(255, 189, 89, 0.2);
+  border-radius: 8px;
+}
+
+.multi-tf-patterns-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Multi-TF Message Styles */
+.multi-tf-message {
+  padding: 16px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 500;
+  background: rgba(17, 34, 80, 0.3);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.multi-tf-message-upgrade {
+  color: #FFBD59;
+  border: 1px solid rgba(255, 189, 89, 0.3);
+  background: rgba(255, 189, 89, 0.08);
+}
+
+.multi-tf-message-error {
+  color: #F6465D;
+  border: 1px solid rgba(246, 70, 93, 0.3);
+  background: rgba(246, 70, 93, 0.08);
+}
+
+.multi-tf-message-info {
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
 }

@@ -1,5 +1,5 @@
 /**
- * GEM Platform - Orders Screen
+ * Gemral - Orders Screen
  * View order history and track orders
  */
 
