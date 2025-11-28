@@ -32,7 +32,8 @@ import shopifyService from '../services/shopifyService';
 
 const ProductPicker = ({ visible, onClose, onSelect, currentProduct }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [products, setProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]); // All products from Shopify
+  const [products, setProducts] = useState([]); // Filtered products to display
   const [loading, setLoading] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(currentProduct);
   const [error, setError] = useState(null);
@@ -48,6 +49,41 @@ const ProductPicker = ({ visible, onClose, onSelect, currentProduct }) => {
   }, [currentProduct]);
 
   /**
+   * Transform Shopify product to our format
+   */
+  const transformProduct = (p, index) => {
+    // Handle image - could be image_url, image, or images array
+    let imageUrl = null;
+    if (p.image_url) {
+      imageUrl = p.image_url;
+    } else if (typeof p.image === 'string') {
+      imageUrl = p.image;
+    } else if (p.image?.src) {
+      imageUrl = p.image.src;
+    } else if (p.images && p.images.length > 0) {
+      imageUrl = typeof p.images[0] === 'string' ? p.images[0] : p.images[0]?.src;
+    }
+
+    // Ensure unique key - prefer shopify_product_id, fallback to id or index
+    const uniqueId = String(p.shopify_product_id || p.id || `product-${index}`);
+
+    return {
+      id: uniqueId,
+      shopifyId: p.shopify_product_id || p.id,
+      title: p.title,
+      price: formatPrice(p.price),
+      priceRaw: p.price,
+      image: imageUrl,
+      images: p.images || [],
+      type: determineProductType(p),
+      handle: p.handle,
+      variantId: p.variantId || p.variants?.[0]?.id,
+      description: p.description,
+      tags: p.tags,
+    };
+  };
+
+  /**
    * Load real products from Shopify via shopifyService
    */
   const loadProducts = async () => {
@@ -57,42 +93,23 @@ const ProductPicker = ({ visible, onClose, onSelect, currentProduct }) => {
     try {
       console.log('[ProductPicker] Loading products from Shopify...');
 
-      // Use searchProducts if there's a query, otherwise get all products
-      let shopifyProducts;
-
-      if (searchQuery && searchQuery.trim().length > 0) {
-        shopifyProducts = await shopifyService.searchProducts(searchQuery.trim());
-      } else {
-        shopifyProducts = await shopifyService.getProducts({ limit: 100 });
-      }
+      const shopifyProducts = await shopifyService.getProducts({ limit: 100 });
 
       console.log('[ProductPicker] Loaded products:', shopifyProducts?.length || 0);
 
       if (shopifyProducts && shopifyProducts.length > 0) {
-        // Transform Shopify products to our format
-        const transformedProducts = shopifyProducts.map(p => ({
-          id: p.id,
-          shopifyId: p.id,
-          title: p.title,
-          price: formatPrice(p.price),
-          priceRaw: p.price,
-          image: p.image || p.images?.[0] || null,
-          images: p.images || [],
-          type: determineProductType(p),
-          handle: p.handle,
-          variantId: p.variantId || p.variants?.[0]?.id,
-          description: p.description,
-          tags: p.tags,
-        }));
-
+        const transformedProducts = shopifyProducts.map(transformProduct);
+        setAllProducts(transformedProducts);
         setProducts(transformedProducts);
       } else {
+        setAllProducts([]);
         setProducts([]);
         setError('Không có sản phẩm nào trong cửa hàng');
       }
     } catch (err) {
       console.error('[ProductPicker] Load error:', err);
       setError('Không thể tải sản phẩm. Vui lòng thử lại.');
+      setAllProducts([]);
       setProducts([]);
     } finally {
       setLoading(false);
@@ -142,48 +159,30 @@ const ProductPicker = ({ visible, onClose, onSelect, currentProduct }) => {
   };
 
   /**
-   * Handle search with debounce
+   * Handle search - filter locally from loaded products
    */
-  const handleSearch = async (query) => {
+  const handleSearch = (query) => {
     setSearchQuery(query);
 
-    // If search is cleared, reload all products
+    // If search is cleared, show all products
     if (!query || query.trim().length === 0) {
-      loadProducts();
+      setProducts(allProducts);
       return;
     }
 
-    // Only search if query is at least 2 characters
-    if (query.trim().length >= 2) {
-      setLoading(true);
-      try {
-        const results = await shopifyService.searchProducts(query.trim());
-        if (results && results.length > 0) {
-          const transformedProducts = results.map(p => ({
-            id: p.id,
-            shopifyId: p.id,
-            title: p.title,
-            price: formatPrice(p.price),
-            priceRaw: p.price,
-            image: p.image || p.images?.[0] || null,
-            images: p.images || [],
-            type: determineProductType(p),
-            handle: p.handle,
-            variantId: p.variantId || p.variants?.[0]?.id,
-          }));
-          setProducts(transformedProducts);
-        } else {
-          setProducts([]);
-        }
-      } catch (err) {
-        console.error('[ProductPicker] Search error:', err);
-      } finally {
-        setLoading(false);
-      }
-    }
+    // Filter locally from allProducts
+    const lowerQuery = query.toLowerCase().trim();
+    const filtered = allProducts.filter(p => {
+      const titleMatch = p.title?.toLowerCase().includes(lowerQuery);
+      const descMatch = p.description?.toLowerCase().includes(lowerQuery);
+      const handleMatch = p.handle?.toLowerCase().includes(lowerQuery);
+      return titleMatch || descMatch || handleMatch;
+    });
+
+    setProducts(filtered);
   };
 
-  // Local filter for quick filtering (products already loaded)
+  // Filtered products to display
   const filteredProducts = products;
 
   const handleSelect = (product) => {
