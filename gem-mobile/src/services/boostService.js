@@ -1,0 +1,458 @@
+/**
+ * Gemral - Boost Service
+ * Feature #7: Boost Post
+ * Handles post boosting/promotion
+ */
+
+import { supabase } from './supabase';
+
+export const boostService = {
+  /**
+   * Get available boost packages
+   */
+  getBoostPackages() {
+    return [
+      {
+        id: 'basic',
+        name: 'Co ban',
+        description: 'Tang tiep can 2x trong 24h',
+        duration_hours: 24,
+        reach_multiplier: 2,
+        price_gems: 50,
+        features: [
+          'Hien thi o vi tri cao hon',
+          'Badge "Duoc quan tam"',
+        ],
+      },
+      {
+        id: 'standard',
+        name: 'Tieu chuan',
+        description: 'Tang tiep can 5x trong 48h',
+        duration_hours: 48,
+        reach_multiplier: 5,
+        price_gems: 100,
+        features: [
+          'Hien thi tren dau feed',
+          'Badge "Dang hot"',
+          'Xuat hien trong De xuat',
+        ],
+        popular: true,
+      },
+      {
+        id: 'premium',
+        name: 'Cao cap',
+        description: 'Tang tiep can 10x trong 7 ngay',
+        duration_hours: 168, // 7 days
+        reach_multiplier: 10,
+        price_gems: 300,
+        features: [
+          'Vi tri hang dau',
+          'Badge "Trending"',
+          'Thong bao den follower',
+          'Phan tich chi tiet',
+        ],
+      },
+      {
+        id: 'ultra',
+        name: 'Sieu cap',
+        description: 'Tang tiep can toi da trong 14 ngay',
+        duration_hours: 336, // 14 days
+        reach_multiplier: 20,
+        price_gems: 500,
+        features: [
+          'Do uu tien cao nhat',
+          'Badge "Viral"',
+          'Quang cao noi bat',
+          'Ho tro tu doi ngu GEM',
+          'Bao cao hieu qua',
+        ],
+      },
+    ];
+  },
+
+  /**
+   * Boost a post
+   * @param {string} postId - Post ID
+   * @param {string} packageId - Boost package ID
+   * @returns {Promise<object>}
+   */
+  async boostPost(postId, packageId) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return { success: false, error: 'Chua dang nhap' };
+      }
+
+      const packages = this.getBoostPackages();
+      const selectedPackage = packages.find(p => p.id === packageId);
+
+      if (!selectedPackage) {
+        return { success: false, error: 'Goi boost khong hop le' };
+      }
+
+      // Check gem balance - use profiles.gems as single source of truth
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('gems')
+        .eq('id', user.id)
+        .single();
+
+      const gemBalance = profile?.gems || 0;
+      if (gemBalance < selectedPackage.price_gems) {
+        return { success: false, error: 'Khong du gems', needGems: true };
+      }
+
+      // Verify post ownership
+      const { data: post } = await supabase
+        .from('forum_posts')
+        .select('user_id')
+        .eq('id', postId)
+        .single();
+
+      if (post?.user_id !== user.id) {
+        return { success: false, error: 'Khong co quyen boost bai viet nay' };
+      }
+
+      // Check if already boosted
+      const { data: existingBoost } = await supabase
+        .from('post_boosts')
+        .select('id, expires_at')
+        .eq('post_id', postId)
+        .eq('status', 'active')
+        .single();
+
+      if (existingBoost) {
+        return {
+          success: false,
+          error: 'Bai viet dang duoc boost',
+          existingBoost,
+        };
+      }
+
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + selectedPackage.duration_hours);
+
+      // Start transaction
+      // 1. Deduct gems from profiles.gems (single source of truth)
+      const newBalance = gemBalance - selectedPackage.price_gems;
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ gems: newBalance })
+        .eq('id', user.id);
+
+      if (profileError) throw profileError;
+
+      // Also update user_wallets for backwards compatibility (trigger should do this too)
+      await supabase
+        .from('user_wallets')
+        .update({ gem_balance: newBalance })
+        .eq('user_id', user.id);
+
+      // 2. Record transaction to gems_transactions
+      await supabase
+        .from('gems_transactions')
+        .insert({
+          user_id: user.id,
+          type: 'debit',
+          amount: selectedPackage.price_gems,
+          description: `Boost bai viet - Goi ${selectedPackage.name}`,
+          reference_type: 'post_boost',
+          balance_before: gemBalance,
+          balance_after: newBalance,
+        });
+
+      // Also log to wallet_transactions for backwards compatibility
+      await supabase
+        .from('wallet_transactions')
+        .insert({
+          user_id: user.id,
+          type: 'spend',
+          amount: selectedPackage.price_gems,
+          currency: 'gems',
+          description: `Boost bai viet - Goi ${selectedPackage.name}`,
+          reference_type: 'post_boost',
+          reference_id: postId,
+        });
+
+      // 3. Create boost record
+      const { data: boost, error: boostError } = await supabase
+        .from('post_boosts')
+        .insert({
+          post_id: postId,
+          user_id: user.id,
+          package_type: packageId,
+          gems_spent: selectedPackage.price_gems,
+          reach_multiplier: selectedPackage.reach_multiplier,
+          expires_at: expiresAt.toISOString(),
+          status: 'active',
+        })
+        .select()
+        .single();
+
+      if (boostError) throw boostError;
+
+      // 4. Update post boost status
+      await supabase
+        .from('forum_posts')
+        .update({
+          is_boosted: true,
+          boost_expires_at: expiresAt.toISOString(),
+        })
+        .eq('id', postId);
+
+      console.log('[Boost] Created boost:', boost.id);
+      return {
+        success: true,
+        data: boost,
+        package: selectedPackage,
+      };
+    } catch (error) {
+      console.error('[Boost] Create error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Get active boosts for user
+   * @returns {Promise<array>}
+   */
+  async getActiveBoosts() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from('post_boosts')
+        .select(`
+          id,
+          package_type,
+          gems_spent,
+          reach_multiplier,
+          impressions,
+          clicks,
+          created_at,
+          expires_at,
+          status,
+          post:post_id (
+            id,
+            content,
+            image_url,
+            media_urls
+          )
+        `)
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .gt('expires_at', new Date().toISOString())
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('[Boost] Get active error:', error);
+      return [];
+    }
+  },
+
+  /**
+   * Get boost history
+   * @param {number} limit - Max results
+   * @returns {Promise<array>}
+   */
+  async getBoostHistory(limit = 20) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from('post_boosts')
+        .select(`
+          id,
+          package_type,
+          gems_spent,
+          reach_multiplier,
+          impressions,
+          clicks,
+          created_at,
+          expires_at,
+          status,
+          post:post_id (
+            id,
+            content,
+            image_url,
+            media_urls
+          )
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('[Boost] Get history error:', error);
+      return [];
+    }
+  },
+
+  /**
+   * Get boost stats for a post
+   * @param {string} postId - Post ID
+   * @returns {Promise<object|null>}
+   */
+  async getBoostStats(postId) {
+    try {
+      const { data, error } = await supabase
+        .from('post_boosts')
+        .select('*')
+        .eq('post_id', postId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      return data;
+    } catch (error) {
+      console.error('[Boost] Get stats error:', error);
+      return null;
+    }
+  },
+
+  /**
+   * Check if post is currently boosted
+   * @param {string} postId - Post ID
+   * @returns {Promise<boolean>}
+   */
+  async isPostBoosted(postId) {
+    try {
+      const { data } = await supabase
+        .from('post_boosts')
+        .select('id')
+        .eq('post_id', postId)
+        .eq('status', 'active')
+        .gt('expires_at', new Date().toISOString())
+        .single();
+
+      return !!data;
+    } catch (error) {
+      return false;
+    }
+  },
+
+  /**
+   * Cancel active boost (no refund)
+   * @param {string} boostId - Boost ID
+   * @returns {Promise<object>}
+   */
+  async cancelBoost(boostId) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return { success: false, error: 'Chua dang nhap' };
+      }
+
+      // Verify ownership
+      const { data: boost } = await supabase
+        .from('post_boosts')
+        .select('user_id, post_id')
+        .eq('id', boostId)
+        .single();
+
+      if (boost?.user_id !== user.id) {
+        return { success: false, error: 'Khong co quyen' };
+      }
+
+      // Update boost status
+      const { error } = await supabase
+        .from('post_boosts')
+        .update({ status: 'cancelled' })
+        .eq('id', boostId);
+
+      if (error) throw error;
+
+      // Update post
+      await supabase
+        .from('forum_posts')
+        .update({
+          is_boosted: false,
+          boost_expires_at: null,
+        })
+        .eq('id', boost.post_id);
+
+      console.log('[Boost] Cancelled:', boostId);
+      return { success: true };
+    } catch (error) {
+      console.error('[Boost] Cancel error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Record boost impression (for analytics)
+   * @param {string} boostId - Boost ID
+   * @returns {Promise<void>}
+   */
+  async recordImpression(boostId) {
+    try {
+      await supabase.rpc('increment_boost_impressions', { p_boost_id: boostId });
+    } catch (error) {
+      console.error('[Boost] Record impression error:', error);
+    }
+  },
+
+  /**
+   * Record boost click (for analytics)
+   * @param {string} boostId - Boost ID
+   * @returns {Promise<void>}
+   */
+  async recordClick(boostId) {
+    try {
+      await supabase.rpc('increment_boost_clicks', { p_boost_id: boostId });
+    } catch (error) {
+      console.error('[Boost] Record click error:', error);
+    }
+  },
+
+  /**
+   * Get user's boost campaigns (alias for getBoostHistory)
+   * @param {string} userId - User ID (optional, uses current user if not provided)
+   * @param {number} limit - Max results
+   * @returns {Promise<object>}
+   */
+  async getUserCampaigns(userId, limit = 20) {
+    try {
+      const data = await this.getBoostHistory(limit);
+      return { success: true, data };
+    } catch (error) {
+      console.error('[Boost] getUserCampaigns error:', error);
+      return { success: false, data: [] };
+    }
+  },
+
+  /**
+   * Get remaining time for boost
+   * @param {string} expiresAt - Expiry timestamp
+   * @returns {object}
+   */
+  getRemainingTime(expiresAt) {
+    const now = new Date();
+    const expires = new Date(expiresAt);
+    const diff = expires - now;
+
+    if (diff <= 0) {
+      return { expired: true, text: 'Da het han' };
+    }
+
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(hours / 24);
+    const remainingHours = hours % 24;
+
+    if (days > 0) {
+      return { expired: false, text: `${days} ngay ${remainingHours}h` };
+    }
+
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    return { expired: false, text: `${hours}h ${minutes}m` };
+  },
+};
+
+export default boostService;

@@ -1,0 +1,90 @@
+/**
+ * TypingIndicator Styles
+ * Animated dots for bot thinking state
+ * Uses design tokens for consistent styling
+ */
+
+.typing-indicator-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm, 16px);
+  padding: var(--space-sm, 16px);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.typing-indicator-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand-purple, #8B5CF6) 0%, var(--brand-burgundy, #9C0612) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary, #FFFFFF);
+  flex-shrink: 0;
+}
+
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: var(--space-xs, 8px) var(--space-sm, 16px);
+  background: var(--bg-card, rgba(30, 42, 94, 0.4));
+  border-radius: var(--radius-lg, 16px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand-gold, #FFBD59);
+  animation: typingBounce 1.4s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.typing-text {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: var(--text-sm, 14px);
+  color: var(--text-muted, rgba(255, 255, 255, 0.5));
+  margin-left: var(--space-xs, 8px);
+}
+
+@keyframes typingBounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Dark theme enforcement */
+.typing-indicator-wrapper {
+  color: var(--text-primary, #FFFFFF);
+}

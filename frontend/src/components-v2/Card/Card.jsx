@@ -2,7 +2,7 @@ import React from 'react';
 import './Card.css';
 
 /**
- * Card Component - GEM Platform
+ * Card Component - Gemral
  * Glassmorphism card with multiple variants
  *
  * @param {Object} props

@@ -167,3 +167,82 @@
     padding: var(--space-md);
   }
 }
+
+/* ============================================
+   MOBILE FIXES - max-width: 767px
+   Desktop styles preserved above - DO NOT TOUCH!
+   ============================================ */
+@media (max-width: 767px) {
+  .portfolio-page-v2 {
+    min-height: auto;
+    padding: 12px;
+    overflow-x: hidden;
+  }
+
+  /* Portfolio Mode Header - Stack vertically */
+  .portfolio-mode-header {
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  .mode-info {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .mode-info h1 {
+    font-size: 1.25rem;
+  }
+
+  .mode-badge-large {
+    padding: 6px 16px;
+    font-size: 0.75rem;
+  }
+
+  /* Tabs section */
+  .portfolio-tabs {
+    margin-top: 16px;
+  }
+
+  .tab-content {
+    margin-top: 12px;
+    padding: 16px 12px;
+    border-radius: 12px;
+    min-height: auto;
+  }
+
+  .tab-badge {
+    min-width: 18px;
+    height: 18px;
+    font-size: 10px;
+    padding: 0 5px;
+  }
+
+  /* Price Update Indicator - Compact */
+  .price-update-indicator {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 12px;
+    margin-top: 12px;
+    font-size: 11px;
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+  }
+
+  .update-text {
+    font-size: 11px;
+  }
+
+  .refresh-btn-inline {
+    padding: 6px 10px;
+    font-size: 12px;
+    min-height: 36px;
+  }
+}

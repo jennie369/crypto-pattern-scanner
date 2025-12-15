@@ -1,0 +1,23 @@
+/* ===================================
+   ⏳ LOADING SPINNER - GEM THEME
+   =================================== */
+
+.loading-spinner {
+  border: 3px solid;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Container for centered spinner */
+.spinner-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}

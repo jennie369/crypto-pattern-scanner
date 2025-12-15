@@ -1,4 +1,4 @@
-# 🎨 GEM PLATFORM - GLOBAL COMPONENT SYSTEM
+# 🎨 Gemral - GLOBAL COMPONENT SYSTEM
 
 ## Quick Reference Guide for Developers
 

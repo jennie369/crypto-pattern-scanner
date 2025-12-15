@@ -16,6 +16,9 @@ export const useScannerStore = create(
       isScanning: false,
       lastScanTime: null,
 
+      // Multi-TF Results (persisted to prevent loss on tab switch)
+      multiTFResults: null,
+
       // Selected coins & settings
       selectedCoin: 'BTC',
       timeframe: '1H',
@@ -32,10 +35,13 @@ export const useScannerStore = create(
 
       setIsScanning: (status) => set({ isScanning: status }),
 
+      setMultiTFResults: (results) => set({ multiTFResults: results }),
+
       clearScanResults: () =>
         set({
           scanResults: [],
           selectedPattern: null,
+          multiTFResults: null,
           lastScanTime: null,
         }),
 
@@ -56,6 +62,7 @@ export const useScannerStore = create(
       partialize: (state) => ({
         scanResults: state.scanResults,
         selectedPattern: state.selectedPattern,
+        multiTFResults: state.multiTFResults,
         lastScanTime: state.lastScanTime,
         selectedCoin: state.selectedCoin,
         timeframe: state.timeframe,

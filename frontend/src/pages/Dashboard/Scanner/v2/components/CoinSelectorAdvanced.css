@@ -149,7 +149,7 @@
 }
 
 .tier-label.tier-free {
-  color: #00D9FF;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .tier-label.tier-tier2 {

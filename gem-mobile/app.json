@@ -1,0 +1,99 @@
+{
+  "expo": {
+    "name": "Gemral",
+    "slug": "gem-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#05040B"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.gemral.mobile",
+      "buildNumber": "2",
+      "associatedDomains": [
+        "applinks:link.gemral.app",
+        "applinks:yinyangmasters.com"
+      ],
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "LSApplicationQueriesSchemes": [
+          "fb-messenger",
+          "fb-messenger-share-api",
+          "whatsapp",
+          "tg",
+          "telegram",
+          "viber",
+          "zalo",
+          "instagram",
+          "twitter",
+          "fb",
+          "fbapi",
+          "fbauth2",
+          "fbshareextension"
+        ],
+        "NSPhotoLibraryUsageDescription": "Cho phép truy cập thư viện ảnh để chia sẻ hình ảnh",
+        "NSCameraUsageDescription": "Cho phép sử dụng camera để chụp ảnh chia sẻ"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#05040B"
+      },
+      "package": "com.gemral.mobile",
+      "softwareKeyboardLayoutMode": "pan",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "link.gemral.app",
+              "pathPrefix": "/p/"
+            },
+            {
+              "scheme": "https",
+              "host": "yinyangmasters.com",
+              "pathPrefix": "/products/"
+            },
+            {
+              "scheme": "gem"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-web-browser",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 34,
+            "buildToolsVersion": "35.0.0"
+          }
+        }
+      ]
+    ],
+    "androidNavigationBar": {
+      "visible": "sticky-immersive"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "3c1882ea-c772-4cc8-9130-a0897978b04b"
+      }
+    }
+  }
+}

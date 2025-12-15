@@ -1,0 +1,154 @@
+/**
+ * ImageUpload Styles
+ * Image upload for chart analysis
+ * Uses design tokens for consistent styling
+ */
+
+.image-upload-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.image-upload-input {
+  display: none;
+}
+
+.image-upload-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: var(--bg-card, rgba(30, 42, 94, 0.4));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md, 12px);
+  color: var(--text-primary, #FFFFFF);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.image-upload-button:hover:not(:disabled):not(.locked) {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: var(--brand-purple, #8B5CF6);
+  transform: translateY(-1px);
+}
+
+.image-upload-button.dragging {
+  background: rgba(0, 255, 136, 0.2);
+  border-color: var(--accent-green, #00FF88);
+  border-style: dashed;
+}
+
+.image-upload-button.locked {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.image-upload-button.locked svg {
+  color: var(--text-muted, rgba(255, 255, 255, 0.5));
+}
+
+.image-upload-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Preview */
+.image-upload-preview {
+  position: relative;
+  width: 100%;
+  max-width: 200px;
+  border-radius: var(--radius-md, 12px);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.preview-image {
+  width: 100%;
+  height: auto;
+  max-height: 150px;
+  object-fit: cover;
+  display: block;
+}
+
+.preview-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 8px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.preview-name {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 11px;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.85));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.preview-remove-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 71, 87, 0.8);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.preview-remove-btn:hover {
+  background: var(--accent-red, #FF4757);
+  transform: scale(1.1);
+}
+
+.preview-loader {
+  animation: spin 1s linear infinite;
+  color: var(--brand-gold, #FFBD59);
+}
+
+/* Error message */
+.image-upload-error {
+  position: absolute;
+  bottom: -24px;
+  left: 0;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 11px;
+  color: var(--accent-red, #FF4757);
+  white-space: nowrap;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .image-upload-button {
+    width: 40px;
+    height: 40px;
+  }
+
+  .image-upload-preview {
+    max-width: 150px;
+  }
+}

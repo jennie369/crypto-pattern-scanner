@@ -15,7 +15,7 @@
 | **Events** | ⚠️ Code Complete | 70% | ❌ NO | Database deployment, Event creation UI |
 | **Leaderboard** | ⚠️ Strong | 75% | ⚠️ PARTIAL | Real-time updates, Auto-triggers |
 | **User Profiles** | ❌ Broken | 45% | ❌ NO | **CRITICAL: profiles table missing** |
-| **GEM MASTER Chatbot** | ⚠️ Partial | 70% | ⚠️ DEMO MODE | AI integration (mock responses) |
+| **Gemral Chatbot** | ⚠️ Partial | 70% | ⚠️ DEMO MODE | AI integration (mock responses) |
 | **Affiliate Dashboard** | ⚠️ Strong | 70% | ❌ NO | **CRITICAL: Tracking not connected** |
 
 **Overall Platform Readiness: 66% Complete**
@@ -386,7 +386,7 @@ Update all 44 file references from `profiles` to `users`
 
 ---
 
-# 🤖 5. GEM MASTER CHATBOT
+# 🤖 5. Gemral CHATBOT
 
 ## Status: ⚠️ **70% COMPLETE - DEMO MODE (MOCK AI)**
 

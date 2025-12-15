@@ -84,15 +84,33 @@ export default function Cart() {
             </h1>
 
             <button
-              className="btn-secondary"
               onClick={clearCart}
               style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                padding: '8px 16px',
                 background: 'rgba(239, 68, 68, 0.1)',
-                borderColor: '#EF4444',
-                color: '#EF4444'
+                border: '2px solid #EF4444',
+                borderRadius: '10px',
+                color: '#EF4444',
+                fontSize: '13px',
+                fontWeight: '600',
+                height: '36px',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                e.currentTarget.style.transform = 'translateY(0)';
               }}
             >
-              <Trash2 size={16} />
+              <Trash2 size={14} />
               <span>Xóa Tất Cả</span>
             </button>
           </div>

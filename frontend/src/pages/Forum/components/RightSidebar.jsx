@@ -10,19 +10,22 @@ import {
   ChevronRight,
   Flame,
   Search,
-  Star
+  Star,
+  Target
 } from 'lucide-react';
 import { forumService } from '../../../services/forum';
 import './RightSidebar.css';
 
 /**
- * RightSidebar Component - DAY 3 IMPLEMENTATION
- * Right column of 3-column Community Hub
+ * RightSidebar Component - DAY 3 IMPLEMENTATION + COMPACT DESIGN
+ * Right column of 3-column Community Hub - MAXIMUM HEIGHT
  *
  * Features:
  * - Trending topics (most liked/commented posts from last 7 days)
  * - Suggested creators (top contributors by posts/likes)
  * - GEM Chatbot widget (link to AI chatbot)
+ * - COMPACT DESIGN: All cards smaller with tight spacing to fit on screen
+ * - MAXIMUM HEIGHT: Sidebar properly calculated (100vh - navbar - padding)
  */
 export default function RightSidebar() {
   const navigate = useNavigate();
@@ -70,7 +73,7 @@ export default function RightSidebar() {
   };
 
   /**
-   * Navigate to chatbot
+   * Navigate to chatbot - LINKED & WORKING
    */
   const goToChatbot = () => {
     navigate('/chatbot');
@@ -89,6 +92,31 @@ export default function RightSidebar() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════
+          SPONSOR WIDGET - MOVED TO TOP
+          ═══════════════════════════════════════════════════════════ */}
+      <div className="sidebar-widget sponsor-widget">
+        <div className="sidebar-widget-header">
+          <Star size={20} />
+          <h3 className="sidebar-widget-title">Đối tác</h3>
+        </div>
+
+        <div className="sponsor-content">
+          <div className="sponsor-card">
+            <div className="sponsor-logo">
+              <Star size={40} />
+            </div>
+            <h4 className="sponsor-name">Premium Partner</h4>
+            <p className="sponsor-description">
+              Nhà tài trợ chính thức của GEM Pattern Scanner
+            </p>
+            <a href="#" className="sponsor-link">
+              Tìm hiểu thêm →
+            </a>
+          </div>
+        </div>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
@@ -223,7 +251,7 @@ export default function RightSidebar() {
       <div className="sidebar-widget chatbot-widget">
         <div className="sidebar-widget-header">
           <Sparkles size={20} />
-          <h3 className="sidebar-widget-title">GEM Master</h3>
+          <h3 className="sidebar-widget-title">Gemral</h3>
         </div>
 
         <div className="chatbot-content">
@@ -233,7 +261,7 @@ export default function RightSidebar() {
 
           <h4 className="chatbot-heading">Trợ lý AI của bạn</h4>
           <p className="chatbot-description">
-            Hỏi GEM Master về chiến lược trading, nhận dạng pattern, và nhiều hơn nữa!
+            Chiến lược trading & nhận dạng pattern
           </p>
 
           <button className="chatbot-btn" onClick={goToChatbot}>
@@ -242,34 +270,14 @@ export default function RightSidebar() {
           </button>
 
           <div className="chatbot-features">
-            <div className="feature-tag">🎯 Phân tích pattern</div>
-            <div className="feature-tag">💡 Tư vấn trading</div>
-            <div className="feature-tag">📊 Báo cáo thị trường</div>
-          </div>
-        </div>
-      </div>
-
-      {/* ═══════════════════════════════════════════════════════════
-          SPONSOR WIDGET
-          ═══════════════════════════════════════════════════════════ */}
-      <div className="sidebar-widget sponsor-widget">
-        <div className="sidebar-widget-header">
-          <Star size={20} />
-          <h3 className="sidebar-widget-title">Đối tác</h3>
-        </div>
-
-        <div className="sponsor-content">
-          <div className="sponsor-card">
-            <div className="sponsor-logo">
-              <Star size={40} />
+            <div className="feature-tag">
+              <Target size={12} />
+              <span>Phân tích</span>
             </div>
-            <h4 className="sponsor-name">Premium Partner</h4>
-            <p className="sponsor-description">
-              Nhà tài trợ chính thức của GEM Pattern Scanner
-            </p>
-            <a href="#" className="sponsor-link">
-              Tìm hiểu thêm →
-            </a>
+            <div className="feature-tag">
+              <TrendingUp size={12} />
+              <span>Trading</span>
+            </div>
           </div>
         </div>
       </div>

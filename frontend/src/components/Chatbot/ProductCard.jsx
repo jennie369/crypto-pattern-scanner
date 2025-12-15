@@ -18,7 +18,7 @@ export const ProductCard = ({ product, source = 'chat' }) => {
   }, [product.id]);
 
   return (
-    <div className="product-card" style={{ background: product.gradient }}>
+    <div className="product-card">
       <div className="product-card-inner">
         {/* Product Image */}
         <div className="product-image-container">

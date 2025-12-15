@@ -14,7 +14,7 @@ const TradingSettings = ({ settings, onUpdate, saving, showToast }) => {
   const [trading, setTrading] = useState({
     defaultTimeframe: '1h',
     riskPercentage: 2,
-    enabledPatterns: ['head_and_shoulders', 'double_top', 'double_bottom', 'triangle', 'wedge'],
+    enabledPatterns: ['head_shoulders', 'double_top', 'double_bottom', 'triangle', 'wedge'],
   });
 
   const timeframes = [
@@ -29,7 +29,7 @@ const TradingSettings = ({ settings, onUpdate, saving, showToast }) => {
   ];
 
   const availablePatterns = [
-    { id: 'head_and_shoulders', name: 'Head and Shoulders', icon: <BarChart3 size={32} /> },
+    { id: 'head_shoulders', name: 'Head and Shoulders', icon: <BarChart3 size={32} /> },
     { id: 'double_top', name: 'Double Top', icon: <Mountain size={32} /> },
     { id: 'double_bottom', name: 'Double Bottom', icon: <TrendingUp size={32} /> },
     { id: 'triangle', name: 'Triangle', icon: <TriangleIcon size={32} /> },

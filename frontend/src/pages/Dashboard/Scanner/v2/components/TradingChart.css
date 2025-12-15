@@ -94,9 +94,9 @@
 }
 
 .badge-cyan {
-  background: rgba(0, 217, 255, 0.15);
-  color: #00D9FF;
-  border: 1px solid rgba(0, 217, 255, 0.4);
+  background: rgba(255, 189, 89, 0.15);
+  color: #FFBD59;
+  border: 1px solid rgba(255, 189, 89, 0.4);
 }
 
 .badge-green {
@@ -544,5 +544,102 @@
 
   .volume-chart {
     height: 40px;
+  }
+}
+
+/* ============================================
+   MOBILE FIXES - max-width: 767px
+   Desktop styles preserved above - DO NOT TOUCH!
+   ============================================ */
+@media (max-width: 767px) {
+  .trading-chart-container {
+    border-radius: 12px;
+  }
+
+  .chart-header {
+    padding: 8px 12px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: space-between;
+  }
+
+  .chart-info {
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .chart-symbol {
+    font-size: 14px;
+  }
+
+  .chart-badge {
+    padding: 3px 8px;
+    font-size: 10px;
+  }
+
+  .chart-controls {
+    gap: 4px;
+  }
+
+  .chart-control-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  .chart-canvas {
+    min-height: 260px;
+  }
+
+  .chart-placeholder {
+    padding: 16px;
+  }
+
+  .placeholder-icon {
+    font-size: 48px;
+  }
+
+  .placeholder-content h2 {
+    font-size: 18px;
+  }
+
+  .feature-item {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .realtime-price-ticker {
+    top: 8px;
+    right: 8px;
+    padding: 8px 12px;
+  }
+
+  .ticker-price {
+    font-size: 16px;
+  }
+
+  .ticker-change {
+    font-size: 11px;
+  }
+
+  .chart-timeline {
+    padding: 6px 12px;
+    font-size: 10px;
+    height: 28px;
+  }
+
+  .chart-resize-handle {
+    height: 32px;
+  }
+
+  .volume-bar {
+    height: 50px;
+    padding: 8px 12px;
+  }
+
+  .volume-chart {
+    height: 32px;
   }
 }

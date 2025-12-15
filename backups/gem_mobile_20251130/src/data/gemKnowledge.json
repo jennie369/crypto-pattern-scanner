@@ -1,0 +1,585 @@
+{
+  "config": {
+    "chatbotTitle": "Gem Master AI Assistant",
+    "chatbotSubtitle": "Trading & Manifestation - Jennie Uyen Chu",
+    "tone": "Thân thiện, motivating, data-driven",
+    "signature": "GEM Trading & YinYang Masters"
+  },
+
+  "knowledge": {
+    "philosophy": "🔮 **HỌC THUYẾT CHUYỂN HÓA NỘI TÂM - YINYANG MASTERS**\n\nFounder: **Jennie Uyen Chu**\n\n**TRIẾT LÝ CỐT LÕI:**\n• Vạn vật đều là năng lượng rung động ở các tần số khác nhau\n• Luật Hấp Dẫn (Law of Attraction): Like attracts like\n• Manifestation: Hiện hóa ước muốn qua ý thức, cảm xúc và hành động\n• Vũ trụ luôn hỗ trợ những ai sống đúng với bản chất cao nhất của mình\n• Mọi sự kiện đều có ý nghĩa, không có gì là ngẫu nhiên",
+
+    "frequency": "**TẦN SỐ & NĂNG LƯỢNG:**\n\n🌟 **Tần số cao:**\n• Tình yêu: 528Hz (Heart Chakra)\n• Tự do: 639Hz (Throat Chakra)\n• Giác ngộ: 963Hz (Crown Chakra)\n• Vui vẻ, biết ơn, yêu thương: 500Hz+\n\n⚡ **Tần số thấp:**\n• Sợ hãi: <100Hz\n• Tức giận: 150Hz\n• Buồn bã: 200Hz\n\n💎 **Đá thạch anh:**\n• Giúp cân bằng và nâng cao tần số cá nhân\n• Kết nối với Chakra (luân xa năng lượng)\n• Hỗ trợ manifest ước muốn hiệu quả hơn",
+
+    "frequency_formulas": "**11 CÔNG THỨC FREQUENCY ĐỘC QUYỀN:**\n\n🔥 **6 CORE (TIER 2):**\n1. DPD - Down-Pause-Down\n2. UPU - Up-Pause-Up\n3. UPD - Up-Pause-Down\n4. DPU - Down-Pause-Up\n5. HFZ - High Frequency Zones\n6. LFZ - Low Frequency Zones\n\n⭐ **5 NÂNG CAO (TIER 3):**\n7-11. Advanced formulas (chỉ TIER 3)\n\n💎 **ĐỘC QUYỀN:**\n• Nghiên cứu 10+ năm\n• Chỉ có ở Gem Trading\n• Win rate 68-90% (backtest 5 năm)\n• KHÔNG có ở đâu khác"
+  },
+
+  "faq": {
+    "greeting": {
+      "keywords": [
+        "xin chào", "hello", "hi", "chào", "hey", "good morning", "good evening",
+        "chào bạn", "alo", "helo", "hallo", "yo", "hola", "bonjour",
+        "chào buổi sáng", "chào buổi tối", "chào em", "chào anh", "chào chị",
+        "xin hỏi", "cho hỏi", "mình hỏi", "em hỏi", "tôi hỏi",
+        "start", "bắt đầu", "mở đầu", "khởi đầu",
+        "giúp tôi", "giúp mình", "giúp em", "help me", "help",
+        "có ai không", "ai đó", "bot ơi", "gem ơi", "master ơi",
+        "tư vấn", "hỏi đáp", "support", "trợ giúp",
+        "có thể giúp", "cần giúp", "muốn hỏi", "hỏi chút",
+        "làm quen", "giới thiệu bản thân", "bạn là ai", "you are",
+        "what can you do", "bạn làm gì", "chức năng"
+      ],
+      "confidence": 0.95,
+      "answers": [
+        "👋 **Xin chào! Tôi là Gem Master AI**\n\nTôi có thể giúp bạn:\n\n💎 **Trading:**\n• Hướng dẫn patterns & công thức\n• Tư vấn nâng cấp TIER\n• Phân tích win rate\n\n✨ **Manifestation:**\n• Chọn crystal phù hợp\n• Manifest tiền bạc, tình yêu\n• Nâng cao tần số\n\n🛍️ **Shopping:**\n• Đá thạch anh năng lượng\n• Khóa học trading & mindset\n• TIER Bundles tiết kiệm 70%\n\nBạn cần hỗ trợ gì hôm nay? 😊",
+        "✨ **Chào bạn! Gem Master AI đây!**\n\nRất vui được gặp bạn! Tôi có thể tư vấn:\n\n📊 **Trading:** Patterns, công thức Frequency độc quyền\n💎 **Crystals:** Đá năng lượng phong thủy\n🌟 **Manifestation:** Thu hút tiền bạc, tình yêu\n📚 **Courses:** Khóa học trading & mindset\n\nBạn muốn bắt đầu từ đâu?",
+        "🌟 **Hello! Tôi là Gem Master - trợ lý AI của bạn!**\n\nTôi được train để hỗ trợ bạn về:\n• 💹 Trading với 6 công thức Frequency\n• 💎 Đá thạch anh năng lượng\n• ✨ Manifestation & Law of Attraction\n• 📚 Các khóa học mindset\n\nHãy hỏi tôi bất cứ điều gì bạn muốn biết!"
+      ],
+      "searchTags": [],
+      "quickActions": ["Xem TIER bundles", "Tư vấn crystal", "Trading patterns"]
+    },
+
+    "trading": {
+      "keywords": [
+        "trade", "trading", "trader", "giao dịch", "đầu tư", "invest",
+        "pattern", "patterns", "mẫu hình", "chart", "biểu đồ", "nến",
+        "entry", "exit", "vào lệnh", "thoát lệnh", "stop loss", "take profit",
+        "long", "short", "buy", "sell", "mua", "bán",
+        "crypto", "bitcoin", "btc", "eth", "coin", "altcoin", "binance",
+        "forex", "stock", "chứng khoán", "cổ phiếu",
+        "technical", "kỹ thuật", "phân tích", "analysis", "indicator",
+        "rsi", "macd", "ma", "ema", "bollinger", "fibonacci", "fibo",
+        "support", "resistance", "hỗ trợ", "kháng cự", "breakout", "breakdown",
+        "trend", "xu hướng", "sideway", "uptrend", "downtrend",
+        "scalping", "swing", "day trading", "position",
+        "leverage", "đòn bẩy", "margin", "futures", "spot",
+        "học trade", "cách trade", "trade như thế nào", "trade sao",
+        "bắt đầu trade", "newbie", "mới học", "người mới",
+        "chiến lược", "strategy", "setup", "signal", "tín hiệu"
+      ],
+      "confidence": 0.93,
+      "answers": [
+        "📊 **TRADING VỚI GEM FREQUENCY METHOD:**\n\n**PHƯƠNG PHÁP ĐỘC QUYỀN:**\n• Zone Retest > Breakout (68% win rate)\n• 6 Công thức Frequency (TIER 2+)\n• Confirmation signals trước entry\n\n**WIN RATE THEO TIER:**\n🆓 FREE: 38% (3 patterns)\n💎 TIER 1: 50-55% (7 patterns) - 11M\n🚀 TIER 2: 70-75% (15 patterns + 6 công thức) - 21M ⭐\n👑 TIER 3: 80-90% (24 patterns + AI) - 68M\n\n**78% học viên chọn TIER 2** vì:\n✅ 6 công thức Frequency độc quyền\n✅ Win rate tăng gấp đôi\n✅ ROI 80-150%/năm\n\nBạn đang ở level nào?",
+        "💹 **HỌC TRADING HIỆU QUẢ:**\n\n**VẤN ĐỀ CỦA TRADER MỚI:**\n❌ Học breakout truyền thống → Win rate 30-40%\n❌ Không có hệ thống rõ ràng\n❌ FOMO, revenge trading\n\n**GIẢI PHÁP GEM:**\n✅ Zone Retest methodology (68% proven)\n✅ 6 Công thức Frequency độc quyền\n✅ Risk management chặt chẽ\n✅ Psychology training\n\n**KẾT QUẢ:**\n• 92% học viên profitable sau 6 tháng\n• ROI trung bình 80-150%/năm\n• Community support 24/7\n\nBạn muốn xem chi tiết TIER 2 không?",
+        "🔥 **TRADING PATTERNS & CÔNG THỨC:**\n\n**15 PATTERNS (TIER 2):**\n• Double Top/Bottom\n• Head & Shoulders\n• Triangle patterns\n• Wedge patterns\n• Flag & Pennant\n• Cup & Handle\n• + 9 patterns nâng cao\n\n**6 CÔNG THỨC FREQUENCY:**\n1️⃣ DPD - Down-Pause-Down\n2️⃣ UPU - Up-Pause-Up\n3️⃣ UPD - Up-Pause-Down\n4️⃣ DPU - Down-Pause-Up\n5️⃣ HFZ - High Frequency Zones\n6️⃣ LFZ - Low Frequency Zones\n\n⚠️ Chi tiết công thức chỉ trong khóa TIER 2+\n\nBạn muốn tìm hiểu thêm?"
+      ],
+      "searchTags": ["tier", "bundle", "course", "trading", "subscription"],
+      "quickActions": ["Xem TIER 2", "So sánh win rate", "6 công thức là gì?"]
+    },
+
+    "crystals": {
+      "keywords": [
+        "crystal", "crystals", "đá", "thạch anh", "viên đá", "đá quý",
+        "năng lượng", "energy", "chakra", "luân xa", "phong thủy", "feng shui",
+        "citrine", "amethyst", "quartz", "tourmaline", "obsidian",
+        "đá phong thủy", "đá năng lượng", "đá tự nhiên", "đá thiên nhiên",
+        "tím", "hồng", "trắng", "khói", "vàng", "đen", "xanh",
+        "rose quartz", "clear quartz", "smoky quartz",
+        "giới thiệu đá", "loại đá", "các loại", "có những loại nào",
+        "công dụng", "tác dụng", "lợi ích", "benefit", "hiệu quả",
+        "mua đá", "chọn đá", "đá gì", "đá nào", "loại nào tốt",
+        "stone", "healing stone", "healing crystal",
+        "chữa lành", "cân bằng", "balance", "protection", "bảo vệ",
+        "thiền", "meditation", "spiritual", "tâm linh", "trực giác",
+        "đá cho", "đá hợp", "đá phù hợp", "recommend", "gợi ý",
+        "set đá", "bộ đá", "combo", "bundle đá",
+        "giá đá", "bao nhiêu", "price", "cost"
+      ],
+      "confidence": 0.93,
+      "answers": [
+        "💎 **5 LOẠI ĐÁ THẠCH ANH PHỔ BIẾN:**\n\n💜 **Thạch Anh Tím (Amethyst)** - 350K-2.5M\n• Chakra đỉnh đầu (963Hz)\n• Tâm linh, trực giác, giác ngộ\n• Tăng focus, calm mind\n• Hỗ trợ thiền định\n\n💗 **Thạch Anh Hồng (Rose Quartz)** - 350K-2.5M\n• Chakra tim (528Hz)\n• Tình yêu đích thực\n• Chữa lành trái tim\n• Thu hút quan hệ tốt đẹp\n\n🤍 **Thạch Anh Trắng (Clear Quartz)** - 300K-2M\n• Master healer\n• Khuếch đại năng lượng\n• Lập trình theo ý muốn\n\n💛 **Thạch Anh Vàng (Citrine)** - 450K-2.8M\n• Chakra rốn (Solar Plexus)\n• Money magnet số 1\n• Thu hút tài lộc\n\n🟤 **Thạch Anh Khói (Smoky)** - 400K-2.2M\n• Grounding, bảo vệ\n• Chống FOMO trading\n\nBạn quan tâm loại nào?",
+        "✨ **ĐÁ THẠCH ANH - CHỌN THEO MỤC ĐÍCH:**\n\n💰 **Muốn THU HÚT TIỀN BẠC:**\n→ Thạch Anh Vàng (Citrine) - 450K-2.8M\n→ Set Ẩn Long Thạch - 6.99M\n\n💖 **Muốn THU HÚT TÌNH YÊU:**\n→ Thạch Anh Hồng (Rose) - 350K-2.5M\n→ Set Mộng Hồi Thanh - 2.45M\n\n🧘 **Muốn TĂNG TẬP TRUNG, THIỀN:**\n→ Thạch Anh Tím (Amethyst) - 350K-2.5M\n→ Thạch Anh Trắng (Clear) - 300K-2M\n\n💼 **Muốn THĂNG TIẾN SỰ NGHIỆP:**\n→ Set Tam Bảo Thạch - 3.25M\n\n📊 **Muốn TRADE TỐT HƠN:**\n→ Thạch Anh Khói - chống FOMO\n→ Thạch Anh Tím - tăng focus\n\nBạn đang cần gì nhất?",
+        "🔮 **HƯỚNG DẪN CHỌN ĐÁ THẠCH ANH:**\n\n**THEO CHAKRA:**\n👑 Crown (đỉnh đầu): Thạch Anh Tím\n👁️ Third Eye (con mắt thứ 3): Lapis Lazuli\n💙 Throat (cổ họng): Aquamarine\n💚 Heart (tim): Thạch Anh Hồng\n💛 Solar Plexus (rốn): Thạch Anh Vàng\n🧡 Sacral (bụng dưới): Carnelian\n❤️ Root (gốc): Thạch Anh Khói\n\n**THEO NGÂN SÁCH:**\n• Dưới 500K: Viên đá đơn lẻ\n• 1-3M: Viên đá chất lượng cao\n• 3-7M: Set đá chuyên dụng\n\n**CAM KẾT:**\n✅ Đá tự nhiên 100%\n✅ Đổi trả nếu không ưng\n✅ Hướng dẫn sử dụng\n\nBạn muốn tư vấn chi tiết không?"
+      ],
+      "searchTags": ["thạch anh", "amethyst", "citrine", "rose quartz", "crystal"],
+      "quickActions": ["Xem Set Tài Lộc", "Chọn cho tôi", "Hướng dẫn sử dụng"]
+    },
+
+    "manifest_wealth": {
+      "keywords": [
+        "manifest", "manifestation", "hiện hóa", "hiện thực hóa",
+        "giàu", "giàu có", "wealth", "wealthy", "rich", "làm giàu",
+        "tiền", "tiền bạc", "money", "dollar", "VND", "thu nhập", "income",
+        "tài lộc", "tài chính", "financial", "finance",
+        "thịnh vượng", "prosperity", "abundance", "dồi dào",
+        "may mắn", "luck", "fortune", "vận may",
+        "luật hấp dẫn", "law of attraction", "LOA", "thu hút",
+        "visualization", "hình dung", "tưởng tượng",
+        "tư duy triệu phú", "millionaire mindset", "mindset",
+        "attract money", "manifest money", "thu hút tiền",
+        "kiếm tiền", "tăng thu nhập", "tự do tài chính", "financial freedom",
+        "thành công", "success", "successful",
+        "vũ trụ", "universe", "energy", "năng lượng tiền",
+        "affirmation", "khẳng định", "positive thinking",
+        "muốn giàu", "muốn có tiền", "cần tiền", "thiếu tiền",
+        "làm sao giàu", "cách kiếm tiền", "bí quyết giàu",
+        "mua Thạch Anh Vàng", "khóa học Manifest", "xem Set Tài Lộc"
+      ],
+      "confidence": 0.92,
+      "answers": [
+        "💰 **MANIFEST TIỀN BẠC - 4 BƯỚC:**\n\n**BƯỚC 1: MINDSET SHIFT**\n• Từ \"thiếu\" → \"dồi dào\"\n• Giải phóng niềm tin giới hạn về tiền\n• \"Tiền là năng lượng tốt\"\n\n**BƯỚC 2: CLARITY (Rõ ràng)**\n• Viết số tiền CỤ THỂ muốn có\n• Deadline rõ ràng\n• Mục đích sử dụng\n\n**BƯỚC 3: FEEL IT REAL**\n• Cảm nhận như đã có\n• Visualization mỗi sáng/tối\n• Nghe nhạc 528Hz\n\n**BƯỚC 4: INSPIRED ACTION**\n• Hành động từ cảm hứng\n• Cho đi để nhận lại\n• Biết ơn mỗi ngày\n\n💎 **HỖ TRỢ:**\n• Thạch Anh Vàng (450K-2.8M) - Money magnet\n• Set Ẩn Long Thạch (6.99M)\n• Khóa Tái Tạo Tư Duy: 499K\n\nBạn muốn bắt đầu từ đâu?",
+        "🌟 **THU HÚT TÀI LỘC VỚI LUẬT HẤP DẪN:**\n\n**NGUYÊN LÝ:**\n\"Năng lượng giống nhau sẽ thu hút nhau\"\n→ Muốn giàu phải CẢM THẤY giàu trước!\n\n**THỰC HÀNH:**\n\n🌅 **Sáng (5 phút):**\n• Viết 3 điều biết ơn về tiền\n• Visualization số tiền muốn có\n• Affirmation: \"Tiền đến với tôi dễ dàng\"\n\n🌙 **Tối (5 phút):**\n• Nghe nhạc 528Hz\n• Cầm Thạch Anh Vàng thiền\n• Cảm nhận sự sung túc\n\n**KẾT QUẢ:**\n• 30 ngày: Thay đổi mindset\n• 90 ngày: Cơ hội mới xuất hiện\n• 6 tháng: Thu nhập tăng đáng kể\n\n💛 Bạn có Thạch Anh Vàng chưa?",
+        "💎 **COMBO MANIFEST TÀI LỘC:**\n\n**CRYSTAL:**\n💛 Thạch Anh Vàng (Citrine)\n• Money magnet số 1\n• Chakra Solar Plexus\n• Năng lượng mặt trời\nGiá: 450K - 2.8M\n\n**SET ĐẶC BIỆT:**\n💰 Set Ẩn Long Thạch\n• 3 viên đá synergy\n• Bảo vệ + Thu hút + Giữ tài\nGiá: 6.99M - 7.53M\n\n**KHÓA HỌC:**\n📚 Tái Tạo Tư Duy Triệu Phú: 499K\n📚 Manifest Tiền Bạc: 997K\n\n**TRADING:**\n🚀 TIER 2: ROI 80-150%/năm\nGiá: 21M (tiết kiệm 52M)\n\nBạn muốn tư vấn thêm không?"
+      ],
+      "searchTags": ["citrine", "thạch anh vàng", "tài lộc", "money", "wealth"],
+      "quickActions": ["Mua Thạch Anh Vàng", "Khóa học Manifest", "Xem Set Tài Lộc"]
+    },
+
+    "manifest_love": {
+      "keywords": [
+        "tình yêu", "love", "yêu", "yêu đương", "tình cảm", "manifest tình yêu",
+        "quan hệ", "relationship", "mối quan hệ",
+        "hôn nhân", "marriage", "kết hôn", "cưới", "wedding",
+        "partner", "người yêu", "bạn trai", "bạn gái", "bf", "gf",
+        "vợ", "chồng", "wife", "husband", "gia đình", "family",
+        "hẹn hò", "dating", "date", "tán tỉnh", "crush",
+        "tình duyên", "duyên số", "duyên phận", "soulmate", "twin flame",
+        "manifest love", "attract love", "thu hút tình yêu",
+        "tần số tình yêu", "528hz", "heart chakra",
+        "tình yêu đích thực", "true love", "chân tình",
+        "chữa lành tình cảm", "heal heart", "broken heart", "thất tình",
+        "self love", "yêu bản thân", "tự yêu",
+        "độc thân", "single", "cô đơn", "lonely",
+        "người ấy", "nửa kia", "the one", "định mệnh",
+        "cải thiện quan hệ", "xây dựng quan hệ",
+        "muốn có người yêu", "tìm người yêu", "kiếm người yêu",
+        "hạnh phúc", "happiness", "happy",
+        "xem Thạch Anh Hồng", "khóa Tình Yêu", "set Mộng Hồi Thanh",
+        "rose quartz", "thạch anh hồng", "tình yêu", "love", "heart"
+      ],
+      "confidence": 0.92,
+      "answers": [
+        "💖 **MANIFEST TÌNH YÊU ĐÍCH THỰC:**\n\n**BƯỚC 1: SELF-LOVE FIRST**\n• Yêu bản thân trước khi yêu người khác\n• Chữa lành tổn thương cũ\n• \"Tôi xứng đáng được yêu\"\n\n**BƯỚC 2: CLARITY**\n• Viết chi tiết về người bạn muốn\n• Tính cách, giá trị, lifestyle\n• Cảm giác khi ở bên người đó\n\n**BƯỚC 3: FEEL IT REAL**\n• Cảm nhận như đã có người ấy\n• Meditate với 528Hz\n• Visualize cuộc sống hạnh phúc\n\n**BƯỚC 4: OPEN HEART**\n• Mở lòng đón nhận\n• Ra ngoài, gặp người mới\n• Trust the universe\n\n💗 **HỖ TRỢ:**\n• Thạch Anh Hồng (350K-2.5M)\n• Set Mộng Hồi Thanh (2.45M)\n• Khóa Tần Số Tình Yêu (497K)\n\nBạn đang ở bước nào? 💕",
+        "💗 **THẠCH ANH HỒNG - ĐÁ TÌNH YÊU:**\n\n**TẠI SAO HIỆU QUẢ:**\n• Tần số 528Hz - Heart Chakra\n• Mở khóa khả năng yêu thương\n• Chữa lành tổn thương tình cảm\n• Thu hút năng lượng tình yêu\n\n**CÁCH SỬ DỤNG:**\n1. Đeo làm trang sức (gần tim)\n2. Đặt đầu giường khi ngủ\n3. Cầm thiền 10 phút/ngày\n4. Nói ý định với viên đá\n\n**KẾT QUẢ:**\n• 7 ngày: Tâm trạng tốt hơn\n• 30 ngày: Self-love tăng\n• 90 ngày: Thu hút người phù hợp\n\n**GIÁ:** 350K - 2.5M (tùy size)\n\n💖 **SET ĐẶC BIỆT:**\nSet Mộng Hồi Thanh: 2.45M\n(3 viên đá synergy tình yêu)\n\nBạn muốn đặt không?",
+        "✨ **THU HÚT TÌNH YÊU - COMBO HIỆU QUẢ:**\n\n**1. CRYSTAL:**\n💗 Thạch Anh Hồng - 350K-2.5M\n→ Thu hút tình yêu đích thực\n\n💖 Set Mộng Hồi Thanh - 2.45M\n→ 3 viên đá synergy\n→ Chữa lành + Thu hút + Giữ tình\n\n**2. KHÓA HỌC:**\n📚 Kích Hoạt Tần Số Tình Yêu - 497K\n→ 7 bài học\n→ Meditation guides\n→ Affirmations\n\n**3. THỰC HÀNH:**\n🌅 Sáng: Visualization 5 phút\n🌙 Tối: Thiền với 528Hz\n📝 Gratitude journal\n\n**CAM KẾT:**\n• Hướng dẫn sử dụng chi tiết\n• Support qua Zalo\n• Đổi trả nếu không ưng\n\nBạn muốn bắt đầu với gì? 💕"
+      ],
+      "searchTags": ["rose quartz", "thạch anh hồng", "tình yêu", "love", "heart"],
+      "quickActions": ["Xem Thạch Anh Hồng", "Khóa Tình Yêu", "Set Mộng Hồi Thanh"]
+    },
+
+    "tan_so": {
+      "keywords": [
+        "tần số", "frequency", "vibration", "rung động",
+        "năng lượng", "energy", "energetic",
+        "528hz", "963hz", "432hz", "639hz", "hz", "hertz",
+        "chakra", "luân xa", "energy center",
+        "nâng tần", "tăng tần số", "raise vibration", "high vibe",
+        "tần số cao", "tần số thấp", "low frequency", "high frequency",
+        "sóng", "wave", "sound healing", "healing frequency",
+        "solfeggio", "binaural", "meditation music",
+        "thiền", "meditation", "meditate",
+        "tâm linh", "spiritual", "spirituality",
+        "cảm xúc", "emotion", "emotional",
+        "vui vẻ", "happy", "joy", "happiness",
+        "biết ơn", "gratitude", "thankful",
+        "sợ hãi", "fear", "anxiety", "lo âu", "stress",
+        "tức giận", "anger", "angry", "buồn", "sad",
+        "cân bằng", "balance", "harmony", "hài hòa",
+        "healing", "chữa lành", "heal",
+        "law of attraction", "luật hấp dẫn", "LOA"
+      ],
+      "confidence": 0.92,
+      "answers": [
+        "🌟 **TẦN SỐ & NĂNG LƯỢNG:**\n\n**THANG TẦN SỐ CẢM XÚC:**\n\n⬆️ **TẦN SỐ CAO (+):**\n• 700+ Hz: Giác ngộ, enlightenment\n• 600 Hz: Bình an, peace\n• 540 Hz: Vui vẻ, joy\n• 500 Hz: Tình yêu, love\n• 400 Hz: Lý trí, reason\n• 350 Hz: Chấp nhận, acceptance\n\n⬇️ **TẦN SỐ THẤP (-):**\n• 200 Hz: Tự hào, pride\n• 175 Hz: Tức giận, anger\n• 150 Hz: Ham muốn, desire\n• 100 Hz: Sợ hãi, fear\n• 75 Hz: Đau buồn, grief\n• 50 Hz: Vô vọng, apathy\n• 20 Hz: Xấu hổ, shame\n\n💎 **NÂNG TẦN SỐ:**\n• Đá thạch anh: Cân bằng chakra\n• Nhạc 528Hz: Chữa lành\n• Thiền định: Kết nối nội tâm\n• Biết ơn: Nâng tần số nhanh nhất\n\nBạn muốn nâng tần số nào?",
+        "🔮 **HEALING FREQUENCIES:**\n\n**SOLFEGGIO FREQUENCIES:**\n• 174 Hz: Giảm đau\n• 285 Hz: Phục hồi mô\n• 396 Hz: Giải phóng sợ hãi\n• 417 Hz: Thay đổi tích cực\n• 528 Hz: Chữa lành DNA ⭐\n• 639 Hz: Kết nối, quan hệ\n• 741 Hz: Thức tỉnh trực giác\n• 852 Hz: Trở về trật tự tâm linh\n• 963 Hz: Giác ngộ, Crown Chakra\n\n**ĐÁ THẠCH ANH & TẦN SỐ:**\n💜 Amethyst → 963 Hz (Crown)\n💗 Rose Quartz → 528 Hz (Heart)\n💛 Citrine → Solar Plexus\n🤍 Clear Quartz → Khuếch đại tất cả\n\n**CÁCH SỬ DỤNG:**\n1. Nghe nhạc tần số khi thiền\n2. Đeo đá thạch anh cả ngày\n3. Thiền 10-20 phút/ngày\n\nBạn quan tâm tần số nào?",
+        "✨ **NÂNG CAO TẦN SỐ CÁ NHÂN:**\n\n**5 CÁCH NHANH NHẤT:**\n\n1️⃣ **Biết ơn (Gratitude)**\n• Viết 3 điều biết ơn mỗi sáng\n• Tần số tăng ngay lập tức\n\n2️⃣ **Thiền định (Meditation)**\n• 10-20 phút/ngày\n• Nghe nhạc 528Hz\n\n3️⃣ **Đá thạch anh**\n• Đeo/mang theo cả ngày\n• Cân bằng năng lượng tự động\n\n4️⃣ **Vận động (Movement)**\n• Yoga, đi bộ, nhảy\n• Giải phóng năng lượng ứ đọng\n\n5️⃣ **Tự nhiên (Nature)**\n• Tiếp đất (grounding)\n• Hấp thụ năng lượng trái đất\n\n💎 **RECOMMEND:**\n• Thạch Anh Tím: Tăng tâm linh\n• Thạch Anh Hồng: Tăng tình yêu\n• Thạch Anh Vàng: Tăng tài lộc\n\nBạn muốn tư vấn thêm?"
+      ],
+      "searchTags": ["amethyst", "thạch anh tím", "crystal", "meditation", "chakra"],
+      "quickActions": ["Xem Thạch Anh Tím", "Manifest tình yêu", "Manifest tài lộc"]
+    },
+
+    "courses": {
+      "keywords": [
+        "khóa học", "course", "courses", "class", "classes",
+        "học", "learn", "learning", "study",
+        "đào tạo", "training", "workshop", "webinar", "seminar",
+        "lớp học", "lesson", "lessons", "bài học", "bài giảng",
+        "video", "videos", "tutorial", "tutorials", "hướng dẫn",
+        "giáo trình", "curriculum", "syllabus", "nội dung",
+        "đăng ký học", "enroll", "register", "tham gia",
+        "học online", "online learning", "e-learning",
+        "học trading", "trading course", "khóa trading",
+        "học manifest", "manifestation course",
+        "mindset", "tư duy", "psychology", "tâm lý",
+        "7 ngày", "khai mở", "tần số gốc",
+        "nền tảng", "foundation", "basic", "cơ bản",
+        "nâng cao", "advanced", "pro", "professional",
+        "chứng chỉ", "certificate", "completion",
+        "học phí", "giá khóa học", "tuition", "fee",
+        "khuyến mãi", "discount", "sale", "ưu đãi"
+      ],
+      "confidence": 0.90,
+      "answers": [
+        "📚 **KHÓA HỌC Gem Academy:**\n\n**🔥 TRADING (Trong TIER Bundles):**\n\n💎 **TIER 1: Nền Tảng** - 11M\n• 7 patterns cơ bản\n• 2 tools\n• Win rate 50-55%\n\n🚀 **TIER 2: Tần Số Thịnh Vượng** - 21M ⭐\n• 15 patterns\n• 6 Công thức Frequency độc quyền\n• 8 tools\n• Win rate 70-75%\n• **78% học viên chọn**\n\n👑 **TIER 3: Đế Chế Bậc Thầy** - 68M\n• 24 patterns + AI\n• 11 công thức FULL\n• 11 tools\n• Win rate 80-90%\n\n**✨ MANIFESTATION (Standalone):**\n• 7 Ngày Khai Mở Tần Số: 1.997K\n• Tần Số Tình Yêu: 497K\n• Tư Duy Triệu Phú: 499K\n• Manifest Tiền Bạc: 997K\n\nBạn quan tâm khóa nào?",
+        "🎓 **SO SÁNH CÁC KHÓA HỌC:**\n\n**TRADING BUNDLES:**\n\n| Feature | TIER 1 | TIER 2 | TIER 3 |\n|---------|--------|--------|--------|\n| Giá | 11M | 21M | 68M |\n| Patterns | 7 | 15 | 24+AI |\n| Tools | 2 | 8 | 11 |\n| Win rate | 50-55% | 70-75% | 80-90% |\n| Công thức | - | 6 | 11 |\n| ROI/năm | 20-30% | 80-150% | 150%+ |\n\n**💡 RECOMMEND:**\n→ Mới bắt đầu: TIER 1\n→ Muốn profitable: **TIER 2** ⭐\n→ Professional: TIER 3\n\n**MANIFESTATION:**\n• Muốn tình yêu → Tần Số Tình Yêu (497K)\n• Muốn tiền bạc → Manifest Tiền Bạc (997K)\n• Muốn tổng quát → 7 Ngày Khai Mở (1.997K)\n\nBạn đang ở level nào?",
+        "✨ **KHÓA HỌC MANIFESTATION:**\n\n**1. 7 NGÀY KHAI MỞ TẦN SỐ GỐC** - 1.997K\n• 7 bài học video HD\n• Meditation guides\n• Workbook\n• Lifetime access\n→ Phù hợp: Người mới bắt đầu\n\n**2. KÍCH HOẠT TẦN SỐ TÌNH YÊU** - 497K\n• Manifest soulmate\n• Healing tổn thương\n• Self-love practices\n→ Phù hợp: Độc thân, thất tình\n\n**3. TÁI TẠO TƯ DUY TRIỆU PHÚ** - 499K\n• Abundance mindset\n• Giải phóng niềm tin giới hạn\n• Money affirmations\n→ Phù hợp: Muốn thay đổi tài chính\n\n**4. MANIFEST TIỀN BẠC** - 997K\n• Chi tiết thu hút tiền\n• Visualization techniques\n• Action plan\n→ Phù hợp: Serious về wealth\n\n**COMBO TIẾT KIỆM:**\nMua 2 khóa → Giảm 10%\nMua 3 khóa → Giảm 15%\n\nBạn muốn đăng ký khóa nào?"
+      ],
+      "searchTags": ["course", "khóa học", "tier", "bundle", "trading"],
+      "quickActions": ["Xem TIER 2", "Khóa Manifest", "7 Ngày Tần Số"]
+    },
+
+    "tier_bundles": {
+      "keywords": [
+        "tier", "tiers", "bundle", "bundles", "package", "packages",
+        "gói", "gói học", "combo", "set",
+        "nâng cấp", "upgrade", "level up",
+        "học phí", "giá", "price", "cost", "bao nhiêu",
+        "so sánh", "compare", "khác nhau", "difference",
+        "tier 1", "tier 2", "tier 3", "tier1", "tier2", "tier3",
+        "nền tảng", "tần số", "đế chế", "bậc thầy",
+        "tiết kiệm", "saving", "discount", "khuyến mãi",
+        "đăng ký", "register", "mua", "buy", "purchase",
+        "tốt nhất", "best", "recommend", "gợi ý",
+        "win rate", "tỷ lệ thắng", "profitable",
+        "roi", "lợi nhuận", "return"
+      ],
+      "confidence": 0.95,
+      "answers": [
+        "💎 **3 TIERS - COURSE BUNDLES:**\n\n**TIER 1: NỀN TẢNG TRADER** - 11M\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n🎁 Bao gồm:\n• Khóa học Nền Tảng (giá gốc 15M)\n• Scanner PRO 12 tháng\n• 7 patterns, 2 tools\n• Win rate: 50-55%\n• ROI: 20-30%/năm\n✨ **Tiết kiệm: 25.4M (70%)**\n\n**TIER 2: TẦN SỐ THỊNH VƯỢNG** - 21M ⭐ BEST\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n🔥 Bao gồm:\n• 6 Công thức Frequency độc quyền\n• Scanner PREMIUM 12 tháng\n• 15 patterns, 8 tools\n• Win rate: 70-75%\n• ROI: 80-150%/năm\n💡 **78% học viên chọn**\n✨ **Tiết kiệm: 52M (71%)**\n\n**TIER 3: ĐẾ CHẾ BẬC THẦY** - 68M 👑\n━━━━━━━━━━━━━━━━━━━━━━━━━━\n👑 Bao gồm:\n• 11 Công thức FULL system\n• Scanner VIP 24 tháng\n• 24 patterns + AI\n• Win rate: 80-90%\n• 1-on-1 coaching\n✨ **Tiết kiệm: 254M (79%)**\n\nBạn muốn xem chi tiết TIER nào?",
+        "🚀 **TẠI SAO TIER 2 ĐƯỢC CHỌN NHIỀU NHẤT:**\n\n**78% HỌC VIÊN CHỌN TIER 2 VÌ:**\n\n1️⃣ **6 Công thức Frequency độc quyền**\n• Nghiên cứu 10+ năm\n• KHÔNG có ở đâu khác\n• Win rate 68-85%\n\n2️⃣ **Win rate tăng gấp đôi**\n• FREE: 38% → TIER 2: 70-75%\n• ROI từ 0% → 80-150%/năm\n\n3️⃣ **Tiết kiệm 52M (71%)**\n• Giá gốc: 73M\n• Giá bundle: 21M\n\n4️⃣ **Đầy đủ tools**\n• 8 tools professional\n• Scanner PREMIUM\n• Multi-timeframe analysis\n\n5️⃣ **Community**\n• Group support 24/7\n• Weekly Q&A sessions\n• Trading signals\n\n**KẾT QUẢ:**\n• 92% profitable sau 6 tháng\n• 78% đạt mục tiêu tài chính\n\nBạn muốn đăng ký TIER 2?",
+        "📊 **SO SÁNH CHI TIẾT 3 TIERS:**\n\n| | TIER 1 | TIER 2 | TIER 3 |\n|---|---|---|---|\n| **Giá** | 11M | 21M | 68M |\n| **Patterns** | 7 | 15 | 24+AI |\n| **Công thức** | 0 | 6 | 11 |\n| **Tools** | 2 | 8 | 11 |\n| **Scanner** | PRO | PREMIUM | VIP |\n| **Win rate** | 50-55% | 70-75% | 80-90% |\n| **ROI/năm** | 20-30% | 80-150% | 150%+ |\n| **Support** | Group | Group | 1-on-1 |\n| **Tiết kiệm** | 70% | 71% | 79% |\n\n**RECOMMEND:**\n• Budget 10-15M → TIER 1\n• Budget 20-30M → **TIER 2** ⭐\n• Budget 60M+ → TIER 3\n\n**TIP:**\n80% trader thành công đều học TIER 2 trở lên!\n\nBạn quyết định TIER nào?"
+      ],
+      "searchTags": ["tier", "bundle", "course", "trading", "subscription"],
+      "quickActions": ["Đăng ký TIER 2", "So sánh TIERS", "Ưu đãi hiện tại"]
+    },
+
+    "6_cong_thuc_frequency": {
+      "keywords": [
+        "6 công thức", "công thức", "formula", "formulas",
+        "frequency", "tần số", "độc quyền", "exclusive",
+        "dpd", "upu", "upd", "dpu", "hfz", "lfz",
+        "down pause down", "up pause up",
+        "zone", "zones", "retest", "breakout",
+        "phương pháp", "method", "methodology",
+        "bí quyết", "secret", "chiến lược", "strategy",
+        "win rate", "tỷ lệ thắng", "hiệu quả"
+      ],
+      "confidence": 0.95,
+      "answers": [
+        "🔥 **6 CÔNG THỨC FREQUENCY ĐỘC QUYỀN:**\n\n**CHỈ CÓ Ở Gem Trading - TIER 2+**\n\n1️⃣ **DPD** - Down-Pause-Down\n• Win rate: 72%\n• Tín hiệu giảm mạnh\n\n2️⃣ **UPU** - Up-Pause-Up\n• Win rate: 69%\n• Tín hiệu tăng mạnh\n\n3️⃣ **UPD** - Up-Pause-Down\n• Win rate: 65%\n• Reversal pattern\n\n4️⃣ **DPU** - Down-Pause-Up\n• Win rate: 67%\n• Reversal pattern\n\n5️⃣ **HFZ** - High Frequency Zones\n• Win rate: 68%\n• Strong support/resistance\n\n6️⃣ **LFZ** - Low Frequency Zones\n• Win rate: 70%\n• Weak zones to avoid\n\n**ĐẶC ĐIỂM:**\n• Nghiên cứu 10+ năm bởi đội ngũ Trader của Gem Trading\n• Backtest 5 năm data\n• KHÔNG có ở đâu khác\n\n⚠️ Chi tiết chỉ trong TIER 2/3\n\nBạn muốn học không?",
+        "💎 **TẠI SAO 6 CÔNG THỨC KHÁC BIỆT:**\n\n**VẤN ĐỀ BREAKOUT TRUYỀN THỐNG:**\n❌ Win rate chỉ 30-40%\n❌ Nhiều false breakout\n❌ Stop loss hay bị quét\n\n**6 CÔNG THỨC FREQUENCY:**\n✅ Win rate 68-85%\n✅ Zone retest > Breakout\n✅ Confirmation signals rõ ràng\n✅ Risk management tích hợp\n\n**NGUYÊN LÝ:**\n\"Market không breakout ngẫu nhiên. Market di chuyển theo tần số và năng lượng.\"\n\n**KẾT QUẢ:**\n• 92% profitable sau 6 tháng\n• ROI trung bình 80-150%/năm\n• Stress giảm 70% (ít FOMO)\n\n**HỌC Ở ĐÂU:**\n→ TIER 2: 21M (6 công thức)\n→ TIER 3: 68M (11 công thức)\n\nBạn sẵn sàng thay đổi?"
+      ],
+      "searchTags": ["tier", "bundle", "trading", "course", "frequency"],
+      "quickActions": ["Xem TIER 2", "So sánh TIERS", "Tại sao khác breakout?"]
+    },
+
+    "loss_streak": {
+      "keywords": [
+        "loss", "thua", "lỗ", "mất", "losing",
+        "streak", "liên tục", "hoài", "nhiều lần",
+        "revenge", "revenge trading", "gỡ lỗ",
+        "fomo", "fear of missing out", "sợ bỏ lỡ",
+        "cháy", "cháy tài khoản", "liquidation", "margin call",
+        "mất tiền", "mất hết", "thua hết",
+        "nản", "chán", "bỏ cuộc", "thất vọng",
+        "sai", "sai lầm", "mistake", "lỗi",
+        "không biết", "confused", "bối rối",
+        "giúp", "cứu", "help", "save",
+        "psychology", "tâm lý", "emotional",
+        "overtrading", "trade nhiều", "vào lệnh liên tục"
+      ],
+      "confidence": 0.93,
+      "answers": [
+        "😔 **ĐANG LOSS STREAK? ĐỪNG LO!**\n\n**NGUYÊN NHÂN PHỔ BIẾN:**\n1. 🎯 **Technical yếu:** Chưa đủ patterns (FREE chỉ có 3)\n2. ⚠️ **Thiếu công thức:** Không biết 6 công thức Frequency\n3. 📊 **Zone yếu:** Trade zones đã tested 2x+\n4. 💔 **Psychology:** FOMO, revenge trading\n5. 📉 **Risk management:** Position size quá lớn\n\n**GIẢI PHÁP:**\n\n✅ **Bước 1: DỪNG LẠI**\n• Nghỉ ngơi 1-2 ngày\n• Không trade khi emotional\n\n✅ **Bước 2: NÂNG CẤP KIẾN THỨC**\n• TIER 2: 15 patterns + 6 công thức\n• Win rate: 38% → 70-75%\n\n✅ **Bước 3: CRYSTAL HỖ TRỢ**\n• Thạch Anh Tím: Tăng focus, calm\n• Thạch Anh Khói: Chống FOMO\n\nBạn đang gặp vấn đề gì nhất?",
+        "🆘 **THOÁT KHỎI LOSS STREAK:**\n\n**CÔNG THỨC:**\n```\nProfitable = Knowledge + Psychology + Risk Management\n```\n\n**1. KNOWLEDGE (Kiến thức)**\n• FREE: 3 patterns → 38% win\n• TIER 2: 15 patterns → 70-75% win\n→ Nâng cấp TIER 2: 21M\n\n**2. PSYCHOLOGY (Tâm lý)**\n• Đặt rule: Max 3 trades/ngày\n• Nghỉ sau mỗi loss\n• Crystal hỗ trợ:\n  - Amethyst: Calm mind\n  - Smoky: Chống FOMO\n\n**3. RISK MANAGEMENT**\n• Max 1-2% per trade\n• Stop loss BẮT BUỘC\n• RR tối thiểu 1:2\n\n**KẾT QUẢ KỲ VỌNG:**\n• 2 tuần: Tâm lý ổn định\n• 1 tháng: Break even\n• 3 tháng: Profitable\n\n💪 Bạn sẵn sàng thay đổi chưa?"
+      ],
+      "searchTags": ["tier", "bundle", "amethyst", "thạch anh tím", "smoky"],
+      "quickActions": ["Xem TIER 2", "Mua Thạch Anh Tím", "Học tâm lý trading"]
+    },
+
+    "support": {
+      "keywords": [
+        "hỗ trợ", "support", "help", "giúp đỡ",
+        "liên hệ", "contact", "liên lạc",
+        "hotline", "điện thoại", "phone", "gọi",
+        "zalo", "facebook", "fb", "messenger",
+        "telegram", "tele", "email", "mail",
+        "chat", "nhắn tin", "message",
+        "tư vấn", "consult", "advice",
+        "hỏi", "question", "thắc mắc",
+        "phản hồi", "feedback", "góp ý",
+        "khiếu nại", "complaint", "vấn đề", "issue"
+      ],
+      "confidence": 0.88,
+      "answers": [
+        "📞 **KÊNH HỖ TRỢ Gem Trading:**\n\n**HOTLINE:**\n📱 0787238002 (8AM-10PM)\n\n**ZALO (Nhanh nhất):**\n💬 zalo.me/0787238002\n\n**SOCIAL:**\n📘 Facebook: GEM Capital Holding\n📸 Instagram: @yinyangmasters\n💬 Telegram: @gemholdinggroup\n\n**HỖ TRỢ NHANH:**\n• Gem Master AI (24/7) - Bạn đang chat!\n• FAQ trong app\n• Community support\n\n**VIP SUPPORT (TIER 3):**\n• Priority response\n• 1-on-1 coaching\n• Private group\n\nBạn cần hỗ trợ vấn đề gì?"
+      ],
+      "searchTags": [],
+      "quickActions": ["Chat Zalo", "Gọi hotline", "Xem FAQ"]
+    },
+
+    "cach_dung": {
+      "keywords": [
+        "cách dùng", "sử dụng", "dùng sao", "dùng như thế nào",
+        "hướng dẫn", "guide", "instruction", "tutorial",
+        "thanh tẩy", "cleanse", "purify", "làm sạch",
+        "sạc năng lượng", "charge", "recharge", "nạp năng lượng",
+        "lập trình", "program", "programming", "set intention",
+        "đeo", "wear", "mang", "carry",
+        "đặt", "place", "để ở đâu",
+        "bảo quản", "storage", "giữ gìn", "care"
+      ],
+      "confidence": 0.88,
+      "answers": [
+        "📖 **HƯỚNG DẪN SỬ DỤNG ĐÁ THẠCH ANH:**\n\n**1️⃣ LÀM SẠCH (Khi mới mua)**\n• Rửa dưới nước sạch 1-2 phút\n• Hoặc ngâm nước muối 2-4 tiếng\n• Để khô tự nhiên\n\n**2️⃣ SẠC NĂNG LƯỢNG**\n• ☀️ Phơi nắng sáng (trước 9h) - 30 phút\n• 🌙 Đặt dưới trăng rằm - qua đêm\n• 🔮 Đặt trên Thạch Anh Trắng - 4 tiếng\n\n**3️⃣ LẬP TRÌNH Ý ĐỊNH**\n• Cầm đá trong tay\n• Nhắm mắt, hít thở sâu\n• Nói rõ ý định của bạn\n• Thiền 5-10 phút\n\n**4️⃣ SỬ DỤNG HÀNG NGÀY**\n• Đeo làm trang sức\n• Bỏ túi mang theo\n• Đặt đầu giường\n• Đặt bàn làm việc\n\n**🔄 BẢO TRÌ:**\n• Làm sạch + sạc lại: 1-2 tuần/lần\n• Sau khi qua stress lớn\n\n📺 Video chi tiết: Youtube Jennie Uyen Chu"
+      ],
+      "searchTags": ["crystal", "thạch anh", "đá"],
+      "quickActions": ["Xem video", "Mua đá", "Tư vấn"]
+    },
+
+    "giao_hang": {
+      "keywords": [
+        "giao hàng", "ship", "shipping", "vận chuyển", "delivery",
+        "bao lâu", "mấy ngày", "thời gian", "khi nào",
+        "tracking", "theo dõi", "đơn hàng", "order",
+        "nội thành", "ngoại thành", "tỉnh", "quốc tế",
+        "phí ship", "shipping fee", "miễn phí ship"
+      ],
+      "confidence": 0.88,
+      "answers": [
+        "📦 **THÔNG TIN GIAO HÀNG:**\n\n**🇻🇳 VIỆT NAM:**\n• Nội thành HCM/HN: 1-2 ngày\n• Tỉnh thành khác: 3-5 ngày\n• Vùng xa: 5-7 ngày\n\n**🌍 QUỐC TẾ:**\n• USA: 3-4 ngày (DHL Express)\n• Các nước khác: 1-2 tuần\n\n**📦 ĐƠN VỊ VẬN CHUYỂN:**\n• Nội địa: GHTK, GHN, Viettel Post\n• Quốc tế: DHL, FedEx\n\n**💰 PHÍ SHIP:**\n• Nội thành: 20-30K\n• Tỉnh: 30-50K\n• Miễn ship đơn > 1M\n\n**📱 TRACKING:**\nSau khi giao hàng, bạn sẽ nhận:\n• SMS mã vận đơn\n• Zalo thông báo\n• Link tracking\n\nBạn cần hỗ trợ gì thêm?"
+      ],
+      "searchTags": [],
+      "quickActions": ["Kiểm tra đơn", "Chat Zalo", "Hotline"]
+    },
+
+    "thanh_toan": {
+      "keywords": [
+        "thanh toán", "payment", "pay", "trả tiền",
+        "chuyển khoản", "transfer", "bank",
+        "cod", "tiền mặt", "cash",
+        "zelle", "paypal", "credit card", "visa", "mastercard",
+        "momo", "zalopay", "ví điện tử",
+        "đặt cọc", "deposit", "trả góp", "installment"
+      ],
+      "confidence": 0.88,
+      "answers": [
+        "💳 **PHƯƠNG THỨC THANH TOÁN:**\n\n**🇻🇳 VIỆT NAM:**\n\n1️⃣ **COD** - Tiền mặt khi nhận\n• Phí: 20K\n• Kiểm tra hàng trước khi thanh toán\n\n2️⃣ **Chuyển khoản:**\n• Vietcombank: 1074286868\n• ACB: 1234567890\n• Tên: CT TNHH GEM CAPITAL HOLDING\n\n3️⃣ **Ví điện tử:**\n• Momo\n• ZaloPay\n• VNPay\n\n**🇺🇸 USA:**\n\n4️⃣ **Zelle:** yinyangmastersofficial@gmail.com\n\n5️⃣ **PayPal:** (phí 4.4%)\n\n6️⃣ **Credit Card:** Visa, Mastercard\n\n**💡 LƯU Ý:**\n• Đơn > 2M: Đặt cọc 50%\n• Có hóa đơn đầy đủ\n• Bảo mật thông tin\n\nBạn muốn thanh toán bằng gì?"
+      ],
+      "searchTags": [],
+      "quickActions": ["Đặt hàng", "Chat Zalo", "Hotline"]
+    },
+
+    "doi_tra": {
+      "keywords": [
+        "đổi trả", "return", "đổi hàng", "trả hàng",
+        "hoàn tiền", "refund", "hoàn lại",
+        "bảo hành", "warranty", "guarantee",
+        "lỗi", "hỏng", "vỡ", "defect",
+        "không ưng", "không thích", "không hài lòng"
+      ],
+      "confidence": 0.88,
+      "answers": [
+        "🔄 **CHÍNH SÁCH ĐỔI TRẢ:**\n\n**✅ ĐỔI TRẢ 100% NẾU:**\n• Không ưng ý (trong 7 ngày)\n• Sản phẩm lỗi từ nhà sản xuất\n• Không đúng mô tả\n• Giao nhầm sản phẩm\n\n**✅ HỖ TRỢ:**\n• Đổi size/màu miễn phí\n• Tư vấn chọn sản phẩm phù hợp hơn\n• Hoàn tiền trong 3-5 ngày\n\n**❌ KHÔNG ÁP DỤNG:**\n• Đã qua sử dụng > 30 ngày\n• Đá bị vỡ do người dùng\n• Mất hóa đơn/bill\n\n**📞 LIÊN HỆ ĐỔI TRẢ:**\n• Zalo: 0787238002\n• Hotline: 0787238002\n• Email: support@gemmaster.com\n\n**QUY TRÌNH:**\n1. Liên hệ Zalo/Hotline\n2. Gửi ảnh sản phẩm\n3. Xác nhận đổi/trả\n4. Gửi hàng về (ship COD)\n5. Nhận hàng mới/hoàn tiền\n\nBạn cần hỗ trợ gì?"
+      ],
+      "searchTags": [],
+      "quickActions": ["Chat Zalo", "Hotline", "Chính sách chi tiết"]
+    },
+
+    "chat_luong": {
+      "keywords": [
+        "chất lượng", "quality", "tốt không", "có tốt",
+        "thật giả", "real", "fake", "giả", "nhái",
+        "nguồn gốc", "origin", "xuất xứ", "từ đâu",
+        "cam kết", "guarantee", "đảm bảo",
+        "tự nhiên", "natural", "authentic", "chính hãng",
+        "certificate", "chứng nhận", "giấy tờ"
+      ],
+      "confidence": 0.88,
+      "answers": [
+        "💎 **CAM KẾT CHẤT LƯỢNG:**\n\n**✅ ĐÁ THẠCH ANH:**\n• Tự nhiên 100% - Không xử lý hóa chất\n• Khai thác tại Brazil\n• Gia công bởi thợ 10+ năm kinh nghiệm\n• Thanh tẩy tại Sacred Blessing\n\n**🔬 KIỂM ĐỊNH:**\n• Certificate of Authenticity\n• Lab test GIA (theo yêu cầu)\n• Video sản phẩm trước khi gửi\n\n**💯 CAM KẾT:**\n• Đổi trả 100% nếu không hài lòng\n• Bảo hành năng lượng 1 năm\n• Tư vấn sử dụng trọn đời\n\n**📸 PROOF:**\n• 5000+ reviews 5 sao\n• 10,000+ khách hàng\n• Hình ảnh thật 100%\n\n**❌ KHÔNG BAO GIỜ:**\n• Bán đá giả, đá nhuộm\n• Nói sai công dụng\n• Giấu khuyết điểm\n\nBạn yên tâm mua sắm nhé! 🙏"
+      ],
+      "searchTags": ["thạch anh", "crystal", "đá"],
+      "quickActions": ["Xem reviews", "Chat tư vấn", "Xem sản phẩm"]
+    },
+
+    "kiem_tien_thu_nhap": {
+      "keywords": [
+        "kiếm tiền", "thu nhập", "income", "earn money",
+        "passive income", "thu nhập thụ động",
+        "side hustle", "làm thêm", "part time",
+        "affiliate", "đối tác", "partner", "partnership",
+        "hoa hồng", "commission", "ref", "referral",
+        "ctv", "cộng tác viên", "đại lý",
+        "mlm", "network", "mạng lưới"
+      ],
+      "confidence": 0.90,
+      "answers": [
+        "💰 **3 CÁCH KIẾM THU NHẬP VỚI GEM:**\n\n**1️⃣ HỌC TRADING:**\n🚀 TIER 2: Win rate 70-75%\n📊 ROI: 80-150%/năm\n\n**Tính toán:**\n• Vốn $5,000\n• ROI 100%/năm = $5,000 profit\n• = ~125M VND/năm\n• = 10M VND/tháng passive!\n\n**2️⃣ CHƯƠNG TRÌNH ĐỐI TÁC 🤝**\n\n**Hoa hồng 4 cấp:**\n• Cấp 1: 10%\n• Cấp 2: 15%\n• Cấp 3: 20%\n• Cấp 4: 30% (Partner)\n\n**Tính toán:**\n10 người mua TIER 2 (21M):\n→ 10 × 21M × 30% = **63M/tháng!**\n\n🔗 Đăng ký: gemral.com/affiliate\n\n**3️⃣ MANIFEST WEALTH:**\n💛 Thạch Anh Vàng + Tư Duy Triệu Phú\n→ Thu hút cơ hội tài chính\n\nBạn muốn bắt đầu từ đâu?",
+        "🤝 **CHƯƠNG TRÌNH ĐỐI TÁC GEM:**\n\n**HOA HỒNG:**\n• Cấp 1 (Member): 10%\n• Cấp 2 (Silver): 15%\n• Cấp 3 (Gold): 20%\n• Cấp 4 (Partner): 30%\n\n**LỢI ÍCH:**\n✅ Không cần vốn\n✅ Làm online 100%\n✅ Hoa hồng recurring\n✅ Training & support\n✅ Marketing materials\n\n**TÍNH TOÁN:**\n| Sản phẩm | Giá | Hoa hồng 30% |\n|----------|-----|-------------|\n| TIER 1 | 11M | 3.3M |\n| TIER 2 | 21M | 6.3M |\n| TIER 3 | 68M | 20.4M |\n\n**VÍ DỤ:**\n5 sales TIER 2/tháng:\n→ 5 × 6.3M = **31.5M/tháng**\n\n🔗 **ĐĂNG KÝ:**\ngemral.com/pages/affiliate\n\nBạn muốn tìm hiểu thêm?"
+      ],
+      "searchTags": ["tier", "bundle", "citrine", "thạch anh vàng", "course"],
+      "quickActions": ["Đăng ký Partnership", "Xem TIER 2", "Mua Thạch Anh Vàng"]
+    },
+
+    "win_rate": {
+      "keywords": [
+        "win rate", "tỷ lệ thắng", "thắng bao nhiêu",
+        "profitable", "lợi nhuận", "profit",
+        "hiệu quả", "effective", "kết quả", "result",
+        "roi", "return", "lời bao nhiêu"
+      ],
+      "confidence": 0.90,
+      "answers": [
+        "📊 **WIN RATE THEO TIER:**\n\n**🆓 FREE TIER:** 38% win rate\n• 3 patterns cơ bản\n• Phù hợp: Mới học thử\n• ROI: Thường âm\n\n**💎 TIER 1:** 50-55% win rate\n• 7 patterns, 2 tools\n• Giá: 11 triệu\n• ROI: 20-30%/năm\n• Phù hợp: Beginner\n\n**🚀 TIER 2:** 70-75% win rate ⭐ BEST\n• 15 patterns, 8 tools\n• 6 Công thức Frequency\n• Giá: 21 triệu\n• ROI: 80-150%/năm\n• **78% học viên chọn**\n• **92% profitable sau 6 tháng**\n\n**👑 TIER 3:** 80-90% win rate\n• 24 patterns + AI\n• 11 công thức FULL\n• Giá: 68 triệu\n• ROI: 150%+/năm\n• Professional level\n\n**💡 TIP:**\nFREE → TIER 2 = Win rate tăng **gấp đôi!**\n\nBạn muốn nâng cấp không?"
+      ],
+      "searchTags": ["tier", "bundle", "course", "trading"],
+      "quickActions": ["Xem TIER 2", "So sánh TIERS", "Upgrade ngay"]
+    },
+
+    "scanner": {
+      "keywords": [
+        "scanner", "scan", "quét", "quét pattern",
+        "tín hiệu", "signal", "signals",
+        "alert", "thông báo", "notification",
+        "pattern scanner", "tool", "tools",
+        "dashboard", "bảng điều khiển"
+      ],
+      "confidence": 0.88,
+      "answers": [
+        "🔍 **GEM SCANNER + TOOLS:**\n\n**STANDALONE SCANNER:**\n• 🆓 FREE: 5 scans/day, 3 patterns\n• 📱 PRO: Unlimited, 7 patterns - 997K/tháng\n• 💎 PREMIUM: 15 patterns - 1.997K/tháng\n• 👑 VIP: 24 patterns + AI - 5.997K/tháng\n\n**TRONG TIER BUNDLES:**\n\n**TIER 1 (2 tools):**\n• Basic Pattern Scanner\n• Telegram Alert Bot\n\n**TIER 2 (8 tools):**\n• Advanced Scanner (15 patterns)\n• 6 HFZ/LFZ zones detection\n• Position Size Calculator\n• Portfolio Tracker\n• Multi-Timeframe Analysis\n• Sentiment Analyzer\n• News Calendar\n• Risk Calculator\n\n**TIER 3 (11 tools):**\n• All TIER 2 tools\n• AI Prediction (73% accuracy)\n• Professional Backtesting\n• Whale Tracker\n\n**🎁 BEST DEAL:**\nMua TIER bundle = Scanner + Tools + Khóa học!\n→ TIER 2: 21M (tiết kiệm 52M)\n\nBạn cần tools nào?"
+      ],
+      "searchTags": ["tier", "bundle", "course", "subscription"],
+      "quickActions": ["Nâng cấp Scanner", "Xem demo", "So sánh features"]
+    }
+  },
+
+  "products": {
+    "thạch anh tím": {
+      "name": "Thạch Anh Tím (Amethyst)",
+      "description": "Viên đá tâm linh mạnh mẽ nhất, kết nối chakra đỉnh đầu, tăng trực giác và giác ngộ",
+      "price": "350.000đ - 2.500.000đ",
+      "shopifyHandle": "thach-anh-tim",
+      "tags": ["Amethyst", "Thạch Anh Tím", "crystal", "tâm linh", "focus"],
+      "benefits": [
+        "Tăng cường tâm linh, trực giác",
+        "Chakra đỉnh đầu (963Hz)",
+        "Chữa lành cảm xúc sâu",
+        "Bảo vệ khỏi năng lượng tiêu cực",
+        "Hỗ trợ thiền định và giấc ngủ sâu",
+        "Tăng focus, calm mind"
+      ]
+    },
+    "thạch anh hồng": {
+      "name": "Thạch Anh Hồng (Rose Quartz)",
+      "description": "Đá tình yêu mạnh mẽ nhất, chữa lành trái tim, thu hút tình yêu đích thực",
+      "price": "350.000đ - 2.500.000đ",
+      "shopifyHandle": "thach-anh-hong",
+      "tags": ["Rose Quartz", "Thạch Anh Hồng", "crystal", "tình yêu", "love"],
+      "benefits": [
+        "Thu hút tình yêu và quan hệ",
+        "Chữa lành trái tim tổn thương",
+        "Tăng self-love (yêu bản thân)",
+        "Chakra tim (528Hz)",
+        "Mở rộng khả năng yêu thương"
+      ]
+    },
+    "thạch anh trắng": {
+      "name": "Thạch Anh Trắng (Clear Quartz)",
+      "description": "Master healer - Khuếch đại năng lượng, chữa lành toàn diện, lập trình theo ý muốn",
+      "price": "300.000đ - 2.000.000đ",
+      "shopifyHandle": "thach-anh-trang",
+      "tags": ["Clear Quartz", "Thạch Anh Trắng", "crystal", "master healer"],
+      "benefits": [
+        "Khuếch đại mọi năng lượng",
+        "Master healer - Chữa lành toàn diện",
+        "Lập trình theo ý muốn",
+        "Cân bằng tất cả chakra",
+        "Tăng cường manifest"
+      ]
+    },
+    "thạch anh khói": {
+      "name": "Thạch Anh Khói (Smoky Quartz)",
+      "description": "Viên đá grounding mạnh mẽ, neo căn bản, bảo vệ và tăng tự tin",
+      "price": "400.000đ - 2.200.000đ",
+      "shopifyHandle": "thach-anh-khoi",
+      "tags": ["Smoky Quartz", "Thạch Anh Khói", "crystal", "grounding", "protection"],
+      "benefits": [
+        "Grounding - Neo căn bản",
+        "Giải phóng căng thẳng, lo âu",
+        "Bảo vệ khỏi năng lượng tiêu cực",
+        "Chakra gốc",
+        "Tăng sự tự tin và tập trung",
+        "Bảo vệ khỏi FOMO"
+      ]
+    },
+    "thạch anh vàng": {
+      "name": "Thạch Anh Vàng (Citrine)",
+      "description": "Viên đá tài lộc số 1, thu hút abundance, thịnh vượng và may mắn",
+      "price": "450.000đ - 2.800.000đ",
+      "shopifyHandle": "thach-anh-vang",
+      "tags": ["Citrine", "Thạch Anh Vàng", "crystal", "tài lộc", "abundance", "money"],
+      "benefits": [
+        "Thu hút tài lộc dồi dào",
+        "Manifest tiền bạc hiệu quả",
+        "Tăng sự tự tin",
+        "Chakra rốn (Solar Plexus)",
+        "Năng lượng mặt trời tích cực",
+        "Money magnet số 1"
+      ]
+    },
+    "set tình yêu": {
+      "name": "Set Mộng Hồi Thanh",
+      "description": "Set đá chuyên về tình yêu, quan hệ, hôn nhân - Chữa lành và thu hút tình yêu đích thực",
+      "price": "2.450.000đ",
+      "shopifyHandle": "set-tinh-yeu",
+      "tags": ["Set", "Tình Yêu", "love", "Special set"],
+      "benefits": [
+        "Thu hút tình yêu đích thực",
+        "Chữa lành tổn thương tình cảm",
+        "Tăng sức hấp dẫn cá nhân",
+        "Cải thiện quan hệ hiện tại",
+        "Mở rộng khả năng yêu thương"
+      ]
+    },
+    "set tài lộc": {
+      "name": "Set Ẩn Long Thạch",
+      "description": "Set đá chuyên về tài lộc, thịnh vượng - Thu hút tiền bạc và cơ hội kinh doanh",
+      "price": "6.990.000đ - 7.530.000đ",
+      "shopifyHandle": "set-tai-loc",
+      "tags": ["Set", "Tài Lộc", "money", "abundance", "Special set"],
+      "benefits": [
+        "Thu hút tài lộc dồi dào",
+        "Mở rộng cơ hội kinh doanh",
+        "Tăng may mắn trong đầu tư",
+        "Manifest tiền bạc hiệu quả",
+        "Bảo vệ và gia tăng tài sản"
+      ]
+    },
+    "set sự nghiệp": {
+      "name": "Set Tam Bảo Thạch",
+      "description": "Set đá chuyên về sự nghiệp - Tăng quyền lực, thăng tiến và thành công",
+      "price": "3.250.000đ",
+      "shopifyHandle": "set-su-nghiep",
+      "tags": ["Set", "Sự Nghiệp", "career", "Special set"],
+      "benefits": [
+        "Tăng sự tự tin trong công việc",
+        "Bảo vệ khỏi kẻ xấu, ghen ghét",
+        "Tăng khả năng lãnh đạo",
+        "Focus và năng suất cao",
+        "Thăng tiến nhanh chóng"
+      ]
+    }
+  },
+
+  "contactButtons": {
+    "facebook": {
+      "enabled": true,
+      "icon": "💬",
+      "text": "Chat Facebook",
+      "url": "https://www.facebook.com/yinyangmasterscrystals"
+    },
+    "zalo": {
+      "enabled": true,
+      "icon": "📱",
+      "text": "Zalo CSKH",
+      "url": "https://zalo.me/0787238002"
+    },
+    "telegram": {
+      "enabled": true,
+      "icon": "✈️",
+      "text": "Telegram",
+      "url": "https://t.me/gemholdinggroup"
+    }
+  }
+}

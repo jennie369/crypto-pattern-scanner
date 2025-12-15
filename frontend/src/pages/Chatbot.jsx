@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, Sparkles, Eye, CreditCard, Lock, Unlock, ScrollText, Send, Lightbulb, Trash2, Volume2, VolumeX, Download, Share2, Printer, FileText, BarChart3, Settings as SettingsIcon, Moon, Sun, Globe } from 'lucide-react';
+import { MessageCircle, Sparkles, Eye, CreditCard, Lock, Unlock, ScrollText, Send, Lightbulb, Trash2, Volume2, VolumeX, Download, Share2, Printer, FileText, BarChart3, Settings as SettingsIcon, Moon, Sun, Globe, Plus, X } from 'lucide-react';
 import { chatbotService } from '../services/chatbot';
 import { soundService } from '../services/soundService';
 import { exportService } from '../services/exportService';
@@ -10,6 +10,8 @@ import { themeService } from '../services/themeService';
 import { i18nService } from '../services/i18nService';
 import { productService } from '../services/products';
 import { widgetDetector } from '../services/widgetDetector';
+import { ResponseDetector, ResponseTypes } from '../services/responseDetector';
+import { WidgetFactory, WIDGET_LIMITS } from '../services/widgetFactory';
 import { useAuth } from '../contexts/AuthContext';
 import { chatStorage } from '../services/chatStorage';
 import { supabase } from '../lib/supabaseClient';
@@ -22,8 +24,15 @@ import PreferencesPanel from '../components/PreferencesPanel';
 import { ProductCard } from '../components/Chatbot/ProductCard';
 import { VoiceInputButton } from '../components/Chatbot/VoiceInputButton';
 import { WidgetPreviewModal } from '../components/Widgets/WidgetPreviewModal';
+import MagicCardExport from '../components/MagicCardExport';
+import { TypingIndicator } from '../components/Chatbot/TypingIndicator';
+import { SuggestedPrompts } from '../components/Chatbot/SuggestedPrompts';
+import { ErrorMessage } from '../components/Chatbot/ErrorMessage';
+import { ImageUpload } from '../components/Chatbot/ImageUpload';
 import './Chatbot.css';
+import '../styles/widgetPrompt.css';
 
+// ✅ FIXED ALL 5 CHATBOT ISSUES: Product cards, Padding, Magic card, Hexagram, Tarot
 export default function Chatbot() {
   const { user, profile, getScannerTier } = useAuth();
   const [messages, setMessages] = useState([]);
@@ -45,9 +54,20 @@ export default function Chatbot() {
   const [detectedWidgets, setDetectedWidgets] = useState([]);
   const [showWidgetPreview, setShowWidgetPreview] = useState(null);
   const [widgetCount, setWidgetCount] = useState(0);
+  const [pendingWidget, setPendingWidget] = useState(null);
+  const [showWidgetPrompt, setShowWidgetPrompt] = useState(false);
+  const [isCreatingWidget, setIsCreatingWidget] = useState(false);
+  const [showMagicCardExport, setShowMagicCardExport] = useState(false);
+  const [exportCardData, setExportCardData] = useState(null);
+  const [chatError, setChatError] = useState(null);
+  const [lastInput, setLastInput] = useState('');
+  const [selectedImage, setSelectedImage] = useState(null);
 
   const messagesEndRef = useRef(null);
   const exportMenuRef = useRef(null);
+
+  // Initialize response detector
+  const responseDetector = new ResponseDetector();
 
   const handleToggleTheme = () => {
     const newTheme = themeService.toggle();
@@ -111,6 +131,36 @@ export default function Chatbot() {
     setShowExportMenu(false);
   };
 
+  const handleExportMagicCard = (message) => {
+    // Extract title from message
+    const extractTitle = (text) => {
+      if (!text) return 'Gemral Card';
+      const lines = text.split('\n');
+      const firstLine = lines[0];
+      if (firstLine.length > 50) {
+        return firstLine.substring(0, 50) + '...';
+      }
+      return firstLine || 'Gemral Card';
+    };
+
+    // Determine card type based on active mode or message metadata
+    let cardType = 'general';
+    if (activeMode === 'iching') cardType = 'iching';
+    else if (activeMode === 'tarot') cardType = 'tarot';
+    else if (message.metadata?.hexagram) cardType = 'iching';
+    else if (message.metadata?.cards || message.metadata?.card) cardType = 'tarot';
+    else if (message.content.toLowerCase().includes('goal')) cardType = 'goal';
+    else if (message.content.toLowerCase().includes('affirmation')) cardType = 'affirmation';
+    else if (message.content.toLowerCase().includes('crystal')) cardType = 'crystal';
+
+    setExportCardData({
+      title: extractTitle(message.content),
+      text: message.content,
+      type: cardType
+    });
+    setShowMagicCardExport(true);
+  };
+
   useEffect(() => {
     // Start analytics session
     analyticsService.startSession();
@@ -122,8 +172,8 @@ export default function Chatbot() {
 
       loadUsageInfo();
       loadHistory();
-      loadConversationHistory();
       loadWidgetCount();
+      loadConversationHistory();
     }
 
     // Load chat from localStorage
@@ -135,7 +185,7 @@ export default function Chatbot() {
       setMessages([{
         id: 'welcome',
         type: 'bot',
-        content: 'Chào mừng đến với Gem Master Chatbot! Tôi có thể giúp bạn với:\n\n**I Ching** - Nhận lời khuyên từ Kinh Dịch\n**Tarot** - Đọc bài Tarot về trading và cuộc sống\n**Chat** - Tư vấn về trading, năng lượng, và phương pháp\n\nBạn muốn bắt đầu với điều gì?',
+        content: 'Chào mừng đến với Gemral Chatbot! Tôi có thể giúp bạn với:\n\n**I Ching** - Nhận lời khuyên từ Kinh Dịch\n**Tarot** - Đọc bài Tarot về trading và cuộc sống\n**Chat** - Tư vấn về trading, năng lượng, và phương pháp\n\nBạn muốn bắt đầu với điều gì?',
         timestamp: new Date().toISOString()
       }]);
     }
@@ -238,7 +288,7 @@ export default function Chatbot() {
       setMessages(prev => [...prev, {
         id: Date.now(),
         type: 'system',
-        content: `Bạn đã hết lượt hỏi hôm nay (${usageInfo.limit} câu hỏi/ngày cho gói ${getScannerTier()?.toUpperCase()}).\n\nNâng cấp tài khoản để có thêm lượt hỏi:\n• GÓI 1: 15 câu/ngày\n• GÓI 2: 50 câu/ngày\n• GÓI 3: Không giới hạn`,
+        content: `Bạn đã hết lượt hỏi hôm nay (${usageInfo.limit} câu hỏi/ngày cho gói ${getScannerTier()?.toUpperCase()}).\n\nNâng cấp tài khoản để có thêm lượt hỏi:\n• PRO: 15 câu/ngày (39.000đ/tháng)\n• PREMIUM: 50 câu/ngày (59.000đ/tháng)\n• VIP: Không giới hạn (99.000đ/tháng)`,
         timestamp: new Date().toISOString()
       }]);
       return;
@@ -311,13 +361,28 @@ export default function Chatbot() {
         setMessages(prev => [...prev, productsMessage]);
       }
 
-      // Detect widgets in bot response
+      // ✨ NEW: Detect if response can create widgets using ResponseDetector
+      const detection = responseDetector.detect(botMessage.content);
+
+      console.log('🎯 Widget Detection Result:', detection);
+
+      // If widget-worthy response (confidence >= 0.85), show prompt
+      if (detection.type !== ResponseTypes.GENERAL_CHAT && detection.confidence >= 0.85) {
+        setPendingWidget({
+          detection: detection,
+          aiResponse: botMessage.content,
+          userInput: action
+        });
+        setShowWidgetPrompt(true);
+      }
+
+      // Keep old widget detector for backwards compatibility
       const widgets = widgetDetector.detectWidgets(botMessage.content, {
-        coin: extractCoin(currentInput),
-        userInput: currentInput
+        coin: extractCoin(action),
+        userInput: action
       });
       if (widgets.length > 0) {
-        console.log('🎯 Detected widgets:', widgets);
+        console.log('🎯 Old detector - Detected widgets:', widgets);
         setDetectedWidgets(widgets);
       }
 
@@ -359,7 +424,7 @@ export default function Chatbot() {
       setMessages([{
         id: 'welcome',
         type: 'bot',
-        content: 'Chào mừng đến với Gem Master Chatbot! Tôi có thể giúp bạn với:\n\n**I Ching** - Nhận lời khuyên từ Kinh Dịch\n**Tarot** - Đọc bài Tarot về trading và cuộc sống\n**Chat** - Tư vấn về trading, năng lượng, và phương pháp\n\nBạn muốn bắt đầu với điều gì?',
+        content: 'Chào mừng đến với Gemral Chatbot! Tôi có thể giúp bạn với:\n\n**I Ching** - Nhận lời khuyên từ Kinh Dịch\n**Tarot** - Đọc bài Tarot về trading và cuộc sống\n**Chat** - Tư vấn về trading, năng lượng, và phương pháp\n\nBạn muốn bắt đầu với điều gì?',
         timestamp: new Date().toISOString()
       }]);
     }
@@ -446,6 +511,68 @@ export default function Chatbot() {
     }
   };
 
+  // New Widget System Helper Functions
+  const canCreateWidget = () => {
+    const userTier = profile?.scanner_tier?.toUpperCase() || 'FREE';
+    const limits = WIDGET_LIMITS[userTier] || WIDGET_LIMITS.FREE;
+
+    if (limits.maxWidgets === -1) return true; // Unlimited
+
+    return widgetCount < limits.maxWidgets;
+  };
+
+  const getCurrentLimit = () => {
+    const userTier = profile?.scanner_tier?.toUpperCase() || 'FREE';
+    const limits = WIDGET_LIMITS[userTier] || WIDGET_LIMITS.FREE;
+    return limits.maxWidgets;
+  };
+
+  const handleAddToDashboard = async () => {
+    if (!pendingWidget || !canCreateWidget()) return;
+
+    setIsCreatingWidget(true);
+
+    try {
+      const result = await WidgetFactory.createFromAIResponse(
+        user.id,
+        pendingWidget.aiResponse,
+        pendingWidget.detection
+      );
+
+      if (result && result.success) {
+        // Success toast
+        alert('✨ ' + (result.message || 'Widget đã được tạo!'));
+
+        // Hide prompt
+        setShowWidgetPrompt(false);
+        setPendingWidget(null);
+
+        // Reload widget count
+        await loadWidgetCount();
+
+        // Add system message with link to dashboard
+        setMessages(prev => [...prev, {
+          id: Date.now() + 100,
+          type: 'system',
+          content: `${result.message}\n\n👉 Xem widgets tại Dashboard`,
+          timestamp: new Date().toISOString()
+        }]);
+
+        // Play success sound
+        soundService.play('success');
+
+      } else {
+        alert('❌ ' + (result?.error || 'Có lỗi khi tạo widget. Vui lòng thử lại!'));
+      }
+
+    } catch (error) {
+      console.error('Error creating widget:', error);
+      alert('❌ Có lỗi khi tạo widget. Vui lòng thử lại!');
+    } finally {
+      setIsCreatingWidget(false);
+    }
+  };
+
   const handleSend = async () => {
     if (!input.trim()) return;
 
@@ -454,7 +581,7 @@ export default function Chatbot() {
       setMessages(prev => [...prev, {
         id: Date.now(),
         type: 'system',
-        content: `Bạn đã hết lượt hỏi hôm nay (${usageInfo.limit} câu hỏi/ngày cho gói ${getScannerTier()?.toUpperCase()}).\n\nNâng cấp tài khoản để có thêm lượt hỏi:\n• GÓI 1: 15 câu/ngày\n• GÓI 2: 50 câu/ngày\n• GÓI 3: Không giới hạn`,
+        content: `Bạn đã hết lượt hỏi hôm nay (${usageInfo.limit} câu hỏi/ngày cho gói ${getScannerTier()?.toUpperCase()}).\n\nNâng cấp tài khoản để có thêm lượt hỏi:\n• PRO: 15 câu/ngày (39.000đ/tháng)\n• PREMIUM: 50 câu/ngày (59.000đ/tháng)\n• VIP: Không giới hạn (99.000đ/tháng)`,
         timestamp: new Date().toISOString()
       }]);
       return;
@@ -474,6 +601,8 @@ export default function Chatbot() {
 
     const currentInput = input;
     setInput('');
+    setLastInput(currentInput); // Save for retry
+    setChatError(null); // Clear previous error
     setLoading(true);
 
     // Play send sound
@@ -532,13 +661,28 @@ export default function Chatbot() {
         setMessages(prev => [...prev, productsMessage]);
       }
 
-      // Detect widgets in bot response
+      // ✨ NEW: Detect if response can create widgets using ResponseDetector
+      const detection = responseDetector.detect(botMessage.content);
+
+      console.log('🎯 Widget Detection Result:', detection);
+
+      // If widget-worthy response (confidence >= 0.85), show prompt
+      if (detection.type !== ResponseTypes.GENERAL_CHAT && detection.confidence >= 0.85) {
+        setPendingWidget({
+          detection: detection,
+          aiResponse: botMessage.content,
+          userInput: currentInput
+        });
+        setShowWidgetPrompt(true);
+      }
+
+      // Keep old widget detector for backwards compatibility
       const widgets = widgetDetector.detectWidgets(botMessage.content, {
         coin: extractCoin(currentInput),
         userInput: currentInput
       });
       if (widgets.length > 0) {
-        console.log('🎯 Detected widgets:', widgets);
+        console.log('🎯 Old detector - Detected widgets:', widgets);
         setDetectedWidgets(widgets);
       }
 
@@ -563,14 +707,23 @@ export default function Chatbot() {
     } catch (error) {
       console.error('Error:', error);
       soundService.play('error');
-      setMessages(prev => [...prev, {
-        id: Date.now() + 1,
-        type: 'system',
-        content: 'Đã có lỗi xảy ra. Vui lòng thử lại.',
-        timestamp: new Date().toISOString()
-      }]);
+      // Set error state for ErrorMessage component instead of adding message
+      setChatError(error.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Retry last failed message
+  const handleRetry = () => {
+    if (lastInput) {
+      setInput(lastInput);
+      setChatError(null);
+      // Auto-trigger send after setting input
+      setTimeout(() => {
+        const sendBtn = document.querySelector('.chatbot-send-button');
+        if (sendBtn) sendBtn.click();
+      }, 100);
     }
   };
 
@@ -652,7 +805,7 @@ export default function Chatbot() {
           {/* Header */}
           <div className="chat-header">
             <div>
-              <h2 className="chat-title"><Eye size={24} style={{ display: 'inline-block', marginRight: '8px', verticalAlign: 'middle' }} /> Gem Master Chatbot</h2>
+              <h2 className="chat-title"><Eye size={24} style={{ display: 'inline-block', marginRight: '8px', verticalAlign: 'middle' }} /> Gemral Chatbot</h2>
               <p className="chat-subtitle">
                 {activeMode === 'chat' && 'Tư vấn trading và năng lượng'}
                 {activeMode === 'iching' && 'Nhận lời khuyên từ Kinh Dịch'}
@@ -676,6 +829,45 @@ export default function Chatbot() {
                 title={currentLang === 'vi' ? 'Switch to English' : 'Chuyển sang Tiếng Việt'}
               >
                 <Globe size={18} />
+              </button>
+
+              {/* New Conversation */}
+              <button
+                onClick={() => {
+                  // Reset to fresh state
+                  setMessages([{
+                    id: 'welcome',
+                    type: 'bot',
+                    content: 'Chào mừng đến với Gemral Chatbot! Tôi có thể giúp bạn với:\n\n**I Ching** - Nhận lời khuyên từ Kinh Dịch\n**Tarot** - Đọc bài Tarot về trading và cuộc sống\n**Chat** - Tư vấn về trading, năng lượng, và phương pháp\n\nBạn muốn bắt đầu với điều gì?',
+                    timestamp: new Date().toISOString()
+                  }]);
+                  setConversationHistory([]);
+                  setSessionId(null);
+                  setInput('');
+                  setDetectedWidgets([]);
+                  chatStorage.clear();
+                }}
+                className="btn-ghost"
+                title="Cuộc trò chuyện mới"
+              >
+                <Plus size={18} />
+              </button>
+
+              {/* Clear Chat */}
+              <button
+                onClick={() => {
+                  if (window.confirm('Bạn có chắc muốn xóa toàn bộ tin nhắn?')) {
+                    setMessages([]);
+                    setConversationHistory([]);
+                    setDetectedWidgets([]);
+                    chatStorage.clear();
+                  }
+                }}
+                className="btn-ghost"
+                title="Xóa toàn bộ chat"
+                disabled={messages.length === 0}
+              >
+                <Trash2 size={18} />
               </button>
 
               {/* Export Menu */}
@@ -916,31 +1108,47 @@ export default function Chatbot() {
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            gap: '0',
-            padding: '24px 20px',
+            gap: '10px',
+            padding: '16px',
             overflowY: 'auto',
-            overflowX: 'hidden',
+            overflowX: 'visible', /* FIX: Không cắt product cards! */
             width: '100%'
           }}>
             {messages.map((msg, idx) => (
-              <MessageBubble key={idx} message={msg} />
+              <MessageBubble key={idx} message={msg} onExport={handleExportMagicCard} />
             ))}
+
+            {/* Suggested Prompts - Show when only welcome message or empty */}
+            {messages.length <= 1 && !loading && (
+              <SuggestedPrompts
+                activeMode={activeMode}
+                onSelectPrompt={(text) => {
+                  setInput(text);
+                  // Auto send the prompt
+                  setTimeout(() => {
+                    const sendBtn = document.querySelector('.chatbot-send-button');
+                    if (sendBtn) sendBtn.click();
+                  }, 100);
+                }}
+                disabled={!usageInfo?.allowed}
+              />
+            )}
 
             {/* Widget Suggestions */}
             {detectedWidgets.length > 0 && (
               <div style={{
-                padding: '16px',
+                padding: '12px',
                 background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(0, 217, 255, 0.1))',
                 backdropFilter: 'blur(10px)',
                 borderRadius: '12px',
                 border: '1px solid rgba(139, 92, 246, 0.3)',
-                marginTop: '16px'
+                marginTop: '12px'
               }}>
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  marginBottom: '12px'
+                  marginBottom: '8px'
                 }}>
                   <Lightbulb size={20} color="#8B5CF6" />
                   <span style={{ fontSize: '14px', fontWeight: '600', color: '#8B5CF6' }}>
@@ -985,11 +1193,16 @@ export default function Chatbot() {
               </div>
             )}
 
-            {loading && (
-              <div className="loading-message">
-                <div className="spinner" />
-                <span>Gem Master đang suy nghĩ...</span>
-              </div>
+            {loading && <TypingIndicator show={loading} />}
+
+            {/* Error Message with retry */}
+            {chatError && !loading && (
+              <ErrorMessage
+                error={chatError}
+                onRetry={handleRetry}
+                onUpgrade={() => window.location.href = '/settings/subscription'}
+                showRetry={true}
+              />
             )}
 
             <div ref={messagesEndRef} />
@@ -1049,6 +1262,15 @@ export default function Chatbot() {
                   fontFamily: 'inherit'
                 }}
               />
+              {/* Image Upload for Chart Analysis (TIER2+) */}
+              <ImageUpload
+                onImageSelect={(image) => setSelectedImage(image)}
+                onImageRemove={() => setSelectedImage(null)}
+                selectedImage={selectedImage}
+                userTier={getScannerTier()?.toUpperCase()}
+                disabled={loading || !usageInfo?.allowed}
+              />
+
               {/* Voice Input (TIER3 Only) */}
               {profile?.scanner_tier === 'TIER3' && (
                 <VoiceInputButton
@@ -1066,6 +1288,7 @@ export default function Chatbot() {
                 />
               )}
               <button
+                className="chatbot-send-button"
                 onClick={handleSend}
                 disabled={!input.trim() || loading || !usageInfo?.allowed}
                 style={{
@@ -1158,26 +1381,92 @@ export default function Chatbot() {
           userTier={getScannerTier()?.toUpperCase() || 'FREE'}
         />
       )}
+
+      {/* Widget Creation Prompt */}
+      {showWidgetPrompt && pendingWidget && (
+        <div className="widget-prompt">
+          <div className="widget-prompt-content">
+            <div className="widget-prompt-icon">
+              <Lightbulb size={32} color="#FFD700" />
+            </div>
+
+            <div className="widget-prompt-text">
+              <h4>✨ Gemral có thể tạo dashboard cho bạn!</h4>
+              <p>
+                {pendingWidget.detection.type === ResponseTypes.MANIFESTATION_GOAL &&
+                  'Tự động track progress, nhắc nhở hàng ngày, và nhiều hơn nữa.'}
+                {pendingWidget.detection.type === ResponseTypes.CRYSTAL_RECOMMENDATION &&
+                  'Lưu crystal recommendations và usage guide.'}
+                {pendingWidget.detection.type === ResponseTypes.AFFIRMATIONS_ONLY &&
+                  'Tạo affirmation widget với daily reminders.'}
+                {pendingWidget.detection.type === ResponseTypes.TRADING_ANALYSIS &&
+                  'Lưu trading analysis và spiritual insights.'}
+              </p>
+
+              {/* Show tier limit warning if needed */}
+              {!canCreateWidget() && (
+                <p className="tier-warning">
+                  ⚠️ Bạn đã đạt giới hạn {getCurrentLimit()} widgets.
+                  <a href="/pricing"> Upgrade để tạo thêm</a>
+                </p>
+              )}
+            </div>
+
+            <div className="widget-prompt-actions">
+              <button
+                className="btn-primary"
+                onClick={handleAddToDashboard}
+                disabled={!canCreateWidget() || isCreatingWidget}
+              >
+                {isCreatingWidget ? '⏳ Đang tạo...' : '✅ Thêm vào Dashboard'}
+              </button>
+              <button
+                className="btn-secondary"
+                onClick={() => {
+                  setShowWidgetPrompt(false);
+                  setPendingWidget(null);
+                }}
+              >
+                Không, cảm ơn
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Magic Card Export Modal */}
+      <MagicCardExport
+        response={exportCardData}
+        cardType={exportCardData?.type}
+        isOpen={showMagicCardExport}
+        onClose={() => {
+          setShowMagicCardExport(false);
+          setExportCardData(null);
+        }}
+      />
     </div>
   );
 }
 
-// Message Bubble Component
-function MessageBubble({ message }) {
+// Message Bubble Component - FIXED: Product cards, Padding, Magic Card centering ✅
+function MessageBubble({ message, onExport }) {
   const isUser = message.type === 'user';
   const isSystem = message.type === 'system';
   const isProducts = message.type === 'products';
+  const isAI = !isUser && !isSystem && !isProducts;
 
   // Render product cards
   if (isProducts && message.products) {
     return (
-      <div style={{
+      <div className="chatbot-products-container" style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: '12px',
-        marginBottom: '16px',
-        width: '100%',
-        alignItems: 'flex-start'
+        gap: '8px',
+        marginBottom: '8px',
+        width: 'fit-content', /* FIX: Not constrained by parent 65% max-width */
+        maxWidth: 'none', /* FIX: Allow cards to show fully */
+        alignItems: 'flex-start',
+        overflow: 'visible' /* FIX: Không cắt cards */
       }}>
         {message.products.map((product, idx) => (
           <ProductCard key={idx} product={product} source="chatbot" />
@@ -1204,7 +1493,7 @@ function MessageBubble({ message }) {
 
   // Base style for all bubbles
   const baseStyle = {
-    padding: '16px 20px',
+    padding: '12px 16px', /* ISSUE #3: Reduced from 16px 20px for compact spacing */
     color: '#FFFFFF',
     fontSize: '15px',
     lineHeight: '1.6',
@@ -1212,7 +1501,7 @@ function MessageBubble({ message }) {
     boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
     backdropFilter: 'blur(20px)',
     WebkitBackdropFilter: 'blur(20px)',
-    marginBottom: '16px',
+    marginBottom: '8px',
     display: 'block',
     width: 'fit-content'
   };
@@ -1262,10 +1551,10 @@ function MessageBubble({ message }) {
 
   const tarotSpreadStyle = {
     display: 'flex',
-    gap: '16px',
+    gap: '12px',
     justifyContent: 'center',
     flexWrap: 'wrap',
-    margin: '16px 0'
+    margin: '8px 0'
   };
 
   return (
@@ -1289,6 +1578,40 @@ function MessageBubble({ message }) {
       <div style={{ marginBottom: '8px', whiteSpace: 'pre-wrap' }}>
         {cleanText(message.content)}
       </div>
+
+      {/* Export Magic Card Button - Only for AI messages */}
+      {isAI && onExport && (
+        <button
+          onClick={() => onExport(message)}
+          style={{
+            marginTop: '12px',
+            padding: '8px 16px',
+            background: 'linear-gradient(135deg, #8B5CF6, #C084FC)',
+            border: '1px solid rgba(192, 132, 252, 0.3)',
+            borderRadius: '10px',
+            color: '#FFFFFF',
+            fontSize: '13px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            transition: 'all 0.3s ease',
+            boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.transform = 'translateY(-2px)';
+            e.target.style.boxShadow = '0 6px 16px rgba(139, 92, 246, 0.5)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.transform = 'translateY(0)';
+            e.target.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.3)';
+          }}
+        >
+          <span>🎴</span>
+          <span>Export Magic Card</span>
+        </button>
+      )}
 
       <div style={timeStyle}>
         {new Date(message.timestamp).toLocaleTimeString('vi-VN', {

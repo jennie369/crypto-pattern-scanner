@@ -1,0 +1,330 @@
+/* ============================================
+   UI CARD COMPONENT
+   Desktop = default, Mobile = @media overrides
+   ============================================ */
+
+/* Base Card */
+.ui-card {
+  background: var(--bg-card, rgba(30, 42, 94, 0.4));
+  border-radius: var(--radius-lg, 14px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(var(--blur-glass, 18px));
+  -webkit-backdrop-filter: blur(var(--blur-glass, 18px));
+  transition: var(--transition-base, 0.3s ease);
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Variants */
+.ui-card-default {
+  background: var(--bg-card, rgba(30, 42, 94, 0.4));
+}
+
+.ui-card-glass {
+  background: var(--bg-glass, rgba(15, 16, 48, 0.55));
+}
+
+.ui-card-bordered {
+  background: transparent;
+  border: 1px solid var(--brand-gold, #FFBD59);
+}
+
+/* Hover effects */
+.ui-card-hoverable:hover {
+  background: var(--bg-card-hover, rgba(30, 42, 94, 0.6));
+  border-color: rgba(255, 189, 89, 0.3);
+  box-shadow: var(--shadow-md, 0 4px 16px rgba(0, 0, 0, 0.2));
+  transform: translateY(-2px);
+}
+
+.ui-card-clickable {
+  cursor: pointer;
+}
+
+/* ============================================
+   PADDING VARIANTS - Desktop (default)
+   ============================================ */
+
+.ui-card-padding-compact {
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.ui-card-padding-default {
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.ui-card-padding-spacious {
+  padding: 32px;
+  margin-bottom: 24px;
+}
+
+/* ============================================
+   CARD SECTIONS
+   ============================================ */
+
+.ui-card-header {
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ui-card-body {
+  padding: 0;
+}
+
+.ui-card-footer {
+  padding-top: 16px;
+  margin-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ============================================
+   STAT CARD - Desktop
+   ============================================ */
+
+.ui-stat-card {
+  min-height: 120px;
+}
+
+.ui-stat-card-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.ui-stat-card-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary, #1E2A5E);
+  border-radius: var(--radius-md, 8px);
+  color: var(--brand-gold, #FFBD59);
+  flex-shrink: 0;
+}
+
+.ui-stat-card-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.ui-stat-card-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ui-stat-card-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-tertiary, rgba(255, 255, 255, 0.70));
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ui-stat-card-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary, #FFFFFF);
+  line-height: 1.2;
+}
+
+.ui-stat-card-trend {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ui-stat-card-trend.trend-up {
+  color: var(--accent-green, #00FF88);
+}
+
+.ui-stat-card-trend.trend-down {
+  color: var(--accent-red, #FF4757);
+}
+
+/* ============================================
+   INFO CARD - Desktop
+   ============================================ */
+
+.ui-info-card {
+  text-align: center;
+}
+
+.ui-info-card-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary, #1E2A5E);
+  border-radius: var(--radius-md, 8px);
+  color: var(--brand-gold, #FFBD59);
+}
+
+.ui-info-card-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.ui-info-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary, #FFFFFF);
+  margin-bottom: 8px;
+}
+
+.ui-info-card-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary, #FFFFFF);
+  display: block;
+  line-height: 1.2;
+}
+
+.ui-info-card-description {
+  font-size: 13px;
+  color: var(--text-tertiary, rgba(255, 255, 255, 0.70));
+  margin-top: 8px;
+}
+
+/* ============================================
+   MOBILE OVERRIDES - max-width: 767px
+   Based on MOBILE_SIZING_FROM_SCREENSHOTS.md
+   ============================================ */
+
+@media (max-width: 767px) {
+  /* Padding variants - Mobile */
+  .ui-card-padding-compact {
+    padding: 10px;
+    margin-bottom: 8px;
+  }
+
+  .ui-card-padding-default {
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+
+  .ui-card-padding-spacious {
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  /* Card sections - Mobile */
+  .ui-card-header {
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+  }
+
+  .ui-card-footer {
+    padding-top: 10px;
+    margin-top: 10px;
+  }
+
+  /* STAT CARD - Mobile (40-50% reduction) */
+  .ui-stat-card {
+    min-height: 70px;
+  }
+
+  .ui-stat-card-content {
+    gap: 12px;
+  }
+
+  .ui-stat-card-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+  }
+
+  .ui-stat-card-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .ui-stat-card-label {
+    font-size: 11px;
+    letter-spacing: 0.3px;
+  }
+
+  .ui-stat-card-value {
+    font-size: 20px;
+  }
+
+  .ui-stat-card-trend {
+    font-size: 11px;
+  }
+
+  /* INFO CARD - Mobile */
+  .ui-info-card-icon {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 10px;
+  }
+
+  .ui-info-card-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .ui-info-card-title {
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+
+  .ui-info-card-value {
+    font-size: 22px;
+  }
+
+  .ui-info-card-description {
+    font-size: 11px;
+    margin-top: 4px;
+  }
+}
+
+/* ============================================
+   TABLET BRIDGE - 768px to 1023px
+   ============================================ */
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .ui-card-padding-compact {
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+
+  .ui-card-padding-default {
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .ui-card-padding-spacious {
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+
+  .ui-stat-card {
+    min-height: 100px;
+  }
+
+  .ui-stat-card-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .ui-stat-card-value {
+    font-size: 26px;
+  }
+
+  .ui-info-card-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .ui-info-card-value {
+    font-size: 24px;
+  }
+}

@@ -1,5 +1,5 @@
 /**
- * Gem Master Chatbot Service
+ * Gemral Chatbot Service
  * I Ching & Tarot reading for trading guidance
  */
 
@@ -1783,7 +1783,7 @@ ${isReversed ? card.reversed : card.upright}
   }
 
   /**
-   * Chat with Gem Master using Gemini AI (general questions)
+   * Chat with Gemral using Gemini AI (general questions)
    */
   async chatWithMaster(message, conversationHistory = []) {
     try {
@@ -1843,11 +1843,11 @@ ${isReversed ? card.reversed : card.upright}
     const lowerMessage = message.toLowerCase();
 
     if (lowerMessage.includes('btc') || lowerMessage.includes('bitcoin')) {
-      return '📊 GEM Platform đang phân tích BTC...\n\nHiện tại hệ thống đang bận. Vui lòng thử lại sau ít phút hoặc liên hệ support qua Telegram. 🙏';
+      return '📊 Gemral đang phân tích BTC...\n\nHiện tại hệ thống đang bận. Vui lòng thử lại sau ít phút hoặc liên hệ support qua Telegram. 🙏';
     }
 
     if (lowerMessage.includes('eth') || lowerMessage.includes('ethereum')) {
-      return '📊 GEM Platform đang phân tích ETH...\n\nHệ thống gặp sự cố tạm thời. Vui lòng thử lại sau. 🙏';
+      return '📊 Gemral đang phân tích ETH...\n\nHệ thống gặp sự cố tạm thời. Vui lòng thử lại sau. 🙏';
     }
 
     if (lowerMessage.includes('trade') || lowerMessage.includes('trading')) {
@@ -1900,18 +1900,23 @@ ${isReversed ? card.reversed : card.upright}
     console.log('🔍 DEBUG checkUsageLimit - userTier type:', typeof userTier);
 
     // Map tier names to limits
+    // NEW PRICING (Nov 2025):
+    // FREE: 5/day, PRO: 15/day (39k), PREMIUM: 50/day (59k), VIP: Unlimited (99k)
     const tierLimits = {
       'free': 5,
       'FREE': 5,
+      'pro': 15,
+      'PRO': 15,
       'TIER1': 15,
       'tier1': 15,
-      'premium': 15,
+      'premium': 50,
+      'PREMIUM': 50,
       'TIER2': 50,
       'tier2': 50,
-      'pro': 50,
+      'vip': Infinity,
+      'VIP': Infinity,
       'TIER3': Infinity,
-      'tier3': Infinity,
-      'vip': Infinity
+      'tier3': Infinity
     };
 
     const dailyLimit = tierLimits[userTier] || tierLimits['free'];

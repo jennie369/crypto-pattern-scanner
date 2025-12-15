@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEM iOS - TAB 2: SHOP Wireframes</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            background: linear-gradient(135deg, #05040B 0%, #0D1B2A 50%, #112250 100%);
+            color: white; min-height: 100vh; padding: 40px 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .back-link {
+            display: inline-flex; align-items: center; gap: 8px;
+            color: #FFBD59; text-decoration: none; font-size: 14px;
+            margin-bottom: 24px; padding: 8px 16px;
+            background: rgba(255,189,89,0.1); border-radius: 20px;
+            border: 1px solid rgba(255,189,89,0.2);
+        }
+        .header {
+            text-align: center; margin-bottom: 48px; padding: 32px;
+            background: rgba(15,16,48,0.55); backdrop-filter: blur(18px);
+            border-radius: 24px; border: 1px solid rgba(255,189,89,0.2);
+        }
+        .header-icon { font-size: 48px; margin-bottom: 12px; }
+        .header-title {
+            font-size: 36px; font-weight: 800;
+            background: linear-gradient(135deg, #FFBD59, #9C0612);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .header-sub { color: rgba(255,255,255,0.6); margin-top: 8px; }
+        .screens-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+            gap: 32px;
+        }
+        .screen-card {
+            background: rgba(15,16,48,0.55); backdrop-filter: blur(18px);
+            border: 1px solid rgba(255,189,89,0.2); border-radius: 20px;
+            padding: 24px;
+        }
+        .screen-header { margin-bottom: 20px; }
+        .screen-number {
+            font-size: 12px; color: #FFBD59; font-weight: 600;
+            background: rgba(255,189,89,0.15); padding: 4px 12px;
+            border-radius: 20px; display: inline-block; margin-bottom: 8px;
+        }
+        .screen-title { font-size: 20px; font-weight: 700; color: white; }
+        .screen-desc { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+        .phone-mockup {
+            width: 280px; height: 580px; margin: 0 auto;
+            background: #0D1B2A; border-radius: 40px;
+            border: 3px solid #333; position: relative;
+            overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .phone-notch {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 120px; height: 28px; background: #000; border-radius: 0 0 20px 20px;
+            z-index: 100;
+        }
+        .phone-screen { padding: 36px 12px 12px; height: 100%; overflow-y: auto; }
+        .phone-screen::-webkit-scrollbar { width: 0; }
+        .status-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 8px 4px; font-size: 11px; font-weight: 600;
+        }
+        .status-time { color: white; }
+        .status-icons { display: flex; gap: 4px; color: white; font-size: 10px; }
+        .page-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 4px; margin-bottom: 12px;
+        }
+        .page-title { font-size: 18px; font-weight: 700; color: white; }
+        .icon-btn {
+            width: 32px; height: 32px; background: rgba(255,255,255,0.1);
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            font-size: 14px; position: relative;
+        }
+        .cart-badge {
+            position: absolute; top: -4px; right: -4px;
+            background: #9C0612; color: white; font-size: 8px;
+            width: 14px; height: 14px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .bottom-tabs {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: rgba(13,27,42,0.95); backdrop-filter: blur(10px);
+            padding: 8px 8px 20px; display: flex; justify-content: space-around;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .tab-item { text-align: center; }
+        .tab-icon { font-size: 18px; margin-bottom: 2px; opacity: 0.5; }
+        .tab-label { font-size: 9px; color: rgba(255,255,255,0.5); }
+        .tab-item.active .tab-icon { opacity: 1; }
+        .tab-item.active .tab-label { color: #FFBD59; font-weight: 600; }
+        .spec-notes {
+            margin-top: 20px; padding: 16px;
+            background: rgba(255,255,255,0.05); border-radius: 12px;
+        }
+        .spec-title { font-size: 12px; font-weight: 700; color: #FFBD59; margin-bottom: 8px; }
+        .spec-item { font-size: 11px; color: rgba(255,255,255,0.7); margin-bottom: 4px; padding-left: 12px; position: relative; }
+        .spec-item::before { content: "•"; position: absolute; left: 0; color: #FFBD59; }
+        /* Shop specific */
+        .category-tabs {
+            display: flex; gap: 8px; padding: 8px 0; overflow-x: auto; margin-bottom: 12px;
+        }
+        .cat-tab {
+            padding: 6px 12px; background: rgba(255,255,255,0.1);
+            border-radius: 16px; font-size: 10px; white-space: nowrap;
+            color: rgba(255,255,255,0.7);
+        }
+        .cat-tab.active { background: #FFBD59; color: #0D1B2A; font-weight: 600; }
+        .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .product-card {
+            background: rgba(15,16,48,0.7); border-radius: 12px;
+            padding: 10px; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .product-image {
+            width: 100%; height: 80px; background: linear-gradient(135deg, #1a2744, #112250);
+            border-radius: 8px; margin-bottom: 8px;
+            display: flex; align-items: center; justify-content: center; font-size: 28px;
+        }
+        .product-name { font-size: 11px; font-weight: 600; color: white; margin-bottom: 4px; }
+        .product-price { font-size: 12px; font-weight: 700; color: #FFBD59; }
+        .product-tier {
+            font-size: 8px; padding: 2px 6px; border-radius: 8px;
+            background: rgba(255,189,89,0.2); color: #FFBD59;
+            display: inline-block; margin-top: 4px;
+        }
+        .cart-item {
+            display: flex; gap: 12px; padding: 12px;
+            background: rgba(15,16,48,0.7); border-radius: 12px;
+            margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .cart-item-img {
+            width: 60px; height: 60px; background: linear-gradient(135deg, #1a2744, #112250);
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+        }
+        .cart-item-info { flex: 1; }
+        .cart-item-name { font-size: 12px; font-weight: 600; color: white; margin-bottom: 4px; }
+        .cart-item-price { font-size: 11px; color: #FFBD59; }
+        .qty-control {
+            display: flex; align-items: center; gap: 8px; margin-top: 6px;
+        }
+        .qty-btn {
+            width: 22px; height: 22px; background: rgba(255,255,255,0.1);
+            border-radius: 6px; display: flex; align-items: center; justify-content: center;
+            font-size: 12px; color: white;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed; top: 20px; right: 20px; z-index: 1000;
+            background: rgba(255,189,89,0.2); border: 1px solid #FFBD59;
+            color: #FFBD59; padding: 10px 20px; border-radius: 25px;
+            cursor: pointer; font-weight: 600; font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .theme-toggle:hover { background: #FFBD59; color: #05040B; }
+
+        /* ========================================
+           LIGHT THEME - SIMPLE & READABLE
+           ======================================== */
+        body.light-theme { background: #FFFFFF !important; color: #000000 !important; }
+        body.light-theme, body.light-theme * { color: #000000 !important; font-weight: 500 !important; }
+        body.light-theme h1, body.light-theme h2, body.light-theme h3,
+        body.light-theme .header-title, body.light-theme .screen-title,
+        body.light-theme .page-title, body.light-theme .product-name {
+            color: #000000 !important; font-weight: 700 !important;
+            -webkit-text-fill-color: #000000 !important; background: none !important;
+        }
+        body.light-theme .header-sub, body.light-theme .screen-desc {
+            color: #333333 !important; font-weight: 500 !important;
+        }
+        body.light-theme .product-price { color: #9C0612 !important; font-weight: 700 !important; }
+        body.light-theme .header, body.light-theme .screen-card,
+        body.light-theme .product-card, body.light-theme .cart-item, body.light-theme .spec-notes {
+            background: #FFFFFF !important; border: 1px solid #CCCCCC !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important; backdrop-filter: none !important;
+        }
+        body.light-theme .phone-mockup { background: #F5F5F5 !important; }
+        body.light-theme .back-link {
+            background: #F5F5F5 !important; border: 1px solid #CCCCCC !important; color: #9C0612 !important;
+        }
+        body.light-theme .screen-number, body.light-theme .product-tier {
+            background: #FFF3CD !important; color: #9C0612 !important;
+        }
+        body.light-theme .cat-tab { background: #F0F0F0 !important; color: #333333 !important; }
+        body.light-theme .cat-tab.active { background: #FFBD59 !important; color: #000000 !important; }
+        body.light-theme a { color: #0066CC !important; font-weight: 600 !important;
+        }
+        .qty-value { font-size: 12px; color: white; }
+        .footer {
+            text-align: center; margin-top: 48px; padding: 24px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.5); font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark / ☀️ Light</button>
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            localStorage.setItem('theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+        }
+        if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-theme');
+    </script>
+    <div class="container">
+        <a href="WIREFRAMES_INDEX.html" class="back-link">← Back to Wireframes Index</a>
+
+        <div class="header">
+            <div class="header-icon">🛒</div>
+            <h1 class="header-title">TAB 2: SHOP</h1>
+            <p class="header-sub">E-commerce: Products, Cart, Checkout • 5 Screens</p>
+        </div>
+
+        <div class="screens-grid">
+            <!-- SCREEN 2.1: PRODUCT GRID -->
+            <div class="screen-card">
+                <div class="screen-header">
+                    <span class="screen-number">SCREEN 2.1</span>
+                    <h3 class="screen-title">Product Grid</h3>
+                    <p class="screen-desc">Browse crystals, courses, subscriptions</p>
+                </div>
+                <div class="phone-mockup">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span class="status-time">9:41</span>
+                            <span class="status-icons">📶 📡 🔋</span>
+                        </div>
+                        <div class="page-header">
+                            <span class="page-title">GEM Shop</span>
+                            <div style="display: flex; gap: 8px;">
+                                <div class="icon-btn">🔍</div>
+                                <div class="icon-btn">🛒<span class="cart-badge">3</span></div>
+                            </div>
+                        </div>
+                        <div class="category-tabs">
+                            <span class="cat-tab active">Tất cả</span>
+                            <span class="cat-tab">Crystals</span>
+                            <span class="cat-tab">Courses</span>
+                            <span class="cat-tab">Tiers</span>
+                            <span class="cat-tab">Merch</span>
+                        </div>
+                        <!-- Featured Banner -->
+                        <div style="background: linear-gradient(135deg, #FFBD59, #9C0612); border-radius: 12px; padding: 12px; margin-bottom: 12px;">
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.9);">HOT DEAL</div>
+                            <div style="font-size: 14px; font-weight: 700; color: white;">Tier 2 Bundle -30%</div>
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.8);">Còn 2 ngày</div>
+                        </div>
+                        <div class="product-grid">
+                            <div class="product-card">
+                                <div class="product-image">💎</div>
+                                <div class="product-name">Crystal Pack 100</div>
+                                <div class="product-price">$9.99</div>
+                            </div>
+                            <div class="product-card">
+                                <div class="product-image">💎💎</div>
+                                <div class="product-name">Crystal Pack 500</div>
+                                <div class="product-price">$39.99</div>
+                                <div class="product-tier">Best Value</div>
+                            </div>
+                            <div class="product-card">
+                                <div class="product-image">📚</div>
+                                <div class="product-name">Pattern Mastery</div>
+                                <div class="product-price">$149</div>
+                            </div>
+                            <div class="product-card">
+                                <div class="product-image">⭐</div>
+                                <div class="product-name">Tier 1 Monthly</div>
+                                <div class="product-price">$99/mo</div>
+                            </div>
+                        </div>
+                        <div class="bottom-tabs">
+                            <div class="tab-item"><div class="tab-icon">🏠</div><div class="tab-label">Home</div></div>
+                            <div class="tab-item active"><div class="tab-icon">🛒</div><div class="tab-label">Shop</div></div>
+                            <div class="tab-item"><div class="tab-icon">📊</div><div class="tab-label">Giao Dịch</div></div>
+                            <div class="tab-item"><div class="tab-icon">🤖</div><div class="tab-label">Gem Master</div></div>
+                            <div class="tab-item"><div class="tab-icon">🔔</div><div class="tab-label">Thông Báo</div></div>
+                            <div class="tab-item"><div class="tab-icon">💰</div><div class="tab-label">Tài Sản</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="spec-notes">
+                    <div class="spec-title">Specifications</div>
+                    <div class="spec-item">2-column product grid</div>
+                    <div class="spec-item">Category filter tabs (scrollable)</div>
+                    <div class="spec-item">Featured/Sale banner rotates</div>
+                    <div class="spec-item">Cart badge shows item count</div>
+                    <div class="spec-item">Pull-to-refresh enabled</div>
+                </div>
+            </div>
+
+            <!-- SCREEN 2.2: PRODUCT DETAIL -->
+            <div class="screen-card">
+                <div class="screen-header">
+                    <span class="screen-number">SCREEN 2.2</span>
+                    <h3 class="screen-title">Product Detail</h3>
+                    <p class="screen-desc">Full product info, reviews, add to cart</p>
+                </div>
+                <div class="phone-mockup">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span class="status-time">9:41</span>
+                            <span class="status-icons">📶 📡 🔋</span>
+                        </div>
+                        <div class="page-header">
+                            <div class="icon-btn">←</div>
+                            <span class="page-title">Chi tiết</span>
+                            <div class="icon-btn">🛒<span class="cart-badge">3</span></div>
+                        </div>
+                        <!-- Product Image -->
+                        <div style="width: 100%; height: 160px; background: linear-gradient(135deg, #1a2744, #112250); border-radius: 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; font-size: 64px;">
+                            💎
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div>
+                                    <div style="font-size: 18px; font-weight: 700; color: white;">Crystal Pack 500</div>
+                                    <div style="font-size: 12px; color: rgba(255,255,255,0.6);">500 Crystals + 50 Bonus</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 20px; font-weight: 800; color: #FFBD59;">$39.99</div>
+                                    <div style="font-size: 11px; color: rgba(255,255,255,0.5); text-decoration: line-through;">$49.99</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Rating -->
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                            <span style="font-size: 12px; color: #FFBD59;">⭐⭐⭐⭐⭐</span>
+                            <span style="font-size: 11px; color: rgba(255,255,255,0.6);">4.9 (1,234 reviews)</span>
+                        </div>
+                        <!-- Description -->
+                        <div style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 12px; margin-bottom: 12px;">
+                            <div style="font-size: 12px; font-weight: 600; color: white; margin-bottom: 6px;">Mô tả</div>
+                            <div style="font-size: 11px; color: rgba(255,255,255,0.7); line-height: 1.5;">Gói 500 crystals + bonus 50 crystals. Sử dụng để mua các tính năng premium, unlock tools, và tip creators.</div>
+                        </div>
+                        <!-- Add to Cart -->
+                        <div style="position: absolute; bottom: 70px; left: 12px; right: 12px;">
+                            <div style="background: linear-gradient(135deg, #FFBD59, #9C0612); border-radius: 12px; padding: 14px; text-align: center;">
+                                <span style="font-size: 14px; font-weight: 700; color: white;">Thêm vào giỏ hàng</span>
+                            </div>
+                        </div>
+                        <div class="bottom-tabs">
+                            <div class="tab-item"><div class="tab-icon">🏠</div><div class="tab-label">Home</div></div>
+                            <div class="tab-item active"><div class="tab-icon">🛒</div><div class="tab-label">Shop</div></div>
+                            <div class="tab-item"><div class="tab-icon">📊</div><div class="tab-label">Giao Dịch</div></div>
+                            <div class="tab-item"><div class="tab-icon">🤖</div><div class="tab-label">Gem Master</div></div>
+                            <div class="tab-item"><div class="tab-icon">🔔</div><div class="tab-label">Thông Báo</div></div>
+                            <div class="tab-item"><div class="tab-icon">💰</div><div class="tab-label">Tài Sản</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="spec-notes">
+                    <div class="spec-title">Specifications</div>
+                    <div class="spec-item">Image carousel (swipeable)</div>
+                    <div class="spec-item">Price with discount shown</div>
+                    <div class="spec-item">Star rating + review count</div>
+                    <div class="spec-item">Sticky "Add to Cart" button</div>
+                    <div class="spec-item">Related products section below</div>
+                </div>
+            </div>
+
+            <!-- SCREEN 2.3: CART -->
+            <div class="screen-card">
+                <div class="screen-header">
+                    <span class="screen-number">SCREEN 2.3</span>
+                    <h3 class="screen-title">Shopping Cart</h3>
+                    <p class="screen-desc">Review items, adjust quantities, apply coupon</p>
+                </div>
+                <div class="phone-mockup">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span class="status-time">9:41</span>
+                            <span class="status-icons">📶 📡 🔋</span>
+                        </div>
+                        <div class="page-header">
+                            <div class="icon-btn">←</div>
+                            <span class="page-title">Giỏ hàng (3)</span>
+                            <div style="width: 32px;"></div>
+                        </div>
+                        <div class="cart-item">
+                            <div class="cart-item-img">💎</div>
+                            <div class="cart-item-info">
+                                <div class="cart-item-name">Crystal Pack 500</div>
+                                <div class="cart-item-price">$39.99</div>
+                                <div class="qty-control">
+                                    <div class="qty-btn">-</div>
+                                    <span class="qty-value">1</span>
+                                    <div class="qty-btn">+</div>
+                                </div>
+                            </div>
+                            <div style="font-size: 14px; color: rgba(255,255,255,0.4);">🗑️</div>
+                        </div>
+                        <div class="cart-item">
+                            <div class="cart-item-img">📚</div>
+                            <div class="cart-item-info">
+                                <div class="cart-item-name">Pattern Mastery Course</div>
+                                <div class="cart-item-price">$149.00</div>
+                                <div class="qty-control">
+                                    <div class="qty-btn">-</div>
+                                    <span class="qty-value">1</span>
+                                    <div class="qty-btn">+</div>
+                                </div>
+                            </div>
+                            <div style="font-size: 14px; color: rgba(255,255,255,0.4);">🗑️</div>
+                        </div>
+                        <div class="cart-item">
+                            <div class="cart-item-img">⭐</div>
+                            <div class="cart-item-info">
+                                <div class="cart-item-name">Tier 1 Monthly</div>
+                                <div class="cart-item-price">$99.00/mo</div>
+                                <div class="qty-control">
+                                    <div class="qty-btn">-</div>
+                                    <span class="qty-value">1</span>
+                                    <div class="qty-btn">+</div>
+                                </div>
+                            </div>
+                            <div style="font-size: 14px; color: rgba(255,255,255,0.4);">🗑️</div>
+                        </div>
+                        <!-- Coupon -->
+                        <div style="display: flex; gap: 8px; margin: 12px 0;">
+                            <input type="text" placeholder="Mã giảm giá" style="flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 10px; color: white; font-size: 12px;">
+                            <div style="background: #FFBD59; color: #0D1B2A; padding: 10px 16px; border-radius: 8px; font-size: 12px; font-weight: 600;">Áp dụng</div>
+                        </div>
+                        <!-- Summary -->
+                        <div style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 12px; margin-bottom: 60px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                <span style="font-size: 11px; color: rgba(255,255,255,0.6);">Tạm tính</span>
+                                <span style="font-size: 11px; color: white;">$287.99</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                <span style="font-size: 11px; color: rgba(255,255,255,0.6);">Giảm giá</span>
+                                <span style="font-size: 11px; color: #4CAF50;">-$28.80</span>
+                            </div>
+                            <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; margin-top: 8px; display: flex; justify-content: space-between;">
+                                <span style="font-size: 13px; font-weight: 700; color: white;">Tổng cộng</span>
+                                <span style="font-size: 15px; font-weight: 800; color: #FFBD59;">$259.19</span>
+                            </div>
+                        </div>
+                        <!-- Checkout Button -->
+                        <div style="position: absolute; bottom: 70px; left: 12px; right: 12px;">
+                            <div style="background: linear-gradient(135deg, #FFBD59, #9C0612); border-radius: 12px; padding: 14px; text-align: center;">
+                                <span style="font-size: 14px; font-weight: 700; color: white;">Thanh toán</span>
+                            </div>
+                        </div>
+                        <div class="bottom-tabs">
+                            <div class="tab-item"><div class="tab-icon">🏠</div><div class="tab-label">Home</div></div>
+                            <div class="tab-item active"><div class="tab-icon">🛒</div><div class="tab-label">Shop</div></div>
+                            <div class="tab-item"><div class="tab-icon">📊</div><div class="tab-label">Giao Dịch</div></div>
+                            <div class="tab-item"><div class="tab-icon">🤖</div><div class="tab-label">Gem Master</div></div>
+                            <div class="tab-item"><div class="tab-icon">🔔</div><div class="tab-label">Thông Báo</div></div>
+                            <div class="tab-item"><div class="tab-icon">💰</div><div class="tab-label">Tài Sản</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="spec-notes">
+                    <div class="spec-title">Specifications</div>
+                    <div class="spec-item">Swipe-to-delete cart items</div>
+                    <div class="spec-item">Quantity +/- controls</div>
+                    <div class="spec-item">Coupon code input</div>
+                    <div class="spec-item">Price breakdown summary</div>
+                    <div class="spec-item">Empty cart state available</div>
+                </div>
+            </div>
+
+            <!-- SCREEN 2.4: CHECKOUT -->
+            <div class="screen-card">
+                <div class="screen-header">
+                    <span class="screen-number">SCREEN 2.4</span>
+                    <h3 class="screen-title">Checkout</h3>
+                    <p class="screen-desc">Payment method selection, confirm order</p>
+                </div>
+                <div class="phone-mockup">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span class="status-time">9:41</span>
+                            <span class="status-icons">📶 📡 🔋</span>
+                        </div>
+                        <div class="page-header">
+                            <div class="icon-btn">←</div>
+                            <span class="page-title">Thanh toán</span>
+                            <div style="width: 32px;"></div>
+                        </div>
+                        <!-- Payment Methods -->
+                        <div style="margin-bottom: 16px;">
+                            <div style="font-size: 12px; font-weight: 600; color: white; margin-bottom: 10px;">Phương thức thanh toán</div>
+                            <div style="background: rgba(255,189,89,0.15); border: 1px solid #FFBD59; border-radius: 12px; padding: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 20px;">💳</span>
+                                <div style="flex: 1;">
+                                    <div style="font-size: 12px; font-weight: 600; color: white;">Visa •••• 4242</div>
+                                    <div style="font-size: 10px; color: rgba(255,255,255,0.6);">Expires 12/25</div>
+                                </div>
+                                <span style="color: #FFBD59; font-size: 14px;">✓</span>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 20px;">🍎</span>
+                                <div style="flex: 1;">
+                                    <div style="font-size: 12px; font-weight: 600; color: white;">Apple Pay</div>
+                                </div>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 10px;">
+                                <span style="font-size: 20px;">₿</span>
+                                <div style="flex: 1;">
+                                    <div style="font-size: 12px; font-weight: 600; color: white;">Crypto (USDT/BTC)</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Order Summary -->
+                        <div style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 12px; margin-bottom: 60px;">
+                            <div style="font-size: 12px; font-weight: 600; color: white; margin-bottom: 10px;">Đơn hàng</div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                <span style="font-size: 10px; color: rgba(255,255,255,0.6);">Crystal Pack 500</span>
+                                <span style="font-size: 10px; color: white;">$39.99</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                <span style="font-size: 10px; color: rgba(255,255,255,0.6);">Pattern Mastery</span>
+                                <span style="font-size: 10px; color: white;">$149.00</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                <span style="font-size: 10px; color: rgba(255,255,255,0.6);">Tier 1 Monthly</span>
+                                <span style="font-size: 10px; color: white;">$99.00</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                <span style="font-size: 10px; color: #4CAF50;">Discount (10%)</span>
+                                <span style="font-size: 10px; color: #4CAF50;">-$28.80</span>
+                            </div>
+                            <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; margin-top: 8px; display: flex; justify-content: space-between;">
+                                <span style="font-size: 13px; font-weight: 700; color: white;">Total</span>
+                                <span style="font-size: 15px; font-weight: 800; color: #FFBD59;">$259.19</span>
+                            </div>
+                        </div>
+                        <!-- Pay Button -->
+                        <div style="position: absolute; bottom: 70px; left: 12px; right: 12px;">
+                            <div style="background: linear-gradient(135deg, #FFBD59, #9C0612); border-radius: 12px; padding: 14px; text-align: center;">
+                                <span style="font-size: 14px; font-weight: 700; color: white;">Xác nhận thanh toán</span>
+                            </div>
+                        </div>
+                        <div class="bottom-tabs">
+                            <div class="tab-item"><div class="tab-icon">🏠</div><div class="tab-label">Home</div></div>
+                            <div class="tab-item active"><div class="tab-icon">🛒</div><div class="tab-label">Shop</div></div>
+                            <div class="tab-item"><div class="tab-icon">📊</div><div class="tab-label">Giao Dịch</div></div>
+                            <div class="tab-item"><div class="tab-icon">🤖</div><div class="tab-label">Gem Master</div></div>
+                            <div class="tab-item"><div class="tab-icon">🔔</div><div class="tab-label">Thông Báo</div></div>
+                            <div class="tab-item"><div class="tab-icon">💰</div><div class="tab-label">Tài Sản</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="spec-notes">
+                    <div class="spec-title">Specifications</div>
+                    <div class="spec-item">Saved payment methods list</div>
+                    <div class="spec-item">Add new card option</div>
+                    <div class="spec-item">Apple Pay / Google Pay</div>
+                    <div class="spec-item">Crypto payment (USDT, BTC)</div>
+                    <div class="spec-item">Order review before confirm</div>
+                </div>
+            </div>
+
+            <!-- SCREEN 2.5: ORDER SUCCESS -->
+            <div class="screen-card">
+                <div class="screen-header">
+                    <span class="screen-number">SCREEN 2.5</span>
+                    <h3 class="screen-title">Order Success</h3>
+                    <p class="screen-desc">Confirmation, receipt, next steps</p>
+                </div>
+                <div class="phone-mockup">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span class="status-time">9:41</span>
+                            <span class="status-icons">📶 📡 🔋</span>
+                        </div>
+                        <!-- Success Content -->
+                        <div style="text-align: center; padding: 40px 20px;">
+                            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #4CAF50, #8BC34A); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 36px;">
+                                ✓
+                            </div>
+                            <div style="font-size: 22px; font-weight: 800; color: white; margin-bottom: 8px;">Thanh toán thành công!</div>
+                            <div style="font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 24px;">Đơn hàng #GEM-2024-1234</div>
+                            <!-- Order Details -->
+                            <div style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 16px; text-align: left; margin-bottom: 16px;">
+                                <div style="font-size: 11px; font-weight: 600; color: #FFBD59; margin-bottom: 10px;">CHI TIẾT ĐƠN HÀNG</div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span style="font-size: 11px; color: rgba(255,255,255,0.7);">Crystal Pack 500</span>
+                                    <span style="font-size: 11px; color: white;">✓ Đã gửi</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span style="font-size: 11px; color: rgba(255,255,255,0.7);">Pattern Mastery</span>
+                                    <span style="font-size: 11px; color: white;">✓ Đã mở</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="font-size: 11px; color: rgba(255,255,255,0.7);">Tier 1 Monthly</span>
+                                    <span style="font-size: 11px; color: white;">✓ Kích hoạt</span>
+                                </div>
+                            </div>
+                            <!-- Tier Upgrade Notice -->
+                            <div style="background: rgba(255,189,89,0.15); border: 1px solid rgba(255,189,89,0.3); border-radius: 12px; padding: 12px; margin-bottom: 16px;">
+                                <div style="font-size: 12px; font-weight: 600; color: #FFBD59;">🎉 Bạn đã upgrade lên Tier 1!</div>
+                                <div style="font-size: 10px; color: rgba(255,255,255,0.7); margin-top: 4px;">7 patterns + 2 tools đã được mở khóa</div>
+                            </div>
+                            <!-- Actions -->
+                            <div style="background: linear-gradient(135deg, #FFBD59, #9C0612); border-radius: 12px; padding: 14px; margin-bottom: 10px;">
+                                <span style="font-size: 14px; font-weight: 700; color: white;">Bắt đầu sử dụng</span>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 12px;">
+                                <span style="font-size: 13px; color: rgba(255,255,255,0.8);">Xem hóa đơn</span>
+                            </div>
+                        </div>
+                        <div class="bottom-tabs">
+                            <div class="tab-item"><div class="tab-icon">🏠</div><div class="tab-label">Home</div></div>
+                            <div class="tab-item active"><div class="tab-icon">🛒</div><div class="tab-label">Shop</div></div>
+                            <div class="tab-item"><div class="tab-icon">📊</div><div class="tab-label">Giao Dịch</div></div>
+                            <div class="tab-item"><div class="tab-icon">🤖</div><div class="tab-label">Gem Master</div></div>
+                            <div class="tab-item"><div class="tab-icon">🔔</div><div class="tab-label">Thông Báo</div></div>
+                            <div class="tab-item"><div class="tab-icon">💰</div><div class="tab-label">Tài Sản</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="spec-notes">
+                    <div class="spec-title">Specifications</div>
+                    <div class="spec-item">Success animation (confetti)</div>
+                    <div class="spec-item">Order ID for reference</div>
+                    <div class="spec-item">Delivery status per item</div>
+                    <div class="spec-item">Tier upgrade notification</div>
+                    <div class="spec-item">Receipt/Invoice download</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>TAB 2: SHOP - 5 Screens Complete</p>
+            <p style="margin-top: 8px;">
+                <a href="WIREFRAMES_TAB1_HOME.html" style="color: rgba(255,255,255,0.5);">← TAB 1 HOME</a>
+                <span style="margin: 0 16px;">|</span>
+                <a href="WIREFRAMES_TAB3_TRADING.html" style="color: #FFBD59;">Next: TAB 3 TRADING →</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

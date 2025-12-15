@@ -6,7 +6,7 @@
 const translations = {
   en: {
     // Header
-    'chatbot.title': 'Gem Master Chatbot',
+    'chatbot.title': 'Gemral Chatbot',
     'chatbot.subtitle.chat': 'Trading & Energy Consulting',
     'chatbot.subtitle.iching': 'I Ching Wisdom',
     'chatbot.subtitle.tarot': 'Tarot Reading',
@@ -73,9 +73,9 @@ const translations = {
     'fontSize.large': 'Large',
 
     // Messages
-    'message.loading': 'Gem Master is thinking...',
+    'message.loading': 'Gemral is thinking...',
     'message.error': 'An error occurred. Please try again.',
-    'message.welcome': 'Welcome to Gem Master Chatbot! I can help you with:\n\n**I Ching** - Ancient wisdom guidance\n**Tarot** - Card readings for trading and life\n**Chat** - Trading, energy, and methodology advice\n\nWhat would you like to start with?',
+    'message.welcome': 'Welcome to Gemral Chatbot! I can help you with:\n\n**I Ching** - Ancient wisdom guidance\n**Tarot** - Card readings for trading and life\n**Chat** - Trading, energy, and methodology advice\n\nWhat would you like to start with?',
 
     // Support
     'support.title': 'Need Help?',
@@ -97,7 +97,7 @@ const translations = {
 
   vi: {
     // Header
-    'chatbot.title': 'Gem Master Chatbot',
+    'chatbot.title': 'Gemral Chatbot',
     'chatbot.subtitle.chat': 'Tư vấn trading và năng lượng',
     'chatbot.subtitle.iching': 'Nhận lời khuyên từ Kinh Dịch',
     'chatbot.subtitle.tarot': 'Đọc bài Tarot',
@@ -164,9 +164,9 @@ const translations = {
     'fontSize.large': 'Lớn',
 
     // Messages
-    'message.loading': 'Gem Master đang suy nghĩ...',
+    'message.loading': 'Gemral đang suy nghĩ...',
     'message.error': 'Đã có lỗi xảy ra. Vui lòng thử lại.',
-    'message.welcome': 'Chào mừng đến với Gem Master Chatbot! Tôi có thể giúp bạn với:\n\n**I Ching** - Nhận lời khuyên từ Kinh Dịch\n**Tarot** - Đọc bài Tarot về trading và cuộc sống\n**Chat** - Tư vấn về trading, năng lượng, và phương pháp\n\nBạn muốn bắt đầu với điều gì?',
+    'message.welcome': 'Chào mừng đến với Gemral Chatbot! Tôi có thể giúp bạn với:\n\n**I Ching** - Nhận lời khuyên từ Kinh Dịch\n**Tarot** - Đọc bài Tarot về trading và cuộc sống\n**Chat** - Tư vấn về trading, năng lượng, và phương pháp\n\nBạn muốn bắt đầu với điều gì?',
 
     // Support
     'support.title': 'Cần hỗ trợ?',

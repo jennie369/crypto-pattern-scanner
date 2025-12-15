@@ -1,0 +1,27 @@
+.breakpoint-indicator {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(156, 6, 18, 0.95);
+  border: 2px solid #FFBD59;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  font-weight: bold;
+  color: #FFFFFF;
+  z-index: 999999;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+}
+
+.bp-label {
+  margin-bottom: 4px;
+}
+
+.bp-dimensions {
+  font-size: 12px;
+  color: #FFBD59;
+  opacity: 0.9;
+}

@@ -255,7 +255,7 @@ class BacktestingService {
           case 'DPU':
             pattern = patternDetector.detectDPU(window);
             break;
-          case 'HEAD_AND_SHOULDERS':
+          case 'HEAD_SHOULDERS':
             pattern = patternDetector.detectHeadAndShoulders(window);
             break;
           case 'DOUBLE_TOP':

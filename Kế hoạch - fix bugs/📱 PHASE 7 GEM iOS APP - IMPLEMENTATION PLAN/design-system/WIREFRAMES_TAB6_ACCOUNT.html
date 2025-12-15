@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEM iOS - TAB 6: TÀI SẢN Wireframes</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            background: linear-gradient(135deg, #05040B 0%, #0D1B2A 50%, #112250 100%);
+            color: white; min-height: 100vh; padding: 40px 20px;
+        }
+        .container { max-width: 1600px; margin: 0 auto; }
+        .back-link {
+            display: inline-flex; align-items: center; gap: 8px;
+            color: #FFBD59; text-decoration: none; font-size: 14px;
+            margin-bottom: 24px; padding: 8px 16px;
+            background: rgba(255,189,89,0.1); border-radius: 20px;
+            border: 1px solid rgba(255,189,89,0.2);
+        }
+        .header {
+            text-align: center; margin-bottom: 48px; padding: 32px;
+            background: rgba(15,16,48,0.55); backdrop-filter: blur(18px);
+            border-radius: 24px; border: 1px solid rgba(255,189,89,0.2);
+        }
+        .header-icon { font-size: 48px; margin-bottom: 12px; }
+        .header-title {
+            font-size: 36px; font-weight: 800;
+            background: linear-gradient(135deg, #FFBD59, #9C0612);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .header-sub { color: rgba(255,255,255,0.6); margin-top: 8px; }
+        .screens-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 28px;
+        }
+        .screen-card {
+            background: rgba(15,16,48,0.55); backdrop-filter: blur(18px);
+            border: 1px solid rgba(255,189,89,0.2); border-radius: 20px;
+            padding: 20px;
+        }
+        .screen-header { margin-bottom: 16px; }
+        .screen-number {
+            font-size: 11px; color: #FFBD59; font-weight: 600;
+            background: rgba(255,189,89,0.15); padding: 4px 10px;
+            border-radius: 20px; display: inline-block; margin-bottom: 6px;
+        }
+        .screen-title { font-size: 18px; font-weight: 700; color: white; }
+        .screen-desc { font-size: 12px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+        .phone-mockup {
+            width: 260px; height: 540px; margin: 0 auto;
+            background: #0D1B2A; border-radius: 36px;
+            border: 3px solid #333; position: relative;
+            overflow: hidden; box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+        }
+        .phone-notch {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 100px; height: 24px; background: #000; border-radius: 0 0 16px 16px;
+            z-index: 100;
+        }
+        .phone-screen { padding: 32px 10px 10px; height: 100%; overflow-y: auto; }
+        .phone-screen::-webkit-scrollbar { width: 0; }
+        .status-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 6px 6px 2px; font-size: 10px; font-weight: 600;
+        }
+        .page-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 6px 2px; margin-bottom: 10px;
+        }
+        .page-title { font-size: 16px; font-weight: 700; color: white; }
+        .icon-btn {
+            width: 28px; height: 28px; background: rgba(255,255,255,0.1);
+            border-radius: 6px; display: flex; align-items: center; justify-content: center;
+            font-size: 12px;
+        }
+        .bottom-tabs {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: rgba(13,27,42,0.95); backdrop-filter: blur(10px);
+            padding: 6px 6px 16px; display: flex; justify-content: space-around;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .tab-item { text-align: center; }
+        .tab-icon { font-size: 16px; margin-bottom: 2px; opacity: 0.5; }
+        .tab-label { font-size: 8px; color: rgba(255,255,255,0.5); }
+        .tab-item.active .tab-icon { opacity: 1; }
+        .tab-item.active .tab-label { color: #FFBD59; font-weight: 600; }
+        .spec-notes {
+            margin-top: 16px; padding: 12px;
+            background: rgba(255,255,255,0.05); border-radius: 10px;
+        }
+        .spec-title { font-size: 11px; font-weight: 700; color: #FFBD59; margin-bottom: 6px; }
+        .spec-item { font-size: 10px; color: rgba(255,255,255,0.7); margin-bottom: 3px; padding-left: 10px; position: relative; }
+        .spec-item::before { content: "•"; position: absolute; left: 0; color: #FFBD59; }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed; top: 20px; right: 20px; z-index: 1000;
+            background: rgba(255,189,89,0.2); border: 1px solid #FFBD59;
+            color: #FFBD59; padding: 10px 20px; border-radius: 25px;
+            cursor: pointer; font-weight: 600; font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .theme-toggle:hover { background: #FFBD59; color: #05040B; }
+
+        /* ========================================
+           LIGHT THEME - SIMPLE & READABLE
+           ======================================== */
+        body.light-theme { background: #FFFFFF !important; color: #000000 !important; }
+        body.light-theme, body.light-theme * { color: #000000 !important; font-weight: 500 !important; }
+        body.light-theme h1, body.light-theme h2, body.light-theme h3,
+        body.light-theme .header-title, body.light-theme .screen-title, body.light-theme .page-title {
+            color: #000000 !important; font-weight: 700 !important;
+            -webkit-text-fill-color: #000000 !important; background: none !important;
+        }
+        body.light-theme .header-sub, body.light-theme .screen-desc {
+            color: #333333 !important; font-weight: 500 !important;
+        }
+        body.light-theme .header, body.light-theme .screen-card, body.light-theme .spec-notes {
+            background: #FFFFFF !important; border: 1px solid #CCCCCC !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important; backdrop-filter: none !important;
+        }
+        body.light-theme .phone-mockup { background: #F5F5F5 !important; }
+        body.light-theme .back-link {
+            background: #F5F5F5 !important; border: 1px solid #CCCCCC !important; color: #9C0612 !important;
+        }
+        body.light-theme .screen-number { background: #FFF3CD !important; color: #9C0612 !important; }
+        body.light-theme .spec-title { color: #9C0612 !important; font-weight: 700 !important; }
+        body.light-theme .spec-item { color: #333333 !important; }
+        body.light-theme a { color: #0066CC !important; font-weight: 600 !important; }
+        body.light-theme .footer { border-top: 1px solid #CCCCCC !important; color: #333333 !important; }
+
+        .footer {
+            text-align: center; margin-top: 48px; padding: 24px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.5); font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark / ☀️ Light</button>
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            localStorage.setItem('theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+        }
+        if (localStorage.getItem('theme') === 'light') document.body.classList.add('light-theme');
+    </script>
+    <div class="container">
+        <a href="WIREFRAMES_INDEX.html" class="back-link">← Back to Wireframes Index</a>
+
+        <div class="header">
+            <div class="header-icon">💰</div>
+            <h1 class="header-title">TAB 6: TÀI SẢN</h1>
+            <p class="header-sub">Portfolio, Journal, Settings, Tier Management • 7 Screens</p>
+        </div>
+
+        <div class="screens-grid">
+            <!-- SCREEN 6.1: ACCOUNT HUB -->
+            <div class="screen-card">
+                <div class="screen-header">
+                    <span class="screen-number">SCREEN 6.1</span>
+                    <h3 class="screen-title">Account Hub</h3>
+                    <p class="screen-desc">Main account dashboard</p>
+                </div>
+                <div class="phone-mockup">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span>9:41</span><span>📶 🔋</span>
+                        </div>
+                        <!-- Profile Header -->
+                        <div style="text-align: center; padding: 12px 0 16px;">
+                            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #FFBD59, #9C0612); border-radius: 50%; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; font-size: 24px;">👤</div>
+                            <div style="font-size: 16px; font-weight: 700; color: white;">CryptoTrader_VN</div>
+                            <div style="display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; padding: 3px 10px; background: rgba(255,189,89,0.2); border-radius: 12px;">
+                                <span style="font-size: 10px; color: #FFBD59; font-weight: 600;">TIER 1</span>
+                            </div>
+                        </div>
+                        <!-- Stats Row -->
+                        <div style="display: flex; justify-content: space-around; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-bottom: 12px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 16px; font-weight: 700; color: white;">💎 1,234</div>
+                                <div style="font-size: 8px; color: rgba(255,255,255,0.5);">Crystals</div>
+                            </div>
+                            <div style="width: 1px; background: rgba(255,255,255,0.1);"></div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 16px; font-weight: 700; color: #4CAF50;">+23.4%</div>
+                                <div style="font-size: 8px; color: rgba(255,255,255,0.5);">Win Rate</div>
+                            </div>
+                            <div style="width: 1px; background: rgba(255,255,255,0.1);"></div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 16px; font-weight: 700; color: white;">47</div>
+                                <div style="font-size: 8px; color: rgba(255,255,255,0.5);">Trades</div>
+                            </div>
+                        </div>
+                        <!-- Menu Items -->
+                        <div style="background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; margin-bottom: 50px;">
+                            <div style="display: flex; align-items: center; gap: 10px; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <span style="font-size: 18px;">📈</span>
+                                <span style="flex: 1; font-size: 12px; color: white;">Portfolio</span>
+                                <span style="font-size: 12px; color: rgba(255,255,255,0.3);">›</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <span style="font-size: 18px;">📔</span>
+                                <span style="flex: 1; font-size: 12px; color: white;">Trading Journal</span>
+                                <span style="font-size: 12px; color: rgba(255,255,255,0.3);">›</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <span style="font-size: 18px;">🔗</span>
+                                <span style="flex: 1; font-size: 12px; color: white;">Affiliate / CTV</span>
+                                <span style="font-size: 9px; padding: 2px 6px; background: rgba(76,175,80,0.2); color: #4CAF50; border-radius: 8px;">$234</span>
+                                <span style="font-size: 12px; color: rgba(255,255,255,0.3);">›</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <span style="font-size: 18px;">⭐</span>
+                                <span style="flex: 1; font-size: 12px; color: white;">Tier & Subscription</span>
+                                <span style="font-size: 12px; color: rgba(255,255,255,0.3);">›</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 10px; padding: 12px;">
+                                <span style="font-size: 18px;">⚙️</span>
+                                <span style="flex: 1; font-size: 12px; color: white;">Settings</span>
+                                <span style="font-size: 12px; color: rgba(255,255,255,0.3);">›</span>
+                            </div>
+                        </div>
+                        <div class="bottom-tabs">
+                            <div class="tab-item"><div class="tab-icon">🏠</div><div class="tab-label">Home</div></div>
+                            <div class="tab-item"><div class="tab-icon">🛒</div><div class="tab-label">Shop</div></div>
+                            <div class="tab-item"><div class="tab-icon">📊</div><div class="tab-label">Giao Dịch</div></div>
+                            <div class="tab-item"><div class="tab-icon">🤖</div><div class="tab-label">Gem Master</div></div>
+                            <div class="tab-item"><div class="tab-icon">🔔</div><div class="tab-label">Thông Báo</div></div>
+                            <div class="tab-item active"><div class="tab-icon">💰</div><div class="tab-label">Tài Sản</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="spec-notes">
+                    <div class="spec-title">Specifications</div>
+                    <div class="spec-item">Profile avatar + name + tier badge</div>
+                    <div class="spec-item">Quick stats: Crystals, Win Rate, Trades</div>
+                    <div class="spec-item">Menu navigation to sub-pages</div>
+                    <div class="spec-item">Affiliate earnings badge</div>
+                </div>
+            </div>
+
+            <!-- SCREEN 6.2: PORTFOLIO -->
+            <div class="screen-card">
+                <div class="screen-header">
+                    <span class="screen-number">SCREEN 6.2</span>
+                    <h3 class="screen-title">Portfolio</h3>
+                    <p class="screen-desc">Holdings and P&L tracking</p>
+                </div>
+                <div class="phone-mockup">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span>9:41</span><span>📶 🔋</span>
+                        </div>
+                        <div class="page-header">
+                            <div class="icon-btn">←</div>
+                            <span class="page-title">Portfolio</span>
+                            <div class="icon-btn">+</div>
+                        </div>
+                        <!-- Total Value -->
+                        <div style="text-align: center; padding: 16px; background: linear-gradient(135deg, rgba(76,175,80,0.2), rgba(76,175,80,0.05)); border-radius: 12px; margin-bottom: 12px;">
+                            <div style="font-size: 9px; color: rgba(255,255,255,0.6);">Total Value</div>
+                            <div style="font-size: 24px; font-weight: 800; color: white;">$24,567.89</div>
+                            <div style="font-size: 11px; color: #4CAF50;">+$1,234.56 (+5.3%) today</div>
+                        </div>
+                        <!-- Holdings -->
+                        <div style="font-size: 9px; font-weight: 600; color: #FFBD59; margin-bottom: 6px;">HOLDINGS</div>
+                        <div style="background: rgba(255,255,255,0.05); border-radius: 10px; padding: 10px; margin-bottom: 6px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="width: 28px; height: 28px; background: #F7931A; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px;">₿</div>
+                                <div style="flex: 1;">
+                                    <div style="font-size: 11px; font-weight: 600; color: white;">Bitcoin</div>
+                                    <div style="font-size: 9px; color: rgba(255,255,255,0.5);">0.25 BTC</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 11px; font-weight: 600; color: white;">$17,308</div>
+                                    <div style="font-size: 9px; color: #4CAF50;">+3.2%</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.05); border-radius: 10px; padding: 10px; margin-bottom: 6px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="width: 28px; height: 28px; background: #627EEA; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px;">Ξ</div>
+                                <div style="flex: 1;">
+                                    <div style="font-size: 11px; font-weight: 600; color: white;">Ethereum</div>
+                                    <div style="font-size: 9px; color: rgba(255,255,255,0.5);">2.5 ETH</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 11px; font-weight: 600; color: white;">$5,850</div>
+                                    <div style="font-size: 9px; color: #F44336;">-1.2%</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.05); border-radius: 10px; padding: 10px; margin-bottom: 50px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="width: 28px; height: 28px; background: #14F195; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #000;">◎</div>
+                                <div style="flex: 1;">
+                                    <div style="font-size: 11px; font-weight: 600; color: white;">Solana</div>
+                                    <div style="font-size: 9px; color: rgba(255,255,255,0.5);">6 SOL</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 11px; font-weight: 600; color: white;">$1,410</div>
+                                    <div style="font-size: 9px; color: #4CAF50;">+8.5%</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bottom-tabs">
+                            <div class="tab-item"><div class="tab-icon">🏠</div><div class="tab-label">Home</div></div>
+                            <div class="tab-item"><div class="tab-icon">🛒</div><div class="tab-label">Shop</div></div>
+                            <div class="tab-item"><div class="tab-icon">📊</div><div class="tab-label">Giao Dịch</div></div>
+                            <div class="tab-item"><div class="tab-icon">🤖</div><div class="tab-label">Gem Master</div></div>
+                            <div class="tab-item"><div class="tab-icon">🔔</div><div class="tab-label">Thông Báo</div></div>
+                            <div class="tab-item active"><div class="tab-icon">💰</div><div class="tab-label">Tài Sản</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="spec-notes">
+                    <div class="spec-title">Specifications</div>
+                    <div class="spec-item">Total portfolio value + daily P&L</div>
+                    <div class="spec-item">Holdings list with coin icons</div>
+                    <div class="spec-item">Add position button</div>
+                    <div class="spec-item">Tap to edit/delete position</div>
+                </div>
+            </div>
+
+            <!-- SCREEN 6.3: TRADING JOURNAL -->
+            <div class="screen-card">
+                <div class="screen-header">
+                    <span class="screen-number">SCREEN 6.3</span>
+                    <h3 class="screen-title">Trading Journal</h3>
+                    <p class="screen-desc">Trade history and notes</p>
+                </div>
+                <div class="phone-mockup">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span>9:41</span><span>📶 🔋</span>
+                        </div>
+                        <div class="page-header">
+                            <div class="icon-btn">←</div>
+                            <span class="page-title">Journal</span>
+                            <div class="icon-btn">+</div>
+                        </div>
+                        <!-- Stats -->
+                        <div style="display: flex; gap: 6px; margin-bottom: 10px;">
+                            <div style="flex: 1; background: rgba(76,175,80,0.15); border-radius: 8px; padding: 8px; text-align: center;">
+                                <div style="font-size: 14px; font-weight: 700; color: #4CAF50;">32</div>
+                                <div style="font-size: 8px; color: rgba(255,255,255,0.5);">Wins</div>
+                            </div>
+                            <div style="flex: 1; background: rgba(244,67,54,0.15); border-radius: 8px; padding: 8px; text-align: center;">
+                                <div style="font-size: 14px; font-weight: 700; color: #F44336;">15</div>
+                                <div style="font-size: 8px; color: rgba(255,255,255,0.5);">Losses</div>
+                            </div>
+                            <div style="flex: 1; background: rgba(255,189,89,0.15); border-radius: 8px; padding: 8px; text-align: center;">
+                                <div style="font-size: 14px; font-weight: 700; color: #FFBD59;">68%</div>
+                                <div style="font-size: 8px; color: rgba(255,255,255,0.5);">Win Rate</div>
+                            </div>
+                        </div>
+                        <!-- Trade Entries -->
+                        <div style="font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.5); margin-bottom: 6px;">RECENT TRADES</div>
+                        <div style="background: rgba(76,175,80,0.1); border-left: 3px solid #4CAF50; border-radius: 0 8px 8px 0; padding: 10px; margin-bottom: 6px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                <span style="font-size: 11px; font-weight: 600; color: white;">BTC/USDT Long</span>
+                                <span style="font-size: 11px; font-weight: 700; color: #4CAF50;">+$456</span>
+                            </div>
+                            <div style="font-size: 9px; color: rgba(255,255,255,0.6);">Triangle • Entry: $68,500 • Exit: $71,200</div>
+                            <div style="font-size: 8px; color: rgba(255,255,255,0.4); margin-top: 4px;">22/11/2024</div>
+                        </div>
+                        <div style="background: rgba(244,67,54,0.1); border-left: 3px solid #F44336; border-radius: 0 8px 8px 0; padding: 10px; margin-bottom: 6px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                <span style="font-size: 11px; font-weight: 600; color: white;">ETH/USDT Short</span>
+                                <span style="font-size: 11px; font-weight: 700; color: #F44336;">-$120</span>
+                            </div>
+                            <div style="font-size: 9px; color: rgba(255,255,255,0.6);">H&S • Entry: $3,450 • SL hit: $3,520</div>
+                            <div style="font-size: 8px; color: rgba(255,255,255,0.4); margin-top: 4px;">21/11/2024</div>
+                        </div>
+                        <div style="background: rgba(76,175,80,0.1); border-left: 3px solid #4CAF50; border-radius: 0 8px 8px 0; padding: 10px; margin-bottom: 50px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                <span style="font-size: 11px; font-weight: 600; color: white;">SOL/USDT Long</span>
+                                <span style="font-size: 11px; font-weight: 700; color: #4CAF50;">+$234</span>
+                            </div>
+                            <div style="font-size: 9px; color: rgba(255,255,255,0.6);">Cup Handle • Entry: $235 • Exit: $248</div>
+                            <div style="font-size: 8px; color: rgba(255,255,255,0.4); margin-top: 4px;">20/11/2024</div>
+                        </div>
+                        <div class="bottom-tabs">
+                            <div class="tab-item"><div class="tab-icon">🏠</div><div class="tab-label">Home</div></div>
+                            <div class="tab-item"><div class="tab-icon">🛒</div><div class="tab-label">Shop</div></div>
+                            <div class="tab-item"><div class="tab-icon">📊</div><div class="tab-label">Giao Dịch</div></div>
+                            <div class="tab-item"><div class="tab-icon">🤖</div><div class="tab-label">Gem Master</div></div>
+                            <div class="tab-item"><div class="tab-icon">🔔</div><div class="tab-label">Thông Báo</div></div>
+                            <div class="tab-item active"><div class="tab-icon">💰</div><div class="tab-label">Tài Sản</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="spec-notes">
+                    <div class="spec-title">Specifications</div>
+                    <div class="spec-item">Win/Loss/Rate summary</div>
+                    <div class="spec-item">Trade entries with P&L</div>
+                    <div class="spec-item">Pattern + entry/exit info</div>
+                    <div class="spec-item">Add trade manually or from scanner</div>
+                </div>
+            </div>
+
+            <!-- SCREEN 6.4: AFFILIATE -->
+            <div class="screen-card">
+                <div class="screen-header">
+                    <span class="screen-number">SCREEN 6.4</span>
+                    <h3 class="screen-title">Affiliate / CTV</h3>
+                    <p class="screen-desc">Referral earnings and stats</p>
+                </div>
+                <div class="phone-mockup">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span>9:41</span><span>📶 🔋</span>
+                        </div>
+                        <div class="page-header">
+                            <div class="icon-btn">←</div>
+                            <span class="page-title">Affiliate</span>
+                            <div class="icon-btn">ℹ️</div>
+                        </div>
+                        <!-- Earnings Card -->
+                        <div style="background: linear-gradient(135deg, #FFBD59, #9C0612); border-radius: 14px; padding: 16px; margin-bottom: 12px;">
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.9);">Total Earnings</div>
+                            <div style="font-size: 28px; font-weight: 800; color: white;">$1,234.50</div>
+                            <div style="display: flex; gap: 16px; margin-top: 10px;">
+                                <div>
+                                    <div style="font-size: 9px; color: rgba(255,255,255,0.7);">This Month</div>
+                                    <div style="font-size: 14px; font-weight: 600; color: white;">$234.00</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 9px; color: rgba(255,255,255,0.7);">Pending</div>
+                                    <div style="font-size: 14px; font-weight: 600; color: white;">$56.50</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Referral Link -->
+                        <div style="background: rgba(255,255,255,0.05); border-radius: 10px; padding: 12px; margin-bottom: 10px;">
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.6); margin-bottom: 6px;">Your Referral Link</div>
+                            <div style="display: flex; gap: 8px;">
+                                <div style="flex: 1; background: rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; font-size: 9px; color: white; overflow: hidden; text-overflow: ellipsis;">gem.app/ref/cryptotrader</div>
+                                <div style="background: #FFBD59; color: #0D1B2A; padding: 8px 12px; border-radius: 6px; font-size: 9px; font-weight: 600;">Copy</div>
+                            </div>
+                        </div>
+                        <!-- Stats -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+                            <div style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 10px; text-align: center;">
+                                <div style="font-size: 18px; font-weight: 700; color: white;">24</div>
+                                <div style="font-size: 8px; color: rgba(255,255,255,0.5);">Referrals</div>
+                            </div>
+                            <div style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 10px; text-align: center;">
+                                <div style="font-size: 18px; font-weight: 700; color: #FFBD59;">30%</div>
+                                <div style="font-size: 8px; color: rgba(255,255,255,0.5);">Commission</div>
+                            </div>
+                        </div>
+                        <!-- Withdraw -->
+                        <div style="background: linear-gradient(135deg, #4CAF50, #45a049); border-radius: 10px; padding: 12px; text-align: center; margin-bottom: 50px;">
+                            <span style="font-size: 12px; font-weight: 600; color: white;">Withdraw $1,178.00</span>
+                        </div>
+                        <div class="bottom-tabs">
+                            <div class="tab-item"><div class="tab-icon">🏠</div><div class="tab-label">Home</div></div>
+                            <div class="tab-item"><div class="tab-icon">🛒</div><div class="tab-label">Shop</div></div>
+                            <div class="tab-item"><div class="tab-icon">📊</div><div class="tab-label">Giao Dịch</div></div>
+                            <div class="tab-item"><div class="tab-icon">🤖</div><div class="tab-label">Gem Master</div></div>
+                            <div class="tab-item"><div class="tab-icon">🔔</div><div class="tab-label">Thông Báo</div></div>
+                            <div class="tab-item active"><div class="tab-icon">💰</div><div class="tab-label">Tài Sản</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="spec-notes">
+                    <div class="spec-title">Specifications</div>
+                    <div class="spec-item">Total/monthly/pending earnings</div>
+                    <div class="spec-item">Referral link with copy button</div>
+                    <div class="spec-item">Referral count + commission rate</div>
+                    <div class="spec-item">Withdraw to bank/crypto</div>
+                </div>
+            </div>
+
+            <!-- SCREEN 6.5: TIER MANAGEMENT -->
+            <div class="screen-card">
+                <div class="screen-header">
+                    <span class="screen-number">SCREEN 6.5</span>
+                    <h3 class="screen-title">Tier & Subscription</h3>
+                    <p class="screen-desc">Current tier and upgrade options</p>
+                </div>
+                <div class="phone-mockup">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span>9:41</span><span>📶 🔋</span>
+                        </div>
+                        <div class="page-header">
+                            <div class="icon-btn">←</div>
+                            <span class="page-title">Subscription</span>
+                            <div style="width: 28px;"></div>
+                        </div>
+                        <!-- Current Tier -->
+                        <div style="background: linear-gradient(135deg, rgba(255,189,89,0.3), rgba(255,189,89,0.1)); border: 1px solid #FFBD59; border-radius: 14px; padding: 16px; margin-bottom: 12px; text-align: center;">
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.7);">Current Plan</div>
+                            <div style="font-size: 24px; font-weight: 800; color: #FFBD59; margin: 6px 0;">TIER 1</div>
+                            <div style="font-size: 11px; color: rgba(255,255,255,0.8);">$99/month • Renews Dec 22</div>
+                        </div>
+                        <!-- Features -->
+                        <div style="font-size: 9px; font-weight: 600; color: #FFBD59; margin-bottom: 6px;">YOUR FEATURES</div>
+                        <div style="background: rgba(255,255,255,0.05); border-radius: 10px; padding: 10px; margin-bottom: 10px;">
+                            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                                <span style="font-size: 12px; color: #4CAF50;">✓</span>
+                                <span style="font-size: 10px; color: white;">7 Pattern Types</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                                <span style="font-size: 12px; color: #4CAF50;">✓</span>
+                                <span style="font-size: 10px; color: white;">2 Trading Tools</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                                <span style="font-size: 12px; color: #4CAF50;">✓</span>
+                                <span style="font-size: 10px; color: white;">15 AI Questions/day</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span style="font-size: 12px; color: rgba(255,255,255,0.3);">✗</span>
+                                <span style="font-size: 10px; color: rgba(255,255,255,0.5);">Multi-TF (TIER 2+)</span>
+                            </div>
+                        </div>
+                        <!-- Upgrade CTA -->
+                        <div style="background: linear-gradient(135deg, #2196F3, #1976D2); border-radius: 10px; padding: 12px; text-align: center; margin-bottom: 8px;">
+                            <div style="font-size: 12px; font-weight: 700; color: white;">Upgrade to TIER 2</div>
+                            <div style="font-size: 10px; color: rgba(255,255,255,0.8);">$199/mo • 15 patterns + 8 tools</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 10px; text-align: center; margin-bottom: 50px;">
+                            <span style="font-size: 11px; color: rgba(255,255,255,0.7);">Cancel Subscription</span>
+                        </div>
+                        <div class="bottom-tabs">
+                            <div class="tab-item"><div class="tab-icon">🏠</div><div class="tab-label">Home</div></div>
+                            <div class="tab-item"><div class="tab-icon">🛒</div><div class="tab-label">Shop</div></div>
+                            <div class="tab-item"><div class="tab-icon">📊</div><div class="tab-label">Giao Dịch</div></div>
+                            <div class="tab-item"><div class="tab-icon">🤖</div><div class="tab-label">Gem Master</div></div>
+                            <div class="tab-item"><div class="tab-icon">🔔</div><div class="tab-label">Thông Báo</div></div>
+                            <div class="tab-item active"><div class="tab-icon">💰</div><div class="tab-label">Tài Sản</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="spec-notes">
+                    <div class="spec-title">Specifications</div>
+                    <div class="spec-item">Current tier + renewal date</div>
+                    <div class="spec-item">Feature checklist (unlocked/locked)</div>
+                    <div class="spec-item">Upgrade to next tier CTA</div>
+                    <div class="spec-item">Cancel subscription option</div>
+                </div>
+            </div>
+
+            <!-- SCREEN 6.6: SETTINGS -->
+            <div class="screen-card">
+                <div class="screen-header">
+                    <span class="screen-number">SCREEN 6.6</span>
+                    <h3 class="screen-title">Settings</h3>
+                    <p class="screen-desc">App preferences and account</p>
+                </div>
+                <div class="phone-mockup">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span>9:41</span><span>📶 🔋</span>
+                        </div>
+                        <div class="page-header">
+                            <div class="icon-btn">←</div>
+                            <span class="page-title">Settings</span>
+                            <div style="width: 28px;"></div>
+                        </div>
+                        <!-- Settings Sections -->
+                        <div style="font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.5); margin-bottom: 6px;">ACCOUNT</div>
+                        <div style="background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <span style="font-size: 11px; color: white;">Edit Profile</span>
+                                <span style="font-size: 10px; color: rgba(255,255,255,0.3);">›</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <span style="font-size: 11px; color: white;">Change Password</span>
+                                <span style="font-size: 10px; color: rgba(255,255,255,0.3);">›</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
+                                <span style="font-size: 11px; color: white;">Linked Accounts</span>
+                                <span style="font-size: 10px; color: rgba(255,255,255,0.3);">›</span>
+                            </div>
+                        </div>
+                        <div style="font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.5); margin-bottom: 6px;">PREFERENCES</div>
+                        <div style="background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <span style="font-size: 11px; color: white;">Language</span>
+                                <span style="font-size: 10px; color: rgba(255,255,255,0.5);">Vietnamese ›</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <span style="font-size: 11px; color: white;">Dark Mode</span>
+                                <div style="width: 36px; height: 20px; background: #4CAF50; border-radius: 10px; position: relative;">
+                                    <div style="width: 16px; height: 16px; background: white; border-radius: 50%; position: absolute; right: 2px; top: 2px;"></div>
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
+                                <span style="font-size: 11px; color: white;">Notifications</span>
+                                <span style="font-size: 10px; color: rgba(255,255,255,0.3);">›</span>
+                            </div>
+                        </div>
+                        <div style="font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.5); margin-bottom: 6px;">SUPPORT</div>
+                        <div style="background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden; margin-bottom: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <span style="font-size: 11px; color: white;">Help Center</span>
+                                <span style="font-size: 10px; color: rgba(255,255,255,0.3);">›</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
+                                <span style="font-size: 11px; color: white;">About GEM</span>
+                                <span style="font-size: 10px; color: rgba(255,255,255,0.5);">v1.0.0</span>
+                            </div>
+                        </div>
+                        <div style="text-align: center; padding: 10px; margin-bottom: 50px;">
+                            <span style="font-size: 11px; color: #F44336;">Log Out</span>
+                        </div>
+                        <div class="bottom-tabs">
+                            <div class="tab-item"><div class="tab-icon">🏠</div><div class="tab-label">Home</div></div>
+                            <div class="tab-item"><div class="tab-icon">🛒</div><div class="tab-label">Shop</div></div>
+                            <div class="tab-item"><div class="tab-icon">📊</div><div class="tab-label">Giao Dịch</div></div>
+                            <div class="tab-item"><div class="tab-icon">🤖</div><div class="tab-label">Gem Master</div></div>
+                            <div class="tab-item"><div class="tab-icon">🔔</div><div class="tab-label">Thông Báo</div></div>
+                            <div class="tab-item active"><div class="tab-icon">💰</div><div class="tab-label">Tài Sản</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="spec-notes">
+                    <div class="spec-title">Specifications</div>
+                    <div class="spec-item">Grouped settings sections</div>
+                    <div class="spec-item">Language selector</div>
+                    <div class="spec-item">Dark mode always ON</div>
+                    <div class="spec-item">Version info + Logout</div>
+                </div>
+            </div>
+
+            <!-- SCREEN 6.7: EDIT PROFILE -->
+            <div class="screen-card">
+                <div class="screen-header">
+                    <span class="screen-number">SCREEN 6.7</span>
+                    <h3 class="screen-title">Edit Profile</h3>
+                    <p class="screen-desc">Update user information</p>
+                </div>
+                <div class="phone-mockup">
+                    <div class="phone-notch"></div>
+                    <div class="phone-screen">
+                        <div class="status-bar">
+                            <span>9:41</span><span>📶 🔋</span>
+                        </div>
+                        <div class="page-header">
+                            <div class="icon-btn">✕</div>
+                            <span class="page-title">Edit Profile</span>
+                            <div style="font-size: 11px; color: #FFBD59; font-weight: 600;">Save</div>
+                        </div>
+                        <!-- Avatar -->
+                        <div style="text-align: center; margin-bottom: 16px;">
+                            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #FFBD59, #9C0612); border-radius: 50%; margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; font-size: 32px; position: relative;">
+                                👤
+                                <div style="position: absolute; bottom: 0; right: 0; width: 24px; height: 24px; background: #FFBD59; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px;">📷</div>
+                            </div>
+                            <div style="font-size: 10px; color: #FFBD59;">Change Photo</div>
+                        </div>
+                        <!-- Form Fields -->
+                        <div style="margin-bottom: 10px;">
+                            <div style="font-size: 9px; color: rgba(255,255,255,0.6); margin-bottom: 4px;">Display Name</div>
+                            <div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 10px;">
+                                <span style="font-size: 12px; color: white;">CryptoTrader_VN</span>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <div style="font-size: 9px; color: rgba(255,255,255,0.6); margin-bottom: 4px;">Bio</div>
+                            <div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; min-height: 60px;">
+                                <span style="font-size: 11px; color: white;">Pattern trader | GEM Tier 1 | VN 🇻🇳</span>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <div style="font-size: 9px; color: rgba(255,255,255,0.6); margin-bottom: 4px;">Email</div>
+                            <div style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 10px;">
+                                <span style="font-size: 11px; color: rgba(255,255,255,0.5);">trader@email.com ✓</span>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 50px;">
+                            <div style="font-size: 9px; color: rgba(255,255,255,0.6); margin-bottom: 4px;">Website</div>
+                            <div style="background: rgba(255,255,255,0.1); border-radius: 8px; padding: 10px;">
+                                <span style="font-size: 11px; color: rgba(255,255,255,0.4);">Add website...</span>
+                            </div>
+                        </div>
+                        <div class="bottom-tabs">
+                            <div class="tab-item"><div class="tab-icon">🏠</div><div class="tab-label">Home</div></div>
+                            <div class="tab-item"><div class="tab-icon">🛒</div><div class="tab-label">Shop</div></div>
+                            <div class="tab-item"><div class="tab-icon">📊</div><div class="tab-label">Giao Dịch</div></div>
+                            <div class="tab-item"><div class="tab-icon">🤖</div><div class="tab-label">Gem Master</div></div>
+                            <div class="tab-item"><div class="tab-icon">🔔</div><div class="tab-label">Thông Báo</div></div>
+                            <div class="tab-item active"><div class="tab-icon">💰</div><div class="tab-label">Tài Sản</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="spec-notes">
+                    <div class="spec-title">Specifications</div>
+                    <div class="spec-item">Avatar upload/camera option</div>
+                    <div class="spec-item">Display name (unique check)</div>
+                    <div class="spec-item">Bio with character limit</div>
+                    <div class="spec-item">Email verified indicator</div>
+                    <div class="spec-item">Save button in header</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>TAB 6: TÀI SẢN - 7 Screens Complete</p>
+            <p style="margin-top: 8px;">
+                <a href="WIREFRAMES_TAB5_NOTIFICATIONS.html" style="color: rgba(255,255,255,0.5);">← TAB 5 NOTIFICATIONS</a>
+                <span style="margin: 0 16px;">|</span>
+                <a href="WIREFRAMES_MODALS.html" style="color: #FFBD59;">Next: MODALS →</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

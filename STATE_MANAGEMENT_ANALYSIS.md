@@ -1,7 +1,7 @@
-# PHÂN TÍCH STATE MANAGEMENT - GEM PLATFORM
+# PHÂN TÍCH STATE MANAGEMENT - Gemral
 
 **Date:** 2025-11-12
-**Project:** Crypto Pattern Scanner (Gem Platform)
+**Project:** Crypto Pattern Scanner (Gemral)
 **State Management:** React Context API + Custom Hooks
 
 ---

@@ -5,17 +5,22 @@
 
 /* Main Container - FLEXIBLE HEIGHT (no more cutting!) */
 .pattern-info-compact {
+  position: relative; /* CRITICAL: For absolute positioned badges */
   background: linear-gradient(135deg, rgba(17, 34, 80, 0.4) 0%, rgba(17, 34, 80, 0.6) 100%);
   border: 1px solid rgba(255, 189, 89, 0.3);
   border-radius: 12px;
-  padding: 16px;
+  padding: 12px;
+  padding-top: 44px; /* Extra space for absolute badges */
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  min-height: 320px; /* FIXED: Flexible height instead of fixed */
-  max-height: 500px;
-  overflow: visible; /* FIXED: Don't cut content! */
+  gap: 10px;
+  min-height: 280px; /* FIXED: Flexible height instead of fixed */
+  max-height: 450px;
+  overflow: hidden; /* FIXED: Prevent horizontal overflow */
   min-width: 0; /* FIXED: Allow text truncation */
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Empty State */
@@ -198,7 +203,7 @@
 }
 
 .item-value.entry {
-  color: #00D9FF;
+  color: #FFBD59;
 }
 
 .item-value.stop-loss {
@@ -304,5 +309,86 @@
 
   .compact-actions {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   MOBILE FIXES - max-width: 767px
+   Desktop styles preserved above - DO NOT TOUCH!
+   ============================================ */
+@media (max-width: 767px) {
+  .pattern-info-compact {
+    min-height: 200px;
+    max-height: none;
+    padding: 12px;
+    padding-top: 40px;
+    gap: 8px;
+  }
+
+  .pattern-info-compact-empty {
+    height: 120px;
+    padding: 16px;
+  }
+
+  .empty-text {
+    font-size: 13px;
+  }
+
+  .compact-header {
+    padding-bottom: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .header-left {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .pattern-name {
+    font-size: 14px;
+    max-width: 150px;
+  }
+
+  .confidence-pill {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+
+  .header-right {
+    width: 100%;
+    flex-wrap: wrap;
+    font-size: 11px;
+    gap: 6px;
+  }
+
+  .compact-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .grid-item {
+    padding: 8px 10px;
+  }
+
+  .item-label {
+    font-size: 9px;
+  }
+
+  .item-value {
+    font-size: 13px;
+    gap: 4px;
+  }
+
+  .compact-actions {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .action-btn-compact {
+    height: 36px;
+    font-size: 12px;
+    gap: 4px;
   }
 }

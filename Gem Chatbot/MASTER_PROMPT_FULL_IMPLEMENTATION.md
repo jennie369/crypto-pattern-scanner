@@ -2,7 +2,7 @@
 ## TOÀN BỘ IMPLEMENTATION - 8 TUẦN
 
 **To:** Claude Code  
-**Project:** GEM Platform - Chatbot AI + Interactive Dashboard  
+**Project:** Gemral - Chatbot AI + Interactive Dashboard  
 **Timeline:** 8 tuần (60 ngày)  
 **Status:** READY TO BUILD
 
@@ -19,7 +19,7 @@ Implement complete system bao gồm:
 6. ✅ Analytics & Tracking
 7. ✅ TIER Access Control
 
-**CRITICAL:** User không biết đang dùng AI - present như GEM Platform features!
+**CRITICAL:** User không biết đang dùng AI - present như Gemral features!
 
 ---
 
@@ -114,7 +114,7 @@ const WIDGET_LIMITS = {
 ## 🚨 CRITICAL REQUIREMENTS
 
 1. ❌ NEVER mention "AI", "Claude"
-2. ✅ ALWAYS say "GEM Platform phân tích..."
+2. ✅ ALWAYS say "Gemral phân tích..."
 3. ✅ Recommend products từ database only
 4. ✅ RLS policies on ALL tables
 5. ✅ Performance < 2s page load

@@ -75,6 +75,26 @@ export const ResultsList = ({ results, onSelect, selectedPattern, onOpenPaperTra
     return <Circle size={10} fill={color} color={color} />;
   };
 
+  // Calculate time ago
+  const getTimeAgo = (dateString) => {
+    if (!dateString) return '';
+    const now = new Date();
+    const detected = new Date(dateString);
+    const diffInMinutes = Math.floor((now - detected) / (1000 * 60));
+
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes === 1) return '1m ago';
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours === 1) return '1h ago';
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays === 1) return '1d ago';
+    return `${diffInDays}d ago`;
+  };
+
   // Debug wrapper for click handling
   const handleCardClick = (result) => {
     console.log('[ResultsList] [CLICK] Card clicked!', {
@@ -119,14 +139,19 @@ export const ResultsList = ({ results, onSelect, selectedPattern, onOpenPaperTra
               <span className="result-timeframe">{result.timeframe}</span>
             </div>
 
-            <div className="result-details">
+            {/* 3-column layout: Entry, Stop, Target */}
+            <div className="result-details-3col">
               <div className="result-detail-item">
-                <span className="detail-label">Entry</span>
-                <span className="detail-value">${result.entry.toLocaleString()}</span>
+                <span className="detail-label">ENTRY</span>
+                <span className="detail-value entry-value">${result.entry?.toLocaleString() || '0.00'}</span>
               </div>
               <div className="result-detail-item">
-                <span className="detail-label">R:R</span>
-                <span className="detail-value">{result.riskReward.toFixed(2)}x</span>
+                <span className="detail-label">STOP</span>
+                <span className="detail-value stop-value">${result.stopLoss?.toLocaleString() || '0.00'}</span>
+              </div>
+              <div className="result-detail-item">
+                <span className="detail-label">TARGET</span>
+                <span className="detail-value target-value">${result.takeProfit?.toLocaleString() || '0.00'}</span>
               </div>
             </div>
 
@@ -141,7 +166,7 @@ export const ResultsList = ({ results, onSelect, selectedPattern, onOpenPaperTra
                   }
                 }}
               >
-                📄 Paper Trade
+                ↗ Paper Trade
               </button>
             ) : (
               <button
@@ -154,6 +179,14 @@ export const ResultsList = ({ results, onSelect, selectedPattern, onOpenPaperTra
               >
                 🔒 Paper Trade (Upgrade Required)
               </button>
+            )}
+
+            {/* Time ago */}
+            {result.detectedAt && (
+              <div className="result-time-ago">
+                <span className="time-icon">⏱</span>
+                <span>{getTimeAgo(result.detectedAt)}</span>
+              </div>
             )}
           </div>
         ))}

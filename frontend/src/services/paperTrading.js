@@ -737,6 +737,31 @@ async function updateHoldings(userId, accountId, symbol, quantity, price, side) 
 }
 
 /**
+ * Update a position (holding)
+ * @param {string} holdingId - Holding ID
+ * @param {Object} updates - Fields to update (stop_loss, take_profit, etc.)
+ * @returns {Promise<Object>} Update result
+ */
+export async function updatePosition(holdingId, updates) {
+  try {
+    const { error } = await supabase
+      .from('paper_trading_holdings')
+      .update(updates)
+      .eq('id', holdingId);
+
+    if (error) {
+      console.error('Error updating position:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error updating position:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
  * Get user's holdings with real-time prices
  * @param {string} userId - User UUID
  * @returns {Promise<Array>} Holdings array
@@ -836,12 +861,22 @@ export async function closePosition(holdingId, userId) {
 
     console.log('📊 [closePosition] Holding found:', holding);
 
-    // Get current market price from Binance
-    const priceResponse = await fetch(
-      `https://api.binance.com/api/v3/ticker/price?symbol=${holding.symbol}`
-    );
-    const priceData = await priceResponse.json();
-    const currentPrice = parseFloat(priceData.price);
+    // Get current market price from Binance Futures API (better CORS support)
+    let currentPrice = 0;
+    try {
+      const priceResponse = await fetch(
+        `https://fapi.binance.com/fapi/v1/ticker/price?symbol=${holding.symbol}`
+      );
+      const priceData = await priceResponse.json();
+      currentPrice = parseFloat(priceData.price);
+    } catch (err) {
+      // Fallback to spot API if futures fails
+      const spotResponse = await fetch(
+        `https://api.binance.com/api/v3/ticker/price?symbol=${holding.symbol}`
+      );
+      const spotData = await spotResponse.json();
+      currentPrice = parseFloat(spotData.price);
+    }
 
     if (!currentPrice || currentPrice <= 0) {
       throw new Error('Unable to fetch current price');

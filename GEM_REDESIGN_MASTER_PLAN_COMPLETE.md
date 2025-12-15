@@ -1,4 +1,4 @@
-# 💎 GEM PLATFORM - MASTER REDESIGN PLAN
+# 💎 Gemral - MASTER REDESIGN PLAN
 ## Complete Guide: Analysis → Design System → Wireframes → Implementation
 
 **Ngày:** 12 Tháng 11, 2025 (Original) | **Updated:** 15 Tháng 11, 2025
@@ -229,7 +229,7 @@ http://localhost:5175/courses/:slug/learn → Course learning page
 /forum/new                  → Create Thread
 /messages                   → Direct Messaging (DM, real-time)
 /events                     → Events Calendar (RSVP system)
-/chatbot                    → Gem Master Chatbot (I Ching/Tarot)
+/chatbot                    → Gemral Chatbot (I Ching/Tarot)
 ```
 
 **💰 Affiliate:**
@@ -283,7 +283,7 @@ Other:           7+ routes ✅
 
 ### **📌 Context - Bối Cảnh Dự Án**
 
-**GEM Platform** là hệ sinh thái trading crypto tại Việt Nam kết hợp:
+**Gemral** là hệ sinh thái trading crypto tại Việt Nam kết hợp:
 - 🎯 **Trading Tools:** Pattern detection (DPD, UPU, HFZ/LFZ) với 68% win rate
 - ☯️ **Spiritual Elements:** Crystals, courses, I Ching/Tarot chatbot
 - 💰 **Revenue Model:** Tiered subscriptions (FREE → TIER 3: 68M VND/24mo)
@@ -438,7 +438,7 @@ Animations: Float, pulse, fade, scale
 ✅ COMMUNITY FEATURES (6/6 - NOV 15 UPDATE):
 26. Community Hub - 90% COMPLETE
    - CommunityHub.jsx (132 lines, 6-tab navigation)
-   - Tabs: Forum, Gem Master, Messages, Events, Leaderboard, Profile
+   - Tabs: Forum, Gemral, Messages, Events, Leaderboard, Profile
 
 27. Direct Messaging - 85% COMPLETE
    - Messages.jsx (371 lines)
@@ -1190,7 +1190,7 @@ Micro:
 ```
 ┌────────────────────────────────────────────────────────────────────┐
 │                    HEADER (Sticky - Glassmorphism)                  │
-│  💎 GEM Platform        Home  Pricing  About      [Login] [Signup] │
+│  💎 Gemral        Home  Pricing  About      [Login] [Signup] │
 └────────────────────────────────────────────────────────────────────┘
 
 ┌────────────────────────────────────────────────────────────────────┐
@@ -1287,7 +1287,7 @@ Micro:
 
 ┌────────────────────────────────────────────────────────────────────┐
 │                            FOOTER                                   │
-│  GEM Platform ©️ 2025                                               │
+│  Gemral ©️ 2025                                               │
 │  Products | Support | About | Terms | Privacy                      │
 │  [Facebook] [Twitter] [Instagram] [Telegram]                        │
 └────────────────────────────────────────────────────────────────────┘

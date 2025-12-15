@@ -7,18 +7,26 @@ import MarketChatbotSection from './components/MarketChatbotSection';
 import PaperTradingPanel from '../../../../components/PaperTradingPanel/PaperTradingPanel';
 import OpenPositionsWidget from '../../../../components/PaperTrading/OpenPositionsWidget';
 import RecentTradesSection from '../../../../components/PaperTrading/RecentTradesSection';
+import CompactSidebar from '../../../../components/CompactSidebar/CompactSidebar';
 import { scanPatterns, ScannerWebSocket, exportToCSV, downloadCSV } from '../../../../services/scannerAPI';
+import { getHoldings, getOrders, closePosition, updatePosition } from '../../../../services/paperTrading';
+import binanceWS from '../../../../services/binanceWebSocket';
+import { useAuth } from '../../../../contexts/AuthContext';
+import toast from 'react-hot-toast';
 import { useScannerStore } from '../../../../stores/scannerStore';
 import './ScannerPage.css';
 
 /**
- * Scanner Page v2 - GEM Platform
+ * Scanner Page v2 - Gemral
  * 3-column layout with real-time pattern detection
  * Week 3, Day 18-21
  *
  * STATE PERSISTENCE: Uses Zustand store for persistent state across page refreshes
+ * UPDATED: 2025-01-19 - Testing ultra-simple widgets
  */
 export const ScannerPage = () => {
+  const { user } = useAuth();
+
   // Zustand store for persistent state
   const {
     scanResults,
@@ -37,6 +45,14 @@ export const ScannerPage = () => {
   // Paper trading panel state
   const [showPaperTradingPanel, setShowPaperTradingPanel] = useState(false);
   const [paperTradingSymbol, setPaperTradingSymbol] = useState(null);
+
+  // Paper trading widgets state (managed at Scanner level)
+  const [positions, setPositions] = useState([]);
+  const [trades, setTrades] = useState([]);
+  const [prices, setPrices] = useState({});
+  const [loadingPositions, setLoadingPositions] = useState(false);
+  const priceWsRefs = useRef([]);
+  const loadedRef = useRef(false);
 
   // Initialize WebSocket on mount
   useEffect(() => {
@@ -67,6 +83,83 @@ export const ScannerPage = () => {
       }
     };
   }, [setScanResults]);
+
+  // Manual data loading function (no automatic useEffect to avoid re-render issues)
+  const handleRefreshPaperTrading = async () => {
+    if (!user?.id) {
+      console.log('[ScannerPage] [Paper Trading] No user');
+      toast.error('Please log in to view paper trading data');
+      return;
+    }
+
+    console.log('[ScannerPage] [Paper Trading] Loading positions and trades...');
+    setLoadingPositions(true);
+
+    try {
+      // Fetch positions and recent trades
+      const [positionsData, ordersData] = await Promise.all([
+        getHoldings(user.id),
+        getOrders(user.id, 10) // Last 10 trades
+      ]);
+
+      console.log('[ScannerPage] [Paper Trading] Loaded:', positionsData.length, 'positions,', ordersData.length, 'trades');
+
+      setPositions(positionsData || []);
+
+      // Filter for closed orders only (status = 'filled')
+      const closedTrades = ordersData.filter(order => order.status === 'filled') || [];
+      setTrades(closedTrades);
+
+      // Unsubscribe from previous subscriptions
+      priceWsRefs.current.forEach(unsub => unsub());
+      priceWsRefs.current = [];
+
+      // Subscribe to price updates for each open position
+      if (positionsData && positionsData.length > 0) {
+        const symbols = positionsData.map(p => p.symbol);
+        console.log('[ScannerPage] [Paper Trading] Subscribing to prices for:', symbols);
+
+        // Subscribe to each symbol
+        symbols.forEach(symbol => {
+          const unsubscribe = binanceWS.subscribe(symbol, (priceData) => {
+            setPrices(prev => ({
+              ...prev,
+              [symbol]: parseFloat(priceData.price)
+            }));
+          });
+          priceWsRefs.current.push(unsubscribe);
+        });
+      }
+
+      toast.success('Paper trading data refreshed');
+    } catch (error) {
+      console.error('[ScannerPage] [Paper Trading] Error loading data:', error);
+      toast.error('Failed to load paper trading data');
+    } finally {
+      setLoadingPositions(false);
+    }
+  };
+
+  // Auto-refresh positions and trades every 30 seconds
+  useEffect(() => {
+    if (!user?.id) {
+      return;
+    }
+
+    console.log('[ScannerPage] [Paper Trading] Starting auto-refresh (30s interval)');
+
+    // Set up interval to refresh every 30 seconds
+    const refreshInterval = setInterval(() => {
+      console.log('[ScannerPage] [Paper Trading] Auto-refreshing data...');
+      handleRefreshPaperTrading();
+    }, 30000); // 30 seconds
+
+    // Cleanup on unmount
+    return () => {
+      console.log('[ScannerPage] [Paper Trading] Stopping auto-refresh');
+      clearInterval(refreshInterval);
+    };
+  }, []); // Empty deps - set up once
 
   const handleScan = async (filters) => {
     console.log('[ScannerPage] Starting scan with filters:', filters);
@@ -178,21 +271,75 @@ export const ScannerPage = () => {
     setPaperTradingSymbol(null);
   };
 
+  const handleClosePosition = async (holdingId, symbol) => {
+    if (!user?.id) {
+      toast.error('Please log in to close positions');
+      return;
+    }
+
+    if (!confirm(`Close position for ${symbol}?`)) {
+      return;
+    }
+
+    console.log('[ScannerPage] [Paper Trading] Closing position:', holdingId, symbol);
+    toast.loading('Closing position...', { id: 'close-position' });
+
+    try {
+      await closePosition(holdingId, user.id);
+
+      toast.success(`Position ${symbol} closed successfully!`, { id: 'close-position' });
+
+      // Refresh data to show updated positions and new closed trade
+      await handleRefreshPaperTrading();
+    } catch (error) {
+      console.error('[ScannerPage] [Paper Trading] Error closing position:', error);
+      toast.error(`Failed to close position: ${error.message}`, { id: 'close-position' });
+    }
+  };
+
+  const handleUpdatePosition = async (positionId, updates) => {
+    if (!user?.id) {
+      toast.error('Please log in to update positions');
+      return;
+    }
+
+    console.log('[ScannerPage] [Paper Trading] Updating position:', positionId, updates);
+    toast.loading('Updating position...', { id: 'update-position' });
+
+    try {
+      const result = await updatePosition(positionId, updates);
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to update position');
+      }
+
+      toast.success('Position updated successfully!', { id: 'update-position' });
+
+      // Refresh data to show updated position
+      await handleRefreshPaperTrading();
+    } catch (error) {
+      console.error('[ScannerPage] [Paper Trading] Error updating position:', error);
+      toast.error(`Failed to update position: ${error.message}`, { id: 'update-position' });
+    }
+  };
+
   return (
-    <div className="scanner-page-v2">
-      {/* Error Display */}
-      {error && (
-        <div style={{
-          padding: '16px',
-          background: 'rgba(246, 70, 93, 0.1)',
-          border: '1px solid #F6465D',
-          borderRadius: '8px',
-          color: '#F6465D',
-          marginBottom: '16px'
-        }}>
-          <strong>Error:</strong> {error}
-        </div>
-      )}
+    <>
+      <CompactSidebar />
+      <div className="scanner-page-v2">
+        {/* Error Display */}
+        {error && (
+          <div style={{
+            padding: '16px',
+            background: 'rgba(246, 70, 93, 0.1)',
+            border: '1px solid #F6465D',
+            borderRadius: '8px',
+            color: '#F6465D',
+            marginBottom: '16px'
+          }}>
+            <strong>Error:</strong> {error}
+          </div>
+        )}
 
       <div className="scanner-layout">
         {/* LEFT - Control Panel */}
@@ -231,44 +378,36 @@ export const ScannerPage = () => {
               pattern={selectedPattern}
             />
 
-            {/* Paper Trading Widgets - TEMPORARILY DISABLED FOR DEBUGGING */}
+            {/* Paper Trading Widgets - MANUAL REFRESH VERSION */}
             <div className="paper-trading-widgets-section">
-              {/* 🔍 DEBUG: Test rendering */}
-              <div style={{
-                background: 'rgba(0, 255, 0, 0.2)',
-                border: '2px solid lime',
-                padding: '20px',
-                borderRadius: '8px',
-                color: 'white',
-                fontWeight: 'bold',
-                textAlign: 'center'
-              }}>
-                ✅ Scanner Right Column Renders OK
-                <br />
-                <small style={{ fontSize: '12px', opacity: 0.7 }}>
-                  (Widgets temporarily disabled for debugging)
-                </small>
-              </div>
-
-              {/* COMMENTED OUT TO TEST IF THESE ARE CAUSING THE CRASH */}
-              {/* <OpenPositionsWidget
+              <OpenPositionsWidget
+                positions={positions}
+                prices={prices}
+                loading={loadingPositions}
                 onOpenPaperTrading={handleOpenPaperTrading}
+                onRefresh={handleRefreshPaperTrading}
+                onClosePosition={handleClosePosition}
+                onUpdatePosition={handleUpdatePosition}
               />
 
-              <RecentTradesSection /> */}
+              <RecentTradesSection
+                trades={trades}
+              />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Paper Trading Side Panel - Renders outside scanner-layout for proper overlay */}
+      </div>
+
+      {/* Paper Trading Side Panel - Renders OUTSIDE scanner-page-v2 for proper z-index */}
       <PaperTradingPanel
         isOpen={showPaperTradingPanel}
         symbol={paperTradingSymbol}
         onClose={handleClosePaperTrading}
         prefilledSide="buy"
       />
-    </div>
+    </>
   );
 };
 

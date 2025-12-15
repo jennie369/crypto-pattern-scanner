@@ -1,4 +1,4 @@
-# 📊 GEM PLATFORM - PROJECT SUMMARY
+# 📊 Gemral - PROJECT SUMMARY
 ## Complete Context for Session Continuation
 
 **Version:** November 17, 2025  
@@ -9,8 +9,8 @@
 
 ## 🎯 PROJECT OVERVIEW
 
-### **What is GEM Platform?**
-GEM Platform là crypto trading ecosystem toàn diện kết hợp:
+### **What is Gemral?**
+Gemral là crypto trading ecosystem toàn diện kết hợp:
 - **Trading Tools:** GEM Frequency Method (68% win rate dựa trên 686 backtests)
 - **Spiritual Wellness:** Academy, Crystals shop, I Ching/Tarot chatbot
 - **Community:** Forum, DM, Events, Leaderboard
@@ -359,7 +359,7 @@ TOP NAVIGATION:
 - Direct messaging (TIER 1+)
 - Events calendar
 - Leaderboard
-- GEM Master Chatbot (I Ching, Tarot, Tử Vi)
+- Gemral Chatbot (I Ching, Tarot, Tử Vi)
 
 ### **4. Affiliate Program**
 - Unique tracking codes

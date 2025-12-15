@@ -18,7 +18,7 @@ export const FinalCTA = () => {
           </h2>
 
           <p className="cta-subheadline">
-            Tham gia cùng <strong>5,000+ traders</strong> đang sử dụng GEM Platform
+            Tham gia cùng <strong>5,000+ traders</strong> đang sử dụng Gemral
           </p>
 
           <div className="cta-benefits">

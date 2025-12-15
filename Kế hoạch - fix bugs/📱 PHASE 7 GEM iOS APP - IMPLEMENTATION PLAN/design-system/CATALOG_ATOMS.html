@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEM iOS - Atoms Components</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: fixed; top: 20px; right: 20px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #9C0612, #6B0F1A);
+            border: 1px solid #FFBD59; border-radius: 24px;
+            color: white; cursor: pointer; z-index: 1000;
+            font-weight: 600; font-size: 14px; font-family: inherit;
+            display: flex; align-items: center; gap: 8px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(156, 6, 18, 0.3);
+        }
+        .theme-toggle:hover { transform: translateY(-2px); }
+
+        /* DARK THEME - DEFAULT */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            background: linear-gradient(135deg, #05040B 0%, #0D1B2A 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 24px;
+            transition: background 0.3s ease;
+        }
+
+        /* ============================================ */
+        /* LIGHT THEME - SIMPLE & READABLE */
+        /* ============================================ */
+
+        /* Base - Pure White & Black */
+        body.light-theme { background: #FFFFFF !important; color: #000000 !important; }
+
+        /* All Text - BLACK & BOLD */
+        body.light-theme, body.light-theme * { color: #000000 !important; font-weight: 500 !important; }
+
+        /* Headings - Extra Bold */
+        body.light-theme h1, body.light-theme h2, body.light-theme h3, body.light-theme h4, body.light-theme h5, body.light-theme h6,
+        body.light-theme .title, body.light-theme .heading, body.light-theme strong, body.light-theme b {
+            color: #000000 !important; font-weight: 700 !important;
+        }
+
+        /* All Cards - White with Shadow */
+        body.light-theme .card, body.light-theme .component-card, body.light-theme div[class*="card"] {
+            background: #FFFFFF !important; border: 1px solid #CCCCCC !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important; color: #000000 !important;
+        }
+
+        /* Container Backgrounds */
+        body.light-theme .container, body.light-theme .screen-content { background: #F5F5F5 !important; }
+
+        /* Preview Areas */
+        body.light-theme .preview { background: #F5F5F5 !important; border: 1px solid #CCCCCC !important; }
+
+        /* Buttons */
+        body.light-theme .theme-toggle { background: #000000 !important; color: #FFFFFF !important; font-weight: 600 !important; }
+        body.light-theme .btn-primary { background: #9C0612 !important; color: #FFFFFF !important; font-weight: 600 !important; border: none !important; }
+        body.light-theme .btn-secondary { background: transparent !important; color: #000000 !important; border: 2px solid #000000 !important; font-weight: 600 !important; }
+        body.light-theme .nav-btn { background: #000000 !important; color: #FFFFFF !important; font-weight: 600 !important; }
+        body.light-theme .nav-btn.secondary { background: transparent !important; border: 2px solid #000000 !important; color: #000000 !important; }
+
+        /* Back Link */
+        body.light-theme .back-link { background: #F5F5F5 !important; border: 1px solid #CCCCCC !important; color: #0066CC !important; font-weight: 600 !important; }
+
+        /* Input Fields */
+        body.light-theme input, body.light-theme textarea {
+            background: #FFFFFF !important; color: #000000 !important; border: 2px solid #CCCCCC !important; font-weight: 500 !important;
+        }
+        body.light-theme input:focus, body.light-theme textarea:focus { border-color: #9C0612 !important; }
+        body.light-theme input::placeholder, body.light-theme textarea::placeholder { color: #666666 !important; font-weight: 400 !important; }
+
+        /* Badges */
+        body.light-theme .badge { background: #F5F5F5 !important; color: #000000 !important; border: 1px solid #CCCCCC !important; font-weight: 700 !important; }
+        body.light-theme .badge-success { background: #D4EDDA !important; color: #155724 !important; }
+        body.light-theme .badge-error { background: #F8D7DA !important; color: #721C24 !important; }
+        body.light-theme .badge-warning { background: #FFF3CD !important; color: #856404 !important; }
+
+        /* Toggle Switch */
+        body.light-theme .toggle.on { background: #059669 !important; }
+        body.light-theme .toggle { background: #CCCCCC !important; }
+
+        /* Code blocks - keep dark */
+        body.light-theme .code-block, body.light-theme pre, body.light-theme code {
+            background: #1E1E1E !important; color: #00FF00 !important; font-weight: 500 !important;
+        }
+
+        /* Specs - Light Gray */
+        body.light-theme .specs { background: #F5F5F5 !important; color: #000000 !important; font-weight: 500 !important; }
+
+        /* Tier Badges */
+        body.light-theme .tier-badge.tier-1 { background: #FFF3CD !important; color: #CC8800 !important; font-weight: 700 !important; }
+        body.light-theme .tier-badge.tier-2 { background: #D1ECF1 !important; color: #0C5460 !important; font-weight: 700 !important; }
+        body.light-theme .tier-badge.tier-3 { background: #F8D7DA !important; color: #9C0612 !important; font-weight: 700 !important; }
+
+        /* Secondary Text - Dark Gray */
+        body.light-theme .secondary-text, body.light-theme .subtitle, body.light-theme .description, body.light-theme small {
+            color: #333333 !important; font-weight: 500 !important;
+        }
+
+        /* Links */
+        body.light-theme a { color: #0066CC !important; font-weight: 600 !important; }
+
+        /* Dividers */
+        body.light-theme hr, body.light-theme .divider { border-color: #CCCCCC !important; background: #CCCCCC !important; }
+
+        /* Override ANY remaining light colors */
+        body.light-theme [style*="color: rgba"], body.light-theme [style*="color: rgb"] { color: #000000 !important; }
+        body.light-theme [style*="#112250"], body.light-theme [style*="rgba(15,16,48"], body.light-theme [style*="#05040B"] { background: #FFFFFF !important; }
+
+        .container { max-width: 1400px; margin: 0 auto; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #FFBD59;
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 24px;
+            padding: 8px 16px;
+            background: rgba(255,189,89,0.1);
+            border-radius: 20px;
+            border: 1px solid rgba(255,189,89,0.2);
+        }
+        .back-link:hover { background: rgba(255,189,89,0.2); }
+        .page-title {
+            font-size: 36px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFBD59, #9C0612);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .page-subtitle { font-size: 16px; color: rgba(255,255,255,0.6); margin-bottom: 32px; }
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 24px;
+        }
+        .component-card {
+            background: rgba(15,16,48,0.55);
+            backdrop-filter: blur(18px);
+            border: 1px solid rgba(255,189,89,0.15);
+            border-radius: 16px;
+            padding: 20px;
+        }
+        .component-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #FFBD59;
+            margin-bottom: 4px;
+        }
+        .component-desc {
+            font-size: 13px;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 16px;
+        }
+        .specs {
+            background: rgba(0,0,0,0.3);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-family: Monaco, monospace;
+            color: #00FF88;
+            margin-bottom: 16px;
+        }
+        .preview {
+            background: #05040B;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+        .preview.light-bg {
+            background: #F7F8FA;
+        }
+        .code-block {
+            background: #000;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 11px;
+            font-family: Monaco, monospace;
+            color: #00FF88;
+            overflow-x: auto;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .code-block .comment { color: #6B7280; }
+        .code-block .keyword { color: #FF79C6; }
+        .code-block .string { color: #F1FA8C; }
+        .nav-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 48px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .nav-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #9C0612, #6B0F1A);
+            border: 1px solid #FFBD59;
+            border-radius: 24px;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .nav-btn:hover { opacity: 0.9; }
+        .nav-btn.secondary {
+            background: transparent;
+            border-color: rgba(255,189,89,0.5);
+        }
+
+        /* Component Styles */
+        .btn-primary {
+            height: 48px;
+            padding: 0 24px;
+            background: linear-gradient(135deg, #9C0612, #6B0F1A);
+            border: 1px solid #FFBD59;
+            border-radius: 24px;
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-secondary {
+            height: 48px;
+            padding: 0 24px;
+            background: transparent;
+            border: 1px solid rgba(255,189,89,0.5);
+            border-radius: 24px;
+            color: #FFBD59;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-compact {
+            height: 36px;
+            padding: 0 16px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 18px;
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-icon {
+            width: 44px;
+            height: 44px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 22px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .input-field {
+            width: 100%;
+            height: 48px;
+            padding: 0 16px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #FFBD59;
+            background: rgba(255,255,255,0.08);
+        }
+        .input-field::placeholder { color: rgba(255,255,255,0.4); }
+        .search-input {
+            width: 100%;
+            height: 44px;
+            padding: 0 16px 0 44px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 22px;
+            color: white;
+            font-size: 14px;
+        }
+        .avatar-xs { width: 28px; height: 28px; background: linear-gradient(135deg, #9C0612, #6B0F1A); border: 2px solid #FFBD59; border-radius: 50%; }
+        .avatar-sm { width: 36px; height: 36px; background: linear-gradient(135deg, #9C0612, #6B0F1A); border: 2px solid #FFBD59; border-radius: 50%; }
+        .avatar-md { width: 44px; height: 44px; background: linear-gradient(135deg, #9C0612, #6B0F1A); border: 2px solid #FFBD59; border-radius: 50%; }
+        .avatar-lg { width: 56px; height: 56px; background: linear-gradient(135deg, #9C0612, #6B0F1A); border: 2px solid #FFBD59; border-radius: 50%; }
+        .badge { padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 700; display: inline-block; }
+        .badge-free { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.2); }
+        .badge-tier1 { background: rgba(255,189,89,0.2); color: #FFBD59; border: 1px solid #FFBD59; }
+        .badge-tier2 { background: rgba(33,150,243,0.2); color: #2196F3; border: 1px solid #2196F3; }
+        .badge-tier3 { background: rgba(156,6,18,0.3); color: #FF4444; border: 1px solid #9C0612; }
+        .badge-success { background: rgba(0,255,136,0.2); color: #00FF88; }
+        .badge-warning { background: rgba(255,184,0,0.2); color: #FFB800; }
+        .badge-error { background: rgba(255,68,68,0.2); color: #FF4444; }
+        .chip { padding: 6px 14px; background: rgba(255,255,255,0.1); border-radius: 20px; font-size: 13px; color: rgba(255,255,255,0.8); display: inline-block; cursor: pointer; }
+        .chip.active { background: #FFBD59; color: #112250; }
+        .divider { width: 100%; height: 1px; background: rgba(255,255,255,0.1); }
+        .checkbox { width: 24px; height: 24px; border: 2px solid rgba(255,255,255,0.3); border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .checkbox.checked { background: #FFBD59; border-color: #FFBD59; color: #000; }
+        .toggle { width: 52px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 16px; padding: 3px; cursor: pointer; position: relative; }
+        .toggle-thumb { width: 26px; height: 26px; background: white; border-radius: 13px; transition: transform 0.2s; }
+        .toggle.on { background: #00FF88; }
+        .toggle.on .toggle-thumb { transform: translateX(20px); }
+        .spinner { width: 32px; height: 32px; border: 3px solid rgba(255,189,89,0.2); border-top-color: #FFBD59; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="dark-theme">
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" onclick="toggleTheme()">
+        🌓 <span id="theme-label">Switch to Light</span>
+    </button>
+
+    <div class="container">
+        <a href="CATALOG_INDEX.html" class="back-link">← Back to Index</a>
+
+        <h1 class="page-title">⚛️ Atoms - Basic Elements</h1>
+        <p class="page-subtitle">15 fundamental building blocks. Cannot be broken down further.</p>
+
+        <div class="component-grid">
+            <!-- 1. Button Primary -->
+            <div class="component-card">
+                <h3 class="component-name">1. Button - Primary</h3>
+                <p class="component-desc">Main CTA. Gradient background with gold border.</p>
+                <div class="specs">Height: 48px | Padding: 24px | Radius: 24px | Font: 15px/600</div>
+                <div class="preview">
+                    <button class="btn-primary">Primary Action</button>
+                    <button class="btn-primary" style="opacity: 0.5;">Disabled</button>
+                </div>
+                <div class="code-block">
+<span class="comment">// React Native</span>
+&lt;TouchableOpacity style={{
+  height: 48, paddingHorizontal: 24,
+  background: '#9C0612', borderWidth: 1,
+  borderColor: '#FFBD59', borderRadius: 24
+}}&gt;
+  &lt;Text style={{color: '#FFF', fontSize: 15, fontWeight: '600'}}&gt;
+    Primary Action
+  &lt;/Text&gt;
+&lt;/TouchableOpacity&gt;
+                </div>
+            </div>
+
+            <!-- 2. Button Secondary -->
+            <div class="component-card">
+                <h3 class="component-name">2. Button - Secondary</h3>
+                <p class="component-desc">Supporting action. Transparent with border.</p>
+                <div class="specs">Height: 48px | Border: 1px | Radius: 24px</div>
+                <div class="preview">
+                    <button class="btn-secondary">Secondary</button>
+                    <button class="btn-compact">Compact</button>
+                </div>
+                <div class="code-block">
+&lt;TouchableOpacity style={{
+  height: 48, paddingHorizontal: 24,
+  backgroundColor: 'transparent',
+  borderWidth: 1, borderColor: 'rgba(255,189,89,0.5)',
+  borderRadius: 24
+}}&gt;
+  &lt;Text style={{color: '#FFBD59'}}&gt;Secondary&lt;/Text&gt;
+&lt;/TouchableOpacity&gt;
+                </div>
+            </div>
+
+            <!-- 3. Icon Button -->
+            <div class="component-card">
+                <h3 class="component-name">3. Icon Button</h3>
+                <p class="component-desc">Circular button for actions like like, share, bookmark.</p>
+                <div class="specs">Size: 44x44px | Radius: 22px | Icon: 20px</div>
+                <div class="preview">
+                    <button class="btn-icon">❤️</button>
+                    <button class="btn-icon">🔖</button>
+                    <button class="btn-icon">📤</button>
+                    <button class="btn-icon">⚙️</button>
+                </div>
+                <div class="code-block">
+<span class="comment">// Use Lucide icons, NOT emojis!</span>
+import { Heart } from 'lucide-react-native';
+
+&lt;TouchableOpacity style={{
+  width: 44, height: 44, borderRadius: 22,
+  backgroundColor: 'rgba(255,255,255,0.1)',
+  justifyContent: 'center', alignItems: 'center'
+}}&gt;
+  &lt;Heart size={20} color="#FFBD59" /&gt;
+&lt;/TouchableOpacity&gt;
+                </div>
+            </div>
+
+            <!-- 4. Input Text -->
+            <div class="component-card">
+                <h3 class="component-name">4. Input - Text Field</h3>
+                <p class="component-desc">Standard text input. Gold border on focus.</p>
+                <div class="specs">Height: 48px | Padding: 16px | Radius: 12px | Font: 14px</div>
+                <div class="preview" style="flex-direction: column;">
+                    <input type="text" class="input-field" placeholder="Enter text...">
+                    <input type="text" class="input-field" style="border-color: #FFBD59;" placeholder="Focused state">
+                </div>
+                <div class="code-block">
+&lt;TextInput
+  placeholder="Enter text..."
+  placeholderTextColor="rgba(255,255,255,0.4)"
+  style={{
+    height: 48, paddingHorizontal: 16,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderWidth: 1, borderRadius: 12,
+    color: '#FFF', fontSize: 14
+  }}
+/&gt;
+                </div>
+            </div>
+
+            <!-- 5. Search Input -->
+            <div class="component-card">
+                <h3 class="component-name">5. Input - Search</h3>
+                <p class="component-desc">Search bar with icon. Pill shape.</p>
+                <div class="specs">Height: 44px | Radius: 22px | Icon: 18px</div>
+                <div class="preview" style="flex-direction: column; position: relative;">
+                    <div style="position: relative; width: 100%;">
+                        <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 16px;">🔍</span>
+                        <input type="text" class="search-input" placeholder="Search...">
+                    </div>
+                </div>
+                <div class="code-block">
+&lt;View style={{position: 'relative'}}&gt;
+  &lt;Search size={18} style={{position: 'absolute', left: 14, top: 13}} /&gt;
+  &lt;TextInput
+    placeholder="Search..."
+    style={{
+      height: 44, paddingLeft: 44, paddingRight: 16,
+      borderRadius: 22, backgroundColor: 'rgba(255,255,255,0.05)'
+    }}
+  /&gt;
+&lt;/View&gt;
+                </div>
+            </div>
+
+            <!-- 6. Avatar -->
+            <div class="component-card">
+                <h3 class="component-name">6. Avatar</h3>
+                <p class="component-desc">User avatar. 4 sizes: XS, SM, MD, LG.</p>
+                <div class="specs">Sizes: 28 | 36 | 44 | 56px | Border: 2px gold</div>
+                <div class="preview">
+                    <div class="avatar-xs"></div>
+                    <div class="avatar-sm"></div>
+                    <div class="avatar-md"></div>
+                    <div class="avatar-lg"></div>
+                </div>
+                <div class="code-block">
+const AVATAR_SIZES = { xs: 28, sm: 36, md: 44, lg: 56 };
+
+&lt;View style={{
+  width: AVATAR_SIZES.md, height: AVATAR_SIZES.md,
+  borderRadius: AVATAR_SIZES.md / 2,
+  borderWidth: 2, borderColor: '#FFBD59',
+  backgroundColor: '#9C0612'
+}}&gt;
+  &lt;Image source={{uri: avatarUrl}} style={{flex: 1, borderRadius: 22}} /&gt;
+&lt;/View&gt;
+                </div>
+            </div>
+
+            <!-- 7. Badge Tier -->
+            <div class="component-card">
+                <h3 class="component-name">7. Badge - Tier</h3>
+                <p class="component-desc">User tier indicator. 4 variants.</p>
+                <div class="specs">Height: 24px | Padding: 4px 12px | Font: 11px/700</div>
+                <div class="preview">
+                    <span class="badge badge-free">FREE</span>
+                    <span class="badge badge-tier1">TIER 1</span>
+                    <span class="badge badge-tier2">TIER 2</span>
+                    <span class="badge badge-tier3">TIER 3</span>
+                </div>
+                <div class="code-block">
+const TIER_STYLES = {
+  FREE: {bg: 'rgba(255,255,255,0.1)', color: '#CCC'},
+  TIER1: {bg: 'rgba(255,189,89,0.2)', color: '#FFBD59'},
+  TIER2: {bg: 'rgba(33,150,243,0.2)', color: '#2196F3'},
+  TIER3: {bg: 'rgba(156,6,18,0.3)', color: '#FF4444'}
+};
+                </div>
+            </div>
+
+            <!-- 8. Badge Status -->
+            <div class="component-card">
+                <h3 class="component-name">8. Badge - Status</h3>
+                <p class="component-desc">Status indicators for trading, patterns.</p>
+                <div class="specs">Height: 24px | Radius: 12px | Font: 11px</div>
+                <div class="preview">
+                    <span class="badge badge-success">+15.5%</span>
+                    <span class="badge badge-error">-8.2%</span>
+                    <span class="badge badge-warning">PENDING</span>
+                    <span class="badge" style="background: rgba(59,130,246,0.2); color: #3B82F6;">NEW</span>
+                </div>
+                <div class="code-block">
+&lt;View style={{
+  paddingHorizontal: 12, paddingVertical: 4,
+  backgroundColor: 'rgba(0,255,136,0.2)',
+  borderRadius: 12
+}}&gt;
+  &lt;Text style={{color: '#00FF88', fontSize: 11, fontWeight: '700'}}&gt;
+    +15.5%
+  &lt;/Text&gt;
+&lt;/View&gt;
+                </div>
+            </div>
+
+            <!-- 9. Chip -->
+            <div class="component-card">
+                <h3 class="component-name">9. Chip / Tag</h3>
+                <p class="component-desc">Category tags and filters.</p>
+                <div class="specs">Height: 32px | Padding: 6px 14px | Radius: 20px</div>
+                <div class="preview">
+                    <span class="chip active">All</span>
+                    <span class="chip">Trading</span>
+                    <span class="chip">Patterns</span>
+                    <span class="chip">Spiritual</span>
+                </div>
+                <div class="code-block">
+&lt;TouchableOpacity style={{
+  paddingHorizontal: 14, paddingVertical: 6,
+  backgroundColor: active ? '#FFBD59' : 'rgba(255,255,255,0.1)',
+  borderRadius: 20
+}}&gt;
+  &lt;Text style={{
+    color: active ? '#112250' : 'rgba(255,255,255,0.8)',
+    fontSize: 13
+  }}&gt;All&lt;/Text&gt;
+&lt;/TouchableOpacity&gt;
+                </div>
+            </div>
+
+            <!-- 10. Divider -->
+            <div class="component-card">
+                <h3 class="component-name">10. Divider</h3>
+                <p class="component-desc">Horizontal separator line.</p>
+                <div class="specs">Height: 1px | Color: rgba(255,255,255,0.1)</div>
+                <div class="preview" style="flex-direction: column;">
+                    <span style="font-size: 14px; color: rgba(255,255,255,0.7);">Content above</span>
+                    <div class="divider" style="margin: 12px 0;"></div>
+                    <span style="font-size: 14px; color: rgba(255,255,255,0.7);">Content below</span>
+                </div>
+                <div class="code-block">
+&lt;View style={{
+  height: 1,
+  backgroundColor: 'rgba(255,255,255,0.1)',
+  marginVertical: 12
+}} /&gt;
+                </div>
+            </div>
+
+            <!-- 11. Checkbox -->
+            <div class="component-card">
+                <h3 class="component-name">11. Checkbox</h3>
+                <p class="component-desc">Selection control. Square with rounded corners.</p>
+                <div class="specs">Size: 24x24px | Border: 2px | Radius: 6px</div>
+                <div class="preview">
+                    <div class="checkbox"></div>
+                    <div class="checkbox checked">✓</div>
+                    <span style="color: rgba(255,255,255,0.6); font-size: 14px; margin-left: 8px;">Accept terms</span>
+                </div>
+                <div class="code-block">
+&lt;TouchableOpacity style={{
+  width: 24, height: 24, borderRadius: 6,
+  borderWidth: 2,
+  borderColor: checked ? '#FFBD59' : 'rgba(255,255,255,0.3)',
+  backgroundColor: checked ? '#FFBD59' : 'transparent',
+  justifyContent: 'center', alignItems: 'center'
+}}&gt;
+  {checked && &lt;Check size={14} color="#000" /&gt;}
+&lt;/TouchableOpacity&gt;
+                </div>
+            </div>
+
+            <!-- 12. Radio -->
+            <div class="component-card">
+                <h3 class="component-name">12. Radio Button</h3>
+                <p class="component-desc">Single selection from options.</p>
+                <div class="specs">Size: 24x24px | Inner: 12px | Radius: 50%</div>
+                <div class="preview">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 24px; height: 24px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%;"></div>
+                        <span style="color: rgba(255,255,255,0.7); font-size: 14px;">Option A</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 24px; height: 24px; border: 2px solid #FFBD59; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <div style="width: 12px; height: 12px; background: #FFBD59; border-radius: 50%;"></div>
+                        </div>
+                        <span style="color: white; font-size: 14px;">Option B</span>
+                    </div>
+                </div>
+                <div class="code-block">
+&lt;View style={{
+  width: 24, height: 24, borderRadius: 12,
+  borderWidth: 2, borderColor: selected ? '#FFBD59' : 'rgba(255,255,255,0.3)',
+  justifyContent: 'center', alignItems: 'center'
+}}&gt;
+  {selected && &lt;View style={{width: 12, height: 12, borderRadius: 6, backgroundColor: '#FFBD59'}} /&gt;}
+&lt;/View&gt;
+                </div>
+            </div>
+
+            <!-- 13. Toggle Switch -->
+            <div class="component-card">
+                <h3 class="component-name">13. Toggle Switch</h3>
+                <p class="component-desc">On/off control.</p>
+                <div class="specs">Size: 52x32px | Thumb: 26px | Radius: 16px</div>
+                <div class="preview">
+                    <div class="toggle">
+                        <div class="toggle-thumb"></div>
+                    </div>
+                    <div class="toggle on">
+                        <div class="toggle-thumb"></div>
+                    </div>
+                </div>
+                <div class="code-block">
+import { Switch } from 'react-native';
+
+&lt;Switch
+  value={isEnabled}
+  onValueChange={setIsEnabled}
+  trackColor={{false: 'rgba(255,255,255,0.2)', true: '#00FF88'}}
+  thumbColor="#FFFFFF"
+  ios_backgroundColor="rgba(255,255,255,0.2)"
+/&gt;
+                </div>
+            </div>
+
+            <!-- 14. Icon -->
+            <div class="component-card">
+                <h3 class="component-name">14. Icons (Lucide)</h3>
+                <p class="component-desc">Use Lucide React Native. NEVER emojis for UI!</p>
+                <div class="specs">Sizes: 16 | 20 | 24 | 32px | StrokeWidth: 2</div>
+                <div class="preview">
+                    <span style="font-size: 16px;">🏠</span>
+                    <span style="font-size: 20px;">🛒</span>
+                    <span style="font-size: 24px;">📊</span>
+                    <span style="font-size: 24px;">🤖</span>
+                    <span style="font-size: 24px;">🔔</span>
+                    <span style="font-size: 24px;">💰</span>
+                </div>
+                <div class="code-block">
+<span class="comment">// Install: npm install lucide-react-native</span>
+import { Home, ShoppingBag, TrendingUp, Bot, Bell, Wallet } from 'lucide-react-native';
+
+&lt;Home size={24} color="#FFBD59" strokeWidth={2} /&gt;
+&lt;TrendingUp size={24} color="#00FF88" strokeWidth={2} /&gt;
+
+<span class="comment">// NEVER use emojis for navigation!</span>
+                </div>
+            </div>
+
+            <!-- 15. Loading Spinner -->
+            <div class="component-card">
+                <h3 class="component-name">15. Loading Spinner</h3>
+                <p class="component-desc">Loading indicator with brand colors.</p>
+                <div class="specs">Size: 32px | Border: 3px | Animation: 1s linear</div>
+                <div class="preview">
+                    <div class="spinner"></div>
+                    <div class="spinner" style="width: 24px; height: 24px; border-width: 2px;"></div>
+                    <div class="spinner" style="width: 48px; height: 48px; border-width: 4px;"></div>
+                </div>
+                <div class="code-block">
+import { ActivityIndicator } from 'react-native';
+
+&lt;ActivityIndicator size="large" color="#FFBD59" /&gt;
+
+<span class="comment">// Or custom spinner with Reanimated:</span>
+&lt;Animated.View style={{
+  width: 32, height: 32, borderRadius: 16,
+  borderWidth: 3, borderColor: 'rgba(255,189,89,0.2)',
+  borderTopColor: '#FFBD59',
+  transform: [{rotate: spinAnimation}]
+}} /&gt;
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-footer">
+            <a href="CATALOG_INDEX.html" class="nav-btn secondary">← Back to Index</a>
+            <a href="CATALOG_MOLECULES.html" class="nav-btn">Next: Molecules →</a>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const label = document.getElementById('theme-label');
+
+            if (body.classList.contains('dark-theme')) {
+                body.classList.remove('dark-theme');
+                body.classList.add('light-theme');
+                label.textContent = 'Switch to Dark';
+                localStorage.setItem('gem-theme', 'light');
+            } else {
+                body.classList.remove('light-theme');
+                body.classList.add('dark-theme');
+                label.textContent = 'Switch to Light';
+                localStorage.setItem('gem-theme', 'dark');
+            }
+        }
+
+        // Load saved theme on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('gem-theme') || 'dark';
+            if (savedTheme === 'light') {
+                document.body.classList.remove('dark-theme');
+                document.body.classList.add('light-theme');
+                document.getElementById('theme-label').textContent = 'Switch to Dark';
+            }
+        });
+    </script>
+</body>
+</html>

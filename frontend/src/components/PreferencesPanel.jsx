@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, X, Moon, Sun, Globe, Type, Volume2, Bell, MessageSquare, Save, RotateCcw, Download, Upload } from 'lucide-react';
+import { Settings, X, Moon, Sun, Globe, Type, Volume2, Bell, MessageSquare, Save, RotateCcw } from 'lucide-react';
 import { preferencesService } from '../services/preferencesService';
 import { themeService } from '../services/themeService';
 import { i18nService } from '../services/i18nService';
@@ -35,23 +35,6 @@ export default function PreferencesPanel({ onClose }) {
     if (preferencesService.reset()) {
       setPrefs(preferencesService.getAll());
       setHasChanges(false);
-    }
-  };
-
-  const handleExport = () => {
-    preferencesService.export();
-  };
-
-  const handleImport = async (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const success = await preferencesService.import(file);
-      if (success) {
-        setPrefs(preferencesService.getAll());
-        alert('✅ Settings imported successfully!');
-      } else {
-        alert('❌ Failed to import settings');
-      }
     }
   };
 
@@ -228,23 +211,6 @@ export default function PreferencesPanel({ onClose }) {
 
         {/* Actions */}
         <div className="preferences-actions">
-          <div className="pref-actions-left">
-            <button onClick={handleExport} className="pref-btn-secondary">
-              <Download size={16} />
-              Export
-            </button>
-            <label className="pref-btn-secondary" style={{ cursor: 'pointer' }}>
-              <Upload size={16} />
-              Import
-              <input
-                type="file"
-                accept=".json"
-                onChange={handleImport}
-                style={{ display: 'none' }}
-              />
-            </label>
-          </div>
-
           <div className="pref-actions-right">
             <button onClick={handleReset} className="pref-btn-danger">
               <RotateCcw size={16} />

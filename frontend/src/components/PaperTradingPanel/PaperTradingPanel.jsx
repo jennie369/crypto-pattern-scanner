@@ -6,8 +6,9 @@
  */
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { X, GripVertical, TrendingUp, TrendingDown, Zap, Target, Shield } from 'lucide-react';
+import { X, GripVertical, TrendingUp, TrendingDown, Zap, Target, Shield, Info, AlertTriangle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import CustomSelect from '../CustomSelect/CustomSelect';
 import { useAuth } from '../../contexts/AuthContext';
 import binanceWS from '../../services/binanceWebSocket';
 import {
@@ -71,6 +72,50 @@ const PaperTradingPanel = ({ isOpen, onClose, symbol, prefilledSide = null }) =>
   // Constants
   const MIN_WIDTH = 320;
   const MAX_WIDTH = 600;
+
+  // 🛡️ Helper: Render price safely (bypass browser extension detection)
+  // Splits price into individual characters to prevent privacy extensions from hiding it
+  // Uses INLINE STYLES + RENDERING LAYER FORCING to bypass CSS conflicts
+  const renderPriceSafely = (price) => {
+    if (!price) return null;
+
+    // Format with proper decimal places
+    const formatted = typeof price === 'number'
+      ? price.toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        })
+      : String(price);
+
+    // Split into individual characters with FORCED inline styles + rendering optimizations
+    return formatted.split('').map((char, index) => (
+      <span
+        key={index}
+        style={{
+          display: 'inline-block',
+          fontSize: '32px',
+          fontWeight: '800',
+          color: '#06B6D4',
+          lineHeight: '1.2',
+          fontFamily: 'inherit',
+          opacity: 1,
+          visibility: 'visible',
+          width: 'auto',
+          height: 'auto',
+          minWidth: 'fit-content',
+          minHeight: 'auto',
+          transform: 'translateZ(0)',
+          WebkitFontSmoothing: 'antialiased',
+          backfaceVisibility: 'visible',
+          pointerEvents: 'auto',
+          position: 'relative',
+          zIndex: 999999
+        }}
+      >
+        {char}
+      </span>
+    ));
+  };
 
   // Normalize symbol (BTC -> BTCUSDT, BTCUSDT/USDT -> BTCUSDT, etc.)
   const normalizeSymbol = (sym) => {
@@ -173,19 +218,39 @@ const PaperTradingPanel = ({ isOpen, onClose, symbol, prefilledSide = null }) =>
         console.log('⚠️ [Paper Trading Panel] WebSocket timeout - fetching from REST API...');
 
         try {
+          // Use Futures API (fapi.binance.com) to avoid CORS issues
+          // Futures API has better CORS support than spot API (api.binance.com)
           const response = await fetch(
-            `https://api.binance.com/api/v3/ticker/price?symbol=${normalizedSymbol}`
+            `https://fapi.binance.com/fapi/v1/ticker/price?symbol=${normalizedSymbol}`
           );
 
           if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            // Fallback to spot API if futures fails (for non-futures symbols)
+            console.log('⚠️ [Paper Trading Panel] Futures API failed, trying spot API...');
+            const spotResponse = await fetch(
+              `https://api.binance.com/api/v3/ticker/price?symbol=${normalizedSymbol}`
+            );
+            if (!spotResponse.ok) {
+              throw new Error(`HTTP ${spotResponse.status}: ${spotResponse.statusText}`);
+            }
+            const spotData = await spotResponse.json();
+            const spotPrice = parseFloat(spotData.price);
+            if (spotPrice && spotPrice > 0) {
+              console.log('✅ [Paper Trading Panel] Price fetched from Spot API:', spotPrice);
+              setCurrentPrice(spotPrice);
+              setPriceLoading(false);
+              priceReceived = true;
+            } else {
+              throw new Error('Invalid price data from spot API');
+            }
+            return;
           }
 
           const data = await response.json();
           const price = parseFloat(data.price);
 
           if (price && price > 0) {
-            console.log('✅ [Paper Trading Panel] Price fetched from REST API:', price);
+            console.log('✅ [Paper Trading Panel] Price fetched from Futures REST API:', price);
             setCurrentPrice(price);
             setPriceLoading(false);
             priceReceived = true;
@@ -689,23 +754,92 @@ const PaperTradingPanel = ({ isOpen, onClose, symbol, prefilledSide = null }) =>
           {/* Scrollable Content */}
           <div className="panel-body">
             {/* Real-time Price Display */}
-            <div className="price-card">
-              <div className="absolute -top-20 -right-20 w-40 h-40 bg-cyan-500/20 rounded-full blur-3xl" />
-              <div className="relative">
-                <div className="price-label">Current Price</div>
-                <div className="price-value">
-                  {priceLoading ? (
-                    <span className="loading-text">Loading...</span>
+            <div className="price-card" style={{
+              opacity: 1,
+              visibility: 'visible',
+              overflow: 'visible'
+            }}>
+              <div className="price-label" style={{
+                fontSize: '12px',
+                color: 'rgba(255, 255, 255, 0.6)',
+                marginBottom: '4px',
+                opacity: 1,
+                visibility: 'visible',
+                display: 'block'
+              }}>
+                Current Price
+              </div>
+              <div className="price-value" style={{
+                opacity: 1,
+                visibility: 'visible',
+                display: 'block',
+                marginBottom: '12px',
+                position: 'relative',
+                zIndex: 9999,
+                transform: 'translateZ(0)',
+                minHeight: '40px',
+                width: '100%',
+                overflow: 'visible'
+              }}>
+                  {!normalizedSymbol ? (
+                    <span style={{ color: '#888', fontSize: '14px', opacity: 1, visibility: 'visible' }}>
+                      Please select a symbol
+                    </span>
+                  ) : priceLoading ? (
+                    <span style={{ color: '#888', fontSize: '14px', opacity: 1, visibility: 'visible' }}>
+                      Loading...
+                    </span>
+                  ) : currentPrice ? (
+                    <div
+                      className="price-amount"
+                      style={{
+                        display: 'block',
+                        fontSize: '32px',
+                        fontWeight: '800',
+                        color: '#06B6D4',
+                        lineHeight: '1.2',
+                        marginBottom: '4px',
+                        opacity: 1,
+                        visibility: 'visible',
+                        position: 'relative',
+                        zIndex: 999999,
+                        transform: 'translateZ(0)',
+                        WebkitFontSmoothing: 'antialiased',
+                        width: '100%',
+                        minHeight: '38px'
+                      }}
+                    >
+                      <span style={{
+                        display: 'inline-block',
+                        fontSize: '32px',
+                        fontWeight: '800',
+                        color: '#06B6D4',
+                        opacity: 1,
+                        visibility: 'visible',
+                        position: 'relative',
+                        zIndex: 999999,
+                        transform: 'translateZ(0)',
+                        WebkitFontSmoothing: 'antialiased',
+                        backfaceVisibility: 'visible'
+                      }}>$</span>
+                      {renderPriceSafely(currentPrice)}
+                    </div>
                   ) : (
-                    <span className="price-amount">
-                      ${currentPrice?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 8 })}
+                    <span style={{ color: '#EF4444', fontSize: '14px', opacity: 1, visibility: 'visible' }}>
+                      Price unavailable
                     </span>
                   )}
-                </div>
-                <div className="live-indicator">
-                  <div className="live-dot" />
-                  <span className="live-text">LIVE</span>
-                </div>
+              </div>
+              <div className="live-indicator" style={{
+                fontSize: '11px',
+                color: '#10b981',
+                marginTop: '4px',
+                opacity: 1,
+                visibility: 'visible',
+                display: 'flex'
+              }}>
+                <div className="live-dot" style={{ opacity: 1, visibility: 'visible' }} />
+                <span className="live-text" style={{ opacity: 1, visibility: 'visible' }}>LIVE</span>
               </div>
             </div>
 
@@ -740,7 +874,7 @@ const PaperTradingPanel = ({ isOpen, onClose, symbol, prefilledSide = null }) =>
                 onClick={() => setSide('buy')}
               >
                 <div className="button-glow" />
-                <TrendingUp size={24} className="button-icon" />
+                <TrendingUp size={20} className="button-icon" style={{ color: '#FFBD59' }} />
                 <span className="button-text">BUY</span>
               </button>
               <button
@@ -748,7 +882,7 @@ const PaperTradingPanel = ({ isOpen, onClose, symbol, prefilledSide = null }) =>
                 onClick={() => setSide('sell')}
               >
                 <div className="button-glow" />
-                <TrendingDown size={24} className="button-icon" />
+                <TrendingDown size={20} className="button-icon" style={{ color: '#FFBD59' }} />
                 <span className="button-text">SELL</span>
               </button>
             </div>
@@ -916,7 +1050,7 @@ const PaperTradingPanel = ({ isOpen, onClose, symbol, prefilledSide = null }) =>
                   </div>
 
                   <div className="input-hint">
-                    <span className="hint-icon">ℹ️</span>
+                    <Info size={14} className="hint-icon" style={{ color: '#FFBD59', flexShrink: 0 }} />
                     <span className="hint-text">
                       Order triggers when price {side === 'buy' ? 'reaches or exceeds' : 'drops to or below'} this value
                     </span>
@@ -1194,14 +1328,14 @@ const PaperTradingPanel = ({ isOpen, onClose, symbol, prefilledSide = null }) =>
                       }}
                       type="button"
                     >
-                      ℹ️
+                      <Info size={14} style={{ color: '#FFBD59' }} />
                     </button>
                   </label>
                 </div>
 
                 {reduceOnly && (
                   <div className="reduce-only-hint">
-                    <span className="hint-icon">⚠️</span>
+                    <AlertTriangle size={14} className="hint-icon" style={{ color: '#FFBD59', flexShrink: 0 }} />
                     <span className="hint-text">
                       This order will be rejected if it would increase your position size
                     </span>
@@ -1224,19 +1358,20 @@ const PaperTradingPanel = ({ isOpen, onClose, symbol, prefilledSide = null }) =>
                     }}
                     type="button"
                   >
-                    ℹ️
+                    <Info size={14} style={{ color: '#FFBD59' }} />
                   </button>
                 </label>
 
-                <select
+                <CustomSelect
                   value={timeInForce}
-                  onChange={(e) => setTimeInForce(e.target.value)}
+                  onChange={setTimeInForce}
+                  options={[
+                    { value: 'GTC', label: 'GTC (Good Till Cancel)' },
+                    { value: 'IOC', label: 'IOC (Immediate or Cancel)' },
+                    { value: 'FOK', label: 'FOK (Fill or Kill)' }
+                  ]}
                   className="tif-select"
-                >
-                  <option value="GTC">GTC (Good Till Cancel)</option>
-                  <option value="IOC">IOC (Immediate or Cancel)</option>
-                  <option value="FOK">FOK (Fill or Kill)</option>
-                </select>
+                />
 
                 <div className="tif-description">
                   {timeInForce === 'GTC' && (
@@ -1260,6 +1395,7 @@ const PaperTradingPanel = ({ isOpen, onClose, symbol, prefilledSide = null }) =>
                 className={`execute-button ${side}`}
                 onClick={handleTrade}
                 disabled={loading || !quantity || !currentPrice || priceLoading}
+                style={{ marginTop: '120px' }}
               >
                 {loading ? (
                   <div className="btn-loading">
@@ -1273,7 +1409,11 @@ const PaperTradingPanel = ({ isOpen, onClose, symbol, prefilledSide = null }) =>
                   </div>
                 ) : (
                   <>
-                    <span className="btn-icon">{side === 'buy' ? '📈' : '📉'}</span>
+                    {side === 'buy' ? (
+                      <TrendingUp size={16} style={{ color: '#FFBD59' }} />
+                    ) : (
+                      <TrendingDown size={16} style={{ color: '#FFBD59' }} />
+                    )}
                     <span>{side.toUpperCase()} {normalizedSymbol || symbol || ''}</span>
                   </>
                 )}

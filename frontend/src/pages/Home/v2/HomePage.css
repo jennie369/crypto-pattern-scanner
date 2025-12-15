@@ -49,3 +49,27 @@
     padding: 0 var(--space-md, 24px);
   }
 }
+
+/* ============================================
+   MOBILE FIXES - max-width: 767px
+   Desktop styles preserved above - DO NOT TOUCH!
+   ============================================ */
+@media (max-width: 767px) {
+  .home-page-v2 {
+    overflow-x: hidden;
+  }
+
+  .home-page-v2 > section {
+    padding: 40px 0;
+  }
+
+  .home-page-v2 > section:first-child {
+    padding-top: calc(56px + 24px); /* Mobile header + padding */
+  }
+
+  .container {
+    padding: 0 16px;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+}

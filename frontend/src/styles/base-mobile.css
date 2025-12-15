@@ -1,0 +1,581 @@
+/* ============================================
+   📱 GEM PLATFORM - MOBILE-FIRST BASE CSS
+   Version: 2.0
+   Purpose: Fix ALL responsive issues globally
+   ============================================ */
+
+/* 1. RESET & FOUNDATION */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  /* Prevent horizontal scroll */
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+
+  /* Smooth scroll */
+  scroll-behavior: smooth;
+
+  /* Touch optimization */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+body {
+  /* Prevent horizontal scroll - CRITICAL */
+  overflow-x: hidden !important;
+  width: 100%;
+  max-width: 100vw;
+  min-height: 100vh;
+
+  /* Text rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Giữ background glow hiện tại */
+  position: relative;
+}
+
+/* 2. APP CONTAINERS */
+.app,
+#root {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Global page containers */
+.page-container,
+.main-content,
+.content-wrapper,
+.page-wrapper {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  padding: 0 16px;
+}
+
+@media (min-width: 768px) {
+  .page-container,
+  .main-content,
+  .content-wrapper,
+  .page-wrapper {
+    padding: 0 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-container,
+  .main-content,
+  .content-wrapper,
+  .page-wrapper {
+    padding: 0 32px;
+    max-width: 1920px;
+    margin: 0 auto;
+  }
+}
+
+/* 3. GRID SYSTEM - RESPONSIVE */
+.grid-container {
+  display: grid;
+  gap: 16px;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Mobile: 1 column */
+.grid-container {
+  grid-template-columns: 1fr;
+}
+
+/* Tablet: 2 columns */
+@media (min-width: 768px) {
+  .grid-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+}
+
+/* Desktop: 3 columns */
+@media (min-width: 1024px) {
+  .grid-container {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+}
+
+/* 4. FLEX SYSTEM - RESPONSIVE */
+.flex-container {
+  display: flex;
+  flex-wrap: wrap; /* CRITICAL: Always wrap on mobile */
+  gap: 16px;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Stack vertically on mobile */
+@media (max-width: 767px) {
+  .flex-container {
+    flex-direction: column;
+  }
+
+  .flex-container > * {
+    width: 100%;
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+}
+
+/* 5. TEXT - READABLE SIZES */
+body {
+  font-size: 16px; /* Base mobile size - prevent iOS zoom */
+  line-height: 1.6;
+}
+
+h1 { font-size: clamp(24px, 5vw, 40px); }
+h2 { font-size: clamp(20px, 4vw, 32px); }
+h3 { font-size: clamp(18px, 3.5vw, 24px); }
+h4 { font-size: clamp(16px, 3vw, 20px); }
+h5 { font-size: clamp(14px, 2.5vw, 18px); }
+h6 { font-size: clamp(14px, 2vw, 16px); }
+
+p, span, div {
+  /* Prevent text overflow */
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
+}
+
+/* 6. IMAGES & MEDIA */
+img,
+video,
+canvas {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* SVG icons inside buttons should maintain their explicit size */
+button svg,
+a svg,
+.btn svg,
+.btn-action svg {
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* 7. TABLES - CARD VIEW ON MOBILE */
+table {
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+  overflow-x: auto;
+  display: block;
+}
+
+@media (max-width: 767px) {
+  /* Hide table headers on mobile */
+  table thead {
+    display: none;
+  }
+
+  /* Stack table rows as cards */
+  table,
+  table tbody,
+  table tr,
+  table td {
+    display: block;
+    width: 100%;
+  }
+
+  table tr {
+    margin-bottom: 16px;
+    padding: 16px;
+    background: var(--glass-bg, rgba(30, 42, 94, 0.4));
+    border-radius: var(--radius-md, 14px);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.12));
+  }
+
+  table td {
+    padding: 8px 0;
+    border: none;
+  }
+
+  /* Add labels before each cell */
+  table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    display: inline-block;
+    margin-right: 8px;
+    color: var(--brand-gold, #FFBD59);
+  }
+}
+
+/* 8. FORMS - TOUCH FRIENDLY */
+input,
+select,
+textarea,
+button {
+  /* Touch target size - WCAG AA */
+  min-height: 48px;
+  font-size: 16px; /* Prevent iOS zoom on focus */
+  padding: 12px 16px;
+  width: 100%;
+  max-width: 100%;
+  border-radius: var(--radius-sm, 8px);
+}
+
+button {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Desktop: Auto width for inputs */
+@media (min-width: 768px) {
+  input,
+  select,
+  textarea {
+    width: auto;
+    min-width: 200px;
+  }
+
+  button {
+    width: auto;
+    min-width: 120px;
+  }
+}
+
+/* 9. MODALS - FULL SCREEN ON MOBILE */
+.modal,
+.dialog,
+.drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  overflow: auto;
+}
+
+.modal-overlay,
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+}
+
+@media (max-width: 767px) {
+  .modal-content,
+  .dialog-content {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .modal-content,
+  .dialog-content {
+    width: 90vw;
+    max-width: 600px;
+    height: auto;
+    max-height: 90vh;
+    margin: 5vh auto;
+    border-radius: var(--radius-lg, 20px);
+  }
+}
+
+/* 10. SCROLLBARS */
+/* Hide scrollbar on mobile, show on desktop */
+@media (max-width: 767px) {
+  ::-webkit-scrollbar {
+    display: none;
+  }
+
+  * {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--bg-base-dark, #0A1628);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg,
+      var(--brand-burgundy, #9C0612),
+      var(--brand-burgundy-dark, #6B0F1A)
+    );
+    border-radius: 10px;
+    border: 2px solid var(--bg-base-dark, #0A1628);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #C51B1B, var(--brand-burgundy, #9C0612));
+  }
+}
+
+/* 11. UTILITIES */
+.hide-mobile {
+  display: none !important;
+}
+
+@media (min-width: 768px) {
+  .hide-mobile {
+    display: block !important;
+  }
+
+  .hide-desktop {
+    display: none !important;
+  }
+}
+
+.show-mobile {
+  display: block !important;
+}
+
+@media (min-width: 768px) {
+  .show-mobile {
+    display: none !important;
+  }
+}
+
+/* Text alignment */
+.text-center-mobile {
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .text-center-mobile {
+    text-align: left;
+  }
+}
+
+/* Spacing utilities */
+.stack-mobile > * + * {
+  margin-top: 16px;
+}
+
+@media (min-width: 768px) {
+  .stack-mobile > * + * {
+    margin-top: 0;
+  }
+}
+
+/* 12. GEM PLATFORM SPECIFIC FIXES */
+
+/* Scanner, Dashboard, Community 3-column layouts */
+.scanner-layout,
+.dashboard-3col,
+.community-3col,
+.account-3col {
+  display: grid;
+  gap: 16px;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Mobile: Stack vertically */
+@media (max-width: 767px) {
+  .scanner-layout,
+  .dashboard-3col,
+  .community-3col,
+  .account-3col {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tablet: 2 columns */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .scanner-layout,
+  .dashboard-3col,
+  .community-3col,
+  .account-3col {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Desktop: 3 columns */
+@media (min-width: 1024px) {
+  .scanner-layout {
+    grid-template-columns: 280px 1fr 380px;
+  }
+
+  .dashboard-3col,
+  .community-3col,
+  .account-3col {
+    grid-template-columns: 300px 1fr 320px;
+  }
+}
+
+/* Chart container fix - CRITICAL */
+.chart-container,
+.trading-chart,
+.chart-wrapper {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden;
+}
+
+/* Mobile: Smaller height */
+@media (max-width: 767px) {
+  .chart-container,
+  .trading-chart,
+  .chart-wrapper {
+    height: 320px !important;
+    min-height: 320px;
+  }
+}
+
+/* Tablet: Medium height */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .chart-container,
+  .trading-chart,
+  .chart-wrapper {
+    height: 450px !important;
+  }
+}
+
+/* Desktop: Full height */
+@media (min-width: 1024px) {
+  .chart-container,
+  .trading-chart,
+  .chart-wrapper {
+    height: 600px !important;
+  }
+}
+
+/* Control panels, button groups */
+.control-panel,
+.button-group,
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Pattern cards, result cards */
+.pattern-card,
+.result-card,
+.info-card {
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (min-width: 768px) {
+  .pattern-card,
+  .result-card,
+  .info-card {
+    max-width: 350px;
+  }
+}
+
+/* Dropdowns, selects */
+select,
+.dropdown,
+.select-wrapper {
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (min-width: 768px) {
+  select,
+  .dropdown,
+  .select-wrapper {
+    width: auto;
+    min-width: 200px;
+    max-width: 400px;
+  }
+}
+
+/* 13. PREVENT COMMON MOBILE ISSUES */
+
+/* No fixed widths on mobile - CRITICAL */
+@media (max-width: 767px) {
+  * {
+    min-width: 0 !important; /* Allow shrinking */
+  }
+
+  /* Except for touch targets */
+  button,
+  input[type="button"],
+  input[type="submit"],
+  a.button {
+    min-width: 120px !important;
+  }
+}
+
+/* No horizontal overflow anywhere */
+body > *,
+#root > *,
+.app > *,
+main > *,
+section > *,
+div > * {
+  max-width: 100vw;
+}
+
+/* Safe area for notched devices (iPhone X+) */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+  }
+}
+
+/* 14. ACCESSIBILITY */
+
+/* Focus visible for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid var(--brand-gold, #FFBD59);
+  outline-offset: 2px;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* 15. PERFORMANCE */
+
+/* GPU acceleration for animations */
+.animated,
+.transition {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+/* Disable GPU acceleration after animation */
+.animated:not(:hover):not(:focus),
+.transition:not(:hover):not(:focus) {
+  will-change: auto;
+}
+
+/* END OF BASE MOBILE CSS */

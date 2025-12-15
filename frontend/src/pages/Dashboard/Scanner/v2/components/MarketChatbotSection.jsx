@@ -105,7 +105,7 @@ export const MarketChatbotSection = ({ onSelectCoin, selectedCoin }) => {
           className={activeTab === 'chatbot' ? 'active' : ''}
           onClick={() => setActiveTab('chatbot')}
         >
-          <MessageCircle size={16} /> Gem Master
+          <MessageCircle size={16} /> Gemral
         </button>
       </div>
 

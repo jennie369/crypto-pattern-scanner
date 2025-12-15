@@ -1,0 +1,110 @@
+/* ===================================
+   💥 ERROR BOUNDARY - GEM THEME
+   =================================== */
+
+.error-boundary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 40px 20px;
+
+  /* GEM Dark Background */
+  background: rgba(17, 34, 80, 0.4);
+  border-radius: 12px;
+}
+
+.error-boundary-content {
+  max-width: 500px;
+  text-align: center;
+}
+
+.error-icon {
+  font-size: 64px;
+  display: block;
+  margin-bottom: 20px;
+}
+
+.error-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #F6465D;
+  margin: 0 0 12px 0;
+}
+
+.error-description {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+}
+
+.error-details {
+  text-align: left;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 12px;
+  margin: 20px 0;
+  cursor: pointer;
+}
+
+.error-details summary {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.error-details pre {
+  font-size: 11px;
+  color: #F6465D;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 8px 0 0 0;
+  font-family: 'Courier New', monospace;
+}
+
+.error-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btn-retry,
+.btn-reload {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.btn-retry {
+  background: rgba(14, 203, 129, 0.2);
+  border: 1px solid rgba(14, 203, 129, 0.4);
+  color: #0ECB81;
+}
+
+.btn-retry:hover {
+  background: rgba(14, 203, 129, 0.3);
+  border-color: #0ECB81;
+}
+
+.btn-reload {
+  background: rgba(0, 217, 255, 0.2);
+  border: 1px solid rgba(0, 217, 255, 0.4);
+  color: #00D9FF;
+}
+
+.btn-reload:hover {
+  background: rgba(0, 217, 255, 0.3);
+  border-color: #00D9FF;
+}
+
+.btn-retry:active,
+.btn-reload:active {
+  transform: scale(0.98);
+}

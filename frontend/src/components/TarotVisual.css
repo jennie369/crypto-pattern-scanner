@@ -1,6 +1,7 @@
+/* ✅ FIXED: Compact spacing + max 200px width (Issues #3 & #4) */
 .tarot-visual {
-  margin: 16px 0;
-  padding: 20px;
+  margin: 8px 0; /* ISSUE #3: Reduced from 16px → 8px */
+  padding: 12px; /* ISSUE #3: Reduced from 20px → 12px */
   background: rgba(139, 92, 246, 0.1);
   backdrop-filter: blur(10px);
   border-radius: 12px;
@@ -12,7 +13,9 @@
   position: relative;
   width: 150px;
   height: 250px;
-  margin: 0 auto 16px;
+  max-width: 200px; /* ISSUE #4: Limit max width to 200px */
+  max-height: 333px; /* ISSUE #4: Maintain aspect ratio (200px * 1.667) */
+  margin: 0 auto 12px; /* ISSUE #3: Reduced from 16px → 12px */
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);

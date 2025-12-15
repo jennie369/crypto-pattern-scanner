@@ -22,3 +22,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Vercel
+.vercel
+.vercel.json
+*.vercel.app
+
+# Environment variables
+.env*.local
+.env.production

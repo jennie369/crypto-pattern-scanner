@@ -1,8 +1,26 @@
 .open-positions-widget {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  /* GEM Dark Background with glassmorphism */
+  background: rgba(17, 34, 80, 0.4);
+  backdrop-filter: blur(8px);
+
+  /* Gold Border - GEM Theme */
+  border: 1px solid rgba(255, 189, 89, 0.2);
   border-radius: 12px;
   padding: 16px;
+
+  /* Overflow handling */
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  transition: all 0.2s ease;
+}
+
+.open-positions-widget:hover {
+  border-color: rgba(255, 189, 89, 0.4);
+  box-shadow: 0 0 12px rgba(255, 189, 89, 0.15);
 }
 
 .widget-header {
@@ -15,26 +33,144 @@
 }
 
 .widget-header h3 {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 11px !important; /* Smaller text */
+  font-weight: 600;
   color: #fff;
   margin: 0;
+}
+
+.header-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.sort-dropdown {
+  /* GEM Dark Background with glassmorphism */
+  background: rgba(17, 34, 80, 0.6) !important;
+  backdrop-filter: blur(8px);
+
+  /* Gold Border - GEM Theme */
+  border: 1px solid rgba(255, 189, 89, 0.3) !important;
+  border-radius: 6px;
+
+  /* Text Styling */
+  color: white !important;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 32px 6px 12px;
+
+  /* Remove default arrow */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  /* Custom gold arrow */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23FFBD59' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+
+  /* Transition */
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sort-dropdown:hover {
+  background: rgba(17, 34, 80, 0.8) !important;
+  border-color: #FFBD59 !important;
+  box-shadow: 0 0 12px rgba(255, 189, 89, 0.2);
+}
+
+.sort-dropdown:focus {
+  outline: none;
+  border-color: #FFBD59 !important;
+  box-shadow: 0 0 16px rgba(255, 189, 89, 0.3);
+}
+
+.sort-dropdown option {
+  background: rgba(17, 34, 80, 0.95) !important;
+  background-color: rgba(17, 34, 80, 0.95) !important;
+  color: white !important;
+  padding: 8px 12px;
+}
+
+/* Force dropdown popup menu styling */
+.sort-dropdown::-ms-expand {
+  display: none;
+}
+
+/* Firefox specific */
+@-moz-document url-prefix() {
+  .sort-dropdown option {
+    background-color: #112250 !important;
+    color: white !important;
+  }
+}
+
+/* Webkit specific (Chrome, Safari, Edge) */
+@supports (-webkit-appearance: none) {
+  .sort-dropdown option {
+    background-color: #112250 !important;
+    color: white !important;
+  }
+
+  .sort-dropdown option:checked,
+  .sort-dropdown option:hover {
+    background: rgba(255, 189, 89, 0.2) !important;
+    background-color: rgba(255, 189, 89, 0.2) !important;
+  }
 }
 
 .btn-refresh {
   width: 32px;
   height: 32px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
+  min-width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(17, 34, 80, 0.5);
+  border: 1px solid rgba(255, 189, 89, 0.2);
+  border-radius: 6px; /* Rounded corners */
   cursor: pointer;
-  font-size: 14px;
+  color: #FFBD59;
   transition: all 0.2s;
+  padding: 0;
+}
+
+.btn-refresh svg {
+  color: #FFBD59 !important;
+  stroke: #FFBD59 !important;
+  fill: none !important;
 }
 
 .btn-refresh:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: rotate(90deg);
+  background: rgba(17, 34, 80, 0.7);
+  border-color: rgba(255, 189, 89, 0.4);
+}
+
+.btn-refresh:hover svg {
+  color: #FFBD59 !important;
+  stroke: #FFBD59 !important;
+}
+
+.btn-refresh:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Spinning animation for loading */
+.btn-refresh .spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .loading-state {
@@ -76,17 +212,23 @@
   gap: 12px;
 }
 
+.position-item,
 .position-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(17, 34, 80, 0.3);
+  border: 1px solid rgba(255, 189, 89, 0.2);
   border-radius: 8px;
   padding: 12px;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
+.position-item:hover,
 .position-card:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(17, 34, 80, 0.5);
+  border-color: rgba(255, 189, 89, 0.4);
+  transform: translateX(2px);
 }
 
 .position-header {
@@ -96,22 +238,30 @@
   margin-bottom: 12px;
 }
 
+/* Coin symbol - GEM brand gold, proper sizing */
+.position-header .symbol,
 .position-symbol {
-  font-size: 15px;
-  font-weight: 700;
-  color: #fff;
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  color: #FFBD59 !important; /* Brand gold */
+  letter-spacing: 0.5px;
+  text-shadow: none !important;
 }
 
+/* P&L percentage badge */
+.position-header .pnl,
 .position-pnl {
   font-size: 14px;
   font-weight: 700;
   font-family: 'Monaco', 'Courier New', monospace;
 }
 
+.position-header .pnl.profit,
 .position-pnl.profit {
   color: #0ECB81;
 }
 
+.position-header .pnl.loss,
 .position-pnl.loss {
   color: #F6465D;
 }
@@ -169,7 +319,8 @@
   background: rgba(246, 70, 93, 0.2);
 }
 
-.btn-manage {
+.btn-manage,
+.btn-edit {
   padding: 8px;
   background: rgba(14, 203, 129, 0.1);
   border: 1px solid rgba(14, 203, 129, 0.3);
@@ -181,6 +332,7 @@
   transition: all 0.2s;
 }
 
-.btn-manage:hover {
+.btn-manage:hover,
+.btn-edit:hover {
   background: rgba(14, 203, 129, 0.2);
 }

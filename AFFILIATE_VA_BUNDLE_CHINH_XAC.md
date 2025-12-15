@@ -494,7 +494,7 @@ MARKETING ASSETS LIBRARY
 │  └─ [Download] [Get Embed Code]
 │
 ├─ Pre-Built Landing Pages (3 pages)
-│  ├─ Generic GEM Platform Page
+│  ├─ Generic Gemral Page
 │  │  └─ URL: gemplatform.vn/lp/YOUR_CODE
 │  ├─ Frequency Trading Focus
 │  │  └─ URL: gemplatform.vn/trading/YOUR_CODE

@@ -1,0 +1,83 @@
+/**
+ * RESPONSIVE BASE STYLES
+ * Mobile-first approach
+ */
+
+:root {
+  /* Breakpoints */
+  --bp-mobile: 320px;
+  --bp-mobile-lg: 480px;
+  --bp-tablet: 768px;
+  --bp-desktop: 1024px;
+  --bp-desktop-lg: 1440px;
+  --bp-desktop-xl: 1920px;
+
+  /* Container widths */
+  --container-mobile: 100%;
+  --container-tablet: 720px;
+  --container-desktop: 960px;
+  --container-desktop-lg: 1200px;
+  --container-desktop-xl: 1400px;
+
+  /* Spacing */
+  --spacing-mobile: 12px;
+  --spacing-tablet: 16px;
+  --spacing-desktop: 24px;
+}
+
+/* Container */
+.container {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--spacing-mobile);
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: var(--container-tablet);
+    padding: 0 var(--spacing-tablet);
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: var(--container-desktop);
+    padding: 0 var(--spacing-desktop);
+  }
+}
+
+/* Typography */
+h1 { font-size: clamp(28px, 5vw, 48px); }
+h2 { font-size: clamp(24px, 4vw, 36px); }
+h3 { font-size: clamp(20px, 3vw, 28px); }
+
+/* Grid */
+.grid {
+  display: grid;
+  gap: var(--spacing-mobile);
+}
+
+@media (min-width: 768px) {
+  .grid { gap: var(--spacing-tablet); }
+}
+
+/* Visibility */
+@media (max-width: 767px) {
+  .hide-mobile { display: none !important; }
+}
+
+@media (min-width: 768px) {
+  .show-mobile-only { display: none !important; }
+}
+
+/* Touch optimization */
+@media (max-width: 767px) {
+  button, .button {
+    min-height: 48px;
+    min-width: 48px;
+  }
+
+  input, select, textarea {
+    font-size: 16px; /* Prevent iOS zoom */
+  }
+}

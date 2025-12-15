@@ -1,0 +1,68 @@
+/* ============================================
+   QuizTimer - Match Mobile Design
+   ============================================ */
+
+.quiz-timer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--course-card-bg, #1A1B3A);
+  border-radius: var(--radius-lg, 16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.quiz-timer.is-warning {
+  border-color: var(--course-warning, #FFB800);
+  background: rgba(255, 184, 0, 0.1);
+}
+
+/* Timer Icon */
+.timer-icon {
+  flex-shrink: 0;
+}
+
+/* Timer Display */
+.timer-display {
+  flex: 1;
+}
+
+.timer-value {
+  font-size: 24px;
+  font-weight: 700;
+  font-family: var(--font-mono, 'Fira Code', monospace);
+}
+
+/* Progress Bar */
+.timer-progress {
+  width: 60px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.timer-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 1s linear;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .quiz-timer {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+
+  .timer-value {
+    font-size: 20px;
+  }
+
+  .timer-progress {
+    width: 40px;
+  }
+}

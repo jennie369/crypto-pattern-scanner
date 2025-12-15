@@ -1,0 +1,471 @@
+/* ============================================
+   ArticleRenderer - Match Mobile LessonRenderer
+   ============================================ */
+
+.article-content {
+  color: var(--text-secondary, #B8B8D0);
+  line-height: 1.7;
+  font-size: 15px;
+}
+
+/* ============================================
+   HEADINGS
+   ============================================ */
+
+.article-heading {
+  color: var(--text-primary, #FFFFFF);
+  font-weight: 700;
+  margin-top: 32px;
+  margin-bottom: 16px;
+  line-height: 1.3;
+}
+
+.article-heading:first-child {
+  margin-top: 0;
+}
+
+.heading-1 {
+  font-size: 28px;
+}
+
+.heading-2 {
+  font-size: 24px;
+}
+
+.heading-3 {
+  font-size: 20px;
+}
+
+.heading-4 {
+  font-size: 17px;
+}
+
+/* ============================================
+   PARAGRAPH
+   ============================================ */
+
+.article-paragraph {
+  margin-bottom: 16px;
+}
+
+.article-paragraph a {
+  color: var(--brand-gold, #FFBD59);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.article-paragraph a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.article-paragraph strong {
+  color: var(--text-primary, #FFFFFF);
+  font-weight: 600;
+}
+
+.article-paragraph em {
+  font-style: italic;
+}
+
+.article-paragraph code {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: var(--font-mono, 'Fira Code', monospace);
+  font-size: 0.9em;
+  color: var(--course-accent-cyan, #00F0FF);
+}
+
+/* ============================================
+   LIST
+   ============================================ */
+
+.article-list {
+  margin-bottom: 16px;
+  padding-left: 24px;
+}
+
+.article-list li {
+  margin-bottom: 8px;
+}
+
+.article-list.unordered {
+  list-style-type: disc;
+}
+
+.article-list.ordered {
+  list-style-type: decimal;
+}
+
+.article-list li::marker {
+  color: var(--brand-gold, #FFBD59);
+}
+
+/* ============================================
+   IMAGE
+   ============================================ */
+
+.article-image {
+  margin: 24px 0;
+}
+
+.article-image img {
+  width: 100%;
+  border-radius: var(--radius-lg, 16px);
+  display: block;
+}
+
+.image-caption {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted, rgba(255, 255, 255, 0.6));
+  margin-top: 10px;
+}
+
+/* ============================================
+   VIDEO
+   ============================================ */
+
+.article-video {
+  margin: 24px 0;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-lg, 16px);
+  overflow: hidden;
+  background: #000;
+}
+
+.article-video iframe,
+.article-video video {
+  width: 100%;
+  height: 100%;
+}
+
+/* ============================================
+   CODE BLOCK
+   ============================================ */
+
+.article-code {
+  margin: 24px 0;
+  border-radius: var(--radius-lg, 16px);
+  overflow: hidden;
+  background: #1E1E2E;
+}
+
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.code-language {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted, rgba(255, 255, 255, 0.6));
+  text-transform: uppercase;
+}
+
+.copy-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  color: var(--text-muted, rgba(255, 255, 255, 0.6));
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.copy-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary, #FFFFFF);
+}
+
+.code-content {
+  margin: 0;
+  padding: 16px;
+  overflow-x: auto;
+}
+
+.code-content code {
+  font-family: var(--font-mono, 'Fira Code', monospace);
+  font-size: 14px;
+  line-height: 1.6;
+  color: #E0E0E0;
+}
+
+/* ============================================
+   CALLOUT
+   ============================================ */
+
+.article-callout {
+  display: flex;
+  gap: 12px;
+  margin: 24px 0;
+  padding: 16px;
+  border-radius: var(--radius-lg, 16px);
+  border: 1px solid;
+}
+
+.callout-icon {
+  flex-shrink: 0;
+}
+
+.callout-content {
+  flex: 1;
+}
+
+.callout-title {
+  font-weight: 600;
+  color: var(--text-primary, #FFFFFF);
+  margin: 0 0 4px 0;
+}
+
+.callout-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ============================================
+   QUOTE
+   ============================================ */
+
+.article-quote {
+  margin: 24px 0;
+  padding: 0 0 0 20px;
+  border-left: 4px solid;
+  font-style: italic;
+}
+
+.article-quote p {
+  margin: 0;
+  color: var(--text-muted, rgba(255, 255, 255, 0.6));
+}
+
+.article-quote footer {
+  margin-top: 10px;
+  font-size: 14px;
+  font-style: normal;
+  color: var(--text-muted, rgba(255, 255, 255, 0.6));
+}
+
+/* ============================================
+   DIVIDER
+   ============================================ */
+
+.article-divider {
+  margin: 32px 0;
+  border: none;
+  height: 1px;
+}
+
+/* ============================================
+   TABLE
+   ============================================ */
+
+.article-table-wrapper {
+  margin: 24px 0;
+  overflow-x: auto;
+}
+
+.article-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.article-table th,
+.article-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.article-table th {
+  font-weight: 600;
+  color: var(--text-primary, #FFFFFF);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.article-table tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* ============================================
+   STEPS
+   ============================================ */
+
+.article-steps {
+  margin: 24px 0;
+}
+
+.step-item {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.step-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.step-content {
+  flex: 1;
+  padding-top: 4px;
+}
+
+.step-title {
+  font-weight: 600;
+  color: var(--text-primary, #FFFFFF);
+  margin: 0 0 4px 0;
+}
+
+.step-text {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* ============================================
+   HTML BLOCK
+   ============================================ */
+
+.article-html-block {
+  margin: 24px 0;
+}
+
+/* ============================================
+   EMBED
+   ============================================ */
+
+.article-embed {
+  margin: 24px 0;
+}
+
+.article-embed iframe {
+  width: 100%;
+  min-height: 400px;
+  border: none;
+  border-radius: var(--radius-lg, 16px);
+}
+
+.embed-caption {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted, rgba(255, 255, 255, 0.6));
+  margin-top: 10px;
+}
+
+/* ============================================
+   RAW HTML CONTENT STYLES
+   ============================================ */
+
+.article-html {
+  /* Apply consistent styling to imported HTML */
+}
+
+.article-html h1,
+.article-html h2,
+.article-html h3,
+.article-html h4 {
+  color: var(--text-primary, #FFFFFF);
+  font-weight: 700;
+  margin-top: 24px;
+  margin-bottom: 12px;
+}
+
+.article-html p {
+  margin-bottom: 16px;
+}
+
+.article-html ul,
+.article-html ol {
+  padding-left: 24px;
+  margin-bottom: 16px;
+}
+
+.article-html a {
+  color: var(--brand-gold, #FFBD59);
+}
+
+.article-html img {
+  max-width: 100%;
+  border-radius: var(--radius-md, 12px);
+}
+
+.article-html pre {
+  background: #1E1E2E;
+  padding: 16px;
+  border-radius: var(--radius-md, 12px);
+  overflow-x: auto;
+}
+
+.article-html table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+}
+
+.article-html th,
+.article-html td {
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .article-content {
+    font-size: 14px;
+  }
+
+  .heading-1 {
+    font-size: 24px;
+  }
+
+  .heading-2 {
+    font-size: 20px;
+  }
+
+  .heading-3 {
+    font-size: 18px;
+  }
+
+  .heading-4 {
+    font-size: 16px;
+  }
+
+  .article-callout {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .code-content code {
+    font-size: 13px;
+  }
+
+  .step-item {
+    gap: 12px;
+  }
+
+  .step-number {
+    width: 28px;
+    height: 28px;
+    font-size: 13px;
+  }
+}

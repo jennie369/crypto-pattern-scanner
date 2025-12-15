@@ -337,3 +337,154 @@
     padding: 24px;
   }
 }
+
+/* ============================================
+   MOBILE FIXES - max-width: 767px
+   Desktop styles preserved above - DO NOT TOUCH!
+   ============================================ */
+@media (max-width: 767px) {
+  .hero-section {
+    min-height: auto;
+    padding: 24px 0 40px;
+  }
+
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .hero-left {
+    gap: 16px;
+  }
+
+  .hero-badge {
+    padding: 6px 12px;
+    font-size: 11px;
+    gap: 6px;
+  }
+
+  .badge-icon {
+    font-size: 14px;
+  }
+
+  .hero-headline {
+    font-size: 28px;
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+  }
+
+  .hero-subheadline {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .hero-benefits {
+    gap: 10px;
+  }
+
+  .hero-benefits li {
+    font-size: 14px;
+    gap: 10px;
+  }
+
+  .benefit-icon {
+    font-size: 20px;
+  }
+
+  .hero-ctas {
+    gap: 12px;
+    margin-top: 4px;
+  }
+
+  .hero-ctas button {
+    padding: 12px 20px;
+    font-size: 14px;
+    min-height: 44px; /* Touch-friendly */
+  }
+
+  .hero-trust {
+    gap: 16px;
+    margin-top: 12px;
+  }
+
+  .trust-item {
+    font-size: 12px;
+    gap: 6px;
+  }
+
+  .trust-icon {
+    font-size: 16px;
+  }
+
+  .hero-right {
+    order: -1;
+    padding: 0;
+  }
+
+  .chatbot-preview-card {
+    padding: 16px;
+    border-radius: 16px;
+    max-width: 100%;
+  }
+
+  .chatbot-header {
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+  }
+
+  .chatbot-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .chatbot-title {
+    font-size: 16px;
+  }
+
+  .chatbot-subtitle {
+    font-size: 12px;
+  }
+
+  .chatbot-messages {
+    gap: 12px;
+    margin-bottom: 16px;
+    max-height: 280px;
+  }
+
+  .message {
+    gap: 8px;
+  }
+
+  .message-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+
+  .message-bubble {
+    padding: 12px;
+    font-size: 13px;
+    border-radius: 12px;
+  }
+
+  .hexagram {
+    font-size: 36px;
+    margin: 8px 0;
+  }
+
+  .chatbot-counter {
+    padding: 10px;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .counter-icon {
+    font-size: 20px;
+  }
+
+  .counter-text {
+    font-size: 12px;
+  }
+}

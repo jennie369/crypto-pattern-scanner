@@ -23,11 +23,15 @@
 
 .scanner-layout {
   display: grid;
-  grid-template-columns: 20% 50% 30%;
+  /* FIX: Use minmax to allow proper shrinking and prevent right column cut-off */
+  grid-template-columns: minmax(0, 20%) minmax(0, 50%) minmax(0, 30%);
   gap: var(--space-md);
   min-height: calc(100vh - 260px);
   height: auto;
   align-items: start;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 
   /* ✅ Transparent to show animated glow */
   background: transparent;
@@ -62,20 +66,36 @@
   max-height: calc(100vh - 260px);
 }
 
-/* RIGHT: overflow visible for dropdown modals */
+/* RIGHT: Hidden overflow to prevent cut off */
 .scanner-right {
-  overflow: visible;
+  overflow: hidden;
+  min-width: 0; /* Allow shrinking */
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-/* RIGHT: Needs inner scroll wrapper to prevent corner cutting */
+/* RIGHT: Inner scroll wrapper */
 .right-column-scroll-wrapper {
   overflow-y: auto;
-  overflow-x: visible;
-  padding: var(--space-md);
+  overflow-x: hidden;
+  padding: 10px;
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: 8px;
+  min-width: 0; /* Allow shrinking */
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* FIX: All children in right column should not overflow */
+.right-column-scroll-wrapper > * {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .scanner-center {
@@ -152,8 +172,13 @@
 .paper-trading-widgets-section {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
-  margin-top: var(--space-md);
+  gap: 12px; /* Reduced from var(--space-md) to bring widgets closer */
+  margin-top: 8px; /* Reduced from var(--space-md) */
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 /* Responsive - Large Tablets */
@@ -194,5 +219,64 @@
   .scanner-right {
     max-height: none;
     padding: var(--space-sm);
+  }
+}
+
+/* ============================================
+   MOBILE FIXES - max-width: 767px
+   Desktop styles preserved above - DO NOT TOUCH!
+   ============================================ */
+@media (max-width: 767px) {
+  .scanner-page-v2 {
+    padding: 8px;
+    min-height: auto;
+  }
+
+  .scanner-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: auto;
+  }
+
+  .scanner-left {
+    order: 1;
+    max-height: 300px;
+    padding: 12px;
+  }
+
+  .scanner-center {
+    order: 2;
+    padding: 0;
+  }
+
+  .scanner-center > .trading-chart-container {
+    min-height: 280px;
+    border-radius: 12px;
+  }
+
+  .scanner-right {
+    order: 3;
+    padding: 8px;
+  }
+
+  .right-column-scroll-wrapper {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .paper-trading-widgets-section {
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  /* Prevent horizontal scroll */
+  .scanner-page-v2,
+  .scanner-layout,
+  .scanner-left,
+  .scanner-center,
+  .scanner-right {
+    overflow-x: hidden;
+    max-width: 100vw;
   }
 }

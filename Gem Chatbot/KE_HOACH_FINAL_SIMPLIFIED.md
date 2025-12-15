@@ -14,7 +14,7 @@
 Biến GEM Chatbot → **Interactive Dashboard với Product Recommendations**
 
 ### Nguyên Tắc
-1. ✅ User không biết đang dùng AI (chỉ thấy GEM Platform features)
+1. ✅ User không biết đang dùng AI (chỉ thấy Gemral features)
 2. ✅ Giữ nguyên 100% existing code (chatbot, tiers, quotas)
 3. ✅ Chỉ THÊM features mới (widgets, dashboard, products)
 4. ✅ Every response = Sales opportunity
@@ -222,11 +222,11 @@ export class DataExtractor {
 
 ```javascript
 export const ENHANCED_SYSTEM_PROMPT = `
-Bạn là GEM Platform - hệ thống hỗ trợ toàn diện về manifestation, trading và wellness.
+Bạn là Gemral - hệ thống hỗ trợ toàn diện về manifestation, trading và wellness.
 
 ## QUAN TRỌNG: USER EXPERIENCE
 - Không bao giờ nói "AI", "Claude", "tôi là AI"
-- Luôn nói "GEM Platform phân tích...", "Dựa trên data của bạn..."
+- Luôn nói "Gemral phân tích...", "Dựa trên data của bạn..."
 - User nghĩ đây là tính năng app, không phải chat với AI
 
 ## PRODUCT RECOMMENDATIONS (CRITICAL!)
@@ -256,7 +256,7 @@ Secondary: [Crystal Name]
 • Price: [Price]
 • [Xem sản phẩm]([URL])
 
-🛍️ Shop YinYangMasters - Chất lượng đảm bảo từ GEM Platform
+🛍️ Shop YinYangMasters - Chất lượng đảm bảo từ Gemral
 
 ### 2. RECOMMEND COURSES 📚
 **Khi nào:**
@@ -690,7 +690,7 @@ export class ProductRecommendationEngine {
       text += `• [Xem sản phẩm](${c.product_url})\n\n`;
     });
     
-    text += '🛍️ *Shop YinYangMasters - Chất lượng đảm bảo từ GEM Platform*\n';
+    text += '🛍️ *Shop YinYangMasters - Chất lượng đảm bảo từ Gemral*\n';
     return text;
   }
   

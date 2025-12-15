@@ -2,7 +2,7 @@ import React, { forwardRef } from 'react';
 import './Input.css';
 
 /**
- * Input Component - GEM Platform
+ * Input Component - Gemral
  * Form input with validation states
  *
  * @param {Object} props

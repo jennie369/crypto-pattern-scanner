@@ -1,0 +1,446 @@
+/**
+ * GEM PLATFORM - GLOBAL STYLES
+ * Desktop-first approach with mobile overrides
+ * Import design-tokens.css for CSS custom properties
+ */
+
+/* ============================================
+   CSS RESET
+   ============================================ */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body, 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  font-size: var(--text-base, 16px);
+  line-height: 1.5;
+  color: var(--text-primary, #FFFFFF);
+  background: var(--bg-primary, #0A0E27);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ============================================
+   PREVENT HORIZONTAL SCROLL
+   ============================================ */
+html,
+body {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+}
+
+/* ============================================
+   DARK THEME ENFORCEMENT
+   ============================================ */
+:root {
+  color-scheme: dark;
+}
+
+/* ============================================
+   TYPOGRAPHY DEFAULTS
+   ============================================ */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display, 'Poppins', sans-serif);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-primary, #FFFFFF);
+  margin: 0;
+}
+
+p {
+  margin: 0;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.85));
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+input,
+textarea,
+select,
+button {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  outline: none;
+}
+
+button {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+button:focus {
+  outline: none;
+}
+
+/* Prevent iOS zoom on input focus */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="search"],
+input[type="tel"],
+input[type="url"],
+textarea,
+select {
+  font-size: 16px !important;
+}
+
+/* ============================================
+   MEDIA ELEMENTS
+   ============================================ */
+img,
+video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* SVG icons inside buttons and links should maintain their size */
+button svg,
+a svg,
+.btn svg,
+.btn-action svg {
+  display: inline-block;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+}
+
+/* ============================================
+   LISTS
+   ============================================ */
+ul,
+ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ============================================
+   TABLES
+   ============================================ */
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+/* ============================================
+   SCROLLBAR STYLING
+   ============================================ */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) rgba(255, 255, 255, 0.02);
+}
+
+/* ============================================
+   CONTAINER
+   ============================================ */
+.container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+@media (min-width: 1440px) {
+  .container {
+    max-width: 1400px;
+    padding: 0 40px;
+  }
+}
+
+/* ============================================
+   SELECTION
+   ============================================ */
+::selection {
+  background: rgba(255, 189, 89, 0.3);
+  color: #FFFFFF;
+}
+
+/* ============================================
+   FOCUS VISIBLE
+   ============================================ */
+:focus-visible {
+  outline: 2px solid var(--brand-gold, #FFBD59);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+/* Text utilities */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.text-primary { color: var(--text-primary, #FFFFFF); }
+.text-secondary { color: var(--text-secondary, rgba(255, 255, 255, 0.85)); }
+.text-tertiary { color: var(--text-tertiary, rgba(255, 255, 255, 0.70)); }
+.text-muted { color: var(--text-muted, rgba(255, 255, 255, 0.50)); }
+.text-gold { color: var(--brand-gold, #FFBD59); }
+.text-success { color: var(--accent-green, #00FF88); }
+.text-error { color: var(--accent-red, #FF4757); }
+
+/* Display utilities */
+.hidden { display: none !important; }
+.block { display: block; }
+.inline-block { display: inline-block; }
+.flex { display: flex; }
+.inline-flex { display: inline-flex; }
+.grid { display: grid; }
+
+/* Flex utilities */
+.flex-row { flex-direction: row; }
+.flex-col { flex-direction: column; }
+.flex-wrap { flex-wrap: wrap; }
+.items-center { align-items: center; }
+.items-start { align-items: flex-start; }
+.items-end { align-items: flex-end; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.justify-start { justify-content: flex-start; }
+.justify-end { justify-content: flex-end; }
+.gap-1 { gap: 4px; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.gap-4 { gap: 16px; }
+.gap-5 { gap: 20px; }
+.gap-6 { gap: 24px; }
+
+/* Width utilities */
+.w-full { width: 100%; }
+.w-auto { width: auto; }
+.max-w-full { max-width: 100%; }
+
+/* Margin utilities */
+.m-0 { margin: 0; }
+.mt-0 { margin-top: 0; }
+.mb-0 { margin-bottom: 0; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+
+/* Padding utilities */
+.p-0 { padding: 0; }
+.p-2 { padding: 8px; }
+.p-3 { padding: 12px; }
+.p-4 { padding: 16px; }
+.p-5 { padding: 20px; }
+.p-6 { padding: 24px; }
+
+/* Position utilities */
+.relative { position: relative; }
+.absolute { position: absolute; }
+.fixed { position: fixed; }
+.sticky { position: sticky; }
+
+/* Overflow utilities */
+.overflow-hidden { overflow: hidden; }
+.overflow-auto { overflow: auto; }
+.overflow-x-hidden { overflow-x: hidden; }
+.overflow-y-auto { overflow-y: auto; }
+
+/* Visibility utilities */
+.visible { visibility: visible; }
+.invisible { visibility: hidden; }
+
+/* Cursor utilities */
+.cursor-pointer { cursor: pointer; }
+.cursor-not-allowed { cursor: not-allowed; }
+
+/* Border radius utilities */
+.rounded { border-radius: var(--radius-md, 8px); }
+.rounded-lg { border-radius: var(--radius-lg, 14px); }
+.rounded-xl { border-radius: var(--radius-xl, 20px); }
+.rounded-full { border-radius: 9999px; }
+
+/* Transition utilities */
+.transition { transition: all 0.3s ease; }
+.transition-fast { transition: all 0.15s ease; }
+
+/* ============================================
+   MOBILE OVERRIDES - max-width: 767px
+   ============================================ */
+@media (max-width: 767px) {
+  .container {
+    padding: 0 16px;
+  }
+
+  /* Hide on mobile */
+  .hide-mobile {
+    display: none !important;
+  }
+
+  /* Show only on mobile */
+  .show-mobile {
+    display: block !important;
+  }
+
+  /* Full width on mobile */
+  .full-mobile {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Stack on mobile */
+  .stack-mobile {
+    flex-direction: column !important;
+  }
+
+  .stack-mobile > * {
+    width: 100% !important;
+  }
+
+  /* Reduce padding on mobile */
+  .p-mobile-sm {
+    padding: 12px !important;
+  }
+
+  .p-mobile-md {
+    padding: 16px !important;
+  }
+
+  /* Reduce gap on mobile */
+  .gap-mobile-sm {
+    gap: 8px !important;
+  }
+
+  .gap-mobile-md {
+    gap: 12px !important;
+  }
+
+  /* Mobile text sizes */
+  .text-mobile-sm {
+    font-size: 12px !important;
+  }
+
+  .text-mobile-base {
+    font-size: 14px !important;
+  }
+}
+
+/* ============================================
+   TABLET BRIDGE - 768px to 1023px
+   ============================================ */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .container {
+    padding: 0 24px;
+  }
+
+  /* Hide on tablet */
+  .hide-tablet {
+    display: none !important;
+  }
+}
+
+/* ============================================
+   DESKTOP ONLY - 1024px+
+   ============================================ */
+@media (min-width: 1024px) {
+  /* Show only on desktop */
+  .show-desktop {
+    display: block !important;
+  }
+
+  /* Hide on desktop */
+  .hide-desktop {
+    display: none !important;
+  }
+}
+
+/* ============================================
+   ANIMATION UTILITIES
+   ============================================ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}

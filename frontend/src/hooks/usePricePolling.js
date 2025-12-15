@@ -14,8 +14,8 @@ async function fetchBinancePrices(symbols) {
   if (!symbols || symbols.length === 0) return {};
 
   try {
-    // Binance API endpoint for ticker prices
-    const response = await fetch('https://api.binance.com/api/v3/ticker/price');
+    // Use Futures API (fapi.binance.com) for better CORS support
+    const response = await fetch('https://fapi.binance.com/fapi/v1/ticker/price');
     const allPrices = await response.json();
 
     // Filter only the symbols we need
@@ -29,8 +29,23 @@ async function fetchBinancePrices(symbols) {
 
     return priceMap;
   } catch (error) {
-    console.error('Error fetching Binance prices:', error);
-    return {};
+    console.error('Error fetching Binance Futures prices, trying spot API:', error);
+    // Fallback to spot API
+    try {
+      const spotResponse = await fetch('https://api.binance.com/api/v3/ticker/price');
+      const spotPrices = await spotResponse.json();
+      const priceMap = {};
+      symbols.forEach(symbol => {
+        const ticker = spotPrices.find(t => t.symbol === symbol);
+        if (ticker) {
+          priceMap[symbol] = parseFloat(ticker.price);
+        }
+      });
+      return priceMap;
+    } catch (spotError) {
+      console.error('Error fetching spot prices:', spotError);
+      return {};
+    }
   }
 }
 

@@ -194,7 +194,6 @@ export default function Pricing() {
       price: '39.000đ',
       period: '/ tháng',
       color: '#2196F3',
-      popular: true,
       features: [
         { text: '15 câu hỏi/ngày', included: true },
         { text: 'Auto reset mỗi 24h', included: true },
@@ -207,9 +206,25 @@ export default function Pricing() {
     {
       id: 'premium',
       name: 'PREMIUM',
-      price: '99.000đ',
+      price: '59.000đ',
       period: '/ tháng',
       color: '#9C27B0',
+      popular: true,
+      features: [
+        { text: '50 câu hỏi/ngày', included: true, bold: true },
+        { text: 'Auto reset mỗi 24h', included: true },
+        { text: 'Phân tích expert-level', included: true },
+        { text: 'Priority response ~3s', included: true },
+        { text: 'Memory context (30 câu)', included: true },
+      ],
+      shopifyHandle: 'gem-chatbot-premium'
+    },
+    {
+      id: 'vip',
+      name: 'VIP',
+      price: '99.000đ',
+      period: '/ tháng',
+      color: '#F44336',
       features: [
         { text: 'UNLIMITED câu hỏi', included: true, bold: true },
         { text: 'Không giới hạn', included: true },
@@ -218,7 +233,7 @@ export default function Pricing() {
         { text: 'Memory context (50 câu)', included: true },
         { text: 'Custom prompts', included: true },
       ],
-      shopifyHandle: 'gem-chatbot-premium'
+      shopifyHandle: 'gem-chatbot-vip'
     }
   ]
 

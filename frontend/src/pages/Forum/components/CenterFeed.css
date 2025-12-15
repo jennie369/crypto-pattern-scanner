@@ -16,39 +16,42 @@
 .center-feed {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
+  max-width: 680px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 /* ═══════════════════════════════════════════════════════════════
    POST CREATION BOX
    ═══════════════════════════════════════════════════════════════ */
 
+/* Facebook-style post creation box */
 .post-creation-box {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 20px 24px;
+  gap: 12px;
+  padding: 12px 16px;
 
-  /* Glassmorphism */
-  background: rgba(30, 42, 94, 0.4);
+  /* Glassmorphism - more subtle like Facebook */
+  background: rgba(30, 42, 94, 0.5);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .post-creation-box:hover {
-  border-color: rgba(255, 189, 89, 0.3);
-  box-shadow: 0 12px 40px rgba(255, 189, 89, 0.15);
-  transform: translateY(-2px);
+  background: rgba(30, 42, 94, 0.6);
+  border-color: rgba(255, 189, 89, 0.2);
 }
 
 .post-creation-avatar {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   flex-shrink: 0;
 }
 
@@ -67,77 +70,91 @@
   background: linear-gradient(135deg, #9C0612 0%, #6B0F1A 100%);
   color: #FFBD59;
   font-family: 'Poppins', sans-serif;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
-  border: 2px solid #FFBD59;
+  border: 2px solid rgba(255, 189, 89, 0.5);
 }
 
 .post-creation-input {
   flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.2s ease;
+}
+
+.post-creation-box:hover .post-creation-input {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .post-creation-input p {
   font-family: 'Inter', sans-serif;
-  font-size: 16px;
-  color: rgba(255, 255, 255, 0.6);
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.5);
   margin: 0;
 }
 
 .post-creation-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
+  gap: 6px;
+  padding: 8px 16px;
 
   /* Burgundy gradient + Gold border */
   background: linear-gradient(135deg, #9C0612 0%, #6B0F1A 100%);
-  border: 2px solid #FFBD59;
-  border-radius: 50px;
+  border: 1px solid #FFBD59;
+  border-radius: 8px;
 
   font-family: 'Poppins', sans-serif;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
   color: #FFFFFF;
 
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .post-creation-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(255, 189, 89, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 189, 89, 0.3);
 }
 
 .post-creation-btn svg {
   color: #FFBD59;
+  width: 16px;
+  height: 16px;
 }
 
 /* ═══════════════════════════════════════════════════════════════
    FEED TABS (Recommended / Following)
    ═══════════════════════════════════════════════════════════════ */
 
+/* Facebook-style feed tabs */
 .feed-tabs {
   display: flex;
-  gap: 32px;
-  padding: 0 4px 12px 4px;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  gap: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
 }
 
 .feed-tab {
   position: relative;
   background: transparent;
   border: none;
-  padding: 12px 0;
-  font-family: 'Poppins', sans-serif;
-  font-size: 16px;
+  padding: 12px 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.6);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .feed-tab:hover {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .feed-tab.active {
@@ -147,50 +164,47 @@
 .feed-tab.active::after {
   content: '';
   position: absolute;
-  bottom: -12px;
+  bottom: 0;
   left: 0;
   right: 0;
-  height: 2px;
-  background: linear-gradient(135deg, #9C0612 0%, #FFBD59 100%);
+  height: 3px;
+  background: #FFBD59;
+  border-radius: 3px 3px 0 0;
 }
 
 /* ═══════════════════════════════════════════════════════════════
    FEED CONTROLS (Search + Sort)
    ═══════════════════════════════════════════════════════════════ */
 
+/* Facebook-style compact filter bar */
 .feed-controls {
   display: flex;
-  gap: 16px;
-
-  /* Glassmorphism */
-  background: rgba(30, 42, 94, 0.4);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 20px;
-  padding: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  gap: 8px;
+  padding: 8px 0;
 }
 
 .search-bar {
   flex: 1;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
+  gap: 8px;
+  padding: 8px 12px;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 50px;
-  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  transition: all 0.2s ease;
 }
 
 .search-bar:focus-within {
-  border-color: #FFBD59;
-  box-shadow: 0 0 0 3px rgba(255, 189, 89, 0.1);
+  border-color: rgba(255, 189, 89, 0.4);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .search-bar svg {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.4);
   flex-shrink: 0;
+  width: 16px;
+  height: 16px;
 }
 
 .search-bar input {
@@ -204,23 +218,30 @@
 }
 
 .search-bar input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .sort-dropdown {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
+  gap: 6px;
+  padding: 8px 12px;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 50px;
-  min-width: 180px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  min-width: 140px;
+  transition: all 0.2s ease;
+}
+
+.sort-dropdown:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .sort-dropdown svg {
   color: #FFBD59;
   flex-shrink: 0;
+  width: 16px;
+  height: 16px;
 }
 
 .sort-dropdown select {
@@ -229,8 +250,8 @@
   border: none;
   outline: none;
   font-family: 'Inter', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
   color: #FFFFFF;
   cursor: pointer;
 }
@@ -247,13 +268,13 @@
 .posts-feed {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .posts-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 /* ═══════════════════════════════════════════════════════════════

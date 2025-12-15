@@ -1,186 +1,177 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { getHoldings, closePosition } from '../../services/paperTrading';
-import binanceWS from '../../services/binanceWebSocket';
-import toast from 'react-hot-toast';
+// PROPS-DRIVEN VERSION - Data managed by parent (ScannerPage)
+import React, { useState, useMemo } from 'react';
+import { BarChart3, RefreshCw } from 'lucide-react';
+import CustomSelect from '../CustomSelect/CustomSelect';
+import EditPositionModal from '../../pages/Dashboard/Portfolio/v2/components/EditPositionModal';
 import './OpenPositionsWidget.css';
 
-export const OpenPositionsWidget = ({ onOpenPaperTrading }) => {
-  const { user } = useAuth();
-  const [positions, setPositions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [prices, setPrices] = useState({});
+export const OpenPositionsWidget = ({
+  positions = [],
+  prices = {},
+  loading = false,
+  onOpenPaperTrading,
+  onRefresh,
+  onClosePosition,
+  onUpdatePosition
+}) => {
+  const [sortBy, setSortBy] = useState('pnl_desc'); // pnl_desc, pnl_asc, symbol_asc, entry_asc
+  const [editingPosition, setEditingPosition] = useState(null);
 
-  // 🔍 DEBUG: Log component mount
-  console.log('[OpenPositionsWidget] Component mounted, user:', user ? 'logged in' : 'not logged in');
-
-  // Load positions
-  useEffect(() => {
-    if (user && user.id) {
-      loadPositions();
-    } else {
-      setLoading(false); // Stop loading if no user
+  // Handle save edit
+  const handleSaveEdit = async (positionId, updates) => {
+    if (onUpdatePosition) {
+      await onUpdatePosition(positionId, updates);
     }
-  }, [user]);
-
-  const loadPositions = async () => {
-    setLoading(true);
-    try {
-      const holdings = await getHoldings(user.id);
-      setPositions(holdings);
-
-      // Subscribe to price updates for each symbol
-      holdings.forEach(holding => {
-        subscribeToPriceUpdates(holding.symbol);
-      });
-    } catch (error) {
-      console.error('Failed to load positions:', error);
-      toast.error('Failed to load positions');
-    } finally {
-      setLoading(false);
+    setEditingPosition(null);
+    if (onRefresh) {
+      onRefresh();
     }
   };
 
-  const subscribeToPriceUpdates = (symbol) => {
-    binanceWS.subscribe(symbol, (update) => {
-      if (update.price) {
-        setPrices(prev => ({
-          ...prev,
-          [symbol]: update.price
-        }));
+  // Calculate P&L for a position
+  const calculatePnL = (position) => {
+    const entryPrice = position.avg_buy_price || 0;
+    const currentPrice = prices[position.symbol] || entryPrice;
+    const quantity = position.quantity || 0;
+
+    if (entryPrice === 0) {
+      return { pnl: 0, pnlPercent: 0 };
+    }
+
+    const pnl = (currentPrice - entryPrice) * quantity;
+    const pnlPercent = ((currentPrice - entryPrice) / entryPrice) * 100;
+    return { pnl, pnlPercent };
+  };
+
+  // Sort positions based on selected sort option
+  const sortedPositions = useMemo(() => {
+    if (!positions || positions.length === 0) return [];
+
+    const sorted = [...positions].sort((a, b) => {
+      switch (sortBy) {
+        case 'pnl_desc': {
+          const pnlA = calculatePnL(a).pnlPercent;
+          const pnlB = calculatePnL(b).pnlPercent;
+          return pnlB - pnlA; // Highest P&L first
+        }
+        case 'pnl_asc': {
+          const pnlA = calculatePnL(a).pnlPercent;
+          const pnlB = calculatePnL(b).pnlPercent;
+          return pnlA - pnlB; // Lowest P&L first
+        }
+        case 'symbol_asc':
+          return (a.symbol || '').localeCompare(b.symbol || ''); // A-Z
+        case 'entry_asc':
+          return (a.avg_buy_price || 0) - (b.avg_buy_price || 0); // Lowest entry first
+        default:
+          return 0;
       }
     });
-  };
 
-  const calculatePnL = (position) => {
-    const currentPrice = prices[position.symbol] || 0;
-    if (!currentPrice || currentPrice <= 0) return { pnl: 0, pnlPercentage: 0 };
-
-    const pnl = (currentPrice - position.average_price) * position.quantity;
-    const pnlPercentage = ((currentPrice / position.average_price) - 1) * 100;
-
-    return { pnl, pnlPercentage };
-  };
-
-  const handleClosePosition = async (position) => {
-    if (!user || !user.id) {
-      toast.error('Please login to close positions');
-      return;
-    }
-
-    if (!window.confirm(`Close ${position.symbol} position?\n\nQuantity: ${position.quantity.toFixed(8)}\nEntry: $${position.average_price.toLocaleString()}\nCurrent: $${(prices[position.symbol] || 0).toLocaleString()}`)) {
-      return;
-    }
-
-    try {
-      await closePosition(position.id, user.id);
-      toast.success(`${position.symbol} position closed successfully!`);
-      loadPositions(); // Reload positions
-    } catch (error) {
-      console.error('Failed to close position:', error);
-      toast.error(`Failed to close position: ${error.message}`);
-    }
-  };
-
-  // 🔍 DEBUG: Log render state
-  console.log('[OpenPositionsWidget] Rendering, loading:', loading, 'positions:', positions.length);
-
-  if (loading) {
-    return (
-      <div className="open-positions-widget">
-        <div className="widget-header">
-          <h3>Open Positions</h3>
-        </div>
-        <div className="loading-state">Loading positions...</div>
-      </div>
-    );
-  }
-
-  if (positions.length === 0) {
-    return (
-      <div className="open-positions-widget">
-        <div className="widget-header">
-          <h3>Open Positions (0)</h3>
-        </div>
-        <div className="empty-state">
-          <span className="empty-icon">📊</span>
-          <p>No open positions</p>
-          <span className="empty-hint">Start paper trading to see positions here</span>
-        </div>
-      </div>
-    );
-  }
+    return sorted;
+  }, [positions, prices, sortBy]);
 
   return (
     <div className="open-positions-widget">
       <div className="widget-header">
         <h3>Open Positions ({positions.length})</h3>
-        <button
-          className="btn-refresh"
-          onClick={loadPositions}
-        >
-          🔄
-        </button>
+        <div className="header-controls">
+          <CustomSelect
+            value={sortBy}
+            onChange={setSortBy}
+            options={[
+              { value: 'pnl_desc', label: 'P&L: High to Low' },
+              { value: 'pnl_asc', label: 'P&L: Low to High' },
+              { value: 'symbol_asc', label: 'Symbol: A-Z' },
+              { value: 'entry_asc', label: 'Entry: Low to High' }
+            ]}
+          />
+          <button
+            className="btn-refresh"
+            onClick={onRefresh}
+            disabled={loading}
+            title="Refresh positions"
+          >
+            <RefreshCw size={16} className={loading ? 'spinning' : ''} />
+          </button>
+        </div>
       </div>
 
-      <div className="positions-list">
-        {positions.map(position => {
-          const { pnl, pnlPercentage } = calculatePnL(position);
-          const currentPrice = prices[position.symbol] || 0;
+      {positions.length === 0 ? (
+        <div className="empty-state">
+          <BarChart3 size={48} style={{ margin: '0 auto 8px', opacity: 0.5, color: '#FFBD59' }} />
+          <p>No open positions</p>
+          <span className="empty-hint">Start paper trading to see positions here</span>
+        </div>
+      ) : (
+        <div className="positions-list">
+          {sortedPositions.map((position) => {
+            const { pnl, pnlPercent } = calculatePnL(position);
+            const isProfitable = pnl >= 0;
 
-          return (
-            <div key={position.id} className="position-card">
-              <div className="position-header">
-                <span className="position-symbol">{position.symbol}</span>
-                <span className={`position-pnl ${pnl >= 0 ? 'profit' : 'loss'}`}>
-                  {pnl >= 0 ? '+' : ''}{pnl.toFixed(2)} USDT
-                </span>
-              </div>
-
-              <div className="position-details">
-                <div className="detail-row">
-                  <span className="detail-label">Quantity</span>
-                  <span className="detail-value">{position.quantity.toFixed(8)}</span>
-                </div>
-
-                <div className="detail-row">
-                  <span className="detail-label">Entry</span>
-                  <span className="detail-value">${position.average_price.toLocaleString()}</span>
-                </div>
-
-                <div className="detail-row">
-                  <span className="detail-label">Current</span>
-                  <span className="detail-value">
-                    {currentPrice > 0 ? `$${currentPrice.toLocaleString()}` : 'Loading...'}
+            return (
+              <div key={position.id} className="position-item">
+                <div className="position-header">
+                  <span className="symbol">{position.symbol || 'Unknown'}</span>
+                  <span className={`pnl ${isProfitable ? 'profit' : 'loss'}`}>
+                    {isProfitable ? '+' : ''}{(pnlPercent || 0).toFixed(2)}%
                   </span>
                 </div>
-
-                <div className="detail-row">
-                  <span className="detail-label">P&L %</span>
-                  <span className={`detail-value ${pnlPercentage >= 0 ? 'profit' : 'loss'}`}>
-                    {pnlPercentage >= 0 ? '+' : ''}{pnlPercentage.toFixed(2)}%
-                  </span>
+                <div className="position-details">
+                  <div className="detail-row">
+                    <span>Entry:</span>
+                    <span>${(position.avg_buy_price || 0).toFixed(2)}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span>Current:</span>
+                    <span>${(prices[position.symbol] || position.avg_buy_price || 0).toFixed(2)}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span>Qty:</span>
+                    <span>{position.quantity || 0}</span>
+                  </div>
+                  <div className="detail-row strong">
+                    <span>P&L:</span>
+                    <span className={isProfitable ? 'profit' : 'loss'}>
+                      {isProfitable ? '+' : ''}${(pnl || 0).toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+                <div className="position-actions">
+                  <button
+                    className="btn-edit"
+                    onClick={() => setEditingPosition(position)}
+                    title="Edit this position"
+                  >
+                    Edit
+                  </button>
+                  {onClosePosition && (
+                    <button
+                      className="btn-close-position"
+                      onClick={() => onClosePosition(position.id, position.symbol)}
+                      title="Close this position"
+                    >
+                      Close
+                    </button>
+                  )}
                 </div>
               </div>
+            );
+          })}
+        </div>
+      )}
 
-              <div className="position-actions">
-                <button
-                  className="btn-close-position"
-                  onClick={() => handleClosePosition(position)}
-                >
-                  Close Position
-                </button>
-                <button
-                  className="btn-manage"
-                  onClick={() => onOpenPaperTrading && onOpenPaperTrading(position.symbol)}
-                >
-                  Manage
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      {/* Edit Position Modal */}
+      {editingPosition && (
+        <EditPositionModal
+          position={{
+            ...editingPosition,
+            current_price: prices[editingPosition.symbol] || editingPosition.avg_buy_price
+          }}
+          onClose={() => setEditingPosition(null)}
+          onSave={handleSaveEdit}
+        />
+      )}
     </div>
   );
 };

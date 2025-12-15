@@ -1,0 +1,112 @@
+/**
+ * AdminPanel Styles
+ * Magenta theme for admin distinction
+ */
+
+.admin-panel-container {
+  padding: var(--space-sm, 16px);
+  background: linear-gradient(135deg, rgba(255, 0, 255, 0.15) 0%, rgba(255, 0, 255, 0.05) 100%);
+  border-radius: var(--radius-xl, 20px);
+  border: 1px solid rgba(255, 0, 255, 0.3);
+  backdrop-filter: blur(20px);
+}
+
+.admin-panel-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs, 8px);
+  margin-bottom: var(--space-sm, 16px);
+  padding-bottom: var(--space-xs, 8px);
+  border-bottom: 1px solid rgba(255, 0, 255, 0.2);
+}
+
+.admin-icon {
+  color: #FF00FF;
+}
+
+.admin-title {
+  margin: 0;
+  font-family: var(--font-display, 'Poppins', sans-serif);
+  font-size: var(--text-base, 16px);
+  font-weight: 600;
+  color: #FF00FF;
+}
+
+.admin-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-xs, 8px);
+  margin-bottom: var(--space-sm, 16px);
+}
+
+.admin-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 0, 255, 0.2);
+  border-radius: var(--radius-md, 12px);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.admin-action-btn:hover {
+  background: rgba(255, 0, 255, 0.1);
+  border-color: rgba(255, 0, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.action-icon-wrapper {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.action-label {
+  flex: 1;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary, #FFFFFF);
+}
+
+.action-arrow {
+  color: var(--text-muted, rgba(255, 255, 255, 0.5));
+}
+
+.admin-dashboard-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  background: linear-gradient(135deg, #FF00FF 0%, #8B00FF 100%);
+  border: none;
+  border-radius: var(--radius-md, 12px);
+  color: white;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-dashboard-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(255, 0, 255, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .admin-actions-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,13 @@
+/* ===================================
+   CHART ANNOTATIONS - STYLES
+   =================================== */
+
+/* This component doesn't render DOM elements */
+/* All visual annotations are drawn directly on the chart via Lightweight Charts API */
+
+/* Future: CSS variables for annotation styling if needed */
+:root {
+  --annotation-zone-opacity: 0.15;
+  --annotation-line-width: 2px;
+  --annotation-highlight-glow: 0 0 10px currentColor;
+}

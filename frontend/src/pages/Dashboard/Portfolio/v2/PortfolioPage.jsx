@@ -15,7 +15,7 @@ import { getAccount, getHoldings, getOrders } from '../../../../services/paperTr
 import './PortfolioPage.css';
 
 /**
- * Portfolio Tracker Page v2 - GEM Platform
+ * Portfolio Tracker Page v2 - Gemral
  * Track portfolio performance, trades, and journal
  */
 export const PortfolioPage = () => {
@@ -145,7 +145,7 @@ export const PortfolioPage = () => {
       </div>
 
       {/* Overview Dashboard */}
-      <OverviewDashboard stats={stats} transactions={transactions} />
+      <OverviewDashboard stats={stats} transactions={transactions} holdings={holdings} />
 
       {/* Price Update Indicator */}
       {lastUpdate && (

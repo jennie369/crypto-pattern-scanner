@@ -1,12 +1,12 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import './index.css'
 
 // Vietnamese Font Fix - Load first for proper rendering
 import './styles/vietnamese-fonts.css'
 
-// Design System Foundation
+// Design System Foundation - MUST LOAD FIRST for CSS variables
 import './styles/design-tokens.css'
+import './index.css'
 import './styles/base.css'
 import './styles/typography.css'
 import './styles/layout.css'

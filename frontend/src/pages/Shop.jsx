@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useShopStore } from '../stores/shopStore';
 import { ShoppingCart, ShoppingBag, Gem, BookOpen, TrendingUp, FileText } from 'lucide-react';
+import CompactSidebar from '../components/CompactSidebar/CompactSidebar';
 
 // Import all new components
 import Section1_Hero from './Shop/components/Section1_Hero';
@@ -116,16 +117,18 @@ export default function Shop() {
   };
 
   return (
-    <div className="page-container">
-      <div className="page-content">
-        {/* Fixed Cart Button */}
-        <button
-          className="btn-primary"
-          style={{
-            position: 'fixed',
-            top: '100px',
-            right: '20px',
-            zIndex: 100,
+    <>
+      <CompactSidebar />
+      <div className="page-container">
+        <div className="page-content">
+          {/* Fixed Cart Button */}
+          <button
+            className="btn-primary"
+            style={{
+              position: 'fixed',
+              top: '100px',
+              right: '20px',
+              zIndex: 100,
             boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)'
           }}
           onClick={() => window.location.href = '/cart'}
@@ -238,5 +241,6 @@ export default function Shop() {
         <CommunityWidget />
       </div>
     </div>
+    </>
   );
 }

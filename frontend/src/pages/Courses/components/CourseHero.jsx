@@ -49,7 +49,7 @@ export const CourseHero = ({
         </h1>
 
         <p className="hero-subtitle">
-          Learn from GEM Masters. Transform your wealth
+          Learn from Gemrals. Transform your wealth
           and wellbeing together.
         </p>
 

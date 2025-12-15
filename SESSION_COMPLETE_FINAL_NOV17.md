@@ -264,7 +264,7 @@ Using **MAPPING_FORUM_DATABASE_TO_COMMUNITY_UI.md**:
 ## 💡 PROMPT TEMPLATE FOR NEXT SESSION
 
 ```
-GEM Platform - Build Community Hub UI
+Gemral - Build Community Hub UI
 
 CONTEXT:
 - Crypto trading platform, 82% complete

@@ -1,0 +1,367 @@
+/* ============================================
+   RESPONSIVE FIXES - MINIMAL CHANGES ONLY
+   DO NOT TOUCH EXISTING STYLES!
+   Only add responsive adjustments via media queries
+   ALL STYLES MUST BE INSIDE MEDIA QUERIES!
+   ============================================ */
+
+/* ============================================
+   MOBILE ONLY FIXES (max-width: 767px)
+   ============================================ */
+@media (max-width: 767px) {
+
+  /* 1. PREVENT HORIZONTAL SCROLL - MOBILE ONLY */
+  html,
+  body,
+  #root {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+
+  /* Force max width on all elements */
+  * {
+    max-width: 100vw !important;
+  }
+
+  /* Allow vertical scroll */
+  body {
+    overflow-y: auto !important;
+  }
+
+  /* -------------------------------------------
+     FIX 1: NAVIGATION HEIGHT (56px on mobile)
+     ------------------------------------------- */
+
+  /* Top navigation bar */
+  .top-nav-bar {
+    height: 56px !important;
+    min-height: 56px !important;
+    max-height: 56px !important;
+    overflow: visible !important;
+  }
+
+  .nav-container {
+    height: 56px !important;
+    min-height: 56px !important;
+    max-height: 56px !important;
+    padding: 0 12px !important;
+  }
+
+  /* Logo - compact */
+  .nav-logo {
+    gap: 8px !important;
+  }
+
+  .logo-icon {
+    font-size: 24px !important;
+  }
+
+  /* Hide main nav on mobile (hamburger menu instead) */
+  .nav-main {
+    display: none !important;
+  }
+
+  /* Show when menu is open */
+  .nav-main.open,
+  .nav-main.mobile.open {
+    display: flex !important;
+    position: fixed !important;
+    top: 56px !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: auto !important;
+    max-height: calc(100vh - 56px) !important;
+    z-index: 999 !important;
+  }
+
+  /* Show hamburger button */
+  .hamburger-button {
+    display: flex !important;
+  }
+
+  /* Nav right - compact */
+  .nav-right {
+    gap: 4px !important;
+  }
+
+  .nav-right .nav-item {
+    padding: 6px 10px !important;
+    min-width: auto !important;
+    height: 36px !important;
+  }
+
+  /* -------------------------------------------
+     FIX 2: SCANNER PAGE - SCROLL LAYOUT
+     ------------------------------------------- */
+
+  /* Scanner page - allow scroll */
+  .scanner-page,
+  .scanner-page-v2,
+  .scanner-container {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    height: auto !important;
+    min-height: 100vh !important;
+  }
+
+  /* Scanner mobile layout */
+  .scanner-page-v2.mobile {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  /* -------------------------------------------
+     FIX 3: CHART VISIBILITY
+     ------------------------------------------- */
+
+  /* Chart container - make visible */
+  .chart-container,
+  .trading-chart-container,
+  .scanner-chart-container,
+  .chart-wrapper,
+  .trading-chart-wrapper {
+    width: 100% !important;
+    height: 320px !important;
+    min-height: 320px !important;
+    overflow: visible !important;
+  }
+
+  /* Chart canvas itself */
+  .chart-container canvas,
+  .trading-chart canvas,
+  .tv-lightweight-charts {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* Chart header - compact */
+  .chart-header {
+    padding: 6px 12px !important;
+    min-height: 36px !important;
+  }
+
+  /* Chart controls bar - compact */
+  .chart-controls-bar {
+    height: 40px !important;
+    padding: 0 8px !important;
+  }
+
+  .chart-controls-bar .chart-info {
+    gap: 8px !important;
+  }
+
+  .chart-controls-bar .chart-symbol {
+    font-size: 13px !important;
+  }
+
+  .chart-controls-bar .chart-timeframe,
+  .chart-controls-bar .chart-pattern,
+  .chart-controls-bar .confidence {
+    font-size: 11px !important;
+    padding: 2px 6px !important;
+  }
+
+  .chart-controls-bar .control-btn {
+    height: 28px !important;
+    min-width: 28px !important;
+    padding: 0 6px !important;
+    font-size: 11px !important;
+  }
+
+  /* -------------------------------------------
+     FIX 4: CONTROL PANEL
+     ------------------------------------------- */
+
+  /* Control panel - full width, scroll */
+  .control-panel,
+  .scan-controls,
+  .scanner-controls {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    padding: 12px !important;
+  }
+
+  /* Coin selector dropdown */
+  .coin-selector,
+  .coin-selector-dropdown,
+  select.coin-select {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Timeframe buttons - wrap */
+  .timeframe-buttons,
+  .time-selector,
+  .timeframe-selector {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .timeframe-buttons button,
+  .time-selector button,
+  .timeframe-selector button {
+    flex: 1 1 calc(33.333% - 6px) !important;
+    min-width: 0 !important;
+    padding: 8px 4px !important;
+    font-size: 12px !important;
+  }
+
+  /* -------------------------------------------
+     FIX 5: PATTERN INFO & RESULTS
+     ------------------------------------------- */
+
+  /* Results list - full width */
+  .results-list,
+  .pattern-results,
+  .scan-results {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 8px !important;
+  }
+
+  /* Pattern cards - stack */
+  .pattern-card,
+  .result-card {
+    width: 100% !important;
+    margin-bottom: 8px !important;
+  }
+
+  /* -------------------------------------------
+     FIX 6: PAGE WRAPPER
+     ------------------------------------------- */
+
+  /* App layout wrapper */
+  .app-layout-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 100vh !important;
+  }
+
+  /* Page wrapper - no extra padding */
+  .page-wrapper {
+    flex: 1 !important;
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Hide spacers */
+  .nav-spacer,
+  .header-spacer {
+    display: none !important;
+  }
+
+  /* -------------------------------------------
+     FIX 7: QUICK TOOLS - REDUCE PADDING
+     ------------------------------------------- */
+
+  /* Sub tools panel - reduce padding */
+  .sub-tools-panel,
+  .quick-tools-section,
+  .tools-grid-container {
+    padding: 8px !important;
+  }
+
+  /* Quick tools grid - tighter */
+  .tools-grid,
+  .quick-tools-grid {
+    gap: 8px !important;
+    padding: 4px !important;
+  }
+
+  /* Tool cards - smaller padding */
+  .tool-card,
+  .quick-tool-card {
+    padding: 8px !important;
+  }
+
+  /* -------------------------------------------
+     FIX 8: HEADINGS - REDUCE PADDING
+     ------------------------------------------- */
+
+  /* Section headings */
+  .section-header,
+  .panel-header,
+  .tools-header,
+  h3, h4 {
+    padding: 8px 12px !important;
+    margin: 0 !important;
+    font-size: 14px !important;
+  }
+
+  /* Patterns by timeframe heading */
+  .patterns-timeframe-header,
+  .confluence-header {
+    padding: 8px !important;
+  }
+
+  /* -------------------------------------------
+     FIX 9: TIER BADGE - PREVENT CUTOFF
+     ------------------------------------------- */
+
+  /* Tier badge container */
+  .tier-badge,
+  .user-tier-badge,
+  [class*="tier-badge"] {
+    position: relative !important;
+    right: auto !important;
+    margin-right: 8px !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  /* TIER badges on cards */
+  .tool-card .tier-badge,
+  .quick-tool-card .tier-badge,
+  [class*="TIER"] {
+    font-size: 9px !important;
+    padding: 2px 4px !important;
+  }
+
+  /* -------------------------------------------
+     FIX 10: MULTI-TF CARD - ENSURE VISIBLE
+     ------------------------------------------- */
+
+  /* Multi-TF auto scan section */
+  .multi-tf-section,
+  .multi-tf-auto-scan,
+  .multi-timeframe-section {
+    display: block !important;
+    width: 100% !important;
+    padding: 8px !important;
+  }
+
+  /* Multi-TF pattern card */
+  .multi-tf-card,
+  .multi-tf-pattern-card {
+    width: 100% !important;
+    padding: 8px !important;
+  }
+
+  /* -------------------------------------------
+     FIX 11: GENERAL SPACING REDUCTION
+     ------------------------------------------- */
+
+  /* Reduce all section gaps */
+  .scanner-content,
+  .scanner-main-content {
+    gap: 8px !important;
+  }
+
+  /* Pattern info sections */
+  .pattern-info-section,
+  .pattern-details-section {
+    padding: 8px !important;
+  }
+
+  /* Confluence patterns */
+  .confluence-patterns,
+  .confluence-section {
+    padding: 8px !important;
+  }
+}
+
+/* END OF RESPONSIVE FIXES */
