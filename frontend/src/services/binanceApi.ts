@@ -3,25 +3,97 @@
  * Provides REST API and WebSocket connections for realtime data
  */
 
+import type {
+  Candle,
+  Timeframe,
+  ConnectionState,
+  TickerData,
+  CandleUpdateCallback,
+  ConnectionStateCallback,
+  TickerUpdateCallback,
+} from '../types';
+
 const FUTURES_API_BASE = 'https://fapi.binance.com';
 const FUTURES_WS_BASE = 'wss://fstream.binance.com';
 
+/** Raw kline data from Binance API */
+type BinanceKlineData = [
+  number,   // 0: Open time
+  string,   // 1: Open
+  string,   // 2: High
+  string,   // 3: Low
+  string,   // 4: Close
+  string,   // 5: Volume
+  number,   // 6: Close time
+  string,   // 7: Quote asset volume
+  number,   // 8: Number of trades
+  string,   // 9: Taker buy base asset volume
+  string,   // 10: Taker buy quote asset volume
+  string,   // 11: Ignore
+];
+
+/** WebSocket kline message */
+interface BinanceKlineMessage {
+  e: string;     // Event type
+  E: number;     // Event time
+  s: string;     // Symbol
+  k: {
+    t: number;   // Kline start time
+    T: number;   // Kline close time
+    s: string;   // Symbol
+    i: string;   // Interval
+    f: number;   // First trade ID
+    L: number;   // Last trade ID
+    o: string;   // Open price
+    c: string;   // Close price
+    h: string;   // High price
+    l: string;   // Low price
+    v: string;   // Base asset volume
+    n: number;   // Number of trades
+    x: boolean;  // Is this kline closed?
+    q: string;   // Quote asset volume
+    V: string;   // Taker buy base asset volume
+    Q: string;   // Taker buy quote asset volume
+    B: string;   // Ignore
+  };
+}
+
+/** WebSocket ticker message */
+interface BinanceTickerMessage {
+  e: string;     // Event type
+  E: number;     // Event time
+  s: string;     // Symbol
+  c: string;     // Close price
+  p: string;     // Price change
+  P: string;     // Price change percent
+  h: string;     // High price
+  l: string;     // Low price
+  v: string;     // Total traded base asset volume
+  q: string;     // Total traded quote asset volume
+}
+
 export class BinanceAPI {
+  private wsConnections: Map<string, WebSocket>;
+  private connectionStates: Map<string, ConnectionState>;
+  private reconnectAttempts: Map<string, number>;
+  private heartbeatIntervals: Map<string, NodeJS.Timeout>;
+  private reconnectTimeouts: Map<string, NodeJS.Timeout>;
+
   constructor() {
     this.wsConnections = new Map();
-    this.connectionStates = new Map(); // Track connection state per symbol
-    this.reconnectAttempts = new Map(); // Track reconnection attempts
-    this.heartbeatIntervals = new Map(); // Track heartbeat timers
-    this.reconnectTimeouts = new Map(); // Track reconnection timeouts
+    this.connectionStates = new Map();
+    this.reconnectAttempts = new Map();
+    this.heartbeatIntervals = new Map();
+    this.reconnectTimeouts = new Map();
   }
 
   /**
    * REST API: Get historical klines
-   * @param {string} symbol - e.g., "BTCUSDT"
-   * @param {string} interval - e.g., "15m", "1h", "4h", "1d"
-   * @param {number} limit - number of candles (default: 500)
+   * @param symbol - e.g., "BTCUSDT"
+   * @param interval - e.g., "15m", "1h", "4h", "1d"
+   * @param limit - number of candles (default: 500)
    */
-  async getKlines(symbol, interval = '15m', limit = 500) {
+  async getKlines(symbol: string, interval: Timeframe = '15m', limit: number = 500): Promise<Candle[]> {
     try {
       const url = `${FUTURES_API_BASE}/fapi/v1/klines`;
       const params = new URLSearchParams({
@@ -33,24 +105,21 @@ export class BinanceAPI {
       console.log(`📡 Fetching klines: ${url}?${params}`);
       const response = await fetch(`${url}?${params}`);
 
-      // Check if response is OK before parsing
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`HTTP ${response.status}: ${response.statusText}. ${errorText}`);
       }
 
-      const data = await response.json();
+      const data = await response.json() as BinanceKlineData[];
 
-      // Validate data format
       if (!Array.isArray(data) || data.length === 0) {
         throw new Error('API returned empty or invalid data');
       }
 
       console.log(`✅ Received ${data.length} candles for ${symbol}`);
 
-      // Convert to Lightweight Charts format
-      return data.map(candle => ({
-        time: candle[0] / 1000, // Convert ms to seconds
+      return data.map((candle): Candle => ({
+        time: candle[0] / 1000,
         open: parseFloat(candle[1]),
         high: parseFloat(candle[2]),
         low: parseFloat(candle[3]),
@@ -58,32 +127,37 @@ export class BinanceAPI {
         volume: parseFloat(candle[5])
       }));
     } catch (error) {
-      console.error(`❌ Error fetching klines for ${symbol}:`, error.message || error);
-      throw error; // Re-throw instead of returning empty array
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error(`❌ Error fetching klines for ${symbol}:`, errorMessage);
+      throw error;
     }
   }
 
   /**
    * Get connection status for a symbol
    */
-  getConnectionStatus(symbol) {
+  getConnectionStatus(symbol: string): ConnectionState {
     return this.connectionStates.get(symbol) || 'disconnected';
   }
 
   /**
    * WebSocket: Subscribe to realtime klines with auto-reconnection
-   * @param {string} symbol - e.g., "BTCUSDT"
-   * @param {string} interval - e.g., "1m"
-   * @param {Function} onUpdate - callback for updates
-   * @param {Function} onStateChange - callback for connection state changes
+   * @param symbol - e.g., "BTCUSDT"
+   * @param interval - e.g., "1m"
+   * @param onUpdate - callback for updates
+   * @param onStateChange - callback for connection state changes
    */
-  subscribeKlines(symbol, interval, onUpdate, onStateChange = null) {
+  subscribeKlines(
+    symbol: string,
+    interval: Timeframe,
+    onUpdate: CandleUpdateCallback,
+    onStateChange: ConnectionStateCallback | null = null
+  ): void {
     const MAX_RECONNECT_ATTEMPTS = 10;
-    const BASE_RECONNECT_DELAY = 1000; // 1 second
-    const MAX_RECONNECT_DELAY = 16000; // 16 seconds
+    const BASE_RECONNECT_DELAY = 1000;
+    const MAX_RECONNECT_DELAY = 16000;
 
-    const connect = () => {
-      // Clean up existing connection if any
+    const connect = (): void => {
       this.cleanupConnection(symbol);
 
       const streamName = `${symbol.toLowerCase()}@kline_${interval}`;
@@ -95,26 +169,23 @@ export class BinanceAPI {
       const ws = new WebSocket(wsUrl);
       let lastMessageTime = Date.now();
 
-      // Connection opened successfully
-      ws.onopen = () => {
+      ws.onopen = (): void => {
         console.log(`✅ ${symbol} WebSocket connected`);
-        this.reconnectAttempts.set(symbol, 0); // Reset attempts
+        this.reconnectAttempts.set(symbol, 0);
         this.setConnectionState(symbol, 'connected', onStateChange);
         lastMessageTime = Date.now();
 
-        // Start heartbeat monitoring
-        this.startHeartbeat(symbol, ws, lastMessageTime);
+        this.startHeartbeat(symbol, ws, () => lastMessageTime);
       };
 
-      // Receive message
-      ws.onmessage = (event) => {
+      ws.onmessage = (event: MessageEvent): void => {
         lastMessageTime = Date.now();
 
         try {
-          const data = JSON.parse(event.data);
+          const data = JSON.parse(event.data as string) as BinanceKlineMessage;
           const kline = data.k;
 
-          const candle = {
+          const candle: Candle = {
             time: kline.t / 1000,
             open: parseFloat(kline.o),
             high: parseFloat(kline.h),
@@ -123,21 +194,19 @@ export class BinanceAPI {
             volume: parseFloat(kline.v)
           };
 
-          onUpdate(candle, kline.x); // x = is candle closed?
+          onUpdate(candle, kline.x);
         } catch (error) {
           console.error(`❌ Error parsing ${symbol} message:`, error);
         }
       };
 
-      // Connection closed
-      ws.onclose = (event) => {
+      ws.onclose = (event: CloseEvent): void => {
         console.log(`🔌 ${symbol} WebSocket closed (code: ${event.code}, reason: ${event.reason})`);
         this.cleanupHeartbeat(symbol);
 
         const currentAttempts = this.reconnectAttempts.get(symbol) || 0;
 
         if (currentAttempts < MAX_RECONNECT_ATTEMPTS) {
-          // Calculate exponential backoff delay
           const delay = Math.min(
             BASE_RECONNECT_DELAY * Math.pow(2, currentAttempts),
             MAX_RECONNECT_DELAY
@@ -159,32 +228,34 @@ export class BinanceAPI {
         }
       };
 
-      // Connection error
-      ws.onerror = (error) => {
-        console.error(`❌ ${symbol} WebSocket error:`, error);
+      ws.onerror = (): void => {
+        console.error(`❌ ${symbol} WebSocket error`);
         this.setConnectionState(symbol, 'error', onStateChange);
       };
 
       this.wsConnections.set(symbol, ws);
     };
 
-    // Start initial connection
     connect();
   }
 
   /**
    * Start heartbeat monitoring
    */
-  startHeartbeat(symbol, ws, lastMessageTime) {
-    const HEARTBEAT_INTERVAL = 30000; // Check every 30 seconds
-    const MAX_MESSAGE_AGE = 120000; // Reconnect if no message for 2 minutes
+  private startHeartbeat(
+    symbol: string,
+    ws: WebSocket,
+    getLastMessageTime: () => number
+  ): void {
+    const HEARTBEAT_INTERVAL = 30000;
+    const MAX_MESSAGE_AGE = 120000;
 
     const intervalId = setInterval(() => {
-      const timeSinceLastMessage = Date.now() - lastMessageTime;
+      const timeSinceLastMessage = Date.now() - getLastMessageTime();
 
       if (timeSinceLastMessage > MAX_MESSAGE_AGE) {
         console.warn(`⚠️ ${symbol} No message for ${Math.round(timeSinceLastMessage / 1000)}s, reconnecting...`);
-        ws.close(); // Trigger reconnection via onclose handler
+        ws.close();
         this.cleanupHeartbeat(symbol);
       } else {
         console.log(`💓 ${symbol} heartbeat OK (last message: ${Math.round(timeSinceLastMessage / 1000)}s ago)`);
@@ -197,7 +268,7 @@ export class BinanceAPI {
   /**
    * Clean up heartbeat interval
    */
-  cleanupHeartbeat(symbol) {
+  private cleanupHeartbeat(symbol: string): void {
     const intervalId = this.heartbeatIntervals.get(symbol);
     if (intervalId) {
       clearInterval(intervalId);
@@ -208,7 +279,11 @@ export class BinanceAPI {
   /**
    * Set connection state and notify listeners
    */
-  setConnectionState(symbol, state, onStateChange) {
+  private setConnectionState(
+    symbol: string,
+    state: ConnectionState,
+    onStateChange: ConnectionStateCallback | null
+  ): void {
     this.connectionStates.set(symbol, state);
     console.log(`🔌 ${symbol} connection state: ${state}`);
 
@@ -220,18 +295,15 @@ export class BinanceAPI {
   /**
    * Clean up connection resources
    */
-  cleanupConnection(symbol) {
-    // Clear reconnection timeout
+  private cleanupConnection(symbol: string): void {
     const timeoutId = this.reconnectTimeouts.get(symbol);
     if (timeoutId) {
       clearTimeout(timeoutId);
       this.reconnectTimeouts.delete(symbol);
     }
 
-    // Clear heartbeat
     this.cleanupHeartbeat(symbol);
 
-    // Close WebSocket if exists
     const ws = this.wsConnections.get(symbol);
     if (ws && ws.readyState !== WebSocket.CLOSED) {
       ws.close();
@@ -241,13 +313,13 @@ export class BinanceAPI {
   /**
    * WebSocket: Subscribe to ticker (24h stats)
    */
-  subscribeTicker(symbol, onUpdate) {
+  subscribeTicker(symbol: string, onUpdate: TickerUpdateCallback): WebSocket {
     const streamName = `${symbol.toLowerCase()}@ticker`;
     const ws = new WebSocket(`${FUTURES_WS_BASE}/ws/${streamName}`);
 
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      onUpdate({
+    ws.onmessage = (event: MessageEvent): void => {
+      const data = JSON.parse(event.data as string) as BinanceTickerMessage;
+      const ticker: TickerData = {
         symbol: data.s,
         price: parseFloat(data.c),
         priceChange: parseFloat(data.p),
@@ -255,7 +327,8 @@ export class BinanceAPI {
         high24h: parseFloat(data.h),
         low24h: parseFloat(data.l),
         volume24h: parseFloat(data.v)
-      });
+      };
+      onUpdate(ticker);
     };
 
     return ws;
@@ -264,7 +337,7 @@ export class BinanceAPI {
   /**
    * Close WebSocket connection and cleanup resources
    */
-  unsubscribe(symbol) {
+  unsubscribe(symbol: string): void {
     console.log(`🔌 Unsubscribing from ${symbol}`);
     this.cleanupConnection(symbol);
     this.wsConnections.delete(symbol);
@@ -275,9 +348,9 @@ export class BinanceAPI {
   /**
    * Close all connections and cleanup all resources
    */
-  closeAll() {
+  closeAll(): void {
     console.log('🔌 Closing all connections');
-    this.wsConnections.forEach((ws, symbol) => {
+    this.wsConnections.forEach((_ws, symbol) => {
       this.cleanupConnection(symbol);
     });
     this.wsConnections.clear();

@@ -13,6 +13,22 @@
  */
 
 import { supabase } from '../lib/supabaseClient';
+import type {
+  PortfolioHolding,
+  NewHoldingInput,
+  PortfolioTransaction,
+  NewTransactionInput,
+  TransactionFilters,
+  PortfolioStats,
+  EntryTypeAnalytics,
+  EntryTypeStats,
+  EntryTypeDistribution,
+  JournalEntry,
+  NewJournalEntryInput,
+  ApiResponse,
+  OperationResult,
+  HoldingPriceUpdate,
+} from '../types';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // PORTFOLIO HOLDINGS - Current Positions
@@ -20,9 +36,8 @@ import { supabase } from '../lib/supabaseClient';
 
 /**
  * Fetch all holdings for current user
- * @returns {Promise<Array>} Array of holdings
  */
-export async function fetchHoldings(userId) {
+export async function fetchHoldings(userId: string): Promise<ApiResponse<PortfolioHolding[]>> {
   try {
     const { data, error } = await supabase
       .from('portfolio_holdings')
@@ -31,20 +46,22 @@ export async function fetchHoldings(userId) {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return { data, error: null };
+    return { data: data as PortfolioHolding[], error: null };
   } catch (error) {
     console.error('Error fetching holdings:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
 /**
  * Add new holding (opens position)
- * @param {Object} holding - Holding data
- * @returns {Promise<Object>} Created holding
  */
-export async function addHolding(userId, holding) {
+export async function addHolding(
+  userId: string,
+  holding: NewHoldingInput
+): Promise<ApiResponse<PortfolioHolding>> {
   try {
+    const currentPrice = holding.current_price ?? holding.avg_entry_price;
     const { data, error } = await supabase
       .from('portfolio_holdings')
       .insert([{
@@ -52,12 +69,12 @@ export async function addHolding(userId, holding) {
         symbol: holding.symbol,
         quantity: holding.quantity,
         avg_entry_price: holding.avg_entry_price,
-        current_price: holding.current_price || holding.avg_entry_price,
+        current_price: currentPrice,
         total_cost: holding.quantity * holding.avg_entry_price,
-        current_value: holding.quantity * (holding.current_price || holding.avg_entry_price),
+        current_value: holding.quantity * currentPrice,
         unrealized_pnl: 0,
         unrealized_pnl_percent: 0,
-        notes: holding.notes || null
+        notes: holding.notes ?? null
       }])
       .select()
       .single();
@@ -70,32 +87,31 @@ export async function addHolding(userId, holding) {
       transaction_type: 'BUY',
       quantity: holding.quantity,
       price: holding.avg_entry_price,
-      entry_type: holding.entry_type || 'OTHER',
-      pattern_type: holding.pattern_type || null,
-      zone_status_at_entry: holding.zone_status_at_entry || null,
-      confirmation_type: holding.confirmation_type || null,
-      notes: holding.notes || null
+      entry_type: holding.entry_type ?? 'OTHER',
+      pattern_type: holding.pattern_type ?? null,
+      zone_status_at_entry: holding.zone_status_at_entry ?? null,
+      confirmation_type: holding.confirmation_type ?? null,
+      notes: holding.notes ?? null
     });
 
-    return { data, error: null };
+    return { data: data as PortfolioHolding, error: null };
   } catch (error) {
     console.error('Error adding holding:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
 /**
  * Update holding (modify position or update current price)
- * @param {string} holdingId - Holding ID
- * @param {Object} updates - Fields to update
- * @returns {Promise<Object>} Updated holding
  */
-export async function updateHolding(holdingId, updates) {
+export async function updateHolding(
+  holdingId: string,
+  updates: Partial<PortfolioHolding>
+): Promise<ApiResponse<PortfolioHolding>> {
   try {
-    // Recalculate values if quantity or price changed
     let calculatedUpdates = { ...updates };
 
-    if (updates.current_price) {
+    if (updates.current_price !== undefined) {
       const { data: holding } = await supabase
         .from('portfolio_holdings')
         .select('quantity, avg_entry_price')
@@ -103,8 +119,8 @@ export async function updateHolding(holdingId, updates) {
         .single();
 
       if (holding) {
-        const currentValue = holding.quantity * updates.current_price;
-        const totalCost = holding.quantity * holding.avg_entry_price;
+        const currentValue = (holding.quantity as number) * updates.current_price;
+        const totalCost = (holding.quantity as number) * (holding.avg_entry_price as number);
         const unrealizedPnl = currentValue - totalCost;
         const unrealizedPnlPercent = (unrealizedPnl / totalCost) * 100;
 
@@ -125,19 +141,17 @@ export async function updateHolding(holdingId, updates) {
       .single();
 
     if (error) throw error;
-    return { data, error: null };
+    return { data: data as PortfolioHolding, error: null };
   } catch (error) {
     console.error('Error updating holding:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
 /**
  * Delete holding (close position)
- * @param {string} holdingId - Holding ID
- * @returns {Promise<Object>} Success status
  */
-export async function deleteHolding(holdingId) {
+export async function deleteHolding(holdingId: string): Promise<OperationResult> {
   try {
     const { error } = await supabase
       .from('portfolio_holdings')
@@ -148,16 +162,17 @@ export async function deleteHolding(holdingId) {
     return { success: true, error: null };
   } catch (error) {
     console.error('Error deleting holding:', error);
-    return { success: false, error };
+    return { success: false, error: error as Error };
   }
 }
 
 /**
  * Update current prices for all holdings
- * @param {Array} priceUpdates - Array of { symbol, price }
- * @returns {Promise<Object>} Success status
  */
-export async function updateHoldingPrices(userId, priceUpdates) {
+export async function updateHoldingPrices(
+  userId: string,
+  priceUpdates: HoldingPriceUpdate[]
+): Promise<OperationResult> {
   try {
     const promises = priceUpdates.map(async ({ symbol, price }) => {
       const { data: holdings } = await supabase
@@ -168,8 +183,10 @@ export async function updateHoldingPrices(userId, priceUpdates) {
 
       if (holdings && holdings.length > 0) {
         return Promise.all(holdings.map(holding => {
-          const currentValue = holding.quantity * price;
-          const totalCost = holding.quantity * holding.avg_entry_price;
+          const quantity = holding.quantity as number;
+          const avgEntryPrice = holding.avg_entry_price as number;
+          const currentValue = quantity * price;
+          const totalCost = quantity * avgEntryPrice;
           const unrealizedPnl = currentValue - totalCost;
           const unrealizedPnlPercent = (unrealizedPnl / totalCost) * 100;
 
@@ -190,7 +207,7 @@ export async function updateHoldingPrices(userId, priceUpdates) {
     return { success: true, error: null };
   } catch (error) {
     console.error('Error updating holding prices:', error);
-    return { success: false, error };
+    return { success: false, error: error as Error };
   }
 }
 
@@ -200,10 +217,11 @@ export async function updateHoldingPrices(userId, priceUpdates) {
 
 /**
  * Fetch all transactions for current user
- * @param {Object} filters - Optional filters (symbol, type, entry_type)
- * @returns {Promise<Array>} Array of transactions
  */
-export async function fetchTransactions(userId, filters = {}) {
+export async function fetchTransactions(
+  userId: string,
+  filters: TransactionFilters = {}
+): Promise<ApiResponse<PortfolioTransaction[]>> {
   try {
     let query = supabase
       .from('portfolio_transactions')
@@ -230,48 +248,48 @@ export async function fetchTransactions(userId, filters = {}) {
     const { data, error } = await query;
 
     if (error) throw error;
-    return { data, error: null };
+    return { data: data as PortfolioTransaction[], error: null };
   } catch (error) {
     console.error('Error fetching transactions:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
 /**
  * Add new transaction
- * @param {Object} transaction - Transaction data
- * @returns {Promise<Object>} Created transaction
  */
-export async function addTransaction(userId, transaction) {
+export async function addTransaction(
+  userId: string,
+  transaction: NewTransactionInput
+): Promise<ApiResponse<PortfolioTransaction>> {
   try {
     const { data, error } = await supabase
       .from('portfolio_transactions')
       .insert([{
         user_id: userId,
         symbol: transaction.symbol,
-        transaction_type: transaction.transaction_type, // BUY or SELL
+        transaction_type: transaction.transaction_type,
         quantity: transaction.quantity,
         price: transaction.price,
         total_amount: transaction.quantity * transaction.price,
-        fees: transaction.fees || 0,
-        // 🆕 Entry Type Analytics Fields
-        entry_type: transaction.entry_type || 'OTHER', // RETEST, BREAKOUT, OTHER
-        pattern_type: transaction.pattern_type || null, // DPD, UPU, etc.
-        zone_status_at_entry: transaction.zone_status_at_entry || null, // Fresh, Tested, etc.
-        confirmation_type: transaction.confirmation_type || null, // PIN_BAR, HAMMER, etc.
-        risk_reward_ratio: transaction.risk_reward_ratio || null,
-        realized_pnl: transaction.realized_pnl || null,
-        realized_pnl_percent: transaction.realized_pnl_percent || null,
-        notes: transaction.notes || null
+        fees: transaction.fees ?? 0,
+        entry_type: transaction.entry_type ?? 'OTHER',
+        pattern_type: transaction.pattern_type ?? null,
+        zone_status_at_entry: transaction.zone_status_at_entry ?? null,
+        confirmation_type: transaction.confirmation_type ?? null,
+        risk_reward_ratio: transaction.risk_reward_ratio ?? null,
+        realized_pnl: transaction.realized_pnl ?? null,
+        realized_pnl_percent: transaction.realized_pnl_percent ?? null,
+        notes: transaction.notes ?? null
       }])
       .select()
       .single();
 
     if (error) throw error;
-    return { data, error: null };
+    return { data: data as PortfolioTransaction, error: null };
   } catch (error) {
     console.error('Error adding transaction:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
@@ -281,11 +299,9 @@ export async function addTransaction(userId, transaction) {
 
 /**
  * Calculate portfolio statistics
- * @returns {Promise<Object>} Portfolio stats
  */
-export async function getPortfolioStats(userId) {
+export async function getPortfolioStats(userId: string): Promise<ApiResponse<PortfolioStats>> {
   try {
-    // Fetch all holdings
     const { data: holdings } = await fetchHoldings(userId);
 
     if (!holdings || holdings.length === 0) {
@@ -303,13 +319,11 @@ export async function getPortfolioStats(userId) {
       };
     }
 
-    // Calculate totals
     const totalValue = holdings.reduce((sum, h) => sum + (h.current_value || 0), 0);
     const totalCost = holdings.reduce((sum, h) => sum + (h.total_cost || 0), 0);
     const totalPnl = totalValue - totalCost;
     const totalPnlPercent = totalCost > 0 ? (totalPnl / totalCost) * 100 : 0;
 
-    // Find top gainer and loser
     const sortedByPnlPercent = [...holdings].sort((a, b) =>
       (b.unrealized_pnl_percent || 0) - (a.unrealized_pnl_percent || 0)
     );
@@ -332,7 +346,7 @@ export async function getPortfolioStats(userId) {
     };
   } catch (error) {
     console.error('Error calculating portfolio stats:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
@@ -342,11 +356,11 @@ export async function getPortfolioStats(userId) {
 
 /**
  * Analyze entry type performance (RETEST vs BREAKOUT vs OTHER)
- * @returns {Promise<Object>} Entry type analytics
  */
-export async function getEntryTypeAnalytics(userId) {
+export async function getEntryTypeAnalytics(
+  userId: string
+): Promise<ApiResponse<EntryTypeAnalytics>> {
   try {
-    // Fetch all SELL transactions (closed positions with realized P&L)
     const { data: transactions } = await supabase
       .from('portfolio_transactions')
       .select('*')
@@ -355,7 +369,9 @@ export async function getEntryTypeAnalytics(userId) {
       .not('realized_pnl', 'is', null)
       .order('transaction_at', { ascending: false });
 
-    if (!transactions || transactions.length === 0) {
+    const typedTransactions = transactions as PortfolioTransaction[] | null;
+
+    if (!typedTransactions || typedTransactions.length === 0) {
       return {
         data: {
           retest: { trades: 0, winRate: 0, avgPnl: 0, avgRR: 0, totalProfit: 0 },
@@ -368,15 +384,13 @@ export async function getEntryTypeAnalytics(userId) {
       };
     }
 
-    // Group by entry type
     const byEntryType = {
-      RETEST: transactions.filter(t => t.entry_type === 'RETEST'),
-      BREAKOUT: transactions.filter(t => t.entry_type === 'BREAKOUT'),
-      OTHER: transactions.filter(t => t.entry_type === 'OTHER')
+      RETEST: typedTransactions.filter(t => t.entry_type === 'RETEST'),
+      BREAKOUT: typedTransactions.filter(t => t.entry_type === 'BREAKOUT'),
+      OTHER: typedTransactions.filter(t => t.entry_type === 'OTHER')
     };
 
-    // Calculate stats for each entry type
-    const calculateStats = (trades) => {
+    const calculateStats = (trades: PortfolioTransaction[]): EntryTypeStats => {
       if (trades.length === 0) {
         return { trades: 0, winRate: 0, avgPnl: 0, avgRR: 0, totalProfit: 0 };
       }
@@ -386,9 +400,9 @@ export async function getEntryTypeAnalytics(userId) {
       const totalProfit = trades.reduce((sum, t) => sum + (t.realized_pnl || 0), 0);
       const avgPnl = totalProfit / trades.length;
 
-      const rrTrades = trades.filter(t => t.risk_reward_ratio);
+      const rrTrades = trades.filter(t => t.risk_reward_ratio !== null);
       const avgRR = rrTrades.length > 0
-        ? rrTrades.reduce((sum, t) => sum + t.risk_reward_ratio, 0) / rrTrades.length
+        ? rrTrades.reduce((sum, t) => sum + (t.risk_reward_ratio || 0), 0) / rrTrades.length
         : 0;
 
       return {
@@ -406,16 +420,14 @@ export async function getEntryTypeAnalytics(userId) {
     const breakoutStats = calculateStats(byEntryType.BREAKOUT);
     const otherStats = calculateStats(byEntryType.OTHER);
 
-    // Overall stats
-    const overallWins = transactions.filter(t => (t.realized_pnl || 0) > 0);
+    const overallWins = typedTransactions.filter(t => (t.realized_pnl || 0) > 0);
     const overallStats = {
-      trades: transactions.length,
-      winRate: parseFloat(((overallWins.length / transactions.length) * 100).toFixed(2)),
-      avgPnl: parseFloat((transactions.reduce((sum, t) => sum + (t.realized_pnl || 0), 0) / transactions.length).toFixed(2)),
-      totalProfit: parseFloat(transactions.reduce((sum, t) => sum + (t.realized_pnl || 0), 0).toFixed(2))
+      trades: typedTransactions.length,
+      winRate: parseFloat(((overallWins.length / typedTransactions.length) * 100).toFixed(2)),
+      avgPnl: parseFloat((typedTransactions.reduce((sum, t) => sum + (t.realized_pnl || 0), 0) / typedTransactions.length).toFixed(2)),
+      totalProfit: parseFloat(typedTransactions.reduce((sum, t) => sum + (t.realized_pnl || 0), 0).toFixed(2))
     };
 
-    // Generate recommendation
     let recommendation = 'CHỈ TRADE RETEST!';
     if (retestStats.winRate > breakoutStats.winRate && retestStats.trades >= 5) {
       recommendation = `✅ RETEST has ${(retestStats.winRate - breakoutStats.winRate).toFixed(1)}% higher win rate! CHỈ TRADE RETEST!`;
@@ -430,7 +442,6 @@ export async function getEntryTypeAnalytics(userId) {
         other: otherStats,
         overall: overallStats,
         recommendation,
-        // Chart data
         comparisonData: [
           { type: 'RETEST', winRate: retestStats.winRate, avgPnl: retestStats.avgPnl, trades: retestStats.trades },
           { type: 'BREAKOUT', winRate: breakoutStats.winRate, avgPnl: breakoutStats.avgPnl, trades: breakoutStats.trades },
@@ -441,37 +452,44 @@ export async function getEntryTypeAnalytics(userId) {
     };
   } catch (error) {
     console.error('Error calculating entry type analytics:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
 /**
  * Get entry type distribution (pie chart data)
- * @returns {Promise<Object>} Entry type distribution
  */
-export async function getEntryTypeDistribution(userId) {
+export async function getEntryTypeDistribution(
+  userId: string
+): Promise<ApiResponse<EntryTypeDistribution[]>> {
   try {
     const { data: transactions } = await supabase
       .from('portfolio_transactions')
       .select('entry_type')
       .eq('user_id', userId)
-      .eq('transaction_type', 'BUY'); // Only count entries
+      .eq('transaction_type', 'BUY');
 
-    if (!transactions || transactions.length === 0) {
+    interface EntryTypeRecord {
+      entry_type: string;
+    }
+
+    const typedTransactions = transactions as EntryTypeRecord[] | null;
+
+    if (!typedTransactions || typedTransactions.length === 0) {
       return {
         data: [
-          { type: 'RETEST', count: 0, percentage: 0 },
-          { type: 'BREAKOUT', count: 0, percentage: 0 },
-          { type: 'OTHER', count: 0, percentage: 0 }
+          { type: 'RETEST', count: 0, percentage: '0' },
+          { type: 'BREAKOUT', count: 0, percentage: '0' },
+          { type: 'OTHER', count: 0, percentage: '0' }
         ],
         error: null
       };
     }
 
-    const retestCount = transactions.filter(t => t.entry_type === 'RETEST').length;
-    const breakoutCount = transactions.filter(t => t.entry_type === 'BREAKOUT').length;
-    const otherCount = transactions.filter(t => t.entry_type === 'OTHER').length;
-    const total = transactions.length;
+    const retestCount = typedTransactions.filter(t => t.entry_type === 'RETEST').length;
+    const breakoutCount = typedTransactions.filter(t => t.entry_type === 'BREAKOUT').length;
+    const otherCount = typedTransactions.filter(t => t.entry_type === 'OTHER').length;
+    const total = typedTransactions.length;
 
     return {
       data: [
@@ -483,7 +501,7 @@ export async function getEntryTypeDistribution(userId) {
     };
   } catch (error) {
     console.error('Error getting entry type distribution:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
@@ -493,10 +511,8 @@ export async function getEntryTypeDistribution(userId) {
 
 /**
  * Fetch all journal entries for user
- * @param {string} userId - User ID
- * @returns {Promise<Object>} Journal entries
  */
-export async function fetchJournalEntries(userId) {
+export async function fetchJournalEntries(userId: string): Promise<ApiResponse<JournalEntry[]>> {
   try {
     const { data, error } = await supabase
       .from('trading_journal')
@@ -505,20 +521,20 @@ export async function fetchJournalEntries(userId) {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return { data, error: null };
+    return { data: data as JournalEntry[], error: null };
   } catch (error) {
     console.error('Error fetching journal entries:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
 /**
  * Add new journal entry
- * @param {string} userId - User ID
- * @param {Object} entry - Entry data
- * @returns {Promise<Object>} Created entry
  */
-export async function addJournalEntry(userId, entry) {
+export async function addJournalEntry(
+  userId: string,
+  entry: NewJournalEntryInput
+): Promise<ApiResponse<JournalEntry>> {
   try {
     const { data, error } = await supabase
       .from('trading_journal')
@@ -526,27 +542,27 @@ export async function addJournalEntry(userId, entry) {
         user_id: userId,
         title: entry.title,
         content: entry.content,
-        tags: entry.tags || [],
-        entry_date: entry.date || new Date().toISOString(),
+        tags: entry.tags ?? [],
+        entry_date: entry.date ?? new Date().toISOString(),
       }])
       .select()
       .single();
 
     if (error) throw error;
-    return { data, error: null };
+    return { data: data as JournalEntry, error: null };
   } catch (error) {
     console.error('Error adding journal entry:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
 /**
  * Update journal entry
- * @param {string} entryId - Entry ID
- * @param {Object} updates - Fields to update
- * @returns {Promise<Object>} Updated entry
  */
-export async function updateJournalEntry(entryId, updates) {
+export async function updateJournalEntry(
+  entryId: string,
+  updates: Partial<NewJournalEntryInput>
+): Promise<ApiResponse<JournalEntry>> {
   try {
     const { data, error } = await supabase
       .from('trading_journal')
@@ -562,19 +578,17 @@ export async function updateJournalEntry(entryId, updates) {
       .single();
 
     if (error) throw error;
-    return { data, error: null };
+    return { data: data as JournalEntry, error: null };
   } catch (error) {
     console.error('Error updating journal entry:', error);
-    return { data: null, error };
+    return { data: null, error: error as Error };
   }
 }
 
 /**
  * Delete journal entry
- * @param {string} entryId - Entry ID
- * @returns {Promise<Object>} Success status
  */
-export async function deleteJournalEntry(entryId) {
+export async function deleteJournalEntry(entryId: string): Promise<OperationResult> {
   try {
     const { error } = await supabase
       .from('trading_journal')
@@ -585,25 +599,21 @@ export async function deleteJournalEntry(entryId) {
     return { success: true, error: null };
   } catch (error) {
     console.error('Error deleting journal entry:', error);
-    return { success: false, error };
+    return { success: false, error: error as Error };
   }
 }
 
 export default {
-  // Holdings
   fetchHoldings,
   addHolding,
   updateHolding,
   deleteHolding,
   updateHoldingPrices,
-  // Transactions
   fetchTransactions,
   addTransaction,
-  // Stats
   getPortfolioStats,
   getEntryTypeAnalytics,
   getEntryTypeDistribution,
-  // Journal
   fetchJournalEntries,
   addJournalEntry,
   updateJournalEntry,

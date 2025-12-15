@@ -6,27 +6,63 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from './useAuth';
+import type { PatternCode, Timeframe, TimeframeDisplay, TierLevel } from '../types';
 
-export function useScanHistory() {
+/** Scan history record from database */
+interface ScanHistoryRecord {
+  id: string;
+  user_id: string;
+  symbols: string[];
+  patterns_found: Record<string, PatternCode[]>;
+  timeframe: Timeframe | TimeframeDisplay;
+  tier_at_scan: TierLevel;
+  created_at: string;
+}
+
+/** Input for saving a scan */
+interface SaveScanInput {
+  symbols: string[];
+  patternsFound: Record<string, PatternCode[]>;
+  timeframe: Timeframe | TimeframeDisplay;
+}
+
+/** Scan statistics */
+interface ScanStats {
+  totalScans: number;
+  totalPatterns: number;
+  mostScannedSymbol: string | null;
+  mostCommonTimeframe: string | null;
+}
+
+/** Operation result */
+interface OperationResult<T = unknown> {
+  success: boolean;
+  data?: T;
+}
+
+/** Scan history hook return type */
+interface UseScanHistoryReturn {
+  history: ScanHistoryRecord[];
+  loading: boolean;
+  error: string | null;
+  saveScan: (input: SaveScanInput) => Promise<OperationResult<ScanHistoryRecord>>;
+  deleteScan: (scanId: string) => Promise<OperationResult>;
+  clearHistory: () => Promise<OperationResult>;
+  reloadHistory: (limit?: number) => Promise<void>;
+  getStats: () => ScanStats;
+  getRecentScans: (count?: number) => ScanHistoryRecord[];
+}
+
+export function useScanHistory(): UseScanHistoryReturn {
   const { user, profile } = useAuth();
-  const [history, setHistory] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // Load history on mount and when user changes
-  useEffect(() => {
-    if (user) {
-      loadHistory();
-    } else {
-      setHistory([]);
-      setLoading(false);
-    }
-  }, [user]);
+  const [history, setHistory] = useState<ScanHistoryRecord[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   /**
    * Load scan history from database
    */
-  const loadHistory = async (limit = 50) => {
+  const loadHistory = async (limit: number = 50): Promise<void> => {
     if (!user) return;
 
     try {
@@ -42,20 +78,31 @@ export function useScanHistory() {
 
       if (historyError) throw historyError;
 
-      setHistory(data || []);
+      setHistory((data as ScanHistoryRecord[]) || []);
     } catch (err) {
       console.error('Error loading history:', err);
-      setError(err.message);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load history';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
+  // Load history on mount and when user changes
+  useEffect(() => {
+    if (user) {
+      loadHistory();
+    } else {
+      setHistory([]);
+      setLoading(false);
+    }
+  }, [user]);
+
   /**
    * Save a new scan to history
    */
   const saveScan = useCallback(
-    async ({ symbols, patternsFound, timeframe }) => {
+    async ({ symbols, patternsFound, timeframe }: SaveScanInput): Promise<OperationResult<ScanHistoryRecord>> => {
       if (!user) {
         throw new Error('User not authenticated');
       }
@@ -78,10 +125,12 @@ export function useScanHistory() {
 
         if (saveError) throw saveError;
 
-        // Add to local state
-        setHistory((prev) => [data, ...prev]);
+        const savedRecord = data as ScanHistoryRecord;
 
-        return { success: true, data };
+        // Add to local state
+        setHistory((prev) => [savedRecord, ...prev]);
+
+        return { success: true, data: savedRecord };
       } catch (err) {
         console.error('Error saving scan:', err);
         throw err;
@@ -94,15 +143,15 @@ export function useScanHistory() {
    * Delete a scan from history
    */
   const deleteScan = useCallback(
-    async (scanId) => {
-      if (!user) return;
+    async (scanId: string): Promise<OperationResult> => {
+      if (!user) return { success: false };
 
       try {
         const { error: deleteError } = await supabase
           .from('scan_history')
           .delete()
           .eq('id', scanId)
-          .eq('user_id', user.id); // Security: only delete own scans
+          .eq('user_id', user.id);
 
         if (deleteError) throw deleteError;
 
@@ -121,8 +170,8 @@ export function useScanHistory() {
   /**
    * Clear all scan history
    */
-  const clearHistory = useCallback(async () => {
-    if (!user) return;
+  const clearHistory = useCallback(async (): Promise<OperationResult> => {
+    if (!user) return { success: false };
 
     try {
       const { error: deleteError } = await supabase
@@ -144,7 +193,7 @@ export function useScanHistory() {
   /**
    * Get scan statistics
    */
-  const getStats = useCallback(() => {
+  const getStats = useCallback((): ScanStats => {
     if (!history.length) {
       return {
         totalScans: 0,
@@ -161,24 +210,22 @@ export function useScanHistory() {
     }, 0);
 
     // Find most scanned symbol
-    const symbolCounts = {};
+    const symbolCounts: Record<string, number> = {};
     history.forEach((scan) => {
       scan.symbols.forEach((symbol) => {
         symbolCounts[symbol] = (symbolCounts[symbol] || 0) + 1;
       });
     });
-    const mostScannedSymbol = Object.entries(symbolCounts).sort(
-      (a, b) => b[1] - a[1]
-    )[0]?.[0];
+    const sortedSymbols = Object.entries(symbolCounts).sort((a, b) => b[1] - a[1]);
+    const mostScannedSymbol = sortedSymbols[0]?.[0] ?? null;
 
     // Find most common timeframe
-    const timeframeCounts = {};
+    const timeframeCounts: Record<string, number> = {};
     history.forEach((scan) => {
       timeframeCounts[scan.timeframe] = (timeframeCounts[scan.timeframe] || 0) + 1;
     });
-    const mostCommonTimeframe = Object.entries(timeframeCounts).sort(
-      (a, b) => b[1] - a[1]
-    )[0]?.[0];
+    const sortedTimeframes = Object.entries(timeframeCounts).sort((a, b) => b[1] - a[1]);
+    const mostCommonTimeframe = sortedTimeframes[0]?.[0] ?? null;
 
     return {
       totalScans: history.length,
@@ -192,7 +239,7 @@ export function useScanHistory() {
    * Get recent scans (last N)
    */
   const getRecentScans = useCallback(
-    (count = 10) => {
+    (count: number = 10): ScanHistoryRecord[] => {
       return history.slice(0, count);
     },
     [history]
