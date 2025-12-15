@@ -3,41 +3,46 @@
  * GEM Trading Platform - Backend Integration
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
+import type { UserProfile } from '../types';
 
 // Environment variables from .env.local
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
 // Validate environment variables
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('❌ Missing Supabase environment variables!');
+  console.error('Missing Supabase environment variables!');
   console.error('Please create .env.local file with:');
   console.error('- VITE_SUPABASE_URL');
   console.error('- VITE_SUPABASE_ANON_KEY');
 }
 
 // Create Supabase client
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-    storage: window.localStorage,
-  },
-});
+export const supabase: SupabaseClient = createClient(
+  supabaseUrl ?? '',
+  supabaseAnonKey ?? '',
+  {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+    },
+  }
+);
 
 /**
  * Check if Supabase is properly configured
  */
-export const isSupabaseConfigured = () => {
+export const isSupabaseConfigured = (): boolean => {
   return !!(supabaseUrl && supabaseAnonKey);
 };
 
 /**
  * Get current user
  */
-export const getCurrentUser = async () => {
+export const getCurrentUser = async (): Promise<User | null> => {
   try {
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error) throw error;
@@ -51,7 +56,7 @@ export const getCurrentUser = async () => {
 /**
  * Get user profile with tier information
  */
-export const getUserProfile = async (userId) => {
+export const getUserProfile = async (userId: string): Promise<UserProfile | null> => {
   try {
     const { data, error } = await supabase
       .from('users')
@@ -60,7 +65,7 @@ export const getUserProfile = async (userId) => {
       .single();
 
     if (error) throw error;
-    return data;
+    return data as UserProfile;
   } catch (error) {
     console.error('Error fetching user profile:', error);
     return null;
