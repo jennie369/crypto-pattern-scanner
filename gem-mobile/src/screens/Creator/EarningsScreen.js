@@ -31,6 +31,7 @@ import {
   ChevronRight,
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS } from '../../utils/tokens';
+import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
 import earningsService from '../../services/earningsService';
 import walletService from '../../services/walletService';
 
@@ -343,7 +344,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: SPACING.lg,
-    paddingBottom: 100,
+    paddingBottom: CONTENT_BOTTOM_PADDING + 60,
   },
   balanceCard: {
     borderRadius: GLASS.borderRadius,

@@ -2,13 +2,17 @@
  * Gemral - Wallet Service
  * Feature #14: Virtual Currency
  * Handles wallet operations and transactions
+ *
+ * IMPORTANT: Gem balance is now unified to profiles.gems
+ * This service reads from profiles.gems as the single source of truth
+ * user_wallets is kept for backwards compatibility and synced via trigger
  */
 
 import { supabase } from './supabase';
 
 export const walletService = {
   /**
-   * Get user's wallet
+   * Get user's wallet - NOW READS FROM profiles.gems
    * @returns {Promise<object>}
    */
   async getWallet() {
@@ -18,64 +22,47 @@ export const walletService = {
         return { success: false, error: 'Chưa đăng nhập' };
       }
 
-      // Get or create wallet
+      // PRIMARY: Get gem balance from profiles.gems (single source of truth)
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('gems')
+        .eq('id', user.id)
+        .single();
+
+      const gemBalance = profile?.gems || 0;
+
+      // SECONDARY: Get additional wallet info (diamonds, stats) if available
       let { data: wallet, error } = await supabase
         .from('user_wallets')
         .select('*')
         .eq('user_id', user.id)
         .single();
 
-      // Table doesn't exist - return default wallet
-      if (error && error.code === 'PGRST205') {
-        console.warn('[Wallet] Table user_wallets not found, using default values');
+      // If wallet doesn't exist or table not found, return with profile gems
+      if (error) {
         return {
           success: true,
           data: {
             id: null,
             user_id: user.id,
-            gem_balance: 0,
+            gem_balance: gemBalance, // From profiles.gems
             diamond_balance: 0,
-            total_earned: 0,
+            total_earned: gemBalance,
             total_spent: 0,
           },
         };
       }
 
-      // If wallet doesn't exist, create one
-      if (error && error.code === 'PGRST116') {
-        const { data: newWallet, error: createError } = await supabase
-          .from('user_wallets')
-          .insert({ user_id: user.id })
-          .select()
-          .single();
-
-        if (createError) {
-          // Table might not exist
-          if (createError.code === 'PGRST205' || createError.code === '42P01') {
-            console.warn('[Wallet] Cannot create wallet - table not found');
-            return {
-              success: true,
-              data: {
-                id: null,
-                user_id: user.id,
-                gem_balance: 0,
-                diamond_balance: 0,
-                total_earned: 0,
-                total_spent: 0,
-              },
-            };
-          }
-          throw createError;
-        }
-        wallet = newWallet;
-      } else if (error) {
-        throw error;
-      }
-
-      return { success: true, data: wallet };
+      // Return wallet with gem_balance from profiles.gems
+      return {
+        success: true,
+        data: {
+          ...wallet,
+          gem_balance: gemBalance, // Override with profiles.gems
+        },
+      };
     } catch (error) {
       console.error('[Wallet] Get wallet error:', error);
-      // Return default wallet on any error to prevent app crash
       return {
         success: true,
         data: {
@@ -91,21 +78,53 @@ export const walletService = {
   },
 
   /**
-   * Get wallet balance
+   * Get wallet balance - NOW READS FROM profiles.gems
    * @returns {Promise<object>}
    */
   async getBalance() {
     try {
-      const result = await this.getWallet();
-      if (!result.success) return result;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        return { success: false, error: 'Chưa đăng nhập' };
+      }
+
+      // Use RPC function for gem balance (single source of truth)
+      const { data: gemBalance, error: rpcError } = await supabase
+        .rpc('get_gem_balance', { p_user_id: user.id });
+
+      if (rpcError) {
+        // Fallback: direct query to profiles.gems
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('gems')
+          .eq('id', user.id)
+          .single();
+
+        return {
+          success: true,
+          data: {
+            gems: profile?.gems || 0,
+            diamonds: 0,
+            totalEarned: profile?.gems || 0,
+            totalSpent: 0,
+          },
+        };
+      }
+
+      // Get additional stats from user_wallets if available
+      const { data: wallet } = await supabase
+        .from('user_wallets')
+        .select('diamond_balance, total_earned, total_spent')
+        .eq('user_id', user.id)
+        .single();
 
       return {
         success: true,
         data: {
-          gems: result.data.gem_balance || 0,
-          diamonds: result.data.diamond_balance || 0,
-          totalEarned: result.data.total_earned || 0,
-          totalSpent: result.data.total_spent || 0,
+          gems: gemBalance || 0,
+          diamonds: wallet?.diamond_balance || 0,
+          totalEarned: wallet?.total_earned || gemBalance || 0,
+          totalSpent: wallet?.total_spent || 0,
         },
       };
     } catch (error) {
@@ -115,7 +134,7 @@ export const walletService = {
   },
 
   /**
-   * Get transaction history
+   * Get transaction history - now uses gems_transactions table
    * @param {number} limit - Max results
    * @param {number} offset - Offset for pagination
    * @returns {Promise<array>}
@@ -125,18 +144,34 @@ export const walletService = {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return [];
 
-      // First get the wallet ID
-      const { data: wallet, error: walletError } = await supabase
+      // PRIMARY: Try gems_transactions table first
+      const { data: gemsTxns, error: gemsError } = await supabase
+        .from('gems_transactions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
+
+      if (!gemsError && gemsTxns && gemsTxns.length > 0) {
+        // Map to wallet_transactions format for compatibility
+        return gemsTxns.map(tx => ({
+          id: tx.id,
+          type: tx.type,
+          currency: 'gem',
+          amount: tx.amount,
+          description: tx.description,
+          reference_id: tx.reference_id,
+          reference_type: tx.reference_type,
+          created_at: tx.created_at,
+        }));
+      }
+
+      // FALLBACK: Try wallet_transactions table
+      const { data: wallet } = await supabase
         .from('user_wallets')
         .select('id')
         .eq('user_id', user.id)
         .single();
-
-      // Table doesn't exist or wallet not found
-      if (walletError && (walletError.code === 'PGRST205' || walletError.code === 'PGRST116')) {
-        console.warn('[Wallet] Cannot get transactions - wallet table not found');
-        return [];
-      }
 
       if (!wallet) return [];
 
@@ -147,13 +182,11 @@ export const walletService = {
         .order('created_at', { ascending: false })
         .range(offset, offset + limit - 1);
 
-      // Table doesn't exist
-      if (error && error.code === 'PGRST205') {
-        console.warn('[Wallet] wallet_transactions table not found');
+      if (error) {
+        console.warn('[Wallet] wallet_transactions error:', error);
         return [];
       }
 
-      if (error) throw error;
       return data || [];
     } catch (error) {
       console.error('[Wallet] Get transactions error:', error);
@@ -280,6 +313,7 @@ export const walletService = {
 
   /**
    * Spend gems (internal use for gifts, etc.)
+   * NOW USES RPC to properly deduct from profiles.gems
    * @param {number} amount - Amount to spend
    * @param {string} description - Transaction description
    * @param {string} referenceId - Reference ID (e.g., gift ID)
@@ -293,41 +327,107 @@ export const walletService = {
         return { success: false, error: 'Chưa đăng nhập' };
       }
 
-      const walletResult = await this.getWallet();
-      if (!walletResult.success) return walletResult;
+      // Use RPC function to properly deduct from profiles.gems
+      const { data: rpcResult, error: rpcError } = await supabase
+        .rpc('spend_gems', {
+          p_user_id: user.id,
+          p_amount: amount,
+          p_description: description,
+          p_reference_id: referenceId,
+          p_reference_type: referenceType,
+        });
 
-      if (walletResult.data.gem_balance < amount) {
+      if (rpcError) {
+        console.warn('[Wallet] RPC spend_gems error, falling back:', rpcError.message, rpcError.code);
+        // Fallback: direct update to profiles.gems
+        return await this._spendGemsFallback(user.id, amount, description, referenceId, referenceType);
+      }
+
+      // RPC can return different formats - handle all cases
+      // Format 1: { success: true/false, new_balance: number, error: string }
+      // Format 2: just new_balance as number
+      // Format 3: null/undefined on success
+      if (rpcResult === null || rpcResult === undefined) {
+        // RPC returned nothing - assume success, verify by checking balance
+        console.log('[Wallet] RPC returned null, assuming success');
+        return { success: true, data: { gem_balance: null } };
+      }
+
+      if (typeof rpcResult === 'object' && rpcResult.success === false) {
+        return { success: false, error: rpcResult.error || 'Không đủ gems' };
+      }
+
+      // Extract new balance from result
+      const newBalance = typeof rpcResult === 'number' ? rpcResult : rpcResult?.new_balance;
+      console.log('[Wallet] Spent gems via RPC:', amount, '- New balance:', newBalance);
+      return { success: true, data: { gem_balance: newBalance } };
+    } catch (error) {
+      console.error('[Wallet] Spend error:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  /**
+   * Fallback method for spending gems (direct update)
+   */
+  async _spendGemsFallback(userId, amount, description, referenceId, referenceType) {
+    try {
+      // Get current balance from profiles.gems
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('gems')
+        .eq('id', userId)
+        .single();
+
+      const currentBalance = profile?.gems || 0;
+
+      if (currentBalance < amount) {
         return { success: false, error: 'Không đủ gems' };
       }
 
-      // Update balance
-      const { data: updatedWallet, error: updateError } = await supabase
-        .from('user_wallets')
-        .update({
-          gem_balance: walletResult.data.gem_balance - amount,
-          total_spent: walletResult.data.total_spent + amount,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', walletResult.data.id)
-        .select()
-        .single();
+      // Deduct from profiles.gems
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ gems: currentBalance - amount })
+        .eq('id', userId);
 
       if (updateError) throw updateError;
 
-      // Record transaction
-      await supabase.from('wallet_transactions').insert({
-        wallet_id: walletResult.data.id,
-        type: 'gift_sent',
-        currency: 'gem',
-        amount: -amount,
-        description,
-        reference_id: referenceId,
-        reference_type: referenceType,
-      });
+      // Also try to update user_wallets for backwards compatibility
+      await supabase
+        .from('user_wallets')
+        .update({
+          gem_balance: currentBalance - amount,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', userId);
 
-      return { success: true, data: updatedWallet };
+      // Try to record transaction in gems_transactions (ignore errors)
+      // IMPORTANT: Use 'spend' type to match CHECK constraint: ('spend', 'receive', 'purchase', 'bonus', 'refund')
+      // The reference_type field distinguishes gift sends from other spends
+      try {
+        const { error: txError } = await supabase.from('gems_transactions').insert({
+          user_id: userId,
+          type: 'spend', // Must match CHECK constraint
+          amount: -amount, // Negative for spending
+          description,
+          reference_id: referenceId,
+          reference_type: referenceType, // 'gift' for gift sends
+        });
+        if (txError) {
+          console.log('[Wallet] Transaction log failed:', txError.message, txError.code);
+        } else {
+          console.log('[Wallet] Transaction recorded: spend', -amount, 'reference_type:', referenceType);
+        }
+      } catch (txError) {
+        // Ignore transaction logging errors
+        console.log('[Wallet] Transaction log exception:', txError.message);
+      }
+
+      console.log('[Wallet] Spent gems via fallback:', amount);
+      return { success: true, data: { gem_balance: currentBalance - amount } };
     } catch (error) {
-      console.error('[Wallet] Spend error:', error);
+      console.error('[Wallet] Fallback spend error:', error);
       return { success: false, error: error.message };
     }
   },

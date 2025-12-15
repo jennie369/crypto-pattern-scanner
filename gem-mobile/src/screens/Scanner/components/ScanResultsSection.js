@@ -1,14 +1,15 @@
 /**
- * GEM Mobile - Scan Results Section
- * Displays scan results with patterns found
+ * GEM Mobile - Scan Results Section (Upgraded)
+ * Issue #16 & #17: Merge Scan Results + Detected Patterns
+ * Uses CoinAccordion for grouped display by coin
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
-  FlatList,
+  ScrollView,
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
@@ -17,122 +18,128 @@ import {
   TrendingDown,
   Filter,
   CheckCircle,
-  XCircle,
-  ChevronRight,
   BarChart2,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../../utils/tokens';
+import { formatConfidence } from '../../../utils/formatters';
+import CoinAccordion from '../../../components/Trading/CoinAccordion';
 
 const ScanResultsSection = ({
   results = [],
   isScanning = false,
   onSelectCoin,
+  onSelectPattern,
+  onPaperTrade,
   selectedCoin,
+  selectedPatternId,
+  userTier = 'FREE',
 }) => {
-  const [showOnlyWithPatterns, setShowOnlyWithPatterns] = useState(false);
+  const [showOnlyWithPatterns, setShowOnlyWithPatterns] = useState(true);
+  // Changed: Only ONE coin can be expanded at a time (string instead of Set)
+  const [expandedCoin, setExpandedCoin] = useState(null);
 
-  // Filter results
+  // Filter results - only coins with patterns by default
   const filteredResults = useMemo(() => {
+    let filtered = results;
     if (showOnlyWithPatterns) {
-      return results.filter(r => r.patterns && r.patterns.length > 0);
+      filtered = results.filter(r => r.patterns && r.patterns.length > 0);
     }
-    return results;
+    // Sort by pattern count (most patterns first)
+    return [...filtered].sort((a, b) =>
+      (b.patterns?.length || 0) - (a.patterns?.length || 0)
+    );
   }, [results, showOnlyWithPatterns]);
+
+  // Group patterns by coin
+  const groupedByCoin = useMemo(() => {
+    const groups = {};
+    filteredResults.forEach(result => {
+      if (result.patterns && result.patterns.length > 0) {
+        groups[result.symbol] = {
+          coin: {
+            symbol: result.symbol,
+            baseAsset: result.symbol?.replace('USDT', ''),
+          },
+          patterns: result.patterns.map((p, idx) => ({
+            ...p,
+            id: `${result.symbol}-${p.name || p.type}-${idx}`,
+            symbol: result.symbol,
+          })),
+        };
+      }
+    });
+    return groups;
+  }, [filteredResults]);
 
   // Stats
   const stats = useMemo(() => {
     const withPatterns = results.filter(r => r.patterns && r.patterns.length > 0).length;
     const totalPatterns = results.reduce((sum, r) => sum + (r.patterns?.length || 0), 0);
+    const longPatterns = results.reduce((sum, r) =>
+      sum + (r.patterns?.filter(p => p.direction === 'LONG')?.length || 0), 0
+    );
+    const shortPatterns = totalPatterns - longPatterns;
+
     return {
       total: results.length,
       withPatterns,
       totalPatterns,
+      longPatterns,
+      shortPatterns,
     };
   }, [results]);
+
+  // Toggle accordion - ONLY ONE coin open at a time
+  // Also selects the coin on chart when expanding
+  const toggleCoin = useCallback((symbol) => {
+    if (expandedCoin === symbol) {
+      // Close if already open
+      setExpandedCoin(null);
+    } else {
+      // Open this coin, close others
+      setExpandedCoin(symbol);
+      // Also select this coin on chart
+      onSelectCoin?.(symbol);
+    }
+  }, [expandedCoin, onSelectCoin]);
+
+  // Expand first coin with patterns
+  const expandFirst = () => {
+    const firstSymbol = Object.keys(groupedByCoin)[0];
+    if (firstSymbol) {
+      setExpandedCoin(firstSymbol);
+      onSelectCoin?.(firstSymbol);
+    }
+  };
+
+  // Collapse all
+  const collapseAll = () => {
+    setExpandedCoin(null);
+  };
+
+  // Handle pattern selection
+  const handleSelectPattern = useCallback((pattern) => {
+    onSelectCoin?.(pattern.symbol);
+    onSelectPattern?.(pattern);
+  }, [onSelectCoin, onSelectPattern]);
 
   if (isScanning) {
     return (
       <View style={styles.container}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.gold} />
-          <Text style={styles.loadingText}>Scanning for patterns...</Text>
-          <Text style={styles.loadingSubtext}>This may take a moment</Text>
+          <Text style={styles.loadingText}>Đang quét pattern...</Text>
+          <Text style={styles.loadingSubtext}>Vui lòng đợi trong giây lát</Text>
         </View>
       </View>
     );
   }
 
   if (results.length === 0) {
-    return null; // Don't show section if no results yet
+    return null;
   }
-
-  const renderResultItem = ({ item }) => {
-    const hasPatterns = item.patterns && item.patterns.length > 0;
-    const bestPattern = hasPatterns ? item.patterns[0] : null;
-    const isSelected = selectedCoin === item.symbol;
-
-    return (
-      <TouchableOpacity
-        style={[styles.resultItem, isSelected && styles.resultItemSelected]}
-        onPress={() => onSelectCoin?.(item.symbol)}
-        activeOpacity={0.7}
-      >
-        <View style={styles.resultLeft}>
-          {/* Status Icon */}
-          <View style={[styles.statusIcon, hasPatterns ? styles.statusSuccess : styles.statusNone]}>
-            {hasPatterns ? (
-              <CheckCircle size={18} color={COLORS.success} />
-            ) : (
-              <XCircle size={18} color={COLORS.textMuted} />
-            )}
-          </View>
-
-          {/* Coin Info */}
-          <View style={styles.coinInfo}>
-            <Text style={styles.coinSymbol}>
-              {item.symbol?.replace('USDT', '')}/USDT
-            </Text>
-            {hasPatterns ? (
-              <View style={styles.patternBadge}>
-                <Text style={styles.patternCount}>
-                  {item.patterns.length} pattern{item.patterns.length > 1 ? 's' : ''}
-                </Text>
-              </View>
-            ) : (
-              <Text style={styles.noPattern}>No patterns</Text>
-            )}
-          </View>
-        </View>
-
-        {/* Best Pattern Info */}
-        {bestPattern && (
-          <View style={styles.resultRight}>
-            <View style={[
-              styles.directionBadge,
-              bestPattern.direction === 'LONG' ? styles.longBadge : styles.shortBadge
-            ]}>
-              {bestPattern.direction === 'LONG' ? (
-                <TrendingUp size={14} color={COLORS.success} />
-              ) : (
-                <TrendingDown size={14} color={COLORS.error} />
-              )}
-              <Text style={[
-                styles.directionText,
-                bestPattern.direction === 'LONG' ? styles.longText : styles.shortText
-              ]}>
-                {bestPattern.direction}
-              </Text>
-            </View>
-            <Text style={styles.confidenceText}>
-              {Math.round(bestPattern.confidence)}%
-            </Text>
-          </View>
-        )}
-
-        <ChevronRight size={18} color={COLORS.textMuted} />
-      </TouchableOpacity>
-    );
-  };
 
   return (
     <View style={styles.container}>
@@ -140,47 +147,87 @@ const ScanResultsSection = ({
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <BarChart2 size={20} color={COLORS.gold} />
-          <Text style={styles.headerTitle}>Scan Results</Text>
+          <Text style={styles.headerTitle}>Kết Quả Scan</Text>
         </View>
         <View style={styles.statsContainer}>
-          <Text style={styles.statText}>
-            <Text style={styles.statHighlight}>{stats.withPatterns}</Text>/{stats.total} coins
-          </Text>
-          <Text style={styles.statText}>
-            <Text style={styles.statHighlight}>{stats.totalPatterns}</Text> patterns
-          </Text>
+          <View style={styles.statBadge}>
+            <CheckCircle size={14} color="#22C55E" />
+            <Text style={styles.statValue}>{stats.withPatterns}</Text>
+            <Text style={styles.statLabel}>coins</Text>
+          </View>
+          <View style={styles.statBadge}>
+            <TrendingUp size={14} color="#22C55E" />
+            <Text style={[styles.statValue, styles.greenText]}>{stats.longPatterns}</Text>
+          </View>
+          <View style={styles.statBadge}>
+            <TrendingDown size={14} color="#EF4444" />
+            <Text style={[styles.statValue, styles.redText]}>{stats.shortPatterns}</Text>
+          </View>
         </View>
       </View>
 
-      {/* Filter Toggle */}
-      <TouchableOpacity
-        style={[styles.filterButton, showOnlyWithPatterns && styles.filterButtonActive]}
-        onPress={() => setShowOnlyWithPatterns(!showOnlyWithPatterns)}
-      >
-        <Filter size={16} color={showOnlyWithPatterns ? COLORS.gold : COLORS.textMuted} />
-        <Text style={[styles.filterText, showOnlyWithPatterns && styles.filterTextActive]}>
-          {showOnlyWithPatterns ? 'Showing patterns only' : 'Show all coins'}
-        </Text>
-      </TouchableOpacity>
+      {/* Controls Row */}
+      <View style={styles.controlsRow}>
+        {/* Filter Toggle */}
+        <TouchableOpacity
+          style={[styles.filterButton, showOnlyWithPatterns && styles.filterButtonActive]}
+          onPress={() => setShowOnlyWithPatterns(!showOnlyWithPatterns)}
+        >
+          <Filter size={14} color={showOnlyWithPatterns ? COLORS.gold : COLORS.textMuted} />
+          <Text style={[styles.filterText, showOnlyWithPatterns && styles.filterTextActive]}>
+            {showOnlyWithPatterns ? 'Có patterns' : 'Tất cả'}
+          </Text>
+        </TouchableOpacity>
 
-      {/* Results List */}
-      <FlatList
-        data={filteredResults}
-        renderItem={renderResultItem}
-        keyExtractor={(item) => item.symbol}
-        style={styles.list}
-        contentContainerStyle={styles.listContent}
+        {/* Expand First / Collapse All */}
+        <View style={styles.expandControls}>
+          <TouchableOpacity style={styles.expandBtn} onPress={expandFirst}>
+            <ChevronDown size={14} color={COLORS.textMuted} />
+            <Text style={styles.expandText}>Mở Đầu</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.expandBtn} onPress={collapseAll}>
+            <ChevronUp size={14} color={COLORS.textMuted} />
+            <Text style={styles.expandText}>Đóng</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Pattern Count */}
+        <Text style={styles.patternTotal}>
+          {stats.totalPatterns} patterns
+        </Text>
+      </View>
+
+      {/* Coin Accordions */}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
+        nestedScrollEnabled={true}
+      >
+        {Object.entries(groupedByCoin).map(([symbol, data]) => (
+          <CoinAccordion
+            key={symbol}
+            coin={data.coin}
+            patterns={data.patterns}
+            isExpanded={expandedCoin === symbol}
+            onToggle={() => toggleCoin(symbol)}
+            onSelectPattern={handleSelectPattern}
+            onPaperTrade={onPaperTrade}
+            selectedPatternId={selectedPatternId}
+            userTier={userTier}
+          />
+        ))}
+
+        {Object.keys(groupedByCoin).length === 0 && (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>
               {showOnlyWithPatterns
-                ? 'No patterns found in selected coins'
-                : 'No scan results yet'}
+                ? 'Không tìm thấy pattern nào'
+                : 'Chưa có kết quả scan'}
             </Text>
           </View>
-        }
-      />
+        )}
+      </ScrollView>
     </View>
   );
 };
@@ -194,23 +241,29 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(106, 91, 255, 0.3)',
     overflow: 'hidden',
+    minHeight: 1000, // FIXED: 5x increase from 200
+    maxHeight: 3000, // FIXED: 5x increase from 600
   },
+
   loadingContainer: {
     paddingVertical: SPACING.xxl * 2,
     alignItems: 'center',
     justifyContent: 'center',
   },
+
   loadingText: {
     fontSize: TYPOGRAPHY.fontSize.lg,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
     color: COLORS.textPrimary,
     marginTop: SPACING.lg,
   },
+
   loadingSubtext: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     color: COLORS.textMuted,
     marginTop: SPACING.xs,
   },
+
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -221,153 +274,129 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgba(106, 91, 255, 0.2)',
     backgroundColor: 'rgba(106, 91, 255, 0.1)',
   },
+
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
   },
+
   headerTitle: {
     fontSize: TYPOGRAPHY.fontSize.lg,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textPrimary,
   },
+
   statsContainer: {
     flexDirection: 'row',
-    gap: SPACING.md,
+    gap: SPACING.sm,
   },
-  statText: {
+
+  statBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+
+  statValue: {
     fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.gold,
+  },
+
+  statLabel: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
     color: COLORS.textMuted,
   },
-  statHighlight: {
-    color: COLORS.gold,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
+
+  greenText: {
+    color: '#22C55E',
   },
+
+  redText: {
+    color: '#EF4444',
+  },
+
+  controlsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.05)',
+  },
+
   filterButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: SPACING.xs,
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    marginHorizontal: SPACING.lg,
-    marginVertical: SPACING.sm,
+    gap: 4,
+    paddingVertical: 6,
+    paddingHorizontal: SPACING.sm,
     backgroundColor: GLASS.background,
-    borderRadius: 8,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: 'transparent',
   },
+
   filterButtonActive: {
     backgroundColor: 'rgba(255, 189, 89, 0.1)',
     borderColor: COLORS.gold,
   },
+
   filterText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontSize: TYPOGRAPHY.fontSize.xs,
     color: COLORS.textMuted,
   },
+
   filterTextActive: {
     color: COLORS.gold,
   },
-  list: {
-    flex: 1,
-    maxHeight: 300,
+
+  expandControls: {
+    flexDirection: 'row',
+    gap: SPACING.xs,
   },
-  listContent: {
-    paddingHorizontal: SPACING.md,
-    paddingBottom: SPACING.md,
-  },
-  resultItem: {
+
+  expandBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.sm,
-    marginVertical: SPACING.xs,
-    backgroundColor: GLASS.background,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  resultItemSelected: {
-    borderColor: COLORS.gold,
-    backgroundColor: 'rgba(255, 189, 89, 0.1)',
-  },
-  resultLeft: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  statusIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  statusSuccess: {
-    backgroundColor: 'rgba(0, 255, 136, 0.15)',
-  },
-  statusNone: {
-    backgroundColor: 'rgba(100, 100, 100, 0.2)',
-  },
-  coinInfo: {
-    flex: 1,
-  },
-  coinSymbol: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-  patternBadge: {
-    marginTop: 2,
-  },
-  patternCount: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.success,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
-  },
-  noPattern: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textMuted,
-    marginTop: 2,
-  },
-  resultRight: {
-    alignItems: 'flex-end',
-    marginRight: SPACING.sm,
-  },
-  directionBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.sm,
+    gap: 2,
     paddingVertical: 4,
-    borderRadius: 6,
-    gap: 4,
+    paddingHorizontal: SPACING.sm,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 4,
   },
-  longBadge: {
-    backgroundColor: 'rgba(0, 255, 136, 0.15)',
-  },
-  shortBadge: {
-    backgroundColor: 'rgba(255, 68, 68, 0.15)',
-  },
-  directionText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-  },
-  longText: {
-    color: COLORS.success,
-  },
-  shortText: {
-    color: COLORS.error,
-  },
-  confidenceText: {
+
+  expandText: {
     fontSize: TYPOGRAPHY.fontSize.xs,
     color: COLORS.textMuted,
-    marginTop: 2,
   },
+
+  patternTotal: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.purple,
+  },
+
+  scrollView: {
+    flex: 1,
+  },
+
+  scrollContent: {
+    padding: SPACING.sm,
+    paddingBottom: 500, // FIXED: 5x increase from 100
+  },
+
   emptyContainer: {
     paddingVertical: SPACING.xxl,
     alignItems: 'center',
   },
+
   emptyText: {
     fontSize: TYPOGRAPHY.fontSize.md,
     color: COLORS.textMuted,

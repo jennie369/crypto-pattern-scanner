@@ -3,9 +3,11 @@
  * Chat message bubble with avatar and export button for AI messages
  */
 
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { User, Sparkles, Download } from 'lucide-react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Pressable, ToastAndroid, Platform } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
+import * as Haptics from 'expo-haptics';
+import { User, Sparkles, Download, Copy, Check } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../../utils/tokens';
 import ExportPreview from '../../../components/GemMaster/ExportPreview';
 import exportService from '../../../services/exportService';
@@ -82,13 +84,65 @@ const renderInlineMarkdown = (text, baseStyle) => {
   return parts;
 };
 
-const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations }) => {
+const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations, onOptionSelect, onQuickBuy }) => {
   const isUser = message.type === 'user';
   // Skip template selector - go directly to preview with reading_card template
   const [showPreview, setShowPreview] = useState(false);
+  // State for copy feedback
+  const [copied, setCopied] = useState(false);
+  // State for selected option (to show visual feedback)
+  const [selectedOption, setSelectedOption] = useState(null);
 
   // Get products from recommendations or message
   const products = message.products || recommendations?.crystals?.slice(0, 2) || [];
+
+  // Check if this message has interactive options (questionnaire)
+  const hasOptions = !isUser && message.options && Array.isArray(message.options) && message.options.length > 0;
+
+  // Handle option button press
+  const handleOptionPress = useCallback((option) => {
+    if (selectedOption) return; // Already selected, prevent double tap
+
+    // Visual feedback
+    setSelectedOption(option.id);
+
+    // Haptic feedback
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    // Call parent handler with the selected option
+    if (onOptionSelect) {
+      // Small delay for visual feedback
+      setTimeout(() => {
+        onOptionSelect(option);
+      }, 200);
+    }
+  }, [selectedOption, onOptionSelect]);
+
+  // Handle long press to copy text
+  const handleLongPress = useCallback(async () => {
+    try {
+      // Haptic feedback
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+      // Copy text to clipboard
+      await Clipboard.setStringAsync(message.text || '');
+
+      // Show feedback
+      setCopied(true);
+
+      // Toast on Android
+      if (Platform.OS === 'android') {
+        ToastAndroid.show('Đã sao chép tin nhắn', ToastAndroid.SHORT);
+      }
+
+      // Reset after 2 seconds
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    } catch (error) {
+      console.error('[MessageBubble] Copy error:', error);
+    }
+  }, [message.text]);
 
   const formatTime = (date) => {
     if (!date) return '';
@@ -146,11 +200,25 @@ const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations }
           </View>
         )}
 
-        {/* Bubble */}
-        <View style={[
-          styles.bubble,
-          isUser ? styles.bubbleUser : styles.bubbleAssistant,
-        ]}>
+        {/* Bubble - Pressable for long press to copy */}
+        <Pressable
+          onLongPress={handleLongPress}
+          delayLongPress={500}
+          style={({ pressed }) => [
+            styles.bubble,
+            isUser ? styles.bubbleUser : styles.bubbleAssistant,
+            pressed && styles.bubblePressed,
+            copied && styles.bubbleCopied,
+          ]}
+        >
+          {/* Copy indicator */}
+          {copied && (
+            <View style={styles.copyIndicator}>
+              <Check size={14} color="#10B981" />
+              <Text style={styles.copyIndicatorText}>Đã sao chép</Text>
+            </View>
+          )}
+
           <Text style={[
             styles.text,
             isUser ? styles.textUser : styles.textAssistant,
@@ -161,6 +229,50 @@ const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations }
             }
           </Text>
 
+          {/* Interactive Choice Buttons for Questionnaire */}
+          {hasOptions && (
+            <View style={styles.optionsContainer}>
+              {message.options.map((option) => {
+                const isSelected = selectedOption === option.id;
+                return (
+                  <TouchableOpacity
+                    key={option.id}
+                    style={[
+                      styles.optionButton,
+                      isSelected && styles.optionButtonSelected,
+                      selectedOption && !isSelected && styles.optionButtonDisabled,
+                    ]}
+                    onPress={() => handleOptionPress(option)}
+                    disabled={!!selectedOption}
+                    activeOpacity={0.7}
+                  >
+                    <View style={[
+                      styles.optionLabel,
+                      isSelected && styles.optionLabelSelected,
+                    ]}>
+                      <Text style={[
+                        styles.optionLabelText,
+                        isSelected && styles.optionLabelTextSelected,
+                      ]}>
+                        {option.label}
+                      </Text>
+                    </View>
+                    <Text style={[
+                      styles.optionText,
+                      isSelected && styles.optionTextSelected,
+                      selectedOption && !isSelected && styles.optionTextDisabled,
+                    ]}>
+                      {option.text}
+                    </Text>
+                    {isSelected && (
+                      <Check size={16} color={COLORS.gold} style={styles.optionCheck} />
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          )}
+
           {/* Divination Visual Card (I Ching hexagram or Tarot cards) */}
           {!isUser && message.divinationType && (message.hexagram || message.cards) && (
             <DivinationResultCard
@@ -169,19 +281,28 @@ const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations }
                 // I Ching data - include id for real image
                 ...(message.hexagram && {
                   id: message.hexagram.id,
+                  hexagramId: message.hexagram.id, // Also include as hexagramId for compatibility
                   name: message.hexagram.name,
                   vietnamese: message.hexagram.vietnamese,
                   meaning: message.hexagram.meaning,
                   lines: message.hexagram.lines,
                   interpretation: message.interpretation,
+                  // Pass through image data if available
+                  imageUri: message.imageUri,
+                  imageSource: message.imageSource,
                 }),
                 // Tarot data - include id for real images
                 ...(message.cards && {
-                  cards: message.cards.map(card => ({
+                  cards: message.cards.map((card, idx) => ({
                     ...card,
                     id: card.id,
+                    // Pass through individual card images if available
+                    imageUri: card.imageUri,
+                    imageSource: card.imageSource,
                   })),
                   interpretation: message.interpretation,
+                  // Pass through array of images if available
+                  images: message.images,
                 }),
               }}
               onExportPress={handleExportPress}
@@ -196,6 +317,7 @@ const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations }
                   key={product.id || index}
                   product={product}
                   compact={true}
+                  onQuickBuy={onQuickBuy}
                 />
               ))}
             </View>
@@ -219,7 +341,7 @@ const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations }
               </TouchableOpacity>
             )}
           </View>
-        </View>
+        </Pressable>
 
         {/* Avatar - User */}
         {isUser && (
@@ -319,6 +441,92 @@ const styles = StyleSheet.create({
   productsContainer: {
     marginTop: SPACING.sm,
     gap: SPACING.xs,
+  },
+  // Long press states
+  bubblePressed: {
+    opacity: 0.8,
+    transform: [{ scale: 0.98 }],
+  },
+  bubbleCopied: {
+    borderColor: '#10B981',
+    borderWidth: 1.5,
+  },
+  copyIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginBottom: 8,
+    alignSelf: 'flex-start',
+  },
+  copyIndicatorText: {
+    fontSize: 11,
+    color: '#10B981',
+    fontWeight: '600',
+  },
+  // Interactive choice button styles
+  optionsContainer: {
+    marginTop: SPACING.md,
+    gap: SPACING.sm,
+  },
+  optionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(106, 91, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.3)',
+    borderRadius: 12,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    gap: SPACING.sm,
+  },
+  optionButtonSelected: {
+    backgroundColor: 'rgba(255, 189, 89, 0.2)',
+    borderColor: COLORS.gold,
+    borderWidth: 1.5,
+  },
+  optionButtonDisabled: {
+    opacity: 0.5,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  optionLabel: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(106, 91, 255, 0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  optionLabelSelected: {
+    backgroundColor: COLORS.gold,
+  },
+  optionLabelText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+  },
+  optionLabelTextSelected: {
+    color: '#1a1a2e',
+  },
+  optionText: {
+    flex: 1,
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textPrimary,
+    lineHeight: 20,
+  },
+  optionTextSelected: {
+    color: COLORS.gold,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  optionTextDisabled: {
+    color: COLORS.textMuted,
+  },
+  optionCheck: {
+    marginLeft: SPACING.xs,
   },
 });
 

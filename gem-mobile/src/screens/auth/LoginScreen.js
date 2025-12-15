@@ -11,15 +11,17 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from 'react-native';
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Gem } from 'lucide-react-native';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, INPUT, BUTTON } from '../../utils/tokens';
-import { signIn } from '../../services/supabase';
+import { signIn, setSessionFromToken } from '../../services/supabase';
+import BiometricButton from '../../components/Auth/BiometricButton';
 
 export default function LoginScreen({ navigation }) {
+  const { alert, AlertComponent } = useCustomAlert();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -29,7 +31,7 @@ export default function LoginScreen({ navigation }) {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      alert({ type: 'error', title: 'Error', message: 'Please fill in all fields' });
       return;
     }
 
@@ -38,7 +40,7 @@ export default function LoginScreen({ navigation }) {
     setLoading(false);
 
     if (error) {
-      Alert.alert('Login Failed', error.message);
+      alert({ type: 'error', title: 'Login Failed', message: error.message });
     }
     // Auth context will handle navigation
   };
@@ -61,6 +63,19 @@ export default function LoginScreen({ navigation }) {
               <Text style={styles.logoText}>Gemral</Text>
               <Text style={styles.tagline}>Pattern Scanner & Trading Tools</Text>
             </View>
+
+            {/* Biometric Login Button */}
+            <BiometricButton
+              onSuccess={() => {
+                // Navigation handled by AuthContext
+                console.log('[LoginScreen] Biometric login successful');
+              }}
+              onError={(error) => {
+                console.log('[LoginScreen] Biometric login failed:', error);
+              }}
+              signInWithToken={setSessionFromToken}
+              disabled={loading}
+            />
 
             {/* Form */}
             <View style={styles.form}>
@@ -121,6 +136,7 @@ export default function LoginScreen({ navigation }) {
           </View>
         </KeyboardAvoidingView>
       </SafeAreaView>
+      {AlertComponent}
     </LinearGradient>
   );
 }

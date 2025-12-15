@@ -12,8 +12,8 @@ import {
   RefreshControl,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
+import alertService from '../../services/alertService';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Clipboard from 'expo-clipboard';
@@ -59,8 +59,18 @@ const COMMISSION_RATES = {
   },
 };
 
-export default function AffiliateDetailScreen({ navigation }) {
+export default function AffiliateDetailScreen({ route, navigation }) {
+  const { fromGemMaster = false } = route?.params || {};
   const { user } = useAuth();
+
+  // Handle back navigation - if came from GemMaster, go back to GemMaster tab
+  const handleGoBack = () => {
+    if (fromGemMaster) {
+      navigation.navigate('GemMaster');
+    } else {
+      navigation.goBack();
+    }
+  };
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -157,9 +167,9 @@ export default function AffiliateDetailScreen({ navigation }) {
     const code = profile?.referral_code || user?.referral_code || 'GEM' + (user?.id?.slice(0, 6) || '').toUpperCase();
     try {
       await Clipboard.setStringAsync(code);
-      Alert.alert('✅ Thành công', `Đã sao chép: ${code}`);
+      alertService.success('Thành công', `Đã sao chép mã giới thiệu: ${code}`);
     } catch (error) {
-      Alert.alert('❌ Lỗi', 'Không thể sao chép');
+      alertService.error('Lỗi', 'Không thể sao chép');
     }
   };
 
@@ -168,9 +178,9 @@ export default function AffiliateDetailScreen({ navigation }) {
     const link = `https://gemral.com/?ref=${code}`;
     try {
       await Clipboard.setStringAsync(link);
-      Alert.alert('✅ Thành công', 'Đã sao chép link giới thiệu!');
+      alertService.success('Thành công', 'Đã sao chép link giới thiệu!');
     } catch (error) {
-      Alert.alert('❌ Lỗi', 'Không thể sao chép');
+      alertService.error('Lỗi', 'Không thể sao chép');
     }
   };
 
@@ -237,7 +247,7 @@ export default function AffiliateDetailScreen({ navigation }) {
       <SafeAreaView style={styles.container} edges={['top']}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
             <ArrowLeft size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Chương Trình Affiliate</Text>
@@ -277,7 +287,7 @@ export default function AffiliateDetailScreen({ navigation }) {
           {/* Tier & Role Card */}
           <View style={styles.tierCard}>
             <View style={styles.tierHeader}>
-              <Award size={24} color={TIER_COLORS[currentTier]} />
+              <Award size={24} color={COLORS.gold} />
               <View style={styles.tierInfo}>
                 <Text style={styles.tierRole}>{profile?.role?.toUpperCase() || 'AFFILIATE'}</Text>
                 <Text style={[styles.tierName, { color: TIER_COLORS[currentTier] }]}>
@@ -312,22 +322,22 @@ export default function AffiliateDetailScreen({ navigation }) {
           {/* Stats Grid */}
           <View style={styles.statsGrid}>
             <View style={styles.statCard}>
-              <DollarSign size={24} color={COLORS.success} />
+              <DollarSign size={24} color={COLORS.gold} />
               <Text style={styles.statValue}>{formatCurrency(stats.totalCommission)}</Text>
               <Text style={styles.statLabel}>Tổng hoa hồng</Text>
             </View>
             <View style={styles.statCard}>
-              <TrendingUp size={24} color={COLORS.warning} />
+              <TrendingUp size={24} color={COLORS.gold} />
               <Text style={styles.statValue}>{formatCurrency(stats.pendingCommission)}</Text>
               <Text style={styles.statLabel}>Chờ thanh toán</Text>
             </View>
             <View style={styles.statCard}>
-              <Users size={24} color={COLORS.cyan} />
+              <Users size={24} color={COLORS.gold} />
               <Text style={styles.statValue}>{stats.totalReferrals}</Text>
               <Text style={styles.statLabel}>Người giới thiệu</Text>
             </View>
             <View style={styles.statCard}>
-              <Gift size={24} color={COLORS.purple} />
+              <Gift size={24} color={COLORS.gold} />
               <Text style={styles.statValue}>{stats.convertedReferrals}</Text>
               <Text style={styles.statLabel}>Đã mua hàng</Text>
             </View>
@@ -408,6 +418,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
   },
   backButton: { padding: 8 },
   headerTitle: {
@@ -470,7 +482,7 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
     marginBottom: SPACING.lg,
     borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.3)',
+    borderColor: 'rgba(255, 189, 89, 0.3)',
   },
   tierHeader: {
     flexDirection: 'row',
@@ -480,12 +492,12 @@ const styles = StyleSheet.create({
   tierRole: { fontSize: 11, color: COLORS.textMuted, fontWeight: '600' },
   tierName: { fontSize: 20, fontWeight: '700', marginTop: 2 },
   ratesBadge: {
-    backgroundColor: 'rgba(106, 91, 255, 0.2)',
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
   },
-  ratesText: { fontSize: 11, color: COLORS.purple, fontWeight: '600' },
+  ratesText: { fontSize: 11, color: COLORS.gold, fontWeight: '600' },
   progressSection: { marginTop: SPACING.lg },
   progressHeader: {
     flexDirection: 'row',
@@ -526,7 +538,7 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
+    borderColor: 'rgba(255, 189, 89, 0.3)',
   },
   statValue: {
     fontSize: 18,
@@ -547,7 +559,7 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
     marginBottom: SPACING.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255, 189, 89, 0.2)',
+    borderColor: 'rgba(255, 189, 89, 0.3)',
   },
   monthHeader: {
     flexDirection: 'row',
@@ -594,13 +606,13 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
     marginBottom: SPACING.sm,
     borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.15)',
+    borderColor: 'rgba(255, 189, 89, 0.2)',
   },
   historyLeft: {},
   historyAmount: {
     fontSize: 16,
     fontWeight: '600',
-    color: COLORS.success,
+    color: COLORS.gold,
   },
   historyDate: {
     fontSize: 12,

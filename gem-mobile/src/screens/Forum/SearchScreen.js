@@ -36,16 +36,16 @@ import PostCard from './components/PostCard';
 
 // Filter options
 const DATE_FILTERS = [
-  { id: null, label: 'Tat ca' },
-  { id: 'today', label: 'Hom nay' },
-  { id: 'week', label: 'Tuan nay' },
-  { id: 'month', label: 'Thang nay' },
+  { id: null, label: 'Tất cả' },
+  { id: 'today', label: 'Hôm nay' },
+  { id: 'week', label: 'Tuần này' },
+  { id: 'month', label: 'Tháng này' },
 ];
 
 const MEDIA_FILTERS = [
-  { id: null, label: 'Tat ca' },
-  { id: true, label: 'Co hinh' },
-  { id: false, label: 'Chi chu' },
+  { id: null, label: 'Tất cả' },
+  { id: true, label: 'Có hình' },
+  { id: false, label: 'Chỉ chữ' },
 ];
 
 const SearchScreen = ({ navigation }) => {
@@ -235,10 +235,10 @@ const SearchScreen = ({ navigation }) => {
         <View style={styles.sectionHeader}>
           <View style={styles.sectionTitleRow}>
             <Clock size={16} color={COLORS.textMuted} />
-            <Text style={styles.sectionTitle}>Tim kiem gan day</Text>
+            <Text style={styles.sectionTitle}>Tìm kiếm gần đây</Text>
           </View>
           <TouchableOpacity onPress={handleClearAllRecent}>
-            <Text style={styles.clearAllText}>Xoa tat ca</Text>
+            <Text style={styles.clearAllText}>Xóa tất cả</Text>
           </TouchableOpacity>
         </View>
         {recentSearches.map((recent, index) => (
@@ -270,7 +270,7 @@ const SearchScreen = ({ navigation }) => {
       <View style={styles.section}>
         <View style={styles.sectionTitleRow}>
           <TrendingUp size={16} color={COLORS.gold} />
-          <Text style={styles.sectionTitle}>Xu huong</Text>
+          <Text style={styles.sectionTitle}>Xu hướng</Text>
         </View>
         {trendingSearches.map((trend, index) => (
           <TouchableOpacity
@@ -280,7 +280,7 @@ const SearchScreen = ({ navigation }) => {
           >
             <Hash size={16} color={COLORS.cyan} />
             <Text style={styles.trendText}>{trend.term}</Text>
-            <Text style={styles.trendCount}>{trend.count} bai viet</Text>
+            <Text style={styles.trendCount}>{trend.count} bài viết</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -297,7 +297,7 @@ const SearchScreen = ({ navigation }) => {
         <View style={styles.filterGroup}>
           <View style={styles.filterLabel}>
             <Calendar size={14} color={COLORS.textMuted} />
-            <Text style={styles.filterLabelText}>Thoi gian</Text>
+            <Text style={styles.filterLabelText}>Thời gian</Text>
           </View>
           <View style={styles.filterOptions}>
             {DATE_FILTERS.map(filter => (
@@ -327,7 +327,7 @@ const SearchScreen = ({ navigation }) => {
         <View style={styles.filterGroup}>
           <View style={styles.filterLabel}>
             <ImageIcon size={14} color={COLORS.textMuted} />
-            <Text style={styles.filterLabelText}>Loai bai viet</Text>
+            <Text style={styles.filterLabelText}>Loại bài viết</Text>
           </View>
           <View style={styles.filterOptions}>
             {MEDIA_FILTERS.map(filter => (
@@ -362,9 +362,9 @@ const SearchScreen = ({ navigation }) => {
       return (
         <View style={styles.noResultsContainer}>
           <Search size={48} color={COLORS.textMuted} />
-          <Text style={styles.noResultsTitle}>Khong tim thay ket qua</Text>
+          <Text style={styles.noResultsTitle}>Không tìm thấy kết quả</Text>
           <Text style={styles.noResultsSubtitle}>
-            Thu tim kiem voi tu khoa khac
+            Thử tìm kiếm với từ khóa khác
           </Text>
         </View>
       );
@@ -407,7 +407,7 @@ const SearchScreen = ({ navigation }) => {
     return (
       <View style={styles.resultsHeader}>
         <Text style={styles.resultsCount}>
-          {totalCount} ket qua cho "{query}"
+          {totalCount} kết quả cho "{query}"
         </Text>
         <TouchableOpacity
           style={[styles.filterButton, showFilters && styles.filterButtonActive]}
@@ -434,7 +434,7 @@ const SearchScreen = ({ navigation }) => {
           onBack={() => navigation.goBack()}
           showBackButton
           autoFocus
-          placeholder="Tim kiem bai viet, hashtag..."
+          placeholder="Tìm kiếm bài viết, hashtag..."
         />
 
         {/* Suggestions (while typing) */}
@@ -449,7 +449,7 @@ const SearchScreen = ({ navigation }) => {
         {loading && results.length === 0 ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={COLORS.gold} />
-            <Text style={styles.loadingText}>Dang tim kiem...</Text>
+            <Text style={styles.loadingText}>Đang tìm kiếm...</Text>
           </View>
         ) : results.length > 0 ? (
           <FlatList

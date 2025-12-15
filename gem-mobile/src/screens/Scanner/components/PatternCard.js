@@ -2,23 +2,77 @@
  * GEM Mobile - Pattern Card
  * Display detected pattern with entry/exit levels
  * Includes Paper Trade button for simulated trading
+ * Updated: Uses patternSignals.js for expected win rate
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { TrendingUp, TrendingDown, ChevronRight, PlayCircle } from 'lucide-react-native';
 import ConfidenceBar from './ConfidenceBar';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../../utils/tokens';
+import { formatPrice } from '../../../utils/formatters';
+import { getPatternSignal, PATTERN_STATES } from '../../../constants/patternSignals';
+import { isPremiumTier } from '../../../constants/tierFeatures';
 
-const PatternCard = ({ pattern, onPress, onPaperTrade }) => {
+/**
+ * Pattern State Badge - Shows lifecycle state (FRESH, ACTIVE, etc.)
+ */
+const PatternStateBadge = ({ state }) => {
+  const stateInfo = PATTERN_STATES[state] || PATTERN_STATES.FRESH;
+
+  return (
+    <View style={[styles.stateBadge, { backgroundColor: stateInfo.bgColor }]}>
+      <Text style={styles.stateEmoji}>{stateInfo.emoji}</Text>
+      <Text style={[styles.stateLabel, { color: stateInfo.color }]}>
+        {stateInfo.label}
+      </Text>
+    </View>
+  );
+};
+
+/**
+ * Quality Grade Badge - Shows A+, A, B+, B, C, D
+ */
+const QualityGradeBadge = ({ grade, hasPremium }) => {
+  if (!hasPremium || !grade) return null;
+
+  const gradeConfig = {
+    'A+': { color: '#00FF88', bg: 'rgba(0, 255, 136, 0.15)' },
+    'A': { color: '#00FF88', bg: 'rgba(0, 255, 136, 0.12)' },
+    'B+': { color: '#FFBD59', bg: 'rgba(255, 189, 89, 0.15)' },
+    'B': { color: '#FFBD59', bg: 'rgba(255, 189, 89, 0.12)' },
+    'C': { color: '#FF9500', bg: 'rgba(255, 149, 0, 0.15)' },
+    'D': { color: '#FF4757', bg: 'rgba(255, 71, 87, 0.15)' },
+  };
+
+  const config = gradeConfig[grade] || gradeConfig['C'];
+
+  return (
+    <View style={[styles.gradeBadge, { backgroundColor: config.bg }]}>
+      <Text style={[styles.gradeText, { color: config.color }]}>{grade}</Text>
+    </View>
+  );
+};
+
+const PatternCard = ({ pattern, onPress, onPaperTrade, userTier = 'FREE' }) => {
   const isLong = pattern.direction === 'LONG';
   const directionColor = isLong ? COLORS.success : COLORS.error;
+  const hasPremium = isPremiumTier(userTier);
 
-  const formatPrice = (price) => {
-    if (price >= 1000) return price.toFixed(2);
-    if (price >= 1) return price.toFixed(4);
-    return price.toFixed(6);
-  };
+  // Get pattern signal info for expected win rate
+  const patternSignal = useMemo(() => {
+    const patternType = pattern.patternType || pattern.type || pattern.name || '';
+    return getPatternSignal(patternType);
+  }, [pattern.patternType, pattern.type, pattern.name]);
+
+  // Use expected win rate from patternSignals.js
+  const expectedWinRate = patternSignal.expectedWinRate || 60;
+
+  // Get pattern state and quality grade
+  const patternState = pattern.state || 'FRESH';
+  const qualityGrade = pattern.qualityGrade || null;
+
+  // formatPrice is now imported from utils/formatters
 
   const formatTime = (timestamp) => {
     const date = new Date(timestamp);
@@ -27,7 +81,7 @@ const PatternCard = ({ pattern, onPress, onPaperTrade }) => {
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
-      {/* Header */}
+      {/* Header with State & Quality Badges */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           {isLong ? (
@@ -43,10 +97,19 @@ const PatternCard = ({ pattern, onPress, onPaperTrade }) => {
           </View>
         </View>
 
-        <View style={[styles.badge, { backgroundColor: `${directionColor}20` }]}>
-          <Text style={[styles.badgeText, { color: directionColor }]}>
-            {pattern.direction}
-          </Text>
+        <View style={styles.headerRight}>
+          {/* Pattern State Badge */}
+          <PatternStateBadge state={patternState} />
+
+          {/* Quality Grade Badge (Premium only) */}
+          <QualityGradeBadge grade={qualityGrade} hasPremium={hasPremium} />
+
+          {/* Direction Badge */}
+          <View style={[styles.badge, { backgroundColor: `${directionColor}20` }]}>
+            <Text style={[styles.badgeText, { color: directionColor }]}>
+              {pattern.direction}
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -56,17 +119,17 @@ const PatternCard = ({ pattern, onPress, onPaperTrade }) => {
       {/* Price Levels */}
       <View style={styles.levels}>
         <View style={styles.levelRow}>
-          <Text style={styles.levelLabel}>Entry</Text>
+          <Text style={styles.levelLabel}>Điểm Vào</Text>
           <Text style={styles.levelValue}>${formatPrice(pattern.entry)}</Text>
         </View>
         <View style={styles.levelRow}>
-          <Text style={styles.levelLabel}>Target</Text>
+          <Text style={styles.levelLabel}>Chốt Lời</Text>
           <Text style={[styles.levelValue, { color: COLORS.success }]}>
-            ${formatPrice(pattern.target)}
+            ${formatPrice(pattern.target || pattern.targets?.[0])}
           </Text>
         </View>
         <View style={styles.levelRow}>
-          <Text style={styles.levelLabel}>Stop Loss</Text>
+          <Text style={styles.levelLabel}>Cắt Lỗ</Text>
           <Text style={[styles.levelValue, { color: COLORS.error }]}>
             ${formatPrice(pattern.stopLoss)}
           </Text>
@@ -76,19 +139,19 @@ const PatternCard = ({ pattern, onPress, onPaperTrade }) => {
       {/* Stats Footer */}
       <View style={styles.footer}>
         <View style={styles.stat}>
-          <Text style={styles.statLabel}>R/R</Text>
+          <Text style={styles.statLabel}>Tỷ Lệ RR</Text>
           <Text style={styles.statValue}>
-            {typeof pattern.riskReward === 'number'
+            1:{typeof pattern.riskReward === 'number'
               ? pattern.riskReward.toFixed(1)
               : pattern.riskReward || '2.0'}
           </Text>
         </View>
         <View style={styles.stat}>
-          <Text style={styles.statLabel}>Win Rate</Text>
-          <Text style={styles.statValue}>{pattern.winRate || 65}%</Text>
+          <Text style={styles.statLabel}>Tỷ Lệ Thắng</Text>
+          <Text style={styles.statValue}>{pattern.winRate || expectedWinRate}%</Text>
         </View>
         <View style={styles.stat}>
-          <Text style={styles.statLabel}>TF</Text>
+          <Text style={styles.statLabel}>Khung</Text>
           <Text style={styles.statValue}>{pattern.timeframe?.toUpperCase()}</Text>
         </View>
         <ChevronRight size={20} color={COLORS.textMuted} />
@@ -131,6 +194,40 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.sm,
+    flex: 1,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flexWrap: 'wrap',
+    justifyContent: 'flex-end',
+  },
+  // State Badge styles
+  stateBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 4,
+    gap: 3,
+  },
+  stateEmoji: {
+    fontSize: 10,
+  },
+  stateLabel: {
+    fontSize: 9,
+    fontWeight: '600',
+  },
+  // Quality Grade Badge styles
+  gradeBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+  },
+  gradeText: {
+    fontSize: 11,
+    fontWeight: '700',
   },
   patternName: {
     fontSize: TYPOGRAPHY.fontSize.lg,

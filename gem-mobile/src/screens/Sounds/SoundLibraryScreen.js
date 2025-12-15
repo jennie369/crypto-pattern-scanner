@@ -14,8 +14,8 @@ import {
   FlatList,
   ScrollView,
   RefreshControl,
-  Alert,
 } from 'react-native';
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Audio } from 'expo-av';
 import * as DocumentPicker from 'expo-document-picker';
@@ -59,6 +59,7 @@ const CATEGORY_ICONS = {
 };
 
 const SoundLibraryScreen = ({ navigation }) => {
+  const { alert, AlertComponent } = useCustomAlert();
   const [activeTab, setActiveTab] = useState('trending');
   const [searchQuery, setSearchQuery] = useState('');
   const [sounds, setSounds] = useState([]);
@@ -131,7 +132,12 @@ const SoundLibraryScreen = ({ navigation }) => {
       });
     } catch (error) {
       console.error('[SoundLibrary] Play error:', error);
-      Alert.alert('Lỗi', 'Không thể phát âm thanh');
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Không thể phát âm thanh',
+        buttons: [{ text: 'OK' }],
+      });
     }
   };
 
@@ -162,7 +168,12 @@ const SoundLibraryScreen = ({ navigation }) => {
       });
     } catch (error) {
       console.error('[SoundLibrary] Pick file error:', error);
-      Alert.alert('Lỗi', 'Không thể chọn file');
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Không thể chọn file',
+        buttons: [{ text: 'OK' }],
+      });
     }
   };
 
@@ -355,6 +366,7 @@ const SoundLibraryScreen = ({ navigation }) => {
             </View>
           }
         />
+        {AlertComponent}
       </SafeAreaView>
     </View>
   );

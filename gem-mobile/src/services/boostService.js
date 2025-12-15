@@ -90,14 +90,15 @@ export const boostService = {
         return { success: false, error: 'Goi boost khong hop le' };
       }
 
-      // Check gem balance
-      const { data: wallet } = await supabase
-        .from('user_wallets')
-        .select('gem_balance')
-        .eq('user_id', user.id)
+      // Check gem balance - use profiles.gems as single source of truth
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('gems')
+        .eq('id', user.id)
         .single();
 
-      if (!wallet || wallet.gem_balance < selectedPackage.price_gems) {
+      const gemBalance = profile?.gems || 0;
+      if (gemBalance < selectedPackage.price_gems) {
         return { success: false, error: 'Khong du gems', needGems: true };
       }
 
@@ -132,17 +133,35 @@ export const boostService = {
       expiresAt.setHours(expiresAt.getHours() + selectedPackage.duration_hours);
 
       // Start transaction
-      // 1. Deduct gems
-      const { error: walletError } = await supabase
+      // 1. Deduct gems from profiles.gems (single source of truth)
+      const newBalance = gemBalance - selectedPackage.price_gems;
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ gems: newBalance })
+        .eq('id', user.id);
+
+      if (profileError) throw profileError;
+
+      // Also update user_wallets for backwards compatibility (trigger should do this too)
+      await supabase
         .from('user_wallets')
-        .update({
-          gem_balance: wallet.gem_balance - selectedPackage.price_gems,
-        })
+        .update({ gem_balance: newBalance })
         .eq('user_id', user.id);
 
-      if (walletError) throw walletError;
+      // 2. Record transaction to gems_transactions
+      await supabase
+        .from('gems_transactions')
+        .insert({
+          user_id: user.id,
+          type: 'debit',
+          amount: selectedPackage.price_gems,
+          description: `Boost bai viet - Goi ${selectedPackage.name}`,
+          reference_type: 'post_boost',
+          balance_before: gemBalance,
+          balance_after: newBalance,
+        });
 
-      // 2. Record transaction
+      // Also log to wallet_transactions for backwards compatibility
       await supabase
         .from('wallet_transactions')
         .insert({

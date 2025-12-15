@@ -16,7 +16,6 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -30,6 +29,9 @@ import messagingService from '../../services/messagingService';
 // Auth
 import { useAuth } from '../../contexts/AuthContext';
 
+// Custom Alert
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
+
 // Tokens
 import {
   COLORS,
@@ -42,6 +44,7 @@ export default function ScheduledMessagesScreen({ route, navigation }) {
   const { conversationId } = route.params;
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const { alert, AlertComponent } = useCustomAlert();
 
   // State
   const [scheduledMessages, setScheduledMessages] = useState([]);
@@ -105,10 +108,11 @@ export default function ScheduledMessagesScreen({ route, navigation }) {
 
   // Handle send now
   const handleSendNow = useCallback(async (message) => {
-    Alert.alert(
-      'Send Now',
-      'Send this message immediately?',
-      [
+    alert({
+      type: 'info',
+      title: 'Send Now',
+      message: 'Send this message immediately?',
+      buttons: [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Send',
@@ -119,20 +123,25 @@ export default function ScheduledMessagesScreen({ route, navigation }) {
               setScheduledMessages(prev => prev.filter(m => m.id !== message.id));
             } catch (error) {
               console.error('Error sending message:', error);
-              Alert.alert('Error', 'Failed to send message');
+              alert({
+                type: 'error',
+                title: 'Error',
+                message: 'Failed to send message',
+              });
             }
           },
         },
-      ]
-    );
-  }, []);
+      ],
+    });
+  }, [alert]);
 
   // Handle cancel
   const handleCancel = useCallback((message) => {
-    Alert.alert(
-      'Cancel Scheduled Message',
-      'Are you sure you want to cancel this scheduled message?',
-      [
+    alert({
+      type: 'warning',
+      title: 'Cancel Scheduled Message',
+      message: 'Are you sure you want to cancel this scheduled message?',
+      buttons: [
         { text: 'Keep', style: 'cancel' },
         {
           text: 'Cancel Message',
@@ -144,20 +153,28 @@ export default function ScheduledMessagesScreen({ route, navigation }) {
               setScheduledMessages(prev => prev.filter(m => m.id !== message.id));
             } catch (error) {
               console.error('Error cancelling message:', error);
-              Alert.alert('Error', 'Failed to cancel message');
+              alert({
+                type: 'error',
+                title: 'Error',
+                message: 'Failed to cancel message',
+              });
             }
           },
         },
-      ]
-    );
-  }, []);
+      ],
+    });
+  }, [alert]);
 
   // Handle edit
   const handleEdit = useCallback((message) => {
     // Could navigate to edit screen or show edit sheet
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    Alert.alert('Edit', 'Edit functionality coming soon');
-  }, []);
+    alert({
+      type: 'info',
+      title: 'Edit',
+      message: 'Edit functionality coming soon',
+    });
+  }, [alert]);
 
   // Render scheduled message item
   const renderScheduledMessage = ({ item }) => {
@@ -305,6 +322,8 @@ export default function ScheduledMessagesScreen({ route, navigation }) {
           Scheduled messages will be sent automatically at the scheduled time
         </Text>
       </View>
+
+      {AlertComponent}
     </LinearGradient>
   );
 }

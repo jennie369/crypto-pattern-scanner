@@ -14,8 +14,12 @@ import {
   Animated,
   Dimensions,
   ActivityIndicator,
-  Alert,
+  Share,
+  Platform,
+  ScrollView,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as Clipboard from 'expo-clipboard';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -30,6 +34,7 @@ import {
 
 import { COLORS, GLASS, SPACING, TYPOGRAPHY, BUTTON, SHADOWS, GRADIENTS } from '../../utils/tokens';
 import affiliateService from '../../services/affiliateService';
+import CustomAlert, { useCustomAlert } from '../CustomAlert';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SHEET_HEIGHT = SCREEN_HEIGHT * 0.65;
@@ -38,7 +43,7 @@ const SHEET_HEIGHT = SCREEN_HEIGHT * 0.65;
  * ProductAffiliateLinkSheet Component
  * @param {boolean} visible - Sheet visibility
  * @param {function} onClose - Close callback
- * @param {object} product - Product data { id, name, price, image_url }
+ * @param {object} product - Product data (Shopify format: { id, handle, title, variants, image })
  * @param {string} productType - 'crystal', 'course', 'subscription', 'bundle'
  */
 export default function ProductAffiliateLinkSheet({
@@ -48,11 +53,36 @@ export default function ProductAffiliateLinkSheet({
   productType = 'crystal',
   onNavigateToPartnership, // Optional callback to navigate to partnership registration
 }) {
+  const insets = useSafeAreaInsets();
   const slideAnim = useRef(new Animated.Value(SHEET_HEIGHT)).current;
   const [loading, setLoading] = useState(false);
   const [linkData, setLinkData] = useState(null);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState(null);
+  const { alert, AlertComponent } = useCustomAlert();
+
+  // Extract product ID - Shopify products may use id or handle
+  const getProductId = () => {
+    return product?.id || product?.handle || null;
+  };
+
+  // Extract product name - Shopify uses title
+  const getProductName = () => {
+    return product?.title || product?.name || product?.title_vi || product?.name_vi || 'Sản phẩm';
+  };
+
+  // Extract product price - Shopify uses variants[0].price
+  const getProductPrice = () => {
+    if (product?.variants?.[0]?.price) {
+      return parseFloat(product.variants[0].price);
+    }
+    return product?.price || product?.rawPrice || 0;
+  };
+
+  // Extract product image
+  const getProductImage = () => {
+    return product?.image || product?.images?.[0]?.src || product?.image_url || product?.thumbnail_url || null;
+  };
 
   // Animate sheet on visibility change
   useEffect(() => {
@@ -75,21 +105,35 @@ export default function ProductAffiliateLinkSheet({
 
   // Generate affiliate link
   const generateLink = async () => {
-    if (!product?.id) return;
+    const productId = getProductId();
+
+    console.log('[AffiliateLinkSheet] Generating link for product:', {
+      productId,
+      name: getProductName(),
+      price: getProductPrice(),
+      image: getProductImage(),
+    });
+
+    if (!productId) {
+      setError('Không tìm thấy ID sản phẩm');
+      return;
+    }
 
     setLoading(true);
     setError(null);
 
     try {
       const result = await affiliateService.generateProductAffiliateLink(
-        product.id,
+        productId,
         productType,
         {
-          name: product.name || product.title_vi || product.name_vi,
-          price: product.price,
-          image_url: product.image_url || product.thumbnail_url,
+          name: getProductName(),
+          price: getProductPrice(),
+          image_url: getProductImage(),
         }
       );
+
+      console.log('[AffiliateLinkSheet] generateProductAffiliateLink result:', result);
 
       if (result.success) {
         setLinkData(result);
@@ -97,6 +141,7 @@ export default function ProductAffiliateLinkSheet({
         setError(result.error || 'Không thể tạo link');
       }
     } catch (err) {
+      console.error('[AffiliateLinkSheet] Error:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -105,27 +150,40 @@ export default function ProductAffiliateLinkSheet({
 
   // Copy link to clipboard
   const handleCopy = async () => {
-    if (!linkData?.link) return;
+    if (!linkData?.url) return;
 
     try {
-      const result = await affiliateService.copyProductLink(linkData.link);
-      if (result.success) {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      }
+      // Copy the URL directly using Clipboard
+      await Clipboard.setStringAsync(linkData.url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      Alert.alert('Lỗi', 'Không thể sao chép link');
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Không thể sao chép link',
+      });
     }
   };
 
   // Share link
   const handleShare = async () => {
-    if (!linkData?.link) return;
+    if (!linkData?.url) return;
 
     try {
-      await affiliateService.shareProductLink(linkData.link);
+      const message = `Xem sản phẩm này đi bạn!\n\n${getProductName()}\nGiá: ${formatPrice(getProductPrice())} VND\n\n${linkData.url}`;
+
+      await Share.share({
+        title: getProductName(),
+        message: message,
+        url: Platform.OS === 'ios' ? linkData.url : undefined,
+      });
     } catch (err) {
-      Alert.alert('Lỗi', 'Không thể chia sẻ link');
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Không thể chia sẻ link',
+      });
     }
   };
 
@@ -177,7 +235,7 @@ export default function ProductAffiliateLinkSheet({
           />
 
           {/* Content */}
-          <View style={styles.content}>
+          <View style={[styles.content, { paddingBottom: Math.max(insets.bottom, 24) + SPACING.lg }]}>
             {/* Handle */}
             <View style={styles.handleContainer}>
               <View style={styles.handle} />
@@ -197,123 +255,130 @@ export default function ProductAffiliateLinkSheet({
               </TouchableOpacity>
             </View>
 
-            {/* Loading State */}
-            {loading && (
-              <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color={COLORS.gold} />
-                <Text style={styles.loadingText}>Đang tạo link...</Text>
-              </View>
-            )}
-
-            {/* Error State */}
-            {error && !loading && (
-              <View style={styles.errorContainer}>
-                <Text style={styles.errorText}>{error}</Text>
-                {error.includes('affiliate') || error.includes('đối tác') ? (
-                  <TouchableOpacity
-                    style={styles.retryButton}
-                    onPress={() => {
-                      handleClose();
-                      onNavigateToPartnership?.();
-                    }}
-                  >
-                    <Text style={styles.retryText}>Đăng ký Partnership</Text>
-                  </TouchableOpacity>
-                ) : (
-                  <TouchableOpacity style={styles.retryButton} onPress={generateLink}>
-                    <Text style={styles.retryText}>Thử lại</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            )}
-
-            {/* Link Content */}
-            {linkData && !loading && !error && (
-              <>
-                {/* Product Card */}
-                <View style={styles.productCard}>
-                  <Text style={styles.productName} numberOfLines={2}>
-                    {linkData.link?.product_name || product?.name}
-                  </Text>
-                  <Text style={styles.productPrice}>
-                    {formatPrice(linkData.link?.product_price || product?.price)} VND
-                  </Text>
+            {/* Scrollable Content Area */}
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.scrollContent}
+            >
+              {/* Loading State */}
+              {loading && (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size="large" color={COLORS.gold} />
+                  <Text style={styles.loadingText}>Đang tạo link...</Text>
                 </View>
+              )}
 
-                {/* Commission Card */}
-                <View style={styles.commissionCard}>
-                  <View style={styles.commissionRow}>
-                    <Text style={styles.commissionLabel}>Hoa hồng của bạn:</Text>
-                    <Text style={styles.commissionRate}>{linkData.commissionRate}%</Text>
-                  </View>
-                  <View style={styles.commissionRow}>
-                    <Text style={styles.commissionLabel}>Thu nhập ước tính:</Text>
-                    <Text style={styles.commissionAmount}>
-                      {formatPrice(linkData.estimatedCommission)} VND
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Link Box */}
-                <View style={styles.linkSection}>
-                  <Text style={styles.linkLabel}>Link giới thiệu:</Text>
-                  <View style={styles.linkBox}>
-                    <Text style={styles.linkText} numberOfLines={1}>
-                      {linkData.url}
-                    </Text>
+              {/* Error State */}
+              {error && !loading && (
+                <View style={styles.errorContainer}>
+                  <Text style={styles.errorText}>{error}</Text>
+                  {error.includes('affiliate') || error.includes('đối tác') ? (
                     <TouchableOpacity
-                      onPress={handleCopy}
-                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      style={styles.retryButton}
+                      onPress={() => {
+                        handleClose();
+                        onNavigateToPartnership?.();
+                      }}
                     >
-                      {copied ? (
-                        <Check size={20} color={COLORS.success} />
-                      ) : (
-                        <Copy size={20} color={COLORS.gold} />
-                      )}
+                      <Text style={styles.retryText}>Đăng ký Partnership</Text>
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity style={styles.retryButton} onPress={generateLink}>
+                      <Text style={styles.retryText}>Thử lại</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              )}
+
+              {/* Link Content */}
+              {linkData && !loading && !error && (
+                <>
+                  {/* Product Card */}
+                  <View style={styles.productCard}>
+                    <Text style={styles.productName} numberOfLines={2}>
+                      {linkData.link?.product_name || getProductName()}
+                    </Text>
+                    <Text style={styles.productPrice}>
+                      {formatPrice(linkData.link?.product_price || getProductPrice())} VND
+                    </Text>
+                  </View>
+
+                  {/* Commission Card */}
+                  <View style={styles.commissionCard}>
+                    <View style={styles.commissionRow}>
+                      <Text style={styles.commissionLabel}>Hoa hồng của bạn:</Text>
+                      <Text style={styles.commissionRate}>{linkData.commissionRate}%</Text>
+                    </View>
+                    <View style={styles.commissionRow}>
+                      <Text style={styles.commissionLabel}>Thu nhập ước tính:</Text>
+                      <Text style={styles.commissionAmount}>
+                        {formatPrice(linkData.estimatedCommission)} VND
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Link Box */}
+                  <View style={styles.linkSection}>
+                    <Text style={styles.linkLabel}>Link giới thiệu:</Text>
+                    <View style={styles.linkBox}>
+                      <Text style={styles.linkText} numberOfLines={1}>
+                        {linkData.url}
+                      </Text>
+                      <TouchableOpacity
+                        onPress={handleCopy}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      >
+                        {copied ? (
+                          <Check size={20} color={COLORS.success} />
+                        ) : (
+                          <Copy size={20} color={COLORS.gold} />
+                        )}
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+
+                  {/* Action Buttons */}
+                  <View style={styles.actions}>
+                    <TouchableOpacity
+                      style={[styles.actionButton, styles.copyButton]}
+                      onPress={handleCopy}
+                      activeOpacity={0.8}
+                    >
+                      <Copy size={18} color={COLORS.textPrimary} />
+                      <Text style={styles.actionText}>
+                        {copied ? 'Đã sao chép!' : 'Sao chép'}
+                      </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={[styles.actionButton, styles.shareButton]}
+                      onPress={handleShare}
+                      activeOpacity={0.8}
+                    >
+                      <LinearGradient
+                        colors={GRADIENTS.primaryButton}
+                        style={styles.shareGradient}
+                      >
+                        <Share2 size={18} color={COLORS.textPrimary} />
+                        <Text style={styles.actionText}>Chia sẻ</Text>
+                      </LinearGradient>
                     </TouchableOpacity>
                   </View>
-                </View>
 
-                {/* Action Buttons */}
-                <View style={styles.actions}>
-                  <TouchableOpacity
-                    style={[styles.actionButton, styles.copyButton]}
-                    onPress={handleCopy}
-                    activeOpacity={0.8}
-                  >
-                    <Copy size={18} color={COLORS.textPrimary} />
-                    <Text style={styles.actionText}>
-                      {copied ? 'Đã sao chép!' : 'Sao chép'}
+                  {/* Tip */}
+                  <View style={styles.tipContainer}>
+                    <Lightbulb size={16} color={COLORS.gold} />
+                    <Text style={styles.tipText}>
+                      Chia sẻ link trên mạng xã hội để tăng thu nhập!
                     </Text>
-                  </TouchableOpacity>
-
-                  <TouchableOpacity
-                    style={[styles.actionButton, styles.shareButton]}
-                    onPress={handleShare}
-                    activeOpacity={0.8}
-                  >
-                    <LinearGradient
-                      colors={GRADIENTS.primaryButton}
-                      style={styles.shareGradient}
-                    >
-                      <Share2 size={18} color={COLORS.textPrimary} />
-                      <Text style={styles.actionText}>Chia sẻ</Text>
-                    </LinearGradient>
-                  </TouchableOpacity>
-                </View>
-
-                {/* Tip */}
-                <View style={styles.tipContainer}>
-                  <Lightbulb size={16} color={COLORS.gold} />
-                  <Text style={styles.tipText}>
-                    Chia sẻ link trên mạng xã hội để tăng thu nhập!
-                  </Text>
-                </View>
-              </>
-            )}
+                  </View>
+                </>
+              )}
+            </ScrollView>
           </View>
         </BlurView>
       </Animated.View>
+      {AlertComponent}
     </Modal>
   );
 }
@@ -353,7 +418,10 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: SPACING.lg,
-    paddingBottom: SPACING.huge,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: SPACING.md,
   },
   handleContainer: {
     alignItems: 'center',
@@ -384,7 +452,7 @@ const styles = StyleSheet.create({
 
   // Loading
   loadingContainer: {
-    flex: 1,
+    paddingVertical: SPACING.huge,
     justifyContent: 'center',
     alignItems: 'center',
     gap: SPACING.md,
@@ -396,7 +464,7 @@ const styles = StyleSheet.create({
 
   // Error
   errorContainer: {
-    flex: 1,
+    paddingVertical: SPACING.huge,
     justifyContent: 'center',
     alignItems: 'center',
     gap: SPACING.md,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import forumService, { forumCategories } from '../../services/forum';
 import LeftSidebar from './components/LeftSidebar';
@@ -7,13 +7,19 @@ import RightSidebar from './components/RightSidebar';
 import './Forum3Column.css';
 
 /**
- * Forum3Column Component
+ * Forum3Column Component - SYNCED FROM MOBILE ForumScreen
  * 3-column Community Hub layout (Binance Square style)
  *
  * Layout:
- * - Left Sidebar (280px): Categories, Online Users, Top Members
+ * - Left Sidebar (280px): Feed filters, Categories, Trending Hashtags
  * - Center Feed (1fr): Posts feed + Post creation
  * - Right Sidebar (360px): Trending topics, Suggested creators
+ *
+ * Features (synced from Mobile):
+ * - Feed Types: explore, following, news, popular, academy
+ * - Category Filters: Giao dịch, Tinh thần, Thịnh vượng, Kiếm tiền
+ * - Quick Actions: Liked posts, Saved posts
+ * - Custom Feeds support
  *
  * Responsive:
  * - < 1024px: Hide left sidebar
@@ -28,12 +34,16 @@ export default function Forum3Column() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Filter state
+  // Feed state (synced from Mobile)
+  const [selectedFeed, setSelectedFeed] = useState('explore'); // explore, following, news, popular, academy, + category feeds
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('latest'); // latest, trending, top
 
-  // Sidebar data (will be fetched in Phase 2)
+  // Custom Feeds state
+  const [customFeeds, setCustomFeeds] = useState([]);
+
+  // Sidebar data
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [topMembers, setTopMembers] = useState([]);
   const [trendingTopics, setTrendingTopics] = useState([]);
@@ -54,13 +64,27 @@ export default function Forum3Column() {
       setLoading(true);
       setError(null);
 
-      const data = await forumService.getThreads({
+      // getThreads returns { threads, total, page, totalPages }
+      const result = await forumService.getThreads({
         limit: 50,
-        orderBy: sortBy === 'latest' ? 'created_at' : 'like_count'
+        sortBy: sortBy === 'latest' ? 'recent' : 'popular'
       });
 
-      setPosts(data);
-      setFilteredPosts(data);
+      // Extract threads array from result
+      const threadsData = result?.threads || result || [];
+
+      // Transform data to match PostCard expected format
+      const transformedPosts = threadsData.map(thread => ({
+        ...thread,
+        // Map author to users for PostCard compatibility
+        users: thread.author ? {
+          display_name: thread.author.full_name || thread.author.display_name,
+          avatar_url: thread.author.avatar_url
+        } : null
+      }));
+
+      setPosts(transformedPosts);
+      setFilteredPosts(transformedPosts);
     } catch (err) {
       console.error('Error loading posts:', err);
       setError('Không thể tải bài viết. Vui lòng thử lại.');
@@ -134,11 +158,23 @@ export default function Forum3Column() {
 
       const newPost = await forumService.createThread(dataWithAuthor);
 
-      // Add to posts list
-      setPosts([newPost, ...posts]);
-      setFilteredPosts([newPost, ...filteredPosts]);
+      // Transform to match PostCard format
+      const transformedPost = {
+        ...newPost,
+        users: newPost.author ? {
+          display_name: newPost.author.full_name || newPost.author.display_name,
+          avatar_url: newPost.author.avatar_url
+        } : {
+          display_name: user.user_metadata?.display_name || user.email,
+          avatar_url: user.user_metadata?.avatar_url
+        }
+      };
 
-      return newPost;
+      // Add to posts list
+      setPosts([transformedPost, ...posts]);
+      setFilteredPosts([transformedPost, ...filteredPosts]);
+
+      return transformedPost;
     } catch (err) {
       console.error('Error creating post:', err);
       throw err;
@@ -176,15 +212,70 @@ export default function Forum3Column() {
     }
   };
 
+  /**
+   * Handle feed change (from LeftSidebar)
+   */
+  const handleFeedChange = useCallback((feedType) => {
+    setSelectedFeed(feedType);
+    setLoading(true);
+
+    // TODO: Implement feed-specific loading logic
+    // For now, just reload all posts
+    loadPosts();
+  }, []);
+
+  /**
+   * Handle quick action (Liked/Saved posts)
+   */
+  const handleQuickAction = useCallback(async (action) => {
+    setLoading(true);
+    try {
+      // TODO: Implement liked/saved posts fetching from API
+      if (action === 'liked') {
+        setSelectedFeed('liked');
+        // const likedPosts = await forumService.getLikedPosts();
+        // setFilteredPosts(likedPosts);
+      } else if (action === 'saved') {
+        setSelectedFeed('saved');
+        // const savedPosts = await forumService.getSavedPosts();
+        // setFilteredPosts(savedPosts);
+      }
+    } catch (err) {
+      console.error('Error loading quick action:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  /**
+   * Handle create custom feed
+   */
+  const handleCreateFeed = useCallback(() => {
+    // TODO: Open CreateFeedModal
+    alert('Tính năng Tạo Feed Mới sẽ sớm được ra mắt!');
+  }, []);
+
+  /**
+   * Handle edit feeds
+   */
+  const handleEditFeeds = useCallback(() => {
+    // TODO: Open EditFeedsModal
+    alert('Tính năng Quản Lý Feed sẽ sớm được ra mắt!');
+  }, []);
+
   return (
     <div className="forum-3column-container">
-      {/* Left Sidebar - Categories, Online Users, Top Members */}
+      {/* Left Sidebar - Feed Filters, Categories, Trending Hashtags */}
       <LeftSidebar
         categories={forumCategories}
         selectedCategory={selectedCategory}
         onCategoryChange={handleCategoryFilter}
-        onlineUsers={onlineUsers}
-        topMembers={topMembers}
+        selectedFeed={selectedFeed}
+        onFeedChange={handleFeedChange}
+        onQuickAction={handleQuickAction}
+        customFeeds={customFeeds}
+        onCreateFeed={handleCreateFeed}
+        onEditFeeds={handleEditFeeds}
       />
 
       {/* Center Feed - Posts */}

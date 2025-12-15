@@ -10,13 +10,13 @@ import {
   Modal,
   TouchableOpacity,
   TextInput,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
 import { X, Eye, EyeOff, Lock, Check } from 'lucide-react-native';
 
 import { COLORS, SPACING, TYPOGRAPHY } from '../../../utils/tokens';
 import { supabase } from '../../../services/supabase';
+import alertService from '../../../services/alertService';
 
 export default function ChangePasswordModal({ isOpen, onClose }) {
   const [newPassword, setNewPassword] = useState('');
@@ -43,17 +43,17 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
   const handleChangePassword = async () => {
     // Validation
     if (!newPassword) {
-      Alert.alert('Lỗi', 'Vui lòng nhập mật khẩu mới');
+      alertService.error('Lỗi', 'Vui lòng nhập mật khẩu mới');
       return;
     }
 
     if (newPassword.length < 8) {
-      Alert.alert('Lỗi', 'Mật khẩu phải có tối thiểu 8 ký tự');
+      alertService.error('Lỗi', 'Mật khẩu phải có tối thiểu 8 ký tự');
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      Alert.alert('Lỗi', 'Mật khẩu xác nhận không khớp');
+      alertService.error('Lỗi', 'Mật khẩu xác nhận không khớp');
       return;
     }
 
@@ -66,7 +66,7 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
 
       if (error) throw error;
 
-      Alert.alert('Thành công', 'Đã đổi mật khẩu thành công!', [
+      alertService.success('Thành công', 'Đã đổi mật khẩu thành công!', [
         {
           text: 'OK',
           onPress: () => {
@@ -78,7 +78,7 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
       ]);
     } catch (error) {
       console.error('[ChangePassword] Error:', error);
-      Alert.alert('Lỗi', error.message || 'Không thể đổi mật khẩu');
+      alertService.error('Lỗi', error.message || 'Không thể đổi mật khẩu');
     } finally {
       setLoading(false);
     }
@@ -235,14 +235,17 @@ export default function ChangePasswordModal({ isOpen, onClose }) {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
     justifyContent: 'flex-end',
   },
   content: {
-    backgroundColor: COLORS.bgMid,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    backgroundColor: '#0a1628',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     padding: SPACING.lg,
+    borderWidth: 1.5,
+    borderBottomWidth: 0,
+    borderColor: 'rgba(0, 240, 255, 0.3)',
   },
   header: {
     flexDirection: 'row',
@@ -339,28 +342,29 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 14,
     borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderWidth: 1,
-    borderColor: COLORS.textMuted,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
   },
   cancelButtonText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
-    color: COLORS.textMuted,
+    color: 'rgba(255, 255, 255, 0.6)',
   },
   saveButton: {
     flex: 1,
     paddingVertical: 14,
     borderRadius: 12,
-    backgroundColor: COLORS.burgundy,
+    backgroundColor: '#F5F0E8',
     alignItems: 'center',
   },
   saveButtonDisabled: {
     opacity: 0.6,
   },
   saveButtonText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
-    color: COLORS.textPrimary,
+    color: '#0a1628',
   },
 });

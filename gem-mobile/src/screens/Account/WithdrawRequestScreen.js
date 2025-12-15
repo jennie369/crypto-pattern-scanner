@@ -11,11 +11,11 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -39,6 +39,7 @@ import { partnershipService } from '../../services/partnershipService';
 const MINIMUM_WITHDRAWAL = 100000; // 100K VND
 
 export default function WithdrawRequestScreen({ navigation }) {
+  const { alert, AlertComponent } = useCustomAlert();
   const { user } = useAuth();
 
   // State
@@ -126,10 +127,11 @@ export default function WithdrawRequestScreen({ navigation }) {
 
     const numericAmount = parseInt(amount) || 0;
 
-    Alert.alert(
-      'Xác nhận rút tiền',
-      `Bạn muốn rút ${formatCurrency(numericAmount)} về tài khoản ${bankName} - ${accountNumber}?`,
-      [
+    alert({
+      type: 'warning',
+      title: 'Xác nhận rút tiền',
+      message: `Bạn muốn rút ${formatCurrency(numericAmount)} về tài khoản ${bankName} - ${accountNumber}?`,
+      buttons: [
         { text: 'Hủy', style: 'cancel' },
         {
           text: 'Xác nhận',
@@ -145,28 +147,34 @@ export default function WithdrawRequestScreen({ navigation }) {
               });
 
               if (result.success) {
-                Alert.alert(
-                  'Thành công',
-                  result.message || 'Yêu cầu rút tiền đã được gửi!',
-                  [
-                    {
-                      text: 'OK',
-                      onPress: () => navigation.goBack(),
-                    },
-                  ]
-                );
+                alert({
+                  type: 'success',
+                  title: 'Thành công',
+                  message: result.message || 'Yêu cầu rút tiền đã được gửi!',
+                  buttons: [{ text: 'OK', onPress: () => navigation.goBack() }],
+                });
               } else {
-                Alert.alert('Lỗi', result.error || 'Có lỗi xảy ra');
+                alert({
+                  type: 'error',
+                  title: 'Lỗi',
+                  message: result.error || 'Có lỗi xảy ra',
+                  buttons: [{ text: 'OK' }],
+                });
               }
             } catch (error) {
-              Alert.alert('Lỗi', 'Có lỗi xảy ra khi gửi yêu cầu');
+              alert({
+                type: 'error',
+                title: 'Lỗi',
+                message: 'Có lỗi xảy ra khi gửi yêu cầu',
+                buttons: [{ text: 'OK' }],
+              });
             } finally {
               setLoading(false);
             }
           },
         },
-      ]
-    );
+      ],
+    });
   };
 
   const setMaxAmount = () => {
@@ -448,6 +456,7 @@ export default function WithdrawRequestScreen({ navigation }) {
             <View style={{ height: 40 }} />
           </ScrollView>
         </KeyboardAvoidingView>
+        {AlertComponent}
       </SafeAreaView>
     </LinearGradient>
   );

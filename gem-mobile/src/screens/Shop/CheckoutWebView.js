@@ -10,55 +10,175 @@ import {
   ActivityIndicator,
   Platform,
   BackHandler,
-  Alert,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import { useRoute, useNavigation, CommonActions } from '@react-navigation/native';
 import { useCart } from '../../contexts/CartContext';
 import { COLORS } from '../../utils/tokens';
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
+import deepLinkHandler from '../../services/deepLinkHandler';
 
 const CheckoutWebView = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { completeCheckout } = useCart();
   const { checkoutUrl } = route.params;
+  const { alert, AlertComponent } = useCustomAlert();
 
   const [loading, setLoading] = useState(true);
   const [checkoutCompleted, setCheckoutCompleted] = useState(false);
+  const [cancelConfirmed, setCancelConfirmed] = useState(false);
+  const [affiliateCode, setAffiliateCode] = useState(null);
   const webViewRef = useRef(null);
+
+  // Get affiliate code from deep link handler on mount
+  useEffect(() => {
+    const loadAffiliateCode = async () => {
+      try {
+        const code = await deepLinkHandler.getCheckoutAffiliate();
+        if (code) {
+          console.log('[CheckoutWebView] Found affiliate code:', code);
+          setAffiliateCode(code);
+        }
+      } catch (error) {
+        console.log('[CheckoutWebView] Error loading affiliate code:', error);
+      }
+    };
+    loadAffiliateCode();
+  }, []);
+
+  // Helper function to navigate back safely without loop
+  const handleCancelCheckout = () => {
+    if (cancelConfirmed) return; // Prevent multiple calls
+    setCancelConfirmed(true);
+
+    // Determine which screen to return to based on productType
+    const { productType, returnScreen } = route.params || {};
+
+    console.log('[CheckoutWebView] Cancel checkout, returning to:', returnScreen || 'Cart');
+
+    // Reset navigation stack to prevent loop
+    if (returnScreen) {
+      // If a specific return screen was provided
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: returnScreen }],
+        })
+      );
+    } else if (productType === 'gems') {
+      // For gem purchases, go back to BuyGems
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 1,
+          routes: [
+            { name: 'ShopMain' },
+            { name: 'BuyGems' },
+          ],
+        })
+      );
+    } else {
+      // For regular shop, go to Cart
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 1,
+          routes: [
+            { name: 'ShopMain' },
+            { name: 'Cart' },
+          ],
+        })
+      );
+    }
+  };
 
   // Prevent back button during checkout
   useEffect(() => {
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       () => {
-        if (checkoutCompleted) {
-          return false; // Allow back after success
+        if (checkoutCompleted || cancelConfirmed) {
+          return false; // Allow back after success or cancel confirmed
         }
 
-        Alert.alert(
-          'Hủy thanh toán?',
-          'Bạn có chắc muốn hủy thanh toán?',
-          [
+        alert({
+          type: 'warning',
+          title: 'Hủy thanh toán?',
+          message: 'Bạn có chắc muốn hủy thanh toán?',
+          buttons: [
             { text: 'Tiếp tục thanh toán', style: 'cancel' },
             {
               text: 'Hủy',
               style: 'destructive',
-              onPress: () => navigation.goBack(),
+              onPress: handleCancelCheckout,
             },
-          ]
-        );
+          ],
+        });
         return true;
       }
     );
 
     return () => backHandler.remove();
-  }, [checkoutCompleted, navigation]);
+  }, [checkoutCompleted, cancelConfirmed, navigation]);
 
   // JavaScript to inject into WebView
+  // Pass affiliate code via string interpolation
   const injectedJavaScript = `
     (function() {
       console.log('[WebView] JavaScript injected successfully');
+
+      // ============================================
+      // PART 0: AFFILIATE CODE TRACKING
+      // ============================================
+      const affiliateCode = '${affiliateCode || ''}';
+      if (affiliateCode) {
+        console.log('[WebView] Affiliate code present:', affiliateCode);
+
+        // Try to inject affiliate code into checkout notes/attributes
+        function injectAffiliateCode() {
+          // Method 1: Look for note textarea and append
+          const noteTextarea = document.querySelector('textarea[name="checkout[note]"]');
+          if (noteTextarea) {
+            const existingNote = noteTextarea.value;
+            if (!existingNote.includes('partner_id:')) {
+              noteTextarea.value = existingNote + (existingNote ? '\\n' : '') + 'partner_id:' + affiliateCode + '|source:mobile_app';
+              console.log('[WebView] Injected affiliate code into note textarea');
+            }
+          }
+
+          // Method 2: Try to find and fill hidden attribute fields
+          const partnerIdField = document.querySelector('input[name="checkout[attributes][partner_id]"]');
+          if (partnerIdField) {
+            partnerIdField.value = affiliateCode;
+            console.log('[WebView] Set partner_id hidden field');
+          } else {
+            // Create hidden field if it doesn't exist
+            const form = document.querySelector('form[action*="checkout"]');
+            if (form) {
+              // Check if we already added this field
+              if (!document.querySelector('input[name="checkout[attributes][partner_id]"]')) {
+                const hiddenField = document.createElement('input');
+                hiddenField.type = 'hidden';
+                hiddenField.name = 'checkout[attributes][partner_id]';
+                hiddenField.value = affiliateCode;
+                form.appendChild(hiddenField);
+
+                const sourceField = document.createElement('input');
+                sourceField.type = 'hidden';
+                sourceField.name = 'checkout[attributes][source]';
+                sourceField.value = 'mobile_app';
+                form.appendChild(sourceField);
+
+                console.log('[WebView] Created hidden fields for affiliate tracking');
+              }
+            }
+          }
+        }
+
+        // Run immediately and on DOM changes
+        injectAffiliateCode();
+        const affiliateObserver = new MutationObserver(injectAffiliateCode);
+        affiliateObserver.observe(document.body, { childList: true, subtree: true });
+      }
 
       // ============================================
       // PART 1: HIDE SHOPIFY HEADER/NAVIGATION
@@ -219,6 +339,7 @@ const CheckoutWebView = () => {
           orderNumber: orderNumber,
           url: window.location.href,
           timestamp: Date.now(),
+          affiliateCode: affiliateCode || null,
         };
       }
 
@@ -396,8 +517,17 @@ const CheckoutWebView = () => {
 
     try {
       console.log('[CheckoutWebView] Processing checkout success...');
+      console.log('[CheckoutWebView] Affiliate code:', affiliateCode || orderData.affiliateCode || 'none');
 
       setCheckoutCompleted(true);
+
+      // Clear affiliate code after successful checkout
+      try {
+        await deepLinkHandler.clearCheckoutAffiliate();
+        console.log('[CheckoutWebView] Cleared affiliate code');
+      } catch (err) {
+        console.log('[CheckoutWebView] Error clearing affiliate code:', err);
+      }
 
       // Get params from route to determine product type
       const { productType, gemAmount, packageName, returnScreen } = route.params || {};
@@ -409,9 +539,12 @@ const CheckoutWebView = () => {
         // Check if this is a GEM purchase
         if (productType === 'gems') {
           console.log('[CheckoutWebView] GEM purchase detected!');
+          console.log('[CheckoutWebView] NOTE: This is ORDER CREATED, not payment confirmed!');
 
-          // Navigate to Gem success screen in Account stack
-          navigation.replace('GemPurchaseSuccess', {
+          // IMPORTANT: Navigate to PENDING screen, NOT success screen
+          // Gems will only be added after webhook confirms payment (orders/paid)
+          // The thank_you page means "order created", NOT "payment completed"
+          navigation.replace('GemPurchasePending', {
             orderId: orderData.orderId,
             orderNumber: orderData.orderNumber,
             orderUrl: orderData.url,
@@ -434,14 +567,16 @@ const CheckoutWebView = () => {
     } catch (error) {
       console.error('[CheckoutWebView] Error handling success:', error);
 
-      // Fallback: just close and show generic success
-      const { productType, gemAmount } = route.params || {};
+      // Fallback: just close and show pending/success
+      const { productType, gemAmount, packageName } = route.params || {};
 
       if (productType === 'gems') {
-        navigation.replace('GemPurchaseSuccess', {
+        // Show pending screen - payment not confirmed yet
+        navigation.replace('GemPurchasePending', {
           orderId: null,
           orderNumber: null,
           gemAmount: gemAmount,
+          packageName: packageName,
         });
       } else {
         navigation.replace('OrderSuccess', {
@@ -457,10 +592,11 @@ const CheckoutWebView = () => {
     const { nativeEvent } = syntheticEvent;
     console.error('[CheckoutWebView] WebView error:', nativeEvent);
 
-    Alert.alert(
-      'Lỗi Tải Trang',
-      'Không thể tải trang thanh toán. Vui lòng thử lại.',
-      [
+    alert({
+      type: 'error',
+      title: 'Lỗi Tải Trang',
+      message: 'Không thể tải trang thanh toán. Vui lòng thử lại.',
+      buttons: [
         {
           text: 'Thử lại',
           onPress: () => {
@@ -472,10 +608,10 @@ const CheckoutWebView = () => {
         {
           text: 'Quay lại',
           style: 'cancel',
-          onPress: () => navigation.goBack(),
+          onPress: handleCancelCheckout,
         },
-      ]
-    );
+      ],
+    });
   };
 
   return (
@@ -523,6 +659,7 @@ const CheckoutWebView = () => {
           thirdPartyCookiesEnabled: true,
         })}
       />
+      {AlertComponent}
     </View>
   );
 };

@@ -1091,3 +1091,459 @@
     font-size: 36px;
   }
 }
+
+/* ============================================
+   MOBILE FIXES - max-width: 767px
+   Desktop styles preserved above - DO NOT TOUCH!
+   EXACT values from MOBILE_SIZING_FROM_SCREENSHOTS.md
+   ============================================ */
+@media (max-width: 767px) {
+  .affiliate-dashboard {
+    padding: 24px 12px;
+  }
+
+  /* Dashboard header */
+  .dashboard-header {
+    margin-bottom: 20px;
+    gap: 12px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 24px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    margin-top: 4px;
+  }
+
+  /* Role badge */
+  .role-badge {
+    padding: 8px 16px;
+    font-size: 12px;
+    border-radius: 8px;
+  }
+
+  /* TABS - CRITICAL FIX from screenshots */
+  .affiliate-tabs {
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 10px;
+    border-radius: 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab-btn {
+    padding: 10px 14px;
+    font-size: 12px;
+    gap: 6px;
+    border-radius: 8px;
+    min-height: 36px; /* Reduced from 44px */
+  }
+
+  .tab-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Tab content */
+  .tab-header {
+    margin-bottom: 16px;
+  }
+
+  .tab-header h2 {
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+
+  .tab-header p {
+    font-size: 13px;
+  }
+
+  /* STATS GRID - CRITICAL FIX */
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    gap: 14px;
+    padding: 14px; /* Reduce from 24px - 40% reduction */
+    border-radius: 12px;
+  }
+
+  .stat-icon {
+    width: 32px; /* Reduce from 56px - 43% reduction */
+    height: 32px;
+    border-radius: 8px;
+  }
+
+  .stat-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .stat-label {
+    font-size: 11px; /* Reduce from 13px */
+    margin-bottom: 4px;
+  }
+
+  .stat-value {
+    font-size: 22px; /* Reduce from 28px - 21% reduction */
+    margin-bottom: 2px;
+  }
+
+  .stat-sub {
+    font-size: 11px;
+  }
+
+  /* REFERRAL LINK CARD */
+  .referral-link-card {
+    padding: 16px; /* Reduce from 32px - 50% reduction */
+    border-radius: 14px;
+    margin-bottom: 20px;
+  }
+
+  .referral-link-card h3 {
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+
+  .help-text {
+    font-size: 12px;
+    margin-bottom: 14px;
+  }
+
+  .link-box {
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .link-box input {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .btn-copy {
+    padding: 10px 16px;
+    font-size: 12px;
+    min-height: 40px; /* Reduce from 48px */
+  }
+
+  .referral-stats {
+    gap: 6px;
+    font-size: 12px;
+  }
+
+  /* TIER PROGRESS CARD */
+  .tier-progress-card {
+    padding: 16px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+  }
+
+  .tier-header {
+    margin-bottom: 14px;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .tier-header h3 {
+    font-size: 16px;
+  }
+
+  .current-tier {
+    font-size: 12px;
+  }
+
+  .tier-info {
+    margin-bottom: 12px;
+  }
+
+  .tier-info p {
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+
+  .progress-bar {
+    height: 8px;
+    margin-bottom: 6px;
+  }
+
+  .progress-labels {
+    font-size: 11px;
+  }
+
+  /* COMMISSION INFO CARD - CRITICAL: Big "3%" font fix */
+  .commission-info-card {
+    padding: 16px; /* Reduce from 32px - 50% reduction */
+    border-radius: 14px;
+  }
+
+  .commission-info-card h3 {
+    font-size: 16px;
+    margin-bottom: 14px;
+  }
+
+  .rate-display {
+    gap: 6px;
+    margin-bottom: 16px;
+    padding: 14px;
+    border-radius: 10px;
+  }
+
+  .rate-value {
+    font-size: 40px; /* CRITICAL: Reduce from 48px - huge "3%" fix */
+    font-weight: 700;
+  }
+
+  .rate-label {
+    font-size: 12px;
+  }
+
+  .rate-tiers {
+    margin-top: 14px;
+  }
+
+  .info-label {
+    font-size: 11px;
+    margin-bottom: 10px;
+  }
+
+  .rate-tiers li {
+    padding: 10px 12px; /* Reduce from 16px */
+    margin-bottom: 6px;
+    font-size: 13px;
+    border-radius: 6px;
+  }
+
+  /* REFERRALS LIST */
+  .referrals-list {
+    gap: 10px;
+  }
+
+  .referral-item {
+    gap: 12px;
+    padding: 14px;
+    border-radius: 10px;
+    flex-wrap: wrap;
+  }
+
+  .referral-avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .referral-name {
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+
+  .referral-email {
+    font-size: 12px;
+    margin-bottom: 2px;
+  }
+
+  .referral-date {
+    font-size: 11px;
+  }
+
+  .referral-status {
+    padding: 6px 12px;
+    font-size: 11px;
+    gap: 4px;
+  }
+
+  /* COMMISSION SUMMARY */
+  .commission-summary {
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .summary-item {
+    gap: 4px;
+    min-width: 100px;
+  }
+
+  .summary-label {
+    font-size: 11px;
+  }
+
+  .summary-value {
+    font-size: 18px;
+  }
+
+  /* COMMISSIONS TABLE */
+  .commissions-table th,
+  .commissions-table td {
+    padding: 10px 6px;
+    font-size: 11px;
+  }
+
+  .commission-amount {
+    font-size: 12px;
+  }
+
+  .status-badge {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+
+  /* KPI INFO CARD */
+  .kpi-info-card {
+    padding: 16px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+  }
+
+  .kpi-info-card h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+
+  .kpi-examples {
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .kpi-example {
+    padding: 14px;
+    border-radius: 10px;
+  }
+
+  .product-name {
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+
+  .kpi-target {
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+
+  .kpi-bonus {
+    font-size: 12px;
+  }
+
+  /* BONUSES LIST */
+  .bonuses-list {
+    gap: 12px;
+  }
+
+  .bonus-item {
+    padding: 16px;
+    border-radius: 10px;
+  }
+
+  .bonus-header {
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+  }
+
+  .bonus-header h4 {
+    font-size: 14px;
+  }
+
+  .bonus-details p {
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+
+  .bonus-amount {
+    font-size: 14px !important;
+  }
+
+  /* WITHDRAWAL BALANCE */
+  .withdrawal-balance {
+    margin-bottom: 20px;
+  }
+
+  .balance-card {
+    padding: 20px;
+    border-radius: 14px;
+  }
+
+  .balance-label {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+
+  .balance-value {
+    font-size: 32px; /* Reduce from 48px - 33% reduction */
+    margin-bottom: 16px;
+  }
+
+  .btn-withdraw {
+    padding: 12px 24px;
+    font-size: 14px;
+    min-height: 44px;
+  }
+
+  /* WITHDRAWALS LIST */
+  .withdrawals-list {
+    gap: 12px;
+  }
+
+  .withdrawal-item {
+    gap: 12px;
+    padding: 16px;
+    border-radius: 10px;
+  }
+
+  .withdrawal-amount {
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+
+  .withdrawal-method {
+    font-size: 12px;
+    margin-bottom: 2px;
+  }
+
+  .withdrawal-date {
+    font-size: 11px;
+  }
+
+  .withdrawal-status {
+    gap: 6px;
+    padding: 10px 14px;
+    font-size: 12px;
+    border-radius: 8px;
+  }
+
+  /* EMPTY STATES */
+  .empty-state {
+    padding: 48px 16px;
+  }
+
+  .empty-state svg {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 14px;
+  }
+
+  .empty-state p {
+    font-size: 14px;
+  }
+
+  /* LOADING/ERROR */
+  .loading-container,
+  .error-container {
+    min-height: 50vh;
+  }
+
+  .loading-container p,
+  .error-container p {
+    font-size: 14px;
+  }
+
+  .btn-retry {
+    padding: 10px 20px;
+    font-size: 13px;
+    min-height: 40px;
+  }
+}

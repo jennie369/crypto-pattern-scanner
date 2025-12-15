@@ -7,14 +7,16 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, TextInput } from 'react-native';
 import { Square, CheckSquare, Plus, MoreVertical, ListChecks } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import widgetManagementService from '../../services/widgetManagementService';
+import CustomAlert, { useCustomAlert } from '../CustomAlert';
 
 const ActionChecklistCard = ({ widget, onTaskToggle, isHighlighted }) => {
   const [showAddTask, setShowAddTask] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
+  const { alert, AlertComponent } = useCustomAlert();
 
   const { tasks } = widget.data;
   const completedCount = tasks.filter(t => t.completed).length;
@@ -37,21 +39,22 @@ const ActionChecklistCard = ({ widget, onTaskToggle, isHighlighted }) => {
 
       // Check if all completed
       if (result.allCompleted) {
-        Alert.alert(
-          'All Done!',
-          'Bạn đã hoàn thành tất cả tasks! Amazing work!'
-        );
+        alert({
+          type: 'success',
+          title: 'All Done!',
+          message: 'Bạn đã hoàn thành tất cả tasks! Amazing work!',
+        });
       }
     } catch (error) {
       console.error('[ActionChecklistCard] Error toggling task:', error);
-      Alert.alert('Lỗi', 'Không thể cập nhật task');
+      alert({ type: 'error', title: 'Lỗi', message: 'Không thể cập nhật task' });
     }
   };
 
   // Handle add new task
   const handleAddTask = async () => {
     if (!newTaskTitle.trim()) {
-      Alert.alert('Lỗi', 'Vui lòng nhập nội dung task');
+      alert({ type: 'error', title: 'Lỗi', message: 'Vui lòng nhập nội dung task' });
       return;
     }
 
@@ -80,16 +83,17 @@ const ActionChecklistCard = ({ widget, onTaskToggle, isHighlighted }) => {
       }
     } catch (error) {
       console.error('[ActionChecklistCard] Error adding task:', error);
-      Alert.alert('Lỗi', 'Không thể thêm task');
+      alert({ type: 'error', title: 'Lỗi', message: 'Không thể thêm task' });
     }
   };
 
   // Handle 3 dots menu
   const handleMenuPress = () => {
-    Alert.alert(
-      widget.title,
-      'Chọn hành động',
-      [
+    alert({
+      type: 'info',
+      title: widget.title,
+      message: 'Chọn hành động',
+      buttons: [
         { text: 'Hủy', style: 'cancel' },
         {
           text: '➕ Thêm task',
@@ -100,16 +104,17 @@ const ActionChecklistCard = ({ widget, onTaskToggle, isHighlighted }) => {
           style: 'destructive',
           onPress: handleDeleteWidget
         }
-      ]
-    );
+      ],
+    });
   };
 
   // Handle delete widget
   const handleDeleteWidget = () => {
-    Alert.alert(
-      'Xác nhận xóa',
-      'Bạn có chắc muốn xóa checklist này?',
-      [
+    alert({
+      type: 'warning',
+      title: 'Xác nhận xóa',
+      message: 'Bạn có chắc muốn xóa checklist này?',
+      buttons: [
         { text: 'Hủy', style: 'cancel' },
         {
           text: 'Xóa',
@@ -119,12 +124,12 @@ const ActionChecklistCard = ({ widget, onTaskToggle, isHighlighted }) => {
               await widgetManagementService.deleteWidget(widget.id);
               if (onTaskToggle) onTaskToggle();
             } catch (error) {
-              Alert.alert('Lỗi', 'Không thể xóa checklist');
+              alert({ type: 'error', title: 'Lỗi', message: 'Không thể xóa checklist' });
             }
           }
         }
-      ]
-    );
+      ],
+    });
   };
 
   return (
@@ -218,6 +223,7 @@ const ActionChecklistCard = ({ widget, onTaskToggle, isHighlighted }) => {
           <Text style={styles.addButtonText}>Thêm Task</Text>
         </TouchableOpacity>
       )}
+      {AlertComponent}
     </View>
   );
 };

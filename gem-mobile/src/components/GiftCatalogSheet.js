@@ -17,8 +17,11 @@ import {
   Dimensions,
   FlatList,
   ActivityIndicator,
-  Alert,
+  Keyboard,
+  Platform,
+  KeyboardAvoidingView,
 } from 'react-native';
+import alertService from '../services/alertService';
 import { BlurView } from 'expo-blur';
 import {
   X,
@@ -38,6 +41,7 @@ import giftService from '../services/giftService';
 import walletService from '../services/walletService';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
+const SCREEN_FULL_HEIGHT = Dimensions.get('screen').height;
 
 // Gift icons mapping (fallback when no image)
 const GIFT_ICONS = {
@@ -67,6 +71,7 @@ const GiftCatalogSheet = ({
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [balance, setBalance] = useState(0);
   const [slideAnim] = useState(new Animated.Value(SCREEN_HEIGHT));
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   useEffect(() => {
     if (visible) {
@@ -96,6 +101,29 @@ const GiftCatalogSheet = ({
     }
   }, [selectedCategory]);
 
+  // Keyboard listeners
+  useEffect(() => {
+    const keyboardShowEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const keyboardHideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    const showListener = Keyboard.addListener(keyboardShowEvent, (e) => {
+      const screenY = e.endCoordinates.screenY;
+      const actualHeight = Platform.OS === 'android'
+        ? (SCREEN_FULL_HEIGHT - screenY)
+        : e.endCoordinates.height;
+      setKeyboardHeight(actualHeight);
+    });
+
+    const hideListener = Keyboard.addListener(keyboardHideEvent, () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showListener.remove();
+      hideListener.remove();
+    };
+  }, []);
+
   const loadData = async () => {
     setLoading(true);
 
@@ -122,7 +150,7 @@ const GiftCatalogSheet = ({
     if (!selectedGift || sending) return;
 
     if (balance < selectedGift.gem_cost) {
-      Alert.alert('Không đủ gems', 'Vui lòng nạp thêm gems để gửi quà');
+      alertService.error('Không đủ gems', 'Vui lòng nạp thêm gems để gửi quà');
       return;
     }
 
@@ -142,9 +170,9 @@ const GiftCatalogSheet = ({
     if (result.success) {
       onGiftSent?.(result.data);
       onClose?.();
-      Alert.alert('Thành công', `Đã gửi "${selectedGift.name}" đến ${recipientName}!`);
+      alertService.success('Thành công', `Đã gửi "${selectedGift.name}" đến ${recipientName}!`);
     } else {
-      Alert.alert('Lỗi', result.error);
+      alertService.error('Lỗi', result.error);
     }
   }, [selectedGift, recipientId, postId, streamId, message, isAnonymous, balance, sending, recipientName]);
 
@@ -172,6 +200,9 @@ const GiftCatalogSheet = ({
     const canAfford = balance >= item.gem_cost;
     const Icon = GIFT_ICONS[item.name?.toLowerCase()] || GIFT_ICONS.default;
 
+    // Check if image_url is a valid external URL (not a relative path)
+    const hasValidImageUrl = item.image_url && item.image_url.startsWith('http');
+
     return (
       <TouchableOpacity
         style={[
@@ -189,7 +220,7 @@ const GiftCatalogSheet = ({
           </View>
         )}
 
-        {item.image_url ? (
+        {hasValidImageUrl ? (
           <Image source={{ uri: item.image_url }} style={styles.giftImage} />
         ) : (
           <View style={styles.giftIconContainer}>
@@ -288,7 +319,10 @@ const GiftCatalogSheet = ({
 
                 {/* Message Input & Options */}
                 {selectedGift && (
-                  <View style={styles.sendSection}>
+                  <View style={[
+                    styles.sendSection,
+                    { paddingBottom: keyboardHeight > 0 ? keyboardHeight + SPACING.md : 44 }
+                  ]}>
                     <TextInput
                       style={styles.messageInput}
                       placeholder="Thêm lời nhắn (tùy chọn)..."
@@ -347,17 +381,18 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)', // Less dim backdrop
   },
   sheet: {
     borderTopLeftRadius: GLASS.borderRadius,
     borderTopRightRadius: GLASS.borderRadius,
     overflow: 'hidden',
-    height: SCREEN_HEIGHT * 0.7,
+    maxHeight: SCREEN_HEIGHT * 0.92, // Taller - almost full screen
+    minHeight: SCREEN_HEIGHT * 0.85, // Much taller minimum
   },
   blurContainer: {
     flex: 1,
-    backgroundColor: GLASS.background,
+    backgroundColor: 'rgba(15, 16, 48, 0.95)', // Solid dark background, more opaque
   },
   header: {
     alignItems: 'center',
@@ -455,21 +490,22 @@ const styles = StyleSheet.create({
   },
   giftCard: {
     width: (SCREEN_WIDTH - SPACING.md * 5) / 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(255, 255, 255, 0.12)', // Brighter background
     borderRadius: 12,
     padding: SPACING.sm,
     margin: SPACING.xs,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'transparent',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.15)', // Visible border
     position: 'relative',
   },
   giftCardSelected: {
     borderColor: COLORS.purple,
-    backgroundColor: 'rgba(106, 91, 255, 0.15)',
+    backgroundColor: 'rgba(106, 91, 255, 0.3)', // More visible selection
+    borderWidth: 2,
   },
   giftCardDisabled: {
-    opacity: 0.5,
+    opacity: 0.4,
   },
   animatedBadge: {
     position: 'absolute',
@@ -482,14 +518,17 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   giftIconContainer: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(106, 91, 255, 0.15)', // Subtle purple glow behind icon
+    borderRadius: 22,
   },
   giftName: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    color: COLORS.textSecondary,
+    fontSize: TYPOGRAPHY.fontSize.sm, // Larger font
+    color: COLORS.textPrimary, // Brighter text
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
     marginTop: SPACING.xs,
     textAlign: 'center',
   },
@@ -523,7 +562,6 @@ const styles = StyleSheet.create({
   },
   sendSection: {
     padding: SPACING.lg,
-    paddingBottom: 34,
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.1)',
   },

@@ -28,6 +28,8 @@ import {
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS } from '../../utils/tokens';
 import walletService from '../../services/walletService';
+import gemEconomyService from '../../services/gemEconomyService';
+import { useAuth } from '../../contexts/AuthContext';
 
 const FILTER_OPTIONS = [
   { id: 'all', label: 'Tất cả' },
@@ -39,6 +41,7 @@ const FILTER_OPTIONS = [
 ];
 
 const TransactionHistoryScreen = ({ navigation }) => {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [transactions, setTransactions] = useState([]);
@@ -51,9 +54,40 @@ const TransactionHistoryScreen = ({ navigation }) => {
     loadData();
   }, []);
 
+  // Helper to detect if transaction is a gift send based on description
+  const isGiftSendTransaction = (t) => {
+    // Check type/reference_type first
+    if (t.type === 'gift_sent' || (t.type === 'spend' && t.reference_type === 'gift')) {
+      return true;
+    }
+    // Also check description pattern for legacy data
+    if (t.description?.includes('Gửi quà') || t.description?.includes('Send gift')) {
+      return true;
+    }
+    return false;
+  };
+
+  // Helper to detect if transaction is a gift receive
+  const isGiftReceiveTransaction = (t) => {
+    if (t.type === 'gift_received' || (t.type === 'receive' && t.reference_type === 'gift')) {
+      return true;
+    }
+    // Also check description pattern
+    if (t.description?.includes('Nhận quà') || t.description?.includes('Receive gift')) {
+      return true;
+    }
+    return false;
+  };
+
   useEffect(() => {
     if (selectedFilter === 'all') {
       setFilteredTransactions(transactions);
+    } else if (selectedFilter === 'gift_sent') {
+      // Filter gift send transactions
+      setFilteredTransactions(transactions.filter(isGiftSendTransaction));
+    } else if (selectedFilter === 'gift_received') {
+      // Filter gift receive transactions
+      setFilteredTransactions(transactions.filter(isGiftReceiveTransaction));
     } else {
       setFilteredTransactions(transactions.filter(t => t.type === selectedFilter));
     }
@@ -65,7 +99,21 @@ const TransactionHistoryScreen = ({ navigation }) => {
       setPage(0);
     }
 
-    const data = await walletService.getTransactions(50, reset ? 0 : page * 50);
+    let data = [];
+    // Use gemEconomyService for transactions from gems_transactions table
+    if (user?.id) {
+      data = await gemEconomyService.getGemTransactions(user.id, 50, reset ? 0 : page * 50) || [];
+      // Debug: log first few transactions to see actual data structure
+      console.log('[TransactionHistory] Loaded transactions:', data.slice(0, 3).map(t => ({
+        type: t.type,
+        amount: t.amount,
+        reference_type: t.reference_type,
+        description: t.description?.substring(0, 30),
+      })));
+    } else {
+      // Fallback to walletService
+      data = await walletService.getTransactions(50, reset ? 0 : page * 50);
+    }
 
     if (reset) {
       setTransactions(data);
@@ -90,19 +138,43 @@ const TransactionHistoryScreen = ({ navigation }) => {
     }
   };
 
-  const getTransactionIcon = (type) => {
+  const getTransactionIcon = (type, referenceType, amount, description) => {
+    // First check description for gift patterns (most reliable for legacy data)
+    if (description?.includes('Gửi quà') || description?.includes('Send gift')) {
+      return { icon: ArrowUpRight, color: COLORS.error };
+    }
+    if (description?.includes('Nhận quà') || description?.includes('Receive gift')) {
+      return { icon: ArrowDownLeft, color: COLORS.success };
+    }
+
     switch (type) {
       case 'purchase':
         return { icon: ShoppingCart, color: COLORS.success };
       case 'gift_sent':
         return { icon: ArrowUpRight, color: COLORS.error };
+      case 'spend':
+        // Check if it's a gift spend
+        if (referenceType === 'gift') {
+          return { icon: ArrowUpRight, color: COLORS.error };
+        }
+        return { icon: ArrowUpRight, color: COLORS.warning };
       case 'gift_received':
+        return { icon: ArrowDownLeft, color: COLORS.success };
+      case 'receive':
+        // 'receive' is the new type from gems_transactions for gift received
         return { icon: ArrowDownLeft, color: COLORS.success };
       case 'bonus':
         return { icon: Sparkles, color: COLORS.gold };
       case 'withdrawal':
+      case 'refund':
         return { icon: ArrowUpRight, color: COLORS.warning };
       default:
+        // Fallback: determine by amount sign
+        if (amount > 0) {
+          return { icon: ArrowDownLeft, color: COLORS.success };
+        } else if (amount < 0) {
+          return { icon: ArrowUpRight, color: COLORS.error };
+        }
         return { icon: Clock, color: COLORS.textMuted };
     }
   };
@@ -133,8 +205,11 @@ const TransactionHistoryScreen = ({ navigation }) => {
   };
 
   const renderItem = ({ item }) => {
-    const { icon: Icon, color } = getTransactionIcon(item.type);
-    const isPositive = item.amount > 0;
+    const { icon: Icon, color } = getTransactionIcon(item.type, item.reference_type, item.amount, item.description);
+    // For gift sends, force display as negative even if amount is positive in DB
+    const isGiftSend = isGiftSendTransaction(item);
+    const displayAmount = isGiftSend && item.amount > 0 ? -item.amount : item.amount;
+    const isPositive = displayAmount > 0;
 
     return (
       <View style={styles.transactionItem}>
@@ -156,7 +231,7 @@ const TransactionHistoryScreen = ({ navigation }) => {
                 { color: isPositive ? COLORS.success : COLORS.error },
               ]}
             >
-              {isPositive ? '+' : ''}{walletService.formatGems(item.amount)}
+              {isPositive ? '+' : ''}{walletService.formatGems(displayAmount)}
             </Text>
           </View>
           {item.currency_type && (

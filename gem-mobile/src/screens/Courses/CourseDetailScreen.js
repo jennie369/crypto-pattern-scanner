@@ -15,7 +15,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
-  Alert,
   Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -37,6 +36,9 @@ import EnrollmentModal from './EnrollmentModal';
 import { useCourse } from '../../contexts/CourseContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, GLASS } from '../../utils/tokens';
+import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
+import shopifyService from '../../services/shopifyService';
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -57,6 +59,7 @@ const TIER_LABELS = {
 const CourseDetailScreen = ({ navigation, route }) => {
   const { courseId } = route.params;
   const { profile } = useAuth();
+  const { alert, AlertComponent } = useCustomAlert();
 
   // Use CourseContext
   const {
@@ -152,24 +155,101 @@ const CourseDetailScreen = ({ navigation, route }) => {
       setShowEnrollModal(false);
 
       if (result.success) {
-        Alert.alert('Thành công!', 'Bạn đã đăng ký khóa học thành công');
+        // FREE course - enrollment successful
+        alert({ type: 'success', title: 'Thành công!', message: 'Bạn đã đăng ký khóa học thành công' });
+      } else if (result.requiresPayment) {
+        // PAID course - need to redirect to Shopify checkout
+        console.log('[CourseDetail] Redirecting to Shopify checkout for paid course');
+        await handlePurchaseCourse(result);
       } else if (result.error === 'Upgrade required') {
-        Alert.alert(
-          'Nâng cấp tài khoản',
-          `Khóa học này yêu cầu gói ${TIER_LABELS[result.requiredTier]}`,
-          [
+        alert({
+          type: 'warning',
+          title: 'Nâng cấp tài khoản',
+          message: `Khóa học này yêu cầu gói ${TIER_LABELS[result.requiredTier]}`,
+          buttons: [
             { text: 'Để sau', style: 'cancel' },
             {
               text: 'Nâng cấp',
-              onPress: () => navigation.navigate('Account', { screen: 'Upgrade' }),
+              onPress: () => navigation.navigate('Shop', { screen: 'ShopMain', params: { category: 'subscriptions' } }),
             },
-          ]
-        );
+          ],
+        });
       } else {
-        Alert.alert('Lỗi', result.error || 'Không thể đăng ký khóa học');
+        alert({ type: 'error', title: 'Lỗi', message: result.error || 'Không thể đăng ký khóa học' });
       }
     } catch (error) {
-      Alert.alert('Lỗi', 'Không thể đăng ký khóa học. Vui lòng thử lại.');
+      alert({ type: 'error', title: 'Lỗi', message: 'Không thể đăng ký khóa học. Vui lòng thử lại.' });
+    } finally {
+      setEnrolling(false);
+    }
+  };
+
+  // Handle purchase flow for paid courses
+  const handlePurchaseCourse = async (paymentInfo) => {
+    try {
+      const { shopifyProductId, price, courseTitle } = paymentInfo;
+
+      if (!shopifyProductId) {
+        // Course has price but no Shopify product linked
+        alert({
+          type: 'warning',
+          title: 'Khóa học chưa sẵn sàng',
+          message: 'Khóa học này đang được chuẩn bị. Vui lòng quay lại sau.',
+          buttons: [{ text: 'Đồng ý' }],
+        });
+        return;
+      }
+
+      setEnrolling(true);
+
+      // Fetch Shopify product to get variant ID
+      console.log('[CourseDetail] Fetching Shopify product:', shopifyProductId);
+      const product = await shopifyService.getProductById(shopifyProductId);
+
+      if (!product) {
+        alert({ type: 'error', title: 'Lỗi', message: 'Không tìm thấy sản phẩm. Vui lòng thử lại.' });
+        setEnrolling(false);
+        return;
+      }
+
+      // Get first variant (or specific course variant)
+      const variant = product.variants?.[0];
+      if (!variant?.id) {
+        alert({ type: 'error', title: 'Lỗi', message: 'Sản phẩm không có biến thể. Vui lòng liên hệ hỗ trợ.' });
+        setEnrolling(false);
+        return;
+      }
+
+      console.log('[CourseDetail] Creating cart with variant:', variant.id);
+
+      // Create cart with the course product
+      const cart = await shopifyService.createCart([
+        {
+          merchandiseId: variant.id,
+          quantity: 1,
+        },
+      ]);
+
+      if (!cart?.checkoutUrl) {
+        alert({ type: 'error', title: 'Lỗi', message: 'Không thể tạo giỏ hàng. Vui lòng thử lại.' });
+        setEnrolling(false);
+        return;
+      }
+
+      console.log('[CourseDetail] Checkout URL:', cart.checkoutUrl);
+
+      // Navigate to checkout WebView with course info
+      navigation.navigate('CourseCheckout', {
+        checkoutUrl: cart.checkoutUrl,
+        courseId: courseId,
+        courseTitle: course?.title || courseTitle,
+        productType: 'course',
+        returnScreen: 'CourseDetail',
+      });
+
+    } catch (error) {
+      console.error('[CourseDetail] Purchase error:', error);
+      alert({ type: 'error', title: 'Lỗi', message: 'Không thể tiến hành thanh toán. Vui lòng thử lại.' });
     } finally {
       setEnrolling(false);
     }
@@ -177,7 +257,7 @@ const CourseDetailScreen = ({ navigation, route }) => {
 
   const handleUpgrade = () => {
     setShowEnrollModal(false);
-    navigation.navigate('Account', { screen: 'Upgrade' });
+    navigation.navigate('Shop', { screen: 'ShopMain', params: { category: 'subscriptions' } });
   };
 
   const handleLessonPress = (lesson) => {
@@ -238,9 +318,23 @@ const CourseDetailScreen = ({ navigation, route }) => {
           </Text>
         </View>
 
-        {/* Play Button for trailer (if enrolled) */}
+        {/* Play Button for trailer/continue (if enrolled) */}
         {enrolled && (
-          <TouchableOpacity style={styles.playBtn}>
+          <TouchableOpacity
+            style={styles.playBtn}
+            onPress={() => {
+              // Navigate to next lesson or first lesson
+              const targetLesson = nextLesson || lessons[0];
+              if (targetLesson) {
+                navigation.navigate('LessonPlayer', {
+                  courseId,
+                  lessonId: targetLesson.id,
+                  lesson: targetLesson,
+                  courseTitle: course?.title,
+                });
+              }
+            }}
+          >
             <Play size={32} color={COLORS.textPrimary} fill={COLORS.textPrimary} />
           </TouchableOpacity>
         )}
@@ -478,7 +572,7 @@ const CourseDetailScreen = ({ navigation, route }) => {
         {renderCurriculum()}
 
         {/* Bottom spacing for button */}
-        <View style={{ height: 100 }} />
+        <View style={{ height: CONTENT_BOTTOM_PADDING }} />
       </ScrollView>
 
       {/* Fixed Enroll/Continue Button with slide animation */}
@@ -506,6 +600,8 @@ const CourseDetailScreen = ({ navigation, route }) => {
         userTier={profile?.scanner_tier || 'FREE'}
         enrolling={enrolling}
       />
+
+      {AlertComponent}
     </LinearGradient>
   );
 };

@@ -1,6 +1,7 @@
 /**
  * Gemral - Lesson Player Screen
  * Video/content player for lessons with progress tracking
+ * Supports: video, article (JSONB content_blocks), quiz
  * Updated to use CourseContext for state management
  */
 
@@ -31,15 +32,23 @@ import {
   CheckCircle,
   ChevronLeft,
   ChevronRight,
+  FileText,
+  HelpCircle,
+  ArrowLeft,
 } from 'lucide-react-native';
 import { useCourse } from '../../contexts/CourseContext';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
+import LessonRenderer from './components/LessonRenderer';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const VIDEO_HEIGHT = (SCREEN_WIDTH * 9) / 16;
 
 const LessonPlayerScreen = ({ navigation, route }) => {
-  const { courseId, lessonId, lesson, courseTitle } = route.params;
+  // Validate route params
+  const courseId = route.params?.courseId;
+  const lessonId = route.params?.lessonId;
+  const lesson = route.params?.lesson;
+  const courseTitle = route.params?.courseTitle;
   const videoRef = useRef(null);
 
   // Use CourseContext
@@ -58,6 +67,7 @@ const LessonPlayerScreen = ({ navigation, route }) => {
 
   // Local state
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [position, setPosition] = useState(0);
@@ -76,7 +86,21 @@ const LessonPlayerScreen = ({ navigation, route }) => {
   const nextLesson = currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1] : null;
 
   useEffect(() => {
-    // Just set loading to false since we get data from context
+    // Validate required data exists
+    if (!courseId || !lessonId) {
+      setError('Thiếu thông tin bài học');
+      setLoading(false);
+      return;
+    }
+
+    if (!lesson && !course) {
+      setError('Không tìm thấy bài học');
+      setLoading(false);
+      return;
+    }
+
+    // Data is valid, ready to render
+    setError(null);
     setLoading(false);
 
     return () => {
@@ -84,7 +108,7 @@ const LessonPlayerScreen = ({ navigation, route }) => {
         clearTimeout(controlsTimeout.current);
       }
     };
-  }, [lessonId]);
+  }, [lessonId, courseId, lesson, course]);
 
   const handlePlaybackStatusUpdate = (status) => {
     if (status.isLoaded) {
@@ -398,17 +422,237 @@ const LessonPlayerScreen = ({ navigation, route }) => {
     </ScrollView>
   );
 
-  return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+  // Render article content using LessonRenderer
+  const renderArticleContent = () => (
+    <ScrollView
+      style={styles.articleScroll}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.articleContainer}
+    >
+      {/* Header */}
+      <View style={styles.articleHeader}>
+        <TouchableOpacity
+          style={styles.backBtn}
+          onPress={() => navigation.goBack()}
+        >
+          <ArrowLeft size={24} color={COLORS.textPrimary} />
+        </TouchableOpacity>
+        <View style={styles.articleHeaderContent}>
+          <Text style={styles.courseTitle}>{courseTitle}</Text>
+          <Text style={styles.articleTitle}>{lesson.title}</Text>
+        </View>
+      </View>
+
+      {/* Article Type Badge */}
+      <View style={styles.typeBadge}>
+        <FileText size={14} color={COLORS.cyan} />
+        <Text style={styles.typeBadgeText}>Bài đọc</Text>
+        {lesson.duration_minutes && (
+          <Text style={styles.typeDuration}>• {lesson.duration_minutes} phút</Text>
+        )}
+      </View>
+
+      {/* JSONB Content Blocks */}
+      {lesson.content_blocks && lesson.content_blocks.length > 0 ? (
+        <LessonRenderer blocks={lesson.content_blocks} />
+      ) : (
+        // Fallback if no content_blocks, show description
+        <View style={styles.fallbackContent}>
+          <Text style={styles.descriptionText}>{lesson.description}</Text>
+        </View>
+      )}
+
+      {/* Mark Complete Button */}
+      {!isCompleted && (
+        <TouchableOpacity
+          style={styles.markCompleteBtn}
+          onPress={handleMarkComplete}
+          disabled={markingComplete}
+        >
+          {markingComplete ? (
+            <ActivityIndicator size="small" color={COLORS.gold} />
+          ) : (
+            <>
+              <CheckCircle size={20} color={COLORS.gold} />
+              <Text style={styles.markCompleteText}>Đánh dấu hoàn thành</Text>
+            </>
+          )}
+        </TouchableOpacity>
+      )}
+
+      {isCompleted && (
+        <View style={styles.completedBanner}>
+          <CheckCircle size={20} color={COLORS.success} />
+          <Text style={styles.completedBannerText}>Bài học đã hoàn thành</Text>
+        </View>
+      )}
+
+      {/* Navigation Buttons */}
+      <View style={styles.navButtons}>
+        <TouchableOpacity
+          style={[styles.navBtn, !prevLesson && styles.navBtnDisabled]}
+          onPress={() => navigateToLesson(prevLesson)}
+          disabled={!prevLesson}
+        >
+          <ChevronLeft size={20} color={prevLesson ? COLORS.textPrimary : COLORS.textMuted} />
+          <Text style={[styles.navBtnText, !prevLesson && styles.navBtnTextDisabled]}>
+            Bài trước
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.navBtn, styles.navBtnNext, !nextLesson && styles.navBtnDisabled]}
+          onPress={() => navigateToLesson(nextLesson)}
+          disabled={!nextLesson}
+        >
+          <Text style={[styles.navBtnText, !nextLesson && styles.navBtnTextDisabled]}>
+            Bài tiếp
+          </Text>
+          <ChevronRight size={20} color={nextLesson ? COLORS.textPrimary : COLORS.textMuted} />
+        </TouchableOpacity>
+      </View>
+
+      {/* Bottom padding */}
+      <View style={{ height: 50 }} />
+    </ScrollView>
+  );
+
+  // Handle quiz type - navigate to QuizScreen
+  const handleQuizLesson = () => {
+    navigation.navigate('QuizScreen', {
+      courseId,
+      lessonId,
+      lesson,
+      courseTitle,
+    });
+  };
+
+  // Render based on lesson type
+  const renderContent = () => {
+    const lessonType = lesson.type || 'video';
+
+    switch (lessonType) {
+      case 'article':
+      case 'text':
+        return renderArticleContent();
+
+      case 'quiz':
+        // Quiz lessons navigate to QuizScreen
+        return (
+          <View style={styles.quizRedirect}>
+            <LinearGradient
+              colors={GRADIENTS.background}
+              locations={GRADIENTS.backgroundLocations}
+              style={styles.gradient}
+            >
+              <SafeAreaView style={styles.quizRedirectContent}>
+                <TouchableOpacity
+                  style={styles.backBtn}
+                  onPress={() => navigation.goBack()}
+                >
+                  <ArrowLeft size={24} color={COLORS.textPrimary} />
+                </TouchableOpacity>
+
+                <View style={styles.quizIconContainer}>
+                  <HelpCircle size={64} color={COLORS.gold} />
+                </View>
+                <Text style={styles.quizTitle}>{lesson.title}</Text>
+                <Text style={styles.quizDescription}>
+                  Bài kiểm tra để củng cố kiến thức
+                </Text>
+
+                <TouchableOpacity
+                  style={styles.startQuizBtn}
+                  onPress={handleQuizLesson}
+                >
+                  <Play size={20} color="#000" fill="#000" />
+                  <Text style={styles.startQuizText}>Bắt đầu Quiz</Text>
+                </TouchableOpacity>
+              </SafeAreaView>
+            </LinearGradient>
+          </View>
+        );
+
+      case 'video':
+      default:
+        return (
+          <>
+            {renderVideoPlayer()}
+            {renderLessonContent()}
+          </>
+        );
+    }
+  };
+
+  // Error state
+  if (error) {
+    return (
       <LinearGradient
         colors={GRADIENTS.background}
         locations={GRADIENTS.backgroundLocations}
-        style={styles.gradient}
+        style={styles.container}
       >
-        {renderVideoPlayer()}
-        {renderLessonContent()}
+        <SafeAreaView style={styles.errorContainer}>
+          <TouchableOpacity
+            style={styles.errorBackBtn}
+            onPress={() => navigation.goBack()}
+          >
+            <ArrowLeft size={24} color={COLORS.textPrimary} />
+          </TouchableOpacity>
+          <View style={styles.errorContent}>
+            <Text style={styles.errorIcon}>⚠️</Text>
+            <Text style={styles.errorTitle}>Không thể tải bài học</Text>
+            <Text style={styles.errorMessage}>{error}</Text>
+            <TouchableOpacity
+              style={styles.errorButton}
+              onPress={() => navigation.goBack()}
+            >
+              <Text style={styles.errorButtonText}>Quay lại</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
       </LinearGradient>
+    );
+  }
+
+  // Loading state
+  if (loading) {
+    return (
+      <LinearGradient
+        colors={GRADIENTS.background}
+        locations={GRADIENTS.backgroundLocations}
+        style={styles.container}
+      >
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={COLORS.gold} />
+          <Text style={styles.loadingText}>Đang tải bài học...</Text>
+        </View>
+      </LinearGradient>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      {lesson?.type === 'article' || lesson?.type === 'text' ? (
+        <LinearGradient
+          colors={GRADIENTS.background}
+          locations={GRADIENTS.backgroundLocations}
+          style={styles.gradient}
+        >
+          {renderContent()}
+        </LinearGradient>
+      ) : lesson.type === 'quiz' ? (
+        renderContent()
+      ) : (
+        <LinearGradient
+          colors={GRADIENTS.background}
+          locations={GRADIENTS.backgroundLocations}
+          style={styles.gradient}
+        >
+          {renderContent()}
+        </LinearGradient>
+      )}
     </View>
   );
 };
@@ -420,6 +664,65 @@ const styles = StyleSheet.create({
   },
   gradient: {
     flex: 1,
+  },
+
+  // Error State
+  errorContainer: {
+    flex: 1,
+  },
+  errorBackBtn: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: SPACING.sm,
+    marginTop: SPACING.sm,
+  },
+  errorContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.xl,
+  },
+  errorIcon: {
+    fontSize: 48,
+    marginBottom: SPACING.lg,
+  },
+  errorTitle: {
+    fontSize: TYPOGRAPHY.fontSize.xxl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.sm,
+    textAlign: 'center',
+  },
+  errorMessage: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    marginBottom: SPACING.xl,
+  },
+  errorButton: {
+    backgroundColor: COLORS.gold,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xxl,
+    borderRadius: 25,
+  },
+  errorButtonText: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: '#112250',
+  },
+
+  // Loading State
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textSecondary,
+    marginTop: SPACING.md,
   },
 
   // Video Player
@@ -632,6 +935,121 @@ const styles = StyleSheet.create({
   },
   navBtnTextDisabled: {
     color: COLORS.textMuted,
+  },
+
+  // Article Layout
+  articleScroll: {
+    flex: 1,
+  },
+  articleContainer: {
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: SPACING.xl,
+  },
+  articleHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingTop: SPACING.xl + 40, // Account for status bar
+    paddingBottom: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    marginBottom: SPACING.lg,
+  },
+  backBtn: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.sm,
+  },
+  articleHeaderContent: {
+    flex: 1,
+  },
+  articleTitle: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+  },
+  typeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+    gap: SPACING.xs,
+  },
+  typeBadgeText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.cyan,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  typeDuration: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+  },
+  fallbackContent: {
+    paddingVertical: SPACING.lg,
+  },
+  completedBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    marginTop: SPACING.lg,
+    paddingVertical: SPACING.md,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0, 255, 100, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 255, 100, 0.3)',
+  },
+  completedBannerText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    color: COLORS.success,
+  },
+
+  // Quiz Redirect Screen
+  quizRedirect: {
+    flex: 1,
+  },
+  quizRedirectContent: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: SPACING.xl,
+  },
+  quizIconContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: SPACING.xl,
+  },
+  quizTitle: {
+    fontSize: TYPOGRAPHY.fontSize.xxl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+    textAlign: 'center',
+    marginBottom: SPACING.sm,
+  },
+  quizDescription: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textSecondary,
+    textAlign: 'center',
+    marginBottom: SPACING.xl,
+  },
+  startQuizBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    backgroundColor: COLORS.gold,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xl,
+    borderRadius: 12,
+  },
+  startQuizText: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: '#000',
   },
 });
 

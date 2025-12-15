@@ -9,18 +9,130 @@ export const partnershipService = {
   /**
    * Get current partnership status for user
    * Returns: has_partnership, affiliate_code, role, tier, commissions, application status
+   * With fallback to direct database query if RPC fails
    */
   async getPartnershipStatus(userId) {
     try {
+      // Try RPC first
       const { data, error } = await supabase.rpc('get_partnership_status', {
         user_id_param: userId,
       });
 
-      if (error) throw error;
-      return { success: true, data };
+      if (error) {
+        console.log('[Partnership] RPC failed, using fallback:', error.message);
+        return await this.getPartnershipStatusFallback(userId);
+      }
+
+      if (data) {
+        console.log('[Partnership] RPC success:', data);
+        return { success: true, data };
+      }
+
+      // RPC returned null, use fallback
+      console.log('[Partnership] RPC returned null, using fallback');
+      return await this.getPartnershipStatusFallback(userId);
     } catch (error) {
       console.error('Error getting partnership status:', error);
-      return { success: false, error: error.message, data: null };
+      return await this.getPartnershipStatusFallback(userId);
+    }
+  },
+
+  /**
+   * Fallback: Get partnership status directly from database tables
+   */
+  async getPartnershipStatusFallback(userId) {
+    try {
+      console.log('[Partnership] Using fallback for user:', userId);
+
+      // 1. Check affiliate_profiles table for approved partnership
+      const { data: affiliateProfile, error: profileError } = await supabase
+        .from('affiliate_profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (profileError) {
+        console.log('[Partnership] affiliate_profiles query error:', profileError.message);
+      }
+
+      // 2. Check partnership_applications table for pending/rejected applications
+      const { data: applications, error: appError } = await supabase
+        .from('partnership_applications')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (appError) {
+        console.log('[Partnership] partnership_applications query error:', appError.message);
+      }
+
+      const latestApp = applications?.[0];
+
+      // 3. Check profiles table for partnership_role
+      const { data: profile, error: pError } = await supabase
+        .from('profiles')
+        .select('partnership_role, affiliate_code, ctv_tier')
+        .eq('id', userId)
+        .single();
+
+      if (pError) {
+        console.log('[Partnership] profiles query error:', pError.message);
+      }
+
+      // 4. Check CTV eligibility (has purchased course)
+      let isCtvEligible = false;
+      try {
+        const { data: courseAccess } = await supabase
+          .from('course_access')
+          .select('id')
+          .eq('user_id', userId)
+          .limit(1);
+        isCtvEligible = courseAccess && courseAccess.length > 0;
+      } catch (e) {
+        console.log('[Partnership] course_access query error');
+      }
+
+      // Build response
+      const hasPartnership = !!(affiliateProfile || profile?.partnership_role);
+      const hasApplication = !!latestApp;
+
+      const result = {
+        // Partnership info
+        has_partnership: hasPartnership,
+        partnership_role: affiliateProfile?.partnership_type || profile?.partnership_role || null,
+        affiliate_code: affiliateProfile?.affiliate_code || profile?.affiliate_code || null,
+        ctv_tier: affiliateProfile?.tier || profile?.ctv_tier || 1,
+
+        // Commission info from affiliate_profiles
+        total_commission: parseFloat(affiliateProfile?.total_commission || 0),
+        pending_commission: parseFloat(affiliateProfile?.pending_commission || 0),
+        available_balance: parseFloat(affiliateProfile?.available_balance || affiliateProfile?.total_commission || 0) - parseFloat(affiliateProfile?.pending_commission || 0),
+
+        // Application info
+        has_application: hasApplication,
+        application_status: latestApp?.status || null,
+        application_type: latestApp?.application_type || null,
+        application_date: latestApp?.created_at || null,
+        rejection_reason: latestApp?.rejection_reason || null,
+
+        // Eligibility
+        is_ctv_eligible: isCtvEligible,
+      };
+
+      console.log('[Partnership] Fallback result:', result);
+      return { success: true, data: result };
+    } catch (error) {
+      console.error('[Partnership] Fallback error:', error);
+      // Return empty state to show registration options
+      return {
+        success: true,
+        data: {
+          has_partnership: false,
+          has_application: false,
+          is_ctv_eligible: false,
+        },
+      };
     }
   },
 
@@ -84,6 +196,17 @@ export const partnershipService = {
       });
 
       if (error) throw error;
+
+      // Notify admins about new application
+      if (data?.success) {
+        await this.notifyAdminsNewApplication({
+          applicationId: data.application_id,
+          applicationType: formData.applicationType,
+          fullName: formData.fullName,
+          userId: formData.userId,
+        });
+      }
+
       return data;
     } catch (error) {
       console.error('Error submitting application:', error);
@@ -91,6 +214,54 @@ export const partnershipService = {
         success: false,
         error: error.message || 'Có lỗi xảy ra khi gửi đơn đăng ký',
       };
+    }
+  },
+
+  /**
+   * Notify admins about new partnership application
+   */
+  async notifyAdminsNewApplication({ applicationId, applicationType, fullName, userId }) {
+    try {
+      // Get all admin users
+      const { data: admins } = await supabase
+        .from('profiles')
+        .select('id')
+        .or('role.eq.admin,is_admin.eq.true');
+
+      if (!admins || admins.length === 0) {
+        console.log('[Partnership] No admins found to notify');
+        return;
+      }
+
+      const typeText = applicationType === 'ctv' ? 'CTV' : 'Affiliate';
+
+      // Create notifications for each admin
+      const notifications = admins.map(admin => ({
+        user_id: admin.id,
+        type: 'admin_partnership_application',
+        title: `Đơn đăng ký ${typeText} mới`,
+        message: `${fullName} vừa đăng ký làm ${typeText}. Vui lòng xem xét và duyệt đơn.`,
+        data: JSON.stringify({
+          application_id: applicationId,
+          application_type: applicationType,
+          applicant_id: userId,
+          screen: 'AdminApplications',
+        }),
+        read: false,
+      }));
+
+      // Insert into forum_notifications (same table used by NotificationsScreen)
+      const { error } = await supabase.from('forum_notifications').insert(notifications);
+
+      if (error) {
+        console.error('[Partnership] Error inserting admin notifications:', error);
+        // Try 'notifications' table as fallback
+        await supabase.from('notifications').insert(notifications);
+      } else {
+        console.log('[Partnership] Admin notifications sent:', admins.length);
+      }
+    } catch (error) {
+      console.error('[Partnership] notifyAdminsNewApplication error:', error);
     }
   },
 
@@ -186,25 +357,52 @@ export const partnershipService = {
 
   /**
    * Get commission statistics
+   * Uses affiliate_profiles and affiliate_sales tables per DATABASE_SCHEMA.md
    */
   async getCommissionStats(partnerId) {
     try {
-      // Get from commission_sales table
-      const { data: commissions, error: commissionError } = await supabase
-        .from('commission_sales')
-        .select('commission_amount, status, product_type, created_at')
-        .eq('partner_id', partnerId);
+      // First get the affiliate_profile for this user
+      const { data: affiliateProfile, error: profileError } = await supabase
+        .from('affiliate_profiles')
+        .select('id, total_commission, pending_commission, paid_commission')
+        .eq('user_id', partnerId)
+        .single();
 
-      if (commissionError) throw commissionError;
+      if (profileError || !affiliateProfile) {
+        console.log('[Partnership] No affiliate profile found');
+        return {
+          success: true,
+          stats: {
+            totalCommission: 0,
+            pendingCommission: 0,
+            paidCommission: 0,
+            digitalCommission: 0,
+            physicalCommission: 0,
+            totalOrders: 0,
+            thisMonthCommission: 0,
+            thisMonthOrders: 0,
+          },
+        };
+      }
+
+      // Get sales from affiliate_sales table
+      const { data: sales, error: salesError } = await supabase
+        .from('affiliate_sales')
+        .select('commission_amount, status, product_type, created_at')
+        .eq('affiliate_id', affiliateProfile.id);
+
+      if (salesError) {
+        console.log('[Partnership] affiliate_sales error:', salesError);
+      }
 
       // Calculate stats
       const stats = {
-        totalCommission: 0,
-        pendingCommission: 0,
-        paidCommission: 0,
+        totalCommission: parseFloat(affiliateProfile.total_commission) || 0,
+        pendingCommission: parseFloat(affiliateProfile.pending_commission) || 0,
+        paidCommission: parseFloat(affiliateProfile.paid_commission) || 0,
         digitalCommission: 0,
         physicalCommission: 0,
-        totalOrders: commissions?.length || 0,
+        totalOrders: sales?.length || 0,
         thisMonthCommission: 0,
         thisMonthOrders: 0,
       };
@@ -213,24 +411,20 @@ export const partnershipService = {
       const thisMonth = now.getMonth();
       const thisYear = now.getFullYear();
 
-      commissions?.forEach((c) => {
-        const amount = parseFloat(c.commission_amount) || 0;
-        stats.totalCommission += amount;
+      // Calculate from sales data if available
+      (sales || []).forEach((sale) => {
+        const amount = parseFloat(sale.commission_amount) || 0;
 
-        if (c.status === 'pending') {
-          stats.pendingCommission += amount;
-        } else if (c.status === 'paid' || c.status === 'approved') {
-          stats.paidCommission += amount;
-        }
-
-        if (c.product_type === 'digital') {
+        // Product type breakdown
+        const isDigital = sale.product_type === 'course' || sale.product_type === 'subscription' || sale.product_type === 'digital';
+        if (isDigital) {
           stats.digitalCommission += amount;
         } else {
           stats.physicalCommission += amount;
         }
 
-        // This month
-        const createdAt = new Date(c.created_at);
+        // This month stats
+        const createdAt = new Date(sale.created_at);
         if (createdAt.getMonth() === thisMonth && createdAt.getFullYear() === thisYear) {
           stats.thisMonthCommission += amount;
           stats.thisMonthOrders += 1;
@@ -258,29 +452,56 @@ export const partnershipService = {
 
   /**
    * Get recent orders with commission
+   * Uses affiliate_sales table per DATABASE_SCHEMA.md
    */
   async getRecentOrdersWithCommission(partnerId, limit = 10) {
     try {
+      // First get the affiliate_profile for this user
+      const { data: affiliateProfile, error: profileError } = await supabase
+        .from('affiliate_profiles')
+        .select('id')
+        .eq('user_id', partnerId)
+        .single();
+
+      if (profileError || !affiliateProfile) {
+        return { success: true, orders: [] };
+      }
+
       const { data, error } = await supabase
-        .from('commission_sales')
+        .from('affiliate_sales')
         .select(`
           id,
+          order_id,
           shopify_order_id,
-          order_total,
           product_type,
-          product_category,
+          product_name,
+          sale_amount,
           commission_rate,
           commission_amount,
           status,
-          buyer_email,
           created_at
         `)
-        .eq('partner_id', partnerId)
+        .eq('affiliate_id', affiliateProfile.id)
         .order('created_at', { ascending: false })
         .limit(limit);
 
       if (error) throw error;
-      return { success: true, orders: data || [] };
+
+      // Map to expected format
+      const orders = (data || []).map(sale => ({
+        id: sale.id,
+        shopify_order_id: sale.shopify_order_id || sale.order_id,
+        order_total: sale.sale_amount,
+        product_type: sale.product_type === 'course' || sale.product_type === 'subscription' ? 'digital' : 'physical',
+        product_category: sale.product_type,
+        product_name: sale.product_name,
+        commission_rate: sale.commission_rate,
+        commission_amount: sale.commission_amount,
+        status: sale.status,
+        created_at: sale.created_at
+      }));
+
+      return { success: true, orders };
     } catch (error) {
       console.error('Error getting recent orders:', error);
       return { success: false, orders: [] };
@@ -304,6 +525,7 @@ export const partnershipService = {
 
   /**
    * Subscribe to partnership updates (real-time)
+   * Uses partnership_applications and affiliate_profiles tables per DATABASE_SCHEMA.md
    */
   subscribeToPartnershipUpdates(userId, callback) {
     const subscription = supabase
@@ -325,8 +547,8 @@ export const partnershipService = {
         {
           event: '*',
           schema: 'public',
-          table: 'commission_sales',
-          filter: `partner_id=eq.${userId}`,
+          table: 'affiliate_profiles',
+          filter: `user_id=eq.${userId}`,
         },
         (payload) => {
           callback(payload);

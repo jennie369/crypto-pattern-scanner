@@ -11,8 +11,30 @@
 import React, { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 import { Animated, Keyboard, Platform } from 'react-native';
 
-const TAB_BAR_HEIGHT = 85; // Height of tab bar + bottom margin
+const TAB_BAR_HEIGHT = 100; // Height of tab bar + bottom margin + extra buffer for safety
 const ANIMATION_DURATION = 250;
+
+// Simple event system for React Native (replacement for Node.js EventEmitter)
+const createSimpleEventEmitter = () => {
+  const listeners = {};
+  return {
+    on: (event, callback) => {
+      if (!listeners[event]) listeners[event] = [];
+      listeners[event].push(callback);
+    },
+    off: (event, callback) => {
+      if (!listeners[event]) return;
+      listeners[event] = listeners[event].filter(cb => cb !== callback);
+    },
+    emit: (event, ...args) => {
+      if (!listeners[event]) return;
+      listeners[event].forEach(callback => callback(...args));
+    },
+  };
+};
+
+// Event emitter for tab double-tap events
+const tabEventEmitter = createSimpleEventEmitter();
 
 const TabBarContext = createContext();
 
@@ -257,6 +279,27 @@ export const TabBarProvider = ({ children }) => {
     setKeyboardAutoHideEnabled(false);
   }, []);
 
+  // ========== Double-tap event system ==========
+  // Emit scroll-to-top and refresh event for a specific tab
+  const emitScrollToTopAndRefresh = useCallback((tabName) => {
+    console.log('[TabBarContext] Emitting scrollToTopAndRefresh for tab:', tabName);
+    tabEventEmitter.emit('scrollToTopAndRefresh', tabName);
+  }, []);
+
+  // Subscribe to scroll-to-top and refresh events
+  const subscribeToScrollToTop = useCallback((tabName, callback) => {
+    const handler = (emittedTabName) => {
+      if (emittedTabName === tabName) {
+        callback();
+      }
+    };
+    tabEventEmitter.on('scrollToTopAndRefresh', handler);
+    // Return unsubscribe function
+    return () => {
+      tabEventEmitter.off('scrollToTopAndRefresh', handler);
+    };
+  }, []);
+
   return (
     <TabBarContext.Provider
       value={{
@@ -277,6 +320,9 @@ export const TabBarProvider = ({ children }) => {
         keyboardAutoHideEnabled,
         enableKeyboardAutoHide,
         disableKeyboardAutoHide,
+        // Double-tap events
+        emitScrollToTopAndRefresh,
+        subscribeToScrollToTop,
       }}
     >
       {children}

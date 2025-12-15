@@ -1,0 +1,38 @@
+Apple ID email: jenniechu68@gmail.com
+
+Your app-specific password is:
+fkwe-zmjl-hgqi-svfc
+
+Membership details
+Team ID
+XLB789JKY6
+SKU:             gemral-ios-app
+Apple ID
+6756418547
+
+🚀 Các bước upload lên TestFlight
+Bước 1: Đăng nhập EAS
+cd gem-mobile
+npx eas login
+
+Bước 2: Cấu hình credentials iOS
+npx eas credentials
+
+Chọn iOS → production
+Để EAS tự động tạo certificates và provisioning profiles
+Bước 3: Build cho iOS production
+npx eas build --platform ios --profile production
+
+Build sẽ mất khoảng 15-30 phút trên EAS servers
+Sau khi build xong, bạn sẽ có file .ipa
+Bước 4: Submit lên App Store Connect
+
+
+ build + submit cùng lúc:
+
+npx eas build --platform ios --profile production --auto-submit
+
+
+
+cd "C:\Users\Jennie Chu\Desktop\Projects\crypto-pattern-scanner\gem-mobile"
+npx eas credentials --platform ios

@@ -13,11 +13,11 @@ import {
   ScrollView,
   TouchableOpacity,
   Switch,
-  Alert,
   ActivityIndicator,
   Modal,
   Platform,
 } from 'react-native';
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -81,6 +81,7 @@ const DEFAULT_WIDGET_SETTINGS = {
 };
 
 export default function NotificationSettingsScreen({ navigation }) {
+  const { alert, AlertComponent } = useCustomAlert();
   const { user } = useAuth();
 
   const [loading, setLoading] = useState(true);
@@ -267,7 +268,12 @@ export default function NotificationSettingsScreen({ navigation }) {
     } catch (error) {
       // Revert on error
       setSettings(prev => ({ ...prev, [field]: !value }));
-      Alert.alert('Lỗi', 'Không thể lưu cài đặt');
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Không thể lưu cài đặt',
+        buttons: [{ text: 'OK' }],
+      });
     }
   };
 
@@ -683,6 +689,7 @@ export default function NotificationSettingsScreen({ navigation }) {
             onChange={handleTimeChange}
           />
         )}
+        {AlertComponent}
       </SafeAreaView>
     </LinearGradient>
   );

@@ -1,0 +1,77 @@
+/**
+ * StatsRow Styles
+ * Uses design tokens for consistent styling
+ */
+
+.stats-row-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: var(--space-sm, 16px) var(--space-md, 24px);
+  background: var(--bg-card, rgba(30, 42, 94, 0.4));
+  border-radius: var(--radius-lg, 16px);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: var(--space-xs, 8px) var(--space-sm, 16px);
+  border-radius: var(--radius-md, 12px);
+}
+
+.stat-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.stat-item:active {
+  transform: scale(0.98);
+}
+
+.stat-icon {
+  color: var(--brand-gold, #FFBD59);
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-family: var(--font-display, 'Poppins', sans-serif);
+  font-size: var(--text-lg, 20px);
+  font-weight: 700;
+  color: var(--text-primary, #FFFFFF);
+}
+
+.stat-label {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 12px;
+  color: var(--text-muted, rgba(255, 255, 255, 0.5));
+}
+
+.stat-divider {
+  width: 1px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .stats-row-container {
+    padding: var(--space-xs, 8px) var(--space-sm, 16px);
+  }
+
+  .stat-item {
+    padding: var(--space-xs, 8px);
+  }
+
+  .stat-value {
+    font-size: var(--text-base, 16px);
+  }
+
+  .stat-label {
+    font-size: 10px;
+  }
+}

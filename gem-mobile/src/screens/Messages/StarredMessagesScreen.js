@@ -17,7 +17,6 @@ import {
   FlatList,
   TouchableOpacity,
   Image,
-  Alert,
   ActivityIndicator,
   SectionList,
 } from 'react-native';
@@ -32,6 +31,9 @@ import messagingService from '../../services/messagingService';
 // Auth
 import { useAuth } from '../../contexts/AuthContext';
 
+// Custom Alert
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
+
 // Tokens
 import {
   COLORS,
@@ -44,6 +46,7 @@ import {
 export default function StarredMessagesScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const { alert, AlertComponent } = useCustomAlert();
 
   // State
   const [starredMessages, setStarredMessages] = useState([]);
@@ -97,10 +100,11 @@ export default function StarredMessagesScreen({ navigation }) {
 
   // Handle unstar
   const handleUnstar = useCallback((messageId) => {
-    Alert.alert(
-      'Remove from Starred',
-      'Remove this message from your starred messages?',
-      [
+    alert({
+      type: 'warning',
+      title: 'Remove from Starred',
+      message: 'Remove this message from your starred messages?',
+      buttons: [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Remove',
@@ -117,13 +121,17 @@ export default function StarredMessagesScreen({ navigation }) {
               })).filter(section => section.data.length > 0));
             } catch (error) {
               console.error('Error unstarring message:', error);
-              Alert.alert('Error', 'Failed to unstar message');
+              alert({
+                type: 'error',
+                title: 'Error',
+                message: 'Failed to unstar message',
+              });
             }
           },
         },
-      ]
-    );
-  }, []);
+      ],
+    });
+  }, [alert]);
 
   // Format date
   const formatDate = (timestamp) => {
@@ -293,6 +301,8 @@ export default function StarredMessagesScreen({ navigation }) {
           stickySectionHeadersEnabled={false}
         />
       )}
+
+      {AlertComponent}
     </LinearGradient>
   );
 }

@@ -17,7 +17,6 @@ import {
   FlatList,
   TouchableOpacity,
   Image,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -30,6 +29,9 @@ import messagingService from '../../services/messagingService';
 
 // Auth
 import { useAuth } from '../../contexts/AuthContext';
+
+// Alert
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 
 // Tokens
 import {
@@ -44,6 +46,7 @@ export default function PinnedMessagesScreen({ route, navigation }) {
   const { conversationId } = route.params;
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const { alert, AlertComponent } = useCustomAlert();
 
   // State
   const [pinnedMessages, setPinnedMessages] = useState([]);
@@ -76,10 +79,11 @@ export default function PinnedMessagesScreen({ route, navigation }) {
 
   // Handle unpin
   const handleUnpin = useCallback((messageId) => {
-    Alert.alert(
-      'Unpin Message',
-      'Are you sure you want to unpin this message?',
-      [
+    alert({
+      type: 'warning',
+      title: 'Unpin Message',
+      message: 'Are you sure you want to unpin this message?',
+      buttons: [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Unpin',
@@ -90,13 +94,13 @@ export default function PinnedMessagesScreen({ route, navigation }) {
               setPinnedMessages(prev => prev.filter(m => m.id !== messageId));
             } catch (error) {
               console.error('Error unpinning message:', error);
-              Alert.alert('Error', 'Failed to unpin message');
+              alert({ type: 'error', title: 'Error', message: 'Failed to unpin message' });
             }
           },
         },
       ]
-    );
-  }, []);
+    });
+  }, [alert]);
 
   // Format date
   const formatPinDate = (timestamp) => {
@@ -271,6 +275,7 @@ export default function PinnedMessagesScreen({ route, navigation }) {
           showsVerticalScrollIndicator={false}
         />
       )}
+      {AlertComponent}
     </LinearGradient>
   );
 }

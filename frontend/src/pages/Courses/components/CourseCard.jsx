@@ -1,126 +1,203 @@
-import React, { useState } from 'react';
-import { getTierBadge, hasAccess, formatPrice } from '../utils/tierHelpers';
+/**
+ * CourseCard - Match Mobile App Design
+ * With Framer Motion animations
+ */
+
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Play,
+  Clock,
+  Lock,
+  BookOpen,
+  Star,
+  Users,
+  ArrowRight,
+} from 'lucide-react';
+import { COLORS, TIER_STYLES, ANIMATION } from '../../../shared/design-tokens';
+import { getTierBadge, hasAccess, formatPrice, getTierLevel } from '../utils/tierHelpers';
 import './CourseCard.css';
 
 export const CourseCard = ({
   course,
   userTier,
   onEnroll,
-  onContinue
+  onContinue,
+  onClick,
 }) => {
-  const [isHovered, setIsHovered] = useState(false);
-
   const hasUserAccess = hasAccess(userTier, course.tier);
   const isEnrolled = course.progress !== undefined && course.progress !== null;
 
-  const tierBadge = getTierBadge(course.tier);
+  // Get tier style from shared tokens (with fallback to helper)
+  // Normalize tier to lowercase for TIER_STYLES lookup
+  const normalizedTier = course.tier ? String(course.tier).toLowerCase().replace('_', '') : 'free';
+  const tierStyle = TIER_STYLES[normalizedTier] || TIER_STYLES.free;
+  // getTierBadge expects a number (tier level), not a string
+  const tierLevel = getTierLevel(course.tier);
+  const tierBadge = getTierBadge(tierLevel);
+
+  // Calculate stats
+  const totalLessons = course.lessonCount || course.lessons?.[0]?.count || 0;
+  const totalStudents = course.studentCount || course.enrollments?.[0]?.count || 0;
+  const rating = course.rating || 0;
+
+  const handleCardClick = (e) => {
+    if (e.target.closest('button')) return;
+    onClick && onClick();
+  };
 
   return (
-    <div
+    <motion.div
       className={`course-card ${!hasUserAccess ? 'locked' : ''}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onClick={handleCardClick}
+      whileHover={hasUserAccess ? ANIMATION.cardHover : {}}
+      whileTap={hasUserAccess ? { scale: 0.98 } : {}}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
     >
-      {/* Glow Border Effect */}
-      <div className="card-glow-border-blue"></div>
-
-      {/* Thumbnail */}
+      {/* Thumbnail Container */}
       <div className="course-thumbnail">
-        <img
-          src={course.thumbnail}
-          alt={course.title}
-          className="thumbnail-image"
+        {/* Background Gradient (fallback) */}
+        <div
+          className="thumbnail-gradient"
+          style={{
+            background: `linear-gradient(135deg, ${COLORS.accent}33 0%, ${COLORS.primary}33 100%)`,
+          }}
         />
 
-        {/* Video Preview Overlay */}
-        {isHovered && hasUserAccess && (
-          <div className="video-preview-overlay">
-            <div className="play-button">
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M8 5v14l11-7z"/>
-              </svg>
-            </div>
-            <span className="preview-hint">Preview</span>
-          </div>
+        {/* Actual Thumbnail */}
+        {course.thumbnail && (
+          <motion.img
+            src={course.thumbnail}
+            alt={course.title}
+            className="thumbnail-image"
+            whileHover={{ scale: 1.1 }}
+            transition={{ duration: 0.5 }}
+          />
         )}
 
+        {/* Hover Overlay with Play Button */}
+        <motion.div
+          className="hover-overlay"
+          initial={{ opacity: 0 }}
+          whileHover={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+        >
+          {hasUserAccess && (
+            <motion.div
+              className="play-button"
+              initial={{ scale: 0.8, opacity: 0 }}
+              whileHover={{ scale: 1, opacity: 1 }}
+              style={{ backgroundColor: COLORS.primary }}
+            >
+              <Play size={28} fill="#000" color="#000" />
+            </motion.div>
+          )}
+        </motion.div>
+
         {/* Duration Badge */}
-        <div className="duration-badge">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <circle cx="12" cy="12" r="10" strokeWidth="2"/>
-            <path d="M12 6v6l4 2" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
-          <span>{course.duration}</span>
-        </div>
+        {course.duration && (
+          <div className="duration-badge">
+            <Clock size={12} />
+            <span>{course.duration}</span>
+          </div>
+        )}
 
         {/* Tier Badge */}
         <div
-          className={`tier-badge tier-${course.tier}`}
+          className="tier-badge"
           style={{
-            background: tierBadge.bg,
-            color: tierBadge.color,
-            borderColor: tierBadge.border
+            backgroundColor: tierStyle.bg,
+            color: tierStyle.color,
+            borderColor: tierStyle.border,
           }}
         >
-          <span className="tier-icon">{tierBadge.icon}</span>
-          <span>{tierBadge.label}</span>
+          {tierStyle.label || tierBadge.label}
         </div>
 
         {/* Lock Overlay */}
-        {!hasUserAccess && (
-          <div className="lock-overlay">
-            <div className="lock-icon">
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C9.243 2 7 4.243 7 7v3H6c-1.103 0-2 .897-2 2v8c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-8c0-1.103-.897-2-2-2h-1V7c0-2.757-2.243-5-5-5zm-1 13.723V18h2v-2.277c.595-.347 1-.984 1-1.723 0-1.103-.897-2-2-2s-2 .897-2 2c0 .738.404 1.376 1 1.723zM9 10V7c0-1.654 1.346-3 3-3s3 1.346 3 3v3H9z"/>
-              </svg>
-            </div>
-            <p className="lock-message">
-              Upgrade to {tierBadge.label} to unlock
-            </p>
-          </div>
-        )}
+        <AnimatePresence>
+          {!hasUserAccess && (
+            <motion.div
+              className="lock-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <div className="lock-icon">
+                <Lock size={32} />
+              </div>
+              <p className="lock-message">
+                Nâng cấp lên {tierStyle.label} để mở khóa
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Course Info */}
+      {/* Course Content */}
       <div className="course-info">
-        {/* Instructor */}
-        <div className="instructor-row">
-          <img
-            src={course.instructor.avatar}
-            alt={course.instructor.name}
-            className="instructor-avatar"
-          />
-          <span className="instructor-name">{course.instructor.name}</span>
-        </div>
-
         {/* Title */}
         <h3 className="course-title">{course.title}</h3>
 
-        {/* Meta */}
+        {/* Description */}
+        {course.description && (
+          <p className="course-description">{course.description}</p>
+        )}
+
+        {/* Instructor */}
+        {course.instructor && (
+          <div className="instructor-row">
+            <img
+              src={course.instructor.avatar || '/default-avatar.png'}
+              alt={course.instructor.name}
+              className="instructor-avatar"
+            />
+            <span className="instructor-name">{course.instructor.name}</span>
+          </div>
+        )}
+
+        {/* Stats Row */}
         <div className="course-meta">
-          <div className="rating-wrapper">
-            <span className="rating-stars">⭐</span>
-            <span className="rating-value">{course.rating.toFixed(1)}</span>
-            <span className="rating-count">({course.studentCount.toLocaleString()})</span>
+          <div className="meta-left">
+            <span className="meta-item">
+              <BookOpen size={14} />
+              {totalLessons} bài
+            </span>
+            <span className="meta-item">
+              <Users size={14} />
+              {totalStudents.toLocaleString()}
+            </span>
           </div>
-          <div className="lesson-count">
-            📖 {course.lessonCount} lessons
-          </div>
+          {rating > 0 && (
+            <div className="rating-wrapper">
+              <Star size={14} fill={COLORS.primary} color={COLORS.primary} />
+              <span className="rating-value">{rating.toFixed(1)}</span>
+            </div>
+          )}
         </div>
 
-        {/* Description */}
-        <p className="course-description">{course.description}</p>
-
-        {/* Progress Bar (nếu đã enroll) */}
+        {/* Progress Bar (if enrolled) */}
         {isEnrolled && (
           <div className="progress-wrapper">
             <div className="progress-bar">
-              <div
+              <motion.div
                 className="progress-fill"
-                style={{ width: `${course.progress}%` }}
-              ></div>
+                initial={{ width: 0 }}
+                animate={{ width: `${course.progress}%` }}
+                transition={{ duration: 0.8, ease: 'easeOut' }}
+                style={{
+                  background: `linear-gradient(90deg, ${COLORS.success} 0%, ${COLORS.info} 100%)`,
+                }}
+              />
             </div>
-            <span className="progress-text">{course.progress}% Complete</span>
+            <span className="progress-text" style={{ color: COLORS.success }}>
+              {course.progress}% hoàn thành
+            </span>
           </div>
         )}
 
@@ -128,9 +205,11 @@ export const CourseCard = ({
         <div className="course-footer">
           <div className="price-wrapper">
             {hasUserAccess ? (
-              <span className="price-included">Included in your plan</span>
+              <span className="price-included" style={{ color: COLORS.success }}>
+                Đã mở khóa
+              </span>
             ) : (
-              <span className="course-price">
+              <span className="course-price" style={{ color: COLORS.primary }}>
                 {formatPrice(course.price)}
               </span>
             )}
@@ -138,30 +217,63 @@ export const CourseCard = ({
 
           {hasUserAccess ? (
             isEnrolled ? (
-              <button
+              <motion.button
                 className="btn-continue"
-                onClick={() => onContinue(course.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onContinue(course.id);
+                }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                style={{
+                  background: `linear-gradient(135deg, ${COLORS.success} 0%, ${COLORS.info} 100%)`,
+                }}
               >
-                Continue Learning →
-              </button>
+                Tiếp tục <ArrowRight size={16} />
+              </motion.button>
             ) : (
-              <button
+              <motion.button
                 className="btn-start"
-                onClick={() => onEnroll(course.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEnroll(course.id);
+                }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                style={{
+                  background: `linear-gradient(135deg, ${COLORS.primary} 0%, ${COLORS.accent} 100%)`,
+                }}
               >
-                Start Course
-              </button>
+                Bắt đầu học
+              </motion.button>
             )
           ) : (
-            <button
+            <motion.button
               className="btn-upgrade"
-              onClick={() => onEnroll(course.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEnroll(course.id);
+              }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              🔒 Unlock with {tierBadge.label}
-            </button>
+              <Lock size={14} /> Mở khóa
+            </motion.button>
           )}
         </div>
       </div>
-    </div>
+
+      {/* Bottom Glow Effect on Hover */}
+      <motion.div
+        className="bottom-glow"
+        initial={{ opacity: 0 }}
+        whileHover={{ opacity: 1 }}
+        style={{
+          background: `linear-gradient(90deg, ${COLORS.primary}, ${COLORS.accent})`,
+        }}
+      />
+    </motion.div>
   );
 };
+
+export default CourseCard;

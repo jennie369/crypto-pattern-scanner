@@ -48,8 +48,10 @@ const HexagramVisual = ({ hexagramId, name, vietnamese }) => {
         )}
         {/* Card name overlay */}
         <View style={hexStyles.cardNameOverlay}>
-          <Text style={hexStyles.name}>{name}</Text>
-          <Text style={hexStyles.vietnamese}>{vietnamese}</Text>
+          <Text style={hexStyles.name}>{name || ''}</Text>
+          {vietnamese && vietnamese !== 'undefined' && (
+            <Text style={hexStyles.vietnamese}>{vietnamese}</Text>
+          )}
         </View>
       </View>
     </View>
@@ -277,6 +279,53 @@ const stripMarkdown = (text) => {
     .trim();
 };
 
+/**
+ * Truncate text for export image
+ * Extract first meaningful paragraph(s) for display
+ * @param {string} text - Full interpretation text
+ * @param {number} maxLength - Maximum characters
+ * @returns {string} Truncated text
+ */
+const truncateForExport = (text, maxLength = 200) => {
+  if (!text) return '';
+
+  // Clean up the text first
+  let cleaned = stripMarkdown(text);
+
+  // Remove section headers like "🔮 Kết quả Kinh Dịch", "📖 Luận giải:", etc.
+  cleaned = cleaned
+    .replace(/^[🔮🃏📖💎✨🌟⭐️🌙💫].*?:\s*/gm, '')  // Remove emoji headers
+    .replace(/^Quẻ.*?\n/gm, '')                        // Remove "Quẻ xxx" lines
+    .replace(/^Kết quả.*?\n/gm, '')                    // Remove "Kết quả" lines
+    .replace(/\(undefined\)/g, '')                     // Remove "(undefined)" text
+    .replace(/undefined/g, '')                         // Remove any "undefined" text
+    .replace(/\n{2,}/g, '\n')                          // Multiple newlines → single
+    .trim();
+
+  // If text is already short enough, return it
+  if (cleaned.length <= maxLength) {
+    return cleaned;
+  }
+
+  // Try to find a natural break point (end of sentence)
+  const truncated = cleaned.substring(0, maxLength);
+  const lastPeriod = truncated.lastIndexOf('.');
+  const lastComma = truncated.lastIndexOf(',');
+  const lastNewline = truncated.lastIndexOf('\n');
+
+  // Find best break point
+  let breakPoint = maxLength;
+  if (lastPeriod > maxLength * 0.5) {
+    breakPoint = lastPeriod + 1;
+  } else if (lastNewline > maxLength * 0.5) {
+    breakPoint = lastNewline;
+  } else if (lastComma > maxLength * 0.5) {
+    breakPoint = lastComma + 1;
+  }
+
+  return cleaned.substring(0, breakPoint).trim();
+};
+
 const ReadingCardTemplate = forwardRef(({ data, showWatermark = true }, ref) => {
   const {
     title = 'Your Reading',
@@ -302,8 +351,9 @@ const ReadingCardTemplate = forwardRef(({ data, showWatermark = true }, ref) => 
     });
   };
 
-  // Clean interpretation text - remove markdown
-  const cleanInterpretation = stripMarkdown(interpretation);
+  // Clean and truncate interpretation text for export image
+  // Use truncateForExport to get a clean, properly-sized text
+  const cleanInterpretation = truncateForExport(interpretation, 180);
 
   return (
     <View ref={ref} style={styles.container} collapsable={false}>

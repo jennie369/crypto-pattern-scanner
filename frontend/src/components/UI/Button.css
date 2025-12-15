@@ -1,0 +1,360 @@
+/* ============================================
+   UI BUTTON COMPONENT
+   Desktop = default, Mobile = @media overrides
+   ============================================ */
+
+/* Base Button */
+.ui-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+  transition: var(--transition-fast, 0.15s ease);
+  white-space: nowrap;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ui-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ui-btn:focus-visible {
+  outline: 2px solid var(--brand-gold, #FFBD59);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   VARIANTS
+   ============================================ */
+
+/* Primary - Burgundy gradient */
+.ui-btn-primary {
+  background: var(--gradient-burgundy, linear-gradient(135deg, #9C0612 0%, #6B0F1A 100%));
+  color: #FFFFFF;
+  box-shadow: var(--glow-burgundy, 0 10px 40px rgba(156, 6, 18, 0.4));
+}
+
+.ui-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #B91D28 0%, #9C0612 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 44px rgba(156, 6, 18, 0.5);
+}
+
+.ui-btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Secondary - Glass style */
+.ui-btn-secondary {
+  background: var(--bg-tertiary, #1E2A5E);
+  color: var(--text-primary, #FFFFFF);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.ui-btn-secondary:hover:not(:disabled) {
+  background: rgba(30, 42, 94, 0.8);
+  border-color: rgba(255, 189, 89, 0.3);
+}
+
+/* Outline - Transparent with border */
+.ui-btn-outline {
+  background: transparent;
+  color: var(--text-primary, #FFFFFF);
+  border: 1px solid var(--brand-gold, #FFBD59);
+}
+
+.ui-btn-outline:hover:not(:disabled) {
+  background: rgba(255, 189, 89, 0.1);
+  border-color: var(--brand-gold-light, #DEBC81);
+}
+
+/* Ghost - No background */
+.ui-btn-ghost {
+  background: transparent;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.85));
+  border: none;
+}
+
+.ui-btn-ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary, #FFFFFF);
+}
+
+/* Danger - Red */
+.ui-btn-danger {
+  background: var(--accent-red, #FF4757);
+  color: #FFFFFF;
+}
+
+.ui-btn-danger:hover:not(:disabled) {
+  background: #FF6B7A;
+}
+
+/* ============================================
+   SIZES - Desktop
+   ============================================ */
+
+.ui-btn-sm {
+  height: 36px;
+  padding: 0 14px;
+  font-size: 13px;
+  border-radius: 6px;
+}
+
+.ui-btn-base {
+  height: 44px;
+  padding: 0 18px;
+  font-size: 15px;
+}
+
+.ui-btn-lg {
+  height: 52px;
+  padding: 0 22px;
+  font-size: 17px;
+}
+
+.ui-btn-xl {
+  height: 60px;
+  padding: 0 28px;
+  font-size: 19px;
+}
+
+/* Full Width */
+.ui-btn-full {
+  width: 100%;
+}
+
+/* ============================================
+   LOADING STATE
+   ============================================ */
+
+.ui-btn-loading {
+  position: relative;
+  color: transparent !important;
+}
+
+.ui-btn-spinner {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #FFFFFF;
+  border-radius: 50%;
+  animation: btn-spin 0.8s linear infinite;
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================
+   ICON BUTTON
+   ============================================ */
+
+.ui-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+  transition: var(--transition-fast, 0.15s ease);
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+
+.ui-icon-btn:focus-visible {
+  outline: 2px solid var(--brand-gold, #FFBD59);
+  outline-offset: 2px;
+}
+
+/* Icon Button Variants */
+.ui-icon-btn-ghost {
+  background: transparent;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.85));
+}
+
+.ui-icon-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary, #FFFFFF);
+}
+
+.ui-icon-btn-primary {
+  background: var(--brand-burgundy, #9C0612);
+  color: #FFFFFF;
+}
+
+.ui-icon-btn-secondary {
+  background: var(--bg-tertiary, #1E2A5E);
+  color: var(--text-primary, #FFFFFF);
+}
+
+/* Icon Button Sizes - Desktop */
+.ui-icon-btn-sm {
+  width: 36px;
+  height: 36px;
+}
+
+.ui-icon-btn-base {
+  width: 44px;
+  height: 44px;
+}
+
+.ui-icon-btn-lg {
+  width: 52px;
+  height: 52px;
+}
+
+.ui-icon-btn-xl {
+  width: 60px;
+  height: 60px;
+}
+
+/* ============================================
+   BUTTON GROUP
+   ============================================ */
+
+.ui-btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ui-btn-group-horizontal {
+  flex-direction: row;
+}
+
+.ui-btn-group-vertical {
+  flex-direction: column;
+}
+
+/* ============================================
+   MOBILE OVERRIDES - max-width: 767px
+   ============================================ */
+
+@media (max-width: 767px) {
+  /* Button Sizes - Mobile (reduced) */
+  .ui-btn-sm {
+    height: 32px;
+    padding: 0 12px;
+    font-size: 12px;
+    border-radius: 5px;
+  }
+
+  .ui-btn-base {
+    height: 40px;
+    padding: 0 16px;
+    font-size: 14px;
+  }
+
+  .ui-btn-lg {
+    height: 44px;
+    padding: 0 18px;
+    font-size: 15px;
+  }
+
+  .ui-btn-xl {
+    height: 48px;
+    padding: 0 20px;
+    font-size: 16px;
+  }
+
+  /* Icon Button Sizes - Mobile */
+  .ui-icon-btn-sm {
+    width: 32px;
+    height: 32px;
+  }
+
+  .ui-icon-btn-base {
+    width: 40px;
+    height: 40px;
+  }
+
+  .ui-icon-btn-lg {
+    width: 44px;
+    height: 44px;
+  }
+
+  .ui-icon-btn-xl {
+    width: 48px;
+    height: 48px;
+  }
+
+  /* Full width on mobile for primary actions */
+  .ui-btn-mobile-full {
+    width: 100%;
+  }
+
+  /* Button group gap - Mobile */
+  .ui-btn-group {
+    gap: 6px;
+  }
+
+  /* Stack vertically on mobile if needed */
+  .ui-btn-group-stack-mobile {
+    flex-direction: column;
+  }
+
+  .ui-btn-group-stack-mobile > * {
+    width: 100%;
+  }
+}
+
+/* ============================================
+   TABLET BRIDGE - 768px to 1023px
+   ============================================ */
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .ui-btn-sm {
+    height: 34px;
+    padding: 0 13px;
+    font-size: 12px;
+  }
+
+  .ui-btn-base {
+    height: 42px;
+    padding: 0 17px;
+    font-size: 14px;
+  }
+
+  .ui-btn-lg {
+    height: 48px;
+    padding: 0 20px;
+    font-size: 16px;
+  }
+
+  .ui-btn-xl {
+    height: 54px;
+    padding: 0 24px;
+    font-size: 17px;
+  }
+
+  .ui-icon-btn-sm {
+    width: 34px;
+    height: 34px;
+  }
+
+  .ui-icon-btn-base {
+    width: 42px;
+    height: 42px;
+  }
+
+  .ui-icon-btn-lg {
+    width: 48px;
+    height: 48px;
+  }
+
+  .ui-icon-btn-xl {
+    width: 54px;
+    height: 54px;
+  }
+}

@@ -12,13 +12,15 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
+  Platform,
 } from 'react-native';
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowLeft, Zap, Clock, Eye, Target, Check, Gem } from 'lucide-react-native';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { useAuth } from '../../contexts/AuthContext';
+import { CONTENT_BOTTOM_PADDING, ACTION_BUTTON_BOTTOM_PADDING } from '../../constants/layout';
 
 const BOOST_PACKAGES = [
   {
@@ -51,6 +53,7 @@ const BOOST_PACKAGES = [
 export default function BoostPostScreen({ navigation, route }) {
   const { postId } = route.params || {};
   const { user } = useAuth();
+  const { alert, AlertComponent } = useCustomAlert();
   const [selectedPackage, setSelectedPackage] = useState('standard');
   const [loading, setLoading] = useState(false);
 
@@ -61,14 +64,15 @@ export default function BoostPostScreen({ navigation, route }) {
     if (!pkg) return;
 
     if (userGems < pkg.gems) {
-      Alert.alert(
-        'Không đủ Gems',
-        `Bạn cần ${pkg.gems} Gems để boost. Hiện tại bạn có ${userGems} Gems.`,
-        [
+      alert({
+        type: 'warning',
+        title: 'Không đủ Gems',
+        message: `Bạn cần ${pkg.gems} Gems để boost. Hiện tại bạn có ${userGems} Gems.`,
+        buttons: [
           { text: 'Hủy', style: 'cancel' },
           { text: 'Nạp Gems', onPress: () => navigation.navigate('Wallet') },
-        ]
-      );
+        ],
+      });
       return;
     }
 
@@ -77,14 +81,15 @@ export default function BoostPostScreen({ navigation, route }) {
       // TODO: Replace with actual API call
       // await boostService.createCampaign(postId, selectedPackage);
 
-      Alert.alert(
-        'Thành công!',
-        `Bài viết của bạn đã được boost với gói ${pkg.name}`,
-        [{ text: 'OK', onPress: () => navigation.goBack() }]
-      );
+      alert({
+        type: 'success',
+        title: 'Thành công!',
+        message: `Bài viết của bạn đã được boost với gói ${pkg.name}`,
+        buttons: [{ text: 'OK', onPress: () => navigation.goBack() }],
+      });
     } catch (error) {
       console.error('[BoostPost] Error:', error);
-      Alert.alert('Lỗi', 'Không thể tạo chiến dịch boost');
+      alert({ type: 'error', title: 'Lỗi', message: 'Không thể tạo chiến dịch boost' });
     } finally {
       setLoading(false);
     }
@@ -179,7 +184,7 @@ export default function BoostPostScreen({ navigation, route }) {
             </TouchableOpacity>
           ))}
 
-          <View style={{ height: 100 }} />
+          <View style={{ height: CONTENT_BOTTOM_PADDING + 60 }} />
         </ScrollView>
 
         {/* Bottom Button */}
@@ -200,6 +205,7 @@ export default function BoostPostScreen({ navigation, route }) {
           </TouchableOpacity>
         </View>
       </SafeAreaView>
+      {AlertComponent}
     </LinearGradient>
   );
 }
@@ -371,6 +377,7 @@ const styles = StyleSheet.create({
   },
   bottomContainer: {
     padding: SPACING.lg,
+    paddingBottom: ACTION_BUTTON_BOTTOM_PADDING,
     backgroundColor: GLASS.background,
     borderTopWidth: 1,
     borderTopColor: 'rgba(106, 91, 255, 0.2)',

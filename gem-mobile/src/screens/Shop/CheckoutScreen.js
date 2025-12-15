@@ -10,7 +10,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
   StatusBar,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,10 +18,12 @@ import { ArrowLeft, X, RefreshCw } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useCart } from '../../contexts/CartContext';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, GLASS } from '../../utils/tokens';
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 
 const CheckoutScreen = ({ navigation, route }) => {
   const { checkoutUrl } = route.params;
   const { completeCheckout } = useCart();
+  const { alert, AlertComponent } = useCustomAlert();
   const webViewRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [canGoBack, setCanGoBack] = useState(false);
@@ -67,10 +68,11 @@ const CheckoutScreen = ({ navigation, route }) => {
     // Complete checkout and clear cart
     await completeCheckout(orderId, orderNumber);
 
-    Alert.alert(
-      'Đặt Hàng Thành Công!',
-      'Cảm ơn bạn đã mua hàng tại Gemral.\nĐơn hàng của bạn đang được xử lý.',
-      [
+    alert({
+      type: 'success',
+      title: 'Đặt Hàng Thành Công!',
+      message: 'Cảm ơn bạn đã mua hàng tại Gemral.\nĐơn hàng của bạn đang được xử lý.',
+      buttons: [
         {
           text: 'Xem Đơn Hàng',
           onPress: () => {
@@ -90,23 +92,24 @@ const CheckoutScreen = ({ navigation, route }) => {
             navigation.navigate('ShopMain');
           },
         },
-      ]
-    );
+      ],
+    });
   };
 
   const handleClose = () => {
-    Alert.alert(
-      'Hủy thanh toán?',
-      'Bạn có chắc muốn hủy thanh toán? Giỏ hàng sẽ được giữ nguyên.',
-      [
+    alert({
+      type: 'warning',
+      title: 'Hủy thanh toán?',
+      message: 'Bạn có chắc muốn hủy thanh toán? Giỏ hàng sẽ được giữ nguyên.',
+      buttons: [
         { text: 'Tiếp tục thanh toán', style: 'cancel' },
         {
           text: 'Hủy',
           style: 'destructive',
           onPress: () => navigation.goBack(),
         },
-      ]
-    );
+      ],
+    });
   };
 
   const handleRefresh = () => {
@@ -167,20 +170,22 @@ const CheckoutScreen = ({ navigation, route }) => {
             onError={(syntheticEvent) => {
               const { nativeEvent } = syntheticEvent;
               console.error('WebView error:', nativeEvent);
-              Alert.alert(
-                'Lỗi',
-                'Không thể tải trang thanh toán. Vui lòng thử lại.',
-                [
+              alert({
+                type: 'error',
+                title: 'Lỗi',
+                message: 'Không thể tải trang thanh toán. Vui lòng thử lại.',
+                buttons: [
                   { text: 'Thử lại', onPress: handleRefresh },
                   { text: 'Đóng', onPress: () => navigation.goBack() },
-                ]
-              );
+                ],
+              });
             }}
           />
         </View>
         <View style={styles.securityNotice}>
           <Text style={styles.securityText}>Thanh toán an toàn qua Shopify</Text>
         </View>
+        {AlertComponent}
       </SafeAreaView>
     </LinearGradient>
   );

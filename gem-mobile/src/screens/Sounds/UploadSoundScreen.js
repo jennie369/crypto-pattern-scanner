@@ -13,9 +13,9 @@ import {
   StyleSheet,
   ScrollView,
   Image,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Audio } from 'expo-av';
 import * as ImagePicker from 'expo-image-picker';
@@ -36,6 +36,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import soundService from '../../services/soundService';
 
 const UploadSoundScreen = ({ navigation, route }) => {
+  const { alert, AlertComponent } = useCustomAlert();
   const { audioUri, audioName, audioSize } = route.params || {};
 
   const [title, setTitle] = useState('');
@@ -129,12 +130,22 @@ const UploadSoundScreen = ({ navigation, route }) => {
 
   const handleUpload = async () => {
     if (!title.trim()) {
-      Alert.alert('Thiếu thông tin', 'Vui lòng nhập tên âm thanh');
+      alert({
+        type: 'warning',
+        title: 'Thiếu thông tin',
+        message: 'Vui lòng nhập tên âm thanh',
+        buttons: [{ text: 'OK' }],
+      });
       return;
     }
 
     if (!audioUri) {
-      Alert.alert('Lỗi', 'Không tìm thấy file audio');
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Không tìm thấy file audio',
+        buttons: [{ text: 'OK' }],
+      });
       return;
     }
 
@@ -154,13 +165,19 @@ const UploadSoundScreen = ({ navigation, route }) => {
     setUploading(false);
 
     if (result.success) {
-      Alert.alert(
-        'Thành công',
-        'Âm thanh đã được tải lên',
-        [{ text: 'OK', onPress: () => navigation.goBack() }]
-      );
+      alert({
+        type: 'success',
+        title: 'Thành công',
+        message: 'Âm thanh đã được tải lên',
+        buttons: [{ text: 'OK', onPress: () => navigation.goBack() }],
+      });
     } else {
-      Alert.alert('Lỗi', result.error || 'Không thể tải lên âm thanh');
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: result.error || 'Không thể tải lên âm thanh',
+        buttons: [{ text: 'OK' }],
+      });
     }
   };
 
@@ -348,6 +365,7 @@ const UploadSoundScreen = ({ navigation, route }) => {
             và đồng ý với điều khoản sử dụng của Gemral.
           </Text>
         </ScrollView>
+        {AlertComponent}
       </SafeAreaView>
     </View>
   );

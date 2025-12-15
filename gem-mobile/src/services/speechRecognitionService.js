@@ -3,17 +3,32 @@
  * Day 11-12: Voice Input Implementation
  *
  * STRATEGY:
- * - Use Web Speech API (via expo-speech or browser API)
- * - Fallback to Google Cloud Speech API for better Vietnamese support
- * - Handle real-time transcription where possible
+ * - Native: Use device speech recognition (FREE - Siri/Google)
+ * - Web: Use Web Speech API
+ * - Fallback: OpenAI Whisper API (paid)
  *
  * SUPPORTED LANGUAGES:
  * - Vietnamese (vi-VN) - Primary
  * - English (en-US) - Secondary
+ *
+ * Updated: December 15, 2025
+ * - Added @react-native-voice/voice for FREE native speech recognition
  */
 
 import { Platform } from 'react-native';
 import * as Speech from 'expo-speech';
+import * as FileSystem from 'expo-file-system';
+import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase';
+
+// Native voice recognition (FREE!)
+let Voice = null;
+if (Platform.OS !== 'web') {
+  try {
+    Voice = require('@react-native-voice/voice').default;
+  } catch (e) {
+    console.log('[SpeechRecognition] @react-native-voice/voice not available');
+  }
+}
 
 class SpeechRecognitionService {
   constructor() {
@@ -23,6 +38,72 @@ class SpeechRecognitionService {
     this.onResultCallback = null;
     this.onErrorCallback = null;
     this.onEndCallback = null;
+    this.partialResults = '';
+
+    // Initialize native voice if available
+    if (Voice) {
+      this._initNativeVoice();
+    }
+  }
+
+  /**
+   * Initialize native voice recognition
+   * @private
+   */
+  _initNativeVoice() {
+    if (!Voice) return;
+
+    Voice.onSpeechStart = () => {
+      console.log('[SpeechRecognition] Native speech started');
+      this.isListening = true;
+    };
+
+    Voice.onSpeechEnd = () => {
+      console.log('[SpeechRecognition] Native speech ended');
+      this.isListening = false;
+      if (this.onEndCallback) {
+        this.onEndCallback();
+      }
+    };
+
+    Voice.onSpeechResults = (event) => {
+      const results = event.value || [];
+      const finalText = results[0] || '';
+      console.log('[SpeechRecognition] Native results:', finalText);
+
+      if (this.onResultCallback && finalText) {
+        this.onResultCallback({
+          finalTranscript: finalText,
+          interimTranscript: '',
+          isFinal: true
+        });
+      }
+    };
+
+    Voice.onSpeechPartialResults = (event) => {
+      const results = event.value || [];
+      const partialText = results[0] || '';
+      this.partialResults = partialText;
+
+      if (this.onResultCallback && partialText) {
+        this.onResultCallback({
+          finalTranscript: '',
+          interimTranscript: partialText,
+          isFinal: false
+        });
+      }
+    };
+
+    Voice.onSpeechError = (event) => {
+      console.error('[SpeechRecognition] Native error:', event.error);
+      this.isListening = false;
+
+      if (this.onErrorCallback) {
+        this.onErrorCallback({ error: event.error?.message || event.error });
+      }
+    };
+
+    console.log('[SpeechRecognition] Native voice initialized');
   }
 
   /**
@@ -33,8 +114,22 @@ class SpeechRecognitionService {
     if (Platform.OS === 'web') {
       return 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
     }
-    // For native, we'll use a third-party service
-    return true;
+    // For native, check if Voice is available
+    return Voice !== null;
+  }
+
+  /**
+   * Check if native voice is available
+   * @returns {Promise<boolean>}
+   */
+  async isNativeAvailable() {
+    if (!Voice) return false;
+    try {
+      const available = await Voice.isAvailable();
+      return available === 1 || available === true;
+    } catch (e) {
+      return false;
+    }
   }
 
   /**
@@ -69,7 +164,10 @@ class SpeechRecognitionService {
   }
 
   /**
-   * Start speech recognition (Web platform)
+   * Start speech recognition
+   * - Native: Uses device speech recognition (FREE - Siri/Google)
+   * - Web: Uses Web Speech API
+   *
    * @param {Object} callbacks - { onResult, onError, onEnd }
    * @returns {Promise<boolean>}
    */
@@ -77,14 +175,51 @@ class SpeechRecognitionService {
     this.onResultCallback = callbacks.onResult;
     this.onErrorCallback = callbacks.onError;
     this.onEndCallback = callbacks.onEnd;
+    this.partialResults = '';
 
     if (Platform.OS === 'web') {
       return this._startWebListening();
     }
 
-    // For native platforms, return audio URI for server-side processing
-    console.log('[SpeechRecognition] Native platform - use voiceService for recording');
-    return true;
+    // For native platforms, use @react-native-voice/voice (FREE!)
+    return this._startNativeListening();
+  }
+
+  /**
+   * Start native voice recognition (iOS/Android)
+   * Uses device's built-in speech recognition - FREE!
+   * @private
+   */
+  async _startNativeListening() {
+    if (!Voice) {
+      console.error('[SpeechRecognition] Native voice not available');
+      if (this.onErrorCallback) {
+        this.onErrorCallback({ error: 'Native voice recognition not available' });
+      }
+      return false;
+    }
+
+    try {
+      // Check if already listening
+      if (this.isListening) {
+        await this.stopListening();
+      }
+
+      console.log('[SpeechRecognition] Starting native listening, language:', this.language);
+
+      // Start voice recognition with language
+      await Voice.start(this.language);
+      this.isListening = true;
+
+      return true;
+
+    } catch (error) {
+      console.error('[SpeechRecognition] Start native listening error:', error);
+      if (this.onErrorCallback) {
+        this.onErrorCallback({ error: error.message });
+      }
+      return false;
+    }
   }
 
   /**
@@ -163,13 +298,16 @@ class SpeechRecognitionService {
    * @returns {Promise<void>}
    */
   async stopListening() {
-    if (Platform.OS === 'web' && this.recognition) {
-      try {
+    try {
+      if (Platform.OS === 'web' && this.recognition) {
         this.recognition.stop();
-        console.log('[SpeechRecognition] Stopped listening');
-      } catch (error) {
-        console.error('[SpeechRecognition] Stop error:', error);
+        console.log('[SpeechRecognition] Stopped web listening');
+      } else if (Voice) {
+        await Voice.stop();
+        console.log('[SpeechRecognition] Stopped native listening');
       }
+    } catch (error) {
+      console.error('[SpeechRecognition] Stop error:', error);
     }
 
     this.isListening = false;
@@ -180,16 +318,35 @@ class SpeechRecognitionService {
    * @returns {Promise<void>}
    */
   async cancelListening() {
-    if (Platform.OS === 'web' && this.recognition) {
-      try {
+    try {
+      if (Platform.OS === 'web' && this.recognition) {
         this.recognition.abort();
-        console.log('[SpeechRecognition] Cancelled listening');
-      } catch (error) {
-        console.error('[SpeechRecognition] Cancel error:', error);
+        console.log('[SpeechRecognition] Cancelled web listening');
+      } else if (Voice) {
+        await Voice.cancel();
+        console.log('[SpeechRecognition] Cancelled native listening');
       }
+    } catch (error) {
+      console.error('[SpeechRecognition] Cancel error:', error);
     }
 
     this.isListening = false;
+    this.partialResults = '';
+  }
+
+  /**
+   * Destroy voice recognition (call on unmount)
+   * @returns {Promise<void>}
+   */
+  async destroy() {
+    try {
+      if (Voice) {
+        await Voice.destroy();
+        console.log('[SpeechRecognition] Native voice destroyed');
+      }
+    } catch (error) {
+      console.error('[SpeechRecognition] Destroy error:', error);
+    }
   }
 
   /**
@@ -228,52 +385,138 @@ class SpeechRecognitionService {
   }
 
   /**
-   * Call server-side transcription API
+   * Call server-side transcription API (OpenAI Whisper via Supabase Edge Function)
    * @private
+   * @param {string} audioUri - Local URI of audio file
+   * @param {string} language - 'vi-VN' | 'en-US'
+   * @returns {Promise<Object>} - { success, text, confidence, error }
    */
   async _callTranscriptionAPI(audioUri, language) {
-    // TODO: Implement server-side transcription
-    // For MVP, we'll simulate the transcription
-    // In production, this would call a Supabase Edge Function
+    try {
+      console.log('[SpeechRecognition] Calling transcription API...');
+      console.log('[SpeechRecognition] Audio URI:', audioUri);
+      console.log('[SpeechRecognition] Language:', language);
 
-    /*
-    Example implementation with Supabase Edge Function:
+      // Get current session for auth
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token || SUPABASE_ANON_KEY;
 
-    const formData = new FormData();
-    formData.append('audio', {
-      uri: audioUri,
-      type: 'audio/m4a',
-      name: 'recording.m4a'
-    });
-    formData.append('language', language);
+      // Read audio file
+      let audioBlob;
+      let fileName = 'recording.m4a';
 
-    const response = await fetch(
-      'https://your-project.supabase.co/functions/v1/transcribe-audio',
-      {
+      if (Platform.OS === 'web') {
+        // For web, fetch the blob from URI
+        const response = await fetch(audioUri);
+        audioBlob = await response.blob();
+      } else {
+        // For native (iOS/Android), read file and create blob
+        const fileInfo = await FileSystem.getInfoAsync(audioUri);
+
+        if (!fileInfo.exists) {
+          console.error('[SpeechRecognition] Audio file not found:', audioUri);
+          return {
+            success: false,
+            text: '',
+            confidence: 0,
+            error: 'audio_file_not_found'
+          };
+        }
+
+        console.log('[SpeechRecognition] File size:', fileInfo.size);
+
+        // Read file as base64
+        const base64Audio = await FileSystem.readAsStringAsync(audioUri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+
+        // Convert base64 to blob
+        const binaryString = atob(base64Audio);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+
+        // Determine MIME type from extension
+        const extension = audioUri.split('.').pop()?.toLowerCase() || 'm4a';
+        const mimeType = {
+          'm4a': 'audio/m4a',
+          'mp4': 'audio/mp4',
+          'mp3': 'audio/mpeg',
+          'wav': 'audio/wav',
+          'webm': 'audio/webm',
+        }[extension] || 'audio/m4a';
+
+        audioBlob = new Blob([bytes], { type: mimeType });
+        fileName = `recording.${extension}`;
+      }
+
+      console.log('[SpeechRecognition] Audio blob size:', audioBlob.size);
+
+      // Create FormData
+      const formData = new FormData();
+      formData.append('audio', audioBlob, fileName);
+      formData.append('language', language);
+
+      // Call Edge Function
+      const edgeFunctionUrl = `${SUPABASE_URL}/functions/v1/transcribe-audio`;
+      console.log('[SpeechRecognition] Calling:', edgeFunctionUrl);
+
+      const startTime = Date.now();
+
+      const response = await fetch(edgeFunctionUrl, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${supabase.auth.session()?.access_token}`,
+          'Authorization': `Bearer ${accessToken}`,
         },
-        body: formData
+        body: formData,
+      });
+
+      const processingTime = Date.now() - startTime;
+      console.log(`[SpeechRecognition] Response time: ${processingTime}ms`);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[SpeechRecognition] API error:', response.status, errorText);
+
+        return {
+          success: false,
+          text: '',
+          confidence: 0,
+          error: `api_error_${response.status}`,
+          details: errorText
+        };
       }
-    );
 
-    const data = await response.json();
-    return {
-      success: true,
-      text: data.transcript,
-      confidence: data.confidence
-    };
-    */
+      const result = await response.json();
+      console.log('[SpeechRecognition] Transcription result:', result);
 
-    // Temporary: Return placeholder
-    console.log('[SpeechRecognition] Server-side transcription not implemented yet');
-    return {
-      success: false,
-      text: '',
-      confidence: 0,
-      error: 'server_transcription_not_implemented'
-    };
+      if (result.success && result.text) {
+        return {
+          success: true,
+          text: result.text,
+          confidence: 0.9, // Whisper doesn't return confidence, assume high
+          processingTimeMs: result.processingTimeMs || processingTime
+        };
+      } else {
+        return {
+          success: false,
+          text: '',
+          confidence: 0,
+          error: result.error || 'transcription_failed',
+          code: result.code
+        };
+      }
+
+    } catch (error) {
+      console.error('[SpeechRecognition] Transcription API error:', error);
+      return {
+        success: false,
+        text: '',
+        confidence: 0,
+        error: error.message || 'transcription_error'
+      };
+    }
   }
 
   /**

@@ -1,9 +1,13 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import consoleMonitor from './vite-plugin-console-monitor.js'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    consoleMonitor(), // Browser console logs forwarded to terminal
+  ],
 
   // Production optimizations
   build: {

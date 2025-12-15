@@ -63,6 +63,183 @@ function determineProductType(lineItems) {
   return 'physical' // Default
   ;
 }
+
+// ========================================
+// HELPER: Check if line item is an individual course
+// Returns courses matching by SKU pattern OR shopify_product_id in database
+// ========================================
+async function extractIndividualCourses(lineItems, supabase) {
+  const courses = [];
+
+  for (const item of lineItems) {
+    const sku = item.sku?.toLowerCase() || '';
+    const productId = item.product_id?.toString() || '';
+    const itemPrice = parseFloat(item.price) || 0;
+    const itemQty = item.quantity || 1;
+
+    // Method 1: Match by SKU pattern (gem-individual-course-{courseId} or course-{courseId})
+    const courseMatch = sku.match(/(?:gem-)?individual-course-(\w+)/i) ||
+                        sku.match(/course-id-(\w+)/i);
+
+    if (courseMatch) {
+      courses.push({
+        course_id: courseMatch[1],
+        sku: item.sku,
+        name: item.name,
+        price: itemPrice,
+        quantity: itemQty,
+        shopify_product_id: productId,
+      });
+      continue; // Skip other checks for this item
+    }
+
+    // Method 2: Check product metadata for course_id
+    if (item.properties) {
+      const courseIdProp = item.properties.find(p =>
+        p.name?.toLowerCase() === 'course_id' || p.name?.toLowerCase() === 'courseid'
+      );
+      if (courseIdProp?.value) {
+        courses.push({
+          course_id: courseIdProp.value,
+          sku: item.sku,
+          name: item.name,
+          price: itemPrice,
+          quantity: itemQty,
+          shopify_product_id: productId,
+        });
+        continue; // Skip other checks for this item
+      }
+    }
+
+    // Method 3 (NEW): Look up course by shopify_product_id in database
+    if (productId && supabase) {
+      try {
+        const { data: courseByProduct, error } = await supabase
+          .from('courses')
+          .select('id, title, shopify_product_id')
+          .eq('shopify_product_id', productId)
+          .single();
+
+        if (!error && courseByProduct) {
+          console.log(`📚 Found course by shopify_product_id: ${productId} -> ${courseByProduct.id}`);
+          courses.push({
+            course_id: courseByProduct.id,
+            sku: item.sku,
+            name: item.name || courseByProduct.title,
+            price: itemPrice,
+            quantity: itemQty,
+            shopify_product_id: productId,
+          });
+        }
+      } catch (lookupError) {
+        console.log(`ℹ️ No course found for product_id ${productId}`);
+      }
+    }
+  }
+  return courses;
+}
+
+// ========================================
+// HELPER: Grant course access to user
+// ========================================
+async function grantCourseAccess(
+  supabase,
+  userId: string,
+  courseId: string,
+  accessType: string,
+  orderData: any
+) {
+  console.log(`📚 Granting course access: User ${userId} -> Course ${courseId}`);
+
+  try {
+    // Get course details for duration
+    const { data: course } = await supabase
+      .from('courses')
+      .select('id, title, membership_duration_days, tier_required')
+      .eq('id', courseId)
+      .single();
+
+    if (!course) {
+      // Try finding by shopify_product_id
+      const { data: courseByShopify } = await supabase
+        .from('courses')
+        .select('id, title, membership_duration_days, tier_required')
+        .eq('shopify_product_id', courseId)
+        .single();
+
+      if (!courseByShopify) {
+        console.error(`❌ Course not found: ${courseId}`);
+        return { success: false, error: 'Course not found' };
+      }
+
+      return grantCourseAccess(supabase, userId, courseByShopify.id, accessType, orderData);
+    }
+
+    // Calculate expiry date
+    const expiresAt = course.membership_duration_days
+      ? new Date(Date.now() + course.membership_duration_days * 24 * 60 * 60 * 1000).toISOString()
+      : null; // null = lifetime access
+
+    // Check if already enrolled
+    const { data: existingEnrollment } = await supabase
+      .from('course_enrollments')
+      .select('id, expires_at')
+      .eq('user_id', userId)
+      .eq('course_id', course.id)
+      .single();
+
+    if (existingEnrollment) {
+      // Extend existing enrollment
+      const currentExpiry = existingEnrollment.expires_at
+        ? new Date(existingEnrollment.expires_at)
+        : null;
+      const newExpiry = expiresAt
+        ? (currentExpiry && currentExpiry > new Date()
+            ? new Date(currentExpiry.getTime() + course.membership_duration_days * 24 * 60 * 60 * 1000)
+            : new Date(Date.now() + course.membership_duration_days * 24 * 60 * 60 * 1000))
+        : null;
+
+      await supabase
+        .from('course_enrollments')
+        .update({
+          expires_at: newExpiry?.toISOString() || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', existingEnrollment.id);
+
+      console.log(`✅ Extended enrollment for course: ${course.title}`);
+      return { success: true, action: 'extended', course_title: course.title };
+    }
+
+    // Create new enrollment
+    const { error: enrollError } = await supabase
+      .from('course_enrollments')
+      .insert({
+        user_id: userId,
+        course_id: course.id,
+        access_type: accessType,
+        enrolled_at: new Date().toISOString(),
+        expires_at: expiresAt,
+        metadata: {
+          shopify_order_id: orderData.id?.toString(),
+          order_number: orderData.order_number || orderData.name,
+          purchase_price: orderData.total_price,
+        },
+      });
+
+    if (enrollError) {
+      console.error(`❌ Failed to create enrollment:`, enrollError);
+      return { success: false, error: enrollError.message };
+    }
+
+    console.log(`✅ Granted access to course: ${course.title}`);
+    return { success: true, action: 'created', course_title: course.title };
+
+  } catch (error) {
+    console.error(`❌ Course access error:`, error);
+    return { success: false, error: error.message };
+  }
+}
 // ========================================
 // HELPER: Get partner ID from order note_attributes
 // ========================================
@@ -80,23 +257,34 @@ function extractTierFromSku(lineItems) {
   let amountPaid = 0;
   let gemAmount = 0;
   let quantity = 1;
+  let variantId = null; // NEW: Track variant ID for gem_packs lookup
 
   for (const item of lineItems){
     const sku = item.sku?.toLowerCase() || '';
     const price = parseFloat(item.price) || 0;
     quantity = item.quantity || 1;
+    const itemVariantId = item.variant_id?.toString() || null;
 
     // ========================================
-    // NEW: Gem pack detection (gem-pack-XXX)
+    // NEW: Gem pack detection (gem-pack-XXX or by variant_id)
     // ========================================
-    if (sku.startsWith('gem-pack-')) {
+    if (sku.startsWith('gem-pack-') || sku.includes('gem') && sku.includes('pack')) {
       productType = 'gems';
       tierPurchased = 'none';
       amountPaid = price * quantity;
+      variantId = itemVariantId;
       // Extract gem amount from SKU (e.g., gem-pack-500 -> 500)
-      const gemAmountStr = sku.replace('gem-pack-', '');
-      gemAmount = parseInt(gemAmountStr, 10) * quantity;
-      console.log(`💎 Gem pack detected: SKU=${sku}, Amount=${gemAmount}, Qty=${quantity}`);
+      const gemAmountMatch = sku.match(/gem-pack-(\d+)/);
+      if (gemAmountMatch) {
+        gemAmount = parseInt(gemAmountMatch[1], 10) * quantity;
+      } else {
+        // Try to extract from title or properties
+        const titleMatch = (item.name || item.title || '').match(/(\d+)\s*gems?/i);
+        if (titleMatch) {
+          gemAmount = parseInt(titleMatch[1], 10) * quantity;
+        }
+      }
+      console.log(`💎 Gem pack detected: SKU=${sku}, VariantID=${variantId}, Amount=${gemAmount}, Qty=${quantity}`);
       break;
     }
 
@@ -152,25 +340,49 @@ function extractTierFromSku(lineItems) {
     productType,
     tierPurchased,
     amountPaid,
-    gemAmount
+    gemAmount,
+    variantId // NEW: Include variant ID for gem_packs lookup
   };
 }
 
 // ========================================
-// HELPER: Process Gem Purchase
+// HELPER: Process Gem Purchase (Updated for GEM_ECONOMY)
 // ========================================
-async function processGemPurchase(supabase, userId: string | null, customerEmail: string, gemAmount: number, orderData: any) {
+async function processGemPurchase(supabase, userId: string | null, customerEmail: string, gemAmount: number, orderData: any, variantId?: string) {
   console.log(`💎 Processing gem purchase: ${gemAmount} gems for ${customerEmail}`);
 
-  // Lookup bonus from currency_packages table
-  const { data: gemPackage } = await supabase
-    .from('currency_packages')
-    .select('gem_amount, bonus_gems')
-    .eq('gem_amount', gemAmount)
-    .single();
+  let bonusGems = 0;
+  let totalGems = gemAmount;
 
-  const bonusGems = gemPackage?.bonus_gems || 0;
-  const totalGems = gemAmount + bonusGems;
+  // Priority 1: Lookup from gem_packs table (GEM_ECONOMY v2)
+  if (variantId) {
+    const { data: gemPack } = await supabase
+      .from('gem_packs')
+      .select('gems_quantity, bonus_gems, total_gems')
+      .eq('shopify_variant_id', variantId)
+      .single();
+
+    if (gemPack) {
+      bonusGems = gemPack.bonus_gems || 0;
+      totalGems = gemPack.total_gems || (gemAmount + bonusGems);
+      console.log(`   Found in gem_packs: Base=${gemPack.gems_quantity}, Bonus=${bonusGems}, Total=${totalGems}`);
+    }
+  }
+
+  // Priority 2: Fallback to currency_packages table (legacy)
+  if (bonusGems === 0) {
+    const { data: gemPackage } = await supabase
+      .from('currency_packages')
+      .select('gem_amount, bonus_gems')
+      .eq('gem_amount', gemAmount)
+      .single();
+
+    if (gemPackage) {
+      bonusGems = gemPackage.bonus_gems || 0;
+      totalGems = gemAmount + bonusGems;
+    }
+  }
+
   console.log(`   Base: ${gemAmount}, Bonus: ${bonusGems}, Total: ${totalGems}`);
 
   // If user exists, add gems directly
@@ -219,20 +431,45 @@ async function processGemPurchase(supabase, userId: string | null, customerEmail
     return { success: true, totalGems, newBalance };
   }
 
-  // User not found - save to pending_gem_purchases
-  console.log(`⏳ User not found, saving to pending_gem_purchases...`);
-  const { error: pendingError } = await supabase.from('pending_gem_purchases').insert({
+  // User not found - save to pending_gem_credits (GEM_ECONOMY v2)
+  console.log(`⏳ User not found, saving to pending_gem_credits...`);
+
+  // Try new pending_gem_credits table first
+  const { error: pendingError } = await supabase.from('pending_gem_credits').insert({
     email: customerEmail,
-    order_id: orderData.id.toString(),
+    shopify_order_id: orderData.id.toString(),
+    order_number: orderData.order_number?.toString() || orderData.name,
     gem_amount: totalGems,
     price_paid: parseFloat(orderData.total_price) || 0,
     currency: orderData.currency || 'VND',
-    purchased_at: new Date().toISOString(),
-    applied: false
+    source: 'shopify_purchase',
+    status: 'pending',
+    created_at: new Date().toISOString(),
+    metadata: {
+      base_gems: gemAmount,
+      bonus_gems: bonusGems,
+      variant_id: variantId || null
+    }
   });
 
   if (pendingError) {
-    console.error('❌ Failed to save pending gems:', pendingError);
+    console.log('⚠️ pending_gem_credits failed, trying pending_gem_purchases...');
+    // Fallback to legacy table
+    const { error: legacyError } = await supabase.from('pending_gem_purchases').insert({
+      email: customerEmail,
+      order_id: orderData.id.toString(),
+      gem_amount: totalGems,
+      price_paid: parseFloat(orderData.total_price) || 0,
+      currency: orderData.currency || 'VND',
+      purchased_at: new Date().toISOString(),
+      applied: false
+    });
+
+    if (legacyError) {
+      console.error('❌ Failed to save pending gems:', legacyError);
+    } else {
+      console.log(`✅ Pending gems saved (legacy) for ${customerEmail}`);
+    }
   } else {
     console.log(`✅ Pending gems saved for ${customerEmail}`);
   }
@@ -303,6 +540,53 @@ async function handleOrderPaid(supabase, orderData) {
   const orderIdShopify = orderData.id;
   const lineItems = orderData.line_items || [];
   const partnerId = getPartnerIdFromOrder(orderData);
+
+  // ========================================
+  // CRITICAL: Check if already processed to prevent duplicate grants
+  // This prevents race condition when orders/paid and orders/updated
+  // webhooks fire simultaneously
+  // ========================================
+  const { data: existingOrder } = await supabase
+    .from('shopify_orders')
+    .select('processed_at')
+    .eq('shopify_order_id', orderIdShopify.toString())
+    .single();
+
+  if (existingOrder?.processed_at) {
+    console.log('⚠️ Order already processed, skipping to prevent duplicate grant');
+    return new Response(JSON.stringify({
+      success: true,
+      message: 'Order already processed',
+      skipped: true
+    }), {
+      status: 200,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json'
+      }
+    });
+  }
+
+  // ========================================
+  // CRITICAL: Immediately mark as processing to prevent race condition
+  // ========================================
+  const { error: lockError } = await supabase
+    .from('shopify_orders')
+    .upsert({
+      shopify_order_id: orderIdShopify.toString(),
+      email: customerEmail,
+      financial_status: 'processing',
+      processed_at: new Date().toISOString()
+    }, {
+      onConflict: 'shopify_order_id'
+    });
+
+  if (lockError) {
+    console.error('⚠️ Failed to lock order, may be processed by another request');
+  } else {
+    console.log('🔒 Order locked for processing');
+  }
+
   if (!customerEmail) {
     console.error('❌ No customer email in order');
     return new Response(JSON.stringify({
@@ -316,10 +600,92 @@ async function handleOrderPaid(supabase, orderData) {
     });
   }
   console.log(`📧 Order from: ${customerEmail}, Order ID: ${orderIdShopify}`);
+
+  // ========================================
+  // STEP 0.5: Check for individual course purchases
+  // NEW: Now also matches by shopify_product_id in courses table
+  // ========================================
+  const individualCourses = await extractIndividualCourses(lineItems, supabase);
+  if (individualCourses.length > 0) {
+    console.log(`📚 Found ${individualCourses.length} individual course(s) in order`);
+
+    // Find user by email
+    const { data: userData } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', customerEmail)
+      .single();
+
+    if (userData) {
+      // Grant access to each course
+      const results = [];
+      for (const course of individualCourses) {
+        const result = await grantCourseAccess(
+          supabase,
+          userData.id,
+          course.course_id,
+          'purchase',
+          orderData
+        );
+        results.push({ ...course, result });
+      }
+
+      // Update order record
+      await supabase.from('shopify_orders').upsert({
+        shopify_order_id: orderIdShopify.toString(),
+        order_number: orderData.order_number?.toString() || orderData.name,
+        user_id: userData.id,
+        email: customerEmail,
+        total_price: parseFloat(orderData.total_price) || 0,
+        product_type: 'individual_course',
+        tier_purchased: 'none',
+        amount: parseFloat(orderData.total_price) || 0,
+        partner_id: partnerId,
+        financial_status: 'paid',
+        paid_at: new Date().toISOString(),
+        processed_at: new Date().toISOString()
+      }, { onConflict: 'shopify_order_id' });
+
+      return new Response(JSON.stringify({
+        success: true,
+        message: `Granted access to ${individualCourses.length} course(s)`,
+        courses: results,
+        user_id: userData.id,
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    } else {
+      // Save to pending for when user signs up
+      console.log(`⏳ User not found, saving individual courses to pending...`);
+      for (const course of individualCourses) {
+        await supabase.from('pending_course_access').insert({
+          email: customerEmail,
+          course_id: course.course_id,
+          shopify_order_id: orderIdShopify.toString(),
+          access_type: 'purchase',
+          price_paid: course.price,
+          purchased_at: new Date().toISOString(),
+          applied: false,
+        });
+      }
+
+      return new Response(JSON.stringify({
+        success: true,
+        message: 'Course access saved to pending. Will be applied when user signs up.',
+        courses: individualCourses,
+        pending: true,
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+  }
+
   // ========================================
   // STEP 1: Extract tier info from SKU
   // ========================================
-  let { productType, tierPurchased, amountPaid, gemAmount } = extractTierFromSku(lineItems);
+  let { productType, tierPurchased, amountPaid, gemAmount, variantId } = extractTierFromSku(lineItems);
   // If amountPaid is 0, use total_price
   if (amountPaid === 0) {
     amountPaid = parseFloat(orderData.total_price) || 0;
@@ -337,7 +703,8 @@ async function handleOrderPaid(supabase, orderData) {
     console.log(`💎 Processing GEM purchase...`);
     const userId = userData?.id || null;
 
-    const gemResult = await processGemPurchase(supabase, userId, customerEmail, gemAmount, orderData);
+    // Pass variantId for gem_packs table lookup
+    const gemResult = await processGemPurchase(supabase, userId, customerEmail, gemAmount, orderData, variantId);
 
     // Update order record
     await supabase.from('shopify_orders').upsert({

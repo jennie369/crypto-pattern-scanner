@@ -11,7 +11,7 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  FlatList,
+  ScrollView,
   Image,
   Keyboard,
 } from 'react-native';
@@ -22,7 +22,7 @@ import { searchService } from '../services/searchService';
 const MentionInput = ({
   value,
   onChangeText,
-  placeholder = 'Viet noi dung...',
+  placeholder = 'Viết nội dung...',
   style,
   multiline = true,
   numberOfLines = 4,
@@ -30,6 +30,8 @@ const MentionInput = ({
   onFocus,
   onBlur,
   autoFocus = false,
+  triggerMention = false, // External trigger to insert @ and show suggestions
+  onTriggerMentionHandled, // Callback when trigger is handled
 }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
@@ -40,6 +42,31 @@ const MentionInput = ({
 
   const inputRef = useRef(null);
   const debounceTimer = useRef(null);
+
+  // Handle external trigger to insert @ and show mention dropdown
+  useEffect(() => {
+    if (triggerMention) {
+      // Focus input first
+      inputRef.current?.focus();
+
+      // Insert @ at cursor position
+      const newText = value
+        ? value.slice(0, cursorPosition) + '@' + value.slice(cursorPosition)
+        : '@';
+
+      onChangeText?.(newText);
+
+      // Set mention state to trigger dropdown
+      setMentionStartIndex(cursorPosition);
+      setMentionQuery('');
+
+      // Load initial suggestions (show recent or popular users)
+      searchUsers('');
+
+      // Notify parent that trigger was handled
+      onTriggerMentionHandled?.();
+    }
+  }, [triggerMention]);
 
   // Detect @ mentions while typing
   const handleTextChange = useCallback((text) => {
@@ -82,12 +109,15 @@ const MentionInput = ({
   const searchUsers = async (query) => {
     setLoading(true);
     try {
-      const results = await searchService.searchUsers(query, 5);
+      // If empty query, show popular/recent users
+      const searchQuery = query || '';
+      const results = await searchService.searchUsers(searchQuery, 8);
       setSuggestions(results);
       setShowSuggestions(results.length > 0);
     } catch (error) {
       console.error('[MentionInput] Search error:', error);
       setSuggestions([]);
+      setShowSuggestions(false);
     } finally {
       setLoading(false);
     }
@@ -148,29 +178,6 @@ const MentionInput = ({
     };
   }, []);
 
-  // Render user suggestion item
-  const renderSuggestion = ({ item }) => {
-    const displayName = item.full_name || item.email?.split('@')[0] || 'User';
-    const avatarUrl = item.avatar_url ||
-      `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=6A5BFF&color=fff`;
-
-    return (
-      <TouchableOpacity
-        style={styles.suggestionItem}
-        onPress={() => handleSelectUser(item)}
-        activeOpacity={0.7}
-      >
-        <Image source={{ uri: avatarUrl }} style={styles.suggestionAvatar} />
-        <View style={styles.suggestionInfo}>
-          <Text style={styles.suggestionName}>{displayName}</Text>
-          {item.email && (
-            <Text style={styles.suggestionEmail}>@{item.email.split('@')[0]}</Text>
-          )}
-        </View>
-      </TouchableOpacity>
-    );
-  };
-
   return (
     <View style={styles.container}>
       <TextInput
@@ -191,20 +198,41 @@ const MentionInput = ({
         textAlignVertical="top"
       />
 
-      {/* Mention Suggestions */}
+      {/* Mention Suggestions - Using ScrollView + map instead of FlatList to avoid VirtualizedList nesting warning */}
       {showSuggestions && suggestions.length > 0 && (
         <View style={styles.suggestionsContainer}>
           <View style={styles.suggestionsHeader}>
             <AtSign size={14} color={COLORS.cyan} />
-            <Text style={styles.suggestionsTitle}>Goi y nguoi dung</Text>
+            <Text style={styles.suggestionsTitle}>Gợi ý người dùng</Text>
           </View>
-          <FlatList
-            data={suggestions}
-            renderItem={renderSuggestion}
-            keyExtractor={(item) => item.id}
-            keyboardShouldPersistTaps="always"
+          <ScrollView
             style={styles.suggestionsList}
-          />
+            keyboardShouldPersistTaps="always"
+            nestedScrollEnabled={true}
+          >
+            {suggestions.map((item) => {
+              const displayName = item.full_name || item.email?.split('@')[0] || 'User';
+              const avatarUrl = item.avatar_url ||
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=6A5BFF&color=fff`;
+
+              return (
+                <TouchableOpacity
+                  key={item.id}
+                  style={styles.suggestionItem}
+                  onPress={() => handleSelectUser(item)}
+                  activeOpacity={0.7}
+                >
+                  <Image source={{ uri: avatarUrl }} style={styles.suggestionAvatar} />
+                  <View style={styles.suggestionInfo}>
+                    <Text style={styles.suggestionName}>{displayName}</Text>
+                    {item.email && (
+                      <Text style={styles.suggestionEmail}>@{item.email.split('@')[0]}</Text>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
         </View>
       )}
     </View>
@@ -288,24 +316,25 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     minHeight: 100,
   },
-  // Suggestions
+  // Suggestions - Position below the input instead of above to avoid overflow issues
   suggestionsContainer: {
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: '100%',
-    marginBottom: SPACING.xs,
-    backgroundColor: GLASS.background,
+    top: '100%',
+    marginTop: SPACING.xs,
+    backgroundColor: 'rgba(20, 20, 35, 0.98)',
     borderRadius: 12,
     borderWidth: 1,
     borderColor: 'rgba(106, 91, 255, 0.3)',
     overflow: 'hidden',
     maxHeight: 200,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
     shadowRadius: 8,
-    elevation: 5,
+    elevation: 10,
+    zIndex: 9999,
   },
   suggestionsHeader: {
     flexDirection: 'row',

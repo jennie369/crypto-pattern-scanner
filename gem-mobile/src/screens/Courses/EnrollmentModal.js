@@ -24,6 +24,7 @@ import {
   Lock,
   CheckCircle,
   AlertTriangle,
+  ShoppingCart,
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, GLASS } from '../../utils/tokens';
 
@@ -92,6 +93,10 @@ const EnrollmentModal = ({
   const tierColor = TIER_COLORS[course.tier_required] || COLORS.textMuted;
   const tierLabel = TIER_LABELS[course.tier_required] || course.tier_required;
   const userTierLabel = TIER_LABELS[userTier] || userTier;
+
+  // Check if this is a paid course (has Shopify product or price > 0)
+  const isPaidCourse = course.shopify_product_id || (course.price && course.price > 0);
+  const isFreeCoure = !isPaidCourse && course.tier_required === 'FREE';
 
   const handleEnroll = () => {
     if (isLocked) {
@@ -195,6 +200,16 @@ const EnrollmentModal = ({
               </View>
             )}
 
+            {/* Paid Course Info */}
+            {isPaidCourse && !isLocked && (
+              <View style={styles.paidCourseInfo}>
+                <ShoppingCart size={18} color={COLORS.gold} />
+                <Text style={styles.paidCourseText}>
+                  Bạn sẽ được chuyển đến trang thanh toán an toàn qua Shopify
+                </Text>
+              </View>
+            )}
+
             {/* What You'll Learn (placeholder) */}
             <View style={styles.benefitsSection}>
               <Text style={styles.benefitsTitle}>Bạn sẽ học được:</Text>
@@ -227,6 +242,7 @@ const EnrollmentModal = ({
               style={[
                 styles.enrollBtn,
                 isLocked && styles.upgradeBtn,
+                isPaidCourse && !isLocked && styles.purchaseBtn,
               ]}
               onPress={handleEnroll}
               disabled={enrolling}
@@ -239,12 +255,15 @@ const EnrollmentModal = ({
                   <Lock size={18} color={COLORS.textPrimary} />
                   <Text style={styles.upgradeBtnText}>Nâng cấp ngay</Text>
                 </>
+              ) : isPaidCourse ? (
+                <>
+                  <ShoppingCart size={18} color="#112250" />
+                  <Text style={styles.enrollBtnText}>
+                    Mua khóa học - {(course.price || 0).toLocaleString()}đ
+                  </Text>
+                </>
               ) : (
-                <Text style={styles.enrollBtnText}>
-                  {course.price > 0
-                    ? `Đăng ký - ${course.price.toLocaleString()} VND`
-                    : 'Đăng ký miễn phí'}
-                </Text>
+                <Text style={styles.enrollBtnText}>Đăng ký miễn phí</Text>
               )}
             </TouchableOpacity>
           </View>
@@ -367,6 +386,21 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     gap: SPACING.sm,
   },
+  // Paid Course Info
+  paidCourseInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 189, 89, 0.08)',
+    padding: SPACING.sm,
+    borderRadius: 8,
+    marginBottom: SPACING.md,
+    gap: SPACING.xs,
+  },
+  paidCourseText: {
+    flex: 1,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textSecondary,
+  },
   warningContent: {
     flex: 1,
   },
@@ -445,6 +479,9 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.fontSize.md,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textPrimary,
+  },
+  purchaseBtn: {
+    backgroundColor: COLORS.gold,
   },
 });
 

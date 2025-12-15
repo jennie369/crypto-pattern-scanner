@@ -126,6 +126,7 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
+    paddingBottom: 20,
   },
   loadingContainer: {
     paddingVertical: SPACING.huge,

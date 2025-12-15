@@ -18,7 +18,6 @@ import {
   TouchableOpacity,
   Animated,
   PanResponder,
-  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
@@ -32,6 +31,9 @@ import {
   TYPOGRAPHY,
 } from '../../../utils/tokens';
 
+// Alert
+import { useCustomAlert } from '../../../components/CustomAlert';
+
 const CANCEL_THRESHOLD = -100; // Slide left to cancel
 const MAX_DURATION = 60; // Max recording duration in seconds
 
@@ -40,6 +42,8 @@ const VoiceRecorder = memo(({
   onCancel,
   disabled,
 }) => {
+  const { alert } = useCustomAlert();
+
   // State
   const [isRecording, setIsRecording] = useState(false);
   const [duration, setDuration] = useState(0);
@@ -143,7 +147,7 @@ const VoiceRecorder = memo(({
       // Request permissions
       const { status } = await Audio.requestPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Please allow microphone access to record voice messages');
+        alert({ type: 'error', title: 'Permission Required', message: 'Please allow microphone access to record voice messages' });
         return;
       }
 
@@ -174,7 +178,7 @@ const VoiceRecorder = memo(({
       }, 1000);
     } catch (error) {
       console.error('Error starting recording:', error);
-      Alert.alert('Error', 'Failed to start recording');
+      alert({ type: 'error', title: 'Error', message: 'Failed to start recording' });
     }
   };
 

@@ -40,47 +40,45 @@ import {
   Heart,
   X,
 } from 'lucide-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCart } from '../../contexts/CartContext';
 import { useTabBar } from '../../contexts/TabBarContext';
 import { shopifyService } from '../../services/shopifyService';
 import { reviewService } from '../../services/reviewService';
 import affiliateService from '../../services/affiliateService';
+import deepLinkHandler from '../../services/deepLinkHandler';
 import { ProductAffiliateLinkSheet } from '../../components/Affiliate';
+import OptimizedImage from '../../components/Common/OptimizedImage';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
 import { DARK_THEME } from '../../theme/darkTheme';
 import { TrendingUp, Eye, Layers, Grid3X3, Link2 } from 'lucide-react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const TAB_BAR_HEIGHT = 90; // Tab bar (76) + bottom offset (8) + small gap (6)
+import { CONTENT_BOTTOM_PADDING, ACTION_BUTTON_BOTTOM_PADDING } from '../../constants/layout';
+
+const TAB_BAR_HEIGHT = 115; // Tab bar height for proper spacing above tab
 
 const ProductDetailScreen = ({ navigation, route }) => {
-  const { product } = route.params;
+  // CRITICAL: Validate route.params and product before destructuring
+  const initialProduct = route.params?.product;
+
+  // Deep link params
+  const deepLinkProductId = route.params?.productId;
+  const deepLinkHandle = route.params?.handle;
+  const affiliateCodeFromLink = route.params?.affiliateCode;
+  const fromDeepLink = route.params?.fromDeepLink === true;
+
+  // State to hold the full product data (fetched from Shopify if needed)
+  const [product, setProduct] = useState(initialProduct);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [deepLinkLoading, setDeepLinkLoading] = useState(fromDeepLink && !initialProduct);
+
+  // IMPORTANT: All hooks MUST be called before any conditional returns
+  // React hooks must be called in the same order on every render
   const { addItem, itemCount } = useCart();
   const { handleScroll, translateY } = useTabBar();
   const [quantity, setQuantity] = useState(1);
-
-  // Handle local fallback products from gemKnowledge.json
-  const isLocalFallback = product?.isLocalFallback === true;
-  console.log('[ProductDetail] Product loaded:', {
-    title: product?.title,
-    isLocalFallback,
-    priceDisplay: product?.priceDisplay,
-    rawPrice: product?.rawPrice,
-    price: product?.price,
-  });
-
-  // CTA buttons position - SYNC with tab bar animation using transform (not bottom)
-  // Native animated module doesn't support 'bottom', use translateY instead
-  // When tab bar translateY is 0 (visible) -> CTA stays at base position
-  // When tab bar translateY is 120 (hidden) -> CTA moves down by TAB_BAR_HEIGHT
-  const ctaTranslateY = translateY.interpolate({
-    inputRange: [0, 120],
-    outputRange: [0, TAB_BAR_HEIGHT],
-    extrapolate: 'clamp',
-  });
-  const [selectedVariant, setSelectedVariant] = useState(
-    product.variants?.[0] || null
-  );
+  const [selectedVariant, setSelectedVariant] = useState(null);
   const [addedToCart, setAddedToCart] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const imageScrollRef = useRef(null);
@@ -108,6 +106,192 @@ const ProductDetailScreen = ({ navigation, route }) => {
   const [isAffiliate, setIsAffiliate] = useState(false);
   const [affiliateLinkSheetVisible, setAffiliateLinkSheetVisible] = useState(false);
 
+  // Set selected variant when product is available
+  useEffect(() => {
+    if (product?.variants?.[0]) {
+      setSelectedVariant(product.variants[0]);
+    }
+  }, [product]);
+
+  // Handle deep link - store affiliate code and fetch product
+  useEffect(() => {
+    const handleDeepLinkInit = async () => {
+      // Store affiliate code for checkout attribution
+      if (affiliateCodeFromLink) {
+        try {
+          await deepLinkHandler.storeCheckoutAffiliate(affiliateCodeFromLink);
+          console.log('[ProductDetail] Stored affiliate code:', affiliateCodeFromLink);
+        } catch (error) {
+          console.error('[ProductDetail] Error storing affiliate code:', error);
+        }
+      }
+
+      // If we came from deep link without product data, fetch it
+      if (fromDeepLink && !initialProduct) {
+        setDeepLinkLoading(true);
+        try {
+          let fetchedProduct = null;
+
+          // Try by handle first
+          if (deepLinkHandle) {
+            fetchedProduct = await shopifyService.getProductByHandle(deepLinkHandle);
+          }
+
+          // Try by ID if handle didn't work
+          if (!fetchedProduct && deepLinkProductId) {
+            fetchedProduct = await shopifyService.getProductById(deepLinkProductId);
+          }
+
+          if (fetchedProduct) {
+            setProduct(fetchedProduct);
+            console.log('[ProductDetail] Fetched product from deep link:', fetchedProduct.title);
+          } else {
+            console.warn('[ProductDetail] Could not find product from deep link params');
+          }
+        } catch (error) {
+          console.error('[ProductDetail] Error fetching product from deep link:', error);
+        } finally {
+          setDeepLinkLoading(false);
+        }
+      }
+    };
+
+    handleDeepLinkInit();
+  }, [affiliateCodeFromLink, fromDeepLink, deepLinkHandle, deepLinkProductId, initialProduct]);
+
+  // Log warning if no product data - don't auto-navigate (causes errors)
+  useEffect(() => {
+    if (!product || (!product.id && !product.handle && !product.title)) {
+      // Don't auto-navigate back - let user press back button
+      // Auto goBack() causes navigation errors and infinite loops
+    }
+  }, [product]);
+
+  // Fetch full product data from Shopify if we only have cached/partial data
+  // This handles products linked from posts which may have outdated price/images
+  // DEFERRED to not block navigation
+  useEffect(() => {
+    const fetchFullProductData = async () => {
+      // Check if we have enough data or need to fetch
+      // Products from posts typically only have: id, handle, title, price, image
+      // Full Shopify products have: variants array, description, multiple images
+      const needsFetch = initialProduct && (initialProduct.handle || initialProduct.id) && (
+        !initialProduct.variants?.length ||
+        !initialProduct.description ||
+        initialProduct.variants?.[0]?.title === 'Default' || // Placeholder variant from PostCard
+        (initialProduct.images?.length || 0) <= 1 // Only has 1 or no images
+      );
+
+      if (needsFetch) {
+        setIsRefreshing(true);
+
+        try {
+          let fullProduct = null;
+
+          // Try by handle first (more reliable), then by ID
+          if (initialProduct.handle) {
+            fullProduct = await shopifyService.getProductByHandle(initialProduct.handle);
+          }
+
+          // If handle fetch failed or no handle, try by ID
+          if (!fullProduct && initialProduct.id) {
+            fullProduct = await shopifyService.getProductById(initialProduct.id);
+          }
+
+          if (fullProduct) {
+            setProduct(fullProduct);
+          }
+        } catch (error) {
+          // Silently fail - product data will use initial data
+        } finally {
+          setIsRefreshing(false);
+        }
+      }
+    };
+
+    // Defer fetch to allow screen to render first
+    const timer = setTimeout(fetchFullProductData, 100);
+    return () => clearTimeout(timer);
+  }, [initialProduct]);
+
+  // Return early if loading from deep link
+  if (deepLinkLoading) {
+    return (
+      <LinearGradient
+        colors={GRADIENTS.background}
+        locations={GRADIENTS.backgroundLocations}
+        style={styles.container}
+      >
+        <SafeAreaView style={styles.safeArea} edges={['top']}>
+          <View style={styles.header}>
+            <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+              <ArrowLeft size={24} color={COLORS.textPrimary} />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Chi tiết sản phẩm</Text>
+            <View style={{ width: 44 }} />
+          </View>
+          <View style={styles.loadingFullScreen}>
+            <ActivityIndicator size="large" color={COLORS.gold} />
+            <Text style={styles.loadingFullScreenText}>Đang tải sản phẩm...</Text>
+            {affiliateCodeFromLink && (
+              <Text style={styles.loadingAffiliateText}>
+                Mã giới thiệu: {affiliateCodeFromLink}
+              </Text>
+            )}
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
+    );
+  }
+
+  // Return early if no product to prevent crash during render
+  // All hooks have been called above, so this is safe
+  // Check for id OR handle OR title since products from different sources may have different identifiers
+  if (!product || (!product.id && !product.handle && !product.title)) {
+    return (
+      <LinearGradient
+        colors={GRADIENTS.background}
+        locations={GRADIENTS.backgroundLocations}
+        style={styles.container}
+      >
+        <SafeAreaView style={styles.safeArea} edges={['top']}>
+          {/* Header with back button */}
+          <View style={styles.header}>
+            <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+              <ArrowLeft size={24} color={COLORS.textPrimary} />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Chi tiết sản phẩm</Text>
+            <View style={{ width: 44 }} />
+          </View>
+          <View style={styles.errorContainer}>
+            <Package size={48} color={COLORS.textMuted} />
+            <Text style={styles.errorText}>Không tìm thấy sản phẩm</Text>
+            <Text style={styles.errorSubtext}>Sản phẩm có thể đã bị xóa hoặc không tồn tại</Text>
+            <TouchableOpacity
+              style={styles.goBackBtn}
+              onPress={() => navigation.goBack()}
+            >
+              <Text style={styles.goBackText}>Quay lại</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </LinearGradient>
+    );
+  }
+
+  // Handle local fallback products from gemKnowledge.json
+  const isLocalFallback = product?.isLocalFallback === true;
+
+  // CTA buttons position - SYNC with tab bar animation using transform (not bottom)
+  // Native animated module doesn't support 'bottom', use translateY instead
+  // When tab bar translateY is 0 (visible) -> CTA stays at base position
+  // When tab bar translateY is 120 (hidden) -> CTA moves down by TAB_BAR_HEIGHT
+  const ctaTranslateY = translateY.interpolate({
+    inputRange: [0, 120],
+    outputRange: [0, TAB_BAR_HEIGHT],
+    extrapolate: 'clamp',
+  });
+
   // Price handling - support local fallback products with priceDisplay string
   const rawPrice = selectedVariant?.price || product.rawPrice || product.price || 0;
   const price = rawPrice;
@@ -119,14 +303,46 @@ const ProductDetailScreen = ({ navigation, route }) => {
     ? product.priceDisplay
     : null;
 
-  // Collect all images
-  const allImages = [
-    product.image,
-    ...(product.images || []).map(img => img.src || img),
-    ...(product.variants || [])
-      .filter(v => v.image)
-      .map(v => v.image.src || v.image),
-  ].filter(Boolean);
+  // Collect all images - handle different image formats from Shopify
+  const collectImages = () => {
+    const imageSet = new Set(); // Use Set to avoid duplicates
+
+    // 1. Main product image
+    if (product.image) {
+      const mainImg = typeof product.image === 'string' ? product.image : product.image?.src;
+      if (mainImg) imageSet.add(mainImg);
+    }
+
+    // 2. Images array (can be objects with src or strings)
+    if (product.images && Array.isArray(product.images)) {
+      product.images.forEach(img => {
+        const imgSrc = typeof img === 'string' ? img : img?.src;
+        if (imgSrc) imageSet.add(imgSrc);
+      });
+    }
+
+    // 3. Featured image
+    if (product.featuredImage) {
+      const featuredSrc = typeof product.featuredImage === 'string'
+        ? product.featuredImage
+        : product.featuredImage?.src || product.featuredImage?.url;
+      if (featuredSrc) imageSet.add(featuredSrc);
+    }
+
+    // 4. Variant images
+    if (product.variants && Array.isArray(product.variants)) {
+      product.variants.forEach(v => {
+        if (v.image) {
+          const variantImg = typeof v.image === 'string' ? v.image : v.image?.src;
+          if (variantImg) imageSet.add(variantImg);
+        }
+      });
+    }
+
+    return Array.from(imageSet);
+  };
+
+  const allImages = collectImages();
   const images = allImages.length > 0 ? allImages : [null];
 
   // Check affiliate status on mount
@@ -136,62 +352,28 @@ const ProductDetailScreen = ({ navigation, route }) => {
         const profile = await affiliateService.getProfile();
         setIsAffiliate(profile?.is_active || false);
       } catch (err) {
-        console.log('[ProductDetail] Not an affiliate:', err.message);
         setIsAffiliate(false);
       }
     };
     checkAffiliateStatus();
   }, []);
 
-  // Load additional sections
+  // Load additional sections - DEFERRED to not block initial render
   useEffect(() => {
-    console.log('[ProductDetail] 🚀 useEffect triggered - calling loadAdditionalSections');
-    loadAdditionalSections().catch(err => {
-      console.error('[ProductDetail] ❌ loadAdditionalSections FAILED:', err);
-    });
+    // Delay loading sections to allow screen to render first (faster perceived performance)
+    const timer = setTimeout(() => {
+      loadAdditionalSections().catch(() => {});
+    }, 300); // 300ms delay for smooth transition
+
+    return () => clearTimeout(timer);
   }, []);
 
-  // DEBUG: Track state changes for product sections
-  useEffect(() => {
-    console.log('[ProductDetail] 🔍 STATE CHECK - Sections updated:', {
-      loadingSections,
-      bestSellers: bestSellers?.length || 0,
-      recommendations: recommendations?.length || 0,
-      similarProducts: similarProducts?.length || 0,
-      complementary: complementary?.length || 0,
-      trending: trending?.length || 0,
-      moreToExplore: moreToExplore?.length || 0,
-    });
-  }, [loadingSections, bestSellers, recommendations, similarProducts, complementary, trending, moreToExplore]);
-
   const loadAdditionalSections = async () => {
-    console.log('[ProductDetail] 🚀 loadAdditionalSections STARTED');
-
     try {
       setLoadingSections(true);
 
-      console.log('═══════════════════════════════════════');
-      console.log('[ProductDetail] 🔍 LOADING PRODUCT SECTIONS');
-      console.log('[ProductDetail] Current product:', {
-        id: product?.id,
-        title: product?.title,
-        tags: product?.tags,
-      });
-      console.log('[ProductDetail] shopifyService available:', !!shopifyService);
-      console.log('═══════════════════════════════════════');
-
-      // STEP 1: Load ALL products first
-      console.log('[ProductDetail] Step 1: Loading ALL products...');
+      // Load ALL products first
       const products = await shopifyService.getProducts({ limit: 100 });
-
-      console.log('[ProductDetail] ✅ Loaded products:', {
-        total: products?.length || 0,
-        sample: products?.slice(0, 3).map(p => ({
-          id: p.id,
-          title: p.title,
-          tags: p.tags,
-        })),
-      });
 
       // Save products for infinite scroll
       if (products && products.length > 0) {
@@ -200,22 +382,11 @@ const ProductDetailScreen = ({ navigation, route }) => {
 
       // If no products from API, we can't show recommendations
       if (!products || products.length === 0) {
-        console.error('[ProductDetail] ❌ NO PRODUCTS LOADED FROM API!');
         setLoadingSections(false);
         return;
       }
 
-      // STEP 2: Check if products have tags
-      const productsWithTags = products.filter(p => p.tags && (Array.isArray(p.tags) ? p.tags.length > 0 : p.tags.trim() !== ''));
-      console.log('[ProductDetail] Products with tags:', productsWithTags.length);
-
-      if (productsWithTags.length === 0) {
-        console.warn('[ProductDetail] ⚠️ NO PRODUCTS HAVE TAGS! Functions will use random fallback');
-      }
-
-      // STEP 3: Get TAG-BASED recommendations using shopifyService
-      console.log('[ProductDetail] Step 2: Loading sections with products...');
-
+      // Get TAG-BASED recommendations using shopifyService
       const [
         bestSellerItems,
         forYouItems,
@@ -230,32 +401,14 @@ const ProductDetailScreen = ({ navigation, route }) => {
         shopifyService.getSpecialSets(6, products),
       ]);
 
-      console.log('[ProductDetail] ✅ Sections loaded:', {
-        bestsellers: bestSellerItems?.length || 0,
-        forYou: forYouItems?.length || 0,
-        similar: similarItems?.length || 0,
-        hot: hotItems?.length || 0,
-        specialSets: specialSetItems?.length || 0,
-      });
-
-      // STEP 4: Debug each section
-      console.log('\n[ProductDetail] 📦 BESTSELLERS:', bestSellerItems?.map(p => p.title) || []);
-      console.log('[ProductDetail] 🎁 FOR YOU:', forYouItems?.map(p => p.title) || []);
-      console.log('[ProductDetail] 👁️ SIMILAR:', similarItems?.map(p => p.title) || []);
-
       // Filter out current product from all sections
-      // Use handle instead of id since product.id is often undefined from Shopify API
       const currentProductHandle = product.handle;
       const currentProductId = product.id;
-      console.log('[ProductDetail] 🔍 Current product for filtering:', {
-        handle: currentProductHandle,
-        id: currentProductId,
-      });
 
       const filterCurrent = (items) => {
         if (!items || items.length === 0) return [];
         // Filter by handle (always available) or id if both exist
-        const filtered = items.filter(p => {
+        return items.filter(p => {
           // Use handle as primary filter since it's always present
           if (currentProductHandle && p.handle) {
             return p.handle !== currentProductHandle;
@@ -267,53 +420,27 @@ const ProductDetailScreen = ({ navigation, route }) => {
           // If no matching criteria, keep the item
           return true;
         });
-        console.log(`[ProductDetail] filterCurrent: ${items.length} -> ${filtered.length} (removed ${items.length - filtered.length})`);
-        return filtered;
       };
 
-      // STEP 5: Set state with detailed logging
+      // Set state for all recommendation sections
       const filteredBestSellers = filterCurrent(bestSellerItems);
       const filteredRecommendations = filterCurrent(forYouItems);
       const filteredSimilar = filterCurrent(similarItems);
       const filteredComplementary = filterCurrent(specialSetItems);
       const filteredTrending = filterCurrent(hotItems);
 
-      console.log('[ProductDetail] 🔧 SETTING STATE WITH:', {
-        bestSellers: filteredBestSellers.length,
-        recommendations: filteredRecommendations.length,
-        similar: filteredSimilar.length,
-        complementary: filteredComplementary.length,
-        trending: filteredTrending.length,
-      });
-
-      // Set state one by one with explicit logging
-      console.log('[ProductDetail] 📝 setBestSellers called with:', filteredBestSellers.map(p => p.title));
       setBestSellers(filteredBestSellers);
-
-      console.log('[ProductDetail] 📝 setRecommendations called with:', filteredRecommendations.map(p => p.title));
       setRecommendations(filteredRecommendations);
-
-      console.log('[ProductDetail] 📝 setSimilarProducts called with:', filteredSimilar.map(p => p.title));
       setSimilarProducts(filteredSimilar);
-
-      console.log('[ProductDetail] 📝 setComplementary called with:', filteredComplementary.map(p => p.title));
       setComplementary(filteredComplementary); // Special sets for "Hoàn thiện phong cách"
-
-      console.log('[ProductDetail] 📝 setTrending called with:', filteredTrending.map(p => p.title));
       setTrending(filteredTrending); // Hot products for "Đang thịnh hành"
 
       // More to explore - get recommended products based on shared tags
       const recommended = await shopifyService.getRecommendedProducts(product, 10, products);
       const filteredMoreToExplore = filterCurrent(recommended);
-      console.log('[ProductDetail] 📝 setMoreToExplore called with:', filteredMoreToExplore.map(p => p.title));
       setMoreToExplore(filteredMoreToExplore);
 
-      console.log('[ProductDetail] ✅ All setState calls completed');
-      console.log('═══════════════════════════════════════\n');
-
     } catch (error) {
-      console.error('[ProductDetail] ❌ Error loading sections:', error);
-      console.error('[ProductDetail] Error stack:', error.stack);
       // Set empty arrays on error
       setBestSellers([]);
       setRecommendations([]);
@@ -342,7 +469,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
         .slice(0, 10);
       setMoreToExplore(prev => [...prev, ...newItems]);
     } catch (error) {
-      console.error('Error loading more products:', error);
+      // Silently fail for infinite scroll
     } finally {
       setLoadingMore(false);
     }
@@ -400,7 +527,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
 
   const renderImageItem = ({ item }) => (
     item ? (
-      <Image source={{ uri: item }} style={styles.productImage} resizeMode="cover" />
+      <OptimizedImage uri={item} style={styles.productImage} resizeMode="cover" />
     ) : (
       <View style={[styles.productImage, styles.imagePlaceholder]}>
         <Package size={48} color={COLORS.textMuted} />
@@ -437,7 +564,6 @@ const ProductDetailScreen = ({ navigation, route }) => {
   // Pass full product object for matching by both ID and handle
   const reviewsData = reviewService.getProductReviews(product);
   const reviewStats = reviewService.getReviewStats(product);
-  console.log('[ProductDetail] Real reviews for product:', product.id, product.handle, '- Count:', reviewsData.length);
 
   // Handle tap on review image - now supports swipe through all images
   const handleReviewImagePress = (imageUrl, allImages, index) => {
@@ -467,7 +593,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
     ));
   };
 
-  const renderProductCard = (item, index) => {
+  const renderProductCard = (item, index, sectionName = 'default') => {
     // Use handle instead of id since id is often undefined from Shopify API
     if (!item || (!item.handle && !item.id)) {
       return null;
@@ -475,17 +601,17 @@ const ProductDetailScreen = ({ navigation, route }) => {
 
     return (
       <TouchableOpacity
-        key={`product-${index}-${item.handle || item.id}`}
+        key={`${sectionName}-${index}-${item.handle || item.id}`}
         style={styles.miniProductCard}
         onPress={() => navigation.push('ProductDetail', { product: item })}
       >
-        <Image
-          source={{ uri: item.image || item.images?.[0]?.src }}
+        <OptimizedImage
+          uri={item.image || item.images?.[0]?.src}
           style={styles.miniProductImage}
           resizeMode="cover"
         />
         <View style={styles.miniProductInfo}>
-          <Text style={styles.miniProductTitle} numberOfLines={2}>{item.title}</Text>
+          <Text style={styles.miniProductTitle} numberOfLines={2}>{item.title || 'Sản phẩm'}</Text>
           <Text style={styles.miniProductPrice}>
             {formatPrice(item.variants?.[0]?.price || item.price || 0)}
           </Text>
@@ -545,42 +671,79 @@ const ProductDetailScreen = ({ navigation, route }) => {
             )}
           </View>
 
-          {/* Thumbnails */}
-          {images.length > 1 && (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.thumbnailScroll} contentContainerStyle={styles.thumbnailContainer}>
-              {images.map((img, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={[styles.thumbnail, selectedImageIndex === index && styles.thumbnailActive]}
-                  onPress={() => handleThumbnailPress(index)}
-                >
-                  {img ? (
-                    <Image source={{ uri: img }} style={styles.thumbnailImage} resizeMode="cover" />
-                  ) : (
-                    <View style={[styles.thumbnailImage, styles.thumbnailPlaceholder]}>
-                      <Package size={20} color={COLORS.textMuted} />
-                    </View>
-                  )}
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          )}
+          {/* Thumbnails with Refresh Button */}
+          <View style={styles.thumbnailRow}>
+            {images.length > 1 ? (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.thumbnailScroll} contentContainerStyle={styles.thumbnailContainer}>
+                {images.map((img, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={[styles.thumbnail, selectedImageIndex === index && styles.thumbnailActive]}
+                    onPress={() => handleThumbnailPress(index)}
+                  >
+                    {img ? (
+                      <OptimizedImage uri={img} style={styles.thumbnailImage} resizeMode="cover" />
+                    ) : (
+                      <View style={[styles.thumbnailImage, styles.thumbnailPlaceholder]}>
+                        <Package size={20} color={COLORS.textMuted} />
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            ) : <View style={{ flex: 1 }} />}
+
+            {/* Manual Refresh Button - always visible */}
+            <TouchableOpacity
+              style={styles.refreshBtn}
+              onPress={async () => {
+                if (isRefreshing || !product?.handle) return;
+                setIsRefreshing(true);
+                try {
+                  const fullProduct = await shopifyService.getProductByHandle(product.handle);
+                  if (fullProduct) {
+                    setProduct(fullProduct);
+                  }
+                } catch (error) {
+                  // Silently fail
+                } finally {
+                  setIsRefreshing(false);
+                }
+              }}
+              disabled={isRefreshing}
+            >
+              {isRefreshing ? (
+                <ActivityIndicator size="small" color={COLORS.gold} />
+              ) : (
+                <RotateCcw size={18} color={COLORS.gold} />
+              )}
+            </TouchableOpacity>
+          </View>
 
           {/* Product Info Section */}
           <View style={styles.infoSection}>
             <Text style={styles.productTitle}>{product.title}</Text>
 
-            {/* Price */}
+            {/* Price - with loading indicator when refreshing */}
             <View style={styles.priceRow}>
-              <Text style={styles.price}>
-                {priceDisplayString ? priceDisplayString : formatPrice(price)}
-              </Text>
-              {isOnSale && !priceDisplayString && (
+              {isRefreshing ? (
+                <View style={styles.priceLoadingRow}>
+                  <ActivityIndicator size="small" color={COLORS.cyan} />
+                  <Text style={styles.priceLoadingText}>Đang cập nhật giá...</Text>
+                </View>
+              ) : (
                 <>
-                  <Text style={styles.comparePrice}>{formatPrice(comparePrice)}</Text>
-                  <View style={styles.saleBadge}>
-                    <Text style={styles.saleBadgeText}>-{Math.round((1 - price / comparePrice) * 100)}%</Text>
-                  </View>
+                  <Text style={styles.price}>
+                    {priceDisplayString ? priceDisplayString : formatPrice(price)}
+                  </Text>
+                  {isOnSale && !priceDisplayString && (
+                    <>
+                      <Text style={styles.comparePrice}>{formatPrice(comparePrice)}</Text>
+                      <View style={styles.saleBadge}>
+                        <Text style={styles.saleBadgeText}>-{Math.round((1 - price / comparePrice) * 100)}%</Text>
+                      </View>
+                    </>
+                  )}
                 </>
               )}
             </View>
@@ -767,7 +930,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
                 </View>
               ) : bestSellers && bestSellers.length > 0 ? (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.productsScroll}>
-                  {bestSellers.map((item, index) => renderProductCard(item, index))}
+                  {bestSellers.map((item, index) => renderProductCard(item, index, 'bestsellers'))}
                 </ScrollView>
               ) : (
                 <Text style={styles.emptyText}>Không có sản phẩm (state: {JSON.stringify({ loading: loadingSections, count: bestSellers?.length })})</Text>
@@ -817,7 +980,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
                 </View>
               ) : recommendations && recommendations.length > 0 ? (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.productsScroll}>
-                  {recommendations.map((item, index) => renderProductCard(item, index))}
+                  {recommendations.map((item, index) => renderProductCard(item, index, 'recommendations'))}
                 </ScrollView>
               ) : (
                 <Text style={styles.emptyText}>Không có sản phẩm (state: {JSON.stringify({ loading: loadingSections, count: recommendations?.length })})</Text>
@@ -837,7 +1000,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
                 </View>
               ) : similarProducts && similarProducts.length > 0 ? (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.productsScroll}>
-                  {similarProducts.map((item, index) => renderProductCard(item, index))}
+                  {similarProducts.map((item, index) => renderProductCard(item, index, 'similar'))}
                 </ScrollView>
               ) : (
                 <Text style={styles.emptyText}>Không có sản phẩm</Text>
@@ -857,7 +1020,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
                 </View>
               ) : complementary && complementary.length > 0 ? (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.productsScroll}>
-                  {complementary.map((item, index) => renderProductCard(item, index))}
+                  {complementary.map((item, index) => renderProductCard(item, index, 'complementary'))}
                 </ScrollView>
               ) : (
                 <Text style={styles.emptyText}>Không có sản phẩm</Text>
@@ -877,7 +1040,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
                 </View>
               ) : trending && trending.length > 0 ? (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.productsScroll}>
-                  {trending.map((item, index) => renderProductCard(item, index))}
+                  {trending.map((item, index) => renderProductCard(item, index, 'trending'))}
                 </ScrollView>
               ) : (
                 <Text style={styles.emptyText}>Không có sản phẩm</Text>
@@ -900,17 +1063,17 @@ const ProductDetailScreen = ({ navigation, route }) => {
                 <View style={styles.exploreGrid}>
                   {moreToExplore.map((item, idx) => (
                     <TouchableOpacity
-                      key={item.handle || item.id || `explore-${idx}`}
+                      key={`explore-${idx}-${item.handle || item.id}`}
                       style={styles.exploreGridCard}
                       onPress={() => navigation.push('ProductDetail', { product: item })}
                     >
-                      <Image
-                        source={{ uri: item.image || item.images?.[0]?.src }}
+                      <OptimizedImage
+                        uri={item.image || item.images?.[0]?.src}
                         style={styles.exploreGridImage}
                         resizeMode="cover"
                       />
                       <View style={styles.exploreGridInfo}>
-                        <Text style={styles.exploreGridTitle} numberOfLines={2}>{item.title}</Text>
+                        <Text style={styles.exploreGridTitle} numberOfLines={2}>{item.title || 'Sản phẩm'}</Text>
                         <Text style={styles.exploreGridPrice}>
                           {formatPrice(item.variants?.[0]?.price || item.price || 0)}
                         </Text>
@@ -1090,7 +1253,7 @@ const styles = StyleSheet.create({
   cartBadge: { position: 'absolute', top: 4, right: 4, backgroundColor: COLORS.burgundy, borderRadius: 10, minWidth: 18, height: 18, justifyContent: 'center', alignItems: 'center' },
   cartBadgeText: { fontSize: 10, fontWeight: TYPOGRAPHY.fontWeight.bold, color: COLORS.textPrimary },
 
-  scrollContent: { paddingBottom: 180 },
+  scrollContent: { paddingBottom: CONTENT_BOTTOM_PADDING + 140 }, // Increased for CTA buttons + tab bar
 
   // Image Gallery
   imageGalleryContainer: { position: 'relative' },
@@ -1103,8 +1266,10 @@ const styles = StyleSheet.create({
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: 'rgba(255, 255, 255, 0.5)' },
   dotActive: { backgroundColor: COLORS.purple, width: 24 },  // Purple active dot
 
-  thumbnailScroll: { marginTop: SPACING.sm },
+  thumbnailRow: { flexDirection: 'row', alignItems: 'center', paddingRight: SPACING.md },
+  thumbnailScroll: { marginTop: SPACING.sm, flex: 1 },
   thumbnailContainer: { paddingHorizontal: SPACING.md, gap: SPACING.sm, flexDirection: 'row' },
+  refreshBtn: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(255, 189, 89, 0.15)', justifyContent: 'center', alignItems: 'center', marginTop: SPACING.sm, marginLeft: SPACING.sm, borderWidth: 1, borderColor: 'rgba(255, 189, 89, 0.3)' },
   thumbnail: { width: 64, height: 64, borderRadius: 8, overflow: 'hidden', borderWidth: 2, borderColor: 'transparent' },
   thumbnailActive: { borderColor: COLORS.purple },           // Purple active border
   thumbnailImage: { width: '100%', height: '100%' },
@@ -1114,6 +1279,8 @@ const styles = StyleSheet.create({
   infoSection: { padding: SPACING.lg },
   productTitle: { fontSize: TYPOGRAPHY.fontSize.xxl, fontWeight: TYPOGRAPHY.fontWeight.bold, color: COLORS.textPrimary, marginBottom: SPACING.sm },
   priceRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginBottom: SPACING.lg },
+  priceLoadingRow: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
+  priceLoadingText: { fontSize: TYPOGRAPHY.fontSize.md, color: COLORS.textMuted },
   price: { fontSize: TYPOGRAPHY.fontSize.xxl, fontWeight: TYPOGRAPHY.fontWeight.bold, color: COLORS.cyan },  // Cyan for price
   comparePrice: { fontSize: TYPOGRAPHY.fontSize.lg, color: COLORS.textMuted, textDecorationLine: 'line-through' },
   saleBadge: { backgroundColor: COLORS.error, paddingHorizontal: SPACING.sm, paddingVertical: 2, borderRadius: 4 },
@@ -1262,6 +1429,61 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     textAlign: 'center',
     opacity: 0.7,
+  },
+
+  // Error Container - Product not found
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.xl,
+  },
+  errorText: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+    marginTop: SPACING.lg,
+    textAlign: 'center',
+  },
+  errorSubtext: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textMuted,
+    marginTop: SPACING.sm,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  goBackBtn: {
+    marginTop: SPACING.xl,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xxl,
+    backgroundColor: COLORS.purple,
+    borderRadius: 12,
+  },
+  goBackText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+  },
+
+  // Loading Full Screen - Deep Link loading
+  loadingFullScreen: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.xl,
+  },
+  loadingFullScreenText: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+    marginTop: SPACING.lg,
+    textAlign: 'center',
+  },
+  loadingAffiliateText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.gold,
+    marginTop: SPACING.sm,
+    textAlign: 'center',
   },
 
   // Image Viewer Modal - Swipe to view multiple images

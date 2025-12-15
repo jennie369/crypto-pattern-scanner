@@ -106,6 +106,9 @@ export const GRADIENTS = {
   // Special gradients
   gold: ['#FFBD59', '#FFD700'],
   avatar: ['#FFBD59', '#9C0612'],
+
+  // Dark Purple (same as background) - for VisionBoard
+  darkPurple: ['#05040B', '#0F1030', '#1a0b2e'],
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -385,6 +388,157 @@ export const Z_INDEX = {
   tooltip: 1070,
 };
 
+// ═══════════════════════════════════════════════════════════
+// POPUP/ALERT STYLES - Glassmorphism Frosted Glass
+// Reference: matte translucent glass with blur background
+// ═══════════════════════════════════════════════════════════
+export const POPUP = {
+  // Container
+  container: {
+    maxWidth: 280,
+    borderRadius: 16,
+  },
+
+  // Glass card background
+  glassCard: {
+    backgroundColor: 'rgba(15, 25, 45, 0.85)',
+    borderWidth: 1,
+    borderColor: 'rgba(100, 150, 200, 0.25)',
+    borderRadius: 16,
+  },
+
+  // Top border highlight
+  borderGlow: {
+    height: 1,
+    backgroundColor: 'rgba(120, 170, 220, 0.4)',
+  },
+
+  // Content padding
+  content: {
+    padding: 20,
+    paddingTop: 24,
+  },
+
+  // Icon container
+  icon: {
+    size: 48,
+    borderRadius: 24,
+    iconSize: 22,
+    strokeWidth: 2.5,
+    marginBottom: 12,
+    borderWidth: 1.5,
+  },
+
+  // Icon colors by type
+  iconTypes: {
+    success: {
+      color: '#4ADE80',
+      bg: 'rgba(74, 222, 128, 0.15)',
+    },
+    error: {
+      color: '#F87171',
+      bg: 'rgba(248, 113, 113, 0.15)',
+    },
+    warning: {
+      color: '#FBBF24',
+      bg: 'rgba(251, 191, 36, 0.15)',
+    },
+    info: {
+      color: '#60A5FA',
+      bg: 'rgba(96, 165, 250, 0.15)',
+    },
+  },
+
+  // Typography
+  title: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 6,
+  },
+
+  message: {
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.7)',
+    lineHeight: 18,
+    marginBottom: 18,
+  },
+
+  // Buttons
+  button: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 22,
+    minWidth: 120,
+  },
+
+  buttonPrimary: {
+    backgroundColor: 'rgba(245, 245, 245, 0.95)',
+    textColor: '#1a1a2e',
+  },
+
+  buttonSecondary: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    textColor: '#FFFFFF',
+  },
+
+  buttonCancel: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    textColor: 'rgba(255, 255, 255, 0.6)',
+  },
+
+  buttonDestructive: {
+    backgroundColor: 'rgba(248, 113, 113, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(248, 113, 113, 0.3)',
+    textColor: '#F87171',
+  },
+
+  // Blur overlay
+  overlay: {
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    blurIntensity: {
+      ios: 30,
+      android: 80,
+    },
+  },
+};
+
+// ═══════════════════════════════════════════════════════════
+// FONT SIZES - Convenience export (same as TYPOGRAPHY.fontSize)
+// ═══════════════════════════════════════════════════════════
+export const FONT_SIZES = {
+  xxs: 9,
+  xs: 10,
+  sm: 11,
+  md: 12,
+  base: 13,
+  lg: 14,
+  xl: 15,
+  xxl: 16,
+  xxxl: 18,
+  display: 20,
+  hero: 32,
+  giant: 42,
+};
+
+// ═══════════════════════════════════════════════════════════
+// BORDER RADIUS - Convenience export
+// ═══════════════════════════════════════════════════════════
+export const BORDER_RADIUS = {
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 18,
+  xxl: 24,
+  full: 9999,
+};
+
 // Default export for convenience
 export default {
   SPACING,
@@ -400,4 +554,7 @@ export default {
   SHADOWS,
   ANIMATION,
   Z_INDEX,
+  POPUP,
+  FONT_SIZES,
+  BORDER_RADIUS,
 };

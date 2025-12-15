@@ -70,12 +70,15 @@ const ProfileFullScreen = () => {
       const data = await forumService.getUserPosts(user.id, 1, 50);
       setPosts(data);
 
-      // Filter photos (posts with images)
+      // Filter photos (posts with images) - include stats for overlay
       const photoPosts = data.filter(p => p.image_url);
       setPhotos(photoPosts.map(p => ({
         id: p.id,
         image_url: p.image_url,
         created_at: p.created_at,
+        likes_count: p.likes_count || 0,
+        comments_count: p.comments_count || 0,
+        views_count: p.views_count || 0,
       })));
 
       // Videos placeholder
@@ -231,10 +234,12 @@ const ProfileFullScreen = () => {
           <ProfileHeader
             profile={profile}
             isOwnProfile={true}
-            onEditProfile={() => {}}
-            onSettings={() => {}}
-            onChangeCover={() => {}}
-            onChangeAvatar={() => {}}
+            onEditProfile={() => navigation.navigate('ProfileSettings')}
+            onSettings={() => navigation.navigate('ProfileSettings')}
+            onProfileUpdate={(updates) => {
+              // Refresh profile when avatar/cover is updated
+              setProfile(prev => ({ ...prev, ...updates }));
+            }}
           />
 
           {/* Profile Stats */}
@@ -243,8 +248,14 @@ const ProfileFullScreen = () => {
             followersCount={stats.followersCount}
             followingCount={stats.followingCount}
             onPostsPress={() => setActiveTab('posts')}
-            onFollowersPress={() => {}}
-            onFollowingPress={() => {}}
+            onFollowersPress={() => navigation.navigate('FollowersList', {
+              userId: user?.id,
+              username: profile?.username
+            })}
+            onFollowingPress={() => navigation.navigate('FollowingList', {
+              userId: user?.id,
+              username: profile?.username
+            })}
           />
 
           {/* Tabs */}
@@ -274,8 +285,8 @@ const ProfileFullScreen = () => {
           {/* Content */}
           {renderContent()}
 
-          {/* Bottom spacing */}
-          <View style={{ height: 100 }} />
+          {/* Bottom spacing - enough for tab bar + safe area */}
+          <View style={{ height: 150 }} />
         </ScrollView>
       </SafeAreaView>
     </LinearGradient>
@@ -336,6 +347,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     gap: SPACING.sm,
+    marginBottom: SPACING.sm, // Add space before content
   },
   tab: {
     flex: 1,

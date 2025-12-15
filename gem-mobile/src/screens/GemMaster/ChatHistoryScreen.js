@@ -18,11 +18,11 @@ import {
   TextInput,
   TouchableOpacity,
   RefreshControl,
-  Alert,
   ActivityIndicator,
   Modal,
   Pressable,
 } from 'react-native';
+import alertService from '../../services/alertService';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -127,7 +127,7 @@ const ChatHistoryScreen = ({ navigation, route }) => {
       setHasMore(result.hasMore);
     } catch (error) {
       console.error('[ChatHistory] Fetch error:', error);
-      Alert.alert('Lỗi', 'Không thể tải lịch sử chat. Vui lòng thử lại.');
+      alertService.error('Lỗi', 'Không thể tải lịch sử chat. Vui lòng thử lại.');
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
@@ -189,7 +189,7 @@ const ChatHistoryScreen = ({ navigation, route }) => {
       setConversationToDelete(null);
     } catch (error) {
       console.error('[ChatHistory] Delete error:', error);
-      Alert.alert('Lỗi', 'Không thể xóa cuộc trò chuyện. Vui lòng thử lại.');
+      alertService.error('Lỗi', 'Không thể xóa cuộc trò chuyện. Vui lòng thử lại.');
     }
   }, [conversationToDelete, user]);
 
@@ -207,7 +207,7 @@ const ChatHistoryScreen = ({ navigation, route }) => {
       setConversations(prev => prev.filter(c => c.id !== conversationId));
     } catch (error) {
       console.error('[ChatHistory] Archive error:', error);
-      Alert.alert('Lỗi', 'Không thể thực hiện. Vui lòng thử lại.');
+      alertService.error('Lỗi', 'Không thể thực hiện. Vui lòng thử lại.');
     }
   }, [user, activeTab]);
 

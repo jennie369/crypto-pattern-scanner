@@ -11,9 +11,9 @@ import {
   TouchableOpacity,
   StyleSheet,
   RefreshControl,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
+import CustomAlert from '../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -28,11 +28,14 @@ import {
   Wallet,
   BarChart2,
   RefreshCw,
+  History,
 } from 'lucide-react-native';
 import { useAuth } from '../../contexts/AuthContext';
 import paperTradeService from '../../services/paperTradeService';
 import { binanceService } from '../../services/binanceService';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { formatPrice, formatCurrency } from '../../utils/formatters';
+import SponsorBannerSection from '../../components/SponsorBannerSection';
 
 export default function OpenPositionsScreen() {
   const navigation = useNavigation();
@@ -43,6 +46,24 @@ export default function OpenPositionsScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [closingId, setClosingId] = useState(null);
+
+  // Custom Alert state
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    buttons: [{ text: 'OK' }],
+    type: 'default',
+  });
+
+  // Custom alert function to replace Alert.alert()
+  const showAlert = (title, message, buttons = [{ text: 'OK' }], type = 'default') => {
+    setAlertConfig({ visible: true, title, message, buttons, type });
+  };
+
+  const closeAlert = () => {
+    setAlertConfig((prev) => ({ ...prev, visible: false }));
+  };
 
   // Load positions on focus
   useFocusEffect(
@@ -94,11 +115,12 @@ export default function OpenPositionsScreen() {
       // Reload if any positions were closed
       if (result.closed.length > 0) {
         for (const closed of result.closed) {
-          Alert.alert(
-            closed.result === 'WIN' ? 'Take Profit Hit!' : 'Stop Loss Hit!',
+          showAlert(
+            closed.result === 'WIN' ? 'Chạm Chốt lời!' : 'Chạm Cắt lỗ!',
             `${closed.symbol} ${closed.direction}\n` +
-              `P/L: ${closed.realizedPnL >= 0 ? '+' : ''}$${closed.realizedPnL.toFixed(2)}`,
-            [{ text: 'OK' }]
+              `P/L: ${closed.realizedPnL >= 0 ? '+' : ''}$${formatCurrency(closed.realizedPnL)}`,
+            [{ text: 'OK' }],
+            closed.result === 'WIN' ? 'success' : 'error'
           );
         }
       }
@@ -119,14 +141,14 @@ export default function OpenPositionsScreen() {
 
   // Close position manually
   const handleClosePosition = async (position) => {
-    Alert.alert(
-      'Dong Position?',
+    showAlert(
+      'Đóng lệnh?',
       `${position.symbol} ${position.direction}\n` +
-        `P/L: ${position.unrealizedPnL >= 0 ? '+' : ''}$${position.unrealizedPnL.toFixed(2)}`,
+        `P/L: ${position.unrealizedPnL >= 0 ? '+' : ''}$${formatCurrency(position.unrealizedPnL)}`,
       [
-        { text: 'Huy', style: 'cancel' },
+        { text: 'Huỷ', style: 'cancel' },
         {
-          text: 'Dong',
+          text: 'Đóng',
           style: 'destructive',
           onPress: async () => {
             try {
@@ -137,30 +159,25 @@ export default function OpenPositionsScreen() {
                 'MANUAL'
               );
               await loadData();
-              Alert.alert('Da dong!', 'Position da duoc dong thanh cong.');
+              showAlert('Đã đóng!', 'Lệnh đã được đóng thành công.', [{ text: 'OK' }], 'success');
             } catch (error) {
-              Alert.alert('Loi', error.message);
+              showAlert('Lỗi', error.message, [{ text: 'OK' }], 'error');
             } finally {
               setClosingId(null);
             }
           },
         },
-      ]
+      ],
+      'warning'
     );
   };
 
-  // Format price
-  const formatPrice = (price) => {
-    if (!price) return '--';
-    if (price >= 1000) return price.toLocaleString('en-US', { maximumFractionDigits: 2 });
-    if (price >= 1) return price.toFixed(4);
-    return price.toFixed(6);
-  };
+  // formatPrice and formatCurrency are imported from utils/formatters
 
-  // Format P&L
+  // Format P&L with thousand separators
   const formatPnL = (pnl, percent) => {
     const sign = pnl >= 0 ? '+' : '';
-    return `${sign}$${pnl.toFixed(2)} (${sign}${percent.toFixed(2)}%)`;
+    return `${sign}$${formatCurrency(Math.abs(pnl))} (${sign}${percent.toFixed(2)}%)`;
   };
 
   // Render position card
@@ -210,23 +227,23 @@ export default function OpenPositionsScreen() {
         {/* Details Grid */}
         <View style={styles.detailsGrid}>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Entry</Text>
+            <Text style={styles.detailLabel}>Giá vào</Text>
             <Text style={styles.detailValue}>${formatPrice(item.entryPrice)}</Text>
           </View>
           <View style={styles.detailItem}>
-            <Text style={styles.detailLabel}>Hien Tai</Text>
+            <Text style={styles.detailLabel}>Hiện tại</Text>
             <Text style={[styles.detailValue, { color: pnlColor }]}>
               ${formatPrice(item.currentPrice)}
             </Text>
           </View>
           <View style={styles.detailItem}>
-            <Text style={[styles.detailLabel, { color: COLORS.error }]}>Stop Loss</Text>
+            <Text style={[styles.detailLabel, { color: COLORS.error }]}>Cắt lỗ</Text>
             <Text style={[styles.detailValue, { color: COLORS.error }]}>
               ${formatPrice(item.stopLoss)}
             </Text>
           </View>
           <View style={styles.detailItem}>
-            <Text style={[styles.detailLabel, { color: COLORS.success }]}>Take Profit</Text>
+            <Text style={[styles.detailLabel, { color: COLORS.success }]}>Chốt lời</Text>
             <Text style={[styles.detailValue, { color: COLORS.success }]}>
               ${formatPrice(item.takeProfit)}
             </Text>
@@ -237,7 +254,7 @@ export default function OpenPositionsScreen() {
         <View style={styles.positionFooter}>
           <View style={styles.footerItem}>
             <DollarSign size={14} color={COLORS.textMuted} />
-            <Text style={styles.footerText}>${item.positionSize.toFixed(2)}</Text>
+            <Text style={styles.footerText}>${formatCurrency(item.positionSize)}</Text>
           </View>
           <View style={styles.footerItem}>
             <Clock size={14} color={COLORS.textMuted} />
@@ -247,7 +264,7 @@ export default function OpenPositionsScreen() {
           </View>
           <View style={styles.footerItem}>
             <Target size={14} color={COLORS.textMuted} />
-            <Text style={styles.footerText}>{item.patternType || 'Pattern'}</Text>
+            <Text style={styles.footerText}>{item.patternType || 'Mẫu'}</Text>
           </View>
         </View>
       </View>
@@ -260,33 +277,53 @@ export default function OpenPositionsScreen() {
       <View style={styles.balanceCard}>
         <Wallet size={24} color={COLORS.gold} />
         <View>
-          <Text style={styles.balanceLabel}>So Du Paper Trade</Text>
-          <Text style={styles.balanceValue}>${stats?.balance?.toFixed(2) || '10,000.00'}</Text>
+          <Text style={styles.balanceLabel}>Số Dư Paper Trade</Text>
+          <Text style={styles.balanceValue}>${formatCurrency(stats?.balance || 10000)}</Text>
         </View>
       </View>
 
       <View style={styles.statsRow}>
         <View style={styles.statBox}>
-          <Text style={styles.statLabel}>Dang Mo</Text>
+          <Text style={styles.statLabel}>Đang Mở</Text>
           <Text style={[styles.statValue, { color: COLORS.purple }]}>
             {stats?.openTrades || 0}
           </Text>
         </View>
         <View style={styles.statBox}>
-          <Text style={styles.statLabel}>Tong P/L</Text>
-          <Text
-            style={[
-              styles.statValue,
-              { color: (stats?.totalPnL || 0) >= 0 ? COLORS.success : COLORS.error },
-            ]}
-          >
-            {(stats?.totalPnL || 0) >= 0 ? '+' : ''}${(stats?.totalPnL || 0).toFixed(2)}
+          <Text style={styles.statLabel}>Đã Đóng</Text>
+          <Text style={[styles.statValue, { color: COLORS.cyan }]}>
+            {stats?.totalTrades || 0}
           </Text>
         </View>
         <View style={styles.statBox}>
           <Text style={styles.statLabel}>Win Rate</Text>
           <Text style={[styles.statValue, { color: COLORS.gold }]}>
             {(stats?.winRate || 0).toFixed(1)}%
+          </Text>
+        </View>
+      </View>
+      <View style={styles.statsRow}>
+        <View style={styles.statBox}>
+          <Text style={styles.statLabel}>Tổng P/L</Text>
+          <Text
+            style={[
+              styles.statValue,
+              { color: (stats?.totalPnL || 0) >= 0 ? COLORS.success : COLORS.error },
+            ]}
+          >
+            {(stats?.totalPnL || 0) >= 0 ? '+' : ''}${formatCurrency(Math.abs(stats?.totalPnL || 0))}
+          </Text>
+        </View>
+        <View style={styles.statBox}>
+          <Text style={[styles.statLabel, { color: COLORS.success }]}>Thắng</Text>
+          <Text style={[styles.statValue, { color: COLORS.success }]}>
+            {stats?.wins || 0}
+          </Text>
+        </View>
+        <View style={styles.statBox}>
+          <Text style={[styles.statLabel, { color: COLORS.error }]}>Thua</Text>
+          <Text style={[styles.statValue, { color: COLORS.error }]}>
+            {stats?.losses || 0}
           </Text>
         </View>
       </View>
@@ -297,15 +334,15 @@ export default function OpenPositionsScreen() {
   const renderEmpty = () => (
     <View style={styles.emptyState}>
       <BarChart2 size={64} color={COLORS.textMuted} />
-      <Text style={styles.emptyTitle}>Chua co position nao</Text>
+      <Text style={styles.emptyTitle}>Chưa có lệnh nào</Text>
       <Text style={styles.emptySubtitle}>
-        Mo paper trade tu Pattern Scanner de bat dau
+        Mở paper trade từ Pattern Scanner để bắt đầu
       </Text>
       <TouchableOpacity
         style={styles.scanButton}
-        onPress={() => navigation.navigate('Scanner')}
+        onPress={() => navigation.navigate('ScannerMain')}
       >
-        <Text style={styles.scanButtonText}>Scan Patterns</Text>
+        <Text style={styles.scanButtonText}>Quét mẫu</Text>
       </TouchableOpacity>
     </View>
   );
@@ -322,10 +359,18 @@ export default function OpenPositionsScreen() {
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <ArrowLeft size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.title}>Open Positions</Text>
-          <TouchableOpacity style={styles.refreshButton} onPress={updatePrices}>
-            <RefreshCw size={20} color={COLORS.gold} />
-          </TouchableOpacity>
+          <Text style={styles.title}>Lệnh đang mở</Text>
+          <View style={styles.headerRight}>
+            <TouchableOpacity
+              style={styles.historyButton}
+              onPress={() => navigation.navigate('PaperTradeHistory')}
+            >
+              <History size={20} color={COLORS.purple} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.refreshButton} onPress={updatePrices}>
+              <RefreshCw size={20} color={COLORS.gold} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {loading ? (
@@ -339,6 +384,25 @@ export default function OpenPositionsScreen() {
             keyExtractor={(item) => item.id}
             ListHeaderComponent={renderStats}
             ListEmptyComponent={renderEmpty}
+            ListFooterComponent={() => (
+              <View style={styles.footerContainer}>
+                {/* Quick Action to History */}
+                <TouchableOpacity
+                  style={styles.viewHistoryButton}
+                  onPress={() => navigation.navigate('PaperTradeHistory')}
+                >
+                  <History size={18} color={COLORS.gold} />
+                  <Text style={styles.viewHistoryText}>Xem Lịch Sử Paper Trade</Text>
+                </TouchableOpacity>
+
+                {/* Sponsor Banner */}
+                <SponsorBannerSection
+                  screenName="paper_trade"
+                  navigation={navigation}
+                  maxBanners={1}
+                />
+              </View>
+            )}
             contentContainerStyle={[
               styles.listContent,
               positions.length === 0 && styles.emptyListContent,
@@ -354,6 +418,16 @@ export default function OpenPositionsScreen() {
           />
         )}
       </SafeAreaView>
+
+      {/* Custom Alert */}
+      <CustomAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        buttons={alertConfig.buttons}
+        type={alertConfig.type}
+        onClose={closeAlert}
+      />
     </LinearGradient>
   );
 }
@@ -385,6 +459,16 @@ const styles = StyleSheet.create({
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textPrimary,
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  historyButton: {
+    padding: SPACING.xs,
+    backgroundColor: 'rgba(106, 91, 255, 0.15)',
+    borderRadius: 8,
+  },
   refreshButton: {
     padding: SPACING.xs,
   },
@@ -392,7 +476,7 @@ const styles = StyleSheet.create({
   // List
   listContent: {
     padding: SPACING.md,
-    paddingBottom: 100,
+    paddingBottom: 180,
   },
   emptyListContent: {
     flex: 1,
@@ -568,5 +652,27 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.fontSize.md,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textPrimary,
+  },
+
+  // Footer Container
+  footerContainer: {
+    marginTop: SPACING.lg,
+  },
+  viewHistoryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 189, 89, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.3)',
+    borderRadius: 12,
+    paddingVertical: SPACING.md,
+    gap: SPACING.sm,
+    marginBottom: SPACING.md,
+  },
+  viewHistoryText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.gold,
   },
 });

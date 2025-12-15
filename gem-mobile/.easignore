@@ -1,0 +1,12 @@
+﻿node_modules/
+.expo/
+.git/
+*.log
+*.mp4
+*.mov
+*.zip
+*.tar.gz
+backups/
+dist/
+android/
+ios/

@@ -52,8 +52,6 @@ class ShopifyService {
   async callEdgeFunction(functionName, body) {
     const url = `${SUPABASE_URL}/functions/v1/${functionName}`;
 
-    console.log(`[Shopify] Calling Edge Function: ${functionName}`);
-
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -101,7 +99,6 @@ class ShopifyService {
       if (!collection && products.length > 0) {
         this._productsCache = products;
         this._productsCacheTime = Date.now();
-        console.log(`[Shopify] Cache populated with ${products.length} products`);
       }
 
       return products;
@@ -226,8 +223,6 @@ class ShopifyService {
         };
       });
 
-      console.log('[Shopify] Creating cart with converted items:', convertedLineItems);
-
       const result = await this.callEdgeFunction('shopify-cart', {
         action: 'createCart',
         lineItems: convertedLineItems,
@@ -338,6 +333,59 @@ class ShopifyService {
     return this.addToCart(cartId, lineItems);
   }
 
+  /**
+   * Create checkout for a specific product handle with pre-filled email
+   * Used for membership/tier upgrades
+   * @param {string} productHandle - Shopify product handle (e.g., 'gem-chatbot-pro')
+   * @param {string} email - User email to pre-fill in checkout
+   * @returns {Promise<{checkoutUrl: string, cart: object}>}
+   */
+  async createCheckoutForProduct(productHandle, email = '') {
+    try {
+      // Get product by handle
+      const product = await this.getProductByHandle(productHandle);
+      if (!product) {
+        console.warn('[Shopify] Product not found:', productHandle);
+        return null;
+      }
+
+      // Get first variant ID
+      const variantId = product.variants?.[0]?.id;
+      if (!variantId) {
+        console.warn('[Shopify] No variant found for product:', productHandle);
+        return null;
+      }
+
+      // Create cart with the product
+      const cart = await this.createCart([
+        {
+          merchandiseId: variantId,
+          quantity: 1,
+        },
+      ]);
+
+      if (!cart?.checkoutUrl) {
+        console.warn('[Shopify] Failed to create cart');
+        return null;
+      }
+
+      // Append email to checkout URL if provided
+      let checkoutUrl = cart.checkoutUrl;
+      if (email) {
+        const separator = checkoutUrl.includes('?') ? '&' : '?';
+        checkoutUrl = `${checkoutUrl}${separator}checkout[email]=${encodeURIComponent(email)}`;
+      }
+
+      return {
+        checkoutUrl,
+        cart,
+      };
+    } catch (error) {
+      console.error('[Shopify] createCheckoutForProduct error:', error);
+      return null;
+    }
+  }
+
   // =====================================================
   // TAG-BASED PRODUCT FILTERING
   // =====================================================
@@ -357,14 +405,11 @@ class ShopifyService {
 
     // Return cached data if valid
     if (this._productsCache && this._productsCache.length > 0 && (now - this._productsCacheTime) < this._cacheValidityMs) {
-      console.log(`[Shopify] Using cached products (${this._productsCache.length} items)`);
       return this._productsCache;
     }
 
     // Fetch fresh data
-    console.log('[Shopify] Cache miss or expired - fetching fresh products');
     const products = await this.getProducts({ limit: 100 });
-    console.log(`[Shopify] Fetched ${products.length} products from API`);
 
     // Only update cache if we got products
     if (products && products.length > 0) {
@@ -385,27 +430,27 @@ class ShopifyService {
    */
   async getProductsByTags(tags, limit = 10, fallbackToRandom = true, productsOverride = null) {
     try {
-      console.log('[Shopify] 🏷️ getProductsByTags called:', {
-        tags: tags,
-        limit: limit,
-        hasOverride: !!productsOverride,
-        overrideCount: productsOverride?.length || 0,
-      });
-
       const allProducts = productsOverride || await this._getCachedProducts();
 
       // Check if we have products
       if (!allProducts || allProducts.length === 0) {
-        console.warn('[Shopify] ⚠️ No products available for tag filtering');
         return [];
       }
 
-      console.log('[Shopify] All products available:', allProducts.length);
-
-      // Normalize tags to array
+      // Normalize tags to array, filter out null/undefined
       const tagList = Array.isArray(tags) ? tags : [tags];
-      const normalizedTags = tagList.map(t => t.toLowerCase().trim());
-      console.log('[Shopify] Looking for tags:', normalizedTags);
+      const normalizedTags = tagList
+        .filter(t => t != null && typeof t === 'string')
+        .map(t => t.toLowerCase().trim());
+
+      // If no valid tags, return fallback or empty
+      if (normalizedTags.length === 0) {
+        if (fallbackToRandom && allProducts.length > 0) {
+          const shuffled = [...allProducts].sort(() => Math.random() - 0.5);
+          return shuffled.slice(0, limit);
+        }
+        return [];
+      }
 
       // Filter products that have ANY of the specified tags
       const filtered = allProducts.filter(product => {
@@ -424,11 +469,8 @@ class ShopifyService {
         return false;
       });
 
-      console.log(`[Shopify] ✅ Found ${filtered.length} products with tags:`, tagList);
-
       // If no products found and fallback enabled, return random products
       if (filtered.length === 0 && fallbackToRandom) {
-        console.log('[Shopify] 🔀 No tag matches, returning random products as fallback');
         const shuffled = [...allProducts].sort(() => Math.random() - 0.5);
         return shuffled.slice(0, limit);
       }
@@ -449,10 +491,7 @@ class ShopifyService {
    * @param {Array} productsOverride - Optional: use these products instead of fetching
    */
   async getBestsellers(limit = 10, productsOverride = null) {
-    console.log('[Shopify] 🌟 getBestsellers called, limit:', limit);
-    const result = await this.getProductsByTags('Bestseller', limit, true, productsOverride);
-    console.log('[Shopify] 🌟 getBestsellers returning:', result?.length || 0, 'products');
-    return result;
+    return this.getProductsByTags('Bestseller', limit, true, productsOverride);
   }
 
   /**
@@ -461,10 +500,7 @@ class ShopifyService {
    * @param {Array} productsOverride - Optional: use these products instead of fetching
    */
   async getHotProducts(limit = 10, productsOverride = null) {
-    console.log('[Shopify] 🔥 getHotProducts called, limit:', limit);
-    const result = await this.getProductsByTags('Hot Product', limit, true, productsOverride);
-    console.log('[Shopify] 🔥 getHotProducts returning:', result?.length || 0, 'products');
-    return result;
+    return this.getProductsByTags('Hot Product', limit, true, productsOverride);
   }
 
   /**
@@ -473,10 +509,7 @@ class ShopifyService {
    * @param {Array} productsOverride - Optional: use these products instead of fetching
    */
   async getSpecialSets(limit = 10, productsOverride = null) {
-    console.log('[Shopify] 🎁 getSpecialSets called, limit:', limit);
-    const result = await this.getProductsByTags('Special set', limit, true, productsOverride);
-    console.log('[Shopify] 🎁 getSpecialSets returning:', result?.length || 0, 'products');
-    return result;
+    return this.getProductsByTags('Special set', limit, true, productsOverride);
   }
 
   /**
@@ -511,7 +544,6 @@ class ShopifyService {
       const allProducts = productsOverride || await this._getCachedProducts();
 
       if (!allProducts || allProducts.length === 0) {
-        console.log('[Shopify] No products available for recommendations');
         return [];
       }
 
@@ -531,7 +563,6 @@ class ShopifyService {
 
       if (productTags.length === 0) {
         // No tags - return random products
-        console.log('[Shopify] No tags found, returning random products');
         return otherProducts.sort(() => Math.random() - 0.5).slice(0, limit);
       }
 
@@ -551,12 +582,10 @@ class ShopifyService {
         .sort((a, b) => b.score - a.score);
 
       if (matched.length > 0) {
-        console.log(`[Shopify] Found ${matched.length} recommended products`);
         return matched.slice(0, limit).map(item => item.product);
       }
 
       // Fallback: random products
-      console.log('[Shopify] No tag matches, returning random products');
       return otherProducts.sort(() => Math.random() - 0.5).slice(0, limit);
 
     } catch (error) {
@@ -574,20 +603,11 @@ class ShopifyService {
    */
   async getForYouProducts(currentProduct, limit = 10, productsOverride = null) {
     try {
-      console.log('[Shopify] 💝 getForYouProducts called:', {
-        currentProduct: currentProduct?.title,
-        limit,
-        hasOverride: !!productsOverride,
-      });
-
       const allProducts = productsOverride || await this._getCachedProducts();
 
       if (!allProducts || allProducts.length === 0) {
-        console.warn('[Shopify] 💝 "For You" - No products available!');
         return [];
       }
-
-      console.log('[Shopify] 💝 All products count:', allProducts.length);
 
       const currentId = this.fromGlobalId(currentProduct?.id) || currentProduct?.id;
 
@@ -600,9 +620,7 @@ class ShopifyService {
         })
         .sort(() => Math.random() - 0.5);
 
-      const result = otherProducts.slice(0, limit);
-      console.log(`[Shopify] 💝 "For You" returning ${result.length} products:`, result.map(p => p.title));
-      return result;
+      return otherProducts.slice(0, limit);
 
     } catch (error) {
       console.error('[Shopify] ❌ getForYouProducts error:', error);
@@ -619,20 +637,11 @@ class ShopifyService {
    */
   async getSimilarProducts(currentProduct, limit = 10, productsOverride = null) {
     try {
-      console.log('[Shopify] 👁️ getSimilarProducts called:', {
-        currentProduct: currentProduct?.title,
-        limit,
-        hasOverride: !!productsOverride,
-      });
-
       const allProducts = productsOverride || await this._getCachedProducts();
 
       if (!allProducts || allProducts.length === 0) {
-        console.warn('[Shopify] 👁️ Similar - No products available!');
         return [];
       }
-
-      console.log('[Shopify] 👁️ All products count:', allProducts.length);
 
       const currentId = this.fromGlobalId(currentProduct?.id) || currentProduct?.id;
 
@@ -645,9 +654,7 @@ class ShopifyService {
         })
         .sort(() => Math.random() - 0.5);
 
-      const result = otherProducts.slice(0, limit);
-      console.log(`[Shopify] 👁️ Similar returning ${result.length} products:`, result.map(p => p.title));
-      return result;
+      return otherProducts.slice(0, limit);
 
     } catch (error) {
       console.error('[Shopify] ❌ getSimilarProducts error:', error);
@@ -661,7 +668,6 @@ class ShopifyService {
   clearProductsCache() {
     this._productsCache = null;
     this._productsCacheTime = 0;
-    console.log('[Shopify] Products cache cleared');
   }
 }
 

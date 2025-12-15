@@ -23,15 +23,22 @@ import { getHexagramImage } from '../../assets/iching';
 /**
  * I Ching Hexagram Visual - Now with real card images
  */
-const HexagramVisual = ({ hexagramId, name, vietnamese }) => {
+const HexagramVisual = ({ hexagramId, name, vietnamese, imageUri, imageSource }) => {
+  // Try multiple sources for image
   const hexagramImage = hexagramId ? getHexagramImage(hexagramId) : null;
+
+  // Determine which image source to use
+  const finalImageSource = imageSource || hexagramImage;
+  const hasImage = !!finalImageSource || !!imageUri;
+
+  console.log('[HexagramVisual] hexagramId:', hexagramId, 'hasImage:', hasImage);
 
   return (
     <View style={styles.hexagramContainer}>
       <View style={styles.hexagramCard}>
-        {hexagramImage ? (
+        {hasImage ? (
           <Image
-            source={hexagramImage}
+            source={imageUri ? { uri: imageUri } : finalImageSource}
             style={styles.hexagramImage}
             resizeMode="cover"
           />
@@ -67,13 +74,19 @@ const TarotCardsVisual = ({ cards }) => {
         // Get real card image using card.id
         const cardImage = card.id !== undefined ? getCardImage(card.id) : null;
 
+        // Determine which image source to use
+        const finalImageSource = card.imageSource || cardImage;
+        const hasImage = !!finalImageSource || !!card.imageUri;
+
+        console.log('[TarotCardsVisual] card:', card.vietnamese, 'id:', card.id, 'hasImage:', hasImage);
+
         return (
           <View key={index} style={styles.tarotCardWrapper}>
             <Text style={styles.positionLabel}>{positions[index]}</Text>
             <View style={styles.tarotCard}>
-              {cardImage ? (
+              {hasImage ? (
                 <Image
-                  source={cardImage}
+                  source={card.imageUri ? { uri: card.imageUri } : finalImageSource}
                   style={styles.tarotCardImage}
                   resizeMode="cover"
                 />
@@ -188,6 +201,8 @@ const DivinationResultCard = ({ type, data, onShare, onExportPress }) => {
           hexagramId={data.id || data.hexagramId}
           name={data.name}
           vietnamese={data.vietnamese}
+          imageUri={data.imageUri}
+          imageSource={data.imageSource}
         />
       )}
 

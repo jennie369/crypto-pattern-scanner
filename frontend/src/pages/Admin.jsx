@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from '../hooks/useTranslation';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
@@ -35,7 +36,15 @@ import {
   ExternalLink,
   ChevronDown,
   ChevronUp,
-  Award
+  Award,
+  Bell,
+  Image as ImageIcon,
+  Calendar,
+  Send,
+  Settings2,
+  Bot,
+  Link2,
+  GraduationCap
 } from 'lucide-react';
 import './Admin.css';
 
@@ -47,7 +56,8 @@ import './Admin.css';
 function Admin() {
   const { t } = useTranslation();
   const { user, profile, loading, isAdmin } = useAuth();
-  const [activeTab, setActiveTab] = useState('users'); // users, applications, withdrawals, analytics, system
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('users'); // users, applications, withdrawals, analytics, system, notifications, banners, calendar, autologs, platforms, seedcontent
   const [showUserModal, setShowUserModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
 
@@ -638,24 +648,254 @@ function Admin() {
 
   return (
     <div className="admin-page">
+      {/* Header with Admin Badge */}
       <div className="admin-header">
-        <h1><Shield size={24} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '8px' }} />{t('adminDashboard')}</h1>
-        <p className="subtitle">Welcome, Admin {profile?.email}!</p>
+        <div className="admin-header-content">
+          <h1><Shield size={28} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '10px' }} />Admin Dashboard</h1>
+          <p className="subtitle">Quản lý hệ thống GEM Platform</p>
+        </div>
+        <div className="admin-badge-large">ADMIN</div>
       </div>
 
-      {/* Tab Navigation */}
+      {/* Pending Actions Alert - Like Mobile */}
+      {(analytics.pendingApplications > 0 || analytics.pendingWithdrawals > 0) && (
+        <div className="admin-alert-card">
+          <h3 className="admin-alert-title"><AlertCircle size={18} /> Cần xử lý</h3>
+          <div className="admin-alert-items">
+            {analytics.pendingApplications > 0 && (
+              <button className="admin-alert-item" onClick={() => setActiveTab('applications')}>
+                <FileText size={18} color="#FF9F43" />
+                <span>{analytics.pendingApplications} đơn đăng ký chờ duyệt</span>
+                <ChevronDown size={16} style={{ transform: 'rotate(-90deg)' }} />
+              </button>
+            )}
+            {analytics.pendingWithdrawals > 0 && (
+              <button className="admin-alert-item" onClick={() => setActiveTab('withdrawals')}>
+                <Wallet size={18} color="#00FF88" />
+                <span>{analytics.pendingWithdrawals} yêu cầu rút tiền chờ</span>
+                <ChevronDown size={16} style={{ transform: 'rotate(-90deg)' }} />
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Stats Overview - Like Mobile */}
+      <h2 className="admin-section-title">Tổng Quan</h2>
+      <div className="admin-stats-grid">
+        <div className="admin-stat-card">
+          <Users size={32} color="#4D9DE0" />
+          <span className="admin-stat-value">{analytics.totalUsers}</span>
+          <span className="admin-stat-label">Tổng Users</span>
+        </div>
+        <div className="admin-stat-card">
+          <User size={32} color="#FF9F43" />
+          <span className="admin-stat-value">{analytics.totalAffiliates}</span>
+          <span className="admin-stat-label">Affiliates (3%)</span>
+        </div>
+        <div className="admin-stat-card">
+          <Award size={32} color="#00FF88" />
+          <span className="admin-stat-value">{analytics.totalCtvs}</span>
+          <span className="admin-stat-label">CTVs (10-30%)</span>
+        </div>
+        <div className="admin-stat-card">
+          <Crown size={32} color="#8B5CF6" />
+          <span className="admin-stat-value">{analytics.adminUsers}</span>
+          <span className="admin-stat-label">Admin Users</span>
+        </div>
+      </div>
+
+      {/* Financial Stats - Like Mobile */}
+      <h2 className="admin-section-title">Tài Chính</h2>
+      <div className="admin-financial-cards">
+        <div className="admin-financial-card revenue">
+          <TrendingUp size={36} color="#00F0FF" />
+          <div className="admin-financial-info">
+            <span className="admin-financial-label">Doanh thu tháng này</span>
+            <span className="admin-financial-value">{formatCurrency(0)}</span>
+          </div>
+        </div>
+        <div className="admin-financial-card commission">
+          <CircleDollarSign size={36} color="#FFBD59" />
+          <div className="admin-financial-info">
+            <span className="admin-financial-label">Tổng hoa hồng đã trả</span>
+            <span className="admin-financial-value">{formatCurrency(analytics.totalCommissions)}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions - Quản Lý (Like Mobile) */}
+      <h2 className="admin-section-title">Quản Lý</h2>
+      <div className="admin-quick-actions">
+        <button className="admin-action-card" onClick={() => setActiveTab('applications')}>
+          <div className="admin-action-icon" style={{ background: 'rgba(255, 159, 67, 0.2)' }}>
+            <FileText size={24} color="#FF9F43" />
+          </div>
+          <div className="admin-action-content">
+            <span className="admin-action-title">Duyệt Đơn Đăng Ký</span>
+            <span className="admin-action-subtitle">{analytics.pendingApplications} đơn chờ xử lý</span>
+          </div>
+          {analytics.pendingApplications > 0 && (
+            <span className="admin-action-badge">{analytics.pendingApplications}</span>
+          )}
+          <ChevronDown size={20} style={{ transform: 'rotate(-90deg)', color: 'rgba(255,255,255,0.4)' }} />
+        </button>
+
+        <button className="admin-action-card" onClick={() => setActiveTab('withdrawals')}>
+          <div className="admin-action-icon" style={{ background: 'rgba(0, 255, 136, 0.2)' }}>
+            <Wallet size={24} color="#00FF88" />
+          </div>
+          <div className="admin-action-content">
+            <span className="admin-action-title">Xử Lý Rút Tiền</span>
+            <span className="admin-action-subtitle">{analytics.pendingWithdrawals} yêu cầu chờ</span>
+          </div>
+          {analytics.pendingWithdrawals > 0 && (
+            <span className="admin-action-badge">{analytics.pendingWithdrawals}</span>
+          )}
+          <ChevronDown size={20} style={{ transform: 'rotate(-90deg)', color: 'rgba(255,255,255,0.4)' }} />
+        </button>
+
+        <button className="admin-action-card" onClick={() => setActiveTab('users')}>
+          <div className="admin-action-icon" style={{ background: 'rgba(77, 157, 224, 0.2)' }}>
+            <Users size={24} color="#4D9DE0" />
+          </div>
+          <div className="admin-action-content">
+            <span className="admin-action-title">Quản Lý Users</span>
+            <span className="admin-action-subtitle">Xem & chỉnh sửa thông tin users</span>
+          </div>
+          <ChevronDown size={20} style={{ transform: 'rotate(-90deg)', color: 'rgba(255,255,255,0.4)' }} />
+        </button>
+
+        <button className="admin-action-card" onClick={() => setActiveTab('analytics')}>
+          <div className="admin-action-icon" style={{ background: 'rgba(139, 92, 246, 0.2)' }}>
+            <BarChart3 size={24} color="#8B5CF6" />
+          </div>
+          <div className="admin-action-content">
+            <span className="admin-action-title">Báo Cáo & Thống Kê</span>
+            <span className="admin-action-subtitle">Chi tiết doanh thu & hiệu suất</span>
+          </div>
+          <ChevronDown size={20} style={{ transform: 'rotate(-90deg)', color: 'rgba(255,255,255,0.4)' }} />
+        </button>
+
+        <button className="admin-action-card" onClick={() => setActiveTab('notifications')}>
+          <div className="admin-action-icon" style={{ background: 'rgba(255, 189, 89, 0.2)' }}>
+            <Bell size={24} color="#FFBD59" />
+          </div>
+          <div className="admin-action-content">
+            <span className="admin-action-title">Gửi Thông Báo</span>
+            <span className="admin-action-subtitle">Thông báo hệ thống đến users</span>
+          </div>
+          <ChevronDown size={20} style={{ transform: 'rotate(-90deg)', color: 'rgba(255,255,255,0.4)' }} />
+        </button>
+
+        <button className="admin-action-card" onClick={() => setActiveTab('banners')}>
+          <div className="admin-action-icon" style={{ background: 'rgba(255, 107, 107, 0.2)' }}>
+            <ImageIcon size={24} color="#FF6B6B" />
+          </div>
+          <div className="admin-action-content">
+            <span className="admin-action-title">Quản Lý Banner</span>
+            <span className="admin-action-subtitle">Banner quảng cáo Portfolio</span>
+          </div>
+          <ChevronDown size={20} style={{ transform: 'rotate(-90deg)', color: 'rgba(255,255,255,0.4)' }} />
+        </button>
+      </div>
+
+      {/* Nội Dung & Auto-Post Section (Like Mobile) */}
+      <h2 className="admin-section-title">Nội Dung & Auto-Post</h2>
+      <div className="admin-quick-actions">
+        <button className="admin-action-card" onClick={() => setActiveTab('calendar')}>
+          <div className="admin-action-icon" style={{ background: 'rgba(0, 200, 255, 0.2)' }}>
+            <Calendar size={24} color="#00C8FF" />
+          </div>
+          <div className="admin-action-content">
+            <span className="admin-action-title">Lịch Nội Dung</span>
+            <span className="admin-action-subtitle">Quản lý & lên lịch bài đăng</span>
+          </div>
+          <ChevronDown size={20} style={{ transform: 'rotate(-90deg)', color: 'rgba(255,255,255,0.4)' }} />
+        </button>
+
+        <button className="admin-action-card" onClick={() => setActiveTab('autologs')}>
+          <div className="admin-action-icon" style={{ background: 'rgba(76, 175, 80, 0.2)' }}>
+            <Send size={24} color="#4CAF50" />
+          </div>
+          <div className="admin-action-content">
+            <span className="admin-action-title">Nhật Ký Auto-Post</span>
+            <span className="admin-action-subtitle">Theo dõi đăng bài tự động</span>
+          </div>
+          <ChevronDown size={20} style={{ transform: 'rotate(-90deg)', color: 'rgba(255,255,255,0.4)' }} />
+        </button>
+
+        <button className="admin-action-card" onClick={() => setActiveTab('platforms')}>
+          <div className="admin-action-icon" style={{ background: 'rgba(156, 39, 176, 0.2)' }}>
+            <Settings2 size={24} color="#9C27B0" />
+          </div>
+          <div className="admin-action-content">
+            <span className="admin-action-title">Kết Nối Nền Tảng</span>
+            <span className="admin-action-subtitle">Facebook, TikTok, YouTube...</span>
+          </div>
+          <ChevronDown size={20} style={{ transform: 'rotate(-90deg)', color: 'rgba(255,255,255,0.4)' }} />
+        </button>
+      </div>
+
+      {/* Seed Content & AI Bot Section (Like Mobile) */}
+      <h2 className="admin-section-title">Seed Content & AI Bot</h2>
+      <div className="admin-quick-actions">
+        <button className="admin-action-card" onClick={() => setActiveTab('seedcontent')}>
+          <div className="admin-action-icon" style={{ background: 'rgba(139, 92, 246, 0.2)' }}>
+            <Bot size={24} color="#8B5CF6" />
+          </div>
+          <div className="admin-action-content">
+            <span className="admin-action-title">Quản Lý Seed Content</span>
+            <span className="admin-action-subtitle">Users, posts, AI bot 24/7</span>
+          </div>
+          <ChevronDown size={20} style={{ transform: 'rotate(-90deg)', color: 'rgba(255,255,255,0.4)' }} />
+        </button>
+      </div>
+
+      {/* Course Admin Section - Navigate to dedicated page */}
+      <h2 className="admin-section-title">Quản Lý Khóa Học</h2>
+      <div className="admin-quick-actions">
+        <button className="admin-action-card" onClick={() => navigate('/courses/admin')}>
+          <div className="admin-action-icon" style={{ background: 'rgba(0, 217, 255, 0.2)' }}>
+            <GraduationCap size={24} color="#00D9FF" />
+          </div>
+          <div className="admin-action-content">
+            <span className="admin-action-title">Quản Lý Khóa Học</span>
+            <span className="admin-action-subtitle">Tạo, sửa, xóa courses & lessons</span>
+          </div>
+          <ChevronDown size={20} style={{ transform: 'rotate(-90deg)', color: 'rgba(255,255,255,0.4)' }} />
+        </button>
+      </div>
+
+      {/* System Settings Section */}
+      <h2 className="admin-section-title">Hệ Thống</h2>
+      <div className="admin-quick-actions">
+        <button className="admin-action-card" onClick={() => setActiveTab('system')}>
+          <div className="admin-action-icon" style={{ background: 'rgba(255, 189, 89, 0.2)' }}>
+            <Settings size={24} color="#FFBD59" />
+          </div>
+          <div className="admin-action-content">
+            <span className="admin-action-title">System Settings</span>
+            <span className="admin-action-subtitle">Cấu hình hệ thống</span>
+          </div>
+          <ChevronDown size={20} style={{ transform: 'rotate(-90deg)', color: 'rgba(255,255,255,0.4)' }} />
+        </button>
+      </div>
+
+      {/* Tab Navigation - More Compact */}
+      <h2 className="admin-section-title" style={{ marginTop: '40px' }}>Chi Tiết Quản Lý</h2>
       <div className="admin-tabs">
         <button
           className={`tab-btn ${activeTab === 'users' ? 'active' : ''}`}
           onClick={() => setActiveTab('users')}
         >
-          <Users size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />Users ({users.length})
+          <Users size={16} /> Users ({users.length})
         </button>
         <button
           className={`tab-btn ${activeTab === 'applications' ? 'active' : ''}`}
           onClick={() => setActiveTab('applications')}
         >
-          <FileText size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
+          <FileText size={16} />
           Đơn Đăng Ký
           {analytics.pendingApplications > 0 && (
             <span className="tab-badge">{analytics.pendingApplications}</span>
@@ -665,8 +905,8 @@ function Admin() {
           className={`tab-btn ${activeTab === 'withdrawals' ? 'active' : ''}`}
           onClick={() => setActiveTab('withdrawals')}
         >
-          <Wallet size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />
-          Yêu Cầu Rút Tiền
+          <Wallet size={16} />
+          Rút Tiền
           {analytics.pendingWithdrawals > 0 && (
             <span className="tab-badge">{analytics.pendingWithdrawals}</span>
           )}
@@ -675,13 +915,13 @@ function Admin() {
           className={`tab-btn ${activeTab === 'analytics' ? 'active' : ''}`}
           onClick={() => setActiveTab('analytics')}
         >
-          <BarChart3 size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />Analytics
+          <BarChart3 size={16} /> Analytics
         </button>
         <button
           className={`tab-btn ${activeTab === 'system' ? 'active' : ''}`}
           onClick={() => setActiveTab('system')}
         >
-          <Settings size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />System
+          <Settings size={16} /> System
         </button>
       </div>
 
@@ -1252,6 +1492,36 @@ function Admin() {
         </div>
       )}
 
+      {/* Notifications Tab */}
+      {activeTab === 'notifications' && (
+        <NotificationsTabContent />
+      )}
+
+      {/* Banners Tab */}
+      {activeTab === 'banners' && (
+        <BannersTabContent />
+      )}
+
+      {/* Content Calendar Tab */}
+      {activeTab === 'calendar' && (
+        <ContentCalendarTabContent />
+      )}
+
+      {/* Auto-Post Logs Tab */}
+      {activeTab === 'autologs' && (
+        <AutoPostLogsTabContent />
+      )}
+
+      {/* Platform Settings Tab */}
+      {activeTab === 'platforms' && (
+        <PlatformSettingsTabContent />
+      )}
+
+      {/* Seed Content Tab */}
+      {activeTab === 'seedcontent' && (
+        <SeedContentTabContent />
+      )}
+
       {/* User Modal */}
       {showUserModal && (
         <UserModal
@@ -1483,6 +1753,689 @@ function UserModal({ user, onClose, onSave }) {
           </div>
         </form>
       </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NOTIFICATIONS TAB CONTENT - Send push notifications to users
+// ═══════════════════════════════════════════════════════════════
+function NotificationsTabContent() {
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
+  const [targetGroup, setTargetGroup] = useState('all');
+  const [sending, setSending] = useState(false);
+  const [history, setHistory] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+
+  useEffect(() => {
+    loadNotificationHistory();
+  }, []);
+
+  const loadNotificationHistory = async () => {
+    try {
+      setLoadingHistory(true);
+      const { data, error } = await supabase
+        .from('admin_notifications')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (!error && data) {
+        setHistory(data);
+      }
+    } catch (err) {
+      console.log('No notification history table yet');
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
+  const handleSendNotification = async () => {
+    if (!title.trim() || !body.trim()) {
+      alert('Vui lòng nhập tiêu đề và nội dung thông báo');
+      return;
+    }
+
+    setSending(true);
+    try {
+      // Call edge function to send broadcast notification
+      const { data, error } = await supabase.functions.invoke('broadcast-notification', {
+        body: {
+          title: title.trim(),
+          body: body.trim(),
+          target_group: targetGroup,
+        }
+      });
+
+      if (error) throw error;
+
+      alert(`Đã gửi thông báo đến ${data?.sent_count || 0} users!`);
+      setTitle('');
+      setBody('');
+      loadNotificationHistory();
+    } catch (err) {
+      console.error('Error sending notification:', err);
+      alert('Lỗi: ' + err.message);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="tab-content">
+      <div className="content-header">
+        <h2>Gửi Thông Báo Hệ Thống</h2>
+      </div>
+
+      <div className="admin-form-card">
+        <div className="admin-form-group">
+          <label>Tiêu đề thông báo</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Nhập tiêu đề..."
+            className="admin-input"
+          />
+        </div>
+
+        <div className="admin-form-group">
+          <label>Nội dung thông báo</label>
+          <textarea
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            placeholder="Nhập nội dung thông báo..."
+            className="admin-textarea"
+            rows={4}
+          />
+        </div>
+
+        <div className="admin-form-group">
+          <label>Đối tượng nhận</label>
+          <select
+            value={targetGroup}
+            onChange={(e) => setTargetGroup(e.target.value)}
+            className="admin-select"
+          >
+            <option value="all">Tất cả users</option>
+            <option value="premium">Premium users</option>
+            <option value="free">Free users</option>
+            <option value="partners">Affiliates & CTVs</option>
+          </select>
+        </div>
+
+        <button
+          className="admin-btn-primary"
+          onClick={handleSendNotification}
+          disabled={sending}
+        >
+          {sending ? (
+            <><RefreshCw size={16} className="spin" /> Đang gửi...</>
+          ) : (
+            <><Bell size={16} /> Gửi Thông Báo</>
+          )}
+        </button>
+      </div>
+
+      {/* Notification History */}
+      <h3 style={{ color: '#FFBD59', marginTop: '32px', marginBottom: '16px' }}>
+        Lịch Sử Thông Báo
+      </h3>
+      {loadingHistory ? (
+        <div className="admin-loading-state">
+          <div className="spinner-large"></div>
+          <p>Đang tải...</p>
+        </div>
+      ) : history.length === 0 ? (
+        <div className="admin-empty-state">
+          <Bell size={48} />
+          <h3>Chưa có thông báo nào</h3>
+          <p>Gửi thông báo đầu tiên cho users</p>
+        </div>
+      ) : (
+        <div className="admin-history-list">
+          {history.map((item) => (
+            <div key={item.id} className="admin-history-item">
+              <div className="admin-history-content">
+                <strong>{item.title}</strong>
+                <p>{item.body}</p>
+                <small>
+                  Gửi đến: {item.target_group} | {new Date(item.created_at).toLocaleString('vi-VN')}
+                </small>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BANNERS TAB CONTENT - Manage sponsor banners
+// ═══════════════════════════════════════════════════════════════
+function BannersTabContent() {
+  const [banners, setBanners] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [editingBanner, setEditingBanner] = useState(null);
+
+  useEffect(() => {
+    loadBanners();
+  }, []);
+
+  const loadBanners = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('sponsor_banners')
+        .select('*')
+        .order('display_order', { ascending: true });
+
+      if (!error) {
+        setBanners(data || []);
+      }
+    } catch (err) {
+      console.error('Error loading banners:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggleActive = async (banner) => {
+    try {
+      const { error } = await supabase
+        .from('sponsor_banners')
+        .update({ is_active: !banner.is_active })
+        .eq('id', banner.id);
+
+      if (error) throw error;
+      loadBanners();
+    } catch (err) {
+      alert('Lỗi: ' + err.message);
+    }
+  };
+
+  const handleDeleteBanner = async (id) => {
+    if (!confirm('Bạn có chắc muốn xóa banner này?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('sponsor_banners')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      loadBanners();
+    } catch (err) {
+      alert('Lỗi: ' + err.message);
+    }
+  };
+
+  return (
+    <div className="tab-content">
+      <div className="content-header">
+        <h2>Quản Lý Banner Quảng Cáo</h2>
+        <button className="add-user-btn" onClick={() => setEditingBanner({})}>
+          <ImageIcon size={16} /> Thêm Banner
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="admin-loading-state">
+          <div className="spinner-large"></div>
+          <p>Đang tải banners...</p>
+        </div>
+      ) : banners.length === 0 ? (
+        <div className="admin-empty-state">
+          <ImageIcon size={48} />
+          <h3>Chưa có banner nào</h3>
+          <p>Thêm banner quảng cáo cho Portfolio</p>
+        </div>
+      ) : (
+        <div className="admin-banners-grid">
+          {banners.map((banner) => (
+            <div key={banner.id} className={`admin-banner-card ${banner.is_active ? 'active' : 'inactive'}`}>
+              {banner.image_url && (
+                <img src={banner.image_url} alt={banner.title} className="admin-banner-image" />
+              )}
+              <div className="admin-banner-info">
+                <h4>{banner.title || 'Untitled'}</h4>
+                <p>{banner.description || 'No description'}</p>
+                <div className="admin-banner-meta">
+                  <span className={`status-badge ${banner.is_active ? 'active' : 'inactive'}`}>
+                    {banner.is_active ? 'Active' : 'Inactive'}
+                  </span>
+                  <span>Order: {banner.display_order}</span>
+                </div>
+              </div>
+              <div className="admin-banner-actions">
+                <button onClick={() => handleToggleActive(banner)} className="action-btn edit">
+                  {banner.is_active ? 'Tắt' : 'Bật'}
+                </button>
+                <button onClick={() => handleDeleteBanner(banner.id)} className="action-btn delete">
+                  Xóa
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CONTENT CALENDAR TAB - Schedule posts
+// ═══════════════════════════════════════════════════════════════
+function ContentCalendarTabContent() {
+  const [scheduledPosts, setScheduledPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadScheduledPosts();
+  }, []);
+
+  const loadScheduledPosts = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('content_calendar')
+        .select('*')
+        .order('scheduled_at', { ascending: true });
+
+      if (!error) {
+        setScheduledPosts(data || []);
+      }
+    } catch (err) {
+      console.error('Error loading scheduled posts:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeletePost = async (id) => {
+    if (!confirm('Xóa bài đăng này?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('content_calendar')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      loadScheduledPosts();
+    } catch (err) {
+      alert('Lỗi: ' + err.message);
+    }
+  };
+
+  return (
+    <div className="tab-content">
+      <div className="content-header">
+        <h2>Lịch Nội Dung</h2>
+        <button className="add-user-btn">
+          <Calendar size={16} /> Tạo Bài Đăng Mới
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="admin-loading-state">
+          <div className="spinner-large"></div>
+          <p>Đang tải lịch...</p>
+        </div>
+      ) : scheduledPosts.length === 0 ? (
+        <div className="admin-empty-state">
+          <Calendar size={48} />
+          <h3>Chưa có bài đăng nào được lên lịch</h3>
+          <p>Tạo bài đăng và lên lịch đăng tự động</p>
+        </div>
+      ) : (
+        <div className="admin-calendar-list">
+          {scheduledPosts.map((post) => (
+            <div key={post.id} className={`admin-calendar-item ${post.status}`}>
+              <div className="admin-calendar-time">
+                <span className="date">{new Date(post.scheduled_at).toLocaleDateString('vi-VN')}</span>
+                <span className="time">{new Date(post.scheduled_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+              <div className="admin-calendar-content">
+                <h4>{post.title || 'Untitled'}</h4>
+                <p>{post.content?.substring(0, 100)}...</p>
+                <div className="admin-calendar-meta">
+                  <span className={`status-badge ${post.status}`}>{post.status}</span>
+                  <span>Platform: {post.platform || 'All'}</span>
+                </div>
+              </div>
+              <div className="admin-calendar-actions">
+                <button className="action-btn edit">Sửa</button>
+                <button className="action-btn delete" onClick={() => handleDeletePost(post.id)}>Xóa</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AUTO-POST LOGS TAB - View auto-posting history
+// ═══════════════════════════════════════════════════════════════
+function AutoPostLogsTabContent() {
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadLogs();
+  }, []);
+
+  const loadLogs = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('auto_post_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (!error) {
+        setLogs(data || []);
+      }
+    } catch (err) {
+      console.error('Error loading logs:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="tab-content">
+      <div className="content-header">
+        <h2>Nhật Ký Auto-Post</h2>
+        <button className="add-user-btn" onClick={loadLogs}>
+          <RefreshCw size={16} /> Làm Mới
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="admin-loading-state">
+          <div className="spinner-large"></div>
+          <p>Đang tải logs...</p>
+        </div>
+      ) : logs.length === 0 ? (
+        <div className="admin-empty-state">
+          <Send size={48} />
+          <h3>Chưa có log nào</h3>
+          <p>Lịch sử đăng bài tự động sẽ hiển thị ở đây</p>
+        </div>
+      ) : (
+        <div className="admin-logs-list">
+          {logs.map((log) => (
+            <div key={log.id} className={`admin-log-item ${log.status}`}>
+              <div className="admin-log-icon">
+                {log.status === 'success' ? (
+                  <CheckCircle size={20} color="#0ECB81" />
+                ) : log.status === 'failed' ? (
+                  <XCircle size={20} color="#F6465D" />
+                ) : (
+                  <Clock size={20} color="#F0B90B" />
+                )}
+              </div>
+              <div className="admin-log-content">
+                <strong>{log.platform || 'Unknown'}</strong>
+                <p>{log.message || log.error_message || 'No message'}</p>
+                <small>{new Date(log.created_at).toLocaleString('vi-VN')}</small>
+              </div>
+              <span className={`status-badge ${log.status}`}>{log.status}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PLATFORM SETTINGS TAB - Connect social platforms
+// ═══════════════════════════════════════════════════════════════
+function PlatformSettingsTabContent() {
+  const [platforms, setPlatforms] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadPlatforms();
+  }, []);
+
+  const loadPlatforms = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('platform_connections')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error) {
+        setPlatforms(data || []);
+      }
+    } catch (err) {
+      console.error('Error loading platforms:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDisconnect = async (id) => {
+    if (!confirm('Ngắt kết nối nền tảng này?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('platform_connections')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      loadPlatforms();
+    } catch (err) {
+      alert('Lỗi: ' + err.message);
+    }
+  };
+
+  const platformConfigs = [
+    { name: 'Facebook', icon: '📘', color: '#1877F2' },
+    { name: 'TikTok', icon: '🎵', color: '#000000' },
+    { name: 'YouTube', icon: '📺', color: '#FF0000' },
+    { name: 'Instagram', icon: '📷', color: '#E4405F' },
+    { name: 'Twitter/X', icon: '🐦', color: '#1DA1F2' },
+  ];
+
+  return (
+    <div className="tab-content">
+      <div className="content-header">
+        <h2>Kết Nối Nền Tảng</h2>
+      </div>
+
+      {loading ? (
+        <div className="admin-loading-state">
+          <div className="spinner-large"></div>
+          <p>Đang tải...</p>
+        </div>
+      ) : (
+        <div className="admin-platforms-grid">
+          {platformConfigs.map((platform) => {
+            const connected = platforms.find(p => p.platform_name?.toLowerCase() === platform.name.toLowerCase());
+            return (
+              <div key={platform.name} className={`admin-platform-card ${connected ? 'connected' : 'disconnected'}`}>
+                <div className="admin-platform-icon" style={{ background: platform.color + '20' }}>
+                  <span style={{ fontSize: '32px' }}>{platform.icon}</span>
+                </div>
+                <div className="admin-platform-info">
+                  <h4>{platform.name}</h4>
+                  {connected ? (
+                    <>
+                      <p className="connected-text">Đã kết nối</p>
+                      <small>Kết nối: {new Date(connected.created_at).toLocaleDateString('vi-VN')}</small>
+                    </>
+                  ) : (
+                    <p className="disconnected-text">Chưa kết nối</p>
+                  )}
+                </div>
+                <div className="admin-platform-actions">
+                  {connected ? (
+                    <button className="action-btn delete" onClick={() => handleDisconnect(connected.id)}>
+                      Ngắt kết nối
+                    </button>
+                  ) : (
+                    <button className="action-btn edit">
+                      <Link2 size={14} /> Kết nối
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SEED CONTENT TAB - Manage AI bot & seed users/posts
+// ═══════════════════════════════════════════════════════════════
+function SeedContentTabContent() {
+  const [seedUsers, setSeedUsers] = useState([]);
+  const [seedPosts, setSeedPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeSection, setActiveSection] = useState('users');
+
+  useEffect(() => {
+    loadSeedData();
+  }, []);
+
+  const loadSeedData = async () => {
+    try {
+      setLoading(true);
+
+      // Load seed users
+      const { data: users, error: usersError } = await supabase
+        .from('seed_users')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!usersError) setSeedUsers(users || []);
+
+      // Load seed posts
+      const { data: posts, error: postsError } = await supabase
+        .from('seed_posts')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (!postsError) setSeedPosts(posts || []);
+    } catch (err) {
+      console.error('Error loading seed data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteSeedUser = async (id) => {
+    if (!confirm('Xóa seed user này?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('seed_users')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      loadSeedData();
+    } catch (err) {
+      alert('Lỗi: ' + err.message);
+    }
+  };
+
+  return (
+    <div className="tab-content">
+      <div className="content-header">
+        <h2>Quản Lý Seed Content</h2>
+        <div className="filter-buttons">
+          <button
+            className={`filter-btn ${activeSection === 'users' ? 'active' : ''}`}
+            onClick={() => setActiveSection('users')}
+          >
+            Seed Users ({seedUsers.length})
+          </button>
+          <button
+            className={`filter-btn ${activeSection === 'posts' ? 'active' : ''}`}
+            onClick={() => setActiveSection('posts')}
+          >
+            Seed Posts ({seedPosts.length})
+          </button>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="admin-loading-state">
+          <div className="spinner-large"></div>
+          <p>Đang tải...</p>
+        </div>
+      ) : activeSection === 'users' ? (
+        seedUsers.length === 0 ? (
+          <div className="admin-empty-state">
+            <Bot size={48} />
+            <h3>Chưa có seed users</h3>
+            <p>Tạo seed users cho AI bot</p>
+          </div>
+        ) : (
+          <div className="admin-seed-users-list">
+            {seedUsers.map((user) => (
+              <div key={user.id} className="admin-seed-user-card">
+                <div className="user-avatar">
+                  {user.avatar_url ? (
+                    <img src={user.avatar_url} alt={user.display_name} />
+                  ) : (
+                    user.display_name?.charAt(0) || '?'
+                  )}
+                </div>
+                <div className="user-details">
+                  <div className="user-name">{user.display_name}</div>
+                  <div className="user-email">@{user.username}</div>
+                  <small>Posts: {user.post_count || 0}</small>
+                </div>
+                <div className="actions-cell">
+                  <button className="action-btn edit">Sửa</button>
+                  <button className="action-btn delete" onClick={() => handleDeleteSeedUser(user.id)}>Xóa</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
+      ) : (
+        seedPosts.length === 0 ? (
+          <div className="admin-empty-state">
+            <FileText size={48} />
+            <h3>Chưa có seed posts</h3>
+            <p>Tạo seed posts cho forum</p>
+          </div>
+        ) : (
+          <div className="admin-seed-posts-list">
+            {seedPosts.map((post) => (
+              <div key={post.id} className="admin-seed-post-card">
+                <div className="post-content">
+                  <p>{post.content?.substring(0, 150)}...</p>
+                  <div className="post-meta">
+                    <small>
+                      Likes: {post.like_count || 0} | Comments: {post.comment_count || 0}
+                    </small>
+                    <small>{new Date(post.created_at).toLocaleDateString('vi-VN')}</small>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
+      )}
     </div>
   );
 }

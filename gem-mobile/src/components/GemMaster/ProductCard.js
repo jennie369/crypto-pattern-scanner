@@ -26,8 +26,9 @@ import { useCart } from '../../contexts/CartContext';
 /**
  * Product Card for displaying Shopify products
  * Now fetches real Shopify data on mount for images
+ * Supports onQuickBuy callback for chat purchase flow with upsells
  */
-const ProductCard = ({ product, onPress, compact = false, showCTA = true }) => {
+const ProductCard = ({ product, onPress, compact = false, showCTA = true, onQuickBuy }) => {
   const navigation = useNavigation();
   const { addItem } = useCart();
 
@@ -85,30 +86,34 @@ const ProductCard = ({ product, onPress, compact = false, showCTA = true }) => {
     fetchShopifyProduct();
   }, [product.handle, product.shopifyHandle, product.name]);
 
+  // Format price helper - show full price with dot separators (Vietnamese format)
+  // MUST be defined BEFORE displayData uses it
+  function formatPrice(value) {
+    if (!value) return 'Liên hệ';
+    const num = parseFloat(value);
+    if (isNaN(num)) return 'Liên hệ';
+    // Always show full price with dot separators for readability
+    return new Intl.NumberFormat('vi-VN').format(num) + 'đ';
+  }
+
+  // Get raw price value from product or shopify
+  const rawPriceValue = shopifyProduct?.variants?.[0]?.price ||
+                        product.rawPrice ||
+                        product.price ||
+                        product.variants?.[0]?.price ||
+                        0;
+
   // Get display data - prefer Shopify data, fallback to prop data
   const displayData = {
     name: shopifyProduct?.title || product.name || product.title,
     description: shopifyProduct?.description || product.description || '',
-    price: product.price || formatPrice(shopifyProduct?.variants?.[0]?.price),
+    price: formatPrice(rawPriceValue), // Always format the price
     imageUrl: shopifyProduct?.images?.[0]?.src ||
               shopifyProduct?.image ||
               product.imageUrl ||
               null,
-    rawPrice: shopifyProduct?.variants?.[0]?.price || product.rawPrice || 350000,
+    rawPrice: rawPriceValue,
   };
-
-  // Format price helper
-  function formatPrice(value) {
-    if (!value) return product.price || 'Liên hệ';
-    const num = parseFloat(value);
-    if (num >= 1000000) {
-      return `${(num / 1000000).toFixed(1)}M`;
-    }
-    if (num >= 1000) {
-      return `${Math.round(num / 1000)}K`;
-    }
-    return new Intl.NumberFormat('vi-VN').format(num) + 'đ';
-  }
 
   const handlePress = async () => {
     if (onPress) {
@@ -172,6 +177,21 @@ const ProductCard = ({ product, onPress, compact = false, showCTA = true }) => {
 
   // Handle Buy Now
   const handleBuyNow = async () => {
+    // If onQuickBuy callback is provided, use it for chat purchase flow with upsells
+    if (onQuickBuy) {
+      const productToUse = shopifyProduct || {
+        ...product,
+        title: displayData.name,
+        variants: [{
+          id: product.id,
+          price: displayData.rawPrice,
+          title: 'Default'
+        }]
+      };
+      onQuickBuy(productToUse);
+      return;
+    }
+    // Default behavior: add to cart and go to cart
     await handleAddToCart();
     navigation.navigate('Shop', { screen: 'Cart' });
   };

@@ -4,7 +4,7 @@
  * Dark glass theme
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,11 +12,15 @@ import {
   ScrollView,
   TouchableOpacity,
   Switch,
+  ActivityIndicator,
 } from 'react-native';
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowLeft, Shield, Globe, Users, Lock, Eye, MessageCircle, Heart } from 'lucide-react-native';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { supabase } from '../../services/supabase';
+import { useAuth } from '../../contexts/AuthContext';
 
 const PRIVACY_OPTIONS = [
   {
@@ -50,6 +54,10 @@ const PRIVACY_OPTIONS = [
 ];
 
 export default function PrivacySettingsScreen({ navigation }) {
+  const { user } = useAuth();
+  const { alert, AlertComponent } = useCustomAlert();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [settings, setSettings] = useState({
     post_visibility: 'everyone',
     comment_permission: 'everyone',
@@ -58,9 +66,78 @@ export default function PrivacySettingsScreen({ navigation }) {
     read_receipts: true,
   });
 
-  const updateSetting = (key, value) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
-    // TODO: Save to backend
+  // Load privacy settings from database
+  useEffect(() => {
+    loadPrivacySettings();
+  }, []);
+
+  const loadPrivacySettings = async () => {
+    if (!user?.id) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Privacy settings stored in profiles.metadata.privacy
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('metadata')
+        .eq('id', user.id)
+        .single();
+
+      if (error) throw error;
+
+      // Load from metadata.privacy or use defaults
+      const privacyData = data?.metadata?.privacy || {};
+      setSettings(prev => ({
+        ...prev,
+        ...privacyData,
+      }));
+    } catch (error) {
+      console.error('[PrivacySettings] Load error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateSetting = async (key, value) => {
+    // Update local state immediately for responsive UI
+    const newSettings = { ...settings, [key]: value };
+    setSettings(newSettings);
+
+    // Save to database
+    if (!user?.id) return;
+
+    setSaving(true);
+    try {
+      // Get current metadata
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('metadata')
+        .eq('id', user.id)
+        .single();
+
+      // Merge privacy settings into metadata
+      const updatedMetadata = {
+        ...(profile?.metadata || {}),
+        privacy: newSettings,
+      };
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({ metadata: updatedMetadata })
+        .eq('id', user.id);
+
+      if (error) throw error;
+      console.log('[PrivacySettings] Saved successfully');
+    } catch (error) {
+      console.error('[PrivacySettings] Save error:', error);
+      // Revert on error
+      setSettings(prev => ({ ...prev, [key]: settings[key] }));
+      alert({ type: 'error', title: 'Lỗi', message: 'Không thể lưu cài đặt. Vui lòng thử lại.' });
+    } finally {
+      setSaving(false);
+    }
   };
 
   const getOptionIcon = (option) => {
@@ -176,6 +253,7 @@ export default function PrivacySettingsScreen({ navigation }) {
           <View style={{ height: 100 }} />
         </ScrollView>
       </SafeAreaView>
+      {AlertComponent}
     </LinearGradient>
   );
 }

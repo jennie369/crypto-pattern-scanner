@@ -13,8 +13,11 @@ import {
   OrderSuccessScreen,
   OrdersScreen,
   OrderDetailScreen,
+  ProductSearchScreen,
+  ProductListScreen,
 } from '../screens/Shop';
 import GemPurchaseSuccessScreen from '../screens/Wallet/GemPurchaseSuccessScreen';
+import GemPurchasePendingScreen from '../screens/Wallet/GemPurchasePendingScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -27,6 +30,8 @@ const ShopStack = () => {
       }}
     >
       <Stack.Screen name="ShopMain" component={ShopScreen} />
+      <Stack.Screen name="ProductSearch" component={ProductSearchScreen} />
+      <Stack.Screen name="ProductList" component={ProductListScreen} />
       <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
       <Stack.Screen name="Cart" component={CartScreen} />
       <Stack.Screen
@@ -65,6 +70,17 @@ const ShopStack = () => {
       <Stack.Screen
         name="GemPurchaseSuccess"
         component={GemPurchaseSuccessScreen}
+        options={{
+          headerShown: false,
+          gestureEnabled: false, // Prevent swipe back
+          animation: 'fade',
+        }}
+      />
+
+      {/* Gem Purchase PENDING Screen - shows after order created, before payment confirmed */}
+      <Stack.Screen
+        name="GemPurchasePending"
+        component={GemPurchasePendingScreen}
         options={{
           headerShown: false,
           gestureEnabled: false, // Prevent swipe back

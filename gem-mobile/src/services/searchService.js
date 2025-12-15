@@ -1,10 +1,47 @@
 /**
  * Gemral - Search Service
+ * Global search across coins, posts, products, and help articles
  * Full-text search for forum posts with filters and recent searches
  */
 
 import { supabase } from './supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Popular coins for global search
+const POPULAR_COINS = [
+  { symbol: 'BTCUSDT', name: 'Bitcoin' },
+  { symbol: 'ETHUSDT', name: 'Ethereum' },
+  { symbol: 'BNBUSDT', name: 'Binance Coin' },
+  { symbol: 'XRPUSDT', name: 'Ripple' },
+  { symbol: 'ADAUSDT', name: 'Cardano' },
+  { symbol: 'DOGEUSDT', name: 'Dogecoin' },
+  { symbol: 'SOLUSDT', name: 'Solana' },
+  { symbol: 'DOTUSDT', name: 'Polkadot' },
+  { symbol: 'MATICUSDT', name: 'Polygon' },
+  { symbol: 'LTCUSDT', name: 'Litecoin' },
+  { symbol: 'AVAXUSDT', name: 'Avalanche' },
+  { symbol: 'LINKUSDT', name: 'Chainlink' },
+  { symbol: 'ATOMUSDT', name: 'Cosmos' },
+  { symbol: 'UNIUSDT', name: 'Uniswap' },
+  { symbol: 'XLMUSDT', name: 'Stellar' },
+  { symbol: 'NEARUSDT', name: 'NEAR Protocol' },
+  { symbol: 'APTUSDT', name: 'Aptos' },
+  { symbol: 'ARBUSDT', name: 'Arbitrum' },
+];
+
+// Help articles for global search
+const HELP_ARTICLES = [
+  { id: 'scanner', title: 'Cách sử dụng Scanner', description: 'Hướng dẫn quét patterns', screen: 'HelpScanner' },
+  { id: 'portfolio', title: 'Quản lý Portfolio', description: 'Theo dõi vị thế', screen: 'HelpPortfolio' },
+  { id: 'tarot', title: 'Tarot Reading', description: 'Hướng dẫn bốc bài', screen: 'HelpTarot' },
+  { id: 'iching', title: 'Kinh Dịch', description: 'Hướng dẫn gieo quẻ', screen: 'HelpIChing' },
+  { id: 'gems', title: 'Hệ thống Gems', description: 'Gems là gì', screen: 'HelpGems' },
+  { id: 'tier', title: 'Các gói Tier', description: 'Free, Premium, VIP', screen: 'HelpTier' },
+  { id: 'affiliate', title: 'Affiliate', description: 'Kiếm tiền với Gemral', screen: 'HelpAffiliate' },
+  { id: 'contact', title: 'Liên hệ hỗ trợ', description: 'Gửi ticket', screen: 'CreateTicket' },
+];
+
+const TRENDING_GLOBAL = ['Bitcoin', 'Pattern', 'Tarot', 'Crystal', 'Trading'];
 
 const RECENT_SEARCHES_KEY = '@gem_recent_searches';
 const MAX_RECENT_SEARCHES = 10;
@@ -115,17 +152,22 @@ export const searchService = {
    */
   async searchUsers(query, limit = 10) {
     try {
-      if (!query || query.trim().length < 1) {
-        return [];
+      // Allow empty query for initial suggestions
+      const searchTerm = (query || '').trim().toLowerCase();
+
+      let queryBuilder = supabase
+        .from('profiles')
+        .select('id, email, full_name, avatar_url')
+        .limit(limit);
+
+      if (searchTerm.length > 0) {
+        queryBuilder = queryBuilder.or(`full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
+      } else {
+        // If no query, return recent/popular users
+        queryBuilder = queryBuilder.order('created_at', { ascending: false });
       }
 
-      const searchTerm = query.trim().toLowerCase();
-
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, email, full_name, avatar_url, verified_seller, verified_trader')
-        .or(`full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`)
-        .limit(limit);
+      const { data, error } = await queryBuilder;
 
       if (error) throw error;
       return data || [];
@@ -323,6 +365,176 @@ export const searchService = {
     } catch (error) {
       console.error('[SearchService] Clear recent searches error:', error);
     }
+  },
+
+  // =====================
+  // Global Search
+  // =====================
+
+  /**
+   * Global search across all sources
+   * @param {string} query - Search query
+   * @param {object} options - Search options
+   * @returns {object} Results grouped by type
+   */
+  async globalSearch(query, options = {}) {
+    try {
+      if (!query || query.trim().length < 2) {
+        return { coins: [], posts: [], products: [], help: [] };
+      }
+
+      const { includeCoins = true, includePosts = true, includeProducts = true, includeHelp = true } = options;
+      const searchTerm = query.trim().toLowerCase();
+
+      const results = {
+        coins: [],
+        posts: [],
+        products: [],
+        help: [],
+      };
+
+      // Run searches in parallel
+      const promises = [];
+
+      if (includeCoins) {
+        promises.push(
+          this.searchCoins(searchTerm).then(data => { results.coins = data; })
+        );
+      }
+
+      if (includePosts) {
+        promises.push(
+          this.searchPosts(searchTerm, {}, 1, 5).then(({ data }) => { results.posts = data || []; })
+        );
+      }
+
+      if (includeProducts) {
+        promises.push(
+          this.searchProducts(searchTerm).then(data => { results.products = data; })
+        );
+      }
+
+      if (includeHelp) {
+        promises.push(
+          Promise.resolve(this.searchHelp(searchTerm)).then(data => { results.help = data; })
+        );
+      }
+
+      await Promise.all(promises);
+
+      // Add to recent searches
+      await this.addRecentSearch(query.trim());
+
+      return results;
+    } catch (error) {
+      console.error('[SearchService] Global search error:', error);
+      return { coins: [], posts: [], products: [], help: [] };
+    }
+  },
+
+  /**
+   * Search coins from local list
+   * @param {string} query - Search query
+   * @returns {array} Matching coins
+   */
+  searchCoins(query) {
+    if (!query || query.length < 1) return [];
+
+    const searchTerm = query.toLowerCase();
+    return POPULAR_COINS.filter(coin =>
+      coin.symbol.toLowerCase().includes(searchTerm) ||
+      coin.name.toLowerCase().includes(searchTerm)
+    ).slice(0, 10);
+  },
+
+  /**
+   * Search products from Shopify (cached)
+   * @param {string} query - Search query
+   * @returns {array} Matching products
+   */
+  async searchProducts(query) {
+    try {
+      if (!query || query.length < 2) return [];
+
+      // Try to get from cache first
+      const cacheKey = '@gem_products_cache';
+      const cached = await AsyncStorage.getItem(cacheKey);
+
+      if (cached) {
+        const { products, timestamp } = JSON.parse(cached);
+        const isExpired = Date.now() - timestamp > 15 * 60 * 1000; // 15 min cache
+
+        if (!isExpired && products) {
+          const searchTerm = query.toLowerCase();
+          return products.filter(p =>
+            p.title?.toLowerCase().includes(searchTerm) ||
+            p.product_type?.toLowerCase().includes(searchTerm) ||
+            p.vendor?.toLowerCase().includes(searchTerm)
+          ).slice(0, 10);
+        }
+      }
+
+      // If no cache, search from Supabase shopify_products table
+      const { data, error } = await supabase
+        .from('shopify_products')
+        .select('id, shopify_id, title, handle, product_type, vendor, image_url, price')
+        .or(`title.ilike.%${query}%,product_type.ilike.%${query}%,vendor.ilike.%${query}%`)
+        .eq('status', 'active')
+        .limit(10);
+
+      if (error) {
+        console.warn('[SearchService] Product search error:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('[SearchService] Product search error:', error);
+      return [];
+    }
+  },
+
+  /**
+   * Search help articles (local static data)
+   * @param {string} query - Search query
+   * @returns {array} Matching help articles
+   */
+  searchHelp(query) {
+    if (!query || query.length < 2) return [];
+
+    const searchTerm = query.toLowerCase();
+    return HELP_ARTICLES.filter(article =>
+      article.title.toLowerCase().includes(searchTerm) ||
+      article.description.toLowerCase().includes(searchTerm)
+    );
+  },
+
+  /**
+   * Get trending global searches
+   * @returns {array} Trending search terms
+   */
+  getTrendingGlobal() {
+    return TRENDING_GLOBAL.map(term => ({
+      term,
+      type: 'trending',
+    }));
+  },
+
+  /**
+   * Get popular coins for quick access
+   * @param {number} limit - Max coins to return
+   * @returns {array} Popular coins
+   */
+  getPopularCoins(limit = 10) {
+    return POPULAR_COINS.slice(0, limit);
+  },
+
+  /**
+   * Get help articles for display
+   * @returns {array} All help articles
+   */
+  getHelpArticles() {
+    return HELP_ARTICLES;
   },
 };
 

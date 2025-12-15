@@ -93,11 +93,12 @@ class UserProfileService {
           .order('created_at', { ascending: false })
           .limit(5),
 
-        // Recent forum activity
+        // Recent forum activity (synced with mobile - uses forum_posts)
         supabase
-          .from('forum_threads')
-          .select('id, title, created_at')
-          .eq('author_id', userId)
+          .from('forum_posts')
+          .select('id, title, content, created_at')
+          .eq('user_id', userId)
+          .eq('status', 'published')
           .order('created_at', { ascending: false })
           .limit(5),
 

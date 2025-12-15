@@ -20,7 +20,6 @@ import {
   Animated,
   TextInput,
   ScrollView,
-  Alert,
   PanResponder,
   Switch,
 } from 'react-native';
@@ -35,6 +34,9 @@ import {
   TYPOGRAPHY,
 } from '../../../utils/tokens';
 
+// Alert
+import { useCustomAlert } from '../../../components/CustomAlert';
+
 const SHEET_HEIGHT = 520;
 
 const GroupSettingsSheet = memo(({
@@ -48,6 +50,8 @@ const GroupSettingsSheet = memo(({
   onDeleteGroup,
   onToggleAdminOnly,
 }) => {
+  const { alert } = useCustomAlert();
+
   // Local state
   const [groupName, setGroupName] = useState('');
   const [description, setDescription] = useState('');
@@ -160,11 +164,11 @@ const GroupSettingsSheet = memo(({
       handleClose();
     } catch (error) {
       console.error('Error saving group settings:', error);
-      Alert.alert('Error', 'Failed to save changes');
+      alert({ type: 'error', title: 'Error', message: 'Failed to save changes' });
     } finally {
       setSaving(false);
     }
-  }, [hasChanges, saving, groupName, description, conversation, onUpdateName, onUpdateDescription, handleClose]);
+  }, [hasChanges, saving, groupName, description, conversation, onUpdateName, onUpdateDescription, handleClose, alert]);
 
   // Handle admin only toggle
   const handleAdminOnlyToggle = useCallback(async (value) => {
@@ -180,10 +184,11 @@ const GroupSettingsSheet = memo(({
 
   // Leave group
   const handleLeaveGroup = useCallback(() => {
-    Alert.alert(
-      'Leave Group',
-      'Are you sure you want to leave this group? You will no longer receive messages.',
-      [
+    alert({
+      type: 'warning',
+      title: 'Leave Group',
+      message: 'Are you sure you want to leave this group? You will no longer receive messages.',
+      buttons: [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Leave',
@@ -195,15 +200,16 @@ const GroupSettingsSheet = memo(({
           },
         },
       ]
-    );
-  }, [handleClose, onLeaveGroup]);
+    });
+  }, [handleClose, onLeaveGroup, alert]);
 
   // Delete group (admin only)
   const handleDeleteGroup = useCallback(() => {
-    Alert.alert(
-      'Delete Group',
-      'This will permanently delete the group and all messages for everyone. This action cannot be undone.',
-      [
+    alert({
+      type: 'warning',
+      title: 'Delete Group',
+      message: 'This will permanently delete the group and all messages for everyone. This action cannot be undone.',
+      buttons: [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Delete',
@@ -215,8 +221,8 @@ const GroupSettingsSheet = memo(({
           },
         },
       ]
-    );
-  }, [handleClose, onDeleteGroup]);
+    });
+  }, [handleClose, onDeleteGroup, alert]);
 
   if (!visible) return null;
 

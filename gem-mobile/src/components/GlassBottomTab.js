@@ -5,16 +5,19 @@
  * Dynamic notification badge count
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, Animated, Dimensions } from 'react-native';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { View, StyleSheet, TouchableOpacity, Text, Animated, Dimensions, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Shadow } from 'react-native-shadow-2';
 import { Home, ShoppingCart, BarChart2, Star, Bell, Box } from 'lucide-react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, StackActions } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTabBar } from '../contexts/TabBarContext';
 import { forumService } from '../services/forumService';
 import { useAuth } from '../contexts/AuthContext';
+
+const DOUBLE_TAP_DELAY = 300; // ms between taps to count as double-tap
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -46,15 +49,25 @@ const Tokens = {
 };
 
 export default function GlassBottomTab({ state, descriptors, navigation }) {
-  // Get tab bar visibility from context
+  // Get safe area insets for Android gesture navigation bar
+  const insets = useSafeAreaInsets();
+  // Calculate bottom padding: use insets.bottom for gesture nav, minimum 8px for 3-button nav
+  const bottomPadding = Math.max(insets.bottom, 8);
+
+  // Get tab bar visibility and double-tap event emitter from context
   let tabBarTranslateY;
+  let emitScrollToTopAndRefresh = null;
   try {
-    const { translateY } = useTabBar();
+    const { translateY, emitScrollToTopAndRefresh: emit } = useTabBar();
     tabBarTranslateY = translateY;
+    emitScrollToTopAndRefresh = emit;
   } catch (e) {
     // Context not available, use default (no animation)
     tabBarTranslateY = new Animated.Value(0);
   }
+
+  // Track last tap time for each tab for double-tap detection
+  const lastTapTimeRef = useRef({});
 
   // Get auth state
   let isAuthenticated = false;
@@ -114,6 +127,12 @@ export default function GlassBottomTab({ state, descriptors, navigation }) {
   const onTabPress = (index, routeName) => {
     const route = state.routes[index];
     const isFocused = state.index === index;
+    const now = Date.now();
+    const lastTapTime = lastTapTimeRef.current[routeName] || 0;
+    const isDoubleTap = now - lastTapTime < DOUBLE_TAP_DELAY;
+
+    // Update last tap time
+    lastTapTimeRef.current[routeName] = now;
 
     const event = navigation.emit({
       type: 'tabPress',
@@ -121,15 +140,50 @@ export default function GlassBottomTab({ state, descriptors, navigation }) {
       canPreventDefault: true,
     });
 
-    if (!isFocused && !event.defaultPrevented) {
-      navigation.navigate(routeName);
+    if (!event.defaultPrevented) {
+      if (isFocused) {
+        // Already on this tab
+        const tabState = route.state;
+        const hasNestedScreens = tabState && tabState.index > 0;
+
+        if (hasNestedScreens) {
+          // There are nested screens, pop to the root of this tab
+          console.log('[GlassBottomTab] Popping to top for tab:', routeName, 'nested index:', tabState?.index);
+          navigation.dispatch(StackActions.popToTop());
+        } else if (isDoubleTap) {
+          // Double-tap on tab's home screen
+          console.log('[GlassBottomTab] Double-tap detected on tab:', routeName);
+          // Emit scroll to top and refresh event if handler exists
+          if (emitScrollToTopAndRefresh) {
+            emitScrollToTopAndRefresh(routeName);
+          }
+        }
+        // Single tap on home screen - do nothing
+      } else {
+        // Navigating to a different tab
+        // Check if target tab has nested screens and reset it
+        const targetRoute = state.routes[index];
+        const targetState = targetRoute?.state;
+        const targetHasNestedScreens = targetState && targetState.index > 0;
+
+        if (targetHasNestedScreens) {
+          // Reset target tab to its root screen before navigating
+          console.log('[GlassBottomTab] Resetting tab with nested screens:', routeName);
+          navigation.navigate(routeName, {
+            screen: targetState.routeNames?.[0] || targetState.routes?.[0]?.name,
+          });
+        } else {
+          // Just navigate normally
+          navigation.navigate(routeName);
+        }
+      }
     }
   };
 
   return (
     <Animated.View
       pointerEvents="box-none"
-      style={[styles.container, { transform: [{ translateY: tabBarTranslateY }] }]}
+      style={[styles.container, { bottom: bottomPadding, transform: [{ translateY: tabBarTranslateY }] }]}
     >
       <Shadow
         startColor="rgba(0,0,0,0.65)"
@@ -187,11 +241,11 @@ export default function GlassBottomTab({ state, descriptors, navigation }) {
                         color={isFocused ? Tokens.colors.icon : Tokens.colors.iconInactive}
                         strokeWidth={2}
                       />
-                      {item.badge && item.badge > 0 && (
+                      {item.badge > 0 ? (
                         <View style={styles.badge}>
                           <Text style={styles.badgeText}>{item.badge}</Text>
                         </View>
-                      )}
+                      ) : null}
                     </View>
                     <Text
                       style={[
@@ -218,7 +272,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: 8,
+    // bottom is now dynamic via inline style (useSafeAreaInsets)
     alignItems: 'center',
     zIndex: Tokens.z.tabBar,
   },

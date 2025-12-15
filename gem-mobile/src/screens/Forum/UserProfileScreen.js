@@ -1,6 +1,7 @@
 /**
  * Gemral - User Profile Screen
  * View other user's profile with follow functionality
+ * UPDATED: Same layout as ProfileFullScreen with tabs (Bài Viết, Hình Ảnh, Video)
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -8,30 +9,38 @@ import {
   View,
   Text,
   Image,
-  FlatList,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowLeft, Users, FileText, Settings, MessageCircle, Grid3X3, List } from 'lucide-react-native';
-import PostCard from './components/PostCard';
+import { ArrowLeft, Users, FileText, MessageCircle, Image as ImageIcon, Video } from 'lucide-react-native';
 import { forumService } from '../../services/forumService';
 import { useAuth } from '../../contexts/AuthContext';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { UserBadges } from '../../components/UserBadge';
-import { ImageGrid } from '../../components/Image';
+
+// Import Tab components from ProfileFullScreen
+import PostsTab from '../tabs/components/PostsTab';
+import PhotosTab from '../tabs/components/PhotosTab';
+import VideosTab from '../tabs/components/VideosTab';
 
 const UserProfileScreen = ({ route, navigation }) => {
-  const { userId } = route.params;
+  // Support both userId and username params (for @mentions)
+  const { userId: paramUserId, username: paramUsername } = route.params || {};
   const { user: currentUser, isAuthenticated } = useAuth();
 
+  const [resolvedUserId, setResolvedUserId] = useState(paramUserId);
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [photos, setPhotos] = useState([]);
+  const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [contentLoading, setContentLoading] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
   const [stats, setStats] = useState({
@@ -39,33 +48,81 @@ const UserProfileScreen = ({ route, navigation }) => {
     following: 0,
     posts: 0,
   });
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+  const [activeTab, setActiveTab] = useState('posts'); // 'posts', 'photos', 'videos'
+  const [notFound, setNotFound] = useState(false);
 
-  const isOwnProfile = currentUser?.id === userId;
+  const isOwnProfile = currentUser?.id === resolvedUserId;
 
-  // Filter posts with images for grid view
-  const postsWithImages = posts.filter(post => post.image_url || post.thumbnail_url || post.media_urls?.length > 0);
-
-  // Load profile data
+  // Resolve username to userId if needed
   useEffect(() => {
-    loadProfileData();
-  }, [userId]);
+    const resolveUser = async () => {
+      if (paramUserId) {
+        setResolvedUserId(paramUserId);
+        return;
+      }
+
+      if (paramUsername) {
+        try {
+          console.log('[UserProfile] Resolving username:', paramUsername);
+          const user = await forumService.getUserByUsername(paramUsername);
+          if (user?.id) {
+            console.log('[UserProfile] Found user:', user.id, user.full_name);
+            setResolvedUserId(user.id);
+          } else {
+            console.warn('[UserProfile] User not found for username:', paramUsername);
+            setNotFound(true);
+            setLoading(false);
+          }
+        } catch (error) {
+          console.error('[UserProfile] Error resolving username:', error);
+          setNotFound(true);
+          setLoading(false);
+        }
+      }
+    };
+
+    resolveUser();
+  }, [paramUserId, paramUsername]);
+
+  // Load profile data when userId is resolved
+  useEffect(() => {
+    if (resolvedUserId) {
+      loadProfileData();
+    }
+  }, [resolvedUserId]);
 
   const loadProfileData = async () => {
+    if (!resolvedUserId) return;
+
     try {
       setLoading(true);
 
       // Load profile, posts, stats, and follow status in parallel
       const [profileData, userPosts, followersCount, followingCount, following] = await Promise.all([
-        forumService.getUserProfile(userId),
-        forumService.getUserPosts(userId),
-        forumService.getFollowersCount(userId),
-        forumService.getFollowingCount(userId),
-        currentUser ? forumService.isFollowing(userId) : false,
+        forumService.getUserProfile(resolvedUserId),
+        forumService.getUserPosts(resolvedUserId),
+        forumService.getFollowersCount(resolvedUserId),
+        forumService.getFollowingCount(resolvedUserId),
+        currentUser ? forumService.isFollowing(resolvedUserId) : false,
       ]);
 
       setProfile(profileData);
       setPosts(userPosts);
+
+      // Filter photos (posts with images) - include stats for overlay
+      const photoPosts = userPosts.filter(p => p.image_url || p.thumbnail_url || p.media_urls?.length > 0);
+      setPhotos(photoPosts.map(p => ({
+        id: p.id,
+        image_url: p.image_url || p.thumbnail_url || p.media_urls?.[0],
+        created_at: p.created_at,
+        likes_count: p.likes_count || 0,
+        comments_count: p.comments_count || 0,
+        views_count: p.views_count || 0,
+      })));
+
+      // Videos placeholder
+      setVideos([]);
+
       setStats({
         followers: followersCount,
         following: followingCount,
@@ -84,7 +141,7 @@ const UserProfileScreen = ({ route, navigation }) => {
     setRefreshing(true);
     await loadProfileData();
     setRefreshing(false);
-  }, [userId]);
+  }, [resolvedUserId]);
 
   // Handle follow/unfollow
   const handleFollowToggle = async () => {
@@ -96,11 +153,11 @@ const UserProfileScreen = ({ route, navigation }) => {
     setFollowLoading(true);
     try {
       if (isFollowing) {
-        await forumService.unfollowUser(userId);
+        await forumService.unfollowUser(resolvedUserId);
         setIsFollowing(false);
         setStats(prev => ({ ...prev, followers: Math.max(0, prev.followers - 1) }));
       } else {
-        await forumService.followUser(userId);
+        await forumService.followUser(resolvedUserId);
         setIsFollowing(true);
         setStats(prev => ({ ...prev, followers: prev.followers + 1 }));
       }
@@ -116,115 +173,63 @@ const UserProfileScreen = ({ route, navigation }) => {
     navigation.navigate('PostDetail', { postId: post.id });
   };
 
-  // Render header
-  const renderHeader = () => (
-    <View style={styles.profileSection}>
-      {/* Avatar */}
-      <Image
-        source={{
-          uri: profile?.avatar_url ||
-            `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.full_name || 'U')}&background=6A5BFF&color=fff&size=200`
-        }}
-        style={styles.avatar}
-      />
+  // Handle photo press
+  const handlePhotoPress = (photo) => {
+    navigation.navigate('PostDetail', { postId: photo.id });
+  };
 
-      {/* Name with Badges */}
-      <View style={styles.nameRow}>
-        <Text style={styles.name}>{profile?.full_name || 'Người dùng'}</Text>
-        <UserBadges user={profile} size="medium" maxBadges={3} />
-      </View>
-      {profile?.username && (
-        <Text style={styles.username}>@{profile.username}</Text>
-      )}
+  // Tabs configuration - same as ProfileFullScreen
+  const tabs = [
+    { key: 'posts', label: 'Bài Viết', Icon: FileText, count: posts.length },
+    { key: 'photos', label: 'Hình Ảnh', Icon: ImageIcon, count: photos.length },
+    { key: 'videos', label: 'Video', Icon: Video, count: videos.length },
+  ];
 
-      {/* Bio */}
-      {profile?.bio && (
-        <Text style={styles.bio}>{profile.bio}</Text>
-      )}
+  // Render tab content - same as ProfileFullScreen
+  const renderContent = () => {
+    if (contentLoading && posts.length === 0) {
+      return (
+        <View style={styles.loadingContent}>
+          <ActivityIndicator size="large" color={COLORS.gold} />
+        </View>
+      );
+    }
 
-      {/* Stats */}
-      <View style={styles.statsRow}>
-        <TouchableOpacity style={styles.statItem}>
-          <Text style={styles.statValue}>{stats.posts}</Text>
-          <Text style={styles.statLabel}>Bài viết</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.statItem}>
-          <Text style={styles.statValue}>{stats.followers}</Text>
-          <Text style={styles.statLabel}>Người theo dõi</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.statItem}>
-          <Text style={styles.statValue}>{stats.following}</Text>
-          <Text style={styles.statLabel}>Đang theo dõi</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Action Buttons */}
-      <View style={styles.actionButtons}>
-        {isOwnProfile ? (
-          <TouchableOpacity
-            style={styles.editButton}
-            onPress={() => navigation.navigate('EditProfile')}
-          >
-            <Settings size={18} color={COLORS.textPrimary} />
-            <Text style={styles.editButtonText}>Chỉnh sửa</Text>
-          </TouchableOpacity>
-        ) : (
-          <>
-            <TouchableOpacity
-              style={[
-                styles.followButton,
-                isFollowing && styles.followingButton,
-              ]}
-              onPress={handleFollowToggle}
-              disabled={followLoading}
-            >
-              {followLoading ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
-              ) : (
-                <>
-                  <Users size={18} color={isFollowing ? COLORS.gold : '#FFFFFF'} />
-                  <Text style={[
-                    styles.followButtonText,
-                    isFollowing && styles.followingButtonText,
-                  ]}>
-                    {isFollowing ? 'Đang theo dõi' : 'Theo dõi'}
-                  </Text>
-                </>
-              )}
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.messageButton}>
-              <MessageCircle size={18} color={COLORS.textPrimary} />
-            </TouchableOpacity>
-          </>
-        )}
-      </View>
-
-      {/* View Mode Toggle */}
-      <View style={styles.viewToggle}>
-        <TouchableOpacity
-          style={[styles.toggleButton, viewMode === 'grid' && styles.toggleButtonActive]}
-          onPress={() => setViewMode('grid')}
-        >
-          <Grid3X3 size={20} color={viewMode === 'grid' ? COLORS.gold : COLORS.textMuted} />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.toggleButton, viewMode === 'list' && styles.toggleButtonActive]}
-          onPress={() => setViewMode('list')}
-        >
-          <List size={20} color={viewMode === 'list' ? COLORS.gold : COLORS.textMuted} />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-
-  // Render empty state
-  const renderEmpty = () => (
-    <View style={styles.emptyState}>
-      <FileText size={48} color={COLORS.textMuted} />
-      <Text style={styles.emptyText}>Chưa có bài viết nào</Text>
-    </View>
-  );
+    switch (activeTab) {
+      case 'posts':
+        return (
+          <PostsTab
+            posts={posts}
+            loading={contentLoading}
+            onPostPress={handlePostPress}
+            onEndReached={() => {}}
+            hasMore={false}
+          />
+        );
+      case 'photos':
+        return (
+          <PhotosTab
+            photos={photos}
+            loading={contentLoading}
+            onPhotoPress={handlePhotoPress}
+            onEndReached={() => {}}
+            hasMore={false}
+          />
+        );
+      case 'videos':
+        return (
+          <VideosTab
+            videos={videos}
+            loading={contentLoading}
+            onVideoPress={() => {}}
+            onEndReached={() => {}}
+            hasMore={false}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
   if (loading) {
     return (
@@ -232,6 +237,25 @@ const UserProfileScreen = ({ route, navigation }) => {
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.gold} />
         </View>
+      </LinearGradient>
+    );
+  }
+
+  if (notFound) {
+    return (
+      <LinearGradient colors={GRADIENTS.background} style={styles.gradient}>
+        <SafeAreaView style={styles.container} edges={['top']}>
+          <View style={styles.header}>
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+              <ArrowLeft size={24} color={COLORS.textPrimary} />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Trang cá nhân</Text>
+            <View style={{ width: 40 }} />
+          </View>
+          <View style={styles.notFoundContainer}>
+            <Text style={styles.notFoundText}>Không tìm thấy người dùng</Text>
+          </View>
+        </SafeAreaView>
       </LinearGradient>
     );
   }
@@ -255,42 +279,143 @@ const UserProfileScreen = ({ route, navigation }) => {
           <View style={{ width: 40 }} />
         </View>
 
-        {/* Posts with Grid/List Toggle */}
-        <FlatList
-          data={viewMode === 'grid' ? [] : posts}
-          renderItem={({ item }) => (
-            <PostCard
-              post={item}
-              onPress={() => handlePostPress(item)}
-            />
-          )}
-          keyExtractor={(item) => item.id?.toString()}
-          ListHeaderComponent={
-            <>
-              {renderHeader()}
-              {viewMode === 'grid' && (
-                <ImageGrid
-                  posts={postsWithImages}
-                  columns={3}
-                  spacing={2}
-                  onPostPress={handlePostPress}
-                  showEmpty={true}
-                  emptyMessage="Chưa có bài viết có ảnh"
-                />
-              )}
-            </>
-          }
-          ListEmptyComponent={viewMode === 'list' ? renderEmpty : null}
-          contentContainerStyle={styles.listContent}
+        <ScrollView
+          style={styles.scrollView}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
               tintColor={COLORS.gold}
+              colors={[COLORS.gold]}
             />
           }
-        />
+        >
+          {/* Profile Section */}
+          <View style={styles.profileSection}>
+            {/* Avatar */}
+            <Image
+              source={{
+                uri: profile?.avatar_url ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(profile?.full_name || 'U')}&background=6A5BFF&color=fff&size=200`
+              }}
+              style={styles.avatar}
+            />
+
+            {/* Name with Badges */}
+            <View style={styles.nameRow}>
+              <Text style={styles.name}>{profile?.full_name || 'Người dùng'}</Text>
+              <UserBadges user={profile} size="medium" maxBadges={3} />
+            </View>
+            {profile?.username && (
+              <Text style={styles.username}>@{profile.username}</Text>
+            )}
+
+            {/* Bio */}
+            {profile?.bio && (
+              <Text style={styles.bio}>{profile.bio}</Text>
+            )}
+
+            {/* Stats - Tap to navigate */}
+            <View style={styles.statsRow}>
+              <TouchableOpacity style={styles.statItem} activeOpacity={0.7}>
+                <Text style={styles.statValue}>{stats.posts}</Text>
+                <Text style={styles.statLabel}>Bài viết</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.statItem}
+                activeOpacity={0.7}
+                onPress={() => navigation.navigate('FollowersList', {
+                  userId: resolvedUserId,
+                  username: profile?.username
+                })}
+              >
+                <Text style={styles.statValue}>{stats.followers}</Text>
+                <Text style={styles.statLabel}>Người theo dõi</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.statItem}
+                activeOpacity={0.7}
+                onPress={() => navigation.navigate('FollowingList', {
+                  userId: resolvedUserId,
+                  username: profile?.username
+                })}
+              >
+                <Text style={styles.statValue}>{stats.following}</Text>
+                <Text style={styles.statLabel}>Đang theo dõi</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Action Buttons */}
+            {!isOwnProfile && (
+              <View style={styles.actionButtons}>
+                <TouchableOpacity
+                  style={[
+                    styles.followButton,
+                    isFollowing && styles.followingButton,
+                  ]}
+                  onPress={handleFollowToggle}
+                  disabled={followLoading}
+                >
+                  {followLoading ? (
+                    <ActivityIndicator size="small" color="#FFFFFF" />
+                  ) : (
+                    <>
+                      <Users size={18} color={isFollowing ? COLORS.gold : '#FFFFFF'} />
+                      <Text style={[
+                        styles.followButtonText,
+                        isFollowing && styles.followingButtonText,
+                      ]}>
+                        {isFollowing ? 'Đang theo dõi' : 'Theo dõi'}
+                      </Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.messageButton}
+                  onPress={() => navigation.navigate('DirectMessage', {
+                    recipientId: resolvedUserId,
+                    recipientName: profile?.full_name || profile?.username || 'Người dùng',
+                    recipientAvatar: profile?.avatar_url,
+                  })}
+                >
+                  <MessageCircle size={18} color={COLORS.textPrimary} />
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+
+          {/* Tabs - Same as ProfileFullScreen */}
+          <View style={styles.tabsContainer}>
+            {tabs.map((tab) => {
+              const isActive = activeTab === tab.key;
+              const IconComponent = tab.Icon;
+
+              return (
+                <TouchableOpacity
+                  key={tab.key}
+                  style={[styles.tab, isActive && styles.tabActive]}
+                  onPress={() => setActiveTab(tab.key)}
+                >
+                  <IconComponent
+                    size={18}
+                    color={isActive ? COLORS.gold : COLORS.textMuted}
+                  />
+                  <Text style={[styles.tabText, isActive && styles.tabTextActive]}>
+                    {tab.label} ({tab.count})
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          {/* Content */}
+          {renderContent()}
+
+          {/* Bottom spacing - enough for tab bar + safe area */}
+          <View style={{ height: 150 }} />
+        </ScrollView>
       </SafeAreaView>
     </LinearGradient>
   );
@@ -299,10 +424,24 @@ const UserProfileScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   gradient: { flex: 1 },
   container: { flex: 1 },
+  scrollView: { flex: 1 },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  loadingContent: {
+    paddingVertical: SPACING.huge,
+    alignItems: 'center',
+  },
+  notFoundContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  notFoundText: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    color: COLORS.textMuted,
   },
 
   // Header
@@ -310,20 +449,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
     backgroundColor: GLASS.background,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(106, 91, 255, 0.2)',
   },
   backButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xxl,
+    fontSize: TYPOGRAPHY.fontSize.xxxl,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textPrimary,
   },
@@ -431,62 +570,38 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  editButton: {
+
+  // Tabs - Same as ProfileFullScreen
+  tabsContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    gap: SPACING.sm,
+    marginBottom: SPACING.sm,
+  },
+  tab: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SPACING.md,
+    borderRadius: 12,
     backgroundColor: GLASS.background,
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.xxl,
-    borderRadius: 25,
     gap: SPACING.xs,
     borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.3)',
+    borderColor: 'transparent',
   },
-  editButtonText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
-  },
-
-  // View Toggle
-  viewToggle: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: SPACING.md,
-    paddingVertical: SPACING.md,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(106, 91, 255, 0.2)',
-    width: '100%',
-  },
-  toggleButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-  },
-  toggleButtonActive: {
+  tabActive: {
     backgroundColor: 'rgba(255, 189, 89, 0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 189, 89, 0.3)',
+    borderColor: COLORS.gold,
   },
-
-  // List
-  listContent: {
-    paddingHorizontal: SPACING.md,
-    paddingBottom: 100,
-  },
-
-  // Empty State
-  emptyState: {
-    alignItems: 'center',
-    paddingVertical: SPACING.huge,
-  },
-  emptyText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
+  tabText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
     color: COLORS.textMuted,
-    marginTop: SPACING.md,
+  },
+  tabTextActive: {
+    color: COLORS.gold,
   },
 });
 

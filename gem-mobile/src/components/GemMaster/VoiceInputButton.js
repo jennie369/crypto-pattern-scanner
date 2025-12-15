@@ -214,6 +214,19 @@ const VoiceInputButton = ({
         if (onRecordingStart) {
           onRecordingStart();
         }
+
+        // Also start speech recognition for real-time transcription (FREE!)
+        speechRecognition.startListening({
+          onResult: (result) => {
+            if (result.isFinal && result.finalTranscript && onTranscription) {
+              onTranscription(result.finalTranscript);
+            }
+          },
+          onError: (err) => {
+            console.log('[VoiceInputButton] Speech recognition error:', err);
+            // Don't fail - audio recording still works
+          }
+        });
       } else {
         if (onError) {
           onError({
@@ -241,24 +254,21 @@ const VoiceInputButton = ({
         Vibration.vibrate(50);
       }
 
+      // Stop both voice recording and speech recognition
       const audioUri = await voiceService.stopRecording();
+      await speechRecognition.stopListening();
       setIsRecording(false);
 
       if (audioUri) {
         if (onRecordingStop) {
           onRecordingStop(audioUri, recordingDuration);
         }
+      }
 
-        // Try to transcribe
-        // For web, use Web Speech API (already handled in real-time)
-        // For native, call server-side transcription
-        if (Platform.OS !== 'web') {
-          const result = await speechRecognition.transcribeAudio(audioUri, 'vi-VN');
-
-          if (result.success && result.text && onTranscription) {
-            onTranscription(result.text);
-          }
-        }
+      // For native, the transcription is handled in real-time via speech recognition callbacks
+      // If we have partial results from real-time recognition, use those
+      if (speechRecognition.partialResults && onTranscription) {
+        onTranscription(speechRecognition.partialResults);
       }
 
     } catch (error) {

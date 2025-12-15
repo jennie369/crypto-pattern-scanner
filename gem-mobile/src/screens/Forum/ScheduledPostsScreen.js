@@ -11,9 +11,9 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Alert,
   RefreshControl,
 } from 'react-native';
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -30,6 +30,7 @@ import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, GLASS } from '../../utils/token
 import { scheduleService } from '../../services/scheduleService';
 
 const ScheduledPostsScreen = ({ navigation }) => {
+  const { alert, AlertComponent } = useCustomAlert();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -59,71 +60,94 @@ const ScheduledPostsScreen = ({ navigation }) => {
   };
 
   const handlePublishNow = async (postId) => {
-    Alert.alert(
-      'Dang ngay',
-      'Ban co chac muon dang bai viet nay ngay bay gio?',
-      [
-        { text: 'Huy', style: 'cancel' },
+    alert({
+      type: 'warning',
+      title: 'Đăng ngay',
+      message: 'Bạn có chắc muốn đăng bài viết này ngay bây giờ?',
+      buttons: [
+        { text: 'Hủy', style: 'cancel' },
         {
-          text: 'Dang',
+          text: 'Đăng',
           onPress: async () => {
             const result = await scheduleService.publishNow(postId);
             if (result.success) {
-              Alert.alert('Thanh cong', 'Bai viet da duoc dang');
+              alert({
+                type: 'success',
+                title: 'Thành công',
+                message: 'Bài viết đã được đăng',
+                buttons: [{ text: 'OK' }],
+              });
               loadPosts();
             } else {
-              Alert.alert('Loi', result.error);
+              alert({
+                type: 'error',
+                title: 'Lỗi',
+                message: result.error,
+                buttons: [{ text: 'OK' }],
+              });
             }
           },
         },
-      ]
-    );
+      ],
+    });
     setActiveMenu(null);
   };
 
   const handleCancel = async (postId) => {
-    Alert.alert(
-      'Huy lich hen',
-      'Ban co chac muon huy lich hen bai viet nay?',
-      [
-        { text: 'Khong', style: 'cancel' },
+    alert({
+      type: 'warning',
+      title: 'Hủy lịch hẹn',
+      message: 'Bạn có chắc muốn hủy lịch hẹn bài viết này?',
+      buttons: [
+        { text: 'Không', style: 'cancel' },
         {
-          text: 'Huy lich',
+          text: 'Hủy lịch',
           style: 'destructive',
           onPress: async () => {
             const result = await scheduleService.cancelScheduledPost(postId);
             if (result.success) {
               loadPosts();
             } else {
-              Alert.alert('Loi', result.error);
+              alert({
+                type: 'error',
+                title: 'Lỗi',
+                message: result.error,
+                buttons: [{ text: 'OK' }],
+              });
             }
           },
         },
-      ]
-    );
+      ],
+    });
     setActiveMenu(null);
   };
 
   const handleDelete = async (postId) => {
-    Alert.alert(
-      'Xoa bai viet',
-      'Ban co chac muon xoa bai viet nay? Hanh dong nay khong the hoan tac.',
-      [
-        { text: 'Huy', style: 'cancel' },
+    alert({
+      type: 'warning',
+      title: 'Xóa bài viết',
+      message: 'Bạn có chắc muốn xóa bài viết này? Hành động này không thể hoàn tác.',
+      buttons: [
+        { text: 'Hủy', style: 'cancel' },
         {
-          text: 'Xoa',
+          text: 'Xóa',
           style: 'destructive',
           onPress: async () => {
             const result = await scheduleService.deleteScheduledPost(postId);
             if (result.success) {
               loadPosts();
             } else {
-              Alert.alert('Loi', result.error);
+              alert({
+                type: 'error',
+                title: 'Lỗi',
+                message: result.error,
+                buttons: [{ text: 'OK' }],
+              });
             }
           },
         },
-      ]
-    );
+      ],
+    });
     setActiveMenu(null);
   };
 
@@ -320,6 +344,7 @@ const ScheduledPostsScreen = ({ navigation }) => {
             />
           }
         />
+        {AlertComponent}
       </SafeAreaView>
     </LinearGradient>
   );

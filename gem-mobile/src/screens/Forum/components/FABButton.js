@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: SPACING.lg,
-    bottom: 120, // Account for floating tab bar
+    bottom: 140, // Account for floating tab bar + safe area
     width: 56,
     height: 56,
     borderRadius: 28,

@@ -315,9 +315,9 @@ const ProductPicker = ({
         </View>
         <View style={styles.productInfo}>
           <Text style={styles.productTitle} numberOfLines={2}>
-            {item.title}
+            {item.title || ''}
           </Text>
-          <Text style={styles.productPrice}>{item.price}</Text>
+          <Text style={styles.productPrice}>{item.price || '0đ'}</Text>
           <View style={[
             styles.productTypeBadge,
             item.type === 'digital' ? styles.digitalBadge :
@@ -329,7 +329,7 @@ const ProductPicker = ({
             </Text>
           </View>
         </View>
-        {isSelected && (
+        {isSelected ? (
           <View style={styles.selectedIndicator}>
             {multiSelect ? (
               <Text style={styles.selectionNumber}>{selectionIndex}</Text>
@@ -337,7 +337,7 @@ const ProductPicker = ({
               <Check size={20} color={COLORS.gold} />
             )}
           </View>
-        )}
+        ) : null}
       </TouchableOpacity>
     );
   };
@@ -365,7 +365,7 @@ const ProductPicker = ({
                 </View>
               )}
               <Text style={styles.selectedChipText} numberOfLines={1}>
-                {product.title}
+                {product.title || ''}
               </Text>
               <TouchableOpacity
                 onPress={() => handleRemoveProduct(product.id)}
@@ -474,7 +474,7 @@ const ProductPicker = ({
             <View style={styles.emptyContainer}>
               <ShoppingBag size={48} color={COLORS.textMuted} />
               <Text style={styles.emptyTitle}>Không thể tải sản phẩm</Text>
-              <Text style={styles.emptyText}>{error}</Text>
+              <Text style={styles.emptyText}>{error || ''}</Text>
               <TouchableOpacity style={styles.retryButton} onPress={loadProducts}>
                 <RefreshCw size={16} color={COLORS.gold} />
                 <Text style={styles.retryText}>Thử lại</Text>
@@ -487,17 +487,17 @@ const ProductPicker = ({
               <Text style={styles.emptyText}>
                 {searchQuery ? 'Thử tìm kiếm với từ khóa khác' : 'Chưa có sản phẩm trong cửa hàng'}
               </Text>
-              {searchQuery && (
+              {searchQuery ? (
                 <TouchableOpacity style={styles.retryButton} onPress={() => handleSearch('')}>
                   <Text style={styles.retryText}>Xem tất cả sản phẩm</Text>
                 </TouchableOpacity>
-              )}
+              ) : null}
             </View>
           ) : (
             <FlatList
               data={filteredProducts}
               renderItem={renderProduct}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item) => String(item.id)}
               contentContainerStyle={styles.listContent}
               showsVerticalScrollIndicator={false}
             />

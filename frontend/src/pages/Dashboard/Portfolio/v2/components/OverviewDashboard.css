@@ -87,10 +87,21 @@
   color: var(--accent-red);
 }
 
+/* Charts Row - Side by side layout */
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md, 24px);
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .charts-row {
+    grid-template-columns: 1fr;
   }
 }
 

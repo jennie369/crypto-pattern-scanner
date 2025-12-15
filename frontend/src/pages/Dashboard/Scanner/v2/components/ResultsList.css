@@ -273,3 +273,85 @@ div.result-card.selected,
   transform: translateY(0) !important;
   box-shadow: 0 2px 8px rgba(255, 189, 89, 0.2) !important;
 }
+
+/* ============================================
+   MOBILE FIXES - max-width: 767px
+   Desktop styles preserved above - DO NOT TOUCH!
+   ============================================ */
+@media (max-width: 767px) {
+  .results-list {
+    gap: 10px;
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+
+  .results-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .results-items {
+    gap: 8px;
+  }
+
+  .result-card,
+  .results-list .results-items .result-card {
+    padding: 10px 12px !important;
+    margin-bottom: 6px !important;
+    border-radius: 10px !important;
+  }
+
+  .result-header {
+    margin-bottom: 4px !important;
+  }
+
+  .result-coin {
+    font-size: 13px !important;
+  }
+
+  .result-confidence {
+    font-size: 10px !important;
+    padding: 2px 5px !important;
+  }
+
+  .result-pattern {
+    margin-bottom: 4px !important;
+    gap: 4px;
+  }
+
+  .results-list .pattern-code {
+    font-size: 11px !important;
+    padding: 4px 6px !important;
+  }
+
+  .result-timeframe {
+    font-size: 10px !important;
+  }
+
+  .result-details-3col {
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .result-details-3col .detail-label {
+    font-size: 9px;
+  }
+
+  .result-details-3col .detail-value {
+    font-size: 12px;
+  }
+
+  .result-time-ago {
+    margin-top: 6px;
+    padding-top: 6px;
+    font-size: 10px;
+  }
+
+  .paper-trade-btn,
+  .results-list .results-items .result-card .paper-trade-btn {
+    height: 32px !important;
+    font-size: 12px !important;
+    margin-top: 6px !important;
+    gap: 4px !important;
+  }
+}

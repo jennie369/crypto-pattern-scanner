@@ -4,12 +4,14 @@
  * Handles sharing posts to external platforms
  */
 
-import { Share, Platform } from 'react-native';
+import { Share, Platform, Linking } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 
 // App deep link base URL
 const APP_SCHEME = 'gem://';
-const WEB_BASE_URL = 'https://gem.app';
+const WEB_BASE_URL = 'https://gemral.com';
 
 /**
  * Generate a shareable link for a post
@@ -98,30 +100,198 @@ export const copyPostLink = async (postId) => {
 };
 
 /**
- * Share to specific platforms (when available)
+ * Download image to local cache for sharing
+ * @param {string} imageUrl - Remote image URL
+ * @returns {Promise<string|null>} Local file URI or null
+ */
+const downloadImageForShare = async (imageUrl) => {
+  if (!imageUrl) return null;
+
+  try {
+    const filename = imageUrl.split('/').pop()?.split('?')[0] || 'share_image.jpg';
+    const localUri = `${FileSystem.cacheDirectory}${filename}`;
+
+    const downloadResult = await FileSystem.downloadAsync(imageUrl, localUri);
+
+    if (downloadResult.status === 200) {
+      return downloadResult.uri;
+    }
+    return null;
+  } catch (error) {
+    console.error('[Share] Download image error:', error);
+    return null;
+  }
+};
+
+/**
+ * Share to WhatsApp with text and optional image
+ * @param {object} post - Post object
+ * @returns {Promise<object>} { success, error? }
  */
 export const shareToWhatsApp = async (post) => {
-  const content = generateShareContent(post);
-  const text = encodeURIComponent(`${content.message}${content.url}`);
-  const whatsappUrl = `whatsapp://send?text=${text}`;
+  try {
+    const content = generateShareContent(post);
+    const shareText = `${content.message}\n\n📱 Xem trên Gemral App`;
 
-  // Note: You'd use Linking.openURL(whatsappUrl) in the component
-  return whatsappUrl;
+    // Check if WhatsApp is available
+    const canOpen = await Linking.canOpenURL('whatsapp://');
+
+    if (!canOpen) {
+      return { success: false, error: 'WhatsApp chưa được cài đặt' };
+    }
+
+    // If post has image, try to share with image using native share
+    if (post.image_url || post.media_url) {
+      const localImageUri = await downloadImageForShare(post.image_url || post.media_url);
+
+      if (localImageUri && await Sharing.isAvailableAsync()) {
+        // Use native sharing with image (will show WhatsApp option)
+        await Sharing.shareAsync(localImageUri, {
+          mimeType: 'image/jpeg',
+          dialogTitle: 'Chia sẻ lên WhatsApp',
+          UTI: 'public.jpeg',
+        });
+        return { success: true };
+      }
+    }
+
+    // Fallback: Share text only via WhatsApp URL scheme
+    const whatsappUrl = `whatsapp://send?text=${encodeURIComponent(shareText)}`;
+    await Linking.openURL(whatsappUrl);
+    return { success: true };
+
+  } catch (error) {
+    console.error('[Share] WhatsApp error:', error);
+    return { success: false, error: error.message };
+  }
 };
 
+/**
+ * Share to Telegram with text and optional image
+ * @param {object} post - Post object
+ * @returns {Promise<object>} { success, error? }
+ */
 export const shareToTelegram = async (post) => {
-  const content = generateShareContent(post);
-  const text = encodeURIComponent(`${content.message}${content.url}`);
-  const telegramUrl = `tg://msg?text=${text}`;
+  try {
+    const content = generateShareContent(post);
+    const shareText = `${content.message}\n\n📱 Xem trên Gemral App`;
 
-  return telegramUrl;
+    // Check if Telegram is available
+    const canOpen = await Linking.canOpenURL('tg://');
+
+    if (!canOpen) {
+      return { success: false, error: 'Telegram chưa được cài đặt' };
+    }
+
+    // If post has image, use native share
+    if (post.image_url || post.media_url) {
+      const localImageUri = await downloadImageForShare(post.image_url || post.media_url);
+
+      if (localImageUri && await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(localImageUri, {
+          mimeType: 'image/jpeg',
+          dialogTitle: 'Chia sẻ lên Telegram',
+        });
+        return { success: true };
+      }
+    }
+
+    // Fallback: Share text only
+    const telegramUrl = `tg://msg?text=${encodeURIComponent(shareText)}`;
+    await Linking.openURL(telegramUrl);
+    return { success: true };
+
+  } catch (error) {
+    console.error('[Share] Telegram error:', error);
+    return { success: false, error: error.message };
+  }
 };
 
+/**
+ * Share to Messenger with text and optional image
+ * @param {object} post - Post object
+ * @returns {Promise<object>} { success, error? }
+ */
 export const shareToMessenger = async (post) => {
-  const links = generatePostLinks(post.id);
-  const messengerUrl = `fb-messenger://share?link=${encodeURIComponent(links.webLink)}`;
+  try {
+    const content = generateShareContent(post);
+    const shareText = `${content.message}\n\n📱 Xem trên Gemral App`;
 
-  return messengerUrl;
+    // Check if Messenger is available
+    const canOpen = await Linking.canOpenURL('fb-messenger://');
+
+    if (!canOpen) {
+      return { success: false, error: 'Messenger chưa được cài đặt' };
+    }
+
+    // Messenger doesn't support direct image share via URL scheme
+    // Best option: Use native share which includes Messenger
+    if (post.image_url || post.media_url) {
+      const localImageUri = await downloadImageForShare(post.image_url || post.media_url);
+
+      if (localImageUri && await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(localImageUri, {
+          mimeType: 'image/jpeg',
+          dialogTitle: 'Chia sẻ lên Messenger',
+        });
+        return { success: true };
+      }
+    }
+
+    // Fallback: Open Messenger share dialog (text only)
+    // Note: fb-messenger://share requires a valid URL, so we use compose instead
+    const messengerUrl = `fb-messenger://share?text=${encodeURIComponent(shareText)}`;
+
+    try {
+      await Linking.openURL(messengerUrl);
+      return { success: true };
+    } catch (e) {
+      // Try alternative Messenger URL format
+      const altMessengerUrl = `fb-messenger://compose?text=${encodeURIComponent(shareText)}`;
+      await Linking.openURL(altMessengerUrl);
+      return { success: true };
+    }
+
+  } catch (error) {
+    console.error('[Share] Messenger error:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Share with image to any app using native share sheet
+ * @param {object} post - Post object
+ * @returns {Promise<object>} { success, error? }
+ */
+export const shareWithImage = async (post) => {
+  try {
+    const content = generateShareContent(post);
+    const shareText = `${content.message}\n\n📱 Xem trên Gemral App`;
+
+    // Download image if available
+    if (post.image_url || post.media_url) {
+      const localImageUri = await downloadImageForShare(post.image_url || post.media_url);
+
+      if (localImageUri && await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(localImageUri, {
+          mimeType: 'image/jpeg',
+          dialogTitle: 'Chia sẻ bài viết',
+        });
+        return { success: true };
+      }
+    }
+
+    // Fallback to text share
+    const result = await Share.share({
+      message: shareText,
+    });
+
+    return { success: result.action === Share.sharedAction };
+
+  } catch (error) {
+    console.error('[Share] shareWithImage error:', error);
+    return { success: false, error: error.message };
+  }
 };
 
 /**
@@ -344,6 +514,7 @@ export default {
   shareToWhatsApp,
   shareToTelegram,
   shareToMessenger,
+  shareWithImage,
   shareImage,
   parseDeepLink,
   // Affiliate sharing

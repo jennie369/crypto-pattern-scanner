@@ -413,4 +413,237 @@ class OrderService {
 }
 
 export const orderService = new OrderService();
+
+// ============================================================
+// STANDALONE FUNCTIONS FOR SHOPIFY ORDERS (V3)
+// ============================================================
+
+/**
+ * Fetch orders from shopify_orders table (with linked_emails support)
+ * @param {string} userId - User ID
+ * @returns {Promise<Array>} List of orders
+ */
+export const fetchUserOrdersFromShopify = async (userId) => {
+  try {
+    // 1. Get user profile with email and linked_emails
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('email, linked_emails')
+      .eq('id', userId)
+      .single();
+
+    if (profileError || !profile) {
+      console.error('[OrderService] Profile not found:', profileError);
+      throw new Error('Không tìm thấy thông tin tài khoản');
+    }
+
+    // 2. Build list of all emails to search
+    const emails = [profile.email, ...(profile.linked_emails || [])].filter(Boolean);
+
+    if (emails.length === 0) {
+      return [];
+    }
+
+    // 3. Query shopify_orders where email IN (all_emails)
+    const { data: orders, error: ordersError } = await supabase
+      .from('shopify_orders')
+      .select('*')
+      .in('email', emails)
+      .order('created_at', { ascending: false });
+
+    if (ordersError) {
+      console.error('[OrderService] Fetch orders error:', ordersError);
+      throw ordersError;
+    }
+
+    return orders || [];
+  } catch (error) {
+    console.error('[OrderService] fetchUserOrdersFromShopify error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Fetch single order detail from shopify_orders
+ * @param {string} orderId - Order UUID
+ * @returns {Promise<Object|null>} Order detail
+ */
+export const fetchShopifyOrderDetail = async (orderId) => {
+  try {
+    const { data, error } = await supabase
+      .from('shopify_orders')
+      .select('*')
+      .eq('id', orderId)
+      .single();
+
+    if (error) {
+      console.error('[OrderService] Fetch order detail error:', error);
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('[OrderService] fetchShopifyOrderDetail error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Link email to user's profile
+ * @param {string} userId - User ID
+ * @param {string} email - Email to link
+ * @returns {Promise<Object>} { success, message }
+ */
+export const linkEmailToAccount = async (userId, email) => {
+  try {
+    // 1. Get current linked_emails
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('linked_emails')
+      .eq('id', userId)
+      .single();
+
+    if (profileError) {
+      throw new Error('Không tìm thấy tài khoản');
+    }
+
+    const currentEmails = profile?.linked_emails || [];
+
+    // 2. Check if already linked
+    if (currentEmails.includes(email)) {
+      return { success: true, message: 'Email đã được liên kết trước đó' };
+    }
+
+    // 3. Add new email
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ linked_emails: [...currentEmails, email] })
+      .eq('id', userId);
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    // 4. Apply any pending course access for that email
+    const { data: pendingAccess } = await supabase
+      .from('pending_course_access')
+      .select('*')
+      .eq('email', email)
+      .eq('applied', false);
+
+    if (pendingAccess && pendingAccess.length > 0) {
+      for (const pending of pendingAccess) {
+        // Grant course enrollment
+        await supabase.from('course_enrollments').upsert({
+          user_id: userId,
+          course_id: pending.course_id,
+          access_type: 'shopify_purchase',
+          metadata: { shopify_order_id: pending.shopify_order_id },
+          enrolled_at: new Date().toISOString(),
+        }, { onConflict: 'user_id,course_id' });
+
+        // Mark as applied
+        await supabase
+          .from('pending_course_access')
+          .update({
+            applied: true,
+            applied_user_id: userId,
+            applied_at: new Date().toISOString(),
+          })
+          .eq('id', pending.id);
+      }
+    }
+
+    return { success: true, message: 'Đã liên kết email thành công' };
+  } catch (error) {
+    console.error('[OrderService] linkEmailToAccount error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Link order to user by order number + email
+ * @param {string} userId - User ID
+ * @param {string} orderNumber - Shopify order number
+ * @param {string} email - Email used when ordering
+ * @returns {Promise<Object>} { success, message }
+ */
+export const linkOrderByNumber = async (userId, orderNumber, email) => {
+  try {
+    // 1. Find order in shopify_orders
+    const { data: order, error: findError } = await supabase
+      .from('shopify_orders')
+      .select('*')
+      .eq('order_number', orderNumber)
+      .eq('email', email.toLowerCase())
+      .single();
+
+    if (findError || !order) {
+      return {
+        success: false,
+        message: 'Không tìm thấy đơn hàng. Vui lòng kiểm tra lại số đơn hàng và email.',
+      };
+    }
+
+    // 2. Check if already linked to this user
+    if (order.user_id === userId) {
+      return { success: true, message: 'Đơn hàng đã được liên kết với tài khoản của bạn' };
+    }
+
+    // 3. Update order's user_id
+    const { error: updateError } = await supabase
+      .from('shopify_orders')
+      .update({ user_id: userId })
+      .eq('id', order.id);
+
+    if (updateError) {
+      throw updateError;
+    }
+
+    // 4. Link email to account as well
+    await linkEmailToAccount(userId, email.toLowerCase());
+
+    return { success: true, message: 'Đã liên kết đơn hàng thành công' };
+  } catch (error) {
+    console.error('[OrderService] linkOrderByNumber error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get Vietnamese status text for order
+ * @param {Object} order - Order object
+ * @returns {string} Vietnamese status text
+ */
+export const getOrderStatusText = (order) => {
+  if (!order) return 'Không xác định';
+
+  const { financial_status, fulfillment_status } = order;
+
+  if (financial_status === 'refunded') return 'Đã hoàn tiền';
+  if (financial_status === 'pending') return 'Chờ thanh toán';
+  if (fulfillment_status === 'fulfilled') return 'Đã giao hàng';
+  if (financial_status === 'paid') return 'Đã thanh toán';
+
+  return 'Đang xử lý';
+};
+
+/**
+ * Get status color for order
+ * @param {Object} order - Order object
+ * @returns {string} Hex color code
+ */
+export const getOrderStatusColor = (order) => {
+  if (!order) return '#888888';
+
+  const { financial_status, fulfillment_status } = order;
+
+  if (financial_status === 'refunded') return '#EF4444'; // Red
+  if (financial_status === 'pending') return '#F59E0B'; // Amber
+  if (fulfillment_status === 'fulfilled') return '#10B981'; // Green
+  if (financial_status === 'paid') return '#3B82F6'; // Blue
+
+  return '#888888'; // Gray
+};
+
 export default orderService;

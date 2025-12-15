@@ -11,7 +11,6 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Trash2, Minus, Plus, ShoppingBag } from 'lucide-react-native';
@@ -19,9 +18,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, SHADOWS, GLASS } from '../../utils/tokens';
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 
 const CartScreen = ({ navigation }) => {
   const { isAuthenticated } = useAuth();
+  const { alert, AlertComponent } = useCustomAlert();
   const {
     items,
     itemCount,
@@ -42,42 +43,45 @@ const CartScreen = ({ navigation }) => {
   };
 
   const handleRemoveItem = (variantId, title) => {
-    Alert.alert(
-      'Xóa sản phẩm',
-      `Bạn có chắc muốn xóa "${title}" khỏi giỏ hàng?`,
-      [
+    alert({
+      type: 'warning',
+      title: 'Xóa sản phẩm',
+      message: `Bạn có chắc muốn xóa "${title}" khỏi giỏ hàng?`,
+      buttons: [
         { text: 'Hủy', style: 'cancel' },
         {
           text: 'Xóa',
           style: 'destructive',
           onPress: () => removeItem(variantId),
         },
-      ]
-    );
+      ],
+    });
   };
 
   const handleClearCart = () => {
-    Alert.alert(
-      'Xóa giỏ hàng',
-      'Bạn có chắc muốn xóa tất cả sản phẩm?',
-      [
+    alert({
+      type: 'warning',
+      title: 'Xóa giỏ hàng',
+      message: 'Bạn có chắc muốn xóa tất cả sản phẩm?',
+      buttons: [
         { text: 'Hủy', style: 'cancel' },
         {
           text: 'Xóa tất cả',
           style: 'destructive',
           onPress: clearCart,
         },
-      ]
-    );
+      ],
+    });
   };
 
   const handleCheckout = async () => {
     // Check authentication before checkout
     if (!isAuthenticated) {
-      Alert.alert(
-        'Đăng Nhập Cần Thiết',
-        'Bạn cần đăng nhập để thanh toán',
-        [
+      alert({
+        type: 'warning',
+        title: 'Đăng Nhập Cần Thiết',
+        message: 'Bạn cần đăng nhập để thanh toán',
+        buttons: [
           { text: 'Để sau', style: 'cancel' },
           {
             text: 'Đăng nhập',
@@ -86,8 +90,8 @@ const CartScreen = ({ navigation }) => {
               params: { returnTo: 'Cart' },
             }),
           },
-        ]
-      );
+        ],
+      });
       return;
     }
 
@@ -96,7 +100,11 @@ const CartScreen = ({ navigation }) => {
       // Navigate to WebView-based checkout with instant success detection
       navigation.navigate('CheckoutWebView', { checkoutUrl: result.checkoutUrl });
     } else {
-      Alert.alert('Lỗi', result.error || 'Không thể tạo đơn hàng');
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: result.error || 'Không thể tạo đơn hàng',
+      });
     }
   };
 
@@ -232,6 +240,7 @@ const CartScreen = ({ navigation }) => {
         ) : (
           renderEmptyCart()
         )}
+        {AlertComponent}
       </SafeAreaView>
     </LinearGradient>
   );

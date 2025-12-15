@@ -1,11 +1,16 @@
 /**
  * Gemral - Course Context
- * Global course state management with AsyncStorage persistence
+ * Global course state management with AsyncStorage persistence + Supabase Realtime Sync
+ * Supports: courses, lessons, quizzes, certificates
+ * REALTIME: Auto-syncs courses, progress, enrollments between Web and Mobile
  */
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { courseService } from '../services/courseService';
+import { quizService } from '../services/quizService';
+import { progressService } from '../services/progressService';
+import { supabase } from '../services/supabase';
 import { useAuth } from './AuthContext';
 
 const CourseContext = createContext(null);
@@ -13,18 +18,29 @@ const CourseContext = createContext(null);
 const ENROLLMENTS_KEY = '@gem_enrollments';
 const PROGRESS_KEY = '@gem_course_progress';
 const COMPLETED_LESSONS_KEY = '@gem_completed_lessons';
+const QUIZ_RESULTS_KEY = '@gem_quiz_results';
+const CERTIFICATES_KEY = '@gem_certificates';
 
 export const CourseProvider = ({ children }) => {
-  const { user, profile } = useAuth();
+  const { user, profile, tier: userTier, isAdmin } = useAuth();
 
   // State
   const [courses, setCourses] = useState([]);
   const [enrolledCourseIds, setEnrolledCourseIds] = useState([]);
   const [courseProgress, setCourseProgress] = useState({}); // { courseId: percent }
   const [completedLessons, setCompletedLessons] = useState({}); // { courseId: [lessonIds] }
+  const [quizResults, setQuizResults] = useState({}); // { lessonId: { passed, score, percentage } }
+  const [certificates, setCertificates] = useState({}); // { courseId: certificate }
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
+
+  // Realtime subscription refs
+  const coursesChannelRef = useRef(null);
+  const modulesChannelRef = useRef(null);
+  const lessonsChannelRef = useRef(null);
+  const enrollmentsChannelRef = useRef(null);
+  const progressChannelRef = useRef(null);
 
   // Computed values
   const enrolledCourses = courses.filter(c => enrolledCourseIds.includes(c.id));
@@ -34,41 +50,361 @@ export const CourseProvider = ({ children }) => {
     return progress > 0 && progress < 100;
   });
 
-  // Load data on mount
+  // Load data on mount or when admin status changes
   useEffect(() => {
     if (user?.id) {
       loadAllData();
+      setupRealtimeSubscriptions();
     } else {
       setLoading(false);
     }
+
+    // Cleanup subscriptions on unmount
+    return () => {
+      cleanupSubscriptions();
+    };
+  }, [user?.id, isAdmin]);
+
+  // ==================== REALTIME SUBSCRIPTIONS ====================
+
+  const setupRealtimeSubscriptions = useCallback(() => {
+    console.log('[CourseContext] Setting up realtime subscriptions...');
+
+    // 1. Subscribe to courses changes (new courses, updates)
+    coursesChannelRef.current = supabase
+      .channel('courses-realtime')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'courses',
+        filter: 'is_published=eq.true',
+      }, (payload) => {
+        console.log('[CourseContext] Course change:', payload.eventType, payload);
+        handleCourseChange(payload);
+      })
+      .subscribe((status) => {
+        console.log('[CourseContext] Courses subscription:', status);
+      });
+
+    // 2. Subscribe to modules changes
+    modulesChannelRef.current = supabase
+      .channel('modules-realtime')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'course_modules',
+      }, (payload) => {
+        console.log('[CourseContext] Module change:', payload.eventType, payload);
+        handleModuleChange(payload);
+      })
+      .subscribe();
+
+    // 3. Subscribe to lessons changes
+    lessonsChannelRef.current = supabase
+      .channel('lessons-realtime')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'course_lessons',
+      }, (payload) => {
+        console.log('[CourseContext] Lesson change:', payload.eventType, payload);
+        handleLessonChange(payload);
+      })
+      .subscribe();
+
+    // 4. Subscribe to user's enrollments
+    if (user?.id) {
+      enrollmentsChannelRef.current = supabase
+        .channel(`enrollments-${user.id}`)
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'course_enrollments',
+          filter: `user_id=eq.${user.id}`,
+        }, (payload) => {
+          console.log('[CourseContext] Enrollment change:', payload.eventType, payload);
+          handleEnrollmentChange(payload);
+        })
+        .subscribe();
+
+      // 5. Subscribe to user's lesson progress
+      progressChannelRef.current = supabase
+        .channel(`progress-${user.id}`)
+        .on('postgres_changes', {
+          event: '*',
+          schema: 'public',
+          table: 'lesson_progress',
+          filter: `user_id=eq.${user.id}`,
+        }, (payload) => {
+          console.log('[CourseContext] Progress change:', payload.eventType, payload);
+          handleProgressChange(payload);
+        })
+        .subscribe();
+    }
   }, [user?.id]);
 
-  // Load all data from service and storage
+  const cleanupSubscriptions = useCallback(() => {
+    console.log('[CourseContext] Cleaning up subscriptions...');
+    if (coursesChannelRef.current) supabase.removeChannel(coursesChannelRef.current);
+    if (modulesChannelRef.current) supabase.removeChannel(modulesChannelRef.current);
+    if (lessonsChannelRef.current) supabase.removeChannel(lessonsChannelRef.current);
+    if (enrollmentsChannelRef.current) supabase.removeChannel(enrollmentsChannelRef.current);
+    if (progressChannelRef.current) supabase.removeChannel(progressChannelRef.current);
+  }, []);
+
+  // Handle course changes from realtime
+  const handleCourseChange = useCallback((payload) => {
+    const { eventType, new: newCourse, old: oldCourse } = payload;
+
+    setCourses(prev => {
+      if (eventType === 'INSERT') {
+        // Add new course if not exists
+        if (!prev.find(c => c.id === newCourse.id)) {
+          console.log('[CourseContext] Adding new course:', newCourse.title);
+          return [...prev, newCourse];
+        }
+      } else if (eventType === 'UPDATE') {
+        // Update existing course
+        return prev.map(c => c.id === newCourse.id ? { ...c, ...newCourse } : c);
+      } else if (eventType === 'DELETE') {
+        // Remove deleted course
+        return prev.filter(c => c.id !== oldCourse.id);
+      }
+      return prev;
+    });
+  }, []);
+
+  // Handle module changes from realtime
+  const handleModuleChange = useCallback(async (payload) => {
+    const { eventType, new: newModule, old: oldModule } = payload;
+    const courseId = newModule?.course_id || oldModule?.course_id;
+
+    if (!courseId) return;
+
+    // Refresh the full course data to get updated modules
+    const updatedCourse = await courseService.getCourseById(courseId);
+    if (updatedCourse) {
+      setCourses(prev =>
+        prev.map(c => c.id === courseId ? updatedCourse : c)
+      );
+    }
+  }, []);
+
+  // Handle lesson changes from realtime
+  const handleLessonChange = useCallback(async (payload) => {
+    const { new: newLesson, old: oldLesson } = payload;
+    const moduleId = newLesson?.module_id || oldLesson?.module_id;
+
+    if (!moduleId) return;
+
+    // Find course that contains this module and refresh it
+    const course = courses.find(c =>
+      c.modules?.some(m => m.id === moduleId)
+    );
+
+    if (course) {
+      const updatedCourse = await courseService.getCourseById(course.id);
+      if (updatedCourse) {
+        setCourses(prev =>
+          prev.map(c => c.id === course.id ? updatedCourse : c)
+        );
+      }
+    }
+  }, [courses]);
+
+  // Handle enrollment changes from realtime (from web or other devices)
+  const handleEnrollmentChange = useCallback(async (payload) => {
+    const { eventType, new: newEnroll, old: oldEnroll } = payload;
+
+    if (eventType === 'INSERT' && newEnroll) {
+      const courseId = newEnroll.course_id;
+      setEnrolledCourseIds(prev => {
+        if (!prev.includes(courseId)) {
+          const updated = [...prev, courseId];
+          AsyncStorage.setItem(ENROLLMENTS_KEY, JSON.stringify(updated));
+          return updated;
+        }
+        return prev;
+      });
+
+      // Initialize progress from enrollment data
+      if (newEnroll.progress_percentage !== undefined) {
+        setCourseProgress(prev => {
+          const updated = { ...prev, [courseId]: newEnroll.progress_percentage };
+          AsyncStorage.setItem(PROGRESS_KEY, JSON.stringify(updated));
+          return updated;
+        });
+      }
+    } else if (eventType === 'UPDATE' && newEnroll) {
+      // Update progress from enrollment
+      const courseId = newEnroll.course_id;
+      if (newEnroll.progress_percentage !== undefined) {
+        setCourseProgress(prev => {
+          const updated = { ...prev, [courseId]: newEnroll.progress_percentage };
+          AsyncStorage.setItem(PROGRESS_KEY, JSON.stringify(updated));
+          return updated;
+        });
+      }
+    } else if (eventType === 'DELETE' && oldEnroll) {
+      const courseId = oldEnroll.course_id;
+      setEnrolledCourseIds(prev => {
+        const updated = prev.filter(id => id !== courseId);
+        AsyncStorage.setItem(ENROLLMENTS_KEY, JSON.stringify(updated));
+        return updated;
+      });
+    }
+  }, []);
+
+  // Handle lesson progress changes from realtime (from web or other devices)
+  const handleProgressChange = useCallback((payload) => {
+    const { eventType, new: newProgress } = payload;
+
+    if ((eventType === 'INSERT' || eventType === 'UPDATE') && newProgress) {
+      const { course_id: courseId, lesson_id: lessonId, status } = newProgress;
+
+      if (status === 'completed') {
+        // Add to completed lessons
+        setCompletedLessons(prev => {
+          const current = prev[courseId] || [];
+          if (!current.includes(lessonId)) {
+            const updated = { ...prev, [courseId]: [...current, lessonId] };
+            AsyncStorage.setItem(COMPLETED_LESSONS_KEY, JSON.stringify(updated));
+            return updated;
+          }
+          return prev;
+        });
+
+        // Recalculate progress
+        const course = courses.find(c => c.id === courseId);
+        if (course) {
+          setCompletedLessons(prevCompleted => {
+            const completedList = prevCompleted[courseId] || [];
+            const totalLessons = course.modules?.reduce(
+              (sum, m) => sum + (m.lessons?.length || 0), 0
+            ) || 1;
+            const newPercent = Math.round((completedList.length / totalLessons) * 100);
+
+            setCourseProgress(prevProgress => {
+              const updated = { ...prevProgress, [courseId]: newPercent };
+              AsyncStorage.setItem(PROGRESS_KEY, JSON.stringify(updated));
+              return updated;
+            });
+
+            return prevCompleted;
+          });
+        }
+      }
+    }
+  }, [courses]);
+
+  // Load all data from service and storage + sync from Supabase
   const loadAllData = async () => {
     setLoading(true);
     setError(null);
 
     try {
       // Load courses from service
-      const coursesData = await courseService.getCourses();
+      // Admin/Creator can see all courses (including unpublished)
+      const coursesData = await courseService.getCourses({
+        includeUnpublished: isAdmin,
+      });
       setCourses(coursesData);
 
-      // Load enrollments from storage
-      const storedEnrollments = await AsyncStorage.getItem(ENROLLMENTS_KEY);
-      if (storedEnrollments) {
-        setEnrolledCourseIds(JSON.parse(storedEnrollments));
+      // Try to load enrollments from Supabase first, fallback to AsyncStorage
+      let enrollments = [];
+      if (user?.id) {
+        try {
+          const { data: dbEnrollments } = await supabase
+            .from('course_enrollments')
+            .select('course_id, progress_percentage')
+            .eq('user_id', user.id)
+            .eq('is_active', true);
+
+          if (dbEnrollments && dbEnrollments.length > 0) {
+            enrollments = dbEnrollments.map(e => e.course_id);
+            // Also sync progress from DB
+            const progressFromDb = {};
+            dbEnrollments.forEach(e => {
+              progressFromDb[e.course_id] = e.progress_percentage || 0;
+            });
+            setCourseProgress(progressFromDb);
+            await AsyncStorage.setItem(PROGRESS_KEY, JSON.stringify(progressFromDb));
+          }
+        } catch (dbErr) {
+          console.warn('[CourseContext] Failed to load enrollments from DB:', dbErr);
+        }
       }
 
-      // Load progress from storage
-      const storedProgress = await AsyncStorage.getItem(PROGRESS_KEY);
-      if (storedProgress) {
-        setCourseProgress(JSON.parse(storedProgress));
+      // If no DB enrollments, use AsyncStorage
+      if (enrollments.length === 0) {
+        const storedEnrollments = await AsyncStorage.getItem(ENROLLMENTS_KEY);
+        if (storedEnrollments) {
+          enrollments = JSON.parse(storedEnrollments);
+        }
+
+        // Load progress from storage
+        const storedProgress = await AsyncStorage.getItem(PROGRESS_KEY);
+        if (storedProgress) {
+          setCourseProgress(JSON.parse(storedProgress));
+        }
       }
 
-      // Load completed lessons from storage
-      const storedCompleted = await AsyncStorage.getItem(COMPLETED_LESSONS_KEY);
-      if (storedCompleted) {
-        setCompletedLessons(JSON.parse(storedCompleted));
+      setEnrolledCourseIds(enrollments);
+      await AsyncStorage.setItem(ENROLLMENTS_KEY, JSON.stringify(enrollments));
+
+      // Try to load completed lessons from Supabase
+      if (user?.id) {
+        try {
+          const { data: dbProgress } = await supabase
+            .from('lesson_progress')
+            .select('course_id, lesson_id, status')
+            .eq('user_id', user.id)
+            .eq('status', 'completed');
+
+          if (dbProgress && dbProgress.length > 0) {
+            const completedFromDb = {};
+            dbProgress.forEach(p => {
+              if (!completedFromDb[p.course_id]) {
+                completedFromDb[p.course_id] = [];
+              }
+              if (!completedFromDb[p.course_id].includes(p.lesson_id)) {
+                completedFromDb[p.course_id].push(p.lesson_id);
+              }
+            });
+            setCompletedLessons(completedFromDb);
+            await AsyncStorage.setItem(COMPLETED_LESSONS_KEY, JSON.stringify(completedFromDb));
+          } else {
+            // Fallback to AsyncStorage
+            const storedCompleted = await AsyncStorage.getItem(COMPLETED_LESSONS_KEY);
+            if (storedCompleted) {
+              setCompletedLessons(JSON.parse(storedCompleted));
+            }
+          }
+        } catch (dbErr) {
+          console.warn('[CourseContext] Failed to load progress from DB:', dbErr);
+          const storedCompleted = await AsyncStorage.getItem(COMPLETED_LESSONS_KEY);
+          if (storedCompleted) {
+            setCompletedLessons(JSON.parse(storedCompleted));
+          }
+        }
+      } else {
+        // Load completed lessons from storage
+        const storedCompleted = await AsyncStorage.getItem(COMPLETED_LESSONS_KEY);
+        if (storedCompleted) {
+          setCompletedLessons(JSON.parse(storedCompleted));
+        }
+      }
+
+      // Load quiz results from storage
+      const storedQuizResults = await AsyncStorage.getItem(QUIZ_RESULTS_KEY);
+      if (storedQuizResults) {
+        setQuizResults(JSON.parse(storedQuizResults));
+      }
+
+      // Load certificates from storage
+      const storedCertificates = await AsyncStorage.getItem(CERTIFICATES_KEY);
+      if (storedCertificates) {
+        setCertificates(JSON.parse(storedCertificates));
       }
     } catch (err) {
       console.error('[CourseContext] Error loading data:', err);
@@ -85,17 +421,25 @@ export const CourseProvider = ({ children }) => {
     setRefreshing(false);
   }, [user?.id]);
 
-  // Enroll in a course
-  const enrollInCourse = useCallback(async (courseId) => {
+  // Enroll in a course - syncs to Supabase
+  // NOTE: This function should ONLY be called for FREE courses or after successful Shopify payment
+  // For paid courses, use purchaseCourse() instead which redirects to Shopify checkout
+  const enrollInCourse = useCallback(async (courseId, options = {}) => {
+    const { bypassPaymentCheck = false, accessSource = 'free_enrollment' } = options;
+
     try {
       // Check if already enrolled
       if (enrolledCourseIds.includes(courseId)) {
         return { success: true, alreadyEnrolled: true };
       }
 
-      // Check tier access
       const course = courses.find(c => c.id === courseId);
-      if (course && !canAccessCourse(course)) {
+      if (!course) {
+        return { success: false, error: 'Khóa học không tồn tại' };
+      }
+
+      // Check tier access
+      if (!canAccessCourse(course)) {
         return {
           success: false,
           error: 'Upgrade required',
@@ -103,7 +447,23 @@ export const CourseProvider = ({ children }) => {
         };
       }
 
-      // Add to enrollments
+      // CRITICAL: Check if this is a paid course (has Shopify product linked)
+      // Only allow direct enrollment for FREE courses or when payment is confirmed
+      const isPaidCourse = course.shopify_product_id || (course.price && course.price > 0);
+
+      if (isPaidCourse && !bypassPaymentCheck) {
+        console.log('[CourseContext] Paid course detected, requires Shopify checkout');
+        return {
+          success: false,
+          error: 'Payment required',
+          requiresPayment: true,
+          shopifyProductId: course.shopify_product_id,
+          price: course.price,
+          courseTitle: course.title,
+        };
+      }
+
+      // Add to enrollments locally
       const newEnrollments = [...enrolledCourseIds, courseId];
       setEnrolledCourseIds(newEnrollments);
 
@@ -115,24 +475,52 @@ export const CourseProvider = ({ children }) => {
       const newCompleted = { ...completedLessons, [courseId]: [] };
       setCompletedLessons(newCompleted);
 
-      // Save to storage
+      // Save to AsyncStorage
       await Promise.all([
         AsyncStorage.setItem(ENROLLMENTS_KEY, JSON.stringify(newEnrollments)),
         AsyncStorage.setItem(PROGRESS_KEY, JSON.stringify(newProgress)),
         AsyncStorage.setItem(COMPLETED_LESSONS_KEY, JSON.stringify(newCompleted)),
       ]);
 
-      // Also update service (for sync when API is ready)
-      await courseService.enrollInCourse(user?.id, courseId);
+      // SYNC TO SUPABASE - This will trigger realtime for other devices/web
+      if (user?.id) {
+        try {
+          const { error } = await supabase
+            .from('course_enrollments')
+            .upsert({
+              user_id: user.id,
+              course_id: courseId,
+              enrolled_at: new Date().toISOString(),
+              progress_percentage: 0,
+              is_active: true,
+              access_source: accessSource, // 'free_enrollment', 'shopify_purchase', 'admin_grant'
+            }, {
+              onConflict: 'user_id,course_id',
+            });
+
+          if (error) {
+            console.warn('[CourseContext] Failed to sync enrollment to DB:', error);
+          } else {
+            console.log('[CourseContext] Enrollment synced to Supabase');
+          }
+        } catch (dbErr) {
+          console.warn('[CourseContext] DB enrollment error:', dbErr);
+        }
+      }
 
       return { success: true };
     } catch (err) {
       console.error('[CourseContext] Enroll error:', err);
       return { success: false, error: err.message };
     }
-  }, [enrolledCourseIds, courses, courseProgress, completedLessons, user?.id]);
+  }, [enrolledCourseIds, courses, courseProgress, completedLessons, user?.id, canAccessCourse]);
 
-  // Mark lesson as complete
+  // NOTE: Course access after Shopify payment is now granted by the Shopify webhook (orders/paid)
+  // The webhook calls grantCourseAccess() in shopify-webhook/index.ts
+  // This ensures bank transfers and delayed payments work correctly
+  // The app should NOT grant access directly - only refresh data from Supabase
+
+  // Mark lesson as complete - syncs to Supabase for realtime
   const completeLesson = useCallback(async (courseId, lessonId) => {
     try {
       const currentCompleted = completedLessons[courseId] || [];
@@ -142,7 +530,7 @@ export const CourseProvider = ({ children }) => {
         return { success: true, alreadyCompleted: true };
       }
 
-      // Add to completed lessons
+      // Add to completed lessons locally
       const newLessonsList = [...currentCompleted, lessonId];
       const newCompleted = { ...completedLessons, [courseId]: newLessonsList };
       setCompletedLessons(newCompleted);
@@ -157,14 +545,39 @@ export const CourseProvider = ({ children }) => {
       const newProgress = { ...courseProgress, [courseId]: newPercent };
       setCourseProgress(newProgress);
 
-      // Save to storage
+      // Save to AsyncStorage
       await Promise.all([
         AsyncStorage.setItem(COMPLETED_LESSONS_KEY, JSON.stringify(newCompleted)),
         AsyncStorage.setItem(PROGRESS_KEY, JSON.stringify(newProgress)),
       ]);
 
-      // Also update service
-      await courseService.markLessonComplete(user?.id, courseId, lessonId);
+      // SYNC TO SUPABASE - This triggers realtime for web and other devices
+      if (user?.id) {
+        try {
+          // 1. Mark lesson as complete in lesson_progress table
+          await progressService.markLessonComplete(user.id, lessonId, courseId);
+          console.log('[CourseContext] Lesson progress synced to Supabase');
+
+          // 2. Update enrollment progress percentage
+          const { error: enrollError } = await supabase
+            .from('course_enrollments')
+            .update({
+              progress_percentage: newPercent,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('user_id', user.id)
+            .eq('course_id', courseId);
+
+          if (enrollError) {
+            console.warn('[CourseContext] Failed to update enrollment progress:', enrollError);
+          } else {
+            console.log('[CourseContext] Enrollment progress updated:', newPercent + '%');
+          }
+        } catch (dbErr) {
+          console.warn('[CourseContext] DB sync error:', dbErr);
+          // Continue - local state is already updated
+        }
+      }
 
       return { success: true, progress: newPercent };
     } catch (err) {
@@ -175,12 +588,31 @@ export const CourseProvider = ({ children }) => {
 
   // Check if user can access a course based on tier
   const canAccessCourse = useCallback((course) => {
-    const userTier = profile?.scanner_tier || 'FREE';
-    const tierOrder = ['FREE', 'TIER1', 'TIER2', 'TIER3'];
-    const userTierIndex = tierOrder.indexOf(userTier);
-    const courseTierIndex = tierOrder.indexOf(course?.tier_required || 'FREE');
-    return courseTierIndex <= userTierIndex;
-  }, [profile?.scanner_tier]);
+    // Use tier from AuthContext (already normalized with fallback to 'FREE')
+    const courseTier = course?.tier_required || 'FREE';
+
+    const tierOrder = ['FREE', 'TIER1', 'TIER2', 'TIER3', 'ADMIN'];
+
+    // If tier not in list, treat as FREE (most permissive)
+    let userTierIdx = tierOrder.indexOf(userTier || 'FREE');
+    if (userTierIdx === -1) userTierIdx = 0; // Treat unknown as FREE
+
+    let courseTierIdx = tierOrder.indexOf(courseTier);
+    if (courseTierIdx === -1) courseTierIdx = 0; // FREE courses accessible to all
+
+    const canAccess = courseTierIdx <= userTierIdx;
+
+    // Debug log
+    console.log('[CourseContext] canAccessCourse:', {
+      courseTier,
+      userTier,
+      courseTierIdx,
+      userTierIdx,
+      canAccess,
+    });
+
+    return canAccess;
+  }, [userTier]);
 
   // Check if course is locked
   const isCourseLocked = useCallback((course) => {
@@ -267,6 +699,120 @@ export const CourseProvider = ({ children }) => {
     }
   }, [enrolledCourseIds]);
 
+  // ==================== QUIZ METHODS ====================
+
+  // Save quiz result
+  const saveQuizResult = useCallback(async (lessonId, result) => {
+    try {
+      const newQuizResults = {
+        ...quizResults,
+        [lessonId]: {
+          passed: result.passed,
+          score: result.score,
+          maxScore: result.maxScore,
+          percentage: result.percentage,
+          completedAt: new Date().toISOString(),
+        },
+      };
+
+      setQuizResults(newQuizResults);
+      await AsyncStorage.setItem(QUIZ_RESULTS_KEY, JSON.stringify(newQuizResults));
+
+      return { success: true };
+    } catch (err) {
+      console.error('[CourseContext] Save quiz result error:', err);
+      return { success: false, error: err.message };
+    }
+  }, [quizResults]);
+
+  // Get quiz result for a lesson
+  const getQuizResult = useCallback((lessonId) => {
+    return quizResults[lessonId] || null;
+  }, [quizResults]);
+
+  // Check if quiz is passed for a lesson
+  const isQuizPassed = useCallback((lessonId) => {
+    const result = quizResults[lessonId];
+    return result?.passed || false;
+  }, [quizResults]);
+
+  // Check if user can retake quiz
+  const canRetakeQuiz = useCallback(async (lessonId) => {
+    if (!user?.id) return { canRetake: false, error: 'Not logged in' };
+
+    try {
+      // Get quiz by lesson ID
+      const quiz = await quizService.getQuizByLessonId(lessonId);
+      if (!quiz) return { canRetake: false, error: 'Quiz not found' };
+
+      return await quizService.canRetakeQuiz(user.id, quiz.id);
+    } catch (err) {
+      console.error('[CourseContext] canRetakeQuiz error:', err);
+      return { canRetake: true, attemptsUsed: 0, maxAttempts: null };
+    }
+  }, [user?.id]);
+
+  // ==================== CERTIFICATE METHODS ====================
+
+  // Get certificate for a course
+  const getCertificate = useCallback(async (courseId) => {
+    // Check local cache first
+    if (certificates[courseId]) {
+      return certificates[courseId];
+    }
+
+    // Try to fetch from service
+    if (user?.id) {
+      try {
+        const cert = await courseService.getCertificate(user.id, courseId);
+        if (cert) {
+          // Cache locally
+          const newCertificates = { ...certificates, [courseId]: cert };
+          setCertificates(newCertificates);
+          await AsyncStorage.setItem(CERTIFICATES_KEY, JSON.stringify(newCertificates));
+          return cert;
+        }
+      } catch (err) {
+        console.error('[CourseContext] getCertificate error:', err);
+      }
+    }
+
+    return null;
+  }, [certificates, user?.id]);
+
+  // Generate certificate for completed course
+  const generateCertificate = useCallback(async (courseId) => {
+    if (!user?.id) return { success: false, error: 'Not logged in' };
+
+    // Check if course is 100% complete
+    const progress = courseProgress[courseId] || 0;
+    if (progress < 100) {
+      return { success: false, error: 'Course not completed' };
+    }
+
+    try {
+      const userName = profile?.username || profile?.full_name || user.email?.split('@')[0] || 'Student';
+      const result = await courseService.generateCertificate(user.id, courseId, userName);
+
+      if (result.success && result.certificate) {
+        // Cache locally
+        const newCertificates = { ...certificates, [courseId]: result.certificate };
+        setCertificates(newCertificates);
+        await AsyncStorage.setItem(CERTIFICATES_KEY, JSON.stringify(newCertificates));
+      }
+
+      return result;
+    } catch (err) {
+      console.error('[CourseContext] generateCertificate error:', err);
+      return { success: false, error: err.message };
+    }
+  }, [user?.id, profile, courseProgress, certificates]);
+
+  // Check if certificate exists for a course
+  const hasCertificate = useCallback((courseId) => {
+    return !!certificates[courseId];
+  }, [certificates]);
+
   const value = {
     // State
     courses,
@@ -276,6 +822,8 @@ export const CourseProvider = ({ children }) => {
     enrolledCourseIds,
     courseProgress,
     completedLessons,
+    quizResults,
+    certificates,
     loading,
     refreshing,
     error,
@@ -287,6 +835,14 @@ export const CourseProvider = ({ children }) => {
     completeLesson,
     resetCourseProgress,
 
+    // Quiz Actions
+    saveQuizResult,
+    canRetakeQuiz,
+
+    // Certificate Actions
+    getCertificate,
+    generateCertificate,
+
     // Getters
     getCourseById,
     isEnrolled,
@@ -296,6 +852,13 @@ export const CourseProvider = ({ children }) => {
     getCompletedLessons,
     isLessonCompleted,
     getNextLesson,
+
+    // Quiz Getters
+    getQuizResult,
+    isQuizPassed,
+
+    // Certificate Getters
+    hasCertificate,
   };
 
   return (

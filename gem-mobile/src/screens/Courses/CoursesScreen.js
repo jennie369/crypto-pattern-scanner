@@ -27,7 +27,7 @@ import {
   CheckCircle,
 } from 'lucide-react-native';
 import { CourseCard } from './components';
-import { useSwipeNavigation } from '../../hooks/useSwipeNavigation';
+// useSwipeNavigation removed - was blocking touch events on Android
 import { useCourse } from '../../contexts/CourseContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTabBar } from '../../contexts/TabBarContext';
@@ -94,13 +94,8 @@ const CoursesScreen = ({ navigation, route }) => {
     ]).start();
   }, []);
 
-  // Swipe navigation for filter tabs
-  const { panHandlers } = useSwipeNavigation({
-    tabs: FILTER_TABS.map(t => ({ id: t.id, title: t.label })),
-    currentTab: activeFilter,
-    onTabChange: setActiveFilter,
-    enabled: true,
-  });
+  // Swipe navigation removed - was blocking touch events on Android
+  // Users can tap filter tabs directly to change filters
 
   // Filter courses based on active tab
   const filteredCourses = useMemo(() => {
@@ -262,7 +257,7 @@ const CoursesScreen = ({ navigation, route }) => {
           <Text style={styles.headerTitle}>Khóa Học</Text>
           <TouchableOpacity
             style={styles.searchBtn}
-            onPress={() => {/* TODO: Search */}}
+            onPress={() => navigation.navigate('CourseSearch')}
           >
             <Search size={22} color={COLORS.textPrimary} />
           </TouchableOpacity>
@@ -291,7 +286,6 @@ const CoursesScreen = ({ navigation, route }) => {
               colors={[COLORS.gold]}
             />
           }
-          {...panHandlers}
         />
       </SafeAreaView>
     </LinearGradient>

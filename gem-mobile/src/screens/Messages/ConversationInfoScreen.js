@@ -21,7 +21,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
-  Alert,
   FlatList,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -35,6 +34,9 @@ import presenceService from '../../services/presenceService';
 
 // Auth
 import { useAuth } from '../../contexts/AuthContext';
+
+// Custom Alert
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 
 // Components
 import DisappearingMessagesSheet from './components/DisappearingMessagesSheet';
@@ -56,6 +58,7 @@ export default function ConversationInfoScreen({ route, navigation }) {
   const { conversationId, conversation } = route.params;
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const { alert, AlertComponent } = useCustomAlert();
 
   // Sheet states
   const [showDisappearing, setShowDisappearing] = useState(false);
@@ -94,10 +97,11 @@ export default function ConversationInfoScreen({ route, navigation }) {
   };
 
   const handleBlock = () => {
-    Alert.alert(
-      'Block User',
-      `Are you sure you want to block ${displayName}?`,
-      [
+    alert({
+      type: 'warning',
+      title: 'Block User',
+      message: `Are you sure you want to block ${displayName}?`,
+      buttons: [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Block',
@@ -105,23 +109,35 @@ export default function ConversationInfoScreen({ route, navigation }) {
           onPress: async () => {
             try {
               await messagingService.blockUser(otherParticipant?.id);
-              Alert.alert('Blocked', `${displayName} has been blocked`);
-              navigation.popToTop();
+              alert({
+                type: 'success',
+                title: 'Blocked',
+                message: `${displayName} has been blocked`,
+              });
+              // Safely navigate back - use goBack if popToTop fails
+              if (navigation.canGoBack()) {
+                navigation.goBack();
+              }
             } catch (error) {
               console.error('Error blocking user:', error);
-              Alert.alert('Error', 'Failed to block user');
+              alert({
+                type: 'error',
+                title: 'Error',
+                message: 'Failed to block user',
+              });
             }
           },
         },
-      ]
-    );
+      ],
+    });
   };
 
   const handleReport = () => {
-    Alert.alert(
-      'Report User',
-      'What would you like to report?',
-      [
+    alert({
+      type: 'warning',
+      title: 'Report User',
+      message: 'What would you like to report?',
+      buttons: [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Spam',
@@ -135,8 +151,8 @@ export default function ConversationInfoScreen({ route, navigation }) {
           text: 'Inappropriate Content',
           onPress: () => submitReport('inappropriate_content'),
         },
-      ]
-    );
+      ],
+    });
   };
 
   const submitReport = async (reportType) => {
@@ -146,10 +162,18 @@ export default function ConversationInfoScreen({ route, navigation }) {
         reportType,
         description: `Reported from conversation ${conversationId}`,
       });
-      Alert.alert('Reported', 'Your report has been submitted');
+      alert({
+        type: 'success',
+        title: 'Reported',
+        message: 'Your report has been submitted',
+      });
     } catch (error) {
       console.error('Error reporting user:', error);
-      Alert.alert('Error', 'Failed to submit report');
+      alert({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to submit report',
+      });
     }
   };
 
@@ -187,9 +211,13 @@ export default function ConversationInfoScreen({ route, navigation }) {
       setDisappearingDuration(duration);
     } catch (error) {
       console.error('Error saving disappearing messages:', error);
-      Alert.alert('Error', 'Failed to update settings');
+      alert({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to update settings',
+      });
     }
-  }, [conversationId]);
+  }, [conversationId, alert]);
 
   // Theme handlers
   const handleSaveTheme = useCallback(async (theme) => {
@@ -200,9 +228,13 @@ export default function ConversationInfoScreen({ route, navigation }) {
       setChatTheme(theme);
     } catch (error) {
       console.error('Error saving theme:', error);
-      Alert.alert('Error', 'Failed to update theme');
+      alert({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to update theme',
+      });
     }
-  }, [conversationId]);
+  }, [conversationId, alert]);
 
   // Mute handlers
   const handleMute = useCallback(async (hours) => {
@@ -217,9 +249,13 @@ export default function ConversationInfoScreen({ route, navigation }) {
       setMuteUntil(muteUntilValue);
     } catch (error) {
       console.error('Error muting conversation:', error);
-      Alert.alert('Error', 'Failed to mute conversation');
+      alert({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to mute conversation',
+      });
     }
-  }, [conversationId]);
+  }, [conversationId, alert]);
 
   const handleUnmute = useCallback(async () => {
     try {
@@ -227,9 +263,13 @@ export default function ConversationInfoScreen({ route, navigation }) {
       setMuteUntil(null);
     } catch (error) {
       console.error('Error unmuting conversation:', error);
-      Alert.alert('Error', 'Failed to unmute conversation');
+      alert({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to unmute conversation',
+      });
     }
-  }, [conversationId]);
+  }, [conversationId, alert]);
 
   // Group handlers
   const handleUpdateGroupName = useCallback(async (name) => {
@@ -253,22 +293,36 @@ export default function ConversationInfoScreen({ route, navigation }) {
   const handleLeaveGroup = useCallback(async () => {
     try {
       await messagingService.leaveGroup(conversationId);
-      navigation.popToTop();
+      // Safely navigate back - use goBack if popToTop not available
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+      }
     } catch (error) {
       console.error('Error leaving group:', error);
-      Alert.alert('Error', 'Failed to leave group');
+      alert({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to leave group',
+      });
     }
-  }, [conversationId, navigation]);
+  }, [conversationId, navigation, alert]);
 
   const handleDeleteGroup = useCallback(async () => {
     try {
       await messagingService.deleteGroup(conversationId);
-      navigation.popToTop();
+      // Safely navigate back - use goBack if popToTop not available
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+      }
     } catch (error) {
       console.error('Error deleting group:', error);
-      Alert.alert('Error', 'Failed to delete group');
+      alert({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to delete group',
+      });
     }
-  }, [conversationId, navigation]);
+  }, [conversationId, navigation, alert]);
 
   const handleAddParticipants = useCallback(async (userIds) => {
     try {
@@ -280,10 +334,11 @@ export default function ConversationInfoScreen({ route, navigation }) {
   }, [conversationId]);
 
   const handleRemoveParticipant = useCallback((participant) => {
-    Alert.alert(
-      'Remove Participant',
-      `Remove ${participant.users?.display_name || 'this member'} from the group?`,
-      [
+    alert({
+      type: 'warning',
+      title: 'Remove Participant',
+      message: `Remove ${participant.users?.display_name || 'this member'} from the group?`,
+      buttons: [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Remove',
@@ -294,13 +349,17 @@ export default function ConversationInfoScreen({ route, navigation }) {
               await messagingService.removeParticipant(conversationId, participant.user_id);
             } catch (error) {
               console.error('Error removing participant:', error);
-              Alert.alert('Error', 'Failed to remove participant');
+              alert({
+                type: 'error',
+                title: 'Error',
+                message: 'Failed to remove participant',
+              });
             }
           },
         },
-      ]
-    );
-  }, [conversationId]);
+      ],
+    });
+  }, [conversationId, alert]);
 
   // Get disappearing messages label
   const getDisappearingLabel = () => {
@@ -574,6 +633,8 @@ export default function ConversationInfoScreen({ route, navigation }) {
           />
         </>
       )}
+
+      {AlertComponent}
     </LinearGradient>
   );
 }

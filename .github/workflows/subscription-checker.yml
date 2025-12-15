@@ -1,0 +1,58 @@
+# Subscription Checker - Daily Cron Job
+# Runs every day at midnight Vietnam time (17:00 UTC)
+
+name: Subscription Checker
+
+on:
+  schedule:
+    # Run at 17:00 UTC = 00:00 Vietnam time (UTC+7)
+    - cron: '0 17 * * *'
+
+  # Allow manual trigger from GitHub Actions UI
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+          - both
+          - check_expired
+          - send_notifications
+
+jobs:
+  check-subscriptions:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Call Subscription Checker Edge Function
+        run: |
+          echo "🔄 Running subscription checker at $(date)"
+
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+            "${{ secrets.SUPABASE_URL }}/functions/v1/subscription-checker" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -d '{"action": "${{ github.event.inputs.action || 'both' }}"}')
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "📊 Response (HTTP $HTTP_CODE):"
+          echo "$BODY" | jq '.' || echo "$BODY"
+
+          if [ "$HTTP_CODE" -ne 200 ]; then
+            echo "❌ Error: HTTP $HTTP_CODE"
+            exit 1
+          fi
+
+          echo "✅ Subscription check completed successfully"
+
+      - name: Summary
+        run: |
+          echo "## Subscription Checker Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Time**: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Action**: ${{ github.event.inputs.action || 'both' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ✅ Completed" >> $GITHUB_STEP_SUMMARY

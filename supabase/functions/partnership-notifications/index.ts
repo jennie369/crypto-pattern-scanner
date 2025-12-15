@@ -78,64 +78,78 @@ function formatCurrency(amount: number): string {
 /**
  * Build notification message based on event type
  */
-function buildNotificationMessage(payload: NotificationPayload): { title: string; body: string } | null {
+function buildNotificationMessage(payload: NotificationPayload): { title: string; body: string; screen?: string; params?: Record<string, any> } | null {
   const { event_type, data } = payload;
 
   switch (event_type) {
     case 'partnership_approved': {
-      const roleText = data.partner_role === 'ctv' ? 'CTV' : 'Affiliate';
-      const tierInfo = data.partner_role === 'ctv' ? ' - Tier 1' : '';
+      const roleText = data.partner_type === 'ctv' ? 'CTV' : 'Affiliate';
+      const tierText = data.partner_type === 'ctv' ? `cấp ${data.ctv_tier || 'Beginner'}` : '';
+      const commissionText = data.partner_type === 'affiliate' ? '3%' : '10-30%';
       return {
-        title: `🎉 Chúc mừng! Bạn đã trở thành ${roleText}${tierInfo}`,
-        body: `Mã giới thiệu của bạn: ${data.affiliate_code}. Bắt đầu chia sẻ và nhận hoa hồng ngay!`,
+        title: `🎉 Chúc mừng! Bạn đã trở thành ${roleText}`,
+        body: `Bắt đầu kiếm ${commissionText} hoa hồng từ mỗi đơn hàng giới thiệu ngay!`,
+        screen: 'AffiliateWelcome',
+        params: {
+          partner_type: data.partner_type,
+          ctv_tier: data.ctv_tier,
+          isNewlyApproved: true,
+        },
       };
     }
 
     case 'partnership_rejected': {
       return {
-        title: '❌ Đơn đăng ký không được duyệt',
-        body: data.reason || 'Đơn đăng ký của bạn không được chấp thuận. Vui lòng liên hệ hỗ trợ.',
+        title: '📋 Đơn đăng ký của bạn cần bổ sung',
+        body: data.reason || 'Vui lòng kiểm tra và cập nhật thông tin để tiếp tục.',
+        screen: 'PartnershipRegistration',
       };
     }
 
     case 'withdrawal_approved': {
       return {
         title: '✅ Yêu cầu rút tiền đã được duyệt',
-        body: `Yêu cầu rút ${formatCurrency(data.amount)} của bạn đã được duyệt và đang chờ xử lý.`,
+        body: `Số tiền ${formatCurrency(data.amount)} sẽ được chuyển trong 24h.`,
+        screen: 'Earnings',
       };
     }
 
     case 'withdrawal_completed': {
       return {
-        title: '💰 Chuyển khoản thành công!',
-        body: `${formatCurrency(data.amount)} đã được chuyển vào tài khoản ngân hàng của bạn. Mã GD: ${data.transaction_id}`,
+        title: '💰 Đã chuyển tiền thành công!',
+        body: `${formatCurrency(data.amount)} đã được chuyển vào tài khoản của bạn.`,
+        screen: 'Earnings',
       };
     }
 
     case 'withdrawal_rejected': {
       return {
         title: '❌ Yêu cầu rút tiền bị từ chối',
-        body: `Yêu cầu rút ${formatCurrency(data.amount)} không được chấp thuận. Lý do: ${data.reason || 'Không xác định'}`,
+        body: 'Vui lòng kiểm tra thông tin ngân hàng và thử lại.',
+        screen: 'WithdrawRequest',
       };
     }
 
     case 'commission_earned': {
       return {
         title: '🎊 Bạn vừa nhận hoa hồng!',
-        body: `+${formatCurrency(data.amount)} từ đơn hàng #${data.order_number}${data.product_name ? ` (${data.product_name})` : ''}`,
+        body: `+${formatCurrency(data.amount)} từ đơn hàng #${data.order_id}`,
+        screen: 'Earnings',
       };
     }
 
     case 'tier_upgrade': {
-      const tierNames: Record<number, string> = {
-        1: 'Tier 1 (Cơ bản)',
-        2: 'Tier 2 (Nâng cao)',
-        3: 'Tier 3 (Chuyên nghiệp)',
-        4: 'Tier 4 (VIP)',
+      const tierNames: Record<string, string> = {
+        beginner: 'Beginner',
+        growing: 'Growing',
+        master: 'Master',
+        expert: 'Expert',
       };
       return {
-        title: '🚀 Chúc mừng! Bạn đã lên cấp!',
-        body: `Bạn đã đạt ${tierNames[data.new_tier] || `Tier ${data.new_tier}`}. Hoa hồng mới: ${data.commission_rate}%`,
+        title: '🚀 Chúc mừng thăng cấp!',
+        body: `Bạn đã lên cấp ${tierNames[data.new_tier] || data.new_tier}! Hoa hồng tăng lên rồi!`,
+        screen: 'AffiliateWelcome',
+        params: { new_tier: data.new_tier },
       };
     }
 
@@ -167,10 +181,10 @@ serve(async (req) => {
       );
     }
 
-    // Get user's push token from database
+    // Get user's push token from database (from profiles table)
     const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('expo_push_token, email, full_name')
+      .from('profiles')
+      .select('expo_push_token, email, full_name, display_name')
       .eq('id', payload.user_id)
       .single();
 
@@ -191,6 +205,14 @@ serve(async (req) => {
       );
     }
 
+    // Build deep link data
+    const deepLinkData = {
+      type: payload.event_type,
+      screen: message.screen || null,
+      ...(message.params || {}),
+      ...payload.data,
+    };
+
     // Send push notification if user has a push token
     let pushSent = false;
     if (userData.expo_push_token) {
@@ -198,12 +220,10 @@ serve(async (req) => {
         to: userData.expo_push_token,
         title: message.title,
         body: message.body,
-        data: {
-          type: payload.event_type,
-          ...payload.data,
-        },
+        data: deepLinkData,
         sound: 'default',
-        channelId: 'alerts',
+        channelId: 'default',
+        badge: 1,
       };
 
       pushSent = await sendExpoPush(pushMessage);
@@ -217,8 +237,9 @@ serve(async (req) => {
         type: payload.event_type,
         title: message.title,
         body: message.body,
-        data: payload.data,
-        read: false,
+        data: deepLinkData,
+        is_read: false,
+        created_at: new Date().toISOString(),
       });
 
     if (insertError) {

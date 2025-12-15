@@ -132,8 +132,8 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px; /* Ultra compact - reduced from 6px */
-  padding: 6px 8px; /* Ultra compact - reduced from 8px 12px */
+  gap: 6px; /* Better spacing between items */
+  padding: 10px 10px; /* More comfortable padding */
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -162,10 +162,10 @@
   align-items: center;
   justify-content: center; /* Center content */
   gap: 0; /* No gap - let expanded state add it via motion */
-  padding: 10px; /* Symmetric padding */
+  padding: 12px; /* Larger padding for better touch target */
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 10px; /* Compact - reduced from 12px */
+  border-radius: 12px; /* Larger radius */
   color: rgba(255, 255, 255, 0.7);
   font-size: 15px;
   font-weight: 600;
@@ -176,6 +176,40 @@
   overflow: hidden; /* Clip content properly */
   width: 100%;
   text-align: left;
+}
+
+/* Collapsed mode - icon only */
+.compact-nav-item.collapsed-mode {
+  padding: 10px;
+  justify-content: center;
+  flex-direction: column;
+}
+
+/* Expanded mode - icon on top, text below */
+.compact-nav-item.expanded-mode {
+  padding: 10px 12px;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.compact-nav-item.expanded-mode .nav-item-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: inherit;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.compact-nav-item.expanded-mode:hover .nav-item-label {
+  color: #FFBD59;
+}
+
+.compact-nav-item.expanded-mode.active .nav-item-label {
+  color: #FFBD59;
 }
 
 .compact-nav-item::before {
@@ -224,14 +258,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 22px; /* Slightly larger for better spacing */
-  height: 22px; /* Slightly larger for better spacing */
+  width: 26px; /* Larger for better visibility */
+  height: 26px; /* Larger for better visibility */
 }
 
 .nav-item-icon {
-  width: 20px; /* Explicit size for compact sidebar */
-  height: 20px; /* Explicit size for compact sidebar */
-  stroke-width: 2.5; /* Thicker stroke for better visibility */
+  width: 24px; /* Larger icons for better visibility */
+  height: 24px; /* Larger icons for better visibility */
+  stroke-width: 2; /* Balanced stroke */
   color: inherit;
   transition: all 0.3s ease;
   display: block; /* Ensure proper rendering */
@@ -342,14 +376,26 @@
 
 .user-profile-section {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center; /* Center all content */
-  gap: 0; /* No gap - controlled by animation */
-  padding: 8px; /* Symmetric padding */
+  justify-content: center;
+  gap: 4px;
+  padding: 8px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 8px; /* Ultra compact - reduced from 10px */
-  margin-bottom: 6px; /* Reduced margin */
+  border-radius: 8px;
+  margin-bottom: 6px;
+}
+
+.user-profile-section .user-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .user-avatar {
@@ -433,16 +479,45 @@
 .sidebar-tooltip {
   position: fixed;
   left: 72px; /* Compact - reduced from 88px to match new sidebar width */
-  background: linear-gradient(135deg, rgba(255, 189, 89, 0.95), rgba(255, 140, 0, 0.95));
-  color: #0A0E27;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  box-shadow: 0 4px 16px rgba(255, 189, 89, 0.4);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 27, 75, 0.98));
+  border: 1px solid rgba(255, 189, 89, 0.4);
+  padding: 10px 14px;
+  border-radius: 10px;
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.5),
+    0 0 20px rgba(255, 189, 89, 0.15);
   pointer-events: none;
   white-space: nowrap;
-  z-index: 1001;
+  z-index: 10000; /* Higher than sidebar z-index (999) */
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.sidebar-tooltip::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 6px solid transparent;
+  border-right-color: rgba(255, 189, 89, 0.4);
+}
+
+.sidebar-tooltip .tooltip-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #FFBD59;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.sidebar-tooltip .tooltip-desc {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: 'Montserrat', sans-serif;
 }
 
 /* Global page offset when sidebar is visible */
@@ -452,7 +527,7 @@
 
 .compact-sidebar + .page-wrapper,
 body:has(.compact-sidebar) .page-wrapper {
-  margin-left: 64px; /* Compact - reduced from 80px to match sidebar width */
+  margin-left: 64px; /* Match collapsed sidebar width */
 }
 
 /* Responsive */

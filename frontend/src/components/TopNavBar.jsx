@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from '../hooks/useTranslation';
 import { useAuth } from '../contexts/AuthContext';
+import { NAV_ITEMS, isPathActive } from '../config/navigation';
+import * as Icons from 'lucide-react';
 import {
   Home, Search, Wrench, Users, GraduationCap, User, Gem,
   ChevronDown, Lock, LogOut, Settings, DollarSign,
@@ -9,7 +11,7 @@ import {
   Heart, Calendar, Filter, BarChart2, Activity,
   Brain, Waves, Bell, Key, MessageSquare, Mail,
   Trophy, Bot, ShoppingCart, CreditCard, UserCircle,
-  Handshake, Briefcase
+  Handshake, Briefcase, Menu, X
 } from 'lucide-react';
 import './TopNavBar.css';
 
@@ -33,6 +35,12 @@ function TopNavBar() {
   const [lastScrollY, setLastScrollY] = useState(0);
 
   const isActive = (path) => location.pathname === path;
+
+  // Get icon component by name
+  const getIcon = (iconName, size = 18) => {
+    const IconComponent = Icons[iconName];
+    return IconComponent ? <IconComponent size={size} /> : null;
+  };
 
   // Get user tier (PRESERVE existing logic)
   const userTier = user?.scanner_tier || profile?.scanner_tier || 'FREE';
@@ -130,275 +138,77 @@ function TopNavBar() {
           </div>
         </div>
 
-        {/* Main Navigation */}
+        {/* Main Navigation - Synced with Mobile 5 Tabs */}
         <div className={`nav-main ${isMenuOpen ? 'open' : ''}`}>
+          {NAV_ITEMS.map((navItem) => {
+            // Skip account nav item if requires auth and user not logged in
+            if (navItem.requiresAuth && !user) return null;
 
-          {/* Home - Always visible */}
-          <Link to="/scanner-v2" className={`nav-item ${isActive('/scanner-v2') ? 'active' : ''}`}>
-            <Home size={20} />
-            <span>Home</span>
-          </Link>
-
-          {/* TOOLS DROPDOWN */}
-          <div className="nav-dropdown">
-            <button
-              className={`nav-item dropdown-trigger ${activeDropdown === 'tools' ? 'active' : ''}`}
-              onClick={() => toggleDropdown('tools')}
-            >
-              <Wrench size={20} />
-              <span>Tools</span>
-              <ChevronDown size={16} className={activeDropdown === 'tools' ? 'rotated' : ''} />
-            </button>
-
-            {activeDropdown === 'tools' && (
-              <div className="dropdown-menu tools-menu">
-
-                {/* TIER 1 Section */}
-                <div className="dropdown-section">
-                  <div className="section-header">
-                    <span className="section-title">TIER 1 TOOLS</span>
-                    <span className="tier-badge tier-1">🔹 PRO</span>
-                  </div>
-
-                  <Link
-                    to="/journal"
-                    className={`dropdown-item ${!hasAccess('TIER1') ? 'locked' : ''}`}
-                    onClick={() => setActiveDropdown(null)}
-                  >
-                    <BookOpen size={18} />
-                    <span>Trading Journal</span>
-                    {!hasAccess('TIER1') && <Lock size={14} className="lock-icon" />}
-                  </Link>
-
-                  <Link
-                    to="/risk-calculator"
-                    className={`dropdown-item ${!hasAccess('TIER1') ? 'locked' : ''}`}
-                    onClick={() => setActiveDropdown(null)}
-                  >
-                    <Calculator size={18} />
-                    <span>Risk Calculator</span>
-                    {!hasAccess('TIER1') && <Lock size={14} className="lock-icon" />}
-                  </Link>
-
-                  <Link
-                    to="/position-size"
-                    className={`dropdown-item ${!hasAccess('TIER1') ? 'locked' : ''}`}
-                    onClick={() => setActiveDropdown(null)}
-                  >
-                    <Percent size={18} />
-                    <span>Position Size</span>
-                    {!hasAccess('TIER1') && <Lock size={14} className="lock-icon" />}
-                  </Link>
-                </div>
-
-                {/* TIER 2 Section */}
-                <div className="dropdown-section">
-                  <div className="section-header">
-                    <span className="section-title">TIER 2 TOOLS</span>
-                    <span className="tier-badge tier-2">💎 PREMIUM</span>
-                  </div>
-
-                  <Link
-                    to="/portfolio"
-                    className={`dropdown-item ${!hasAccess('TIER2') ? 'locked' : ''}`}
-                    onClick={() => setActiveDropdown(null)}
-                  >
-                    <TrendingUp size={18} />
-                    <span>Portfolio Tracker</span>
-                    {!hasAccess('TIER2') && <Lock size={14} className="lock-icon" />}
-                  </Link>
-
-                  <Link
-                    to="/mtf-analysis"
-                    className={`dropdown-item ${!hasAccess('TIER2') ? 'locked' : ''}`}
-                    onClick={() => setActiveDropdown(null)}
-                  >
-                    <BarChart size={18} />
-                    <span>Multi-Timeframe</span>
-                    {!hasAccess('TIER2') && <Lock size={14} className="lock-icon" />}
-                  </Link>
-
-                  <Link
-                    to="/sentiment"
-                    className={`dropdown-item ${!hasAccess('TIER2') ? 'locked' : ''}`}
-                    onClick={() => setActiveDropdown(null)}
-                  >
-                    <Heart size={18} />
-                    <span>Sentiment Analyzer</span>
-                    {!hasAccess('TIER2') && <Lock size={14} className="lock-icon" />}
-                  </Link>
-
-                  <Link
-                    to="/news-calendar"
-                    className={`dropdown-item ${!hasAccess('TIER2') ? 'locked' : ''}`}
-                    onClick={() => setActiveDropdown(null)}
-                  >
-                    <Calendar size={18} />
-                    <span>News Calendar</span>
-                    {!hasAccess('TIER2') && <Lock size={14} className="lock-icon" />}
-                  </Link>
-
-                  <Link
-                    to="/screener"
-                    className={`dropdown-item ${!hasAccess('TIER2') ? 'locked' : ''}`}
-                    onClick={() => setActiveDropdown(null)}
-                  >
-                    <Filter size={18} />
-                    <span>Market Screener</span>
-                    {!hasAccess('TIER2') && <Lock size={14} className="lock-icon" />}
-                  </Link>
-
-                  <Link
-                    to="/sr-levels"
-                    className={`dropdown-item ${!hasAccess('TIER2') ? 'locked' : ''}`}
-                    onClick={() => setActiveDropdown(null)}
-                  >
-                    <TrendingUp size={18} />
-                    <span>S/R Levels</span>
-                    {!hasAccess('TIER2') && <Lock size={14} className="lock-icon" />}
-                  </Link>
-
-                  <Link
-                    to="/volume"
-                    className={`dropdown-item ${!hasAccess('TIER2') ? 'locked' : ''}`}
-                    onClick={() => setActiveDropdown(null)}
-                  >
-                    <BarChart2 size={18} />
-                    <span>Volume Analysis</span>
-                    {!hasAccess('TIER2') && <Lock size={14} className="lock-icon" />}
-                  </Link>
-                </div>
-
-                {/* TIER 3 Section */}
-                <div className="dropdown-section">
-                  <div className="section-header">
-                    <span className="section-title">TIER 3 ELITE</span>
-                    <span className="tier-badge tier-3">👑 VIP</span>
-                  </div>
-
-                  <Link
-                    to="/tier3/backtesting"
-                    className={`dropdown-item ${!hasAccess('TIER3') ? 'locked' : ''}`}
-                    onClick={() => setActiveDropdown(null)}
-                  >
-                    <Activity size={18} />
-                    <span>Backtesting</span>
-                    {!hasAccess('TIER3') && <Lock size={14} className="lock-icon" />}
-                  </Link>
-
-                  <Link
-                    to="/tier3/ai-prediction"
-                    className={`dropdown-item ${!hasAccess('TIER3') ? 'locked' : ''}`}
-                    onClick={() => setActiveDropdown(null)}
-                  >
-                    <Brain size={18} />
-                    <span>AI Prediction</span>
-                    {!hasAccess('TIER3') && <Lock size={14} className="lock-icon" />}
-                  </Link>
-
-                  <Link
-                    to="/tier3/whale-tracker"
-                    className={`dropdown-item ${!hasAccess('TIER3') ? 'locked' : ''}`}
-                    onClick={() => setActiveDropdown(null)}
-                  >
-                    <Waves size={18} />
-                    <span>Whale Tracker</span>
-                    {!hasAccess('TIER3') && <Lock size={14} className="lock-icon" />}
-                  </Link>
-
-                  <Link
-                    to="/alerts"
-                    className={`dropdown-item ${!hasAccess('TIER3') ? 'locked' : ''}`}
-                    onClick={() => setActiveDropdown(null)}
-                  >
-                    <Bell size={18} />
-                    <span>Alerts Manager</span>
-                    {!hasAccess('TIER3') && <Lock size={14} className="lock-icon" />}
-                  </Link>
-
-                  <Link
-                    to="/api-keys"
-                    className={`dropdown-item ${!hasAccess('TIER3') ? 'locked' : ''}`}
-                    onClick={() => setActiveDropdown(null)}
-                  >
-                    <Key size={18} />
-                    <span>API Keys</span>
-                    {!hasAccess('TIER3') && <Lock size={14} className="lock-icon" />}
-                  </Link>
-                </div>
-
-              </div>
-            )}
-          </div>
-
-          {/* Shop - Direct link */}
-          <Link to="/shop" className={`nav-item ${isActive('/shop') ? 'active' : ''}`}>
-            <ShoppingCart size={20} />
-            <span>Shop</span>
-          </Link>
-
-          {/* NEWS FEED DROPDOWN */}
-          <div className="nav-dropdown">
-            <button
-              className={`nav-item dropdown-trigger ${activeDropdown === 'community' ? 'active' : ''}`}
-              onClick={() => toggleDropdown('community')}
-            >
-              <Users size={20} />
-              <span>News Feed</span>
-              <ChevronDown size={16} className={activeDropdown === 'community' ? 'rotated' : ''} />
-            </button>
-
-            {activeDropdown === 'community' && (
-              <div className="dropdown-menu">
-                <Link to="/forum" className="dropdown-item" onClick={() => setActiveDropdown(null)}>
-                  <MessageSquare size={18} />
-                  <span>Forum</span>
-                </Link>
-
-                <Link to="/messages" className="dropdown-item" onClick={() => setActiveDropdown(null)}>
-                  <Mail size={18} />
-                  <span>Messages</span>
-                  {unreadMessages > 0 && (
-                    <span className="badge">{unreadMessages}</span>
+            return (
+              <div
+                key={navItem.id}
+                className="nav-dropdown"
+                onMouseEnter={() => setActiveDropdown(navItem.id)}
+                onMouseLeave={() => setActiveDropdown(null)}
+              >
+                <Link
+                  to={navItem.path}
+                  className={`nav-item dropdown-trigger ${
+                    isPathActive(location.pathname, navItem.path) ? 'active' : ''
+                  } ${activeDropdown === navItem.id ? 'active' : ''}`}
+                  onClick={(e) => {
+                    // On mobile, toggle dropdown instead of navigating
+                    if (window.innerWidth <= 968 && navItem.children?.length > 0) {
+                      e.preventDefault();
+                      toggleDropdown(navItem.id);
+                    } else {
+                      setActiveDropdown(null);
+                      setIsMenuOpen(false);
+                    }
+                  }}
+                >
+                  {getIcon(navItem.icon, 20)}
+                  <span>{navItem.label}</span>
+                  {navItem.children && navItem.children.length > 0 && (
+                    <ChevronDown
+                      size={16}
+                      className={activeDropdown === navItem.id ? 'rotated' : ''}
+                    />
                   )}
                 </Link>
 
-                <Link to="/events" className="dropdown-item" onClick={() => setActiveDropdown(null)}>
-                  <Calendar size={18} />
-                  <span>Events</span>
-                </Link>
-
-                <Link to="/leaderboard" className="dropdown-item" onClick={() => setActiveDropdown(null)}>
-                  <Trophy size={18} />
-                  <span>Leaderboard</span>
-                </Link>
-
-                <Link to="/chatbot" className="dropdown-item" onClick={() => setActiveDropdown(null)}>
-                  <Bot size={18} />
-                  <span>GEM Chatbot</span>
-                </Link>
+                {/* Dropdown Menu */}
+                {activeDropdown === navItem.id && navItem.children && navItem.children.length > 0 && (
+                  <div className="dropdown-menu">
+                    {navItem.children.map((child) => {
+                      const isChildLocked = child.requiresAuth && !user;
+                      return (
+                        <Link
+                          key={child.path}
+                          to={isChildLocked ? '#' : child.path}
+                          className={`dropdown-item ${isChildLocked ? 'locked' : ''} ${
+                            isPathActive(location.pathname, child.path) ? 'active' : ''
+                          }`}
+                          onClick={(e) => {
+                            if (isChildLocked) {
+                              e.preventDefault();
+                              navigate('/login', { state: { from: child.path } });
+                            }
+                            setActiveDropdown(null);
+                            setIsMenuOpen(false);
+                          }}
+                        >
+                          {getIcon(child.icon, 18)}
+                          <span>{child.label}</span>
+                          {isChildLocked && <Lock size={14} className="lock-icon" />}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-
-          {/* Gemral - Direct link */}
-          <Link to="/chatbot" className={`nav-item ${isActive('/chatbot') ? 'active' : ''}`}>
-            <Bot size={20} />
-            <span>Gemral</span>
-          </Link>
-
-          {/* Khóa Học - Direct link */}
-          <Link to="/courses" className={`nav-item ${isActive('/courses') ? 'active' : ''}`}>
-            <GraduationCap size={20} />
-            <span>Khóa Học</span>
-          </Link>
-
-          {/* Tài Sản (Portfolio) - Direct link */}
-          <Link to="/portfolio" className={`nav-item ${isActive('/portfolio') ? 'active' : ''}`}>
-            <Briefcase size={20} />
-            <span>Tài Sản</span>
-          </Link>
-
+            );
+          })}
         </div>
 
         {/* Right Navigation - User Account & Admin */}
@@ -408,8 +218,8 @@ function TopNavBar() {
           {user && (
             <div className="nav-dropdown account-dropdown">
               <button
-                className={`nav-item dropdown-trigger user-menu ${activeDropdown === 'account' ? 'active' : ''}`}
-                onClick={() => toggleDropdown('account')}
+                className={`nav-item dropdown-trigger user-menu ${activeDropdown === 'user-account' ? 'active' : ''}`}
+                onClick={() => toggleDropdown('user-account')}
               >
                 {profile?.avatar_url ? (
                   <img src={profile.avatar_url} alt="Avatar" className="user-avatar" />
@@ -417,10 +227,10 @@ function TopNavBar() {
                   <User size={20} />
                 )}
                 <span className="user-name">{profile?.full_name || user?.email?.split('@')[0] || 'User'}</span>
-                <ChevronDown size={16} className={activeDropdown === 'account' ? 'rotated' : ''} />
+                <ChevronDown size={16} className={activeDropdown === 'user-account' ? 'rotated' : ''} />
               </button>
 
-              {activeDropdown === 'account' && (
+              {activeDropdown === 'user-account' && (
                 <div className="dropdown-menu account-menu">
                   <div className="account-info">
                     <p className="user-email">{user?.email}</p>

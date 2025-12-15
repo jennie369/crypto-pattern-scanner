@@ -21,7 +21,9 @@ class ResponseDetectionService {
       triggers: [
         'manifest', 'goal', 'achieve', 'target', 'thu nhập', 'giàu có',
         'thành công', 'mục tiêu', 'ước mơ', 'tài chính', 'financial',
-        'abundance', 'prosperity', 'wealth', 'money', 'tiền'
+        'abundance', 'prosperity', 'wealth', 'money', 'tiền',
+        'affirmation', 'khẳng định', 'lời khẳng định', 'câu nói tích cực',
+        'tôi xứng đáng', 'tôi có thể', 'hàng ngày', 'mỗi ngày'
       ],
       hasFields: ['target_amount', 'timeline', 'affirmations', 'action_plan'],
       widgetTypes: ['GOAL_CARD', 'AFFIRMATION_CARD', 'ACTION_CHECKLIST'],
@@ -75,13 +77,24 @@ class ResponseDetectionService {
     const text = (aiResponse + ' ' + userQuery).toLowerCase();
     const detections = [];
 
+    // Minimum trigger matches required per type to reduce false positives
+    const MIN_MATCHES = {
+      MANIFESTATION_GOAL: 2,    // Reduced from 3 for better affirmation detection
+      CRYSTAL_HEALING: 2,       // Need at least 2 crystal keywords
+      TRADING_ANALYSIS: 3,      // Need at least 3 trading keywords
+      GENERAL_ADVICE: 1,        // General advice is fallback
+    };
+
     // Check each response type
     Object.entries(this.RESPONSE_TYPES).forEach(([type, rules]) => {
       const triggerMatches = rules.triggers.filter(trigger =>
         text.includes(trigger.toLowerCase())
       ).length;
 
-      if (triggerMatches > 0) {
+      const minRequired = MIN_MATCHES[type] || 2;
+
+      // Only add detection if we meet minimum threshold
+      if (triggerMatches >= minRequired) {
         const confidence = (triggerMatches / rules.triggers.length) * rules.confidence;
 
         detections.push({
@@ -96,8 +109,10 @@ class ResponseDetectionService {
     // Sort by confidence
     detections.sort((a, b) => b.confidence - a.confidence);
 
-    // Return highest confidence
-    return detections.length > 0 ? detections[0] : null;
+    // Return highest confidence only if it's above threshold
+    // Don't return GENERAL_ADVICE as it should not trigger widget
+    const result = detections.find(d => d.type !== 'GENERAL_ADVICE');
+    return result || null;
   }
 
   /**
@@ -219,16 +234,40 @@ class ResponseDetectionService {
     }
 
     // Look for bullet points with affirmation keywords
-    const bulletPattern = /[•✨\-]\s*([^\n]+)/g;
+    const bulletPattern = /[•✨\-*]\s*([^\n]+)/g;
     while ((match = bulletPattern.exec(text)) !== null) {
       const line = match[1].trim();
+      const lineLower = line.toLowerCase();
+      // Check if it looks like an affirmation (expanded criteria)
+      if (line.length > 10 && line.length < 200 &&
+          (lineLower.includes('tôi') ||
+           lineLower.includes('i am') ||
+           lineLower.includes('i will') ||
+           lineLower.includes('sẽ') ||
+           lineLower.includes('xứng đáng') ||
+           lineLower.includes('có thể') ||
+           lineLower.includes('yêu thương') ||
+           lineLower.includes('bình an') ||
+           lineLower.includes('hạnh phúc') ||
+           lineLower.includes('giàu có') ||
+           lineLower.includes('thành công') ||
+           lineLower.startsWith('affirmation'))) {
+        affirmations.push(line);
+      }
+    }
+
+    // Also look for numbered lists (1. 2. 3.)
+    const numberedPattern = /\d+\.\s*([^\n]+)/g;
+    while ((match = numberedPattern.exec(text)) !== null) {
+      const line = match[1].trim();
+      const lineLower = line.toLowerCase();
       // Check if it looks like an affirmation
       if (line.length > 10 && line.length < 200 &&
-          (line.toLowerCase().includes('tôi') ||
-           line.toLowerCase().includes('i am') ||
-           line.toLowerCase().includes('i will') ||
-           line.toLowerCase().includes('sẽ'))) {
-        affirmations.push(line);
+          (lineLower.includes('tôi') ||
+           lineLower.includes('xứng đáng') ||
+           lineLower.includes('có thể') ||
+           lineLower.startsWith('"'))) {
+        affirmations.push(line.replace(/^["']|["']$/g, '').trim());
       }
     }
 
@@ -374,8 +413,11 @@ class ResponseDetectionService {
   shouldSuggestDashboard(detection) {
     if (!detection) return false;
 
+    // Require higher confidence to avoid spam
+    // Need at least 25% confidence (was 15%)
+    // Also require suggestDashboard flag from rules
     return detection.rules.suggestDashboard &&
-           detection.confidence >= 0.15; // Lower threshold for better UX
+           detection.confidence >= 0.25;
   }
 
   /**

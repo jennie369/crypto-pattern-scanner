@@ -12,10 +12,10 @@ import {
   StyleSheet,
   RefreshControl,
   ActivityIndicator,
-  Alert,
   TextInput,
   Modal,
 } from 'react-native';
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -37,9 +37,11 @@ import {
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { supabase } from '../../services/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import { processWithdrawal, getPendingWithdrawRequests, getAllWithdrawRequests } from '../../services/withdrawService';
 
 const AdminWithdrawalsScreen = ({ navigation }) => {
   const { user, isAdmin } = useAuth();
+  const { alert, AlertComponent } = useCustomAlert();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [withdrawals, setWithdrawals] = useState([]);
@@ -89,7 +91,12 @@ const AdminWithdrawalsScreen = ({ navigation }) => {
       setWithdrawals(data || []);
     } catch (error) {
       console.error('[AdminWithdrawals] Error loading:', error);
-      Alert.alert('Lỗi', 'Không thể tải danh sách yêu cầu rút tiền');
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Không thể tải danh sách yêu cầu rút tiền',
+        buttons: [{ text: 'OK' }],
+      });
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -168,10 +175,11 @@ const AdminWithdrawalsScreen = ({ navigation }) => {
   };
 
   const handleApprove = async (withdrawal) => {
-    Alert.alert(
-      'Xác nhận duyệt',
-      `Duyệt yêu cầu rút ${formatCurrency(withdrawal.amount)}?`,
-      [
+    alert({
+      type: 'warning',
+      title: 'Xác nhận duyệt',
+      message: `Duyệt yêu cầu rút ${formatCurrency(withdrawal.amount)}?`,
+      buttons: [
         { text: 'Hủy', style: 'cancel' },
         {
           text: 'Duyệt',
@@ -188,22 +196,35 @@ const AdminWithdrawalsScreen = ({ navigation }) => {
               if (error) throw error;
 
               if (data?.success) {
-                Alert.alert('Thành công', 'Đã duyệt yêu cầu rút tiền', [
-                  { text: 'OK', onPress: () => loadWithdrawals() },
-                ]);
+                alert({
+                  type: 'success',
+                  title: 'Thành công',
+                  message: 'Đã duyệt yêu cầu rút tiền',
+                  buttons: [{ text: 'OK', onPress: () => loadWithdrawals() }],
+                });
               } else {
-                Alert.alert('Lỗi', data?.error || 'Không thể duyệt yêu cầu');
+                alert({
+                  type: 'error',
+                  title: 'Lỗi',
+                  message: data?.error || 'Không thể duyệt yêu cầu',
+                  buttons: [{ text: 'OK' }],
+                });
               }
             } catch (error) {
               console.error('[AdminWithdrawals] Approve error:', error);
-              Alert.alert('Lỗi', 'Không thể duyệt yêu cầu rút tiền');
+              alert({
+                type: 'error',
+                title: 'Lỗi',
+                message: 'Không thể duyệt yêu cầu rút tiền',
+                buttons: [{ text: 'OK' }],
+              });
             } finally {
               setProcessing(false);
             }
           },
         },
-      ]
-    );
+      ],
+    });
   };
 
   const handleComplete = (withdrawal) => {
@@ -214,7 +235,12 @@ const AdminWithdrawalsScreen = ({ navigation }) => {
 
   const confirmComplete = async () => {
     if (!transactionRef.trim()) {
-      Alert.alert('Lỗi', 'Vui lòng nhập mã giao dịch ngân hàng');
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Vui lòng nhập mã giao dịch ngân hàng',
+        buttons: [{ text: 'OK' }],
+      });
       return;
     }
 
@@ -231,15 +257,28 @@ const AdminWithdrawalsScreen = ({ navigation }) => {
 
       if (data?.success) {
         setShowCompleteModal(false);
-        Alert.alert('Thành công', 'Đã hoàn tất chuyển tiền!', [
-          { text: 'OK', onPress: () => loadWithdrawals() },
-        ]);
+        alert({
+          type: 'success',
+          title: 'Thành công',
+          message: 'Đã hoàn tất chuyển tiền!',
+          buttons: [{ text: 'OK', onPress: () => loadWithdrawals() }],
+        });
       } else {
-        Alert.alert('Lỗi', data?.error || 'Không thể hoàn tất');
+        alert({
+          type: 'error',
+          title: 'Lỗi',
+          message: data?.error || 'Không thể hoàn tất',
+          buttons: [{ text: 'OK' }],
+        });
       }
     } catch (error) {
       console.error('[AdminWithdrawals] Complete error:', error);
-      Alert.alert('Lỗi', 'Không thể hoàn tất yêu cầu');
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Không thể hoàn tất yêu cầu',
+        buttons: [{ text: 'OK' }],
+      });
     } finally {
       setProcessing(false);
     }
@@ -253,7 +292,12 @@ const AdminWithdrawalsScreen = ({ navigation }) => {
 
   const confirmReject = async () => {
     if (!rejectionReason.trim()) {
-      Alert.alert('Lỗi', 'Vui lòng nhập lý do từ chối');
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Vui lòng nhập lý do từ chối',
+        buttons: [{ text: 'OK' }],
+      });
       return;
     }
 
@@ -270,15 +314,28 @@ const AdminWithdrawalsScreen = ({ navigation }) => {
 
       if (data?.success) {
         setShowRejectModal(false);
-        Alert.alert('Thành công', 'Đã từ chối yêu cầu. Số tiền đã được hoàn lại.', [
-          { text: 'OK', onPress: () => loadWithdrawals() },
-        ]);
+        alert({
+          type: 'success',
+          title: 'Thành công',
+          message: 'Đã từ chối yêu cầu. Số tiền đã được hoàn lại.',
+          buttons: [{ text: 'OK', onPress: () => loadWithdrawals() }],
+        });
       } else {
-        Alert.alert('Lỗi', data?.error || 'Không thể từ chối');
+        alert({
+          type: 'error',
+          title: 'Lỗi',
+          message: data?.error || 'Không thể từ chối',
+          buttons: [{ text: 'OK' }],
+        });
       }
     } catch (error) {
       console.error('[AdminWithdrawals] Reject error:', error);
-      Alert.alert('Lỗi', 'Không thể từ chối yêu cầu');
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Không thể từ chối yêu cầu',
+        buttons: [{ text: 'OK' }],
+      });
     } finally {
       setProcessing(false);
     }
@@ -666,6 +723,8 @@ const AdminWithdrawalsScreen = ({ navigation }) => {
             </View>
           </View>
         </Modal>
+
+        {AlertComponent}
       </SafeAreaView>
     </LinearGradient>
   );
@@ -682,40 +741,44 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
   },
   backBtn: {
-    padding: 8,
+    padding: 6,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 17,
     fontWeight: '700',
-    color: '#FFD700',
+    color: COLORS.gold,
   },
   filterScroll: {
-    maxHeight: 50,
+    maxHeight: 44,
   },
   filterTabs: {
-    paddingHorizontal: SPACING.lg,
-    gap: 8,
+    paddingHorizontal: SPACING.md,
+    gap: 6,
   },
   filterTab: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 10,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    borderRadius: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   filterTabActive: {
-    backgroundColor: '#FFD700',
+    backgroundColor: 'rgba(106, 91, 255, 0.2)',
+    borderColor: COLORS.purple,
   },
   filterTabText: {
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: '600',
     color: COLORS.textMuted,
   },
   filterTabTextActive: {
-    color: '#000',
+    color: COLORS.gold,
+    fontWeight: '700',
   },
   loadingContainer: {
     flex: 1,
@@ -726,17 +789,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    paddingTop: SPACING.sm,
+    paddingBottom: 120,
   },
   emptyState: {
     alignItems: 'center',
     paddingVertical: SPACING.huge,
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: 14,
     color: COLORS.textMuted,
-    marginTop: SPACING.md,
+    marginTop: SPACING.sm,
   },
   accessDenied: {
     flex: 1,
@@ -744,24 +808,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   accessDeniedText: {
-    fontSize: 18,
+    fontSize: 16,
     color: COLORS.error,
   },
 
   // Withdrawal Card
   withdrawalCard: {
-    backgroundColor: GLASS.background,
-    borderRadius: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 10,
+    marginBottom: 8,
     overflow: 'hidden',
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: SPACING.md,
+    padding: SPACING.sm,
   },
   cardHeaderLeft: {
     flex: 1,
@@ -769,115 +831,115 @@ const styles = StyleSheet.create({
   amountContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 4,
   },
   amountText: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: '700',
-    color: '#4CAF50',
+    color: COLORS.gold,
   },
   partnerName: {
-    fontSize: 14,
+    fontSize: 12,
     color: COLORS.textMuted,
-    marginTop: 4,
+    marginTop: 2,
   },
   cardHeaderRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
   },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    gap: 3,
   },
   statusText: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: '600',
   },
 
   // Card Details
   cardDetails: {
-    padding: SPACING.md,
+    padding: SPACING.sm,
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    gap: 12,
+    gap: 8,
   },
   sectionCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
-    padding: SPACING.md,
+    borderRadius: 8,
+    padding: SPACING.sm,
   },
   sectionTitle: {
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: '600',
-    color: COLORS.textMuted,
-    marginBottom: 8,
+    color: COLORS.gold,
+    marginBottom: 6,
   },
   detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 6,
+    gap: 6,
+    marginBottom: 4,
   },
   detailText: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#FFF',
   },
   refCard: {
-    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+    backgroundColor: 'rgba(255, 189, 89, 0.1)',
   },
   refLabel: {
-    fontSize: 12,
+    fontSize: 10,
     color: COLORS.textMuted,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   refValue: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
-    color: '#4CAF50',
+    color: COLORS.gold,
   },
   rejectionCard: {
     backgroundColor: 'rgba(255, 82, 82, 0.1)',
   },
   rejectionLabel: {
-    fontSize: 12,
+    fontSize: 10,
     color: '#FF5252',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   rejectionText: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#FF8A80',
   },
 
   // Action Buttons
   actionButtons: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 8,
   },
   actionBtn: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 12,
-    gap: 6,
+    paddingVertical: 10,
+    borderRadius: 8,
+    gap: 4,
   },
   rejectBtn: {
-    backgroundColor: '#FF5252',
+    backgroundColor: COLORS.burgundy,
   },
   approveBtn: {
-    backgroundColor: '#2196F3',
+    backgroundColor: 'rgba(106, 91, 255, 0.3)',
   },
   completeBtn: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: 'rgba(76, 175, 80, 0.3)',
   },
   actionBtnText: {
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: '600',
     color: '#FFF',
   },
@@ -888,81 +950,79 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: SPACING.lg,
+    padding: SPACING.md,
   },
   modalContent: {
     backgroundColor: '#1a1a2e',
-    borderRadius: 20,
-    padding: SPACING.xl,
+    borderRadius: 14,
+    padding: SPACING.lg,
     width: '100%',
-    maxWidth: 400,
+    maxWidth: 360,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 17,
     fontWeight: '700',
-    color: '#FFF',
-    marginBottom: 8,
+    color: COLORS.gold,
+    marginBottom: 6,
   },
   modalSubtitle: {
-    fontSize: 16,
-    color: '#4CAF50',
+    fontSize: 14,
+    color: COLORS.gold,
     fontWeight: '600',
-    marginBottom: SPACING.lg,
+    marginBottom: SPACING.md,
   },
   modalInput: {
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
-    padding: SPACING.md,
+    borderRadius: 10,
+    padding: SPACING.sm,
     color: '#FFF',
-    fontSize: 15,
-    minHeight: 100,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    fontSize: 13,
+    minHeight: 80,
   },
   bankInfoModal: {
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
-    padding: SPACING.md,
-    marginBottom: SPACING.md,
+    borderRadius: 10,
+    padding: SPACING.sm,
+    marginBottom: SPACING.sm,
   },
   bankLabel: {
-    fontSize: 12,
+    fontSize: 10,
     color: COLORS.textMuted,
-    marginTop: 4,
+    marginTop: 2,
   },
   bankValue: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#FFF',
     fontWeight: '500',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   modalButtons: {
     flexDirection: 'row',
-    gap: 12,
-    marginTop: SPACING.lg,
+    gap: 10,
+    marginTop: SPACING.md,
   },
   modalBtn: {
     flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
+    paddingVertical: 12,
+    borderRadius: 10,
     alignItems: 'center',
   },
   modalCancelBtn: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
   modalRejectBtn: {
-    backgroundColor: '#FF5252',
+    backgroundColor: COLORS.burgundy,
   },
   modalCompleteBtn: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: 'rgba(76, 175, 80, 0.3)',
   },
   modalCancelText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: '#FFF',
   },
   modalConfirmText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: '#FFF',
   },

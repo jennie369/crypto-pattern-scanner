@@ -7,9 +7,8 @@ Tạo 4 sản phẩm Gem packages trên Shopify store để user có thể mua g
 
 ## PHẦN 1: TẠO SẢN PHẨM TRÊN SHOPIFY ADMIN
 
-### Bước 1: Đăng nhập Shopify Admin
-1. Mở trình duyệt, truy cập: `https://admin.shopify.com`
-2. Đăng nhập với tài khoản Shopify của store
+### Bước 1: Vào trang shopify admin tôi đang mở sẵn
+
 
 ### Bước 2: Vào trang Products
 1. Ở sidebar bên trái, click vào **"Products"**
@@ -254,20 +253,8 @@ Sau khi tạo xong 4 sản phẩm, cần lấy Variant ID của mỗi sản ph�
 
 ## PHẦN 2: CẬP NHẬT DATABASE SUPABASE
 
-### Bước 1: Mở Supabase Dashboard
-1. Truy cập: `https://supabase.com/dashboard`
-2. Đăng nhập và chọn project: `pgfkbcnzqozzkohwbgbk`
 
-### Bước 2: Mở SQL Editor
-1. Ở sidebar bên trái, click **"SQL Editor"**
-2. Click **"New query"**
-
-### Bước 3: Chạy Migration
-1. Copy toàn bộ nội dung file: `supabase/migrations/20251128_gem_shopify_integration.sql`
-2. Paste vào SQL Editor
-3. Click **"Run"** hoặc nhấn Ctrl+Enter
-
-### Bước 4: Cập nhật Variant IDs
+### Bước 1: Cập nhật Variant IDs
 Sau khi có Variant IDs từ Shopify, chạy SQL sau (thay XXX bằng ID thực):
 
 ```sql
@@ -299,7 +286,7 @@ SET
 WHERE gem_amount = 5000;
 ```
 
-### Bước 5: Verify Data
+### Bước 2: Verify Data
 Chạy query để kiểm tra:
 ```sql
 SELECT id, name, gem_amount, bonus_gems, price_vnd, sku, shopify_variant_id, shopify_product_id
@@ -311,37 +298,6 @@ ORDER BY gem_amount;
 
 ## PHẦN 3: DEPLOY WEBHOOK LÊN SUPABASE
 
-### Cách 1: Qua Supabase CLI (Khuyến nghị)
-
-**Bước 1: Mở Terminal/Command Prompt**
-1. Mở Terminal (Mac/Linux) hoặc Command Prompt (Windows)
-2. Navigate đến thư mục project:
-```bash
-cd "C:\Users\Jennie Chu\Desktop\Projects\crypto-pattern-scanner"
-```
-
-**Bước 2: Login Supabase (nếu chưa)**
-```bash
-"C:/Users/Jennie Chu/AppData/Local/supabase/supabase.exe" login
-```
-
-**Bước 3: Link Project (nếu chưa)**
-```bash
-"C:/Users/Jennie Chu/AppData/Local/supabase/supabase.exe" link --project-ref pgfkbcnzqozzkohwbgbk
-```
-
-**Bước 4: Deploy Webhook Function**
-```bash
-"C:/Users/Jennie Chu/AppData/Local/supabase/supabase.exe" functions deploy shopify-webhook --project-ref pgfkbcnzqozzkohwbgbk
-```
-
-**Bước 5: Verify Deployment**
-```bash
-"C:/Users/Jennie Chu/AppData/Local/supabase/supabase.exe" functions list --project-ref pgfkbcnzqozzkohwbgbk
-```
-
-### Cách 2: Qua Supabase Dashboard
-
 **Bước 1: Mở Edge Functions**
 1. Vào Supabase Dashboard: `https://supabase.com/dashboard`
 2. Chọn project `pgfkbcnzqozzkohwbgbk`
@@ -351,7 +307,7 @@ cd "C:\Users\Jennie Chu\Desktop\Projects\crypto-pattern-scanner"
 1. Tìm function **"shopify-webhook"**
 2. Click vào function đó
 3. Click **"Edit"** hoặc **"Deploy new version"**
-4. Copy nội dung file `supabase/functions/shopify-webhook/index.ts`
+4. Copy nội dung file đính kèm tên `index.ts`
 5. Paste vào editor
 6. Click **"Deploy"**
 
@@ -365,16 +321,7 @@ cd "C:\Users\Jennie Chu\Desktop\Projects\crypto-pattern-scanner"
 - [ ] Migration SQL đã chạy thành công trên Supabase
 - [ ] currency_packages table đã có shopify_variant_id
 - [ ] shopify-webhook function đã deploy thành công
-- [ ] Test flow: BuyGems > Checkout > Success
 
-### Test Flow (Manual)
-
-1. Mở app Gemral
-2. Vào Account > Wallet > Nạp Gems
-3. Chọn một gói gems
-4. Click "Thanh toán"
-5. Hoàn thành checkout trên Shopify
-6. Verify gems được cộng vào tài khoản
 
 ---
 

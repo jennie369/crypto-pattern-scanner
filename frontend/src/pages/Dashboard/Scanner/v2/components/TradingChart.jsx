@@ -44,6 +44,9 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
   const pingIntervalRef = useRef(null);
   const lastPongRef = useRef(Date.now());
 
+  // 🔥 FIX: Track if chart is disposed to prevent "Object is disposed" errors
+  const isChartDisposedRef = useRef(false);
+
   // 🔥 PHASE 2B: Ref usage verified ✓
   // All data tracking uses refs (candleDataRef, lastCandleTimeRef, activeSymbolRef, etc.)
   // State variables are correctly used ONLY for UI updates (volumeVisible, isLive, currentPrice, etc.)
@@ -417,6 +420,9 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
     if (!chartContainerRef.current) return;
     console.log('[TradingChart] Loading chart for:', pattern?.coin || symbol);
 
+    // 🔥 FIX: Reset disposed flag when creating new chart
+    isChartDisposedRef.current = false;
+
     // Create chart instance
     const chart = createChart(chartContainerRef.current, {
       width: chartContainerRef.current.clientWidth,
@@ -536,6 +542,9 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
     window.addEventListener('resize', handleResize);
 
     return () => {
+      // 🔥 FIX: Mark chart as disposed FIRST to prevent WebSocket updates
+      isChartDisposedRef.current = true;
+
       window.removeEventListener('resize', handleResize);
       clearPriceLines(); // Clean up price lines
 
@@ -553,6 +562,10 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
         chartRef.current.remove();
         chartRef.current = null;
       }
+
+      // 🔥 FIX: Clear series refs after chart is removed
+      candlestickSeriesRef.current = null;
+      volumeSeriesRef.current = null;
     };
   }, [pattern, symbol, volumeVisible, chartHeight]);
 
@@ -763,7 +776,13 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
 
           // Extract kline data
           const kline = message.k;
-          if (!kline || !candlestickSeriesRef.current) return;
+          // 🔥 FIX: Check if chart is disposed to prevent "Object is disposed" errors
+          if (!kline || !candlestickSeriesRef.current || isChartDisposedRef.current) {
+            if (isChartDisposedRef.current) {
+              console.log('[TradingChart] [SKIP] Chart disposed, ignoring WebSocket update');
+            }
+            return;
+          }
 
           // 🔥 PHASE 1: Use helper function for time conversion
           const candleTime = toSeconds(kline.t);
@@ -870,6 +889,12 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
             // NEW CANDLE - Previous candle closed, new one started!
             console.log(`[NEW] NEW CANDLE | ${new Date().toLocaleTimeString()} | ${cleanedSymbol} | Time: ${candleTime} (prev: ${lastTime})`);
 
+            // 🔥 FIX: Check if chart is disposed before updating
+            if (isChartDisposedRef.current || !candlestickSeriesRef.current) {
+              console.log('[TradingChart] [SKIP] Chart disposed, skipping new candle update');
+              return;
+            }
+
             try {
               // 🔥 FIX #1: Add to data array
               candleDataRef.current.push(candle);
@@ -894,6 +919,13 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
           } else {
             // SAME TIME - Update CURRENT forming candle
             // This is where real-time magic happens!
+
+            // 🔥 FIX: Check if chart is disposed before updating
+            if (isChartDisposedRef.current || !candlestickSeriesRef.current) {
+              console.log('[TradingChart] [SKIP] Chart disposed, skipping forming candle update');
+              return;
+            }
+
             try {
               // 🔥 DEBUG: Verify series reference before update
               console.log('[DEBUG] [UPDATE] About to update forming candle:', {
@@ -908,12 +940,14 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
               if (candleDataRef.current.length === 0) {
                 console.warn('[TradingChart] [WARN] Forming candle but no data! Initializing...');
                 candleDataRef.current = [candle];
-                candlestickSeriesRef.current.setData([candle]);
+                if (!isChartDisposedRef.current && candlestickSeriesRef.current) {
+                  candlestickSeriesRef.current.setData([candle]);
+                }
                 return;
               }
 
-              // Try to detect if series is stale
-              if (candlestickSeriesRef.current) {
+              // Try to detect if series is stale (check disposed ref first)
+              if (!isChartDisposedRef.current && candlestickSeriesRef.current) {
                 try {
                   const markers = candlestickSeriesRef.current.markers();
                   console.log('[DEBUG] [OK] Series is valid, markers:', markers?.length || 0);
@@ -921,14 +955,18 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
                   console.error('[DEBUG] [ERROR] Series is STALE/INVALID:', error);
                   return; // Don't update stale series
                 }
+              } else {
+                return; // Chart disposed
               }
 
               // Update in data array
               const lastIndex = candleDataRef.current.length - 1;
               candleDataRef.current[lastIndex] = candle;
 
-              // CRITICAL: Use update() for last candle
-              candlestickSeriesRef.current.update(candle);
+              // CRITICAL: Use update() for last candle (double-check disposed)
+              if (!isChartDisposedRef.current && candlestickSeriesRef.current) {
+                candlestickSeriesRef.current.update(candle);
+              }
 
               // 🔥 DEBUG: Log EVERY forming candle update (100% temp)
               console.log(`[UPDATE] FORMING | ${new Date().toLocaleTimeString()} | ${cleanedSymbol} | $${candle.close.toFixed(2)} | H:${candle.high.toFixed(2)} L:${candle.low.toFixed(2)}`);
@@ -937,8 +975,8 @@ export const TradingChart = ({ pattern, symbol = 'BTCUSDT' }) => {
             }
           }
 
-          // Update volume if visible
-          if (volumeSeriesRef.current && volumeVisible) {
+          // Update volume if visible (also check if chart is disposed)
+          if (volumeSeriesRef.current && volumeVisible && !isChartDisposedRef.current) {
             try {
               const volume = {
                 time: candle.time,

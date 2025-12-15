@@ -173,20 +173,37 @@ class NotificationScheduler {
 
   /**
    * Save push token to database
+   * Uses user_push_tokens table per DATABASE_SCHEMA.md
    */
   async savePushToken(userId, token) {
     try {
+      // Save to user_push_tokens table (per DATABASE_SCHEMA.md)
       await supabase
         .from('user_push_tokens')
         .upsert(
           {
             user_id: userId,
-            token: token,
-            platform: Platform.OS,
+            push_token: token,        // Column name per schema
+            device_type: Platform.OS, // 'ios' or 'android'
+            device_name: null,        // Optional
+            is_active: true,
+            last_used_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           },
           { onConflict: 'user_id' }
         );
+
+      // Also update profiles.expo_push_token for quick access
+      await supabase
+        .from('profiles')
+        .update({
+          expo_push_token: token,
+          push_enabled: true,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', userId);
+
+      console.log('[NotificationScheduler] Push token saved successfully');
     } catch (error) {
       console.error('[NotificationScheduler] Error saving push token:', error);
     }
@@ -350,10 +367,9 @@ class NotificationScheduler {
           userId,
           widgetId: content.widgetId,
           deepLink: {
-            screen: 'Account',
+            screen: 'VisionBoard',
             params: {
-              scrollToWidget: content.widgetId,
-              expandDashboard: true,
+              tab: 'affirmation',
             },
           },
         },
@@ -390,12 +406,9 @@ class NotificationScheduler {
           widgetId: content.widgetId,
           taskId: content.taskId,
           deepLink: {
-            screen: 'Account',
+            screen: 'VisionBoard',
             params: {
-              scrollToWidget: content.widgetId,
-              expandDashboard: true,
-              action: 'FOCUS_TASK',
-              taskId: content.taskId,
+              tab: 'goals',
             },
           },
         },
@@ -431,10 +444,9 @@ class NotificationScheduler {
           userId,
           widgetId: content.widgetId,
           deepLink: {
-            screen: 'Account',
+            screen: 'VisionBoard',
             params: {
-              scrollToWidget: content.widgetId,
-              expandDashboard: true,
+              tab: 'affirmation',
             },
           },
         },
@@ -480,10 +492,9 @@ class NotificationScheduler {
           widgetId: widget.id,
           milestone: percentage,
           deepLink: {
-            screen: 'Account',
+            screen: 'VisionBoard',
             params: {
-              scrollToWidget: widget.id,
-              expandDashboard: true,
+              tab: 'goals',
               showConfetti: true,
             },
           },

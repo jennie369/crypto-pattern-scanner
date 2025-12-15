@@ -25,6 +25,10 @@ import { ProductCard } from '../components/Chatbot/ProductCard';
 import { VoiceInputButton } from '../components/Chatbot/VoiceInputButton';
 import { WidgetPreviewModal } from '../components/Widgets/WidgetPreviewModal';
 import MagicCardExport from '../components/MagicCardExport';
+import { TypingIndicator } from '../components/Chatbot/TypingIndicator';
+import { SuggestedPrompts } from '../components/Chatbot/SuggestedPrompts';
+import { ErrorMessage } from '../components/Chatbot/ErrorMessage';
+import { ImageUpload } from '../components/Chatbot/ImageUpload';
 import './Chatbot.css';
 import '../styles/widgetPrompt.css';
 
@@ -55,6 +59,9 @@ export default function Chatbot() {
   const [isCreatingWidget, setIsCreatingWidget] = useState(false);
   const [showMagicCardExport, setShowMagicCardExport] = useState(false);
   const [exportCardData, setExportCardData] = useState(null);
+  const [chatError, setChatError] = useState(null);
+  const [lastInput, setLastInput] = useState('');
+  const [selectedImage, setSelectedImage] = useState(null);
 
   const messagesEndRef = useRef(null);
   const exportMenuRef = useRef(null);
@@ -594,6 +601,8 @@ export default function Chatbot() {
 
     const currentInput = input;
     setInput('');
+    setLastInput(currentInput); // Save for retry
+    setChatError(null); // Clear previous error
     setLoading(true);
 
     // Play send sound
@@ -698,14 +707,23 @@ export default function Chatbot() {
     } catch (error) {
       console.error('Error:', error);
       soundService.play('error');
-      setMessages(prev => [...prev, {
-        id: Date.now() + 1,
-        type: 'system',
-        content: 'Đã có lỗi xảy ra. Vui lòng thử lại.',
-        timestamp: new Date().toISOString()
-      }]);
+      // Set error state for ErrorMessage component instead of adding message
+      setChatError(error.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Retry last failed message
+  const handleRetry = () => {
+    if (lastInput) {
+      setInput(lastInput);
+      setChatError(null);
+      // Auto-trigger send after setting input
+      setTimeout(() => {
+        const sendBtn = document.querySelector('.chatbot-send-button');
+        if (sendBtn) sendBtn.click();
+      }, 100);
     }
   };
 
@@ -811,6 +829,45 @@ export default function Chatbot() {
                 title={currentLang === 'vi' ? 'Switch to English' : 'Chuyển sang Tiếng Việt'}
               >
                 <Globe size={18} />
+              </button>
+
+              {/* New Conversation */}
+              <button
+                onClick={() => {
+                  // Reset to fresh state
+                  setMessages([{
+                    id: 'welcome',
+                    type: 'bot',
+                    content: 'Chào mừng đến với Gemral Chatbot! Tôi có thể giúp bạn với:\n\n**I Ching** - Nhận lời khuyên từ Kinh Dịch\n**Tarot** - Đọc bài Tarot về trading và cuộc sống\n**Chat** - Tư vấn về trading, năng lượng, và phương pháp\n\nBạn muốn bắt đầu với điều gì?',
+                    timestamp: new Date().toISOString()
+                  }]);
+                  setConversationHistory([]);
+                  setSessionId(null);
+                  setInput('');
+                  setDetectedWidgets([]);
+                  chatStorage.clear();
+                }}
+                className="btn-ghost"
+                title="Cuộc trò chuyện mới"
+              >
+                <Plus size={18} />
+              </button>
+
+              {/* Clear Chat */}
+              <button
+                onClick={() => {
+                  if (window.confirm('Bạn có chắc muốn xóa toàn bộ tin nhắn?')) {
+                    setMessages([]);
+                    setConversationHistory([]);
+                    setDetectedWidgets([]);
+                    chatStorage.clear();
+                  }
+                }}
+                className="btn-ghost"
+                title="Xóa toàn bộ chat"
+                disabled={messages.length === 0}
+              >
+                <Trash2 size={18} />
               </button>
 
               {/* Export Menu */}
@@ -1061,6 +1118,22 @@ export default function Chatbot() {
               <MessageBubble key={idx} message={msg} onExport={handleExportMagicCard} />
             ))}
 
+            {/* Suggested Prompts - Show when only welcome message or empty */}
+            {messages.length <= 1 && !loading && (
+              <SuggestedPrompts
+                activeMode={activeMode}
+                onSelectPrompt={(text) => {
+                  setInput(text);
+                  // Auto send the prompt
+                  setTimeout(() => {
+                    const sendBtn = document.querySelector('.chatbot-send-button');
+                    if (sendBtn) sendBtn.click();
+                  }, 100);
+                }}
+                disabled={!usageInfo?.allowed}
+              />
+            )}
+
             {/* Widget Suggestions */}
             {detectedWidgets.length > 0 && (
               <div style={{
@@ -1120,11 +1193,16 @@ export default function Chatbot() {
               </div>
             )}
 
-            {loading && (
-              <div className="loading-message">
-                <div className="spinner" />
-                <span>Gemral đang suy nghĩ...</span>
-              </div>
+            {loading && <TypingIndicator show={loading} />}
+
+            {/* Error Message with retry */}
+            {chatError && !loading && (
+              <ErrorMessage
+                error={chatError}
+                onRetry={handleRetry}
+                onUpgrade={() => window.location.href = '/settings/subscription'}
+                showRetry={true}
+              />
             )}
 
             <div ref={messagesEndRef} />
@@ -1184,6 +1262,15 @@ export default function Chatbot() {
                   fontFamily: 'inherit'
                 }}
               />
+              {/* Image Upload for Chart Analysis (TIER2+) */}
+              <ImageUpload
+                onImageSelect={(image) => setSelectedImage(image)}
+                onImageRemove={() => setSelectedImage(null)}
+                selectedImage={selectedImage}
+                userTier={getScannerTier()?.toUpperCase()}
+                disabled={loading || !usageInfo?.allowed}
+              />
+
               {/* Voice Input (TIER3 Only) */}
               {profile?.scanner_tier === 'TIER3' && (
                 <VoiceInputButton
@@ -1201,6 +1288,7 @@ export default function Chatbot() {
                 />
               )}
               <button
+                className="chatbot-send-button"
                 onClick={handleSend}
                 disabled={!input.trim() || loading || !usageInfo?.allowed}
                 style={{

@@ -27,6 +27,9 @@ export { default as ClearChatButton } from './ClearChatButton';
 
 // Modal Components
 export { default as UpgradeModal } from './UpgradeModal';
+export { default as ChatbotPricingModal } from './ChatbotPricingModal';
+export { default as QuickBuyModal } from './QuickBuyModal';
+export { default as UpsellModal } from './UpsellModal';
 
 // Export Image Components
 export { default as ExportButton } from './ExportButton';
@@ -44,6 +47,49 @@ export { default as AffirmationCard } from './AffirmationCard';
 export { default as ActionChecklistCard } from './ActionChecklistCard';
 export { default as StatsWidget } from './StatsWidget';
 export { default as WidgetSuggestionCard } from './WidgetSuggestionCard';
+export { default as ProductRecommendation } from './ProductRecommendation';
 
 // Product Card
 export { default as ProductCard } from './ProductCard';
+
+// Smart Widget Components (Phase 2-3 GemMaster)
+export { default as SmartFormCard } from '../SmartFormCard';
+export { default as AddWidgetSuggestion, AddWidgetButton, AddWidgetFAB } from '../AddWidgetSuggestion';
+
+// NEW: Improved Smart Widget Components (with proper Supabase/Shopify integration)
+export { default as SmartFormCardNew } from './SmartFormCardNew';
+export { default as CrystalRecommendationNew } from './CrystalRecommendationNew';
+export { default as ProductRecommendations, detectRecommendations } from './ProductRecommendations';
+
+// Goal Setting Form (Phase 2-3: Interactive Form instead of text chat)
+export { default as GoalSettingForm } from './GoalSettingForm';
+
+// NEW: Inline Chat Form (replaces modal with in-chat form for better UX)
+export { default as InlineChatForm } from './InlineChatForm';
+
+// Crystal Components
+export { default as CrystalLink, CrystalList, CrystalChip } from '../CrystalLink';
+
+// Utils - Widget Trigger Detection
+export {
+  WIDGET_TYPES,
+  detectWidgetTrigger,
+  detectAllWidgetTriggers,
+  shouldShowWidgetSuggestion,
+  getWidgetIcon,
+  getWidgetColor,
+} from '../../utils/widgetTriggerDetector';
+
+// Utils - Intent Detection
+export {
+  INTENT_TYPES,
+  detectIntent,
+  detectEmotion,
+  detectLifeArea,
+  getSuggestedTool,
+  getCrystalRecommendations,
+  getAutoFillData,
+  isDivinationRequest,
+  isGreeting,
+  getResponseContext,
+} from '../../utils/intentDetector';

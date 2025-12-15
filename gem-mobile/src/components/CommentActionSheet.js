@@ -16,7 +16,6 @@ import {
   Dimensions,
   ActivityIndicator,
   ScrollView,
-  Alert,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import {
@@ -30,6 +29,7 @@ import {
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, INPUT } from '../utils/tokens';
 import commentModerationService from '../services/commentModerationService';
+import CustomAlert, { useCustomAlert } from './CustomAlert';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -48,6 +48,7 @@ const CommentActionSheet = ({
   const [selectedReason, setSelectedReason] = useState(null);
   const [reportDetails, setReportDetails] = useState('');
   const [slideAnim] = useState(new Animated.Value(SCREEN_HEIGHT));
+  const { alert, AlertComponent } = useCustomAlert();
 
   // Fetch permissions on mount
   useEffect(() => {
@@ -99,16 +100,17 @@ const CommentActionSheet = ({
       onCommentPinned?.(result.data);
       onClose?.();
     } else {
-      Alert.alert('Lỗi', result.error);
+      alert({ type: 'error', title: 'Lỗi', message: result.error });
     }
-  }, [comment, postId, loading, permissions, onCommentPinned, onClose]);
+  }, [comment, postId, loading, permissions, onCommentPinned, onClose, alert]);
 
   // Handle delete
   const handleDelete = useCallback(() => {
-    Alert.alert(
-      'Xóa bình luận',
-      'Bạn có chắc chắn muốn xóa bình luận này?',
-      [
+    alert({
+      type: 'warning',
+      title: 'Xóa bình luận',
+      message: 'Bạn có chắc chắn muốn xóa bình luận này?',
+      buttons: [
         { text: 'Hủy', style: 'cancel' },
         {
           text: 'Xóa',
@@ -125,13 +127,13 @@ const CommentActionSheet = ({
               onCommentDeleted?.(comment.id);
               onClose?.();
             } else {
-              Alert.alert('Lỗi', result.error);
+              alert({ type: 'error', title: 'Lỗi', message: result.error });
             }
           },
         },
-      ]
-    );
-  }, [comment, postId, onCommentDeleted, onClose]);
+      ],
+    });
+  }, [comment, postId, onCommentDeleted, onClose, alert]);
 
   // Handle report submission
   const handleSubmitReport = useCallback(async () => {
@@ -148,11 +150,11 @@ const CommentActionSheet = ({
     if (result.success) {
       onCommentReported?.(comment.id);
       onClose?.();
-      Alert.alert('Cảm ơn', 'Báo cáo của bạn đã được gửi');
+      alert({ type: 'success', title: 'Cảm ơn', message: 'Báo cáo của bạn đã được gửi' });
     } else {
-      Alert.alert('Lỗi', result.error);
+      alert({ type: 'error', title: 'Lỗi', message: result.error });
     }
-  }, [comment, selectedReason, reportDetails, loading, onCommentReported, onClose]);
+  }, [comment, selectedReason, reportDetails, loading, onCommentReported, onClose, alert]);
 
   const reportReasons = commentModerationService.getReportReasons();
 
@@ -366,6 +368,7 @@ const CommentActionSheet = ({
             )}
           </BlurView>
         </Animated.View>
+        {AlertComponent}
       </View>
     </Modal>
   );

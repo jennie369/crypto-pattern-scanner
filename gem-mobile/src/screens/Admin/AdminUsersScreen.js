@@ -11,11 +11,11 @@ import {
   FlatList,
   TouchableOpacity,
   TextInput,
-  Alert,
   ActivityIndicator,
   RefreshControl,
   Modal,
 } from 'react-native';
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -43,6 +43,7 @@ const ROLE_OPTIONS = ['user', 'admin'];
 
 const AdminUsersScreen = ({ navigation }) => {
   const { isAdmin } = useAuth();
+  const { alert, AlertComponent } = useCustomAlert();
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -67,7 +68,12 @@ const AdminUsersScreen = ({ navigation }) => {
       setFilteredUsers(data || []);
     } catch (error) {
       console.error('[AdminUsers] Error loading users:', error);
-      Alert.alert('Lỗi', 'Không thể tải danh sách người dùng');
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Không thể tải danh sách người dùng',
+        buttons: [{ text: 'OK' }],
+      });
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -124,27 +130,37 @@ const AdminUsersScreen = ({ navigation }) => {
 
       if (error) throw error;
 
-      Alert.alert('Thành công', 'Đã cập nhật thông tin người dùng');
+      alert({
+        type: 'success',
+        title: 'Thành công',
+        message: 'Đã cập nhật thông tin người dùng',
+        buttons: [{ text: 'OK' }],
+      });
       setEditModal({ visible: false, user: null });
       loadUsers();
     } catch (error) {
       console.error('[AdminUsers] Error updating user:', error);
-      Alert.alert('Lỗi', 'Không thể cập nhật người dùng');
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Không thể cập nhật người dùng',
+        buttons: [{ text: 'OK' }],
+      });
     } finally {
       setSaving(false);
     }
   };
 
-  // Get tier color
+  // Get tier color - sáng hơn để đọc được trên nền tối
   const getTierColor = (tier) => {
     const colors = {
-      FREE: '#FF6B6B',
-      TIER1: '#FFBD59',
-      TIER2: '#6A5BFF',
-      TIER3: '#FFD700',
-      ADMIN: '#FF00FF',
+      FREE: COLORS.gold,
+      TIER1: '#7DD3FC',
+      TIER2: '#A78BFA',
+      TIER3: '#FCD34D',
+      ADMIN: '#F472B6',
     };
-    return colors[tier] || colors.FREE;
+    return colors[tier] || COLORS.gold;
   };
 
   // Format date
@@ -167,9 +183,9 @@ const AdminUsersScreen = ({ navigation }) => {
         <View style={styles.userHeader}>
           <View style={styles.userAvatar}>
             {isUserAdmin ? (
-              <Shield size={24} color="#FF00FF" />
+              <Shield size={20} color={COLORS.gold} />
             ) : (
-              <Users size={24} color={COLORS.textMuted} />
+              <Users size={20} color={COLORS.gold} />
             )}
           </View>
 
@@ -198,13 +214,13 @@ const AdminUsersScreen = ({ navigation }) => {
         {isExpanded && (
           <View style={styles.userDetails}>
             <View style={styles.detailRow}>
-              <Mail size={16} color={COLORS.textMuted} />
+              <Mail size={14} color={COLORS.gold} />
               <Text style={styles.detailLabel}>Email:</Text>
               <Text style={styles.detailValue}>{item.email || 'N/A'}</Text>
             </View>
 
             <View style={styles.detailRow}>
-              <Star size={16} color={COLORS.textMuted} />
+              <Star size={14} color={COLORS.gold} />
               <Text style={styles.detailLabel}>Scanner Tier:</Text>
               <Text style={[styles.detailValue, { color: getTierColor(item.scanner_tier) }]}>
                 {item.scanner_tier || 'FREE'}
@@ -212,7 +228,7 @@ const AdminUsersScreen = ({ navigation }) => {
             </View>
 
             <View style={styles.detailRow}>
-              <Star size={16} color={COLORS.textMuted} />
+              <Star size={14} color={COLORS.gold} />
               <Text style={styles.detailLabel}>Chatbot Tier:</Text>
               <Text style={[styles.detailValue, { color: getTierColor(item.chatbot_tier) }]}>
                 {item.chatbot_tier || 'FREE'}
@@ -220,15 +236,15 @@ const AdminUsersScreen = ({ navigation }) => {
             </View>
 
             <View style={styles.detailRow}>
-              <Shield size={16} color={COLORS.textMuted} />
+              <Shield size={14} color={COLORS.gold} />
               <Text style={styles.detailLabel}>Role:</Text>
-              <Text style={[styles.detailValue, { color: item.role === 'admin' ? '#FF00FF' : COLORS.textSecondary }]}>
+              <Text style={[styles.detailValue, { color: item.role === 'admin' ? '#F472B6' : COLORS.textPrimary }]}>
                 {item.role || 'user'}
               </Text>
             </View>
 
             <View style={styles.detailRow}>
-              <Calendar size={16} color={COLORS.textMuted} />
+              <Calendar size={14} color={COLORS.gold} />
               <Text style={styles.detailLabel}>Ngày tham gia:</Text>
               <Text style={styles.detailValue}>{formatDate(item.created_at)}</Text>
             </View>
@@ -237,7 +253,7 @@ const AdminUsersScreen = ({ navigation }) => {
               style={styles.editButton}
               onPress={() => setEditModal({ visible: true, user: item })}
             >
-              <Edit3 size={16} color={COLORS.primary} />
+              <Edit3 size={14} color={COLORS.gold} />
               <Text style={styles.editButtonText}>Chỉnh sửa</Text>
             </TouchableOpacity>
           </View>
@@ -469,6 +485,8 @@ const AdminUsersScreen = ({ navigation }) => {
 
         {/* Edit Modal */}
         {editModal.visible && <EditUserModal />}
+
+        {AlertComponent}
       </SafeAreaView>
     </LinearGradient>
   );
@@ -486,12 +504,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.md,
+    paddingVertical: SPACING.sm,
   },
   headerTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
+    fontSize: 17,
+    fontWeight: '700',
+    color: COLORS.gold,
   },
   searchContainer: {
     paddingHorizontal: SPACING.md,
@@ -501,51 +519,46 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
-    paddingHorizontal: SPACING.md,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 10,
+    paddingHorizontal: SPACING.sm,
   },
   searchInput: {
     flex: 1,
     paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.sm,
     color: COLORS.textPrimary,
-    fontSize: TYPOGRAPHY.fontSize.md,
+    fontSize: 14,
   },
   filterTabs: {
     flexDirection: 'row',
     paddingHorizontal: SPACING.md,
     marginBottom: SPACING.sm,
     flexWrap: 'wrap',
-    gap: SPACING.xs,
+    gap: 6,
   },
   filterTab: {
-    paddingVertical: SPACING.xs,
+    paddingVertical: 6,
     paddingHorizontal: SPACING.sm,
-    borderRadius: 16,
+    borderRadius: 14,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   filterTabActive: {
-    backgroundColor: COLORS.primary + '30',
-    borderColor: COLORS.primary,
+    backgroundColor: COLORS.gold,
   },
   filterTabText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontSize: 11,
     color: COLORS.textMuted,
   },
   filterTabTextActive: {
-    color: COLORS.primary,
-    fontWeight: TYPOGRAPHY.fontWeight.semiBold,
+    color: '#000',
+    fontWeight: '600',
   },
   statsRow: {
     paddingHorizontal: SPACING.md,
     marginBottom: SPACING.sm,
   },
   statsText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontSize: 12,
     color: COLORS.textMuted,
   },
   listContent: {
@@ -554,85 +567,83 @@ const styles = StyleSheet.create({
   },
   userCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 16,
-    padding: SPACING.md,
-    marginBottom: SPACING.sm,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 10,
+    padding: SPACING.sm,
+    marginBottom: 8,
   },
   userHeader: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   userAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: SPACING.md,
+    marginRight: SPACING.sm,
   },
   userInfo: {
     flex: 1,
   },
   userName: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    fontWeight: TYPOGRAPHY.fontWeight.semiBold,
+    fontSize: 14,
+    fontWeight: '600',
     color: COLORS.textPrimary,
-    marginBottom: 2,
+    marginBottom: 1,
   },
   userEmail: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontSize: 11,
     color: COLORS.textMuted,
   },
   userTiers: {
-    marginRight: SPACING.sm,
+    marginRight: SPACING.xs,
   },
   tierBadge: {
-    paddingVertical: 4,
+    paddingVertical: 3,
     paddingHorizontal: 8,
-    borderRadius: 8,
+    borderRadius: 6,
   },
   tierText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
-    fontWeight: TYPOGRAPHY.fontWeight.semiBold,
+    fontSize: 10,
+    fontWeight: '700',
   },
   userDetails: {
-    marginTop: SPACING.md,
-    paddingTop: SPACING.md,
+    marginTop: SPACING.sm,
+    paddingTop: SPACING.sm,
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.1)',
   },
   detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: SPACING.sm,
+    marginBottom: 6,
   },
   detailLabel: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontSize: 12,
     color: COLORS.textMuted,
-    marginLeft: SPACING.sm,
-    width: 100,
+    marginLeft: SPACING.xs,
+    width: 90,
   },
   detailValue: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textSecondary,
+    fontSize: 12,
+    color: COLORS.textPrimary,
     flex: 1,
   },
   editButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: COLORS.primary + '20',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     paddingVertical: SPACING.sm,
     borderRadius: 8,
     marginTop: SPACING.sm,
   },
   editButtonText: {
-    color: COLORS.primary,
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.semiBold,
+    color: COLORS.gold,
+    fontSize: 13,
+    fontWeight: '600',
     marginLeft: SPACING.xs,
   },
   loadingContainer: {
@@ -645,9 +656,9 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.xxl,
   },
   emptyText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
+    fontSize: 14,
     color: COLORS.textMuted,
-    marginTop: SPACING.md,
+    marginTop: SPACING.sm,
   },
   // Modal styles
   modalOverlay: {
@@ -660,10 +671,8 @@ const styles = StyleSheet.create({
   modalContent: {
     width: '100%',
     backgroundColor: '#1A1B2E',
-    borderRadius: 20,
+    borderRadius: 14,
     padding: SPACING.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -672,52 +681,49 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   modalTitle: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.gold,
   },
   modalUserEmail: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontSize: 12,
     color: COLORS.textMuted,
-    marginBottom: SPACING.lg,
+    marginBottom: SPACING.md,
   },
   fieldLabel: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.semiBold,
-    color: COLORS.textSecondary,
+    fontSize: 11,
+    fontWeight: '600',
+    color: COLORS.gold,
     marginBottom: SPACING.xs,
   },
   optionsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: SPACING.xs,
+    gap: 6,
     marginBottom: SPACING.md,
   },
   optionButton: {
-    paddingVertical: SPACING.xs,
+    paddingVertical: 6,
     paddingHorizontal: SPACING.sm,
     borderRadius: 8,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   optionButtonActive: {
-    backgroundColor: COLORS.primary + '30',
-    borderColor: COLORS.primary,
+    backgroundColor: COLORS.gold,
   },
   optionText: {
-    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontSize: 11,
     color: COLORS.textMuted,
   },
   optionTextActive: {
-    color: COLORS.primary,
-    fontWeight: TYPOGRAPHY.fontWeight.semiBold,
+    color: '#000',
+    fontWeight: '600',
   },
   modalActions: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     gap: SPACING.sm,
-    marginTop: SPACING.lg,
+    marginTop: SPACING.md,
   },
   cancelButton: {
     paddingVertical: SPACING.sm,
@@ -726,8 +732,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
   cancelButtonText: {
-    color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textPrimary,
+    fontSize: 13,
   },
   saveButton: {
     flexDirection: 'row',
@@ -735,12 +741,12 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm,
     paddingHorizontal: SPACING.lg,
     borderRadius: 8,
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.gold,
   },
   saveButtonText: {
-    color: '#FFF',
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.semiBold,
+    color: '#000',
+    fontSize: 13,
+    fontWeight: '600',
     marginLeft: SPACING.xs,
   },
   accessDenied: {
@@ -750,13 +756,13 @@ const styles = StyleSheet.create({
     padding: SPACING.xl,
   },
   accessDeniedTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    fontSize: 18,
+    fontWeight: '700',
     color: COLORS.error,
     marginTop: SPACING.md,
   },
   accessDeniedText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
+    fontSize: 14,
     color: COLORS.textMuted,
     marginTop: SPACING.sm,
     textAlign: 'center',

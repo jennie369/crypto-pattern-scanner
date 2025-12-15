@@ -7,15 +7,17 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Volume2, Check, ChevronLeft, ChevronRight, Flame, Sparkles } from 'lucide-react-native';
 import * as Speech from 'expo-speech';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import widgetManagementService from '../../services/widgetManagementService';
+import CustomAlert, { useCustomAlert } from '../CustomAlert';
 
 const AffirmationCard = ({ widget, onComplete }) => {
   const [currentIndex, setCurrentIndex] = useState(widget.data.currentIndex || 0);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const { alert, AlertComponent } = useCustomAlert();
 
   const { affirmations, completedToday, streak } = widget.data;
   const currentAffirmation = affirmations[currentIndex] || 'No affirmations available';
@@ -72,13 +74,13 @@ const AffirmationCard = ({ widget, onComplete }) => {
 
       // Show encouragement at milestones
       if (result.completedToday === 3) {
-        Alert.alert('Amazing!', 'Bạn đã hoàn thành 3 affirmations hôm nay!');
+        alert({ type: 'success', title: 'Amazing!', message: 'Bạn đã hoàn thành 3 affirmations hôm nay!' });
       } else if (result.streak === 7) {
-        Alert.alert('Streak!', 'Bạn đã duy trì streak 7 ngày liên tục!');
+        alert({ type: 'success', title: 'Streak!', message: 'Bạn đã duy trì streak 7 ngày liên tục!' });
       }
     } catch (error) {
       console.error('[AffirmationCard] Error marking done:', error);
-      Alert.alert('Lỗi', 'Không thể cập nhật');
+      alert({ type: 'error', title: 'Lỗi', message: 'Không thể cập nhật' });
     }
   };
 
@@ -161,6 +163,7 @@ const AffirmationCard = ({ widget, onComplete }) => {
           <Text style={styles.streakText}>{streak || 0}-day streak</Text>
         </View>
       </View>
+      {AlertComponent}
     </View>
   );
 };

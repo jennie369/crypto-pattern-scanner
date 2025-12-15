@@ -10,15 +10,17 @@ const STORAGE_KEYS = {
   POSITIONS: 'gem_paper_positions',
   HISTORY: 'gem_paper_history',
   BALANCE: 'gem_paper_balance',
+  INITIAL_BALANCE: 'gem_paper_initial_balance',
 };
 
-const INITIAL_BALANCE = 10000; // $10,000 paper money
+const DEFAULT_INITIAL_BALANCE = 10000; // $10,000 paper money (default)
 
 class PaperTradeService {
   constructor() {
     this.openPositions = [];
     this.tradeHistory = [];
-    this.balance = INITIAL_BALANCE;
+    this.balance = DEFAULT_INITIAL_BALANCE;
+    this.initialBalance = DEFAULT_INITIAL_BALANCE; // User-configurable initial balance
     this.initialized = false;
   }
 
@@ -33,15 +35,17 @@ class PaperTradeService {
       console.log('[PaperTrade] Initializing...');
 
       // Load from local storage
-      const [positions, history, balance] = await Promise.all([
+      const [positions, history, balance, initialBalance] = await Promise.all([
         AsyncStorage.getItem(STORAGE_KEYS.POSITIONS),
         AsyncStorage.getItem(STORAGE_KEYS.HISTORY),
         AsyncStorage.getItem(STORAGE_KEYS.BALANCE),
+        AsyncStorage.getItem(STORAGE_KEYS.INITIAL_BALANCE),
       ]);
 
       this.openPositions = positions ? JSON.parse(positions) : [];
       this.tradeHistory = history ? JSON.parse(history) : [];
-      this.balance = balance ? parseFloat(balance) : INITIAL_BALANCE;
+      this.initialBalance = initialBalance ? parseFloat(initialBalance) : DEFAULT_INITIAL_BALANCE;
+      this.balance = balance ? parseFloat(balance) : this.initialBalance;
 
       this.initialized = true;
 
@@ -49,12 +53,14 @@ class PaperTradeService {
         positions: this.openPositions.length,
         history: this.tradeHistory.length,
         balance: this.balance,
+        initialBalance: this.initialBalance,
       });
     } catch (error) {
       console.error('[PaperTrade] Init error:', error);
       this.openPositions = [];
       this.tradeHistory = [];
-      this.balance = INITIAL_BALANCE;
+      this.initialBalance = DEFAULT_INITIAL_BALANCE;
+      this.balance = DEFAULT_INITIAL_BALANCE;
     }
   }
 
@@ -329,13 +335,22 @@ class PaperTradeService {
 
   getStats(userId = null) {
     const history = this.getTradeHistory(userId, 1000);
+    const openPositions = this.getOpenPositions(userId);
+
+    // Calculate unrealized P&L from open positions
+    const unrealizedPnL = openPositions.reduce((sum, p) => sum + (p.unrealizedPnL || 0), 0);
+
+    // Calculate total position size in use
+    const usedMargin = openPositions.reduce((sum, p) => sum + (p.positionSize || 0), 0);
 
     if (history.length === 0) {
       return {
-        totalTrades: 0,
-        openTrades: this.getOpenPositions(userId).length,
+        totalTrades: 0, // Closed trades count
+        openTrades: openPositions.length,
         winRate: 0,
-        totalPnL: 0,
+        totalPnL: unrealizedPnL, // Include unrealized P&L
+        realizedPnL: 0,
+        unrealizedPnL: unrealizedPnL,
         avgPnL: 0,
         wins: 0,
         losses: 0,
@@ -344,32 +359,41 @@ class PaperTradeService {
         avgHoldingTime: '0h',
         profitFactor: 0,
         balance: this.balance,
+        usedMargin: usedMargin,
+        availableBalance: this.balance,
       };
     }
 
     const wins = history.filter((t) => t.result === 'WIN');
     const losses = history.filter((t) => t.result === 'LOSS');
 
-    const totalPnL = history.reduce((sum, t) => sum + (t.realizedPnL || 0), 0);
+    const realizedPnL = history.reduce((sum, t) => sum + (t.realizedPnL || 0), 0);
+    const totalPnL = realizedPnL + unrealizedPnL; // Combined P&L
+
     const winPnL = wins.reduce((sum, t) => sum + (t.realizedPnL || 0), 0);
     const lossPnL = Math.abs(
       losses.reduce((sum, t) => sum + (t.realizedPnL || 0), 0)
     );
 
     const pnls = history.map((t) => t.realizedPnL || 0);
+    const closedTradesCount = history.length;
 
     return {
-      totalTrades: history.length,
-      openTrades: this.getOpenPositions(userId).length,
-      winRate: (wins.length / history.length) * 100,
-      totalPnL: totalPnL,
-      avgPnL: totalPnL / history.length,
+      totalTrades: closedTradesCount, // Number of CLOSED trades
+      openTrades: openPositions.length,
+      winRate: closedTradesCount > 0 ? (wins.length / closedTradesCount) * 100 : 0,
+      totalPnL: totalPnL, // Realized + Unrealized
+      realizedPnL: realizedPnL,
+      unrealizedPnL: unrealizedPnL,
+      avgPnL: closedTradesCount > 0 ? realizedPnL / closedTradesCount : 0,
       wins: wins.length,
       losses: losses.length,
-      bestTrade: Math.max(...pnls, 0),
-      worstTrade: Math.min(...pnls, 0),
+      bestTrade: pnls.length > 0 ? Math.max(...pnls, 0) : 0,
+      worstTrade: pnls.length > 0 ? Math.min(...pnls, 0) : 0,
       profitFactor: lossPnL > 0 ? winPnL / lossPnL : winPnL,
       balance: this.balance,
+      usedMargin: usedMargin,
+      availableBalance: this.balance,
     };
   }
 
@@ -423,18 +447,170 @@ class PaperTradeService {
           JSON.stringify(this.tradeHistory)
         ),
         AsyncStorage.setItem(STORAGE_KEYS.BALANCE, this.balance.toString()),
+        AsyncStorage.setItem(STORAGE_KEYS.INITIAL_BALANCE, this.initialBalance.toString()),
       ]);
     } catch (error) {
       console.error('[PaperTrade] Save error:', error);
     }
   }
 
+  /**
+   * Reset all data and start fresh with current initial balance
+   * Clears all positions and history, resets balance to initialBalance
+   */
   async resetAll() {
     this.openPositions = [];
     this.tradeHistory = [];
-    this.balance = INITIAL_BALANCE;
+    this.balance = this.initialBalance; // Use user-configured initial balance
     await this.saveAll();
-    console.log('[PaperTrade] Reset complete');
+    console.log('[PaperTrade] Reset complete with balance:', this.initialBalance);
+    return {
+      balance: this.balance,
+      initialBalance: this.initialBalance,
+    };
+  }
+
+  /**
+   * Get the current initial balance setting
+   */
+  getInitialBalance() {
+    return this.initialBalance;
+  }
+
+  /**
+   * Set a new initial balance for paper trading
+   * @param {number} amount - New initial balance (min $100, max $10,000,000)
+   * @param {boolean} resetAccount - If true, also reset all positions/history
+   */
+  async setInitialBalance(amount, resetAccount = false) {
+    await this.init();
+
+    // Validate amount
+    const MIN_BALANCE = 100;
+    const MAX_BALANCE = 10000000; // 10 million
+
+    if (typeof amount !== 'number' || isNaN(amount)) {
+      throw new Error('Số tiền không hợp lệ');
+    }
+
+    if (amount < MIN_BALANCE) {
+      throw new Error(`Số tiền tối thiểu là $${MIN_BALANCE.toLocaleString()}`);
+    }
+
+    if (amount > MAX_BALANCE) {
+      throw new Error(`Số tiền tối đa là $${MAX_BALANCE.toLocaleString()}`);
+    }
+
+    const oldInitialBalance = this.initialBalance;
+    this.initialBalance = amount;
+
+    if (resetAccount) {
+      // Full reset with new initial balance
+      this.openPositions = [];
+      this.tradeHistory = [];
+      this.balance = amount;
+    } else {
+      // Adjust current balance by the difference
+      // New balance = current balance + (new initial - old initial)
+      const difference = amount - oldInitialBalance;
+      this.balance += difference;
+
+      // Ensure balance doesn't go negative
+      if (this.balance < 0) {
+        this.balance = 0;
+      }
+    }
+
+    await this.saveAll();
+
+    console.log('[PaperTrade] Initial balance set:', {
+      oldInitialBalance,
+      newInitialBalance: this.initialBalance,
+      currentBalance: this.balance,
+      resetAccount,
+    });
+
+    return {
+      initialBalance: this.initialBalance,
+      balance: this.balance,
+      resetAccount,
+    };
+  }
+
+  /**
+   * Reset to default initial balance ($10,000) and clear all data
+   */
+  async resetToDefault() {
+    this.initialBalance = DEFAULT_INITIAL_BALANCE;
+    this.openPositions = [];
+    this.tradeHistory = [];
+    this.balance = DEFAULT_INITIAL_BALANCE;
+    await this.saveAll();
+    console.log('[PaperTrade] Reset to default complete');
+    return {
+      initialBalance: this.initialBalance,
+      balance: this.balance,
+    };
+  }
+
+  /**
+   * Recalculate balance based on history and open positions
+   * Use this to fix corrupted balance data
+   * Formula: Balance = initialBalance + sum(realizedPnL) - sum(openPositionSizes)
+   */
+  async recalculateBalance() {
+    await this.init();
+
+    // Sum of all realized P&L from closed trades
+    const totalRealizedPnL = this.tradeHistory.reduce((sum, t) => {
+      return sum + (t.realizedPnL || 0);
+    }, 0);
+
+    // Sum of position sizes currently in use (locked in open trades)
+    const usedMargin = this.openPositions.reduce((sum, p) => {
+      return sum + (p.positionSize || 0);
+    }, 0);
+
+    // Correct balance = Initial + Profits/Losses - Currently Used Margin
+    const correctBalance = this.initialBalance + totalRealizedPnL - usedMargin;
+
+    console.log('[PaperTrade] Recalculating balance:', {
+      initial: this.initialBalance,
+      totalRealizedPnL,
+      usedMargin,
+      oldBalance: this.balance,
+      newBalance: correctBalance,
+    });
+
+    this.balance = correctBalance;
+    await this.saveAll();
+
+    return {
+      oldBalance: this.balance,
+      newBalance: correctBalance,
+      initialBalance: this.initialBalance,
+      totalRealizedPnL,
+      usedMargin,
+    };
+  }
+
+  /**
+   * Get equity (balance + unrealized P&L)
+   * This is the "real" account value including floating profits/losses
+   */
+  getEquity(userId = null) {
+    const openPositions = this.getOpenPositions(userId);
+    const unrealizedPnL = openPositions.reduce((sum, p) => sum + (p.unrealizedPnL || 0), 0);
+    const usedMargin = openPositions.reduce((sum, p) => sum + (p.positionSize || 0), 0);
+
+    return {
+      initialBalance: this.initialBalance,
+      balance: this.balance,
+      usedMargin: usedMargin,
+      unrealizedPnL: unrealizedPnL,
+      equity: this.balance + usedMargin + unrealizedPnL, // Total account value
+      availableBalance: this.balance, // Free margin
+    };
   }
 
   // ═══════════════════════════════════════════════════════════

@@ -3,7 +3,7 @@
  * Detailed view of detected pattern with chart
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   View,
   Text,
@@ -26,6 +26,10 @@ import {
 } from 'lucide-react-native';
 import { binanceService } from '../../services/binanceService';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { formatPrice } from '../../utils/formatters';
+import EnhancementStatsCard from '../../components/Trading/EnhancementStatsCard';
+import { TierUpgradeModal } from '../../components/TierUpgradePrompt';
+import { AuthContext } from '../../contexts/AuthContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -33,6 +37,11 @@ const PatternDetailScreen = ({ navigation, route }) => {
   const { pattern } = route.params;
   const [currentPrice, setCurrentPrice] = useState(pattern.currentPrice || 0);
   const [priceChange, setPriceChange] = useState(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  // Get user tier from AuthContext (uses scanner_tier from profile)
+  const { userTier: contextUserTier } = useContext(AuthContext) || {};
+  const userTier = contextUserTier || 'FREE';
 
   const isLong = pattern.direction === 'LONG';
   const directionColor = isLong ? COLORS.success : COLORS.error;
@@ -47,12 +56,7 @@ const PatternDetailScreen = ({ navigation, route }) => {
     return () => unsubscribe();
   }, [pattern.symbol]);
 
-  const formatPrice = (price) => {
-    if (!price) return '--';
-    if (price >= 1000) return price.toFixed(2);
-    if (price >= 1) return price.toFixed(4);
-    return price.toFixed(6);
-  };
+  // formatPrice is now imported from utils/formatters
 
   const formatTime = (timestamp) => {
     if (!timestamp) return '--';
@@ -234,6 +238,16 @@ const PatternDetailScreen = ({ navigation, route }) => {
             </View>
           </View>
 
+          {/* Enhancement Stats Card - TIER2/3 Features */}
+          <View style={styles.enhancementSection}>
+            <EnhancementStatsCard
+              pattern={pattern}
+              userTier={userTier}
+              onUpgradePress={() => setShowUpgradeModal(true)}
+              expanded={true}
+            />
+          </View>
+
           {/* Description */}
           <View style={styles.descriptionCard}>
             <Text style={styles.sectionTitle}>Pattern Description</Text>
@@ -261,6 +275,17 @@ const PatternDetailScreen = ({ navigation, route }) => {
           {/* Bottom spacing */}
           <View style={{ height: 100 }} />
         </ScrollView>
+
+        {/* Tier Upgrade Modal */}
+        <TierUpgradeModal
+          visible={showUpgradeModal}
+          onClose={() => setShowUpgradeModal(false)}
+          userTier={userTier}
+          onUpgrade={(targetTier) => {
+            setShowUpgradeModal(false);
+            navigation.navigate('Shop');
+          }}
+        />
       </SafeAreaView>
     </LinearGradient>
   );
@@ -470,6 +495,10 @@ const styles = StyleSheet.create({
   timeText: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     color: COLORS.textMuted,
+  },
+  enhancementSection: {
+    marginHorizontal: SPACING.md,
+    marginBottom: SPACING.md,
   },
 });
 

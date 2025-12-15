@@ -19,7 +19,6 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
-  Alert,
   ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -34,6 +33,9 @@ import presenceService from '../../services/presenceService';
 // Auth
 import { useAuth } from '../../contexts/AuthContext';
 
+// Alert
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
+
 // Tokens
 import {
   COLORS,
@@ -46,6 +48,7 @@ import {
 export default function CreateGroupScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const { alert, AlertComponent } = useCustomAlert();
 
   // State
   const [groupName, setGroupName] = useState('');
@@ -102,12 +105,12 @@ export default function CreateGroupScreen({ navigation }) {
 
   const handleCreateGroup = useCallback(async () => {
     if (!groupName.trim()) {
-      Alert.alert('Group Name Required', 'Please enter a name for the group');
+      alert({ type: 'error', title: 'Group Name Required', message: 'Please enter a name for the group' });
       return;
     }
 
     if (selectedUsers.length < 2) {
-      Alert.alert('More Members Needed', 'Please select at least 2 other members');
+      alert({ type: 'error', title: 'More Members Needed', message: 'Please select at least 2 other members' });
       return;
     }
 
@@ -131,11 +134,11 @@ export default function CreateGroupScreen({ navigation }) {
       });
     } catch (error) {
       console.error('Error creating group:', error);
-      Alert.alert('Error', 'Failed to create group');
+      alert({ type: 'error', title: 'Error', message: 'Failed to create group' });
     } finally {
       setCreating(false);
     }
-  }, [groupName, selectedUsers, user?.id, navigation, creating]);
+  }, [groupName, selectedUsers, user?.id, navigation, creating, alert]);
 
   // =====================================================
   // RENDER
@@ -337,6 +340,7 @@ export default function CreateGroupScreen({ navigation }) {
           </View>
         )}
       </ScrollView>
+      {AlertComponent}
     </LinearGradient>
   );
 }

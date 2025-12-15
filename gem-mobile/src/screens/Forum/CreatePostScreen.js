@@ -16,13 +16,17 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  Alert,
   Image,
   Modal,
+  Dimensions,
 } from 'react-native';
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { X, ChevronDown, Check, ImagePlus, Trash2, Crop, RotateCw, Plus, Music, Users, ShoppingBag, Globe, Lock, UserCheck } from 'lucide-react-native';
+import { X, ChevronDown, Check, ImagePlus, Trash2, Crop, RotateCw, Plus, Music, Users, ShoppingBag, Globe, Lock, UserCheck, RefreshCw } from 'lucide-react-native';
+import alertService from '../../services/alertService';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { forumService } from '../../services/forumService';
@@ -30,10 +34,11 @@ import { hashtagService } from '../../services/hashtagService';
 import { useAuth } from '../../contexts/AuthContext';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 
-// Feature modals for sound and audience selection
+// Feature modals for sound and product selection
 import SoundPicker from '../../components/SoundPicker';
-import AudiencePicker from '../../components/AudiencePicker';
 import ProductPicker from '../../components/ProductPicker';
+import MentionInput from '../../components/MentionInput';
+// NOTE: AudiencePicker modal removed - using inline dropdown instead
 
 // Main topic selections - CHỈ 3 TOPIC CHÍNH cho user thường
 const MAIN_TOPICS = [
@@ -157,6 +162,7 @@ const ImageEditorModal = ({ visible, imageUri, onSave, onCancel }) => {
 
 const CreatePostScreen = ({ navigation }) => {
   const { user, isAdmin } = useAuth();
+  const { alert, AlertComponent } = useCustomAlert();
   const [content, setContent] = useState('');
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [showTopicPicker, setShowTopicPicker] = useState(false);
@@ -180,9 +186,35 @@ const CreatePostScreen = ({ navigation }) => {
   const [audience, setAudience] = useState('public'); // 'public', 'followers', 'private'
   const [showAudiencePicker, setShowAudiencePicker] = useState(false);
 
-  // Product attachment state
-  const [linkedProduct, setLinkedProduct] = useState(null);
+  // Product attachment state - NOW SUPPORTS MULTIPLE PRODUCTS
+  const [linkedProducts, setLinkedProducts] = useState([]);
   const [showProductPicker, setShowProductPicker] = useState(false);
+
+  // Image aspect ratio state for full-size display
+  const [imageAspectRatios, setImageAspectRatios] = useState({});
+
+  // Mention trigger state - for external trigger from Tag People button
+  const [triggerMention, setTriggerMention] = useState(false);
+
+  // Calculate aspect ratio when images change
+  useEffect(() => {
+    selectedImages.forEach((uri, index) => {
+      if (!imageAspectRatios[uri]) {
+        Image.getSize(
+          uri,
+          (width, height) => {
+            setImageAspectRatios(prev => ({
+              ...prev,
+              [uri]: width / height
+            }));
+          },
+          (error) => {
+            console.log('[CreatePost] Could not get image size:', error);
+          }
+        );
+      }
+    });
+  }, [selectedImages]);
 
   // isAdmin is now from AuthContext - uses profile role/tier check
 
@@ -198,28 +230,45 @@ const CreatePostScreen = ({ navigation }) => {
   const handlePickImage = async () => {
     try {
       if (selectedImages.length >= MAX_IMAGES) {
-        Alert.alert('Giới hạn', `Bạn chỉ có thể chọn tối đa ${MAX_IMAGES} ảnh`);
+        alert({
+          type: 'warning',
+          title: 'Giới hạn',
+          message: `Bạn chỉ có thể chọn tối đa ${MAX_IMAGES} ảnh`,
+          buttons: [{ text: 'OK' }],
+        });
         return;
       }
 
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert(
-          'Quyền truy cập',
-          'Cần quyền truy cập thư viện ảnh để tải ảnh lên',
-          [{ text: 'OK' }]
-        );
+        alert({
+          type: 'warning',
+          title: 'Quyền truy cập',
+          message: 'Cần quyền truy cập thư viện ảnh để tải ảnh lên',
+          buttons: [{ text: 'OK' }],
+        });
         return;
       }
 
       const remainingSlots = MAX_IMAGES - selectedImages.length;
 
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsMultipleSelection: true,
-        selectionLimit: remainingSlots,
-        quality: 0.9,
-      });
+      let result;
+      try {
+        // Disable multi-select on Android due to ActivityResultLauncher bug
+        result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsMultipleSelection: Platform.OS === 'ios' ? true : false,
+          selectionLimit: remainingSlots,
+          quality: 0.9,
+        });
+      } catch (multiSelectError) {
+        console.warn('[CreatePost] Multi-select failed, falling back to single select:', multiSelectError.message);
+        result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsMultipleSelection: false,
+          quality: 0.9,
+        });
+      }
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         // Add selected images to array
@@ -228,7 +277,12 @@ const CreatePostScreen = ({ navigation }) => {
       }
     } catch (error) {
       console.error('[CreatePost] Pick image error:', error);
-      Alert.alert('Lỗi', 'Không thể chọn ảnh. Vui lòng thử lại.');
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Không thể chọn ảnh. Vui lòng thử lại.',
+        buttons: [{ text: 'OK' }],
+      });
     }
   };
 
@@ -236,17 +290,23 @@ const CreatePostScreen = ({ navigation }) => {
   const handleTakePhoto = async () => {
     try {
       if (selectedImages.length >= MAX_IMAGES) {
-        Alert.alert('Giới hạn', `Bạn chỉ có thể chọn tối đa ${MAX_IMAGES} ảnh`);
+        alert({
+          type: 'warning',
+          title: 'Giới hạn',
+          message: `Bạn chỉ có thể chọn tối đa ${MAX_IMAGES} ảnh`,
+          buttons: [{ text: 'OK' }],
+        });
         return;
       }
 
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert(
-          'Quyền truy cập',
-          'Cần quyền truy cập camera để chụp ảnh',
-          [{ text: 'OK' }]
-        );
+        alert({
+          type: 'warning',
+          title: 'Quyền truy cập',
+          message: 'Cần quyền truy cập camera để chụp ảnh',
+          buttons: [{ text: 'OK' }],
+        });
         return;
       }
 
@@ -262,7 +322,12 @@ const CreatePostScreen = ({ navigation }) => {
       }
     } catch (error) {
       console.error('[CreatePost] Take photo error:', error);
-      Alert.alert('Lỗi', 'Không thể chụp ảnh. Vui lòng thử lại.');
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Không thể chụp ảnh. Vui lòng thử lại.',
+        buttons: [{ text: 'OK' }],
+      });
     }
   };
 
@@ -304,8 +369,9 @@ const CreatePostScreen = ({ navigation }) => {
 
   // Show media options
   const showMediaOptions = () => {
-    Alert.alert(
-      'Thêm ảnh',
+    const title = selectedImages.length > 0 ? 'Thêm ảnh khác' : 'Thêm ảnh';
+    alertService.info(
+      title,
       'Chọn nguồn ảnh',
       [
         { text: 'Thư viện ảnh', onPress: handlePickImage },
@@ -315,9 +381,19 @@ const CreatePostScreen = ({ navigation }) => {
     );
   };
 
+  // Handle Tag People - trigger @ mention dropdown
+  const handleTagPeople = () => {
+    setTriggerMention(true);
+  };
+
   const handleSubmit = async () => {
     if (!content.trim()) {
-      Alert.alert('Lỗi', 'Vui lòng nhập nội dung bài viết');
+      alert({
+        type: 'warning',
+        title: 'Lỗi',
+        message: 'Vui lòng nhập nội dung bài viết',
+        buttons: [{ text: 'OK' }],
+      });
       return;
     }
 
@@ -339,7 +415,12 @@ const CreatePostScreen = ({ navigation }) => {
           imageUrl = uploadResult.urls[0]; // First image as cover
         } else {
           console.error('[CreatePost] Upload failed:', uploadResult.errors);
-          Alert.alert('Lỗi', 'Không thể tải ảnh lên. Bài viết sẽ được đăng không có ảnh.');
+          alert({
+            type: 'warning',
+            title: 'Lỗi',
+            message: 'Không thể tải ảnh lên. Bài viết sẽ được đăng không có ảnh.',
+            buttons: [{ text: 'OK' }],
+          });
         }
         setUploading(false);
       }
@@ -367,17 +448,40 @@ const CreatePostScreen = ({ navigation }) => {
         media_urls: mediaUrls, // JSONB array of all images
         hashtags: hashtags, // Extracted hashtags array
         feed_type: feedType,
+        visibility: audience, // Save audience setting: 'public', 'followers', 'private'
+        sound_id: selectedSound?.id || null, // Save attached sound
       });
 
       if (error) {
         console.error('[CreatePost] Create error:', error);
-        Alert.alert('Lỗi', 'Không thể tạo bài viết. Vui lòng thử lại.');
+        alert({
+          type: 'error',
+          title: 'Lỗi',
+          message: 'Không thể tạo bài viết. Vui lòng thử lại.',
+          buttons: [{ text: 'OK' }],
+        });
       } else {
+        // Insert linked products into post_products table
+        if (data?.id && linkedProducts.length > 0) {
+          console.log('[CreatePost] Linking products to post:', linkedProducts.length);
+          try {
+            await forumService.linkProductsToPost(data.id, linkedProducts);
+            console.log('[CreatePost] Products linked successfully');
+          } catch (linkError) {
+            console.error('[CreatePost] Failed to link products:', linkError);
+            // Don't block post creation if product linking fails
+          }
+        }
         navigation.goBack();
       }
     } catch (error) {
       console.error('[CreatePost] Submit error:', error);
-      Alert.alert('Lỗi', 'Đã xảy ra lỗi. Vui lòng thử lại.');
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Đã xảy ra lỗi. Vui lòng thử lại.',
+        buttons: [{ text: 'OK' }],
+      });
     } finally {
       setSubmitting(false);
       setUploading(false);
@@ -400,7 +504,7 @@ const CreatePostScreen = ({ navigation }) => {
       locations={GRADIENTS.backgroundLocations}
       style={styles.gradient}
     >
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
@@ -425,84 +529,153 @@ const CreatePostScreen = ({ navigation }) => {
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
           <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-            {/* Topic Selector - CHỦ ĐỀ */}
-            <TouchableOpacity
-              style={styles.categorySelector}
-              onPress={() => setShowTopicPicker(!showTopicPicker)}
-            >
-              <Text style={styles.categorySelectorLabel}>CHỦ ĐỀ</Text>
-              <View style={styles.categorySelectorValue}>
-                <Text style={[
-                  styles.categorySelectorText,
-                  selectedTopic && { color: selectedTopic.color }
-                ]}>
-                  {getTopicDisplayText()}
-                </Text>
-                <ChevronDown size={20} color={COLORS.textMuted} />
-              </View>
-            </TouchableOpacity>
-
-            {/* Topic Picker */}
-            {showTopicPicker && (
-              <View style={styles.categoryPicker}>
-                {/* No selection option */}
+            {/* Topic Selector - CHỈ HIỂN THỊ CHO ADMIN */}
+            {isAdmin && (
+              <>
                 <TouchableOpacity
-                  style={styles.categoryOption}
-                  onPress={() => {
-                    setSelectedTopic(null);
-                    setShowTopicPicker(false);
-                  }}
+                  style={styles.categorySelector}
+                  onPress={() => setShowTopicPicker(!showTopicPicker)}
                 >
-                  <Text style={styles.categoryOptionText}>Không chọn</Text>
-                  {!selectedTopic && <Check size={18} color={COLORS.gold} />}
+                  <Text style={styles.categorySelectorLabel}>CHỦ ĐỀ (ADMIN)</Text>
+                  <View style={styles.categorySelectorValue}>
+                    <Text style={[
+                      styles.categorySelectorText,
+                      selectedTopic && { color: selectedTopic.color }
+                    ]}>
+                      {getTopicDisplayText()}
+                    </Text>
+                    <ChevronDown size={20} color={COLORS.textMuted} />
+                  </View>
                 </TouchableOpacity>
 
-                {/* Available Topics */}
-                {getAvailableTopics().map((topic, index) => (
-                  <TouchableOpacity
-                    key={`topic-${index}-${topic.id}`}
-                    style={[
-                      styles.mainTopicOption,
-                      selectedTopic?.id === topic.id && styles.mainTopicOptionActive,
-                      topic.feedType && styles.adminTopicOption, // Visual indicator for admin topics
-                    ]}
-                    onPress={() => {
-                      setSelectedTopic(topic);
-                      setShowTopicPicker(false);
-                    }}
-                  >
-                    <View style={[styles.categoryDot, { backgroundColor: topic.color }]} />
-                    <Text style={[
-                      styles.mainTopicText,
-                      selectedTopic?.id === topic.id && styles.mainTopicTextActive
-                    ]}>
-                      {topic.icon} {topic.name}
-                    </Text>
-                    {topic.feedType && (
-                      <Text style={styles.adminBadge}>ADMIN</Text>
-                    )}
-                    {selectedTopic?.id === topic.id && (
-                      <Check size={18} color={COLORS.gold} />
-                    )}
-                  </TouchableOpacity>
-                ))}
-              </View>
+                {/* Topic Picker */}
+                {showTopicPicker && (
+                  <View style={styles.categoryPicker}>
+                    {/* No selection option */}
+                    <TouchableOpacity
+                      style={styles.categoryOption}
+                      onPress={() => {
+                        setSelectedTopic(null);
+                        setShowTopicPicker(false);
+                      }}
+                    >
+                      <Text style={styles.categoryOptionText}>Không chọn</Text>
+                      {!selectedTopic && <Check size={18} color={COLORS.gold} />}
+                    </TouchableOpacity>
+
+                    {/* Available Topics */}
+                    {getAvailableTopics().map((topic, index) => (
+                      <TouchableOpacity
+                        key={`topic-${index}-${topic.id}`}
+                        style={[
+                          styles.mainTopicOption,
+                          selectedTopic?.id === topic.id && styles.mainTopicOptionActive,
+                          topic.feedType && styles.adminTopicOption, // Visual indicator for admin topics
+                        ]}
+                        onPress={() => {
+                          setSelectedTopic(topic);
+                          setShowTopicPicker(false);
+                        }}
+                      >
+                        <View style={[styles.categoryDot, { backgroundColor: topic.color }]} />
+                        <Text style={[
+                          styles.mainTopicText,
+                          selectedTopic?.id === topic.id && styles.mainTopicTextActive
+                        ]}>
+                          {topic.icon} {topic.name}
+                        </Text>
+                        {topic.feedType && (
+                          <Text style={styles.adminBadge}>ADMIN</Text>
+                        )}
+                        {selectedTopic?.id === topic.id && (
+                          <Check size={18} color={COLORS.gold} />
+                        )}
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </>
             )}
 
-            {/* Combined Content Input */}
+            {/* Combined Content Input with @mention and #hashtag support */}
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>NỘI DUNG BÀI VIẾT *</Text>
-              <TextInput
+              <MentionInput
                 style={styles.contentInput}
-                placeholder="Dòng đầu tiên sẽ là tiêu đề...&#10;&#10;Viết nội dung bài viết của bạn..."
-                placeholderTextColor={COLORS.textMuted}
+                placeholder="Dòng đầu tiên sẽ là tiêu đề...&#10;&#10;Viết nội dung bài viết của bạn...&#10;&#10;Dùng @ để tag người dùng, # để thêm hashtag"
                 value={content}
                 onChangeText={setContent}
                 multiline
-                textAlignVertical="top"
+                numberOfLines={8}
+                triggerMention={triggerMention}
+                onTriggerMentionHandled={() => setTriggerMention(false)}
               />
-              <Text style={styles.hint}>💡 Dòng đầu tiên sẽ tự động trở thành tiêu đề</Text>
+              <Text style={styles.hint}>💡 Dòng đầu tiên sẽ tự động trở thành tiêu đề. Dùng @ để tag, # cho hashtag</Text>
             </View>
+
+            {/* ═══════════════════════════════════════════ */}
+            {/* ACTION TOOLBAR - Photo, Tag People (MOVED UP) */}
+            {/* ═══════════════════════════════════════════ */}
+            <View style={styles.actionToolbar}>
+              <TouchableOpacity style={styles.toolbarItem} onPress={showMediaOptions}>
+                <ImagePlus size={22} color={COLORS.success} />
+                <Text style={styles.toolbarItemText}>
+                  {selectedImages.length > 0 ? `Ảnh (${selectedImages.length}/${MAX_IMAGES})` : 'Ảnh'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.toolbarItem} onPress={handleTagPeople}>
+                <Users size={22} color={COLORS.cyan} />
+                <Text style={styles.toolbarItemText}>Gắn thẻ</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* ═══════════════════════════════════════════ */}
+            {/* MEDIA SECTION - FULL ASPECT RATIO PREVIEW */}
+            {/* ═══════════════════════════════════════════ */}
+            {selectedImages.length > 0 && (
+              <View style={styles.mediaPreviewSection}>
+                {selectedImages.map((uri, index) => {
+                  const aspectRatio = imageAspectRatios[uri] || 1;
+                  const imageHeight = Math.min((SCREEN_WIDTH - SPACING.lg * 2) / aspectRatio, SCREEN_WIDTH * 1.2);
+
+                  return (
+                    <View key={`img-${index}`} style={styles.mediaPreviewItem}>
+                      <TouchableOpacity
+                        activeOpacity={0.9}
+                        onPress={() => handleEditImage(index)}
+                      >
+                        <Image
+                          source={{ uri }}
+                          style={[styles.mediaPreviewFull, { height: imageHeight }]}
+                          resizeMode="cover"
+                        />
+                        <View style={styles.tapHintOverlay}>
+                          <Crop size={20} color="rgba(255,255,255,0.8)" />
+                          <Text style={styles.tapHintText}>Nhấn để chỉnh sửa</Text>
+                        </View>
+                      </TouchableOpacity>
+                      {index === 0 && (
+                        <View style={styles.coverBadge}>
+                          <Text style={styles.coverBadgeText}>BÌA</Text>
+                        </View>
+                      )}
+                      <TouchableOpacity
+                        style={styles.mediaDeleteBtn}
+                        onPress={() => handleRemoveImage(index)}
+                      >
+                        <Trash2 size={18} color="#FFFFFF" />
+                      </TouchableOpacity>
+                    </View>
+                  );
+                })}
+                {uploading && (
+                  <View style={styles.uploadingOverlay}>
+                    <ActivityIndicator size="large" color={COLORS.gold} />
+                    <Text style={styles.uploadingText}>Đang tải lên...</Text>
+                  </View>
+                )}
+              </View>
+            )}
 
             {/* ═══════════════════════════════════════════ */}
             {/* CREATOR TOOLBAR - Sound, Audience, Product */}
@@ -541,20 +714,20 @@ const CreatePostScreen = ({ navigation }) => {
                 <ChevronDown size={14} color={COLORS.textMuted} />
               </TouchableOpacity>
 
-              {/* Product Link Button */}
+              {/* Product Link Button - MULTI-SELECT */}
               <TouchableOpacity
                 style={[
                   styles.toolbarBtn,
-                  linkedProduct && styles.toolbarBtnActive,
+                  linkedProducts.length > 0 && styles.toolbarBtnActive,
                 ]}
                 onPress={() => setShowProductPicker(true)}
               >
-                <ShoppingBag size={20} color={linkedProduct ? COLORS.gold : COLORS.textMuted} />
+                <ShoppingBag size={20} color={linkedProducts.length > 0 ? COLORS.gold : COLORS.textMuted} />
                 <Text style={[
                   styles.toolbarBtnText,
-                  linkedProduct && styles.toolbarBtnTextActive,
+                  linkedProducts.length > 0 && styles.toolbarBtnTextActive,
                 ]}>
-                  {linkedProduct ? 'Đã gắn' : 'Gắn SP'}
+                  {linkedProducts.length > 0 ? `${linkedProducts.length} SP` : 'Gắn SP'}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -615,93 +788,31 @@ const CreatePostScreen = ({ navigation }) => {
               </View>
             )}
 
-            {/* Linked Product Display */}
-            {linkedProduct && (
-              <View style={styles.linkedProductCard}>
-                <ShoppingBag size={18} color={COLORS.gold} />
-                <View style={styles.linkedProductInfo}>
-                  <Text style={styles.linkedProductName}>{linkedProduct.title}</Text>
-                  <Text style={styles.linkedProductPrice}>{linkedProduct.price}</Text>
-                </View>
-                <TouchableOpacity
-                  onPress={() => setLinkedProduct(null)}
-                  style={styles.removeProductBtn}
-                >
-                  <X size={16} color={COLORS.error} />
-                </TouchableOpacity>
+            {/* Linked Products Display - MULTI-SELECT */}
+            {linkedProducts.length > 0 && (
+              <View style={styles.linkedProductsContainer}>
+                <Text style={styles.linkedProductsTitle}>Sản phẩm đã gắn ({linkedProducts.length})</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.linkedProductsScroll}>
+                  {linkedProducts.map((product, index) => (
+                    <View key={product.id || index} style={styles.linkedProductCard}>
+                      {product.image && (
+                        <Image source={{ uri: product.image }} style={styles.linkedProductImage} />
+                      )}
+                      <View style={styles.linkedProductInfo}>
+                        <Text style={styles.linkedProductName} numberOfLines={1}>{product.title}</Text>
+                        <Text style={styles.linkedProductPrice}>{product.price}</Text>
+                      </View>
+                      <TouchableOpacity
+                        onPress={() => setLinkedProducts(prev => prev.filter((_, i) => i !== index))}
+                        style={styles.removeProductBtn}
+                      >
+                        <X size={14} color={COLORS.error} />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </ScrollView>
               </View>
             )}
-
-            {/* Media Section - MULTI-IMAGE SUPPORT */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>
-                ẢNH ĐÍNH KÈM ({selectedImages.length}/{MAX_IMAGES})
-              </Text>
-
-              {selectedImages.length > 0 ? (
-                // Show image gallery preview
-                <View style={styles.imageGallery}>
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.imageGalleryContent}
-                  >
-                    {selectedImages.map((uri, index) => (
-                      <View key={`img-${index}`} style={styles.galleryImageContainer}>
-                        <Image source={{ uri }} style={styles.galleryImage} />
-                        {/* Cover badge for first image */}
-                        {index === 0 && (
-                          <View style={styles.coverBadge}>
-                            <Text style={styles.coverBadgeText}>BIA</Text>
-                          </View>
-                        )}
-                        {/* Action buttons */}
-                        <View style={styles.galleryImageActions}>
-                          <TouchableOpacity
-                            style={styles.galleryActionBtn}
-                            onPress={() => handleEditImage(index)}
-                          >
-                            <Crop size={14} color="#FFFFFF" />
-                          </TouchableOpacity>
-                          <TouchableOpacity
-                            style={[styles.galleryActionBtn, styles.galleryActionBtnDanger]}
-                            onPress={() => handleRemoveImage(index)}
-                          >
-                            <X size={14} color="#FFFFFF" />
-                          </TouchableOpacity>
-                        </View>
-                      </View>
-                    ))}
-                    {/* Add more button if under limit */}
-                    {selectedImages.length < MAX_IMAGES && (
-                      <TouchableOpacity
-                        style={styles.addMoreBtn}
-                        onPress={showMediaOptions}
-                      >
-                        <Plus size={28} color={COLORS.textMuted} />
-                        <Text style={styles.addMoreText}>Thêm</Text>
-                      </TouchableOpacity>
-                    )}
-                  </ScrollView>
-                  {uploading && (
-                    <View style={styles.uploadingOverlay}>
-                      <ActivityIndicator size="large" color={COLORS.gold} />
-                      <Text style={styles.uploadingText}>Đang tải lên...</Text>
-                    </View>
-                  )}
-                </View>
-              ) : (
-                // Show add media button
-                <TouchableOpacity
-                  style={styles.addMediaBtn}
-                  onPress={showMediaOptions}
-                >
-                  <ImagePlus size={32} color={COLORS.textMuted} />
-                  <Text style={styles.addMediaText}>Thêm ảnh (tối đa {MAX_IMAGES})</Text>
-                  <Text style={styles.addMediaHint}>Chạm để chọn từ thư viện hoặc chụp ảnh</Text>
-                </TouchableOpacity>
-              )}
-            </View>
 
             {/* Bottom padding */}
             <View style={{ height: 100 }} />
@@ -726,27 +837,21 @@ const CreatePostScreen = ({ navigation }) => {
           }}
         />
 
-        {/* Audience Picker Modal */}
-        <AudiencePicker
-          visible={showAudiencePicker}
-          onClose={() => setShowAudiencePicker(false)}
-          currentAudience={audience}
-          onSelect={(newAudience) => {
-            setAudience(newAudience);
-            setShowAudiencePicker(false);
-          }}
-        />
+        {/* NOTE: Audience selection is handled by inline dropdown in toolbar, not modal */}
 
-        {/* Product Picker Modal */}
+        {/* Product Picker Modal - MULTI-SELECT MODE */}
         <ProductPicker
           visible={showProductPicker}
           onClose={() => setShowProductPicker(false)}
-          onSelect={(product) => {
-            setLinkedProduct(product);
+          onSelect={(products) => {
+            setLinkedProducts(products);
             setShowProductPicker(false);
           }}
-          currentProduct={linkedProduct}
+          currentProduct={linkedProducts}
+          multiSelect={true}
+          maxSelect={5}
         />
+        {AlertComponent}
       </SafeAreaView>
     </LinearGradient>
   );
@@ -982,6 +1087,85 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.fontSize.md,
     color: COLORS.textPrimary,
     marginTop: SPACING.sm,
+  },
+
+  // ═══════════════════════════════════════════
+  // FULL ASPECT RATIO MEDIA PREVIEW STYLES
+  // ═══════════════════════════════════════════
+  mediaPreviewSection: {
+    marginBottom: SPACING.lg,
+  },
+  mediaPreviewItem: {
+    position: 'relative',
+    marginBottom: SPACING.md,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  mediaPreviewFull: {
+    width: '100%',
+    borderRadius: 12,
+    backgroundColor: COLORS.bgMid,
+  },
+  tapHintOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: SPACING.sm,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
+  },
+  tapHintText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  mediaDeleteBtn: {
+    position: 'absolute',
+    top: SPACING.sm,
+    right: SPACING.sm,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 107, 107, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+
+  // ═══════════════════════════════════════════
+  // ACTION TOOLBAR STYLES - Photo, Tag, Products
+  // ═══════════════════════════════════════════
+  actionToolbar: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: SPACING.md,
+    marginBottom: SPACING.lg,
+    backgroundColor: GLASS.background,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
+  },
+  toolbarItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.sm,
+  },
+  toolbarItemText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textPrimary,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
   },
 
   // Multi-image gallery styles
@@ -1237,38 +1421,69 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  // Linked Product Card
+  // Linked Products Container - MULTI-SELECT STYLES
+  linkedProductsContainer: {
+    marginBottom: SPACING.md,
+    padding: SPACING.sm,
+    backgroundColor: 'rgba(255, 189, 89, 0.05)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.2)',
+  },
+  linkedProductsTitle: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.gold,
+    marginBottom: SPACING.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+  },
+  linkedProductsScroll: {
+    flexDirection: 'row',
+    paddingVertical: SPACING.xs,
+  },
   linkedProductCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 189, 89, 0.1)',
+    backgroundColor: 'rgba(30, 30, 40, 0.8)',
     borderRadius: 12,
-    padding: SPACING.md,
-    marginBottom: SPACING.md,
+    padding: SPACING.sm,
+    marginRight: SPACING.md,
     borderWidth: 1,
     borderColor: 'rgba(255, 189, 89, 0.3)',
-    gap: SPACING.md,
+    minWidth: 180,
+    maxWidth: 220,
+  },
+  linkedProductImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    marginRight: SPACING.sm,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
   linkedProductInfo: {
     flex: 1,
+    minWidth: 80,
+    paddingRight: SPACING.xs,
   },
   linkedProductName: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontSize: TYPOGRAPHY.fontSize.sm,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
     color: COLORS.textPrimary,
+    lineHeight: 18,
   },
   linkedProductPrice: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontSize: TYPOGRAPHY.fontSize.xs,
     color: COLORS.gold,
-    marginTop: 2,
+    marginTop: 4,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
   },
   removeProductBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: 'rgba(255, 107, 107, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
+    marginLeft: SPACING.xs,
   },
 });
 

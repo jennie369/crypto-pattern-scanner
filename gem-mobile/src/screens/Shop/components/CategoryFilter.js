@@ -99,13 +99,16 @@ const CategoryFilter = ({ categories, selected, onSelect, darkMode = false }) =>
   );
 };
 
+// STYLES - Matching CategoryTabs style (purple border, gold text)
 const styles = StyleSheet.create({
   container: {
     borderBottomWidth: 1,
+    borderBottomColor: 'rgba(106, 91, 255, 0.2)',
   },
   scrollContent: {
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    alignItems: 'center',
     gap: SPACING.sm,
   },
   tab: {
@@ -115,23 +118,30 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm,
     borderRadius: 20,
     borderWidth: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    marginRight: SPACING.sm,
+    height: 36,
   },
   tabActive: {
-    // Active styles in dynamic styles
+    backgroundColor: 'rgba(106, 91, 255, 0.2)',
+    borderColor: COLORS.purple,
   },
   icon: {
     marginRight: 6,
   },
   tabText: {
     fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textMuted,
   },
   tabTextActive: {
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.gold,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
   },
 });
 
-// Light theme styles
+// Light theme styles (for non-dark mode screens)
 const lightStyles = StyleSheet.create({
   container: {
     backgroundColor: COLORS.bgWhite,
@@ -152,7 +162,7 @@ const lightStyles = StyleSheet.create({
   },
 });
 
-// Dark theme styles - Matching TimeframeSelector (purple border, gold text)
+// Dark theme styles - Same as base styles (matching CategoryTabs)
 const darkStyles = StyleSheet.create({
   container: {
     backgroundColor: 'transparent',

@@ -1,7 +1,7 @@
 /**
  * Gemral - Shop Screen (Main)
- * Product catalog with categories & recommendation sections - DARK THEME
- * Infinite scroll experience with personalized recommendations
+ * Product catalog với sections theo Shopify tags - DARK THEME
+ * Sử dụng design tokens từ DESIGN_TOKENS.md v3.0
  */
 
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
@@ -19,85 +19,144 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Search, ShoppingCart, ShoppingBag, ChevronRight, Sparkles, TrendingUp, Clock, Star } from 'lucide-react-native';
+import { Search, ShoppingCart, ShoppingBag } from 'lucide-react-native';
 import { ProductCard, CategoryFilter } from './components';
-import { useSwipeNavigation } from '../../hooks/useSwipeNavigation';
+import ProductSection from './components/ProductSection';
+import ShopCategoryTabs from './components/ShopCategoryTabs';
+import { useSponsorBanners } from '../../components/SponsorBannerSection';
+import SponsorBannerCard from '../../components/SponsorBannerCard';
+import { distributeBannersAmongSections } from '../../utils/bannerDistribution';
 import { shopifyService } from '../../services/shopifyService';
-import { recommendationService } from '../../services/recommendationService';
+import { useShopSections, useFilteredProducts } from '../../hooks/useShopProducts';
+import { prefetchImages } from '../../components/Common/OptimizedImage';
 import { useCart } from '../../contexts/CartContext';
 import { useTabBar } from '../../contexts/TabBarContext';
-import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
+import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, GLASS } from '../../utils/tokens';
+import { SHOP_SECTIONS, SHOP_CATEGORIES } from '../../utils/shopConfig';
+import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
+import useScrollToTop from '../../hooks/useScrollToTop';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = (SCREEN_WIDTH - SPACING.md * 3) / 2;
 
+// Header and tabs height for auto-hide
+const HEADER_HEIGHT = 60;
+const TABS_HEIGHT = 60; // 12 (paddingTop) + 36 (tab height) + 12 (paddingBottom)
+const TOTAL_HEADER_HEIGHT = HEADER_HEIGHT + TABS_HEIGHT;
+
 const ShopScreen = ({ navigation }) => {
   const { itemCount } = useCart();
-  const { handleScroll } = useTabBar();
-  const scrollViewRef = useRef(null);
+  const { handleScroll: handleTabBarScroll } = useTabBar();
+
+  // Auto-hide header animation
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const lastScrollY = useRef(0);
+  const headerTranslateY = useRef(new Animated.Value(0)).current;
+  const isScrollingDown = useRef(false);
+
+  // Sponsor banners - use hook to fetch ALL banners for distribution
+  const { banners: sponsorBanners, dismissBanner, userId } = useSponsorBanners('shop', null);
 
   // Data states
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [allProducts, setAllProducts] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Section states
-  const [forYouProducts, setForYouProducts] = useState([]);
-  const [trendingProducts, setTrendingProducts] = useState([]);
-  const [newArrivals, setNewArrivals] = useState([]);
-  const [becauseYouViewed, setBecauseYouViewed] = useState([]);
-  const [moreProducts, setMoreProducts] = useState([]);
+  // Sections data từ Shopify tags
+  const [sectionsData, setSectionsData] = useState({});
+  const [sectionsLoading, setSectionsLoading] = useState({});
 
-  // Infinite scroll states
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
+  // Infinity scroll state cho section "explore"
+  const [exploreProducts, setExploreProducts] = useState([]);
+  const [exploreLoading, setExploreLoading] = useState(false);
+  const [exploreLoadingMore, setExploreLoadingMore] = useState(false);
+  const [exploreHasMore, setExploreHasMore] = useState(true);
+  const exploreOffsetRef = useRef(0);
+  const EXPLORE_LIMIT = 12;
 
-  // Convert categories to tabs format for swipe navigation
-  const categoryTabs = useMemo(() => {
-    const allTab = { id: null, handle: null, title: 'Tất cả' };
-    const mappedCategories = categories.map(cat => ({
-      id: cat.handle,
-      handle: cat.handle,
-      title: cat.title,
-    }));
-    return [allTab, ...mappedCategories];
-  }, [categories]);
+  // Filtered products khi chọn category
+  const filteredProducts = useFilteredProducts(allProducts, selectedCategory);
 
-  // Swipe Navigation Hook
-  const { panHandlers } = useSwipeNavigation({
-    tabs: categoryTabs,
-    currentTab: selectedCategory,
-    onTabChange: (handle) => handleCategorySelect(handle),
-    enabled: true,
+  // Double-tap to scroll to top and refresh
+  const { scrollViewRef } = useScrollToTop('Shop', async () => {
+    setRefreshing(true);
+    exploreOffsetRef.current = 0;
+    setExploreHasMore(true);
+    await loadInitialData();
+    setRefreshing(false);
   });
+
+  // Handle scroll for auto-hide header/tabs
+  const handleScroll = useCallback((event) => {
+    const currentScrollY = event.nativeEvent.contentOffset.y;
+    const diff = currentScrollY - lastScrollY.current;
+
+    // Also handle TabBar visibility
+    handleTabBarScroll(event);
+
+    // Only animate if we've scrolled enough (threshold 10px)
+    if (Math.abs(diff) < 10) return;
+
+    const scrollingDown = diff > 0;
+
+    // At the top - always show header
+    if (currentScrollY <= 10) {
+      Animated.spring(headerTranslateY, {
+        toValue: 0,
+        useNativeDriver: true,
+        tension: 100,
+        friction: 10,
+      }).start();
+      isScrollingDown.current = false;
+    }
+    // Scrolling down - hide header
+    else if (scrollingDown && !isScrollingDown.current) {
+      Animated.spring(headerTranslateY, {
+        toValue: -TOTAL_HEADER_HEIGHT,
+        useNativeDriver: true,
+        tension: 100,
+        friction: 10,
+      }).start();
+      isScrollingDown.current = true;
+    }
+    // Scrolling up - show header
+    else if (!scrollingDown && isScrollingDown.current) {
+      Animated.spring(headerTranslateY, {
+        toValue: 0,
+        useNativeDriver: true,
+        tension: 100,
+        friction: 10,
+      }).start();
+      isScrollingDown.current = false;
+    }
+
+    lastScrollY.current = currentScrollY;
+  }, [handleTabBarScroll, headerTranslateY]);
 
   useEffect(() => {
     loadInitialData();
   }, []);
 
-  useEffect(() => {
-    if (selectedCategory) {
-      loadCategoryProducts();
-    }
-  }, [selectedCategory]);
-
   const loadInitialData = async () => {
     setLoading(true);
     try {
-      // Load base data
-      const [productsData, categoriesData] = await Promise.all([
-        shopifyService.getProducts({ limit: 100 }),
-        shopifyService.getCollections(),
-      ]);
+      // Load tất cả sản phẩm
+      const productsData = await shopifyService.getProducts({ limit: 100 });
+      setAllProducts(productsData);
 
-      setProducts(productsData);
-      setCategories(categoriesData);
+      // Prefetch images for faster loading - get first image of each product
+      const imageUrls = productsData
+        .slice(0, 30) // Prefetch first 30 products for immediate view
+        .map(p => p.images?.[0]?.src || p.image)
+        .filter(Boolean);
+      prefetchImages(imageUrls);
 
-      // Generate recommendation sections
-      await loadRecommendationSections(productsData);
+      // Load các sections theo tags
+      await loadSections(productsData);
+
+      // Load initial explore products
+      await loadExploreProducts(productsData, true);
     } catch (error) {
       console.error('Error loading shop data:', error);
     } finally {
@@ -105,201 +164,180 @@ const ShopScreen = ({ navigation }) => {
     }
   };
 
-  const loadRecommendationSections = async (allProducts) => {
-    try {
-      const [forYou, trending, newItems, viewed] = await Promise.all([
-        recommendationService.getForYouProducts(allProducts, 8),
-        recommendationService.getTrendingProducts(allProducts, 8),
-        recommendationService.getNewArrivals(allProducts, 8),
-        recommendationService.getBecauseYouViewed(allProducts, 8),
-      ]);
-
-      setForYouProducts(forYou);
-      setTrendingProducts(trending);
-      setNewArrivals(newItems);
-      setBecauseYouViewed(viewed);
-
-      // Initial "more products" for infinite scroll
-      const excludeIds = [...forYou, ...trending, ...newItems, ...viewed].map(p => p.id);
-      const more = allProducts.filter(p => !excludeIds.includes(p.id)).slice(0, 10);
-      setMoreProducts(more);
-      setHasMore(allProducts.length > excludeIds.length + more.length);
-    } catch (error) {
-      console.error('Error loading recommendations:', error);
+  // Load explore products với pagination
+  const loadExploreProducts = async (productsToUse, reset = false) => {
+    if (reset) {
+      setExploreLoading(true);
+      exploreOffsetRef.current = 0;
+    } else {
+      setExploreLoadingMore(true);
     }
-  };
 
-  const loadCategoryProducts = async () => {
-    setLoading(true);
     try {
-      const data = await shopifyService.getProducts({
-        collection: selectedCategory,
-        limit: 50,
-      });
-      setProducts(data);
-    } catch (error) {
-      console.error('Error loading category products:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+      const allProductsList = productsToUse || allProducts;
+      const start = exploreOffsetRef.current;
+      const end = start + EXPLORE_LIMIT;
 
-  const loadMoreProducts = async () => {
-    if (loadingMore || !hasMore) return;
+      // Slice products for pagination (local pagination since we have all products)
+      const newProducts = allProductsList.slice(start, end);
 
-    setLoadingMore(true);
-    try {
-      // Simulate loading more with shuffled products
-      const existingIds = new Set([
-        ...forYouProducts,
-        ...trendingProducts,
-        ...newArrivals,
-        ...becauseYouViewed,
-        ...moreProducts,
-      ].map(p => p.id));
-
-      const remaining = products.filter(p => !existingIds.has(p.id));
-
-      if (remaining.length > 0) {
-        // Shuffle and take next batch
-        const shuffled = remaining.sort(() => Math.random() - 0.5);
-        const nextBatch = shuffled.slice(0, 10);
-        setMoreProducts(prev => [...prev, ...nextBatch]);
-        setPage(prev => prev + 1);
-        setHasMore(remaining.length > nextBatch.length);
+      if (reset) {
+        setExploreProducts(newProducts);
       } else {
-        // Recycle products with different order (infinite effect)
-        const recycled = await recommendationService.getRecommendations(products, {
-          limit: 10,
-          excludeIds: moreProducts.slice(-20).map(p => p.id),
-        });
-        setMoreProducts(prev => [...prev, ...recycled]);
+        setExploreProducts(prev => [...prev, ...newProducts]);
       }
+
+      // Update offset and hasMore
+      exploreOffsetRef.current = end;
+      setExploreHasMore(end < allProductsList.length);
+
     } catch (error) {
-      console.error('Error loading more products:', error);
+      console.error('Error loading explore products:', error);
     } finally {
-      setLoadingMore(false);
+      setExploreLoading(false);
+      setExploreLoadingMore(false);
     }
+  };
+
+  // Handle load more for explore section
+  const handleLoadMoreExplore = useCallback(() => {
+    if (!exploreLoadingMore && exploreHasMore) {
+      loadExploreProducts(null, false);
+    }
+  }, [exploreLoadingMore, exploreHasMore, allProducts]);
+
+  const loadSections = async (productsToUse) => {
+    const newSectionsData = {};
+
+    // Load từng section song song
+    await Promise.all(
+      SHOP_SECTIONS.map(async (section) => {
+        setSectionsLoading(prev => ({ ...prev, [section.id]: true }));
+
+        try {
+          let products = [];
+
+          // Xử lý theo section type
+          switch (section.type) {
+            case 'personalized':
+              // "Dành Cho Bạn" - Lấy sản phẩm random
+              products = await shopifyService.getForYouProducts(null, section.limit, productsToUse);
+              break;
+
+            case 'tagged':
+              // Sections có tags - filter theo tags array
+              if (section.tags && section.tags.length > 0) {
+                products = await shopifyService.getProductsByTags(
+                  section.tags,
+                  section.limit,
+                  true,
+                  productsToUse
+                );
+              }
+              break;
+
+            case 'all':
+              // "Khám Phá Thêm" - Được xử lý riêng trong explore section
+              // Không cần load ở đây
+              break;
+
+            default:
+              // Fallback: lấy sản phẩm random
+              products = productsToUse?.slice(0, section.limit) || [];
+          }
+
+          newSectionsData[section.id] = {
+            ...section,
+            products: products || [],
+          };
+        } catch (error) {
+          console.error(`Error loading section ${section.id}:`, error);
+          newSectionsData[section.id] = {
+            ...section,
+            products: [],
+          };
+        } finally {
+          setSectionsLoading(prev => ({ ...prev, [section.id]: false }));
+        }
+      })
+    );
+
+    setSectionsData(newSectionsData);
   };
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    setPage(1);
+    // Reset explore state
+    exploreOffsetRef.current = 0;
+    setExploreHasMore(true);
     await loadInitialData();
     setRefreshing(false);
   }, []);
 
   const handleProductPress = async (product) => {
-    // Track view for recommendations
-    await recommendationService.trackView(product);
     navigation.navigate('ProductDetail', { product });
   };
 
-  const handleCategorySelect = (category) => {
-    setSelectedCategory(category);
-    if (!category) {
-      // Reset to all products view
-      loadInitialData();
+  const handleCategorySelect = (categoryId) => {
+    setSelectedCategory(categoryId);
+    // Scroll to top khi chọn category
+    scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+  };
+
+  const handleViewAll = (section) => {
+    navigation.navigate('ProductList', {
+      sectionId: section.id,
+      title: section.title,
+      tags: section.tags, // Sử dụng tags array thay vì tag đơn
+    });
+  };
+
+  // Render section với ProductSection component
+  const renderSection = (sectionConfig) => {
+    const data = sectionsData[sectionConfig.id];
+    const isLoading = sectionsLoading[sectionConfig.id];
+
+    // Special handling for "explore" section with infinite scroll
+    if (sectionConfig.id === 'explore' && sectionConfig.hasInfiniteScroll) {
+      return (
+        <ProductSection
+          key={sectionConfig.id}
+          title={sectionConfig.title}
+          subtitle={sectionConfig.subtitle}
+          products={exploreProducts}
+          loading={exploreLoading}
+          layout="grid"
+          showViewAll={false}
+          onProductPress={handleProductPress}
+          // Infinity scroll props
+          hasInfiniteScroll={true}
+          onLoadMore={handleLoadMoreExplore}
+          loadingMore={exploreLoadingMore}
+          hasMore={exploreHasMore}
+        />
+      );
     }
-  };
 
-  // Render horizontal product list
-  const renderHorizontalSection = (title, icon, products, showAll = true) => {
-    if (!products || products.length === 0) return null;
-
-    const IconComponent = icon;
-
+    // Normal sections
     return (
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <View style={styles.sectionTitleRow}>
-            <IconComponent size={20} color={COLORS.gold} />
-            <Text style={styles.sectionTitle}>{title}</Text>
-          </View>
-          {showAll && (
-            <TouchableOpacity style={styles.seeAllBtn}>
-              <Text style={styles.seeAllText}>Xem tất cả</Text>
-              <ChevronRight size={16} color={COLORS.purple} />
-            </TouchableOpacity>
-          )}
-        </View>
-
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.horizontalList}
-        >
-          {products.map((product, index) => (
-            <ProductCard
-              key={`${product.id}-${index}`}
-              product={product}
-              onPress={() => handleProductPress(product)}
-              style={styles.horizontalCard}
-              darkMode={true}
-              compact={true}
-            />
-          ))}
-        </ScrollView>
-      </View>
+      <ProductSection
+        key={sectionConfig.id}
+        title={data?.title || sectionConfig.title}
+        subtitle={data?.subtitle || sectionConfig.subtitle}
+        products={data?.products || []}
+        loading={isLoading}
+        layout={sectionConfig.layout}
+        showViewAll={sectionConfig.showViewAll}
+        onViewAll={() => handleViewAll(sectionConfig)}
+        onProductPress={handleProductPress}
+      />
     );
-  };
-
-  // Render grid products for infinite scroll
-  const renderGridProducts = () => {
-    if (moreProducts.length === 0) return null;
-
-    return (
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <View style={styles.sectionTitleRow}>
-            <Star size={20} color={COLORS.gold} />
-            <Text style={styles.sectionTitle}>Khám Phá Thêm</Text>
-          </View>
-        </View>
-
-        <View style={styles.gridContainer}>
-          {moreProducts.map((product, index) => (
-            <ProductCard
-              key={`more-${product.id}-${index}`}
-              product={product}
-              onPress={() => handleProductPress(product)}
-              style={[
-                styles.gridCard,
-                index % 2 === 0 ? styles.leftCard : styles.rightCard,
-              ]}
-              darkMode={true}
-            />
-          ))}
-        </View>
-
-        {loadingMore && (
-          <View style={styles.loadingMore}>
-            <ActivityIndicator size="small" color={COLORS.gold} />
-            <Text style={styles.loadingMoreText}>Đang tải thêm...</Text>
-          </View>
-        )}
-      </View>
-    );
-  };
-
-  // Check if near bottom for infinite scroll
-  const handleScrollEnd = (event) => {
-    handleScroll(event);
-
-    const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
-    const paddingToBottom = 100;
-    const isCloseToBottom =
-      layoutMeasurement.height + contentOffset.y >= contentSize.height - paddingToBottom;
-
-    if (isCloseToBottom && !loadingMore && hasMore) {
-      loadMoreProducts();
-    }
   };
 
   // Category view (filtered products grid)
   const renderCategoryView = () => (
     <FlatList
-      data={products}
+      data={filteredProducts}
       renderItem={({ item, index }) => (
         <ProductCard
           product={item}
@@ -310,8 +348,9 @@ const ShopScreen = ({ navigation }) => {
       )}
       keyExtractor={(item, index) => `${item.id}-${index}`}
       numColumns={2}
-      contentContainerStyle={styles.grid}
+      contentContainerStyle={styles.gridWithHeader}
       columnWrapperStyle={styles.row}
+      ListHeaderComponent={<View style={{ height: TOTAL_HEADER_HEIGHT }} />}
       ListEmptyComponent={renderEmptyState}
       showsVerticalScrollIndicator={false}
       onScroll={handleScroll}
@@ -320,8 +359,8 @@ const ShopScreen = ({ navigation }) => {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          tintColor={COLORS.gold}
-          colors={[COLORS.gold]}
+          tintColor={COLORS.purple}
+          colors={[COLORS.purple]}
         />
       }
     />
@@ -335,14 +374,14 @@ const ShopScreen = ({ navigation }) => {
     </View>
   );
 
-  if (loading && products.length === 0) {
+  if (loading && allProducts.length === 0) {
     return (
       <LinearGradient
         colors={GRADIENTS.background}
         locations={GRADIENTS.backgroundLocations}
         style={styles.loadingContainer}
       >
-        <ActivityIndicator size="large" color={COLORS.gold} />
+        <ActivityIndicator size="large" color={COLORS.purple} />
         <Text style={styles.loadingText}>Đang tải sản phẩm...</Text>
       </LinearGradient>
     );
@@ -355,81 +394,105 @@ const ShopScreen = ({ navigation }) => {
       style={styles.container}
     >
       <SafeAreaView style={styles.safeArea} edges={['top']}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>GEM Shop</Text>
-          <View style={styles.headerActions}>
-            <TouchableOpacity
-              style={styles.iconBtn}
-              onPress={() => navigation.navigate('SearchProducts')}
-            >
-              <Search size={22} color={COLORS.textPrimary} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.cartBtn}
-              onPress={() => navigation.navigate('Cart')}
-            >
-              <ShoppingCart size={22} color={COLORS.textPrimary} />
-              {itemCount > 0 && (
-                <View style={styles.cartBadge}>
-                  <Text style={styles.cartBadgeText}>
-                    {itemCount > 99 ? '99+' : itemCount}
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Category Filter */}
-        <CategoryFilter
-          categories={categories}
-          selected={selectedCategory}
-          onSelect={handleCategorySelect}
-          darkMode={true}
-        />
-
-        {/* Content - with swipe navigation */}
-        <Animated.View style={{ flex: 1 }} {...panHandlers}>
-          {selectedCategory ? (
+        {/* Content - scrollable area with header space */}
+        <View style={styles.contentWrapper}>
+          {selectedCategory !== 'all' ? (
             // Show filtered grid when category is selected
             renderCategoryView()
           ) : (
-            // Show recommendation sections for "All" view
+            // Show sections for "Tất cả" view
             <ScrollView
               ref={scrollViewRef}
               showsVerticalScrollIndicator={false}
-              onScroll={handleScrollEnd}
+              onScroll={handleScroll}
               scrollEventThrottle={16}
               refreshControl={
                 <RefreshControl
                   refreshing={refreshing}
                   onRefresh={onRefresh}
-                  tintColor={COLORS.gold}
-                  colors={[COLORS.gold]}
+                  tintColor={COLORS.purple}
+                  colors={[COLORS.purple]}
                 />
               }
               contentContainerStyle={styles.scrollContent}
             >
-              {/* Section 1: For You */}
-              {renderHorizontalSection('Dành Cho Bạn', Sparkles, forYouProducts)}
+              {/* Spacer for header */}
+              <View style={{ height: TOTAL_HEADER_HEIGHT }} />
 
-              {/* Section 2: Trending */}
-              {renderHorizontalSection('Đang Thịnh Hành', TrendingUp, trendingProducts)}
+              {/* Render sections với banners phân phối đều - đảm bảo TẤT CẢ banners được hiển thị */}
+              {(() => {
+                // New algorithm: distribute ALL banners evenly among sections
+                const distributedList = distributeBannersAmongSections(
+                  SHOP_SECTIONS,
+                  sponsorBanners,
+                  { minGap: 1, maxBannersPerGap: 2 }
+                );
 
-              {/* Section 3: New Arrivals */}
-              {renderHorizontalSection('Hàng Mới Về', Clock, newArrivals)}
-
-              {/* Section 4: Because You Viewed */}
-              {renderHorizontalSection('Vì Bạn Đã Xem', Star, becauseYouViewed)}
-
-              {/* Section 5: Infinite Grid - More Products */}
-              {renderGridProducts()}
+                return distributedList.map((item) => {
+                  if (item.type === 'banner') {
+                    return (
+                      <SponsorBannerCard
+                        key={item.key}
+                        banner={item.data}
+                        navigation={navigation}
+                        userId={userId}
+                        onDismiss={dismissBanner}
+                      />
+                    );
+                  } else {
+                    // item.type === 'section'
+                    return renderSection(item.data);
+                  }
+                });
+              })()}
 
               {/* Bottom padding for tab bar */}
-              <View style={{ height: 120 }} />
+              <View style={{ height: CONTENT_BOTTOM_PADDING }} />
             </ScrollView>
           )}
+        </View>
+
+        {/* Animated Header - on top of content */}
+        <Animated.View
+          style={[
+            styles.animatedHeaderContainer,
+            {
+              transform: [{ translateY: headerTranslateY }],
+            },
+          ]}
+        >
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>GEM Shop</Text>
+            <View style={styles.headerActions}>
+              <TouchableOpacity
+                style={styles.iconBtn}
+                onPress={() => navigation.navigate('ProductSearch')}
+              >
+                <Search size={22} color={COLORS.textPrimary} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.cartBtn}
+                onPress={() => navigation.navigate('Cart')}
+              >
+                <ShoppingCart size={22} color={COLORS.textPrimary} />
+                {itemCount > 0 && (
+                  <View style={styles.cartBadge}>
+                    <Text style={styles.cartBadgeText}>
+                      {itemCount > 99 ? '99+' : itemCount}
+                    </Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Category Tabs */}
+          <ShopCategoryTabs
+            selectedCategory={selectedCategory}
+            onSelectCategory={handleCategorySelect}
+            categories={SHOP_CATEGORIES}
+          />
         </Animated.View>
       </SafeAreaView>
     </LinearGradient>
@@ -446,32 +509,48 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
+  // Full content wrapper
+  contentWrapper: {
+    flex: 1,
+  },
+
+  // Animated header container for auto-hide
+  animatedHeaderContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 100,
+    // Transparent background - content scrolls behind
+  },
+
   scrollContent: {
-    paddingBottom: 20,
+    paddingBottom: SPACING.xxl, // 20
   },
 
   // Header - DARK THEME v3.0
   header: {
+    height: HEADER_HEIGHT,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
-    backgroundColor: COLORS.glassBg,
+    paddingHorizontal: SPACING.lg, // 16
+    paddingVertical: SPACING.md, // 12
+    backgroundColor: GLASS.background, // rgba(15, 16, 48, 0.55)
     borderBottomWidth: 1.2,
-    borderBottomColor: COLORS.inputBorder,
+    borderBottomColor: COLORS.inputBorder, // rgba(106, 91, 255, 0.3)
   },
   headerTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.gold,
+    fontSize: TYPOGRAPHY.fontSize.xxl, // 16
+    fontWeight: TYPOGRAPHY.fontWeight.bold, // 700
+    color: COLORS.gold, // #FFBD59
   },
   headerActions: {
     flexDirection: 'row',
-    gap: SPACING.sm,
+    gap: SPACING.sm, // 8
   },
   iconBtn: {
-    width: 44,
+    width: 44, // TOUCH.minimum
     height: 44,
     justifyContent: 'center',
     alignItems: 'center',
@@ -487,7 +566,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 4,
     right: 4,
-    backgroundColor: COLORS.burgundy,
+    backgroundColor: COLORS.burgundy, // #9C0612
     borderRadius: 10,
     minWidth: 18,
     height: 18,
@@ -496,77 +575,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   cartBadgeText: {
-    fontSize: 10,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-
-  // Sections
-  section: {
-    marginTop: SPACING.xl,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: SPACING.lg,
-    marginBottom: SPACING.md,
-  },
-  sectionTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  sectionTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-  seeAllBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  seeAllText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.purple,
-  },
-
-  // Horizontal list
-  horizontalList: {
-    paddingHorizontal: SPACING.lg,
-    gap: SPACING.md,
-  },
-  horizontalCard: {
-    width: CARD_WIDTH * 0.85,
-    marginRight: SPACING.md,
+    fontSize: TYPOGRAPHY.fontSize.xs, // 10
+    fontWeight: TYPOGRAPHY.fontWeight.bold, // 700
+    color: COLORS.textPrimary, // #FFFFFF
   },
 
   // Grid
-  gridContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: SPACING.md,
-    justifyContent: 'space-between',
-  },
-  gridCard: {
-    width: CARD_WIDTH,
-    marginBottom: SPACING.md,
-  },
   grid: {
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: SPACING.lg, // 16
     paddingTop: SPACING.sm,
-    paddingBottom: 120,
+    paddingBottom: CONTENT_BOTTOM_PADDING,
+  },
+  gridWithHeader: {
+    paddingHorizontal: SPACING.lg, // 16
+    paddingBottom: CONTENT_BOTTOM_PADDING,
   },
   row: {
     justifyContent: 'space-between',
+    marginBottom: SPACING.md, // 12
   },
   leftCard: {
-    marginRight: SPACING.xs,
+    marginRight: SPACING.xs, // 4
   },
   rightCard: {
-    marginLeft: SPACING.xs,
+    marginLeft: SPACING.xs, // 4
   },
 
   // Loading
@@ -576,20 +608,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    marginTop: SPACING.md,
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textSecondary,
-  },
-  loadingMore: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: SPACING.lg,
-    gap: SPACING.sm,
-  },
-  loadingMoreText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textSecondary,
+    marginTop: SPACING.md, // 12
+    fontSize: TYPOGRAPHY.fontSize.base, // 13
+    color: COLORS.textMuted, // rgba(255, 255, 255, 0.6)
   },
 
   // Empty State
@@ -599,19 +620,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 100,
   },
-  emptyIcon: {
-    fontSize: 48,
-    marginBottom: SPACING.md,
-  },
   emptyTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-    marginBottom: SPACING.xs,
+    marginTop: SPACING.lg, // 16
+    fontSize: TYPOGRAPHY.fontSize.xxxl, // 18
+    fontWeight: TYPOGRAPHY.fontWeight.bold, // 700
+    color: COLORS.textPrimary, // #FFFFFF
   },
   emptySubtitle: {
-    fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.textSecondary,
+    marginTop: SPACING.xs, // 4
+    fontSize: TYPOGRAPHY.fontSize.base, // 13
+    color: COLORS.textMuted, // rgba(255, 255, 255, 0.6)
   },
 });
 

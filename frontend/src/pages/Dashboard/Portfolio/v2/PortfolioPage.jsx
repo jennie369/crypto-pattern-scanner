@@ -145,7 +145,7 @@ export const PortfolioPage = () => {
       </div>
 
       {/* Overview Dashboard */}
-      <OverviewDashboard stats={stats} transactions={transactions} />
+      <OverviewDashboard stats={stats} transactions={transactions} holdings={holdings} />
 
       {/* Price Update Indicator */}
       {lastUpdate && (

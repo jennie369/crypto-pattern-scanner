@@ -13,8 +13,6 @@ import {
   Modal,
   Animated,
   Dimensions,
-  Linking,
-  Alert,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import {
@@ -32,6 +30,7 @@ import {
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../utils/tokens';
 import shareService from '../services/shareService';
+import CustomAlert, { useCustomAlert } from './CustomAlert';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -43,6 +42,7 @@ const ShareSheet = ({
 }) => {
   const [copied, setCopied] = useState(false);
   const [slideAnim] = useState(new Animated.Value(SCREEN_HEIGHT));
+  const { alert, AlertComponent } = useCustomAlert();
 
   React.useEffect(() => {
     if (visible) {
@@ -83,83 +83,77 @@ const ShareSheet = ({
     }
   }, [post, onClose]);
 
-  // Handle share to WhatsApp
+  // Handle share to WhatsApp (with text + image)
   const handleWhatsApp = useCallback(async () => {
     if (!post) return;
     try {
-      const url = await shareService.shareToWhatsApp(post);
-      const canOpen = await Linking.canOpenURL('whatsapp://');
-      if (canOpen) {
-        await Linking.openURL(url);
+      const result = await shareService.shareToWhatsApp(post);
+      if (result.success) {
         onClose?.();
-      } else {
-        // Fallback to native share
-        Alert.alert(
-          'Không thể mở',
-          'WhatsApp chưa được cài đặt. Bạn có muốn chia sẻ qua ứng dụng khác?',
-          [
+      } else if (result.error) {
+        alert({
+          type: 'warning',
+          title: 'WhatsApp không khả dụng',
+          message: result.error,
+          buttons: [
             { text: 'Huỷ', style: 'cancel' },
             { text: 'Chia sẻ khác', onPress: handleNativeShare },
-          ]
-        );
+          ],
+        });
       }
     } catch (error) {
       console.error('[ShareSheet] WhatsApp error:', error);
       handleNativeShare();
     }
-  }, [post, onClose, handleNativeShare]);
+  }, [post, onClose, handleNativeShare, alert]);
 
-  // Handle share to Telegram
+  // Handle share to Telegram (with text + image)
   const handleTelegram = useCallback(async () => {
     if (!post) return;
     try {
-      const url = await shareService.shareToTelegram(post);
-      const canOpen = await Linking.canOpenURL('tg://');
-      if (canOpen) {
-        await Linking.openURL(url);
+      const result = await shareService.shareToTelegram(post);
+      if (result.success) {
         onClose?.();
-      } else {
-        // Fallback to native share
-        Alert.alert(
-          'Không thể mở',
-          'Telegram chưa được cài đặt. Bạn có muốn chia sẻ qua ứng dụng khác?',
-          [
+      } else if (result.error) {
+        alert({
+          type: 'warning',
+          title: 'Telegram không khả dụng',
+          message: result.error,
+          buttons: [
             { text: 'Huỷ', style: 'cancel' },
             { text: 'Chia sẻ khác', onPress: handleNativeShare },
-          ]
-        );
+          ],
+        });
       }
     } catch (error) {
       console.error('[ShareSheet] Telegram error:', error);
       handleNativeShare();
     }
-  }, [post, onClose, handleNativeShare]);
+  }, [post, onClose, handleNativeShare, alert]);
 
-  // Handle share to Messenger
+  // Handle share to Messenger (with text + image)
   const handleMessenger = useCallback(async () => {
     if (!post) return;
     try {
-      const url = await shareService.shareToMessenger(post);
-      const canOpen = await Linking.canOpenURL('fb-messenger://');
-      if (canOpen) {
-        await Linking.openURL(url);
+      const result = await shareService.shareToMessenger(post);
+      if (result.success) {
         onClose?.();
-      } else {
-        // Fallback to native share
-        Alert.alert(
-          'Không thể mở',
-          'Messenger chưa được cài đặt. Bạn có muốn chia sẻ qua ứng dụng khác?',
-          [
+      } else if (result.error) {
+        alert({
+          type: 'warning',
+          title: 'Messenger không khả dụng',
+          message: result.error,
+          buttons: [
             { text: 'Huỷ', style: 'cancel' },
             { text: 'Chia sẻ khác', onPress: handleNativeShare },
-          ]
-        );
+          ],
+        });
       }
     } catch (error) {
       console.error('[ShareSheet] Messenger error:', error);
       handleNativeShare();
     }
-  }, [post, onClose, handleNativeShare]);
+  }, [post, onClose, handleNativeShare, alert]);
 
   // Handle repost
   const handleRepost = useCallback(() => {
@@ -327,6 +321,7 @@ const ShareSheet = ({
             </View>
           </BlurView>
         </Animated.View>
+        {AlertComponent}
       </View>
     </Modal>
   );

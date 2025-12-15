@@ -14,8 +14,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
+import CustomAlert, { useCustomAlert } from '../../../components/CustomAlert';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Clipboard from 'expo-clipboard';
 import {
@@ -38,6 +38,7 @@ import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../../utils/to
 import { partnershipService } from '../../../services/partnershipService';
 
 export default function AffiliateSection({ user, navigation }) {
+  const { alert, AlertComponent } = useCustomAlert();
   const [loading, setLoading] = useState(true);
   const [partnershipStatus, setPartnershipStatus] = useState(null);
   const [commissionStats, setCommissionStats] = useState(null);
@@ -74,9 +75,9 @@ export default function AffiliateSection({ user, navigation }) {
   const handleCopyCode = async (code) => {
     try {
       await Clipboard.setStringAsync(code);
-      Alert.alert('Thành công', `Đã sao chép mã giới thiệu: ${code}`);
+      alert({ type: 'success', title: 'Thành công', message: `Đã sao chép mã giới thiệu: ${code}` });
     } catch (error) {
-      Alert.alert('Lỗi', 'Không thể sao chép mã giới thiệu');
+      alert({ type: 'error', title: 'Lỗi', message: 'Không thể sao chép mã giới thiệu' });
     }
   };
 
@@ -84,25 +85,26 @@ export default function AffiliateSection({ user, navigation }) {
     try {
       const link = partnershipService.getReferralLink(code);
       await Clipboard.setStringAsync(link);
-      Alert.alert('Thành công', 'Đã sao chép link giới thiệu!');
+      alert({ type: 'success', title: 'Thành công', message: 'Đã sao chép link giới thiệu!' });
     } catch (error) {
-      Alert.alert('Lỗi', 'Không thể sao chép link');
+      alert({ type: 'error', title: 'Lỗi', message: 'Không thể sao chép link' });
     }
   };
 
   const handleCtvRegister = () => {
     if (!partnershipStatus?.is_ctv_eligible) {
-      Alert.alert(
-        'Chưa đủ điều kiện',
-        'Bạn cần mua ít nhất 1 khóa học để đăng ký CTV 4 Cấp',
-        [
+      alert({
+        type: 'warning',
+        title: 'Chưa đủ điều kiện',
+        message: 'Bạn cần mua ít nhất 1 khóa học để đăng ký CTV 4 Cấp',
+        buttons: [
           { text: 'Đóng', style: 'cancel' },
           {
             text: 'Xem Khóa Học',
             onPress: () => navigation.navigate('Courses'),
           },
         ]
-      );
+      });
       return;
     }
     navigation.navigate('PartnershipRegistration', { type: 'ctv' });
@@ -121,6 +123,135 @@ export default function AffiliateSection({ user, navigation }) {
           <ActivityIndicator size="small" color={COLORS.gold} />
           <Text style={styles.loadingText}>Đang tải...</Text>
         </View>
+      </View>
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // SCENARIO 4: Has partnership (approved) - Main dashboard
+  // *** MOVED TO TOP - Check approved status FIRST before pending ***
+  // Also check if application_status is 'approved' (admin approved but affiliate_profiles might not exist yet)
+  // ═══════════════════════════════════════════════════════════════
+  const isApproved = partnershipStatus?.has_partnership ||
+                     partnershipStatus?.application_status === 'approved';
+
+  if (isApproved) {
+    const isAffiliate = partnershipStatus.partnership_role === 'affiliate' ||
+                        partnershipStatus.application_type === 'affiliate';
+    const tierNames = ['Beginner', 'Growing', 'Master', 'Grand'];
+    const tierName = isAffiliate ? 'Affiliate' : tierNames[(partnershipStatus.ctv_tier || 1) - 1];
+
+    // Generate fallback affiliate code if not set
+    const affiliateCode = partnershipStatus.affiliate_code ||
+                          `GEM${user?.id?.slice(0, 6)?.toUpperCase() || 'USER'}`;
+
+    // Check if user has pending CTV upgrade application
+    const hasPendingUpgrade = partnershipStatus?.has_application &&
+                               partnershipStatus?.application_status === 'pending' &&
+                               partnershipStatus?.application_type === 'ctv';
+
+    return (
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>
+          {isAffiliate ? 'Chương Trình Affiliate' : 'Chương Trình CTV 4 Cấp'}
+        </Text>
+
+        <View style={styles.partnerCard}>
+          {/* Header with Code */}
+          <View style={styles.partnerHeader}>
+            <Share2 size={28} color={COLORS.gold} />
+            <View style={styles.partnerInfo}>
+              <Text style={styles.codeLabel}>Mã giới thiệu của bạn</Text>
+              <Text style={styles.codeValue}>{affiliateCode}</Text>
+            </View>
+            <View style={styles.tierBadge}>
+              <Text style={styles.tierText}>{tierName}</Text>
+            </View>
+          </View>
+
+          {/* Pending CTV Upgrade Notice */}
+          {hasPendingUpgrade && (
+            <View style={styles.pendingUpgradeNotice}>
+              <Clock size={16} color={COLORS.gold} />
+              <Text style={styles.pendingUpgradeText}>
+                Đơn nâng cấp CTV đang chờ duyệt
+              </Text>
+            </View>
+          )}
+
+          {/* Action Buttons */}
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              style={styles.copyButton}
+              onPress={() => handleCopyCode(affiliateCode)}
+            >
+              <Copy size={18} color={COLORS.textPrimary} />
+              <Text style={styles.copyButtonText}>Sao chép mã</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.linkButton}
+              onPress={() => handleCopyLink(affiliateCode)}
+            >
+              <ExternalLink size={18} color={COLORS.gold} />
+              <Text style={styles.linkButtonText}>Sao chép link</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Stats Grid */}
+          <View style={styles.statsGrid}>
+            <View style={styles.statCard}>
+              <DollarSign size={20} color={COLORS.gold} />
+              <Text style={styles.statValue}>
+                {formatCurrency(commissionStats?.totalCommission || partnershipStatus.total_commission)}
+              </Text>
+              <Text style={styles.statLabel}>Tổng hoa hồng</Text>
+            </View>
+
+            <View style={styles.statCard}>
+              <TrendingUp size={20} color={COLORS.gold} />
+              <Text style={styles.statValue}>
+                {formatCurrency(commissionStats?.thisMonthCommission || 0)}
+              </Text>
+              <Text style={styles.statLabel}>Tháng này</Text>
+            </View>
+
+            <View style={styles.statCard}>
+              <Users size={20} color={COLORS.gold} />
+              <Text style={styles.statValue}>
+                {commissionStats?.totalOrders || 0}
+              </Text>
+              <Text style={styles.statLabel}>Đơn hàng</Text>
+            </View>
+
+            <View style={styles.statCard}>
+              <CheckCircle size={20} color={COLORS.gold} />
+              <Text style={styles.statValue}>
+                {formatCurrency(partnershipStatus.available_balance)}
+              </Text>
+              <Text style={styles.statLabel}>Khả dụng</Text>
+            </View>
+          </View>
+
+          {/* Footer Buttons */}
+          <View style={styles.footerButtons}>
+            <TouchableOpacity
+              style={styles.detailButton}
+              onPress={() => navigation.navigate('AffiliateDetail')}
+            >
+              <Text style={styles.detailButtonText}>Xem Chi Tiết</Text>
+              <ChevronRight size={18} color={COLORS.gold} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.withdrawButton}
+              onPress={() => navigation.navigate('WithdrawRequest')}
+            >
+              <Text style={styles.withdrawButtonText}>Rút Tiền</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        {AlertComponent}
       </View>
     );
   }
@@ -308,111 +439,12 @@ export default function AffiliateSection({ user, navigation }) {
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════
-  // SCENARIO 4: Has partnership (approved) - Main dashboard
-  // ═══════════════════════════════════════════════════════════════
-  if (partnershipStatus?.has_partnership) {
-    const isAffiliate = partnershipStatus.partnership_role === 'affiliate';
-    const tierNames = ['Beginner', 'Growing', 'Master', 'Grand'];
-    const tierName = isAffiliate ? 'Affiliate' : tierNames[(partnershipStatus.ctv_tier || 1) - 1];
-
-    return (
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>
-          {isAffiliate ? 'Chương Trình Affiliate' : 'Chương Trình CTV 4 Cấp'}
-        </Text>
-
-        <View style={styles.partnerCard}>
-          {/* Header with Code */}
-          <View style={styles.partnerHeader}>
-            <Share2 size={28} color={COLORS.gold} />
-            <View style={styles.partnerInfo}>
-              <Text style={styles.codeLabel}>Mã giới thiệu của bạn</Text>
-              <Text style={styles.codeValue}>{partnershipStatus.affiliate_code}</Text>
-            </View>
-            <View style={styles.tierBadge}>
-              <Text style={styles.tierText}>{tierName}</Text>
-            </View>
-          </View>
-
-          {/* Action Buttons */}
-          <View style={styles.actionButtons}>
-            <TouchableOpacity
-              style={styles.copyButton}
-              onPress={() => handleCopyCode(partnershipStatus.affiliate_code)}
-            >
-              <Copy size={18} color={COLORS.textPrimary} />
-              <Text style={styles.copyButtonText}>Sao chép mã</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.linkButton}
-              onPress={() => handleCopyLink(partnershipStatus.affiliate_code)}
-            >
-              <ExternalLink size={18} color={COLORS.gold} />
-              <Text style={styles.linkButtonText}>Sao chép link</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Stats Grid */}
-          <View style={styles.statsGrid}>
-            <View style={styles.statCard}>
-              <DollarSign size={20} color={COLORS.success} />
-              <Text style={styles.statValue}>
-                {formatCurrency(commissionStats?.totalCommission || partnershipStatus.total_commission)}
-              </Text>
-              <Text style={styles.statLabel}>Tổng hoa hồng</Text>
-            </View>
-
-            <View style={styles.statCard}>
-              <TrendingUp size={20} color={COLORS.cyan} />
-              <Text style={styles.statValue}>
-                {formatCurrency(commissionStats?.thisMonthCommission || 0)}
-              </Text>
-              <Text style={styles.statLabel}>Tháng này</Text>
-            </View>
-
-            <View style={styles.statCard}>
-              <Users size={20} color={COLORS.purple} />
-              <Text style={styles.statValue}>
-                {commissionStats?.totalOrders || 0}
-              </Text>
-              <Text style={styles.statLabel}>Đơn hàng</Text>
-            </View>
-
-            <View style={styles.statCard}>
-              <CheckCircle size={20} color={COLORS.gold} />
-              <Text style={styles.statValue}>
-                {formatCurrency(partnershipStatus.available_balance)}
-              </Text>
-              <Text style={styles.statLabel}>Khả dụng</Text>
-            </View>
-          </View>
-
-          {/* Footer Buttons */}
-          <View style={styles.footerButtons}>
-            <TouchableOpacity
-              style={styles.detailButton}
-              onPress={() => navigation.navigate('AffiliateDetail')}
-            >
-              <Text style={styles.detailButtonText}>Xem Chi Tiết</Text>
-              <ChevronRight size={18} color={COLORS.gold} />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.withdrawButton}
-              onPress={() => navigation.navigate('WithdrawRequest')}
-            >
-              <Text style={styles.withdrawButtonText}>Rút Tiền</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    );
-  }
-
   // Fallback
-  return null;
+  return (
+    <>
+      {AlertComponent}
+    </>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -744,6 +776,22 @@ const styles = StyleSheet.create({
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.purple,
   },
+  // Pending CTV upgrade notice
+  pendingUpgradeNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: 8,
+    marginBottom: SPACING.md,
+    gap: SPACING.sm,
+  },
+  pendingUpgradeText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.gold,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
   actionButtons: {
     flexDirection: 'row',
     gap: SPACING.sm,
@@ -828,15 +876,19 @@ const styles = StyleSheet.create({
   },
   withdrawButton: {
     flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: COLORS.success,
+    backgroundColor: 'transparent',
     paddingVertical: SPACING.md,
     borderRadius: 10,
+    borderWidth: 1,
+    borderColor: COLORS.gold,
+    gap: SPACING.xs,
   },
   withdrawButtonText: {
     fontSize: TYPOGRAPHY.fontSize.md,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.bgDark,
+    color: COLORS.gold,
   },
 });

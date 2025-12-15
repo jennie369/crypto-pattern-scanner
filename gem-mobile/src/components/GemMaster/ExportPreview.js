@@ -12,16 +12,16 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
-  ScrollView,
   Dimensions,
 } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { X, Download, Share2, Check } from 'lucide-react-native';
 import { COLORS, TYPOGRAPHY, SPACING } from '../../utils/tokens';
 import exportService from '../../services/exportService';
 import { getTemplateComponent } from '../../templates';
 import * as Haptics from '../../utils/haptics';
+import DarkAlert from '../UI/DarkAlert';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -37,8 +37,32 @@ const ExportPreview = ({
   const [exportedUri, setExportedUri] = useState(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
+  // DarkAlert state
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    type: 'info',
+    buttons: [],
+  });
+
   const showWatermark = exportService.shouldHaveWatermark(userTier);
   const TemplateComponent = getTemplateComponent(templateId);
+
+  // Helper to show dark alert
+  const showDarkAlert = (title, message, type = 'info', buttons = [{ text: 'OK' }]) => {
+    setAlertConfig({
+      visible: true,
+      title,
+      message,
+      type,
+      buttons,
+    });
+  };
+
+  const hideDarkAlert = () => {
+    setAlertConfig(prev => ({ ...prev, visible: false }));
+  };
 
   // Reset state when modal opens/closes
   useEffect(() => {
@@ -79,9 +103,10 @@ const ExportPreview = ({
       setSaveSuccess(true);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-      Alert.alert(
-        'Saved!',
-        'Image saved to your gallery in "Gemral" album.',
+      showDarkAlert(
+        'Đã lưu!',
+        'Hình ảnh đã được lưu vào thư viện trong album "Gemral".',
+        'success',
         [{ text: 'OK', onPress: onClose }]
       );
     } catch (error) {
@@ -89,15 +114,19 @@ const ExportPreview = ({
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
 
       if (error.message.includes('permission')) {
-        Alert.alert(
-          'Permission Required',
-          'Please allow access to your photo library to save images.',
+        showDarkAlert(
+          'Cần cấp quyền',
+          'Vui lòng cho phép truy cập thư viện ảnh để lưu hình.',
+          'warning',
           [{ text: 'OK' }]
         );
       } else {
-        Alert.alert('Error', 'Failed to save image. Please try again.', [
-          { text: 'OK' },
-        ]);
+        showDarkAlert(
+          'Lỗi',
+          'Không thể lưu hình ảnh. Vui lòng thử lại.',
+          'error',
+          [{ text: 'OK' }]
+        );
       }
     } finally {
       setIsExporting(false);
@@ -115,7 +144,7 @@ const ExportPreview = ({
       }
 
       await exportService.shareImage(uri, {
-        dialogTitle: 'Share GEM Reading',
+        dialogTitle: 'Chia sẻ kết quả GEM',
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -124,9 +153,12 @@ const ExportPreview = ({
 
       if (!error.message.includes('dismiss')) {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-        Alert.alert('Error', 'Failed to share image. Please try again.', [
-          { text: 'OK' },
-        ]);
+        showDarkAlert(
+          'Lỗi',
+          'Không thể chia sẻ hình ảnh. Vui lòng thử lại.',
+          'error',
+          [{ text: 'OK' }]
+        );
       }
     } finally {
       setIsExporting(false);
@@ -134,7 +166,8 @@ const ExportPreview = ({
   };
 
   // Scale factor for preview - fit in available space
-  const availableHeight = SCREEN_HEIGHT - 250; // Header + buttons + padding
+  // Increased bottom space for buttons + safe area (was 250, now 300)
+  const availableHeight = SCREEN_HEIGHT - 300;
   const availableWidth = SCREEN_WIDTH - 40;
 
   // Calculate scale to fit the template (1080x1920) into available space
@@ -147,105 +180,117 @@ const ExportPreview = ({
   const scaledHeight = 1920 * previewScale;
 
   return (
-    <Modal
-      visible={visible}
-      animationType="fade"
-      transparent={true}
-      onRequestClose={onClose}
-    >
-      <View style={styles.overlay}>
-        <LinearGradient
-          colors={['rgba(5, 4, 11, 0.98)', 'rgba(15, 16, 48, 0.98)']}
-          style={styles.container}
-        >
-          {/* Header */}
-          <View style={styles.header}>
-            <Text style={styles.title}>Preview</Text>
-            <TouchableOpacity
-              onPress={onClose}
-              style={styles.closeButton}
-              disabled={isExporting}
-            >
-              <X size={24} color={COLORS.textPrimary} />
-            </TouchableOpacity>
-          </View>
-
-          {/* Preview Area - Centered */}
-          <View style={styles.previewWrapper}>
-            <View
-              style={[
-                styles.previewContainer,
-                {
-                  width: scaledWidth,
-                  height: scaledHeight,
-                },
-              ]}
-            >
-              {/* Scaled template container */}
-              <View
-                style={{
-                  width: 1080,
-                  height: 1920,
-                  transform: [{ scale: previewScale }],
-                  transformOrigin: 'top left',
-                }}
+    <>
+      <Modal
+        visible={visible}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={onClose}
+      >
+        <SafeAreaView style={styles.overlay} edges={['top', 'bottom']}>
+          <LinearGradient
+            colors={['rgba(5, 4, 11, 0.98)', 'rgba(15, 16, 48, 0.98)']}
+            style={styles.container}
+          >
+            {/* Header */}
+            <View style={styles.header}>
+              <Text style={styles.title}>Preview</Text>
+              <TouchableOpacity
+                onPress={onClose}
+                style={styles.closeButton}
+                disabled={isExporting}
               >
-                <TemplateComponent
-                  ref={templateRef}
-                  data={messageData}
-                  showWatermark={showWatermark}
-                />
+                <X size={24} color={COLORS.textPrimary} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Preview Area - Centered */}
+            <View style={styles.previewWrapper}>
+              <View
+                style={[
+                  styles.previewContainer,
+                  {
+                    width: scaledWidth,
+                    height: scaledHeight,
+                  },
+                ]}
+              >
+                {/* Scaled template container */}
+                <View
+                  style={{
+                    width: 1080,
+                    height: 1920,
+                    transform: [{ scale: previewScale }],
+                    transformOrigin: 'top left',
+                  }}
+                >
+                  <TemplateComponent
+                    ref={templateRef}
+                    data={messageData}
+                    showWatermark={showWatermark}
+                  />
+                </View>
               </View>
             </View>
-          </View>
 
-          {/* Watermark Info */}
-          {showWatermark && (
-            <View style={styles.watermarkInfo}>
-              <Text style={styles.watermarkInfoText}>
-                Upgrade to remove watermark
-              </Text>
+            {/* Watermark Info */}
+            {showWatermark && (
+              <View style={styles.watermarkInfo}>
+                <Text style={styles.watermarkInfoText}>
+                  Upgrade to remove watermark
+                </Text>
+              </View>
+            )}
+
+            {/* Action Buttons - with safe bottom padding */}
+            <View style={styles.actions}>
+              {/* Save Button */}
+              <TouchableOpacity
+                style={[styles.actionButton, styles.saveButton]}
+                onPress={handleSaveToGallery}
+                disabled={isExporting}
+                activeOpacity={0.8}
+              >
+                {isExporting ? (
+                  <ActivityIndicator size="small" color={COLORS.bgMid} />
+                ) : saveSuccess ? (
+                  <>
+                    <Check size={20} color={COLORS.bgMid} />
+                    <Text style={styles.saveButtonText}>Đã lưu!</Text>
+                  </>
+                ) : (
+                  <>
+                    <Download size={20} color={COLORS.bgMid} />
+                    <Text style={styles.saveButtonText}>Save to Gallery</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+
+              {/* Share Button */}
+              <TouchableOpacity
+                style={[styles.actionButton, styles.shareButton]}
+                onPress={handleShare}
+                disabled={isExporting}
+                activeOpacity={0.8}
+              >
+                <Share2 size={20} color={COLORS.textPrimary} />
+                <Text style={styles.shareButtonText}>Share</Text>
+              </TouchableOpacity>
             </View>
-          )}
+          </LinearGradient>
+        </SafeAreaView>
+      </Modal>
 
-          {/* Action Buttons */}
-          <View style={styles.actions}>
-            {/* Save Button */}
-            <TouchableOpacity
-              style={[styles.actionButton, styles.saveButton]}
-              onPress={handleSaveToGallery}
-              disabled={isExporting}
-              activeOpacity={0.8}
-            >
-              {isExporting ? (
-                <ActivityIndicator size="small" color={COLORS.bgMid} />
-              ) : saveSuccess ? (
-                <>
-                  <Check size={20} color={COLORS.bgMid} />
-                  <Text style={styles.saveButtonText}>Saved!</Text>
-                </>
-              ) : (
-                <>
-                  <Download size={20} color={COLORS.bgMid} />
-                  <Text style={styles.saveButtonText}>Save to Gallery</Text>
-                </>
-              )}
-            </TouchableOpacity>
-
-            {/* Share Button */}
-            <TouchableOpacity
-              style={[styles.actionButton, styles.shareButton]}
-              onPress={handleShare}
-              disabled={isExporting}
-              activeOpacity={0.8}
-            >
-              <Share2 size={20} color={COLORS.textPrimary} />
-              <Text style={styles.shareButtonText}>Share</Text>
-            </TouchableOpacity>
-          </View>
-        </LinearGradient>
-      </View>
-    </Modal>
+      {/* Dark Alert */}
+      <DarkAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        buttons={alertConfig.buttons}
+        onClose={hideDarkAlert}
+      />
+    </>
   );
 };
 
@@ -264,7 +309,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: SPACING.lg,
-    paddingTop: 50, // Safe area
+    paddingTop: SPACING.md, // SafeAreaView handles safe area
   },
   title: {
     fontSize: TYPOGRAPHY.fontSize.xxl,
@@ -312,7 +357,7 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     padding: SPACING.lg,
-    paddingBottom: 34, // Safe area
+    paddingBottom: SPACING.md, // SafeAreaView handles safe area
     gap: SPACING.md,
   },
   actionButton: {

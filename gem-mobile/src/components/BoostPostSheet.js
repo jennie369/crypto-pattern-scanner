@@ -14,7 +14,6 @@ import {
   Animated,
   Modal,
   Dimensions,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
@@ -33,6 +32,7 @@ import {
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS } from '../utils/tokens';
 import boostService from '../services/boostService';
+import CustomAlert, { useCustomAlert } from './CustomAlert';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -61,6 +61,7 @@ const BoostPostSheet = ({
   const [selectedPackage, setSelectedPackage] = useState('standard');
   const [boosting, setBoosting] = useState(false);
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+  const { alert, AlertComponent } = useCustomAlert();
 
   const packages = boostService.getBoostPackages();
 
@@ -85,14 +86,15 @@ const BoostPostSheet = ({
     const pkg = packages.find(p => p.id === selectedPackage);
 
     if (gemBalance < pkg.price_gems) {
-      Alert.alert(
-        'Không đủ Gems',
-        `Bạn cần ${pkg.price_gems} Gems để boost. Số dư: ${gemBalance} Gems`,
-        [
+      alert({
+        type: 'warning',
+        title: 'Không đủ Gems',
+        message: `Bạn cần ${pkg.price_gems} Gems để boost. Số dư: ${gemBalance} Gems`,
+        buttons: [
           { text: 'Hủy', style: 'cancel' },
           { text: 'Mua Gems', onPress: onBuyGems },
-        ]
-      );
+        ],
+      });
       return;
     }
 
@@ -101,25 +103,27 @@ const BoostPostSheet = ({
     setBoosting(false);
 
     if (result.success) {
-      Alert.alert(
-        'Thành công!',
-        `Bài viết đã được boost với gói ${pkg.name}`,
-        [{ text: 'OK', onPress: () => {
+      alert({
+        type: 'success',
+        title: 'Thành công!',
+        message: `Bài viết đã được boost với gói ${pkg.name}`,
+        buttons: [{ text: 'OK', onPress: () => {
           onSuccess?.(result);
           onClose?.();
-        }}]
-      );
+        }}],
+      });
     } else if (result.needGems) {
-      Alert.alert(
-        'Không đủ Gems',
-        result.error,
-        [
+      alert({
+        type: 'warning',
+        title: 'Không đủ Gems',
+        message: result.error,
+        buttons: [
           { text: 'Hủy', style: 'cancel' },
           { text: 'Mua Gems', onPress: onBuyGems },
-        ]
-      );
+        ],
+      });
     } else {
-      Alert.alert('Lỗi', result.error || 'Không thể boost bài viết');
+      alert({ type: 'error', title: 'Lỗi', message: result.error || 'Không thể boost bài viết' });
     }
   };
 
@@ -277,6 +281,7 @@ const BoostPostSheet = ({
             </TouchableOpacity>
           </View>
         </Animated.View>
+        {AlertComponent}
       </View>
     </Modal>
   );

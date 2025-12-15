@@ -16,7 +16,6 @@ import {
   Animated,
   Modal,
   Dimensions,
-  Alert,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import {
@@ -31,6 +30,7 @@ import {
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS } from '../utils/tokens';
 import { LinearGradient } from 'expo-linear-gradient';
 import privacyService from '../services/privacyService';
+import CustomAlert, { useCustomAlert } from './CustomAlert';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -45,6 +45,7 @@ const CloseFriendsManager = ({
   const [searching, setSearching] = useState(false);
   const [activeTab, setActiveTab] = useState('list'); // 'list' or 'add'
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+  const { alert, AlertComponent } = useCustomAlert();
 
   useEffect(() => {
     if (visible) {
@@ -91,15 +92,16 @@ const CloseFriendsManager = ({
       setSearchResults(prev => prev.filter(u => u.id !== userId));
       loadCloseFriends();
     } else {
-      Alert.alert('Lỗi', result.error);
+      alert({ type: 'error', title: 'Lỗi', message: result.error });
     }
   };
 
   const handleRemoveFriend = async (userId) => {
-    Alert.alert(
-      'Xác nhận',
-      'Bỏ người này khỏi danh sách bạn thân?',
-      [
+    alert({
+      type: 'warning',
+      title: 'Xác nhận',
+      message: 'Bỏ người này khỏi danh sách bạn thân?',
+      buttons: [
         { text: 'Hủy', style: 'cancel' },
         {
           text: 'Bỏ',
@@ -109,12 +111,12 @@ const CloseFriendsManager = ({
             if (result.success) {
               setCloseFriends(prev => prev.filter(f => f.id !== userId));
             } else {
-              Alert.alert('Lỗi', result.error);
+              alert({ type: 'error', title: 'Lỗi', message: result.error });
             }
           },
         },
-      ]
-    );
+      ],
+    });
   };
 
   const renderCloseFriend = ({ item }) => (
@@ -292,6 +294,7 @@ const CloseFriendsManager = ({
             </Text>
           </View>
         </Animated.View>
+        {AlertComponent}
       </View>
     </Modal>
   );

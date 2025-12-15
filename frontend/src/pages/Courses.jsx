@@ -1,73 +1,155 @@
-import React, { useState, useEffect } from 'react';
-import { BookOpen, Sparkles, Gift } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { BookOpen, Sparkles, Loader2, AlertCircle, Search } from 'lucide-react';
 import CompactSidebar from '../components/CompactSidebar/CompactSidebar';
-import TradingCoursesSection from './sections/TradingCoursesSection';
-import SpiritualCoursesSection from './sections/SpiritualCoursesSection';
-import BundlesSection from './sections/BundlesSection';
 import { CourseHero } from './Courses/components/CourseHero';
 import { CourseCard } from './Courses/components/CourseCard';
-import { LearningPaths } from './Courses/components/LearningPaths';
 import { FreePreview } from './Courses/components/FreePreview';
-import { SAMPLE_COURSES, SAMPLE_LEARNING_PATHS, getCoursesByCategory } from './Courses/courseData';
 import { useAuth } from '../contexts/AuthContext';
+import { courseService } from '../services/courseService';
+import { enrollmentService } from '../services/enrollmentService';
+import { progressService } from '../services/progressService';
 import './Courses.css';
 
 export default function Courses() {
-  const [activeTab, setActiveTab] = useState('trading'); // trading | spiritual | bundles
+  const navigate = useNavigate();
   const [categoryFilter, setCategoryFilter] = useState('all'); // all | trading | spiritual
-  const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [courses, setCourses] = useState([]);
+  const [userEnrollments, setUserEnrollments] = useState([]);
+  const [courseStats, setCourseStats] = useState({ totalCourses: 0, totalStudents: 0, completionRate: 0 });
+  const [error, setError] = useState(null);
 
   const { user } = useAuth();
   const userCourseTier = user?.course_tier || 'FREE';
 
-  const tabs = [
-    {
-      id: 'trading',
-      icon: BookOpen,
-      label: 'GEM TRADING',
-      description: 'Pattern Detection & Trading Mastery',
-    },
-    {
-      id: 'spiritual',
-      icon: Sparkles,
-      label: 'GEM ACADEMY',
-      description: 'Spiritual Transformation Courses',
-    },
-    {
-      id: 'bundles',
-      icon: Gift,
-      label: 'BUNDLES & OFFERS',
-      description: 'Special Package Deals',
-    },
-  ];
-
   const categories = [
-    { id: 'all', name: 'All Courses', icon: '📚' },
-    { id: 'trading', name: 'Trading Education', icon: '📊' },
-    { id: 'spiritual', name: 'Spiritual Wellness', icon: '💜' },
+    { id: 'all', name: 'Tất cả khóa học', icon: BookOpen },
+    { id: 'trading', name: 'GEM Trading', icon: BookOpen },
+    { id: 'spiritual', name: 'GEM Academy', icon: Sparkles },
   ];
 
-  const filteredCourses = getCoursesByCategory(categoryFilter);
+  // Fetch courses from Supabase
+  const fetchCourses = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const options = {};
+      if (categoryFilter !== 'all') {
+        options.category = categoryFilter;
+      }
+      if (searchQuery.trim()) {
+        options.search = searchQuery.trim();
+      }
 
-  const handleEnroll = (courseId) => {
-    console.log('Enrolling in course:', courseId);
-    // TODO: Navigate to pricing or enrollment page
+      const data = await courseService.getPublishedCourses(options);
+      setCourses(data);
+
+      // Calculate stats
+      const totalStudents = data.reduce((sum, c) => sum + (c.studentCount || 0), 0);
+      setCourseStats({
+        totalCourses: data.length,
+        totalStudents,
+        completionRate: 95, // Could calculate from real data
+      });
+    } catch (err) {
+      console.error('[Courses] Error fetching courses:', err);
+      setError('Không thể tải danh sách khóa học. Vui lòng thử lại.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [categoryFilter, searchQuery]);
+
+  // Fetch user enrollments
+  const fetchUserEnrollments = useCallback(async () => {
+    if (!user?.id) return;
+    try {
+      const enrollments = await enrollmentService.getUserEnrollments(user.id);
+      setUserEnrollments(enrollments);
+    } catch (err) {
+      console.error('[Courses] Error fetching enrollments:', err);
+    }
+  }, [user?.id]);
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchCourses();
+  }, [fetchCourses]);
+
+  // Fetch user data when logged in
+  useEffect(() => {
+    fetchUserEnrollments();
+  }, [fetchUserEnrollments]);
+
+  // Get filtered courses with enrollment data
+  const getCoursesWithEnrollment = () => {
+    return courses.map(course => {
+      const enrollment = userEnrollments.find(e => e.course_id === course.id);
+      return {
+        ...course,
+        progress: enrollment?.progress_percentage,
+        isEnrolled: !!enrollment,
+        // Map to expected CourseCard format
+        tier: normalizeTier(course.tier_required),
+        // Use real data from database (via courseService transform)
+        rating: course.rating || 0, // Real rating from DB
+        studentCount: course.studentCount || 0, // students_count from DB
+        duration: formatDuration(course.durationMinutes), // duration_hours * 60 from service
+        lessonCount: course.lessonCount || 0, // total_lessons from DB
+        price: course.price || 0,
+        thumbnail: course.thumbnail || null, // thumbnail_url from DB
+      };
+    });
+  };
+
+  // Helper: Normalize tier string for CourseCard
+  // CourseCard expects lowercase tier keys (free, tier1, tier2, tier3)
+  const normalizeTier = (tierString) => {
+    if (!tierString) return 'free';
+    // Convert TIER1 -> tier1, FREE -> free
+    return tierString.toLowerCase();
+  };
+
+  // Helper: Format duration
+  const formatDuration = (minutes) => {
+    if (!minutes) return '0 phút';
+    if (minutes < 60) return `${minutes} phút`;
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return mins > 0 ? `${hours}h ${mins}m` : `${hours} giờ`;
+  };
+
+  const filteredCourses = getCoursesWithEnrollment();
+
+  const handleEnroll = async (courseId) => {
+    if (!user) {
+      navigate('/login', { state: { from: `/courses/${courseId}` } });
+      return;
+    }
+    // Navigate to course detail for enrollment
+    navigate(`/courses/${courseId}`);
   };
 
   const handleContinue = (courseId) => {
-    console.log('Continuing course:', courseId);
-    // TODO: Navigate to course learning page
-    window.location.href = `/courses/${courseId}`;
+    navigate(`/courses/${courseId}/learn`);
   };
 
-  const handleStartPath = (pathId) => {
-    console.log('Starting learning path:', pathId);
-    // TODO: Navigate to path enrollment
+  const handleViewCourse = (courseId) => {
+    navigate(`/courses/${courseId}`);
   };
 
   const handleStartFreeTrial = () => {
-    console.log('Starting free trial');
-    // TODO: Navigate to signup with trial
+    if (!user) {
+      navigate('/signup');
+    } else {
+      navigate('/pricing');
+    }
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    fetchCourses();
   };
 
   return (
@@ -75,53 +157,45 @@ export default function Courses() {
       <CompactSidebar />
       <div className="page-container">
         <div className="page-content">
-          {/* Tab Navigation */}
-          <div className="courses-tabs">
-            <div className="tabs-container">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                <button
-                  key={tab.id}
-                  className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}
-                  onClick={() => setActiveTab(tab.id)}
-                >
-                  <Icon size={20} />
-                  <div className="tab-content">
-                    <span className="tab-label">{tab.label}</span>
-                    <span className="tab-description">{tab.description}</span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Tab Content */}
-        <div className="tab-content-container">
-          {activeTab === 'trading' && (
-            <>
-              {/* Course Hero Section */}
-              <CourseHero
-                totalCourses={25}
-                totalStudents={5000}
-                completionRate={95}
+          {/* Course Hero Section */}
+          <CourseHero
+                totalCourses={courseStats.totalCourses}
+                totalStudents={courseStats.totalStudents}
+                completionRate={courseStats.completionRate}
               />
 
-              {/* Category Filter Tabs */}
+              {/* Search & Category Filter */}
               <section className="category-section-courses">
                 <div className="container">
+                  {/* Search Bar */}
+                  <form onSubmit={handleSearch} className="courses-search-form">
+                    <div className="search-input-wrapper">
+                      <Search size={18} className="search-icon" />
+                      <input
+                        type="text"
+                        placeholder="Tìm kiếm khóa học..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="courses-search-input"
+                      />
+                    </div>
+                  </form>
+
+                  {/* Category Tabs */}
                   <div className="category-tabs-courses">
-                    {categories.map(category => (
-                      <button
-                        key={category.id}
-                        className={`category-tab-course ${categoryFilter === category.id ? 'active' : ''}`}
-                        onClick={() => setCategoryFilter(category.id)}
-                      >
-                        <span className="tab-icon">{category.icon}</span>
-                        <span className="tab-label">{category.name}</span>
-                      </button>
-                    ))}
+                    {categories.map(category => {
+                      const Icon = category.icon;
+                      return (
+                        <button
+                          key={category.id}
+                          className={`category-tab-course ${categoryFilter === category.id ? 'active' : ''}`}
+                          onClick={() => setCategoryFilter(category.id)}
+                        >
+                          <Icon size={16} className="tab-icon" />
+                          <span className="tab-label">{category.name}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </section>
@@ -130,16 +204,52 @@ export default function Courses() {
               <section className="courses-grid-section">
                 <div className="container">
                   <div className="section-header-simple">
-                    <h2>Featured Courses</h2>
-                    <p>Hand-picked courses to accelerate your journey</p>
+                    <h2>Khóa học nổi bật</h2>
+                    <p>Những khóa học được lựa chọn để đẩy nhanh hành trình của bạn</p>
                   </div>
 
-                  {isLoading ? (
-                    <div className="loading-state">
-                      <div className="loading-spinner"></div>
-                      <p>Loading courses...</p>
+                  {/* Error State */}
+                  {error && (
+                    <div className="courses-error-state">
+                      <AlertCircle size={48} />
+                      <p>{error}</p>
+                      <button onClick={fetchCourses} className="btn-retry">
+                        Thử lại
+                      </button>
                     </div>
-                  ) : (
+                  )}
+
+                  {/* Loading State */}
+                  {isLoading && !error && (
+                    <div className="loading-state">
+                      <Loader2 size={40} className="loading-spinner-icon" />
+                      <p>Đang tải khóa học...</p>
+                    </div>
+                  )}
+
+                  {/* Empty State */}
+                  {!isLoading && !error && filteredCourses.length === 0 && (
+                    <div className="courses-empty-state">
+                      <BookOpen size={48} />
+                      <h3>Chưa có khóa học nào</h3>
+                      <p>
+                        {searchQuery
+                          ? `Không tìm thấy khóa học nào với "${searchQuery}"`
+                          : 'Các khóa học sẽ được cập nhật sớm'}
+                      </p>
+                      {searchQuery && (
+                        <button
+                          onClick={() => { setSearchQuery(''); setCategoryFilter('all'); }}
+                          className="btn-clear-search"
+                        >
+                          Xóa bộ lọc
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Courses Grid */}
+                  {!isLoading && !error && filteredCourses.length > 0 && (
                     <div className="courses-grid">
                       {filteredCourses.map(course => (
                         <CourseCard
@@ -148,18 +258,13 @@ export default function Courses() {
                           userTier={userCourseTier}
                           onEnroll={handleEnroll}
                           onContinue={handleContinue}
+                          onClick={() => handleViewCourse(course.id)}
                         />
                       ))}
                     </div>
                   )}
                 </div>
               </section>
-
-              {/* Learning Paths */}
-              <LearningPaths
-                paths={SAMPLE_LEARNING_PATHS}
-                onStartPath={handleStartPath}
-              />
 
               {/* Free Preview */}
               <FreePreview
@@ -186,14 +291,8 @@ export default function Courses() {
                   </div>
                 </div>
               </section>
-            </>
-          )}
-
-          {activeTab === 'spiritual' && <SpiritualCoursesSection />}
-          {activeTab === 'bundles' && <BundlesSection />}
         </div>
       </div>
-    </div>
     </>
   );
 }

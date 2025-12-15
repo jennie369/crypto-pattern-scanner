@@ -79,38 +79,147 @@ const ReactionsListSheet = ({
     }
   }, [selectedFilter, reactions]);
 
+  /**
+   * Fetch user data from both profiles and seed_users tables
+   * Returns map of userId -> { id, full_name, avatar_url }
+   */
+  const fetchUserDataBatch = async (userIds) => {
+    const userMap = new Map();
+
+    if (!userIds || userIds.length === 0) return userMap;
+
+    // Remove duplicates
+    const uniqueIds = [...new Set(userIds)];
+
+    try {
+      // Query profiles table first (real users)
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, full_name, avatar_url')
+        .in('id', uniqueIds);
+
+      if (profilesData) {
+        profilesData.forEach(user => {
+          userMap.set(user.id, user);
+        });
+      }
+
+      // Find which users were not found in profiles
+      const missingIds = uniqueIds.filter(id => !userMap.has(id));
+
+      // Query seed_users table for missing users
+      if (missingIds.length > 0) {
+        const { data: seedUsersData } = await supabase
+          .from('seed_users')
+          .select('id, full_name, avatar_url')
+          .in('id', missingIds);
+
+        if (seedUsersData) {
+          seedUsersData.forEach(user => {
+            userMap.set(user.id, user);
+          });
+        }
+      }
+
+      console.log(`[ReactionsListSheet] Fetched ${userMap.size} users from ${uniqueIds.length} IDs`);
+    } catch (error) {
+      console.error('[ReactionsListSheet] fetchUserDataBatch error:', error);
+    }
+
+    return userMap;
+  };
+
   const loadReactions = async () => {
     if (!postId) return;
 
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      // First try post_reactions table (for reactions with different types)
+      // Query WITHOUT join - we'll fetch user data separately
+      const { data: reactionsData, error: reactionsError } = await supabase
         .from('post_reactions')
-        .select(`
-          id,
-          reaction_type,
-          created_at,
-          user:user_id (
-            id,
-            full_name,
-            avatar_url
-          )
-        `)
+        .select('id, reaction_type, created_at, user_id')
         .eq('post_id', postId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      // Get likes from forum_likes table - try both post_id and seed_post_id
+      // because likes can be stored with either column depending on post type
+      const { data: likesDataByPostId } = await supabase
+        .from('forum_likes')
+        .select('id, created_at, user_id')
+        .eq('post_id', postId)
+        .order('created_at', { ascending: false })
+        .limit(100);
 
-      setReactions(data || []);
-      setFilteredReactions(data || []);
+      const { data: likesDataBySeedPostId } = await supabase
+        .from('forum_likes')
+        .select('id, created_at, user_id')
+        .eq('seed_post_id', postId)
+        .order('created_at', { ascending: false })
+        .limit(100);
+
+      // Combine likes from both columns
+      const likesData = [...(likesDataByPostId || []), ...(likesDataBySeedPostId || [])];
+
+      // Combine both sources
+      let allReactions = [];
+
+      // Add reactions with types
+      if (reactionsData && !reactionsError) {
+        allReactions = [...reactionsData];
+      }
+
+      // Add likes (as 'like' reaction type)
+      if (likesData && likesData.length > 0) {
+        const likesAsReactions = likesData.map(like => ({
+          ...like,
+          reaction_type: 'like',
+        }));
+        allReactions = [...allReactions, ...likesAsReactions];
+      }
+
+      // Remove duplicates (same user might be in both tables)
+      const uniqueUsers = new Map();
+      allReactions.forEach(reaction => {
+        const userId = reaction.user_id;
+        if (userId && !uniqueUsers.has(userId)) {
+          uniqueUsers.set(userId, reaction);
+        }
+      });
+
+      const uniqueReactions = Array.from(uniqueUsers.values());
+
+      // Collect all user IDs to fetch
+      const userIds = uniqueReactions.map(r => r.user_id).filter(Boolean);
+
+      // Batch fetch user data from both profiles and seed_users
+      const userDataMap = await fetchUserDataBatch(userIds);
+
+      // Merge user data into reactions
+      const reactionsWithUsers = uniqueReactions.map(reaction => ({
+        ...reaction,
+        user: userDataMap.get(reaction.user_id) || {
+          id: reaction.user_id,
+          full_name: 'Người dùng',
+          avatar_url: null,
+        },
+      }));
+
+      // Sort by created_at
+      reactionsWithUsers.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+      setReactions(reactionsWithUsers);
+      setFilteredReactions(reactionsWithUsers);
 
       // Calculate counts per reaction type
-      const counts = (data || []).reduce((acc, reaction) => {
+      const counts = reactionsWithUsers.reduce((acc, reaction) => {
         acc[reaction.reaction_type] = (acc[reaction.reaction_type] || 0) + 1;
         return acc;
       }, {});
-      counts.all = data?.length || 0;
+      counts.all = reactionsWithUsers.length;
       setReactionCounts(counts);
+
+      console.log(`[ReactionsListSheet] Loaded ${reactionsWithUsers.length} reactions for post ${postId}`);
     } catch (error) {
       console.error('[ReactionsListSheet] Load error:', error);
     } finally {

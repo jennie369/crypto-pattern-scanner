@@ -18,7 +18,6 @@ import {
   Animated,
   PanResponder,
   Dimensions,
-  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from '../../../utils/haptics';
@@ -31,6 +30,9 @@ import {
   COLORS,
   SPACING,
 } from '../../../utils/tokens';
+
+// Alert
+import { useCustomAlert } from '../../../components/CustomAlert';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const ACTION_WIDTH = 80;
@@ -45,6 +47,8 @@ const SwipeableConversationItem = memo(({
   onMute,
   index,
 }) => {
+  const { alert } = useCustomAlert();
+
   // Animation refs
   const translateX = useRef(new Animated.Value(0)).current;
   const actionsOpacity = useRef(new Animated.Value(0)).current;
@@ -143,10 +147,11 @@ const SwipeableConversationItem = memo(({
   const handleDelete = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
 
-    Alert.alert(
-      'Delete Conversation',
-      'Are you sure you want to delete this conversation? This action cannot be undone.',
-      [
+    alert({
+      type: 'warning',
+      title: 'Delete Conversation',
+      message: 'Are you sure you want to delete this conversation? This action cannot be undone.',
+      buttons: [
         { text: 'Cancel', style: 'cancel', onPress: closeActions },
         {
           text: 'Delete',
@@ -157,8 +162,8 @@ const SwipeableConversationItem = memo(({
           },
         },
       ]
-    );
-  }, [conversation.id, onDelete, closeActions]);
+    });
+  }, [conversation.id, onDelete, closeActions, alert]);
 
   // Handle press (close if open, otherwise navigate)
   const handlePress = useCallback(() => {

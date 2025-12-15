@@ -4,10 +4,14 @@
  */
 
 import * as Notifications from 'expo-notifications';
+import * as Device from 'expo-device';
+import Constants from 'expo-constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
+import { supabase } from './supabase';
 
 const NOTIFICATION_SETTINGS_KEY = '@gem_notification_settings';
+const PUSH_TOKEN_KEY = '@gem_push_token';
 
 // Configure notification handling
 Notifications.setNotificationHandler({
@@ -50,6 +54,8 @@ export const TYPE_TO_CATEGORY = {
   forum_reply: 'social',
   forum_follow: 'social',
   mention: 'social',
+  gift_received: 'social',
+  gift_sent: 'social',
   // System
   order: 'system',
   promotion: 'system',
@@ -63,6 +69,9 @@ export const TYPE_TO_CATEGORY = {
   withdrawal_completed: 'system',
   withdrawal_rejected: 'system',
   commission_earned: 'system',
+  // Admin notifications
+  admin_partnership_application: 'system',
+  admin_withdraw_request: 'system',
 };
 
 class NotificationService {
@@ -126,12 +135,143 @@ class NotificationService {
         });
       }
 
+      // Get and save push token
+      await this.registerPushToken();
+
       console.log('[Notifications] Initialized successfully');
       return true;
     } catch (error) {
       console.error('[Notifications] Initialize error:', error);
       return false;
     }
+  }
+
+  /**
+   * Check if running in Expo Go (development client without native modules)
+   */
+  isExpoGo() {
+    return Constants.appOwnership === 'expo' || !Constants.expoConfig?.extra?.eas?.projectId;
+  }
+
+  /**
+   * Register and save Expo push token to database
+   */
+  async registerPushToken() {
+    try {
+      if (!Device.isDevice) {
+        console.log('[Notifications] Push notifications only work on physical devices');
+        return null;
+      }
+
+      // Skip FCM token in Expo Go - Firebase is not initialized
+      if (this.isExpoGo()) {
+        console.log('[Notifications] Running in Expo Go - skipping FCM push token registration');
+        console.log('[Notifications] Push notifications will work in production/development builds with Firebase configured');
+        return null;
+      }
+
+      // Get push token
+      const projectId = Constants.expoConfig?.extra?.eas?.projectId;
+      const token = await Notifications.getExpoPushTokenAsync({
+        projectId: projectId,
+      });
+
+      if (!token?.data) {
+        console.log('[Notifications] Failed to get push token');
+        return null;
+      }
+
+      this._expoPushToken = token.data;
+      console.log('[Notifications] Push token:', token.data);
+
+      // Save to AsyncStorage
+      await AsyncStorage.setItem(PUSH_TOKEN_KEY, token.data);
+
+      // Save to database if user is logged in
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await this.savePushTokenToDatabase(user.id, token.data);
+      }
+
+      return token.data;
+    } catch (error) {
+      // Handle Firebase not initialized error gracefully
+      if (error.message?.includes('FirebaseApp is not initialized')) {
+        console.log('[Notifications] Firebase not initialized - skipping push token (Expo Go mode)');
+        return null;
+      }
+      console.error('[Notifications] registerPushToken error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Save push token to database
+   */
+  async savePushTokenToDatabase(userId, pushToken) {
+    try {
+      const deviceType = Platform.OS;
+      const deviceName = Device.modelName || Device.deviceName || 'Unknown Device';
+
+      // Upsert token (insert or update if exists)
+      const { error } = await supabase
+        .from('user_push_tokens')
+        .upsert({
+          user_id: userId,
+          push_token: pushToken,
+          device_type: deviceType,
+          device_name: deviceName,
+          is_active: true,
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id,push_token',
+        });
+
+      if (error) {
+        // Table might not exist yet
+        if (error.code === 'PGRST205' || error.code === '42P01') {
+          console.warn('[Notifications] user_push_tokens table not found');
+          return;
+        }
+        console.error('[Notifications] savePushTokenToDatabase error:', error);
+      } else {
+        console.log('[Notifications] Push token saved to database');
+      }
+    } catch (error) {
+      console.error('[Notifications] savePushTokenToDatabase error:', error);
+    }
+  }
+
+  /**
+   * Remove push token from database (on logout)
+   */
+  async removePushToken() {
+    try {
+      const storedToken = await AsyncStorage.getItem(PUSH_TOKEN_KEY);
+      if (!storedToken) return;
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase
+          .from('user_push_tokens')
+          .update({ is_active: false })
+          .eq('user_id', user.id)
+          .eq('push_token', storedToken);
+      }
+
+      await AsyncStorage.removeItem(PUSH_TOKEN_KEY);
+      this._expoPushToken = null;
+      console.log('[Notifications] Push token removed');
+    } catch (error) {
+      console.error('[Notifications] removePushToken error:', error);
+    }
+  }
+
+  /**
+   * Get current push token
+   */
+  getPushToken() {
+    return this._expoPushToken;
   }
 
   /**
@@ -581,6 +721,57 @@ class NotificationService {
   }
 
   // ==========================================
+  // GIFT NOTIFICATIONS
+  // ==========================================
+
+  /**
+   * Send gift received notification
+   * @param {string} senderName - Name of the sender
+   * @param {string} giftName - Name of the gift
+   * @param {number} gemAmount - Amount of gems
+   * @param {object} data - Additional data
+   */
+  async sendGiftReceivedNotification(senderName, giftName, gemAmount, data = {}) {
+    if (!this._settings.forumLikes) return; // Use forumLikes setting for social notifications
+
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: `🎁 Bạn nhận được quà!`,
+          body: `${senderName} đã tặng bạn ${giftName} (${gemAmount} gems)`,
+          data: { type: 'gift_received', ...data },
+        },
+        trigger: null,
+      });
+      console.log('[Notifications] Gift received notification sent');
+    } catch (error) {
+      console.error('[Notifications] sendGiftReceivedNotification error:', error);
+    }
+  }
+
+  /**
+   * Generic method to send a local notification immediately
+   * @param {string} title - Notification title
+   * @param {string} body - Notification body
+   * @param {object} data - Additional data
+   */
+  async sendLocalNotification(title, body, data = {}) {
+    try {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title,
+          body,
+          data,
+        },
+        trigger: null,
+      });
+      console.log('[Notifications] Local notification sent:', title);
+    } catch (error) {
+      console.error('[Notifications] sendLocalNotification error:', error);
+    }
+  }
+
+  // ==========================================
   // PARTNERSHIP NOTIFICATIONS
   // ==========================================
 
@@ -769,6 +960,865 @@ class NotificationService {
       console.log('[Notifications] Tier upgrade notification sent');
     } catch (error) {
       console.error('[Notifications] sendTierUpgradeNotification error:', error);
+    }
+  }
+
+  // ==========================================
+  // DATABASE NOTIFICATIONS (Issue #25)
+  // ==========================================
+
+  /**
+   * Get user's notifications from database (including broadcasts)
+   * Key: user_id IS NULL means broadcast to all users
+   */
+  async getUserNotificationsFromDB(userId, page = 1, limit = 20) {
+    try {
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .or(`user_id.eq.${userId},user_id.is.null`) // User's + Broadcasts
+        .order('created_at', { ascending: false })
+        .range((page - 1) * limit, page * limit - 1);
+
+      if (error) throw error;
+
+      // Enrich with category
+      const enrichedData = (data || []).map(n => ({
+        ...n,
+        category: this.getCategoryForType(n.type),
+        isBroadcast: n.user_id === null,
+      }));
+
+      return { success: true, data: enrichedData };
+    } catch (error) {
+      console.error('[Notifications] getUserNotificationsFromDB error:', error);
+      return { success: false, data: [] };
+    }
+  }
+
+  /**
+   * Get unread notification count
+   */
+  async getUnreadCount(userId) {
+    try {
+      const { count, error } = await supabase
+        .from('notifications')
+        .select('id', { count: 'exact', head: true })
+        .or(`user_id.eq.${userId},user_id.is.null`)
+        .eq('read', false);
+
+      return { count: count || 0, error };
+    } catch (error) {
+      return { count: 0, error };
+    }
+  }
+
+  /**
+   * Mark notification as read
+   */
+  async markNotificationAsRead(notificationId, userId) {
+    try {
+      // Only update if it's user's own notification (not broadcasts)
+      const { error } = await supabase
+        .from('notifications')
+        .update({ read: true, read_at: new Date().toISOString() })
+        .eq('id', notificationId)
+        .eq('user_id', userId);
+
+      return { success: !error, error };
+    } catch (error) {
+      return { success: false, error };
+    }
+  }
+
+  /**
+   * Mark all notifications as read for user
+   */
+  async markAllNotificationsAsRead(userId) {
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ read: true, read_at: new Date().toISOString() })
+        .eq('user_id', userId)
+        .eq('read', false);
+
+      return { success: !error, error };
+    } catch (error) {
+      return { success: false, error };
+    }
+  }
+
+  /**
+   * Delete notification
+   */
+  async deleteNotification(notificationId, userId) {
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('id', notificationId)
+        .eq('user_id', userId);
+
+      return { success: !error, error };
+    } catch (error) {
+      return { success: false, error };
+    }
+  }
+
+  /**
+   * [ADMIN] Send broadcast notification to all users
+   */
+  async sendBroadcastNotification({ title, message, type = 'system', data = {}, imageUrl = null }) {
+    try {
+      const { data: result, error } = await supabase.rpc('send_broadcast_notification', {
+        p_title: title,
+        p_message: message,
+        p_type: type,
+        p_data: data,
+        p_image_url: imageUrl,
+      });
+
+      if (error) throw error;
+
+      return { success: result?.success || false, data: result };
+    } catch (error) {
+      console.error('[Notifications] sendBroadcastNotification error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * [ADMIN] Send notification to specific users
+   */
+  async sendNotificationToUsers(userIds, title, message, type = 'system', data = {}) {
+    try {
+      const { data: result, error } = await supabase.rpc('send_notification_to_users', {
+        p_user_ids: userIds,
+        p_title: title,
+        p_message: message,
+        p_type: type,
+        p_data: data,
+      });
+
+      if (error) throw error;
+
+      return { success: result?.success || false, data: result };
+    } catch (error) {
+      console.error('[Notifications] sendNotificationToUsers error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * [ADMIN] Get notification history (broadcasts only)
+   */
+  async getNotificationHistory(limit = 50) {
+    try {
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .is('user_id', null) // Only broadcasts
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      return { success: !error, data: data || [] };
+    } catch (error) {
+      return { success: false, data: [] };
+    }
+  }
+
+  /**
+   * [ADMIN] Delete broadcast notification
+   */
+  async deleteBroadcastNotification(notificationId) {
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('id', notificationId)
+        .is('user_id', null);
+
+      return { success: !error, error };
+    } catch (error) {
+      return { success: false, error };
+    }
+  }
+
+  // ==========================================
+  // ADMIN: PUSH SCHEDULE MANAGEMENT
+  // ==========================================
+
+  /**
+   * Create scheduled push notification
+   */
+  async createScheduledNotification(data) {
+    try {
+      const { data: user } = await supabase.auth.getUser();
+
+      // Calculate estimated reach
+      const reach = await this.calculateReach(data.segment || 'all');
+
+      const { data: notification, error } = await supabase
+        .from('notification_schedule')
+        .insert({
+          title: data.title,
+          body: data.body,
+          deep_link: data.deep_link,
+          image_url: data.image_url,
+          segment: data.segment || 'all',
+          segment_filters: data.segment_filters || {},
+          estimated_reach: reach,
+          template_id: data.template_id,
+          ab_test_enabled: data.ab_test_enabled || false,
+          ab_variants: data.ab_variants,
+          ab_winner_criteria: data.ab_winner_criteria,
+          ab_test_duration: data.ab_test_duration,
+          scheduled_at: data.scheduled_at,
+          is_recurring: data.is_recurring || false,
+          recurrence_rule: data.recurrence_rule,
+          status: data.scheduled_at ? 'scheduled' : 'draft',
+          created_by: user?.user?.id,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return { success: true, data: notification };
+    } catch (error) {
+      console.error('[Notifications] createScheduledNotification error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Update scheduled notification
+   */
+  async updateScheduledNotification(id, updates) {
+    try {
+      // Recalculate reach if segment changed
+      if (updates.segment) {
+        updates.estimated_reach = await this.calculateReach(updates.segment);
+      }
+
+      const { data, error } = await supabase
+        .from('notification_schedule')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return { success: true, data };
+    } catch (error) {
+      console.error('[Notifications] updateScheduledNotification error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Delete scheduled notification
+   */
+  async deleteScheduledNotification(id) {
+    try {
+      const { error } = await supabase
+        .from('notification_schedule')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      return { success: true };
+    } catch (error) {
+      console.error('[Notifications] deleteScheduledNotification error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get scheduled notifications
+   */
+  async getScheduledNotifications(options = {}) {
+    try {
+      let query = supabase
+        .from('notification_schedule')
+        .select('*')
+        .order('scheduled_at', { ascending: true });
+
+      if (options.status) {
+        query = query.eq('status', options.status);
+      }
+
+      if (options.startDate) {
+        query = query.gte('scheduled_at', options.startDate);
+      }
+
+      if (options.endDate) {
+        query = query.lte('scheduled_at', options.endDate);
+      }
+
+      if (options.limit) {
+        query = query.limit(options.limit);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      return { success: true, data: data || [] };
+    } catch (error) {
+      console.error('[Notifications] getScheduledNotifications error:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  }
+
+  /**
+   * Get scheduled notifications by date range (for calendar)
+   */
+  async getScheduledByDateRange(startDate, endDate) {
+    try {
+      const { data, error } = await supabase
+        .from('notification_schedule')
+        .select('*')
+        .gte('scheduled_at', startDate.toISOString())
+        .lte('scheduled_at', endDate.toISOString())
+        .in('status', ['scheduled', 'sent'])
+        .order('scheduled_at', { ascending: true });
+
+      if (error) throw error;
+
+      // Add type marker for calendar
+      const withType = (data || []).map(item => ({
+        ...item,
+        _type: 'push', // Để calendar phân biệt với post
+      }));
+
+      return withType;
+    } catch (error) {
+      console.error('[Notifications] getScheduledByDateRange error:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Send notification immediately via Edge Function
+   */
+  async sendNow(notificationId) {
+    try {
+      // Get notification data
+      const { data: notification } = await supabase
+        .from('notification_schedule')
+        .select('*')
+        .eq('id', notificationId)
+        .single();
+
+      if (!notification) throw new Error('Notification not found');
+
+      // Update status to sending
+      await supabase
+        .from('notification_schedule')
+        .update({ status: 'sending' })
+        .eq('id', notificationId);
+
+      // Get target users
+      const users = await this.getUsersBySegment(notification.segment);
+
+      if (users.length === 0) {
+        throw new Error('No users in segment');
+      }
+
+      // Send via Edge Function
+      const { data, error } = await supabase.functions.invoke('send-push-notification', {
+        body: {
+          notificationId,
+          notification: {
+            title: notification.title,
+            body: notification.body,
+            data: {
+              deep_link: notification.deep_link,
+              notification_id: notificationId,
+            },
+          },
+          tokens: users.map(u => u.expo_push_token),
+          userIds: users.map(u => u.id),
+        },
+      });
+
+      if (error) throw error;
+
+      return { success: true, data };
+    } catch (error) {
+      console.error('[Notifications] sendNow error:', error);
+
+      // Update status to failed
+      await supabase
+        .from('notification_schedule')
+        .update({
+          status: 'failed',
+          error_message: error.message,
+        })
+        .eq('id', notificationId);
+
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Send test notification to admin device
+   */
+  async sendTest(notificationData) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      // Get admin's token from profiles
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('expo_push_token')
+        .eq('id', user.id)
+        .single();
+
+      // Fallback to user_push_tokens
+      let token = profile?.expo_push_token;
+      if (!token) {
+        const { data: tokenData } = await supabase
+          .from('user_push_tokens')
+          .select('push_token')
+          .eq('user_id', user.id)
+          .eq('is_active', true)
+          .single();
+        token = tokenData?.push_token;
+      }
+
+      if (!token) {
+        throw new Error('No push token registered. Please enable notifications first.');
+      }
+
+      // Send single notification via Expo
+      const response = await fetch('https://exp.host/--/api/v2/push/send', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: token,
+          title: `[TEST] ${notificationData.title}`,
+          body: notificationData.body,
+          data: {
+            deep_link: notificationData.deep_link,
+            is_test: true,
+          },
+          sound: 'default',
+          badge: 1,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.data?.[0]?.status === 'error') {
+        throw new Error(result.data[0].message);
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('[Notifications] sendTest error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // ==========================================
+  // SEGMENTATION
+  // ==========================================
+
+  /**
+   * Get users by segment
+   */
+  async getUsersBySegment(segment) {
+    try {
+      let query = supabase
+        .from('profiles')
+        .select('id, expo_push_token')
+        .not('expo_push_token', 'is', null);
+
+      // Apply segment filters
+      switch (segment) {
+        case 'traders':
+          query = query.contains('notification_segments', ['trading']);
+          break;
+        case 'spiritual':
+          query = query.contains('notification_segments', ['spiritual']);
+          break;
+        case 'tier1_plus':
+          query = query.in('scanner_tier', ['tier1', 'tier2', 'tier3', 'PRO', 'PREMIUM', 'VIP']);
+          break;
+        case 'inactive_3d':
+          const threeDaysAgo = new Date();
+          threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+          query = query.lt('last_active_at', threeDaysAgo.toISOString());
+          break;
+        case 'all':
+        default:
+          // No additional filters
+          break;
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      return data || [];
+    } catch (error) {
+      console.error('[Notifications] getUsersBySegment error:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Calculate reach for segment
+   */
+  async calculateReach(segment) {
+    try {
+      const users = await this.getUsersBySegment(segment);
+      return users.length;
+    } catch (error) {
+      return 0;
+    }
+  }
+
+  /**
+   * Get segment stats
+   */
+  async getSegmentStats() {
+    try {
+      const segments = {
+        all: { name: 'Tất cả', count: 0 },
+        traders: { name: 'Traders', count: 0 },
+        spiritual: { name: 'Spiritual', count: 0 },
+        tier1_plus: { name: 'TIER1+', count: 0 },
+        inactive_3d: { name: 'Inactive 3+ days', count: 0 },
+      };
+
+      for (const key of Object.keys(segments)) {
+        segments[key].count = await this.calculateReach(key);
+      }
+
+      return segments;
+    } catch (error) {
+      console.error('[Notifications] getSegmentStats error:', error);
+      return {};
+    }
+  }
+
+  // ==========================================
+  // TEMPLATES
+  // ==========================================
+
+  /**
+   * Get notification templates
+   */
+  async getTemplates(category = null, type = 'push') {
+    try {
+      let query = supabase
+        .from('notification_templates')
+        .select('*')
+        .eq('is_active', true)
+        .eq('type', type)
+        .order('usage_count', { ascending: false });
+
+      if (category) {
+        query = query.eq('category', category);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      return { success: true, data: data || [] };
+    } catch (error) {
+      console.error('[Notifications] getTemplates error:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  }
+
+  /**
+   * Create template
+   */
+  async createTemplate(templateData) {
+    try {
+      const { data: user } = await supabase.auth.getUser();
+
+      const { data, error } = await supabase
+        .from('notification_templates')
+        .insert({
+          ...templateData,
+          created_by: user?.user?.id,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return { success: true, data };
+    } catch (error) {
+      console.error('[Notifications] createTemplate error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Update template
+   */
+  async updateTemplate(id, updates) {
+    try {
+      const { data, error } = await supabase
+        .from('notification_templates')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return { success: true, data };
+    } catch (error) {
+      console.error('[Notifications] updateTemplate error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Delete template
+   */
+  async deleteTemplate(id) {
+    try {
+      const { error } = await supabase
+        .from('notification_templates')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      return { success: true };
+    } catch (error) {
+      console.error('[Notifications] deleteTemplate error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Increment template usage
+   */
+  async incrementTemplateUsage(templateId) {
+    try {
+      await supabase.rpc('increment_template_usage', {
+        p_template_id: templateId,
+      });
+    } catch (error) {
+      console.error('[Notifications] incrementTemplateUsage error:', error);
+    }
+  }
+
+  // ==========================================
+  // ANALYTICS
+  // ==========================================
+
+  /**
+   * Get notification stats for date range
+   */
+  async getStats(startDate, endDate) {
+    try {
+      const { data, error } = await supabase.rpc('get_notification_stats_by_date_range', {
+        p_start_date: startDate.toISOString(),
+        p_end_date: endDate.toISOString(),
+      });
+
+      if (error) throw error;
+
+      return { success: true, data: data?.[0] || {} };
+    } catch (error) {
+      console.error('[Notifications] getStats error:', error);
+      return { success: false, data: {}, error: error.message };
+    }
+  }
+
+  /**
+   * Get top performing notifications
+   */
+  async getTopPerforming(limit = 5) {
+    try {
+      const { data, error } = await supabase
+        .from('notification_schedule')
+        .select('*')
+        .eq('status', 'sent')
+        .gt('total_delivered', 0)
+        .order('total_opened', { ascending: false })
+        .limit(limit);
+
+      if (error) throw error;
+
+      // Calculate rates
+      const withRates = (data || []).map(n => ({
+        ...n,
+        openRate: n.total_delivered > 0
+          ? ((n.total_opened / n.total_delivered) * 100).toFixed(1)
+          : '0',
+        clickRate: n.total_delivered > 0
+          ? ((n.total_clicked / n.total_delivered) * 100).toFixed(1)
+          : '0',
+      }));
+
+      return { success: true, data: withRates };
+    } catch (error) {
+      console.error('[Notifications] getTopPerforming error:', error);
+      return { success: false, data: [], error: error.message };
+    }
+  }
+
+  /**
+   * Get dashboard stats (quick overview)
+   */
+  async getDashboardStats() {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const weekAgo = new Date(today);
+      weekAgo.setDate(weekAgo.getDate() - 7);
+
+      // Get today's scheduled
+      const { data: todayPush } = await supabase
+        .from('notification_schedule')
+        .select('id', { count: 'exact', head: true })
+        .gte('scheduled_at', today.toISOString())
+        .lt('scheduled_at', new Date(today.getTime() + 24 * 60 * 60 * 1000).toISOString());
+
+      // Get week stats
+      const { data: weekStats } = await supabase.rpc('get_notification_stats_by_date_range', {
+        p_start_date: weekAgo.toISOString(),
+        p_end_date: new Date().toISOString(),
+      });
+
+      return {
+        success: true,
+        data: {
+          pushToday: todayPush?.count || 0,
+          sentThisWeek: weekStats?.[0]?.total_sent || 0,
+          openRate: weekStats?.[0]?.avg_open_rate || 0,
+          clickRate: weekStats?.[0]?.avg_click_rate || 0,
+        },
+      };
+    } catch (error) {
+      console.error('[Notifications] getDashboardStats error:', error);
+      return { success: false, data: {} };
+    }
+  }
+
+  // ==========================================
+  // USER NOTIFICATION SETTINGS (JSONB Schema)
+  // ==========================================
+
+  /**
+   * Get user notification settings from database
+   */
+  async getUserNotificationSettings() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data } = await supabase
+        .from('notification_settings')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      return data;
+    } catch (error) {
+      console.error('[Notifications] getUserNotificationSettings error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Update user notification settings in database
+   */
+  async updateUserNotificationSettings(settings) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { success: false };
+
+      const { error } = await supabase
+        .from('notification_settings')
+        .upsert({
+          user_id: user.id,
+          ...settings,
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id',
+        });
+
+      if (error) throw error;
+
+      return { success: true };
+    } catch (error) {
+      console.error('[Notifications] updateUserNotificationSettings error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Toggle master notification enabled/disabled
+   */
+  async toggleNotificationsEnabled(enabled) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { success: false };
+
+      const { error } = await supabase
+        .from('notification_settings')
+        .upsert({
+          user_id: user.id,
+          enabled: enabled,
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id',
+        });
+
+      if (error) throw error;
+
+      return { success: true };
+    } catch (error) {
+      console.error('[Notifications] toggleNotificationsEnabled error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Save push token to profiles table (for admin targeting)
+   */
+  async saveTokenToProfile(token) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      await supabase
+        .from('profiles')
+        .update({
+          expo_push_token: token,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', user.id);
+
+      console.log('[Notifications] Token saved to profile');
+    } catch (error) {
+      console.error('[Notifications] saveTokenToProfile error:', error);
     }
   }
 }

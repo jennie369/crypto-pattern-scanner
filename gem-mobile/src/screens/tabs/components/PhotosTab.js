@@ -1,6 +1,6 @@
 /**
  * Gemral - Photos Tab Component
- * Grid display of user's photos from posts
+ * Instagram-style grid display with stats overlay
  */
 
 import React from 'react';
@@ -14,7 +14,8 @@ import {
   ActivityIndicator,
   Dimensions,
 } from 'react-native';
-import { ImageOff } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { ImageOff, Heart, MessageCircle, Eye } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../../utils/tokens';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -29,6 +30,14 @@ const PhotosTab = ({
   onEndReached,
   hasMore,
 }) => {
+  // Format number to compact form
+  const formatNumber = (num) => {
+    if (!num) return '0';
+    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+    return num.toString();
+  };
+
   const renderPhoto = ({ item, index }) => (
     <TouchableOpacity
       style={[
@@ -45,6 +54,29 @@ const PhotosTab = ({
         style={styles.photo}
         resizeMode="cover"
       />
+
+      {/* Stats Overlay - Instagram Style */}
+      <LinearGradient
+        colors={['transparent', 'rgba(0, 0, 0, 0.7)']}
+        style={styles.statsOverlay}
+      >
+        <View style={styles.statsRow}>
+          <View style={styles.statItem}>
+            <Heart size={12} color="#fff" fill="#fff" />
+            <Text style={styles.statText}>{formatNumber(item.likes_count)}</Text>
+          </View>
+          <View style={styles.statItem}>
+            <MessageCircle size={12} color="#fff" />
+            <Text style={styles.statText}>{formatNumber(item.comments_count)}</Text>
+          </View>
+          {item.views_count > 0 && (
+            <View style={styles.statItem}>
+              <Eye size={12} color="#fff" />
+              <Text style={styles.statText}>{formatNumber(item.views_count)}</Text>
+            </View>
+          )}
+        </View>
+      </LinearGradient>
     </TouchableOpacity>
   );
 
@@ -104,6 +136,7 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
+    paddingBottom: 20,
   },
   loadingContainer: {
     paddingVertical: SPACING.huge,
@@ -120,6 +153,30 @@ const styles = StyleSheet.create({
   photo: {
     width: '100%',
     height: '100%',
+  },
+  statsOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.xs,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+  },
+  statItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  statText: {
+    fontSize: 10,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: '#fff',
   },
   emptyContainer: {
     paddingVertical: SPACING.huge,

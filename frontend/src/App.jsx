@@ -1,7 +1,21 @@
 import React, { lazy, Suspense } from 'react';
+
+// Custom error handler for development
+if (import.meta.env.DEV) {
+  window.addEventListener('error', (e) => {
+    console.error('RUNTIME ERROR:', e.message);
+    console.error('File:', e.filename);
+    console.error('Line:', e.lineno);
+    console.error('Stack:', e.error?.stack);
+  });
+
+  window.addEventListener('unhandledrejection', (e) => {
+    console.error('PROMISE ERROR:', e.reason);
+  });
+}
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import TopNavBar from './components/TopNavBar';
-import Footer from './components/Footer';
 import AuthenticatedLayout from './components/AuthenticatedLayout';
 import Landing from './pages/Landing';
 import HomePage from './pages/Home/v2'; // Home Page v2 with AIDA funnel
@@ -41,7 +55,16 @@ import Cart from './pages/Cart';
 
 // Courses & Education
 import Courses from './pages/Courses';
+import CourseDetail from './pages/CourseDetail';
 import CourseLearning from './pages/CourseLearning';
+
+// Teacher Dashboard - Course Admin
+import CourseAdmin from './pages/CourseAdmin';
+import CourseBuilder from './pages/CourseAdmin/CourseBuilder';
+import ModuleBuilder from './pages/CourseAdmin/ModuleBuilder';
+import LessonEditor from './pages/CourseAdmin/LessonEditor';
+import QuizBuilder from './pages/CourseAdmin/QuizBuilder';
+import StudentManagement from './pages/CourseAdmin/StudentManagement';
 
 // Community Forum
 import Forum from './pages/Forum/Forum3Column'; // Updated to 3-column layout
@@ -54,7 +77,7 @@ import Messages from './pages/Messages/Messages';
 // Events Calendar
 import Events from './pages/Events/Events';
 
-// Community Hub (combines all community features)
+// Community Hub (Legacy - for backwards compatibility)
 import CommunityHub from './pages/Community/CommunityHub';
 
 // Leaderboard
@@ -114,7 +137,6 @@ function App() {
                 <div className="page-wrapper">
                   <ScannerV2 />
                 </div>
-                <Footer />
               </div>
             }
           />
@@ -138,7 +160,6 @@ function App() {
                 <div className="page-wrapper">
                   <Pricing />
                 </div>
-                <Footer />
               </div>
             }
           />
@@ -152,7 +173,6 @@ function App() {
                 <div className="page-wrapper">
                   <Shop />
                 </div>
-                <Footer />
               </div>
             }
           />
@@ -164,7 +184,6 @@ function App() {
                 <div className="page-wrapper">
                   <Cart />
                 </div>
-                <Footer />
               </div>
             }
           />
@@ -178,7 +197,19 @@ function App() {
                 <div className="page-wrapper">
                   <Courses />
                 </div>
-                <Footer />
+              </div>
+            }
+          />
+
+          {/* Course Detail Page */}
+          <Route
+            path="/courses/:courseId"
+            element={
+              <div className="app-layout-wrapper">
+                <TopNavBar />
+                <div className="page-wrapper">
+                  <CourseDetail />
+                </div>
               </div>
             }
           />
@@ -189,6 +220,113 @@ function App() {
             element={
               <ProtectedRoute>
                 <CourseLearning />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Course Learning with specific lesson */}
+          <Route
+            path="/courses/:courseId/learn/:lessonId"
+            element={
+              <ProtectedRoute>
+                <CourseLearning />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* ═══════════════════════════════════════════════════════════════
+              TEACHER DASHBOARD - Course Admin
+              Routes for teachers to create and manage courses
+              ═══════════════════════════════════════════════════════════════ */}
+
+          {/* Course Admin - Main Dashboard */}
+          <Route
+            path="/courses/admin"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <CourseAdmin />
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Create New Course */}
+          <Route
+            path="/courses/admin/create"
+            element={
+              <ProtectedRoute>
+                <CourseBuilder />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Edit Course */}
+          <Route
+            path="/courses/admin/edit/:courseId"
+            element={
+              <ProtectedRoute>
+                <CourseBuilder />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Module Builder - Manage course modules and lessons */}
+          <Route
+            path="/courses/admin/edit/:courseId/modules"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <ModuleBuilder />
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Create New Lesson */}
+          <Route
+            path="/courses/admin/edit/:courseId/modules/:moduleId/lessons/new"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <LessonEditor />
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Edit Lesson */}
+          <Route
+            path="/courses/admin/edit/:courseId/modules/:moduleId/lessons/:lessonId"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <LessonEditor />
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Quiz Builder */}
+          <Route
+            path="/courses/admin/edit/:courseId/modules/:moduleId/lessons/:lessonId/quiz"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <QuizBuilder />
+                </AuthenticatedLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Student Management */}
+          <Route
+            path="/courses/admin/:courseId/students"
+            element={
+              <ProtectedRoute>
+                <AuthenticatedLayout>
+                  <StudentManagement />
+                </AuthenticatedLayout>
               </ProtectedRoute>
             }
           />
@@ -323,9 +461,21 @@ function App() {
             }
           />
 
-          {/* Community Hub Routes - 6-in-1 Navigation */}
+          {/* ═══════════════════════════════════════════════════════════════
+              COMMUNITY ROUTES - Redirect to Forum (Legacy support)
+              ═══════════════════════════════════════════════════════════════ */}
+
+          {/* Redirect old /community routes to /forum */}
+          <Route path="/community" element={<Navigate to="/forum" replace />} />
+          <Route path="/community/following" element={<Navigate to="/forum?tab=following" replace />} />
+          <Route path="/community/trending" element={<Navigate to="/forum?tab=trending" replace />} />
+          <Route path="/community/search" element={<Navigate to="/forum" replace />} />
+          <Route path="/community/create" element={<Navigate to="/forum/new" replace />} />
+          <Route path="/community/post/:postId" element={<Navigate to="/forum/thread/:postId" replace />} />
+
+          {/* Legacy Community Hub - Keep for backwards compatibility */}
           <Route
-            path="/community"
+            path="/community-hub"
             element={
               <ProtectedRoute>
                 <AuthenticatedLayout>
@@ -335,7 +485,7 @@ function App() {
             }
           />
           <Route
-            path="/community/:tab"
+            path="/community-hub/:tab"
             element={
               <ProtectedRoute>
                 <AuthenticatedLayout>

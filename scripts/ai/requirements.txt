@@ -1,0 +1,23 @@
+# GEMRAL AI BRAIN - Python Dependencies
+# Phase 1: Knowledge Base & Embeddings
+
+# OpenAI for embeddings
+openai>=1.0.0
+
+# Tiktoken for token counting
+tiktoken>=0.5.0
+
+# Supabase client
+supabase>=2.0.0
+
+# Utilities
+python-dotenv>=1.0.0
+requests>=2.28.0
+
+# Data processing
+numpy>=1.24.0
+pandas>=2.0.0
+
+# For backtesting (Phase 7)
+# ta-lib  # Technical analysis library - requires separate installation
+# ccxt  # Crypto exchange library

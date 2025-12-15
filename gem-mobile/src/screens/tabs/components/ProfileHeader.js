@@ -1,9 +1,12 @@
 /**
  * Gemral - Profile Header Component
- * Facebook-style cover photo + avatar + edit button
+ * Instagram/TikTok style cover photo + avatar + edit button
+ * With working image upload functionality
+ *
+ * Uses DESIGN_TOKENS v3.0
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -11,14 +14,20 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Camera, Edit3, Settings } from 'lucide-react-native';
-import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, TOUCH } from '../../../utils/tokens';
+import * as ImagePicker from 'expo-image-picker';
+import { Camera, Edit3, Settings, ImagePlus } from 'lucide-react-native';
+import { useNavigation } from '@react-navigation/native';
+import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, TOUCH, GLASS } from '../../../utils/tokens';
 import { UserBadges } from '../../../components/UserBadge';
+import { forumService } from '../../../services/forumService';
+import { supabase } from '../../../services/supabase';
+import alertService from '../../../services/alertService';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const COVER_HEIGHT = 160;
+const COVER_HEIGHT = 180;
 const AVATAR_SIZE = 100;
 
 const ProfileHeader = ({
@@ -26,14 +35,253 @@ const ProfileHeader = ({
   isOwnProfile = true,
   onEditProfile,
   onSettings,
-  onChangeCover,
-  onChangeAvatar,
+  onProfileUpdate,
 }) => {
-  const displayName = profile?.full_name || profile?.email?.split('@')[0] || 'User';
+  const navigation = useNavigation();
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  const displayName = profile?.full_name || profile?.email?.split('@')[0] || 'Người dùng';
   const username = profile?.username || profile?.email?.split('@')[0] || 'user';
   const bio = profile?.bio || '';
   const avatarUrl = profile?.avatar_url;
-  const coverUrl = profile?.cover_url;
+  // Support both column and metadata fallback for cover_url
+  const coverUrl = profile?.cover_url || profile?.metadata?.cover_url;
+
+  // ==========================================
+  // IMAGE PICKER & UPLOAD HANDLERS
+  // ==========================================
+
+  /**
+   * Pick image from library or camera
+   */
+  const pickImage = async (type = 'avatar') => {
+    try {
+      // Request permissions
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        alertService.warning(
+          'Cần quyền truy cập',
+          'Vui lòng cho phép truy cập thư viện ảnh để chọn ảnh.',
+          [{ text: 'OK' }]
+        );
+        return null;
+      }
+
+      // Launch image picker
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: type === 'cover' ? [16, 9] : [1, 1],
+        quality: 0.8,
+      });
+
+      if (result.canceled || !result.assets?.[0]) {
+        return null;
+      }
+
+      return result.assets[0].uri;
+    } catch (error) {
+      console.error('[ProfileHeader] Pick image error:', error);
+      alertService.error('Lỗi', 'Không thể chọn ảnh. Vui lòng thử lại.');
+      return null;
+    }
+  };
+
+  /**
+   * Upload image to Supabase Storage
+   */
+  const uploadImage = async (uri, type = 'avatar') => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Chưa đăng nhập');
+
+      const timestamp = Date.now();
+      const folder = type === 'cover' ? 'covers' : 'avatars';
+      const filename = `${folder}/${user.id}/${timestamp}.jpg`;
+
+      // Fetch image and convert to Uint8Array
+      const response = await fetch(uri);
+      const arrayBuffer = await response.arrayBuffer();
+      const uint8Array = new Uint8Array(arrayBuffer);
+
+      // Upload to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('forum-images')
+        .upload(filename, uint8Array, {
+          contentType: 'image/jpeg',
+          upsert: true,
+        });
+
+      if (error) {
+        // Try fallback bucket
+        const { data: fallbackData, error: fallbackError } = await supabase.storage
+          .from('avatars')
+          .upload(`forum/${filename}`, uint8Array, {
+            contentType: 'image/jpeg',
+            upsert: true,
+          });
+
+        if (fallbackError) throw fallbackError;
+
+        const { data: fallbackUrl } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(`forum/${filename}`);
+
+        return fallbackUrl.publicUrl;
+      }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('forum-images')
+        .getPublicUrl(filename);
+
+      return urlData.publicUrl;
+    } catch (error) {
+      console.error('[ProfileHeader] Upload error:', error);
+      throw error;
+    }
+  };
+
+  /**
+   * Handle cover photo change
+   */
+  const handleChangeCover = async () => {
+    const uri = await pickImage('cover');
+    if (!uri) return;
+
+    setUploadingCover(true);
+    try {
+      const imageUrl = await uploadImage(uri, 'cover');
+
+      // Update profile with new cover URL
+      const { data: { user } } = await supabase.auth.getUser();
+
+      // Try to update cover_url, if column doesn't exist, store in metadata
+      const { error } = await supabase
+        .from('profiles')
+        .update({ cover_url: imageUrl })
+        .eq('id', user.id);
+
+      if (error) {
+        // If cover_url column doesn't exist or any error, try updating metadata as fallback
+        console.log('[ProfileHeader] cover_url update error:', error.message);
+        console.log('[ProfileHeader] Trying metadata fallback...');
+
+        const { error: metaError } = await supabase
+          .from('profiles')
+          .update({
+            metadata: {
+              ...profile?.metadata,
+              cover_url: imageUrl
+            }
+          })
+          .eq('id', user.id);
+
+        if (metaError) {
+          console.error('[ProfileHeader] Metadata update also failed:', metaError);
+          throw metaError;
+        }
+        console.log('[ProfileHeader] Successfully saved cover_url in metadata');
+      }
+
+      // Notify parent to refresh profile
+      if (onProfileUpdate) {
+        onProfileUpdate({ cover_url: imageUrl });
+      }
+
+      alertService.success('Thành công', 'Đã cập nhật ảnh bìa!');
+    } catch (error) {
+      console.error('[ProfileHeader] Change cover error:', error);
+      alertService.error('Lỗi', 'Không thể cập nhật ảnh bìa. Vui lòng thử lại.');
+    } finally {
+      setUploadingCover(false);
+    }
+  };
+
+  /**
+   * Handle avatar change
+   */
+  const handleChangeAvatar = async () => {
+    const uri = await pickImage('avatar');
+    if (!uri) return;
+
+    setUploadingAvatar(true);
+    try {
+      const imageUrl = await uploadImage(uri, 'avatar');
+
+      // Update profile with new avatar URL
+      const { data: { user } } = await supabase.auth.getUser();
+      const { error } = await supabase
+        .from('profiles')
+        .update({ avatar_url: imageUrl })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      // Notify parent to refresh profile
+      if (onProfileUpdate) {
+        onProfileUpdate({ avatar_url: imageUrl });
+      }
+
+      alertService.success('Thành công', 'Đã cập nhật ảnh đại diện!');
+    } catch (error) {
+      console.error('[ProfileHeader] Change avatar error:', error);
+      alertService.error('Lỗi', 'Không thể cập nhật ảnh đại diện. Vui lòng thử lại.');
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  /**
+   * Handle Edit Profile button
+   */
+  const handleEditProfile = () => {
+    console.log('[ProfileHeader] Edit button pressed');
+    if (onEditProfile) {
+      onEditProfile();
+    } else {
+      // Navigate to ProfileSettings - try multiple approaches for different navigation contexts
+      try {
+        // First try: direct navigation (works if ProfileSettings is in current stack)
+        navigation.navigate('ProfileSettings');
+      } catch (e) {
+        console.log('[ProfileHeader] Direct navigation failed, trying nested:', e);
+        try {
+          // Second try: navigate through Account tab
+          navigation.navigate('Account', {
+            screen: 'ProfileSettings',
+          });
+        } catch (e2) {
+          console.log('[ProfileHeader] Account navigation failed:', e2);
+        }
+      }
+    }
+  };
+
+  /**
+   * Handle Settings button
+   */
+  const handleSettings = () => {
+    console.log('[ProfileHeader] Settings button pressed');
+    if (onSettings) {
+      onSettings();
+    } else {
+      // Navigate to ProfileSettings - try multiple approaches
+      try {
+        navigation.navigate('ProfileSettings');
+      } catch (e) {
+        console.log('[ProfileHeader] Direct navigation failed:', e);
+        try {
+          navigation.navigate('Account', {
+            screen: 'ProfileSettings',
+          });
+        } catch (e2) {
+          console.log('[ProfileHeader] Account navigation failed:', e2);
+        }
+      }
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -60,9 +308,17 @@ const ProfileHeader = ({
         {isOwnProfile && (
           <TouchableOpacity
             style={styles.changeCoverBtn}
-            onPress={onChangeCover}
+            onPress={handleChangeCover}
+            disabled={uploadingCover}
           >
-            <Camera size={16} color={COLORS.textPrimary} />
+            {uploadingCover ? (
+              <ActivityIndicator size="small" color={COLORS.textPrimary} />
+            ) : (
+              <>
+                <ImagePlus size={16} color={COLORS.textPrimary} />
+                <Text style={styles.changeCoverText}>Đổi ảnh bìa</Text>
+              </>
+            )}
           </TouchableOpacity>
         )}
       </View>
@@ -84,13 +340,21 @@ const ProfileHeader = ({
                 </Text>
               </LinearGradient>
             )}
+
+            {/* Avatar loading overlay */}
+            {uploadingAvatar && (
+              <View style={styles.avatarLoadingOverlay}>
+                <ActivityIndicator size="small" color={COLORS.textPrimary} />
+              </View>
+            )}
           </View>
 
           {/* Change Avatar Button (only for own profile) */}
           {isOwnProfile && (
             <TouchableOpacity
               style={styles.changeAvatarBtn}
-              onPress={onChangeAvatar}
+              onPress={handleChangeAvatar}
+              disabled={uploadingAvatar}
             >
               <Camera size={14} color={COLORS.textPrimary} />
             </TouchableOpacity>
@@ -109,6 +373,10 @@ const ProfileHeader = ({
         {/* Bio */}
         {bio ? (
           <Text style={styles.bio} numberOfLines={3}>{bio}</Text>
+        ) : isOwnProfile ? (
+          <TouchableOpacity onPress={handleEditProfile}>
+            <Text style={styles.bioPlaceholder}>Thêm tiểu sử...</Text>
+          </TouchableOpacity>
         ) : null}
 
         {/* Action Buttons */}
@@ -117,7 +385,7 @@ const ProfileHeader = ({
             <>
               <TouchableOpacity
                 style={styles.editButton}
-                onPress={onEditProfile}
+                onPress={handleEditProfile}
               >
                 <Edit3 size={16} color={COLORS.textPrimary} />
                 <Text style={styles.editButtonText}>Chỉnh sửa</Text>
@@ -125,13 +393,13 @@ const ProfileHeader = ({
 
               <TouchableOpacity
                 style={styles.settingsButton}
-                onPress={onSettings}
+                onPress={handleSettings}
               >
                 <Settings size={18} color={COLORS.textPrimary} />
               </TouchableOpacity>
             </>
           ) : (
-            // Follow button for other users' profiles
+            // For other users' profiles - will be replaced with FollowButton component
             <TouchableOpacity style={styles.followButton}>
               <Text style={styles.followButtonText}>Theo dõi</Text>
             </TouchableOpacity>
@@ -173,14 +441,20 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: SPACING.md,
     right: SPACING.md,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    justifyContent: 'center',
+    flexDirection: 'row',
     alignItems: 'center',
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    borderRadius: GLASS.borderRadius / 2,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
+    gap: SPACING.xs,
+  },
+  changeCoverText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    color: COLORS.textPrimary,
   },
 
   // Profile Info
@@ -218,17 +492,23 @@ const styles = StyleSheet.create({
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textPrimary,
   },
+  avatarLoadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   changeAvatarBtn: {
     position: 'absolute',
     bottom: 0,
     right: 0,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: COLORS.purple,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: COLORS.bgDarkest,
   },
 
@@ -239,7 +519,8 @@ const styles = StyleSheet.create({
   displayNameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: SPACING.sm,
+    flexWrap: 'wrap',
   },
   displayName: {
     fontSize: TYPOGRAPHY.fontSize.display,
@@ -249,7 +530,7 @@ const styles = StyleSheet.create({
   username: {
     fontSize: TYPOGRAPHY.fontSize.lg,
     color: COLORS.textSecondary,
-    marginTop: 2,
+    marginTop: SPACING.xxs,
   },
 
   // Bio
@@ -258,6 +539,12 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     marginTop: SPACING.md,
     lineHeight: 20,
+  },
+  bioPlaceholder: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    color: COLORS.textMuted,
+    marginTop: SPACING.md,
+    fontStyle: 'italic',
   },
 
   // Action Buttons
@@ -273,7 +560,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(106, 91, 255, 0.2)',
     paddingVertical: SPACING.md,
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: COLORS.purple,
     gap: SPACING.sm,
@@ -284,9 +571,9 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
   },
   settingsButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
+    width: TOUCH.minimum,
+    height: TOUCH.minimum,
+    borderRadius: 12,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -299,7 +586,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: COLORS.purple,
     paddingVertical: SPACING.md,
-    borderRadius: 10,
+    borderRadius: 12,
   },
   followButtonText: {
     fontSize: TYPOGRAPHY.fontSize.lg,

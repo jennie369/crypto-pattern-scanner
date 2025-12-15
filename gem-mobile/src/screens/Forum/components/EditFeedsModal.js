@@ -11,8 +11,8 @@ import {
   ScrollView,
   Modal,
   StyleSheet,
-  Alert,
 } from 'react-native';
+import CustomAlert, { useCustomAlert } from '../../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -35,6 +35,7 @@ const EditFeedsModal = ({
   onDelete,
   onCreateNew,
 }) => {
+  const { alert, AlertComponent } = useCustomAlert();
   const [editingFeeds, setEditingFeeds] = useState(feeds);
 
   // System feeds (cannot be edited/deleted)
@@ -48,10 +49,11 @@ const EditFeedsModal = ({
   }, [feeds]);
 
   const handleDelete = (feedId, feedName) => {
-    Alert.alert(
-      'Xóa Feed',
-      `Bạn có chắc muốn xóa feed "${feedName}"?`,
-      [
+    alert({
+      type: 'warning',
+      title: 'Xóa Feed',
+      message: `Bạn có chắc muốn xóa feed "${feedName}"?`,
+      buttons: [
         { text: 'Hủy', style: 'cancel' },
         {
           text: 'Xóa',
@@ -61,8 +63,8 @@ const EditFeedsModal = ({
             setEditingFeeds(editingFeeds.filter(f => f.id !== feedId));
           },
         },
-      ]
-    );
+      ],
+    });
   };
 
   return (
@@ -210,6 +212,7 @@ const EditFeedsModal = ({
             {/* Bottom Padding */}
             <View style={{ height: 100 }} />
           </ScrollView>
+          {AlertComponent}
         </SafeAreaView>
       </LinearGradient>
     </Modal>

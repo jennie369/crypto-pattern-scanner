@@ -17,6 +17,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Star, ExternalLink, ChevronRight, Sparkles } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS } from '../../utils/tokens';
 import { trackAdClick } from '../../services/engagementService';
+import { sponsorBannerService } from '../../services/sponsorBannerService';
+import deepLinkHandler from '../../services/deepLinkHandler';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function AdCard({ ad, sessionId, onPress }) {
@@ -29,7 +31,47 @@ export default function AdCard({ ad, sessionId, onPress }) {
     // Track the click
     await trackAdClick(user.id, ad.type, sessionId);
 
-    // Handle navigation based on ad type
+    // For sponsor banners from database, also record click in sponsor_banners table
+    if (ad.type === 'sponsor_banner' && ad.id) {
+      sponsorBannerService.recordClick(ad.id);
+    }
+
+    // Handle sponsor banner navigation with action_type
+    if (ad.type === 'sponsor_banner' && ad.action_type) {
+      if (ad.action_type === 'url' && ad.link) {
+        Linking.openURL(ad.link);
+        return;
+      } else if (ad.action_type === 'screen' && ad.link) {
+        onPress && onPress(ad);
+        return;
+      } else if (ad.action_type === 'deeplink' && ad.link) {
+        try {
+          let deepLink;
+          if (ad.link.startsWith('{')) {
+            deepLink = JSON.parse(ad.link);
+          } else if (ad.link.startsWith('gem://')) {
+            const url = ad.link.replace('gem://', '');
+            const [screen, queryString] = url.split('?');
+            const params = {};
+            if (queryString) {
+              queryString.split('&').forEach(param => {
+                const [key, value] = param.split('=');
+                params[key] = decodeURIComponent(value);
+              });
+            }
+            deepLink = { screen, params };
+          } else {
+            deepLink = { screen: ad.link };
+          }
+          deepLinkHandler.processDeepLink(deepLink);
+        } catch (error) {
+          console.error('[AdCard] Deep link parse error:', error);
+        }
+        return;
+      }
+    }
+
+    // Handle regular ad navigation
     if (ad.link) {
       if (ad.link.startsWith('http')) {
         // External link
@@ -45,6 +87,22 @@ export default function AdCard({ ad, sessionId, onPress }) {
 
   // Get ad styling based on type
   const getAdStyle = () => {
+    // Sponsor banner from database - use custom colors
+    if (ad.type === 'sponsor_banner') {
+      const bgColor = ad.background_color || '#1a0b2e';
+      const accentColor = ad.accent_color || COLORS.gold;
+      return {
+        gradient: [bgColor, bgColor],
+        borderColor: `${accentColor}40`,
+        icon: Sparkles,
+        iconColor: accentColor,
+        badge: 'Tài trợ',
+        badgeColor: accentColor,
+        textColor: ad.text_color || '#FFFFFF',
+        useCustomBg: true,
+      };
+    }
+
     switch (ad.type) {
       case 'tier_upgrade_1':
       case 'tier_upgrade_2':
@@ -120,10 +178,10 @@ export default function AdCard({ ad, sessionId, onPress }) {
 
           {/* Text Content */}
           <View style={styles.textContent}>
-            <Text style={styles.title} numberOfLines={2}>
+            <Text style={[styles.title, adStyle.textColor && { color: adStyle.textColor }]} numberOfLines={2}>
               {ad.title}
             </Text>
-            <Text style={styles.description} numberOfLines={2}>
+            <Text style={[styles.description, adStyle.textColor && { color: adStyle.textColor, opacity: 0.9 }]} numberOfLines={2}>
               {ad.description}
             </Text>
           </View>

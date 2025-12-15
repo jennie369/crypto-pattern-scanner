@@ -18,7 +18,6 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -30,6 +29,9 @@ import messagingService from '../../services/messagingService';
 
 // Auth
 import { useAuth } from '../../contexts/AuthContext';
+
+// Alert
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 
 // Tokens
 import {
@@ -43,6 +45,7 @@ import {
 export default function BlockedUsersScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const { alert, AlertComponent } = useCustomAlert();
 
   // State
   const [blockedUsers, setBlockedUsers] = useState([]);
@@ -67,10 +70,11 @@ export default function BlockedUsersScreen({ navigation }) {
 
   // Unblock user
   const handleUnblock = useCallback((blockedUser) => {
-    Alert.alert(
-      'Unblock User',
-      `Are you sure you want to unblock ${blockedUser.display_name || 'this user'}?`,
-      [
+    alert({
+      type: 'warning',
+      title: 'Unblock User',
+      message: `Are you sure you want to unblock ${blockedUser.display_name || 'this user'}?`,
+      buttons: [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Unblock',
@@ -87,15 +91,15 @@ export default function BlockedUsersScreen({ navigation }) {
             } catch (error) {
               console.error('Error unblocking user:', error);
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-              Alert.alert('Error', 'Failed to unblock user');
+              alert({ type: 'error', title: 'Error', message: 'Failed to unblock user' });
             } finally {
               setUnblocking(null);
             }
           },
         },
       ]
-    );
-  }, []);
+    });
+  }, [alert]);
 
   // Get initials
   const getInitials = (name) => {
@@ -224,6 +228,7 @@ export default function BlockedUsersScreen({ navigation }) {
           showsVerticalScrollIndicator={false}
         />
       )}
+      {AlertComponent}
     </LinearGradient>
   );
 }

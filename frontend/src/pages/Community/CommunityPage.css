@@ -1,0 +1,308 @@
+/* ============================================
+   CommunityPage - Main Community Feed
+   Synced with Mobile Home Tab
+   ============================================ */
+
+.community-header {
+  background: linear-gradient(135deg, rgba(26, 27, 58, 0.8), rgba(10, 22, 40, 0.9));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 24px 0;
+  margin-bottom: 24px;
+}
+
+.header-content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.header-title-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.header-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255, 189, 89, 0.2), rgba(255, 189, 89, 0.05));
+  border: 1px solid rgba(255, 189, 89, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-gold, #FFBD59);
+}
+
+.header-title-section h1 {
+  margin: 0 0 4px 0;
+  font-size: 28px;
+}
+
+.header-subtitle {
+  color: var(--text-secondary, #B8B8D0);
+  font-size: 15px;
+  margin: 0;
+}
+
+.btn-create-post {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--primary-gold, #FFBD59);
+  color: #000;
+  border: none;
+  border-radius: 9999px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-create-post:hover {
+  background: #E5A94D;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 189, 89, 0.3);
+}
+
+/* Feed Tabs */
+.feed-tabs {
+  max-width: 900px;
+  margin: 20px auto 0;
+  padding: 0 24px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.feed-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.feed-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  color: var(--text-secondary, #B8B8D0);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.feed-tab:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: var(--text-primary, #FFFFFF);
+}
+
+.feed-tab.active {
+  background: var(--primary-gold, #FFBD59);
+  border-color: var(--primary-gold, #FFBD59);
+  color: #000;
+}
+
+/* Community Feed */
+.community-feed {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 24px 40px;
+}
+
+.posts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Post Card - NAMESPACED to avoid conflicts with Forum PostCard */
+.community-feed .community-post-card {
+  background: rgba(26, 27, 58, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.community-feed .community-post-card:hover {
+  background: rgba(26, 27, 58, 0.8);
+  border-color: rgba(255, 189, 89, 0.2);
+  transform: translateY(-2px);
+}
+
+.community-feed .community-post-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.community-feed .community-author-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 189, 89, 0.3);
+}
+
+.community-feed .community-author-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.community-feed .community-author-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #FFFFFF);
+}
+
+.community-feed .community-post-time {
+  font-size: 12px;
+  color: var(--text-muted, rgba(255, 255, 255, 0.5));
+}
+
+.community-feed .community-post-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary, #FFFFFF);
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.community-feed .community-post-excerpt {
+  font-size: 14px;
+  color: var(--text-secondary, #B8B8D0);
+  margin: 0 0 16px 0;
+  line-height: 1.6;
+}
+
+.community-feed .community-post-stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.post-category {
+  padding: 4px 10px;
+  background: rgba(var(--cat-color, 255, 189, 89), 0.15);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--cat-color, var(--primary-gold, #FFBD59));
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-muted, rgba(255, 255, 255, 0.5));
+}
+
+.badge-pinned {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(255, 189, 89, 0.15);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--primary-gold, #FFBD59);
+}
+
+/* Load More Button */
+.btn-load-more {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  margin: 24px auto 0;
+  padding: 14px 24px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 9999px;
+  color: var(--text-primary, #FFFFFF);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-load-more:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 189, 89, 0.3);
+}
+
+.btn-load-more:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .community-header {
+    padding: 20px 0;
+    margin-bottom: 16px;
+  }
+
+  .header-content {
+    flex-direction: column;
+    padding: 0 16px;
+    gap: 16px;
+  }
+
+  .header-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .header-title-section h1 {
+    font-size: 24px;
+  }
+
+  .btn-create-post {
+    width: 100%;
+    justify-content: center;
+    padding: 14px 20px;
+  }
+
+  .feed-tabs {
+    padding: 0 16px;
+    gap: 6px;
+  }
+
+  .feed-tab {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .community-feed {
+    padding: 0 16px 32px;
+  }
+
+  .community-feed .community-post-card {
+    padding: 16px;
+  }
+
+  .community-feed .community-post-title {
+    font-size: 15px;
+  }
+
+  .community-feed .community-post-stats {
+    gap: 12px;
+  }
+}

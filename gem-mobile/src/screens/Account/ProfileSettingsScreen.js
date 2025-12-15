@@ -12,10 +12,10 @@ import {
   TouchableOpacity,
   TextInput,
   Image,
-  Alert,
   ActivityIndicator,
   Platform,
 } from 'react-native';
+import alertService from '../../services/alertService';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
@@ -81,7 +81,7 @@ export default function ProfileSettingsScreen({ navigation }) {
       // Request permission
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Cần quyền truy cập', 'Vui lòng cấp quyền truy cập thư viện ảnh');
+        alertService.warning('Cần quyền truy cập', 'Vui lòng cấp quyền truy cập thư viện ảnh');
         return;
       }
 
@@ -97,7 +97,7 @@ export default function ProfileSettingsScreen({ navigation }) {
       }
     } catch (error) {
       console.error('[ProfileSettings] Pick image error:', error);
-      Alert.alert('Lỗi', 'Không thể chọn ảnh');
+      alertService.error('Lỗi', 'Không thể chọn ảnh');
     }
   };
 
@@ -128,10 +128,10 @@ export default function ProfileSettingsScreen({ navigation }) {
         .getPublicUrl(data.path);
 
       setAvatarUrl(urlData.publicUrl);
-      Alert.alert('Thành công', 'Đã tải lên ảnh đại diện');
+      alertService.success('Thành công', 'Đã tải lên ảnh đại diện');
     } catch (error) {
       console.error('[ProfileSettings] Upload error:', error);
-      Alert.alert('Lỗi', 'Không thể tải lên ảnh');
+      alertService.error('Lỗi', 'Không thể tải lên ảnh');
     } finally {
       setUploading(false);
     }
@@ -140,7 +140,7 @@ export default function ProfileSettingsScreen({ navigation }) {
   const handleSave = async () => {
     // Validate username
     if (username && !/^[a-zA-Z0-9_]+$/.test(username)) {
-      Alert.alert('Lỗi', 'Username chỉ được chứa chữ cái, số và dấu gạch dưới');
+      alertService.error('Lỗi', 'Username chỉ được chứa chữ cái, số và dấu gạch dưới');
       return;
     }
 
@@ -161,7 +161,7 @@ export default function ProfileSettingsScreen({ navigation }) {
         }
 
         if (existingUsers && existingUsers.length > 0) {
-          Alert.alert('Lỗi', 'Username này đã được sử dụng');
+          alertService.error('Lỗi', 'Username này đã được sử dụng');
           setSaving(false);
           return;
         }
@@ -182,12 +182,12 @@ export default function ProfileSettingsScreen({ navigation }) {
 
       if (error) throw error;
 
-      Alert.alert('Thành công', 'Đã cập nhật thông tin!', [
+      alertService.success('Thành công', 'Đã cập nhật thông tin!', [
         { text: 'OK', onPress: () => navigation.goBack() }
       ]);
     } catch (error) {
       console.error('[ProfileSettings] Save error:', error);
-      Alert.alert('Lỗi', 'Không thể lưu thông tin');
+      alertService.error('Lỗi', 'Không thể lưu thông tin');
     } finally {
       setSaving(false);
     }

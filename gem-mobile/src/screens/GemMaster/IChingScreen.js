@@ -8,18 +8,25 @@ import {
   View,
   Text,
   TouchableOpacity,
+  Pressable,
   ScrollView,
   StyleSheet,
   Animated,
   Share,
-  Alert,
   ActivityIndicator,
   Image,
 } from 'react-native';
+import alertService from '../../services/alertService';
+import * as Clipboard from 'expo-clipboard';
+import { Asset } from 'expo-asset';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, RefreshCw, Share2, Hexagon, Lock } from 'lucide-react-native';
+import { ArrowLeft, RefreshCw, Share2, Hexagon, Lock, Briefcase, DollarSign, Heart, Activity, Sparkles, ChevronDown, ChevronUp, ShoppingBag, Gem, Copy } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS, LAYOUT } from '../../utils/tokens';
+
+// Bottom padding to avoid tab bar overlap (increased for buttons)
+const BOTTOM_PADDING = 140;
+
 import { useTabBar } from '../../contexts/TabBarContext';
 import { getHexagramImage, getCardBack } from '../../assets/iching';
 
@@ -27,86 +34,72 @@ import { getHexagramImage, getCardBack } from '../../assets/iching';
 import TierService from '../../services/tierService';
 import QuotaService from '../../services/quotaService';
 import { supabase } from '../../services/supabase';
+import { shopifyService } from '../../services/shopifyService';
 
-// Complete 64 hexagrams data
-const HEXAGRAMS = [
-  { id: 1, name: 'Càn', vietnamese: 'Trời', meaning: 'Sức mạnh sáng tạo', lines: [1, 1, 1, 1, 1, 1] },
-  { id: 2, name: 'Khôn', vietnamese: 'Đất', meaning: 'Tiếp nhận', lines: [0, 0, 0, 0, 0, 0] },
-  { id: 3, name: 'Truân', vietnamese: 'Khó khăn ban đầu', meaning: 'Khởi đầu gian nan', lines: [1, 0, 0, 0, 1, 0] },
-  { id: 4, name: 'Mông', vietnamese: 'Non trẻ', meaning: 'Học hỏi', lines: [0, 1, 0, 0, 0, 1] },
-  { id: 5, name: 'Nhu', vietnamese: 'Chờ đợi', meaning: 'Kiên nhẫn', lines: [1, 1, 1, 0, 1, 0] },
-  { id: 6, name: 'Tụng', vietnamese: 'Tranh tụng', meaning: 'Xung đột', lines: [0, 1, 0, 1, 1, 1] },
-  { id: 7, name: 'Sư', vietnamese: 'Quân đội', meaning: 'Kỷ luật', lines: [0, 1, 0, 0, 0, 0] },
-  { id: 8, name: 'Tỷ', vietnamese: 'Đoàn kết', meaning: 'Hợp tác', lines: [0, 0, 0, 0, 1, 0] },
-  { id: 9, name: 'Tiểu Súc', vietnamese: 'Thuần dưỡng nhỏ', meaning: 'Tích lũy nhỏ', lines: [1, 1, 1, 0, 1, 1] },
-  { id: 10, name: 'Lý', vietnamese: 'Đạp lên', meaning: 'Cẩn trọng tiến bước', lines: [1, 1, 0, 1, 1, 1] },
-  { id: 11, name: 'Thái', vietnamese: 'Hanh thông', meaning: 'Hòa bình phát triển', lines: [1, 1, 1, 0, 0, 0] },
-  { id: 12, name: 'Bĩ', vietnamese: 'Bế tắc', meaning: 'Trì trệ', lines: [0, 0, 0, 1, 1, 1] },
-  { id: 13, name: 'Đồng Nhân', vietnamese: 'Đồng lòng', meaning: 'Cộng đồng', lines: [1, 0, 1, 1, 1, 1] },
-  { id: 14, name: 'Đại Hữu', vietnamese: 'Sở hữu lớn', meaning: 'Thịnh vượng', lines: [1, 1, 1, 1, 0, 1] },
-  { id: 15, name: 'Khiêm', vietnamese: 'Khiêm tốn', meaning: 'Nhún nhường', lines: [0, 0, 1, 0, 0, 0] },
-  { id: 16, name: 'Dự', vietnamese: 'Vui vẻ', meaning: 'Nhiệt tình', lines: [0, 0, 0, 1, 0, 0] },
-  { id: 17, name: 'Tùy', vietnamese: 'Theo', meaning: 'Thích ứng', lines: [1, 0, 0, 1, 1, 0] },
-  { id: 18, name: 'Cổ', vietnamese: 'Sửa chữa', meaning: 'Cải thiện', lines: [0, 1, 1, 0, 0, 1] },
-  { id: 19, name: 'Lâm', vietnamese: 'Tiếp cận', meaning: 'Đến gần', lines: [1, 1, 0, 0, 0, 0] },
-  { id: 20, name: 'Quan', vietnamese: 'Chiêm ngưỡng', meaning: 'Quan sát', lines: [0, 0, 0, 0, 1, 1] },
-  { id: 21, name: 'Phệ Hạp', vietnamese: 'Cắn', meaning: 'Quyết đoán', lines: [1, 0, 0, 1, 0, 1] },
-  { id: 22, name: 'Bí', vietnamese: 'Trang sức', meaning: 'Vẻ đẹp', lines: [1, 0, 1, 0, 0, 1] },
-  { id: 23, name: 'Bác', vietnamese: 'Bóc lột', meaning: 'Sụp đổ', lines: [0, 0, 0, 0, 0, 1] },
-  { id: 24, name: 'Phục', vietnamese: 'Quay về', meaning: 'Hồi phục', lines: [1, 0, 0, 0, 0, 0] },
-  { id: 25, name: 'Vô Vọng', vietnamese: 'Không lỗi', meaning: 'Chân thực', lines: [1, 0, 0, 1, 1, 1] },
-  { id: 26, name: 'Đại Súc', vietnamese: 'Thuần dưỡng lớn', meaning: 'Tích lũy lớn', lines: [1, 1, 1, 0, 0, 1] },
-  { id: 27, name: 'Di', vietnamese: 'Nuôi dưỡng', meaning: 'Dinh dưỡng', lines: [1, 0, 0, 0, 0, 1] },
-  { id: 28, name: 'Đại Quá', vietnamese: 'Quá lớn', meaning: 'Vượt mức', lines: [0, 1, 1, 1, 1, 0] },
-  { id: 29, name: 'Khảm', vietnamese: 'Nước', meaning: 'Nguy hiểm', lines: [0, 1, 0, 0, 1, 0] },
-  { id: 30, name: 'Ly', vietnamese: 'Lửa', meaning: 'Sáng suốt', lines: [1, 0, 1, 1, 0, 1] },
-  { id: 31, name: 'Hàm', vietnamese: 'Cảm ứng', meaning: 'Hấp dẫn', lines: [0, 0, 1, 1, 1, 0] },
-  { id: 32, name: 'Hằng', vietnamese: 'Bền bỉ', meaning: 'Kiên trì', lines: [0, 1, 1, 1, 0, 0] },
-  { id: 33, name: 'Độn', vietnamese: 'Rút lui', meaning: 'Ẩn mình', lines: [0, 0, 1, 1, 1, 1] },
-  { id: 34, name: 'Đại Tráng', vietnamese: 'Sức mạnh lớn', meaning: 'Hùng mạnh', lines: [1, 1, 1, 1, 0, 0] },
-  { id: 35, name: 'Tấn', vietnamese: 'Tiến bộ', meaning: 'Phát triển', lines: [0, 0, 0, 1, 0, 1] },
-  { id: 36, name: 'Minh Di', vietnamese: 'Ánh sáng bị che', meaning: 'Ẩn giấu', lines: [1, 0, 1, 0, 0, 0] },
-  { id: 37, name: 'Gia Nhân', vietnamese: 'Gia đình', meaning: 'Gia đạo', lines: [1, 0, 1, 0, 1, 1] },
-  { id: 38, name: 'Khuê', vietnamese: 'Đối nghịch', meaning: 'Mâu thuẫn', lines: [1, 1, 0, 1, 0, 1] },
-  { id: 39, name: 'Kiển', vietnamese: 'Chướng ngại', meaning: 'Khó khăn', lines: [0, 0, 1, 0, 1, 0] },
-  { id: 40, name: 'Giải', vietnamese: 'Giải thoát', meaning: 'Giải phóng', lines: [0, 1, 0, 1, 0, 0] },
-  { id: 41, name: 'Tổn', vietnamese: 'Giảm bớt', meaning: 'Hy sinh', lines: [1, 1, 0, 0, 0, 1] },
-  { id: 42, name: 'Ích', vietnamese: 'Tăng thêm', meaning: 'Lợi ích', lines: [1, 0, 0, 0, 1, 1] },
-  { id: 43, name: 'Quải', vietnamese: 'Đột phá', meaning: 'Quyết định', lines: [1, 1, 1, 1, 1, 0] },
-  { id: 44, name: 'Cấu', vietnamese: 'Gặp gỡ', meaning: 'Đối mặt', lines: [0, 1, 1, 1, 1, 1] },
-  { id: 45, name: 'Tụy', vietnamese: 'Tụ họp', meaning: 'Tập hợp', lines: [0, 0, 0, 1, 1, 0] },
-  { id: 46, name: 'Thăng', vietnamese: 'Đi lên', meaning: 'Thăng tiến', lines: [0, 1, 1, 0, 0, 0] },
-  { id: 47, name: 'Khốn', vietnamese: 'Khốn cùng', meaning: 'Kiệt sức', lines: [0, 1, 0, 1, 1, 0] },
-  { id: 48, name: 'Tỉnh', vietnamese: 'Giếng', meaning: 'Nguồn nước', lines: [0, 1, 1, 0, 1, 0] },
-  { id: 49, name: 'Cách', vietnamese: 'Cách mạng', meaning: 'Thay đổi', lines: [1, 0, 1, 1, 1, 0] },
-  { id: 50, name: 'Đỉnh', vietnamese: 'Đỉnh vạc', meaning: 'Nuôi dưỡng', lines: [0, 1, 1, 1, 0, 1] },
-  { id: 51, name: 'Chấn', vietnamese: 'Sấm', meaning: 'Chấn động', lines: [1, 0, 0, 1, 0, 0] },
-  { id: 52, name: 'Cấn', vietnamese: 'Núi', meaning: 'Tĩnh lặng', lines: [0, 0, 1, 0, 0, 1] },
-  { id: 53, name: 'Tiệm', vietnamese: 'Dần dần', meaning: 'Tiến từ từ', lines: [0, 0, 1, 0, 1, 1] },
-  { id: 54, name: 'Quy Muội', vietnamese: 'Cô gái về nhà chồng', meaning: 'Kết hôn', lines: [1, 1, 0, 1, 0, 0] },
-  { id: 55, name: 'Phong', vietnamese: 'Dồi dào', meaning: 'Sung túc', lines: [1, 0, 1, 1, 0, 0] },
-  { id: 56, name: 'Lữ', vietnamese: 'Lữ khách', meaning: 'Du hành', lines: [0, 0, 1, 1, 0, 1] },
-  { id: 57, name: 'Tốn', vietnamese: 'Gió', meaning: 'Thâm nhập', lines: [0, 1, 1, 0, 1, 1] },
-  { id: 58, name: 'Đoài', vietnamese: 'Đầm', meaning: 'Vui vẻ', lines: [1, 1, 0, 1, 1, 0] },
-  { id: 59, name: 'Hoán', vietnamese: 'Phân tán', meaning: 'Lan tỏa', lines: [0, 1, 0, 0, 1, 1] },
-  { id: 60, name: 'Tiết', vietnamese: 'Tiết chế', meaning: 'Hạn chế', lines: [1, 1, 0, 0, 1, 0] },
-  { id: 61, name: 'Trung Phu', vietnamese: 'Thành tín', meaning: 'Chân thành', lines: [1, 1, 0, 0, 1, 1] },
-  { id: 62, name: 'Tiểu Quá', vietnamese: 'Quá nhỏ', meaning: 'Vượt mức nhỏ', lines: [0, 0, 1, 1, 0, 0] },
-  { id: 63, name: 'Ký Tế', vietnamese: 'Hoàn thành', meaning: 'Đã hoàn thành', lines: [1, 0, 1, 0, 1, 0] },
-  { id: 64, name: 'Vị Tế', vietnamese: 'Chưa hoàn thành', meaning: 'Sắp hoàn thành', lines: [0, 1, 0, 1, 0, 1] },
-];
+// Vision Board 2.0 - I Ching history service
+import { saveReading as saveIChingReading } from '../../services/ichingService';
+
+// Crystal tag mapping for Shopify
+import { getCrystalTagsForList } from '../../utils/crystalTagMapping';
+
+// Import complete 64 hexagrams data from new data file
+import { HEXAGRAMS, getHexagram, getRandomHexagram } from '../../data/iching/hexagrams';
+
+// Import CrystalLink component
+import CrystalLink, { CrystalList } from '../../components/CrystalLink';
+
+// Import widget detection for "Add to Dashboard"
+import { detectWidgetTrigger, WIDGET_TYPES } from '../../utils/widgetTriggerDetector';
+import AddWidgetSuggestion from '../../components/AddWidgetSuggestion';
+import SmartFormCard from '../../components/SmartFormCard';
+// NEW: Crystal recommendation component with proper Shopify tags
+import CrystalRecommendationNew from '../../components/GemMaster/CrystalRecommendationNew';
+// NEW: Product recommendations (courses, scanner, affiliate)
+import ProductRecommendations from '../../components/GemMaster/ProductRecommendations';
+// NEW: Upgrade modal with Shopify checkout flow
+import ChatbotPricingModal from '../../components/GemMaster/ChatbotPricingModal';
+// NEW: Quick Buy & Upsell Modals for crystal purchase flow
+import QuickBuyModal from '../../components/GemMaster/QuickBuyModal';
+import UpsellModal from '../../components/GemMaster/UpsellModal';
 
 const IChingScreen = ({ navigation, route }) => {
   const [hexagram, setHexagram] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [interpretation, setInterpretation] = useState(null);
+  const [selectedArea, setSelectedArea] = useState('career'); // career, finance, love, health, spiritual
+  const [showCrystals, setShowCrystals] = useState(false);
+  const [showAffirmations, setShowAffirmations] = useState(false);
   const { hideTabBar, showTabBar } = useTabBar();
+
+  // Widget suggestion state
+  const [widgetTrigger, setWidgetTrigger] = useState(null);
+  const [showWidgetForm, setShowWidgetForm] = useState(false);
 
   // Quota state
   const [user, setUser] = useState(null);
   const [userTier, setUserTier] = useState('FREE');
   const [quota, setQuota] = useState(null);
   const [isLoadingQuota, setIsLoadingQuota] = useState(true);
+
+  // NEW: Quick Buy & Upsell Modal state for crystal purchase flow
+  const [quickBuyModal, setQuickBuyModal] = useState({
+    visible: false,
+    product: null,
+  });
+  const [upsellModal, setUpsellModal] = useState({
+    visible: false,
+    upsellData: null,
+  });
+
+  // Shopify crystal products state
+  const [shopifyProducts, setShopifyProducts] = useState([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
+
+  // NEW: Crystal recommendation context from I Ching reading
+  const [crystalContext, setCrystalContext] = useState('');
+
+  // NEW: Upgrade modal state
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // Callback to send result back to chat
   const onSendToChat = route?.params?.onSendToChat;
@@ -173,30 +166,93 @@ const IChingScreen = ({ navigation, route }) => {
     new Animated.Value(0),
   ]).current;
 
-  /**
-   * Fisher-Yates shuffle algorithm for true randomness
-   * Ensures each hexagram has equal probability of being selected
-   */
-  const shuffleArray = (array) => {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      // Use timestamp + Math.random for better entropy
-      const seed = Date.now() + Math.random() * 1000000;
-      const j = Math.floor(seed % (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  // Fetch crystal products from Shopify
+  const fetchCrystalProducts = useCallback(async (crystals) => {
+    try {
+      setIsLoadingProducts(true);
+      console.log('[IChingScreen] Fetching crystal products for:', crystals.map(c => c.name));
+
+      // Get Shopify tags from crystal data
+      const tags = getCrystalTagsForList(crystals);
+      console.log('[IChingScreen] Searching Shopify with tags:', tags);
+
+      // Fetch products from Shopify
+      const products = await shopifyService.getProductsByTags(tags, 4, true);
+      console.log('[IChingScreen] Found', products.length, 'Shopify products');
+
+      if (products && products.length > 0) {
+        // Merge static crystal data with Shopify product data
+        const mergedCrystals = crystals.map((crystal) => {
+          // Find matching product by name/tag
+          const matchedProduct = products.find((p) => {
+            const productTitle = (p.title || '').toLowerCase();
+            const productTags = Array.isArray(p.tags) ? p.tags.join(' ').toLowerCase() : (p.tags || '').toLowerCase();
+            const crystalName = (crystal.name || '').toLowerCase();
+            const crystalVnName = (crystal.vietnameseName || '').toLowerCase();
+
+            return productTitle.includes(crystalName) ||
+                   productTitle.includes(crystalVnName) ||
+                   productTags.includes(crystalName) ||
+                   productTags.includes(crystalVnName);
+          });
+
+          if (matchedProduct) {
+            return {
+              ...crystal,
+              imageUrl: matchedProduct.images?.[0]?.url || matchedProduct.featuredImage?.url,
+              price: matchedProduct.variants?.[0]?.price?.amount || matchedProduct.priceRange?.minVariantPrice?.amount,
+              shopHandle: matchedProduct.handle || crystal.shopHandle,
+              available: matchedProduct.availableForSale !== false,
+            };
+          }
+          return crystal;
+        });
+
+        // Also add any unmatched products as extra recommendations
+        const unmatchedProducts = products.filter((p) => {
+          return !crystals.some((c) => {
+            const productTitle = (p.title || '').toLowerCase();
+            return productTitle.includes((c.name || '').toLowerCase());
+          });
+        });
+
+        const extraCrystals = unmatchedProducts.slice(0, 2).map((p) => ({
+          name: p.title,
+          vietnameseName: p.title,
+          reason: 'Sản phẩm liên quan từ Shop',
+          shopHandle: p.handle,
+          imageUrl: p.images?.[0]?.url || p.featuredImage?.url,
+          price: p.variants?.[0]?.price?.amount || p.priceRange?.minVariantPrice?.amount,
+          available: p.availableForSale !== false,
+        }));
+
+        setShopifyProducts([...mergedCrystals, ...extraCrystals]);
+      }
+    } catch (error) {
+      console.error('[IChingScreen] Error fetching crystal products:', error);
+    } finally {
+      setIsLoadingProducts(false);
     }
-    return shuffled;
+  }, []);
+
+  /**
+   * Get a truly random hexagram using enhanced entropy
+   * Uses timestamp + Math.random for better randomness
+   */
+  const getEnhancedRandomHexagram = () => {
+    const hexagramIds = Object.keys(HEXAGRAMS);
+    // Use timestamp + Math.random for better entropy
+    const seed = Date.now() + Math.random() * 1000000;
+    const randomIndex = Math.floor(seed % hexagramIds.length);
+    const selectedId = hexagramIds[randomIndex];
+    return HEXAGRAMS[selectedId];
   };
 
   // Cast hexagram
   const castHexagram = useCallback(async () => {
-    // CHECK QUOTA FIRST
+    // CHECK QUOTA FIRST - show upgrade modal instead of alert
     if (!canDivine()) {
-      Alert.alert(
-        'Hết lượt hôm nay',
-        `Bạn đã sử dụng hết ${quota?.limit || 5} lượt hỏi trong ngày.\n\nNâng cấp lên tier cao hơn để có thêm lượt:\n• TIER1/PRO: 15 lượt/ngày\n• TIER2/PREMIUM: 50 lượt/ngày\n• TIER3/VIP: Không giới hạn`,
-        [{ text: 'Đóng', style: 'cancel' }]
-      );
+      setShowUpgradeModal(true);
       return;
     }
 
@@ -213,12 +269,8 @@ const IChingScreen = ({ navigation, route }) => {
       await refreshQuota();
     }
 
-    // True random hexagram using Fisher-Yates shuffle
-    const shuffled = shuffleArray(HEXAGRAMS);
-    // Add extra randomness with timestamp-based seed
-    const extraRandom = Math.floor((Date.now() % 1000) * Math.random());
-    const randomIndex = (extraRandom + Math.floor(Math.random() * 64)) % 64;
-    const selected = shuffled[randomIndex];
+    // Get random hexagram using enhanced entropy
+    const selected = getEnhancedRandomHexagram();
 
     // Animate lines appearing one by one
     for (let i = 0; i < 6; i++) {
@@ -235,19 +287,152 @@ const IChingScreen = ({ navigation, route }) => {
 
     // Generate interpretation after a delay
     await new Promise((resolve) => setTimeout(resolve, 500));
-    setInterpretation(generateInterpretation(selected));
+    const interp = generateInterpretation(selected);
+    setInterpretation(interp);
     setIsLoading(false);
-  }, [lineAnimations, canDivine, quota, user, refreshQuota]);
 
-  // Generate mock interpretation
+    // Fetch real crystal products from Shopify
+    if (interp.crystals && interp.crystals.length > 0) {
+      fetchCrystalProducts(interp.crystals);
+    }
+
+    // NEW: Build crystal context for CrystalRecommendationNew
+    const crystalNames = interp.crystals?.map(c => c.vietnameseName || c.name).join(', ') || '';
+    const ichingContext = `I Ching quẻ: ${selected.vietnamese || selected.name}. Đá năng lượng: ${crystalNames}. Tâm linh, năng lượng, phong thủy.`;
+    setCrystalContext(ichingContext);
+
+    // Detect widget trigger for "Add to Dashboard" suggestion
+    const trigger = detectWidgetTrigger({
+      type: 'iching',
+      hexagramNumber: selected.id,
+      hexagramName: selected.name,
+      vietnameseName: selected.vietnamese,
+      interpretation: interp.general,
+      selectedArea: selectedArea,
+      crystals: interp.crystals,
+      affirmations: interp.affirmations,
+    });
+    setWidgetTrigger(trigger);
+
+    // Vision Board 2.0: Save reading to database for history
+    if (user?.id) {
+      try {
+        await saveIChingReading(user.id, {
+          question: route?.params?.question || 'Xin một quẻ',
+          hexagram: {
+            primaryHexagram: {
+              number: selected.id,
+              name: selected.name,
+              nameVi: selected.vietnamese,
+              meaningVi: selected.overview?.meaning || selected.meaning || '',
+            },
+            lines: selected.lines || [],
+            changingLines: [],
+            relatingHexagram: null,
+          },
+          interpretation: interp.general,
+        });
+        console.log('[IChingScreen] Reading saved to history');
+      } catch (err) {
+        console.error('[IChingScreen] Failed to save reading:', err);
+      }
+    }
+  }, [lineAnimations, canDivine, quota, user, refreshQuota, selectedArea]);
+
+  // Generate interpretation from new data structure
   const generateInterpretation = (hex) => {
+    // Get full hexagram data from new data file
+    const fullHex = getHexagram(hex.id);
+
+    if (fullHex && fullHex.overview) {
+      return {
+        general: fullHex.overview.meaning,
+        keywords: fullHex.overview.keywords || [],
+        advice: fullHex.overview.overallAdvice,
+        interpretations: fullHex.interpretations || {},
+        crystals: fullHex.crystals || [],
+        affirmations: fullHex.affirmations || [],
+        lineInterpretations: fullHex.lineInterpretations || {},
+        fortune: Math.floor(Math.random() * 5) + 1, // 1-5 stars
+      };
+    }
+
+    // Fallback for basic data
     return {
-      general: `Quẻ ${hex.name} (${hex.vietnamese}) mang ý nghĩa ${hex.meaning}. Đây là thời điểm thuận lợi để bạn suy ngẫm về những quyết định quan trọng.`,
+      general: `Quẻ ${hex.name} (${hex.image || hex.vietnamese}) mang ý nghĩa ${hex.overview?.meaning || 'quan trọng'}. Đây là thời điểm thuận lợi để bạn suy ngẫm về những quyết định quan trọng.`,
+      keywords: [],
       advice: 'Hãy kiên nhẫn và tin tưởng vào quá trình. Mọi thứ đều có thời điểm của nó.',
-      warning: 'Tránh hấp tấp, vội vàng trong các quyết định tài chính.',
-      fortune: Math.floor(Math.random() * 5) + 1, // 1-5 stars
+      interpretations: {},
+      crystals: [],
+      affirmations: [],
+      lineInterpretations: {},
+      fortune: Math.floor(Math.random() * 5) + 1,
     };
   };
+
+  // Area icons mapping
+  const AREA_ICONS = {
+    career: Briefcase,
+    finance: DollarSign,
+    love: Heart,
+    health: Activity,
+    spiritual: Sparkles,
+  };
+
+  const AREA_LABELS = {
+    career: 'Sự nghiệp',
+    finance: 'Tài chính',
+    love: 'Tình yêu',
+    health: 'Sức khỏe',
+    spiritual: 'Tâm linh',
+  };
+
+  // NEW: Handler for quick buy from crystal recommendations
+  const handleQuickBuy = useCallback((product) => {
+    console.log('[IChingScreen] Quick buy product:', product?.title);
+    setQuickBuyModal({
+      visible: true,
+      product,
+    });
+  }, []);
+
+  // NEW: Handler for showing upsell modal after adding to cart
+  const handleShowUpsell = useCallback((upsellData) => {
+    console.log('[IChingScreen] Show upsell:', upsellData?.upsells?.length, 'products');
+    setUpsellModal({
+      visible: true,
+      upsellData,
+    });
+  }, []);
+
+  // NEW: Handler for buy now (opens checkout after quick buy)
+  const handleBuyNow = useCallback(async (purchaseData) => {
+    console.log('[IChingScreen] Buy now:', purchaseData?.product?.title);
+    if (purchaseData?.upsells && purchaseData.upsells.length > 0) {
+      setUpsellModal({
+        visible: true,
+        upsellData: {
+          primaryProduct: purchaseData.product,
+          upsells: purchaseData.upsells,
+        },
+      });
+    } else {
+      navigation.navigate('Shop', { screen: 'Checkout' });
+    }
+  }, [navigation]);
+
+  // NEW: Handler for checkout from upsell modal
+  const handleCheckout = useCallback((checkoutUrl) => {
+    navigation.navigate('Shop', {
+      screen: 'Checkout',
+      params: { checkoutUrl },
+    });
+  }, [navigation]);
+
+  // NEW: Handler for continue shopping
+  const handleContinueShopping = useCallback(() => {
+    // Just close the modal - user can continue browsing
+  }, []);
 
   // Render hexagram line
   const renderLine = (value, index) => {
@@ -356,16 +541,19 @@ const IChingScreen = ({ navigation, route }) => {
           </View>
         )}
 
-        {/* Cast Button */}
-        <TouchableOpacity
-          style={[
+        {/* Cast Button - Using Pressable for better touch handling */}
+        <Pressable
+          style={({ pressed }) => [
             styles.castButton,
             (isLoading || isLoadingQuota) && styles.castButtonDisabled,
-            !canDivine() && styles.castButtonLocked
+            !canDivine() && styles.castButtonLocked,
+            pressed && { opacity: 0.8, transform: [{ scale: 0.98 }] },
           ]}
-          onPress={castHexagram}
+          onPress={() => {
+            console.log('[IChingScreen] Cast button pressed');
+            castHexagram();
+          }}
           disabled={isLoading || isLoadingQuota}
-          activeOpacity={0.8}
         >
           <LinearGradient
             colors={!canDivine() ? ['#555', '#444'] : GRADIENTS.gold}
@@ -391,12 +579,23 @@ const IChingScreen = ({ navigation, route }) => {
               </>
             )}
           </LinearGradient>
-        </TouchableOpacity>
+        </Pressable>
 
         {/* Interpretation */}
         {interpretation && (
           <View style={styles.interpretationSection}>
             <Text style={styles.sectionTitle}>Giải quẻ</Text>
+
+            {/* Keywords */}
+            {interpretation.keywords && interpretation.keywords.length > 0 && (
+              <View style={styles.keywordsContainer}>
+                {interpretation.keywords.map((kw, idx) => (
+                  <View key={idx} style={styles.keywordTag}>
+                    <Text style={styles.keywordText}>{kw}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
 
             {/* General */}
             <View style={styles.interpretCard}>
@@ -410,11 +609,153 @@ const IChingScreen = ({ navigation, route }) => {
               <Text style={styles.interpretText}>{interpretation.advice}</Text>
             </View>
 
-            {/* Warning */}
-            <View style={[styles.interpretCard, styles.warningCard]}>
-              <Text style={[styles.interpretLabel, styles.warningLabel]}>Cảnh báo</Text>
-              <Text style={styles.interpretText}>{interpretation.warning}</Text>
-            </View>
+            {/* Area Selector Tabs */}
+            {interpretation.interpretations && Object.keys(interpretation.interpretations).length > 0 && (
+              <>
+                <Text style={[styles.sectionTitle, { marginTop: SPACING.lg }]}>Theo lĩnh vực</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.areaTabs}>
+                  {Object.keys(AREA_LABELS).map((area) => {
+                    const AreaIcon = AREA_ICONS[area];
+                    const isActive = selectedArea === area;
+                    return (
+                      <TouchableOpacity
+                        key={area}
+                        style={[styles.areaTab, isActive && styles.areaTabActive]}
+                        onPress={() => setSelectedArea(area)}
+                      >
+                        <AreaIcon size={16} color={isActive ? COLORS.gold : COLORS.textMuted} />
+                        <Text style={[styles.areaTabText, isActive && styles.areaTabTextActive]}>
+                          {AREA_LABELS[area]}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+
+                {/* Selected Area Interpretation */}
+                {interpretation?.interpretations?.[selectedArea] && (
+                  <View style={styles.areaInterpretCard}>
+                    <Text style={styles.areaInterpretTitle}>
+                      {interpretation.interpretations[selectedArea]?.title || AREA_LABELS[selectedArea]}
+                    </Text>
+                    <Text style={styles.areaInterpretReading}>
+                      {interpretation.interpretations[selectedArea]?.reading || 'Đang phân tích...'}
+                    </Text>
+                    {interpretation.interpretations[selectedArea]?.actionSteps?.length > 0 && (
+                      <View style={styles.actionStepsContainer}>
+                        <Text style={styles.actionStepsLabel}>Hành động cụ thể:</Text>
+                        {interpretation.interpretations[selectedArea].actionSteps.map((step, idx) => (
+                          <Text key={idx} style={styles.actionStep}>• {step}</Text>
+                        ))}
+                      </View>
+                    )}
+                  </View>
+                )}
+              </>
+            )}
+
+            {/* Crystals Section */}
+            {interpretation.crystals && interpretation.crystals.length > 0 && (
+              <TouchableOpacity
+                style={styles.collapsibleHeader}
+                onPress={() => setShowCrystals(!showCrystals)}
+              >
+                <View style={styles.collapsibleHeaderLeft}>
+                  <ShoppingBag size={18} color={COLORS.gold} />
+                  <Text style={styles.collapsibleTitle}>Đá năng lượng phù hợp</Text>
+                </View>
+                {showCrystals ? (
+                  <ChevronUp size={20} color={COLORS.textMuted} />
+                ) : (
+                  <ChevronDown size={20} color={COLORS.textMuted} />
+                )}
+              </TouchableOpacity>
+            )}
+
+            {showCrystals && (
+              <>
+                {/* ONLY use CrystalRecommendationNew - it fetches real Shopify products */}
+                {crystalContext ? (
+                  <CrystalRecommendationNew
+                    context={crystalContext}
+                    limit={4}
+                    onQuickBuy={handleQuickBuy}
+                  />
+                ) : (
+                  <View style={{ padding: SPACING.md, alignItems: 'center' }}>
+                    <Text style={{ color: COLORS.textMuted }}>
+                      Đang tải sản phẩm từ Shop...
+                    </Text>
+                  </View>
+                )}
+              </>
+            )}
+
+            {/* Affirmations Section */}
+            {interpretation.affirmations && interpretation.affirmations.length > 0 && (
+              <TouchableOpacity
+                style={styles.collapsibleHeader}
+                onPress={() => setShowAffirmations(!showAffirmations)}
+              >
+                <View style={styles.collapsibleHeaderLeft}>
+                  <Sparkles size={18} color={COLORS.gold} />
+                  <Text style={styles.collapsibleTitle}>Affirmations</Text>
+                </View>
+                {showAffirmations ? (
+                  <ChevronUp size={20} color={COLORS.textMuted} />
+                ) : (
+                  <ChevronDown size={20} color={COLORS.textMuted} />
+                )}
+              </TouchableOpacity>
+            )}
+
+            {showAffirmations && interpretation.affirmations && (
+              <View style={styles.affirmationsContainer}>
+                {interpretation.affirmations.map((aff, idx) => (
+                  <View key={idx} style={styles.affirmationCard}>
+                    <View style={styles.affirmationContent}>
+                      <Text style={styles.affirmationText}>"{aff}"</Text>
+                      <TouchableOpacity
+                        style={styles.copyButton}
+                        onPress={async () => {
+                          await Clipboard.setStringAsync(aff);
+                          alertService.success('Đã copy!', 'Affirmation đã được copy vào clipboard.');
+                        }}
+                        activeOpacity={0.7}
+                      >
+                        <Copy size={16} color={COLORS.cyan} />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ))}
+                {/* Button to save affirmations to VisionBoard */}
+                <TouchableOpacity
+                  style={styles.saveAffirmationsButton}
+                  onPress={() => {
+                    // Set widget trigger for affirmation type
+                    setWidgetTrigger({
+                      type: WIDGET_TYPES.AFFIRMATION,
+                      data: {
+                        title: 'Affirmations từ Kinh Dịch',
+                        affirmations: interpretation.affirmations,
+                        source: 'iching',
+                        hexagram: hexagram?.vietnamese || hexagram?.name,
+                      },
+                    });
+                    setShowWidgetForm(true);
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Sparkles size={16} color={COLORS.gold} />
+                  <Text style={styles.saveAffirmationsText}>Lưu vào VisionBoard</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* Product Recommendations (Courses, Scanner, Affiliate) */}
+            <ProductRecommendations
+              context={`${selectedArea} ${interpretation.general || ''} ${interpretation.advice || ''}`}
+            />
 
             {/* Fortune */}
             <View style={styles.fortuneSection}>
@@ -435,14 +776,34 @@ const IChingScreen = ({ navigation, route }) => {
             </View>
 
             {/* Send to Chat Button */}
-            <TouchableOpacity
-              style={styles.sendToChatButton}
-              activeOpacity={0.7}
-              onPress={() => {
-                // Format result for chat with visual data
+            <Pressable
+              style={({ pressed }) => [
+                styles.sendToChatButton,
+                pressed && { opacity: 0.8, transform: [{ scale: 0.98 }] },
+              ]}
+              onPress={async () => {
+                console.log('[IChingScreen] Send to chat pressed');
+
+                // Get the hexagram image asset for sending to chat
+                const hexagramImageAsset = getHexagramImage(hexagram.id);
+                let imageUri = null;
+
+                try {
+                  // Resolve the image asset to get local URI
+                  if (hexagramImageAsset) {
+                    const asset = Asset.fromModule(hexagramImageAsset);
+                    await asset.downloadAsync();
+                    imageUri = asset.localUri || asset.uri;
+                    console.log('[IChingScreen] Image URI:', imageUri);
+                  }
+                } catch (error) {
+                  console.error('[IChingScreen] Error getting image URI:', error);
+                }
+
+                // Format result for chat with visual data AND image
                 const resultData = {
                   type: 'iching',
-                  text: `🔮 **Kết quả Kinh Dịch**\n\n**Quẻ ${hexagram.name}** (${hexagram.vietnamese})\n\n${interpretation.general}\n\n**Lời khuyên:** ${interpretation.advice}\n\n**Cảnh báo:** ${interpretation.warning}`,
+                  text: `🔮 **Kết quả Kinh Dịch**\n\n**Quẻ ${hexagram.name}** (${hexagram.vietnamese})\n\n${interpretation.general}\n\n**Lời khuyên:** ${interpretation.advice}`,
                   hexagram: {
                     id: hexagram.id,
                     name: hexagram.name,
@@ -451,6 +812,9 @@ const IChingScreen = ({ navigation, route }) => {
                     lines: hexagram.lines,
                   },
                   interpretation: interpretation,
+                  // Include image data for chat display
+                  imageUri: imageUri,
+                  imageSource: hexagramImageAsset, // Fallback to require() source
                 };
 
                 // Go back and send to chat
@@ -470,7 +834,7 @@ const IChingScreen = ({ navigation, route }) => {
               >
                 <Text style={styles.sendToChatText}>📨 Gửi vào Chat</Text>
               </LinearGradient>
-            </TouchableOpacity>
+            </Pressable>
 
             {/* Share Button */}
             <TouchableOpacity
@@ -492,16 +856,84 @@ const IChingScreen = ({ navigation, route }) => {
                     title: 'Kết quả Kinh Dịch - Gemral',
                   });
                 } catch (error) {
-                  Alert.alert('Lỗi', 'Không thể chia sẻ. Vui lòng thử lại.');
+                  alertService.error('Lỗi', 'Không thể chia sẻ. Vui lòng thử lại.');
                 }
               }}
             >
               <Share2 size={18} color={COLORS.textPrimary} />
               <Text style={styles.shareButtonText}>Chia sẻ kết quả</Text>
             </TouchableOpacity>
+
+            {/* Widget Suggestion - Add to Dashboard */}
+            <AddWidgetSuggestion
+              visible={!!widgetTrigger && !showWidgetForm}
+              trigger={widgetTrigger}
+              onAccept={(trigger) => {
+                setShowWidgetForm(true);
+              }}
+              onDismiss={() => setWidgetTrigger(null)}
+              position="inline"
+              autoHide={false}
+            />
           </View>
         )}
+
+        {/* Smart Form Modal for saving widget */}
+        <SmartFormCard
+          visible={showWidgetForm}
+          widgetType={widgetTrigger?.type || WIDGET_TYPES.ICHING}
+          initialData={{
+            hexagramNumber: hexagram?.id,
+            hexagramName: hexagram?.name,
+            vietnameseName: hexagram?.vietnamese,
+            interpretation: interpretation?.general,
+            area: selectedArea,
+            crystals: interpretation?.crystals,
+            affirmations: interpretation?.affirmations,
+          }}
+          onSave={(widgetData) => {
+            console.log('[IChingScreen] Widget saved:', widgetData);
+            setShowWidgetForm(false);
+            setWidgetTrigger(null);
+            alertService.success('Đã lưu!', 'Quẻ đã được thêm vào Dashboard của bạn.');
+          }}
+          onCancel={() => {
+            setShowWidgetForm(false);
+          }}
+          onNavigateToShop={(shopHandle) => {
+            navigation.navigate('Shop', {
+              screen: 'ProductDetail',
+              params: { handle: shopHandle }
+            });
+          }}
+        />
       </ScrollView>
+
+        {/* Upgrade Modal - with Shopify checkout flow */}
+        <ChatbotPricingModal
+          visible={showUpgradeModal}
+          onClose={() => setShowUpgradeModal(false)}
+          quota={quota}
+          currentTier={userTier}
+        />
+
+        {/* NEW: Quick Buy Modal for crystal purchase from recommendations */}
+        <QuickBuyModal
+          visible={quickBuyModal.visible}
+          product={quickBuyModal.product}
+          onClose={() => setQuickBuyModal({ visible: false, product: null })}
+          onShowUpsell={handleShowUpsell}
+          onBuyNow={handleBuyNow}
+        />
+
+        {/* NEW: Upsell Modal - shows after adding to cart */}
+        <UpsellModal
+          visible={upsellModal.visible}
+          upsellData={upsellModal.upsellData}
+          onClose={() => setUpsellModal({ visible: false, upsellData: null })}
+          onCheckout={handleCheckout}
+          onContinueShopping={handleContinueShopping}
+        />
       </SafeAreaView>
     </LinearGradient>
   );
@@ -542,7 +974,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: SPACING.md,
-    paddingBottom: SPACING.xxl,
+    paddingBottom: BOTTOM_PADDING,
   },
   hexagramSection: {
     alignItems: 'center',
@@ -733,6 +1165,205 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.fontSize.md,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
     color: COLORS.textPrimary,
+  },
+  // Keywords
+  keywordsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.xs,
+    marginBottom: SPACING.md,
+  },
+  keywordTag: {
+    backgroundColor: 'rgba(212, 175, 55, 0.15)',
+    borderRadius: 12,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.3)',
+  },
+  keywordText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.gold,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  // Area Tabs
+  areaTabs: {
+    flexDirection: 'row',
+    marginBottom: SPACING.md,
+  },
+  areaTab: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: 20,
+    marginRight: SPACING.sm,
+    backgroundColor: 'rgba(106, 91, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
+  },
+  areaTabActive: {
+    backgroundColor: 'rgba(212, 175, 55, 0.2)',
+    borderColor: COLORS.gold,
+  },
+  areaTabText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+  },
+  areaTabTextActive: {
+    color: COLORS.gold,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+  },
+  // Area Interpretation Card
+  areaInterpretCard: {
+    backgroundColor: GLASS.background,
+    borderRadius: GLASS.borderRadius,
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.3)',
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+  },
+  areaInterpretTitle: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.gold,
+    marginBottom: SPACING.sm,
+  },
+  areaInterpretReading: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textSecondary,
+    lineHeight: 22,
+    marginBottom: SPACING.md,
+  },
+  actionStepsContainer: {
+    backgroundColor: 'rgba(106, 91, 255, 0.1)',
+    borderRadius: 12,
+    padding: SPACING.sm,
+  },
+  actionStepsLabel: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.xs,
+  },
+  actionStep: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textSecondary,
+    marginBottom: 4,
+    paddingLeft: SPACING.xs,
+  },
+  // Collapsible Header
+  collapsibleHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: GLASS.background,
+    borderRadius: GLASS.borderRadius,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
+    padding: SPACING.md,
+    marginTop: SPACING.md,
+  },
+  collapsibleHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  collapsibleTitle: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+  },
+  // Crystals
+  crystalsContainer: {
+    gap: SPACING.sm,
+    marginTop: SPACING.sm,
+  },
+  crystalCard: {
+    backgroundColor: 'rgba(106, 91, 255, 0.1)',
+    borderRadius: 12,
+    padding: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.2)',
+  },
+  crystalName: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.gold,
+  },
+  crystalNameEn: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    marginBottom: SPACING.xs,
+  },
+  crystalReason: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textSecondary,
+    marginBottom: SPACING.xs,
+  },
+  crystalUsage: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textMuted,
+    fontStyle: 'italic',
+    marginBottom: SPACING.xs,
+  },
+  crystalShopLink: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.purple,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    marginTop: SPACING.xs,
+  },
+  // Affirmations
+  affirmationsContainer: {
+    gap: SPACING.sm,
+    marginTop: SPACING.sm,
+  },
+  affirmationCard: {
+    backgroundColor: 'rgba(212, 175, 55, 0.1)',
+    borderRadius: 12,
+    padding: SPACING.md,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.gold,
+  },
+  affirmationContent: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: SPACING.sm,
+  },
+  affirmationText: {
+    flex: 1,
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textSecondary,
+    fontStyle: 'italic',
+    lineHeight: 22,
+  },
+  copyButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(0, 240, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 240, 255, 0.3)',
+  },
+  // Save affirmations button
+  saveAffirmationsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.4)',
+    borderRadius: 12,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    marginTop: SPACING.md,
+  },
+  saveAffirmationsText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.gold,
   },
 });
 

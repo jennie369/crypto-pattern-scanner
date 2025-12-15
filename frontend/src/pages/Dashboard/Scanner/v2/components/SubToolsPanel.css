@@ -364,3 +364,86 @@
   color: rgba(255, 255, 255, 0.7);
   border: 1px dashed rgba(255, 255, 255, 0.2);
 }
+
+/* ============================================
+   MOBILE FIXES - max-width: 767px
+   Desktop styles preserved above - DO NOT TOUCH!
+   ============================================ */
+@media (max-width: 767px) {
+  .sub-tools-panel {
+    gap: 6px;
+    padding: 0;
+  }
+
+  .sub-tools-header-compact h3 {
+    font-size: 13px;
+  }
+
+  .sub-tools-grid,
+  .sub-tools-grid-compact {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .sub-tool-btn {
+    min-height: 56px;
+    padding: 6px 4px;
+    border-radius: 8px;
+  }
+
+  .sub-tool-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .sub-tool-title {
+    font-size: 8px;
+    line-height: 1.1;
+  }
+
+  .sub-tool-tier {
+    font-size: 6px;
+    padding: 1px 3px;
+    top: 2px;
+    right: 2px;
+  }
+
+  .tool-icon {
+    font-size: 18px;
+  }
+
+  .tool-name {
+    font-size: 9px;
+  }
+
+  .tool-tier {
+    font-size: 7px;
+    padding: 1px 3px;
+  }
+
+  /* Multi-TF Section Mobile */
+  .multi-tf-section {
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+
+  .multi-tf-header h3 {
+    font-size: 13px;
+  }
+
+  .multi-tf-header svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .multi-tf-loading,
+  .multi-tf-empty {
+    padding: 16px;
+    font-size: 11px;
+  }
+
+  .multi-tf-message {
+    padding: 12px;
+    font-size: 11px;
+  }
+}

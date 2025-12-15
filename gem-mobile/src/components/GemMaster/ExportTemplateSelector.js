@@ -13,7 +13,6 @@ import {
   ScrollView,
   StyleSheet,
   ActivityIndicator,
-  Alert,
   Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -29,6 +28,7 @@ import { COLORS, TYPOGRAPHY, SPACING, GLASS } from '../../utils/tokens';
 import exportService from '../../services/exportService';
 import TierService from '../../services/tierService';
 import { useAuth } from '../../contexts/AuthContext';
+import CustomAlert, { useCustomAlert } from '../CustomAlert';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -48,6 +48,7 @@ const ExportTemplateSelector = ({
   const [templates, setTemplates] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedId, setSelectedId] = useState(null);
+  const { alert, AlertComponent } = useCustomAlert();
 
   useEffect(() => {
     if (visible) {
@@ -74,10 +75,11 @@ const ExportTemplateSelector = ({
 
   const handleTemplatePress = (template) => {
     if (template.isLocked) {
-      Alert.alert(
-        'Premium Template',
-        `This template requires ${template.tier}+.\n\nUpgrade to unlock all templates!`,
-        [
+      alert({
+        type: 'warning',
+        title: 'Premium Template',
+        message: `This template requires ${template.tier}+.\n\nUpgrade to unlock all templates!`,
+        buttons: [
           { text: 'Later', style: 'cancel' },
           {
             text: 'Learn More',
@@ -86,8 +88,8 @@ const ExportTemplateSelector = ({
               console.log('Navigate to upgrade');
             },
           },
-        ]
-      );
+        ],
+      });
       return;
     }
     setSelectedId(template.id);
@@ -288,6 +290,7 @@ const ExportTemplateSelector = ({
             </TouchableOpacity>
           </View>
         </View>
+        {AlertComponent}
       </View>
     </Modal>
   );

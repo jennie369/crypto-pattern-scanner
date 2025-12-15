@@ -4,7 +4,9 @@
 -- product_id != NULL → Product affiliate link (new feature)
 
 -- Add product-related columns to affiliate_codes
-ALTER TABLE affiliate_codes ADD COLUMN IF NOT EXISTS product_id UUID;
+-- NOTE: product_id is TEXT because Shopify IDs are numeric strings (e.g., "9732564713776")
+-- not UUIDs. We store them as TEXT for compatibility.
+ALTER TABLE affiliate_codes ADD COLUMN IF NOT EXISTS product_id TEXT;
 ALTER TABLE affiliate_codes ADD COLUMN IF NOT EXISTS product_type TEXT CHECK (product_type IN ('crystal', 'course', 'subscription', 'bundle', 'book'));
 ALTER TABLE affiliate_codes ADD COLUMN IF NOT EXISTS short_code TEXT;
 ALTER TABLE affiliate_codes ADD COLUMN IF NOT EXISTS product_name TEXT;

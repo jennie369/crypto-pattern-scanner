@@ -85,9 +85,18 @@
 .nav-main {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex: 1;
   justify-content: flex-start;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.nav-main::-webkit-scrollbar {
+  display: none;
 }
 
 .nav-item {
@@ -95,15 +104,15 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 10px 20px;
-  min-width: 130px;
-  max-width: 130px;
-  height: 44px;
+  padding: 10px 16px;
+  min-width: auto;
+  max-width: none;
+  height: 42px;
   background: rgba(17, 34, 80, 0.4);
   border: 1px solid rgba(255, 189, 89, 0.2);
-  border-radius: 12px;
+  border-radius: 10px;
   color: white;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -111,7 +120,6 @@
   text-decoration: none;
   white-space: nowrap;
   flex-shrink: 0;
-  flex-grow: 0;
   box-sizing: border-box;
   outline: none; /* Remove browser default outline */
 }
@@ -197,8 +205,9 @@
 /* Dropdown Menu Container */
 .dropdown-menu {
   position: absolute;
-  top: calc(100% + 8px);
+  top: 100%;
   left: 0;
+  margin-top: 4px;
   min-width: 220px;
   background: linear-gradient(135deg, #1a2847, #0f1b35);
   border: 2px solid rgba(255, 189, 89, 0.3);
@@ -206,13 +215,13 @@
   padding: 8px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
   z-index: 1001;
-  animation: dropdownSlide 0.2s ease;
+  animation: dropdownSlideDown 0.2s ease forwards;
 }
 
-@keyframes dropdownSlide {
+@keyframes dropdownSlideDown {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -616,5 +625,157 @@
 
   .section-header {
     padding: 6px 4px;
+  }
+}
+
+/* ============================================
+   MOBILE FIXES - max-width: 767px
+   Desktop styles preserved above - DO NOT TOUCH!
+   ============================================ */
+@media (max-width: 767px) {
+  .top-nav-bar {
+    position: fixed;
+    height: 56px;
+    max-height: 56px;
+  }
+
+  .nav-container {
+    height: 56px;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .nav-logo {
+    gap: 8px;
+  }
+
+  .logo-icon {
+    font-size: 28px;
+  }
+
+  .logo-text {
+    display: none;
+  }
+
+  /* Hide desktop nav */
+  .nav-main {
+    display: none;
+    position: fixed;
+    top: 56px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #1a2847, #0f1b35);
+    flex-direction: column;
+    padding: 16px;
+    gap: 8px;
+    overflow-y: auto;
+    z-index: 999;
+  }
+
+  .nav-main.open {
+    display: flex;
+  }
+
+  /* Hamburger visible */
+  .mobile-menu-toggle {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+  }
+
+  /* Nav items in mobile menu */
+  .nav-main .nav-item {
+    width: 100%;
+    min-width: auto;
+    max-width: none;
+    height: 44px;
+    padding: 10px 16px;
+    font-size: 14px;
+    justify-content: flex-start;
+    border-radius: 10px;
+  }
+
+  /* Dropdowns full width */
+  .nav-dropdown {
+    width: 100%;
+  }
+
+  .dropdown-menu {
+    position: static;
+    width: 100%;
+    margin-top: 8px;
+    animation: none;
+    border: none;
+    box-shadow: none;
+    background: rgba(17, 34, 80, 0.6);
+  }
+
+  .tools-menu {
+    grid-template-columns: 1fr;
+    min-width: 100%;
+    max-width: 100%;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .dropdown-section {
+    padding: 8px;
+  }
+
+  .dropdown-item {
+    padding: 10px 12px;
+    font-size: 13px;
+    gap: 10px;
+    min-height: 40px;
+  }
+
+  /* Right nav */
+  .nav-right {
+    gap: 4px;
+  }
+
+  .nav-right .nav-item {
+    padding: 6px 10px;
+    min-width: auto;
+    max-width: none;
+    height: 36px;
+    font-size: 12px;
+  }
+
+  .user-name {
+    display: none;
+  }
+
+  .user-avatar {
+    width: 28px;
+    height: 28px;
+  }
+
+  .account-menu {
+    right: 0;
+    left: auto;
+    min-width: 200px;
+  }
+
+  /* Tier badges */
+  .tier-badge {
+    font-size: 7px !important;
+    padding: 2px 6px !important;
+  }
+
+  .nav-badge {
+    font-size: 9px;
+    padding: 1px 4px;
+  }
+
+  /* Notification badge */
+  .badge {
+    font-size: 10px;
+    padding: 1px 4px;
+    min-width: 16px;
   }
 }

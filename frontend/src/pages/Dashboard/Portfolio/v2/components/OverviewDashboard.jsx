@@ -3,9 +3,10 @@ import { DollarSign, TrendingUp, Target, BarChart3, CheckCircle } from 'lucide-r
 import { Card } from '../../../../../components-v2/Card';
 import { calculateWinLossStats } from '../../../../../utils/portfolioStats';
 import EquityChart from './EquityChart';
+import { AssetAllocationChart } from './AssetAllocationChart';
 import './OverviewDashboard.css';
 
-export const OverviewDashboard = ({ stats, transactions = [] }) => {
+export const OverviewDashboard = ({ stats, transactions = [], holdings = [] }) => {
   // Handle both API data structure and mock data
   const portfolioStats = useMemo(() => {
     if (!stats) {
@@ -124,8 +125,14 @@ export const OverviewDashboard = ({ stats, transactions = [] }) => {
         </Card>
       </div>
 
-      {/* Equity Curve Chart */}
-      <EquityChart />
+      {/* Charts Row */}
+      <div className="charts-row">
+        {/* Equity Curve Chart */}
+        <EquityChart />
+
+        {/* Asset Allocation Pie Chart */}
+        <AssetAllocationChart holdings={holdings} />
+      </div>
     </div>
   );
 };

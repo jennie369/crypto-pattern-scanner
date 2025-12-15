@@ -22,8 +22,8 @@ import {
   PanResponder,
   Dimensions,
   StatusBar,
-  Alert,
   Share,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
@@ -36,6 +36,9 @@ import {
   TYPOGRAPHY,
 } from '../../../utils/tokens';
 
+// Alert
+import { useCustomAlert } from '../../../components/CustomAlert';
+
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const DISMISS_THRESHOLD = 150;
 
@@ -46,6 +49,8 @@ const ImageViewer = memo(({
   senderName,
   timestamp,
 }) => {
+  const { alert } = useCustomAlert();
+
   // State
   const [loading, setLoading] = useState(true);
 
@@ -126,12 +131,20 @@ const ImageViewer = memo(({
     lastTap.current = now;
   }, [scale, translateX, translateY]);
 
-  // Pan responder
+  // Pan responder - improved for Android gesture handling
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: (_, gestureState) => {
         return Math.abs(gestureState.dy) > 5 || Math.abs(gestureState.dx) > 5;
+      },
+      onMoveShouldSetPanResponderCapture: (_, gestureState) => {
+        // On Android, be more aggressive about capturing vertical swipes
+        if (Platform.OS === 'android' && !isZoomed.current) {
+          const isVertical = Math.abs(gestureState.dy) > Math.abs(gestureState.dx);
+          return isVertical && Math.abs(gestureState.dy) > 10;
+        }
+        return false;
       },
       onPanResponderGrant: () => {
         // Store current values
@@ -186,7 +199,7 @@ const ImageViewer = memo(({
     try {
       const { status } = await MediaLibrary.requestPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Please allow access to save images');
+        alert({ type: 'error', title: 'Permission Required', message: 'Please allow access to save images' });
         return;
       }
 
@@ -197,10 +210,10 @@ const ImageViewer = memo(({
       // Save to library
       await MediaLibrary.saveToLibraryAsync(downloadResult.uri);
 
-      Alert.alert('Saved', 'Image saved to your library');
+      alert({ type: 'success', title: 'Saved', message: 'Image saved to your library' });
     } catch (error) {
       console.error('Error saving image:', error);
-      Alert.alert('Error', 'Failed to save image');
+      alert({ type: 'error', title: 'Error', message: 'Failed to save image' });
     }
   };
 

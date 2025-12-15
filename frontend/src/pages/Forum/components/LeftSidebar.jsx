@@ -1,204 +1,310 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Home,
   TrendingUp,
   Hash,
   Newspaper,
-  Calendar,
-  History,
   Bell,
-  Settings,
+  GraduationCap,
+  Users,
+  Sparkles,
+  Heart,
+  Bookmark,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Target,
+  DollarSign,
+  Gem,
+  Compass,
+  Star,
+  Rocket,
+  Crosshair,
+  Coins,
+  Rss,
+  Plus,
+  Edit3
 } from 'lucide-react';
 import './LeftSidebar.css';
 
 /**
- * LeftSidebar Component - REDESIGNED TO LIST-STYLE NAVIGATION
+ * LeftSidebar Component - SYNCED FROM MOBILE SideMenu
  * Left column of 3-column Community Hub
  *
- * Features:
- * - List-style navigation (no card containers)
- * - Items: Home, Trending, Chủ đề (Categories), News, Events, History, Notification, Settings
- * - Collapsible categories section
- * - Active state highlighting
+ * Features (synced from Mobile):
+ * - Quick Actions: Đã Thích, Đã Lưu
+ * - Feed Types: Explore, Following, News, Popular, Academy
+ * - Categories: Giao dịch, Tinh thần, Thịnh vượng, Kiếm tiền
+ * - Trending Hashtags
+ * - Custom Feeds
  */
 export default function LeftSidebar({
   categories = [],
   selectedCategory = 'all',
-  onCategoryChange
+  onCategoryChange,
+  selectedFeed = 'explore',
+  onFeedChange,
+  onQuickAction,
+  customFeeds = [],
+  onCreateFeed,
+  onEditFeeds
 }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [categoriesExpanded, setCategoriesExpanded] = useState(true);
+
+  // Expanded states for sections
+  const [tradingExpanded, setTradingExpanded] = useState(true);
+  const [wellnessExpanded, setWellnessExpanded] = useState(false);
+  const [prosperityExpanded, setProsperityExpanded] = useState(false);
+  const [earnExpanded, setEarnExpanded] = useState(false);
+  const [customExpanded, setCustomExpanded] = useState(false);
+
+  // Trending hashtags
+  const [trendingHashtags, setTrendingHashtags] = useState([]);
+  const [loadingTrending, setLoadingTrending] = useState(false);
+
+  // Load trending hashtags on mount
+  useEffect(() => {
+    loadTrendingHashtags();
+  }, []);
+
+  const loadTrendingHashtags = async () => {
+    setLoadingTrending(true);
+    try {
+      // Mock data - replace with actual API call
+      setTrendingHashtags([
+        { hashtag: 'bitcoin', count: 1234 },
+        { hashtag: 'ethereum', count: 892 },
+        { hashtag: 'trading', count: 756 },
+        { hashtag: 'crystal', count: 543 },
+        { hashtag: 'mindset', count: 421 }
+      ]);
+    } catch (error) {
+      console.error('[LeftSidebar] Load trending error:', error);
+    } finally {
+      setLoadingTrending(false);
+    }
+  };
+
+  const handleHashtagClick = (hashtag) => {
+    navigate(`/forum/hashtag/${hashtag}`);
+  };
 
   /**
-   * Navigation items configuration
+   * Main Feed Types - Compact version
    */
-  const navItems = [
-    {
-      id: 'home',
-      label: 'Home',
-      icon: Home,
-      onClick: () => navigate('/forum'),
-      isActive: location.pathname === '/forum'
-    },
-    {
-      id: 'trending',
-      label: 'Trending',
-      icon: TrendingUp,
-      onClick: () => console.log('Trending clicked'),
-      isActive: false
-    },
-    {
-      id: 'categories',
-      label: 'Chủ đề',
-      icon: Hash,
-      onClick: () => setCategoriesExpanded(!categoriesExpanded),
-      isActive: false,
-      hasSubmenu: true,
-      isExpanded: categoriesExpanded
-    },
-    {
-      id: 'news',
-      label: 'News',
-      icon: Newspaper,
-      onClick: () => console.log('News clicked'),
-      isActive: false
-    },
-    {
-      id: 'events',
-      label: 'Events',
-      icon: Calendar,
-      onClick: () => navigate('/events'),
-      isActive: location.pathname === '/events'
-    },
-    {
-      id: 'history',
-      label: 'History',
-      icon: History,
-      onClick: () => console.log('History clicked'),
-      isActive: false
-    },
-    {
-      id: 'notification',
-      label: 'Notification',
-      icon: Bell,
-      onClick: () => console.log('Notification clicked'),
-      isActive: false
-    },
-    {
-      id: 'settings',
-      label: 'Settings',
-      icon: Settings,
-      onClick: () => navigate('/settings'),
-      isActive: location.pathname === '/settings'
-    }
+  const mainFeeds = [
+    { id: 'explore', label: 'Khám phá', icon: Sparkles },
+    { id: 'following', label: 'Theo dõi', icon: Users },
+    { id: 'news', label: 'Tin tức', icon: Newspaper }
   ];
 
   /**
-   * Get category Vietnamese label
+   * Category Feeds - Compact version (no subtitles)
    */
-  const getCategoryLabel = (slug) => {
-    const labels = {
-      'all': 'Tất cả',
-      'trading-discussion': 'Thảo luận Trading',
-      'pattern-help': 'Hỏi đáp Pattern',
-      'spiritual': 'Tâm linh',
-      'success-stories': 'Chia sẻ thành công',
-      'questions': 'Hỏi & Đáp'
-    };
-    return labels[slug] || slug;
+  const categoryFeeds = {
+    trading: {
+      section: 'GIAO DỊCH',
+      sectionIcon: Crosshair,
+      items: [
+        { id: 'trading', title: 'Phân Tích', icon: TrendingUp },
+        { id: 'patterns', title: 'Tips Hay', icon: Target },
+        { id: 'results', title: 'Kết Quả', icon: DollarSign }
+      ]
+    },
+    wellness: {
+      section: 'TINH THẦN',
+      sectionIcon: Compass,
+      items: [
+        { id: 'wellness', title: 'Crystal', icon: Gem },
+        { id: 'meditation', title: 'Luật Hấp Dẫn', icon: Sparkles },
+        { id: 'growth', title: 'Chữa Lành', icon: Users }
+      ]
+    },
+    prosperity: {
+      section: 'THỊNH VƯỢNG',
+      sectionIcon: Star,
+      items: [
+        { id: 'mindful-trading', title: 'Chánh Niệm', icon: Target },
+        { id: 'sieu-giau', title: 'Thành Công', icon: Rocket }
+      ]
+    },
+    earn: {
+      section: 'KIẾM TIỀN',
+      sectionIcon: Coins,
+      items: [
+        { id: 'earn', title: 'Affiliate', icon: DollarSign }
+      ]
+    }
+  };
+
+  const renderCategorySection = (key, section, isExpanded, setExpanded) => {
+    const SectionIcon = section.sectionIcon;
+
+    return (
+      <div className="feed-section" key={key}>
+        <button
+          className="section-header"
+          onClick={() => setExpanded(!isExpanded)}
+        >
+          <span className="section-icon"><SectionIcon size={12} /></span>
+          <span className="section-title">{section.section}</span>
+          <span className="section-chevron">
+            {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+          </span>
+        </button>
+
+        {isExpanded && (
+          <div className="section-items">
+            {section.items.map((item) => {
+              const Icon = item.icon;
+              const isActive = selectedFeed === item.id;
+
+              return (
+                <button
+                  key={item.id}
+                  className={`feed-item ${isActive ? 'active' : ''}`}
+                  onClick={() => onFeedChange?.(item.id)}
+                >
+                  <span className="feed-icon"><Icon size={14} /></span>
+                  <span className="feed-item-title">{item.title}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
     <aside className="left-sidebar">
-      <nav className="sidebar-nav">
-        {/* Navigation Items */}
-        {navItems.map((item) => {
-          const Icon = item.icon;
-
-          return (
-            <React.Fragment key={item.id}>
-              <button
-                className={`nav-item ${item.isActive ? 'active' : ''}`}
-                onClick={item.onClick}
-              >
-                <Icon size={20} className="nav-icon" />
-                <span className="nav-label">{item.label}</span>
-                {item.hasSubmenu && (
-                  <span className="nav-chevron">
-                    {item.isExpanded ? (
-                      <ChevronDown size={16} />
-                    ) : (
-                      <ChevronRight size={16} />
-                    )}
-                  </span>
-                )}
-              </button>
-
-              {/* Categories Submenu */}
-              {item.id === 'categories' && item.isExpanded && (
-                <div className="categories-submenu">
-                  {/* All Categories */}
-                  <button
-                    className={`category-item ${selectedCategory === 'all' ? 'active' : ''}`}
-                    onClick={() => onCategoryChange('all')}
-                  >
-                    <Hash size={16} className="category-icon" />
-                    <span className="category-name">Tất cả</span>
-                  </button>
-
-                  {/* Category Items */}
-                  {categories.map((category) => (
-                    <button
-                      key={category.slug}
-                      className={`category-item ${selectedCategory === category.slug ? 'active' : ''}`}
-                      onClick={() => onCategoryChange(category.slug)}
-                    >
-                      <Hash size={16} className="category-icon" />
-                      <span className="category-name">{category.name}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </React.Fragment>
-          );
-        })}
-      </nav>
-
-      {/* Events Simplified Widget */}
-      <div className="events-widget">
-        <div className="events-widget-header">
-          <Calendar size={16} />
-          <h4>Sự kiện sắp tới</h4>
-        </div>
-        <div className="events-list">
-          <div className="event-item">
-            <div className="event-date">
-              <span className="event-day">15</span>
-              <span className="event-month">Jan</span>
-            </div>
-            <div className="event-info">
-              <p className="event-title">Webinar: Trading Strategies</p>
-              <p className="event-time">14:00 - 16:00</p>
-            </div>
-          </div>
-          <div className="event-item">
-            <div className="event-date">
-              <span className="event-day">22</span>
-              <span className="event-month">Jan</span>
-            </div>
-            <div className="event-info">
-              <p className="event-title">Live Q&A Session</p>
-              <p className="event-time">19:00 - 20:30</p>
-            </div>
-          </div>
-        </div>
-        <button className="view-all-events" onClick={() => navigate('/events')}>
-          Xem tất cả →
+      {/* Quick Actions - Compact */}
+      <div className="quick-actions">
+        <button
+          className="quick-action-btn"
+          onClick={() => onQuickAction?.('liked')}
+        >
+          <Heart size={14} className="quick-icon liked" />
+          <span>Thích</span>
         </button>
+        <button
+          className="quick-action-btn"
+          onClick={() => onQuickAction?.('saved')}
+        >
+          <Bookmark size={14} className="quick-icon saved" />
+          <span>Lưu</span>
+        </button>
+      </div>
+
+      {/* Main Feeds - Compact */}
+      <div className="feed-section main-feeds">
+        <div className="section-header-row">
+          <Rss size={12} className="section-icon" />
+          <span className="section-title">NGUỒN TIN</span>
+        </div>
+
+        <div className="section-items">
+          {mainFeeds.map((feed) => {
+            const Icon = feed.icon;
+            const isActive = selectedFeed === feed.id;
+
+            return (
+              <button
+                key={feed.id}
+                className={`feed-item ${isActive ? 'active' : ''}`}
+                onClick={() => onFeedChange?.(feed.id)}
+              >
+                <Icon size={14} className="feed-icon" />
+                <span className="feed-item-title">{feed.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Category Feeds */}
+      {renderCategorySection('trading', categoryFeeds.trading, tradingExpanded, setTradingExpanded)}
+      {renderCategorySection('wellness', categoryFeeds.wellness, wellnessExpanded, setWellnessExpanded)}
+      {renderCategorySection('prosperity', categoryFeeds.prosperity, prosperityExpanded, setProsperityExpanded)}
+      {renderCategorySection('earn', categoryFeeds.earn, earnExpanded, setEarnExpanded)}
+
+      {/* Trending Hashtags - Compact */}
+      {trendingHashtags.length > 0 && (
+        <div className="feed-section trending-section">
+          <div className="section-header-row">
+            <Hash size={12} className="section-icon trending" />
+            <span className="section-title">XU HƯỚNG</span>
+          </div>
+
+          <div className="trending-items">
+            {loadingTrending ? (
+              <div className="trending-loading">Đang tải...</div>
+            ) : (
+              trendingHashtags.slice(0, 3).map((item, index) => (
+                <button
+                  key={`trending-${index}`}
+                  className="trending-item"
+                  onClick={() => handleHashtagClick(item.hashtag)}
+                >
+                  <Hash size={12} className="trending-icon" />
+                  <span className="hashtag-name">#{item.hashtag}</span>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Custom Feeds - Compact */}
+      {customFeeds.length > 0 && (
+        <div className="feed-section">
+          <button
+            className="section-header"
+            onClick={() => setCustomExpanded(!customExpanded)}
+          >
+            <Sparkles size={12} className="section-icon" />
+            <span className="section-title">TÙY CHỈNH</span>
+            <span className="section-chevron">
+              {customExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+            </span>
+          </button>
+
+          {customExpanded && (
+            <div className="section-items">
+              {customFeeds.map((feed) => (
+                <button
+                  key={feed.id}
+                  className={`feed-item ${selectedFeed === feed.id ? 'active' : ''}`}
+                  onClick={() => onFeedChange?.(feed.id)}
+                >
+                  <Sparkles size={14} className="feed-icon" />
+                  <span className="feed-item-title">{feed.name}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Create Feed - Compact */}
+      <div className="feed-actions">
+        <button
+          className="feed-action-btn"
+          onClick={onCreateFeed}
+        >
+          <Plus size={12} />
+          <span>Tạo Feed</span>
+        </button>
+        {customFeeds.length > 0 && (
+          <button
+            className="feed-action-btn outline"
+            onClick={onEditFeeds}
+          >
+            <Edit3 size={12} />
+            <span>Quản Lý</span>
+          </button>
+        )}
       </div>
     </aside>
   );

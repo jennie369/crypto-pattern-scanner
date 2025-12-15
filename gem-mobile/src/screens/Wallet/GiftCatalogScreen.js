@@ -11,8 +11,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
+import alertService from '../../services/alertService';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
@@ -107,18 +107,18 @@ const GiftCatalogScreen = ({ navigation, route }) => {
 
   const handleSendGift = async () => {
     if (!selectedGift) {
-      Alert.alert('Thông báo', 'Vui lòng chọn một món quà');
+      alertService.info('Thông báo', 'Vui lòng chọn một món quà');
       return;
     }
 
     const totalCost = selectedGift.price * quantity;
 
     if (balance < totalCost) {
-      Alert.alert(
+      alertService.warning(
         'Không đủ Gems',
         `Bạn cần ${totalCost} gems để gửi quà này. Số dư hiện tại: ${balance} gems`,
         [
-          { text: 'Hủy', style: 'cancel' },
+          { text: 'Hủy' },
           { text: 'Nạp Gems', onPress: () => navigation.navigate('BuyGems') },
         ]
       );
@@ -126,11 +126,11 @@ const GiftCatalogScreen = ({ navigation, route }) => {
     }
 
     if (recipient) {
-      Alert.alert(
+      alertService.info(
         'Xác nhận',
         `Gửi ${quantity}x ${selectedGift.name} (${totalCost} gems) cho ${recipient.name || recipient.full_name}?`,
         [
-          { text: 'Hủy', style: 'cancel' },
+          { text: 'Hủy' },
           {
             text: 'Gửi',
             onPress: async () => {
@@ -141,10 +141,10 @@ const GiftCatalogScreen = ({ navigation, route }) => {
                 'gift'
               );
               if (result.success) {
-                Alert.alert('Thành công', 'Đã gửi quà!');
+                alertService.success('Thành công', 'Đã gửi quà!');
                 navigation.goBack();
               } else {
-                Alert.alert('Lỗi', result.error || 'Không thể gửi quà');
+                alertService.error('Lỗi', result.error || 'Không thể gửi quà');
               }
             },
           },
@@ -152,7 +152,7 @@ const GiftCatalogScreen = ({ navigation, route }) => {
       );
     } else {
       // Show info about how to send gifts
-      Alert.alert(
+      alertService.info(
         'Cách gửi quà',
         'Để gửi quà cho ai đó:\n\n' +
         '1. Vào trang cá nhân của họ\n' +
@@ -160,10 +160,11 @@ const GiftCatalogScreen = ({ navigation, route }) => {
         '3. Chọn quà và số lượng\n\n' +
         'Hoặc gửi quà trong bình luận/tin nhắn!',
         [
-          { text: 'Đã hiểu', style: 'default' },
+          { text: 'Đã hiểu' },
           {
             text: 'Tìm bạn bè',
-            onPress: () => navigation.navigate('Forum', { screen: 'SearchScreen' })
+            // Navigate to Forum (Home) where users can browse posts and find profiles
+            onPress: () => navigation.navigate('Home', { screen: 'Forum' })
           },
         ]
       );

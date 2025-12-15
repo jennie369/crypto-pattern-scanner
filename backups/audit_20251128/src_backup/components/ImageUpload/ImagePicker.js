@@ -1,0 +1,207 @@
+/**
+ * Gemral - Image Picker Component
+ * Select images from library or camera
+ */
+
+import React, { useState } from 'react';
+import { View, TouchableOpacity, Text, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import * as ExpoImagePicker from 'expo-image-picker';
+import { Image, Camera, Upload } from 'lucide-react-native';
+import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+
+const ImagePickerComponent = ({
+  onImageSelected,
+  maxImages = 1,
+  disabled = false,
+  compact = false
+}) => {
+  const [loading, setLoading] = useState(false);
+
+  const requestMediaLibraryPermissions = async () => {
+    const { status } = await ExpoImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(
+        'Cần quyền truy cập',
+        'Vui lòng cho phép truy cập thư viện ảnh để tải ảnh lên.',
+        [{ text: 'OK' }]
+      );
+      return false;
+    }
+    return true;
+  };
+
+  const requestCameraPermissions = async () => {
+    const { status } = await ExpoImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(
+        'Cần quyền truy cập',
+        'Vui lòng cho phép sử dụng camera.',
+        [{ text: 'OK' }]
+      );
+      return false;
+    }
+    return true;
+  };
+
+  const pickImage = async () => {
+    if (disabled || loading) return;
+
+    try {
+      const hasPermission = await requestMediaLibraryPermissions();
+      if (!hasPermission) return;
+
+      setLoading(true);
+
+      const result = await ExpoImagePicker.launchImageLibraryAsync({
+        mediaTypes: ExpoImagePicker.MediaTypeOptions.Images,
+        allowsMultipleSelection: maxImages > 1,
+        selectionLimit: maxImages,
+        quality: 1,
+        allowsEditing: false,
+        exif: true
+      });
+
+      if (!result.canceled && result.assets?.length > 0) {
+        onImageSelected(result.assets);
+      }
+
+    } catch (error) {
+      console.error('Image picker error:', error);
+      Alert.alert('Lỗi', 'Không thể chọn ảnh. Vui lòng thử lại.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const takePhoto = async () => {
+    if (disabled || loading) return;
+
+    try {
+      const hasPermission = await requestCameraPermissions();
+      if (!hasPermission) return;
+
+      setLoading(true);
+
+      const result = await ExpoImagePicker.launchCameraAsync({
+        quality: 1,
+        allowsEditing: false,
+        exif: true
+      });
+
+      if (!result.canceled && result.assets?.length > 0) {
+        onImageSelected(result.assets);
+      }
+
+    } catch (error) {
+      console.error('Camera error:', error);
+      Alert.alert('Lỗi', 'Không thể mở camera. Vui lòng thử lại.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (compact) {
+    return (
+      <View style={styles.compactContainer}>
+        <TouchableOpacity
+          style={[styles.compactButton, disabled && styles.disabledButton]}
+          onPress={pickImage}
+          disabled={disabled || loading}
+        >
+          {loading ? (
+            <ActivityIndicator size="small" color={COLORS.purple} />
+          ) : (
+            <Image size={22} color={disabled ? COLORS.textMuted : COLORS.purple} />
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.compactButton, disabled && styles.disabledButton]}
+          onPress={takePhoto}
+          disabled={disabled || loading}
+        >
+          <Camera size={22} color={disabled ? COLORS.textMuted : COLORS.purple} />
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <TouchableOpacity
+        style={[styles.button, disabled && styles.disabledButton]}
+        onPress={pickImage}
+        disabled={disabled || loading}
+      >
+        {loading ? (
+          <ActivityIndicator size="small" color={COLORS.purple} />
+        ) : (
+          <>
+            <Image size={24} color={disabled ? COLORS.textMuted : COLORS.purple} />
+            <Text style={[styles.buttonText, disabled && styles.disabledText]}>
+              Thư viện
+            </Text>
+          </>
+        )}
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.button, disabled && styles.disabledButton]}
+        onPress={takePhoto}
+        disabled={disabled || loading}
+      >
+        <Camera size={24} color={disabled ? COLORS.textMuted : COLORS.purple} />
+        <Text style={[styles.buttonText, disabled && styles.disabledText]}>
+          Camera
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    gap: SPACING.md,
+    padding: SPACING.md
+  },
+  compactContainer: {
+    flexDirection: 'row',
+    gap: SPACING.sm
+  },
+  button: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    padding: SPACING.lg,
+    backgroundColor: GLASS.background,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)'
+  },
+  compactButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: GLASS.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)'
+  },
+  disabledButton: {
+    opacity: 0.5
+  },
+  buttonText: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary
+  },
+  disabledText: {
+    color: COLORS.textMuted
+  }
+});
+
+export default ImagePickerComponent;

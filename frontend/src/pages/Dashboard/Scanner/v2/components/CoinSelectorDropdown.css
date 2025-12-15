@@ -406,3 +406,126 @@
     max-height: 350px;
   }
 }
+
+/* ============================================
+   MOBILE FIXES - max-width: 767px
+   Desktop styles preserved above - DO NOT TOUCH!
+   ============================================ */
+@media (max-width: 767px) {
+  .coin-selector-dropdown {
+    margin-bottom: 10px;
+  }
+
+  .dropdown-trigger {
+    height: 38px;
+    padding: 0 10px;
+    font-size: 13px;
+    border-radius: 8px;
+  }
+
+  .trigger-content {
+    gap: 6px;
+  }
+
+  .count-badge {
+    padding: 2px 6px;
+    font-size: 10px;
+  }
+
+  .selection-info {
+    margin-top: 4px;
+    font-size: 10px;
+  }
+
+  .tier-badge {
+    padding: 2px 6px;
+    font-size: 9px;
+  }
+
+  .dropdown-modal {
+    top: 56px;
+    left: -8px;
+    right: -8px;
+    border-radius: 10px;
+  }
+
+  .dropdown-search {
+    padding: 10px;
+  }
+
+  .dropdown-search input {
+    height: 34px;
+    font-size: 12px;
+    padding: 0 32px;
+  }
+
+  .dropdown-actions-top {
+    padding: 6px 10px;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .action-btn-top {
+    padding: 4px 8px;
+    font-size: 9px;
+  }
+
+  .tier-badge-top {
+    padding: 3px 6px;
+    font-size: 8px;
+  }
+
+  .coin-total-count {
+    font-size: 9px;
+  }
+
+  .coin-list-scrollable {
+    max-height: 280px;
+    padding: 6px;
+  }
+
+  .coin-item {
+    grid-template-columns: 14px 18px 1fr auto auto;
+    gap: 4px;
+    padding: 5px 6px;
+    border-radius: 6px;
+    margin-bottom: 3px;
+  }
+
+  .coin-item input[type="checkbox"] {
+    width: 12px;
+    height: 12px;
+  }
+
+  .coin-symbol {
+    font-size: 10px;
+  }
+
+  .coin-price {
+    font-size: 9px;
+  }
+
+  .coin-change {
+    font-size: 9px;
+    min-width: 40px;
+    padding: 1px 3px;
+  }
+
+  .favorite-btn {
+    width: 16px;
+    height: 16px;
+  }
+
+  .dropdown-footer {
+    padding: 6px 10px;
+    gap: 6px;
+  }
+
+  .selected-count {
+    font-size: 10px;
+  }
+
+  .tier-info {
+    font-size: 9px;
+  }
+}

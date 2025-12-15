@@ -44,20 +44,37 @@ export const repostService = {
           id,
           quote,
           created_at,
-          original_post:original_post_id (
-            id,
-            content,
-            images,
-            author:user_id (
-              id,
-              full_name,
-              avatar_url
-            )
-          )
+          original_post_id
         `)
         .single();
 
       if (error) throw error;
+
+      // Fetch original post separately to avoid nested select issues
+      const { data: originalPost } = await supabase
+        .from('forum_posts')
+        .select(`
+          id,
+          content,
+          image_url,
+          profiles:user_id (
+            id,
+            full_name,
+            avatar_url
+          )
+        `)
+        .eq('id', originalPostId)
+        .single();
+
+      // Combine data
+      if (originalPost) {
+        data.original_post = {
+          id: originalPost.id,
+          content: originalPost.content,
+          images: originalPost.image_url ? [originalPost.image_url] : [],
+          author: originalPost.profiles,
+        };
+      }
 
       // Increment repost count on original post
       await supabase.rpc('increment_repost_count', { p_post_id: originalPostId });

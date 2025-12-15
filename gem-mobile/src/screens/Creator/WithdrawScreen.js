@@ -13,10 +13,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -29,13 +29,21 @@ import {
   AlertTriangle,
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS, INPUT } from '../../utils/tokens';
+import { CONTENT_BOTTOM_PADDING, ACTION_BUTTON_BOTTOM_PADDING } from '../../constants/layout';
 import earningsService from '../../services/earningsService';
 import walletService from '../../services/walletService';
+import { WITHDRAW_CONFIG, calculateWithdrawAmounts, checkWithdrawEligibility } from '../../config/withdraw';
+import { submitWithdrawRequest, checkPendingWithdraw } from '../../services/withdrawService';
+import { useAuth } from '../../contexts/AuthContext';
 
-const MIN_WITHDRAWAL = 100; // Minimum 100 gems
-const QUICK_AMOUNTS = [100, 500, 1000, 5000];
+// Use config values
+const MIN_WITHDRAWAL = WITHDRAW_CONFIG.MIN_AMOUNT;
+const MIN_BALANCE = WITHDRAW_CONFIG.MIN_BALANCE;
+const QUICK_AMOUNTS = WITHDRAW_CONFIG.QUICK_AMOUNTS;
 
 const WithdrawScreen = ({ navigation }) => {
+  const { user } = useAuth();
+  const { alert, AlertComponent } = useCustomAlert();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [availableBalance, setAvailableBalance] = useState(0);
@@ -43,19 +51,34 @@ const WithdrawScreen = ({ navigation }) => {
   const [bankName, setBankName] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
   const [accountHolder, setAccountHolder] = useState('');
+  const [hasPendingRequest, setHasPendingRequest] = useState(false);
+  const [pendingRequest, setPendingRequest] = useState(null);
 
   useEffect(() => {
-    loadBalance();
+    loadData();
   }, []);
 
-  const loadBalance = async () => {
+  const loadData = async () => {
     setLoading(true);
+
+    // Load balance
     const result = await earningsService.getEarningsSummary();
     if (result.success) {
       setAvailableBalance(result.data.available);
     }
+
+    // Check for pending request
+    if (user?.id) {
+      const { hasPending, request } = await checkPendingWithdraw(user.id);
+      setHasPendingRequest(hasPending);
+      setPendingRequest(request);
+    }
+
     setLoading(false);
   };
+
+  // Alias for backward compatibility
+  const loadBalance = loadData;
 
   const handleQuickAmount = (value) => {
     if (value <= availableBalance) {
@@ -64,34 +87,50 @@ const WithdrawScreen = ({ navigation }) => {
   };
 
   const handleMaxAmount = () => {
-    setAmount(availableBalance.toString());
+    // Max amount is balance minus MIN_BALANCE requirement
+    const maxAmount = Math.max(0, availableBalance - MIN_BALANCE);
+    setAmount(maxAmount.toString());
   };
 
   const validateForm = () => {
     const amountNum = parseInt(amount) || 0;
+    const remainingBalance = availableBalance - amountNum;
 
     if (amountNum < MIN_WITHDRAWAL) {
-      Alert.alert('Lỗi', `Rút tối thiểu ${MIN_WITHDRAWAL} gems`);
+      alert({ type: 'error', title: 'Lỗi', message: `Rút tối thiểu ${MIN_WITHDRAWAL.toLocaleString()} gems` });
       return false;
     }
 
     if (amountNum > availableBalance) {
-      Alert.alert('Lỗi', 'Số tiền vượt quá số dư khả dụng');
+      alert({ type: 'error', title: 'Lỗi', message: 'Số tiền vượt quá số dư khả dụng' });
+      return false;
+    }
+
+    // Check minimum balance requirement
+    if (remainingBalance < MIN_BALANCE) {
+      const maxWithdrawable = Math.max(0, availableBalance - MIN_BALANCE);
+      alert({
+        type: 'warning',
+        title: 'Không đủ điều kiện',
+        message: `Bạn phải giữ tối thiểu ${MIN_BALANCE.toLocaleString()} gems trong tài khoản.\n\n` +
+          `Số dư hiện tại: ${availableBalance.toLocaleString()} gems\n` +
+          `Số tiền rút tối đa: ${maxWithdrawable.toLocaleString()} gems`
+      });
       return false;
     }
 
     if (!bankName.trim()) {
-      Alert.alert('Lỗi', 'Vui lòng nhập tên ngân hàng');
+      alert({ type: 'error', title: 'Lỗi', message: 'Vui lòng nhập tên ngân hàng' });
       return false;
     }
 
     if (!accountNumber.trim()) {
-      Alert.alert('Lỗi', 'Vui lòng nhập số tài khoản');
+      alert({ type: 'error', title: 'Lỗi', message: 'Vui lòng nhập số tài khoản' });
       return false;
     }
 
     if (!accountHolder.trim()) {
-      Alert.alert('Lỗi', 'Vui lòng nhập tên chủ tài khoản');
+      alert({ type: 'error', title: 'Lỗi', message: 'Vui lòng nhập tên chủ tài khoản' });
       return false;
     }
 
@@ -99,48 +138,60 @@ const WithdrawScreen = ({ navigation }) => {
   };
 
   const handleSubmit = async () => {
-    if (!validateForm() || submitting) return;
+    if (!validateForm() || submitting || hasPendingRequest) return;
 
     const amountNum = parseInt(amount);
-    const vndAmount = earningsService.gemsToVND(amountNum);
+    const amounts = calculateWithdrawAmounts(amountNum);
 
-    Alert.alert(
-      'Xác nhận rút tiền',
-      `Bạn muốn rút ${walletService.formatGems(amountNum)} gems (~ ${earningsService.formatVND(vndAmount)})?`,
-      [
+    alert({
+      type: 'warning',
+      title: 'Xác nhận rút tiền',
+      message: `Bạn muốn rút ${walletService.formatGems(amountNum)} gems?\n\n` +
+        `Tổng giá trị: ${amounts.vndTotal.toLocaleString()}đ\n` +
+        `Phí nền tảng (${WITHDRAW_CONFIG.PLATFORM_FEE_PERCENT}%): ${amounts.platformFee.toLocaleString()}đ\n` +
+        `Bạn nhận được: ${amounts.authorReceive.toLocaleString()}đ`,
+      buttons: [
         { text: 'Hủy', style: 'cancel' },
         {
           text: 'Xác nhận',
           onPress: async () => {
             setSubmitting(true);
 
-            const result = await earningsService.requestWithdrawal({
+            // Use the new withdrawService
+            const result = await submitWithdrawRequest({
+              userId: user?.id,
               amount: amountNum,
-              bankName: bankName.trim(),
-              accountNumber: accountNumber.trim(),
-              accountHolder: accountHolder.trim().toUpperCase(),
+              bankInfo: {
+                bankName: bankName.trim(),
+                accountNumber: accountNumber.trim(),
+                accountName: accountHolder.trim().toUpperCase(),
+              },
             });
 
             setSubmitting(false);
 
             if (result.success) {
-              Alert.alert(
-                'Yêu cầu đã được gửi',
-                'Chúng tôi sẽ xử lý trong vòng 1-3 ngày làm việc.',
-                [{ text: 'OK', onPress: () => navigation.goBack() }]
-              );
+              alert({
+                type: 'success',
+                title: 'Yêu cầu đã được gửi',
+                message: `Chúng tôi sẽ xử lý trong vòng ${WITHDRAW_CONFIG.PROCESSING_DAYS} ngày làm việc.`,
+                buttons: [{ text: 'OK', onPress: () => navigation.goBack() }],
+              });
             } else {
-              Alert.alert('Lỗi', result.error);
+              alert({ type: 'error', title: 'Lỗi', message: result.error || 'Không thể gửi yêu cầu' });
             }
           },
         },
-      ]
-    );
+      ],
+    });
   };
 
   const amountNum = parseInt(amount) || 0;
-  const vndAmount = earningsService.gemsToVND(amountNum);
-  const isValid = amountNum >= MIN_WITHDRAWAL && amountNum <= availableBalance;
+  const vndAmount = amountNum * WITHDRAW_CONFIG.GEM_TO_VND_RATE;
+  const remainingAfterWithdraw = availableBalance - amountNum;
+  const maxWithdrawable = Math.max(0, availableBalance - MIN_BALANCE);
+  const isValid = amountNum >= MIN_WITHDRAWAL && amountNum <= maxWithdrawable && remainingAfterWithdraw >= MIN_BALANCE && !hasPendingRequest;
+  const canWithdraw = availableBalance >= MIN_BALANCE && !hasPendingRequest;
 
   if (loading) {
     return (
@@ -290,6 +341,28 @@ const WithdrawScreen = ({ navigation }) => {
               </View>
             </View>
 
+            {/* Pending Request Warning */}
+            {hasPendingRequest && pendingRequest && (
+              <View style={styles.minBalanceWarning}>
+                <AlertTriangle size={20} color={COLORS.warning} />
+                <Text style={styles.minBalanceWarningText}>
+                  Bạn đang có yêu cầu rút {pendingRequest.gems_amount?.toLocaleString()} gems chờ xử lý.{'\n'}
+                  Vui lòng đợi yêu cầu hiện tại được xử lý xong.
+                </Text>
+              </View>
+            )}
+
+            {/* Minimum Balance Warning */}
+            {!hasPendingRequest && availableBalance < MIN_BALANCE && (
+              <View style={styles.minBalanceWarning}>
+                <AlertTriangle size={20} color={COLORS.error} />
+                <Text style={styles.minBalanceWarningText}>
+                  Bạn cần có tối thiểu {MIN_BALANCE.toLocaleString()} gems để rút tiền.{'\n'}
+                  Số dư hiện tại: {availableBalance.toLocaleString()} gems
+                </Text>
+              </View>
+            )}
+
             {/* Warning */}
             <View style={styles.warningCard}>
               <AlertTriangle size={18} color={COLORS.warning} />
@@ -303,7 +376,9 @@ const WithdrawScreen = ({ navigation }) => {
             <View style={styles.infoCard}>
               <Text style={styles.infoTitle}>Lưu ý</Text>
               <Text style={styles.infoText}>
-                - Rút tối thiểu: {MIN_WITHDRAWAL} gems{'\n'}
+                - Rút tối thiểu: {MIN_WITHDRAWAL.toLocaleString()} gems{'\n'}
+                - Số dư tối thiểu cần giữ: {MIN_BALANCE.toLocaleString()} gems{'\n'}
+                - Rút tối đa: {maxWithdrawable.toLocaleString()} gems{'\n'}
                 - Thời gian xử lý: 1-3 ngày làm việc{'\n'}
                 - Tỉ giá: 1 gem = 200 VND
               </Text>
@@ -339,6 +414,7 @@ const WithdrawScreen = ({ navigation }) => {
           </View>
         </KeyboardAvoidingView>
       </SafeAreaView>
+      {AlertComponent}
     </LinearGradient>
   );
 };
@@ -386,7 +462,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: SPACING.lg,
-    paddingBottom: 120,
+    paddingBottom: CONTENT_BOTTOM_PADDING + 80,
   },
   balanceCard: {
     backgroundColor: GLASS.background,
@@ -499,6 +575,24 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     paddingVertical: SPACING.md,
     paddingHorizontal: SPACING.md,
+  },
+  minBalanceWarning: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: 'rgba(255, 71, 87, 0.15)',
+    borderRadius: 12,
+    padding: SPACING.md,
+    marginTop: SPACING.lg,
+    gap: SPACING.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 71, 87, 0.3)',
+  },
+  minBalanceWarningText: {
+    flex: 1,
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.error,
+    lineHeight: 22,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
   },
   warningCard: {
     flexDirection: 'row',

@@ -14,7 +14,7 @@
 └─────────────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │   [🏠]      [🛒]      [📊]            [🤖]             [🔔]       [💰]                │
-│   Home      Shop   Giao Dịch  Gemral  Notifications Tài Sản              │
+│   Home      Shop   Giao Dịch  Gem Master  Notifications Tài Sản              │
 │  ACTIVE                                                                     │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -330,12 +330,12 @@ PatternDetailScreen
 
 ---
 
-## 4️⃣ **Gemral** 🤖
+## 4️⃣ **Gem Master** 🤖
 
 **Icon:** Robot (robot)  
-**Tên:** Gemral  
-**Route:** `/Gemral` (internal)  
-**Screen:** GemralScreen
+**Tên:** GEM Master  
+**Route:** `/Gem Master` (internal)  
+**Screen:** Gem MasterScreen
 
 **Chức năng:**
 - ✅ AI chat (I Ching, Tarot, Tử Vi)
@@ -347,11 +347,11 @@ PatternDetailScreen
 **Layout:**
 
 ```
-GemralScreen
+Gem MasterScreen
 ├─ Header:
 │   ├─ Back button
-│   ├─ Title: Gemral
-│   ├─ Info icon (about Gemral)
+│   ├─ Title: GEM Master
+│   ├─ Info icon (about Gem Master)
 │   └─ Dashboard button (top right)
 │
 ├─ Chat Messages (inverted FlatList)
@@ -380,7 +380,7 @@ GemralScreen
 
 **DashboardScreen (nested):**
 ```
-DashboardScreen (accessed from Gemral header)
+DashboardScreen (accessed from Gem Master header)
 ├─ Header:
 │   ├─ Back to Chat
 │   ├─ Title: My Dashboard
@@ -431,8 +431,8 @@ DashboardScreen (accessed from Gemral header)
 - Only adapt UI components
 
 **Web App Equivalent:**
-- Web: `/Gemral` + `/dashboard`
-- Mobile: Gemral tab + nested Dashboard
+- Web: `/Gem Master` + `/dashboard`
+- Mobile: Gem Master tab + nested Dashboard
 
 ---
 
@@ -765,7 +765,7 @@ AffiliateScreen
 | 1 | **Home** | 🏠 | `/forum` | ForumScreen | Forum posts, Community feed, Categories |
 | 2 | **Shop** | 🛒 | `/shop` | ShopScreen | Products, Courses, Subscriptions, Cart |
 | 3 | **Giao Dịch** | 📊 | `/scannerv2` | ScannerScreen | Pattern scanner, Charts, Trading signals |
-| 4 | **Gemral** | 🤖 | `/Gemral` | GemralScreen | AI chat, Dashboard, Widgets |
+| 4 | **Gem Master** | 🤖 | `/Gem Master` | Gem MasterScreen | AI chat, Dashboard, Widgets |
 | 5 | **Notifications** | 🔔 | `/notifications` | NotificationsScreen | All alerts, Deep linking |
 | 6 | **Tài Sản** | 💰 | `/account` | AccountScreen | Profile, Portfolio, Settings, Tools |
 
@@ -808,7 +808,7 @@ const TAB_ICONS = {
   Home: 'home',                           // Material Community Icons
   Shop: 'shopping',                       // or 'cart'
   Trading: 'chart-line',                  // or 'trending-up'
-  Gemral: 'robot',
+  Gem Master: 'robot',
   Notifications: 'bell',
   Account: 'wallet',                      // or 'account-circle'
 };
@@ -828,7 +828,7 @@ const TAB_ICONS = {
 1. Scanner 🔍
 2. Tools 🛠️
 3. Community 👥
-4. Gemral 🤖
+4. Gem Master 🤖
 5. Account 👤
 ```
 
@@ -837,7 +837,7 @@ const TAB_ICONS = {
 1. Giao Dịch 📊
 2. Feeds 📰
 3. Shop 🛒
-4. Gemral 🤖
+4. Gem Master 🤖
 5. Notifications 🔔
 6. Account 👤
 ```
@@ -847,7 +847,7 @@ const TAB_ICONS = {
 1. Home 🏠 → /forum
 2. Shop 🛒 → /shop
 3. Giao Dịch 📊 → /scannerv2
-4. Gemral 🤖
+4. Gem Master 🤖
 5. Notifications 🔔
 6. Tài Sản 💰 → /account
 ```
@@ -870,7 +870,7 @@ const TAB_ICONS = {
 - ✅ Routes to `/scannerv2` (matches web exactly)
 - ✅ Core trading functionality
 
-### **4. Gemral giữ nguyên:**
+### **4. Gem Master giữ nguyên:**
 - ✅ AI assistant + Dashboard
 
 ### **5. Notifications giữ nguyên:**
@@ -897,7 +897,7 @@ import { COLORS } from '../utils/colors';
 import ForumScreen from '../screens/Forum/ForumScreen';
 import ShopScreen from '../screens/Shop/ShopScreen';
 import ScannerScreen from '../screens/Scanner/ScannerScreen';
-import GemralScreen from '../screens/Gemral/GemralScreen';
+import Gem MasterScreen from '../screens/Gem Master/Gem MasterScreen';
 import NotificationsScreen from '../screens/Notifications/NotificationsScreen';
 import AccountScreen from '../screens/Account/AccountScreen';
 
@@ -972,10 +972,10 @@ const MainNavigator = () => {
       />
       
       <Tab.Screen
-        name="Gemral"
-        component={GemralScreen}
+        name="Gem Master"
+        component={Gem MasterScreen}
         options={{
-          title: 'Gemral',
+          title: 'Gem Master',
           tabBarIcon: ({ color, size }) => (
             <Icon name="robot" size={size} color={color} />
           ),
@@ -1038,7 +1038,7 @@ Login Screen
   ├─ View chart
   └─ Set alerts
   ↓
-🤖 Gemral
+🤖 GEM MASTER
   ├─ Chat with AI
   ├─ Create widgets
   └─ View dashboard
@@ -1065,7 +1065,7 @@ Login Screen
 | `/forum` | Home 🏠 | ForumScreen |
 | `/shop` | Shop 🛒 | ShopScreen |
 | `/scannerv2` | Giao Dịch 📊 | ScannerScreen |
-| `/Gemral` | Gemral 🤖 | GemralScreen |
+| `/Gem Master` | Gem Master 🤖 | Gem MasterScreen |
 | `/account` | Tài Sản 💰 | AccountScreen |
 | `/notifications` (new) | Notifications 🔔 | NotificationsScreen |
 
@@ -1090,7 +1090,7 @@ TABS:
 1. Home (🏠) → ForumScreen (/forum)
 2. Shop (🛒) → ShopScreen (/shop)
 3. Giao Dịch (📊) → ScannerScreen (/scannerv2)
-4. Gemral (🤖) → GemralScreen
+4. Gem Master (🤖) → Gem MasterScreen
 5. Notifications (🔔) → NotificationsScreen
 6. Tài Sản (💰) → AccountScreen (/account)
 
@@ -1102,4 +1102,4 @@ Test navigation flow
 
 ---
 
-**💎 NAVIGATION STRUCTURE HOÀN CHỈNH! APPROVE? 🚀**
+**💎 NAVIGATION STRUCTURE HOÀN CHỈNH!

@@ -12,10 +12,10 @@ import {
   StyleSheet,
   RefreshControl,
   ActivityIndicator,
-  Alert,
   TextInput,
   Modal,
 } from 'react-native';
+import CustomAlert from '../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -49,6 +49,23 @@ const AdminApplicationsScreen = ({ navigation }) => {
   const [rejectingApp, setRejectingApp] = useState(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [processing, setProcessing] = useState(false);
+
+  // Custom Alert state
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: '',
+    message: '',
+    buttons: [{ text: 'OK' }],
+    type: 'default',
+  });
+
+  const showAlert = (title, message, buttons = [{ text: 'OK' }], type = 'default') => {
+    setAlertConfig({ visible: true, title, message, buttons, type });
+  };
+
+  const closeAlert = () => {
+    setAlertConfig((prev) => ({ ...prev, visible: false }));
+  };
 
   useEffect(() => {
     if (isAdmin) {
@@ -99,7 +116,7 @@ const AdminApplicationsScreen = ({ navigation }) => {
       setApplications(enrichedApplications);
     } catch (error) {
       console.error('[AdminApplications] Error loading:', error);
-      Alert.alert('Lỗi', 'Không thể tải danh sách đơn đăng ký');
+      showAlert('Lỗi', 'Không thể tải danh sách đơn đăng ký', [{ text: 'OK' }], 'error');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -112,14 +129,13 @@ const AdminApplicationsScreen = ({ navigation }) => {
   };
 
   const handleApprove = async (application) => {
-    Alert.alert(
+    showAlert(
       'Xác nhận duyệt',
       `Duyệt đơn đăng ký ${application.application_type.toUpperCase()} của ${application.full_name}?`,
       [
-        { text: 'Hủy', style: 'cancel' },
+        { text: 'Huỷ', style: 'cancel' },
         {
           text: 'Duyệt',
-          style: 'default',
           onPress: async () => {
             try {
               setProcessing(true);
@@ -134,23 +150,44 @@ const AdminApplicationsScreen = ({ navigation }) => {
               if (error) throw error;
 
               if (data?.success) {
-                Alert.alert(
+                // Gửi notification cho user
+                try {
+                  await supabase.functions.invoke('partnership-notifications', {
+                    body: {
+                      event_type: 'partnership_approved',
+                      user_id: application.user_id,
+                      data: {
+                        partner_type: application.application_type,
+                        ctv_tier: application.application_type === 'ctv' ? 'beginner' : null,
+                        affiliate_code: data.affiliate_code,
+                      },
+                    },
+                  });
+                  console.log('[AdminApplications] Notification sent');
+                } catch (notifError) {
+                  console.error('[AdminApplications] Notification error:', notifError);
+                  // Không throw lỗi vì approve đã thành công
+                }
+
+                showAlert(
                   'Thành công',
                   `Đã duyệt đơn đăng ký!\nMã Affiliate: ${data.affiliate_code}`,
-                  [{ text: 'OK', onPress: () => loadApplications() }]
+                  [{ text: 'OK', onPress: () => loadApplications() }],
+                  'success'
                 );
               } else {
-                Alert.alert('Lỗi', data?.error || 'Không thể duyệt đơn');
+                showAlert('Lỗi', data?.error || 'Không thể duyệt đơn', [{ text: 'OK' }], 'error');
               }
             } catch (error) {
               console.error('[AdminApplications] Approve error:', error);
-              Alert.alert('Lỗi', 'Không thể duyệt đơn đăng ký');
+              showAlert('Lỗi', 'Không thể duyệt đơn đăng ký', [{ text: 'OK' }], 'error');
             } finally {
               setProcessing(false);
             }
           },
         },
-      ]
+      ],
+      'warning'
     );
   };
 
@@ -162,7 +199,7 @@ const AdminApplicationsScreen = ({ navigation }) => {
 
   const confirmReject = async () => {
     if (!rejectionReason.trim()) {
-      Alert.alert('Lỗi', 'Vui lòng nhập lý do từ chối');
+      showAlert('Lỗi', 'Vui lòng nhập lý do từ chối', [{ text: 'OK' }], 'error');
       return;
     }
 
@@ -179,15 +216,15 @@ const AdminApplicationsScreen = ({ navigation }) => {
 
       if (data?.success) {
         setShowRejectModal(false);
-        Alert.alert('Thành công', 'Đã từ chối đơn đăng ký', [
+        showAlert('Thành công', 'Đã từ chối đơn đăng ký', [
           { text: 'OK', onPress: () => loadApplications() },
-        ]);
+        ], 'success');
       } else {
-        Alert.alert('Lỗi', data?.error || 'Không thể từ chối đơn');
+        showAlert('Lỗi', data?.error || 'Không thể từ chối đơn', [{ text: 'OK' }], 'error');
       }
     } catch (error) {
       console.error('[AdminApplications] Reject error:', error);
-      Alert.alert('Lỗi', 'Không thể từ chối đơn đăng ký');
+      showAlert('Lỗi', 'Không thể từ chối đơn đăng ký', [{ text: 'OK' }], 'error');
     } finally {
       setProcessing(false);
     }
@@ -502,6 +539,16 @@ const AdminApplicationsScreen = ({ navigation }) => {
             </View>
           </View>
         </Modal>
+
+        {/* Custom Alert */}
+        <CustomAlert
+          visible={alertConfig.visible}
+          title={alertConfig.title}
+          message={alertConfig.message}
+          buttons={alertConfig.buttons}
+          type={alertConfig.type}
+          onClose={closeAlert}
+        />
       </SafeAreaView>
     </LinearGradient>
   );
@@ -518,40 +565,45 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
   },
   backBtn: {
-    padding: 8,
+    padding: 6,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 17,
     fontWeight: '700',
-    color: '#FFD700',
+    color: COLORS.gold,
   },
   filterTabs: {
     flexDirection: 'row',
-    paddingHorizontal: SPACING.lg,
-    marginBottom: SPACING.md,
-    gap: 8,
+    paddingHorizontal: SPACING.md,
+    marginBottom: SPACING.sm,
+    gap: SPACING.sm,
   },
   filterTab: {
     flex: 1,
-    paddingVertical: 10,
-    borderRadius: 10,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    borderRadius: 20,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   filterTabActive: {
-    backgroundColor: '#FFD700',
+    backgroundColor: 'rgba(106, 91, 255, 0.2)',
+    borderColor: COLORS.purple,
   },
   filterTabText: {
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: '600',
     color: COLORS.textMuted,
   },
   filterTabTextActive: {
-    color: '#000',
+    color: COLORS.gold,
+    fontWeight: '700',
   },
   loadingContainer: {
     flex: 1,
@@ -562,16 +614,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: SPACING.lg,
+    paddingHorizontal: SPACING.md,
+    paddingBottom: 120,
   },
   emptyState: {
     alignItems: 'center',
     paddingVertical: SPACING.huge,
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: 14,
     color: COLORS.textMuted,
-    marginTop: SPACING.md,
+    marginTop: SPACING.sm,
   },
   accessDenied: {
     flex: 1,
@@ -579,24 +632,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   accessDeniedText: {
-    fontSize: 18,
+    fontSize: 16,
     color: COLORS.error,
   },
 
   // Application Card
   applicationCard: {
-    backgroundColor: GLASS.background,
-    borderRadius: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 10,
+    marginBottom: 8,
     overflow: 'hidden',
   },
   appHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: SPACING.md,
+    padding: SPACING.sm,
   },
   appHeaderLeft: {
     flexDirection: 'row',
@@ -604,75 +655,76 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   appTypeBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
-    marginRight: SPACING.sm,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    marginRight: SPACING.xs,
   },
   appTypeText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
+    color: COLORS.gold,
   },
   appInfo: {
     flex: 1,
   },
   appName: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: '#FFF',
   },
   appEmail: {
-    fontSize: 13,
+    fontSize: 11,
     color: COLORS.textMuted,
-    marginTop: 2,
+    marginTop: 1,
   },
   appHeaderRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
   },
   statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
   },
   statusText: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: '600',
   },
 
   // Details
   appDetails: {
-    paddingHorizontal: SPACING.md,
-    paddingBottom: SPACING.md,
+    paddingHorizontal: SPACING.sm,
+    paddingBottom: SPACING.sm,
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.1)',
-    paddingTop: SPACING.md,
+    paddingTop: SPACING.sm,
   },
   detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
+    gap: 6,
+    marginBottom: 6,
   },
   detailText: {
-    fontSize: 14,
+    fontSize: 12,
     color: COLORS.textSecondary,
   },
   detailSection: {
-    marginTop: SPACING.sm,
-    padding: SPACING.sm,
+    marginTop: SPACING.xs,
+    padding: SPACING.xs,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 8,
+    borderRadius: 6,
   },
   detailLabel: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: '600',
     color: COLORS.textMuted,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   detailValue: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#FFF',
   },
   rejectionSection: {
@@ -688,26 +740,26 @@ const styles = StyleSheet.create({
   // Action Buttons
   actionButtons: {
     flexDirection: 'row',
-    gap: 12,
-    marginTop: SPACING.md,
+    gap: 8,
+    marginTop: SPACING.sm,
   },
   actionBtn: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
-    borderRadius: 12,
-    gap: 6,
+    paddingVertical: 10,
+    borderRadius: 8,
+    gap: 4,
   },
   rejectBtn: {
-    backgroundColor: '#FF5252',
+    backgroundColor: COLORS.burgundy,
   },
   approveBtn: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: 'rgba(76, 175, 80, 0.3)',
   },
   actionBtnText: {
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: '600',
     color: '#FFF',
   },
@@ -718,60 +770,58 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: SPACING.lg,
+    padding: SPACING.md,
   },
   modalContent: {
     backgroundColor: '#1a1a2e',
-    borderRadius: 20,
-    padding: SPACING.xl,
+    borderRadius: 14,
+    padding: SPACING.lg,
     width: '100%',
-    maxWidth: 400,
+    maxWidth: 360,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 17,
     fontWeight: '700',
-    color: '#FFF',
-    marginBottom: 8,
+    color: COLORS.gold,
+    marginBottom: 6,
   },
   modalSubtitle: {
-    fontSize: 14,
+    fontSize: 12,
     color: COLORS.textMuted,
-    marginBottom: SPACING.lg,
+    marginBottom: SPACING.md,
   },
   reasonInput: {
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
-    padding: SPACING.md,
+    borderRadius: 10,
+    padding: SPACING.sm,
     color: '#FFF',
-    fontSize: 15,
-    minHeight: 100,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    fontSize: 13,
+    minHeight: 80,
   },
   modalButtons: {
     flexDirection: 'row',
-    gap: 12,
-    marginTop: SPACING.lg,
+    gap: 10,
+    marginTop: SPACING.md,
   },
   modalBtn: {
     flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
+    paddingVertical: 12,
+    borderRadius: 10,
     alignItems: 'center',
   },
   modalCancelBtn: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
   modalConfirmBtn: {
-    backgroundColor: '#FF5252',
+    backgroundColor: COLORS.burgundy,
   },
   modalCancelText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: '#FFF',
   },
   modalConfirmText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: '#FFF',
   },

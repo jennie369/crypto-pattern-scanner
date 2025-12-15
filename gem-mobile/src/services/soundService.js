@@ -5,6 +5,8 @@
  */
 
 import { supabase } from './supabase';
+import * as FileSystem from 'expo-file-system';
+import { decode } from 'base64-arraybuffer';
 
 export const soundService = {
   /**
@@ -217,14 +219,18 @@ export const soundService = {
         return { success: false, error: 'Chua dang nhap' };
       }
 
-      // Upload audio file
+      // Upload audio file using FileSystem (React Native compatible)
       const audioFileName = `${user.id}/${Date.now()}_audio.mp3`;
-      const audioResponse = await fetch(audioUri);
-      const audioBlob = await audioResponse.blob();
+
+      // Read file as base64 and convert to ArrayBuffer
+      const audioBase64 = await FileSystem.readAsStringAsync(audioUri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      const audioArrayBuffer = decode(audioBase64);
 
       const { data: audioData, error: audioError } = await supabase.storage
         .from('sounds')
-        .upload(audioFileName, audioBlob, {
+        .upload(audioFileName, audioArrayBuffer, {
           contentType: 'audio/mpeg',
           upsert: false,
         });
@@ -239,12 +245,16 @@ export const soundService = {
       let coverUrl = null;
       if (coverUri) {
         const coverFileName = `${user.id}/${Date.now()}_cover.jpg`;
-        const coverResponse = await fetch(coverUri);
-        const coverBlob = await coverResponse.blob();
+
+        // Read cover image as base64
+        const coverBase64 = await FileSystem.readAsStringAsync(coverUri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+        const coverArrayBuffer = decode(coverBase64);
 
         const { error: coverError } = await supabase.storage
           .from('sounds')
-          .upload(coverFileName, coverBlob, {
+          .upload(coverFileName, coverArrayBuffer, {
             contentType: 'image/jpeg',
             upsert: false,
           });

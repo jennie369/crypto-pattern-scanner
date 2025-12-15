@@ -7,6 +7,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../utils/constants';
 
+// Re-export for use in other services
+export { SUPABASE_URL, SUPABASE_ANON_KEY };
+
 // Custom storage adapter that works on both web and native
 const customStorage = {
   getItem: async (key) => {
@@ -153,6 +156,20 @@ export const updateUserProfile = async (userId, updates) => {
   } catch (error) {
     console.error('UpdateUserProfile error:', error);
     return { data: null, error };
+  }
+};
+
+// Biometric auth helper - login with refresh token
+export const setSessionFromToken = async (refreshToken) => {
+  try {
+    const { data, error } = await supabase.auth.setSession({
+      refresh_token: refreshToken,
+      access_token: '', // Supabase will generate new access token
+    });
+    return { data, error };
+  } catch (error) {
+    console.error('SetSessionFromToken error:', error);
+    return { data: null, error: { message: error.message || 'Lỗi khôi phục phiên đăng nhập' } };
   }
 };
 

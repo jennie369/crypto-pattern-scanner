@@ -28,6 +28,20 @@ class VoiceService {
   }
 
   /**
+   * Get today's date in Vietnam timezone (UTC+7)
+   * CRITICAL: Must match database timezone for proper daily reset
+   * @returns {string} YYYY-MM-DD format
+   */
+  getVietnamDate() {
+    const now = new Date();
+    // Vietnam is UTC+7
+    const vietnamOffset = 7 * 60; // minutes
+    const localOffset = now.getTimezoneOffset();
+    const vietnamTime = new Date(now.getTime() + (vietnamOffset + localOffset) * 60 * 1000);
+    return vietnamTime.toISOString().split('T')[0];
+  }
+
+  /**
    * Request microphone permission
    * @returns {Promise<boolean>}
    */
@@ -286,7 +300,8 @@ class VoiceService {
     if (!userId) return 0;
 
     try {
-      const today = new Date().toISOString().split('T')[0];
+      // Use Vietnam timezone for consistent daily reset at 00:00 Vietnam time
+      const today = this.getVietnamDate();
 
       const { data, error } = await supabase
         .from('voice_usage')
@@ -317,46 +332,50 @@ class VoiceService {
     if (!userId) return false;
 
     try {
-      const today = new Date().toISOString().split('T')[0];
+      // Use Vietnam timezone for consistent daily reset at 00:00 Vietnam time
+      const today = this.getVietnamDate();
 
-      // Upsert voice usage
-      const { error } = await supabase
+      // Try to get existing record first
+      const { data: existing } = await supabase
         .from('voice_usage')
-        .upsert(
-          {
+        .select('count')
+        .eq('user_id', userId)
+        .eq('date', today)
+        .single();
+
+      if (existing) {
+        // Update existing record
+        const { error } = await supabase
+          .from('voice_usage')
+          .update({
+            count: existing.count + 1,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', userId)
+          .eq('date', today);
+
+        if (error) {
+          console.error('[VoiceService] Update voice count error:', error);
+          return false;
+        }
+      } else {
+        // Insert new record for today
+        const { error } = await supabase
+          .from('voice_usage')
+          .insert({
             user_id: userId,
             date: today,
             count: 1,
             updated_at: new Date().toISOString()
-          },
-          {
-            onConflict: 'user_id,date',
-            ignoreDuplicates: false
-          }
-        );
+          });
 
-      if (error) {
-        // Try increment if upsert fails
-        const { data: existing } = await supabase
-          .from('voice_usage')
-          .select('count')
-          .eq('user_id', userId)
-          .eq('date', today)
-          .single();
-
-        if (existing) {
-          await supabase
-            .from('voice_usage')
-            .update({
-              count: existing.count + 1,
-              updated_at: new Date().toISOString()
-            })
-            .eq('user_id', userId)
-            .eq('date', today);
+        if (error) {
+          console.error('[VoiceService] Insert voice count error:', error);
+          return false;
         }
       }
 
-      console.log('[VoiceService] Incremented voice count for user:', userId);
+      console.log('[VoiceService] Incremented voice count for user:', userId, 'date:', today);
       return true;
 
     } catch (error) {

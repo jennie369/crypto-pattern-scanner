@@ -11,7 +11,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
@@ -34,12 +33,23 @@ import {
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { useAuth } from '../../contexts/AuthContext';
 import { partnershipService } from '../../services/partnershipService';
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 
 export default function PartnershipRegistrationScreen({ route, navigation }) {
-  const { type = 'affiliate' } = route.params || {};
+  const { type = 'affiliate', fromGemMaster = false } = route.params || {};
   const { user, profile } = useAuth();
+  const { alert, AlertComponent } = useCustomAlert();
 
   const isCtv = type === 'ctv';
+
+  // Handle back navigation - if came from GemMaster, go back to GemMaster tab
+  const handleGoBack = () => {
+    if (fromGemMaster) {
+      navigation.navigate('GemMaster');
+    } else {
+      navigation.goBack();
+    }
+  };
 
   // Form state
   const [formData, setFormData] = useState({
@@ -105,7 +115,12 @@ export default function PartnershipRegistrationScreen({ route, navigation }) {
 
   const handleSubmit = async () => {
     if (!validateForm()) {
-      Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin bắt buộc');
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Vui lòng điền đầy đủ thông tin bắt buộc',
+        buttons: [{ text: 'OK' }],
+      });
       return;
     }
 
@@ -123,21 +138,32 @@ export default function PartnershipRegistrationScreen({ route, navigation }) {
       });
 
       if (result.success) {
-        Alert.alert(
-          'Thành công',
-          result.message || 'Đơn đăng ký đã được gửi!',
-          [
+        alert({
+          type: 'success',
+          title: 'Thành công',
+          message: result.message || 'Đơn đăng ký đã được gửi thành công! Chúng tôi sẽ xem xét trong 1-2 ngày làm việc.',
+          buttons: [
             {
               text: 'OK',
-              onPress: () => navigation.goBack(),
+              onPress: handleGoBack,
             },
-          ]
-        );
+          ],
+        });
       } else {
-        Alert.alert('Lỗi', result.error || 'Có lỗi xảy ra');
+        alert({
+          type: 'error',
+          title: 'Lỗi',
+          message: result.error || 'Có lỗi xảy ra',
+          buttons: [{ text: 'OK' }],
+        });
       }
     } catch (error) {
-      Alert.alert('Lỗi', 'Có lỗi xảy ra khi gửi đơn đăng ký');
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Có lỗi xảy ra khi gửi đơn đăng ký',
+        buttons: [{ text: 'OK' }],
+      });
     } finally {
       setLoading(false);
     }
@@ -161,7 +187,7 @@ export default function PartnershipRegistrationScreen({ route, navigation }) {
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => navigation.goBack()}
+            onPress={handleGoBack}
           >
             <ArrowLeft size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
@@ -402,6 +428,9 @@ export default function PartnershipRegistrationScreen({ route, navigation }) {
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
+
+      {/* Custom Alert Modal */}
+      {AlertComponent}
     </LinearGradient>
   );
 }

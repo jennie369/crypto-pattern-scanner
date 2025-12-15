@@ -34,15 +34,19 @@ import {
   Trash2,
   ChartLine,
   Zap,
+  Gift,
 } from 'lucide-react-native';
 import { forumService } from '../../services/forumService';
 import {
+  notificationService,
   NOTIFICATION_CATEGORIES,
   CATEGORY_LABELS,
   TYPE_TO_CATEGORY,
 } from '../../services/notificationService';
 import { useAuth } from '../../contexts/AuthContext';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
+import useScrollToTop from '../../hooks/useScrollToTop';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -58,6 +62,9 @@ const NOTIFICATION_CONFIG = {
   follow: { icon: UserPlus, color: COLORS.green, fill: 'transparent' },
   forum_follow: { icon: UserPlus, color: COLORS.green, fill: 'transparent' },
   mention: { icon: MessageCircle, color: COLORS.purple, fill: 'transparent' },
+  // Gift
+  gift_received: { icon: Gift, color: COLORS.gold, fill: COLORS.gold },
+  gift_sent: { icon: Gift, color: COLORS.purple, fill: 'transparent' },
   // Trading
   pattern_detected: { icon: ChartLine, color: COLORS.gold, fill: 'transparent' },
   price_alert: { icon: Target, color: COLORS.gold, fill: 'transparent' },
@@ -71,6 +78,14 @@ const NOTIFICATION_CONFIG = {
   promotion: { icon: Bell, color: COLORS.gold, fill: 'transparent' },
   system: { icon: Bell, color: COLORS.textMuted, fill: 'transparent' },
   default: { icon: Bell, color: COLORS.textMuted, fill: 'transparent' },
+  // Partnership/Affiliate
+  partnership_approved: { icon: Zap, color: COLORS.gold, fill: COLORS.gold },
+  partnership_rejected: { icon: AlertTriangle, color: '#F6465D', fill: 'transparent' },
+  partnership_pending: { icon: Bell, color: COLORS.purple, fill: 'transparent' },
+  affiliate_commission: { icon: TrendingUp, color: COLORS.green, fill: 'transparent' },
+  // Admin notifications
+  admin_partnership_application: { icon: UserPlus, color: COLORS.gold, fill: COLORS.gold },
+  admin_withdraw_request: { icon: TrendingDown, color: COLORS.gold, fill: 'transparent' },
 };
 
 // Category tabs data
@@ -83,7 +98,7 @@ const CATEGORY_TABS = [
 
 export default function NotificationsScreen() {
   const navigation = useNavigation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const swipeableRefs = useRef({});
 
   const [notifications, setNotifications] = useState([]);
@@ -91,6 +106,13 @@ export default function NotificationsScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [activeCategory, setActiveCategory] = useState('all');
   const [deletingIds, setDeletingIds] = useState(new Set());
+
+  // Double-tap to scroll to top and refresh
+  const { scrollViewRef: flatListRef } = useScrollToTop('Notifications', async () => {
+    setRefreshing(true);
+    await loadNotifications();
+    setRefreshing(false);
+  });
 
   // Load notifications on focus
   useFocusEffect(
@@ -105,13 +127,37 @@ export default function NotificationsScreen() {
 
   const loadNotifications = async () => {
     try {
-      const data = await forumService.getNotifications();
-      // Add category to each notification
-      const enrichedData = data.map(n => ({
-        ...n,
-        category: TYPE_TO_CATEGORY[n.type] || 'system',
-      }));
-      setNotifications(enrichedData);
+      // Get notifications from database (includes broadcasts where user_id IS NULL)
+      if (user?.id) {
+        const { success, data } = await notificationService.getUserNotificationsFromDB(user.id);
+        if (success && data) {
+          // Data already has category added by the service
+          // Normalize read field (notifications table uses 'read', forum_notifications uses 'is_read')
+          const normalizedData = data.map(n => ({
+            ...n,
+            read: n.read || n.is_read || false,
+          }));
+          setNotifications(normalizedData);
+        } else {
+          // Fallback to forumService if database query fails
+          const forumData = await forumService.getNotifications();
+          const enrichedData = forumData.map(n => ({
+            ...n,
+            category: TYPE_TO_CATEGORY[n.type] || 'system',
+            read: n.read || n.is_read || false,
+          }));
+          setNotifications(enrichedData);
+        }
+      } else {
+        // No user, try forumService
+        const data = await forumService.getNotifications();
+        const enrichedData = data.map(n => ({
+          ...n,
+          category: TYPE_TO_CATEGORY[n.type] || 'system',
+          read: n.read || n.is_read || false,
+        }));
+        setNotifications(enrichedData);
+      }
     } catch (error) {
       console.error('[Notifications] Load error:', error);
     } finally {
@@ -132,16 +178,49 @@ export default function NotificationsScreen() {
 
   // Handle notification press
   const handleNotificationPress = async (notification) => {
-    // Mark as read
-    if (!notification.read) {
-      await forumService.markAsRead(notification.id);
+    // Mark as read - check both `read` and `is_read` fields
+    const isRead = notification.read || notification.is_read;
+    if (!isRead) {
+      // Try both services to ensure we update the correct table
+      // notificationService for 'notifications' table, forumService for 'forum_notifications' table
+      await Promise.all([
+        notificationService.markNotificationAsRead(notification.id, user?.id),
+        forumService.markAsRead(notification.id),
+      ]);
       setNotifications(prev =>
-        prev.map(n => n.id === notification.id ? { ...n, read: true } : n)
+        prev.map(n => n.id === notification.id ? { ...n, read: true, is_read: true } : n)
       );
     }
 
     // Navigate based on type
     const data = notification.data || {};
+
+    // Check for screen-based navigation (deep link from push notification)
+    if (data.screen) {
+      switch (data.screen) {
+        case 'AffiliateWelcome':
+          navigation.navigate('Account', {
+            screen: 'AffiliateWelcome',
+            params: {
+              partner_type: data.partner_type,
+              ctv_tier: data.ctv_tier,
+              isNewlyApproved: data.isNewlyApproved,
+            },
+          });
+          return;
+        case 'AffiliateDashboard':
+          navigation.navigate('Account', { screen: 'AffiliateDashboard' });
+          return;
+        case 'MarketingKits':
+          navigation.navigate('Account', { screen: 'MarketingKits' });
+          return;
+        case 'HelpCenter':
+          navigation.navigate('Account', { screen: 'HelpCenter' });
+          return;
+      }
+    }
+
+    // Legacy type-based navigation
     switch (notification.type) {
       case 'like':
       case 'forum_like':
@@ -184,6 +263,48 @@ export default function NotificationsScreen() {
           });
         }
         break;
+      // Partnership notifications
+      case 'partnership_approved':
+        navigation.navigate('Account', {
+          screen: 'AffiliateWelcome',
+          params: {
+            partner_type: data.partner_type,
+            ctv_tier: data.ctv_tier,
+            isNewlyApproved: true,
+          },
+        });
+        break;
+      case 'partnership_rejected':
+        navigation.navigate('Account', { screen: 'PartnershipRegistration' });
+        break;
+      case 'affiliate_commission':
+        navigation.navigate('Account', { screen: 'AffiliateDashboard' });
+        break;
+      // Admin notifications
+      case 'admin_partnership_application':
+        navigation.navigate('Account', {
+          screen: 'AdminDashboard',
+          params: { initialTab: 'applications' },
+        });
+        break;
+      case 'admin_withdraw_request':
+        navigation.navigate('Account', {
+          screen: 'AdminDashboard',
+          params: { initialTab: 'withdrawals' },
+        });
+        break;
+      // Gift notifications
+      case 'gift_received':
+        if (data.post_id) {
+          navigation.navigate('Home', {
+            screen: 'PostDetail',
+            params: { postId: data.post_id },
+          });
+        } else {
+          // Navigate to wallet/gift history
+          navigation.navigate('Account', { screen: 'GiftHistory' });
+        }
+        break;
     }
   };
 
@@ -207,7 +328,9 @@ export default function NotificationsScreen() {
 
   // Mark all as read
   const handleMarkAllAsRead = async () => {
-    await forumService.markAllAsRead();
+    if (user?.id) {
+      await notificationService.markAllNotificationsAsRead(user.id);
+    }
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
   };
 
@@ -448,6 +571,7 @@ export default function NotificationsScreen() {
           </View>
         ) : (
           <FlatList
+            ref={flatListRef}
             data={filteredNotifications}
             renderItem={renderNotification}
             keyExtractor={(item) => item.id?.toString()}
@@ -562,7 +686,7 @@ const styles = StyleSheet.create({
   // List
   listContent: {
     padding: SPACING.md,
-    paddingBottom: 120,
+    paddingBottom: CONTENT_BOTTOM_PADDING,
   },
   emptyListContent: {
     flex: 1,

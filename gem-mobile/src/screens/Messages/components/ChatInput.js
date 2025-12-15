@@ -23,8 +23,8 @@ import {
   Animated,
   Image,
   Platform,
-  Alert,
 } from 'react-native';
+import alertService from '../../../services/alertService';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -124,12 +124,12 @@ export default function ChatInput({
   // =====================================================
 
   const handleMediaPicker = useCallback(() => {
-    Alert.alert(
-      'Add Attachment',
-      'Choose what to send',
+    alertService.info(
+      'Thêm tệp đính kèm',
+      'Chọn nội dung muốn gửi',
       [
         {
-          text: 'Photo Library',
+          text: 'Thư viện ảnh',
           onPress: pickImage,
         },
         {
@@ -137,15 +137,14 @@ export default function ChatInput({
           onPress: takePhoto,
         },
         {
-          text: 'File',
+          text: 'Tài liệu',
           onPress: pickDocument,
         },
         {
-          text: 'Cancel',
+          text: 'Huỷ',
           style: 'cancel',
         },
-      ],
-      { cancelable: true }
+      ]
     );
   }, []);
 
@@ -153,7 +152,7 @@ export default function ChatInput({
     try {
       const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!permission.granted) {
-        Alert.alert('Permission Required', 'Please allow access to your photo library');
+        alertService.warning('Cần cấp quyền', 'Vui lòng cho phép truy cập thư viện ảnh');
         return;
       }
 
@@ -168,7 +167,7 @@ export default function ChatInput({
       }
     } catch (error) {
       console.error('Error picking image:', error);
-      Alert.alert('Error', 'Failed to pick image');
+      alertService.error('Lỗi', 'Không thể chọn ảnh');
     }
   };
 
@@ -176,7 +175,7 @@ export default function ChatInput({
     try {
       const permission = await ImagePicker.requestCameraPermissionsAsync();
       if (!permission.granted) {
-        Alert.alert('Permission Required', 'Please allow access to your camera');
+        alertService.warning('Cần cấp quyền', 'Vui lòng cho phép truy cập camera');
         return;
       }
 
@@ -190,7 +189,7 @@ export default function ChatInput({
       }
     } catch (error) {
       console.error('Error taking photo:', error);
-      Alert.alert('Error', 'Failed to take photo');
+      alertService.error('Lỗi', 'Không thể chụp ảnh');
     }
   };
 
@@ -206,7 +205,7 @@ export default function ChatInput({
       }
     } catch (error) {
       console.error('Error picking document:', error);
-      Alert.alert('Error', 'Failed to pick file');
+      alertService.error('Lỗi', 'Không thể chọn tệp');
     }
   };
 
@@ -230,7 +229,7 @@ export default function ChatInput({
       });
     } catch (error) {
       console.error('Error uploading attachment:', error);
-      Alert.alert('Error', 'Failed to upload attachment');
+      alertService.error('Lỗi', 'Không thể tải lên tệp đính kèm');
     } finally {
       setUploading(false);
     }
@@ -276,7 +275,7 @@ export default function ChatInput({
       });
     } catch (error) {
       console.error('Error sending voice message:', error);
-      Alert.alert('Error', 'Failed to send voice message');
+      alertService.error('Lỗi', 'Không thể gửi tin nhắn thoại');
     } finally {
       setUploading(false);
     }

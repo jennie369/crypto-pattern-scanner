@@ -1,11 +1,11 @@
 /**
  * Gemral - Buy Gems Screen
  * Feature #14: Virtual Currency
- * Purchase currency packages via Shopify checkout
+ * Purchase gem packs via Shopify checkout
  *
  * Flow:
- * 1. User selects a gem package
- * 2. App creates Shopify cart with gem-pack-XXX variant
+ * 1. User selects a gem package from gem_packs table
+ * 2. App creates Shopify checkout URL with variant ID
  * 3. Navigate to CheckoutWebView for payment
  * 4. Shopify webhook processes order and adds gems
  * 5. User redirected to success screen
@@ -19,7 +19,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -33,10 +32,10 @@ import {
   Shield,
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS } from '../../utils/tokens';
-import walletService from '../../services/walletService';
-import shopifyService from '../../services/shopifyService';
+import gemEconomyService from '../../services/gemEconomyService';
 import { useTabBar } from '../../contexts/TabBarContext';
 import { useAuth } from '../../contexts/AuthContext';
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 
 const BuyGemsScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
@@ -48,6 +47,7 @@ const BuyGemsScreen = ({ navigation }) => {
   // Hide tab bar on this screen
   const { hideTabBar, showTabBar } = useTabBar();
   const { user } = useAuth();
+  const { alert, AlertComponent } = useCustomAlert();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -63,22 +63,30 @@ const BuyGemsScreen = ({ navigation }) => {
   const loadData = async () => {
     setLoading(true);
 
-    const [packagesData, balanceResult] = await Promise.all([
-      walletService.getCurrencyPackages(),
-      walletService.getBalance(),
-    ]);
+    try {
+      // Use gemEconomyService to get gem packs from gem_packs table
+      const [packagesData, balance] = await Promise.all([
+        gemEconomyService.getGemPacks(),
+        user?.id ? gemEconomyService.getGemBalance(user.id) : Promise.resolve(0),
+      ]);
 
-    setPackages(packagesData);
-    if (balanceResult.success) {
-      setCurrentBalance(balanceResult.data.gems);
-    }
+      setPackages(packagesData);
+      setCurrentBalance(balance);
 
-    // Auto-select featured package
-    const featured = packagesData.find(p => p.is_featured);
-    if (featured) {
-      setSelectedPackage(featured.id);
-    } else if (packagesData.length > 0) {
-      setSelectedPackage(packagesData[0].id);
+      // Auto-select featured package
+      const featured = packagesData.find(p => p.is_featured);
+      if (featured) {
+        setSelectedPackage(featured.id);
+      } else if (packagesData.length > 0) {
+        setSelectedPackage(packagesData[0].id);
+      }
+    } catch (error) {
+      console.error('[BuyGems] loadData error:', error);
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Không thể tải dữ liệu. Vui lòng thử lại.',
+      });
     }
 
     setLoading(false);
@@ -86,31 +94,24 @@ const BuyGemsScreen = ({ navigation }) => {
 
   /**
    * Create Shopify checkout for gem package
-   * Uses the shopify_variant_id from currency_packages table
+   * Uses buildCheckoutUrl from gemEconomyService
    */
   const createGemCheckout = async (pkg) => {
     try {
-      // Use shopify_variant_id if available, otherwise construct from SKU
-      const variantId = pkg.shopify_variant_id;
-
-      if (!variantId) {
-        // Fallback: If no variant ID, show error
+      // Check for shopify_variant_id
+      if (!pkg.shopify_variant_id) {
         console.warn('[BuyGems] No shopify_variant_id for package:', pkg.name);
-        Alert.alert(
-          'Chưa sẵn sàng',
-          'Gói này chưa được kết nối với cửa hàng. Vui lòng thử lại sau.',
-        );
+        alert({
+          type: 'warning',
+          title: 'Chưa sẵn sàng',
+          message: 'Gói này chưa được kết nối với cửa hàng. Vui lòng thử lại sau.',
+        });
         return null;
       }
 
-      // Create cart with gem package
-      const lineItems = [{
-        merchandiseId: variantId,
-        quantity: 1,
-      }];
-
-      const cart = await shopifyService.createCart(lineItems, user?.id);
-      return cart?.checkoutUrl || null;
+      // Build checkout URL using gemEconomyService
+      const checkoutUrl = gemEconomyService.buildCheckoutUrl(pkg, user?.id, user?.email);
+      return checkoutUrl;
     } catch (error) {
       console.error('[BuyGems] Create checkout error:', error);
       return null;
@@ -126,11 +127,12 @@ const BuyGemsScreen = ({ navigation }) => {
     setPurchasing(true);
 
     try {
-      // Create Shopify checkout
+      // Create Shopify checkout URL
       const checkoutUrl = await createGemCheckout(pkg);
 
       if (checkoutUrl) {
-        const totalGems = pkg.gem_amount + (pkg.bonus_gems || 0);
+        // Use total_gems (gems_quantity + bonus_gems) from gem_packs table
+        const totalGems = pkg.total_gems || (pkg.gems_quantity + (pkg.bonus_gems || 0));
 
         // Navigate to WebView checkout (same as Shop products)
         navigation.navigate('Shop', {
@@ -144,11 +146,19 @@ const BuyGemsScreen = ({ navigation }) => {
           },
         });
       } else {
-        Alert.alert('Lỗi', 'Không thể tạo đơn hàng. Vui lòng thử lại.');
+        alert({
+          type: 'error',
+          title: 'Lỗi',
+          message: 'Không thể tạo đơn hàng. Vui lòng thử lại.',
+        });
       }
     } catch (error) {
       console.error('[BuyGems] Purchase error:', error);
-      Alert.alert('Lỗi', 'Có lỗi xảy ra. Vui lòng thử lại.');
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Có lỗi xảy ra. Vui lòng thử lại.',
+      });
     } finally {
       setPurchasing(false);
     }
@@ -181,7 +191,7 @@ const BuyGemsScreen = ({ navigation }) => {
           <View style={styles.headerRight}>
             <Gem size={16} color={COLORS.purple} />
             <Text style={styles.balanceText}>
-              {walletService.formatGems(currentBalance)}
+              {gemEconomyService.formatGemAmount(currentBalance)}
             </Text>
           </View>
         </View>
@@ -197,7 +207,10 @@ const BuyGemsScreen = ({ navigation }) => {
           <View style={styles.packagesGrid}>
             {packages.map((pkg) => {
               const isSelected = selectedPackage === pkg.id;
-              const totalGems = pkg.gem_amount + (pkg.bonus_gems || 0);
+              // gem_packs table uses: gems_quantity, bonus_gems, total_gems, price
+              const gemsQty = pkg.gems_quantity || pkg.gem_amount || 0;
+              const totalGems = pkg.total_gems || (gemsQty + (pkg.bonus_gems || 0));
+              const priceVnd = pkg.price || pkg.price_vnd || 0;
 
               return (
                 <TouchableOpacity
@@ -223,7 +236,7 @@ const BuyGemsScreen = ({ navigation }) => {
                       color={isSelected ? COLORS.purple : COLORS.textMuted}
                     />
                     <Text style={[styles.packageGems, isSelected && styles.packageGemsSelected]}>
-                      {walletService.formatGems(pkg.gem_amount)}
+                      {gemEconomyService.formatGemAmount(gemsQty)}
                     </Text>
                     {pkg.bonus_gems > 0 && (
                       <View style={styles.bonusBadge}>
@@ -231,10 +244,10 @@ const BuyGemsScreen = ({ navigation }) => {
                       </View>
                     )}
                     <Text style={styles.packagePrice}>
-                      {walletService.formatVND(pkg.price_vnd)}
+                      {gemEconomyService.formatVND(priceVnd)}
                     </Text>
                     <Text style={styles.packagePerGem}>
-                      {Math.round(pkg.price_vnd / totalGems)}d/gem
+                      {totalGems > 0 ? Math.round(priceVnd / totalGems) : 0}đ/gem
                     </Text>
                   </View>
 
@@ -271,14 +284,14 @@ const BuyGemsScreen = ({ navigation }) => {
               <View style={styles.summaryRow}>
                 <Text style={styles.summaryLabel}>Gems nhận được</Text>
                 <Text style={styles.summaryValue}>
-                  {selectedPkg.gem_amount}
+                  {selectedPkg.gems_quantity || selectedPkg.gem_amount}
                   {selectedPkg.bonus_gems > 0 && ` + ${selectedPkg.bonus_gems}`}
                 </Text>
               </View>
               <View style={[styles.summaryRow, styles.summaryTotal]}>
                 <Text style={styles.summaryTotalLabel}>Tổng</Text>
                 <Text style={styles.summaryTotalValue}>
-                  {walletService.formatVND(selectedPkg.price_vnd)}
+                  {gemEconomyService.formatVND(selectedPkg.price || selectedPkg.price_vnd)}
                 </Text>
               </View>
             </View>
@@ -303,13 +316,14 @@ const BuyGemsScreen = ({ navigation }) => {
                 <>
                   <ShoppingCart size={18} color={COLORS.textPrimary} />
                   <Text style={styles.purchaseButtonText}>
-                    Thanh toán {selectedPkg ? walletService.formatVND(selectedPkg.price_vnd) : ''}
+                    Thanh toán {selectedPkg ? gemEconomyService.formatVND(selectedPkg.price || selectedPkg.price_vnd) : ''}
                   </Text>
                 </>
               )}
             </LinearGradient>
           </TouchableOpacity>
         </View>
+        {AlertComponent}
       </SafeAreaView>
     </LinearGradient>
   );

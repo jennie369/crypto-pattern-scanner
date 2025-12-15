@@ -6,25 +6,31 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../../utils/tokens';
+import { formatConfidence } from '../../../utils/formatters';
 
 const ConfidenceBar = ({ confidence }) => {
+  // Safe confidence value - handle decimal (0.8) or percentage (80)
+  const confidenceValue = confidence > 1 ? confidence : confidence * 100;
+
   const getColor = () => {
-    if (confidence >= 80) return COLORS.success;
-    if (confidence >= 60) return COLORS.gold;
+    if (confidenceValue >= 80) return COLORS.success;
+    if (confidenceValue >= 60) return COLORS.gold;
     return COLORS.error;
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.labelRow}>
-        <Text style={styles.label}>Confidence</Text>
-        <Text style={[styles.value, { color: getColor() }]}>{confidence}%</Text>
+        <Text style={styles.label}>Độ Tin Cậy</Text>
+        <Text style={[styles.value, { color: getColor() }]}>
+          {formatConfidence(confidenceValue, 1)}
+        </Text>
       </View>
       <View style={styles.barBackground}>
         <View
           style={[
             styles.barFill,
-            { width: `${confidence}%`, backgroundColor: getColor() },
+            { width: `${Math.min(confidenceValue, 100)}%`, backgroundColor: getColor() },
           ]}
         />
       </View>

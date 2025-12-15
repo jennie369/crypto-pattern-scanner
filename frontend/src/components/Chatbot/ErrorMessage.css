@@ -1,0 +1,125 @@
+/**
+ * ErrorMessage Styles
+ * Error display with retry option
+ * Uses design tokens for consistent styling
+ */
+
+.error-message-container {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm, 16px);
+  padding: var(--space-sm, 16px);
+  background: rgba(255, 71, 87, 0.1);
+  border: 1px solid rgba(255, 71, 87, 0.3);
+  border-radius: var(--radius-lg, 16px);
+  animation: errorSlideIn 0.3s ease-out;
+}
+
+.error-message-icon {
+  flex-shrink: 0;
+  padding: 8px;
+  background: rgba(255, 71, 87, 0.15);
+  border-radius: var(--radius-md, 12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-message-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.error-message-title {
+  margin: 0 0 4px 0;
+  font-family: var(--font-display, 'Poppins', sans-serif);
+  font-size: var(--text-base, 16px);
+  font-weight: 600;
+}
+
+.error-message-text {
+  margin: 0;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: var(--text-sm, 14px);
+  color: var(--text-secondary, rgba(255, 255, 255, 0.85));
+  line-height: 1.5;
+}
+
+.error-message-actions {
+  flex-shrink: 0;
+  display: flex;
+  gap: 8px;
+}
+
+.error-retry-button,
+.error-upgrade-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius-md, 12px);
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.error-retry-button {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary, #FFFFFF);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.error-retry-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.error-retry-button:active {
+  transform: translateY(0);
+}
+
+.error-upgrade-button {
+  background: linear-gradient(135deg, var(--brand-purple, #8B5CF6) 0%, var(--brand-burgundy, #9C0612) 100%);
+  color: var(--text-primary, #FFFFFF);
+  border: none;
+}
+
+.error-upgrade-button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+}
+
+.error-upgrade-button:active {
+  transform: translateY(0);
+}
+
+@keyframes errorSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .error-message-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .error-message-icon {
+    align-self: flex-start;
+  }
+
+  .error-message-actions {
+    margin-top: var(--space-xs, 8px);
+  }
+}

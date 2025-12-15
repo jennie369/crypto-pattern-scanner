@@ -20,7 +20,6 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -33,6 +32,9 @@ import messagingService from '../../services/messagingService';
 
 // Auth
 import { useAuth } from '../../contexts/AuthContext';
+
+// Alert
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 
 // Tokens
 import {
@@ -47,6 +49,7 @@ export default function ForwardMessageScreen({ route, navigation }) {
   const { message } = route.params;
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
+  const { alert, AlertComponent } = useCustomAlert();
 
   // State
   const [conversations, setConversations] = useState([]);
@@ -102,19 +105,20 @@ export default function ForwardMessageScreen({ route, navigation }) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
       // Show success and go back
-      Alert.alert(
-        'Message Forwarded',
-        `Message sent to ${selectedIds.length} conversation${selectedIds.length > 1 ? 's' : ''}`,
-        [{ text: 'OK', onPress: () => navigation.goBack() }]
-      );
+      alert({
+        type: 'success',
+        title: 'Message Forwarded',
+        message: `Message sent to ${selectedIds.length} conversation${selectedIds.length > 1 ? 's' : ''}`,
+        buttons: [{ text: 'OK', onPress: () => navigation.goBack() }]
+      });
     } catch (error) {
       console.error('Error forwarding message:', error);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert('Error', 'Failed to forward message');
+      alert({ type: 'error', title: 'Error', message: 'Failed to forward message' });
     } finally {
       setForwarding(false);
     }
-  }, [selectedIds, message?.id, navigation, forwarding]);
+  }, [selectedIds, message?.id, navigation, forwarding, alert]);
 
   // Filter conversations
   const filteredConversations = conversations.filter(conv => {
@@ -309,6 +313,7 @@ export default function ForwardMessageScreen({ route, navigation }) {
           }
         />
       )}
+      {AlertComponent}
     </LinearGradient>
   );
 }

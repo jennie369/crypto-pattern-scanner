@@ -7,20 +7,25 @@ import React from 'react';
 import {
   View,
   Text,
-  Image,
   TouchableOpacity,
   StyleSheet,
   Dimensions,
 } from 'react-native';
 import { ShoppingBag } from 'lucide-react-native';
+import OptimizedImage from '../../../components/Common/OptimizedImage';
 import { useCart } from '../../../contexts/CartContext';
 import { COLORS, SPACING, TYPOGRAPHY, SHADOWS } from '../../../utils/tokens';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = (SCREEN_WIDTH - SPACING.md * 3) / 2;
 
-const ProductCard = ({ product, onPress, style, darkMode = false }) => {
+const ProductCard = ({ product, onPress, style, darkMode = true, compact = false }) => {
   const { addItem, loading } = useCart();
+
+  // CRITICAL: Early return if product is null/undefined
+  if (!product) {
+    return null;
+  }
 
   const price = product.variants?.[0]?.price || product.price || 0;
   const comparePrice = product.variants?.[0]?.compareAtPrice || product.compareAtPrice;
@@ -48,23 +53,22 @@ const ProductCard = ({ product, onPress, style, darkMode = false }) => {
 
   return (
     <TouchableOpacity
-      style={[styles.container, dynamicStyles.container, style]}
+      style={[
+        styles.container,
+        dynamicStyles.container,
+        compact && styles.compactContainer,
+        style,
+      ]}
       onPress={onPress}
       activeOpacity={0.9}
     >
-      {/* Image */}
+      {/* Image - Using OptimizedImage for fast loading with caching */}
       <View style={[styles.imageContainer, dynamicStyles.imageContainer]}>
-        {imageUrl ? (
-          <Image
-            source={{ uri: imageUrl }}
-            style={styles.image}
-            resizeMode="cover"
-          />
-        ) : (
-          <View style={[styles.imagePlaceholder, dynamicStyles.imagePlaceholder]}>
-            <Text style={[styles.placeholderText, dynamicStyles.placeholderText]}>No Image</Text>
-          </View>
-        )}
+        <OptimizedImage
+          uri={imageUrl}
+          style={styles.image}
+          resizeMode="cover"
+        />
 
         {/* Sale Badge */}
         {isOnSale && (
@@ -106,6 +110,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: SPACING.md,
     overflow: 'hidden',
+  },
+  compactContainer: {
+    width: 160,
+    marginBottom: 0,
   },
 
   // Image

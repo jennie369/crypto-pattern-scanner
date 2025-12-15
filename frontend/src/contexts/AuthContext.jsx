@@ -15,9 +15,11 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Check active session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('[AuthContext] getSession result:', !!session?.user);
       setUser(session?.user ?? null);
       if (session?.user) {
-        loadUserProfile(session.user.id).finally(() => {
+        // Initial load - pass true to set loading state
+        loadUserProfile(session.user.id, true).finally(() => {
           setInitialLoadDone(true);
         });
       } else {
@@ -30,9 +32,11 @@ export const AuthProvider = ({ children }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('[AuthContext] onAuthStateChange:', _event, !!session?.user);
       setUser(session?.user ?? null);
       if (session?.user) {
-        loadUserProfile(session.user.id);
+        // Not initial load - don't set loading to avoid flicker
+        loadUserProfile(session.user.id, false);
       } else {
         setProfile(null);
         setLoading(false);
@@ -106,11 +110,14 @@ export const AuthProvider = ({ children }) => {
   }, [user, profile]);
 
   // ===== LOAD USER PROFILE =====
-  const loadUserProfile = async (userId) => {
-    console.log('📊 Loading profile for user:', userId);
+  const loadUserProfile = async (userId, isInitialLoad = false) => {
+    console.log('📊 Loading profile for user:', userId, '| initial:', isInitialLoad);
 
-    // ✅ Set loading to true at start
-    setLoading(true);
+    // Only set loading to true on initial load (not on refresh/auth state change)
+    // This prevents screen flickering when profile is reloaded
+    if (isInitialLoad) {
+      setLoading(true);
+    }
 
     try {
       const { data, error } = await supabase
@@ -409,10 +416,55 @@ export const AuthProvider = ({ children }) => {
   };
 
   // ===== HELPER FUNCTIONS =====
-  
+
   // Check if admin
   const isAdmin = () => {
     return profile && profile.role === 'admin';
+  };
+
+  // Check if teacher
+  const isTeacher = () => {
+    return profile && profile.role === 'teacher';
+  };
+
+  // Check if manager (quản lý)
+  const isManager = () => {
+    return profile && profile.role === 'manager';
+  };
+
+  // Check if user has access to course admin page
+  // Admin, Teacher, Manager can access
+  const hasCourseAdminAccess = () => {
+    if (!profile) return false;
+    return ['admin', 'teacher', 'manager'].includes(profile.role);
+  };
+
+  // Check if user can edit a specific course
+  // Admin: can edit all
+  // Teacher: can edit only their own courses
+  // Manager: can only view (read-only)
+  const canEditCourse = (courseCreatorId) => {
+    if (!profile) return false;
+    if (profile.role === 'admin') return true;
+    if (profile.role === 'teacher' && courseCreatorId === profile.id) return true;
+    return false; // manager and user cannot edit
+  };
+
+  // Check if user can create courses
+  // Only admin and teacher can create courses
+  const canCreateCourse = () => {
+    if (!profile) return false;
+    return ['admin', 'teacher'].includes(profile.role);
+  };
+
+  // Check if user can delete courses
+  // Admin: can delete all
+  // Teacher: can delete only their own courses
+  const canDeleteCourse = (courseCreatorId) => {
+    if (!profile) return false;
+    if (profile.role === 'admin') return true;
+    if (profile.role === 'teacher' && courseCreatorId === profile.id) return true;
+    return false;
   };
 
   // Legacy: Check if premium (DEPRECATED - use specific checkers)
@@ -445,17 +497,23 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Get scanner tier level
+  // Admin users always get tier3 (full access)
   const getScannerTier = () => {
+    if (profile?.role === 'admin') return 'tier3';
     return profile?.scanner_tier || 'free';
   };
 
   // Get course tier level
+  // Admin users always get tier3 (full access)
   const getCourseTier = () => {
+    if (profile?.role === 'admin') return 'tier3';
     return profile?.course_tier || 'free';
   };
 
   // Get chatbot tier level
+  // Admin users always get tier3 (full access)
   const getChatbotTier = () => {
+    if (profile?.role === 'admin') return 'tier3';
     return profile?.chatbot_tier || 'free';
   };
 
@@ -536,6 +594,12 @@ export const AuthProvider = ({ children }) => {
     signOut,
     loading,
     isAdmin,
+    isTeacher,
+    isManager,
+    hasCourseAdminAccess,
+    canEditCourse,
+    canCreateCourse,
+    canDeleteCourse,
     isPremium, // DEPRECATED
     isPremiumExpired,
     refreshProfile,
@@ -552,7 +616,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };

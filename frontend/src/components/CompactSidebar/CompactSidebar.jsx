@@ -6,22 +6,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   LayoutDashboard,
   User,
-  Briefcase,
   Handshake,
   Settings,
   LogOut,
-  ChevronRight,
-  ChevronLeft,
   Gem,
   Users,
   MessageSquare,
   Sparkles,
   Trophy,
-  Calendar
+  Calendar,
+  GraduationCap
 } from 'lucide-react';
 import './CompactSidebar.css';
 
@@ -33,7 +31,6 @@ const CompactSidebar = () => {
   // State for hover and locked expanded state
   const [isHovered, setIsHovered] = useState(false);
   const [isLocked, setIsLocked] = useState(false); // Default collapsed
-  const [hoveredItem, setHoveredItem] = useState(null); // Track hovered item for tooltip
 
   // Load locked state from localStorage
   // One-time fix: Clear the forced 'true' value from previous buggy version
@@ -116,6 +113,13 @@ const CompactSidebar = () => {
       icon: Handshake,
       path: '/affiliate',
       description: 'Referral program'
+    },
+    {
+      id: 'course-admin',
+      label: 'Khóa Học',
+      icon: GraduationCap,
+      path: '/courses/admin',
+      description: 'Quản lý khóa học'
     }
   ];
 
@@ -148,7 +152,7 @@ const CompactSidebar = () => {
   // Animation variants
   const sidebarVariants = {
     collapsed: {
-      width: 64, // Compact - reduced from 80px
+      width: 64, // Icon only
       transition: {
         type: 'spring',
         damping: 25,
@@ -156,51 +160,12 @@ const CompactSidebar = () => {
       }
     },
     expanded: {
-      width: 280,
+      width: 90, // Icon + text below
       transition: {
         type: 'spring',
         damping: 25,
         stiffness: 300
       }
-    }
-  };
-
-  const labelVariants = {
-    collapsed: {
-      opacity: 0,
-      x: -10,
-      width: 0,
-      marginLeft: 0,
-      transition: {
-        duration: 0.15
-      }
-    },
-    expanded: {
-      opacity: 1,
-      x: 0,
-      width: 'auto',
-      marginLeft: 12,
-      transition: {
-        duration: 0.25,
-        delay: 0.1
-      }
-    }
-  };
-
-  const arrowVariants = {
-    collapsed: {
-      opacity: 0,
-      scale: 0.8,
-      width: 0,
-      marginLeft: 0,
-      transition: { duration: 0.15 }
-    },
-    expanded: {
-      opacity: 1,
-      scale: 1,
-      width: 'auto',
-      marginLeft: 8,
-      transition: { duration: 0.25, delay: 0.1 }
     }
   };
 
@@ -219,27 +184,7 @@ const CompactSidebar = () => {
           <div className="logo-icon-wrapper">
             <Gem size={24} strokeWidth={2.5} className="logo-gem" />
           </div>
-          <motion.div
-            className="logo-text"
-            variants={labelVariants}
-            animate={isExpanded ? 'expanded' : 'collapsed'}
-          >
-            <span className="logo-title">GEM</span>
-            <span className="logo-subtitle">Platform</span>
-          </motion.div>
         </div>
-
-        {/* Toggle Lock Button */}
-        <motion.button
-          className="sidebar-lock-toggle"
-          onClick={toggleLock}
-          variants={arrowVariants}
-          animate={isExpanded ? 'expanded' : 'collapsed'}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-        >
-          {isLocked ? <ChevronLeft size={16} strokeWidth={2.5} /> : <ChevronRight size={16} strokeWidth={2.5} />}
-        </motion.button>
       </div>
 
       {/* Navigation Items */}
@@ -251,34 +196,18 @@ const CompactSidebar = () => {
           return (
             <motion.button
               key={item.id}
-              className={`compact-nav-item ${active ? 'active' : ''}`}
+              className={`compact-nav-item ${active ? 'active' : ''} ${isExpanded ? 'expanded-mode' : 'collapsed-mode'}`}
               onClick={() => handleNavigation(item.path)}
-              onMouseEnter={() => setHoveredItem({ ...item, index })}
-              onMouseLeave={() => setHoveredItem(null)}
-              whileHover={{ x: 4 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               <div className="nav-item-icon-wrapper">
                 <Icon size={20} strokeWidth={2.5} className="nav-item-icon" />
                 {active && <div className="nav-item-indicator" />}
               </div>
-
-              <motion.div
-                className="nav-item-content"
-                variants={labelVariants}
-                animate={isExpanded ? 'expanded' : 'collapsed'}
-              >
+              {isExpanded && (
                 <span className="nav-item-label">{item.label}</span>
-                <span className="nav-item-description">{item.description}</span>
-              </motion.div>
-
-              <motion.div
-                className="nav-item-arrow"
-                variants={arrowVariants}
-                animate={isExpanded ? 'expanded' : 'collapsed'}
-              >
-                <ChevronRight size={14} strokeWidth={2.5} />
-              </motion.div>
+              )}
             </motion.button>
           );
         })}
@@ -291,39 +220,25 @@ const CompactSidebar = () => {
       <div className="compact-sidebar-user">
         {/* Settings Button */}
         <motion.button
-          className={`compact-nav-item ${isActive(settingsItem.path) ? 'active' : ''}`}
+          className={`compact-nav-item ${isActive(settingsItem.path) ? 'active' : ''} ${isExpanded ? 'expanded-mode' : 'collapsed-mode'}`}
           onClick={() => handleNavigation(settingsItem.path)}
-          whileHover={{ x: 4 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
           <div className="nav-item-icon-wrapper">
             <Settings size={20} strokeWidth={2.5} className="nav-item-icon" />
             {isActive(settingsItem.path) && <div className="nav-item-indicator" />}
           </div>
-
-          <motion.div
-            className="nav-item-content"
-            variants={labelVariants}
-            animate={isExpanded ? 'expanded' : 'collapsed'}
-          >
+          {isExpanded && (
             <span className="nav-item-label">{settingsItem.label}</span>
-            <span className="nav-item-description">{settingsItem.description}</span>
-          </motion.div>
-
-          <motion.div
-            className="nav-item-arrow"
-            variants={arrowVariants}
-            animate={isExpanded ? 'expanded' : 'collapsed'}
-          >
-            <ChevronRight size={14} strokeWidth={2.5} />
-          </motion.div>
+          )}
         </motion.button>
 
         {/* Divider */}
         <div className="compact-sidebar-divider compact-sidebar-divider-footer" />
 
         {/* User Profile Section */}
-        <div className="user-profile-section">
+        <div className={`user-profile-section ${isExpanded ? 'expanded-mode' : 'collapsed-mode'}`}>
           <div className="user-avatar">
             {profile?.avatar_url ? (
               <img src={profile.avatar_url} alt={profile.display_name || 'User'} />
@@ -331,59 +246,28 @@ const CompactSidebar = () => {
               <User size={16} strokeWidth={2.5} />
             )}
           </div>
-
-          <motion.div
-            className="user-info"
-            variants={labelVariants}
-            animate={isExpanded ? 'expanded' : 'collapsed'}
-          >
+          {isExpanded && (
             <span className="user-name">
               {profile?.display_name || user?.email?.split('@')[0] || 'User'}
             </span>
-            <span className="user-tier">
-              {profile?.scanner_tier || 'FREE'} Member
-            </span>
-          </motion.div>
+          )}
         </div>
 
         {/* Logout Button */}
         <motion.button
-          className="compact-nav-item logout"
+          className={`compact-nav-item logout ${isExpanded ? 'expanded-mode' : 'collapsed-mode'}`}
           onClick={handleLogout}
-          whileHover={{ x: 4 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
           <div className="nav-item-icon-wrapper">
             <LogOut size={20} strokeWidth={2.5} className="nav-item-icon" />
           </div>
-
-          <motion.div
-            className="nav-item-content"
-            variants={labelVariants}
-            animate={isExpanded ? 'expanded' : 'collapsed'}
-          >
+          {isExpanded && (
             <span className="nav-item-label">Logout</span>
-          </motion.div>
+          )}
         </motion.button>
       </div>
-
-      {/* Tooltip for collapsed state - Shows on hover */}
-      <AnimatePresence>
-        {!isExpanded && hoveredItem && (
-          <motion.div
-            key={`tooltip-${hoveredItem.id}`}
-            className="sidebar-tooltip"
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -10 }}
-            style={{
-              top: `${100 + (hoveredItem.index * 48)}px` // Position based on item index
-            }}
-          >
-            {hoveredItem.label}
-          </motion.div>
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 };

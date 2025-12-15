@@ -5,6 +5,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase, getCurrentUser, getUserProfile } from '../services/supabase';
 import presenceService from '../services/presenceService';
+import biometricService from '../services/biometricService';
+import notificationScheduler from '../services/notificationScheduler';
+import QuotaService from '../services/quotaService';
 
 const AuthContext = createContext({});
 
@@ -37,6 +40,30 @@ export const AuthProvider = ({ children }) => {
 
           // Initialize presence service for real-time messaging
           presenceService.initialize();
+
+          // Initialize push notification scheduler
+          notificationScheduler.initialize(user.id).then((success) => {
+            if (success) {
+              console.log('[AuthContext] Push notifications initialized');
+            }
+          }).catch((err) => {
+            console.warn('[AuthContext] Push notifications init failed:', err?.message);
+          });
+
+          // =====================================================
+          // REFRESH QUOTA ON APP START (Database-backed)
+          // Clear cache and fetch fresh quota from database
+          // =====================================================
+          QuotaService.clearCache();
+          QuotaService.checkAllQuotas(user.id, true).then((quota) => {
+            console.log('[AuthContext] Quota refreshed on app start:', {
+              chatbot: `${quota.chatbot?.remaining}/${quota.chatbot?.limit}`,
+              scanner: `${quota.scanner?.remaining}/${quota.scanner?.limit}`,
+              resetAt: quota.resetAt,
+            });
+          }).catch((err) => {
+            console.warn('[AuthContext] Quota refresh failed:', err?.message);
+          });
         }
       } catch (error) {
         console.error('Error loading session:', error);
@@ -51,6 +78,21 @@ export const AuthProvider = ({ children }) => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('[AuthContext] Auth event:', event);
+
+        // Update biometric stored token when token is refreshed
+        if (event === 'TOKEN_REFRESHED' && session?.refresh_token) {
+          try {
+            const isEnabled = await biometricService.isEnabled();
+            if (isEnabled) {
+              await biometricService.updateToken(session.refresh_token);
+              console.log('[AuthContext] Biometric token updated');
+            }
+          } catch (err) {
+            console.error('[AuthContext] Failed to update biometric token:', err);
+          }
+        }
+
         if (session?.user) {
           setUser(session.user);
           const { data: profileData } = await getUserProfile(session.user.id);
@@ -67,12 +109,37 @@ export const AuthProvider = ({ children }) => {
 
           // Initialize presence service for real-time messaging
           presenceService.initialize();
+
+          // Initialize push notifications on login
+          if (event === 'SIGNED_IN') {
+            notificationScheduler.initialize(session.user.id).then((success) => {
+              if (success) {
+                console.log('[AuthContext] Push notifications initialized on sign in');
+              }
+            }).catch((err) => {
+              console.warn('[AuthContext] Push notifications init failed:', err?.message);
+            });
+
+            // REFRESH QUOTA ON LOGIN
+            QuotaService.clearCache();
+            QuotaService.checkAllQuotas(session.user.id, true).then((quota) => {
+              console.log('[AuthContext] Quota refreshed on login:', {
+                chatbot: `${quota.chatbot?.remaining}/${quota.chatbot?.limit}`,
+                scanner: `${quota.scanner?.remaining}/${quota.scanner?.limit}`,
+              });
+            }).catch((err) => {
+              console.warn('[AuthContext] Quota refresh failed:', err?.message);
+            });
+          }
         } else {
           setUser(null);
           setProfile(null);
 
           // Cleanup presence service on logout
           presenceService.cleanup();
+
+          // Clear quota cache on logout
+          QuotaService.clearCache();
         }
         setLoading(false);
       }
@@ -112,9 +179,9 @@ export const AuthProvider = ({ children }) => {
     loading,
     initialized,
     isAuthenticated: !!user,
-    tier: profile?.scanner_tier || 'free',
-    userTier, // Normalized tier
-    isAdmin,  // ⚡ Admin flag for bypassing restrictions
+    tier: profile?.scanner_tier || 'FREE',  // Always uppercase per DATABASE_SCHEMA.md
+    userTier, // Normalized tier (uppercase)
+    isAdmin,  // Admin flag for bypassing restrictions
   };
 
   return (

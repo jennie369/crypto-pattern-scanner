@@ -29,13 +29,23 @@ import {
   Sparkles,
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS } from '../../utils/tokens';
+import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
 import walletService from '../../services/walletService';
+import gemEconomyService from '../../services/gemEconomyService';
+import { useAuth } from '../../contexts/AuthContext';
+import { useSponsorBanners } from '../../components/SponsorBannerSection';
+import SponsorBannerCard from '../../components/SponsorBannerCard';
+import { interleaveBannersWithContent } from '../../utils/bannerDistribution';
 
 const WalletScreen = ({ navigation }) => {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [balance, setBalance] = useState({ gems: 0, diamonds: 0 });
   const [transactions, setTransactions] = useState([]);
+
+  // Sponsor banners - use hook to fetch ALL banners for distribution
+  const { banners: sponsorBanners, dismissBanner, userId } = useSponsorBanners('wallet', refreshing);
 
   useEffect(() => {
     loadData();
@@ -48,15 +58,30 @@ const WalletScreen = ({ navigation }) => {
   };
 
   const loadBalance = async () => {
-    const result = await walletService.getBalance();
-    if (result.success) {
-      setBalance(result.data);
+    // Use gemEconomyService for accurate balance from profiles.gems
+    // This matches what the Shopify webhook updates
+    if (user?.id) {
+      const gemBalance = await gemEconomyService.getGemBalance(user.id);
+      setBalance({ gems: gemBalance, diamonds: 0 });
+    } else {
+      // Fallback to walletService if no user
+      const result = await walletService.getBalance();
+      if (result.success) {
+        setBalance(result.data);
+      }
     }
   };
 
   const loadTransactions = async () => {
-    const data = await walletService.getTransactions(50);
-    setTransactions(data);
+    // Use gemEconomyService for transactions from gems_transactions table
+    if (user?.id) {
+      const txData = await gemEconomyService.getGemTransactions(user.id, 50);
+      setTransactions(txData || []);
+    } else {
+      // Fallback to walletService
+      const data = await walletService.getTransactions(50);
+      setTransactions(data);
+    }
   };
 
   const handleRefresh = useCallback(async () => {
@@ -65,12 +90,18 @@ const WalletScreen = ({ navigation }) => {
     setRefreshing(false);
   }, []);
 
-  const getTransactionIcon = (type) => {
+  const getTransactionIcon = (type, referenceType) => {
     switch (type) {
       case 'purchase':
         return { icon: ShoppingCart, color: COLORS.success };
       case 'gift_sent':
         return { icon: ArrowUpRight, color: COLORS.error };
+      case 'spend':
+        // Check if it's a gift spend
+        if (referenceType === 'gift') {
+          return { icon: ArrowUpRight, color: COLORS.error };
+        }
+        return { icon: ArrowUpRight, color: COLORS.warning };
       case 'gift_received':
         return { icon: ArrowDownLeft, color: COLORS.success };
       case 'bonus':
@@ -134,57 +165,50 @@ const WalletScreen = ({ navigation }) => {
         >
           {/* Balance Card */}
           <View style={styles.balanceCard}>
-            <LinearGradient
-              colors={['rgba(106, 91, 255, 0.3)', 'rgba(0, 240, 255, 0.2)']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.balanceGradient}
-            >
-              <Text style={styles.balanceLabel}>Số dư hiện tại</Text>
+            <Text style={styles.balanceLabel}>Số dư hiện tại</Text>
 
-              {/* Gems Balance */}
-              <View style={styles.balanceRow}>
-                <View style={styles.balanceItem}>
-                  <View style={styles.currencyIcon}>
-                    <Gem size={24} color={COLORS.purple} />
-                  </View>
-                  <View>
-                    <Text style={styles.balanceAmount}>
-                      {walletService.formatGems(balance.gems)}
-                    </Text>
-                    <Text style={styles.currencyName}>Gems</Text>
-                  </View>
+            {/* Gems Balance */}
+            <View style={styles.balanceRow}>
+              <View style={styles.balanceItem}>
+                <View style={styles.currencyIcon}>
+                  <Gem size={24} color={COLORS.gold} />
                 </View>
-
-                <View style={styles.balanceItem}>
-                  <View style={[styles.currencyIcon, { backgroundColor: 'rgba(0, 240, 255, 0.2)' }]}>
-                    <Diamond size={24} color={COLORS.cyan} />
-                  </View>
-                  <View>
-                    <Text style={styles.balanceAmount}>
-                      {walletService.formatGems(balance.diamonds)}
-                    </Text>
-                    <Text style={styles.currencyName}>Diamonds</Text>
-                  </View>
+                <View>
+                  <Text style={styles.balanceAmount}>
+                    {walletService.formatGems(balance.gems)}
+                  </Text>
+                  <Text style={styles.currencyName}>Gems</Text>
                 </View>
               </View>
 
-              {/* Stats */}
-              <View style={styles.statsRow}>
-                <View style={styles.statItem}>
-                  <Text style={styles.statLabel}>Đã nhận</Text>
-                  <Text style={styles.statValue}>
-                    {walletService.formatGems(balance.totalEarned)}
-                  </Text>
+              <View style={styles.balanceItem}>
+                <View style={styles.currencyIcon}>
+                  <Diamond size={24} color={COLORS.gold} />
                 </View>
-                <View style={styles.statItem}>
-                  <Text style={styles.statLabel}>Đã chi</Text>
-                  <Text style={styles.statValue}>
-                    {walletService.formatGems(balance.totalSpent)}
+                <View>
+                  <Text style={styles.balanceAmount}>
+                    {walletService.formatGems(balance.diamonds)}
                   </Text>
+                  <Text style={styles.currencyName}>Diamonds</Text>
                 </View>
               </View>
-            </LinearGradient>
+            </View>
+
+            {/* Stats */}
+            <View style={styles.statsRow}>
+              <View style={styles.statItem}>
+                <Text style={styles.statLabel}>Đã nhận</Text>
+                <Text style={styles.statValue}>
+                  {walletService.formatGems(balance.totalEarned)}
+                </Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text style={styles.statLabel}>Đã chi</Text>
+                <Text style={styles.statValue}>
+                  {walletService.formatGems(balance.totalSpent)}
+                </Text>
+              </View>
+            </View>
           </View>
 
           {/* Buy Gems Button */}
@@ -193,13 +217,8 @@ const WalletScreen = ({ navigation }) => {
             onPress={() => navigation.navigate('BuyGems')}
             activeOpacity={0.8}
           >
-            <LinearGradient
-              colors={GRADIENTS.primaryButton}
-              style={styles.buyButtonGradient}
-            >
-              <Plus size={20} color={COLORS.textPrimary} />
-              <Text style={styles.buyButtonText}>Nạp Gems</Text>
-            </LinearGradient>
+            <Plus size={20} color={COLORS.textPrimary} />
+            <Text style={styles.buyButtonText}>Nạp Gems</Text>
           </TouchableOpacity>
 
           {/* Quick Actions */}
@@ -208,18 +227,28 @@ const WalletScreen = ({ navigation }) => {
               style={styles.quickActionItem}
               onPress={() => navigation.navigate('GiftCatalog')}
             >
-              <View style={[styles.quickActionIcon, { backgroundColor: 'rgba(255, 107, 107, 0.2)' }]}>
-                <Gift size={20} color="#FF6B6B" />
+              <View style={styles.quickActionIcon}>
+                <Gift size={20} color={COLORS.gold} />
               </View>
               <Text style={styles.quickActionLabel}>Gửi quà</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.quickActionItem}
+              onPress={() => navigation.navigate('GiftHistory')}
+            >
+              <View style={styles.quickActionIcon}>
+                <Gift size={20} color={COLORS.gold} />
+              </View>
+              <Text style={styles.quickActionLabel}>Quà tặng</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.quickActionItem}
               onPress={() => navigation.navigate('TransactionHistory')}
             >
-              <View style={[styles.quickActionIcon, { backgroundColor: 'rgba(106, 91, 255, 0.2)' }]}>
-                <Clock size={20} color={COLORS.purple} />
+              <View style={styles.quickActionIcon}>
+                <Clock size={20} color={COLORS.gold} />
               </View>
               <Text style={styles.quickActionLabel}>Lịch sử</Text>
             </TouchableOpacity>
@@ -240,8 +269,16 @@ const WalletScreen = ({ navigation }) => {
               </View>
             ) : (
               transactions.slice(0, 5).map((transaction) => {
-                const { icon: Icon, color } = getTransactionIcon(transaction.type);
-                const isPositive = transaction.amount > 0;
+                const { icon: Icon, color } = getTransactionIcon(transaction.type, transaction.reference_type);
+
+                // Detect gift sends - force negative display even if amount is positive in DB
+                const isGiftSend = (transaction.type === 'spend' && transaction.reference_type === 'gift') ||
+                  transaction.description?.includes('Gửi quà') ||
+                  transaction.description?.includes('Send gift');
+
+                // For gift sends, always show as negative
+                const displayAmount = isGiftSend && transaction.amount > 0 ? -transaction.amount : transaction.amount;
+                const isPositive = displayAmount > 0;
 
                 return (
                   <View key={transaction.id} style={styles.transactionItem}>
@@ -262,13 +299,24 @@ const WalletScreen = ({ navigation }) => {
                         { color: isPositive ? COLORS.success : COLORS.error },
                       ]}
                     >
-                      {isPositive ? '+' : ''}{walletService.formatGems(transaction.amount)}
+                      {isPositive ? '+' : ''}{walletService.formatGems(displayAmount)}
                     </Text>
                   </View>
                 );
               })
             )}
           </View>
+
+          {/* Sponsor Banners - distributed after transactions */}
+          {sponsorBanners.map((banner) => (
+            <SponsorBannerCard
+              key={banner.id}
+              banner={banner}
+              navigation={navigation}
+              userId={userId}
+              onDismiss={dismissBanner}
+            />
+          ))}
         </ScrollView>
       </SafeAreaView>
     </LinearGradient>
@@ -315,17 +363,15 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: SPACING.lg,
-    paddingBottom: 100,
+    paddingBottom: CONTENT_BOTTOM_PADDING + 60,
   },
   balanceCard: {
-    borderRadius: GLASS.borderRadius,
+    borderRadius: 14,
     overflow: 'hidden',
-  },
-  balanceGradient: {
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
     padding: SPACING.xl,
-    borderRadius: GLASS.borderRadius,
     borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.3)',
+    borderColor: 'rgba(255, 189, 89, 0.3)',
   },
   balanceLabel: {
     fontSize: TYPOGRAPHY.fontSize.sm,
@@ -346,7 +392,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(106, 91, 255, 0.2)',
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -383,13 +429,14 @@ const styles = StyleSheet.create({
     marginTop: SPACING.lg,
     borderRadius: 12,
     overflow: 'hidden',
-  },
-  buyButtonGradient: {
+    backgroundColor: COLORS.burgundy,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: SPACING.lg,
     gap: SPACING.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.5)',
   },
   buyButtonText: {
     fontSize: TYPOGRAPHY.fontSize.lg,
@@ -403,17 +450,18 @@ const styles = StyleSheet.create({
   },
   quickActionItem: {
     flex: 1,
-    backgroundColor: GLASS.background,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
     borderRadius: 12,
     padding: SPACING.lg,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: 'rgba(255, 189, 89, 0.3)',
   },
   quickActionIcon: {
     width: 44,
     height: 44,
     borderRadius: 22,
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: SPACING.sm,
@@ -438,7 +486,7 @@ const styles = StyleSheet.create({
   },
   seeAllText: {
     fontSize: TYPOGRAPHY.fontSize.md,
-    color: COLORS.purple,
+    color: COLORS.gold,
   },
   emptyTransactions: {
     backgroundColor: GLASS.background,

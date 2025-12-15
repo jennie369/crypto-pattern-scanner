@@ -11,9 +11,9 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   ScrollView,
 } from 'react-native';
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Gem } from 'lucide-react-native';
@@ -21,6 +21,7 @@ import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, INPUT, BUTTON } from '../../uti
 import { signUp } from '../../services/supabase';
 
 export default function SignupScreen({ navigation }) {
+  const { alert, AlertComponent } = useCustomAlert();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -28,17 +29,17 @@ export default function SignupScreen({ navigation }) {
 
   const handleSignup = async () => {
     if (!email || !password || !confirmPassword) {
-      Alert.alert('Error', 'Please fill in all fields');
+      alert({ type: 'error', title: 'Error', message: 'Please fill in all fields' });
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      alert({ type: 'error', title: 'Error', message: 'Passwords do not match' });
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters');
+      alert({ type: 'error', title: 'Error', message: 'Password must be at least 6 characters' });
       return;
     }
 
@@ -47,13 +48,14 @@ export default function SignupScreen({ navigation }) {
     setLoading(false);
 
     if (error) {
-      Alert.alert('Signup Failed', error.message);
+      alert({ type: 'error', title: 'Signup Failed', message: error.message });
     } else {
-      Alert.alert(
-        'Success',
-        'Account created! Please check your email to verify.',
-        [{ text: 'OK', onPress: () => navigation.navigate('Login') }]
-      );
+      alert({
+        type: 'success',
+        title: 'Success',
+        message: 'Account created! Please check your email to verify.',
+        buttons: [{ text: 'OK', onPress: () => navigation.navigate('Login') }],
+      });
     }
   };
 
@@ -146,6 +148,7 @@ export default function SignupScreen({ navigation }) {
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
+      {AlertComponent}
     </LinearGradient>
   );
 }

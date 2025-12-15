@@ -870,6 +870,93 @@ class MessagingService {
     }
   }
 
+  // =====================================================
+  // PINNED MESSAGES
+  // =====================================================
+
+  /**
+   * Get pinned messages in a conversation
+   * @param {string} conversationId - Conversation ID
+   * @returns {Promise<Array>} List of pinned messages
+   */
+  async getPinnedMessages(conversationId) {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select(`
+          *,
+          sender:sender_id(
+            id,
+            display_name,
+            avatar_url
+          )
+        `)
+        .eq('conversation_id', conversationId)
+        .eq('is_pinned', true)
+        .eq('is_deleted', false)
+        .order('pinned_at', { ascending: false });
+
+      if (error) throw error;
+
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching pinned messages:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Pin a message
+   * @param {string} messageId - Message ID
+   * @returns {Promise<Object>} Updated message
+   */
+  async pinMessage(messageId) {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .update({
+          is_pinned: true,
+          pinned_at: new Date().toISOString()
+        })
+        .eq('id', messageId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return data;
+    } catch (error) {
+      console.error('Error pinning message:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Unpin a message
+   * @param {string} messageId - Message ID
+   * @returns {Promise<Object>} Updated message
+   */
+  async unpinMessage(messageId) {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .update({
+          is_pinned: false,
+          pinned_at: null
+        })
+        .eq('id', messageId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      return data;
+    } catch (error) {
+      console.error('Error unpinning message:', error);
+      throw error;
+    }
+  }
+
   /**
    * Get total unread count across all conversations
    * @returns {Promise<number>} Total unread count

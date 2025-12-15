@@ -14,13 +14,15 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
+  Pressable,
   Image,
   RefreshControl,
-  Alert,
   StyleSheet,
   ActivityIndicator,
   Dimensions,
+  Modal,
 } from 'react-native';
+import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
@@ -68,46 +70,67 @@ import {
   ArrowUpRight,
   ShoppingBag,
   Gift,
+  Eye,
+  Sparkles,
+  Target,
+  Fingerprint,
+  Scan,
+  X,
 } from 'lucide-react-native';
+import { Switch } from 'react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
 import { useAuth } from '../../contexts/AuthContext';
+import useScrollToTop from '../../hooks/useScrollToTop';
 import { forumService } from '../../services/forumService';
 import { signOut, supabase } from '../../services/supabase';
 import EditProfileModal from './components/EditProfileModal';
 import ChangePasswordModal from './components/ChangePasswordModal';
 import AffiliateSection from './components/AffiliateSection';
+import { useSponsorBanners } from '../../components/SponsorBannerSection';
+import SponsorBannerCard from '../../components/SponsorBannerCard';
+import biometricService from '../../services/biometricService';
+import BiometricSetupModal from '../../components/Auth/BiometricSetupModal';
+import { getSession } from '../../services/supabase';
+import { UserBadges } from '../../components/UserBadge';
 
-// Dashboard Widget Components (Day 17-19)
-import {
-  GoalTrackingCard,
-  AffirmationCard,
-  ActionChecklistCard,
-  StatsWidget,
-} from '../../components/GemMaster';
-import widgetManagementService from '../../services/widgetManagementService';
 
 export default function AccountScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const { user, profile: authProfile, isAdmin } = useAuth();
-  const scrollViewRef = useRef(null);
-  const dashboardSectionRef = useRef(null);
+  const { alert, AlertComponent } = useCustomAlert();
 
   // State
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState({ postsCount: 0, followersCount: 0, followingCount: 0 });
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Double-tap to scroll to top and refresh
+  const { scrollViewRef } = useScrollToTop('Account', async () => {
+    setRefreshing(true);
+    await loadData();
+    setRefreshing(false);
+  });
+
+  // Sponsor banners - use hook to fetch ALL banners for distribution
+  const { banners: sponsorBanners, dismissBanner, userId: bannerUserId } = useSponsorBanners('account', refreshing);
+
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
 
-  // Dashboard Widgets State (Day 17-19)
-  const [widgets, setWidgets] = useState([]);
-  const [isWidgetSectionCollapsed, setIsWidgetSectionCollapsed] = useState(false);
-  const [isLoadingWidgets, setIsLoadingWidgets] = useState(true);
+  // Biometric State
+  const [biometricEnabled, setBiometricEnabled] = useState(false);
+  const [biometricSupported, setBiometricSupported] = useState(false);
+  const [biometricType, setBiometricType] = useState('Sinh trắc học');
+  const [showBiometricModal, setShowBiometricModal] = useState(false);
+  const [biometricLoading, setBiometricLoading] = useState(true);
+  const [currentRefreshToken, setCurrentRefreshToken] = useState(null);
+
 
   // Admin Stats State
   const [adminStats, setAdminStats] = useState({
@@ -126,7 +149,6 @@ export default function AccountScreen() {
   const [recentActivity, setRecentActivity] = useState([]);
 
   // Deep link / Notification State (Day 20-22)
-  const [highlightedWidgetId, setHighlightedWidgetId] = useState(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const confettiRef = useRef(null);
 
@@ -135,31 +157,25 @@ export default function AccountScreen() {
     useCallback(() => {
       if (user?.id) {
         loadData();
-        loadUserWidgets();
         // Load admin stats if user is admin
         if (isAdmin) {
           loadAdminStats();
         }
       } else {
         setLoading(false);
-        setIsLoadingWidgets(false);
       }
     }, [user?.id, isAdmin])
   );
 
-  // Handle deep link from notification (scroll to widget, expand dashboard, show confetti)
+  // Handle deep link from notification - navigate to VisionBoard
   useEffect(() => {
     const params = route.params;
     if (!params) return;
 
-    // Handle expandDashboard
-    if (params.expandDashboard) {
-      setIsWidgetSectionCollapsed(false);
-    }
-
-    // Handle scrollToWidget
-    if (params.scrollToWidget) {
-      handleDeepLinkToWidget(params.scrollToWidget);
+    // Handle openVisionBoard or expandDashboard (legacy) - navigate to VisionBoard screen
+    if (params.openVisionBoard || params.expandDashboard) {
+      const tab = params.visionBoardTab || params.scrollToWidget || 'affirmation';
+      navigation.navigate('VisionBoard', { tab });
     }
 
     // Handle showConfetti (for milestone celebrations)
@@ -178,14 +194,37 @@ export default function AccountScreen() {
     }
 
     // Clear params after handling
-    if (params.scrollToWidget || params.expandDashboard || params.showConfetti) {
+    if (params.openVisionBoard || params.expandDashboard || params.showConfetti || params.visionBoardTab) {
       navigation.setParams({
-        scrollToWidget: undefined,
+        openVisionBoard: undefined,
         expandDashboard: undefined,
+        visionBoardTab: undefined,
         showConfetti: undefined,
       });
     }
-  }, [route.params?.scrollToWidget, route.params?.expandDashboard, route.params?.showConfetti]);
+  }, [route.params?.openVisionBoard, route.params?.expandDashboard, route.params?.showConfetti, route.params?.visionBoardTab]);
+
+  // Check biometric status on mount
+  useEffect(() => {
+    const checkBiometricStatus = async () => {
+      setBiometricLoading(true);
+      try {
+        const support = await biometricService.checkSupport();
+        const enabled = await biometricService.isEnabled();
+        const typeName = await biometricService.getTypeName();
+
+        setBiometricSupported(support.supported);
+        setBiometricEnabled(enabled);
+        setBiometricType(typeName || support.typeName || 'Sinh trắc học');
+      } catch (err) {
+        console.error('[AccountScreen] checkBiometricStatus error:', err);
+      } finally {
+        setBiometricLoading(false);
+      }
+    };
+
+    checkBiometricStatus();
+  }, []);
 
   const loadData = async () => {
     try {
@@ -261,201 +300,130 @@ export default function AccountScreen() {
 
   // ⚡ Load Admin Stats
   const loadAdminStats = async () => {
+    let pendingApps = 0;
+    let pendingWithdrawals = 0;
+    let totalPartners = 0;
+    let totalUsers = 0;
+
     try {
       // Pending partnership applications
-      const { count: pendingApps } = await supabase
+      const { count } = await supabase
         .from('partnership_applications')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'pending');
+      pendingApps = count || 0;
+    } catch (e) {
+      console.log('[Account] partnership_applications not available');
+    }
 
-      // Pending withdrawal requests
-      const { count: pendingWithdrawals } = await supabase
+    try {
+      // Pending withdrawal requests - table may not exist
+      const { count, error } = await supabase
         .from('withdrawal_requests')
-        .select('*', { count: 'exact', head: true })
+        .select('id', { count: 'exact', head: true })
         .eq('status', 'pending');
+      if (!error) pendingWithdrawals = count || 0;
+    } catch (e) {
+      console.log('[Account] withdrawal_requests not available');
+    }
 
+    try {
       // Total partners
-      const { count: totalPartners } = await supabase
+      const { count } = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true })
         .not('partnership_role', 'is', null);
+      totalPartners = count || 0;
+    } catch (e) {
+      console.log('[Account] profiles query error');
+    }
 
+    try {
       // Total users
-      const { count: totalUsers } = await supabase
+      const { count } = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true });
-
-      setAdminStats({
-        pendingApplications: pendingApps || 0,
-        pendingWithdrawals: pendingWithdrawals || 0,
-        totalPartners: totalPartners || 0,
-        totalUsers: totalUsers || 0,
-      });
-
-      console.log('[Account] Admin stats loaded:', {
-        pendingApps,
-        pendingWithdrawals,
-        totalPartners,
-        totalUsers
-      });
-    } catch (error) {
-      console.error('[Account] Load admin stats error:', error);
+      totalUsers = count || 0;
+    } catch (e) {
+      console.log('[Account] profiles count error');
     }
+
+    setAdminStats({
+      pendingApplications: pendingApps,
+      pendingWithdrawals: pendingWithdrawals,
+      totalPartners: totalPartners,
+      totalUsers: totalUsers,
+    });
+
+    console.log('[Account] Admin stats loaded:', {
+      pendingApps,
+      pendingWithdrawals,
+      totalPartners,
+      totalUsers
+    });
   };
 
-  // Load user widgets (Day 17-19)
-  const loadUserWidgets = async () => {
+  // ========== BIOMETRIC HANDLERS ==========
+  // Get refresh token for biometric setup
+  const getRefreshToken = async () => {
     try {
-      setIsLoadingWidgets(true);
-      const userWidgets = await widgetManagementService.getUserWidgets(user.id);
-      setWidgets(userWidgets);
-
-      // Auto-collapse if >3 widgets
-      const savedPreference = await AsyncStorage.getItem('dashboard_collapsed');
-      if (savedPreference !== null) {
-        setIsWidgetSectionCollapsed(savedPreference === 'true');
-      } else {
-        setIsWidgetSectionCollapsed(userWidgets.length > 3);
-      }
-    } catch (error) {
-      console.error('[Account] Load widgets error:', error);
-    } finally {
-      setIsLoadingWidgets(false);
+      const { session } = await getSession();
+      return session?.refresh_token || null;
+    } catch (err) {
+      console.error('[AccountScreen] getRefreshToken error:', err);
+      return null;
     }
   };
 
-  // Handle deep link to widget
-  const handleDeepLinkToWidget = async (widgetId) => {
-    // Expand dashboard section
-    setIsWidgetSectionCollapsed(false);
-
-    // Set highlighted widget
-    setHighlightedWidgetId(widgetId);
-
-    // Wait for render then scroll
-    setTimeout(() => {
-      if (dashboardSectionRef.current && scrollViewRef.current) {
-        dashboardSectionRef.current.measureLayout(
-          scrollViewRef.current,
-          (x, y) => {
-            scrollViewRef.current.scrollTo({
-              y: y - 20,
-              animated: true,
-            });
+  const handleBiometricToggle = async (value) => {
+    if (value) {
+      // Muốn bật → lấy refresh token và show setup modal
+      const refreshToken = await getRefreshToken();
+      setCurrentRefreshToken(refreshToken);
+      setShowBiometricModal(true);
+    } else {
+      // Muốn tắt → confirm và disable
+      alert({
+        type: 'warning',
+        title: 'Tắt đăng nhập sinh trắc học?',
+        message: 'Bạn sẽ cần nhập email và mật khẩu để đăng nhập lần sau.',
+        buttons: [
+          { text: 'Huỷ', style: 'cancel' },
+          {
+            text: 'Tắt',
+            style: 'destructive',
+            onPress: async () => {
+              const result = await biometricService.disable();
+              if (result.success) {
+                setBiometricEnabled(false);
+              } else {
+                alert({
+                  type: 'error',
+                  title: 'Lỗi',
+                  message: result.error || 'Không thể tắt sinh trắc học',
+                });
+              }
+            },
           },
-          () => console.warn('[Account] measureLayout failed')
-        );
-      }
-    }, 300);
-
-    // Clear highlight after 3 seconds
-    setTimeout(() => {
-      setHighlightedWidgetId(null);
-    }, 3000);
-  };
-
-  // Toggle dashboard section collapse
-  const toggleDashboardSection = async () => {
-    const newState = !isWidgetSectionCollapsed;
-    setIsWidgetSectionCollapsed(newState);
-    await AsyncStorage.setItem('dashboard_collapsed', newState.toString());
-  };
-
-  // Navigate to GemMaster to create new goals
-  // Shows choice: Manual add or Ask Gemral
-  const navigateToGemMaster = () => {
-    Alert.alert(
-      'Thêm Mục Tiêu Mới',
-      'Bạn muốn tạo mục tiêu như thế nào?',
-      [
-        {
-          text: 'Hủy',
-          style: 'cancel'
-        },
-        {
-          text: '✍️ Tự nhập',
-          onPress: () => {
-            // TODO: Show manual goal creation modal
-            Alert.alert('Coming Soon', 'Tính năng tự nhập mục tiêu sẽ sớm có mặt!');
-          }
-        },
-        {
-          text: '🤖 Hỏi Gemral',
-          onPress: () => {
-            navigation.navigate('GemMaster', {
-              initialPrompt: 'Tôi muốn đặt mục tiêu mới. Hãy giúp tôi xác định mục tiêu rõ ràng.'
-            });
-          }
-        }
-      ]
-    );
-  };
-
-  // Render widget based on type
-  const renderWidget = (widget) => {
-    const isHighlighted = highlightedWidgetId === widget.id;
-
-    // Wrapper with highlight effect
-    const WidgetWrapper = ({ children }) => (
-      <View
-        style={[
-          styles.widgetWrapper,
-          isHighlighted && styles.widgetHighlighted,
-        ]}
-      >
-        {children}
-      </View>
-    );
-
-    switch (widget.type) {
-      case 'GOAL_CARD':
-        return (
-          <WidgetWrapper key={widget.id}>
-            <GoalTrackingCard
-              widget={widget}
-              onUpdate={loadUserWidgets}
-              isHighlighted={isHighlighted}
-            />
-          </WidgetWrapper>
-        );
-      case 'AFFIRMATION_CARD':
-        return (
-          <WidgetWrapper key={widget.id}>
-            <AffirmationCard
-              widget={widget}
-              onComplete={loadUserWidgets}
-              isHighlighted={isHighlighted}
-            />
-          </WidgetWrapper>
-        );
-      case 'ACTION_CHECKLIST':
-        return (
-          <WidgetWrapper key={widget.id}>
-            <ActionChecklistCard
-              widget={widget}
-              onTaskToggle={loadUserWidgets}
-              isHighlighted={isHighlighted}
-            />
-          </WidgetWrapper>
-        );
-      case 'STATS_WIDGET':
-        return (
-          <WidgetWrapper key={widget.id}>
-            <StatsWidget
-              widget={widget}
-              userId={user?.id}
-              isHighlighted={isHighlighted}
-            />
-          </WidgetWrapper>
-        );
-      default:
-        return null;
+        ],
+      });
     }
   };
+
+  const handleBiometricSetupSuccess = (typeName) => {
+    setBiometricEnabled(true);
+    setBiometricType(typeName);
+    console.log('[AccountScreen] Biometric enabled successfully:', typeName);
+  };
+
+  const handleBiometricSetupClose = () => {
+    setShowBiometricModal(false);
+  };
+
 
   const onRefresh = async () => {
     setRefreshing(true);
-    const promises = [loadData(), loadUserWidgets()];
+    const promises = [loadData()];
     if (isAdmin) {
       promises.push(loadAdminStats());
     }
@@ -463,7 +431,7 @@ export default function AccountScreen() {
     setRefreshing(false);
   };
 
-  // ⚡ RENDER ADMIN DASHBOARD SECTION - MAGENTA THEME
+  // ⚡ RENDER ADMIN DASHBOARD SECTION - Subtle theme matching app
   const renderAdminDashboard = () => {
     if (!isAdmin) {
       return null;
@@ -473,7 +441,7 @@ export default function AccountScreen() {
       <View style={styles.adminSection}>
         {/* Admin Header */}
         <View style={styles.adminHeader}>
-          <Shield size={20} color="#FF00FF" />
+          <Shield size={18} color={COLORS.gold} />
           <Text style={styles.adminHeaderText}>ADMIN PANEL</Text>
         </View>
 
@@ -484,13 +452,13 @@ export default function AccountScreen() {
           activeOpacity={0.8}
         >
           <View style={styles.adminButtonContent}>
-            <Settings size={20} color="#FFF" />
+            <Settings size={18} color={COLORS.textPrimary} />
             <Text style={styles.adminButtonText}>Quản Lý Hệ Thống</Text>
           </View>
-          <ChevronRight size={20} color="#FFF" />
+          <ChevronRight size={18} color={COLORS.textMuted} />
         </TouchableOpacity>
 
-        {/* Quick Actions */}
+        {/* Quick Actions Row 1 */}
         <View style={styles.adminQuickActions}>
           <TouchableOpacity
             style={styles.adminQuickBtn}
@@ -509,7 +477,7 @@ export default function AccountScreen() {
             style={styles.adminQuickBtn}
             onPress={() => navigation.navigate('AdminWithdrawals')}
           >
-            <CreditCard size={18} color={COLORS.success} />
+            <CreditCard size={18} color={COLORS.gold} />
             <Text style={styles.adminQuickText}>Rút tiền</Text>
             {adminStats.pendingWithdrawals > 0 && (
               <View style={styles.adminBadgeCount}>
@@ -522,8 +490,27 @@ export default function AccountScreen() {
             style={styles.adminQuickBtn}
             onPress={() => navigation.navigate('AdminUsers')}
           >
-            <Users size={18} color={COLORS.info} />
+            <Users size={18} color={COLORS.gold} />
             <Text style={styles.adminQuickText}>Users</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Quick Actions Row 2 - Course Management */}
+        <View style={styles.adminQuickActions}>
+          <TouchableOpacity
+            style={[styles.adminQuickBtn, styles.adminQuickBtnWide]}
+            onPress={() => navigation.navigate('AdminCourses')}
+          >
+            <GraduationCap size={18} color={COLORS.gold} />
+            <Text style={styles.adminQuickText}>Quản lý khóa học</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.adminQuickBtn, styles.adminQuickBtnWide]}
+            onPress={() => navigation.navigate('GrantAccess')}
+          >
+            <UserCheck size={18} color={COLORS.gold} />
+            <Text style={styles.adminQuickText}>Cấp quyền truy cập</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -531,10 +518,11 @@ export default function AccountScreen() {
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      'Đăng xuất',
-      'Bạn có chắc muốn đăng xuất?',
-      [
+    alert({
+      type: 'warning',
+      title: 'Đăng xuất',
+      message: 'Bạn có chắc muốn đăng xuất?',
+      buttons: [
         { text: 'Hủy', style: 'cancel' },
         {
           text: 'Đăng xuất',
@@ -543,17 +531,25 @@ export default function AccountScreen() {
             await signOut();
           }
         },
-      ]
-    );
+      ],
+    });
   };
 
   const copyReferralCode = async () => {
     try {
       const code = user?.referral_code || 'GEM' + (user?.id?.slice(0, 6) || '').toUpperCase();
       await Clipboard.setStringAsync(code);
-      Alert.alert('✅ Thành công', `Đã sao chép mã giới thiệu: ${code}`);
+      alert({
+        type: 'success',
+        title: 'Thành công',
+        message: `Đã sao chép mã giới thiệu: ${code}`,
+      });
     } catch (error) {
-      Alert.alert('❌ Lỗi', 'Không thể sao chép mã giới thiệu');
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Không thể sao chép mã giới thiệu',
+      });
     }
   };
 
@@ -660,7 +656,10 @@ export default function AccountScreen() {
 
             {/* User Info */}
             <View style={styles.userInfo}>
-              <Text style={styles.displayName}>{displayName}</Text>
+              <View style={styles.nameRow}>
+                <Text style={styles.displayName}>{displayName}</Text>
+                <UserBadges user={profile} size="small" maxBadges={3} />
+              </View>
               {username && <Text style={styles.username}>@{username}</Text>}
               <Text style={styles.bio} numberOfLines={2}>{bio}</Text>
             </View>
@@ -675,33 +674,6 @@ export default function AccountScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* ═══════════════════════════════════════════ */}
-          {/* STATS ROW */}
-          {/* ═══════════════════════════════════════════ */}
-          <View style={styles.statsContainer}>
-            <TouchableOpacity
-              style={styles.statItem}
-              onPress={() => navigation.navigate('ProfileFull', { tab: 'posts' })}
-            >
-              <Text style={styles.statNumber}>{stats.postsCount}</Text>
-              <Text style={styles.statLabel}>Bài viết</Text>
-            </TouchableOpacity>
-
-            <View style={styles.statDivider} />
-
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{stats.followersCount}</Text>
-              <Text style={styles.statLabel}>Followers</Text>
-            </View>
-
-            <View style={styles.statDivider} />
-
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>{stats.followingCount}</Text>
-              <Text style={styles.statLabel}>Following</Text>
-            </View>
-          </View>
-
           {/* View Full Profile Button */}
           <TouchableOpacity
             style={styles.viewProfileButton}
@@ -713,19 +685,57 @@ export default function AccountScreen() {
           </TouchableOpacity>
 
           {/* ═══════════════════════════════════════════ */}
+          {/* VISION BOARD - Goals & Affirmations (MOVED UP) */}
+          {/* ═══════════════════════════════════════════ */}
+          <Pressable
+            style={({ pressed }) => [
+              styles.visionBoardCard,
+              pressed && { opacity: 0.8 },
+            ]}
+            onPress={() => {
+              console.log('[AccountScreen] VisionBoard card pressed');
+              navigation.navigate('VisionBoard');
+            }}
+          >
+            <View style={styles.visionBoardContent}>
+              <View style={styles.visionBoardLeft}>
+                <View style={styles.visionBoardIconRow}>
+                  <Eye size={20} color={COLORS.gold} />
+                  <Sparkles size={14} color={COLORS.gold} style={{ marginLeft: 6 }} />
+                </View>
+                <Text style={styles.visionBoardTitle}>Vision Board</Text>
+                <Text style={styles.visionBoardSubtitle}>Mục tiêu & Affirmations</Text>
+              </View>
+              <View style={styles.visionBoardRight}>
+                <View style={styles.visionBoardStats}>
+                  <View style={styles.visionBoardStatItem}>
+                    <Target size={14} color={COLORS.gold} />
+                    <Text style={styles.visionBoardStatText}>Goals</Text>
+                  </View>
+                  <View style={styles.visionBoardStatItem}>
+                    <Sparkles size={14} color={COLORS.gold} />
+                    <Text style={styles.visionBoardStatText}>Daily</Text>
+                  </View>
+                </View>
+                <ChevronRight size={20} color={COLORS.textMuted} />
+              </View>
+            </View>
+          </Pressable>
+
+          {/* ═══════════════════════════════════════════ */}
           {/* ⚡ ADMIN DASHBOARD SECTION - MAGENTA THEME */}
           {/* ═══════════════════════════════════════════ */}
           {renderAdminDashboard()}
 
           {/* ═══════════════════════════════════════════ */}
-          {/* ASSET STATS CARDS (from AssetsHomeScreen) */}
+          {/* ASSET STATS CARDS - All icons gold */}
           {/* ═══════════════════════════════════════════ */}
           <View style={styles.assetStatsContainer}>
             <View style={styles.assetStatCard}>
               <View style={styles.assetStatIconContainer}>
                 <Gem size={24} color={COLORS.gold} />
               </View>
-              <Text style={[styles.assetStatValue, { color: COLORS.gold }]}>
+              <Text style={styles.assetStatValue}>
                 {assetStats.gems.toLocaleString()}
               </Text>
               <Text style={styles.assetStatLabel}>Gems</Text>
@@ -735,9 +745,9 @@ export default function AccountScreen() {
             </View>
             <View style={styles.assetStatCard}>
               <View style={styles.assetStatIconContainer}>
-                <DollarSign size={24} color={COLORS.success} />
+                <DollarSign size={24} color={COLORS.gold} />
               </View>
-              <Text style={[styles.assetStatValue, { color: COLORS.success }]}>
+              <Text style={styles.assetStatValue}>
                 {(assetStats.earnings / 1000).toFixed(0)}K
               </Text>
               <Text style={styles.assetStatLabel}>Thu nhập</Text>
@@ -745,9 +755,9 @@ export default function AccountScreen() {
             </View>
             <View style={styles.assetStatCard}>
               <View style={styles.assetStatIconContainer}>
-                <Link2 size={24} color={COLORS.info} />
+                <Link2 size={24} color={COLORS.gold} />
               </View>
-              <Text style={[styles.assetStatValue, { color: COLORS.info }]}>
+              <Text style={styles.assetStatValue}>
                 {(assetStats.affiliate / 1000).toFixed(0)}K
               </Text>
               <Text style={styles.assetStatLabel}>Affiliate</Text>
@@ -756,7 +766,7 @@ export default function AccountScreen() {
           </View>
 
           {/* ═══════════════════════════════════════════ */}
-          {/* QUICK ACTIONS GRID (from AssetsHomeScreen) */}
+          {/* QUICK ACTIONS GRID - All icons gold */}
           {/* ═══════════════════════════════════════════ */}
           <Text style={styles.quickActionsSectionTitle}>Quản lý tài sản</Text>
           <View style={styles.actionsGrid}>
@@ -777,8 +787,8 @@ export default function AccountScreen() {
               onPress={() => navigation.navigate('Earnings')}
               activeOpacity={0.7}
             >
-              <View style={[styles.actionIconContainer, { backgroundColor: 'rgba(58, 247, 166, 0.15)' }]}>
-                <DollarSign size={24} color={COLORS.success} />
+              <View style={[styles.actionIconContainer, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
+                <DollarSign size={24} color={COLORS.gold} />
               </View>
               <Text style={styles.actionTitle}>Thu Nhập</Text>
               <Text style={styles.actionSubtitle}>Xem & rút tiền</Text>
@@ -789,8 +799,8 @@ export default function AccountScreen() {
               onPress={() => navigation.navigate('EarningsHistory')}
               activeOpacity={0.7}
             >
-              <View style={[styles.actionIconContainer, { backgroundColor: 'rgba(106, 91, 255, 0.15)' }]}>
-                <TrendingUp size={24} color={COLORS.purple} />
+              <View style={[styles.actionIconContainer, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
+                <TrendingUp size={24} color={COLORS.gold} />
               </View>
               <Text style={styles.actionTitle}>Giao Dịch</Text>
               <Text style={styles.actionSubtitle}>Lịch sử chi tiêu</Text>
@@ -801,8 +811,8 @@ export default function AccountScreen() {
               onPress={() => navigation.navigate('BoostedPosts')}
               activeOpacity={0.7}
             >
-              <View style={[styles.actionIconContainer, { backgroundColor: 'rgba(236, 72, 153, 0.15)' }]}>
-                <Rocket size={24} color="#EC4899" />
+              <View style={[styles.actionIconContainer, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
+                <Rocket size={24} color={COLORS.gold} />
               </View>
               <Text style={styles.actionTitle}>Boost</Text>
               <Text style={styles.actionSubtitle}>Quảng cáo bài</Text>
@@ -813,8 +823,8 @@ export default function AccountScreen() {
               onPress={() => navigation.navigate('Portfolio')}
               activeOpacity={0.7}
             >
-              <View style={[styles.actionIconContainer, { backgroundColor: 'rgba(139, 92, 246, 0.15)' }]}>
-                <BarChart3 size={24} color="#8B5CF6" />
+              <View style={[styles.actionIconContainer, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
+                <BarChart3 size={24} color={COLORS.gold} />
               </View>
               <Text style={styles.actionTitle}>Portfolio</Text>
               <Text style={styles.actionSubtitle}>Thống kê</Text>
@@ -825,8 +835,8 @@ export default function AccountScreen() {
               onPress={() => navigation.navigate('SoundLibrary')}
               activeOpacity={0.7}
             >
-              <View style={[styles.actionIconContainer, { backgroundColor: 'rgba(245, 158, 11, 0.15)' }]}>
-                <Music size={24} color="#F59E0B" />
+              <View style={[styles.actionIconContainer, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
+                <Music size={24} color={COLORS.gold} />
               </View>
               <Text style={styles.actionTitle}>Âm Thanh</Text>
               <Text style={styles.actionSubtitle}>Thư viện</Text>
@@ -834,120 +844,78 @@ export default function AccountScreen() {
           </View>
 
           {/* ═══════════════════════════════════════════ */}
-          {/* DASHBOARD WIDGETS SECTION (Day 17-19) */}
-          {/* Position #2 - Right after Profile Header */}
+          {/* SECTION: GEM ECONOMY - All icons gold */}
           {/* ═══════════════════════════════════════════ */}
-          {widgets.length > 0 ? (
-            <View
-              ref={dashboardSectionRef}
-              style={styles.dashboardSection}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Gem Economy</Text>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => navigation.navigate('GemPackList')}
             >
-              <TouchableOpacity
-                style={styles.dashboardHeader}
-                onPress={toggleDashboardSection}
-                activeOpacity={0.7}
-              >
-                <View style={styles.dashboardHeaderLeft}>
-                  <LayoutDashboard size={SPACING.xl} color={COLORS.gold} />
-                  <Text style={styles.dashboardTitle}>Dashboard - Goals & Actions</Text>
-                </View>
-                {isWidgetSectionCollapsed ? (
-                  <ChevronDown size={SPACING.xxl} color={COLORS.gold} />
-                ) : (
-                  <ChevronUp size={SPACING.xxl} color={COLORS.gold} />
-                )}
-              </TouchableOpacity>
-
-              {!isWidgetSectionCollapsed && (
-                <View style={styles.widgetsContainer}>
-                  {widgets.map(renderWidget)}
-
-                  {/* Add New Goal Button */}
-                  <TouchableOpacity
-                    style={styles.addWidgetButton}
-                    onPress={navigateToGemMaster}
-                    activeOpacity={0.8}
-                  >
-                    <Plus size={SPACING.xxl} color={COLORS.gold} />
-                    <Text style={styles.addWidgetText}>Thêm Mục Tiêu Mới</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
-          ) : (
-            /* Empty State - No widgets yet */
-            !isLoadingWidgets && (
-              <View style={styles.emptyDashboard}>
-                <View style={styles.emptyIconContainer}>
-                  <LayoutDashboard size={48} color={COLORS.textMuted} />
-                </View>
-                <Text style={styles.emptyTitle}>Chưa có mục tiêu nào</Text>
-                <Text style={styles.emptyText}>
-                  Chat với GEM AI để tạo goals & affirmations!
-                </Text>
-                <TouchableOpacity
-                  style={styles.createGoalButton}
-                  onPress={navigateToGemMaster}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.createGoalButtonText}>Bắt Đầu Ngay</Text>
-                </TouchableOpacity>
+              <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
+                <Gem size={20} color={COLORS.gold} />
               </View>
-            )
-          )}
+              <View style={styles.menuContent}>
+                <Text style={styles.menuText}>Mua Gems</Text>
+                <Text style={styles.menuSubtext}>Nạp Gems để sử dụng dịch vụ</Text>
+              </View>
+              <ChevronRight size={20} color={COLORS.textMuted} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => navigation.navigate('DailyCheckin')}
+            >
+              <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
+                <Clock size={20} color={COLORS.gold} />
+              </View>
+              <View style={styles.menuContent}>
+                <Text style={styles.menuText}>Điểm danh</Text>
+                <Text style={styles.menuSubtext}>Nhận 5 Gems miễn phí mỗi ngày</Text>
+              </View>
+              <View style={styles.gemBadge}>
+                <Gift size={12} color={COLORS.gold} />
+                <Text style={[styles.gemBadgeText, { color: COLORS.gold }]}>+5</Text>
+              </View>
+              <ChevronRight size={20} color={COLORS.textMuted} />
+            </TouchableOpacity>
+          </View>
 
           {/* ═══════════════════════════════════════════ */}
-          {/* SECTION: ĐƠN HÀNG CỦA TÔI */}
+          {/* SECTION: ĐƠN HÀNG CỦA TÔI - All icons gold */}
           {/* ═══════════════════════════════════════════ */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Đơn Hàng Của Tôi</Text>
 
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => navigation.navigate('Shop', { screen: 'Orders' })}
+              onPress={() => navigation.navigate('MyOrders')}
             >
               <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
                 <Package size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Tất cả đơn hàng</Text>
-                <Text style={styles.menuSubtext}>Xem lịch sử mua hàng</Text>
+                <Text style={styles.menuSubtext}>Theo dõi đơn hàng từ Shopify</Text>
               </View>
               <ChevronRight size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
 
-            {/* Order Status Quick Links */}
-            <View style={styles.orderStatusRow}>
-              <TouchableOpacity
-                style={styles.orderStatusItem}
-                onPress={() => navigation.navigate('Shop', { screen: 'Orders', params: { filter: 'pending' } })}
-              >
-                <View style={[styles.orderStatusIcon, { backgroundColor: 'rgba(255, 189, 89, 0.2)' }]}>
-                  <Package size={18} color={COLORS.gold} />
-                </View>
-                <Text style={styles.orderStatusText}>Chờ xử lý</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.orderStatusItem}
-                onPress={() => navigation.navigate('Shop', { screen: 'Orders', params: { filter: 'shipping' } })}
-              >
-                <View style={[styles.orderStatusIcon, { backgroundColor: 'rgba(106, 91, 255, 0.2)' }]}>
-                  <Package size={18} color={COLORS.purple} />
-                </View>
-                <Text style={styles.orderStatusText}>Đang giao</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.orderStatusItem}
-                onPress={() => navigation.navigate('Shop', { screen: 'Orders', params: { filter: 'delivered' } })}
-              >
-                <View style={[styles.orderStatusIcon, { backgroundColor: 'rgba(58, 247, 166, 0.2)' }]}>
-                  <Package size={18} color={COLORS.success} />
-                </View>
-                <Text style={styles.orderStatusText}>Đã giao</Text>
-              </TouchableOpacity>
-            </View>
+            {/* Link Order Button */}
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => navigation.navigate('LinkOrder')}
+            >
+              <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
+                <Link2 size={20} color={COLORS.gold} />
+              </View>
+              <View style={styles.menuContent}>
+                <Text style={styles.menuText}>Liên kết đơn hàng</Text>
+                <Text style={styles.menuSubtext}>Liên kết đơn mua bằng email khác</Text>
+              </View>
+              <ChevronRight size={20} color={COLORS.textMuted} />
+            </TouchableOpacity>
           </View>
 
           {/* ═══════════════════════════════════════════ */}
@@ -956,7 +924,7 @@ export default function AccountScreen() {
           <AffiliateSection user={user} navigation={navigation} />
 
           {/* ═══════════════════════════════════════════ */}
-          {/* SECTION: PORTFOLIO / TÀI SẢN */}
+          {/* SECTION: PORTFOLIO / TÀI SẢN - All icons gold */}
           {/* ═══════════════════════════════════════════ */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Tài Sản</Text>
@@ -965,8 +933,8 @@ export default function AccountScreen() {
               style={styles.menuItem}
               onPress={() => navigation.navigate('Portfolio')}
             >
-              <View style={[styles.menuIcon, { backgroundColor: 'rgba(58, 247, 166, 0.15)' }]}>
-                <Wallet size={20} color={COLORS.success} />
+              <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
+                <Wallet size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Portfolio</Text>
@@ -979,8 +947,8 @@ export default function AccountScreen() {
               style={styles.menuItem}
               onPress={() => navigation.navigate('PaperTradeHistory')}
             >
-              <View style={[styles.menuIcon, { backgroundColor: 'rgba(106, 91, 255, 0.15)' }]}>
-                <TrendingUp size={20} color={COLORS.purple} />
+              <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
+                <TrendingUp size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Paper Trade History</Text>
@@ -991,7 +959,7 @@ export default function AccountScreen() {
           </View>
 
           {/* ═══════════════════════════════════════════ */}
-          {/* SECTION: KHÓA HỌC CỦA TÔI */}
+          {/* SECTION: KHÓA HỌC CỦA TÔI - All icons gold */}
           {/* ═══════════════════════════════════════════ */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Khóa Học Của Tôi</Text>
@@ -1000,8 +968,8 @@ export default function AccountScreen() {
               style={styles.menuItem}
               onPress={() => navigation.navigate('Courses')}
             >
-              <View style={[styles.menuIcon, { backgroundColor: 'rgba(0, 200, 255, 0.15)' }]}>
-                <GraduationCap size={20} color={COLORS.cyan} />
+              <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
+                <GraduationCap size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Tất cả khóa học</Text>
@@ -1014,8 +982,8 @@ export default function AccountScreen() {
               style={styles.menuItem}
               onPress={() => navigation.navigate('Courses', { filter: 'enrolled' })}
             >
-              <View style={[styles.menuIcon, { backgroundColor: 'rgba(106, 91, 255, 0.15)' }]}>
-                <BookOpen size={20} color={COLORS.purple} />
+              <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
+                <BookOpen size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Đang học</Text>
@@ -1026,80 +994,20 @@ export default function AccountScreen() {
           </View>
 
           {/* ═══════════════════════════════════════════ */}
-          {/* SECTION: CREATOR TOOLS */}
+          {/* SECTION: CÀI ĐẶT - All icons gold */}
           {/* ═══════════════════════════════════════════ */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Creator Tools</Text>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => navigation.navigate('Wallet')}
-            >
-              <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <Gem size={20} color={COLORS.gold} />
-              </View>
-              <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Ví Gems</Text>
-                <Text style={styles.menuSubtext}>Quản lý gems & nạp thêm</Text>
-              </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => navigation.navigate('Earnings')}
-            >
-              <View style={[styles.menuIcon, { backgroundColor: 'rgba(58, 247, 166, 0.15)' }]}>
-                <DollarSign size={20} color={COLORS.success} />
-              </View>
-              <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Thu Nhập</Text>
-                <Text style={styles.menuSubtext}>Xem thu nhập từ gifts & tips</Text>
-              </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => navigation.navigate('SoundLibrary')}
-            >
-              <View style={[styles.menuIcon, { backgroundColor: 'rgba(106, 91, 255, 0.15)' }]}>
-                <Music size={20} color={COLORS.purple} />
-              </View>
-              <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Thư Viện Âm Thanh</Text>
-                <Text style={styles.menuSubtext}>Âm thanh cho bài viết của bạn</Text>
-              </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => navigation.navigate('BoostedPosts')}
-            >
-              <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 140, 0, 0.15)' }]}>
-                <Zap size={20} color="#FF8C00" />
-              </View>
-              <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Bài Đăng Boost</Text>
-                <Text style={styles.menuSubtext}>Quản lý bài viết đang được boost</Text>
-              </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
-            </TouchableOpacity>
-          </View>
-
-          {/* ═══════════════════════════════════════════ */}
-          {/* SECTION: TÀI KHOẢN */}
-          {/* ═══════════════════════════════════════════ */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Tài Khoản</Text>
+            <View style={styles.sectionHeaderRow}>
+              <Settings size={18} color={COLORS.gold} />
+              <Text style={[styles.sectionTitle, { marginBottom: 0, marginLeft: SPACING.sm }]}>Cài Đặt</Text>
+            </View>
 
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => navigation.navigate('ProfileSettings')}
             >
-              <View style={[styles.menuIcon, { backgroundColor: 'rgba(106, 91, 255, 0.15)' }]}>
-                <User size={20} color={COLORS.purple} />
+              <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
+                <User size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Thông tin cá nhân</Text>
@@ -1111,14 +1019,43 @@ export default function AccountScreen() {
               style={styles.menuItem}
               onPress={() => setPasswordModalVisible(true)}
             >
-              <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 107, 107, 0.15)' }]}>
-                <Lock size={20} color={COLORS.error} />
+              <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
+                <Lock size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Đổi mật khẩu</Text>
               </View>
               <ChevronRight size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
+
+            {/* Biometric Toggle - Chỉ hiện nếu thiết bị hỗ trợ */}
+            {biometricSupported && (
+              <View style={styles.menuItem}>
+                <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
+                  {biometricType?.includes('Face') || biometricType?.includes('khuôn mặt') ? (
+                    <Scan size={20} color={COLORS.gold} />
+                  ) : (
+                    <Fingerprint size={20} color={COLORS.gold} />
+                  )}
+                </View>
+                <View style={styles.menuContent}>
+                  <Text style={styles.menuText}>Đăng nhập bằng {biometricType}</Text>
+                  <Text style={styles.menuSubtext}>
+                    {biometricEnabled ? 'Đã bật' : 'Chưa bật'}
+                  </Text>
+                </View>
+                {biometricLoading ? (
+                  <ActivityIndicator size="small" color={COLORS.gold} />
+                ) : (
+                  <Switch
+                    value={biometricEnabled}
+                    onValueChange={handleBiometricToggle}
+                    trackColor={{ false: 'rgba(255, 255, 255, 0.2)', true: 'rgba(255, 189, 89, 0.5)' }}
+                    thumbColor={biometricEnabled ? COLORS.gold : COLORS.textMuted}
+                  />
+                )}
+              </View>
+            )}
 
             <TouchableOpacity
               style={styles.menuItem}
@@ -1137,8 +1074,8 @@ export default function AccountScreen() {
               style={styles.menuItem}
               onPress={() => navigation.navigate('PrivacySettings')}
             >
-              <View style={[styles.menuIcon, { backgroundColor: 'rgba(0, 200, 255, 0.15)' }]}>
-                <Shield size={20} color={COLORS.cyan} />
+              <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
+                <Shield size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Cài đặt quyền riêng tư</Text>
@@ -1151,8 +1088,8 @@ export default function AccountScreen() {
               style={styles.menuItem}
               onPress={() => navigation.navigate('CloseFriends')}
             >
-              <View style={[styles.menuIcon, { backgroundColor: 'rgba(58, 247, 166, 0.15)' }]}>
-                <UserCheck size={20} color={COLORS.success} />
+              <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
+                <UserCheck size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Bạn thân</Text>
@@ -1177,7 +1114,7 @@ export default function AccountScreen() {
           </View>
 
           {/* ═══════════════════════════════════════════ */}
-          {/* SECTION: KHÁC */}
+          {/* SECTION: KHÁC - All icons gold */}
           {/* ═══════════════════════════════════════════ */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Khác</Text>
@@ -1186,8 +1123,8 @@ export default function AccountScreen() {
               style={styles.menuItem}
               onPress={() => navigation.navigate('HelpSupport')}
             >
-              <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 255, 255, 0.1)' }]}>
-                <HelpCircle size={20} color={COLORS.textMuted} />
+              <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
+                <HelpCircle size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Trợ giúp & Hỗ trợ</Text>
@@ -1199,8 +1136,8 @@ export default function AccountScreen() {
               style={styles.menuItem}
               onPress={() => navigation.navigate('Terms')}
             >
-              <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 255, 255, 0.1)' }]}>
-                <FileText size={20} color={COLORS.textMuted} />
+              <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
+                <FileText size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
                 <Text style={styles.menuText}>Điều khoản sử dụng</Text>
@@ -1221,8 +1158,19 @@ export default function AccountScreen() {
             </TouchableOpacity>
           </View>
 
+          {/* Sponsor Banners - distributed */}
+          {sponsorBanners.map((banner) => (
+            <SponsorBannerCard
+              key={banner.id}
+              banner={banner}
+              navigation={navigation}
+              userId={bannerUserId}
+              onDismiss={dismissBanner}
+            />
+          ))}
+
           {/* Bottom spacing */}
-          <View style={{ height: 120 }} />
+          <View style={{ height: CONTENT_BOTTOM_PADDING }} />
         </ScrollView>
 
         {/* Edit Profile Modal */}
@@ -1237,6 +1185,15 @@ export default function AccountScreen() {
         <ChangePasswordModal
           isOpen={passwordModalVisible}
           onClose={() => setPasswordModalVisible(false)}
+        />
+
+        {/* Biometric Setup Modal */}
+        <BiometricSetupModal
+          visible={showBiometricModal}
+          onClose={handleBiometricSetupClose}
+          onSuccess={handleBiometricSetupSuccess}
+          email={user?.email}
+          refreshToken={currentRefreshToken}
         />
 
         {/* Confetti for milestone celebrations (Day 20-22) */}
@@ -1260,6 +1217,8 @@ export default function AccountScreen() {
             </View>
           </View>
         )}
+
+        {AlertComponent}
       </SafeAreaView>
     </LinearGradient>
   );
@@ -1278,6 +1237,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.md,
+    paddingBottom: CONTENT_BOTTOM_PADDING + 40,
   },
   loadingContainer: {
     flex: 1,
@@ -1407,6 +1367,13 @@ const styles = StyleSheet.create({
     color: COLORS.gold,
   },
 
+  // Name row with badges
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+
   // Stats
   statsContainer: {
     flexDirection: 'row',
@@ -1464,7 +1431,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: TYPOGRAPHY.fontSize.lg,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.gold,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.md,
+    marginLeft: 4,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: SPACING.md,
     marginLeft: 4,
   },
@@ -1500,6 +1473,21 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.fontSize.sm,
     color: COLORS.textMuted,
     marginTop: 2,
+  },
+  gemBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(58, 247, 166, 0.15)',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    borderRadius: 12,
+    marginRight: SPACING.sm,
+    gap: 4,
+  },
+  gemBadgeText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.success,
   },
   logoutItem: {
     borderColor: 'rgba(255, 107, 107, 0.3)',
@@ -1606,91 +1594,57 @@ const styles = StyleSheet.create({
   },
 
   // ═══════════════════════════════════════════
-  // Dashboard Section Styles (Day 17-19)
+  // Vision Board Card Styles - Subtle, matching app theme
   // ═══════════════════════════════════════════
-  dashboardSection: {
-    backgroundColor: 'rgba(255, 189, 89, 0.05)',
-    borderRadius: GLASS.borderRadius,
-    borderWidth: GLASS.borderWidth,
-    borderColor: 'rgba(255, 189, 89, 0.2)',
+  visionBoardCard: {
     marginBottom: SPACING.lg,
+    borderRadius: 14,
     overflow: 'hidden',
+    backgroundColor: GLASS.background,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.3)',
   },
-  dashboardHeader: {
+  visionBoardContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: SPACING.lg,
-    backgroundColor: 'rgba(255, 189, 89, 0.1)',
   },
-  dashboardHeaderLeft: {
+  visionBoardLeft: {
+    flex: 1,
+  },
+  visionBoardIconRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.sm,
-  },
-  dashboardTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
-  },
-  widgetsContainer: {
-    padding: SPACING.md,
-  },
-  addWidgetButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: SPACING.sm,
-    padding: SPACING.lg,
-    backgroundColor: 'rgba(255, 189, 89, 0.1)',
-    borderRadius: SPACING.md,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 189, 89, 0.3)',
-    borderStyle: 'dashed',
-    marginTop: SPACING.xs,
-  },
-  addWidgetText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.gold,
-  },
-
-  // Empty Dashboard State
-  emptyDashboard: {
-    padding: SPACING.huge,
-    backgroundColor: 'rgba(255, 189, 89, 0.05)',
-    borderRadius: GLASS.borderRadius,
-    borderWidth: GLASS.borderWidth,
-    borderColor: 'rgba(255, 189, 89, 0.2)',
-    alignItems: 'center',
-    marginBottom: SPACING.lg,
-  },
-  emptyIconContainer: {
-    marginBottom: SPACING.md,
-    opacity: 0.6,
-  },
-  emptyTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xxxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
     marginBottom: SPACING.sm,
   },
-  emptyText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
+  visionBoardTitle: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+    marginBottom: 2,
+  },
+  visionBoardSubtitle: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
     color: COLORS.textMuted,
-    textAlign: 'center',
-    marginBottom: SPACING.xxl,
   },
-  createGoalButton: {
-    paddingVertical: SPACING.md,
-    paddingHorizontal: SPACING.xxxl,
-    backgroundColor: COLORS.gold,
-    borderRadius: SPACING.md,
+  visionBoardRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
   },
-  createGoalButtonText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.bgMid,
+  visionBoardStats: {
+    alignItems: 'flex-end',
+    gap: 4,
+  },
+  visionBoardStatItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  visionBoardStatText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textMuted,
   },
 
   // ═══════════════════════════════════════════
@@ -1732,15 +1686,15 @@ const styles = StyleSheet.create({
   },
 
   // ═══════════════════════════════════════════
-  // ⚡ ADMIN DASHBOARD STYLES - MAGENTA THEME
+  // ⚡ ADMIN DASHBOARD STYLES - Subtle, matching app theme
   // ═══════════════════════════════════════════
   adminSection: {
-    backgroundColor: 'rgba(255, 0, 255, 0.08)',
-    borderRadius: GLASS.borderRadius,
+    backgroundColor: GLASS.background,
+    borderRadius: 14,
     padding: SPACING.lg,
     marginBottom: SPACING.lg,
-    borderWidth: 2,
-    borderColor: 'rgba(255, 0, 255, 0.4)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.3)',
   },
   adminHeader: {
     flexDirection: 'row',
@@ -1749,18 +1703,18 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   adminHeaderText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontSize: TYPOGRAPHY.fontSize.sm,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: '#FF00FF',
-    letterSpacing: 2,
+    color: COLORS.gold,
+    letterSpacing: 1.5,
   },
   adminMainButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: 'rgba(255, 0, 255, 0.3)',
-    borderRadius: SPACING.md,
-    padding: SPACING.lg,
+    backgroundColor: 'rgba(106, 91, 255, 0.15)',
+    borderRadius: 12,
+    padding: SPACING.md,
     marginBottom: SPACING.md,
   },
   adminButtonContent: {
@@ -1769,27 +1723,34 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   adminButtonText: {
-    fontSize: TYPOGRAPHY.fontSize.xxl,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: '#FFFFFF',
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
   },
   adminQuickActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: SPACING.sm,
+    marginTop: SPACING.xs,
   },
   adminQuickBtn: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: GLASS.background,
-    borderRadius: SPACING.sm,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    borderRadius: 10,
     padding: SPACING.md,
     borderWidth: 1,
-    borderColor: 'rgba(255, 0, 255, 0.3)',
+    borderColor: 'rgba(106, 91, 255, 0.1)',
+  },
+  adminQuickBtnWide: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    minHeight: 48,
   },
   adminQuickText: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    color: COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textSecondary,
     marginTop: SPACING.xs,
     textAlign: 'center',
   },
@@ -1799,14 +1760,14 @@ const styles = StyleSheet.create({
     right: -4,
     backgroundColor: COLORS.error,
     borderRadius: 10,
-    minWidth: 20,
-    height: 20,
+    minWidth: 18,
+    height: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 6,
+    paddingHorizontal: 5,
   },
   adminBadgeCountText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
     color: '#FFF',
   },

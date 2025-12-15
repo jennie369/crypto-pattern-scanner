@@ -214,24 +214,34 @@ export const calculateDisplayHeight = (screenWidth, ratio, options = {}) => {
 /**
  * Get image height with smart fallback
  * Uses image_width/image_height if available, falls back to image_ratio
+ * ENFORCES 1:1 (square) minimum and 3:4 (portrait) maximum ratio
+ * Landscape images (16:9, etc.) will be displayed as square (1:1)
  * @param {Object} post - Post object with image data
  * @param {number} containerWidth - Width of container
  * @returns {number} - Calculated height
  */
 export const getImageDisplayHeight = (post, containerWidth) => {
+  // Feed display constraints:
+  // - MIN: 1:1 (square) - landscape images become square
+  // - MAX: 3:4 (portrait) - very tall images are capped
+  const FEED_MIN_RATIO = 1.0;   // 1:1 square (no landscape)
+  const FEED_MAX_RATIO = 1.33;  // 3:4 portrait
+  const FEED_DEFAULT_RATIO = 1.0; // Default to square
+
+  let ratio = FEED_DEFAULT_RATIO;
+
   // If we have explicit dimensions, calculate from them
   if (post.image_width && post.image_height) {
-    const ratio = post.image_height / post.image_width;
-    return calculateDisplayHeight(containerWidth, ratio);
+    ratio = post.image_height / post.image_width;
+  } else if (post.image_ratio) {
+    // If we have stored ratio, use it
+    ratio = post.image_ratio;
   }
 
-  // If we have stored ratio, use it
-  if (post.image_ratio) {
-    return calculateDisplayHeight(containerWidth, post.image_ratio);
-  }
+  // Clamp ratio: no landscape (min 1:1), max 3:4 portrait
+  const clampedRatio = Math.max(FEED_MIN_RATIO, Math.min(ratio, FEED_MAX_RATIO));
 
-  // Default to 4:5 (Instagram optimal ratio)
-  return calculateDisplayHeight(containerWidth, 0.8);
+  return Math.round(containerWidth * clampedRatio);
 };
 
 export default {

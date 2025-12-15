@@ -25,9 +25,20 @@ import { AuthProvider } from './src/contexts/AuthContext';
 import { CartProvider } from './src/contexts/CartContext';
 import { CourseProvider } from './src/contexts/CourseContext';
 import { TabBarProvider } from './src/contexts/TabBarContext';
+import { ScannerProvider } from './src/contexts/ScannerContext';
+import { VisionBoardProvider } from './src/contexts/VisionBoardContext';
+
+// Tooltip Provider for feature discovery
+import TooltipProvider from './src/components/Common/TooltipProvider';
 
 // Services
 import { notificationService } from './src/services/notificationService';
+
+// Hooks
+import { useActionReset } from './src/hooks/useActionReset';
+
+// Global Alert Provider (dark themed alerts)
+import GlobalAlertProvider from './src/components/UI/GlobalAlertProvider';
 
 // Ignore specific warnings (optional)
 LogBox.ignoreLogs([
@@ -37,24 +48,53 @@ LogBox.ignoreLogs([
   '[expo-notifications] Listening to push token', // Web-only limitation
 ]);
 
+/**
+ * AppContent - Wrapper inside AuthProvider to use hooks that need auth
+ * Handles auto-reset of Vision Board actions on app open/foreground
+ */
+function AppContent() {
+  // Auto-reset Vision Board actions when app opens or comes to foreground
+  useActionReset({
+    enabled: true,
+    onReset: (result) => {
+      if (__DEV__ && result.resetCount > 0) {
+        console.log(`[App] Reset ${result.resetCount} Vision Board actions`);
+      }
+    },
+  });
+
+  return (
+    <CartProvider>
+      <CourseProvider>
+        <ScannerProvider>
+          <VisionBoardProvider>
+            <TooltipProvider>
+              <TabBarProvider>
+                <StatusBar style="light" />
+                <AppNavigator />
+              </TabBarProvider>
+            </TooltipProvider>
+          </VisionBoardProvider>
+        </ScannerProvider>
+      </CourseProvider>
+    </CartProvider>
+  );
+}
+
 export default function App() {
   // Initialize notifications on app start
   useEffect(() => {
     notificationService.initialize();
   }, []);
+
   return (
     <GestureHandlerRootView style={styles.container}>
       <SafeAreaProvider>
-        <AuthProvider>
-          <CartProvider>
-            <CourseProvider>
-              <TabBarProvider>
-                <StatusBar style="light" />
-                <AppNavigator />
-              </TabBarProvider>
-            </CourseProvider>
-          </CartProvider>
-        </AuthProvider>
+        <GlobalAlertProvider>
+          <AuthProvider>
+            <AppContent />
+          </AuthProvider>
+        </GlobalAlertProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

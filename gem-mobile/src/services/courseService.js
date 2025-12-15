@@ -1,15 +1,14 @@
 /**
  * Gemral - Course Service (Mobile)
- * Mock data service với structure tương thích Tevello API
- * Supports API fallback pattern - uses Tevello API when configured,
- * falls back to mock data otherwise
+ * Supabase-powered course service with mock data fallback
+ * Supports: courses, enrollments, progress, quizzes, certificates
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { tevelloApi, isApiConfigured } from './tevelloApi';
+import { supabase } from './supabase';
 
-// Feature flag for using real API
-const USE_REAL_API = false; // Set to true when Tevello API is ready
+// Feature flag for using Supabase
+const USE_SUPABASE = true; // Set to true to use Supabase, false for mock only
 
 // Storage keys
 const ENROLLMENTS_KEY = '@gem_course_enrollments';
@@ -357,12 +356,9 @@ const MOCK_COURSES = [
 // Tier order for comparison
 const TIER_ORDER = ['FREE', 'TIER1', 'TIER2', 'TIER3'];
 
-/**
- * Check if we should use real API
- */
-const shouldUseRealApi = () => {
-  return USE_REAL_API && isApiConfigured();
-};
+// Storage keys for certificates
+const CERTIFICATES_KEY = '@gem_course_certificates';
+const REVIEWS_KEY = '@gem_course_reviews';
 
 /**
  * Course Service - Mock data với API-ready structure
@@ -387,30 +383,75 @@ class CourseService {
 
   /**
    * Get all courses
-   * Uses Tevello API if configured, otherwise falls back to mock data
+   * Uses Supabase if enabled, otherwise falls back to mock data
    */
   async getCourses(filters = {}) {
     try {
       let courses;
 
-      // Try real API first if configured
-      if (shouldUseRealApi()) {
+      // Try Supabase first if enabled
+      if (USE_SUPABASE) {
         try {
-          console.log('[Course] Fetching from Tevello API...');
-          courses = await tevelloApi.getCourses(filters);
-          this._coursesCache = courses;
-          this._lastFetchTime = Date.now();
+          console.log('[Course] Fetching from Supabase...', { filters });
+          let query = supabase
+            .from('courses')
+            .select('*');
+
+          // Only filter by is_published if not in admin/creator mode
+          // Admin/Creator can see all courses (published + unpublished)
+          if (!filters.includeUnpublished) {
+            query = query.eq('is_published', true);
+          }
+
+          // Apply tier filter at DB level
+          if (filters.tier) {
+            query = query.eq('tier_required', filters.tier);
+          }
+
+          const { data, error } = await query.order('created_at', { ascending: false });
+
+          console.log('[Course] Supabase response:', { dataCount: data?.length || 0, error: error?.message });
+
+          if (error) throw error;
+
+          if (data && data.length > 0) {
+            // Transform Supabase data to match expected format
+            courses = data.map(c => ({
+              ...c,
+              instructor: {
+                name: c.instructor_name || 'Gemral',
+                avatar: c.instructor_avatar || 'https://ui-avatars.com/api/?name=GEM&background=6A5BFF&color=fff',
+                bio: '',
+              },
+              thumbnail_url: c.thumbnail_url || 'https://placehold.co/400x200/1a0b2e/FFBD59?text=Course',
+            }));
+            console.log('[Course] Loaded', courses.length, 'courses from Supabase:', courses.map(c => c.title));
+            this._coursesCache = courses;
+            this._lastFetchTime = Date.now();
+          } else {
+            // No courses in DB - return empty array instead of mock
+            // This ensures we only show real courses from Supabase
+            console.log('[Course] No published courses found in Supabase database');
+            courses = [];
+          }
         } catch (apiError) {
-          console.warn('[Course] Tevello API failed, falling back to mock:', apiError.message);
-          courses = [...MOCK_COURSES];
+          console.error('[Course] Supabase failed:', apiError.message);
+          // On error, return cached data if available, otherwise empty
+          if (this._coursesCache) {
+            console.log('[Course] Using cached courses');
+            courses = this._coursesCache;
+          } else {
+            courses = [];
+          }
         }
       } else {
-        // Use mock data
+        // Use mock data only when Supabase is explicitly disabled
+        console.log('[Course] USE_SUPABASE is false, using mock data');
         courses = [...MOCK_COURSES];
       }
 
-      // Filter by tier
-      if (filters.tier) {
+      // Filter by tier (for mock data)
+      if (filters.tier && !USE_SUPABASE) {
         courses = courses.filter(c => c.tier_required === filters.tier);
       }
 
@@ -441,18 +482,74 @@ class CourseService {
   }
 
   /**
-   * Get course by ID
-   * Uses Tevello API if configured, otherwise falls back to mock data
+   * Get course by ID with modules and lessons
+   * Uses Supabase if enabled, otherwise falls back to mock data
    */
   async getCourseById(courseId) {
     try {
-      // Try real API first if configured
-      if (shouldUseRealApi()) {
+      // Try Supabase first if enabled
+      if (USE_SUPABASE) {
         try {
-          const course = await tevelloApi.getCourseById(courseId);
-          return course;
+          // Fetch course first (without nested relations to avoid PGRST200 errors)
+          const { data: course, error } = await supabase
+            .from('courses')
+            .select('*')
+            .eq('id', courseId)
+            .single();
+
+          if (error) throw error;
+
+          if (course) {
+            // Fetch modules separately
+            const { data: modulesData, error: modulesError } = await supabase
+              .from('course_modules')
+              .select('*')
+              .eq('course_id', courseId)
+              .order('order_index', { ascending: true });
+
+            if (modulesError) {
+              console.warn('[Course] Modules fetch error:', modulesError);
+              course.modules = [];
+            } else {
+              // Fetch lessons for each module separately
+              const modulesWithLessons = await Promise.all(
+                (modulesData || []).map(async (module) => {
+                  try {
+                    const { data: lessonsData, error: lessonsError } = await supabase
+                      .from('course_lessons')
+                      .select('*')
+                      .eq('module_id', module.id)
+                      .order('order_index', { ascending: true });
+
+                    if (lessonsError) {
+                      console.warn('[Course] Lessons fetch error for module', module.id, lessonsError);
+                      return { ...module, lessons: [] };
+                    }
+
+                    return { ...module, lessons: lessonsData || [] };
+                  } catch (err) {
+                    console.warn('[Course] Error loading lessons for module:', module.id, err);
+                    return { ...module, lessons: [] };
+                  }
+                })
+              );
+
+              course.modules = modulesWithLessons;
+            }
+
+            // Transform to expected format
+            return {
+              ...course,
+              instructor: {
+                name: course.instructor_name || 'Gemral',
+                avatar: course.instructor_avatar || 'https://ui-avatars.com/api/?name=GEM&background=6A5BFF&color=fff',
+                bio: '',
+              },
+              thumbnail_url: course.thumbnail_url || 'https://placehold.co/400x200/1a0b2e/FFBD59?text=Course',
+            };
+          }
         } catch (apiError) {
-          console.warn('[Course] Tevello API failed, falling back to mock:', apiError.message);
+          console.warn('[Course] Supabase failed, falling back to mock:', apiError.message);
         }
       }
 
@@ -752,6 +849,357 @@ class CourseService {
     }
   }
 
+  // ==================== CERTIFICATES ====================
+
+  /**
+   * Get user's certificate for a course
+   * @param {string} userId - User ID
+   * @param {string} courseId - Course ID
+   * @returns {Promise<Object|null>} Certificate or null
+   */
+  async getCertificate(userId, courseId) {
+    try {
+      // Try Supabase first
+      if (USE_SUPABASE) {
+        try {
+          const { data, error } = await supabase
+            .from('course_certificates')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('course_id', courseId)
+            .single();
+
+          if (!error && data) return data;
+        } catch (apiError) {
+          console.warn('[Course] Certificate fetch failed:', apiError.message);
+        }
+      }
+
+      // Fallback to local storage
+      const stored = await AsyncStorage.getItem(CERTIFICATES_KEY);
+      const certs = stored ? JSON.parse(stored) : {};
+      const key = `${userId}_${courseId}`;
+      return certs[key] || null;
+    } catch (error) {
+      console.error('[Course] getCertificate error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Generate certificate for completed course
+   * @param {string} userId - User ID
+   * @param {string} courseId - Course ID
+   * @param {string} userName - User's display name
+   * @returns {Promise<Object>} Generated certificate
+   */
+  async generateCertificate(userId, courseId, userName) {
+    try {
+      // Check if course is 100% complete
+      const progress = await this.getProgress(userId, courseId);
+      if (progress.percentComplete < 100) {
+        return { success: false, error: 'Course not completed' };
+      }
+
+      const course = await this.getCourseById(courseId);
+      if (!course) {
+        return { success: false, error: 'Course not found' };
+      }
+
+      // Generate certificate data
+      const certificate = {
+        id: `cert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        user_id: userId,
+        course_id: courseId,
+        user_name: userName,
+        course_title: course.title,
+        instructor_name: course.instructor?.name || 'Gemral',
+        completed_at: new Date().toISOString(),
+        certificate_number: `GEM-${Date.now().toString(36).toUpperCase()}`,
+      };
+
+      // Try Supabase first
+      if (USE_SUPABASE) {
+        try {
+          const { data, error } = await supabase
+            .from('course_certificates')
+            .insert(certificate)
+            .select()
+            .single();
+
+          if (!error && data) {
+            return { success: true, certificate: data };
+          }
+        } catch (apiError) {
+          console.warn('[Course] Certificate insert failed:', apiError.message);
+        }
+      }
+
+      // Fallback to local storage
+      const stored = await AsyncStorage.getItem(CERTIFICATES_KEY);
+      const certs = stored ? JSON.parse(stored) : {};
+      const key = `${userId}_${courseId}`;
+      certs[key] = certificate;
+      await AsyncStorage.setItem(CERTIFICATES_KEY, JSON.stringify(certs));
+
+      return { success: true, certificate };
+    } catch (error) {
+      console.error('[Course] generateCertificate error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get all certificates for a user
+   * @param {string} userId - User ID
+   * @returns {Promise<Array>} List of certificates
+   */
+  async getUserCertificates(userId) {
+    try {
+      // Try Supabase first
+      if (USE_SUPABASE) {
+        try {
+          const { data, error } = await supabase
+            .from('course_certificates')
+            .select('*')
+            .eq('user_id', userId)
+            .order('completed_at', { ascending: false });
+
+          if (!error && data) return data;
+        } catch (apiError) {
+          console.warn('[Course] Certificates fetch failed:', apiError.message);
+        }
+      }
+
+      // Fallback to local storage
+      const stored = await AsyncStorage.getItem(CERTIFICATES_KEY);
+      const certs = stored ? JSON.parse(stored) : {};
+      return Object.values(certs).filter(c => c.user_id === userId);
+    } catch (error) {
+      console.error('[Course] getUserCertificates error:', error);
+      return [];
+    }
+  }
+
+  // ==================== REVIEWS ====================
+
+  /**
+   * Get reviews for a course
+   * @param {string} courseId - Course ID
+   * @param {Object} options - Pagination options
+   * @returns {Promise<Array>} List of reviews
+   */
+  async getCourseReviews(courseId, options = {}) {
+    const { limit = 10, offset = 0 } = options;
+
+    try {
+      // Try Supabase first
+      if (USE_SUPABASE) {
+        try {
+          const { data, error } = await supabase
+            .from('course_reviews')
+            .select(`
+              *,
+              profiles:user_id(username, avatar_url)
+            `)
+            .eq('course_id', courseId)
+            .order('created_at', { ascending: false })
+            .range(offset, offset + limit - 1);
+
+          if (!error && data) {
+            return data.map(r => ({
+              ...r,
+              user_name: r.profiles?.username || 'Anonymous',
+              user_avatar: r.profiles?.avatar_url,
+            }));
+          }
+        } catch (apiError) {
+          console.warn('[Course] Reviews fetch failed:', apiError.message);
+        }
+      }
+
+      // Fallback to local storage
+      const stored = await AsyncStorage.getItem(REVIEWS_KEY);
+      const reviews = stored ? JSON.parse(stored) : {};
+      const courseReviews = Object.values(reviews)
+        .filter(r => r.course_id === courseId)
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .slice(offset, offset + limit);
+      return courseReviews;
+    } catch (error) {
+      console.error('[Course] getCourseReviews error:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get user's review for a course
+   * @param {string} userId - User ID
+   * @param {string} courseId - Course ID
+   * @returns {Promise<Object|null>} Review or null
+   */
+  async getUserReview(userId, courseId) {
+    try {
+      // Try Supabase first
+      if (USE_SUPABASE) {
+        try {
+          const { data, error } = await supabase
+            .from('course_reviews')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('course_id', courseId)
+            .single();
+
+          if (!error && data) return data;
+        } catch (apiError) {
+          // Not found is OK
+        }
+      }
+
+      // Fallback to local storage
+      const stored = await AsyncStorage.getItem(REVIEWS_KEY);
+      const reviews = stored ? JSON.parse(stored) : {};
+      const key = `${userId}_${courseId}`;
+      return reviews[key] || null;
+    } catch (error) {
+      console.error('[Course] getUserReview error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Submit or update a course review
+   * @param {string} userId - User ID
+   * @param {string} courseId - Course ID
+   * @param {number} rating - Rating 1-5
+   * @param {string} reviewText - Review text (optional)
+   * @returns {Promise<Object>} Result
+   */
+  async submitReview(userId, courseId, rating, reviewText = '') {
+    try {
+      if (rating < 1 || rating > 5) {
+        return { success: false, error: 'Rating must be 1-5' };
+      }
+
+      // Check if user completed the course (for verified badge)
+      const progress = await this.getProgress(userId, courseId);
+      const isVerified = progress.percentComplete >= 100;
+
+      const reviewData = {
+        user_id: userId,
+        course_id: courseId,
+        rating,
+        review_text: reviewText,
+        is_verified: isVerified,
+        updated_at: new Date().toISOString(),
+      };
+
+      // Try Supabase first
+      if (USE_SUPABASE) {
+        try {
+          // Upsert (insert or update)
+          const { data, error } = await supabase
+            .from('course_reviews')
+            .upsert(reviewData, { onConflict: 'user_id,course_id' })
+            .select()
+            .single();
+
+          if (!error && data) {
+            return { success: true, review: data };
+          }
+        } catch (apiError) {
+          console.warn('[Course] Review upsert failed:', apiError.message);
+        }
+      }
+
+      // Fallback to local storage
+      const stored = await AsyncStorage.getItem(REVIEWS_KEY);
+      const reviews = stored ? JSON.parse(stored) : {};
+      const key = `${userId}_${courseId}`;
+
+      // Check if updating existing
+      const existing = reviews[key];
+      reviews[key] = {
+        id: existing?.id || `review_${Date.now()}`,
+        ...reviewData,
+        created_at: existing?.created_at || new Date().toISOString(),
+      };
+
+      await AsyncStorage.setItem(REVIEWS_KEY, JSON.stringify(reviews));
+      return { success: true, review: reviews[key] };
+    } catch (error) {
+      console.error('[Course] submitReview error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Delete a review
+   * @param {string} userId - User ID
+   * @param {string} courseId - Course ID
+   * @returns {Promise<Object>} Result
+   */
+  async deleteReview(userId, courseId) {
+    try {
+      // Try Supabase first
+      if (USE_SUPABASE) {
+        try {
+          const { error } = await supabase
+            .from('course_reviews')
+            .delete()
+            .eq('user_id', userId)
+            .eq('course_id', courseId);
+
+          if (!error) {
+            return { success: true };
+          }
+        } catch (apiError) {
+          console.warn('[Course] Review delete failed:', apiError.message);
+        }
+      }
+
+      // Fallback to local storage
+      const stored = await AsyncStorage.getItem(REVIEWS_KEY);
+      const reviews = stored ? JSON.parse(stored) : {};
+      const key = `${userId}_${courseId}`;
+      delete reviews[key];
+      await AsyncStorage.setItem(REVIEWS_KEY, JSON.stringify(reviews));
+
+      return { success: true };
+    } catch (error) {
+      console.error('[Course] deleteReview error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Mark review as helpful
+   * @param {string} reviewId - Review ID
+   * @returns {Promise<Object>} Result
+   */
+  async markReviewHelpful(reviewId) {
+    try {
+      if (USE_SUPABASE) {
+        try {
+          const { data, error } = await supabase.rpc('increment_review_helpful', {
+            review_id: reviewId,
+          });
+
+          if (!error) {
+            return { success: true };
+          }
+        } catch (apiError) {
+          console.warn('[Course] Mark helpful failed:', apiError.message);
+        }
+      }
+
+      return { success: false, error: 'Not supported in offline mode' };
+    } catch (error) {
+      console.error('[Course] markReviewHelpful error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
   // ==================== UTILITY ====================
 
   /**
@@ -761,6 +1209,8 @@ class CourseService {
     try {
       await AsyncStorage.removeItem(ENROLLMENTS_KEY);
       await AsyncStorage.removeItem(PROGRESS_KEY);
+      await AsyncStorage.removeItem(CERTIFICATES_KEY);
+      await AsyncStorage.removeItem(REVIEWS_KEY);
       console.log('[Course] All data cleared');
     } catch (error) {
       console.error('[Course] clearAllData error:', error);

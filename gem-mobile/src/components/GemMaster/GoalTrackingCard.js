@@ -7,15 +7,17 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, TextInput, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, TextInput } from 'react-native';
 import { TrendingUp, Edit3, MoreVertical, Calendar, Bell } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import widgetManagementService from '../../services/widgetManagementService';
+import CustomAlert, { useCustomAlert } from '../CustomAlert';
 
 const GoalTrackingCard = ({ widget, onUpdate, isHighlighted }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editAmount, setEditAmount] = useState('');
   const [showDetails, setShowDetails] = useState(false);
+  const { alert, AlertComponent } = useCustomAlert();
 
   const { targetAmount, currentAmount, timeline, targetDate } = widget.data;
   const percentage = targetAmount > 0 ? (currentAmount / targetAmount) * 100 : 0;
@@ -27,7 +29,7 @@ const GoalTrackingCard = ({ widget, onUpdate, isHighlighted }) => {
 
   const handleUpdateProgress = async () => {
     if (!editAmount || isNaN(editAmount)) {
-      Alert.alert('Lỗi', 'Vui lòng nhập số hợp lệ');
+      alert({ type: 'error', title: 'Lỗi', message: 'Vui lòng nhập số hợp lệ' });
       return;
     }
 
@@ -39,10 +41,11 @@ const GoalTrackingCard = ({ widget, onUpdate, isHighlighted }) => {
       );
 
       if (result.newMilestone) {
-        Alert.alert(
-          'Milestone!',
-          `Chúc mừng! Bạn đã đạt ${result.newMilestone}% mục tiêu!`
-        );
+        alert({
+          type: 'success',
+          title: 'Milestone!',
+          message: `Chúc mừng! Bạn đã đạt ${result.newMilestone}% mục tiêu!`,
+        });
       }
 
       setIsEditing(false);
@@ -53,16 +56,17 @@ const GoalTrackingCard = ({ widget, onUpdate, isHighlighted }) => {
       }
     } catch (error) {
       console.error('[GoalTrackingCard] Error updating progress:', error);
-      Alert.alert('Lỗi', 'Không thể cập nhật progress');
+      alert({ type: 'error', title: 'Lỗi', message: 'Không thể cập nhật progress' });
     }
   };
 
   // Handle 3 dots menu
   const handleMenuPress = () => {
-    Alert.alert(
-      widget.title,
-      'Chọn hành động',
-      [
+    alert({
+      type: 'info',
+      title: widget.title,
+      message: 'Chọn hành động',
+      buttons: [
         { text: 'Hủy', style: 'cancel' },
         {
           text: '📝 Chỉnh sửa mục tiêu',
@@ -73,16 +77,17 @@ const GoalTrackingCard = ({ widget, onUpdate, isHighlighted }) => {
           style: 'destructive',
           onPress: handleDeleteWidget
         }
-      ]
-    );
+      ],
+    });
   };
 
   // Handle delete widget
   const handleDeleteWidget = () => {
-    Alert.alert(
-      'Xác nhận xóa',
-      'Bạn có chắc muốn xóa mục tiêu này?',
-      [
+    alert({
+      type: 'warning',
+      title: 'Xác nhận xóa',
+      message: 'Bạn có chắc muốn xóa mục tiêu này?',
+      buttons: [
         { text: 'Hủy', style: 'cancel' },
         {
           text: 'Xóa',
@@ -92,12 +97,12 @@ const GoalTrackingCard = ({ widget, onUpdate, isHighlighted }) => {
               await widgetManagementService.deleteWidget(widget.id);
               if (onUpdate) onUpdate();
             } catch (error) {
-              Alert.alert('Lỗi', 'Không thể xóa mục tiêu');
+              alert({ type: 'error', title: 'Lỗi', message: 'Không thể xóa mục tiêu' });
             }
           }
         }
-      ]
-    );
+      ],
+    });
   };
 
   const formatCurrency = (amount) => {
@@ -254,6 +259,7 @@ const GoalTrackingCard = ({ widget, onUpdate, isHighlighted }) => {
         </View>
         <Text style={styles.reminderNext}>Next: 8:00 AM</Text>
       </View>
+      {AlertComponent}
     </View>
   );
 };

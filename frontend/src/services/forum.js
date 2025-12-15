@@ -1,6 +1,7 @@
 /**
  * Forum Service
  * Community forum backend service
+ * SYNCED WITH MOBILE: Uses forum_posts table (not forum_threads)
  */
 
 import { supabase } from '../lib/supabaseClient';
@@ -46,64 +47,63 @@ export const forumCategories = [
 
 export class ForumService {
   /**
-   * Create a new thread
-   * @param {Object} data - Thread data
-   * @param {string} data.title - Thread title
-   * @param {string} data.content - Thread content
-   * @param {string} data.category - Category ID
-   * @param {string} data.authorId - User ID
-   * @param {Array} data.tags - Optional tags
-   * @returns {Promise<Object>} Created thread
+   * Create a new post
+   * Uses forum_posts table (synced with mobile)
    */
   async createThread(data) {
-    const { data: thread, error } = await supabase
-      .from('forum_threads')
+    const { data: post, error } = await supabase
+      .from('forum_posts')
       .insert({
-        title: data.title,
+        title: data.title || '',
         content: data.content,
-        category: data.category,
-        author_id: data.authorId,
-        tags: data.tags || []
+        category_id: data.category,
+        user_id: data.authorId,
+        image_url: data.image_url || null,
+        status: 'published'
       })
       .select(`
         *,
-        author:users!forum_threads_author_id_fkey(id, full_name, avatar_url, scanner_tier)
+        author:profiles(id, full_name, avatar_url, scanner_tier, role)
       `)
       .single();
 
     if (error) throw error;
-    return thread;
+    return post;
   }
 
   /**
-   * Get threads with pagination and filtering
-   * @param {Object} options - Query options
-   * @param {string} options.category - Filter by category
-   * @param {number} options.page - Page number
-   * @param {number} options.limit - Items per page
-   * @param {string} options.sortBy - Sort method
-   * @returns {Promise<Object>} Threads and pagination info
+   * Get posts with pagination and filtering
+   * Uses forum_posts table (synced with mobile)
    */
   async getThreads({ category, page = 1, limit = 20, sortBy = 'recent' }) {
     let query = supabase
-      .from('forum_threads')
+      .from('forum_posts')
       .select(`
         *,
-        author:users!forum_threads_author_id_fkey(id, full_name, avatar_url, scanner_tier)
-      `, { count: 'exact' });
+        author:profiles(id, email, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, role),
+        category:forum_categories(id, name, color),
+        likes:forum_likes(user_id),
+        tagged_products:post_products(
+          id,
+          product_id,
+          product_title,
+          product_price,
+          product_image,
+          product_handle
+        )
+      `, { count: 'exact' })
+      .eq('status', 'published');
 
     // Filter by category
     if (category && category !== 'all') {
-      query = query.eq('category', category);
+      query = query.eq('category_id', category);
     }
 
     // Sorting
     if (sortBy === 'recent') {
-      query = query.order('updated_at', { ascending: false });
+      query = query.order('created_at', { ascending: false });
     } else if (sortBy === 'popular') {
-      query = query.order('view_count', { ascending: false });
-    } else if (sortBy === 'unanswered') {
-      query = query.eq('is_answered', false).order('created_at', { ascending: false });
+      query = query.order('likes_count', { ascending: false });
     }
 
     // Pagination
@@ -114,8 +114,15 @@ export class ForumService {
 
     if (error) throw error;
 
+    // Transform data for compatibility
+    const transformedData = (data || []).map(post => ({
+      ...post,
+      like_count: post.likes_count || post.likes?.length || 0,
+      reply_count: post.comments_count || 0,
+    }));
+
     return {
-      threads: data || [],
+      threads: transformedData,
       total: count || 0,
       page,
       totalPages: Math.ceil((count || 0) / limit)
@@ -123,88 +130,75 @@ export class ForumService {
   }
 
   /**
-   * Get thread details with replies
-   * @param {string} threadId - Thread UUID
-   * @returns {Promise<Object>} Thread with replies
+   * Get post details with comments
+   * Uses forum_posts and forum_comments tables
    */
-  async getThread(threadId) {
+  async getThread(postId) {
     const { data, error } = await supabase
-      .from('forum_threads')
+      .from('forum_posts')
       .select(`
         *,
-        author:users!forum_threads_author_id_fkey(id, full_name, avatar_url, scanner_tier),
-        replies:forum_replies(
+        author:profiles(id, full_name, avatar_url, scanner_tier, role),
+        comments:forum_comments(
           *,
-          author:users!forum_replies_author_id_fkey(id, full_name, avatar_url, scanner_tier)
+          author:profiles(id, full_name, avatar_url, scanner_tier, role)
         )
       `)
-      .eq('id', threadId)
+      .eq('id', postId)
       .single();
 
     if (error) throw error;
 
-    // Increment view count (fire and forget)
+    // Increment view count
     supabase
-      .from('forum_threads')
-      .update({ view_count: (data?.view_count || 0) + 1 })
-      .eq('id', threadId)
+      .from('forum_posts')
+      .update({ views_count: (data?.views_count || 0) + 1 })
+      .eq('id', postId)
       .then(() => {});
 
     return data;
   }
 
   /**
-   * Create a reply to a thread
-   * @param {Object} data - Reply data
-   * @param {string} data.threadId - Thread UUID
-   * @param {string} data.content - Reply content
-   * @param {string} data.authorId - User ID
-   * @param {string} data.parentId - Parent reply ID for nesting (optional)
-   * @returns {Promise<Object>} Created reply
+   * Create a comment on a post
+   * Uses forum_comments table
    */
   async createReply(data) {
-    const { data: reply, error } = await supabase
-      .from('forum_replies')
+    const { data: comment, error } = await supabase
+      .from('forum_comments')
       .insert({
-        thread_id: data.threadId,
+        post_id: data.threadId,
         content: data.content,
-        author_id: data.authorId,
+        user_id: data.authorId,
         parent_id: data.parentId || null
       })
       .select(`
         *,
-        author:users!forum_replies_author_id_fkey(id, full_name, avatar_url, scanner_tier)
+        author:profiles(id, full_name, avatar_url, scanner_tier, role)
       `)
       .single();
 
     if (error) throw error;
-
-    return reply;
+    return comment;
   }
 
   /**
-   * Toggle like on thread or reply
-   * @param {string} type - 'thread' or 'reply'
-   * @param {string} id - Thread or reply UUID
-   * @param {string} userId - User ID
-   * @returns {Promise<Object>} Like status
+   * Toggle like on post
+   * Uses forum_likes table
    */
   async toggleLike(type, id, userId) {
-    const table = type === 'thread' ? 'forum_thread_likes' : 'forum_reply_likes';
-    const column = type === 'thread' ? 'thread_id' : 'reply_id';
-
     // Check if already liked
     const { data: existing } = await supabase
-      .from(table)
+      .from('forum_likes')
       .select('id')
-      .eq(column, id)
+      .eq('post_id', id)
       .eq('user_id', userId)
       .single();
 
     if (existing) {
       // Unlike
       await supabase
-        .from(table)
+        .from('forum_likes')
         .delete()
         .eq('id', existing.id);
 
@@ -212,30 +206,23 @@ export class ForumService {
     } else {
       // Like
       await supabase
-        .from(table)
-        .insert({ [column]: id, user_id: userId });
+        .from('forum_likes')
+        .insert({ post_id: id, user_id: userId });
 
       return { liked: true };
     }
   }
 
   /**
-   * Check if user has liked a thread/reply
-   * @param {string} type - 'thread' or 'reply'
-   * @param {string} id - Thread or reply UUID
-   * @param {string} userId - User ID
-   * @returns {Promise<boolean>} True if liked
+   * Check if user has liked a post
    */
   async hasLiked(type, id, userId) {
     if (!userId) return false;
 
-    const table = type === 'thread' ? 'forum_thread_likes' : 'forum_reply_likes';
-    const column = type === 'thread' ? 'thread_id' : 'reply_id';
-
     const { data } = await supabase
-      .from(table)
+      .from('forum_likes')
       .select('id')
-      .eq(column, id)
+      .eq('post_id', id)
       .eq('user_id', userId)
       .single();
 
@@ -243,37 +230,18 @@ export class ForumService {
   }
 
   /**
-   * Mark thread as solved
-   * @param {string} threadId - Thread UUID
-   * @param {string} replyId - Accepted reply UUID
-   * @returns {Promise<void>}
-   */
-  async markAsSolved(threadId, replyId) {
-    const { error } = await supabase
-      .from('forum_threads')
-      .update({
-        is_answered: true,
-        accepted_reply_id: replyId
-      })
-      .eq('id', threadId);
-
-    if (error) throw error;
-  }
-
-  /**
-   * Search threads by title or content
-   * @param {string} query - Search query
-   * @returns {Promise<Array>} Matching threads
+   * Search posts by title or content
    */
   async searchThreads(query) {
-    const { data, error} = await supabase
-      .from('forum_threads')
+    const { data, error } = await supabase
+      .from('forum_posts')
       .select(`
         *,
-        author:users!forum_threads_author_id_fkey(id, full_name, avatar_url, scanner_tier)
+        author:profiles(id, email, full_name, avatar_url, scanner_tier, role)
       `)
+      .eq('status', 'published')
       .or(`title.ilike.%${query}%,content.ilike.%${query}%`)
-      .order('updated_at', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(20);
 
     if (error) throw error;
@@ -281,44 +249,37 @@ export class ForumService {
   }
 
   /**
-   * Delete a thread (only by author)
-   * @param {string} threadId - Thread UUID
-   * @returns {Promise<void>}
+   * Delete a post (only by author)
    */
-  async deleteThread(threadId) {
+  async deleteThread(postId) {
     const { error } = await supabase
-      .from('forum_threads')
+      .from('forum_posts')
       .delete()
-      .eq('id', threadId);
+      .eq('id', postId);
 
     if (error) throw error;
   }
 
   /**
-   * Delete a reply (only by author)
-   * @param {string} replyId - Reply UUID
-   * @returns {Promise<void>}
+   * Delete a comment (only by author)
    */
-  async deleteReply(replyId) {
+  async deleteReply(commentId) {
     const { error } = await supabase
-      .from('forum_replies')
+      .from('forum_comments')
       .delete()
-      .eq('id', replyId);
+      .eq('id', commentId);
 
     if (error) throw error;
   }
 
   /**
-   * Update thread
-   * @param {string} threadId - Thread UUID
-   * @param {Object} updates - Fields to update
-   * @returns {Promise<Object>} Updated thread
+   * Update post
    */
-  async updateThread(threadId, updates) {
+  async updateThread(postId, updates) {
     const { data, error } = await supabase
-      .from('forum_threads')
+      .from('forum_posts')
       .update(updates)
-      .eq('id', threadId)
+      .eq('id', postId)
       .select()
       .single();
 
@@ -327,16 +288,13 @@ export class ForumService {
   }
 
   /**
-   * Update reply
-   * @param {string} replyId - Reply UUID
-   * @param {Object} updates - Fields to update
-   * @returns {Promise<Object>} Updated reply
+   * Update comment
    */
-  async updateReply(replyId, updates) {
+  async updateReply(commentId, updates) {
     const { data, error } = await supabase
-      .from('forum_replies')
+      .from('forum_comments')
       .update(updates)
-      .eq('id', replyId)
+      .eq('id', commentId)
       .select()
       .single();
 
@@ -345,28 +303,26 @@ export class ForumService {
   }
 
   /**
-   * Get trending topics (most liked/commented posts from last 7 days)
-   * @param {number} limit - Number of topics to return (default: 5)
-   * @returns {Promise<Array>} Trending topics
+   * Get trending topics (most liked posts from last 7 days)
    */
   async getTrendingTopics(limit = 5) {
-    // Get date 7 days ago
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
     const { data, error } = await supabase
-      .from('forum_threads')
+      .from('forum_posts')
       .select(`
         id,
         title,
-        like_count,
-        reply_count,
-        view_count,
+        content,
+        likes_count,
+        comments_count,
+        views_count,
         created_at
       `)
+      .eq('status', 'published')
       .gte('created_at', sevenDaysAgo.toISOString())
-      .order('like_count', { ascending: false })
-      .order('reply_count', { ascending: false })
+      .order('likes_count', { ascending: false })
       .limit(limit);
 
     if (error) throw error;
@@ -374,9 +330,7 @@ export class ForumService {
   }
 
   /**
-   * Get suggested creators (top contributors by posts and likes)
-   * @param {number} limit - Number of creators to return (default: 5)
-   * @returns {Promise<Array>} Top creators with stats
+   * Get suggested creators (top contributors by posts)
    */
   async getSuggestedCreators(limit = 5) {
     const { data, error } = await supabase
@@ -387,16 +341,17 @@ export class ForumService {
 
       // Fallback: Get users who have posted recently
       const { data: fallbackData, error: fallbackError } = await supabase
-        .from('forum_threads')
+        .from('forum_posts')
         .select(`
-          author_id,
-          author:users!forum_threads_author_id_fkey(
+          user_id,
+          author:profiles(
             id,
             full_name,
             avatar_url,
             scanner_tier
           )
         `)
+        .eq('status', 'published')
         .order('created_at', { ascending: false })
         .limit(20);
 
@@ -405,17 +360,17 @@ export class ForumService {
       // Group by author and count posts
       const authorMap = new Map();
 
-      fallbackData?.forEach((thread) => {
-        if (thread.author) {
-          const authorId = thread.author.id;
+      fallbackData?.forEach((post) => {
+        if (post.author) {
+          const authorId = post.author.id;
           if (authorMap.has(authorId)) {
             authorMap.get(authorId).post_count++;
           } else {
             authorMap.set(authorId, {
-              id: thread.author.id,
-              display_name: thread.author.full_name,
-              avatar_url: thread.author.avatar_url,
-              scanner_tier: thread.author.scanner_tier,
+              id: post.author.id,
+              display_name: post.author.full_name,
+              avatar_url: post.author.avatar_url,
+              scanner_tier: post.author.scanner_tier,
               post_count: 1,
               total_likes: 0
             });
@@ -436,22 +391,16 @@ export class ForumService {
 
   /**
    * Get online users count
-   * @returns {Promise<number>} Number of online users
    */
   async getOnlineUsersCount() {
-    // This would require a presence system (e.g., Supabase Realtime)
-    // For now, return a mock count
     // TODO: Implement real-time presence tracking
     return Math.floor(Math.random() * 50) + 10;
   }
 
   /**
    * Get top forum members by contribution
-   * @param {number} limit - Number of members to return (default: 10)
-   * @returns {Promise<Array>} Top members
    */
   async getTopMembers(limit = 10) {
-    // Reuse getSuggestedCreators for now
     return this.getSuggestedCreators(limit);
   }
 }

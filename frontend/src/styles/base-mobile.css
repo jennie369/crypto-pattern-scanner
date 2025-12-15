@@ -156,11 +156,19 @@ p, span, div {
 /* 6. IMAGES & MEDIA */
 img,
 video,
-canvas,
-svg {
+canvas {
   max-width: 100%;
   height: auto;
   display: block;
+}
+
+/* SVG icons inside buttons should maintain their explicit size */
+button svg,
+a svg,
+.btn svg,
+.btn-action svg {
+  display: inline-block;
+  flex-shrink: 0;
 }
 
 /* 7. TABLES - CARD VIEW ON MOBILE */

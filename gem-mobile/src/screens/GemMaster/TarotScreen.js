@@ -8,122 +8,84 @@ import {
   View,
   Text,
   TouchableOpacity,
+  Pressable,
   ScrollView,
   StyleSheet,
   Animated,
   Dimensions,
   Share,
-  Alert,
   ActivityIndicator,
   Image,
 } from 'react-native';
+import alertService from '../../services/alertService';
+import * as Clipboard from 'expo-clipboard';
+import { Asset } from 'expo-asset';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, RefreshCw, Share2, Layers, Star, Moon, Sun, Lock } from 'lucide-react-native';
+import { ArrowLeft, RefreshCw, Share2, Layers, Star, Moon, Sun, Lock, Briefcase, DollarSign, Heart, Activity, Sparkles, ChevronDown, ChevronUp, ShoppingBag, RotateCcw, Copy } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS, LAYOUT } from '../../utils/tokens';
+
+// Bottom padding to avoid tab bar overlap (increased for buttons)
+const BOTTOM_PADDING = 140;
 import { useTabBar } from '../../contexts/TabBarContext';
 
 // Services for tier/quota checking
 import TierService from '../../services/tierService';
 import QuotaService from '../../services/quotaService';
 import { supabase } from '../../services/supabase';
+import { shopifyService } from '../../services/shopifyService';
+
+// Vision Board 2.0 - Tarot history service
+import { saveReading as saveTarotReading } from '../../services/tarotService';
+
+// Crystal tag mapping for Shopify
+import { getCrystalTagsForList } from '../../utils/crystalTagMapping';
 
 // Tarot card images
 import { getCardImage } from '../../assets/tarot';
 
+// Import Tarot data from new data files
+import { FULL_DECK, MAJOR_ARCANA, getMajorArcanaCard } from '../../data/tarot';
+import { getMinorArcanaCard } from '../../data/tarot/minorArcana';
+
+// Import CrystalLink component
+import CrystalLink, { CrystalList } from '../../components/CrystalLink';
+
+// Import widget detection for "Add to Dashboard"
+import { detectWidgetTrigger, WIDGET_TYPES } from '../../utils/widgetTriggerDetector';
+import AddWidgetSuggestion from '../../components/AddWidgetSuggestion';
+import SmartFormCard from '../../components/SmartFormCard';
+// NEW: Crystal recommendation component with proper Shopify tags
+import CrystalRecommendationNew from '../../components/GemMaster/CrystalRecommendationNew';
+// NEW: Product recommendations (courses, scanner, affiliate)
+import ProductRecommendations from '../../components/GemMaster/ProductRecommendations';
+// NEW: Upgrade modal with Shopify checkout flow
+import ChatbotPricingModal from '../../components/GemMaster/ChatbotPricingModal';
+// NEW: Quick Buy & Upsell Modals for crystal purchase flow
+import QuickBuyModal from '../../components/GemMaster/QuickBuyModal';
+import UpsellModal from '../../components/GemMaster/UpsellModal';
+
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = (SCREEN_WIDTH - SPACING.md * 4) / 3;
 
-// Complete 78 Tarot cards (22 Major Arcana + 56 Minor Arcana)
-const TAROT_CARDS = [
-  // Major Arcana (0-21)
-  { id: 0, name: 'The Fool', vietnamese: 'Kẻ Khờ', meaning: 'Khởi đầu mới, mạo hiểm', icon: Star, arcana: 'major' },
-  { id: 1, name: 'The Magician', vietnamese: 'Pháp Sư', meaning: 'Sáng tạo, ý chí', icon: Star, arcana: 'major' },
-  { id: 2, name: 'The High Priestess', vietnamese: 'Nữ Tu', meaning: 'Trực giác, bí ẩn', icon: Moon, arcana: 'major' },
-  { id: 3, name: 'The Empress', vietnamese: 'Hoàng Hậu', meaning: 'Sung túc, nữ tính', icon: Star, arcana: 'major' },
-  { id: 4, name: 'The Emperor', vietnamese: 'Hoàng Đế', meaning: 'Quyền lực, ổn định', icon: Star, arcana: 'major' },
-  { id: 5, name: 'The Hierophant', vietnamese: 'Giáo Hoàng', meaning: 'Truyền thống, hướng dẫn', icon: Star, arcana: 'major' },
-  { id: 6, name: 'The Lovers', vietnamese: 'Người Tình', meaning: 'Tình yêu, lựa chọn', icon: Star, arcana: 'major' },
-  { id: 7, name: 'The Chariot', vietnamese: 'Chiến Xa', meaning: 'Chiến thắng, quyết tâm', icon: Star, arcana: 'major' },
-  { id: 8, name: 'Strength', vietnamese: 'Sức Mạnh', meaning: 'Dũng cảm, kiên nhẫn', icon: Star, arcana: 'major' },
-  { id: 9, name: 'The Hermit', vietnamese: 'Ẩn Sĩ', meaning: 'Nội tâm, tìm kiếm', icon: Moon, arcana: 'major' },
-  { id: 10, name: 'Wheel of Fortune', vietnamese: 'Bánh Xe', meaning: 'Vận mệnh, thay đổi', icon: Sun, arcana: 'major' },
-  { id: 11, name: 'Justice', vietnamese: 'Công Lý', meaning: 'Công bằng, cân bằng', icon: Star, arcana: 'major' },
-  { id: 12, name: 'The Hanged Man', vietnamese: 'Người Treo', meaning: 'Hy sinh, nhìn mới', icon: Moon, arcana: 'major' },
-  { id: 13, name: 'Death', vietnamese: 'Tử Thần', meaning: 'Kết thúc, chuyển hóa', icon: Moon, arcana: 'major' },
-  { id: 14, name: 'Temperance', vietnamese: 'Tiết Chế', meaning: 'Điều độ, hài hòa', icon: Star, arcana: 'major' },
-  { id: 15, name: 'The Devil', vietnamese: 'Ác Quỷ', meaning: 'Ràng buộc, cám dỗ', icon: Moon, arcana: 'major' },
-  { id: 16, name: 'The Tower', vietnamese: 'Tháp', meaning: 'Đổ vỡ, giác ngộ', icon: Moon, arcana: 'major' },
-  { id: 17, name: 'The Star', vietnamese: 'Ngôi Sao', meaning: 'Hy vọng, cảm hứng', icon: Star, arcana: 'major' },
-  { id: 18, name: 'The Moon', vietnamese: 'Mặt Trăng', meaning: 'Ảo tưởng, tiềm thức', icon: Moon, arcana: 'major' },
-  { id: 19, name: 'The Sun', vietnamese: 'Mặt Trời', meaning: 'Thành công, niềm vui', icon: Sun, arcana: 'major' },
-  { id: 20, name: 'Judgement', vietnamese: 'Phán Xét', meaning: 'Phục sinh, đánh giá', icon: Star, arcana: 'major' },
-  { id: 21, name: 'The World', vietnamese: 'Thế Giới', meaning: 'Hoàn thành, thành tựu', icon: Sun, arcana: 'major' },
+// Transform new data format to screen format
+const transformCardData = (card) => {
+  if (!card) return null;
 
-  // Minor Arcana - Wands (Fire) - Hành động, đam mê
-  { id: 22, name: 'Ace of Wands', vietnamese: 'Át Gậy', meaning: 'Khởi đầu sáng tạo', icon: Sun, arcana: 'wands' },
-  { id: 23, name: 'Two of Wands', vietnamese: 'Hai Gậy', meaning: 'Lập kế hoạch, quyết định', icon: Star, arcana: 'wands' },
-  { id: 24, name: 'Three of Wands', vietnamese: 'Ba Gậy', meaning: 'Mở rộng, tiến bộ', icon: Star, arcana: 'wands' },
-  { id: 25, name: 'Four of Wands', vietnamese: 'Bốn Gậy', meaning: 'Ăn mừng, ổn định', icon: Sun, arcana: 'wands' },
-  { id: 26, name: 'Five of Wands', vietnamese: 'Năm Gậy', meaning: 'Cạnh tranh, xung đột', icon: Star, arcana: 'wands' },
-  { id: 27, name: 'Six of Wands', vietnamese: 'Sáu Gậy', meaning: 'Chiến thắng, công nhận', icon: Sun, arcana: 'wands' },
-  { id: 28, name: 'Seven of Wands', vietnamese: 'Bảy Gậy', meaning: 'Bảo vệ, kiên định', icon: Star, arcana: 'wands' },
-  { id: 29, name: 'Eight of Wands', vietnamese: 'Tám Gậy', meaning: 'Tốc độ, hành động', icon: Sun, arcana: 'wands' },
-  { id: 30, name: 'Nine of Wands', vietnamese: 'Chín Gậy', meaning: 'Kiên trì, thận trọng', icon: Star, arcana: 'wands' },
-  { id: 31, name: 'Ten of Wands', vietnamese: 'Mười Gậy', meaning: 'Gánh nặng, trách nhiệm', icon: Moon, arcana: 'wands' },
-  { id: 32, name: 'Page of Wands', vietnamese: 'Thị Vệ Gậy', meaning: 'Khám phá, nhiệt huyết', icon: Star, arcana: 'wands' },
-  { id: 33, name: 'Knight of Wands', vietnamese: 'Hiệp Sĩ Gậy', meaning: 'Phiêu lưu, đam mê', icon: Sun, arcana: 'wands' },
-  { id: 34, name: 'Queen of Wands', vietnamese: 'Hoàng Hậu Gậy', meaning: 'Tự tin, quyến rũ', icon: Sun, arcana: 'wands' },
-  { id: 35, name: 'King of Wands', vietnamese: 'Hoàng Đế Gậy', meaning: 'Lãnh đạo, tầm nhìn', icon: Sun, arcana: 'wands' },
+  // Check if it's from Major Arcana (has numeric id) or Minor Arcana (has string id)
+  const isMajor = typeof card.id === 'number';
 
-  // Minor Arcana - Cups (Water) - Cảm xúc, quan hệ
-  { id: 36, name: 'Ace of Cups', vietnamese: 'Át Cốc', meaning: 'Tình yêu mới, cảm xúc', icon: Moon, arcana: 'cups' },
-  { id: 37, name: 'Two of Cups', vietnamese: 'Hai Cốc', meaning: 'Kết nối, đối tác', icon: Star, arcana: 'cups' },
-  { id: 38, name: 'Three of Cups', vietnamese: 'Ba Cốc', meaning: 'Ăn mừng, tình bạn', icon: Sun, arcana: 'cups' },
-  { id: 39, name: 'Four of Cups', vietnamese: 'Bốn Cốc', meaning: 'Thiền định, thờ ơ', icon: Moon, arcana: 'cups' },
-  { id: 40, name: 'Five of Cups', vietnamese: 'Năm Cốc', meaning: 'Mất mát, hối tiếc', icon: Moon, arcana: 'cups' },
-  { id: 41, name: 'Six of Cups', vietnamese: 'Sáu Cốc', meaning: 'Hoài niệm, ngây thơ', icon: Star, arcana: 'cups' },
-  { id: 42, name: 'Seven of Cups', vietnamese: 'Bảy Cốc', meaning: 'Ảo tưởng, lựa chọn', icon: Moon, arcana: 'cups' },
-  { id: 43, name: 'Eight of Cups', vietnamese: 'Tám Cốc', meaning: 'Rời bỏ, tìm kiếm', icon: Moon, arcana: 'cups' },
-  { id: 44, name: 'Nine of Cups', vietnamese: 'Chín Cốc', meaning: 'Mãn nguyện, ước mơ', icon: Sun, arcana: 'cups' },
-  { id: 45, name: 'Ten of Cups', vietnamese: 'Mười Cốc', meaning: 'Hạnh phúc, gia đình', icon: Sun, arcana: 'cups' },
-  { id: 46, name: 'Page of Cups', vietnamese: 'Thị Vệ Cốc', meaning: 'Sáng tạo, trực giác', icon: Star, arcana: 'cups' },
-  { id: 47, name: 'Knight of Cups', vietnamese: 'Hiệp Sĩ Cốc', meaning: 'Lãng mạn, mơ mộng', icon: Moon, arcana: 'cups' },
-  { id: 48, name: 'Queen of Cups', vietnamese: 'Hoàng Hậu Cốc', meaning: 'Từ bi, trực giác', icon: Moon, arcana: 'cups' },
-  { id: 49, name: 'King of Cups', vietnamese: 'Hoàng Đế Cốc', meaning: 'Điềm tĩnh, khôn ngoan', icon: Star, arcana: 'cups' },
+  return {
+    ...card,
+    vietnamese: card.vietnameseName,
+    meaning: card.keywords?.join(', ') || '',
+    arcana: isMajor ? 'major' : (card.suit?.toLowerCase() || 'minor'),
+    icon: Star, // Default icon
+  };
+};
 
-  // Minor Arcana - Swords (Air) - Tư duy, giao tiếp
-  { id: 50, name: 'Ace of Swords', vietnamese: 'Át Kiếm', meaning: 'Sáng suốt, sự thật', icon: Star, arcana: 'swords' },
-  { id: 51, name: 'Two of Swords', vietnamese: 'Hai Kiếm', meaning: 'Bế tắc, quyết định', icon: Moon, arcana: 'swords' },
-  { id: 52, name: 'Three of Swords', vietnamese: 'Ba Kiếm', meaning: 'Đau buồn, mất mát', icon: Moon, arcana: 'swords' },
-  { id: 53, name: 'Four of Swords', vietnamese: 'Bốn Kiếm', meaning: 'Nghỉ ngơi, hồi phục', icon: Moon, arcana: 'swords' },
-  { id: 54, name: 'Five of Swords', vietnamese: 'Năm Kiếm', meaning: 'Xung đột, thất bại', icon: Moon, arcana: 'swords' },
-  { id: 55, name: 'Six of Swords', vietnamese: 'Sáu Kiếm', meaning: 'Chuyển tiếp, di chuyển', icon: Star, arcana: 'swords' },
-  { id: 56, name: 'Seven of Swords', vietnamese: 'Bảy Kiếm', meaning: 'Chiến thuật, lừa dối', icon: Moon, arcana: 'swords' },
-  { id: 57, name: 'Eight of Swords', vietnamese: 'Tám Kiếm', meaning: 'Giới hạn, bất lực', icon: Moon, arcana: 'swords' },
-  { id: 58, name: 'Nine of Swords', vietnamese: 'Chín Kiếm', meaning: 'Lo lắng, ác mộng', icon: Moon, arcana: 'swords' },
-  { id: 59, name: 'Ten of Swords', vietnamese: 'Mười Kiếm', meaning: 'Kết thúc đau đớn', icon: Moon, arcana: 'swords' },
-  { id: 60, name: 'Page of Swords', vietnamese: 'Thị Vệ Kiếm', meaning: 'Tò mò, quan sát', icon: Star, arcana: 'swords' },
-  { id: 61, name: 'Knight of Swords', vietnamese: 'Hiệp Sĩ Kiếm', meaning: 'Quyết đoán, nhanh nhẹn', icon: Star, arcana: 'swords' },
-  { id: 62, name: 'Queen of Swords', vietnamese: 'Hoàng Hậu Kiếm', meaning: 'Độc lập, sắc bén', icon: Star, arcana: 'swords' },
-  { id: 63, name: 'King of Swords', vietnamese: 'Hoàng Đế Kiếm', meaning: 'Công bằng, lý trí', icon: Star, arcana: 'swords' },
-
-  // Minor Arcana - Pentacles (Earth) - Vật chất, tài chính
-  { id: 64, name: 'Ace of Pentacles', vietnamese: 'Át Xu', meaning: 'Cơ hội tài chính', icon: Sun, arcana: 'pentacles' },
-  { id: 65, name: 'Two of Pentacles', vietnamese: 'Hai Xu', meaning: 'Cân bằng, thích ứng', icon: Star, arcana: 'pentacles' },
-  { id: 66, name: 'Three of Pentacles', vietnamese: 'Ba Xu', meaning: 'Hợp tác, kỹ năng', icon: Star, arcana: 'pentacles' },
-  { id: 67, name: 'Four of Pentacles', vietnamese: 'Bốn Xu', meaning: 'Tiết kiệm, bảo thủ', icon: Moon, arcana: 'pentacles' },
-  { id: 68, name: 'Five of Pentacles', vietnamese: 'Năm Xu', meaning: 'Khó khăn, thiếu thốn', icon: Moon, arcana: 'pentacles' },
-  { id: 69, name: 'Six of Pentacles', vietnamese: 'Sáu Xu', meaning: 'Hào phóng, chia sẻ', icon: Sun, arcana: 'pentacles' },
-  { id: 70, name: 'Seven of Pentacles', vietnamese: 'Bảy Xu', meaning: 'Kiên nhẫn, đầu tư', icon: Star, arcana: 'pentacles' },
-  { id: 71, name: 'Eight of Pentacles', vietnamese: 'Tám Xu', meaning: 'Chăm chỉ, rèn luyện', icon: Star, arcana: 'pentacles' },
-  { id: 72, name: 'Nine of Pentacles', vietnamese: 'Chín Xu', meaning: 'Thành công, độc lập', icon: Sun, arcana: 'pentacles' },
-  { id: 73, name: 'Ten of Pentacles', vietnamese: 'Mười Xu', meaning: 'Thịnh vượng, gia tộc', icon: Sun, arcana: 'pentacles' },
-  { id: 74, name: 'Page of Pentacles', vietnamese: 'Thị Vệ Xu', meaning: 'Học hỏi, cơ hội', icon: Star, arcana: 'pentacles' },
-  { id: 75, name: 'Knight of Pentacles', vietnamese: 'Hiệp Sĩ Xu', meaning: 'Siêng năng, đáng tin', icon: Star, arcana: 'pentacles' },
-  { id: 76, name: 'Queen of Pentacles', vietnamese: 'Hoàng Hậu Xu', meaning: 'Nuôi dưỡng, thực tế', icon: Sun, arcana: 'pentacles' },
-  { id: 77, name: 'King of Pentacles', vietnamese: 'Hoàng Đế Xu', meaning: 'Thành đạt, vững chắc', icon: Sun, arcana: 'pentacles' },
-];
+// Create TAROT_CARDS array from new data
+const TAROT_CARDS = FULL_DECK.map(transformCardData);
 
 // Spread positions
 const SPREAD_POSITIONS = ['Quá khứ', 'Hiện tại', 'Tương lai'];
@@ -148,13 +110,41 @@ const TarotScreen = ({ navigation, route }) => {
   const [isRevealed, setIsRevealed] = useState([false, false, false]);
   const [isReading, setIsReading] = useState(false);
   const [interpretation, setInterpretation] = useState(null);
+  const [isReversed, setIsReversed] = useState([false, false, false]); // Track reversed cards
+  const [selectedCardIndex, setSelectedCardIndex] = useState(null); // For detailed view
+  const [showCrystals, setShowCrystals] = useState(false);
+  const [showAffirmations, setShowAffirmations] = useState(false);
   const { hideTabBar, showTabBar } = useTabBar();
+
+  // Widget suggestion state
+  const [widgetTrigger, setWidgetTrigger] = useState(null);
+  const [showWidgetForm, setShowWidgetForm] = useState(false);
 
   // Quota state
   const [user, setUser] = useState(null);
   const [userTier, setUserTier] = useState('FREE');
   const [quota, setQuota] = useState(null);
   const [isLoadingQuota, setIsLoadingQuota] = useState(true);
+
+  // Shopify crystal products state
+  const [shopifyProducts, setShopifyProducts] = useState([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
+
+  // NEW: Crystal recommendation context from tarot reading
+  const [crystalContext, setCrystalContext] = useState('');
+
+  // NEW: Upgrade modal state
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  // NEW: Quick Buy & Upsell Modal state for crystal purchase flow
+  const [quickBuyModal, setQuickBuyModal] = useState({
+    visible: false,
+    product: null,
+  });
+  const [upsellModal, setUpsellModal] = useState({
+    visible: false,
+    upsellData: null,
+  });
 
   // Callback to send result back to chat
   const onSendToChat = route?.params?.onSendToChat;
@@ -218,22 +208,138 @@ const TarotScreen = ({ navigation, route }) => {
     new Animated.Value(0),
   ]).current;
 
+  // Fetch crystal products from Shopify
+  const fetchCrystalProducts = useCallback(async (crystals) => {
+    try {
+      setIsLoadingProducts(true);
+      console.log('[TarotScreen] Fetching crystal products for:', crystals.map(c => c.name));
+
+      // Get Shopify tags from crystal data
+      const tags = getCrystalTagsForList(crystals);
+      console.log('[TarotScreen] Searching Shopify with tags:', tags);
+
+      // Fetch products from Shopify
+      const products = await shopifyService.getProductsByTags(tags, 4, true);
+      console.log('[TarotScreen] Found', products.length, 'Shopify products');
+
+      if (products && products.length > 0) {
+        // Merge static crystal data with Shopify product data
+        const mergedCrystals = crystals.map((crystal) => {
+          // Find matching product by name/tag
+          const matchedProduct = products.find((p) => {
+            const productTitle = (p.title || '').toLowerCase();
+            const productTags = Array.isArray(p.tags) ? p.tags.join(' ').toLowerCase() : (p.tags || '').toLowerCase();
+            const crystalName = (crystal.name || '').toLowerCase();
+            const crystalVnName = (crystal.vietnameseName || '').toLowerCase();
+
+            return productTitle.includes(crystalName) ||
+                   productTitle.includes(crystalVnName) ||
+                   productTags.includes(crystalName) ||
+                   productTags.includes(crystalVnName);
+          });
+
+          if (matchedProduct) {
+            return {
+              ...crystal,
+              imageUrl: matchedProduct.images?.[0]?.url || matchedProduct.featuredImage?.url,
+              price: matchedProduct.variants?.[0]?.price?.amount || matchedProduct.priceRange?.minVariantPrice?.amount,
+              shopHandle: matchedProduct.handle || crystal.shopHandle,
+              available: matchedProduct.availableForSale !== false,
+            };
+          }
+          return crystal;
+        });
+
+        // Also add any unmatched products as extra recommendations
+        const unmatchedProducts = products.filter((p) => {
+          return !crystals.some((c) => {
+            const productTitle = (p.title || '').toLowerCase();
+            return productTitle.includes((c.name || '').toLowerCase());
+          });
+        });
+
+        const extraCrystals = unmatchedProducts.slice(0, 2).map((p) => ({
+          name: p.title,
+          vietnameseName: p.title,
+          reason: 'Sản phẩm liên quan từ Shop',
+          shopHandle: p.handle,
+          imageUrl: p.images?.[0]?.url || p.featuredImage?.url,
+          price: p.variants?.[0]?.price?.amount || p.priceRange?.minVariantPrice?.amount,
+          available: p.availableForSale !== false,
+        }));
+
+        setShopifyProducts([...mergedCrystals, ...extraCrystals]);
+      }
+    } catch (error) {
+      console.error('[TarotScreen] Error fetching crystal products:', error);
+    } finally {
+      setIsLoadingProducts(false);
+    }
+  }, []);
+
+  // NEW: Handler for quick buy from crystal recommendations
+  const handleQuickBuy = useCallback((product) => {
+    console.log('[TarotScreen] Quick buy product:', product?.title);
+    setQuickBuyModal({
+      visible: true,
+      product,
+    });
+  }, []);
+
+  // NEW: Handler for showing upsell modal after adding to cart
+  const handleShowUpsell = useCallback((upsellData) => {
+    console.log('[TarotScreen] Show upsell:', upsellData?.upsells?.length, 'products');
+    setUpsellModal({
+      visible: true,
+      upsellData,
+    });
+  }, []);
+
+  // NEW: Handler for buy now (opens checkout after quick buy)
+  const handleBuyNow = useCallback(async (purchaseData) => {
+    console.log('[TarotScreen] Buy now:', purchaseData?.product?.title);
+    if (purchaseData?.upsells && purchaseData.upsells.length > 0) {
+      setUpsellModal({
+        visible: true,
+        upsellData: {
+          primaryProduct: purchaseData.product,
+          upsells: purchaseData.upsells,
+        },
+      });
+    } else {
+      navigation.navigate('Shop', { screen: 'Checkout' });
+    }
+  }, [navigation]);
+
+  // NEW: Handler for checkout from upsell modal
+  const handleCheckout = useCallback((checkoutUrl) => {
+    navigation.navigate('Shop', {
+      screen: 'Checkout',
+      params: { checkoutUrl },
+    });
+  }, [navigation]);
+
+  // NEW: Handler for continue shopping
+  const handleContinueShopping = useCallback(() => {
+    // Just close the modal
+  }, []);
+
   // Draw cards
   const drawCards = useCallback(async () => {
-    // CHECK QUOTA FIRST
+    // CHECK QUOTA FIRST - show upgrade modal instead of alert
     if (!canDivine()) {
-      Alert.alert(
-        'Hết lượt hôm nay',
-        `Bạn đã sử dụng hết ${quota?.limit || 5} lượt hỏi trong ngày.\n\nNâng cấp lên tier cao hơn để có thêm lượt:\n• TIER1/PRO: 15 lượt/ngày\n• TIER2/PREMIUM: 50 lượt/ngày\n• TIER3/VIP: Không giới hạn`,
-        [{ text: 'Đóng', style: 'cancel' }]
-      );
+      setShowUpgradeModal(true);
       return;
     }
 
     setIsReading(true);
     setSelectedCards([null, null, null]);
     setIsRevealed([false, false, false]);
+    setIsReversed([false, false, false]);
     setInterpretation(null);
+    setSelectedCardIndex(null);
+    setShowCrystals(false);
+    setShowAffirmations(false);
 
     // Reset animations
     cardFlips.forEach((anim) => anim.setValue(0));
@@ -253,6 +359,14 @@ const TarotScreen = ({ navigation, route }) => {
       shuffled[(extraSeed + 17) % 78], // Prime offset for better distribution
       shuffled[(extraSeed + 41) % 78], // Another prime offset
     ];
+
+    // Randomly determine if each card is reversed (30% chance)
+    const reversedCards = [
+      Math.random() < 0.3,
+      Math.random() < 0.3,
+      Math.random() < 0.3,
+    ];
+    setIsReversed(reversedCards);
 
     // Reveal cards one by one with animation
     for (let i = 0; i < 3; i++) {
@@ -280,18 +394,131 @@ const TarotScreen = ({ navigation, route }) => {
 
     // Generate interpretation
     await new Promise((resolve) => setTimeout(resolve, 300));
-    setInterpretation(generateInterpretation(drawn));
+    const interp = generateInterpretation(drawn, reversedCards);
+    setInterpretation(interp);
     setIsReading(false);
+
+    // Fetch real crystal products from Shopify
+    if (interp.crystals && interp.crystals.length > 0) {
+      fetchCrystalProducts(interp.crystals);
+    }
+
+    // NEW: Build crystal context for CrystalRecommendationNew
+    const crystalNames = interp.crystals?.map(c => c.vietnameseName || c.name).join(', ') || '';
+    const tarotContext = `Tarot reading: ${drawn.map(c => c.vietnamese).join(', ')}. Đá năng lượng: ${crystalNames}. Tâm linh, năng lượng, phong thủy.`;
+    setCrystalContext(tarotContext);
+
+    // Detect widget trigger for "Add to Dashboard" suggestion
+    const trigger = detectWidgetTrigger({
+      type: 'tarot',
+      cards: drawn.map((c, idx) => ({
+        name: c.name,
+        vietnamese: c.vietnamese,
+        position: SPREAD_POSITIONS[idx],
+        isReversed: reversedCards[idx],
+      })),
+      spreadType: 'three-card',
+      interpretation: interp.summary,
+      crystals: interp.crystals,
+      affirmations: interp.affirmations,
+    });
+    setWidgetTrigger(trigger);
+
+    // Vision Board 2.0: Save reading to database for history
+    if (user?.id) {
+      try {
+        await saveTarotReading(user.id, {
+          question: route?.params?.question || 'Trải bài 3 lá',
+          cards: drawn.map((c, idx) => ({
+            id: c.id,
+            name: c.name,
+            nameVi: c.vietnamese,
+            isReversed: reversedCards[idx],
+          })),
+          spreadType: 'threeCard',
+          interpretation: interp.summary,
+        });
+        console.log('[TarotScreen] Reading saved to history');
+      } catch (err) {
+        console.error('[TarotScreen] Failed to save reading:', err);
+      }
+    }
   }, [cardFlips, canDivine, quota, user, refreshQuota]);
 
-  // Generate mock interpretation
-  const generateInterpretation = (cards) => {
+  // Generate interpretation from new data structure
+  const generateInterpretation = (cards, reversedArr) => {
+    // Get detailed card data for each position
+    const getCardDetails = (card, index) => {
+      const isRev = reversedArr[index];
+      const isMajor = typeof card.id === 'number';
+
+      // Get full card data
+      let fullCard = null;
+      if (isMajor) {
+        fullCard = getMajorArcanaCard(card.id);
+      } else if (card.id) {
+        fullCard = getMinorArcanaCard(card.id);
+      }
+
+      if (fullCard) {
+        const reading = isRev ? fullCard.reversed : fullCard.upright;
+        return {
+          name: fullCard.vietnameseName || card.vietnamese,
+          isReversed: isRev,
+          keywords: fullCard.keywords || [],
+          overview: reading?.overview || '',
+          career: reading?.career,
+          finance: reading?.finance,
+          love: reading?.love,
+          health: reading?.health,
+          spiritual: reading?.spiritual,
+          warning: fullCard.reversed?.warning,
+          advice: fullCard.reversed?.advice || reading?.overview,
+          crystals: fullCard.crystals || [],
+          affirmations: fullCard.affirmations || [],
+        };
+      }
+
+      // Fallback
+      return {
+        name: card.vietnamese,
+        isReversed: isRev,
+        keywords: card.meaning?.split(', ') || [],
+        overview: card.meaning || '',
+        crystals: [],
+        affirmations: [],
+      };
+    };
+
+    const pastCard = getCardDetails(cards[0], 0);
+    const presentCard = getCardDetails(cards[1], 1);
+    const futureCard = getCardDetails(cards[2], 2);
+
     return {
-      summary: `Trải bài của bạn cho thấy một hành trình từ ${cards[0].vietnamese} đến ${cards[2].vietnamese}. Đây là thông điệp quan trọng cho giai đoạn này.`,
-      past: `${cards[0].vietnamese}: ${cards[0].meaning}. Quá khứ đã định hình con người bạn ngày hôm nay.`,
-      present: `${cards[1].vietnamese}: ${cards[1].meaning}. Hiện tại đang mang đến những cơ hội mới.`,
-      future: `${cards[2].vietnamese}: ${cards[2].meaning}. Tương lai hứa hẹn nhiều điều thú vị.`,
-      advice: 'Hãy tin tưởng vào trực giác và không ngừng tiến về phía trước.',
+      summary: `Trải bài của bạn cho thấy một hành trình từ ${pastCard.name}${pastCard.isReversed ? ' (ngược)' : ''} đến ${futureCard.name}${futureCard.isReversed ? ' (ngược)' : ''}. Đây là thông điệp quan trọng cho giai đoạn này.`,
+      cards: [pastCard, presentCard, futureCard],
+      past: {
+        title: pastCard.name + (pastCard.isReversed ? ' (Ngược)' : ''),
+        overview: pastCard.overview,
+        keywords: pastCard.keywords,
+      },
+      present: {
+        title: presentCard.name + (presentCard.isReversed ? ' (Ngược)' : ''),
+        overview: presentCard.overview,
+        keywords: presentCard.keywords,
+      },
+      future: {
+        title: futureCard.name + (futureCard.isReversed ? ' (Ngược)' : ''),
+        overview: futureCard.overview,
+        keywords: futureCard.keywords,
+      },
+      // Combine crystals from all cards
+      crystals: [...pastCard.crystals, ...presentCard.crystals, ...futureCard.crystals]
+        .filter((c, i, arr) => arr.findIndex(x => x.name === c.name) === i).slice(0, 5),
+      // Combine affirmations
+      affirmations: [...pastCard.affirmations, ...presentCard.affirmations, ...futureCard.affirmations]
+        .filter((a, i, arr) => arr.indexOf(a) === i).slice(0, 4),
+      advice: 'Hãy tin tưởng vào trực giác và không ngừng tiến về phía trước. Mỗi lá bài đều mang thông điệp riêng, hãy lắng nghe và áp dụng vào cuộc sống.',
     };
   };
 
@@ -322,8 +549,18 @@ const TarotScreen = ({ navigation, route }) => {
       ],
     };
 
-    // Get real card image
+    // Get real card image - debug logging
     const cardImage = card ? getCardImage(card.id) : null;
+    if (card) {
+      console.log('[TarotScreen] renderCard:', {
+        index,
+        cardId: card.id,
+        cardIdType: typeof card.id,
+        cardName: card.vietnamese || card.name,
+        hasImage: !!cardImage,
+        imageValue: cardImage,
+      });
+    }
 
     return (
       <View key={index} style={styles.cardSlot}>
@@ -425,16 +662,19 @@ const TarotScreen = ({ navigation, route }) => {
           </View>
         )}
 
-        {/* Draw Button */}
-        <TouchableOpacity
-          style={[
+        {/* Draw Button - Using Pressable for better touch handling */}
+        <Pressable
+          style={({ pressed }) => [
             styles.drawButton,
             (isReading || isLoadingQuota) && styles.drawButtonDisabled,
-            !canDivine() && styles.drawButtonLocked
+            !canDivine() && styles.drawButtonLocked,
+            pressed && { opacity: 0.8, transform: [{ scale: 0.98 }] },
           ]}
-          onPress={drawCards}
+          onPress={() => {
+            console.log('[TarotScreen] Draw button pressed');
+            drawCards();
+          }}
           disabled={isReading || isLoadingQuota}
-          activeOpacity={0.8}
         >
           <LinearGradient
             colors={!canDivine() ? ['#555', '#444'] : GRADIENTS.glassBorder}
@@ -460,7 +700,7 @@ const TarotScreen = ({ navigation, route }) => {
               </>
             )}
           </LinearGradient>
-        </TouchableOpacity>
+        </Pressable>
 
         {/* Interpretation */}
         {interpretation && (
@@ -474,21 +714,178 @@ const TarotScreen = ({ navigation, route }) => {
 
             {/* Past */}
             <View style={styles.interpretCard}>
-              <Text style={styles.interpretLabel}>Quá khứ</Text>
-              <Text style={styles.interpretText}>{interpretation.past}</Text>
+              <View style={styles.interpretHeader}>
+                <Text style={styles.interpretLabel}>Quá khứ</Text>
+                {isReversed[0] && (
+                  <View style={styles.reversedBadge}>
+                    <RotateCcw size={12} color={COLORS.warning} />
+                    <Text style={styles.reversedText}>Ngược</Text>
+                  </View>
+                )}
+              </View>
+              <Text style={styles.interpretTitle}>{interpretation.past?.title}</Text>
+              {interpretation.past?.keywords && interpretation.past.keywords.length > 0 && (
+                <View style={styles.keywordsRow}>
+                  {interpretation.past.keywords.slice(0, 3).map((kw, idx) => (
+                    <View key={idx} style={styles.keywordTag}>
+                      <Text style={styles.keywordText}>{kw}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+              <Text style={styles.interpretText}>{interpretation.past?.overview}</Text>
             </View>
 
             {/* Present */}
             <View style={[styles.interpretCard, styles.presentCard]}>
-              <Text style={[styles.interpretLabel, styles.presentLabel]}>Hiện tại</Text>
-              <Text style={styles.interpretText}>{interpretation.present}</Text>
+              <View style={styles.interpretHeader}>
+                <Text style={[styles.interpretLabel, styles.presentLabel]}>Hiện tại</Text>
+                {isReversed[1] && (
+                  <View style={styles.reversedBadge}>
+                    <RotateCcw size={12} color={COLORS.warning} />
+                    <Text style={styles.reversedText}>Ngược</Text>
+                  </View>
+                )}
+              </View>
+              <Text style={styles.interpretTitle}>{interpretation.present?.title}</Text>
+              {interpretation.present?.keywords && interpretation.present.keywords.length > 0 && (
+                <View style={styles.keywordsRow}>
+                  {interpretation.present.keywords.slice(0, 3).map((kw, idx) => (
+                    <View key={idx} style={[styles.keywordTag, styles.keywordTagCyan]}>
+                      <Text style={[styles.keywordText, styles.keywordTextCyan]}>{kw}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+              <Text style={styles.interpretText}>{interpretation.present?.overview}</Text>
             </View>
 
             {/* Future */}
             <View style={[styles.interpretCard, styles.futureCard]}>
-              <Text style={[styles.interpretLabel, styles.futureLabel]}>Tương lai</Text>
-              <Text style={styles.interpretText}>{interpretation.future}</Text>
+              <View style={styles.interpretHeader}>
+                <Text style={[styles.interpretLabel, styles.futureLabel]}>Tương lai</Text>
+                {isReversed[2] && (
+                  <View style={styles.reversedBadge}>
+                    <RotateCcw size={12} color={COLORS.warning} />
+                    <Text style={styles.reversedText}>Ngược</Text>
+                  </View>
+                )}
+              </View>
+              <Text style={styles.interpretTitle}>{interpretation.future?.title}</Text>
+              {interpretation.future?.keywords && interpretation.future.keywords.length > 0 && (
+                <View style={styles.keywordsRow}>
+                  {interpretation.future.keywords.slice(0, 3).map((kw, idx) => (
+                    <View key={idx} style={[styles.keywordTag, styles.keywordTagGreen]}>
+                      <Text style={[styles.keywordText, styles.keywordTextGreen]}>{kw}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+              <Text style={styles.interpretText}>{interpretation.future?.overview}</Text>
             </View>
+
+            {/* Crystals Section */}
+            {interpretation.crystals && interpretation.crystals.length > 0 && (
+              <TouchableOpacity
+                style={styles.collapsibleHeader}
+                onPress={() => setShowCrystals(!showCrystals)}
+              >
+                <View style={styles.collapsibleHeaderLeft}>
+                  <ShoppingBag size={18} color={COLORS.gold} />
+                  <Text style={styles.collapsibleTitle}>Đá năng lượng gợi ý</Text>
+                </View>
+                {showCrystals ? (
+                  <ChevronUp size={20} color={COLORS.textMuted} />
+                ) : (
+                  <ChevronDown size={20} color={COLORS.textMuted} />
+                )}
+              </TouchableOpacity>
+            )}
+
+            {showCrystals && (
+              <>
+                {/* ONLY use CrystalRecommendationNew - it fetches real Shopify products */}
+                {crystalContext ? (
+                  <CrystalRecommendationNew
+                    context={crystalContext}
+                    limit={4}
+                    onQuickBuy={handleQuickBuy}
+                  />
+                ) : (
+                  <View style={{ padding: SPACING.md, alignItems: 'center' }}>
+                    <Text style={{ color: COLORS.textMuted }}>
+                      Đang tải sản phẩm từ Shop...
+                    </Text>
+                  </View>
+                )}
+              </>
+            )}
+
+            {/* Affirmations Section */}
+            {interpretation.affirmations && interpretation.affirmations.length > 0 && (
+              <TouchableOpacity
+                style={styles.collapsibleHeader}
+                onPress={() => setShowAffirmations(!showAffirmations)}
+              >
+                <View style={styles.collapsibleHeaderLeft}>
+                  <Sparkles size={18} color={COLORS.gold} />
+                  <Text style={styles.collapsibleTitle}>Affirmations</Text>
+                </View>
+                {showAffirmations ? (
+                  <ChevronUp size={20} color={COLORS.textMuted} />
+                ) : (
+                  <ChevronDown size={20} color={COLORS.textMuted} />
+                )}
+              </TouchableOpacity>
+            )}
+
+            {showAffirmations && interpretation.affirmations && (
+              <View style={styles.affirmationsContainer}>
+                {interpretation.affirmations.map((aff, idx) => (
+                  <View key={idx} style={styles.affirmationCard}>
+                    <View style={styles.affirmationContent}>
+                      <Text style={styles.affirmationText}>"{aff}"</Text>
+                      <TouchableOpacity
+                        style={styles.copyButton}
+                        onPress={async () => {
+                          await Clipboard.setStringAsync(aff);
+                          alertService.success('Đã copy!', 'Affirmation đã được copy vào clipboard.');
+                        }}
+                        activeOpacity={0.7}
+                      >
+                        <Copy size={16} color={COLORS.cyan} />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ))}
+                {/* Button to save affirmations to VisionBoard */}
+                <TouchableOpacity
+                  style={styles.saveAffirmationsButton}
+                  onPress={() => {
+                    // Set widget trigger for affirmation type
+                    setWidgetTrigger({
+                      type: WIDGET_TYPES.AFFIRMATION,
+                      data: {
+                        title: 'Affirmations từ Tarot',
+                        affirmations: interpretation.affirmations,
+                        source: 'tarot',
+                        cards: selectedCards?.map(c => c?.vietnamese).join(', '),
+                      },
+                    });
+                    setShowWidgetForm(true);
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Sparkles size={16} color={COLORS.gold} />
+                  <Text style={styles.saveAffirmationsText}>Lưu vào VisionBoard</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            {/* Product Recommendations (Courses, Scanner, Affiliate) */}
+            <ProductRecommendations
+              context={`${interpretation.summary || ''} ${interpretation.advice || ''} tâm linh năng lượng tần số`}
+            />
 
             {/* Advice */}
             <View style={styles.adviceCard}>
@@ -497,24 +894,58 @@ const TarotScreen = ({ navigation, route }) => {
             </View>
 
             {/* Send to Chat Button */}
-            <TouchableOpacity
-              style={styles.sendToChatButton}
-              activeOpacity={0.7}
-              onPress={() => {
-                // Format result for chat with visual data
+            <Pressable
+              style={({ pressed }) => [
+                styles.sendToChatButton,
+                pressed && { opacity: 0.8, transform: [{ scale: 0.98 }] },
+              ]}
+              onPress={async () => {
+                console.log('[TarotScreen] Send to chat pressed');
+
                 const cards = selectedCards;
+
+                // Get image URIs for all 3 cards
+                const cardImages = await Promise.all(
+                  cards.map(async (card) => {
+                    try {
+                      const cardImageAsset = getCardImage(card.id);
+                      if (cardImageAsset) {
+                        const asset = Asset.fromModule(cardImageAsset);
+                        await asset.downloadAsync();
+                        return {
+                          uri: asset.localUri || asset.uri,
+                          source: cardImageAsset,
+                        };
+                      }
+                    } catch (error) {
+                      console.error('[TarotScreen] Error getting card image:', error);
+                    }
+                    return null;
+                  })
+                );
+
+                console.log('[TarotScreen] Card images:', cardImages);
+
+                // Format result for chat with visual data AND images
                 const resultData = {
                   type: 'tarot',
                   text: `🃏 **Kết quả Tarot - Trải 3 lá**\n\n**Quá khứ:** ${cards[0].vietnamese} - ${cards[0].meaning}\n\n**Hiện tại:** ${cards[1].vietnamese} - ${cards[1].meaning}\n\n**Tương lai:** ${cards[2].vietnamese} - ${cards[2].meaning}\n\n📖 ${interpretation.summary}\n\n💡 **Lời khuyên:** ${interpretation.advice}`,
-                  cards: cards.map(card => ({
+                  cards: cards.map((card, idx) => ({
                     id: card.id,
                     name: card.name,
                     vietnamese: card.vietnamese,
                     meaning: card.meaning,
                     icon: card.icon?.name || 'Star',
                     arcana: card.arcana,
+                    isReversed: isReversed[idx],
+                    position: SPREAD_POSITIONS[idx],
+                    // Include image data
+                    imageUri: cardImages[idx]?.uri,
+                    imageSource: cardImages[idx]?.source,
                   })),
                   interpretation: interpretation,
+                  // Include array of images for easy access
+                  images: cardImages.filter(Boolean).map(img => img.uri),
                 };
 
                 // Go back and send to chat
@@ -534,7 +965,7 @@ const TarotScreen = ({ navigation, route }) => {
               >
                 <Text style={styles.sendToChatText}>📨 Gửi vào Chat</Text>
               </LinearGradient>
-            </TouchableOpacity>
+            </Pressable>
 
             {/* Share Button */}
             <TouchableOpacity
@@ -557,16 +988,88 @@ const TarotScreen = ({ navigation, route }) => {
                     title: 'Kết quả Tarot - Gemral',
                   });
                 } catch (error) {
-                  Alert.alert('Lỗi', 'Không thể chia sẻ. Vui lòng thử lại.');
+                  alertService.error('Lỗi', 'Không thể chia sẻ. Vui lòng thử lại.');
                 }
               }}
             >
               <Share2 size={18} color={COLORS.textPrimary} />
               <Text style={styles.shareButtonText}>Chia sẻ kết quả</Text>
             </TouchableOpacity>
+
+            {/* Widget Suggestion - Add to Dashboard */}
+            <AddWidgetSuggestion
+              visible={!!widgetTrigger && !showWidgetForm}
+              trigger={widgetTrigger}
+              onAccept={(trigger) => {
+                setShowWidgetForm(true);
+              }}
+              onDismiss={() => setWidgetTrigger(null)}
+              position="inline"
+              autoHide={false}
+            />
           </View>
         )}
+
+        {/* Smart Form Modal for saving widget */}
+        <SmartFormCard
+          visible={showWidgetForm}
+          widgetType={widgetTrigger?.type || WIDGET_TYPES.TAROT}
+          initialData={{
+            cards: selectedCards?.map((c, idx) => ({
+              id: c?.id, // Card ID for image lookup
+              name: c?.name,
+              vietnamese: c?.vietnamese,
+              position: SPREAD_POSITIONS[idx],
+              isReversed: isReversed[idx],
+            })),
+            spread: 'three-card',
+            interpretation: interpretation?.summary,
+            crystals: interpretation?.crystals,
+            affirmations: interpretation?.affirmations,
+          }}
+          onSave={(widgetData) => {
+            console.log('[TarotScreen] Widget saved:', widgetData);
+            setShowWidgetForm(false);
+            setWidgetTrigger(null);
+            alertService.success('Đã lưu!', 'Trải bài đã được thêm vào Dashboard của bạn.');
+          }}
+          onCancel={() => {
+            setShowWidgetForm(false);
+          }}
+          onNavigateToShop={(shopHandle) => {
+            navigation.navigate('Shop', {
+              screen: 'ProductDetail',
+              params: { handle: shopHandle }
+            });
+          }}
+        />
       </ScrollView>
+
+        {/* Upgrade Modal - with Shopify checkout flow */}
+        <ChatbotPricingModal
+          visible={showUpgradeModal}
+          onClose={() => setShowUpgradeModal(false)}
+          quota={quota}
+          currentTier={userTier}
+        />
+
+        {/* NEW: Quick Buy Modal for crystal purchase from recommendations */}
+        <QuickBuyModal
+          visible={quickBuyModal.visible}
+          product={quickBuyModal.product}
+          onClose={() => setQuickBuyModal({ visible: false, product: null })}
+          onShowUpsell={handleShowUpsell}
+          onBuyNow={handleBuyNow}
+        />
+
+        {/* NEW: Upsell Modal - shows after adding to cart */}
+        <UpsellModal
+          visible={upsellModal.visible}
+          upsellData={upsellModal.upsellData}
+          onClose={() => setUpsellModal({ visible: false, upsellData: null })}
+          onCheckout={handleCheckout}
+          onContinueShopping={handleContinueShopping}
+        />
       </SafeAreaView>
     </LinearGradient>
   );
@@ -607,7 +1110,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: SPACING.md,
-    paddingBottom: SPACING.xxl,
+    paddingBottom: BOTTOM_PADDING,
   },
   cardsSection: {
     alignItems: 'center',
@@ -866,6 +1369,172 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.fontSize.md,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
     color: COLORS.textPrimary,
+  },
+  // New styles for enhanced interpretation
+  interpretHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.xs,
+  },
+  interpretTitle: {
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.sm,
+  },
+  reversedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  reversedText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.warning,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  keywordsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.xs,
+    marginBottom: SPACING.sm,
+  },
+  keywordTag: {
+    backgroundColor: 'rgba(106, 91, 255, 0.15)',
+    borderRadius: 10,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.3)',
+  },
+  keywordText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.purple,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  keywordTagCyan: {
+    backgroundColor: 'rgba(0, 240, 255, 0.15)',
+    borderColor: 'rgba(0, 240, 255, 0.3)',
+  },
+  keywordTextCyan: {
+    color: COLORS.cyan,
+  },
+  keywordTagGreen: {
+    backgroundColor: 'rgba(58, 247, 166, 0.15)',
+    borderColor: 'rgba(58, 247, 166, 0.3)',
+  },
+  keywordTextGreen: {
+    color: COLORS.success,
+  },
+  // Collapsible sections
+  collapsibleHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: GLASS.background,
+    borderRadius: GLASS.borderRadius,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
+    padding: SPACING.md,
+    marginTop: SPACING.md,
+  },
+  collapsibleHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  collapsibleTitle: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+  },
+  // Crystals
+  crystalsContainer: {
+    gap: SPACING.sm,
+    marginTop: SPACING.sm,
+  },
+  crystalCard: {
+    backgroundColor: 'rgba(106, 91, 255, 0.1)',
+    borderRadius: 12,
+    padding: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(212, 175, 55, 0.2)',
+  },
+  crystalName: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.gold,
+  },
+  crystalNameEn: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    marginBottom: SPACING.xs,
+  },
+  crystalReason: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textSecondary,
+    marginBottom: SPACING.xs,
+  },
+  crystalShopLink: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.purple,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    marginTop: SPACING.xs,
+  },
+  // Affirmations
+  affirmationsContainer: {
+    gap: SPACING.sm,
+    marginTop: SPACING.sm,
+  },
+  affirmationCard: {
+    backgroundColor: 'rgba(0, 240, 255, 0.1)',
+    borderRadius: 12,
+    padding: SPACING.md,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.cyan,
+  },
+  affirmationContent: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: SPACING.sm,
+  },
+  affirmationText: {
+    flex: 1,
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textSecondary,
+    fontStyle: 'italic',
+    lineHeight: 22,
+  },
+  copyButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(0, 240, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 240, 255, 0.3)',
+  },
+  // Save affirmations button
+  saveAffirmationsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.4)',
+    borderRadius: 12,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    marginTop: SPACING.md,
+  },
+  saveAffirmationsText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.gold,
   },
 });
 

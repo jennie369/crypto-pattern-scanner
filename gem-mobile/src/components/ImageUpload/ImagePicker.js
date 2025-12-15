@@ -4,10 +4,11 @@
  */
 
 import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import * as ExpoImagePicker from 'expo-image-picker';
 import { Image, Camera, Upload } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import CustomAlert, { useCustomAlert } from '../CustomAlert';
 
 const ImagePickerComponent = ({
   onImageSelected,
@@ -16,15 +17,16 @@ const ImagePickerComponent = ({
   compact = false
 }) => {
   const [loading, setLoading] = useState(false);
+  const { alert, AlertComponent } = useCustomAlert();
 
   const requestMediaLibraryPermissions = async () => {
     const { status } = await ExpoImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert(
-        'Cần quyền truy cập',
-        'Vui lòng cho phép truy cập thư viện ảnh để tải ảnh lên.',
-        [{ text: 'OK' }]
-      );
+      alert({
+        type: 'warning',
+        title: 'Cần quyền truy cập',
+        message: 'Vui lòng cho phép truy cập thư viện ảnh để tải ảnh lên.',
+      });
       return false;
     }
     return true;
@@ -33,11 +35,11 @@ const ImagePickerComponent = ({
   const requestCameraPermissions = async () => {
     const { status } = await ExpoImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert(
-        'Cần quyền truy cập',
-        'Vui lòng cho phép sử dụng camera.',
-        [{ text: 'OK' }]
-      );
+      alert({
+        type: 'warning',
+        title: 'Cần quyền truy cập',
+        message: 'Vui lòng cho phép sử dụng camera.',
+      });
       return false;
     }
     return true;
@@ -67,7 +69,7 @@ const ImagePickerComponent = ({
 
     } catch (error) {
       console.error('Image picker error:', error);
-      Alert.alert('Lỗi', 'Không thể chọn ảnh. Vui lòng thử lại.');
+      alert({ type: 'error', title: 'Lỗi', message: 'Không thể chọn ảnh. Vui lòng thử lại.' });
     } finally {
       setLoading(false);
     }
@@ -94,7 +96,7 @@ const ImagePickerComponent = ({
 
     } catch (error) {
       console.error('Camera error:', error);
-      Alert.alert('Lỗi', 'Không thể mở camera. Vui lòng thử lại.');
+      alert({ type: 'error', title: 'Lỗi', message: 'Không thể mở camera. Vui lòng thử lại.' });
     } finally {
       setLoading(false);
     }
@@ -102,60 +104,66 @@ const ImagePickerComponent = ({
 
   if (compact) {
     return (
-      <View style={styles.compactContainer}>
+      <>
+        <View style={styles.compactContainer}>
+          <TouchableOpacity
+            style={[styles.compactButton, disabled && styles.disabledButton]}
+            onPress={pickImage}
+            disabled={disabled || loading}
+          >
+            {loading ? (
+              <ActivityIndicator size="small" color={COLORS.purple} />
+            ) : (
+              <Image size={22} color={disabled ? COLORS.textMuted : COLORS.purple} />
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.compactButton, disabled && styles.disabledButton]}
+            onPress={takePhoto}
+            disabled={disabled || loading}
+          >
+            <Camera size={22} color={disabled ? COLORS.textMuted : COLORS.purple} />
+          </TouchableOpacity>
+        </View>
+        {AlertComponent}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <View style={styles.container}>
         <TouchableOpacity
-          style={[styles.compactButton, disabled && styles.disabledButton]}
+          style={[styles.button, disabled && styles.disabledButton]}
           onPress={pickImage}
           disabled={disabled || loading}
         >
           {loading ? (
             <ActivityIndicator size="small" color={COLORS.purple} />
           ) : (
-            <Image size={22} color={disabled ? COLORS.textMuted : COLORS.purple} />
+            <>
+              <Image size={24} color={disabled ? COLORS.textMuted : COLORS.purple} />
+              <Text style={[styles.buttonText, disabled && styles.disabledText]}>
+                Thư viện
+              </Text>
+            </>
           )}
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.compactButton, disabled && styles.disabledButton]}
+          style={[styles.button, disabled && styles.disabledButton]}
           onPress={takePhoto}
           disabled={disabled || loading}
         >
-          <Camera size={22} color={disabled ? COLORS.textMuted : COLORS.purple} />
+          <Camera size={24} color={disabled ? COLORS.textMuted : COLORS.purple} />
+          <Text style={[styles.buttonText, disabled && styles.disabledText]}>
+            Camera
+          </Text>
         </TouchableOpacity>
       </View>
-    );
-  }
-
-  return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        style={[styles.button, disabled && styles.disabledButton]}
-        onPress={pickImage}
-        disabled={disabled || loading}
-      >
-        {loading ? (
-          <ActivityIndicator size="small" color={COLORS.purple} />
-        ) : (
-          <>
-            <Image size={24} color={disabled ? COLORS.textMuted : COLORS.purple} />
-            <Text style={[styles.buttonText, disabled && styles.disabledText]}>
-              Thư viện
-            </Text>
-          </>
-        )}
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[styles.button, disabled && styles.disabledButton]}
-        onPress={takePhoto}
-        disabled={disabled || loading}
-      >
-        <Camera size={24} color={disabled ? COLORS.textMuted : COLORS.purple} />
-        <Text style={[styles.buttonText, disabled && styles.disabledText]}>
-          Camera
-        </Text>
-      </TouchableOpacity>
-    </View>
+      {AlertComponent}
+    </>
   );
 };
 
