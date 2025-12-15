@@ -1,0 +1,244 @@
+GEM Mobile - Vision Board & GemMaster Chatbot - COMPLETE HANDOFF DOCUMENT
+
+    ---
+  VISION BOARD 2.0 - COMPLETE FEATURE SPEC
+
+  File Structure
+
+  gem-mobile/src/screens/VisionBoard/
+  ├── VisionBoardScreen.js (Main dashboard)
+  ├── RitualPlaygroundScreen.js (Ritual interactions)
+  ├── RitualHistoryScreen.js
+  ├── AchievementsScreen.js
+  ├── CalendarScreen.js
+  ├── GoalDetailScreen.js
+  ├── DailyRecapScreen.js
+  └── components/
+      ├── AffirmationWidget.js
+      ├── GoalsWidget.js
+      └── AddWidgetModal.js
+
+  gem-mobile/src/components/VisionBoard/
+  ├── index.js
+  ├── StreakBanner.js
+  ├── ComboTracker.js
+  ├── HabitGrid.js (GitHub-style activity grid)
+  ├── AchievementModal.js
+  ├── StreakHistoryModal.js
+  ├── DailyScoreCard.js
+  ├── QuickStatsRow.js
+  ├── TodayTasksList.js
+  ├── GoalCard.js
+  └── DivinationSection.js
+
+  VisionBoardScreen Features
+
+  1. Progress Overview - Daily score, streak counter
+  2. Goals Section - Goals by life area with checkboxes
+  3. Affirmations - Daily affirmations with TTS
+  4. Action Plan/Habits - Habit tracking with combo system
+  5. Crystal Reminders - Product recommendations based on goals
+  6. Cross-navigation with GemMaster
+
+  Gamification System (gamificationService.js)
+
+  - Streak tracking: affirmation, habit, goal, combo
+  - Daily completion: 3 categories
+  - Combo multiplier: x1, x1.5, x2
+  - Achievements:
+    - streak_3 (50pts), streak_7 (100pts), streak_14 (200pts), streak_30 (500pts), streak_100
+  (2000pts)
+    - first_combo (50pts), combo_streak_3 (150pts), combo_streak_7 (350pts)
+
+  Ritual Types (RITUAL_CONFIGS)
+
+  'letter-to-universe': { targetZone: 'sky', transformTo: 'star' }
+  'burn-release': { targetZone: 'fire', transformTo: 'ash' }
+  'star-wish': { targetZone: 'star', transformTo: 'sparkle' }
+  'purify-breathwork': { targetZone: 'wind', transformTo: 'breeze' }
+  'heart-opening': { targetZone: 'heart', transformTo: 'love' }
+  'gratitude-flow': { targetZone: 'golden', transformTo: 'blessing' }
+
+  ---
+  GEMMASTER CHATBOT - COMPLETE FEATURE SPEC
+
+  File Structure
+
+  gem-mobile/src/screens/GemMaster/
+  ├── index.js
+  ├── GemMasterScreen.js (Main chat)
+  ├── IChingScreen.js
+  ├── TarotScreen.js
+  ├── ChatHistoryScreen.js
+  └── components/
+      ├── MessageBubble.js
+      ├── ChatInput.js
+      ├── TypingIndicator.js
+      └── QuickActions.js
+
+  gem-mobile/src/components/GemMaster/
+  ├── index.js
+  ├── TierBadge.js
+  ├── QuotaIndicator.js
+  ├── QuickActionBar.js
+  ├── ClearChatButton.js
+  ├── UpgradeModal.js
+  ├── VoiceInputButton.js
+  ├── RecordingIndicator.js
+  ├── VoiceQuotaDisplay.js
+  ├── GoalTrackingCard.js
+  ├── AffirmationCard.js
+  ├── ActionChecklistCard.js
+  ├── StatsWidget.js
+  ├── WidgetSuggestionCard.js
+  ├── ProductRecommendation.js
+  ├── ProductCard.js
+  ├── SmartFormCardNew.js
+  ├── CrystalRecommendationNew.js
+  ├── ProductRecommendations.js
+  ├── GoalSettingForm.js
+  ├── InlineChatForm.js
+  ├── ExportButton.js
+  ├── ExportTemplateSelector.js
+  ├── ExportPreview.js
+  └── DivinationResultCard.js
+
+  GemMaster Features
+
+  1. AI Chat Interface - Chat with Gemral AI assistant
+  2. Tier System - FREE, Tier1, Tier2, Tier3 with badges
+  3. Quota System - Message and voice quotas
+  4. Voice Input - Speech-to-text with VoiceQuotaDisplay
+  5. Quick Actions - I Ching, Tarot, Crystal recommendations
+  6. Widget Suggestions - Auto-detect intent and suggest widgets
+  7. Smart Forms - Goal setting, affirmation creation
+  8. Product Recommendations - Crystals from Shopify based on conversation
+  9. Export Feature - Export readings as images
+
+  Services Used
+
+  - TierService - User tier management
+  - QuotaService - Message/voice quota tracking
+  - voiceService - Voice input handling
+  - gemMasterService - AI response generation
+  - widgetDetectionService - Detect widget triggers from text
+  - crystalTagMappingService - Map user needs to crystal tags
+  - shopifyService - Fetch products from Shopify
+  - chatHistoryService - Save/load conversations
+
+  Intent Detection (intentDetector.js)
+
+  INTENT_TYPES: money, love, health, career, family, frequency, general
+  detectIntent(text) - Detect user intent from message
+  detectEmotion(text) - Detect emotional state
+  detectLifeArea(text) - Detect life area
+  getCrystalRecommendations(intent) - Get crystal suggestions
+  isDivinationRequest(text) - Check if user wants I Ching/Tarot
+
+  Widget Trigger Detection (widgetTriggerDetector.js)
+
+  WIDGET_TYPES: goal, affirmation, habit, reminder, journal
+  detectWidgetTrigger(text) - Detect which widget to suggest
+  detectAllWidgetTriggers(text) - Get all possible widget triggers
+
+  ---
+  DESIGN TOKENS (tokens.js)
+
+  Colors
+
+  COLORS = {
+    // Brand
+    burgundy: '#9C0612',
+    gold: '#FFBD59', goldBright: '#FFD700',
+
+    // Background
+    bgDarkest: '#05040B', bgMid: '#0F1030', bgLight: '#1a0b2e',
+
+    // Accent
+    purple: '#6A5BFF', purpleGlow: '#8C64FF',
+    cyan: '#00F0FF',
+
+    // Functional
+    success: '#3AF7A6', error: '#FF6B6B', warning: '#FFB800', info: '#3B82F6',
+
+    // Text
+    textPrimary: '#FFFFFF',
+    textSecondary: 'rgba(255, 255, 255, 0.8)',
+    textMuted: 'rgba(255, 255, 255, 0.6)',
+
+    // Glass
+    glassBg: 'rgba(15, 16, 48, 0.55)',
+  }
+
+  Gradients
+
+  GRADIENTS = {
+    background: ['#05040B', '#0F1030', '#1a0b2e'],
+    primaryButton: ['#9C0612', '#6B0F1A'],
+    glassBorder: ['#6A5BFF', '#00F0FF'],
+    toggleActive: ['#3AF7A6', '#00F0FF'],
+    gold: ['#FFBD59', '#FFD700'],
+  }
+
+  Glass Card Style
+
+  GLASS = {
+    background: 'rgba(15, 16, 48, 0.55)',
+    blur: 18,
+    borderWidth: 1.2,
+    borderRadius: 18,
+    borderStart: '#6A5BFF', borderEnd: '#00F0FF',
+    shadowColor: 'rgba(0, 0, 0, 0.7)',
+    glowColor: '#8C64FF', glowOpacity: 0.22,
+    padding: 20,
+  }
+
+  Typography
+
+  TYPOGRAPHY = {
+    fontSize: {
+      xs: 10, sm: 11, md: 12, base: 13, lg: 14,
+      xl: 15, xxl: 16, xxxl: 18, display: 20, hero: 32, giant: 42
+    },
+    fontWeight: {
+      regular: '400', medium: '500', semibold: '600', bold: '700'
+    }
+  }
+
+  Spacing
+
+  SPACING = {
+    xxs: 2, xs: 4, sm: 8, md: 12, lg: 16, xl: 18, xxl: 20, xxxl: 24
+  }
+
+  Button
+
+  BUTTON = {
+    primary: { padding: 16, borderRadius: 12, borderWidth: 1, borderColor: '#FFBD59' }
+  }
+
+  Burn Ritual Colors
+
+  FLAME_COLORS = {
+    core: '#FFFFFF',
+    inner: '#FFC940',
+    outer: '#FF9330',
+    tip: '#FF6B6B',
+    mystical: '#A45CFF'
+  }
+  PAPER_COLOR = '#FCE2BF'
+
+  ---
+  NAVIGATION (AccountStack.js)
+
+  VisionBoard screens in Account tab:
+  <Stack.Screen name="VisionBoard" component={VisionBoardScreen} />
+  <Stack.Screen name="Achievements" component={AchievementsScreen} />
+  <Stack.Screen name="VisionCalendar" component={CalendarScreen} />
+  <Stack.Screen name="GoalDetail" component={GoalDetailScreen} />
+  <Stack.Screen name="DailyRecap" component={DailyRecapScreen} />
+  <Stack.Screen name="RitualPlayground" component={RitualPlaygroundScreen}
+    options={{ animation: 'slide_from_bottom', presentation: 'modal' }} />
+  <Stack.Screen name="RitualHistory" component={RitualHistoryScreen} />
+
+  ---
