@@ -3,13 +3,18 @@
  * Functions to get user's IP address for anonymous quota tracking
  */
 
-let cachedIP = null;
+/** IP response from ipify API */
+interface IpifyResponse {
+  ip: string;
+}
+
+let cachedIP: string | null = null;
 
 /**
  * Get user's public IP address
  * Uses ipify API (free, no auth required)
  */
-export async function getUserIP() {
+export async function getUserIP(): Promise<string> {
   // Return cached IP if available
   if (cachedIP) {
     return cachedIP;
@@ -17,7 +22,7 @@ export async function getUserIP() {
 
   try {
     const response = await fetch('https://api.ipify.org?format=json');
-    const data = await response.json();
+    const data = await response.json() as IpifyResponse;
     cachedIP = data.ip;
     return cachedIP;
   } catch (error) {
@@ -30,6 +35,6 @@ export async function getUserIP() {
 /**
  * Clear cached IP (useful for testing)
  */
-export function clearCachedIP() {
+export function clearCachedIP(): void {
   cachedIP = null;
 }

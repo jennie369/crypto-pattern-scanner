@@ -3,29 +3,52 @@
  * Handles all backend API calls for Scanner v2
  */
 
-// Import supabase only when needed (commented out for mock implementation)
-// import { supabase } from '../lib/supabaseClient';
+import type {
+  DetectedPattern,
+  ScanFilters,
+  PatternAlert,
+  PatternCode,
+  Candle,
+  Timeframe,
+  TimeframeDisplay,
+  PriceUpdate,
+  PatternDetectedCallback,
+  PriceUpdateCallback,
+  ErrorCallback,
+} from '../types';
+
+/** Pattern name mapping */
+const PATTERN_NAMES: Record<string, string> = {
+  'DPD': 'Down-Pause-Down',
+  'UPU': 'Up-Pause-Up',
+  'UPD': 'Up-Pause-Down',
+  'DPU': 'Down-Pause-Up',
+  'H&S': 'Head & Shoulders',
+  'Double Top': 'Double Top',
+  'Double Bottom': 'Double Bottom',
+  'Triangle': 'Triangle',
+};
+
+/**
+ * Get pattern name from pattern code
+ */
+const getPatternName = (pattern: string): string => {
+  return PATTERN_NAMES[pattern] ?? pattern;
+};
 
 /**
  * Scan for patterns across multiple coins and timeframes
- * @param {Object} filters - Scan configuration
- * @param {Array<string>} filters.coins - List of coins to scan (e.g., ['BTC', 'ETH'])
- * @param {string} filters.timeframe - Timeframe to analyze (e.g., '1H', '4H', '1D')
- * @param {string} filters.patternFilter - Pattern type filter (e.g., 'All', 'DPD', 'UPU')
- * @returns {Promise<Array>} Array of detected patterns
  */
-export const scanPatterns = async (filters) => {
+export const scanPatterns = async (filters: ScanFilters): Promise<DetectedPattern[]> => {
   try {
     console.log('[scanPatterns] Starting scan with filters:', filters);
 
-    // Validate filters
     if (!filters) {
       throw new Error('No filters provided');
     }
 
-    // Extract filters with fallback for property name (pattern or patternFilter)
     const { coins, timeframe, pattern, patternFilter } = filters;
-    const selectedPattern = pattern || patternFilter || 'All';
+    const selectedPattern = pattern ?? patternFilter ?? 'All';
 
     if (!coins || coins.length === 0) {
       throw new Error('No coins selected for scanning');
@@ -33,23 +56,20 @@ export const scanPatterns = async (filters) => {
 
     console.log('[scanPatterns] Validated filters:', { coins, timeframe, selectedPattern });
 
-    // TODO: Replace with actual backend API call
-    // For now, return mock data
-
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     // Generate mock patterns based on filters
-    const mockPatterns = [];
-    const patternTypes = selectedPattern === 'All'
+    const mockPatterns: DetectedPattern[] = [];
+    const patternTypes: PatternCode[] = selectedPattern === 'All'
       ? ['DPD', 'UPU', 'UPD', 'DPU', 'H&S', 'Double Top', 'Double Bottom', 'Triangle']
-      : [selectedPattern];
+      : [selectedPattern as PatternCode];
 
     coins.forEach((coin, index) => {
-      if (Math.random() > 0.5) { // 50% chance of finding a pattern
+      if (Math.random() > 0.5) {
         const randomPattern = patternTypes[Math.floor(Math.random() * patternTypes.length)];
         const basePrice = Math.random() * 100000 + 1000;
-        const confidence = Math.floor(Math.random() * 40) + 60; // 60-100%
+        const confidence = Math.floor(Math.random() * 40) + 60;
 
         mockPatterns.push({
           id: `${coin}-${Date.now()}-${index}`,
@@ -75,35 +95,14 @@ export const scanPatterns = async (filters) => {
 };
 
 /**
- * Get pattern name from pattern code
- */
-const getPatternName = (pattern) => {
-  const names = {
-    'DPD': 'Down-Pause-Down',
-    'UPU': 'Up-Pause-Up',
-    'UPD': 'Up-Pause-Down',
-    'DPU': 'Down-Pause-Up',
-    'H&S': 'Head & Shoulders',
-    'Double Top': 'Double Top',
-    'Double Bottom': 'Double Bottom',
-    'Triangle': 'Triangle',
-  };
-  return names[pattern] || pattern;
-};
-
-/**
  * Save pattern alert to database
- * @param {Object} pattern - Pattern data to save
- * @returns {Promise<Object>} Saved pattern data
  */
-export const savePatternAlert = async (pattern) => {
+export const savePatternAlert = async (pattern: DetectedPattern): Promise<PatternAlert> => {
   try {
     console.log('[savePatternAlert] Saving pattern:', pattern);
 
-    // TODO: Implement actual Supabase integration
-    // For now, just save to localStorage
-    const savedAlerts = JSON.parse(localStorage.getItem('pattern_alerts') || '[]');
-    const newAlert = {
+    const savedAlerts: PatternAlert[] = JSON.parse(localStorage.getItem('pattern_alerts') ?? '[]');
+    const newAlert: PatternAlert = {
       id: Date.now(),
       coin: pattern.coin,
       pattern_type: pattern.pattern,
@@ -129,10 +128,8 @@ export const savePatternAlert = async (pattern) => {
 
 /**
  * Export scan results to CSV
- * @param {Array} patterns - Array of pattern results
- * @returns {string} CSV content
  */
-export const exportToCSV = (patterns) => {
+export const exportToCSV = (patterns: DetectedPattern[]): string => {
   const headers = [
     'Coin',
     'Pattern',
@@ -167,10 +164,8 @@ export const exportToCSV = (patterns) => {
 
 /**
  * Download CSV file
- * @param {string} csvContent - CSV content
- * @param {string} filename - Filename
  */
-export const downloadCSV = (csvContent, filename = 'pattern-scan-results.csv') => {
+export const downloadCSV = (csvContent: string, filename: string = 'pattern-scan-results.csv'): void => {
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
   const url = URL.createObjectURL(blob);
@@ -186,18 +181,16 @@ export const downloadCSV = (csvContent, filename = 'pattern-scan-results.csv') =
 
 /**
  * Get historical candlestick data
- * @param {string} coin - Coin symbol (e.g., 'BTC/USDT')
- * @param {string} timeframe - Timeframe (e.g., '1H')
- * @param {number} limit - Number of candles to fetch
- * @returns {Promise<Array>} Array of candlestick data
  */
-export const getCandlestickData = async (coin, timeframe, limit = 100) => {
+export const getCandlestickData = async (
+  coin: string,
+  timeframe: Timeframe | TimeframeDisplay,
+  limit: number = 100
+): Promise<Candle[]> => {
   try {
-    // TODO: Integrate with Binance API or your backend API
     console.log(`Fetching candlestick data for ${coin} ${timeframe}`);
 
-    // Mock data generation
-    const data = [];
+    const data: Candle[] = [];
     const now = Math.floor(Date.now() / 1000);
     let currentPrice = Math.random() * 100000 + 1000;
 
@@ -209,7 +202,7 @@ export const getCandlestickData = async (coin, timeframe, limit = 100) => {
       const low = Math.min(open, close) - Math.random() * (currentPrice * 0.01);
 
       data.push({
-        time: now - (i * 3600), // 1 hour intervals
+        time: now - (i * 3600),
         open,
         high,
         low,
@@ -226,12 +219,24 @@ export const getCandlestickData = async (coin, timeframe, limit = 100) => {
   }
 };
 
+/** WebSocket callbacks interface */
+interface ScannerWebSocketCallbacks {
+  onPattern: PatternDetectedCallback | null;
+  onPrice: PriceUpdateCallback | null;
+  onError: ErrorCallback | null;
+}
+
 /**
  * WebSocket connection for real-time updates
  */
 export class ScannerWebSocket {
+  private ws: WebSocket | null;
+  private callbacks: ScannerWebSocketCallbacks;
+  private interval: NodeJS.Timeout | null;
+
   constructor() {
     this.ws = null;
+    this.interval = null;
     this.callbacks = {
       onPattern: null,
       onPrice: null,
@@ -239,52 +244,46 @@ export class ScannerWebSocket {
     };
   }
 
-  connect(coins) {
+  connect(coins: string[]): void {
     try {
-      // TODO: Replace with actual WebSocket URL
-      const wsUrl = 'wss://stream.binance.com:9443/stream';
-
-      // For now, just log
       console.log('WebSocket connection initialized for coins:', coins);
-
-      // Simulate WebSocket connection
       this.simulateWebSocket(coins);
     } catch (error) {
       console.error('WebSocket connection error:', error);
       if (this.callbacks.onError) {
-        this.callbacks.onError(error);
+        this.callbacks.onError(error as Error);
       }
     }
   }
 
-  simulateWebSocket(coins) {
-    // Simulate periodic updates
+  private simulateWebSocket(coins: string[]): void {
     this.interval = setInterval(() => {
       if (this.callbacks.onPrice) {
         coins.forEach(coin => {
-          this.callbacks.onPrice({
+          const update: PriceUpdate = {
             coin: `${coin}/USDT`,
             price: Math.random() * 100000 + 1000,
             change24h: (Math.random() - 0.5) * 10,
-          });
+          };
+          this.callbacks.onPrice!(update);
         });
       }
     }, 3000);
   }
 
-  onPattern(callback) {
+  onPattern(callback: PatternDetectedCallback): void {
     this.callbacks.onPattern = callback;
   }
 
-  onPrice(callback) {
+  onPrice(callback: PriceUpdateCallback): void {
     this.callbacks.onPrice = callback;
   }
 
-  onError(callback) {
+  onError(callback: ErrorCallback): void {
     this.callbacks.onError = callback;
   }
 
-  disconnect() {
+  disconnect(): void {
     if (this.ws) {
       this.ws.close();
       this.ws = null;

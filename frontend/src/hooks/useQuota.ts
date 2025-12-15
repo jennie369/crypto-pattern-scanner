@@ -7,9 +7,41 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../contexts/AuthContext';
 
-export function useQuota() {
+/** Quota state */
+interface QuotaState {
+  remaining: number;
+  maxScans: number;
+  canScan: boolean;
+  resetAt: Date | null;
+  loading: boolean;
+  error: string | null;
+}
+
+/** RPC response for quota check */
+interface QuotaCheckResponse {
+  can_scan: boolean;
+  remaining: number;
+  max_scans: number;
+  reset_at: string;
+}
+
+/** Quota slot result */
+interface UseQuotaSlotResult {
+  success: boolean;
+  error?: string;
+  remaining?: number;
+}
+
+/** Quota hook return type */
+interface UseQuotaReturn {
+  quota: QuotaState;
+  useQuotaSlot: () => Promise<UseQuotaSlotResult>;
+  refreshQuota: () => Promise<void>;
+}
+
+export function useQuota(): UseQuotaReturn {
   const { user } = useAuth();
-  const [quota, setQuota] = useState({
+  const [quota, setQuota] = useState<QuotaState>({
     remaining: 5,
     maxScans: 5,
     canScan: true,
@@ -19,7 +51,7 @@ export function useQuota() {
   });
 
   // Fetch current quota from database
-  const fetchQuota = async () => {
+  const fetchQuota = async (): Promise<void> => {
     if (!user) {
       setQuota(prev => ({ ...prev, loading: false }));
       return;
@@ -51,7 +83,7 @@ export function useQuota() {
 
       // Check if user has quota record
       if (!data) {
-        console.log('ℹ️ No quota record found, using defaults (new user)');
+        console.log('No quota record found, using defaults (new user)');
         setQuota({
           remaining: 5,
           maxScans: 5,
@@ -63,22 +95,30 @@ export function useQuota() {
         return;
       }
 
+      interface QuotaRecord {
+        max_scans: number;
+        scan_count: number;
+      }
+
+      const quotaData = data as QuotaRecord;
+
       setQuota({
-        remaining: data.max_scans - data.scan_count,
-        maxScans: data.max_scans,
-        canScan: data.scan_count < data.max_scans,
+        remaining: quotaData.max_scans - quotaData.scan_count,
+        maxScans: quotaData.max_scans,
+        canScan: quotaData.scan_count < quotaData.max_scans,
         resetAt: resetAt,
         loading: false,
         error: null
       });
     } catch (error) {
       console.error('Unexpected error:', error);
-      setQuota(prev => ({ ...prev, loading: false, error: error.message }));
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      setQuota(prev => ({ ...prev, loading: false, error: errorMessage }));
     }
   };
 
   // Use a quota slot (call before scanning)
-  const useQuotaSlot = async () => {
+  const useQuotaSlot = async (): Promise<UseQuotaSlotResult> => {
     if (!user) {
       return { success: false, error: 'Not authenticated' };
     }
@@ -94,8 +134,10 @@ export function useQuota() {
         return { success: false, error: error.message };
       }
 
+      const rpcResponse = data as QuotaCheckResponse;
+
       // Check if scan is allowed
-      if (!data.can_scan) {
+      if (!rpcResponse.can_scan) {
         return {
           success: false,
           error: 'Đã hết lượt scan hôm nay! Vui lòng nâng cấp hoặc chờ reset.',
@@ -105,23 +147,24 @@ export function useQuota() {
 
       // Update local state
       setQuota({
-        remaining: data.remaining,
-        maxScans: data.max_scans,
-        canScan: data.remaining > 0,
-        resetAt: new Date(data.reset_at),
+        remaining: rpcResponse.remaining,
+        maxScans: rpcResponse.max_scans,
+        canScan: rpcResponse.remaining > 0,
+        resetAt: new Date(rpcResponse.reset_at),
         loading: false,
         error: null
       });
 
       return {
         success: true,
-        remaining: data.remaining
+        remaining: rpcResponse.remaining
       };
     } catch (error) {
       console.error('Error using quota:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       return {
         success: false,
-        error: error.message
+        error: errorMessage
       };
     }
   };

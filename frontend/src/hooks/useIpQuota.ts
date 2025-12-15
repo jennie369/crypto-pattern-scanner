@@ -1,13 +1,50 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabaseClient';
-import { getUserIP } from '../utils/ipUtils';
-
 /**
  * Hook for IP-based quota management (for anonymous Bitcoin scans)
  * Provides 5 free scans per day based on IP address
  */
-export function useIpQuota() {
-  const [ipQuota, setIpQuota] = useState({
+
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabaseClient';
+import { getUserIP } from '../utils/ipUtils';
+
+/** IP Quota state */
+interface IpQuotaState {
+  loading: boolean;
+  canScan: boolean;
+  remaining: number;
+  maxScans: number;
+  resetAt: Date | null;
+}
+
+/** RPC response for IP quota check */
+interface IpQuotaCheckResponse {
+  can_scan: boolean;
+  remaining: number;
+  reset_at: string | null;
+}
+
+/** RPC response for IP scan increment */
+interface IpScanIncrementResponse {
+  remaining: number;
+}
+
+/** IP quota slot result */
+interface UseIPQuotaSlotResult {
+  success: boolean;
+  remaining: number;
+  needsSignup?: boolean;
+  error?: string;
+}
+
+/** IP quota hook return type */
+interface UseIpQuotaReturn {
+  ipQuota: IpQuotaState;
+  useIPQuotaSlot: () => Promise<UseIPQuotaSlotResult>;
+  refreshIPQuota: () => Promise<void>;
+}
+
+export function useIpQuota(): UseIpQuotaReturn {
+  const [ipQuota, setIpQuota] = useState<IpQuotaState>({
     loading: true,
     canScan: true,
     remaining: 5,
@@ -18,7 +55,7 @@ export function useIpQuota() {
   /**
    * Load IP quota summary
    */
-  const loadIpQuotaSummary = async () => {
+  const loadIpQuotaSummary = async (): Promise<void> => {
     setIpQuota(prev => ({ ...prev, loading: true }));
     try {
       const ip = await getUserIP();
@@ -39,12 +76,14 @@ export function useIpQuota() {
         return;
       }
 
+      const rpcResponse = data as IpQuotaCheckResponse;
+
       setIpQuota({
         loading: false,
-        canScan: data.can_scan,
-        remaining: data.remaining,
+        canScan: rpcResponse.can_scan,
+        remaining: rpcResponse.remaining,
         maxScans: 5,
-        resetAt: data.reset_at || null
+        resetAt: rpcResponse.reset_at ? new Date(rpcResponse.reset_at) : null
       });
     } catch (error) {
       console.error('Error loading IP quota summary:', error);
@@ -60,9 +99,8 @@ export function useIpQuota() {
 
   /**
    * Use an IP quota slot (check + increment)
-   * @returns {Promise<{success: boolean, remaining: number, needsSignup?: boolean, error?: string}>}
    */
-  const useIPQuotaSlot = async () => {
+  const useIPQuotaSlot = async (): Promise<UseIPQuotaSlotResult> => {
     try {
       const ip = await getUserIP();
 
@@ -80,7 +118,9 @@ export function useIpQuota() {
         };
       }
 
-      if (!checkData.can_scan) {
+      const checkResponse = checkData as IpQuotaCheckResponse;
+
+      if (!checkResponse.can_scan) {
         return {
           success: false,
           remaining: 0,
@@ -98,24 +138,27 @@ export function useIpQuota() {
         console.error('Error incrementing IP scan:', incrementError);
         return {
           success: false,
-          remaining: checkData.remaining,
+          remaining: checkResponse.remaining,
           error: 'Lỗi khi sử dụng quota'
         };
       }
+
+      const incrementResponse = incrementData as IpScanIncrementResponse;
 
       // Refresh quota
       await loadIpQuotaSummary();
 
       return {
         success: true,
-        remaining: incrementData.remaining
+        remaining: incrementResponse.remaining
       };
     } catch (error) {
       console.error('Error in useIPQuotaSlot:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       return {
         success: false,
         remaining: 0,
-        error: error.message
+        error: errorMessage
       };
     }
   };
