@@ -2034,17 +2034,20 @@ export default function DraggableBlockEditor({
               onClick={() => handleSelect(index)}
               style={{
                 position: 'relative',
-                marginBottom: '8px',
+                marginBottom: '8px', // CONSTANT margin - no shift
                 borderRadius: '8px',
-                border: `1px solid ${isSelected ? COLORS.gold : isHovered ? COLORS.borderHover : COLORS.border}`,
+                // Use OUTLINE instead of border to prevent layout shift
+                border: `1px solid ${isHovered && !isSelected ? COLORS.borderHover : COLORS.border}`,
+                outline: isSelected ? `2px solid ${COLORS.gold}` : 'none',
+                outlineOffset: '-1px',
                 backgroundColor: isSelected ? COLORS.selected : isDragging ? COLORS.dragging : isHovered ? 'rgba(255,255,255,0.02)' : 'transparent',
-                transition: 'all 0.15s ease',
+                transition: 'background 0.15s ease, outline 0.1s ease, border-color 0.15s ease',
                 opacity: isDragging ? 0.5 : 1,
-                // Allow block to grow and show all content
-                display: 'block', // Changed from inline-block to block for proper height
+                display: 'block',
                 minWidth: '200px',
                 maxWidth: '100%',
-                overflow: 'visible', // Ensure toolbar and settings are never cut off
+                overflow: 'visible',
+                boxSizing: 'border-box',
               }}
             >
               {/* Drop indicator - above (block reorder) */}
@@ -2343,16 +2346,22 @@ export default function DraggableBlockEditor({
                 </div>
               </div>
 
-              {/* Resize toolbar - shown when selected */}
+              {/* Resize toolbar - shown when selected - FLOATING below block */}
               {isSelected && (
                 <div style={{
+                  position: 'absolute',
+                  bottom: '-45px',
+                  left: '0',
+                  right: '0',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
-                  padding: '8px',
-                  borderTop: `1px solid ${COLORS.border}`,
-                  backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                  padding: '6px 8px',
+                  backgroundColor: 'rgba(30, 30, 40, 0.95)',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+                  zIndex: 50,
                 }}>
                   {/* Alignment buttons */}
                   <div style={{ display: 'flex', gap: '4px' }}>
@@ -2446,12 +2455,18 @@ export default function DraggableBlockEditor({
                 </div>
               )}
 
-              {/* Settings panel */}
+              {/* Settings panel - FLOATING below toolbar */}
               {isSelected && showBlockSettings[block.id] && (
                 <div style={{
+                  position: 'absolute',
+                  bottom: '-200px',
+                  left: '0',
+                  right: '0',
                   padding: '12px',
-                  borderTop: `1px solid ${COLORS.border}`,
-                  backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                  backgroundColor: 'rgba(20, 20, 30, 0.98)',
+                  borderRadius: '8px',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+                  zIndex: 49,
                 }}>
                   {/* MOBILE WIDTH - for mobile preview (iPhone) */}
                   <div style={{

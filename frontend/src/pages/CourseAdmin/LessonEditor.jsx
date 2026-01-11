@@ -1086,8 +1086,8 @@ export default function LessonEditor() {
   };
 
   // Find meaningful parent container for selection
-  // SIMPLIFIED: FIRST check for placeholder at click point, THEN walk up
-  const findMeaningfulParent = (element, container, clickEvent = null) => {
+  // OPTIMIZED: Walk up DOM tree only - NO getBoundingClientRect to avoid layout thrashing
+  const findMeaningfulParent = (element, container) => {
     // Check if element is a placeholder
     const isPlaceholder = (el) => {
       if (!el) return false;
@@ -1097,36 +1097,18 @@ export default function LessonEditor() {
              classAttr.includes('empty-card');
     };
 
-    // ═══ STEP 0: ALWAYS check for placeholder at click point FIRST ═══
-    // This ensures small placeholders inside large components can be selected
-    if (clickEvent && clickEvent.clientX && clickEvent.clientY) {
-      const allPlaceholders = container.querySelectorAll('[class*="placeholder"], .lesson-image, .empty-card');
-      for (const placeholder of allPlaceholders) {
-        const rect = placeholder.getBoundingClientRect();
-        if (clickEvent.clientX >= rect.left && clickEvent.clientX <= rect.right &&
-            clickEvent.clientY >= rect.top && clickEvent.clientY <= rect.bottom) {
-          console.log('[findMeaningfulParent] Found placeholder at click point:', placeholder.className);
-          return placeholder;
-        }
-      }
-    }
-
-    // ═══ STEP 1: If clicked on IMG, check size ═══
-    if (element.tagName === 'IMG') {
-      const rect = element.getBoundingClientRect();
-      if (rect.width > 60 || rect.height > 60) {
-        return element; // Large image - select directly
-      }
-      // Small icon - continue to find parent
-    }
-
-    // ═══ STEP 2: Walk up to find placeholder ═══
+    // ═══ STEP 1: Walk up to find placeholder FIRST (highest priority) ═══
     let current = element;
     while (current && current !== container) {
       if (isPlaceholder(current)) {
         return current;
       }
       current = current.parentElement;
+    }
+
+    // ═══ STEP 2: If clicked on IMG, select it ═══
+    if (element.tagName === 'IMG') {
+      return element;
     }
 
     // ═══ STEP 3: Walk up to find small container ═══
@@ -2857,8 +2839,6 @@ export default function LessonEditor() {
                               const target = e.target;
                               const container = e.currentTarget;
 
-                              console.log('[MouseDown] Clicked on:', target.tagName, 'class:', target.className, 'at:', e.clientX, e.clientY);
-
                               // Remove previous selection
                               container.querySelectorAll('.selected-for-delete').forEach(el => {
                                 el.classList.remove('selected-for-delete');
@@ -2869,19 +2849,13 @@ export default function LessonEditor() {
                                 // For text nodes, select parent element
                                 let elementToSelect = target.nodeType === 3 ? target.parentElement : target;
 
-                                console.log('[MouseDown] Before findMeaningfulParent:', elementToSelect.tagName, 'class:', elementToSelect.className);
-
                                 // Find meaningful parent (e.g., whole placeholder card instead of icon inside)
-                                // Pass the event so we can check for child placeholders at click coordinates
-                                elementToSelect = findMeaningfulParent(elementToSelect, container, e);
-
-                                console.log('[MouseDown] After findMeaningfulParent:', elementToSelect?.tagName, 'class:', elementToSelect?.className);
+                                elementToSelect = findMeaningfulParent(elementToSelect, container);
 
                                 // Select the element
                                 if (elementToSelect && elementToSelect !== container) {
                                   elementToSelect.classList.add('selected-for-delete');
                                   selectedElementPathRef.current = getElementPath(elementToSelect, container);
-                                  console.log('[Preview] Selected:', elementToSelect.tagName, elementToSelect.className);
                                 }
                               } else {
                                 selectedElementPathRef.current = null;
