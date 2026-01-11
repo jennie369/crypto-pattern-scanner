@@ -6,7 +6,7 @@
  * - Paste/drop URLs onto links to update them
  */
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useTransition } from 'react';
 import {
   GripVertical, Trash2, Copy, ChevronUp, ChevronDown, Link2, X, Check, ExternalLink,
   Maximize2, Lock, Unlock, AlignLeft, AlignCenter, AlignRight, Settings,
@@ -124,6 +124,35 @@ const TOOLBOX_CATEGORIES = [
   <span style="color: #FFBD59; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">✦</span>
   <div style="flex: 1; height: 1px; background: linear-gradient(to left, transparent, rgba(255,189,89,0.5), transparent);"></div>
 </div>`,
+      },
+      // ═══ SPACING COMPONENTS - For Shopify compatibility ═══
+      {
+        id: 'spacing-sm',
+        label: 'Spacing S (20px)',
+        icon: Minus,
+        description: 'Khoảng cách nhỏ 20px',
+        html: `<div class="spacer spacer-sm" aria-hidden="true" style="height: 20px; width: 100%; display: block;"></div>`,
+      },
+      {
+        id: 'spacing-md',
+        label: 'Spacing M (40px)',
+        icon: Minus,
+        description: 'Khoảng cách vừa 40px',
+        html: `<div class="spacer spacer-md" aria-hidden="true" style="height: 40px; width: 100%; display: block;"></div>`,
+      },
+      {
+        id: 'spacing-lg',
+        label: 'Spacing L (60px)',
+        icon: Minus,
+        description: 'Khoảng cách lớn 60px',
+        html: `<div class="spacer spacer-lg" aria-hidden="true" style="height: 60px; width: 100%; display: block;"></div>`,
+      },
+      {
+        id: 'spacing-xl',
+        label: 'Spacing XL (80px)',
+        icon: Minus,
+        description: 'Khoảng cách rất lớn 80px',
+        html: `<div class="spacer spacer-xl" aria-hidden="true" style="height: 80px; width: 100%; display: block;"></div>`,
       },
       {
         id: 'two-column',
@@ -464,13 +493,6 @@ console.log(example);</code></pre>`,
   <span style="font-size: 2rem; opacity: 0.4; margin-bottom: 6px; position: relative; z-index: 1;">🎨</span>
   <p style="margin: 0; color: rgba(255,255,255,0.7); font-size: 12px; font-weight: 500; position: relative; z-index: 1;">Background (Nhỏ)</p>
 </div>`,
-      },
-      {
-        id: 'spacer',
-        label: 'Spacer',
-        icon: Minus,
-        description: 'Khoảng trống',
-        html: `<div style="height: 1rem; margin: 0.25rem 0;"></div>`,
       },
     ],
   },
@@ -1149,6 +1171,10 @@ export default function DraggableBlockEditor({
   const lastGeneratedHtml = useRef(null); // Store last HTML we generated to detect our own updates
   const blocksRef = useRef(blocks); // Keep latest blocks for event handlers
 
+  // useTransition for non-blocking selection updates
+  // This allows the browser to paint before updating the selection state
+  const [isPending, startTransition] = useTransition();
+
   // Keep blocksRef in sync with blocks state
   useEffect(() => {
     blocksRef.current = blocks;
@@ -1199,8 +1225,14 @@ export default function DraggableBlockEditor({
     setDragOverPosition(null);
   }, []);
 
-  // Auto-scroll when dragging near edges
+  // ═══════════════════════════════════════════════════════════
+  // OPTIMIZED AUTO-SCROLL - Uses requestAnimationFrame for smoothness
+  // ═══════════════════════════════════════════════════════════
   const autoScrollRef = useRef(null);
+  const scrollDirectionRef = useRef(null); // 'up', 'down', or null
+  const lastScrollTimeRef = useRef(0);
+
+  // Smoother auto-scroll using requestAnimationFrame
   const performAutoScroll = useCallback((e) => {
     const scrollContainer = containerRef.current?.closest('.fullscreen-block-editor') ||
                            containerRef.current?.closest('.editor-content-panel') ||
@@ -1208,26 +1240,41 @@ export default function DraggableBlockEditor({
     if (!scrollContainer) return;
 
     const containerRect = scrollContainer.getBoundingClientRect();
-    const scrollSpeed = 15;
-    const edgeThreshold = 60; // pixels from edge to trigger scroll
+    const scrollSpeed = 5; // REDUCED from 15 - much smoother
+    const edgeThreshold = 50; // Reduced from 60
 
-    // Clear existing scroll interval
-    if (autoScrollRef.current) {
-      clearInterval(autoScrollRef.current);
-      autoScrollRef.current = null;
-    }
-
-    // Check if near top edge
+    // Determine scroll direction
+    let newDirection = null;
     if (e.clientY < containerRect.top + edgeThreshold) {
-      autoScrollRef.current = setInterval(() => {
-        scrollContainer.scrollTop -= scrollSpeed;
-      }, 16);
+      newDirection = 'up';
+    } else if (e.clientY > containerRect.bottom - edgeThreshold) {
+      newDirection = 'down';
     }
-    // Check if near bottom edge
-    else if (e.clientY > containerRect.bottom - edgeThreshold) {
-      autoScrollRef.current = setInterval(() => {
-        scrollContainer.scrollTop += scrollSpeed;
-      }, 16);
+
+    // If direction changed, cancel existing animation
+    if (newDirection !== scrollDirectionRef.current) {
+      if (autoScrollRef.current) {
+        cancelAnimationFrame(autoScrollRef.current);
+        autoScrollRef.current = null;
+      }
+      scrollDirectionRef.current = newDirection;
+    }
+
+    // Start scroll animation if direction set and not already running
+    if (newDirection && !autoScrollRef.current) {
+      const doScroll = () => {
+        if (!scrollDirectionRef.current) return;
+
+        if (scrollDirectionRef.current === 'up') {
+          scrollContainer.scrollTop -= scrollSpeed;
+        } else if (scrollDirectionRef.current === 'down') {
+          scrollContainer.scrollTop += scrollSpeed;
+        }
+
+        // Continue animation
+        autoScrollRef.current = requestAnimationFrame(doScroll);
+      };
+      autoScrollRef.current = requestAnimationFrame(doScroll);
     }
   }, []);
 
@@ -1235,11 +1282,19 @@ export default function DraggableBlockEditor({
   useEffect(() => {
     if (draggingIndex === null && draggingToolboxItem === null) {
       if (autoScrollRef.current) {
-        clearInterval(autoScrollRef.current);
+        cancelAnimationFrame(autoScrollRef.current);
         autoScrollRef.current = null;
       }
+      scrollDirectionRef.current = null;
     }
   }, [draggingIndex, draggingToolboxItem]);
+
+  // ═══════════════════════════════════════════════════════════
+  // THROTTLED DRAG OVER - Prevents excessive updates (max 30fps)
+  // ═══════════════════════════════════════════════════════════
+  const lastDragOverTimeRef = useRef(0);
+  const lastDragOverIndexRef = useRef(null);
+  const lastDragOverPositionRef = useRef(null);
 
   const handleDragOver = useCallback((e, index) => {
     e.preventDefault();
@@ -1252,8 +1307,12 @@ export default function DraggableBlockEditor({
 
     e.dataTransfer.dropEffect = 'move';
 
-    // Auto-scroll when near edges
-    performAutoScroll(e);
+    // THROTTLE: Only update auto-scroll every 50ms (20fps)
+    const now = Date.now();
+    if (now - lastScrollTimeRef.current > 50) {
+      performAutoScroll(e);
+      lastScrollTimeRef.current = now;
+    }
 
     if (draggingIndex === null || draggingIndex === index) {
       return;
@@ -1264,8 +1323,19 @@ export default function DraggableBlockEditor({
     const midY = rect.top + rect.height / 2;
     const position = e.clientY < midY ? 'above' : 'below';
 
-    setDragOverIndex(index);
-    setDragOverPosition(position);
+    // THROTTLE STATE UPDATES: Only update if changed or after 33ms (30fps max)
+    const shouldUpdate =
+      index !== lastDragOverIndexRef.current ||
+      position !== lastDragOverPositionRef.current ||
+      (now - lastDragOverTimeRef.current > 33);
+
+    if (shouldUpdate) {
+      lastDragOverIndexRef.current = index;
+      lastDragOverPositionRef.current = position;
+      lastDragOverTimeRef.current = now;
+      setDragOverIndex(index);
+      setDragOverPosition(position);
+    }
   }, [draggingIndex, performAutoScroll]);
 
   const handleDragLeave = useCallback((e) => {
@@ -1317,10 +1387,15 @@ export default function DraggableBlockEditor({
     handleDragEnd();
   }, [blocks, dragOverPosition, handleDragEnd, onSaveToUndo, updateHtml]);
 
-  // Block actions
-  const handleSelect = (index) => {
-    setSelectedIndex(index === selectedIndex ? null : index);
-  };
+  // Block actions - optimized with useTransition to prevent layout shift
+  const handleSelect = useCallback((index) => {
+    // Use startTransition for non-blocking selection update
+    // This allows the browser to paint before committing the state change
+    startTransition(() => {
+      // Toggle selection: deselect if clicking same block, otherwise select new block
+      setSelectedIndex(prevIndex => prevIndex === index ? null : index);
+    });
+  }, [startTransition]);
 
   const handleDelete = (index) => {
     onSaveToUndo?.();
@@ -1396,7 +1471,10 @@ export default function DraggableBlockEditor({
     setToolboxInsertIndex(null);
   };
 
-  // Handle drag over blocks area (for toolbox items)
+  // Handle drag over blocks area (for toolbox items) - THROTTLED
+  const lastToolboxDragOverTimeRef = useRef(0);
+  const lastToolboxInsertIndexRef = useRef(null);
+
   const handleToolboxDragOver = useCallback((e, index) => {
     // Check if this is a toolbox item drag
     if (!e.dataTransfer.types.includes('application/x-toolbox-item')) {
@@ -1407,15 +1485,26 @@ export default function DraggableBlockEditor({
     e.stopPropagation();
     e.dataTransfer.dropEffect = 'copy';
 
-    // Auto-scroll when near edges
-    performAutoScroll(e);
+    const now = Date.now();
+
+    // THROTTLE: Only update auto-scroll every 50ms
+    if (now - lastScrollTimeRef.current > 50) {
+      performAutoScroll(e);
+      lastScrollTimeRef.current = now;
+    }
 
     // Determine insert position
     const rect = e.currentTarget.getBoundingClientRect();
     const midY = rect.top + rect.height / 2;
     const insertAt = e.clientY < midY ? index : index + 1;
-    setToolboxInsertIndex(insertAt);
-    setToolboxDropZoneActive(true);
+
+    // THROTTLE STATE UPDATES: Only update if changed or after 33ms
+    if (insertAt !== lastToolboxInsertIndexRef.current || (now - lastToolboxDragOverTimeRef.current > 33)) {
+      lastToolboxInsertIndexRef.current = insertAt;
+      lastToolboxDragOverTimeRef.current = now;
+      setToolboxInsertIndex(insertAt);
+      setToolboxDropZoneActive(true);
+    }
   }, [performAutoScroll]);
 
   // Handle drop from toolbox
@@ -1969,10 +2058,13 @@ export default function DraggableBlockEditor({
     );
   }
 
+  // Determine if any drag operation is active
+  const isDragActive = draggingIndex !== null || draggingToolboxItem !== null;
+
   return (
     <div
       ref={containerRef}
-      className={`draggable-block-editor ${className}`}
+      className={`draggable-block-editor ${className} ${isDragActive ? 'is-dragging' : ''}`}
       style={{
         padding: '16px',
         minHeight: '200px',
@@ -2004,7 +2096,13 @@ export default function DraggableBlockEditor({
       </div>
 
       {/* Blocks list */}
-      <div className="blocks-list" style={{ overflow: 'visible' }}>
+      <div className={`blocks-list ${isDragActive ? 'is-dragging' : ''}`} style={{
+        overflow: 'visible',
+        // GPU acceleration to prevent layout shifts
+        transform: 'translate3d(0,0,0)',
+        backfaceVisibility: 'hidden',
+        WebkitBackfaceVisibility: 'hidden',
+      }}>
         {blocks.map((block, index) => {
           const isSelected = selectedIndex === index;
           const isDragging = draggingIndex === index;
@@ -2031,23 +2129,32 @@ export default function DraggableBlockEditor({
                 handleDrop(e, index);
                 handleToolboxDrop(e, index);
               }}
-              onClick={() => handleSelect(index)}
+              onClick={(e) => {
+                // Don't trigger select if clicking inside contentEditable
+                if (e.target.closest('.block-html-content')) {
+                  return;
+                }
+                handleSelect(index);
+              }}
               style={{
                 position: 'relative',
-                marginBottom: '8px', // CONSTANT margin - no shift
+                marginBottom: '8px',
                 borderRadius: '8px',
-                // Use OUTLINE instead of border to prevent layout shift
                 border: `1px solid ${isHovered && !isSelected ? COLORS.borderHover : COLORS.border}`,
-                outline: isSelected ? `2px solid ${COLORS.gold}` : 'none',
-                outlineOffset: '-1px',
-                backgroundColor: isSelected ? COLORS.selected : isDragging ? COLORS.dragging : isHovered ? 'rgba(255,255,255,0.02)' : 'transparent',
-                transition: 'background 0.15s ease, outline 0.1s ease, border-color 0.15s ease',
+                // REMOVED boxShadow - now using CSS outline for selection (no reflow)
+                // Selection styling is handled via CSS class .draggable-block-item.selected
+                backgroundColor: isDragging ? COLORS.dragging : isHovered && !isSelected ? 'rgba(255,255,255,0.02)' : 'transparent',
+                // Only transition non-layout-affecting properties
+                transition: 'background-color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease',
                 opacity: isDragging ? 0.5 : 1,
                 display: 'block',
                 minWidth: '200px',
                 maxWidth: '100%',
                 overflow: 'visible',
                 boxSizing: 'border-box',
+                // Create isolated stacking context - prevent layout shifts
+                transform: 'translateZ(0)',
+                willChange: isSelected ? 'outline-color' : 'auto',
               }}
             >
               {/* Drop indicator - above (block reorder) */}
@@ -2112,7 +2219,12 @@ export default function DraggableBlockEditor({
               )}
 
               {/* Block layout: drag handle + resizable content area */}
-              <div style={{ display: 'flex', alignItems: 'flex-start', overflow: 'visible' }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                overflow: 'visible',
+                width: '100%',
+              }}>
                 {/* Drag handle */}
                 <div
                   draggable="true"
@@ -2148,13 +2260,12 @@ export default function DraggableBlockEditor({
                     padding: '10px 12px',
                     minHeight: '40px',
                     minWidth: '100px',
+                    // Use flex: 1 when no custom width, otherwise use custom width
+                    flex: typeof block.width === 'number' ? 'none' : '1',
                     width: typeof block.width === 'number' ? `${block.width}px` : 'auto',
-                    // Don't set fixed height - let content flow naturally
-                    // Height resize only affects the visual indicator, not actual constraint
                     boxSizing: 'border-box',
-                    overflow: 'visible', // Allow resize handles to show outside
+                    overflow: 'visible',
                     backgroundColor: typeof block.width === 'number' ? 'rgba(106, 91, 255, 0.05)' : undefined,
-                    // ALWAYS have 2px border to prevent layout shift - just change color
                     border: `2px dashed ${typeof block.width === 'number' ? 'rgba(106, 91, 255, 0.5)' : 'transparent'}`,
                   }}
                 >
@@ -2193,56 +2304,75 @@ export default function DraggableBlockEditor({
                         e.preventDefault();
                       }
                     }}
-                    style={{ outline: 'none', color: COLORS.textPrimary, cursor: 'text' }}
+                    style={{
+                      // CRITICAL: Prevent ALL layout shifts on focus
+                      outline: 'none',
+                      outlineOffset: '0',
+                      border: 'none',
+                      boxShadow: 'none',
+                      color: COLORS.textPrimary,
+                      cursor: 'text',
+                      // Ensure stable dimensions
+                      minHeight: '20px',
+                      width: '100%',
+                    }}
                   />
 
-                  {/* RESIZE HANDLES - inside content wrapper */}
-                  {isSelected && (
-                    <>
-                      {/* SE corner - MAIN RESIZE HANDLE - big and visible */}
-                      <div
-                        onMouseDown={(e) => {
-                          console.log('[CLICK SE HANDLE]');
-                          handleResizeStart(e, index, 'se');
-                        }}
-                        style={{
-                          position: 'absolute', bottom: '-8px', right: '-8px',
-                          width: '20px', height: '20px',
-                          background: 'linear-gradient(135deg, #FF6B6B, #FF8E53)',
-                          border: '3px solid #fff',
-                          borderRadius: '4px', cursor: 'nwse-resize',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.5)', zIndex: 100,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}
-                        title="Kéo để resize"
-                      >
-                        <span style={{ fontSize: '10px', color: '#fff', fontWeight: 'bold' }}>↘</span>
-                      </div>
-                      {/* East edge - visible bar */}
-                      <div
-                        onMouseDown={(e) => handleResizeStart(e, index, 'e')}
-                        style={{
-                          position: 'absolute', right: '-4px', top: '10px', bottom: '25px',
-                          width: '8px', cursor: 'ew-resize', zIndex: 90,
-                          background: 'rgba(106, 91, 255, 0.5)',
-                          borderRadius: '4px',
-                        }}
-                      />
-                      {/* South edge - visible bar */}
-                      <div
-                        onMouseDown={(e) => handleResizeStart(e, index, 's')}
-                        style={{
-                          position: 'absolute', bottom: '-4px', left: '10px', right: '25px',
-                          height: '8px', cursor: 'ns-resize', zIndex: 90,
-                          background: 'rgba(106, 91, 255, 0.5)',
-                          borderRadius: '4px',
-                        }}
-                      />
-                    </>
-                  )}
+                  {/* RESIZE HANDLES - ALWAYS render, visibility controlled via CSS to prevent layout shift */}
+                  <div
+                    className="resize-handles-wrapper"
+                    style={{
+                      position: 'absolute',
+                      top: 0, left: 0, right: 0, bottom: 0,
+                      // CSS controls visibility based on parent .selected class
+                      pointerEvents: isSelected ? 'auto' : 'none',
+                      opacity: isSelected ? 1 : 0,
+                      transition: 'opacity 0.15s ease',
+                    }}
+                  >
+                    {/* SE corner - MAIN RESIZE HANDLE - big and visible */}
+                    <div
+                      onMouseDown={(e) => {
+                        console.log('[CLICK SE HANDLE]');
+                        handleResizeStart(e, index, 'se');
+                      }}
+                      style={{
+                        position: 'absolute', bottom: '-8px', right: '-8px',
+                        width: '20px', height: '20px',
+                        background: 'linear-gradient(135deg, #FF6B6B, #FF8E53)',
+                        border: '3px solid #fff',
+                        borderRadius: '4px', cursor: 'nwse-resize',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.5)', zIndex: 100,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}
+                      title="Kéo để resize"
+                    >
+                      <span style={{ fontSize: '10px', color: '#fff', fontWeight: 'bold' }}>↘</span>
+                    </div>
+                    {/* East edge - visible bar */}
+                    <div
+                      onMouseDown={(e) => handleResizeStart(e, index, 'e')}
+                      style={{
+                        position: 'absolute', right: '-4px', top: '10px', bottom: '25px',
+                        width: '8px', cursor: 'ew-resize', zIndex: 90,
+                        background: 'rgba(106, 91, 255, 0.5)',
+                        borderRadius: '4px',
+                      }}
+                    />
+                    {/* South edge - visible bar */}
+                    <div
+                      onMouseDown={(e) => handleResizeStart(e, index, 's')}
+                      style={{
+                        position: 'absolute', bottom: '-4px', left: '10px', right: '25px',
+                        height: '8px', cursor: 'ns-resize', zIndex: 90,
+                        background: 'rgba(106, 91, 255, 0.5)',
+                        borderRadius: '4px',
+                      }}
+                    />
+                  </div>
                 </div>
 
-                {/* Action buttons */}
+                {/* Action buttons - ALWAYS render with fixed width to prevent layout shift */}
                 <div
                   style={{
                     display: 'flex',
@@ -2255,53 +2385,55 @@ export default function DraggableBlockEditor({
                     borderLeft: `1px solid ${COLORS.border}`,
                     backgroundColor: showTools ? 'rgba(255, 255, 255, 0.02)' : 'transparent',
                     borderRadius: '0 8px 8px 0',
+                    width: '36px', // Fixed width to prevent shift
+                    flexShrink: 0, // Don't shrink
                   }}
                 >
-                  {/* Move up */}
-                  {index > 0 && (
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleMoveUp(index); }}
-                      style={{
-                        width: '28px',
-                        height: '28px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: 'transparent',
-                        border: `1px solid ${COLORS.border}`,
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        color: COLORS.textSecondary,
-                        transition: 'all 0.15s ease',
-                      }}
-                      title="Di chuyển lên (Ctrl+↑)"
-                    >
-                      <ChevronUp size={14} />
-                    </button>
-                  )}
+                  {/* Move up - ALWAYS render, just hide when not applicable */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); if (index > 0) handleMoveUp(index); }}
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: 'transparent',
+                      border: `1px solid ${COLORS.border}`,
+                      borderRadius: '4px',
+                      cursor: index > 0 ? 'pointer' : 'default',
+                      color: COLORS.textSecondary,
+                      transition: 'all 0.15s ease',
+                      opacity: index > 0 ? 1 : 0.2, // Dim when disabled
+                      pointerEvents: index > 0 ? 'auto' : 'none',
+                    }}
+                    title="Di chuyển lên (Ctrl+↑)"
+                  >
+                    <ChevronUp size={14} />
+                  </button>
 
-                  {/* Move down */}
-                  {index < blocks.length - 1 && (
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleMoveDown(index); }}
-                      style={{
-                        width: '28px',
-                        height: '28px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: 'transparent',
-                        border: `1px solid ${COLORS.border}`,
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        color: COLORS.textSecondary,
-                        transition: 'all 0.15s ease',
-                      }}
-                      title="Di chuyển xuống (Ctrl+↓)"
-                    >
-                      <ChevronDown size={14} />
-                    </button>
-                  )}
+                  {/* Move down - ALWAYS render, just hide when not applicable */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); if (index < blocks.length - 1) handleMoveDown(index); }}
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: 'transparent',
+                      border: `1px solid ${COLORS.border}`,
+                      borderRadius: '4px',
+                      cursor: index < blocks.length - 1 ? 'pointer' : 'default',
+                      color: COLORS.textSecondary,
+                      transition: 'all 0.15s ease',
+                      opacity: index < blocks.length - 1 ? 1 : 0.2, // Dim when disabled
+                      pointerEvents: index < blocks.length - 1 ? 'auto' : 'none',
+                    }}
+                    title="Di chuyển xuống (Ctrl+↓)"
+                  >
+                    <ChevronDown size={14} />
+                  </button>
 
                   {/* Duplicate */}
                   <button
@@ -2347,11 +2479,13 @@ export default function DraggableBlockEditor({
                 </div>
               </div>
 
-              {/* Resize toolbar - shown when selected - FLOATING below block */}
-              {isSelected && (
-                <div style={{
+              {/* Resize toolbar - ALWAYS render, visibility controlled via opacity/pointer-events */}
+              <div
+                className="resize-toolbar-container"
+                style={{
                   position: 'absolute',
-                  bottom: '-45px',
+                  // Use top: 100% + transform instead of bottom to prevent layout shift
+                  top: '100%',
                   left: '0',
                   right: '0',
                   display: 'flex',
@@ -2363,6 +2497,13 @@ export default function DraggableBlockEditor({
                   borderRadius: '8px',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
                   zIndex: 50,
+                  // Use transform for positioning - doesn't affect layout
+                  transform: 'translateY(5px)',
+                  // CRITICAL: Always render, control visibility via opacity/pointer-events
+                  opacity: isSelected ? 1 : 0,
+                  visibility: isSelected ? 'visible' : 'hidden',
+                  pointerEvents: isSelected ? 'auto' : 'none',
+                  transition: 'opacity 0.15s ease, visibility 0.15s ease',
                 }}>
                   {/* Alignment buttons */}
                   <div style={{ display: 'flex', gap: '4px' }}>
@@ -2454,13 +2595,13 @@ export default function DraggableBlockEditor({
                     )}
                   </div>
                 </div>
-              )}
 
-              {/* Settings panel - FLOATING below toolbar */}
+              {/* Settings panel - FLOATING below toolbar - only render when needed */}
               {isSelected && showBlockSettings[block.id] && (
                 <div style={{
                   position: 'absolute',
-                  bottom: '-200px',
+                  // Use top: 100% + transform instead of bottom
+                  top: '100%',
                   left: '0',
                   right: '0',
                   padding: '12px',
@@ -2468,6 +2609,8 @@ export default function DraggableBlockEditor({
                   borderRadius: '8px',
                   boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
                   zIndex: 49,
+                  // Position below the toolbar (toolbar is ~40px)
+                  transform: 'translateY(55px)',
                 }}>
                   {/* MOBILE WIDTH - for mobile preview (iPhone) */}
                   <div style={{

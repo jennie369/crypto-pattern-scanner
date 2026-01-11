@@ -388,41 +388,68 @@ export default function LessonEditor() {
   // Sync WYSIWYG editor content without causing scroll jumps
   // Only update innerHTML when content changes from external source (not user typing)
   // Use useLayoutEffect to sync content immediately before browser paint (prevents blank flash)
+  // CRITICAL: This is the ONLY place where innerHTML should be set (no dangerouslySetInnerHTML)
   useLayoutEffect(() => {
     // Handle both fullscreen and non-fullscreen editors
     const editors = [wysiwygEditorRef.current, wysiwygEditorRef2.current].filter(Boolean);
     if (editors.length === 0) return;
 
-    // Skip if this is an internal edit (user typing/dropping)
+    // Skip if this is an internal edit (user typing/dropping/deleting)
+    // IMPORTANT: Don't reset the flag here - let it persist until content is actually different
     if (isInternalEditRef.current) {
+      // Check if lastContentFromEditorRef matches - if so, keep skipping
+      if (lastContentFromEditorRef.current === formData.content_html) {
+        // Content matches what we captured, safe to skip but DON'T reset flag yet
+        // The flag will be reset when we need to sync external changes
+        return;
+      }
+      // Content is different from what we captured - this is an external change
+      // Reset flag and proceed to sync
       isInternalEditRef.current = false;
-      return;
     }
 
-    // Skip if content matches what we last synced from editor (but not on initial render)
-    if (lastContentFromEditorRef.current === formData.content_html && lastContentFromEditorRef.current !== '') return;
+    // Skip if content matches what we last synced (but NOT on initial render - empty check)
+    // Also check if editors already have this content (prevents unnecessary DOM updates)
+    const contentToSet = formData.content_html || '';
 
     editors.forEach(editor => {
-      // Skip if content is the same as what's already in editor
-      if (editor.innerHTML === formData.content_html) return;
+      // Skip if content is exactly the same as what's already in editor
+      if (editor.innerHTML === contentToSet) {
+        // Content already matches - just update ref
+        lastContentFromEditorRef.current = contentToSet;
+        return;
+      }
 
-      // External change detected - update editor while preserving scroll
+      // Content is different - need to update editor
+      // Save scroll positions before modifying DOM
       const scrollTop = editor.scrollTop;
       const scrollLeft = editor.scrollLeft;
       const parentScrollTop = editor.parentElement?.scrollTop || 0;
+      const windowScrollY = window.scrollY;
+      const windowScrollX = window.scrollX;
 
       // Update content
-      editor.innerHTML = formData.content_html || '';
+      editor.innerHTML = contentToSet;
 
-      // Restore scroll position
+      // Restore scroll position immediately and after next paint
+      editor.scrollTop = scrollTop;
+      editor.scrollLeft = scrollLeft;
+      if (editor.parentElement) {
+        editor.parentElement.scrollTop = parentScrollTop;
+      }
+
       requestAnimationFrame(() => {
         editor.scrollTop = scrollTop;
         editor.scrollLeft = scrollLeft;
         if (editor.parentElement) {
           editor.parentElement.scrollTop = parentScrollTop;
         }
+        window.scrollTo(windowScrollX, windowScrollY);
       });
     });
+
+    // Update lastContentFromEditorRef to prevent re-syncing the same content
+    lastContentFromEditorRef.current = contentToSet;
   }, [formData.content_html, showHtmlPreview, blockEditMode, isFullscreen]);
 
   // Set visual styles for draggable elements (event delegation handles the actual drag)
@@ -1023,6 +1050,165 @@ export default function LessonEditor() {
     }, 0);
   };
 
+  // ═══════════════════════════════════════════════════════════════════
+  // CONVERT <style> TAGS TO INLINE STYLES
+  // For landing page templates that use <style> tags
+  // ═══════════════════════════════════════════════════════════════════
+  const convertStyleTagsToInline = useCallback((html) => {
+    if (!html || typeof html !== 'string') return html;
+
+    // Check if HTML contains <style> tags
+    if (!html.includes('<style')) return html;
+
+    try {
+      // Create a temporary DOM to work with
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+
+      // Extract CSS variables from :root
+      const cssVariables = {};
+      const styleTags = doc.querySelectorAll('style');
+
+      styleTags.forEach(styleTag => {
+        const cssText = styleTag.textContent || '';
+
+        // Extract :root variables
+        const rootMatch = cssText.match(/:root\s*\{([^}]+)\}/);
+        if (rootMatch) {
+          const varDeclarations = rootMatch[1].match(/--[\w-]+:\s*[^;]+/g) || [];
+          varDeclarations.forEach(decl => {
+            const [name, value] = decl.split(':').map(s => s.trim());
+            if (name && value) {
+              cssVariables[name] = value;
+            }
+          });
+        }
+      });
+
+      // Function to resolve CSS variables
+      const resolveVariables = (value) => {
+        if (!value) return value;
+        return value.replace(/var\((--[\w-]+)\)/g, (match, varName) => {
+          return cssVariables[varName] || match;
+        });
+      };
+
+      // Parse CSS rules from all <style> tags
+      const cssRules = [];
+      styleTags.forEach(styleTag => {
+        const cssText = styleTag.textContent || '';
+
+        // Remove comments
+        const cleanCss = cssText.replace(/\/\*[\s\S]*?\*\//g, '');
+
+        // Match CSS rules (selector { properties })
+        // Skip @keyframes, @media, :root, etc.
+        const ruleRegex = /([^{@]+)\{([^}]+)\}/g;
+        let match;
+
+        while ((match = ruleRegex.exec(cleanCss)) !== null) {
+          const selector = match[1].trim();
+          const properties = match[2].trim();
+
+          // Skip special selectors
+          if (selector.startsWith('@') ||
+              selector.startsWith(':root') ||
+              selector.includes('::before') ||
+              selector.includes('::after') ||
+              selector.includes(':hover') ||
+              selector.includes(':active') ||
+              selector.includes(':focus') ||
+              selector.includes('@keyframes')) {
+            continue;
+          }
+
+          // Parse properties into object
+          const propsObj = {};
+          properties.split(';').forEach(prop => {
+            const colonIndex = prop.indexOf(':');
+            if (colonIndex > 0) {
+              const propName = prop.substring(0, colonIndex).trim();
+              let propValue = prop.substring(colonIndex + 1).trim();
+
+              // Resolve CSS variables
+              propValue = resolveVariables(propValue);
+
+              // Skip animation-related properties that cause opacity:0 issues
+              if (propName === 'opacity' && propValue === '0') {
+                propValue = '1'; // Force visible
+              }
+              if (propName === 'animation' || propName === 'animation-name') {
+                return; // Skip animations
+              }
+
+              if (propName && propValue) {
+                propsObj[propName] = propValue;
+              }
+            }
+          });
+
+          if (Object.keys(propsObj).length > 0) {
+            cssRules.push({ selector, properties: propsObj });
+          }
+        }
+      });
+
+      // Get body content (or full document if no body)
+      let contentRoot = doc.body || doc.documentElement;
+
+      // Apply CSS rules to matching elements
+      cssRules.forEach(({ selector, properties }) => {
+        try {
+          // Handle multiple selectors (comma-separated)
+          const selectors = selector.split(',').map(s => s.trim());
+
+          selectors.forEach(sel => {
+            if (!sel || sel.includes(':')) return; // Skip pseudo-selectors
+
+            const elements = contentRoot.querySelectorAll(sel);
+            elements.forEach(el => {
+              // Merge with existing inline styles
+              Object.entries(properties).forEach(([prop, value]) => {
+                // Convert CSS property name to camelCase for style object
+                // But we'll use setAttribute for the style string
+                const existingStyle = el.getAttribute('style') || '';
+
+                // Check if this property already exists in inline style
+                const propRegex = new RegExp(`${prop}\\s*:`, 'i');
+                if (!propRegex.test(existingStyle)) {
+                  el.style.setProperty(prop, value);
+                }
+              });
+            });
+          });
+        } catch (selectorError) {
+          // Invalid selector, skip
+          console.warn('[StyleConvert] Invalid selector:', selector);
+        }
+      });
+
+      // Remove <style> tags from output
+      styleTags.forEach(tag => tag.remove());
+
+      // Remove <script> tags for safety
+      doc.querySelectorAll('script').forEach(tag => tag.remove());
+
+      // Get the processed HTML
+      let result = contentRoot.innerHTML;
+
+      // Clean up - remove empty style attributes
+      result = result.replace(/\s*style=""\s*/g, ' ');
+
+      console.log('[StyleConvert] Converted', cssRules.length, 'CSS rules to inline styles');
+      console.log('[StyleConvert] CSS Variables found:', Object.keys(cssVariables).length);
+
+      return result;
+    } catch (error) {
+      console.error('[StyleConvert] Error converting styles:', error);
+      return html; // Return original on error
+    }
+  }, []);
+
   // Handle paste from clipboard
   const handlePaste = async (e) => {
     // Allow default paste behavior but save to undo
@@ -1088,8 +1274,8 @@ export default function LessonEditor() {
   // Find meaningful parent container for selection
   // OPTIMIZED: Walk up DOM tree only - NO getBoundingClientRect to avoid layout thrashing
   const findMeaningfulParent = (element, container) => {
-    // Check if element is a placeholder
-    const isPlaceholder = (el) => {
+    // Check if element is a placeholder or placeholder wrapper
+    const isPlaceholderOrWrapper = (el) => {
       if (!el) return false;
       const classAttr = el.getAttribute ? el.getAttribute('class') || '' : '';
       return classAttr.includes('placeholder') ||
@@ -1097,13 +1283,39 @@ export default function LessonEditor() {
              classAttr.includes('empty-card');
     };
 
-    // ═══ STEP 1: Walk up to find placeholder FIRST (highest priority) ═══
+    // ═══ STEP 0: Check if clicked element IS a spacer - return it directly ═══
+    // Spacers should always be directly selectable, regardless of nesting
+    if (element.classList?.contains('spacer')) {
+      return element;
+    }
+
+    // Also check if we clicked inside a spacer (on the ::after pseudo-element area)
     let current = element;
     while (current && current !== container) {
-      if (isPlaceholder(current)) {
+      if (current.classList?.contains('spacer')) {
         return current;
       }
+      // Don't walk too far up for spacers - stop at common containers
+      if (current.parentElement === container) break;
       current = current.parentElement;
+    }
+
+    // ═══ STEP 1: Walk up to find OUTERMOST placeholder wrapper (highest priority) ═══
+    // Keep walking up to find all nested placeholder wrappers, return the outermost one
+    current = element;
+    let outermostPlaceholder = null;
+
+    while (current && current !== container) {
+      if (isPlaceholderOrWrapper(current)) {
+        outermostPlaceholder = current;
+        // Continue walking up to find if there's an outer wrapper
+      }
+      current = current.parentElement;
+    }
+
+    // If we found any placeholder wrapper, return the outermost one
+    if (outermostPlaceholder) {
+      return outermostPlaceholder;
     }
 
     // ═══ STEP 2: If clicked on IMG, select it ═══
@@ -1370,13 +1582,34 @@ export default function LessonEditor() {
       }
 
       case 'delete': {
+        // ═══ SAVE SCROLL POSITIONS BEFORE DELETE ═══
+        // This prevents layout shift when element is removed
+        const editorScrollTop = editorElement.scrollTop;
+        const editorScrollLeft = editorElement.scrollLeft;
+        const parentScrollTop = editorElement.parentElement?.scrollTop || 0;
+        const windowScrollY = window.scrollY;
+        const windowScrollX = window.scrollX;
+
         forceSaveToUndo();
         element.remove();
+        selectedElementPathRef.current = null; // Clear path ref
+
         // Sync changes
         const newHtml3 = editorElement.innerHTML;
         isInternalEditRef.current = true;
         lastContentFromEditorRef.current = newHtml3;
         handleChange('content_html', newHtml3);
+
+        // ═══ RESTORE SCROLL POSITIONS AFTER DELETE ═══
+        requestAnimationFrame(() => {
+          editorElement.scrollTop = editorScrollTop;
+          editorElement.scrollLeft = editorScrollLeft;
+          if (editorElement.parentElement) {
+            editorElement.parentElement.scrollTop = parentScrollTop;
+          }
+          window.scrollTo(windowScrollX, windowScrollY);
+        });
+
         setSuccessMessage('Đã xóa component');
         setTimeout(() => setSuccessMessage(''), 1500);
         break;
@@ -1422,44 +1655,77 @@ export default function LessonEditor() {
     const blocks = editorElement.querySelectorAll(blockSelectors);
 
     // Edge threshold - how close to top/bottom edge to trigger before/after insertion
-    const EDGE_THRESHOLD = 20; // pixels
+    const EDGE_THRESHOLD = 40; // pixels - increased for better UX
+
+    // Helper: Check if block is a large container that shouldn't receive 'inside' drops
+    const isLargeContainer = (block) => {
+      const classAttr = block.getAttribute('class') || '';
+      return block.querySelector('img') ||
+             classAttr.includes('placeholder') ||
+             classAttr.includes('lesson-image') ||
+             classAttr.includes('hero-section') ||
+             classAttr.includes('feature-card') ||
+             classAttr.includes('grid-2x2') ||
+             classAttr.includes('product-card') ||
+             block.tagName === 'FIGURE';
+    };
 
     let bestTarget = null;
     let bestPosition = 'inside'; // 'before', 'after', 'inside'
     let minDistance = Infinity;
 
     blocks.forEach((block) => {
+      // Skip if block is a direct child element of a larger container we're already considering
+      if (block.parentElement !== editorElement &&
+          block.parentElement?.closest('[class*="placeholder"], [class*="lesson-image"], [class*="hero-section"]')) {
+        return;
+      }
+
       const rect = block.getBoundingClientRect();
 
       // Skip very small elements (likely inline or wrapper)
       if (rect.height < 10) return;
 
-      // Check if mouse X is within the block's horizontal bounds
-      if (x >= rect.left && x <= rect.right) {
+      // Check if mouse X is within the block's horizontal bounds (with some padding)
+      const xPadding = 20;
+      if (x >= rect.left - xPadding && x <= rect.right + xPadding) {
         // Check vertical position
         const topDist = Math.abs(y - rect.top);
         const bottomDist = Math.abs(y - rect.bottom);
-        const centerDist = Math.abs(y - (rect.top + rect.height / 2));
+        const centerY = rect.top + rect.height / 2;
+
+        // For large containers, use larger threshold and prefer before/after
+        const threshold = isLargeContainer(block) ? Math.max(EDGE_THRESHOLD, rect.height * 0.3) : EDGE_THRESHOLD;
 
         // Near top edge?
-        if (topDist < EDGE_THRESHOLD && topDist < minDistance) {
+        if (topDist < threshold && topDist < minDistance) {
           minDistance = topDist;
           bestTarget = block;
           bestPosition = 'before';
         }
         // Near bottom edge?
-        else if (bottomDist < EDGE_THRESHOLD && bottomDist < minDistance) {
+        else if (bottomDist < threshold && bottomDist < minDistance) {
           minDistance = bottomDist;
           bestTarget = block;
           bestPosition = 'after';
         }
-        // Inside the block?
+        // Inside the block - but for large containers, decide based on which half
         else if (y >= rect.top && y <= rect.bottom) {
-          // Only set as 'inside' if we haven't found a better edge target
-          if (centerDist < minDistance) {
-            minDistance = centerDist;
+          if (isLargeContainer(block)) {
+            // For large containers, decide before/after based on which half of the block
+            const distFromTop = y - rect.top;
+            const distFromBottom = rect.bottom - y;
+            minDistance = Math.min(distFromTop, distFromBottom);
             bestTarget = block;
-            bestPosition = 'inside';
+            bestPosition = distFromTop < distFromBottom ? 'before' : 'after';
+          } else {
+            // Regular blocks can receive 'inside' drops
+            const centerDist = Math.abs(y - centerY);
+            if (centerDist < minDistance) {
+              minDistance = centerDist;
+              bestTarget = block;
+              bestPosition = 'inside';
+            }
           }
         }
       }
@@ -1485,6 +1751,11 @@ export default function LessonEditor() {
           }
         }
       }
+    }
+
+    // Final safety: If best position is still 'inside' for a large container, change to 'after'
+    if (bestTarget && bestPosition === 'inside' && isLargeContainer(bestTarget)) {
+      bestPosition = 'after';
     }
 
     return { target: bestTarget, position: bestPosition };
@@ -1729,10 +2000,20 @@ export default function LessonEditor() {
         const end = textarea?.selectionEnd || formData.content_html.length;
         const beforeText = formData.content_html.substring(0, start);
         const afterText = formData.content_html.substring(end);
-        const newText = beforeText + text + afterText;
+
+        // Convert <style> tags to inline styles for Shopify compatibility
+        const processedText = convertStyleTagsToInline(text);
+
+        const newText = beforeText + processedText + afterText;
         handleChange('content_html', newText);
-        setSuccessMessage('Đã dán nội dung từ clipboard');
-        setTimeout(() => setSuccessMessage(''), 2000);
+
+        // Show appropriate message
+        if (text.includes('<style')) {
+          setSuccessMessage('Đã dán và chuyển đổi <style> thành inline styles');
+        } else {
+          setSuccessMessage('Đã dán nội dung từ clipboard');
+        }
+        setTimeout(() => setSuccessMessage(''), 3000);
       }
     } catch (err) {
       console.error('[LessonEditor] Paste error:', err);
@@ -2041,93 +2322,86 @@ export default function LessonEditor() {
     });
   }, []);
 
-  // Update resize overlay position on scroll/resize
-  useEffect(() => {
-    if (!resizeOverlay?.element) return;
-
-    const updatePosition = () => {
-      if (resizeOverlay.element && resizeOverlay.element.isConnected) {
-        const rect = resizeOverlay.element.getBoundingClientRect();
-        setResizeOverlay(prev => ({
-          ...prev,
-          x: rect.left,
-          y: rect.top,
-          width: rect.width,
-          height: rect.height
-        }));
-      } else {
-        // Element was removed from DOM
-        setResizeOverlay(null);
-      }
-    };
-
-    // Listen to scroll on both editor panels and window
-    const editorPanel = document.querySelector('.editor-content-panel');
-    const handleScroll = () => requestAnimationFrame(updatePosition);
-
-    window.addEventListener('scroll', handleScroll, true);
-    window.addEventListener('resize', handleScroll);
-    if (editorPanel) {
-      editorPanel.addEventListener('scroll', handleScroll);
-    }
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll, true);
-      window.removeEventListener('resize', handleScroll);
-      if (editorPanel) {
-        editorPanel.removeEventListener('scroll', handleScroll);
-      }
-    };
-  }, [resizeOverlay?.element]);
+  // DISABLED: Resize overlay scroll tracking - causes performance issues
+  // The resize overlay feature is disabled anyway (see render section with {false && ...})
+  // Removing these scroll listeners significantly improves scroll performance
 
   // ═══════════════════════════════════════════════════════════
-  // AUTO-SCROLL WHILE DRAGGING - Scroll editor when near edges
+  // AUTO-SCROLL WHILE DRAGGING - OPTIMIZED with throttling
   // ═══════════════════════════════════════════════════════════
-  const autoScrollIntervalRef = useRef(null);
+  const autoScrollRafRef = useRef(null);
+  const scrollDirectionFSRef = useRef(null); // 'up', 'down', or null
+  const lastDragOverTimeFS = useRef(0);
+  const cachedEditorPanelRef = useRef(null);
+  const cachedRectRef = useRef(null);
 
   useEffect(() => {
     if (!isFullscreen) return;
 
+    // Cache the editor panel reference
+    cachedEditorPanelRef.current = document.querySelector('.editor-content-panel');
+
     const handleGlobalDragOver = (e) => {
-      // Find the editor content panel
-      const editorPanel = document.querySelector('.editor-content-panel');
+      // THROTTLE: Only process every 50ms
+      const now = Date.now();
+      if (now - lastDragOverTimeFS.current < 50) return;
+      lastDragOverTimeFS.current = now;
+
+      const editorPanel = cachedEditorPanelRef.current;
       if (!editorPanel) return;
 
-      const rect = editorPanel.getBoundingClientRect();
-      const scrollSpeed = 12;
-      const edgeThreshold = 80;
+      // Cache rect and only update every 100ms
+      if (!cachedRectRef.current || now % 100 < 50) {
+        cachedRectRef.current = editorPanel.getBoundingClientRect();
+      }
+      const rect = cachedRectRef.current;
 
-      // Clear existing interval
-      if (autoScrollIntervalRef.current) {
-        clearInterval(autoScrollIntervalRef.current);
-        autoScrollIntervalRef.current = null;
+      const scrollSpeed = 4; // Reduced from 12
+      const edgeThreshold = 60; // Reduced from 80
+
+      // Determine scroll direction
+      let newDirection = null;
+      if (e.clientX >= rect.left && e.clientX <= rect.right) {
+        if (e.clientY < rect.top + edgeThreshold && e.clientY > rect.top - 50) {
+          newDirection = 'up';
+        } else if (e.clientY > rect.bottom - edgeThreshold && e.clientY < rect.bottom + 50) {
+          newDirection = 'down';
+        }
       }
 
-      // Check if mouse is within editor panel horizontally
-      if (e.clientX >= rect.left && e.clientX <= rect.right) {
-        // Near top edge - scroll up
-        if (e.clientY < rect.top + edgeThreshold && e.clientY > rect.top - 50) {
-          autoScrollIntervalRef.current = setInterval(() => {
-            editorPanel.scrollTop -= scrollSpeed;
-          }, 16);
+      // Only update if direction changed
+      if (newDirection !== scrollDirectionFSRef.current) {
+        if (autoScrollRafRef.current) {
+          cancelAnimationFrame(autoScrollRafRef.current);
+          autoScrollRafRef.current = null;
         }
-        // Near bottom edge - scroll down
-        else if (e.clientY > rect.bottom - edgeThreshold && e.clientY < rect.bottom + 50) {
-          autoScrollIntervalRef.current = setInterval(() => {
-            editorPanel.scrollTop += scrollSpeed;
-          }, 16);
+        scrollDirectionFSRef.current = newDirection;
+
+        // Start smooth scroll with requestAnimationFrame
+        if (newDirection) {
+          const doScroll = () => {
+            if (!scrollDirectionFSRef.current || !cachedEditorPanelRef.current) return;
+            if (scrollDirectionFSRef.current === 'up') {
+              cachedEditorPanelRef.current.scrollTop -= scrollSpeed;
+            } else {
+              cachedEditorPanelRef.current.scrollTop += scrollSpeed;
+            }
+            autoScrollRafRef.current = requestAnimationFrame(doScroll);
+          };
+          autoScrollRafRef.current = requestAnimationFrame(doScroll);
         }
       }
     };
 
     const handleGlobalDragEnd = () => {
-      if (autoScrollIntervalRef.current) {
-        clearInterval(autoScrollIntervalRef.current);
-        autoScrollIntervalRef.current = null;
+      if (autoScrollRafRef.current) {
+        cancelAnimationFrame(autoScrollRafRef.current);
+        autoScrollRafRef.current = null;
       }
+      scrollDirectionFSRef.current = null;
     };
 
-    document.addEventListener('dragover', handleGlobalDragOver);
+    document.addEventListener('dragover', handleGlobalDragOver, { passive: true });
     document.addEventListener('dragend', handleGlobalDragEnd);
     document.addEventListener('drop', handleGlobalDragEnd);
 
@@ -2135,9 +2409,11 @@ export default function LessonEditor() {
       document.removeEventListener('dragover', handleGlobalDragOver);
       document.removeEventListener('dragend', handleGlobalDragEnd);
       document.removeEventListener('drop', handleGlobalDragEnd);
-      if (autoScrollIntervalRef.current) {
-        clearInterval(autoScrollIntervalRef.current);
+      if (autoScrollRafRef.current) {
+        cancelAnimationFrame(autoScrollRafRef.current);
       }
+      cachedEditorPanelRef.current = null;
+      cachedRectRef.current = null;
     };
   }, [isFullscreen]);
 
@@ -2160,7 +2436,8 @@ export default function LessonEditor() {
     const isDropZone = (element) => {
       // Check if element or parent is a designated drop zone
       return element?.closest('.fullscreen-images-panel') ||
-             element?.closest('.sidebar-images-panel') ||
+             element?.closest('.sidebar-images-panel-inner') ||
+             element?.closest('.images-sidebar') ||
              element?.closest('.wysiwyg-editor') ||
              element?.closest('.html-preview');
     };
@@ -2173,8 +2450,10 @@ export default function LessonEditor() {
     };
 
     const handleDragOver = (e) => {
-      // Only prevent default if dragging files - this prevents browser opening file
-      if (hasFiles(e)) {
+      // Prevent default for files AND JSON data (from Image Panel)
+      // This is REQUIRED for drop event to fire on contentEditable!
+      const hasJsonData = e.dataTransfer?.types?.includes('application/json');
+      if (hasFiles(e) || hasJsonData) {
         e.preventDefault();
         e.dataTransfer.dropEffect = 'copy';
       }
@@ -2190,14 +2469,21 @@ export default function LessonEditor() {
 
     const handleDrop = (e) => {
       // Check if dropped on a valid drop zone
-      if (hasFiles(e) && !isDropZone(e.target)) {
+      const inDropZone = isDropZone(e.target);
+      console.log('[GlobalDrag] Drop detected, inDropZone:', inDropZone, 'target:', e.target?.className);
+
+      if (hasFiles(e) && !inDropZone) {
         // Dropped outside drop zones - prevent browser opening file
         e.preventDefault();
         console.log('[GlobalDrag] Drop outside drop zone - prevented');
+        // Reset state immediately for outside drops
+        dragCounter = 0;
+        setIsDraggingFile(false);
+      } else {
+        // Inside drop zone - delay state reset to let target handler run first
+        dragCounter = 0;
+        // Don't reset isDraggingFile here - let the target handler do it
       }
-      // Reset state
-      dragCounter = 0;
-      setIsDraggingFile(false);
     };
 
     // Add listeners to document - use capture phase for early detection
@@ -2826,14 +3112,14 @@ export default function LessonEditor() {
                             />
                           )
                         ) : (
-                          /* WYSIWYG Editor */
+                          /* WYSIWYG Editor - NO dangerouslySetInnerHTML to prevent React overwriting user edits */
+                          /* innerHTML is managed by useLayoutEffect for full control */
                           <div
                             key={`editor-${lessonId}`}
                             ref={setWysiwygEditorRef}
                             className={`html-preview wysiwyg-editor ${isDraggingOverEditor ? 'drag-over' : ''}`}
                             contentEditable
                             suppressContentEditableWarning
-                            dangerouslySetInnerHTML={{ __html: formData.content_html || '' }}
                             onMouseDown={(e) => {
                               // Use mousedown for more reliable element selection
                               const target = e.target;
@@ -3076,14 +3362,36 @@ export default function LessonEditor() {
                                 }
                                 if (selectedEl) {
                                   e.preventDefault();
+
+                                  // ═══ SAVE SCROLL POSITIONS BEFORE DELETE ═══
+                                  // This prevents layout shift when element is removed
+                                  const editor = e.currentTarget;
+                                  const editorScrollTop = editor.scrollTop;
+                                  const editorScrollLeft = editor.scrollLeft;
+                                  const parentScrollTop = editor.parentElement?.scrollTop || 0;
+                                  const windowScrollY = window.scrollY;
+                                  const windowScrollX = window.scrollX;
+
                                   forceSaveToUndo();
                                   selectedEl.remove();
                                   selectedElementPathRef.current = null; // Clear path ref
                                   // Sync changes (mark as internal edit to prevent scroll jump)
-                                  const newHtml = e.currentTarget.innerHTML;
+                                  const newHtml = editor.innerHTML;
                                   isInternalEditRef.current = true;
                                   lastContentFromEditorRef.current = newHtml;
                                   handleChange('content_html', newHtml);
+
+                                  // ═══ RESTORE SCROLL POSITIONS AFTER DELETE ═══
+                                  // Use requestAnimationFrame to restore after React re-render
+                                  requestAnimationFrame(() => {
+                                    editor.scrollTop = editorScrollTop;
+                                    editor.scrollLeft = editorScrollLeft;
+                                    if (editor.parentElement) {
+                                      editor.parentElement.scrollTop = parentScrollTop;
+                                    }
+                                    window.scrollTo(windowScrollX, windowScrollY);
+                                  });
+
                                   setSuccessMessage('Đã xóa phần tử');
                                   setTimeout(() => setSuccessMessage(''), 1500);
                                 }
@@ -3151,8 +3459,11 @@ export default function LessonEditor() {
                             onDragOver={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              // Allow copy/move operations
-                              e.dataTransfer.dropEffect = e.dataTransfer.types.includes('application/x-toolbox-item') ? 'copy' : 'move';
+                              // Allow copy/move operations - use 'copy' for images and toolbox items
+                              const isToolbox = e.dataTransfer.types.includes('application/x-toolbox-item');
+                              const isImageFromPanel = e.dataTransfer.types.includes('application/json');
+                              const isInternalMove = e.dataTransfer.types.includes('application/x-internal-element');
+                              e.dataTransfer.dropEffect = isInternalMove ? 'move' : 'copy';
                               setIsDraggingOverEditor(true);
                             }}
                             onDragEnter={(e) => {
@@ -3989,6 +4300,34 @@ export default function LessonEditor() {
                                     </button>
                                     <button
                                       type="button"
+                                      className="btn-download-img"
+                                      onClick={async (e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        try {
+                                          const response = await fetch(img.image_url);
+                                          const blob = await response.blob();
+                                          const url = window.URL.createObjectURL(blob);
+                                          const a = document.createElement('a');
+                                          a.href = url;
+                                          a.download = img.position_id || 'image';
+                                          document.body.appendChild(a);
+                                          a.click();
+                                          window.URL.revokeObjectURL(url);
+                                          document.body.removeChild(a);
+                                          setSuccessMessage('Đang tải về...');
+                                          setTimeout(() => setSuccessMessage(''), 1500);
+                                        } catch (err) {
+                                          console.error('Download failed:', err);
+                                          setError('Không thể tải về');
+                                        }
+                                      }}
+                                      title="Tải về"
+                                    >
+                                      <Download size={12} />
+                                    </button>
+                                    <button
+                                      type="button"
                                       className="btn-delete-img"
                                       onClick={async (e) => {
                                         e.preventDefault();
@@ -4142,13 +4481,13 @@ export default function LessonEditor() {
                       )
                     ) : (
                       /* WYSIWYG Editor - Non-fullscreen mode */
+                      /* NO dangerouslySetInnerHTML - innerHTML managed by useLayoutEffect */
                       <div
                         key={`editor2-${lessonId}`}
                         ref={setWysiwygEditorRef2}
                         className={`html-preview wysiwyg-editor ${isDraggingOverEditor ? 'drag-over' : ''}`}
                         contentEditable
                         suppressContentEditableWarning
-                        dangerouslySetInnerHTML={{ __html: formData.content_html || '' }}
                         onMouseDown={(e) => {
                           const target = e.target;
                           const container = e.currentTarget;
@@ -4403,13 +4742,35 @@ export default function LessonEditor() {
                             }
                             if (selectedEl) {
                               e.preventDefault();
+
+                              // ═══ SAVE SCROLL POSITIONS BEFORE DELETE ═══
+                              // This prevents layout shift when element is removed
+                              const editor = e.currentTarget;
+                              const editorScrollTop = editor.scrollTop;
+                              const editorScrollLeft = editor.scrollLeft;
+                              const parentScrollTop = editor.parentElement?.scrollTop || 0;
+                              const windowScrollY = window.scrollY;
+                              const windowScrollX = window.scrollX;
+
                               forceSaveToUndo();
                               selectedEl.remove();
                               selectedElementPathRef.current = null;
-                              const newHtml = e.currentTarget.innerHTML;
+                              const newHtml = editor.innerHTML;
                               isInternalEditRef.current = true;
                               lastContentFromEditorRef.current = newHtml;
                               handleChange('content_html', newHtml);
+
+                              // ═══ RESTORE SCROLL POSITIONS AFTER DELETE ═══
+                              // Use requestAnimationFrame to restore after React re-render
+                              requestAnimationFrame(() => {
+                                editor.scrollTop = editorScrollTop;
+                                editor.scrollLeft = editorScrollLeft;
+                                if (editor.parentElement) {
+                                  editor.parentElement.scrollTop = parentScrollTop;
+                                }
+                                window.scrollTo(windowScrollX, windowScrollY);
+                              });
+
                               setSuccessMessage('Đã xóa phần tử');
                               setTimeout(() => setSuccessMessage(''), 1500);
                             }
@@ -4433,7 +4794,9 @@ export default function LessonEditor() {
                         onDragOver={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          e.dataTransfer.dropEffect = e.dataTransfer.types.includes('application/x-toolbox-item') ? 'copy' : 'move';
+                          // Allow copy/move operations - use 'copy' for images and toolbox items
+                          const isInternalMove = e.dataTransfer.types.includes('application/x-internal-element');
+                          e.dataTransfer.dropEffect = isInternalMove ? 'move' : 'copy';
                           setIsDraggingOverEditor(true);
                         }}
                         onDragEnter={(e) => {
@@ -4638,36 +5001,112 @@ export default function LessonEditor() {
                                 selectedEl.classList?.contains('lesson-image') ||
                                 selectedEl.classList?.contains('image-placeholder') ||
                                 selectedEl.classList?.contains('circle-placeholder') ||
-                                selectedEl.classList?.contains('banner-placeholder')
+                                selectedEl.classList?.contains('banner-placeholder') ||
+                                selectedEl.classList?.contains('vertical-placeholder') ||
+                                selectedEl.classList?.contains('square-placeholder') ||
+                                selectedEl.classList?.contains('background-placeholder') ||
+                                (selectedEl.className && typeof selectedEl.className === 'string' && selectedEl.className.includes('placeholder'))
                               ) {
                                 // For circle placeholder - REPLACE with circular image in wrapper
                                 if (selectedEl.classList?.contains('circle-placeholder')) {
                                   const size = selectedEl.style.width || '150px';
+                                  const container = document.createElement('div');
+                                  container.style.cssText = `display: block; width: 100%; text-align: center;`;
                                   const wrapper = document.createElement('div');
-                                  wrapper.style.cssText = `width: ${size}; height: ${size}; border-radius: 50%; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.2); display: block; margin: 0 auto;`;
-                                          // Wrap in spacing container for Shopify compatibility
-                                          const spacer = document.createElement('div');
-                                          spacer.style.cssText = `padding: 16px 0 40px 0; display: block; width: 100%;`;
-                                          spacer.appendChild(wrapper);
-                                          current.parentNode.replaceChild(spacer, current);
+                                  wrapper.style.cssText = `width: ${size}; height: ${size}; border-radius: 50%; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.2); display: inline-block; margin: 16px auto 40px auto;`;
                                   wrapper.className = 'circle-image-wrapper';
                                   newImg.style.cssText = `width: 100%; height: 100%; object-fit: cover; display: block;`;
                                   wrapper.appendChild(newImg);
-                                  selectedEl.parentNode.replaceChild(wrapper, selectedEl);
+                                  container.appendChild(wrapper);
+                                  const spacerDiv = document.createElement('div');
+                                  spacerDiv.style.cssText = `display: block; width: 100%; height: 40px; min-height: 40px; line-height: 40px; font-size: 1px; clear: both;`;
+                                  spacerDiv.innerHTML = '&nbsp;';
+                                  container.appendChild(spacerDiv);
+                                  selectedEl.parentNode.replaceChild(container, selectedEl);
                                   inserted = true;
                                   setSuccessMessage('✅ Đã thay thế avatar tròn');
                                 }
                                 // For banner placeholder - REPLACE with 16:9 image in wrapper
                                 else if (selectedEl.classList?.contains('banner-placeholder')) {
                                   const maxW = selectedEl.style.maxWidth || '800px';
+                                  const container = document.createElement('div');
+                                  container.style.cssText = `display: block; width: 100%;`;
                                   const wrapper = document.createElement('div');
-                                  wrapper.style.cssText = `width: 100%; max-width: ${maxW}; aspect-ratio: 16/9; overflow: hidden; margin-top: 16px; margin-left: auto; margin-right: auto; margin-bottom: 40px; padding-bottom: 0; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.2); display: block;`;
+                                  wrapper.style.cssText = `width: 100%; max-width: ${maxW}; aspect-ratio: 16/9; overflow: hidden; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.2); display: block; margin: 16px auto 40px auto;`;
                                   wrapper.className = 'banner-image-wrapper';
                                   newImg.style.cssText = `width: 100%; height: 100%; object-fit: cover; display: block;`;
                                   wrapper.appendChild(newImg);
-                                  selectedEl.parentNode.replaceChild(wrapper, selectedEl);
+                                  container.appendChild(wrapper);
+                                  const spacerDiv = document.createElement('div');
+                                  spacerDiv.style.cssText = `display: block; width: 100%; height: 40px; min-height: 40px; line-height: 40px; font-size: 1px; clear: both;`;
+                                  spacerDiv.innerHTML = '&nbsp;';
+                                  container.appendChild(spacerDiv);
+                                  selectedEl.parentNode.replaceChild(container, selectedEl);
                                   inserted = true;
                                   setSuccessMessage('✅ Đã thay thế banner 16:9');
+                                }
+                                // For vertical placeholder - REPLACE with 9:16 image in wrapper
+                                else if (selectedEl.classList?.contains('vertical-placeholder')) {
+                                  const maxW = selectedEl.style.maxWidth || '450px';
+                                  const container = document.createElement('div');
+                                  container.style.cssText = `display: block; width: 100%;`;
+                                  const wrapper = document.createElement('div');
+                                  wrapper.style.cssText = `width: 100%; max-width: ${maxW}; aspect-ratio: 9/16; overflow: hidden; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.2); display: block; margin: 16px auto 40px auto;`;
+                                  wrapper.className = 'vertical-image-wrapper';
+                                  newImg.style.cssText = `width: 100%; height: 100%; object-fit: cover; display: block;`;
+                                  wrapper.appendChild(newImg);
+                                  container.appendChild(wrapper);
+                                  const spacerDiv = document.createElement('div');
+                                  spacerDiv.style.cssText = `display: block; width: 100%; height: 40px; min-height: 40px; line-height: 40px; font-size: 1px; clear: both;`;
+                                  spacerDiv.innerHTML = '&nbsp;';
+                                  container.appendChild(spacerDiv);
+                                  selectedEl.parentNode.replaceChild(container, selectedEl);
+                                  inserted = true;
+                                  setSuccessMessage('✅ Đã thay thế hình dọc 9:16');
+                                }
+                                // For square placeholder - REPLACE with 1:1 image in wrapper
+                                else if (selectedEl.classList?.contains('square-placeholder')) {
+                                  const maxW = selectedEl.style.maxWidth || '500px';
+                                  const container = document.createElement('div');
+                                  container.style.cssText = `display: block; width: 100%;`;
+                                  const wrapper = document.createElement('div');
+                                  wrapper.style.cssText = `width: 100%; max-width: ${maxW}; aspect-ratio: 1/1; overflow: hidden; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.2); display: block; margin: 16px auto 40px auto;`;
+                                  wrapper.className = 'square-image-wrapper';
+                                  newImg.style.cssText = `width: 100%; height: 100%; object-fit: cover; display: block;`;
+                                  wrapper.appendChild(newImg);
+                                  container.appendChild(wrapper);
+                                  const spacerDiv = document.createElement('div');
+                                  spacerDiv.style.cssText = `display: block; width: 100%; height: 40px; min-height: 40px; line-height: 40px; font-size: 1px; clear: both;`;
+                                  spacerDiv.innerHTML = '&nbsp;';
+                                  container.appendChild(spacerDiv);
+                                  selectedEl.parentNode.replaceChild(container, selectedEl);
+                                  inserted = true;
+                                  setSuccessMessage('✅ Đã thay thế hình vuông 1:1');
+                                }
+                                // For background placeholder - REPLACE with background section
+                                else if (selectedEl.classList?.contains('background-placeholder')) {
+                                  const minH = selectedEl.style.minHeight || '400px';
+                                  const section = document.createElement('section');
+                                  section.className = 'background-section';
+                                  section.style.cssText = `position: relative; width: 100%; min-height: ${minH}; background-image: url('${imageUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat; border-radius: 16px; overflow: hidden; margin: 16px 0 40px 0;`;
+                                  const overlay = document.createElement('div');
+                                  overlay.className = 'background-overlay';
+                                  overlay.style.cssText = `position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%); z-index: 1;`;
+                                  section.appendChild(overlay);
+                                  const content = document.createElement('div');
+                                  content.className = 'background-content';
+                                  content.style.cssText = `position: relative; z-index: 2; padding: 60px 40px; text-align: center;`;
+                                  content.innerHTML = '<h2 style="color: #fff; font-size: 2rem; font-weight: 700; margin-bottom: 16px; text-shadow: 0 2px 8px rgba(0,0,0,0.5);">Tiêu đề Section</h2><p style="color: rgba(255,255,255,0.9); font-size: 1.1rem; max-width: 600px; margin: 0 auto;">Mô tả nội dung của section này. Chỉnh sửa text này theo ý muốn.</p>';
+                                  section.appendChild(content);
+                                  const container = document.createElement('div');
+                                  container.appendChild(section);
+                                  const spacerDiv = document.createElement('div');
+                                  spacerDiv.style.cssText = `display: block; width: 100%; height: 40px; min-height: 40px; line-height: 40px; font-size: 1px; clear: both;`;
+                                  spacerDiv.innerHTML = '&nbsp;';
+                                  container.appendChild(spacerDiv);
+                                  selectedEl.parentNode.replaceChild(container, selectedEl);
+                                  inserted = true;
+                                  setSuccessMessage('✅ Đã thay thế background section');
                                 }
                                 // For other placeholders
                                 else {
@@ -4704,7 +5143,11 @@ export default function LessonEditor() {
                                     current.classList?.contains('lesson-image') ||
                                     current.classList?.contains('image-placeholder') ||
                                     current.classList?.contains('circle-placeholder') ||
-                                    current.classList?.contains('banner-placeholder');
+                                    current.classList?.contains('banner-placeholder') ||
+                                    current.classList?.contains('vertical-placeholder') ||
+                                    current.classList?.contains('square-placeholder') ||
+                                    current.classList?.contains('background-placeholder') ||
+                                    (current.className && typeof current.className === 'string' && current.className.includes('placeholder'));
 
                                   if (isPlaceholder) {
                                     const newImg = createNewImg();
@@ -4712,17 +5155,19 @@ export default function LessonEditor() {
                                     // For circle placeholder - REPLACE with circular image in wrapper
                                     if (current.classList?.contains('circle-placeholder')) {
                                       const size = current.style.width || '150px';
+                                      const container = document.createElement('div');
+                                      container.style.cssText = `display: block; width: 100%; text-align: center;`;
                                       const wrapper = document.createElement('div');
-                                      wrapper.style.cssText = `width: ${size}; height: ${size}; border-radius: 50%; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.2); display: block; margin: 0 auto;`;
-                                          // Wrap in spacing container for Shopify compatibility
-                                          const spacer = document.createElement('div');
-                                          spacer.style.cssText = `padding: 16px 0 40px 0; display: block; width: 100%;`;
-                                          spacer.appendChild(wrapper);
-                                          current.parentNode.replaceChild(spacer, current);
+                                      wrapper.style.cssText = `width: ${size}; height: ${size}; border-radius: 50%; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.2); display: inline-block; margin: 16px auto 40px auto;`;
                                       wrapper.className = 'circle-image-wrapper';
                                       newImg.style.cssText = `width: 100%; height: 100%; object-fit: cover; display: block;`;
                                       wrapper.appendChild(newImg);
-                                      current.parentNode.replaceChild(wrapper, current);
+                                      container.appendChild(wrapper);
+                                      const spacerDiv = document.createElement('div');
+                                      spacerDiv.style.cssText = `display: block; width: 100%; height: 40px; min-height: 40px; line-height: 40px; font-size: 1px; clear: both;`;
+                                      spacerDiv.innerHTML = '&nbsp;';
+                                      container.appendChild(spacerDiv);
+                                      current.parentNode.replaceChild(container, current);
                                       inserted = true;
                                       setSuccessMessage('✅ Đã thay thế avatar tròn');
                                       break;
@@ -4730,14 +5175,87 @@ export default function LessonEditor() {
                                     // For banner placeholder - REPLACE with 16:9 image in wrapper
                                     else if (current.classList?.contains('banner-placeholder')) {
                                       const maxW = current.style.maxWidth || '800px';
+                                      const container = document.createElement('div');
+                                      container.style.cssText = `display: block; width: 100%;`;
                                       const wrapper = document.createElement('div');
-                                      wrapper.style.cssText = `width: 100%; max-width: ${maxW}; aspect-ratio: 16/9; overflow: hidden; margin-top: 16px; margin-left: auto; margin-right: auto; margin-bottom: 40px; padding-bottom: 0; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.2); display: block;`;
+                                      wrapper.style.cssText = `width: 100%; max-width: ${maxW}; aspect-ratio: 16/9; overflow: hidden; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.2); display: block; margin: 16px auto 40px auto;`;
                                       wrapper.className = 'banner-image-wrapper';
                                       newImg.style.cssText = `width: 100%; height: 100%; object-fit: cover; display: block;`;
                                       wrapper.appendChild(newImg);
-                                      current.parentNode.replaceChild(wrapper, current);
+                                      container.appendChild(wrapper);
+                                      const spacerDiv = document.createElement('div');
+                                      spacerDiv.style.cssText = `display: block; width: 100%; height: 40px; min-height: 40px; line-height: 40px; font-size: 1px; clear: both;`;
+                                      spacerDiv.innerHTML = '&nbsp;';
+                                      container.appendChild(spacerDiv);
+                                      current.parentNode.replaceChild(container, current);
                                       inserted = true;
                                       setSuccessMessage('✅ Đã thay thế banner 16:9');
+                                      break;
+                                    }
+                                    // For vertical placeholder - REPLACE with 9:16 image in wrapper
+                                    else if (current.classList?.contains('vertical-placeholder')) {
+                                      const maxW = current.style.maxWidth || '450px';
+                                      const container = document.createElement('div');
+                                      container.style.cssText = `display: block; width: 100%;`;
+                                      const wrapper = document.createElement('div');
+                                      wrapper.style.cssText = `width: 100%; max-width: ${maxW}; aspect-ratio: 9/16; overflow: hidden; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.2); display: block; margin: 16px auto 40px auto;`;
+                                      wrapper.className = 'vertical-image-wrapper';
+                                      newImg.style.cssText = `width: 100%; height: 100%; object-fit: cover; display: block;`;
+                                      wrapper.appendChild(newImg);
+                                      container.appendChild(wrapper);
+                                      const spacerDiv = document.createElement('div');
+                                      spacerDiv.style.cssText = `display: block; width: 100%; height: 40px; min-height: 40px; line-height: 40px; font-size: 1px; clear: both;`;
+                                      spacerDiv.innerHTML = '&nbsp;';
+                                      container.appendChild(spacerDiv);
+                                      current.parentNode.replaceChild(container, current);
+                                      inserted = true;
+                                      setSuccessMessage('✅ Đã thay thế hình dọc 9:16');
+                                      break;
+                                    }
+                                    // For square placeholder - REPLACE with 1:1 image in wrapper
+                                    else if (current.classList?.contains('square-placeholder')) {
+                                      const maxW = current.style.maxWidth || '500px';
+                                      const container = document.createElement('div');
+                                      container.style.cssText = `display: block; width: 100%;`;
+                                      const wrapper = document.createElement('div');
+                                      wrapper.style.cssText = `width: 100%; max-width: ${maxW}; aspect-ratio: 1/1; overflow: hidden; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.2); display: block; margin: 16px auto 40px auto;`;
+                                      wrapper.className = 'square-image-wrapper';
+                                      newImg.style.cssText = `width: 100%; height: 100%; object-fit: cover; display: block;`;
+                                      wrapper.appendChild(newImg);
+                                      container.appendChild(wrapper);
+                                      const spacerDiv = document.createElement('div');
+                                      spacerDiv.style.cssText = `display: block; width: 100%; height: 40px; min-height: 40px; line-height: 40px; font-size: 1px; clear: both;`;
+                                      spacerDiv.innerHTML = '&nbsp;';
+                                      container.appendChild(spacerDiv);
+                                      current.parentNode.replaceChild(container, current);
+                                      inserted = true;
+                                      setSuccessMessage('✅ Đã thay thế hình vuông 1:1');
+                                      break;
+                                    }
+                                    // For background placeholder - REPLACE with background section
+                                    else if (current.classList?.contains('background-placeholder')) {
+                                      const minH = current.style.minHeight || '400px';
+                                      const section = document.createElement('section');
+                                      section.className = 'background-section';
+                                      section.style.cssText = `position: relative; width: 100%; min-height: ${minH}; background-image: url('${imageUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat; border-radius: 16px; overflow: hidden; margin: 16px 0 40px 0;`;
+                                      const overlay = document.createElement('div');
+                                      overlay.className = 'background-overlay';
+                                      overlay.style.cssText = `position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%); z-index: 1;`;
+                                      section.appendChild(overlay);
+                                      const content = document.createElement('div');
+                                      content.className = 'background-content';
+                                      content.style.cssText = `position: relative; z-index: 2; padding: 60px 40px; text-align: center;`;
+                                      content.innerHTML = '<h2 style="color: #fff; font-size: 2rem; font-weight: 700; margin-bottom: 16px; text-shadow: 0 2px 8px rgba(0,0,0,0.5);">Tiêu đề Section</h2><p style="color: rgba(255,255,255,0.9); font-size: 1.1rem; max-width: 600px; margin: 0 auto;">Mô tả nội dung của section này. Chỉnh sửa text này theo ý muốn.</p>';
+                                      section.appendChild(content);
+                                      const container = document.createElement('div');
+                                      container.appendChild(section);
+                                      const spacerDiv = document.createElement('div');
+                                      spacerDiv.style.cssText = `display: block; width: 100%; height: 40px; min-height: 40px; line-height: 40px; font-size: 1px; clear: both;`;
+                                      spacerDiv.innerHTML = '&nbsp;';
+                                      container.appendChild(spacerDiv);
+                                      current.parentNode.replaceChild(container, current);
+                                      inserted = true;
+                                      setSuccessMessage('✅ Đã thay thế background section');
                                       break;
                                     }
                                     // For other placeholders (lesson-image, image-placeholder)
@@ -4917,18 +5435,94 @@ export default function LessonEditor() {
         </div>
 
         {/* Right Sidebar - Images Panel */}
-        <aside className="images-sidebar">
+        <aside
+          className={`images-sidebar ${isDraggingFile ? 'panel-dragging' : ''}`}
+          onDragEnter={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsDraggingFile(true);
+          }}
+          onDragOver={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            e.dataTransfer.dropEffect = 'copy';
+            setIsDraggingFile(true);
+          }}
+          onDragLeave={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const rect = e.currentTarget.getBoundingClientRect();
+            const isOutside = e.clientX < rect.left || e.clientX > rect.right ||
+                             e.clientY < rect.top || e.clientY > rect.bottom;
+            if (isOutside) {
+              setIsDraggingFile(false);
+            }
+          }}
+          onDrop={async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsDraggingFile(false);
+            console.log('[Sidebar Aside Drop] Drop event received');
+
+            if (!lessonId || lessonId === 'new') {
+              setError('Lưu bài học trước khi upload hình');
+              return;
+            }
+
+            const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+            console.log('[Sidebar Aside Drop] Files found:', files.length, files);
+
+            if (files.length === 0) {
+              const imageUrl = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
+              console.log('[Sidebar Aside Drop] No files, URL:', imageUrl);
+              if (imageUrl && /\.(png|jpg|jpeg|gif|webp)/i.test(imageUrl)) {
+                setError('Kéo file từ máy tính, không phải từ trình duyệt');
+              } else {
+                setError('Không tìm thấy file hình ảnh');
+              }
+              return;
+            }
+
+            setSuccessMessage(`Đang upload ${files.length} hình...`);
+
+            for (const file of files) {
+              try {
+                const positionId = courseImageService.generatePositionId(file.name);
+                const { data, error } = await courseImageService.uploadAndCreate(file, lessonId, { positionId });
+                if (error) throw error;
+                if (data) {
+                  setLessonImages(prev => [...prev, data]);
+                  setSuccessMessage(`Đã upload: ${file.name}`);
+                  setTimeout(() => setSuccessMessage(''), 2000);
+                }
+              } catch (err) {
+                console.error('Upload error:', err);
+                setError(`Lỗi upload: ${err.message}`);
+              }
+            }
+          }}
+        >
           <div
             className={`sidebar-images-panel-inner ${isDraggingFile ? 'panel-dragging' : ''}`}
+            onDragEnter={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsDraggingFile(true);
+            }}
             onDragOver={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              e.dataTransfer.dropEffect = 'copy';
               setIsDraggingFile(true);
             }}
             onDragLeave={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              if (!e.currentTarget.contains(e.relatedTarget)) {
+              // Only set false if leaving the panel entirely
+              const rect = e.currentTarget.getBoundingClientRect();
+              const isOutside = e.clientX < rect.left || e.clientX > rect.right ||
+                               e.clientY < rect.top || e.clientY > rect.bottom;
+              if (isOutside) {
                 setIsDraggingFile(false);
               }
             }}
@@ -4936,17 +5530,34 @@ export default function LessonEditor() {
               e.preventDefault();
               e.stopPropagation();
               setIsDraggingFile(false);
+              console.log('[Sidebar Inner Drop] ★★★ DROP EVENT ON INNER ★★★');
 
               if (!lessonId || lessonId === 'new') {
                 setError('Lưu bài học trước khi upload hình');
+                console.log('[Sidebar Drop] No lessonId');
                 return;
               }
 
               const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-              if (files.length === 0) return;
+              console.log('[Sidebar Inner Drop] Image files found:', files.length);
+
+              if (files.length === 0) {
+                // Check if it's an image from browser (URL)
+                const imageUrl = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
+                console.log('[Sidebar Inner Drop] No files, checking URL:', imageUrl);
+                if (imageUrl && (imageUrl.includes('.png') || imageUrl.includes('.jpg') || imageUrl.includes('.jpeg') || imageUrl.includes('.gif') || imageUrl.includes('.webp'))) {
+                  setError('Kéo file từ máy tính, không phải từ trình duyệt');
+                } else {
+                  setError('Không tìm thấy file hình ảnh');
+                }
+                return;
+              }
+
+              setSuccessMessage(`Đang upload ${files.length} hình...`);
 
               for (const file of files) {
                 try {
+                  console.log('[Sidebar Inner Drop] Uploading:', file.name);
                   const positionId = courseImageService.generatePositionId(file.name);
                   const { data, error } = await courseImageService.uploadAndCreate(file, lessonId, { positionId });
                   if (error) throw error;
@@ -5058,6 +5669,32 @@ export default function LessonEditor() {
                           >
                             {isCopied ? <Check size={10} /> : <Copy size={10} />}
                             {isCopied ? 'OK!' : 'Copy'}
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-download-img-small"
+                            onClick={async (e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              try {
+                                const response = await fetch(img.image_url);
+                                const blob = await response.blob();
+                                const url = window.URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = img.position_id || 'image';
+                                document.body.appendChild(a);
+                                a.click();
+                                window.URL.revokeObjectURL(url);
+                                document.body.removeChild(a);
+                              } catch (err) {
+                                console.error('Download failed:', err);
+                                setError('Không thể tải về');
+                              }
+                            }}
+                            title="Tải về"
+                          >
+                            <Download size={10} />
                           </button>
                           <button
                             type="button"
@@ -5392,6 +6029,59 @@ export default function LessonEditor() {
             <ClipboardPaste size={16} style={{ color: copiedElement ? '#00F0FF' : 'rgba(255,255,255,0.3)' }} />
             Paste {copiedElement ? '' : '(chưa copy)'}
           </button>
+          {/* Download Image - only show if element is or contains an image */}
+          {(() => {
+            const el = contextMenu.element;
+            const imgEl = el?.tagName === 'IMG' ? el : el?.querySelector('img');
+            if (!imgEl) return null;
+            return (
+              <button
+                onClick={async () => {
+                  try {
+                    const response = await fetch(imgEl.src);
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    // Get filename from src or use default
+                    const srcParts = imgEl.src.split('/');
+                    const filename = srcParts[srcParts.length - 1].split('?')[0] || 'image';
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    setSuccessMessage('Đang tải về...');
+                    setTimeout(() => setSuccessMessage(''), 1500);
+                  } catch (err) {
+                    console.error('Download failed:', err);
+                    setError('Không thể tải về');
+                  }
+                  setContextMenu({ visible: false, x: 0, y: 0, element: null });
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  width: '100%',
+                  padding: '10px 14px',
+                  background: 'transparent',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  transition: 'background 0.15s',
+                }}
+                onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'}
+                onMouseLeave={(e) => e.target.style.background = 'transparent'}
+              >
+                <Download size={16} style={{ color: '#3b82f6' }} />
+                Download Image
+              </button>
+            );
+          })()}
           <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '6px 0' }} />
           <button
             onClick={() => handleContextMenuAction('delete')}

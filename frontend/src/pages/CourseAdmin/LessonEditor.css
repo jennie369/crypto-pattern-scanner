@@ -382,6 +382,8 @@ body.editor-fullscreen-active > nav {
   flex-direction: column;
   gap: var(--space-5);
   overflow-y: auto;
+  /* CRITICAL: Disable scroll anchoring to prevent layout shifts */
+  overflow-anchor: none !important;
   padding-right: 4px;
 }
 
@@ -867,6 +869,21 @@ body.editor-fullscreen-active > nav {
   max-height: 100%;
   overflow-y: auto; /* THIS is the only element that scrolls */
   overflow-x: hidden;
+  /* CRITICAL: Disable scroll anchoring to prevent layout shifts on selection */
+  overflow-anchor: none !important;
+  /* PERFORMANCE: Layout containment and GPU acceleration */
+  contain: layout style;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: scroll-position;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* PERFORMANCE: Disable heavy effects inside scrollable editor */
+.fullscreen-editor-area .html-preview *,
+.fullscreen-editor-area .code-editor * {
+  /* Disable box-shadow transitions during scroll */
+  transition-property: color, background-color, border-color, opacity !important;
 }
 
 /* Fullscreen Outline Sidebar - Full height of parent */
@@ -1371,6 +1388,41 @@ body.editor-fullscreen-active > nav {
   transform: scale(0.95);
 }
 
+/* Download button for fullscreen panel */
+.btn-download-img {
+  padding: 4px 8px;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 4px;
+  color: #3b82f6;
+  font-size: 9px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-download-img svg {
+  width: 12px;
+  height: 12px;
+}
+
+.btn-download-img:hover {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+}
+
+.btn-download-img:active {
+  transform: scale(0.95);
+}
+
 /* Zoom overlay on image thumbnail */
 .image-panel-thumb {
   position: relative;
@@ -1626,6 +1678,30 @@ body.editor-fullscreen-active > nav {
   height: 10px;
 }
 
+/* Download button for sidebar panel */
+.btn-download-img-small {
+  padding: 4px 6px;
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 4px;
+  color: #3b82f6;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.btn-download-img-small:hover {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-download-img-small svg {
+  width: 10px;
+  height: 10px;
+}
+
 .btn-refresh-images {
   padding: 3px 6px;
   background: transparent;
@@ -1835,6 +1911,23 @@ body.editor-fullscreen-active > nav {
   overflow: visible; /* Allow resize handles and settings to show */
 }
 
+/* CRITICAL: Blocks list container - prevent layout shifts on selection */
+.blocks-list {
+  /* Disable scroll anchoring - prevents browser from "helping" keep elements in view */
+  overflow-anchor: none !important;
+
+  /* Create isolated layout context */
+  position: relative;
+
+  /* Don't let block selection affect parent layout */
+  min-height: 0;
+
+  /* Ensure stable rendering */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
 /* Block styles within the editor */
 .draggable-block-editor .block-content {
   color: var(--text-primary);
@@ -2029,9 +2122,17 @@ body.editor-fullscreen-active > nav {
   flex: 1;
   min-height: calc(100vh - 320px); /* Ensure editor is tall enough to see more content */
   overflow-y: auto;
+  /* CRITICAL: Disable scroll anchoring to prevent layout shifts on selection */
+  overflow-anchor: none !important;
   position: relative;
   /* Only transition visual properties, NOT layout-affecting ones */
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color 0.2s ease;
+  /* PERFORMANCE: Layout containment and GPU acceleration */
+  contain: layout style;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: scroll-position;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Disable ALL animations inside HTML preview/editor to make editing easier */
@@ -2054,6 +2155,81 @@ body.editor-fullscreen-active > nav {
 .html-preview.wysiwyg-editor {
   cursor: text;
   outline: none;
+}
+
+/* ═══ FORCE VISIBILITY - Override opacity:0 from pasted HTML animations ═══ */
+/* Many landing page templates use opacity:0 + animation for reveal effects */
+/* In editor, we need to see everything for editing */
+.html-preview.wysiwyg-editor * {
+  opacity: 1 !important;
+  animation-fill-mode: forwards !important;
+}
+
+/* But keep actual hidden elements hidden */
+.html-preview.wysiwyg-editor [hidden],
+.html-preview.wysiwyg-editor [style*="display: none"],
+.html-preview.wysiwyg-editor [style*="display:none"] {
+  opacity: 0 !important;
+}
+
+/* ═══ SPACER COMPONENTS - Visible in editor, transparent in Shopify ═══ */
+/* Simple div with height - Shopify keeps the height, editor shows visual indicator */
+.html-preview.wysiwyg-editor .spacer {
+  position: relative;
+  cursor: pointer !important;
+  z-index: 5 !important; /* Ensure clickable above other elements */
+  min-height: 20px; /* Minimum clickable area */
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255, 189, 89, 0.02),
+    rgba(255, 189, 89, 0.02) 10px,
+    rgba(255, 189, 89, 0.04) 10px,
+    rgba(255, 189, 89, 0.04) 20px
+  ) !important;
+  border: 1px dashed rgba(255, 189, 89, 0.15) !important;
+  border-radius: 4px;
+}
+
+.html-preview.wysiwyg-editor .spacer::after {
+  content: 'SPACING';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 9px;
+  font-weight: 600;
+  color: rgba(255, 189, 89, 0.35);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.html-preview.wysiwyg-editor .spacer-sm::after { content: 'S'; }
+.html-preview.wysiwyg-editor .spacer-md::after { content: 'M'; }
+.html-preview.wysiwyg-editor .spacer-lg::after { content: 'L'; }
+.html-preview.wysiwyg-editor .spacer-xl::after { content: 'XL'; }
+
+.html-preview.wysiwyg-editor .spacer:hover {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255, 189, 89, 0.04),
+    rgba(255, 189, 89, 0.04) 10px,
+    rgba(255, 189, 89, 0.08) 10px,
+    rgba(255, 189, 89, 0.08) 20px
+  ) !important;
+  border-color: rgba(255, 189, 89, 0.3) !important;
+}
+
+.html-preview.wysiwyg-editor .spacer.selected-for-delete {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(0, 217, 255, 0.04),
+    rgba(0, 217, 255, 0.04) 10px,
+    rgba(0, 217, 255, 0.08) 10px,
+    rgba(0, 217, 255, 0.08) 20px
+  ) !important;
+  border-color: #00D9FF !important;
 }
 
 /* ═══ DETAILS/SUMMARY TOGGLE SUPPORT ═══ */
@@ -3081,6 +3257,13 @@ body.editor-fullscreen-active > nav {
   height: 100%;
   overflow: hidden;
   position: relative;
+}
+
+/* Drop zone highlighting for images-sidebar */
+.images-sidebar.panel-dragging {
+  border-color: var(--brand-gold) !important;
+  background: rgba(255, 189, 89, 0.08) !important;
+  box-shadow: inset 0 0 40px rgba(255, 189, 89, 0.15), 0 0 20px rgba(255, 189, 89, 0.2);
 }
 
 .sidebar-images-panel-inner.panel-dragging {
