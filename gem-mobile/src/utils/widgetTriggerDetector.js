@@ -87,7 +87,7 @@ export const detectWidgetTrigger = (content) => {
         timestamp: Date.now(),
       },
       title: 'Lưu quẻ Dịch này?',
-      description: `Quẻ ${content.hexagramNumber}: ${content.vietnameseName}`,
+      description: `Quẻ ${content.hexagramNumber}: ${content.hexagramName || content.vietnameseName || ''}`,
     });
   }
 

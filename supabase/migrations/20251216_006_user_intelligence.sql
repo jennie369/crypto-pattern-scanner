@@ -156,6 +156,12 @@ CREATE TABLE IF NOT EXISTS ai_feature_usage_stats (
 -- 5. RPC FUNCTIONS
 -- ═══════════════════════════════════════════════════════════════════════════
 
+-- Drop existing functions first (for idempotent migration)
+DROP FUNCTION IF EXISTS track_user_event(UUID, TEXT, TEXT, TEXT, TEXT, JSONB, TEXT, TEXT);
+DROP FUNCTION IF EXISTS get_user_behavior_profile(UUID);
+DROP FUNCTION IF EXISTS calculate_engagement_score(UUID);
+DROP FUNCTION IF EXISTS batch_track_events(JSONB);
+
 -- Track user event
 CREATE OR REPLACE FUNCTION track_user_event(
   p_user_id UUID,
@@ -352,6 +358,14 @@ ALTER TABLE ai_user_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_user_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_user_sessions ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies first (for idempotent migration)
+DROP POLICY IF EXISTS "Users can view own events" ON ai_user_events;
+DROP POLICY IF EXISTS "Users can insert own events" ON ai_user_events;
+DROP POLICY IF EXISTS "Users can view own profile" ON ai_user_profiles;
+DROP POLICY IF EXISTS "Users can view own sessions" ON ai_user_sessions;
+DROP POLICY IF EXISTS "Admin can view all events" ON ai_user_events;
+DROP POLICY IF EXISTS "Admin can view all profiles" ON ai_user_profiles;
+
 -- Users can only see their own events
 CREATE POLICY "Users can view own events"
   ON ai_user_events FOR SELECT
@@ -395,6 +409,10 @@ CREATE POLICY "Admin can view all profiles"
 -- ═══════════════════════════════════════════════════════════════════════════
 -- 7. TRIGGERS
 -- ═══════════════════════════════════════════════════════════════════════════
+
+-- Drop existing trigger and function first
+DROP TRIGGER IF EXISTS trigger_ai_user_profiles_updated ON ai_user_profiles;
+DROP FUNCTION IF EXISTS update_ai_user_profiles_timestamp();
 
 -- Auto-update updated_at
 CREATE OR REPLACE FUNCTION update_ai_user_profiles_timestamp()

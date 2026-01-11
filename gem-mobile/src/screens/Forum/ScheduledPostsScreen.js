@@ -285,10 +285,10 @@ const ScheduledPostsScreen = ({ navigation }) => {
   );
 
   const filters = [
-    { key: 'pending', label: 'Cho dang' },
-    { key: 'published', label: 'Da dang' },
-    { key: 'cancelled', label: 'Da huy' },
-    { key: 'all', label: 'Tat ca' },
+    { key: 'pending', label: 'Chờ đăng' },
+    { key: 'published', label: 'Đã đăng' },
+    { key: 'cancelled', label: 'Đã hủy' },
+    { key: 'all', label: 'Tất cả' },
   ];
 
   return (

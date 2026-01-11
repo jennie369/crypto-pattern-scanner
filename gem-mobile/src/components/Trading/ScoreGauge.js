@@ -19,6 +19,20 @@ import { SCORE_COLORS, SCORE_THRESHOLDS } from '../../services/mindsetAdvisorSer
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
+// Animated Score Text component for smooth number animation
+const AnimatedScoreText = ({ animatedValue, style, color }) => {
+  const [displayScore, setDisplayScore] = React.useState(0);
+
+  React.useEffect(() => {
+    const listener = animatedValue.addListener(({ value }) => {
+      setDisplayScore(Math.round(value));
+    });
+    return () => animatedValue.removeListener(listener);
+  }, [animatedValue]);
+
+  return <Text style={[style, { color }]}>{displayScore}</Text>;
+};
+
 const ScoreGauge = ({
   score = 0,
   size = 180,
@@ -178,15 +192,17 @@ const ScoreGauge = ({
 
       {/* Center content */}
       <View style={styles.centerContent}>
-        <Animated.Text style={[styles.scoreText, { color: scoreColor }]}>
-          {animated
-            ? animatedScore.interpolate({
-                inputRange: [0, 100],
-                outputRange: ['0', '100'],
-                extrapolate: 'clamp',
-              })
-            : Math.round(score)}
-        </Animated.Text>
+        {animated ? (
+          <AnimatedScoreText
+            animatedValue={animatedScore}
+            style={styles.scoreText}
+            color={scoreColor}
+          />
+        ) : (
+          <Text style={[styles.scoreText, { color: scoreColor }]}>
+            {Math.round(score)}
+          </Text>
+        )}
         <Text style={[styles.statusText, { color: scoreColor }]}>{statusText}</Text>
 
         {/* Breakdown mini display */}
@@ -212,20 +228,6 @@ const ScoreGauge = ({
       </View>
     </View>
   );
-};
-
-// Animated Score Text component for smooth number animation
-const AnimatedScoreText = ({ animatedValue, style }) => {
-  const [displayScore, setDisplayScore] = React.useState(0);
-
-  useEffect(() => {
-    const listener = animatedValue.addListener(({ value }) => {
-      setDisplayScore(Math.round(value));
-    });
-    return () => animatedValue.removeListener(listener);
-  }, [animatedValue]);
-
-  return <Text style={style}>{displayScore}</Text>;
 };
 
 const styles = StyleSheet.create({

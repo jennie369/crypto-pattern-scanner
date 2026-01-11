@@ -664,7 +664,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: COLORS.bgDark,
+    backgroundColor: COLORS.bgDarkest,
     borderRadius: 16,
     padding: SPACING.xl,
     alignItems: 'center',

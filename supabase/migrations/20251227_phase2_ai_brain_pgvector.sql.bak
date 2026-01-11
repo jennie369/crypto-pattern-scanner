@@ -1,0 +1,453 @@
+-- =====================================================
+-- PHASE 2: AI BRAIN - PGVECTOR KNOWLEDGE BASE
+-- =====================================================
+-- Enable vector extension for semantic search
+-- Create knowledge base tables with embeddings
+-- Create FAQ system for quick responses
+-- =====================================================
+
+-- Enable pgvector extension
+CREATE EXTENSION IF NOT EXISTS vector;
+
+-- =====================================================
+-- KNOWLEDGE BASE TABLE
+-- Stores crystal knowledge, FAQ, and other data with embeddings
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS knowledge_base (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    -- Content
+    category TEXT NOT NULL CHECK (category IN (
+        'crystal', 'menh', 'zodiac', 'faq',
+        'care', 'authenticity', 'product', 'general'
+    )),
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    keywords TEXT[] DEFAULT '{}',
+
+    -- Embeddings (1536 dimensions for OpenAI, 768 for smaller models)
+    embedding vector(768),
+
+    -- Metadata
+    metadata JSONB DEFAULT '{}',
+    source TEXT DEFAULT 'manual',
+
+    -- Status
+    is_active BOOLEAN DEFAULT true,
+
+    -- Timestamps
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Index for semantic search
+CREATE INDEX IF NOT EXISTS knowledge_base_embedding_idx
+ON knowledge_base USING ivfflat (embedding vector_cosine_ops)
+WITH (lists = 100);
+
+-- Index for category filtering
+CREATE INDEX IF NOT EXISTS knowledge_base_category_idx ON knowledge_base(category);
+CREATE INDEX IF NOT EXISTS knowledge_base_keywords_idx ON knowledge_base USING GIN(keywords);
+
+-- =====================================================
+-- FAQ TABLE
+-- Quick responses for common questions
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS livestream_faq (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    -- Question
+    question TEXT NOT NULL,
+    question_variants TEXT[] DEFAULT '{}',
+    keywords TEXT[] NOT NULL DEFAULT '{}',
+
+    -- Answer
+    answer TEXT NOT NULL,
+    answer_short TEXT, -- For quick responses
+
+    -- Classification
+    intent TEXT NOT NULL DEFAULT 'QUESTION',
+    category TEXT NOT NULL DEFAULT 'general',
+
+    -- Embedding for semantic matching
+    embedding vector(768),
+
+    -- Response config
+    persona TEXT DEFAULT 'banthan',
+    tier INTEGER DEFAULT 1,
+
+    -- Priority
+    priority INTEGER DEFAULT 0,
+
+    -- Status
+    is_active BOOLEAN DEFAULT true,
+
+    -- Analytics
+    use_count INTEGER DEFAULT 0,
+    last_used_at TIMESTAMPTZ,
+
+    -- Timestamps
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Indexes
+CREATE INDEX IF NOT EXISTS faq_embedding_idx
+ON livestream_faq USING ivfflat (embedding vector_cosine_ops)
+WITH (lists = 50);
+CREATE INDEX IF NOT EXISTS faq_keywords_idx ON livestream_faq USING GIN(keywords);
+CREATE INDEX IF NOT EXISTS faq_category_idx ON livestream_faq(category);
+
+-- =====================================================
+-- AI RESPONSE LOGS
+-- Track AI responses for analytics and improvement
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS ai_response_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    -- Session context
+    session_id UUID REFERENCES livestream_sessions(id) ON DELETE SET NULL,
+    comment_id UUID REFERENCES livestream_comments(id) ON DELETE SET NULL,
+
+    -- Input
+    user_message TEXT NOT NULL,
+    user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+
+    -- Analysis
+    intent TEXT NOT NULL,
+    intent_confidence DECIMAL(3,2),
+    emotion TEXT NOT NULL,
+    emotion_confidence DECIMAL(3,2),
+    priority DECIMAL(3,2),
+
+    -- Response
+    response_text TEXT NOT NULL,
+    response_tier INTEGER NOT NULL CHECK (response_tier IN (1, 2, 3)),
+    persona TEXT NOT NULL,
+
+    -- Performance
+    latency_ms INTEGER NOT NULL,
+
+    -- Knowledge used
+    knowledge_ids UUID[] DEFAULT '{}',
+    faq_id UUID REFERENCES livestream_faq(id) ON DELETE SET NULL,
+
+    -- Quality (for future training)
+    feedback_score INTEGER CHECK (feedback_score BETWEEN 1 AND 5),
+    feedback_text TEXT,
+
+    -- Timestamps
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Indexes for analytics
+CREATE INDEX IF NOT EXISTS response_logs_session_idx ON ai_response_logs(session_id);
+CREATE INDEX IF NOT EXISTS response_logs_intent_idx ON ai_response_logs(intent);
+CREATE INDEX IF NOT EXISTS response_logs_tier_idx ON ai_response_logs(response_tier);
+CREATE INDEX IF NOT EXISTS response_logs_created_idx ON ai_response_logs(created_at);
+
+-- =====================================================
+-- USER KNOWLEDGE PROFILES
+-- Store user preferences and history for personalization
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS user_knowledge_profiles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+
+    -- Ngũ Hành
+    menh TEXT CHECK (menh IN ('kim', 'moc', 'thuy', 'hoa', 'tho')),
+    menh_nap_am TEXT,
+    birth_year INTEGER,
+
+    -- Zodiac
+    zodiac TEXT CHECK (zodiac IN (
+        'ty', 'suu', 'dan', 'mao', 'thin', 'ti',
+        'ngo', 'mui', 'than', 'dau', 'tuat', 'hoi'
+    )),
+
+    -- Preferences
+    favorite_crystals TEXT[] DEFAULT '{}',
+    interests TEXT[] DEFAULT '{}',
+
+    -- Emotional profile (learned over time)
+    emotional_profile JSONB DEFAULT '{
+        "dominant_emotions": [],
+        "avg_sentiment": 0.5,
+        "engagement_level": "medium"
+    }',
+
+    -- Purchase history
+    purchase_intents INTEGER DEFAULT 0,
+    purchases INTEGER DEFAULT 0,
+
+    -- Timestamps
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+    UNIQUE(user_id)
+);
+
+-- =====================================================
+-- FUNCTIONS FOR SEMANTIC SEARCH
+-- =====================================================
+
+-- Function to search knowledge base by embedding similarity
+CREATE OR REPLACE FUNCTION search_knowledge_by_embedding(
+    query_embedding vector(768),
+    match_threshold DECIMAL DEFAULT 0.7,
+    match_count INTEGER DEFAULT 5,
+    filter_category TEXT DEFAULT NULL
+)
+RETURNS TABLE (
+    id UUID,
+    category TEXT,
+    title TEXT,
+    content TEXT,
+    keywords TEXT[],
+    metadata JSONB,
+    similarity DECIMAL
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        kb.id,
+        kb.category,
+        kb.title,
+        kb.content,
+        kb.keywords,
+        kb.metadata,
+        (1 - (kb.embedding <=> query_embedding))::DECIMAL AS similarity
+    FROM knowledge_base kb
+    WHERE kb.is_active = true
+        AND (filter_category IS NULL OR kb.category = filter_category)
+        AND (1 - (kb.embedding <=> query_embedding)) > match_threshold
+    ORDER BY kb.embedding <=> query_embedding
+    LIMIT match_count;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to search FAQ by embedding
+CREATE OR REPLACE FUNCTION search_faq_by_embedding(
+    query_embedding vector(768),
+    match_threshold DECIMAL DEFAULT 0.7
+)
+RETURNS TABLE (
+    id UUID,
+    question TEXT,
+    answer TEXT,
+    answer_short TEXT,
+    intent TEXT,
+    category TEXT,
+    tier INTEGER,
+    similarity DECIMAL
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        f.id,
+        f.question,
+        f.answer,
+        f.answer_short,
+        f.intent,
+        f.category,
+        f.tier,
+        (1 - (f.embedding <=> query_embedding))::DECIMAL AS similarity
+    FROM livestream_faq f
+    WHERE f.is_active = true
+        AND (1 - (f.embedding <=> query_embedding)) > match_threshold
+    ORDER BY f.embedding <=> query_embedding
+    LIMIT 1;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to log AI response
+CREATE OR REPLACE FUNCTION log_ai_response(
+    p_session_id UUID,
+    p_comment_id UUID,
+    p_user_message TEXT,
+    p_user_id UUID,
+    p_intent TEXT,
+    p_intent_confidence DECIMAL,
+    p_emotion TEXT,
+    p_emotion_confidence DECIMAL,
+    p_priority DECIMAL,
+    p_response_text TEXT,
+    p_response_tier INTEGER,
+    p_persona TEXT,
+    p_latency_ms INTEGER,
+    p_knowledge_ids UUID[] DEFAULT '{}',
+    p_faq_id UUID DEFAULT NULL
+)
+RETURNS UUID AS $$
+DECLARE
+    v_log_id UUID;
+BEGIN
+    INSERT INTO ai_response_logs (
+        session_id, comment_id, user_message, user_id,
+        intent, intent_confidence, emotion, emotion_confidence, priority,
+        response_text, response_tier, persona, latency_ms,
+        knowledge_ids, faq_id
+    ) VALUES (
+        p_session_id, p_comment_id, p_user_message, p_user_id,
+        p_intent, p_intent_confidence, p_emotion, p_emotion_confidence, p_priority,
+        p_response_text, p_response_tier, p_persona, p_latency_ms,
+        p_knowledge_ids, p_faq_id
+    )
+    RETURNING id INTO v_log_id;
+
+    -- Update FAQ use count if used
+    IF p_faq_id IS NOT NULL THEN
+        UPDATE livestream_faq
+        SET use_count = use_count + 1,
+            last_used_at = NOW()
+        WHERE id = p_faq_id;
+    END IF;
+
+    RETURN v_log_id;
+END;
+$$ LANGUAGE plpgsql;
+
+-- =====================================================
+-- SEED DATA: FAQ
+-- =====================================================
+
+INSERT INTO livestream_faq (question, keywords, answer, answer_short, intent, category, tier) VALUES
+    ('Giao hàng bao lâu?',
+     ARRAY['giao hàng', 'ship', 'bao lâu', 'mấy ngày'],
+     'Gemral ship toàn quốc! Nội thành 1-2 ngày, tỉnh xa 3-5 ngày ạ. Free ship cho đơn từ 500k!',
+     'Nội thành 1-2 ngày, tỉnh xa 3-5 ngày ạ!',
+     'SHIPPING_QUERY', 'shipping', 1),
+
+    ('Phí ship bao nhiêu?',
+     ARRAY['phí ship', 'tiền ship', 'free ship', 'ship bao nhiêu'],
+     'Free ship đơn từ 500k! Phí ship thường 25-35k tùy khu vực ạ.',
+     'Free ship từ 500k, thường 25-35k ạ!',
+     'SHIPPING_QUERY', 'shipping', 1),
+
+    ('Thanh toán bằng gì?',
+     ARRAY['thanh toán', 'trả tiền', 'payment', 'momo', 'chuyển khoản', 'COD'],
+     'Gemral nhận: Chuyển khoản, MoMo, ZaloPay, COD đều được ạ! Tùy bạn thích cách nào nhé.',
+     'Chuyển khoản, MoMo, ZaloPay, COD đều OK ạ!',
+     'PAYMENT_QUERY', 'payment', 1),
+
+    ('Đá có thật không?',
+     ARRAY['thật', 'giả', 'fake', 'chứng nhận', 'authentic', 'thật hay giả'],
+     'Tất cả đá Gemral đều là đá thiên nhiên 100%, có giấy chứng nhận và bảo hành ạ. Bạn yên tâm nhé!',
+     'Đá thiên nhiên 100%, có chứng nhận ạ!',
+     'CRYSTAL_AUTHENTICITY', 'authenticity', 1),
+
+    ('Có đổi trả không?',
+     ARRAY['đổi', 'trả', 'hoàn tiền', 'return', 'refund', 'đổi trả'],
+     'Gemral hỗ trợ đổi trả trong 7 ngày nếu sản phẩm lỗi hoặc không đúng mô tả ạ. Bảo hành 1 năm!',
+     'Đổi trả 7 ngày, bảo hành 1 năm ạ!',
+     'PRODUCT_INFO', 'policy', 1),
+
+    ('Làm sao tẩy tế đá?',
+     ARRAY['tẩy tế', 'thanh lọc', 'cleanse', 'nạp năng lượng', 'làm sạch đá'],
+     'Có nhiều cách tẩy tế: Ngâm nước muối, phơi trăng, dùng xô thảo mộc, hoặc đặt trên thạch anh trắng. Mình recommend phơi trăng rằm nhé!',
+     'Phơi trăng, ngâm muối, hoặc đặt trên thạch anh trắng ạ!',
+     'CRYSTAL_CARE', 'care', 1),
+
+    ('Đeo tay nào?',
+     ARRAY['tay nào', 'tay trái', 'tay phải', 'đeo tay'],
+     'Thường đeo tay trái để nhận năng lượng (thu hút), tay phải để phát năng lượng (bảo vệ). Đá như Obsidian nên đeo tay phải ạ.',
+     'Tay trái thu hút, tay phải bảo vệ ạ!',
+     'CRYSTAL_CARE', 'care', 1),
+
+    ('Đá nào thu hút tình yêu?',
+     ARRAY['tình yêu', 'yêu', 'duyên', 'thu hút', 'ế', 'FA'],
+     'Thạch Anh Hồng (Rose Quartz) là số 1 cho tình yêu! Kết hợp với Rhodonite để chữa lành trái tim, hoặc Moonstone cho trực giác tình cảm.',
+     'Rose Quartz là best cho tình yêu ạ!',
+     'LOVE_QUERY', 'love', 2),
+
+    ('Đá nào thu hút tiền?',
+     ARRAY['tiền', 'tài lộc', 'may mắn', 'làm ăn', 'kinh doanh', 'giàu'],
+     'Citrine là đá tài lộc số 1! Pyrite (đá vàng) cũng cực tốt. Nếu bạn kinh doanh, Tiger Eye sẽ giúp ra quyết định sáng suốt.',
+     'Citrine, Pyrite, Tiger Eye cho tài lộc ạ!',
+     'WEALTH_QUERY', 'wealth', 2),
+
+    ('Đá nào giúp ngủ ngon?',
+     ARRAY['ngủ', 'mất ngủ', 'insomnia', 'ngủ ngon', 'stress'],
+     'Amethyst giúp ngủ ngon và thư giãn! Howlite cũng rất tốt cho giấc ngủ. Đặt dưới gối hoặc đeo khi ngủ nhé.',
+     'Amethyst hoặc Howlite cho giấc ngủ ạ!',
+     'HEALTH_QUERY', 'health', 2)
+ON CONFLICT DO NOTHING;
+
+-- =====================================================
+-- RLS POLICIES
+-- =====================================================
+
+ALTER TABLE knowledge_base ENABLE ROW LEVEL SECURITY;
+ALTER TABLE livestream_faq ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ai_response_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_knowledge_profiles ENABLE ROW LEVEL SECURITY;
+
+-- Knowledge base: read-only for all
+CREATE POLICY "Knowledge base is readable by all"
+    ON knowledge_base FOR SELECT
+    USING (is_active = true);
+
+-- FAQ: read-only for all
+CREATE POLICY "FAQ is readable by all"
+    ON livestream_faq FOR SELECT
+    USING (is_active = true);
+
+-- Response logs: users can see their own
+CREATE POLICY "Users can view own response logs"
+    ON ai_response_logs FOR SELECT
+    USING (user_id = auth.uid());
+
+-- User profiles: users can manage their own
+CREATE POLICY "Users can view own profile"
+    ON user_knowledge_profiles FOR SELECT
+    USING (user_id = auth.uid());
+
+CREATE POLICY "Users can update own profile"
+    ON user_knowledge_profiles FOR UPDATE
+    USING (user_id = auth.uid());
+
+CREATE POLICY "Users can insert own profile"
+    ON user_knowledge_profiles FOR INSERT
+    WITH CHECK (user_id = auth.uid());
+
+-- =====================================================
+-- TRIGGERS
+-- =====================================================
+
+-- Update timestamps
+CREATE OR REPLACE FUNCTION update_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER knowledge_base_updated_at
+    BEFORE UPDATE ON knowledge_base
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+CREATE TRIGGER faq_updated_at
+    BEFORE UPDATE ON livestream_faq
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+CREATE TRIGGER user_knowledge_profiles_updated_at
+    BEFORE UPDATE ON user_knowledge_profiles
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- =====================================================
+-- COMMENTS
+-- =====================================================
+
+COMMENT ON TABLE knowledge_base IS 'Knowledge base with vector embeddings for semantic search';
+COMMENT ON TABLE livestream_faq IS 'FAQ database for quick Tier 1 responses';
+COMMENT ON TABLE ai_response_logs IS 'Logs of AI responses for analytics and improvement';
+COMMENT ON TABLE user_knowledge_profiles IS 'User preferences and history for personalization';
+
+COMMENT ON FUNCTION search_knowledge_by_embedding IS 'Semantic search on knowledge base using vector similarity';
+COMMENT ON FUNCTION search_faq_by_embedding IS 'Find best matching FAQ using vector similarity';
+COMMENT ON FUNCTION log_ai_response IS 'Log AI response for analytics';

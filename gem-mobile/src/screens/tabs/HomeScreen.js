@@ -19,7 +19,8 @@ import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/token
 import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSponsorBanners } from '../../components/SponsorBannerSection';
-import SponsorBannerCard from '../../components/SponsorBannerCard';
+import SponsorBanner from '../../components/SponsorBanner';
+import { UpgradeBanner } from '../../components/upgrade';
 import useScrollToTop from '../../hooks/useScrollToTop';
 
 export default function HomeScreen({ navigation }) {
@@ -64,9 +65,23 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.subtitle}>Community discussions</Text>
           </View>
 
+          {/* Upgrade Banner for free users */}
+          <UpgradeBanner
+            banner={{
+              title: 'Nâng cấp để mở khóa tất cả',
+              subtitle: 'Truy cập Scanner, Courses và AI Chatbot',
+              cta_text: 'Xem các gói',
+              icon_name: 'sparkles',
+              trigger_screen: 'home_screen',
+            }}
+            tierType="scanner"
+            variant="prominent"
+            style={{ marginHorizontal: SPACING.md, marginTop: SPACING.md }}
+          />
+
           {/* Sponsor Banners - distributed */}
           {sponsorBanners.map((banner) => (
-            <SponsorBannerCard
+            <SponsorBanner
               key={banner.id}
               banner={banner}
               navigation={navigation}

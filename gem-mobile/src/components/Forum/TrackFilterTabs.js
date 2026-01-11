@@ -223,7 +223,7 @@ const TrackFilterTabs = ({ visible, onClose, onTrackChange }) => {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator size="small" color={COLORS.bgDark} />
+              <ActivityIndicator size="small" color={COLORS.bgDarkest} />
             ) : (
               <Text style={styles.saveButtonText}>
                 {selectedTrack === initialTrack ? 'Đóng' : 'Lưu thay đổi'}
@@ -424,7 +424,7 @@ const styles = StyleSheet.create({
   saveButtonText: {
     fontSize: TYPOGRAPHY.fontSize.md,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.bgDark,
+    color: COLORS.bgDarkest,
   },
 
   // Badge

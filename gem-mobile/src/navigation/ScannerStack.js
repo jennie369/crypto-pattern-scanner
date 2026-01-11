@@ -5,8 +5,9 @@
 
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { ScannerScreen, PatternDetailScreen } from '../screens/Scanner';
+import { ScannerScreen, PatternDetailScreen, MTFDashboardScreen } from '../screens/Scanner';
 import OpenPositionsScreen from '../screens/Scanner/OpenPositionsScreen';
+import PaperTradeHistoryScreen from '../screens/Account/PaperTradeHistoryScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -31,6 +32,20 @@ const ScannerStack = () => {
         component={OpenPositionsScreen}
         options={{
           animation: 'slide_from_right',
+        }}
+      />
+      <Stack.Screen
+        name="PaperTradeHistory"
+        component={PaperTradeHistoryScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+      <Stack.Screen
+        name="MTFDashboard"
+        component={MTFDashboardScreen}
+        options={{
+          animation: 'slide_from_bottom',
         }}
       />
     </Stack.Navigator>

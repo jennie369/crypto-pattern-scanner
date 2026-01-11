@@ -27,9 +27,18 @@ import {
   Animated,
   Image,
   Alert,
+  LayoutAnimation,
+  UIManager,
+  Platform,
 } from 'react-native';
+
+// Enable LayoutAnimation on Android
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation, useFocusEffect, CommonActions } from '@react-navigation/native';
+import { Swipeable } from 'react-native-gesture-handler';
+import { useNavigation, useRoute, useFocusEffect, CommonActions } from '@react-navigation/native';
 import {
   Target,
   Sparkles,
@@ -52,10 +61,20 @@ import {
   Flame,
   HelpCircle,
   Info,
+  Archive,
+  Wind,
+  Moon,
+  Zap,
+  Heart,
+  Mail,
+  Droplets,
+  Play,
+  Star,
 } from 'lucide-react-native';
 
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Speech from 'expo-speech';
+import * as Haptics from 'expo-haptics';
 import Svg, { Path, Circle, Rect, G } from 'react-native-svg';
 
 // =========== SVG ICONS FOR LIFE AREAS ===========
@@ -97,6 +116,14 @@ const SpiritualIcon = ({ size = 28, color = '#8B5CF6' }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <Circle cx="12" cy="12" r="4" fill={color} />
     <Path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" stroke={color} strokeWidth="2" strokeLinecap="round" />
+  </Svg>
+);
+
+const CryptoIcon = ({ size = 28, color = '#F7931A' }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2" />
+    <Path d="M9.5 9h5c1 0 1.5.5 1.5 1.5s-.5 1.5-1.5 1.5h-5v-3zM9.5 12h5.5c1 0 1.5.5 1.5 1.5s-.5 1.5-1.5 1.5H9.5v-3z" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+    <Path d="M11 7v2M13 7v2M11 15v2M13 15v2" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
   </Svg>
 );
 
@@ -184,7 +211,7 @@ import { COLORS, SPACING, TYPOGRAPHY, GLASS, SHADOWS, BUTTON, INPUT, GRADIENTS }
 import {
   LifeBalanceCard,
   WeeklyProgressCard,
-  XPGoalTracker,
+  XPGoalTrackerInline,
 } from '../../components/Charts';
 
 // NEW: Calendar Components with Day Detail Modal
@@ -194,6 +221,7 @@ import { FeaturedRitualSection } from '../../components/Rituals';
 // NEW: Services for Calendar/Charts
 import calendarService from '../../services/calendarService';
 import statsService from '../../services/statsService';
+import readingHistoryService from '../../services/readingHistoryService';
 import progressCalculator, {
   LEVELS,
   XP_REWARDS,
@@ -224,12 +252,39 @@ const BOTTOM_PADDING = TAB_BAR_HEIGHT + 40;
 // Life area options with SVG icons and Vietnamese names
 const LIFE_AREAS = [
   { key: 'finance', label: 'Tài chính', Icon: FinanceIcon, color: '#10B981' },
+  { key: 'crypto', label: 'Crypto', Icon: CryptoIcon, color: '#F7931A' },
   { key: 'relationships', label: 'Mối quan hệ', Icon: HeartIcon, color: '#EC4899' },
   { key: 'career', label: 'Sự nghiệp', Icon: BriefcaseIcon, color: '#6366F1' },
   { key: 'health', label: 'Sức khỏe', Icon: ActivityIcon, color: '#14B8A6' },
   { key: 'personal', label: 'Phát triển cá nhân', Icon: StarIcon, color: '#F59E0B' },
   { key: 'spiritual', label: 'Tâm linh', Icon: SpiritualIcon, color: '#8B5CF6' },
 ];
+
+// Ritual icon mapping for displaying rituals in goal cards
+const RITUAL_ICON_MAP = {
+  'cleansing-breath': { Icon: Wind, color: '#667EEA' },
+  'burn-release': { Icon: Flame, color: '#FF6B6B' },
+  'letter-to-universe': { Icon: Mail, color: '#9D4EDD' },
+  'heart-opening': { Icon: Heart, color: '#EC4899' },
+  'gratitude-flow': { Icon: Sparkles, color: '#FFB800' },
+  'water-manifest': { Icon: Droplets, color: '#00BCD4' },
+  'moon-ritual': { Icon: Moon, color: '#8B5CF6' },
+  'energy-boost': { Icon: Zap, color: '#F7931A' },
+  'heart-expansion': { Icon: Heart, color: '#F093FB' },
+  'star-wish': { Icon: Star, color: '#4ECDC4' },
+  default: { Icon: Flame, color: '#FF6B6B' },
+};
+
+// Default rituals for each life area (fallback when none selected)
+const DEFAULT_RITUALS = {
+  finance: { id: 'gratitude-flow', title: 'Dòng Chảy Biết Ơn', subtitle: 'Thu hút thịnh vượng', color: '#FFD700' },
+  crypto: { id: 'cleansing-breath', title: 'Thở Thanh Lọc', subtitle: 'Giữ bình tĩnh khi trading', color: '#667EEA' },
+  career: { id: 'letter-to-universe', title: 'Thư Gửi Vũ Trụ', subtitle: 'Gửi ước nguyện sự nghiệp', color: '#9D4EDD' },
+  health: { id: 'cleansing-breath', title: 'Thở Thanh Lọc', subtitle: 'Thải độc cơ thể', color: '#667EEA' },
+  relationships: { id: 'heart-expansion', title: 'Mở Rộng Trái Tim', subtitle: 'Tăng tần số yêu thương', color: '#F093FB' },
+  personal: { id: 'letter-to-universe', title: 'Thư Gửi Vũ Trụ', subtitle: 'Gửi ước mơ phát triển', color: '#9D4EDD' },
+  spiritual: { id: 'heart-expansion', title: 'Mở Rộng Trái Tim', subtitle: 'Kết nối yêu thương', color: '#F093FB' },
+};
 
 // =========== HELPER FUNCTIONS ===========
 
@@ -398,6 +453,7 @@ const isReadingType = (type) => type === 'tarot' || type === 'iching';
 // Life area label mapping
 const LIFE_AREA_LABELS = {
   finance: { label: 'Tài chính', color: '#10B981' },
+  crypto: { label: 'Crypto', color: '#F7931A' },
   career: { label: 'Sự nghiệp', color: '#6366F1' },
   health: { label: 'Sức khỏe', color: '#EF4444' },
   relationships: { label: 'Mối quan hệ', color: '#EC4899' },
@@ -463,7 +519,7 @@ const GoalTabs = memo(({
     <View style={styles.goalTabsContainer}>
       <View style={styles.goalTabsTitleRow}>
         <Target size={18} color={COLORS.gold} />
-        <Text style={styles.goalTabsTitle}>Mục tiêu của tôi</Text>
+        <Text style={styles.goalTabsTitle}>MỤC TIÊU CỦA TÔI</Text>
       </View>
       <ScrollView
         horizontal
@@ -493,12 +549,15 @@ const GoalTabs = memo(({
           </View>
         </TouchableOpacity>
 
-        {/* Individual life area tabs */}
+        {/* Individual life area tabs - Only show tabs with goals */}
         {lifeAreas.map((lifeArea) => {
           const areaInfo = LIFE_AREA_LABELS[lifeArea] || { label: lifeArea, color: COLORS.gold };
           const isSelected = selectedLifeArea === lifeArea;
           // Count goals in this lifeArea
           const goalCount = groupedByLifeArea.groups[lifeArea]?.goalWidgets?.length || 0;
+
+          // Skip empty life areas - don't show tabs with 0 goals
+          if (goalCount === 0) return null;
 
           return (
             <TouchableOpacity
@@ -616,6 +675,7 @@ const EditableAffirmationItem = memo(({
   onStartEdit,
   onSave,
   onCancel,
+  onDelete,
   onReadAloud,
   onAffirmationComplete,
   isSelectionMode,
@@ -712,6 +772,14 @@ const EditableAffirmationItem = memo(({
         <Text style={styles.affirmationListText}>"{text}"</Text>
       </View>
       <View style={styles.affirmationListActions}>
+        {/* Delete button */}
+        <TouchableOpacity
+          style={styles.affirmationMiniBtn}
+          onPress={() => onDelete?.(index)}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Trash2 size={14} color={COLORS.error} />
+        </TouchableOpacity>
         {/* Edit hint icon */}
         <TouchableOpacity
           style={styles.affirmationMiniBtn}
@@ -748,6 +816,7 @@ const EditableActionStepItem = memo(({
   onStartEdit,
   onSave,
   onCancel,
+  onDelete,
   onToggleComplete,
   isSelectionMode,
   isSelected,
@@ -861,6 +930,14 @@ const EditableActionStepItem = memo(({
       ]} numberOfLines={2}>
         {step?.title}
       </Text>
+      {/* Delete action step button */}
+      <TouchableOpacity
+        style={styles.editStepBtn}
+        onPress={() => onDelete?.(index)}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+      >
+        <Trash2 size={12} color={COLORS.error} />
+      </TouchableOpacity>
       {/* Edit action step button */}
       <TouchableOpacity
         style={styles.editStepBtn}
@@ -870,6 +947,144 @@ const EditableActionStepItem = memo(({
         <Edit3 size={12} color={COLORS.textMuted} />
       </TouchableOpacity>
     </TouchableOpacity>
+  );
+});
+
+/**
+ * Editable Spiritual Ritual Item - Inline editing for spiritual rituals from I Ching/Tarot
+ */
+const EditableSpiritualRitualItem = memo(({
+  index,
+  ritual,
+  widgetId,
+  isEditing,
+  onStartEdit,
+  onSave,
+  onCancel,
+  onDelete,
+  onToggleComplete,
+}) => {
+  const [editName, setEditName] = useState(ritual?.name || '');
+  const [editDesc, setEditDesc] = useState(ritual?.description || '');
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isEditing]);
+
+  useEffect(() => {
+    setEditName(ritual?.name || '');
+    setEditDesc(ritual?.description || '');
+  }, [ritual?.name, ritual?.description]);
+
+  const handleSave = () => {
+    if (editName.trim()) {
+      onSave(index, { name: editName.trim(), description: editDesc.trim() });
+    } else {
+      onCancel();
+    }
+  };
+
+  const handleCancel = () => {
+    setEditName(ritual?.name || '');
+    setEditDesc(ritual?.description || '');
+    onCancel();
+  };
+
+  if (isEditing) {
+    return (
+      <View style={styles.spiritualRitualEditContainer}>
+        <TextInput
+          ref={inputRef}
+          style={styles.spiritualRitualEditName}
+          value={editName}
+          onChangeText={setEditName}
+          placeholder="Tên nghi thức..."
+          placeholderTextColor={COLORS.textMuted}
+        />
+        <TextInput
+          style={styles.spiritualRitualEditDesc}
+          value={editDesc}
+          onChangeText={setEditDesc}
+          placeholder="Mô tả nghi thức..."
+          placeholderTextColor={COLORS.textMuted}
+          multiline
+          numberOfLines={3}
+        />
+        <View style={styles.spiritualRitualEditActions}>
+          <TouchableOpacity
+            style={styles.spiritualRitualEditBtn}
+            onPress={handleCancel}
+          >
+            <X size={14} color={COLORS.error} />
+            <Text style={styles.spiritualRitualEditBtnText}>Hủy</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.spiritualRitualEditBtn, styles.spiritualRitualEditBtnSave]}
+            onPress={handleSave}
+          >
+            <Check size={14} color="#000" />
+            <Text style={[styles.spiritualRitualEditBtnText, { color: '#000' }]}>Lưu</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.spiritualRitualCard}>
+      <View style={styles.spiritualRitualHeader}>
+        <TouchableOpacity
+          style={[
+            styles.spiritualRitualIcon,
+            ritual?.completed && { backgroundColor: 'rgba(16, 185, 129, 0.2)' }
+          ]}
+          onPress={() => onToggleComplete?.(ritual?.id || `ritual_${index}`)}
+        >
+          {ritual?.completed ? (
+            <Check size={14} color={COLORS.success} />
+          ) : (
+            <Gem size={14} color="#9D4EDD" />
+          )}
+        </TouchableOpacity>
+        <Text
+          style={[
+            styles.spiritualRitualName,
+            ritual?.completed && { textDecorationLine: 'line-through', color: COLORS.textMuted }
+          ]}
+          numberOfLines={1}
+        >
+          {ritual?.name || `Nghi thức ${index + 1}`}
+        </Text>
+        <TouchableOpacity
+          style={styles.spiritualRitualEditIconBtn}
+          onPress={() => onDelete?.(index)}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Trash2 size={14} color={COLORS.error} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.spiritualRitualEditIconBtn}
+          onPress={onStartEdit}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Edit3 size={14} color={COLORS.textMuted} />
+        </TouchableOpacity>
+      </View>
+      {ritual?.description && (
+        <Text
+          style={[
+            styles.spiritualRitualDesc,
+            ritual?.completed && { textDecorationLine: 'line-through' }
+          ]}
+          numberOfLines={3}
+        >
+          {ritual.description}
+        </Text>
+      )}
+    </View>
   );
 });
 
@@ -888,6 +1103,7 @@ const IndividualGoalCard = memo(({
   onToggleHabit,
   onToggleGoalComplete,
   onDelete,
+  onArchive,
   onDeleteMultiple,
   onEdit,
   onEditGoalTitle,
@@ -896,6 +1112,14 @@ const IndividualGoalCard = memo(({
   onSaveAffirmation,
   onSaveGoalTitle,
   onSaveActionStep,
+  onSaveRitual,
+  onToggleRitual,
+  onDeleteAffirmation,
+  onDeleteActionStep,
+  onDeleteRitual,
+  onAddAffirmation,
+  onAddActionStep,
+  onAddRitual,
   onAffirmationComplete,
   onReadAloud,
   completedToday,
@@ -907,10 +1131,14 @@ const IndividualGoalCard = memo(({
   onLongPress,
   onToggleSelect,
 }) => {
+  // Navigation for ritual navigation
+  const navigation = useNavigation();
+
   // State for inline editing
   const [editingAffirmationIndex, setEditingAffirmationIndex] = useState(null);
   const [editingGoalTitle, setEditingGoalTitle] = useState(false);
   const [editingActionStepIndex, setEditingActionStepIndex] = useState(null);
+  const [editingSpiritualRitualIndex, setEditingSpiritualRitualIndex] = useState(null);
   const [goalTitleText, setGoalTitleText] = useState('');
   const goalTitleInputRef = useRef(null);
 
@@ -923,6 +1151,23 @@ const IndividualGoalCard = memo(({
 
   const goalContent = parseWidgetContent(goalWidget);
   const goals = extractGoals(goalContent, goalWidget?.id);
+
+  // DEBUG: Trace ritual data at parse time
+  console.log('[IndividualGoalCard] RITUAL PARSE DEBUG:', {
+    widgetId: goalWidget?.id,
+    // Raw widget content type
+    rawContentType: typeof goalWidget?.content,
+    // Parsed content rituals
+    parsedContentRituals: goalContent?.rituals?.length || 0,
+    parsedContentRitualIds: goalContent?.rituals?.map(r => r?.id),
+    // Goals array rituals
+    goalsCount: goals?.length || 0,
+    goals0Rituals: goals?.[0]?.rituals?.length || 0,
+    goals0RitualIds: goals?.[0]?.rituals?.map(r => r?.id),
+    // Full content preview
+    contentPreview: JSON.stringify(goalContent)?.substring(0, 400),
+  });
+
   const goalTitle = goals[0]?.title || goalWidget?.title || 'Mục tiêu';
   const goalCompleted = goals[0]?.completed || false;
   const goalItemId = goals[0]?.id || `${goalWidget?.id}_goal_0`;
@@ -962,15 +1207,36 @@ const IndividualGoalCard = memo(({
     return false;
   });
 
-  // Extract affirmations from linked widget
-  const affirmations = linkedAffirmationWidget
+  // Extract affirmations from linked widget OR from goal widget's embedded content
+  let affirmations = linkedAffirmationWidget
     ? extractAffirmations(parseWidgetContent(linkedAffirmationWidget)).filter(a => a && typeof a === 'string' && a.trim())
     : [];
 
-  // Extract action steps from linked widget
-  const actionSteps = linkedActionPlanWidget
+  // Fallback: Check for embedded affirmations in goal widget's own content
+  if (affirmations.length === 0 && goalContent?.affirmations) {
+    affirmations = Array.isArray(goalContent.affirmations)
+      ? goalContent.affirmations.filter(a => a && typeof a === 'string' && a.trim())
+      : [];
+  }
+
+  // Extract action steps from linked widget OR from goal widget's embedded content
+  let actionSteps = linkedActionPlanWidget
     ? extractHabits(parseWidgetContent(linkedActionPlanWidget), linkedActionPlanWidget?.id)
     : [];
+
+  // Fallback: Check for embedded steps in goal widget's own content
+  if (actionSteps.length === 0 && goalContent?.steps) {
+    actionSteps = Array.isArray(goalContent.steps)
+      ? goalContent.steps.map((step, idx) => ({
+          id: step.id || `${goalWidget?.id}_step_${idx}`,
+          title: typeof step === 'string' ? step : (step.title || step.text || step.name || ''),
+          frequency: step.action_type || step.frequency || 'daily',
+          action_type: step.action_type || step.frequency || 'daily',
+          completed: step.completed || false,
+          widgetId: goalWidget?.id,
+        }))
+      : [];
+  }
 
   // Calculate progress
   const completedSteps = actionSteps.filter(s => s?.completed).length;
@@ -1003,10 +1269,89 @@ const IndividualGoalCard = memo(({
     setEditingGoalTitle(false);
   };
 
+  // Render swipe actions (archive and delete) - Smooth animation
+  const renderRightActions = (progress, dragX) => {
+    // Use progress for smoother animation (0 to 1)
+    const translateX = progress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [140, 0],
+      extrapolate: 'clamp',
+    });
+
+    const opacity = progress.interpolate({
+      inputRange: [0, 0.5, 1],
+      outputRange: [0, 0.8, 1],
+      extrapolate: 'clamp',
+    });
+
+    return (
+      <Animated.View
+        style={[
+          styles.swipeActionsContainer,
+          {
+            transform: [{ translateX }],
+            opacity,
+          }
+        ]}
+      >
+        {/* Archive Button */}
+        <TouchableOpacity
+          style={[styles.swipeActionBtn, styles.swipeArchiveBtn]}
+          onPress={() => onArchive?.(validIds)}
+          activeOpacity={0.7}
+        >
+          <Archive size={20} color={COLORS.textPrimary} />
+          <Text style={styles.swipeActionText}>Lưu trữ</Text>
+        </TouchableOpacity>
+
+        {/* Delete Button - Uses onDeleteMultiple for array of widget IDs */}
+        <TouchableOpacity
+          style={[styles.swipeActionBtn, styles.swipeDeleteBtn]}
+          onPress={() => onDeleteMultiple?.(validIds, `Xóa mục tiêu "${goalTitle}" và các widget liên quan?`)}
+          activeOpacity={0.7}
+        >
+          <Trash2 size={20} color="#FFFFFF" />
+          <Text style={[styles.swipeActionText, { color: '#FFFFFF' }]}>Xóa</Text>
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  };
+
   return (
+    <Swipeable
+      renderRightActions={renderRightActions}
+      overshootRight={false}
+      friction={1.5}
+      overshootFriction={8}
+      rightThreshold={30}
+      enableTrackpadTwoFingerGesture
+    >
     <View style={[styles.individualGoalCard, { borderColor: `${areaInfo.color}40` }]}>
+      {/* Life Area Header Bar - NEW: Distinctive colored bar to separate goals */}
+      <View style={[styles.goalAreaHeaderBar, { backgroundColor: `${areaInfo.color}25` }]}>
+        <View style={[styles.goalAreaBadge, { backgroundColor: areaInfo.color }]}>
+          {areaInfo.Icon && <areaInfo.Icon width={14} height={14} color="#fff" />}
+        </View>
+        <Text style={[styles.goalAreaLabel, { color: areaInfo.color }]}>{areaInfo.label}</Text>
+        {/* Quick stats in header bar */}
+        <View style={styles.goalAreaStats}>
+          {affirmations.length > 0 && (
+            <View style={styles.goalAreaStatItem}>
+              <Sparkles size={12} color="#FF6B9D" />
+              <Text style={styles.goalAreaStatText}>{affirmations.length}</Text>
+            </View>
+          )}
+          {actionSteps.length > 0 && (
+            <View style={styles.goalAreaStatItem}>
+              <ListChecks size={12} color="#6C63FF" />
+              <Text style={styles.goalAreaStatText}>{completedSteps}/{totalSteps}</Text>
+            </View>
+          )}
+        </View>
+      </View>
+
       {/* Goal Header - COLLAPSED: Show progress bar like wireframe */}
-      <View style={[styles.goalCardHeader, { borderLeftColor: areaInfo.color }]}>
+      <View style={styles.goalCardHeader}>
         {/* Selection checkbox in selection mode */}
         {isSelectionMode && (
           <TouchableOpacity
@@ -1040,8 +1385,10 @@ const IndividualGoalCard = memo(({
           style={styles.goalCardInfo}
           onPress={onToggleExpand}
           onLongPress={() => onLongPress?.(goalWidget?.id)}
-          activeOpacity={0.7}
-          delayLongPress={500}
+          delayLongPress={400}
+          delayPressIn={0}
+          delayPressOut={0}
+          activeOpacity={0.6}
         >
           {editingGoalTitle ? (
             <View style={styles.goalTitleEditContainer}>
@@ -1079,7 +1426,7 @@ const IndividualGoalCard = memo(({
                 <Text style={styles.goalCardTitle} numberOfLines={2}>
                   {goalTitle}
                 </Text>
-                {/* Edit & Expand buttons */}
+                {/* Edit & Expand buttons - FIXED: Better spacing and touch targets */}
                 <View style={styles.goalCardActions}>
                   <TouchableOpacity
                     style={styles.goalCardActionBtn}
@@ -1087,32 +1434,30 @@ const IndividualGoalCard = memo(({
                       e.stopPropagation();
                       handleStartEditGoalTitle();
                     }}
-                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    hitSlop={{ top: 12, bottom: 12, left: 12, right: 6 }}
                   >
-                    <Edit3 size={14} color={COLORS.textMuted} />
+                    <Edit3 size={16} color={COLORS.textMuted} />
                   </TouchableOpacity>
-                  <ChevronRight
-                    size={18}
-                    color={COLORS.textMuted}
-                    style={{ transform: [{ rotate: isExpanded ? '90deg' : '0deg' }] }}
-                  />
+                  <TouchableOpacity
+                    style={styles.goalCardToggleBtn}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      onToggleExpand?.();
+                    }}
+                    activeOpacity={0.5}
+                    delayPressIn={0}
+                    delayPressOut={0}
+                    hitSlop={{ top: 20, bottom: 20, left: 15, right: 20 }}
+                  >
+                    <Animated.View
+                      style={{
+                        transform: [{ rotate: isExpanded ? '90deg' : '0deg' }],
+                      }}
+                    >
+                      <ChevronRight size={22} color={COLORS.textMuted} />
+                    </Animated.View>
+                  </TouchableOpacity>
                 </View>
-              </View>
-
-              {/* Meta info (khẳng định count, action steps count) */}
-              <View style={styles.goalCardMeta}>
-                {affirmations.length > 0 && (
-                  <View style={styles.goalCardMetaItem}>
-                    <Sparkles size={12} color="#FF6B9D" />
-                    <Text style={styles.goalCardMetaText}>{affirmations.length}</Text>
-                  </View>
-                )}
-                {actionSteps.length > 0 && (
-                  <View style={styles.goalCardMetaItem}>
-                    <ListChecks size={12} color="#6C63FF" />
-                    <Text style={styles.goalCardMetaText}>{completedSteps}/{totalSteps}</Text>
-                  </View>
-                )}
               </View>
 
               {/* Progress Bar - Always visible in collapsed state */}
@@ -1166,6 +1511,7 @@ const IndividualGoalCard = memo(({
                       setEditingAffirmationIndex(null);
                     }}
                     onCancel={() => setEditingAffirmationIndex(null)}
+                    onDelete={(idx) => onDeleteAffirmation?.(linkedAffirmationWidget, idx)}
                     onReadAloud={onReadAloud}
                     onAffirmationComplete={onAffirmationComplete}
                     isSelectionMode={isSelectionMode}
@@ -1176,6 +1522,14 @@ const IndividualGoalCard = memo(({
                   />
                 );
               })}
+              {/* Add new affirmation button */}
+              <TouchableOpacity
+                style={styles.addItemBtn}
+                onPress={() => onAddAffirmation?.(linkedAffirmationWidget || goalWidget)}
+              >
+                <Plus size={14} color={COLORS.gold} />
+                <Text style={styles.addItemBtnText}>Thêm khẳng định</Text>
+              </TouchableOpacity>
             </View>
           )}
 
@@ -1226,6 +1580,7 @@ const IndividualGoalCard = memo(({
                             setEditingActionStepIndex(null);
                           }}
                           onCancel={() => setEditingActionStepIndex(null)}
+                          onDelete={(idx) => onDeleteActionStep?.(linkedActionPlanWidget, idx)}
                           onToggleComplete={onToggleHabit}
                           isSelectionMode={isSelectionMode}
                           isSelected={selectedItems?.has(stepItemId)}
@@ -1239,6 +1594,15 @@ const IndividualGoalCard = memo(({
                 );
               })}
 
+              {/* Add new action step button */}
+              <TouchableOpacity
+                style={styles.addItemBtn}
+                onPress={() => onAddActionStep?.(linkedActionPlanWidget || goalWidget)}
+              >
+                <Plus size={14} color="#6C63FF" />
+                <Text style={[styles.addItemBtnText, { color: '#6C63FF' }]}>Thêm bước hành động</Text>
+              </TouchableOpacity>
+
               <View style={styles.actionStepProgress}>
                 <View style={styles.progressBar}>
                   <View style={[styles.progressFill, styles.progressFillPurple, { width: `${stepsPercent}%` }]} />
@@ -1247,6 +1611,136 @@ const IndividualGoalCard = memo(({
               </View>
             </View>
           )}
+
+          {/* Rituals Section - Display selected rituals from goal creation */}
+          {(() => {
+            // Extract rituals from goalContent or goals array
+            const allRituals = goalContent?.rituals || goals[0]?.rituals || [];
+
+            // Separate library rituals (have title) from spiritual rituals (have name)
+            const libraryRituals = allRituals.filter(r => r?.title && RITUAL_ICON_MAP[r?.id]);
+            const spiritualRituals = allRituals.filter(r => r?.name && !r?.title);
+
+            // Debug logging to track ritual data
+            console.log('[IndividualGoalCard] Ritual Debug:', {
+              widgetId: goalWidget?.id,
+              totalRituals: allRituals?.length || 0,
+              libraryRituals: libraryRituals?.length || 0,
+              spiritualRituals: spiritualRituals?.length || 0,
+            });
+
+            if (allRituals.length === 0) return null;
+
+            return (
+              <>
+                {/* Library Rituals Section */}
+                {libraryRituals.length > 0 && (
+                  <View style={styles.selectedRitualsSection}>
+                    <View style={styles.selectedSectionHeader}>
+                      <Flame size={16} color="#FF6B6B" />
+                      <Text style={styles.selectedSectionTitle}>Nghi thức</Text>
+                      <Text style={[styles.selectedSectionProgress, { color: '#FF6B6B' }]}>
+                        {libraryRituals.length} nghi thức
+                      </Text>
+                    </View>
+
+                    <View style={styles.ritualsGrid}>
+                      {libraryRituals.map((ritual, index) => {
+                        const ritualIconData = RITUAL_ICON_MAP[ritual?.id] || RITUAL_ICON_MAP.default;
+                        const RitualIcon = ritualIconData.Icon;
+                        const ritualColor = ritual?.color || ritualIconData.color;
+
+                        return (
+                          <TouchableOpacity
+                            key={ritual?.id || `library_ritual_${index}`}
+                            style={[styles.ritualCardSmall, { borderColor: `${ritualColor}40` }]}
+                            onPress={() => {
+                              // Navigate to dedicated cosmic ritual screen
+                              const ritualScreenMap = {
+                                'heart-expansion': 'HeartExpansionRitual',
+                                'heart-opening': 'HeartExpansionRitual',
+                                'gratitude-flow': 'GratitudeFlowRitual',
+                                'cleansing-breath': 'CleansingBreathRitual',
+                                'purify-breathwork': 'CleansingBreathRitual',
+                                'water-manifest': 'WaterManifestRitual',
+                                'letter-to-universe': 'LetterToUniverseRitual',
+                                'burn-release': 'BurnReleaseRitual',
+                                'star-wish': 'StarWishRitual',
+                              };
+                              const screenName = ritualScreenMap[ritual?.id] || 'HeartExpansionRitual';
+                              navigation.navigate('Account', {
+                                screen: screenName,
+                                params: { ritual: ritual },
+                              });
+                            }}
+                            activeOpacity={0.7}
+                          >
+                            <View style={[styles.ritualIconSmall, { backgroundColor: `${ritualColor}20` }]}>
+                              <RitualIcon size={16} color={ritualColor} />
+                            </View>
+                            <View style={styles.ritualInfoSmall}>
+                              <Text style={styles.ritualTitleSmall} numberOfLines={1}>
+                                {ritual?.title || 'Nghi thức'}
+                              </Text>
+                              {ritual?.subtitle && (
+                                <Text style={styles.ritualSubtitleSmall} numberOfLines={1}>
+                                  {ritual.subtitle}
+                                </Text>
+                              )}
+                            </View>
+                            <View style={[styles.ritualPlayBtn, { backgroundColor: `${ritualColor}30` }]}>
+                              <Play size={12} color={ritualColor} fill={ritualColor} />
+                            </View>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  </View>
+                )}
+
+                {/* Spiritual Rituals Section (from I Ching/Tarot) */}
+                {spiritualRituals.length > 0 && (
+                  <View style={styles.spiritualRitualsSection}>
+                    <View style={styles.selectedSectionHeader}>
+                      <Gem size={16} color="#9D4EDD" />
+                      <Text style={styles.selectedSectionTitle}>Nghi Thức Tâm Linh</Text>
+                      <Text style={[styles.selectedSectionProgress, { color: '#9D4EDD' }]}>
+                        {spiritualRituals.filter(r => r?.completed).length}/{spiritualRituals.length}
+                      </Text>
+                    </View>
+
+                    <View style={styles.spiritualRitualsContainer}>
+                      {spiritualRituals.map((ritual, index) => (
+                        <EditableSpiritualRitualItem
+                          key={ritual?.id || `spiritual_ritual_${index}`}
+                          index={index}
+                          ritual={ritual}
+                          widgetId={goalWidget?.id}
+                          isEditing={editingSpiritualRitualIndex === index}
+                          onStartEdit={() => setEditingSpiritualRitualIndex(index)}
+                          onSave={(idx, updatedRitual) => {
+                            onSaveRitual?.(goalWidget, idx, updatedRitual);
+                            setEditingSpiritualRitualIndex(null);
+                          }}
+                          onCancel={() => setEditingSpiritualRitualIndex(null)}
+                          onDelete={(idx) => onDeleteRitual?.(goalWidget, idx)}
+                          onToggleComplete={(ritualId) => onToggleRitual?.(goalWidget, ritualId)}
+                        />
+                      ))}
+                      {/* Add new ritual button */}
+                      <TouchableOpacity
+                        style={styles.addItemBtn}
+                        onPress={() => onAddRitual?.(goalWidget)}
+                      >
+                        <Plus size={14} color="#9D4EDD" />
+                        <Text style={[styles.addItemBtnText, { color: '#9D4EDD' }]}>Thêm nghi thức</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+              </>
+            );
+          })()}
 
           {/* No content messages */}
           {affirmations.length === 0 && actionSteps.length === 0 && (
@@ -1270,6 +1764,7 @@ const IndividualGoalCard = memo(({
         </View>
       )}
     </View>
+    </Swipeable>
   );
 });
 
@@ -1280,6 +1775,7 @@ const SelectedGoalContent = memo(({
   onToggleHabit,
   onToggleGoalComplete,
   onDelete,
+  onArchive,
   onDeleteMultiple,
   onEdit,
   onEditGoalTitle,
@@ -1288,18 +1784,32 @@ const SelectedGoalContent = memo(({
   onSaveAffirmation,
   onSaveGoalTitle,
   onSaveActionStep,
+  onSaveRitual,
+  onToggleRitual,
+  onDeleteAffirmation,
+  onDeleteActionStep,
+  onDeleteRitual,
+  onAddAffirmation,
+  onAddActionStep,
+  onAddRitual,
   onAffirmationComplete,
   onReadAloud,
   completedToday,
   streak,
+  // GLOBAL selection props (lifted state)
+  isSelectionMode = false,
+  selectedItems = new Set(),
+  onLongPressGlobal,
+  onToggleSelectGlobal,
+  onCancelSelectionGlobal,
+  onDeleteSelectedGlobal,
+  onSelectAllGlobal,
+  allGoalIds = [],
 }) => {
   // Track which goals are expanded
   const [expandedGoals, setExpandedGoals] = useState({});
   // Track expanded state for fallback card (when no goal widgets)
   const [fallbackExpanded, setFallbackExpanded] = useState(true);
-  // Multi-select state
-  const [isSelectionMode, setIsSelectionMode] = useState(false);
-  const [selectedItems, setSelectedItems] = useState(new Set());
 
   if (!group) return null;
 
@@ -1310,265 +1820,40 @@ const SelectedGoalContent = memo(({
   const affirmationWidgets = group.affirmationWidgets || [];
   const actionPlanWidgets = group.actionPlanWidgets || [];
 
-  // Toggle expand for a specific goal
-  const handleToggleExpand = (goalId) => {
+  // Toggle expand for a specific goal - INSTANT response
+  const handleToggleExpand = useCallback((goalId) => {
+    // Instant state update - no animation delay
     setExpandedGoals(prev => ({
       ...prev,
       [goalId]: !prev[goalId],
     }));
-  };
+  }, []);
 
-  // Handle long press - enter selection mode
-  const handleLongPress = (itemId) => {
-    setIsSelectionMode(true);
-    setSelectedItems(new Set([itemId]));
-  };
+  // Use global handlers passed from parent (for cross-group selection)
+  const handleLongPress = useCallback((itemId) => {
+    onLongPressGlobal?.(itemId);
+  }, [onLongPressGlobal]);
 
-  // Toggle item selection
-  const handleToggleSelect = (itemId) => {
-    if (!isSelectionMode) return;
-    setSelectedItems(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(itemId)) {
-        newSet.delete(itemId);
-      } else {
-        newSet.add(itemId);
-      }
-      return newSet;
-    });
-  };
+  const handleToggleSelect = useCallback((itemId) => {
+    onToggleSelectGlobal?.(itemId);
+  }, [onToggleSelectGlobal]);
 
-  // Cancel selection mode
-  const handleCancelSelection = () => {
-    setIsSelectionMode(false);
-    setSelectedItems(new Set());
-  };
+  const handleCancelSelection = useCallback(() => {
+    onCancelSelectionGlobal?.();
+  }, [onCancelSelectionGlobal]);
 
-  // Delete selected items
-  const handleDeleteSelected = () => {
-    if (selectedItems.size > 0) {
-      onDeleteMultiple?.(Array.from(selectedItems), `Xóa ${selectedItems.size} mục đã chọn?`);
-      handleCancelSelection();
-    }
-  };
+  const handleDeleteSelected = useCallback(() => {
+    onDeleteSelectedGlobal?.();
+  }, [onDeleteSelectedGlobal]);
 
-  // If no goal widgets, show fallback with all affirmations and action plans
-  // Using SAME UI style as IndividualGoalCard for consistency
+  const handleSelectAll = useCallback(() => {
+    onSelectAllGlobal?.(allGoalIds);
+  }, [onSelectAllGlobal, allGoalIds]);
+
+  // If no goal widgets, don't show this section at all
+  // Orphaned affirmation/action_plan widgets will be shown in ungrouped sections instead
   if (goalWidgets.length === 0) {
-    // Show all affirmations and action plans without a goal
-    const allAffirmations = [...new Set(
-      affirmationWidgets.flatMap(w => extractAffirmations(parseWidgetContent(w)))
-        .filter(a => a && typeof a === 'string' && a.trim())
-    )];
-
-    const allActionSteps = actionPlanWidgets.flatMap(w =>
-      extractHabits(parseWidgetContent(w), w?.id)
-    );
-
-    const completedSteps = allActionSteps.filter(s => s?.completed).length;
-    const totalSteps = allActionSteps.length;
-    const stepsPercent = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
-
-    const allWidgetIds = [
-      ...affirmationWidgets.map(w => w?.id),
-      ...actionPlanWidgets.map(w => w?.id),
-    ].filter(id => id);
-
-    // If nothing at all, don't render
-    if (allAffirmations.length === 0 && allActionSteps.length === 0) {
-      return null;
-    }
-
-    return (
-      <View style={[styles.individualGoalCard, { borderColor: `${areaInfo.color}40` }]}>
-        {/* Fallback Header - Same style as IndividualGoalCard */}
-        <TouchableOpacity
-          style={[styles.goalCardHeader, { borderLeftColor: areaInfo.color }]}
-          onPress={() => setFallbackExpanded(!fallbackExpanded)}
-          activeOpacity={0.7}
-        >
-          {/* Area Icon */}
-          <View style={[
-            styles.goalCompleteCheckbox,
-            { borderColor: areaInfo.color, backgroundColor: `${areaInfo.color}20` }
-          ]}>
-            <Target size={14} color={areaInfo.color} />
-          </View>
-
-          {/* Goal Info - Title and Progress */}
-          <View style={styles.goalCardInfo}>
-            <View style={styles.goalCardTitleRow}>
-              <Text style={styles.goalCardTitle} numberOfLines={2}>
-                {areaInfo.label}
-              </Text>
-              {/* Expand button */}
-              <View style={styles.goalCardActions}>
-                <ChevronRight
-                  size={18}
-                  color={COLORS.textMuted}
-                  style={{ transform: [{ rotate: fallbackExpanded ? '90deg' : '0deg' }] }}
-                />
-              </View>
-            </View>
-
-            {/* Meta info */}
-            <View style={styles.goalCardMeta}>
-              {allAffirmations.length > 0 && (
-                <View style={styles.goalCardMetaItem}>
-                  <Sparkles size={12} color="#FF6B9D" />
-                  <Text style={styles.goalCardMetaText}>{allAffirmations.length}</Text>
-                </View>
-              )}
-              {allActionSteps.length > 0 && (
-                <View style={styles.goalCardMetaItem}>
-                  <ListChecks size={12} color="#6C63FF" />
-                  <Text style={styles.goalCardMetaText}>{completedSteps}/{totalSteps}</Text>
-                </View>
-              )}
-            </View>
-
-            {/* Progress Bar - Always visible in collapsed state */}
-            {totalSteps > 0 && (
-              <View style={styles.goalCardProgressSection}>
-                <View style={styles.goalCardProgressBar}>
-                  <View
-                    style={[
-                      styles.goalCardProgressFill,
-                      {
-                        width: `${stepsPercent}%`,
-                        backgroundColor: stepsPercent >= 70 ? COLORS.success : stepsPercent >= 40 ? COLORS.gold : areaInfo.color
-                      }
-                    ]}
-                  />
-                </View>
-                <Text style={styles.goalCardProgressText}>{stepsPercent}%</Text>
-              </View>
-            )}
-          </View>
-        </TouchableOpacity>
-
-        {/* Expanded Content */}
-        {fallbackExpanded && (
-          <View style={styles.individualGoalContent}>
-            {/* Affirmations */}
-            {allAffirmations.length > 0 && (
-              <View style={styles.selectedAffirmationSection}>
-                <View style={styles.selectedSectionHeader}>
-                  <Sparkles size={16} color="#FF6B9D" />
-                  <Text style={styles.selectedSectionTitle}>Khẳng định</Text>
-                  <Text style={[styles.selectedSectionProgress, { color: '#FF6B9D' }]}>
-                    {allAffirmations.length} câu
-                  </Text>
-                </View>
-                {allAffirmations.map((aff, index) => (
-                  <View key={index} style={styles.affirmationListItem}>
-                    <View style={styles.affirmationListContent}>
-                      <Text style={styles.affirmationListNumber}>{index + 1}.</Text>
-                      <Text style={styles.affirmationListText}>"{aff}"</Text>
-                    </View>
-                    <View style={styles.affirmationListActions}>
-                      <TouchableOpacity
-                        style={styles.affirmationMiniBtn}
-                        onPress={() => onReadAloud?.(aff)}
-                      >
-                        <Volume2 size={14} color={COLORS.gold} />
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={[styles.affirmationMiniBtn, styles.affirmationMiniBtnPrimary]}
-                        onPress={() => onAffirmationComplete?.()}
-                      >
-                        <Check size={14} color="#000" />
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                ))}
-              </View>
-            )}
-
-            {/* Action Plan - Grouped by Frequency */}
-            {allActionSteps.length > 0 && (
-              <View style={styles.selectedActionPlanSection}>
-                <View style={styles.selectedSectionHeader}>
-                  <ListChecks size={16} color="#6C63FF" />
-                  <Text style={styles.selectedSectionTitle}>Kế hoạch hành động</Text>
-                  <Text style={[styles.selectedSectionProgress, { color: '#6C63FF' }]}>
-                    {completedSteps}/{totalSteps}
-                  </Text>
-                </View>
-
-                {/* Group by frequency: daily, weekly, monthly */}
-                {['daily', 'weekly', 'monthly'].map(freq => {
-                  const freqSteps = allActionSteps.filter(s => (s?.frequency || 'daily') === freq);
-                  if (freqSteps.length === 0) return null;
-
-                  const freqInfo = FREQUENCY_LABELS[freq];
-                  const freqCompleted = freqSteps.filter(s => s?.completed).length;
-
-                  return (
-                    <View key={freq} style={styles.frequencyGroup}>
-                      <View style={[styles.frequencyHeader, { borderLeftColor: freqInfo.color }]}>
-                        <Text style={styles.frequencyIcon}>{freqInfo.icon}</Text>
-                        <Text style={[styles.frequencyTitle, { color: freqInfo.color }]}>
-                          {freqInfo.label}
-                        </Text>
-                        <Text style={styles.frequencyCount}>
-                          {freqCompleted}/{freqSteps.length}
-                        </Text>
-                      </View>
-
-                      {freqSteps.map((step, index) => (
-                        <TouchableOpacity
-                          key={step?.id || `${freq}_step_${index}`}
-                          style={[
-                            styles.actionStepItem,
-                            { borderLeftWidth: 3, borderLeftColor: step?.completed ? freqInfo.color : 'transparent' },
-                          ]}
-                          onPress={() => {
-                            console.log('[VisionBoard] Toggling step:', step?.id);
-                            onToggleHabit?.(step?.id);
-                          }}
-                          activeOpacity={0.7}
-                        >
-                          <View style={[
-                            styles.actionStepCheckbox,
-                            step?.completed && styles.actionStepCheckboxDone,
-                            step?.completed && { backgroundColor: freqInfo.color, borderColor: freqInfo.color },
-                          ]}>
-                            {step?.completed && <Check size={12} color="#fff" />}
-                          </View>
-                          <Text style={[
-                            styles.actionStepText,
-                            step?.completed && styles.actionStepTextDone,
-                          ]}>
-                            {step?.title}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  );
-                })}
-
-                <View style={styles.actionStepProgress}>
-                  <View style={styles.progressBar}>
-                    <View style={[styles.progressFill, styles.progressFillPurple, { width: `${stepsPercent}%` }]} />
-                  </View>
-                  <Text style={[styles.progressPercent, { color: '#6C63FF' }]}>{stepsPercent}%</Text>
-                </View>
-              </View>
-            )}
-
-            {/* Delete button */}
-            <TouchableOpacity
-              style={styles.deleteGoalGroupBtn}
-              onPress={() => onDeleteMultiple?.(allWidgetIds, 'Xóa tất cả widgets trong nhóm này?')}
-            >
-              <Trash2 size={14} color="#E74C3C" />
-              <Text style={styles.deleteGoalGroupText}>Xóa tất cả</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-    );
+    return null;
   }
 
   // Collect all widget IDs for batch delete
@@ -1580,33 +1865,9 @@ const SelectedGoalContent = memo(({
 
   // MAIN: Render each goal widget as a separate card
   // REMOVED: lifeAreaHeader and statsBar - user requested cleaner UI
+  // REMOVED: Selection bar moved to parent level (globalSelectionModeBar)
   return (
     <View style={styles.selectedGoalContentList}>
-      {/* Selection mode bar - keep for delete functionality */}
-      {isSelectionMode && (
-        <View style={styles.selectionModeBar}>
-          <Text style={styles.selectionModeText}>
-            Đã chọn {selectedItems.size} mục
-          </Text>
-          <View style={styles.selectionModeActions}>
-            <TouchableOpacity
-              style={styles.selectionModeBtn}
-              onPress={handleCancelSelection}
-            >
-              <X size={16} color={COLORS.textMuted} />
-              <Text style={styles.selectionModeBtnText}>Hủy</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.selectionModeBtn, styles.selectionModeBtnDanger]}
-              onPress={handleDeleteSelected}
-            >
-              <Trash2 size={16} color="#E74C3C" />
-              <Text style={[styles.selectionModeBtnText, { color: '#E74C3C' }]}>Xóa</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
-
       {/* Render each goal separately */}
       {goalWidgets.map((goalWidget, index) => (
         <IndividualGoalCard
@@ -1618,6 +1879,7 @@ const SelectedGoalContent = memo(({
           onToggleHabit={onToggleHabit}
           onToggleGoalComplete={onToggleGoalComplete}
           onDelete={onDelete}
+          onArchive={onArchive}
           onDeleteMultiple={onDeleteMultiple}
           onEdit={onEdit}
           onEditGoalTitle={onEditGoalTitle}
@@ -1626,6 +1888,14 @@ const SelectedGoalContent = memo(({
           onSaveAffirmation={onSaveAffirmation}
           onSaveGoalTitle={onSaveGoalTitle}
           onSaveActionStep={onSaveActionStep}
+          onSaveRitual={onSaveRitual}
+          onToggleRitual={onToggleRitual}
+          onDeleteAffirmation={onDeleteAffirmation}
+          onDeleteActionStep={onDeleteActionStep}
+          onDeleteRitual={onDeleteRitual}
+          onAddAffirmation={onAddAffirmation}
+          onAddActionStep={onAddActionStep}
+          onAddRitual={onAddRitual}
           onAffirmationComplete={onAffirmationComplete}
           onReadAloud={onReadAloud}
           completedToday={completedToday}
@@ -2227,6 +2497,10 @@ const CrystalSection = memo(({
   onToggleHabit,
   onSaveAffirmation,
   onSaveActionStep,
+  onDeleteAffirmation,
+  onDeleteActionStep,
+  onAddAffirmation,
+  onAddActionStep,
   onAffirmationComplete,
   onReadAloud,
 }) => {
@@ -2365,10 +2639,19 @@ const CrystalSection = memo(({
                           setEditingAffirmationIndex(null);
                         }}
                         onCancel={() => setEditingAffirmationIndex(null)}
+                        onDelete={(idx) => onDeleteAffirmation?.(spiritualAffirmation, idx)}
                         onReadAloud={onReadAloud}
                         onAffirmationComplete={onAffirmationComplete}
                       />
                     ))}
+                    {/* Add new affirmation button */}
+                    <TouchableOpacity
+                      style={styles.addItemBtn}
+                      onPress={() => onAddAffirmation?.(spiritualAffirmation)}
+                    >
+                      <Plus size={14} color={COLORS.gold} />
+                      <Text style={styles.addItemBtnText}>Thêm khẳng định</Text>
+                    </TouchableOpacity>
                   </View>
                 )}
 
@@ -2396,9 +2679,18 @@ const CrystalSection = memo(({
                           setEditingActionStepIndex(null);
                         }}
                         onCancel={() => setEditingActionStepIndex(null)}
+                        onDelete={(idx) => onDeleteActionStep?.(spiritualActionPlan, idx)}
                         onToggleComplete={onToggleHabit}
                       />
                     ))}
+                    {/* Add new action step button */}
+                    <TouchableOpacity
+                      style={styles.addItemBtn}
+                      onPress={() => onAddActionStep?.(spiritualActionPlan)}
+                    >
+                      <Plus size={14} color="#6C63FF" />
+                      <Text style={[styles.addItemBtnText, { color: '#6C63FF' }]}>Thêm bước hành động</Text>
+                    </TouchableOpacity>
 
                     <View style={styles.actionStepProgress}>
                       <View style={styles.progressBar}>
@@ -2670,7 +2962,12 @@ const ReadingsSection = memo(({
 
 const VisionBoardScreen = () => {
   const navigation = useNavigation();
+  const route = useRoute();
   const { user, userTier } = useAuth();
+
+  // Refs for scroll to section functionality
+  const scrollViewRef = useRef(null);
+  const goalsSectionY = useRef(0);
 
   // Tooltip hook for feature discovery
   const { showTooltipForScreen, initialized: tooltipInitialized } = useTooltip();
@@ -2698,6 +2995,10 @@ const VisionBoardScreen = () => {
   const [selectedGoalLifeArea, setSelectedGoalLifeArea] = useState(null);
   // Track affirmation index per lifeArea
   const [goalAffirmationIndexes, setGoalAffirmationIndexes] = useState({});
+
+  // GLOBAL Multi-select state (lifted from SelectedGoalContent for cross-group selection)
+  const [globalSelectionMode, setGlobalSelectionMode] = useState(false);
+  const [globalSelectedItems, setGlobalSelectedItems] = useState(new Set());
 
   // Modal state
   const [showAddModal, setShowAddModal] = useState(false);
@@ -2749,6 +3050,9 @@ const VisionBoardScreen = () => {
   const [levelTitle, setLevelTitle] = useState('Người Mới Bắt Đầu');
   const [xpForNextLevel, setXpForNextLevel] = useState(100);
   const [xpProgress, setXpProgress] = useState(0);
+
+  // NEW: Reading history from database (tarot_readings + iching_readings)
+  const [savedReadings, setSavedReadings] = useState([]);
 
   // Computed level data for XPGoalTracker full card
   const currentLevelData = useMemo(() => {
@@ -2806,9 +3110,10 @@ const VisionBoardScreen = () => {
       };
     });
 
-  // Combine all readings (tarot and iching) - memoized to prevent infinite re-renders
+  // Combine all readings (tarot and iching) - from BOTH widgets AND saved readings database
   const allReadings = useMemo(() => {
-    return widgets
+    // 1. Widget-based readings (legacy)
+    const widgetReadings = widgets
       .filter(w => isReadingType(w?.type))
       .map(w => ({
         id: w?.id,
@@ -2816,8 +3121,71 @@ const VisionBoardScreen = () => {
         title: w?.title,
         content: parseWidgetContent(w),
         created_at: w?.created_at,
+        source: 'widget',
       }));
-  }, [widgets]);
+
+    // 2. Database readings from tarot_readings/iching_readings tables
+    const dbReadings = savedReadings.map(r => {
+      const isIChing = r.reading_type === 'iching';
+
+      // Map content to match DivinationCard expectations
+      const content = isIChing ? {
+        // I-Ching fields
+        question: r.question,
+        lifeArea: r.life_area,
+        hexagramNumber: r.present_hexagram?.number || r.present_hexagram,
+        hexagramName: r.present_hexagram?.name || r.present_hexagram?.vietnameseName,
+        vietnameseName: r.present_hexagram?.vietnameseName || r.present_hexagram?.name,
+        chineseName: r.present_hexagram?.chineseName,
+        presentHexagram: r.present_hexagram,
+        futureHexagram: r.future_hexagram,
+        changingLines: r.changing_lines,
+        overallInterpretation: r.overall_interpretation,
+        aiInterpretation: r.ai_interpretation,
+      } : {
+        // Tarot fields
+        question: r.question,
+        lifeArea: r.life_area,
+        spreadName: r.spread_type || 'Tarot',
+        spreadType: r.spread_type,
+        // Map card fields for proper image loading
+        // Note: card_id may be stored as string in JSONB - need to preserve type for getCardImage
+        cards: (r.cards || []).map(c => {
+          let cardId = c.card_id || c.id;
+          // Convert numeric strings to numbers (Major Arcana IDs are 0-21)
+          if (typeof cardId === 'string' && /^\d+$/.test(cardId)) {
+            cardId = parseInt(cardId, 10);
+          }
+          return {
+            id: cardId,
+            vietnamese: c.name || c.vietnamese || c.vietnameseName,
+            name: c.name || c.vietnamese || c.vietnameseName,
+            position: c.position,
+            isReversed: c.reversed || c.isReversed,
+          };
+        }),
+        overallInterpretation: r.overall_interpretation,
+        aiInterpretation: r.ai_interpretation,
+      };
+
+      return {
+        id: r.id,
+        type: isIChing ? 'iching' : 'tarot',
+        title: r.question || (isIChing ? 'Gieo quẻ Kinh Dịch' : `Trải bài ${r.spread_type || 'Tarot'}`),
+        content,
+        created_at: r.created_at,
+        source: 'database',
+        starred: r.is_starred,
+      };
+    });
+
+    // 3. Combine and sort by created_at (newest first)
+    const combined = [...widgetReadings, ...dbReadings];
+    combined.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+    console.log('[VisionBoard] Combined readings:', combined.length, '(widgets:', widgetReadings.length, ', database:', dbReadings.length, ')');
+    return combined;
+  }, [widgets, savedReadings]);
 
   // Current affirmation
   const currentAffirmation = allAffirmations[currentAffirmationIndex] || '';
@@ -2884,15 +3252,9 @@ const VisionBoardScreen = () => {
           // Found matching lifeArea in existing group - PUSH to arrays
           if (isAff) groups[lifeArea].affirmationWidgets.push(w);
           if (isHab) groups[lifeArea].actionPlanWidgets.push(w);
-        } else if (lifeArea && !groups[lifeArea]) {
-          // Has lifeArea but no matching goal - create new group
-          groups[lifeArea] = {
-            goalWidgets: [],
-            affirmationWidgets: isAff ? [w] : [],
-            actionPlanWidgets: isHab ? [w] : [],
-          };
         } else {
-          // No lifeArea - track separately for fallback linking
+          // FIX: Don't create empty groups for affirmation/habit without matching goal
+          // Put them in ungrouped instead - they'll be linked via fallback if needed
           if (isAff) {
             ungroupedAffirmationWidgets.push(w);
           } else {
@@ -2903,33 +3265,59 @@ const VisionBoardScreen = () => {
       }
     });
 
-    // Third pass: FALLBACK - Link ungrouped affirmation/action_plan to groups that don't have them
-    // This handles the case where old widgets don't have lifeArea stored
+    // Third pass: FALLBACK - Link ungrouped affirmation/action_plan to groups based on linked_goal_id
+    // UPDATED: Only link if the widget has a linked_goal_id matching a goal in the group
+    // This prevents orphaned widgets from being incorrectly linked
     const groupKeys = Object.keys(groups);
     if (groupKeys.length > 0) {
-      // If we have groups with goals but missing affirmation/action_plan, link ungrouped ones
+      // Get all goal IDs per group for quick lookup
+      const goalIdsByGroup = {};
       groupKeys.forEach(lifeArea => {
-        const group = groups[lifeArea];
+        goalIdsByGroup[lifeArea] = new Set(
+          groups[lifeArea].goalWidgets.map(g => g?.id).filter(Boolean)
+        );
+      });
 
-        // If group has goals but no affirmation, link ungrouped affirmations
-        if (group.goalWidgets.length > 0 && group.affirmationWidgets.length === 0 && ungroupedAffirmationWidgets.length > 0) {
-          const affWidget = ungroupedAffirmationWidgets.shift(); // Take first one
-          group.affirmationWidgets.push(affWidget);
-          // Remove from ungroupedWidgets
-          const idx = ungroupedWidgets.findIndex(w => w?.id === affWidget?.id);
-          if (idx !== -1) ungroupedWidgets.splice(idx, 1);
-          console.log('[VisionBoard] FALLBACK: Linked affirmation', affWidget?.id, 'to group', lifeArea);
-        }
+      // Link ungrouped affirmation widgets to their proper goals via linked_goal_id
+      [...ungroupedAffirmationWidgets].forEach(affWidget => {
+        const content = parseWidgetContent(affWidget);
+        const linkedGoalId = content?.linked_goal_id;
 
-        // If group has goals but no action_plan, link ungrouped action_plans
-        if (group.goalWidgets.length > 0 && group.actionPlanWidgets.length === 0 && ungroupedActionPlanWidgets.length > 0) {
-          const apWidget = ungroupedActionPlanWidgets.shift(); // Take first one
-          group.actionPlanWidgets.push(apWidget);
-          // Remove from ungroupedWidgets
-          const idx = ungroupedWidgets.findIndex(w => w?.id === apWidget?.id);
-          if (idx !== -1) ungroupedWidgets.splice(idx, 1);
-          console.log('[VisionBoard] FALLBACK: Linked action_plan', apWidget?.id, 'to group', lifeArea);
+        if (linkedGoalId) {
+          // Find which group contains this goal
+          const targetGroup = groupKeys.find(la => goalIdsByGroup[la]?.has(linkedGoalId));
+          if (targetGroup) {
+            groups[targetGroup].affirmationWidgets.push(affWidget);
+            // Remove from ungrouped arrays
+            const affIdx = ungroupedAffirmationWidgets.indexOf(affWidget);
+            if (affIdx !== -1) ungroupedAffirmationWidgets.splice(affIdx, 1);
+            const idx = ungroupedWidgets.findIndex(w => w?.id === affWidget?.id);
+            if (idx !== -1) ungroupedWidgets.splice(idx, 1);
+            console.log('[VisionBoard] FALLBACK: Linked affirmation', affWidget?.id, 'to group', targetGroup, 'via linked_goal_id');
+          }
         }
+        // NOTE: Widgets without linked_goal_id stay in ungrouped (but won't be displayed due to filtering)
+      });
+
+      // Link ungrouped action_plan widgets to their proper goals via linked_goal_id
+      [...ungroupedActionPlanWidgets].forEach(apWidget => {
+        const content = parseWidgetContent(apWidget);
+        const linkedGoalId = content?.linked_goal_id;
+
+        if (linkedGoalId) {
+          // Find which group contains this goal
+          const targetGroup = groupKeys.find(la => goalIdsByGroup[la]?.has(linkedGoalId));
+          if (targetGroup) {
+            groups[targetGroup].actionPlanWidgets.push(apWidget);
+            // Remove from ungrouped arrays
+            const apIdx = ungroupedActionPlanWidgets.indexOf(apWidget);
+            if (apIdx !== -1) ungroupedActionPlanWidgets.splice(apIdx, 1);
+            const idx = ungroupedWidgets.findIndex(w => w?.id === apWidget?.id);
+            if (idx !== -1) ungroupedWidgets.splice(idx, 1);
+            console.log('[VisionBoard] FALLBACK: Linked action_plan', apWidget?.id, 'to group', targetGroup, 'via linked_goal_id');
+          }
+        }
+        // NOTE: Widgets without linked_goal_id stay in ungrouped (but won't be displayed due to filtering)
       });
     }
 
@@ -2941,13 +3329,35 @@ const VisionBoardScreen = () => {
       }
     });
 
-    console.log('[VisionBoard] Groups:', Object.keys(groups));
-    Object.entries(groups).forEach(([key, group]) => {
+    // Fifth pass: Filter out groups that have NO goal widgets (only affirmation/action_plan)
+    // These orphaned widgets will be shown in ungrouped sections instead
+    const filteredGroups = {};
+    Object.entries(groups).forEach(([lifeArea, group]) => {
+      if (group.goalWidgets.length > 0) {
+        filteredGroups[lifeArea] = group;
+      } else {
+        // Move orphaned affirmation/action_plan widgets back to ungrouped
+        group.affirmationWidgets.forEach(w => {
+          if (!ungroupedWidgets.find(uw => uw?.id === w?.id)) {
+            ungroupedWidgets.push(w);
+          }
+        });
+        group.actionPlanWidgets.forEach(w => {
+          if (!ungroupedWidgets.find(uw => uw?.id === w?.id)) {
+            ungroupedWidgets.push(w);
+          }
+        });
+        console.log('[VisionBoard] Filtered out empty group:', lifeArea, '(no goal widgets)');
+      }
+    });
+
+    console.log('[VisionBoard] Groups:', Object.keys(filteredGroups));
+    Object.entries(filteredGroups).forEach(([key, group]) => {
       console.log('[VisionBoard]', key, '- goals:', group.goalWidgets.length, 'affs:', group.affirmationWidgets.length, 'actions:', group.actionPlanWidgets.length);
     });
     console.log('[VisionBoard] Ungrouped:', ungroupedWidgets.length);
 
-    return { groups, ungroupedWidgets };
+    return { groups: filteredGroups, ungroupedWidgets };
   }, [widgets]);
 
   // Get ungrouped widgets (use helper functions for legacy type support)
@@ -2955,19 +3365,82 @@ const VisionBoardScreen = () => {
     .filter(w => isGoalType(w?.type))
     .flatMap(w => extractGoals(parseWidgetContent(w), w?.id));
 
+  // Get all valid goal widget IDs (for checking linked_goal_id validity)
+  const allGoalWidgetIds = useMemo(() => {
+    const ids = new Set();
+    // From grouped widgets
+    Object.values(groupedByLifeArea.groups).forEach(group => {
+      (group.goalWidgets || []).forEach(w => {
+        if (w?.id) ids.add(w.id);
+      });
+    });
+    // From ungrouped goals
+    groupedByLifeArea.ungroupedWidgets.forEach(w => {
+      if (isGoalType(w?.type) && w?.id) ids.add(w.id);
+    });
+    return ids;
+  }, [groupedByLifeArea]);
+
+  // FILTER: Only show ungrouped affirmations that have a VALID linked_goal_id
+  // Orphaned affirmation widgets (no goal association) should NOT be displayed
+  // This prevents "Khẳng định hôm nay" from auto-displaying when there are no goals
   const ungroupedAffirmations = [...new Set(
     groupedByLifeArea.ungroupedWidgets
-      .filter(w => isAffirmationType(w?.type))
+      .filter(w => {
+        if (!isAffirmationType(w?.type)) return false;
+        const content = parseWidgetContent(w);
+        const linkedGoalId = content?.linked_goal_id;
+
+        // STRICT: Only show if linked to an EXISTING goal
+        // Orphaned widgets (no linked_goal_id or invalid linked_goal_id) are hidden
+        if (!linkedGoalId) {
+          console.log('[VisionBoard] Hiding orphaned affirmation (no linked_goal_id):', w?.id);
+          return false;
+        }
+        if (!allGoalWidgetIds.has(linkedGoalId)) {
+          console.log('[VisionBoard] Hiding orphaned affirmation (goal deleted):', w?.id, 'linkedTo:', linkedGoalId);
+          return false;
+        }
+        return true;
+      })
       .flatMap(w => extractAffirmations(parseWidgetContent(w)))
       .filter(a => a && typeof a === 'string' && a.trim())
   )];
 
+  // FILTER: Only show ungrouped habits/action_plans that have a VALID linked_goal_id
+  // Orphaned action_plan widgets (no goal association) should NOT be displayed
   const ungroupedHabits = groupedByLifeArea.ungroupedWidgets
-    .filter(w => isHabitType(w?.type) && !isGoalType(w?.type))
+    .filter(w => {
+      if (!isHabitType(w?.type) || isGoalType(w?.type)) return false;
+      const content = parseWidgetContent(w);
+      const linkedGoalId = content?.linked_goal_id;
+
+      // STRICT: Only show if linked to an EXISTING goal
+      if (!linkedGoalId) {
+        console.log('[VisionBoard] Hiding orphaned action_plan (no linked_goal_id):', w?.id);
+        return false;
+      }
+      if (!allGoalWidgetIds.has(linkedGoalId)) {
+        console.log('[VisionBoard] Hiding orphaned action_plan (goal deleted):', w?.id, 'linkedTo:', linkedGoalId);
+        return false;
+      }
+      return true;
+    })
     .flatMap(w => extractHabits(parseWidgetContent(w), w?.id));
 
   // Check if there are grouped widgets
   const hasGroupedWidgets = Object.keys(groupedByLifeArea.groups).length > 0;
+
+  // Calculate ALL goal IDs across ALL groups (for global multi-select)
+  const allGoalIds = useMemo(() => {
+    const ids = [];
+    Object.values(groupedByLifeArea.groups).forEach(group => {
+      (group.goalWidgets || []).forEach(w => {
+        if (w?.id) ids.push(w.id);
+      });
+    });
+    return ids;
+  }, [groupedByLifeArea.groups]);
 
   // =========== TAB BAR VISIBILITY ===========
   useFocusEffect(
@@ -2994,6 +3467,7 @@ const VisionBoardScreen = () => {
         .select('*')
         .eq('user_id', user.id)
         .eq('is_active', true)
+        .or('archived.is.null,archived.eq.false') // Exclude archived widgets
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -3001,6 +3475,18 @@ const VisionBoardScreen = () => {
         setWidgets([]);
       } else {
         console.log('[VisionBoard] Loaded widgets:', data?.length || 0);
+        // Debug: Log goal widgets with their ritual data
+        const goalWidgets = data?.filter(w => w?.type === 'goal') || [];
+        goalWidgets.forEach((gw, i) => {
+          const content = typeof gw.content === 'string' ? JSON.parse(gw.content) : gw.content;
+          console.log(`[VisionBoard] Goal ${i + 1} ritual data:`, {
+            id: gw.id,
+            title: gw.title,
+            contentType: typeof gw.content,
+            contentRituals: content?.rituals,
+            goals0Rituals: content?.goals?.[0]?.rituals,
+          });
+        });
         setWidgets(data || []);
       }
     } catch (err) {
@@ -3020,8 +3506,55 @@ const VisionBoardScreen = () => {
     useCallback(() => {
       console.log('[VisionBoard] Screen focused - refreshing widgets');
       fetchWidgets();
+      fetchReadingHistory();
     }, [fetchWidgets])
   );
+
+  // =========== HANDLE SCROLL TO SECTION FROM NAVIGATION PARAMS ===========
+  useFocusEffect(
+    useCallback(() => {
+      const scrollToSection = route.params?.scrollToSection;
+      if (scrollToSection === 'goals' && goalsSectionY.current > 0) {
+        // Delay to ensure layout is complete
+        setTimeout(() => {
+          scrollViewRef.current?.scrollTo({
+            y: goalsSectionY.current - 100, // Offset for header
+            animated: true,
+          });
+        }, 300);
+        // Clear the param to prevent re-scrolling on next focus
+        navigation.setParams({ scrollToSection: undefined });
+      }
+    }, [route.params?.scrollToSection, navigation])
+  );
+
+  // =========== FETCH READING HISTORY FROM DATABASE ===========
+  const fetchReadingHistory = useCallback(async () => {
+    if (!user?.id) return;
+
+    try {
+      const { data, error } = await readingHistoryService.getReadings(user.id, {
+        type: 'all',
+        limit: 50, // Get recent 50 readings
+      });
+
+      if (error) {
+        console.warn('[VisionBoard] Reading history fetch error:', error);
+        setSavedReadings([]);
+      } else {
+        console.log('[VisionBoard] Loaded reading history:', data?.length || 0);
+        setSavedReadings(data || []);
+      }
+    } catch (err) {
+      console.error('[VisionBoard] Reading history error:', err);
+      setSavedReadings([]);
+    }
+  }, [user?.id]);
+
+  // Fetch reading history on mount
+  useEffect(() => {
+    fetchReadingHistory();
+  }, [fetchReadingHistory]);
 
   // Show tooltips for first-time users
   useEffect(() => {
@@ -3037,9 +3570,10 @@ const VisionBoardScreen = () => {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await fetchWidgets();
+    await fetchReadingHistory();
     await fetchCalendarAndCharts();
     setRefreshing(false);
-  }, [fetchWidgets]);
+  }, [fetchWidgets, fetchReadingHistory]);
 
   // =========== NEW: FETCH CALENDAR & CHARTS DATA ===========
   const fetchCalendarAndCharts = useCallback(async () => {
@@ -3299,7 +3833,7 @@ const VisionBoardScreen = () => {
 
   // Toggle checkbox for goals/habits
   // itemId format: "widgetId_goal_0" or "widgetId_step_0"
-  const handleToggleItem = useCallback(async (itemId, type) => {
+  const handleToggleItem = useCallback((itemId, type) => {
     // Guard: itemId must be a valid string
     if (!itemId || typeof itemId !== 'string') {
       console.warn('[VisionBoard] handleToggleItem: Invalid itemId:', itemId);
@@ -3313,7 +3847,8 @@ const VisionBoardScreen = () => {
     const widgetId = widgetIdMatch ? widgetIdMatch[1] : null;
     const itemIndex = widgetIdMatch ? parseInt(widgetIdMatch[3], 10) : -1;
 
-    // Update local state first for instant feedback
+    // OPTIMISTIC UPDATE: Update local state IMMEDIATELY for instant feedback
+    // No await - this runs synchronously for instant UI response
     setWidgets(prev => {
       return prev.map(w => {
         // Only update the specific widget that contains this item
@@ -3382,78 +3917,10 @@ const VisionBoardScreen = () => {
           }
           return w;
         }
-        return w;
-      });
-    });
 
-    // Track gamification based on type and widget type
-    const targetWidget = widgets.find(w => w?.id === widgetId);
-    const isActionPlanWidget = targetWidget && (targetWidget.type === 'action_plan' || targetWidget.type === 'steps');
-
-    if (type === 'habit') {
-      // Check if this is an action_plan widget - track 'action' instead of 'habit'
-      if (isActionPlanWidget) {
-        await trackAction();
-        console.log('[Gamification] Tracked action for action_plan widget');
-      } else {
-        await trackHabit();
-      }
-
-      // Auto-track goal when ALL action plan steps are completed
-      if (isActionPlanWidget) {
-        const content = parseWidgetContent(targetWidget);
-        if (content?.steps) {
-          // Get current step index
-          const indexMatch = itemId.match(/_step_(\d+)$/);
-          const index = indexMatch ? parseInt(indexMatch[1], 10) : -1;
-
-          // Check if all steps will be completed after this toggle
-          const allStepsCompleted = content.steps.every((step, i) => {
-            if (i === index) {
-              // This is the step being toggled - it will become completed
-              return !step?.completed;
-            }
-            return step?.completed;
-          });
-
-          if (allStepsCompleted) {
-            console.log('[Gamification] All action plan steps completed - auto-tracking goal');
-            await trackGoal();
-          }
-        }
-      }
-    } else if (type === 'goal') {
-      await trackGoal();
-    }
-
-    // Sync to database - update widget content
-    try {
-      // Find the widget to get its updated content
-      const widgetToUpdate = widgets.find(w => w?.id === widgetId);
-      if (widgetToUpdate) {
-        let updatedContent;
-        const content = parseWidgetContent(widgetToUpdate);
-
-        if (type === 'goal' && isGoalType(widgetToUpdate?.type)) {
-          if (Array.isArray(content)) {
-            const indexMatch = itemId.match(/_goal_(\d+)$/);
-            const index = indexMatch ? parseInt(indexMatch[1], 10) : -1;
-            if (index >= 0 && index < content.length) {
-              const updatedArray = [...content];
-              updatedArray[index] = {
-                ...updatedArray[index],
-                completed: !content[index]?.completed,
-              };
-              updatedContent = updatedArray;
-            }
-          } else if (content?.goals) {
-            const updatedGoals = content.goals.map((g, i) => {
-              const goalId = `${widgetId}_goal_${i}`;
-              return goalId === itemId ? { ...g, completed: !g.completed } : g;
-            });
-            updatedContent = { ...content, goals: updatedGoals };
-          }
-        } else if (type === 'habit') {
+        // Handle embedded steps in GOAL widgets (from karma analysis)
+        if ((type === 'habit') && isGoalType(w?.type) && w?.id === widgetId) {
+          const content = parseWidgetContent(w);
           if (content?.steps) {
             const indexMatch = itemId.match(/_step_(\d+)$/);
             const index = indexMatch ? parseInt(indexMatch[1], 10) : -1;
@@ -3461,35 +3928,124 @@ const VisionBoardScreen = () => {
               const updatedSteps = [...content.steps];
               updatedSteps[index] = {
                 ...updatedSteps[index],
-                completed: !content.steps[index]?.completed,
+                completed: !updatedSteps[index]?.completed,
               };
-              updatedContent = { ...content, steps: updatedSteps };
+              return {
+                ...w,
+                content: { ...content, steps: updatedSteps },
+              };
             }
-          } else if (content?.habits) {
-            const updatedHabits = content.habits.map((h, i) => {
-              const habitId = `${widgetId}_habit_${i}`;
-              return habitId === itemId ? { ...h, completed: !h.completed } : h;
-            });
-            updatedContent = { ...content, habits: updatedHabits };
           }
+          return w;
         }
+        return w;
+      });
+    });
 
-        if (updatedContent) {
-          const { error } = await supabase
-            .from('vision_board_widgets')
-            .update({ content: updatedContent })
-            .eq('id', widgetId);
+    // BACKGROUND: Track gamification and sync to database (non-blocking)
+    // Use setTimeout to ensure UI updates first, then run async operations
+    setTimeout(async () => {
+      try {
+        const targetWidget = widgets.find(w => w?.id === widgetId);
+        const isActionPlanWidget = targetWidget && (targetWidget.type === 'action_plan' || targetWidget.type === 'steps');
 
-          if (error) {
-            console.error('[VisionBoard] Sync error:', error);
+        // Track gamification based on type
+        if (type === 'habit') {
+          if (isActionPlanWidget) {
+            trackAction(); // Fire and forget
+            console.log('[Gamification] Tracked action for action_plan widget');
           } else {
-            console.log('[VisionBoard] Synced to database:', widgetId);
+            trackHabit(); // Fire and forget
+          }
+
+          // Auto-track goal when ALL action plan steps are completed
+          if (isActionPlanWidget) {
+            const content = parseWidgetContent(targetWidget);
+            if (content?.steps) {
+              const indexMatch = itemId.match(/_step_(\d+)$/);
+              const index = indexMatch ? parseInt(indexMatch[1], 10) : -1;
+              const allStepsCompleted = content.steps.every((step, i) => {
+                if (i === index) return !step?.completed;
+                return step?.completed;
+              });
+              if (allStepsCompleted) {
+                console.log('[Gamification] All action plan steps completed - auto-tracking goal');
+                trackGoal(); // Fire and forget
+              }
+            }
+          }
+        } else if (type === 'goal') {
+          trackGoal(); // Fire and forget
+        }
+
+        // Sync to database
+        const widgetToUpdate = widgets.find(w => w?.id === widgetId);
+        if (widgetToUpdate) {
+          let updatedContent;
+          const content = parseWidgetContent(widgetToUpdate);
+
+          if (type === 'goal' && isGoalType(widgetToUpdate?.type)) {
+            if (Array.isArray(content)) {
+              const indexMatch = itemId.match(/_goal_(\d+)$/);
+              const index = indexMatch ? parseInt(indexMatch[1], 10) : -1;
+              if (index >= 0 && index < content.length) {
+                const updatedArray = [...content];
+                updatedArray[index] = { ...updatedArray[index], completed: !content[index]?.completed };
+                updatedContent = updatedArray;
+              }
+            } else if (content?.goals) {
+              const updatedGoals = content.goals.map((g, i) => {
+                const goalId = `${widgetId}_goal_${i}`;
+                return goalId === itemId ? { ...g, completed: !g.completed } : g;
+              });
+              updatedContent = { ...content, goals: updatedGoals };
+            }
+          } else if (type === 'habit') {
+            // Handle habit/action_plan widgets
+            if (content?.steps && (widgetToUpdate.type === 'habit' || widgetToUpdate.type === 'steps' || widgetToUpdate.type === 'action_plan')) {
+              const indexMatch = itemId.match(/_step_(\d+)$/);
+              const index = indexMatch ? parseInt(indexMatch[1], 10) : -1;
+              if (index >= 0 && index < content.steps.length) {
+                const updatedSteps = [...content.steps];
+                updatedSteps[index] = { ...updatedSteps[index], completed: !content.steps[index]?.completed };
+                updatedContent = { ...content, steps: updatedSteps };
+              }
+            } else if (content?.habits) {
+              const updatedHabits = content.habits.map((h, i) => {
+                const habitId = `${widgetId}_habit_${i}`;
+                return habitId === itemId ? { ...h, completed: !h.completed } : h;
+              });
+              updatedContent = { ...content, habits: updatedHabits };
+            }
+            // Handle embedded steps in GOAL widgets (from karma analysis)
+            else if (content?.steps && isGoalType(widgetToUpdate?.type)) {
+              const indexMatch = itemId.match(/_step_(\d+)$/);
+              const index = indexMatch ? parseInt(indexMatch[1], 10) : -1;
+              if (index >= 0 && index < content.steps.length) {
+                const updatedSteps = [...content.steps];
+                updatedSteps[index] = { ...updatedSteps[index], completed: !content.steps[index]?.completed };
+                updatedContent = { ...content, steps: updatedSteps };
+              }
+            }
+          }
+
+          if (updatedContent) {
+            const { error } = await supabase
+              .from('vision_board_widgets')
+              .update({ content: updatedContent })
+              .eq('id', widgetId);
+
+            if (error) {
+              console.error('[VisionBoard] Sync error:', error);
+            } else {
+              console.log('[VisionBoard] Synced to database:', widgetId);
+            }
           }
         }
+      } catch (err) {
+        console.error('[VisionBoard] Background sync error:', err);
       }
-    } catch (err) {
-      console.error('[VisionBoard] Sync error:', err);
-    }
+    }, 0); // setTimeout with 0 allows UI to update first
   }, [widgets, trackHabit, trackGoal, trackAction]);
 
   // Shorthand alias for habit toggle (used by CrystalSection)
@@ -3892,15 +4448,380 @@ const VisionBoardScreen = () => {
     }
   }, [user?.id]);
 
-  // Delete single widget
+  // Save spiritual ritual inline - for goal widgets with embedded rituals
+  const handleSaveRitual = useCallback(async (widget, index, updatedRitual) => {
+    if (!widget?.id || !user?.id || index < 0 || !updatedRitual?.name?.trim()) return;
+
+    try {
+      const content = parseWidgetContent(widget);
+      const rituals = content?.rituals || [];
+
+      // Update the ritual at the given index
+      const updatedRituals = [...rituals];
+      if (index < updatedRituals.length) {
+        updatedRituals[index] = {
+          ...updatedRituals[index],
+          name: updatedRitual.name.trim(),
+          description: updatedRitual.description?.trim() || '',
+        };
+      }
+
+      const updatedContent = {
+        ...content,
+        rituals: updatedRituals,
+      };
+
+      // Update in database
+      const { error } = await supabase
+        .from('vision_board_widgets')
+        .update({
+          content: updatedContent,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', widget.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setWidgets(prev => prev.map(w => {
+        if (w?.id === widget.id) {
+          return { ...w, content: updatedContent };
+        }
+        return w;
+      }));
+
+      console.log('[VisionBoard] Ritual saved inline:', { widgetId: widget.id, index, updatedRitual });
+    } catch (err) {
+      console.error('[VisionBoard] Save ritual error:', err);
+      setAlertConfig({
+        visible: true,
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Không thể lưu nghi thức. Vui lòng thử lại.',
+        buttons: [{ text: 'OK', style: 'primary' }],
+      });
+    }
+  }, [user?.id]);
+
+  // Toggle ritual completion status
+  const handleToggleRitual = useCallback(async (widget, ritualId) => {
+    if (!widget?.id || !user?.id || !ritualId) return;
+
+    try {
+      const content = parseWidgetContent(widget);
+      const rituals = content?.rituals || [];
+
+      // Find and toggle the ritual
+      const updatedRituals = rituals.map((r, idx) => {
+        const rId = r?.id || `ritual_${idx}`;
+        if (rId === ritualId) {
+          return { ...r, completed: !r?.completed };
+        }
+        return r;
+      });
+
+      const updatedContent = {
+        ...content,
+        rituals: updatedRituals,
+      };
+
+      // Update in database
+      const { error } = await supabase
+        .from('vision_board_widgets')
+        .update({
+          content: updatedContent,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', widget.id);
+
+      if (error) throw error;
+
+      // Update local state
+      setWidgets(prev => prev.map(w => {
+        if (w?.id === widget.id) {
+          return { ...w, content: updatedContent };
+        }
+        return w;
+      }));
+
+      console.log('[VisionBoard] Ritual toggled:', { widgetId: widget.id, ritualId });
+    } catch (err) {
+      console.error('[VisionBoard] Toggle ritual error:', err);
+    }
+  }, [user?.id]);
+
+  // Delete single affirmation from widget
+  const handleDeleteAffirmation = useCallback(async (widget, index) => {
+    if (!widget?.id || !user?.id || index < 0) return;
+
+    try {
+      const content = parseWidgetContent(widget);
+      let updatedContent;
+
+      if (Array.isArray(content)) {
+        updatedContent = content.filter((_, i) => i !== index);
+      } else if (content?.affirmations && Array.isArray(content.affirmations)) {
+        updatedContent = { ...content, affirmations: content.affirmations.filter((_, i) => i !== index) };
+      } else {
+        console.warn('[VisionBoard] Unexpected affirmation content structure');
+        return;
+      }
+
+      const { error } = await supabase
+        .from('vision_board_widgets')
+        .update({
+          content: updatedContent,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', widget.id);
+
+      if (error) throw error;
+
+      setWidgets(prev => prev.map(w => {
+        if (w?.id === widget.id) {
+          return { ...w, content: updatedContent };
+        }
+        return w;
+      }));
+
+      console.log('[VisionBoard] Affirmation deleted:', { widgetId: widget.id, index });
+    } catch (err) {
+      console.error('[VisionBoard] Delete affirmation error:', err);
+    }
+  }, [user?.id]);
+
+  // Delete single action step from widget
+  const handleDeleteActionStep = useCallback(async (widget, index) => {
+    if (!widget?.id || !user?.id || index < 0) return;
+
+    try {
+      const content = parseWidgetContent(widget);
+      let updatedContent;
+
+      if (Array.isArray(content)) {
+        updatedContent = content.filter((_, i) => i !== index);
+      } else if (content?.habits && Array.isArray(content.habits)) {
+        updatedContent = { ...content, habits: content.habits.filter((_, i) => i !== index) };
+      } else if (content?.steps && Array.isArray(content.steps)) {
+        updatedContent = { ...content, steps: content.steps.filter((_, i) => i !== index) };
+      } else {
+        console.warn('[VisionBoard] Unexpected action step content structure');
+        return;
+      }
+
+      const { error } = await supabase
+        .from('vision_board_widgets')
+        .update({
+          content: updatedContent,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', widget.id);
+
+      if (error) throw error;
+
+      setWidgets(prev => prev.map(w => {
+        if (w?.id === widget.id) {
+          return { ...w, content: updatedContent };
+        }
+        return w;
+      }));
+
+      console.log('[VisionBoard] Action step deleted:', { widgetId: widget.id, index });
+    } catch (err) {
+      console.error('[VisionBoard] Delete action step error:', err);
+    }
+  }, [user?.id]);
+
+  // Delete single ritual from widget
+  const handleDeleteRitual = useCallback(async (widget, index) => {
+    if (!widget?.id || !user?.id || index < 0) return;
+
+    try {
+      const content = parseWidgetContent(widget);
+      const rituals = content?.rituals || [];
+      const updatedRituals = rituals.filter((_, i) => i !== index);
+
+      const updatedContent = {
+        ...content,
+        rituals: updatedRituals,
+      };
+
+      const { error } = await supabase
+        .from('vision_board_widgets')
+        .update({
+          content: updatedContent,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', widget.id);
+
+      if (error) throw error;
+
+      setWidgets(prev => prev.map(w => {
+        if (w?.id === widget.id) {
+          return { ...w, content: updatedContent };
+        }
+        return w;
+      }));
+
+      console.log('[VisionBoard] Ritual deleted:', { widgetId: widget.id, index });
+    } catch (err) {
+      console.error('[VisionBoard] Delete ritual error:', err);
+    }
+  }, [user?.id]);
+
+  // Add new affirmation to widget
+  const handleAddAffirmation = useCallback(async (widget) => {
+    if (!widget?.id || !user?.id) return;
+
+    try {
+      const content = parseWidgetContent(widget);
+      let updatedContent;
+      const newAffirmation = 'Câu khẳng định mới...';
+
+      if (Array.isArray(content)) {
+        updatedContent = [...content, newAffirmation];
+      } else if (content?.affirmations && Array.isArray(content.affirmations)) {
+        updatedContent = { ...content, affirmations: [...content.affirmations, newAffirmation] };
+      } else {
+        updatedContent = { ...content, affirmations: [newAffirmation] };
+      }
+
+      const { error } = await supabase
+        .from('vision_board_widgets')
+        .update({
+          content: updatedContent,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', widget.id);
+
+      if (error) throw error;
+
+      setWidgets(prev => prev.map(w => {
+        if (w?.id === widget.id) {
+          return { ...w, content: updatedContent };
+        }
+        return w;
+      }));
+
+      console.log('[VisionBoard] Affirmation added:', { widgetId: widget.id });
+    } catch (err) {
+      console.error('[VisionBoard] Add affirmation error:', err);
+    }
+  }, [user?.id]);
+
+  // Add new action step to widget
+  const handleAddActionStep = useCallback(async (widget) => {
+    if (!widget?.id || !user?.id) return;
+
+    try {
+      const content = parseWidgetContent(widget);
+      let updatedContent;
+      const newStep = {
+        id: `step_${Date.now()}`,
+        title: 'Bước hành động mới...',
+        text: 'Bước hành động mới...',
+        completed: false,
+        action_type: 'daily',
+      };
+
+      if (Array.isArray(content)) {
+        updatedContent = [...content, newStep];
+      } else if (content?.habits && Array.isArray(content.habits)) {
+        updatedContent = { ...content, habits: [...content.habits, newStep] };
+      } else if (content?.steps && Array.isArray(content.steps)) {
+        updatedContent = { ...content, steps: [...content.steps, newStep] };
+      } else {
+        updatedContent = { ...content, steps: [newStep] };
+      }
+
+      const { error } = await supabase
+        .from('vision_board_widgets')
+        .update({
+          content: updatedContent,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', widget.id);
+
+      if (error) throw error;
+
+      setWidgets(prev => prev.map(w => {
+        if (w?.id === widget.id) {
+          return { ...w, content: updatedContent };
+        }
+        return w;
+      }));
+
+      console.log('[VisionBoard] Action step added:', { widgetId: widget.id });
+    } catch (err) {
+      console.error('[VisionBoard] Add action step error:', err);
+    }
+  }, [user?.id]);
+
+  // Add new ritual to widget
+  const handleAddRitual = useCallback(async (widget) => {
+    if (!widget?.id || !user?.id) return;
+
+    try {
+      const content = parseWidgetContent(widget);
+      const rituals = content?.rituals || [];
+      const newRitual = {
+        id: `ritual_${Date.now()}`,
+        name: 'Nghi thức mới...',
+        description: '',
+        completed: false,
+      };
+
+      const updatedContent = {
+        ...content,
+        rituals: [...rituals, newRitual],
+      };
+
+      const { error } = await supabase
+        .from('vision_board_widgets')
+        .update({
+          content: updatedContent,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', widget.id);
+
+      if (error) throw error;
+
+      setWidgets(prev => prev.map(w => {
+        if (w?.id === widget.id) {
+          return { ...w, content: updatedContent };
+        }
+        return w;
+      }));
+
+      console.log('[VisionBoard] Ritual added:', { widgetId: widget.id });
+    } catch (err) {
+      console.error('[VisionBoard] Add ritual error:', err);
+    }
+  }, [user?.id]);
+
+  // Delete single widget - with cascade delete for linked widgets
+  // When a goal widget is deleted, also delete linked affirmation/action_plan widgets
   const handleDeleteWidget = useCallback(async (widgetId) => {
     if (!widgetId) return;
+
+    // Find the widget to check if it's a goal
+    const widgetToDelete = widgets.find(w => w?.id === widgetId);
+    const isGoalWidget = widgetToDelete?.type === 'goal';
+
+    // If deleting a goal, find linked widgets to show in confirmation message
+    const linkedWidgets = isGoalWidget
+      ? widgets.filter(w => w?.content?.linked_goal_id === widgetId)
+      : [];
+
+    const confirmMessage = isGoalWidget && linkedWidgets.length > 0
+      ? `Bạn có chắc chắn muốn xóa mục tiêu này?\n\nSẽ xóa luôn ${linkedWidgets.length} widget liên kết (khẳng định và kế hoạch hành động).`
+      : 'Bạn có chắc chắn muốn xóa widget này?';
 
     setAlertConfig({
       visible: true,
       type: 'error',
-      title: 'Xóa Widget?',
-      message: 'Bạn có chắc chắn muốn xóa widget này?',
+      title: isGoalWidget ? 'Xóa Mục Tiêu?' : 'Xóa Widget?',
+      message: confirmMessage,
       buttons: [
         { text: 'Hủy', style: 'secondary' },
         {
@@ -3908,13 +4829,38 @@ const VisionBoardScreen = () => {
           style: 'primary',
           onPress: async () => {
             try {
+              // If it's a goal widget, also delete linked affirmation/action_plan widgets
+              if (isGoalWidget && linkedWidgets.length > 0) {
+                const linkedIds = linkedWidgets.map(w => w.id);
+                console.log('[VisionBoard] Cascade deleting linked widgets:', linkedIds);
+
+                const { error: linkedError } = await supabase
+                  .from('vision_board_widgets')
+                  .delete()
+                  .in('id', linkedIds);
+
+                if (linkedError) {
+                  console.error('[VisionBoard] Error deleting linked widgets:', linkedError);
+                  // Continue with main delete even if linked delete fails
+                }
+              }
+
+              // Delete the main widget
               const { error } = await supabase
                 .from('vision_board_widgets')
                 .delete()
                 .eq('id', widgetId);
 
               if (error) throw error;
-              setWidgets(prev => prev.filter(w => w?.id !== widgetId));
+
+              // Update local state - remove both the widget and any linked widgets
+              setWidgets(prev => prev.filter(w => {
+                if (w?.id === widgetId) return false;
+                if (isGoalWidget && w?.content?.linked_goal_id === widgetId) return false;
+                return true;
+              }));
+
+              console.log('[VisionBoard] Deleted widget:', widgetId, isGoalWidget ? `+ ${linkedWidgets.length} linked` : '');
             } catch (err) {
               console.error('[VisionBoard] Delete error:', err);
               setAlertConfig({
@@ -3929,9 +4875,9 @@ const VisionBoardScreen = () => {
         },
       ],
     });
-  }, []);
+  }, [widgets]);
 
-  // Delete multiple widgets (batch delete)
+  // Delete multiple widgets (batch delete) - with cascade delete for linked widgets
   const handleDeleteMultipleWidgets = useCallback(async (widgetIds, confirmMessage = 'Bạn có chắc chắn muốn xóa các widget này?') => {
     if (!widgetIds || widgetIds.length === 0) return;
     if (!user?.id) {
@@ -3943,11 +4889,33 @@ const VisionBoardScreen = () => {
     const validIds = widgetIds.filter(id => id);
     if (validIds.length === 0) return;
 
+    // Find any linked widgets for goal widgets being deleted (cascade delete)
+    const goalWidgetIds = validIds.filter(id => {
+      const widget = widgets.find(w => w?.id === id);
+      return widget?.type === 'goal';
+    });
+
+    // Find all widgets linked to these goals
+    const linkedWidgetIds = goalWidgetIds.length > 0
+      ? widgets
+          .filter(w => goalWidgetIds.includes(w?.content?.linked_goal_id))
+          .map(w => w.id)
+          .filter(id => !validIds.includes(id)) // Don't duplicate
+      : [];
+
+    // Combine all widget IDs to delete
+    const allIdsToDelete = [...validIds, ...linkedWidgetIds];
+
+    // Update message if there are linked widgets
+    const finalMessage = linkedWidgetIds.length > 0
+      ? `${confirmMessage}\n\n(+ ${linkedWidgetIds.length} widget liên kết sẽ bị xóa)`
+      : confirmMessage;
+
     setAlertConfig({
       visible: true,
       type: 'error',
       title: `Xóa ${validIds.length} Widget?`,
-      message: confirmMessage,
+      message: finalMessage,
       buttons: [
         { text: 'Hủy', style: 'secondary' },
         {
@@ -3955,11 +4923,11 @@ const VisionBoardScreen = () => {
           style: 'primary',
           onPress: async () => {
             try {
-              console.log('[VisionBoard] Batch deleting widgets:', validIds);
+              console.log('[VisionBoard] Batch deleting widgets:', allIdsToDelete);
 
               // Delete widgets one by one to avoid RLS issues
               let successCount = 0;
-              for (const id of validIds) {
+              for (const id of allIdsToDelete) {
                 const { error } = await supabase
                   .from('vision_board_widgets')
                   .delete()
@@ -3973,13 +4941,13 @@ const VisionBoardScreen = () => {
                 }
               }
 
-              // Update local state
-              setWidgets(prev => prev.filter(w => !validIds.includes(w?.id)));
+              // Update local state - remove all deleted widgets including linked ones
+              setWidgets(prev => prev.filter(w => !allIdsToDelete.includes(w?.id)));
 
               // Reset selected lifeArea if all its widgets were deleted
               setSelectedGoalLifeArea(null);
 
-              console.log('[VisionBoard] Successfully deleted', successCount, 'of', validIds.length, 'widgets');
+              console.log('[VisionBoard] Successfully deleted', successCount, 'of', allIdsToDelete.length, 'widgets (including', linkedWidgetIds.length, 'linked)');
             } catch (err) {
               console.error('[VisionBoard] Batch delete error:', err);
               setAlertConfig({
@@ -3987,6 +4955,286 @@ const VisionBoardScreen = () => {
                 type: 'error',
                 title: 'Lỗi',
                 message: 'Không thể xóa widgets. Vui lòng thử lại.',
+                buttons: [{ text: 'OK', style: 'primary' }],
+              });
+            }
+          },
+        },
+      ],
+    });
+  }, [user?.id, widgets]);
+
+  // GLOBAL selection handlers (for cross-group multi-select)
+  const handleGlobalLongPress = useCallback((itemId) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setGlobalSelectionMode(true);
+    setGlobalSelectedItems(new Set([itemId]));
+  }, []);
+
+  const handleGlobalToggleSelect = useCallback((itemId) => {
+    if (!globalSelectionMode) return;
+    Haptics.selectionAsync();
+    setGlobalSelectedItems(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(itemId)) {
+        newSet.delete(itemId);
+      } else {
+        newSet.add(itemId);
+      }
+      return newSet;
+    });
+  }, [globalSelectionMode]);
+
+  const handleGlobalCancelSelection = useCallback(() => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setGlobalSelectionMode(false);
+    setGlobalSelectedItems(new Set());
+  }, []);
+
+  const handleGlobalDeleteSelected = useCallback(() => {
+    if (globalSelectedItems.size > 0) {
+      handleDeleteMultipleWidgets(
+        Array.from(globalSelectedItems),
+        `Xóa ${globalSelectedItems.size} mục tiêu đã chọn?`
+      );
+      handleGlobalCancelSelection();
+    }
+  }, [globalSelectedItems, handleDeleteMultipleWidgets, handleGlobalCancelSelection]);
+
+  // =========== DELETE READING (handles both widget and database sources) ===========
+  const handleDeleteReading = useCallback(async (reading) => {
+    if (!reading?.id) return;
+    if (!user?.id) {
+      console.error('[VisionBoard] No user ID for delete reading');
+      return;
+    }
+
+    const readingTitle = reading?.type === 'tarot'
+      ? 'trải bài Tarot'
+      : 'quẻ Kinh Dịch';
+
+    setAlertConfig({
+      visible: true,
+      type: 'error',
+      title: `Xóa ${reading?.type === 'tarot' ? 'Tarot' : 'Kinh Dịch'}?`,
+      message: `Bạn có chắc chắn muốn xóa ${readingTitle} này?`,
+      buttons: [
+        { text: 'Hủy', style: 'secondary' },
+        {
+          text: 'Xóa',
+          style: 'primary',
+          onPress: async () => {
+            try {
+              console.log('[VisionBoard] Deleting reading:', reading.id, 'source:', reading.source, 'type:', reading.type);
+
+              if (reading.source === 'database') {
+                // Delete from tarot_readings or iching_readings table
+                let result;
+                if (reading.type === 'tarot') {
+                  result = await readingHistoryService.deleteTarotReading(reading.id, user.id);
+                } else {
+                  result = await readingHistoryService.deleteIChingReading(reading.id, user.id);
+                }
+
+                if (!result.success) {
+                  throw new Error(result.error || 'Lỗi không xác định');
+                }
+
+                // Update local state
+                setSavedReadings(prev => prev.filter(r => r?.id !== reading.id));
+                console.log('[VisionBoard] Successfully deleted reading from database');
+              } else {
+                // Delete from vision_board_widgets table
+                const { error } = await supabase
+                  .from('vision_board_widgets')
+                  .delete()
+                  .eq('id', reading.id);
+
+                if (error) throw error;
+
+                // Update local state
+                setWidgets(prev => prev.filter(w => w?.id !== reading.id));
+                console.log('[VisionBoard] Successfully deleted reading from widgets');
+              }
+            } catch (err) {
+              console.error('[VisionBoard] Delete reading error:', err);
+              setAlertConfig({
+                visible: true,
+                type: 'error',
+                title: 'Lỗi',
+                message: 'Không thể xóa. Vui lòng thử lại.',
+                buttons: [{ text: 'OK', style: 'primary' }],
+              });
+            }
+          },
+        },
+      ],
+    });
+  }, [user?.id]);
+
+  // Delete multiple readings (batch delete)
+  const handleDeleteMultipleReadings = useCallback(async (readings) => {
+    if (!readings || readings.length === 0) return;
+    if (!user?.id) {
+      console.error('[VisionBoard] No user ID for batch delete readings');
+      return;
+    }
+
+    setAlertConfig({
+      visible: true,
+      type: 'error',
+      title: `Xóa ${readings.length} mục?`,
+      message: `Bạn có chắc chắn muốn xóa ${readings.length} lịch sử trải bài đã chọn?`,
+      buttons: [
+        { text: 'Hủy', style: 'secondary' },
+        {
+          text: 'Xóa tất cả',
+          style: 'primary',
+          onPress: async () => {
+            try {
+              console.log('[VisionBoard] Batch deleting readings:', readings.length);
+
+              let successCount = 0;
+              const deletedDbIds = [];
+              const deletedWidgetIds = [];
+
+              for (const reading of readings) {
+                try {
+                  if (reading.source === 'database') {
+                    let result;
+                    if (reading.type === 'tarot') {
+                      result = await readingHistoryService.deleteTarotReading(reading.id, user.id);
+                    } else {
+                      result = await readingHistoryService.deleteIChingReading(reading.id, user.id);
+                    }
+                    if (result.success) {
+                      successCount++;
+                      deletedDbIds.push(reading.id);
+                    }
+                  } else {
+                    const { error } = await supabase
+                      .from('vision_board_widgets')
+                      .delete()
+                      .eq('id', reading.id)
+                      .eq('user_id', user.id);
+                    if (!error) {
+                      successCount++;
+                      deletedWidgetIds.push(reading.id);
+                    }
+                  }
+                } catch (err) {
+                  console.error('[VisionBoard] Failed to delete reading:', reading.id, err);
+                }
+              }
+
+              // Update local states
+              if (deletedDbIds.length > 0) {
+                setSavedReadings(prev => prev.filter(r => !deletedDbIds.includes(r?.id)));
+              }
+              if (deletedWidgetIds.length > 0) {
+                setWidgets(prev => prev.filter(w => !deletedWidgetIds.includes(w?.id)));
+              }
+
+              console.log('[VisionBoard] Successfully deleted', successCount, 'of', readings.length, 'readings');
+            } catch (err) {
+              console.error('[VisionBoard] Batch delete readings error:', err);
+              setAlertConfig({
+                visible: true,
+                type: 'error',
+                title: 'Lỗi',
+                message: 'Không thể xóa. Vui lòng thử lại.',
+                buttons: [{ text: 'OK', style: 'primary' }],
+              });
+            }
+          },
+        },
+      ],
+    });
+  }, [user?.id]);
+
+  const handleGlobalSelectAll = useCallback((allGoalIds) => {
+    setGlobalSelectedItems(new Set(allGoalIds));
+  }, []);
+
+  // Archive widgets (swipe action) - marks widgets as archived instead of deleting
+  const handleArchiveWidgets = useCallback(async (widgetIds) => {
+    if (!widgetIds || widgetIds.length === 0) return;
+    if (!user?.id) {
+      console.error('[VisionBoard] No user ID for archive');
+      return;
+    }
+
+    // Filter out null/undefined ids
+    const validIds = widgetIds.filter(id => id);
+    if (validIds.length === 0) return;
+
+    setAlertConfig({
+      visible: true,
+      type: 'info',
+      title: 'Lưu trữ mục tiêu?',
+      message: `Bạn có muốn lưu trữ ${validIds.length} widget? Bạn có thể khôi phục sau.`,
+      buttons: [
+        { text: 'Hủy', style: 'secondary' },
+        {
+          text: 'Lưu trữ',
+          style: 'primary',
+          onPress: async () => {
+            try {
+              console.log('[VisionBoard] Archiving widgets:', validIds);
+
+              // Update widgets one by one to avoid RLS issues
+              let successCount = 0;
+              for (const id of validIds) {
+                const { error } = await supabase
+                  .from('vision_board_widgets')
+                  .update({ archived: true, archived_at: new Date().toISOString() })
+                  .eq('id', id)
+                  .eq('user_id', user.id);
+
+                if (!error) {
+                  successCount++;
+                } else {
+                  console.error('[VisionBoard] Failed to archive widget:', id, error);
+                }
+              }
+
+              console.log('[VisionBoard] Successfully archived', successCount, 'of', validIds.length, 'widgets');
+
+              // Check if any widgets were actually archived
+              if (successCount === 0) {
+                // All failed - show error
+                setAlertConfig({
+                  visible: true,
+                  type: 'error',
+                  title: 'Lỗi lưu trữ',
+                  message: 'Không thể lưu trữ mục tiêu. Vui lòng thử lại.',
+                  buttons: [{ text: 'OK', style: 'primary' }],
+                });
+                return;
+              }
+
+              // Update local state - filter out archived widgets
+              setWidgets(prev => prev.filter(w => !validIds.includes(w?.id)));
+
+              // Reset selected lifeArea if all its widgets were archived
+              setSelectedGoalLifeArea(null);
+
+              // Show success message
+              setAlertConfig({
+                visible: true,
+                type: 'success',
+                title: 'Đã lưu trữ',
+                message: `Đã lưu trữ ${successCount} mục tiêu thành công.`,
+                buttons: [{ text: 'OK', style: 'primary' }],
+              });
+            } catch (err) {
+              console.error('[VisionBoard] Archive error:', err);
+              setAlertConfig({
+                visible: true,
+                type: 'error',
+                title: 'Lỗi',
+                message: 'Không thể lưu trữ widgets. Vui lòng thử lại.',
                 buttons: [{ text: 'OK', style: 'primary' }],
               });
             }
@@ -4054,6 +5302,7 @@ const VisionBoardScreen = () => {
   // Handle questionnaire completion - save personalized goal + affirmations + actions
   const handleQuestionnaireComplete = useCallback(async (personalizedData) => {
     console.log('[VisionBoard] Questionnaire completed:', personalizedData);
+    console.log('[VisionBoard] Rituals from questionnaire:', personalizedData?.rituals);
     setShowQuestionnaire(false);
 
     if (!user?.id || !personalizedData) return;
@@ -4062,13 +5311,25 @@ const VisionBoardScreen = () => {
       const lifeAreaInfo = LIFE_AREAS.find(la => la.key === personalizedData.lifeArea);
       const timestamp = Date.now();
 
+      // Get rituals - use provided or fallback to default for life area
+      const providedRituals = personalizedData?.rituals || [];
+      const defaultRitual = DEFAULT_RITUALS[personalizedData.lifeArea] || DEFAULT_RITUALS.personal;
+      const ritualsToSave = providedRituals.length > 0 ? providedRituals : [defaultRitual];
+
+      console.log('[VisionBoard] Saving goal with rituals:', {
+        provided: providedRituals?.length || 0,
+        autoSelected: providedRituals.length === 0,
+        ritualsToSave,
+      });
+
       // Create GOAL widget with personalized title
+      // NOTE: Use direct objects (not JSON.stringify) for JSONB columns - Supabase handles serialization
       const goalData = {
         user_id: user.id,
         type: 'goal',
         title: personalizedData.goalTitle,
         icon: 'target',
-        content: JSON.stringify({
+        content: {
           lifeArea: personalizedData.lifeArea,
           deadline: personalizedData.deadline,
           questionnaire: personalizedData.questionnaire, // Save answers for reference
@@ -4076,8 +5337,10 @@ const VisionBoardScreen = () => {
             id: `goal_${timestamp}_0`,
             title: personalizedData.goalTitle,
             completed: false,
+            rituals: ritualsToSave, // Save selected or default rituals
           }],
-        }),
+          rituals: ritualsToSave, // Also save at content level for easy access
+        },
         is_active: true,
       };
 
@@ -4087,10 +5350,10 @@ const VisionBoardScreen = () => {
         type: 'affirmation',
         title: `${lifeAreaInfo?.label || personalizedData.lifeArea} Affirmations`,
         icon: 'sparkles',
-        content: JSON.stringify({
+        content: {
           lifeArea: personalizedData.lifeArea,
           affirmations: personalizedData.affirmations || [],
-        }),
+        },
         is_active: true,
       };
 
@@ -4100,7 +5363,7 @@ const VisionBoardScreen = () => {
         type: 'action_plan',
         title: `Kế hoạch: ${personalizedData.goalTitle}`,
         icon: 'list-checks',
-        content: JSON.stringify({
+        content: {
           lifeArea: personalizedData.lifeArea,
           deadline: personalizedData.deadline,
           steps: (personalizedData.actionSteps || []).map((step, i) => ({
@@ -4110,7 +5373,7 @@ const VisionBoardScreen = () => {
             action_type: step.action_type || 'daily', // NEW: Include action_type
             completed: false,
           })),
-        }),
+        },
         is_active: true,
       };
 
@@ -4127,19 +5390,26 @@ const VisionBoardScreen = () => {
 
       const goalId = goalResult.id;
 
+      // Debug: Log what Supabase returned
+      console.log('[VisionBoard] Goal widget saved, content returned:', {
+        contentType: typeof goalResult.content,
+        content: goalResult.content,
+        parsedContent: typeof goalResult.content === 'string'
+          ? JSON.parse(goalResult.content)
+          : goalResult.content,
+      });
+
       // Update affirmationData content with goalId
-      const affirmationContentWithGoalId = {
-        ...JSON.parse(affirmationData.content),
+      affirmationData.content = {
+        ...affirmationData.content,
         goalId: goalId,
       };
-      affirmationData.content = JSON.stringify(affirmationContentWithGoalId);
 
       // Update actionPlanData content with goalId
-      const actionPlanContentWithGoalId = {
-        ...JSON.parse(actionPlanData.content),
+      actionPlanData.content = {
+        ...actionPlanData.content,
         goalId: goalId,
       };
-      actionPlanData.content = JSON.stringify(actionPlanContentWithGoalId);
 
       const { data: affirmResult, error: affirmError } = await supabase
         .from('vision_board_widgets')
@@ -4255,7 +5525,7 @@ const VisionBoardScreen = () => {
         icon: widgetForm.type === 'affirmation' ? 'sparkles'
             : widgetForm.type === 'goal' ? 'target'
             : 'list-checks',
-        content: JSON.stringify(contentData),
+        content: contentData, // Direct object for JSONB column
         is_active: true,
       };
 
@@ -4363,6 +5633,7 @@ const VisionBoardScreen = () => {
 
       {/* Content */}
       <ScrollView
+        ref={scrollViewRef}
         style={styles.scrollView}
         contentContainerStyle={[
           styles.scrollContent,
@@ -4396,10 +5667,15 @@ const VisionBoardScreen = () => {
         ) : (
           <>
             {/* =========== NEW: DAILY SCORE & STREAK (TOP OF PAGE) =========== */}
+            {/* Score formula: 40% goals + 30% affirmations + 30% habits */}
             <DailyScoreCard
-              dailyScore={Math.round((stats.goalsCompleted / Math.max(stats.goalsTotal, 1)) * 100)}
-              tasksCompleted={stats.goalsCompleted + stats.affirmationsCompleted}
-              tasksTotal={stats.goalsTotal + (stats.affirmationsCompleted > 0 ? 1 : 0) + (stats.habitsPercent > 0 ? 1 : 0)}
+              dailyScore={Math.round(
+                (stats.goalsCompleted / Math.max(stats.goalsTotal, 1)) * 40 +
+                (stats.affirmationsCompleted > 0 ? 30 : 0) +
+                (stats.habitsPercent / 100) * 30
+              )}
+              tasksCompleted={stats.goalsCompleted + stats.affirmationsCompleted + Math.round(stats.habitsPercent / 100 * allHabits.length)}
+              tasksTotal={stats.goalsTotal + 1 + allHabits.length}
               streakDays={streakDays}
               currentLevel={currentLevel}
               levelTitle={levelTitle}
@@ -4411,7 +5687,7 @@ const VisionBoardScreen = () => {
             <QuickStatsRow
               stats={{
                 goals: { completed: stats.goalsCompleted, total: stats.goalsTotal },
-                affirmations: { completed: stats.affirmationsCompleted, total: stats.affirmationsCompleted > 0 ? stats.affirmationsCompleted : 1 },
+                affirmations: { completed: stats.affirmationsCompleted, total: allAffirmations.length || 0 },
                 habits: { completed: Math.round(stats.habitsPercent / 100 * allHabits.length), total: allHabits.length },
                 xpToday: xpToday,
               }}
@@ -4421,22 +5697,36 @@ const VisionBoardScreen = () => {
               }}
             />
 
+            {/* =========== XP LEVEL TRACKER (Compact Inline) =========== */}
+            <XPGoalTrackerInline
+              totalXP={totalXP}
+              currentLevel={currentLevel}
+              levelTitle={currentLevelData?.title || 'Người Mới Bắt Đầu'}
+              levelBadge={currentLevelData?.badge || 'seedling'}
+              xpForCurrentLevel={currentLevelData?.xpRequired || 0}
+              xpForNextLevel={nextLevelData?.xpRequired || 100}
+              showWeeklyXP={true}
+              weeklyXP={weeklyXPEarned}
+            />
+
             {/* =========== NEW: FEATURED RITUAL SECTION =========== */}
             <FeaturedRitualSection
               onRitualPress={(ritual) => {
                 console.log('[VisionBoard] Ritual pressed:', ritual?.id, ritual?.title);
                 // Navigate to dedicated ritual screen based on ritual ID
                 const ritualScreenMap = {
-                  // 4 dedicated ritual screens
-                  'heart-opening': 'HeartExpansionRitual',     // Mở Rộng Trái Tim
-                  'gratitude-flow': 'GratitudeFlowRitual',     // Dòng Chảy Biết Ơn
-                  'purify-breathwork': 'CleansingBreathRitual', // Thở Thanh Lọc
-                  'water-manifest': 'WaterManifestRitual',     // Nghi Thức Nước
-                  // Fallback to RitualPlayground for rituals without dedicated screens
-                  'burn-release': 'RitualPlayground',          // Đốt & Giải Phóng
-                  'letter-to-universe': 'RitualPlayground',    // Thư Gửi Vũ Trụ (Featured)
+                  // All 7 Cosmic Glassmorphism ritual screens
+                  'heart-expansion': 'HeartExpansionRitual',      // Mở Rộng Trái Tim
+                  'heart-opening': 'HeartExpansionRitual',        // Alias for heart-expansion
+                  'gratitude-flow': 'GratitudeFlowRitual',        // Dòng Chảy Biết Ơn
+                  'cleansing-breath': 'CleansingBreathRitual',    // Hơi Thở Thanh Lọc
+                  'purify-breathwork': 'CleansingBreathRitual',   // Alias for cleansing-breath
+                  'water-manifest': 'WaterManifestRitual',        // Hiện Thực Hóa Bằng Nước
+                  'letter-to-universe': 'LetterToUniverseRitual', // Thư Gửi Vũ Trụ
+                  'burn-release': 'BurnReleaseRitual',            // Đốt & Buông Bỏ
+                  'star-wish': 'StarWishRitual',                  // Ước Nguyện Sao Băng
                 };
-                const screenName = ritualScreenMap[ritual?.id] || 'RitualPlayground';
+                const screenName = ritualScreenMap[ritual?.id] || 'HeartExpansionRitual';
                 navigation.navigate(screenName, { ritual });
               }}
               onCreateRitual={() => {
@@ -4520,18 +5810,6 @@ const VisionBoardScreen = () => {
               onViewDetails={() => setActiveTooltip('weekly')}
             />
 
-            {/* XP Goal Tracker - New Full Card UI */}
-            <XPGoalTracker
-              totalXP={totalXP}
-              currentLevel={currentLevel}
-              levelTitle={currentLevelData?.title || 'Người Mới Bắt Đầu'}
-              levelBadge={currentLevelData?.badge || 'seedling'}
-              xpForCurrentLevel={currentLevelData?.xpRequired || 0}
-              xpForNextLevel={nextLevelData?.xpRequired || 100}
-              showWeeklyXP={true}
-              weeklyXP={weeklyXPEarned}
-            />
-
             {/* Info Tooltip Modal */}
             <InfoTooltip
               tooltip={activeTooltip ? SECTION_TOOLTIPS[activeTooltip] : ''}
@@ -4541,16 +5819,53 @@ const VisionBoardScreen = () => {
 
             {/* Goal Tabs - Selectable cards by Life Area */}
             {hasGroupedWidgets && (
-              <>
+              <View
+                onLayout={(event) => {
+                  goalsSectionY.current = event.nativeEvent.layout.y;
+                }}
+              >
                 <GoalTabs
                   groupedByLifeArea={groupedByLifeArea}
                   selectedLifeArea={selectedGoalLifeArea}
                   onSelectLifeArea={setSelectedGoalLifeArea}
                 />
 
+                {/* GLOBAL Selection Mode Bar - Single bar for all goals */}
+                {globalSelectionMode && (
+                  <View style={styles.globalSelectionModeBar}>
+                    <Text style={styles.selectionModeText}>
+                      Đã chọn {globalSelectedItems.size}/{allGoalIds.length}
+                    </Text>
+                    <View style={styles.selectionModeActions}>
+                      <TouchableOpacity
+                        style={styles.selectionModeBtn}
+                        onPress={() => handleGlobalSelectAll(allGoalIds)}
+                      >
+                        <Check size={16} color={COLORS.gold} />
+                        <Text style={[styles.selectionModeBtnText, { color: COLORS.gold }]}>Tất cả</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.selectionModeBtn}
+                        onPress={handleGlobalCancelSelection}
+                      >
+                        <X size={16} color={COLORS.textMuted} />
+                        <Text style={styles.selectionModeBtnText}>Hủy</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.selectionModeBtn, styles.selectionModeBtnDanger]}
+                        onPress={handleGlobalDeleteSelected}
+                        disabled={globalSelectedItems.size === 0}
+                      >
+                        <Trash2 size={16} color={globalSelectedItems.size > 0 ? "#E74C3C" : COLORS.textMuted} />
+                        <Text style={[styles.selectionModeBtnText, { color: globalSelectedItems.size > 0 ? '#E74C3C' : COLORS.textMuted }]}>Xóa</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+
                 {/* Selected Goal Content - Shows affirmations & action plan */}
-                {/* When 'all' is selected, render ALL life areas */}
-                {selectedGoalLifeArea === 'all' && Object.keys(groupedByLifeArea.groups).map((lifeArea) => (
+                {/* When 'all' is selected or initial state (null), render ALL life areas */}
+                {(selectedGoalLifeArea === 'all' || selectedGoalLifeArea === null) && Object.keys(groupedByLifeArea.groups).map((lifeArea) => (
                   <SelectedGoalContent
                     key={lifeArea}
                     lifeArea={lifeArea}
@@ -4558,6 +5873,7 @@ const VisionBoardScreen = () => {
                     onToggleHabit={(id) => handleToggleItem(id, 'habit')}
                     onToggleGoalComplete={(id) => handleToggleItem(id, 'goal')}
                     onDelete={handleDeleteWidget}
+                    onArchive={handleArchiveWidgets}
                     onDeleteMultiple={handleDeleteMultipleWidgets}
                     onEdit={handleEditWidget}
                     onEditGoalTitle={handleEditGoalTitle}
@@ -4566,10 +5882,26 @@ const VisionBoardScreen = () => {
                     onSaveAffirmation={handleSaveAffirmation}
                     onSaveGoalTitle={handleSaveGoalTitle}
                     onSaveActionStep={handleSaveActionStep}
+                    onSaveRitual={handleSaveRitual}
+                    onToggleRitual={handleToggleRitual}
+                    onDeleteAffirmation={handleDeleteAffirmation}
+                    onDeleteActionStep={handleDeleteActionStep}
+                    onDeleteRitual={handleDeleteRitual}
+                    onAddAffirmation={handleAddAffirmation}
+                    onAddActionStep={handleAddActionStep}
+                    onAddRitual={handleAddRitual}
                     onAffirmationComplete={handleGoalAffirmationComplete}
                     onReadAloud={handleGoalReadAloud}
                     completedToday={affirmationsCompletedToday}
                     streak={affirmationStreak}
+                    isSelectionMode={globalSelectionMode}
+                    selectedItems={globalSelectedItems}
+                    onLongPressGlobal={handleGlobalLongPress}
+                    onToggleSelectGlobal={handleGlobalToggleSelect}
+                    onCancelSelectionGlobal={handleGlobalCancelSelection}
+                    onDeleteSelectedGlobal={handleGlobalDeleteSelected}
+                    onSelectAllGlobal={handleGlobalSelectAll}
+                    allGoalIds={allGoalIds}
                   />
                 ))}
 
@@ -4581,6 +5913,7 @@ const VisionBoardScreen = () => {
                     onToggleHabit={(id) => handleToggleItem(id, 'habit')}
                     onToggleGoalComplete={(id) => handleToggleItem(id, 'goal')}
                     onDelete={handleDeleteWidget}
+                    onArchive={handleArchiveWidgets}
                     onDeleteMultiple={handleDeleteMultipleWidgets}
                     onEdit={handleEditWidget}
                     onEditGoalTitle={handleEditGoalTitle}
@@ -4589,47 +5922,82 @@ const VisionBoardScreen = () => {
                     onSaveAffirmation={handleSaveAffirmation}
                     onSaveGoalTitle={handleSaveGoalTitle}
                     onSaveActionStep={handleSaveActionStep}
+                    onSaveRitual={handleSaveRitual}
+                    onToggleRitual={handleToggleRitual}
+                    onDeleteAffirmation={handleDeleteAffirmation}
+                    onDeleteActionStep={handleDeleteActionStep}
+                    onDeleteRitual={handleDeleteRitual}
+                    onAddAffirmation={handleAddAffirmation}
+                    onAddActionStep={handleAddActionStep}
+                    onAddRitual={handleAddRitual}
                     onAffirmationComplete={handleGoalAffirmationComplete}
                     onReadAloud={handleGoalReadAloud}
                     completedToday={affirmationsCompletedToday}
                     streak={affirmationStreak}
+                    isSelectionMode={globalSelectionMode}
+                    selectedItems={globalSelectedItems}
+                    onLongPressGlobal={handleGlobalLongPress}
+                    onToggleSelectGlobal={handleGlobalToggleSelect}
+                    onCancelSelectionGlobal={handleGlobalCancelSelection}
+                    onDeleteSelectedGlobal={handleGlobalDeleteSelected}
+                    onSelectAllGlobal={handleGlobalSelectAll}
+                    allGoalIds={allGoalIds}
                   />
                 )}
 
-                {/* Hint when no goal is selected */}
-                {!selectedGoalLifeArea && (
+                {/* Hint when no goal is selected - HIDDEN when in "All" tab mode since goals are auto-displayed */}
+                {/* This hint only shows when a specific category is selected but hasn't expanded any goal */}
+                {selectedGoalLifeArea && selectedGoalLifeArea !== 'all' && selectedGoalLifeArea !== null && (
                   <View style={styles.selectGoalHint}>
                     <ChevronUp size={18} color={COLORS.textMuted} style={{ marginBottom: 4 }} />
                     <Text style={styles.selectGoalHintText}>
-                      Chọn một mục tiêu ở trên để xem khẳng định và kế hoạch hành động
+                      Bấm vào mục tiêu để xem chi tiết
                     </Text>
                   </View>
                 )}
-              </>
+              </View>
             )}
 
             {/* Ungrouped Goals Section (widgets without lifeArea) */}
             {ungroupedGoals.length > 0 && (
-              <GoalsSection
-                goals={ungroupedGoals}
-                widgets={groupedByLifeArea.ungroupedWidgets}
-                onToggle={handleToggleItem}
-                onEdit={handleEditWidget}
-                onDelete={handleDeleteWidget}
-                onNavigateToGemMaster={() => navigateToGemMaster('Tôi muốn đặt mục tiêu mới')}
-              />
+              <View
+                onLayout={(event) => {
+                  // Only set if not already set by grouped widgets
+                  if (goalsSectionY.current === 0) {
+                    goalsSectionY.current = event.nativeEvent.layout.y;
+                  }
+                }}
+              >
+                <GoalsSection
+                  goals={ungroupedGoals}
+                  widgets={groupedByLifeArea.ungroupedWidgets}
+                  onToggle={handleToggleItem}
+                  onEdit={handleEditWidget}
+                  onDelete={handleDeleteWidget}
+                  onNavigateToGemMaster={() => navigateToGemMaster('Tôi muốn đặt mục tiêu mới')}
+                />
+              </View>
             )}
 
             {/* Empty Goals State (only if no grouped and no ungrouped goals) */}
             {!hasGroupedWidgets && ungroupedGoals.length === 0 && (
-              <GoalsSection
-                goals={[]}
-                widgets={[]}
-                onToggle={handleToggleItem}
-                onEdit={handleEditWidget}
-                onDelete={handleDeleteWidget}
-                onNavigateToGemMaster={() => navigateToGemMaster('Tôi muốn đặt mục tiêu mới')}
-              />
+              <View
+                onLayout={(event) => {
+                  // Set for empty state (user just added their first goal)
+                  if (goalsSectionY.current === 0) {
+                    goalsSectionY.current = event.nativeEvent.layout.y;
+                  }
+                }}
+              >
+                <GoalsSection
+                  goals={[]}
+                  widgets={[]}
+                  onToggle={handleToggleItem}
+                  onEdit={handleEditWidget}
+                  onDelete={handleDeleteWidget}
+                  onNavigateToGemMaster={() => navigateToGemMaster('Tôi muốn đặt mục tiêu mới')}
+                />
+              </View>
             )}
 
             {/* Ungrouped Affirmations Section - ONLY show when NO grouped widgets
@@ -4672,6 +6040,10 @@ const VisionBoardScreen = () => {
                 onToggleHabit={handleToggleHabit}
                 onSaveAffirmation={handleSaveAffirmation}
                 onSaveActionStep={handleSaveActionStep}
+                onDeleteAffirmation={handleDeleteAffirmation}
+                onDeleteActionStep={handleDeleteActionStep}
+                onAddAffirmation={handleAddAffirmation}
+                onAddActionStep={handleAddActionStep}
                 onAffirmationComplete={handleAffirmationComplete}
                 onReadAloud={handleReadAloud}
               />
@@ -4690,7 +6062,8 @@ const VisionBoardScreen = () => {
                   screen: 'IChing',
                 });
               }}
-              onDelete={handleDeleteWidget}
+              onDelete={handleDeleteReading}
+              onDeleteMultiple={handleDeleteMultipleReadings}
               onCreateRitual={(reading) => {
                 // Navigate to GratitudeFlowRitual with context from reading
                 navigation.navigate('GratitudeFlowRitual', {
@@ -5747,6 +7120,7 @@ const styles = StyleSheet.create({
 
   // Goal Tabs Section
   goalTabsContainer: {
+    marginTop: SPACING.lg,
     marginBottom: SPACING.md,
   },
   goalTabsTitleRow: {
@@ -5756,9 +7130,11 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   goalTabsTitle: {
-    fontSize: TYPOGRAPHY.fontSize.xxl,
+    fontSize: TYPOGRAPHY.fontSize.md, // Consistent with other section headers
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textPrimary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   goalTabsScroll: {
     gap: SPACING.xs,
@@ -6266,13 +7642,54 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 6,
   },
-  // NEW: Goal Card Header (collapsed view with progress bar)
+  // NEW: Life Area Header Bar - Distinctive colored bar to separate goals
+  goalAreaHeaderBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    gap: SPACING.sm,
+    borderTopLeftRadius: GLASS.borderRadius,
+    borderTopRightRadius: GLASS.borderRadius,
+  },
+  goalAreaBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  goalAreaLabel: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  goalAreaStats: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    marginLeft: 'auto',
+  },
+  goalAreaStatItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  goalAreaStatText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textMuted,
+  },
+  // Goal Card Header (collapsed view with progress bar) - Enhanced for better visibility
   goalCardHeader: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     padding: SPACING.md,
-    borderLeftWidth: 4,
+    paddingVertical: SPACING.md + 4,
     gap: SPACING.sm,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)', // Subtle lighter background
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
   },
   goalCardInfo: {
     flex: 1,
@@ -6281,24 +7698,67 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    marginBottom: SPACING.xs,
+    marginBottom: SPACING.sm,
   },
   goalCardTitle: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    fontSize: TYPOGRAPHY.fontSize.xl, // Larger font size
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textPrimary,
     flex: 1,
-    lineHeight: 22,
+    lineHeight: 26,
+    letterSpacing: 0.3,
   },
   goalCardActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.xs,
-    marginLeft: SPACING.sm,
+    gap: SPACING.md, // Increased from SPACING.xs for better separation
+    marginLeft: SPACING.md,
   },
   goalCardActionBtn: {
-    padding: SPACING.xs,
+    padding: SPACING.sm, // Increased from SPACING.xs for better touch target
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: SPACING.xs,
   },
+  goalCardToggleBtn: {
+    padding: SPACING.md, // Larger padding for better touch target
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: SPACING.sm,
+    minWidth: 40,
+    minHeight: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // Swipe action styles for goal cards
+  swipeActionsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+    height: 70, // Fixed height for swipe actions
+  },
+  swipeActionBtn: {
+    width: 70,
+    height: 70, // Fixed height instead of 100%
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  swipeArchiveBtn: {
+    backgroundColor: 'rgba(106, 91, 255, 0.9)',
+    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 0,
+  },
+  swipeDeleteBtn: {
+    backgroundColor: '#E74C3C',
+    borderTopRightRadius: GLASS.borderRadius,
+    borderBottomRightRadius: GLASS.borderRadius,
+  },
+  swipeActionText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textPrimary,
+    marginTop: 4,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+
   goalCardMeta: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -6404,6 +7864,172 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.fontSize.md,
     color: COLORS.error,
   },
+
+  // Ritual section styles in goal cards
+  selectedRitualsSection: {
+    marginTop: SPACING.md,
+    paddingTop: SPACING.md,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  ritualsGrid: {
+    gap: SPACING.sm,
+  },
+  ritualCardSmall: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 107, 107, 0.08)',
+    borderRadius: 12,
+    padding: SPACING.sm,
+    borderWidth: 1,
+    gap: SPACING.sm,
+  },
+  ritualIconSmall: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ritualInfoSmall: {
+    flex: 1,
+    gap: 2,
+  },
+  ritualTitleSmall: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+  },
+  ritualSubtitleSmall: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+  },
+  ritualPlayBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // Spiritual Rituals (from I Ching/Tarot)
+  spiritualRitualsSection: {
+    marginTop: SPACING.md,
+    paddingTop: SPACING.md,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(157, 78, 221, 0.15)',
+  },
+  spiritualRitualsContainer: {
+    gap: SPACING.sm,
+  },
+  spiritualRitualCard: {
+    backgroundColor: 'rgba(157, 78, 221, 0.08)',
+    borderRadius: 12,
+    padding: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(157, 78, 221, 0.2)',
+  },
+  spiritualRitualHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  spiritualRitualIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: 'rgba(157, 78, 221, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  spiritualRitualName: {
+    flex: 1,
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+  },
+  spiritualRitualDesc: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    marginTop: SPACING.xs,
+    lineHeight: TYPOGRAPHY.fontSize.sm * 1.5,
+  },
+  spiritualRitualEditIconBtn: {
+    padding: 4,
+  },
+  spiritualRitualEditContainer: {
+    backgroundColor: 'rgba(157, 78, 221, 0.08)',
+    borderRadius: 12,
+    padding: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(157, 78, 221, 0.3)',
+    gap: SPACING.sm,
+  },
+  spiritualRitualEditName: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    borderRadius: 8,
+    padding: SPACING.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(157, 78, 221, 0.3)',
+  },
+  spiritualRitualEditDesc: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textPrimary,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    borderRadius: 8,
+    padding: SPACING.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(157, 78, 221, 0.2)',
+    minHeight: 60,
+    textAlignVertical: 'top',
+  },
+  spiritualRitualEditActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: SPACING.sm,
+  },
+  spiritualRitualEditBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  spiritualRitualEditBtnSave: {
+    backgroundColor: COLORS.gold,
+  },
+  spiritualRitualEditBtnText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    color: COLORS.textPrimary,
+  },
+
+  // Add item button (for affirmations, action steps, rituals)
+  addItemBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    marginTop: SPACING.sm,
+    borderRadius: INPUT.borderRadius,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: 'rgba(212, 175, 55, 0.4)',
+    backgroundColor: 'rgba(212, 175, 55, 0.05)',
+  },
+  addItemBtnText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    color: COLORS.gold,
+  },
+
   deleteAllGoalsBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -6507,6 +8133,21 @@ const styles = StyleSheet.create({
   selectionModeBtnText: {
     fontSize: TYPOGRAPHY.fontSize.md,
     color: COLORS.textSecondary,
+  },
+
+  // Global Selection Mode Bar (single bar at top for all goals)
+  globalSelectionModeBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    borderRadius: 12,
+    marginHorizontal: SPACING.lg,
+    marginBottom: SPACING.md,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 189, 89, 0.4)',
   },
 
   // Modal

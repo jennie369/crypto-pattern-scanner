@@ -44,7 +44,6 @@ BEGIN
   GROUP BY ap.total_sales;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
 -- =====================================================
 -- FUNCTION 2: Calculate Commission Amount
 -- Utility function for commission calculation
@@ -58,7 +57,6 @@ BEGIN
   RETURN FLOOR(order_total * (commission_rate / 100));
 END;
 $$ LANGUAGE plpgsql IMMUTABLE;
-
 -- =====================================================
 -- FUNCTION 3: Get Referral Details for User
 -- Called when: Viewing referral list in dashboard
@@ -95,7 +93,6 @@ BEGIN
   ORDER BY r.created_at DESC;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
 -- =====================================================
 -- FUNCTION 4: Get Commission History
 -- Called when: Viewing commission history
@@ -136,7 +133,6 @@ BEGIN
   OFFSET offset_param;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
 -- =====================================================
 -- VERIFY FUNCTIONS CREATED
 -- =====================================================
@@ -159,7 +155,6 @@ BEGIN
     RAISE WARNING 'Only % functions created. Expected 4.', func_count;
   END IF;
 END $$;
-
 -- =====================================================
 -- GRANT EXECUTE PERMISSIONS
 -- =====================================================
@@ -167,7 +162,6 @@ GRANT EXECUTE ON FUNCTION get_affiliate_dashboard_summary TO authenticated;
 GRANT EXECUTE ON FUNCTION calculate_commission TO authenticated;
 GRANT EXECUTE ON FUNCTION get_user_referrals TO authenticated;
 GRANT EXECUTE ON FUNCTION get_user_commissions TO authenticated;
-
 -- =====================================================
 -- COMMENTS
 -- =====================================================

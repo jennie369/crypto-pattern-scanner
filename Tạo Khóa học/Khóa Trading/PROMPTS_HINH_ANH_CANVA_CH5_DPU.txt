@@ -1,0 +1,1110 @@
+═══════════════════════════════════════════════════════════════════════════════
+TIER 1 - CHƯƠNG 5: DPU PATTERN MASTERY
+PROMPTS CHI TIẾT TẠO HÌNH ẢNH - BÀI 5.1 ĐẾN 5.6
+═══════════════════════════════════════════════════════════════════════════════
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 5.1: DPU LÀ GÌ?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 5.1.1: DPU PATTERN DEFINITION
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK, KHÔNG dùng đường line
+- Nến xanh: #00C853 - SOLID FILLED (tô đặc)
+- Nến đỏ: #EF4444 - SOLID FILLED (tô đặc)
+
+📋 DESIGN SYSTEM GENERAL:
+┌─────────────────┬───────────────────────────────────────┐
+│ Element         │ Specification                         │
+├─────────────────┼───────────────────────────────────────┤
+│ Background      │ Navy gradient #112250 → #1a1a2e       │
+│ Primary Text    │ White #FFFFFF                         │
+│ Accent Gold     │ #FFBD59                               │
+│ Accent Cyan     │ #00F0FF                               │
+│ Accent Purple   │ #6A5BFF                               │
+│ Success Green   │ #10B981                               │
+│ Error Red       │ #EF4444                               │
+│ Border Radius   │ 12px cho cards                        │
+└─────────────────┴───────────────────────────────────────┘
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 5.1" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "DPU PATTERN LÀ GÌ?" (White, bold)                               │
+│ - Subtitle: "Down → Pause → Up | Bullish Reversal"                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ HERO SECTION:                                                                │
+│                                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │               D    P    U                                               │ │
+│ │              📉   ⏸️   📈                                               │ │
+│ │             DOWN PAUSE  UP                                              │ │
+│ │                                                                         │ │
+│ │    [Chart: 7 nến đỏ → 4 nến sideway → 7 nến xanh]                       │ │
+│ │                                                                         │ │
+│ │    Phase 1      Phase 2      Phase 3                                    │ │
+│ │    (Giảm)       (Tích lũy)   (Tăng)                                     │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ DEFINITION BOX:                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📖 ĐỊNH NGHĨA:                                                          │ │
+│ │                                                                         │ │
+│ │ DPU = Down-Pause-Up                                                     │ │
+│ │                                                                         │ │
+│ │ • Giá giảm mạnh (DOWN)                                                  │ │
+│ │ • Tích lũy tại LFZ (PAUSE)                                              │ │
+│ │ • Đảo chiều tăng (UP)                                                   │ │
+│ │                                                                         │ │
+│ │ Type: BULLISH REVERSAL - Đảo chiều từ đáy                               │ │
+│ │ Trade: LONG khi giá chạm LFZ                                            │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Key insight: "💡 DPU = Cơ hội mua tại đáy với xác nhận"                   │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🕯️ QUY TẮC VẼ NẾN CANDLESTICK:
+- Nến TĂNG (bullish): Màu #00C853, thân TÔ ĐẶC (SOLID FILLED)
+- Nến GIẢM (bearish): Màu #EF4444, thân TÔ ĐẶC (SOLID FILLED)
+- KHÔNG vẽ nến rỗng (hollow)
+
+
+📐 HÌNH 5.1.2: DPU MARKET CONTEXT
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK, KHÔNG dùng đường line
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 5.1" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "ĐIỀU KIỆN THỊ TRƯỜNG CHO DPU" (White, bold)                     │
+│ - Subtitle: "Khi nào DPU pattern xuất hiện?"                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN CONTENT - 3 CONDITIONS:                                                 │
+│                                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ CONDITION 1: DOWNTREND RÕ RÀNG                                          │ │
+│ │ [Mini chart: Nến đỏ SOLID đi xuống liên tục]                            │ │
+│ │ "Giá giảm ít nhất 5-7 nến liên tiếp"                                    │ │
+│ │ ✓ Momentum giảm mạnh                                                    │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ CONDITION 2: LFZ FORMATION                                              │ │
+│ │ [Mini chart: Consolidation box với support line]                        │ │
+│ │ "Giá ngừng giảm, đi ngang tạo LFZ"                                      │ │
+│ │ ✓ Volume giảm trong PAUSE phase                                         │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ CONDITION 3: ACCUMULATION SIGNS                                         │ │
+│ │ [Mini chart: Nến với bấc dài dưới (demand)]                             │ │
+│ │ "Xuất hiện dấu hiệu tích lũy"                                           │ │
+│ │ ✓ Long lower wicks = Buyers stepping in                                 │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ IDEAL SCENARIO BOX:                                                          │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 🎯 KỊCH BẢN LÝ TƯỞNG:                                                   │ │
+│ │ • Sau đợt giảm mạnh (-15% trở lên)                                      │ │
+│ │ • Chạm vào support quan trọng                                           │ │
+│ │ • RSI < 30 (oversold)                                                   │ │
+│ │ • Volume spike tại LFZ                                                  │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🕯️ QUY TẮC VẼ NẾN CANDLESTICK:
+- Nến TĂNG: #00C853 SOLID FILLED
+- Nến GIẢM: #EF4444 SOLID FILLED
+- Bấc (wick): Cùng màu với thân
+
+
+📐 HÌNH 5.1.3: DPU VS OTHER PATTERNS
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 5.1" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "DPU SO VỚI CÁC PATTERN KHÁC" (White, bold)                      │
+│ - Subtitle: "4 GEM Patterns Comparison"                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 4-GRID COMPARISON:                                                           │
+│                                                                              │
+│ ┌─────────────────────┐  ┌─────────────────────┐                            │
+│ │ UPU                 │  │ UPD                 │                            │
+│ │ [UP→PAUSE→UP]       │  │ [UP→PAUSE→DOWN]     │                            │
+│ │ Nến xanh→ngang→xanh │  │ Nến xanh→ngang→đỏ   │                            │
+│ │ LONG - Continuation │  │ SHORT - Reversal    │                            │
+│ │ Zone: LFZ           │  │ Zone: HFZ           │                            │
+│ └─────────────────────┘  └─────────────────────┘                            │
+│                                                                              │
+│ ┌─────────────────────┐  ┌─────────────────────┐                            │
+│ │ ⭐ DPU (Highlight)  │  │ DPD                 │                            │
+│ │ [DOWN→PAUSE→UP]     │  │ [DOWN→PAUSE→DOWN]   │                            │
+│ │ Nến đỏ→ngang→xanh   │  │ Nến đỏ→ngang→đỏ     │                            │
+│ │ LONG - Reversal     │  │ SHORT - Continuation│                            │
+│ │ Zone: LFZ           │  │ Zone: HFZ           │                            │
+│ │ Border: Gold glow   │  │                     │                            │
+│ └─────────────────────┘  └─────────────────────┘                            │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ KEY DIFFERENCES TABLE:                                                       │
+│ ┌─────────┬──────────┬──────────┬──────────┬──────────┐                     │
+│ │         │ Phase 1  │ Phase 3  │ Trade    │ Zone     │                     │
+│ ├─────────┼──────────┼──────────┼──────────┼──────────┤                     │
+│ │ UPU     │ UP       │ UP       │ LONG     │ LFZ      │                     │
+│ │ UPD     │ UP       │ DOWN     │ SHORT    │ HFZ      │                     │
+│ │ DPU     │ DOWN     │ UP       │ LONG     │ LFZ      │                     │
+│ │ DPD     │ DOWN     │ DOWN     │ SHORT    │ HFZ      │                     │
+│ └─────────┴──────────┴──────────┴──────────┴──────────┘                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Highlight: "⭐ DPU = Pattern đảo chiều LONG duy nhất trong 4 patterns"    │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 5.2: DPU CẤU TRÚC 3 PHASES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 5.2.1: DPU 3 PHASES DIAGRAM
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK, KHÔNG dùng đường line
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 5.2" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "DPU 3 PHASES CHI TIẾT" (White, bold)                            │
+│ - Subtitle: "Phân tích từng giai đoạn của pattern"                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN CHART (70% height):                                                     │
+│                                                                              │
+│ PHASE 1 - DOWN (Màu đỏ #EF4444):                                            │
+│ - 7-10 nến CANDLESTICK đỏ SOLID FILLED đi xuống                             │
+│ - Nến có thân dày, momentum giảm mạnh                                       │
+│ - Mũi tên đỏ chỉ hướng xuống                                                │
+│ - Label: "PHASE 1: DOWN"                                                    │
+│ - Sub-label: "Xu hướng giảm mạnh"                                           │
+│ - Box viền đỏ bao quanh vùng này                                            │
+│                                                                              │
+│ PHASE 2 - PAUSE (Màu vàng #FFBD59):                                         │
+│ - 3-5 nến CANDLESTICK nhỏ đi ngang                                          │
+│ - Nến có thân ngắn, bấc dài (uncertainty)                                   │
+│ - Vùng LFZ được highlight màu xanh nhạt rgba(16,185,129,0.2)                │
+│ - Label: "PHASE 2: PAUSE"                                                   │
+│ - Sub-label: "LFZ - Low Frequency Zone"                                     │
+│ - Đường ngang đánh dấu support                                              │
+│                                                                              │
+│ PHASE 3 - UP (Màu xanh #10B981):                                            │
+│ - 7-10 nến CANDLESTICK xanh (#00C853) SOLID FILLED đi lên                   │
+│ - Nến có thân dày, momentum tăng mạnh                                       │
+│ - Mũi tên xanh chỉ hướng lên                                                │
+│ - Label: "PHASE 3: UP"                                                      │
+│ - Sub-label: "Đảo chiều tăng mạnh"                                          │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ PHASE DETAILS:                                                               │
+│ ┌──────────────┬──────────────┬──────────────┐                              │
+│ │ PHASE 1      │ PHASE 2      │ PHASE 3      │                              │
+│ ├──────────────┼──────────────┼──────────────┤                              │
+│ │ Duration:    │ Duration:    │ Duration:    │                              │
+│ │ 5-15 nến     │ 3-8 nến      │ 5-15 nến     │                              │
+│ │ Sellers rule │ Balance      │ Buyers rule  │                              │
+│ └──────────────┴──────────────┴──────────────┘                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Key: "🔑 LFZ = Vùng tích lũy = Cơ hội LONG"                               │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🕯️ QUY TẮC VẼ NẾN CANDLESTICK:
+- Nến TĂNG (bullish): #00C853 SOLID FILLED
+- Nến GIẢM (bearish): #EF4444 SOLID FILLED
+- LFZ zone: rgba(16,185,129,0.2) - xanh nhạt
+
+
+📐 HÌNH 5.2.2: DPU DEMAND ZONE (LFZ)
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 5.2" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "LFZ = DEMAND ZONE" (White, bold)                                │
+│ - Subtitle: "Tại sao LFZ trong DPU là vùng cầu mạnh?"                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN CHART:                                                                  │
+│                                                                              │
+│ [DPU Pattern với CANDLESTICKS]                                              │
+│                                                                              │
+│ DEMAND ZONE AREA (Highlight xanh):                                           │
+│ - Vùng LFZ được tô màu xanh nhạt rgba(16,185,129,0.3)                       │
+│ - Label: "DEMAND ZONE" với icon 💰                                          │
+│ - Mũi tên: "Buyers control" chỉ lên                                         │
+│                                                                              │
+│ ANNOTATIONS:                                                                 │
+│ - "Unfilled buy orders từ institutions"                                     │
+│ - "Pending long orders chờ fill"                                            │
+│ - "Giá quay lại → được absorption"                                          │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ EXPLANATION BOX:                                                             │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📊 TẠI SAO DEMAND ZONE MẠNH?                                            │ │
+│ │                                                                         │ │
+│ │ 1. Institutions mua một phần → giá tăng nhẹ                             │ │
+│ │ 2. Còn lại unfilled orders tại LFZ                                      │ │
+│ │ 3. Khi giá quay lại → orders được fill                                  │ │
+│ │ 4. Áp lực mua → giá bật tăng mạnh                                       │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Key insight: "💡 LFZ = Nơi Smart Money đặt lệnh mua"                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+📐 HÌNH 5.2.3: DPU VOLUME ANALYSIS
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK + Volume bars
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 5.2" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "PHÂN TÍCH VOLUME TRONG DPU" (White, bold)                       │
+│ - Subtitle: "Volume xác nhận pattern"                                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN CHART (2 panels):                                                       │
+│                                                                              │
+│ PANEL 1 - PRICE (60% height):                                                │
+│ [DPU Pattern với CANDLESTICKS - 3 phases rõ ràng]                           │
+│                                                                              │
+│ PANEL 2 - VOLUME (30% height):                                               │
+│ [Volume bars tương ứng với price]                                           │
+│                                                                              │
+│ PHASE 1 VOLUME:                                                              │
+│ - Volume bars cao (màu đỏ)                                                  │
+│ - Label: "High Volume - Selling pressure"                                   │
+│                                                                              │
+│ PHASE 2 VOLUME:                                                              │
+│ - Volume bars thấp (màu xám)                                                │
+│ - Label: "Low Volume - Accumulation"                                        │
+│ - Highlight: "🔍 Volume giảm = Sellers exhausted"                           │
+│                                                                              │
+│ PHASE 3 VOLUME:                                                              │
+│ - Volume bars cao trở lại (màu xanh)                                        │
+│ - Label: "Volume Spike - Breakout confirmation"                             │
+│ - Highlight: "✅ Volume tăng = Buyers in control"                           │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ VOLUME RULES BOX:                                                            │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📊 QUY TẮC VOLUME CHO DPU:                                              │ │
+│ │                                                                         │ │
+│ │ ✓ Phase 1: Volume CAO (selling climax)                                  │ │
+│ │ ✓ Phase 2: Volume THẤP (quiet accumulation)                             │ │
+│ │ ✓ Phase 3: Volume TĂNG VỌT (breakout confirmation)                      │ │
+│ │                                                                         │ │
+│ │ ⚠️ Nếu Phase 3 không có volume → False breakout risk!                   │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 5.3: TẠI SAO DPU HIỆU QUẢ?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 5.3.1: DPU WYCKOFF ACCUMULATION
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Diagram style: Professional flow chart
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 5.3" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "WYCKOFF ACCUMULATION TRONG DPU" (White, bold)                   │
+│ - Subtitle: "Dòng tiền tổ chức tích lũy"                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ FLOW DIAGRAM (Horizontal):                                                   │
+│                                                                              │
+│ ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                    │
+│ │ PHASE 1      │───▶│ PHASE 2      │───▶│ PHASE 3      │                    │
+│ │              │    │              │    │              │                    │
+│ │ 📉 MARKDOWN  │    │ ⏸️ ACCUMUL   │    │ 📈 MARKUP    │                    │
+│ │              │    │              │    │              │                    │
+│ │ [Chart:      │    │ [Chart:      │    │ [Chart:      │                    │
+│ │ Nến đỏ       │    │ Nến sideway] │    │ Nến xanh     │                    │
+│ │ đi xuống]    │    │              │    │ đi lên]      │                    │
+│ │              │    │              │    │              │                    │
+│ │ "Retail      │    │ "Smart Money │    │ "Institutions│                    │
+│ │ panic sell"  │    │ tích lũy"    │    │ đẩy giá lên" │                    │
+│ └──────────────┘    └──────────────┘    └──────────────┘                    │
+│       │                   │                   │                              │
+│       ▼                   ▼                   ▼                              │
+│   CAPITULATION      ACCUMULATION          MARKUP                             │
+│   (đầu hàng)        (tích lũy)            (đẩy giá)                          │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ KEY INSIGHT BOX:                                                             │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 🎯 WYCKOFF CYCLE:                                                       │ │
+│ │ Accumulation → Markup → Distribution → Markdown                         │ │
+│ │                                                                         │ │
+│ │ DPU = Markdown + Accumulation + Markup phases                           │ │
+│ │ → Đây là điểm đảo chiều lý tưởng!                                       │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+📐 HÌNH 5.3.2: DPU WIN RATE STATISTICS
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Style: Data visualization / Infographic
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 5.3" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "DPU PATTERN STATISTICS" (White, bold)                           │
+│ - Subtitle: "Thống kê hiệu quả thực tế"                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN STATS (3 Circle Gauges):                                                │
+│                                                                              │
+│ ┌───────────────┐ ┌───────────────┐ ┌───────────────┐                       │
+│ │   ◐ 65%       │ │   ◐ 1:2.2     │ │   ◐ 70%       │                       │
+│ │               │ │               │ │               │                       │
+│ │   WIN RATE    │ │    R:R        │ │  ACCURACY     │                       │
+│ │               │ │               │ │  (với LFZ)    │                       │
+│ │  (Green ring) │ │  (Gold ring)  │ │  (Cyan ring)  │                       │
+│ └───────────────┘ └───────────────┘ └───────────────┘                       │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ COMPARISON WITH OTHER REVERSAL PATTERNS:                                     │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ REVERSAL PATTERNS COMPARISON                                            │ │
+│ │                                                                         │ │
+│ │ DPU (GEM)          ████████████████ 65%                                 │ │
+│ │ Double Bottom      ██████████████ 60%                                   │ │
+│ │ Inv Head Shoulders ███████████████ 63%                                  │ │
+│ │ Morning Star       ████████████ 55%                                     │ │
+│ │                                                                         │ │
+│ │ "DPU outperforms most classical reversal patterns"                      │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ KEY FACTORS:                                                                 │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📈 FACTORS TĂNG WIN RATE:                                               │ │
+│ │ • LFZ tại major support: +10% accuracy                                  │ │
+│ │ • Volume spike tại breakout: +8% accuracy                               │ │
+│ │ • RSI < 30 trước reversal: +7% accuracy                                 │ │
+│ │ • Multi-TF confluence: +12% accuracy                                    │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Data source: "Backtest 1000+ trades | 2020-2024"                          │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+📐 HÌNH 5.3.3: DPU PSYCHOLOGY
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 5.3" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "TÂM LÝ THỊ TRƯỜNG TRONG DPU" (White, bold)                      │
+│ - Subtitle: "Market Psychology Analysis"                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 3-PHASE PSYCHOLOGY:                                                          │
+│                                                                              │
+│ PHASE 1 - DOWN:                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 😱 FEAR & PANIC                                                         │ │
+│ │ [Mini chart: Nến đỏ đi xuống]                                           │ │
+│ │                                                                         │ │
+│ │ Retail: "Bán tháo! Cut loss!"                                           │ │
+│ │ Smart Money: "Đợi... để tích lũy"                                       │ │
+│ │ Sentiment: 😨😰😱                                                        │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│ PHASE 2 - PAUSE:                                                             │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 😐 UNCERTAINTY & DOUBT                                                  │ │
+│ │ [Mini chart: Nến sideway]                                               │ │
+│ │                                                                         │ │
+│ │ Retail: "Chờ xem... không dám mua"                                      │ │
+│ │ Smart Money: "Mua dần, tích lũy"                                        │ │
+│ │ Sentiment: 😕🤔😐                                                        │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│ PHASE 3 - UP:                                                                │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 😀 OPTIMISM & FOMO                                                      │ │
+│ │ [Mini chart: Nến xanh đi lên]                                           │ │
+│ │                                                                         │ │
+│ │ Retail: "FOMO! Mua đuổi giá!"                                           │ │
+│ │ Smart Money: "Đã long từ LFZ, relax"                                    │ │
+│ │ Sentiment: 😊😃🚀                                                        │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Key: "🧠 Trade with Smart Money, not against them"                        │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 5.4: CHIẾN LƯỢC ENTRY DPU
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 5.4.1: DPU ENTRY STRATEGY
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK, KHÔNG dùng đường line
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 5.4" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "CHIẾN LƯỢC VÀO LỆNH LONG" (White, bold)                         │
+│ - Subtitle: "Entry Strategy cho DPU Pattern"                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ CHART AREA:                                                                  │
+│                                                                              │
+│ [Full DPU Pattern với CANDLESTICKS]                                         │
+│                                                                              │
+│ PHASE 1 (DOWN): Nến đỏ #EF4444 SOLID đi xuống                               │
+│ PHASE 2 (PAUSE): Nến consolidation tại LFZ                                  │
+│ - LFZ box highlight xanh nhạt                                               │
+│ - Entry point marker: ⬆️ "LONG ENTRY"                                       │
+│                                                                              │
+│ PHASE 3 (UP): Nến xanh #00C853 SOLID đi lên                                 │
+│                                                                              │
+│ ENTRY CHECKLIST (Right side):                                               │
+│ ☑️ Giá chạm LFZ                                                             │
+│ ☑️ Nến xác nhận bullish                                                     │
+│ ☑️ Volume tăng khi bounce                                                   │
+│ ☑️ RSI < 30 (oversold)                                                      │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ ACTION BOX:                                                                  │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 🎯 HÀNH ĐỘNG:                                                           │ │
+│ │ 1. Đợi giá chạm LFZ                                                     │ │
+│ │ 2. Chờ nến xác nhận (Bullish Engulfing, Hammer, Morning Star)           │ │
+│ │ 3. Vào lệnh LONG khi nến close trên entry trigger                       │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+📐 HÌNH 5.4.2: DPU STOP LOSS PLACEMENT
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 5.4" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "ĐẶT STOP LOSS CHO DPU" (White, bold)                            │
+│ - Subtitle: "SL dưới LFZ + Buffer"                                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ CHART AREA:                                                                  │
+│                                                                              │
+│ [DPU Pattern với CANDLESTICKS]                                              │
+│                                                                              │
+│ LFZ ZONE:                                                                    │
+│ - Box highlight xanh nhạt                                                   │
+│ - Đường ngang: "LFZ LOW" (màu xanh dashed)                                  │
+│                                                                              │
+│ STOP LOSS LINE:                                                              │
+│ - Đường đỏ solid DƯỚI LFZ LOW                                               │
+│ - Label: "SL = LFZ LOW - Buffer (0.5-1%)"                                   │
+│ - Icon: 🛑                                                                  │
+│                                                                              │
+│ ENTRY LINE:                                                                  │
+│ - Đường cyan tại entry point                                                │
+│ - Label: "ENTRY"                                                            │
+│                                                                              │
+│ BUFFER ZONE:                                                                 │
+│ - Vùng giữa LFZ LOW và SL                                                   │
+│ - Highlight màu cam nhạt                                                    │
+│ - Label: "BUFFER 0.5-1%"                                                    │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ SL RULES BOX:                                                                │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📏 QUY TẮC ĐẶT SL:                                                      │ │
+│ │ • SL = LFZ Low - Buffer (0.5-1% tùy TF)                                 │ │
+│ │ • TF 1H: Buffer 0.5% | TF 4H: Buffer 0.7% | TF 1D: Buffer 1%            │ │
+│ │ • KHÔNG BAO GIỜ di chuyển SL ra xa hơn                                  │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Warning: "⚠️ SL là bảo hiểm - Luôn đặt TRƯỚC khi vào lệnh"               │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+📐 HÌNH 5.4.3: DPU TAKE PROFIT LEVELS
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 5.4" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "3 MỨC TAKE PROFIT" (White, bold)                                │
+│ - Subtitle: "TP1, TP2, TP3 cho DPU Pattern"                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ CHART AREA:                                                                  │
+│                                                                              │
+│ [DPU Pattern với CANDLESTICKS - Đầy đủ phases]                              │
+│                                                                              │
+│ ENTRY & SL:                                                                  │
+│ - Entry line: Cyan dashed                                                   │
+│ - SL line: Red solid (dưới LFZ)                                             │
+│                                                                              │
+│ TAKE PROFIT LEVELS (Lines going up):                                         │
+│                                                                              │
+│ TP1 (Green #10B981):                                                         │
+│ - Line: Green dashed                                                        │
+│ - Label: "TP1: 1:1 R:R | Chốt 40%"                                          │
+│ - Icon: 💰                                                                  │
+│                                                                              │
+│ TP2 (Gold #FFBD59):                                                          │
+│ - Line: Gold dashed                                                         │
+│ - Label: "TP2: 1:2 R:R | Chốt 40%"                                          │
+│ - Icon: 💰💰                                                                │
+│                                                                              │
+│ TP3 (Cyan #00F0FF):                                                          │
+│ - Line: Cyan dashed                                                         │
+│ - Label: "TP3: 1:3+ R:R | Chốt 20%"                                         │
+│ - Icon: 💰💰💰                                                              │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ TP STRATEGY BOX:                                                             │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 🎯 CHIẾN LƯỢC CHỐT LỜI:                                                 │ │
+│ │ • TP1 (40%): Đảm bảo có lãi, di SL về entry                             │ │
+│ │ • TP2 (40%): Lock thêm profit, trailing stop                            │ │
+│ │ • TP3 (20%): Để chạy, target swing high                                 │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+📐 HÌNH 5.4.4: DPU ENTRY CONFIRMATION CANDLES
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 5.4" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "NẾN XÁC NHẬN BULLISH" (White, bold)                             │
+│ - Subtitle: "Confirmation candles cho DPU Entry"                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN CONTENT - 4 Candle Types:                                               │
+│                                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 1. BULLISH ENGULFING                                                    │ │
+│ │ [Diagram: Nến đỏ nhỏ + Nến xanh lớn bao trùm]                           │ │
+│ │ "Nến xanh bao trùm hoàn toàn nến đỏ trước"                              │ │
+│ │ Strength: ⭐⭐⭐⭐⭐                                                      │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 2. HAMMER                                                               │ │
+│ │ [Diagram: Nến với thân nhỏ trên, bấc dài dưới]                          │ │
+│ │ "Bấc dưới dài > 2x thân, thân ở trên"                                   │ │
+│ │ Strength: ⭐⭐⭐⭐                                                        │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 3. MORNING STAR                                                         │ │
+│ │ [Diagram: Nến đỏ + Doji + Nến xanh lớn]                                 │ │
+│ │ "3 nến: Đỏ lớn → Doji → Xanh lớn"                                       │ │
+│ │ Strength: ⭐⭐⭐⭐⭐                                                      │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 4. BULLISH PIN BAR                                                      │ │
+│ │ [Diagram: Nến với bấc dưới rất dài, thân nhỏ xanh]                      │ │
+│ │ "Rejection từ LFZ, bấc dưới > 3x thân"                                  │ │
+│ │ Strength: ⭐⭐⭐⭐                                                        │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Tip: "💡 Đợi nến CLOSE hoàn toàn trước khi vào lệnh"                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 5.5: DPU PHÂN BIỆT VỚI UPU
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 5.5.1: DPU VS UPU COMPARISON
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 5.5" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "DPU VS UPU: SO SÁNH CHI TIẾT" (White, bold)                     │
+│ - Subtitle: "Phân biệt 2 pattern LONG"                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ SIDE-BY-SIDE COMPARISON:                                                     │
+│                                                                              │
+│ ┌─────────────────────────┐  ┌─────────────────────────┐                    │
+│ │ ⭐ DPU PATTERN          │  │ UPU PATTERN             │                    │
+│ │                         │  │                         │                    │
+│ │ [Chart: DOWN→PAUSE→UP]  │  │ [Chart: UP→PAUSE→UP]    │                    │
+│ │ Nến đỏ → ngang → xanh   │  │ Nến xanh → ngang → xanh │                    │
+│ │                         │  │                         │                    │
+│ │ Type: REVERSAL          │  │ Type: CONTINUATION      │                    │
+│ │ Signal: Đảo chiều tăng  │  │ Signal: Tiếp tục tăng   │                    │
+│ │                         │  │                         │                    │
+│ │ Zone: LFZ (Demand)      │  │ Zone: LFZ (Demand)      │                    │
+│ │ Context: Sau downtrend  │  │ Context: Trong uptrend  │                    │
+│ │ Border: Gold glow       │  │                         │                    │
+│ └─────────────────────────┘  └─────────────────────────┘                    │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ COMPARISON TABLE:                                                            │
+│ ┌─────────────────┬──────────────────┬──────────────────┐                   │
+│ │ Tiêu chí        │ DPU              │ UPU              │                   │
+│ ├─────────────────┼──────────────────┼──────────────────┤                   │
+│ │ Phase 1         │ DOWN (giảm)      │ UP (tăng)        │                   │
+│ │ Phase 2         │ PAUSE            │ PAUSE            │                   │
+│ │ Phase 3         │ UP               │ UP               │                   │
+│ │ Loại            │ Đảo chiều        │ Tiếp diễn        │                   │
+│ │ Win Rate        │ 65%              │ 72%              │                   │
+│ │ R:R             │ 1:2.2            │ 1:2.0            │                   │
+│ │ Risk            │ Higher           │ Lower            │                   │
+│ └─────────────────┴──────────────────┴──────────────────┘                   │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Key: "🔑 DPU = Bắt đáy | UPU = Theo trend"                                │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+📐 HÌNH 5.5.2: DPU FALSE SIGNALS
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 5.5" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "TRÁNH FALSE SIGNALS" (White, bold)                              │
+│ - Subtitle: "Dấu hiệu DPU không hợp lệ"                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ FALSE SIGNAL 1:                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ ❌ WEAK DOWNTREND                                                       │ │
+│ │ [Chart: Downtrend yếu, chỉ 3-4 nến đỏ nhỏ]                              │ │
+│ │                                                                         │ │
+│ │ Problem: Phase 1 không đủ mạnh                                          │ │
+│ │ Solution: Cần ít nhất 5-7 nến đỏ momentum                               │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│ FALSE SIGNAL 2:                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ ❌ NO CLEAR LFZ                                                         │ │
+│ │ [Chart: Price bouncing randomly, no zone]                               │ │
+│ │                                                                         │ │
+│ │ Problem: Không có vùng LFZ rõ ràng                                      │ │
+│ │ Solution: LFZ cần test ít nhất 2 lần                                    │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│ FALSE SIGNAL 3:                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ ❌ LOW VOLUME BREAKOUT                                                  │ │
+│ │ [Chart: Breakout với volume thấp]                                       │ │
+│ │                                                                         │ │
+│ │ Problem: Phase 3 không có volume confirmation                           │ │
+│ │ Solution: Volume phải tăng ít nhất 50% khi breakout                     │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Warning: "⚠️ Khi nghi ngờ → KHÔNG TRADE"                                  │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+📐 HÌNH 5.5.3: DPU QUALITY CHECKLIST
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 5.5" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "DPU QUALITY CHECKLIST" (White, bold)                            │
+│ - Subtitle: "Checklist xác nhận chất lượng pattern"                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ CHECKLIST CARD:                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ ✅ PHASE 1 - DOWN                                                       │ │
+│ │    □ Ít nhất 5-7 nến đỏ liên tiếp                                       │ │
+│ │    □ Volume cao trong downtrend                                         │ │
+│ │    □ RSI tiến về vùng oversold (< 30)                                   │ │
+│ │                                                                         │ │
+│ │ ✅ PHASE 2 - PAUSE                                                      │ │
+│ │    □ 3-8 nến consolidation                                              │ │
+│ │    □ LFZ zone rõ ràng (support test 2+ lần)                             │ │
+│ │    □ Volume giảm (accumulation)                                         │ │
+│ │    □ Bấc dài dưới = Demand                                              │ │
+│ │                                                                         │ │
+│ │ ✅ PHASE 3 - UP (Confirmation)                                          │ │
+│ │    □ Nến xác nhận bullish xuất hiện                                     │ │
+│ │    □ Volume tăng vọt khi break                                          │ │
+│ │    □ Close trên LFZ high                                                │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ SCORING:                                                                     │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📊 QUALITY SCORE:                                                       │ │
+│ │ • 9-10 checks: A+ Grade → Trade full size                               │ │
+│ │ • 7-8 checks: B Grade → Trade 50% size                                  │ │
+│ │ • 5-6 checks: C Grade → Skip or small size                              │ │
+│ │ • < 5 checks: D Grade → DO NOT TRADE                                    │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 5.6: VÍ DỤ THỰC TẾ DPU
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 5.6.1: BTC DPU EXAMPLE
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK, KHÔNG dùng đường line
+- Style: Realistic trading chart với annotations
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 5.6" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "BTC/USDT - DPU THỰC TẾ" (White, bold)                           │
+│ - Subtitle: "Ví dụ trade LONG trên Bitcoin"                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ CHART INFO BAR:                                                              │
+│ - Pair: "BTC/USDT" | TF: "4H" | Date: "Sep 2024"                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN CHART:                                                                  │
+│                                                                              │
+│ [Full candlestick chart showing DPU pattern]                                │
+│                                                                              │
+│ PHASE 1 - DOWN:                                                              │
+│ - 10-12 nến đỏ #EF4444 SOLID FILLED                                         │
+│ - Price từ $67,000 → $54,000                                                │
+│ - Box màu đỏ với label "PHASE 1: DOWN"                                      │
+│                                                                              │
+│ PHASE 2 - PAUSE:                                                             │
+│ - 5-6 nến sideway                                                           │
+│ - LFZ box highlight xanh nhạt                                               │
+│ - Range: $53,500 - $55,000                                                  │
+│ - Label: "LFZ ZONE"                                                         │
+│                                                                              │
+│ PHASE 3 - UP:                                                                │
+│ - 10-12 nến xanh #00C853 SOLID FILLED                                       │
+│ - Price từ $54,000 → $66,000                                                │
+│ - Box màu xanh với label "PHASE 3: UP"                                      │
+│                                                                              │
+│ TRADE MARKERS:                                                               │
+│ - Entry: Arrow + "LONG @ $55,200"                                           │
+│ - SL: Red line @ $52,800 + "SL -4.3%"                                       │
+│ - TP1: Green line @ $59,500 + "TP1 +7.8%"                                   │
+│ - TP2: Gold line @ $64,000 + "TP2 +16%"                                     │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ RESULT BOX:                                                                  │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📊 KẾT QUẢ:                                                             │ │
+│ │ Entry: $55,200 | SL: $52,800 | TP1: $59,500 | TP2: $64,000              │ │
+│ │ R:R = 1:3.7 | Profit: +16% | Duration: 5 days                           │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+📐 HÌNH 5.6.2: SOL DPU TRADE SETUP
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 5.6" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "SOL/USDT - SETUP LONG" (White, bold)                            │
+│ - Subtitle: "Step-by-step trade execution"                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ CHART INFO BAR:                                                              │
+│ - Pair: "SOL/USDT" | TF: "1H" | Date: "Oct 2024"                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN CHART với STEP ANNOTATIONS:                                             │
+│                                                                              │
+│ [Full candlestick chart]                                                    │
+│                                                                              │
+│ STEP 1 (Cyan circle):                                                        │
+│ - Vị trí: Đầu Phase 1 (DOWN)                                                │
+│ - Label: "① Xác định xu hướng DOWN"                                         │
+│                                                                              │
+│ STEP 2 (Cyan circle):                                                        │
+│ - Vị trí: Tại LFZ                                                           │
+│ - Label: "② Đánh dấu LFZ Zone"                                              │
+│ - LFZ box highlight                                                         │
+│                                                                              │
+│ STEP 3 (Cyan circle):                                                        │
+│ - Vị trí: Tại nến rejection                                                 │
+│ - Label: "③ Đợi nến xác nhận"                                               │
+│ - Nến Hammer highlighted                                                    │
+│                                                                              │
+│ STEP 4 (Cyan circle):                                                        │
+│ - Vị trí: Entry point                                                       │
+│ - Label: "④ Vào LONG"                                                       │
+│ - Arrow marker                                                              │
+│                                                                              │
+│ STEP 5 (Cyan circle):                                                        │
+│ - Vị trí: SL và TP lines                                                    │
+│ - Label: "⑤ Đặt SL & TP"                                                    │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ EXECUTION BOX:                                                               │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📋 EXECUTION CHECKLIST:                                                 │ │
+│ │ ☑️ DOWN trend rõ ràng (10+ nến đỏ)                                      │ │
+│ │ ☑️ LFZ formed (consolidation 5+ nến)                                    │ │
+│ │ ☑️ Bullish confirmation (Hammer)                                        │ │
+│ │ ☑️ Entry @ $142 | SL @ $135 | TP1 @ $155                                │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+📐 HÌNH 5.6.3: DPU TRADE RESULT SUMMARY
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Style: Result summary / Infographic
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 5.6" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "KẾT QUẢ TRADE THỰC TẾ" (White, bold)                            │
+│ - Subtitle: "DPU Pattern Real Results"                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ TRADE SUMMARY CARD:                                                          │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 🎯 SOL/USDT LONG - DPU PATTERN                                          │ │
+│ │                                                                         │ │
+│ │ Entry:     $142.00                                                      │ │
+│ │ Stop Loss: $135.00 (-4.9%)                                              │ │
+│ │ TP1:       $155.00 (+9.2%) ✅ HIT                                       │ │
+│ │ TP2:       $168.00 (+18.3%) ✅ HIT                                      │ │
+│ │ TP3:       $180.00 (+26.8%) ⏳ Running                                  │ │
+│ │                                                                         │ │
+│ │ Current R:R: 1:3.7                                                      │ │
+│ │ Duration:  48 hours                                                     │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ PROFIT BREAKDOWN:                                                            │
+│ ┌────────────────────────────────────────────────────────────────┐          │
+│ │ POSITION SIZE: $1,000                                          │          │
+│ │                                                                │          │
+│ │ TP1 (40%): $400 × 9.2% = +$36.80                              │          │
+│ │ TP2 (40%): $400 × 18.3% = +$73.20                             │          │
+│ │ TP3 (20%): $200 × 26.8% = +$53.60 (unrealized)                │          │
+│ │ ─────────────────────────────────────                          │          │
+│ │ REALIZED PROFIT: +$110.00 (+11%)                              │          │
+│ │ TOTAL POTENTIAL: +$163.60 (+16.36%)                           │          │
+│ │                                                                │          │
+│ │ [Progress bar: Green 70%, Yellow 30%]                          │          │
+│ └────────────────────────────────────────────────────────────────┘          │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ KEY TAKEAWAYS:                                                               │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ ✅ Caught the reversal at LFZ zone                                      │ │
+│ │ ✅ Confirmation candle (Hammer) worked perfectly                        │ │
+│ │ ✅ Risk management: SL never hit, all TPs progressing                   │ │
+│ │ ✅ Partial profit taking secured gains early                            │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Message: "🎓 DPU = Bắt đáy với xác nhận, không phải FOMO!"                │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════
+TỔNG KẾT CHƯƠNG 5: DPU PATTERN
+═══════════════════════════════════════════════════════════════════════════════
+
+Tổng số hình: 18 hình
+- Bài 5.1: 3 hình (Definition, Market Context, vs Other Patterns)
+- Bài 5.2: 3 hình (3 Phases, Demand Zone, Volume Analysis)
+- Bài 5.3: 3 hình (Wyckoff, Statistics, Psychology)
+- Bài 5.4: 4 hình (Entry Strategy, SL, TP, Confirmation Candles)
+- Bài 5.5: 3 hình (DPU vs UPU, False Signals, Quality Checklist)
+- Bài 5.6: 3 hình (BTC Example, SOL Setup, Trade Result)
+
+Tất cả hình đều có:
+✅ ENFORCE notes về size ratio và font
+✅ DESIGN SYSTEM GENERAL table
+✅ NỘI DUNG HÌNH chi tiết
+✅ QUY TẮC VẼ NẾN CANDLESTICK (cho hình có chart)
+
+GEM TRADING ACADEMY - 2025

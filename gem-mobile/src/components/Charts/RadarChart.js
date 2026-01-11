@@ -37,9 +37,12 @@ const RadarChart = ({
   labelColor = COLORS.textMuted,
   style,
 }) => {
-  const centerX = size / 2;
-  const centerY = size / 2;
-  const radius = (size / 2) - 30; // Leave space for labels
+  // Add padding for labels - labels need extra space outside the chart
+  const labelPadding = showLabels ? 55 : 0;
+  const svgSize = size + labelPadding * 2;
+  const centerX = svgSize / 2;
+  const centerY = svgSize / 2;
+  const radius = (size / 2) - 10; // Chart radius
   const angleSlice = (Math.PI * 2) / LIFE_AREAS.length;
 
   // Calculate point position on radar
@@ -133,7 +136,7 @@ const RadarChart = ({
   const renderLabels = () => {
     return LIFE_AREAS.map((area, index) => {
       const angle = angleSlice * index - Math.PI / 2;
-      const labelRadius = radius + 20;
+      const labelRadius = radius + 25; // Distance from chart edge to label
       const x = centerX + labelRadius * Math.cos(angle);
       const y = centerY + labelRadius * Math.sin(angle);
 
@@ -150,8 +153,8 @@ const RadarChart = ({
             x={x}
             y={y}
             fill={labelColor}
-            fontSize={TYPOGRAPHY.fontSize.sm}
-            fontWeight={TYPOGRAPHY.fontWeight.medium}
+            fontSize={12}
+            fontWeight="500"
             textAnchor={textAnchor}
             alignmentBaseline="middle"
           >
@@ -160,10 +163,10 @@ const RadarChart = ({
           {showValues && (
             <SvgText
               x={x}
-              y={y + 12}
+              y={y + 14}
               fill={area.color}
-              fontSize={TYPOGRAPHY.fontSize.xs}
-              fontWeight={TYPOGRAPHY.fontWeight.bold}
+              fontSize={11}
+              fontWeight="700"
               textAnchor={textAnchor}
               alignmentBaseline="middle"
             >
@@ -177,7 +180,7 @@ const RadarChart = ({
 
   return (
     <View style={[styles.container, style]}>
-      <Svg width={size} height={size}>
+      <Svg width={svgSize} height={svgSize}>
         <G>
           {renderGridCircles()}
           {renderAxisLines()}
@@ -339,7 +342,7 @@ export const LifeBalanceCard = ({
               onPress={() => onAreaPress?.(area.key)}
             >
               <View style={[styles.lifeAreaQuickIcon, { backgroundColor: `${area.color}20` }]}>
-                <IconComponent size={14} color={area.color} />
+                <IconComponent size={16} color={area.color} />
               </View>
               <Text style={styles.lifeAreaQuickLabel}>{area.label}</Text>
               <Text style={[styles.lifeAreaQuickValue, { color: area.color }]}>
@@ -499,25 +502,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
     paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs,
+    paddingVertical: SPACING.sm, // Increased from xs
     borderRadius: SPACING.sm,
     minWidth: '48%',
     gap: SPACING.xs,
   },
   lifeAreaQuickIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     alignItems: 'center',
     justifyContent: 'center',
   },
   lifeAreaQuickLabel: {
     flex: 1,
     color: COLORS.textMuted,
-    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontSize: TYPOGRAPHY.fontSize.sm, // Increased from xs
   },
   lifeAreaQuickValue: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontSize: TYPOGRAPHY.fontSize.md, // Increased from sm
     fontWeight: TYPOGRAPHY.fontWeight.bold,
   },
 });

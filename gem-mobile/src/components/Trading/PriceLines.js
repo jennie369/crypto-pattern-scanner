@@ -111,7 +111,7 @@ const PriceLines = ({
       <View style={styles.rrBadge}>
         <Text style={styles.rrLabel}>R:R</Text>
         <Text style={styles.rrValue}>
-          1:{calculateRR(pattern).toFixed(2)}
+          1:{calculateRR(pattern).toFixed(2).replace('.', ',')}
         </Text>
       </View>
     </View>
@@ -197,7 +197,7 @@ export const PriceLevelsBadge = ({ pattern }) => {
             badgeStyles.priceValue,
             rr >= 2 ? badgeStyles.greenText : badgeStyles.yellowText,
           ]}>
-            1:{rr.toFixed(2)}
+            1:{rr.toFixed(2).replace('.', ',')}
           </Text>
         </View>
       </View>

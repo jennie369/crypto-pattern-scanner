@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Sections - Dark</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Noto+Sans+Display:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root{--primary-burgundy:#9C0612;--primary-dark:#640A0C;--secondary-red:#761E0B;--gold-accent:#FFBD59;--gold-light:#DEBC81;--bg-navy:#112250;--text-light:#FFF;--text-gold:#DEBC81;--font-heading:'Montserrat',sans-serif;--font-body:'Noto Sans Display',sans-serif}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:var(--font-body);line-height:1.6;color:var(--text-light);overflow-x:hidden;background:#000}
+        .container{max-width:1200px;margin:0 auto;padding:0 20px}
+        h1,h2,h3,h4{font-family:var(--font-heading);font-weight:700;line-height:1.2}
+        .btn-primary{display:inline-block;background:var(--gold-accent);color:var(--bg-navy);padding:18px 50px;font-size:20px;font-weight:700;text-decoration:none;border-radius:50px;transition:all .3s;border:3px solid var(--gold-accent);box-shadow:0 10px 30px rgba(255,189,89,.4)}
+        .btn-primary:hover{background:var(--primary-burgundy);color:var(--gold-accent);transform:translateY(-3px);box-shadow:0 15px 40px rgba(255,189,89,.6)}
+        
+        /* ========== SECTION 1: FINAL FOMO ========== */
+        .fomo-section{padding:80px 20px;background:linear-gradient(135deg,var(--secondary-red) 0%,var(--primary-dark) 100%);color:var(--text-light);text-align:center;position:relative;overflow:hidden}
+        .fomo-section::before{content:'';position:absolute;width:100%;height:100%;top:0;left:0;background:radial-gradient(circle at 50% 50%,rgba(255,189,89,.1) 0%,transparent 50%);pointer-events:none}
+        .fomo-section h2{color:var(--gold-accent);font-size:42px;margin-bottom:30px;position:relative;z-index:2}
+        .spots-remaining{display:inline-block;background:rgba(255,189,89,.2);border:3px solid var(--gold-accent);padding:30px 50px;border-radius:20px;margin:30px 0;position:relative;z-index:2}
+        .spots-remaining .number{font-size:72px;font-weight:800;color:var(--gold-accent);display:block;line-height:1}
+        .spots-remaining .label{font-size:20px;color:var(--text-gold);margin-top:10px}
+        .fomo-reasons{max-width:700px;margin:40px auto;text-align:left;position:relative;z-index:2}
+        .fomo-reasons li{padding:15px 0 15px 40px;position:relative;font-size:18px;color:var(--text-gold)}
+        .fomo-reasons li::before{content:"→";position:absolute;left:0;color:var(--gold-accent);font-weight:700;font-size:24px}
+        .next-batch{background:rgba(0,0,0,.3);padding:30px;border-radius:15px;margin-top:40px;max-width:600px;margin-left:auto;margin-right:auto;position:relative;z-index:2}
+        .next-batch p{font-size:18px;color:var(--text-gold);margin-bottom:10px}
+        .next-batch .price-increase{font-size:24px;font-weight:700;color:var(--gold-accent)}
+        
+        /* ========== SECTION 2: TRUST BADGES ========== */
+        .trust-section{padding:80px 20px;background:linear-gradient(180deg,var(--primary-dark) 0%,#5C0A14 20%,#4D0610 40%,#3E060C 60%,#2F0508 80%,#200404 100%);text-align:center;position:relative;overflow:hidden}
+        .trust-section::before{content:'';position:absolute;width:100%;height:100%;top:0;left:0;background:radial-gradient(circle at 30% 30%,rgba(255,189,89,.08) 0%,transparent 40%);pointer-events:none}
+        .trust-section h3{color:var(--gold-accent);font-size:32px;margin-bottom:40px;position:relative;z-index:2}
+        .trust-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:40px;max-width:1000px;margin:0 auto;position:relative;z-index:2}
+        .trust-item{padding:20px;background:rgba(255,255,255,.05);backdrop-filter:blur(10px);border-radius:15px;border:2px solid rgba(255,189,89,.2);transition:all .3s}
+        .trust-item:hover{border-color:var(--gold-accent);transform:translateY(-5px);box-shadow:0 10px 30px rgba(255,189,89,.3)}
+        .trust-icon{font-size:48px;margin-bottom:15px;color:var(--gold-accent)}
+        .trust-item h4{color:var(--gold-accent);font-size:32px;font-weight:800;margin-bottom:5px}
+        .trust-item p{color:var(--text-gold);font-size:16px}
+        .media-mentions{margin-top:50px;position:relative;z-index:2}
+        .media-mentions p{font-size:18px;color:var(--text-gold);margin-bottom:20px}
+        .media-logos{display:flex;justify-content:center;gap:30px;flex-wrap:wrap;opacity:.6}
+        .media-logos span{font-size:24px;color:var(--text-gold)}
+        
+        /* ========== SECTION 3: TRANSFORMATION ========== */
+        .transformation-section{padding:80px 20px;background:linear-gradient(180deg,#200404 0%,#2F0508 20%,#3E060C 40%,#4D0509 60%,var(--primary-dark) 80%,#5C0A14 100%);position:relative;overflow:hidden}
+        .transformation-section::before{content:'';position:absolute;width:100%;height:100%;top:0;left:0;background:radial-gradient(circle at 70% 30%,rgba(255,189,89,.06) 0%,transparent 35%);pointer-events:none}
+        .transformation-section h2{text-align:center;color:var(--gold-accent);font-size:42px;margin-bottom:60px;position:relative;z-index:2}
+        .transformation-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:40px;max-width:1200px;margin:0 auto;position:relative;z-index:2}
+        .before-after-card{background:rgba(0,0,0,.6);backdrop-filter:blur(15px);border-radius:20px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.5);border:2px solid rgba(255,189,89,.3);transition:all .3s}
+        .before-after-card:hover{border-color:var(--gold-accent);transform:translateY(-5px)}
+        .ba-header{background:linear-gradient(135deg,var(--primary-burgundy) 0%,var(--secondary-red) 100%);color:var(--text-light);padding:20px;text-align:center}
+        .ba-header h3{font-size:22px;margin-bottom:5px}
+        .ba-header p{font-size:14px;color:var(--text-gold)}
+        .ba-content{display:grid;grid-template-columns:1fr 1fr}
+        .before-side,.after-side{padding:30px 20px}
+        .before-side{background:rgba(118,30,11,.3);border-right:2px dashed rgba(255,189,89,.3)}
+        .after-side{background:rgba(40,167,69,.2)}
+        .ba-label{font-weight:700;font-size:16px;margin-bottom:15px;text-align:center}
+        .before-side .ba-label{color:#ff6b6b}
+        .after-side .ba-label{color:#51cf66}
+        .ba-list{list-style:none}
+        .ba-list li{padding:8px 0 8px 25px;position:relative;font-size:14px;line-height:1.6;color:var(--text-gold)}
+        .before-side .ba-list li::before{content:"❌";position:absolute;left:0;font-size:16px}
+        .after-side .ba-list li::before{content:"✅";position:absolute;left:0;font-size:16px}
+        .quote-box{text-align:center;margin-top:60px;padding:50px;background:rgba(0,0,0,.6);backdrop-filter:blur(15px);border-radius:20px;border:3px solid var(--gold-accent);max-width:900px;margin-left:auto;margin-right:auto}
+        .quote-box h3{color:var(--gold-accent);font-size:28px;margin-bottom:20px}
+        .quote-box p{font-size:18px;color:var(--text-gold);line-height:1.8}
+        
+        /* ========== SECTION 4: FINAL CTA ========== */
+        .final-cta-section{padding:100px 20px;background:linear-gradient(135deg,var(--bg-navy) 0%,var(--primary-dark) 100%);color:var(--text-light);text-align:center;position:relative;overflow:hidden}
+        .final-cta-section::before{content:'';position:absolute;width:100%;height:100%;top:0;left:0;background:radial-gradient(circle at 50% 50%,rgba(255,189,89,.15) 0%,transparent 60%);pointer-events:none}
+        .final-cta-section h2{font-size:42px;color:var(--gold-accent);margin-bottom:30px;position:relative;z-index:2}
+        .choices-box{background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border:2px solid var(--gold-accent);border-radius:20px;padding:40px;max-width:600px;margin:40px auto;position:relative;z-index:2}
+        .choices-box p:first-child{font-size:18px;margin-bottom:20px;color:var(--text-gold)}
+        .choice-list{text-align:left;margin:20px 0}
+        .choice-list p{margin-bottom:20px;padding-left:30px;position:relative;color:var(--text-light)}
+        .choice-list p span{position:absolute;left:0;font-size:24px}
+        .commitment-box{margin-top:60px;padding:40px;background:rgba(0,0,0,.3);border-radius:20px;max-width:800px;margin-left:auto;margin-right:auto;position:relative;z-index:2}
+        .commitment-box .title{font-size:20px;color:var(--gold-accent);font-weight:700;margin-bottom:20px}
+        .commitment-box .text{font-size:16px;color:var(--text-gold);line-height:1.8}
+        
+        @media (max-width:768px){
+            .fomo-section,.trust-section,.transformation-section,.final-cta-section{padding:60px 15px}
+            .fomo-section h2,.trust-section h3,.transformation-section h2,.final-cta-section h2{font-size:32px}
+            .spots-remaining .number{font-size:48px}
+            .trust-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:20px}
+            .ba-content{grid-template-columns:1fr}
+            .before-side{border-right:none;border-bottom:2px dashed rgba(255,189,89,.3)}
+            .quote-box{padding:30px 20px}
+            .quote-box h3{font-size:22px}
+            .btn-primary{font-size:18px;padding:16px 40px}
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========== SECTION 1: FINAL FOMO ========== -->
+<section class="fomo-section">
+    <div class="container">
+        <h2>⚠️ Lời Nhắc Cuối Cùng</h2>
+
+        <div class="spots-remaining">
+            <span class="number">12</span>
+            <span class="label">CHỖ TRỐNG CÒN LẠI</span>
+        </div>
+
+        <p style="font-size:22px;margin:30px auto;max-width:700px;color:var(--text-gold);position:relative;z-index:2">
+            Tại sao chúng tôi giới hạn số lượng?
+        </p>
+
+        <ul class="fomo-reasons" style="list-style:none">
+            <li>Để đảm bảo chất lượng tương tác 1-1 với mỗi học viên</li>
+            <li>Mentor tham gia TRỰC TIẾP với mỗi nhóm, không thể mở quá nhiều</li>
+            <li>Community nhỏ = kết nối sâu hơn, chuyển hóa mạnh hơn</li>
+            <li>Đây là đợt PILOT - chúng tôi muốn đảm bảo 100% thành công</li>
+        </ul>
+
+        <div class="next-batch">
+            <p>Đợt tiếp theo:</p>
+            <p class="price-increase">+1.000.000đ | Mở sau 6 tuần</p>
+            <p style="margin-top:15px;font-size:16px">
+                (Và có thể không còn các bonus hiện tại)
+            </p>
+        </div>
+
+        <div style="margin-top:50px;position:relative;z-index:2">
+            <a href="#dang-ky" class="btn-primary">BẢO VỆ CHỖ CỦA TÔI NGAY</a>
+        </div>
+
+        <p style="margin-top:30px;font-size:18px;color:var(--text-gold);position:relative;z-index:2">
+            ⏰ Đếm ngược đang chạy. Mỗi phút trôi qua là một cơ hội bỏ lỡ.
+        </p>
+    </div>
+</section>
+
+<!-- ========== SECTION 2: TRUST BADGES ========== -->
+<section class="trust-section">
+    <div class="container">
+        <h3>🏆 Được Tin Tưởng Bởi Cộng Đồng</h3>
+
+        <div class="trust-grid">
+            <div class="trust-item">
+                <div class="trust-icon">👥</div>
+                <h4>1,247+</h4>
+                <p>Người đã chuyển đổi</p>
+            </div>
+
+            <div class="trust-item">
+                <div class="trust-icon">⭐</div>
+                <h4>4.9/5</h4>
+                <p>Rating từ 386 reviews</p>
+            </div>
+
+            <div class="trust-item">
+                <div class="trust-icon">🌍</div>
+                <h4>12</h4>
+                <p>Quốc gia</p>
+            </div>
+
+            <div class="trust-item">
+                <div class="trust-icon">💯</div>
+                <h4>94%</h4>
+                <p>Tỷ lệ hoàn thành 7 ngày</p>
+            </div>
+        </div>
+
+        <div class="media-mentions">
+            <p>"Chương trình thay đổi cuộc đời được đánh giá cao nhất năm 2025"</p>
+            <div class="media-logos">
+                <span>📰 VnExpress</span>
+                <span>📱 Forbes Vietnam</span>
+                <span>🎯 Startup Việt</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== SECTION 3: TRANSFORMATION ========== -->
+<section class="transformation-section">
+    <div class="container">
+        <h2>🦋 Chuyển Biến Thật Từ Học Viên</h2>
+
+        <div class="transformation-grid">
+            <div class="before-after-card">
+                <div class="ba-header">
+                    <h3>Minh Anh, 29 tuổi</h3>
+                    <p>Marketing Manager</p>
+                </div>
+                <div class="ba-content">
+                    <div class="before-side">
+                        <div class="ba-label">TRƯỚC 7 NGÀY</div>
+                        <ul class="ba-list">
+                            <li>Burnout nghiêm trọng, mất động lực làm việc</li>
+                            <li>Hay cáu gắt với đồng nghiệp vì chuyện nhỏ</li>
+                            <li>Ngủ 4-5 tiếng/đêm, mệt mỏi liên tục</li>
+                            <li>Cảm giác cuộc đời không có ý nghĩa</li>
+                            <li>Nghĩ đến việc nghỉ việc nhưng không biết làm gì</li>
+                        </ul>
+                    </div>
+                    <div class="after-side">
+                        <div class="ba-label">SAU 7 NGÀY</div>
+                        <ul class="ba-list">
+                            <li>Năng lượng trở lại, thức dậy háo hức mỗi sáng</li>
+                            <li>Bình tĩnh hơn, biết cách xử lý cảm xúc</li>
+                            <li>Ngủ ngon hơn, 7 tiếng/đêm đều đặn</li>
+                            <li>Nhìn thấy mục đích rõ ràng trong công việc</li>
+                            <li>Được thăng chức sau 3 tuần (nhờ mindset mới)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="before-after-card">
+                <div class="ba-header">
+                    <h3>Minh Nguyễn, 35 tuổi</h3>
+                    <p>Founder Startup</p>
+                </div>
+                <div class="ba-content">
+                    <div class="before-side">
+                        <div class="ba-label">TRƯỚC 7 NGÀY</div>
+                        <ul class="ba-list">
+                            <li>Startup gặp khủng hoảng tài chính</li>
+                            <li>Lo âu không ngủ được, suy nghĩ tiêu cực</li>
+                            <li>Mối quan hệ với cofounders căng thẳng</li>
+                            <li>Nghĩ đến việc từ bỏ dự án</li>
+                            <li>Cảm giác thất bại, tự ti với bản thân</li>
+                        </ul>
+                    </div>
+                    <div class="after-side">
+                        <div class="ba-label">SAU 7 NGÀY</div>
+                        <ul class="ba-list">
+                            <li>Gọi vốn thành công 500K USD (trong tháng sau)</li>
+                            <li>Bình tĩnh đưa ra quyết định chiến lược</li>
+                            <li>Hàn gắn và làm việc tốt hơn với team</li>
+                            <li>Tìm ra hướng đi mới cho sản phẩm</li>
+                            <li>Tự tin, tin tưởng vào năng lực bản thân</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="before-after-card">
+                <div class="ba-header">
+                    <h3>Thanh Hà, 42 tuổi</h3>
+                    <p>Chủ Doanh Nghiệp</p>
+                </div>
+                <div class="ba-content">
+                    <div class="before-side">
+                        <div class="ba-label">TRƯỚC 7 NGÀY</div>
+                        <ul class="ba-list">
+                            <li>Hôn nhân lạnh nhạt, sắp ly hôn</li>
+                            <li>Con cái xa cách, không giao tiếp</li>
+                            <li>Stress từ công việc làm sức khỏe suy giảm</li>
+                            <li>Cảm thấy cô đơn dù có tiền bạc</li>
+                            <li>Sống vì nghĩa vụ, không có niềm vui</li>
+                        </ul>
+                    </div>
+                    <div class="after-side">
+                        <div class="ba-label">SAU 7 NGÀY</div>
+                        <ul class="ba-list">
+                            <li>Hôn nhân cải thiện, chồng chủ động nói chuyện</li>
+                            <li>Con gái 16 tuổi bắt đầu tâm sự với mẹ</li>
+                            <li>Giảm được 3kg, làn da sáng hơn</li>
+                            <li>Tìm lại niềm vui, cười nhiều hơn</li>
+                            <li>Sống với ý nghĩa, biết ơn những gì có</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quote-box">
+            <h3>💬 "Nếu tôi biết nó mạnh mẽ đến vậy, tôi đã tham gia sớm hơn 5 năm"</h3>
+            <p style="margin-bottom:15px;font-weight:600">- Hương Giang, 38 tuổi, CEO</p>
+            <p>
+                "7 ngày này đã làm được điều mà 5 năm therapy không làm được. 
+                Tôi đã tìm thấy bản thân thật của mình. Tôi đã về nhà."
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- ========== SECTION 4: FINAL CTA ========== -->
+<section class="final-cta-section">
+    <div class="container">
+        <h2>Câu Hỏi Duy Nhất Còn Lại Là...</h2>
+        
+        <p style="font-size:24px;color:var(--text-gold);margin-bottom:40px;line-height:1.6;position:relative;z-index:2">
+            Bạn có sẵn sàng cho bản thân 7 ngày<br>
+            để thay đổi cả cuộc đời không?
+        </p>
+
+        <div class="choices-box">
+            <p>Bạn có 2 lựa chọn:</p>
+            <div class="choice-list">
+                <p>
+                    <span style="color:var(--secondary-red)">❌</span>
+                    Tiếp tục sống như cũ, hy vọng mọi thứ tự khác đi
+                </p>
+                <p>
+                    <span style="color:var(--gold-accent)">✅</span>
+                    Hành động NGAY, chuyển hóa từ gốc rễ trong 7 ngày
+                </p>
+            </div>
+        </div>
+
+        <a href="#dang-ky" class="btn-primary" style="font-size:24px;padding:22px 60px;position:relative;z-index:2">
+            BẮT ĐẦU 7 NGÀY CHUYỂN HÓA
+        </a>
+
+        <p style="margin-top:30px;font-size:16px;color:var(--text-gold);position:relative;z-index:2">
+            ✅ Cam kết hoàn tiền 100%<br>
+            ✅ Chỉ còn 12 chỗ<br>
+            ✅ Đóng đăng ký sau 2 ngày 14 giờ
+        </p>
+
+        <div class="commitment-box">
+            <p class="title">💎 Lời Cam Kết Của Chúng Tôi</p>
+            <p class="text">
+                Chúng tôi không hứa hẹn phép màu. Nhưng chúng tôi CAM KẾT:<br>
+                Nếu bạn xuất hiện đầy đủ 7 ngày, làm đủ bài tập,<br>
+                bạn SẼ THẤY sự thay đổi rõ ràng trong năng lượng, tâm trạng và cuộc sống.<br>
+                Chỉ đơn giản như vậy.
+            </p>
+        </div>
+    </div>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,1657 @@
+═══════════════════════════════════════════════════════════════════════════════
+TIER 1 - CHƯƠNG 7: PAPER TRADING & BACKTESTING
+═══════════════════════════════════════════════════════════════════════════════
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 7.1: TẠI SAO CẦN PAPER TRADING?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: PAPER TRADING BENEFITS
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Success       | Green         | #10B981
+Warning       | Red           | #EF4444
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge góc trái: "BÀI 7.1"
+- Màu nền: Vàng gold (#FFBD59)
+- Màu text: Navy (#112250)
+
+Tiêu đề chính: "TẠI SAO CẦN PAPER TRADING?"
+- Màu: Vàng gold (#FFBD59)
+
+Subtitle: "5 Lợi ích quan trọng của việc thực hành trước"
+- Màu: Trắng (#FFFFFF)
+
+═══════════════════════════════════════════════════════════════
+NỘI DUNG CHÍNH (5 BENEFITS GRID):
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  ①  KHÔNG MẤT TIỀN THẬT                                     │
+│      💰 Viền: Green (#10B981)                               │
+│      • Thực hành với tiền ảo                                │
+│      • Không có rủi ro tài chính                            │
+│      • An toàn để mắc sai lầm                               │
+│                                                              │
+│  ②  XÂY DỰNG KỶ LUẬT                                        │
+│      🎯 Viền: Cyan (#00F0FF)                                │
+│      • Tạo thói quen giao dịch đúng                         │
+│      • Tuân thủ chiến lược                                  │
+│      • Kiểm soát cảm xúc                                    │
+│                                                              │
+│  ③  KIỂM TRA KIẾN THỨC                                      │
+│      📚 Viền: Purple (#6A5BFF)                              │
+│      • Áp dụng patterns đã học                              │
+│      • Xác nhận hiểu biết                                   │
+│      • Phát hiện lỗ hổng                                    │
+│                                                              │
+│  ④  THỐNG KÊ KẾT QUẢ                                        │
+│      📊 Viền: Cyan (#00F0FF)                                │
+│      • Win Rate cá nhân                                     │
+│      • R:R thực tế                                          │
+│      • Điểm mạnh/yếu                                        │
+│                                                              │
+│  ⑤  TỰ TIN KHI LIVE                                         │
+│      💪 Viền: Gold (#FFBD59)                                │
+│      • Sẵn sàng cho tiền thật                               │
+│      • Đã qua thử nghiệm                                    │
+│      • Tâm lý vững vàng                                     │
+└─────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+HIGHLIGHT BOX:
+═══════════════════════════════════════════════════════════════
+💡 NGUYÊN TẮC VÀNG:
+"Paper Trade 100 lệnh trước khi dùng tiền thật"
+Viền: Gold (#FFBD59), Background: Navy lighter
+
+═══════════════════════════════════════════════════════════════
+FOOTER:
+═══════════════════════════════════════════════════════════════
+"GEM TRADING" - màu trắng, căn giữa
+
+
+📐 HÌNH 2: REAL TRADING VS PAPER TRADING
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "SO SÁNH"
+- Màu nền: Purple (#6A5BFF)
+
+Tiêu đề: "REAL TRADING VS PAPER TRADING"
+
+═══════════════════════════════════════════════════════════════
+BẢNG SO SÁNH 2 CỘT:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────┬─────────────────────────────┐
+│    ❌ REAL TRADING          │    ✅ PAPER TRADING         │
+│    (Không chuẩn bị)         │    (Có chuẩn bị)            │
+│ ═══════════════════════════ │ ═══════════════════════════ │
+│                             │                             │
+│  💸 Mất tiền thật           │  💰 Không mất tiền          │
+│  😰 Stress cao              │  😊 Thoải mái học           │
+│  🎰 Giao dịch cảm tính      │  📊 Giao dịch có hệ thống   │
+│  📉 Không có thống kê       │  📈 Thống kê chi tiết       │
+│  ❌ Win Rate: 20-30%        │  ✅ Win Rate: Tăng dần      │
+│                             │                             │
+│  Viền: Đỏ (#EF4444)         │  Viền: Xanh lá (#10B981)    │
+└─────────────────────────────┴─────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+TIMELINE CHO HỌC VIÊN MỚI:
+═══════════════════════════════════════════════════════════════
+Tháng 1 → Paper Trading (100 lệnh)
+Tháng 2 → Real Trading nhỏ ($100)
+Tháng 3 → Tăng dần vốn
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: COMMON MISTAKES WITHOUT PRACTICE
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "CẢNH BÁO"
+- Màu nền: Red (#EF4444)
+
+Tiêu đề: "5 SAI LẦM KHI KHÔNG THỰC HÀNH"
+- Icon: ⚠️
+
+═══════════════════════════════════════════════════════════════
+5 SAI LẦM (Vertical List):
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  ① FOMO - Sợ bỏ lỡ cơ hội                                  │
+│     → Nhảy vào lệnh không có setup                          │
+│     Icon: 🏃 | Viền: Red                                    │
+├─────────────────────────────────────────────────────────────┤
+│  ② REVENGE TRADING - Gỡ gạc                                │
+│     → Thua 1 lệnh, vào liên tục để gỡ                      │
+│     Icon: 😤 | Viền: Red                                    │
+├─────────────────────────────────────────────────────────────┤
+│  ③ OVER-LEVERAGE - Dùng đòn bẩy quá cao                    │
+│     → Liquidation liên tục                                  │
+│     Icon: 💥 | Viền: Red                                    │
+├─────────────────────────────────────────────────────────────┤
+│  ④ NO STOP LOSS - Không cắt lỗ                             │
+│     → "Nó sẽ quay lại" → Cháy tài khoản                    │
+│     Icon: 🔥 | Viền: Red                                    │
+├─────────────────────────────────────────────────────────────┤
+│  ⑤ RANDOM ENTRIES - Vào lệnh ngẫu nhiên                    │
+│     → Không theo bất kỳ pattern nào                         │
+│     Icon: 🎲 | Viền: Red                                    │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 7.2: THIẾT LẬP PAPER TRADING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: TRADINGVIEW PAPER TRADING SETUP
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Success       | Green         | #10B981
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "HƯỚNG DẪN"
+- Màu nền: Cyan (#00F0FF)
+
+Tiêu đề: "THIẾT LẬP TRADINGVIEW PAPER TRADING"
+
+═══════════════════════════════════════════════════════════════
+4 BƯỚC THIẾT LẬP (với screenshot mockup):
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  BƯỚC 1: Đăng nhập TradingView                              │
+│  ════════════════════════════════════════════════════════   │
+│  📍 Vào tradingview.com                                     │
+│  📍 Đăng ký tài khoản miễn phí                              │
+│  [Screenshot: Login page]                                    │
+│                                                              │
+│  BƯỚC 2: Mở Trading Panel                                   │
+│  ════════════════════════════════════════════════════════   │
+│  📍 Click "Trading Panel" ở dưới chart                      │
+│  📍 Chọn "Paper Trading"                                    │
+│  [Screenshot: Trading panel location]                        │
+│                                                              │
+│  BƯỚC 3: Thiết lập vốn                                      │
+│  ════════════════════════════════════════════════════════   │
+│  📍 Reset account về $100,000                               │
+│  📍 Hoặc dùng số tiền bạn dự định trade thật                │
+│  [Screenshot: Account settings]                              │
+│                                                              │
+│  BƯỚC 4: Bắt đầu giao dịch                                  │
+│  ════════════════════════════════════════════════════════   │
+│  📍 Click Buy/Sell trên chart                               │
+│  📍 Đặt Entry, SL, TP như thật                              │
+│  [Screenshot: Order placement]                               │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: BINANCE TESTNET SETUP
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "BINANCE"
+- Màu nền: Gold (#FFBD59)
+- Icon: Binance logo
+
+Tiêu đề: "BINANCE TESTNET - PAPER TRADING"
+
+═══════════════════════════════════════════════════════════════
+HƯỚNG DẪN:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  🌐 URL: testnet.binancefuture.com                          │
+│  ════════════════════════════════════════════════════════   │
+│                                                              │
+│  BƯỚC 1: Đăng ký tài khoản Testnet                          │
+│  📍 Hoàn toàn miễn phí                                      │
+│  📍 Không cần KYC                                           │
+│                                                              │
+│  BƯỚC 2: Nhận USDT Test                                     │
+│  📍 Vào Wallet → Transfer                                   │
+│  📍 Nhận 3000 USDT miễn phí                                 │
+│                                                              │
+│  BƯỚC 3: Bắt đầu giao dịch                                  │
+│  📍 Giao diện giống hệt Binance thật                        │
+│  📍 Thực hành Futures với leverage                          │
+│                                                              │
+│  ⚠️ LƯU Ý:                                                  │
+│  • Giá realtime như thật                                    │
+│  • Liquidation giống thật                                   │
+│  • Chỉ khác là tiền test                                    │
+└─────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+SO SÁNH 2 CÔNG CỤ:
+═══════════════════════════════════════════════════════════════
+┌──────────────────┬──────────────────┐
+│  TradingView     │  Binance Testnet │
+│ ════════════════ │ ════════════════ │
+│ ✅ Dễ sử dụng    │ ✅ Giống thật    │
+│ ✅ Chart đẹp     │ ✅ Có leverage   │
+│ ❌ Không có lev  │ ❌ Phức tạp hơn  │
+│ Viền: Purple     │ Viền: Gold       │
+└──────────────────┴──────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: ACCOUNT SETTINGS CHECKLIST
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "CHECKLIST"
+- Màu nền: Green (#10B981)
+
+Tiêu đề: "THIẾT LẬP TÀI KHOẢN PAPER TRADING"
+
+═══════════════════════════════════════════════════════════════
+CHECKLIST TABLE:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  ☐  VỐN: Dùng số tiền bạn thực sự có thể đầu tư            │
+│      📍 Gợi ý: $1,000 - $10,000                             │
+│      📍 KHÔNG dùng $100,000 vì không thực tế                │
+├─────────────────────────────────────────────────────────────┤
+│  ☐  LEVERAGE: Bắt đầu với 3-5x                              │
+│      📍 Không dùng 20x-50x khi mới bắt đầu                  │
+│      📍 Học quản lý rủi ro trước                            │
+├─────────────────────────────────────────────────────────────┤
+│  ☐  RISK PER TRADE: 1-2% vốn                                │
+│      📍 Với $1000: Risk $10-20/lệnh                         │
+│      📍 Tuân thủ như tiền thật                              │
+├─────────────────────────────────────────────────────────────┤
+│  ☐  GHI CHÉP: Lập nhật ký cho TỪNG lệnh                     │
+│      📍 Entry/SL/TP                                         │
+│      📍 Lý do vào lệnh                                      │
+│      📍 Kết quả và bài học                                  │
+├─────────────────────────────────────────────────────────────┤
+│  ☐  MỤC TIÊU: 100 lệnh paper trading                        │
+│      📍 Thống kê Win Rate sau 100 lệnh                      │
+│      📍 Nếu > 60% → Sẵn sàng cho tiền thật                  │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 7.3: BACKTESTING TRÊN DỮ LIỆU QUÁ KHỨ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: WHAT IS BACKTESTING?
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+⚠️ ENFORCE: Vẽ BIỂU ĐỒ NẾN CANDLESTICK thực tế
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Nến xanh      | Green solid   | #00C853
+Nến đỏ        | Red solid     | #EF4444
+Zone          | Green trans   | #10B981 (30% opacity)
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+
+⚠️ QUY TẮC VẼ NẾN CANDLESTICK - BẮT BUỘC:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  • NẾN XANH (Bullish): FILL MÀU XANH ĐẶC (#00C853), opacity 100%           │
+│  • NẾN ĐỎ (Bearish): FILL MÀU ĐỎ ĐẶC (#EF4444), opacity 100%               │
+│  • CẢ HAI đều là hình chữ nhật SOLID FILLED, không outline rỗng            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "KIẾN THỨC"
+- Màu nền: Purple (#6A5BFF)
+
+Tiêu đề: "BACKTESTING LÀ GÌ?"
+
+═══════════════════════════════════════════════════════════════
+DEFINITION + DIAGRAM:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  📊 BACKTESTING = THỬ NGHIỆM TRÊN DỮ LIỆU QUÁ KHỨ          │
+│  ════════════════════════════════════════════════════════   │
+│                                                              │
+│  [BIỂU ĐỒ NẾN CANDLESTICK - DỮ LIỆU QUÁ KHỨ]               │
+│                                                              │
+│         THÁNG 1      THÁNG 2      THÁNG 3                   │
+│     ┌────────────┬────────────┬────────────┐                │
+│     │  Pattern 1 │  Pattern 2 │  Pattern 3 │                │
+│     │  ✅ Win    │  ❌ Loss   │  ✅ Win    │                │
+│     └────────────┴────────────┴────────────┘                │
+│                                                              │
+│  MỤC ĐÍCH:                                                   │
+│  • Tìm patterns trong dữ liệu đã qua                        │
+│  • Ghi lại Entry, SL, TP giả định                           │
+│  • Tính Win Rate dựa trên kết quả                           │
+│  • Xác nhận chiến lược TRƯỚC khi giao dịch thật             │
+└─────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+VÍ DỤ THỐNG KÊ BACKTEST:
+═══════════════════════════════════════════════════════════════
+Pattern UPU - BTC/USDT H4 (6 tháng qua):
+┌───────────────────────────────────┐
+│  Tổng setups: 25                  │
+│  Win: 18 | Loss: 7                │
+│  Win Rate: 72%                    │
+│  Avg R:R: 1:2.3                   │
+│  → Chiến lược CÓ LỢI NHUẬN       │
+└───────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: BACKTESTING PROCESS
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+⚠️ ENFORCE: Vẽ BIỂU ĐỒ NẾN CANDLESTICK thực tế
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+⚠️ QUY TẮC VẼ NẾN CANDLESTICK - BẮT BUỘC:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  • NẾN XANH (Bullish): FILL MÀU XANH ĐẶC (#00C853), opacity 100%           │
+│  • NẾN ĐỎ (Bearish): FILL MÀU ĐỎ ĐẶC (#EF4444), opacity 100%               │
+│  • CẢ HAI đều là hình chữ nhật SOLID FILLED, không outline rỗng            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "QUY TRÌNH"
+- Màu nền: Cyan (#00F0FF)
+
+Tiêu đề: "5 BƯỚC BACKTESTING HIỆU QUẢ"
+
+═══════════════════════════════════════════════════════════════
+5 BƯỚC (FLOWCHART):
+═══════════════════════════════════════════════════════════════
+     ┌─────────────────────────────────────────┐
+     │  BƯỚC 1: Chọn cặp coin + Timeframe      │
+     │  📍 VD: BTC/USDT H4                     │
+     │  📍 Lùi chart về 6 tháng trước          │
+     └────────────────────┬────────────────────┘
+                          ↓
+     ┌─────────────────────────────────────────┐
+     │  BƯỚC 2: Tìm Pattern trong quá khứ      │
+     │  📍 Scroll qua chart                    │
+     │  📍 Đánh dấu khi thấy UPU/DPD/UPD/DPU   │
+     └────────────────────┬────────────────────┘
+                          ↓
+     ┌─────────────────────────────────────────┐
+     │  BƯỚC 3: Ghi Entry, SL, TP              │
+     │  📍 Entry: Tại zone                     │
+     │  📍 SL: Theo quy tắc                    │
+     │  📍 TP: R:R 1:2                         │
+     └────────────────────┬────────────────────┘
+                          ↓
+     ┌─────────────────────────────────────────┐
+     │  BƯỚC 4: Xác định Win/Loss              │
+     │  📍 Chạy chart về sau                   │
+     │  📍 Xem giá đã đến TP hay SL            │
+     └────────────────────┬────────────────────┘
+                          ↓
+     ┌─────────────────────────────────────────┐
+     │  BƯỚC 5: Thống kê kết quả               │
+     │  📍 Tính Win Rate                       │
+     │  📍 Tối thiểu 50 setups                 │
+     └─────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: BACKTESTING SPREADSHEET TEMPLATE
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "TEMPLATE"
+- Màu nền: Green (#10B981)
+
+Tiêu đề: "BẢNG GHI CHÉP BACKTEST"
+
+═══════════════════════════════════════════════════════════════
+SPREADSHEET MOCKUP:
+═══════════════════════════════════════════════════════════════
+┌─────┬────────┬─────────┬──────────┬────────┬────────┬────────┬────────┐
+│ #   │ Ngày   │ Coin    │ Pattern  │ Entry  │ SL     │ TP     │ Result │
+├─────┼────────┼─────────┼──────────┼────────┼────────┼────────┼────────┤
+│ 1   │ 01/01  │ BTC     │ UPU      │ 42000  │ 41500  │ 43000  │ ✅ WIN │
+│ 2   │ 03/01  │ ETH     │ DPD      │ 2400   │ 2450   │ 2300   │ ✅ WIN │
+│ 3   │ 05/01  │ SOL     │ UPD      │ 100    │ 103    │ 94     │ ❌ LOSS│
+│ 4   │ 07/01  │ BTC     │ DPU      │ 41000  │ 40500  │ 42500  │ ✅ WIN │
+│ 5   │ ...    │ ...     │ ...      │ ...    │ ...    │ ...    │ ...    │
+└─────┴────────┴─────────┴──────────┴────────┴────────┴────────┴────────┘
+
+═══════════════════════════════════════════════════════════════
+THỐNG KÊ SUMMARY:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  📊 SUMMARY AFTER 50 TRADES:                                │
+│  ════════════════════════════════════════════════════════   │
+│  Total Trades: 50                                           │
+│  Wins: 34 (68%)        Losses: 16 (32%)                     │
+│  Average R:R: 1:2.1                                         │
+│  Expectancy: +$1.05 per $1 risked                           │
+│  → CHIẾN LƯỢC CÓ LỢI NHUẬN!                                │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 7.4: NHẬT KÝ GIAO DỊCH
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: TRADING JOURNAL IMPORTANCE
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Success       | Green         | #10B981
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "QUAN TRỌNG"
+- Màu nền: Gold (#FFBD59)
+
+Tiêu đề: "TẠI SAO CẦN NHẬT KÝ GIAO DỊCH?"
+
+═══════════════════════════════════════════════════════════════
+5 LÝ DO (VISUAL ICONS):
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  📈  THEO DÕI TIẾN BỘ                                       │
+│      • Nhìn lại hành trình                                  │
+│      • Thấy sự phát triển                                   │
+│                                                              │
+│  🔍  PHÁT HIỆN SAI LẦM                                      │
+│      • Pattern nào hay sai?                                 │
+│      • Điều kiện nào không hợp?                             │
+│                                                              │
+│  💡  RÚT RA BÀI HỌC                                         │
+│      • Mỗi lệnh là một bài học                              │
+│      • Tránh lặp lại sai lầm                                │
+│                                                              │
+│  📊  CẢI THIỆN WIN RATE                                     │
+│      • Tập trung vào điểm mạnh                              │
+│      • Loại bỏ điểm yếu                                     │
+│                                                              │
+│  🎯  XÂY DỰNG KỶ LUẬT                                       │
+│      • Buộc mình phải suy nghĩ                              │
+│      • Giao dịch có hệ thống                                │
+└─────────────────────────────────────────────────────────────┘
+
+HIGHLIGHT BOX:
+💡 "Traders thành công đều có nhật ký giao dịch"
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: TRADING JOURNAL TEMPLATE
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "TEMPLATE"
+- Màu nền: Green (#10B981)
+
+Tiêu đề: "MẪU NHẬT KÝ GIAO DỊCH"
+
+═══════════════════════════════════════════════════════════════
+JOURNAL ENTRY TEMPLATE:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  📅 NGÀY: 15/01/2025                                        │
+│  ════════════════════════════════════════════════════════   │
+│                                                              │
+│  🔷 THÔNG TIN LỆNH:                                         │
+│  ──────────────────────                                     │
+│  • Coin: BTC/USDT                                           │
+│  • Timeframe: H4                                            │
+│  • Pattern: UPU                                             │
+│  • Hướng: LONG                                              │
+│                                                              │
+│  🔷 MỨC GIÁ:                                                │
+│  ──────────────────────                                     │
+│  • Entry: $42,500                                           │
+│  • Stop Loss: $42,000                                       │
+│  • Take Profit: $43,500                                     │
+│  • R:R: 1:2                                                 │
+│                                                              │
+│  🔷 LÝ DO VÀO LỆNH:                                         │
+│  ──────────────────────                                     │
+│  • Pattern UPU rõ ràng, 3 phases đầy đủ                     │
+│  • LFZ chưa bị test                                         │
+│  • Volume giảm trong pause zone                             │
+│                                                              │
+│  🔷 KẾT QUẢ: ✅ WIN (+$1,000)                               │
+│                                                              │
+│  🔷 BÀI HỌC:                                                │
+│  ──────────────────────                                     │
+│  • Đợi xác nhận candle tốt hơn nữa                          │
+│  • Có thể để TP xa hơn (pattern mạnh)                       │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: WEEKLY REVIEW TEMPLATE
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "WEEKLY"
+- Màu nền: Purple (#6A5BFF)
+
+Tiêu đề: "REVIEW TUẦN - TỔNG KẾT 7 NGÀY"
+
+═══════════════════════════════════════════════════════════════
+WEEKLY SUMMARY TABLE:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  📅 TUẦN: 13-19/01/2025                                     │
+│  ════════════════════════════════════════════════════════   │
+│                                                              │
+│  📊 THỐNG KÊ:                                               │
+│  ┌────────────────────┬────────────────────┐                │
+│  │ Tổng lệnh: 8       │ Win/Loss: 6/2      │                │
+│  │ Win Rate: 75%      │ Profit: +$850      │                │
+│  └────────────────────┴────────────────────┘                │
+│                                                              │
+│  ✅ ĐIỀU LÀM TỐT:                                           │
+│  • Kiên nhẫn đợi setup                                      │
+│  • Đặt SL đúng vị trí                                       │
+│  • Không FOMO                                               │
+│                                                              │
+│  ❌ CẦN CẢI THIỆN:                                          │
+│  • Chốt lời quá sớm 2 lần                                   │
+│  • Vào 1 lệnh không có pattern rõ                           │
+│                                                              │
+│  🎯 MỤC TIÊU TUẦN SAU:                                      │
+│  • Giữ SL, TP đúng kế hoạch                                 │
+│  • Chỉ vào lệnh khi có pattern 100% rõ                      │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 7.5: TỪ PAPER TRADING ĐẾN GIAO DỊCH THẬT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: READINESS CHECKLIST
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Success       | Green         | #10B981
+Warning       | Red           | #EF4444
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "CHECKLIST"
+- Màu nền: Green (#10B981)
+
+Tiêu đề: "BẠN SẴN SÀNG CHO TIỀN THẬT CHƯA?"
+
+═══════════════════════════════════════════════════════════════
+CHECKLIST 8 ĐIỂM:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  ☐ 1. Đã paper trade ít nhất 100 lệnh                       │
+│                                                              │
+│  ☐ 2. Win Rate trên 55% (lý tưởng > 60%)                    │
+│                                                              │
+│  ☐ 3. Có nhật ký giao dịch đầy đủ                           │
+│                                                              │
+│  ☐ 4. Hiểu rõ 4 patterns cơ bản                             │
+│        (DPD, UPU, UPD, DPU)                                  │
+│                                                              │
+│  ☐ 5. Biết đặt SL/TP đúng vị trí                            │
+│                                                              │
+│  ☐ 6. Có quy tắc quản lý rủi ro                             │
+│        (Risk 1-2% per trade)                                 │
+│                                                              │
+│  ☐ 7. Đã backtest ít nhất 50 setups                         │
+│                                                              │
+│  ☐ 8. Có vốn "sẵn sàng mất"                                 │
+│        (Không dùng tiền cần thiết)                           │
+└─────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+SCORING:
+═══════════════════════════════════════════════════════════════
+8/8 ✅ → SẴN SÀNG 100%
+6-7/8 ⚠️ → Thêm 2-4 tuần paper trading
+< 6/8 ❌ → Chưa sẵn sàng, tiếp tục thực hành
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: TRANSITION ROADMAP
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "LỘ TRÌNH"
+- Màu nền: Cyan (#00F0FF)
+
+Tiêu đề: "LỘ TRÌNH CHUYỂN ĐỔI AN TOÀN"
+
+═══════════════════════════════════════════════════════════════
+TIMELINE (4 GIAI ĐOẠN):
+═══════════════════════════════════════════════════════════════
+     ┌─────────────────────────────────────────────────────┐
+     │  📍 GIAI ĐOẠN 1: PAPER TRADING (4-8 tuần)          │
+     │     ───────────────────────────────────────         │
+     │     • 100+ lệnh paper                               │
+     │     • Win Rate tracking                             │
+     │     • Nhật ký đầy đủ                                │
+     │     Viền: Purple (#6A5BFF)                          │
+     └─────────────────────┬───────────────────────────────┘
+                           ↓
+     ┌─────────────────────────────────────────────────────┐
+     │  📍 GIAI ĐOẠN 2: VỐN NHỎ (2-4 tuần)                │
+     │     ───────────────────────────────────────         │
+     │     • $50-100 vốn thật                              │
+     │     • 20+ lệnh                                      │
+     │     • Làm quen cảm xúc tiền thật                    │
+     │     Viền: Cyan (#00F0FF)                            │
+     └─────────────────────┬───────────────────────────────┘
+                           ↓
+     ┌─────────────────────────────────────────────────────┐
+     │  📍 GIAI ĐOẠN 3: VỐN TRUNG BÌNH (4-8 tuần)         │
+     │     ───────────────────────────────────────         │
+     │     • $200-500 vốn                                  │
+     │     • Tăng position size dần                        │
+     │     • Theo dõi tâm lý                               │
+     │     Viền: Green (#10B981)                           │
+     └─────────────────────┬───────────────────────────────┘
+                           ↓
+     ┌─────────────────────────────────────────────────────┐
+     │  📍 GIAI ĐOẠN 4: VỐN CHUẨN (Ongoing)               │
+     │     ───────────────────────────────────────         │
+     │     • $1,000+ vốn                                   │
+     │     • Risk management hoàn chỉnh                    │
+     │     • Trading plan rõ ràng                          │
+     │     Viền: Gold (#FFBD59)                            │
+     └─────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: PSYCHOLOGY MANAGEMENT
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "TÂM LÝ"
+- Màu nền: Purple (#6A5BFF)
+
+Tiêu đề: "QUẢN LÝ TÂM LÝ KHI GIAO DỊCH THẬT"
+
+═══════════════════════════════════════════════════════════════
+5 NGUYÊN TẮC TÂM LÝ:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  ① CHẤP NHẬN THUA LỖ                                        │
+│     ──────────────────────                                   │
+│     "Stop loss là CHI PHÍ làm ăn, không phải thất bại"      │
+│     • 100% traders đều có lệnh thua                         │
+│     • Quan trọng là Win Rate và R:R tổng thể                │
+│     Icon: 🛡️ | Viền: Green                                  │
+├─────────────────────────────────────────────────────────────┤
+│  ② KHÔNG REVENGE TRADING                                    │
+│     ──────────────────────                                   │
+│     "Thua 1 lệnh → Nghỉ 30 phút → Phân tích → Tiếp"         │
+│     • Cảm xúc là kẻ thù #1                                  │
+│     • Bình tĩnh mới thắng                                   │
+│     Icon: 🧘 | Viền: Cyan                                   │
+├─────────────────────────────────────────────────────────────┤
+│  ③ TUÂN THỦ KẾ HOẠCH                                        │
+│     ──────────────────────                                   │
+│     "Không di chuyển SL, không đóng sớm TP"                 │
+│     • Đã plan = Thực hiện                                   │
+│     • Tin vào hệ thống                                      │
+│     Icon: 📋 | Viền: Purple                                 │
+├─────────────────────────────────────────────────────────────┤
+│  ④ RISK CHỈ 1-2% MỖI LỆNH                                   │
+│     ──────────────────────                                   │
+│     "Bảo vệ vốn là ưu tiên số 1"                            │
+│     • Không bao giờ all-in                                  │
+│     • Nhỏ và consistent > Lớn và may rủi                    │
+│     Icon: 💰 | Viền: Gold                                   │
+├─────────────────────────────────────────────────────────────┤
+│  ⑤ GHI CHÉP MỌI LỆNH                                        │
+│     ──────────────────────                                   │
+│     "Nhật ký = Gương phản chiếu trading"                    │
+│     • Phân tích sau mỗi lệnh                                │
+│     • Học từ cả win và loss                                 │
+│     Icon: 📓 | Viền: Green                                  │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+═══════════════════════════════════════════════════════════════════════════════
+CHƯƠNG 8: GEM MASTER AI CƠ BẢN
+═══════════════════════════════════════════════════════════════════════════════
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 8.1: GIỚI THIỆU GEM MASTER AI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: GEM MASTER AI OVERVIEW
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Success       | Green         | #10B981
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "GEM AI"
+- Màu nền: Purple (#6A5BFF)
+- Icon: 🤖
+
+Tiêu đề: "GEM MASTER AI - TRỢ LÝ TRADING THÔNG MINH"
+
+═══════════════════════════════════════════════════════════════
+CENTRAL DIAGRAM (AI HUB):
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│                    ┌──────────────┐                         │
+│                    │   🤖 GEM     │                         │
+│                    │  MASTER AI   │                         │
+│                    └──────┬───────┘                         │
+│                           │                                  │
+│         ┌─────────────────┼─────────────────┐               │
+│         │                 │                 │               │
+│         ↓                 ↓                 ↓               │
+│    ┌─────────┐      ┌─────────┐      ┌─────────┐           │
+│    │ CHATBOT │      │ SCANNER │      │ CẢNH BÁO│           │
+│    │ HỎI ĐÁP │      │ PATTERN │      │ REALTIME│           │
+│    └─────────┘      └─────────┘      └─────────┘           │
+│    Viền: Cyan       Viền: Purple     Viền: Green           │
+│                                                              │
+│  • Trả lời câu     • Quét 50 coins   • Alert khi           │
+│    hỏi về trading  • Tìm patterns    • có signal           │
+│  • 24/7 available  • 50 lần/ngày     • Telegram            │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+TIER 1 FEATURES:
+═══════════════════════════════════════════════════════════════
+┌───────────────────────────────────────┐
+│  📱 TIER 1 PACKAGE:                   │
+│  ─────────────────────                │
+│  ✅ Chatbot hỏi đáp không giới hạn   │
+│  ✅ Scanner: 50 lần/ngày              │
+│  ✅ 50 coins theo dõi                 │
+│  ✅ 1 khung thời gian (H4)            │
+│  ✅ 10 cảnh báo đang hoạt động        │
+│  Viền: Gold (#FFBD59)                 │
+└───────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: AI FEATURES COMPARISON
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "SO SÁNH"
+- Màu nền: Purple (#6A5BFF)
+
+Tiêu đề: "SO SÁNH TÍNH NĂNG AI THEO TIER"
+
+═══════════════════════════════════════════════════════════════
+COMPARISON TABLE:
+═══════════════════════════════════════════════════════════════
+┌──────────────────┬───────────┬───────────┬───────────┐
+│  TÍNH NĂNG       │  TIER 1   │  TIER 2   │  TIER 3   │
+│ ═════════════════│═══════════│═══════════│═══════════│
+│  Chatbot         │  ✅ Basic │  ✅ Pro   │  ✅ Elite │
+│  Scanner/ngày    │  50 lần   │  Unlimited│  Unlimited│
+│  Số coins        │  50       │  200      │  437+     │
+│  Timeframes      │  1 (H4)   │  3        │  5        │
+│  Cảnh báo        │  10       │  50       │  Unlimited│
+│  Multi-TF        │  ❌       │  ✅       │  ✅       │
+│  AI Signals      │  ❌       │  ❌       │  ✅       │
+│  Whale Tracking  │  ❌       │  ❌       │  ✅       │
+│ ─────────────────│───────────│───────────│───────────│
+│  GIÁ             │  11M VNĐ  │  21M VNĐ  │  68M VNĐ  │
+└──────────────────┴───────────┴───────────┴───────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: HOW TO ACCESS GEM AI
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "HƯỚNG DẪN"
+- Màu nền: Cyan (#00F0FF)
+
+Tiêu đề: "CÁCH TRUY CẬP GEM MASTER AI"
+
+═══════════════════════════════════════════════════════════════
+3 BƯỚC ACCESS:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  BƯỚC 1: Tải app GEM Mobile                                 │
+│  ───────────────────────────────────                        │
+│  📍 iOS: App Store "GEM Trading"                            │
+│  📍 Android: Google Play "GEM Trading"                      │
+│  [App Store & Play Store icons]                              │
+│                                                              │
+│  BƯỚC 2: Đăng nhập tài khoản                                │
+│  ───────────────────────────────────                        │
+│  📍 Dùng email đã đăng ký khóa học                          │
+│  📍 Hoặc tạo tài khoản mới                                  │
+│  [Login screen mockup]                                       │
+│                                                              │
+│  BƯỚC 3: Chọn GEM Master tab                                │
+│  ───────────────────────────────────                        │
+│  📍 Tap icon 🤖 ở thanh dưới                                │
+│  📍 Bắt đầu chat hoặc scan                                  │
+│  [App navigation mockup]                                     │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 8.2: SỬ DỤNG CHATBOT HỎI ĐÁP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: CHATBOT INTERFACE
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+User bubble   | Purple dark   | #3A2F6B
+AI bubble     | Navy light    | #1A3A6E
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "CHATBOT"
+- Màu nền: Purple (#6A5BFF)
+
+Tiêu đề: "GIAO DIỆN CHAT VỚI GEM MASTER"
+
+═══════════════════════════════════════════════════════════════
+CHAT INTERFACE MOCKUP:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  ┌───────────────────────────────────────────────────────┐  │
+│  │ 👤 USER:                                               │  │
+│  │ "Pattern UPU là gì?"                                   │  │
+│  │ [Purple bubble - bên phải]                             │  │
+│  └───────────────────────────────────────────────────────┘  │
+│                                                              │
+│  ┌───────────────────────────────────────────────────────┐  │
+│  │ 🤖 GEM MASTER:                                         │  │
+│  │ "Pattern UPU (Up-Pause-Up) là mô hình tiếp diễn       │  │
+│  │ xu hướng tăng, bao gồm 3 phases:                       │  │
+│  │                                                         │  │
+│  │ 1. UP: Giá tăng mạnh                                   │  │
+│  │ 2. PAUSE: Sideway, tạo LFZ                             │  │
+│  │ 3. UP: Tiếp tục tăng                                   │  │
+│  │                                                         │  │
+│  │ Win Rate: 71% | R:R: 1:2.8"                            │  │
+│  │ [Navy bubble - bên trái]                               │  │
+│  └───────────────────────────────────────────────────────┘  │
+│                                                              │
+│  ┌───────────────────────────────────────────────────────┐  │
+│  │ [Nhập câu hỏi...]                    [🎤] [📎] [➤]   │  │
+│  └───────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: QUESTION TYPES
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "CÂU HỎI"
+- Màu nền: Cyan (#00F0FF)
+
+Tiêu đề: "CÁC LOẠI CÂU HỎI CÓ THỂ HỎI"
+
+═══════════════════════════════════════════════════════════════
+5 CATEGORIES:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  📚 KIẾN THỨC PATTERNS                                      │
+│     ─────────────────────                                    │
+│     "Pattern DPD là gì?"                                    │
+│     "Cách vẽ LFZ zone?"                                     │
+│     "Win rate của UPD?"                                     │
+│     Viền: Purple (#6A5BFF)                                  │
+├─────────────────────────────────────────────────────────────┤
+│  📊 PHÂN TÍCH COIN                                          │
+│     ─────────────────────                                    │
+│     "BTC H4 có pattern gì?"                                 │
+│     "SOL đang ở vùng nào?"                                  │
+│     "ETH nên long hay short?"                               │
+│     Viền: Cyan (#00F0FF)                                    │
+├─────────────────────────────────────────────────────────────┤
+│  🎯 CHIẾN LƯỢC ENTRY                                        │
+│     ─────────────────────                                    │
+│     "Entry UPU như thế nào?"                                │
+│     "Đặt SL ở đâu cho DPD?"                                 │
+│     "TP nên để R:R bao nhiêu?"                              │
+│     Viền: Green (#10B981)                                   │
+├─────────────────────────────────────────────────────────────┤
+│  💰 QUẢN LÝ RỦI RO                                          │
+│     ─────────────────────                                    │
+│     "Risk 2% nghĩa là gì?"                                  │
+│     "Position size tính như thế nào?"                       │
+│     "Leverage bao nhiêu an toàn?"                           │
+│     Viền: Gold (#FFBD59)                                    │
+├─────────────────────────────────────────────────────────────┤
+│  🧘 TÂM LÝ TRADING                                          │
+│     ─────────────────────                                    │
+│     "Làm sao không FOMO?"                                   │
+│     "Thua liên tục phải làm gì?"                            │
+│     "Cách giữ kỷ luật?"                                     │
+│     Viền: Purple (#6A5BFF)                                  │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: SAMPLE CONVERSATIONS
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "VÍ DỤ"
+- Màu nền: Green (#10B981)
+
+Tiêu đề: "CÁC CUỘC HỘI THOẠI MẪU"
+
+═══════════════════════════════════════════════════════════════
+3 EXAMPLE CONVERSATIONS:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  💬 VÍ DỤ 1: Hỏi về Pattern                                 │
+│  ═════════════════════════════                               │
+│  👤 "Phân biệt UPU và DPU?"                                 │
+│  🤖 "UPU: Up-Pause-Up = Tiếp diễn tăng                      │
+│      DPU: Down-Pause-Up = Đảo chiều tăng                    │
+│      Cả hai đều tạo LFZ, nhưng context khác..."             │
+├─────────────────────────────────────────────────────────────┤
+│  💬 VÍ DỤ 2: Hỏi về Entry                                   │
+│  ═════════════════════════════                               │
+│  👤 "Entry như thế nào khi thấy UPD?"                       │
+│  🤖 "Với UPD pattern, bạn cần:                              │
+│      1. Đợi giá quay lại test HFZ                           │
+│      2. Xác nhận bằng nến bearish                           │
+│      3. Entry SHORT tại HFZ                                 │
+│      4. SL trên HFZ + 0.5%..."                              │
+├─────────────────────────────────────────────────────────────┤
+│  💬 VÍ DỤ 3: Hỏi phân tích coin                             │
+│  ═════════════════════════════                               │
+│  👤 "BTC H4 có setup nào không?"                            │
+│  🤖 "BTC/USDT H4 hiện tại:                                  │
+│      ✅ Có pattern UPU đang hình thành                      │
+│      📍 LFZ zone: $41,500 - $42,000                         │
+│      🎯 Chờ giá về zone để LONG..."                         │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 8.3: SCANNER CƠ BẢN - TÌM PATTERNS TỰ ĐỘNG
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: SCANNER INTERFACE
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Bullish       | Green         | #10B981
+Bearish       | Red           | #EF4444
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "SCANNER"
+- Màu nền: Purple (#6A5BFF)
+
+Tiêu đề: "GIAO DIỆN SCANNER - TÌM PATTERN TỰ ĐỘNG"
+
+═══════════════════════════════════════════════════════════════
+SCANNER SCREEN MOCKUP:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │  🔍 SCANNER              [SCAN NOW] 💫              │    │
+│  │  ─────────────────────────────────────────────────   │    │
+│  │  Timeframe: [H4 ▼]      Coins: [Top 50]             │    │
+│  │  Pattern:   [All ▼]     Scans left: 45/50           │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │  📊 SCAN RESULTS (12 patterns found)                 │    │
+│  │  ─────────────────────────────────────────────────   │    │
+│  │                                                       │    │
+│  │  ┌─────────────────────────────────────────────┐     │    │
+│  │  │ 🟢 BTC/USDT     UPU     H4      Strong 85%  │     │    │
+│  │  │    LFZ: $42,500 | Entry ready               │     │    │
+│  │  └─────────────────────────────────────────────┘     │    │
+│  │                                                       │    │
+│  │  ┌─────────────────────────────────────────────┐     │    │
+│  │  │ 🔴 ETH/USDT     DPD     H4      Medium 72%  │     │    │
+│  │  │    HFZ: $2,450  | Waiting retest            │     │    │
+│  │  └─────────────────────────────────────────────┘     │    │
+│  │                                                       │    │
+│  │  ┌─────────────────────────────────────────────┐     │    │
+│  │  │ 🟢 SOL/USDT     DPU     H4      Strong 80%  │     │    │
+│  │  │    LFZ: $98     | Entry ready               │     │    │
+│  │  └─────────────────────────────────────────────┘     │    │
+│  │                                                       │    │
+│  └─────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: TIER 1 SCANNER LIMITS
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "TIER 1"
+- Màu nền: Gold (#FFBD59)
+
+Tiêu đề: "GIỚI HẠN SCANNER - TIER 1"
+
+═══════════════════════════════════════════════════════════════
+LIMITS TABLE:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  📊 TIER 1 SCANNER PACKAGE                                  │
+│  ════════════════════════════════════════════════════════   │
+│                                                              │
+│  ┌────────────────────┬─────────────────────────────┐       │
+│  │  Số lần scan/ngày  │  50 lần                     │       │
+│  ├────────────────────┼─────────────────────────────┤       │
+│  │  Số coins          │  50 coins (Top market cap)  │       │
+│  ├────────────────────┼─────────────────────────────┤       │
+│  │  Khung thời gian   │  1 (H4 only)                │       │
+│  ├────────────────────┼─────────────────────────────┤       │
+│  │  Patterns          │  4 (DPD, UPU, UPD, DPU)     │       │
+│  ├────────────────────┼─────────────────────────────┤       │
+│  │  Reset             │  Mỗi ngày 00:00 UTC         │       │
+│  └────────────────────┴─────────────────────────────┘       │
+│                                                              │
+│  💡 MUỐN NHIỀU HƠN?                                         │
+│  ─────────────────────                                       │
+│  TIER 2: Unlimited scans, 200 coins, 3 TFs                  │
+│  TIER 3: + AI Signals, Whale Tracking, 437+ coins           │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: FILTER SETTINGS
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "FILTER"
+- Màu nền: Cyan (#00F0FF)
+
+Tiêu đề: "CÁCH SỬ DỤNG BỘ LỌC SCANNER"
+
+═══════════════════════════════════════════════════════════════
+FILTER OPTIONS:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  🔧 BỘ LỌC CÓ SẴN:                                          │
+│  ════════════════════════════════════════════════════════   │
+│                                                              │
+│  ① PATTERN TYPE                                             │
+│     ──────────────────                                       │
+│     ☑ UPU (Bullish Continuation)                            │
+│     ☑ DPU (Bullish Reversal)                                │
+│     ☐ UPD (Bearish Reversal)                                │
+│     ☐ DPD (Bearish Continuation)                            │
+│                                                              │
+│  ② STRENGTH                                                 │
+│     ──────────────────                                       │
+│     ○ All patterns                                          │
+│     ● Strong only (>75%)                                    │
+│     ○ Medium + Strong (>60%)                                │
+│                                                              │
+│  ③ ZONE STATUS                                              │
+│     ──────────────────                                       │
+│     ☑ Entry ready (giá tại zone)                            │
+│     ☑ Waiting retest (đợi giá về)                           │
+│     ☐ Recently triggered                                    │
+│                                                              │
+│  💡 GỢI Ý: Bắt đầu với Strong + Entry ready                │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 8.4: THIẾT LẬP CẢNH BÁO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: ALERT CREATION
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Alert active  | Green         | #10B981
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "ALERT"
+- Màu nền: Green (#10B981)
+
+Tiêu đề: "TẠO CẢNH BÁO KHI PATTERN XUẤT HIỆN"
+
+═══════════════════════════════════════════════════════════════
+ALERT CREATION FORM:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  🔔 TẠO CẢNH BÁO MỚI                                        │
+│  ════════════════════════════════════════════════════════   │
+│                                                              │
+│  Coin:        [BTC/USDT ▼]                                  │
+│  Timeframe:   [H4 ▼]                                        │
+│  Pattern:     [UPU ▼]                                       │
+│  Condition:   [Entry Ready ▼]                               │
+│                                                              │
+│  📱 Thông báo qua:                                          │
+│  ☑ Push notification (App)                                  │
+│  ☑ Telegram                                                 │
+│  ☐ Email                                                    │
+│                                                              │
+│  ⏰ Thời gian hoạt động:                                    │
+│  ○ 24/7                                                     │
+│  ● Giờ trading (8AM - 10PM)                                 │
+│                                                              │
+│           [✅ TẠO CẢNH BÁO]                                 │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+TIER 1 LIMIT:
+═══════════════════════════════════════════════════════════════
+⚠️ TIER 1: Tối đa 10 cảnh báo đang hoạt động
+   Đang dùng: 3/10
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: ALERT MANAGEMENT
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "QUẢN LÝ"
+- Màu nền: Purple (#6A5BFF)
+
+Tiêu đề: "QUẢN LÝ CẢNH BÁO ĐANG HOẠT ĐỘNG"
+
+═══════════════════════════════════════════════════════════════
+ACTIVE ALERTS LIST:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  📋 CẢNH BÁO ĐANG HOẠT ĐỘNG (3/10)                          │
+│  ════════════════════════════════════════════════════════   │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │ 🟢 BTC/USDT | UPU | H4                   [🔔] [✕]  │    │
+│  │    Đợi entry ready tại LFZ                           │    │
+│  │    Created: 15/01/2025                               │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │ 🔴 ETH/USDT | DPD | H4                   [🔔] [✕]  │    │
+│  │    Đợi pattern hình thành                            │    │
+│  │    Created: 14/01/2025                               │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │ 🟢 SOL/USDT | DPU | H4                   [🔕] [✕]  │    │
+│  │    Đang tạm dừng (paused)                            │    │
+│  │    Created: 13/01/2025                               │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                                                              │
+│           [+ Tạo cảnh báo mới]                              │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: TELEGRAM INTEGRATION
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "TELEGRAM"
+- Màu nền: Cyan (#00F0FF)
+- Icon: Telegram logo
+
+Tiêu đề: "TÍCH HỢP CẢNH BÁO VỚI TELEGRAM"
+
+═══════════════════════════════════════════════════════════════
+SETUP STEPS:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  📱 BƯỚC 1: Mở Telegram Bot                                 │
+│  ─────────────────────────────────                          │
+│  📍 Tìm: @GEMTradingAlertsBot                              │
+│  📍 Nhấn "Start"                                            │
+│                                                              │
+│  📱 BƯỚC 2: Kết nối tài khoản                               │
+│  ─────────────────────────────────                          │
+│  📍 Nhập mã từ app GEM Mobile                               │
+│  📍 Xác nhận kết nối                                        │
+│                                                              │
+│  📱 BƯỚC 3: Nhận alerts                                     │
+│  ─────────────────────────────────                          │
+│  📍 Bot sẽ gửi tin nhắn khi có signal                       │
+│  📍 Có thể tắt/mở notification                              │
+└─────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+SAMPLE TELEGRAM ALERT:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  🤖 GEM Trading Alerts                                      │
+│  ──────────────────────────────────                         │
+│  🔔 PATTERN ALERT                                           │
+│                                                              │
+│  📊 BTC/USDT - H4                                           │
+│  📈 Pattern: UPU (Bullish)                                  │
+│  💪 Strength: 85%                                           │
+│  📍 Zone: $42,500 - $43,000 (LFZ)                           │
+│  ✅ Status: ENTRY READY                                     │
+│                                                              │
+│  🎯 Suggested:                                              │
+│  Entry: $42,600                                             │
+│  SL: $42,200                                                │
+│  TP: $44,000                                                │
+│                                                              │
+│  [View Chart 📊]                                            │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 8.5: TỔNG KẾT & XEM TRƯỚC TIER 2
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: TIER 1 SUMMARY
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Success       | Green         | #10B981
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "TỔNG KẾT"
+- Màu nền: Gold (#FFBD59)
+
+Tiêu đề: "BẠN ĐÃ HỌC ĐƯỢC GÌ Ở TIER 1?"
+
+═══════════════════════════════════════════════════════════════
+ACHIEVEMENT GRID:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  🏆 THÀNH TỰU TIER 1                                        │
+│  ════════════════════════════════════════════════════════   │
+│                                                              │
+│  ┌───────────────────┐  ┌───────────────────┐               │
+│  │ 📊 4 PATTERNS     │  │ 📈 3 CLASSIC      │               │
+│  │ ─────────────────  │  │ ─────────────────  │               │
+│  │ ✅ DPD (68%)      │  │ ✅ Head & Shoulders│               │
+│  │ ✅ UPU (71%)      │  │ ✅ Double Top     │               │
+│  │ ✅ UPD (65%)      │  │ ✅ Double Bottom  │               │
+│  │ ✅ DPU (69%)      │  │                    │               │
+│  │ Viền: Purple      │  │ Viền: Cyan        │               │
+│  └───────────────────┘  └───────────────────┘               │
+│                                                              │
+│  ┌───────────────────┐  ┌───────────────────┐               │
+│  │ 💼 SKILLS         │  │ 🤖 AI TOOLS       │               │
+│  │ ─────────────────  │  │ ─────────────────  │               │
+│  │ ✅ Zone Drawing   │  │ ✅ Chatbot        │               │
+│  │ ✅ Entry Strategy │  │ ✅ Scanner        │               │
+│  │ ✅ Risk Management│  │ ✅ Alerts         │               │
+│  │ ✅ Paper Trading  │  │                    │               │
+│  │ Viền: Green       │  │ Viền: Gold        │               │
+│  └───────────────────┘  └───────────────────┘               │
+│                                                              │
+│  📊 TỔNG: 7 Patterns | 67.8% Win Rate | 8 Chapters          │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: TIER 2 PREVIEW
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "TIER 2"
+- Màu nền: Purple (#6A5BFF)
+
+Tiêu đề: "TIER 2 - TẦN SỐ TRADER THỊNH VƯỢNG"
+
+═══════════════════════════════════════════════════════════════
+TIER 2 FEATURES:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  📚 BẠN SẼ HỌC THÊM:                                        │
+│  ════════════════════════════════════════════════════════   │
+│                                                              │
+│  🔷 HFZ & LFZ MASTERY                                       │
+│     • Nhận diện Zone chất lượng cao                         │
+│     • Zone Grading System                                   │
+│     • Multi-Timeframe Zones                                 │
+│                                                              │
+│  🔷 8 PATTERNS MỚI                                          │
+│     • Ascending/Descending Triangle                         │
+│     • Symmetrical Triangle                                  │
+│     • Rising/Falling Wedge                                  │
+│     • Inverse Head & Shoulders                              │
+│     • Rounding Bottom/Top                                   │
+│                                                              │
+│  🔷 MULTI-TIMEFRAME ANALYSIS                                │
+│     • Phân tích đa khung thời gian                          │
+│     • Confluence signals                                    │
+│     • Zone stacking                                         │
+│                                                              │
+│  🔷 QUẢN LÝ RỦI RO NÂNG CAO                                 │
+│     • Position sizing                                       │
+│     • Portfolio allocation                                  │
+│     • Drawdown management                                   │
+│                                                              │
+│  🤖 AI SCANNER NÂNG CAO                                     │
+│     • Unlimited scans                                       │
+│     • 200 coins                                             │
+│     • 3 timeframes                                          │
+│                                                              │
+│  💰 GIÁ: 21.000.000 VNĐ (12 tháng)                          │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: UPGRADE CHECKLIST
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "CHECKLIST"
+- Màu nền: Green (#10B981)
+
+Tiêu đề: "BẠN ĐÃ SẴN SÀNG CHO TIER 2?"
+
+═══════════════════════════════════════════════════════════════
+READINESS CHECKLIST:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  ☐ Đã hoàn thành toàn bộ 8 chapters TIER 1                  │
+│                                                              │
+│  ☐ Đã paper trade ít nhất 100 lệnh                          │
+│                                                              │
+│  ☐ Win Rate paper trading > 55%                             │
+│                                                              │
+│  ☐ Hiểu rõ 4 patterns cơ bản                                │
+│                                                              │
+│  ☐ Có thể tự vẽ zone chính xác                              │
+│                                                              │
+│  ☐ Đã sử dụng GEM Master AI thành thạo                      │
+│                                                              │
+│  ☐ Có kế hoạch giao dịch rõ ràng                            │
+│                                                              │
+│  ☐ Sẵn sàng học thêm 8 patterns nâng cao                    │
+└─────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+DECISION BOX:
+═══════════════════════════════════════════════════════════════
+✅ 8/8 → Sẵn sàng TIER 2!
+⚠️ 6-7/8 → Ôn tập thêm 2 tuần
+❌ < 6/8 → Hoàn thành TIER 1 trước
+
+[Liên hệ tư vấn nâng cấp]
+
+FOOTER: "GEM TRADING"

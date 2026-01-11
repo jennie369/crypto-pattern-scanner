@@ -1,0 +1,982 @@
+
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 0.1: Chào Mừng - Bạn Đang Đứng Trước Cửa Thịnh Vượng</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+    <style>
+        /* ========== V5.3 CORE STYLES ========== */
+        :root {
+            --navy: #112250;
+            --gold: #FFBD59;
+            --burgundy: #9C0612;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --bg-dark: #0a0a0f;
+            --bg-card: rgba(17, 34, 80, 0.4);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.5);
+            --border-glass: rgba(255, 189, 89, 0.2);
+            --shadow-gold: 0 0 30px rgba(255, 189, 89, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        /* 5-Layer Background */
+        .bg-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(106, 91, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(0, 240, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(255, 189, 89, 0.05) 0%, transparent 70%),
+                linear-gradient(180deg, #0a0a0f 0%, #112250 50%, #0a0a0f 100%);
+        }
+
+        /* V5.3: Container padding 0 on mobile */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Header */
+        .lesson-header {
+            background: linear-gradient(135deg, var(--navy) 0%, rgba(17, 34, 80, 0.8) 100%);
+            padding: 2rem 1rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        @media (min-width: 768px) {
+            .lesson-header {
+                border-radius: 16px 16px 0 0;
+                padding: 2.5rem 2rem;
+            }
+        }
+
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .lesson-badge {
+            background: rgba(255, 189, 89, 0.2);
+            color: var(--gold);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .lesson-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 20px rgba(255, 189, 89, 0.3);
+        }
+
+        @media (min-width: 768px) {
+            .lesson-title {
+                font-size: 2rem;
+            }
+        }
+
+        .lesson-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Content Area */
+        .lesson-content {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        @media (min-width: 768px) {
+            .lesson-content {
+                border-radius: 0 0 16px 16px;
+                border: 1px solid var(--border-glass);
+                border-top: none;
+            }
+        }
+
+        /* V5.3: Only text elements have padding */
+        .section {
+            padding: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section-header {
+            padding: 1.5rem 1rem 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .section-header {
+                padding: 2rem 2rem 1rem;
+            }
+        }
+
+        .section-number {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--gold) 0%, #e5a84d 100%);
+            color: var(--navy);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            font-weight: 700;
+            font-size: 0.875rem;
+            margin-right: 0.75rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: inline;
+        }
+
+        @media (min-width: 768px) {
+            .section-title {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* V5.3: Text content padding */
+        .text-content {
+            padding-left: 1rem;
+            padding-right: 1rem;
+            padding-bottom: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .text-content {
+                padding-left: 2rem;
+                padding-right: 2rem;
+                padding-bottom: 2rem;
+            }
+        }
+
+        .text-content p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .text-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Highlight Box - V5.3 Mobile: border-left only */
+        .highlight-box {
+            background: rgba(255, 189, 89, 0.1);
+            padding: 1.25rem 1rem;
+            margin: 1rem 0;
+            border-left: 4px solid var(--gold);
+            border-radius: 0;
+        }
+
+        @media (min-width: 768px) {
+            .highlight-box {
+                border-radius: 12px;
+                border: 1px solid rgba(255, 189, 89, 0.3);
+                border-left: 4px solid var(--gold);
+                margin: 1rem 2rem;
+            }
+        }
+
+        .highlight-box p {
+            color: var(--text-primary);
+            font-style: italic;
+        }
+
+        .highlight-box .author {
+            color: var(--gold);
+            font-weight: 600;
+            margin-top: 0.5rem;
+            font-style: normal;
+        }
+
+        /* Image Container - V5.3: Full width on mobile */
+        .image-container {
+            width: 100%;
+            margin: 1.5rem 0;
+        }
+
+        @media (min-width: 768px) {
+            .image-container {
+                padding: 0 2rem;
+            }
+        }
+
+        .image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        @media (min-width: 768px) {
+            .image-container img {
+                border-radius: 12px;
+                box-shadow: var(--shadow-gold);
+            }
+        }
+
+        .image-caption {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-top: 0.75rem;
+            padding: 0 1rem;
+        }
+
+        /* List Styles */
+        .styled-list {
+            list-style: none;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .styled-list {
+                padding-left: 2rem;
+                padding-right: 2rem;
+            }
+        }
+
+        .styled-list li {
+            position: relative;
+            padding-left: 1.75rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .styled-list li::before {
+            content: "✦";
+            position: absolute;
+            left: 0;
+            color: var(--gold);
+        }
+
+        /* Numbered List for Steps */
+        .numbered-list {
+            counter-reset: step-counter;
+            list-style: none;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .numbered-list {
+                padding-left: 2rem;
+                padding-right: 2rem;
+            }
+        }
+
+        .numbered-list li {
+            counter-increment: step-counter;
+            position: relative;
+            padding-left: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .numbered-list li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: linear-gradient(135deg, var(--gold) 0%, #e5a84d 100%);
+            color: var(--navy);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            font-weight: 700;
+            font-size: 0.75rem;
+        }
+
+        /* 5 Beliefs Grid - V5.3 Mobile: gap 1px */
+        .beliefs-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 1rem 0;
+        }
+
+        @media (min-width: 768px) {
+            .beliefs-grid {
+                gap: 1rem;
+                background: transparent;
+                margin: 1rem 2rem;
+            }
+        }
+
+        .belief-card {
+            background: rgba(17, 34, 80, 0.6);
+            padding: 1.25rem 1rem;
+            border-left: 3px solid var(--cyan);
+        }
+
+        @media (min-width: 768px) {
+            .belief-card {
+                border-radius: 12px;
+                border: 1px solid var(--border-glass);
+                border-left: 3px solid var(--cyan);
+            }
+        }
+
+        .belief-number {
+            color: var(--cyan);
+            font-weight: 700;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .belief-title {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .belief-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Module Timeline - V5.3 */
+        .timeline {
+            padding: 0 1rem;
+            margin: 1.5rem 0;
+        }
+
+        @media (min-width: 768px) {
+            .timeline {
+                padding: 0 2rem;
+            }
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .timeline-item:last-child {
+            border-bottom: none;
+        }
+
+        .timeline-marker {
+            flex-shrink: 0;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--purple) 0%, #5548cc 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.875rem;
+        }
+
+        .timeline-content h4 {
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .timeline-content p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* Commitment Form */
+        .form-section {
+            padding: 1.5rem 1rem;
+            background: rgba(17, 34, 80, 0.4);
+            margin: 1rem 0;
+            border-left: 4px solid var(--burgundy);
+        }
+
+        @media (min-width: 768px) {
+            .form-section {
+                margin: 1rem 2rem;
+                border-radius: 12px;
+                border: 1px solid rgba(156, 6, 18, 0.3);
+                border-left: 4px solid var(--burgundy);
+            }
+        }
+
+        .form-title {
+            color: var(--gold);
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-glass);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+
+        .checkbox-input {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--gold);
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .checkbox-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--gold) 0%, #e5a84d 100%);
+            border: none;
+            border-radius: 8px;
+            color: var(--navy);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 189, 89, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Success Message */
+        .success-message {
+            display: none;
+            background: rgba(0, 200, 83, 0.2);
+            border: 1px solid rgba(0, 200, 83, 0.5);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            color: #00c853;
+            margin-top: 1rem;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        /* App Integration Box */
+        .app-box {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.2) 0%, rgba(0, 240, 255, 0.1) 100%);
+            padding: 1.25rem 1rem;
+            margin: 1rem 0;
+            border-left: 4px solid var(--purple);
+        }
+
+        @media (min-width: 768px) {
+            .app-box {
+                margin: 1rem 2rem;
+                border-radius: 12px;
+                border: 1px solid rgba(106, 91, 255, 0.3);
+                border-left: 4px solid var(--purple);
+            }
+        }
+
+        .app-box-title {
+            color: var(--cyan);
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .app-feature {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+        }
+
+        .app-feature-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        /* Footer */
+        .lesson-footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .lesson-footer a {
+            color: var(--gold);
+            text-decoration: none;
+        }
+    </style>
+
+
+    <div class="bg-layer"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="lesson-header">
+            <div class="lesson-meta">
+                <span class="lesson-badge">Module 0</span>
+                <span class="lesson-badge">Bài 1/2</span>
+                <span class="lesson-badge">25 phút</span>
+            </div>
+            <h1 class="lesson-title">Chào Mừng - Bạn Đang Đứng Trước Cửa Thịnh Vượng</h1>
+            <p class="lesson-subtitle">Khởi đầu hành trình 49 ngày chuyển hóa tư duy về tiền bạc</p>
+        </header>
+
+        <!-- Content -->
+        <main class="lesson-content">
+
+            <!-- Section 1: Lời chào từ Jennie -->
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-number">1</span>
+                    <h2 class="section-title">Lời Chào Từ Jennie Uyen Chu</h2>
+                </div>
+                
+                <div class="text-content">
+                    <p>Xin chào bạn thân mến,</p>
+                    
+                    <p>Tôi là Jennie Uyen Chu, tác giả của Học Thuyết Chuyển Hóa Nội Tâm và người sáng lập GEM Academy. Cảm ơn bạn đã tin tưởng và chọn đồng hành cùng tôi trong hành trình 49 ngày sắp tới.</p>
+
+                    <p>Trước khi chúng ta bắt đầu, tôi muốn chia sẻ với bạn một câu chuyện - câu chuyện của chính tôi.</p>
+
+                    <p>Nhiều năm trước, tôi từng là một người sợ tiền. Đúng vậy - không phải sợ nghèo, mà là sợ chính TIỀN. Tôi lớn lên trong gia đình luôn lo lắng về tiền bạc. Mỗi cuộc trò chuyện về tiền đều đi kèm căng thẳng. Tôi học được rằng "tiền là nguồn gốc của mọi rắc rối".</p>
+
+                    <p>Kết quả? Dù làm việc chăm chỉ, tiền vẫn cứ "chảy" đi đâu mất. Tôi mắc nợ, sống trong lo âu, và tin rằng "người như tôi không xứng đáng giàu có".</p>
+                </div>
+
+                <div class="highlight-box">
+                    <p>"Bước ngoặt đến khi tôi nhận ra: Vấn đề không phải là tiền - vấn đề là TẦN SỐ NĂNG LƯỢNG tôi đang phát ra về tiền."</p>
+                    <p class="author">— Jennie Uyen Chu</p>
+                </div>
+
+                <div class="text-content">
+                    <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mjsgu0wy-y7p7or/1767177596083_5idro8_FUG_6276.jpg" alt="fug-6276-rkl9"><p>Từ đó, tôi bắt đầu hành trình chuyển hóa. Tôi nghiên cứu về năng lượng, về luật hấp dẫn, về cách tiềm thức hoạt động. Và quan trọng nhất - tôi THỰC HÀNH mỗi ngày.</p>
+
+                    <p>Kết quả sau 3 năm: Từ nợ nần chồng chất, tôi trở thành người tự do tài chính. Từ lo lắng về tiền mỗi đêm, tôi thức dậy với lòng biết ơn và sự thịnh vượng.</p>
+
+                    <p><strong>Và bây giờ, tôi muốn chia sẻ con đường đó với bạn.</strong></p>
+
+                    <p>Bạn đang ở đây không phải ngẫu nhiên. Luật Hấp Dẫn đã dẫn bạn đến. Một phần trong bạn đã sẵn sàng cho sự thay đổi. Và 49 ngày tới sẽ là khởi đầu của cuộc đời mới - cuộc đời thịnh vượng mà bạn xứng đáng được sống.</p>
+                </div>
+            </section>
+
+            <!-- Section 2: Học Thuyết Chuyển Hóa Nội Tâm -->
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-number">2</span>
+                    <h2 class="section-title">Học Thuyết Chuyển Hóa Nội Tâm - Nền Tảng</h2>
+                </div>
+
+                <div class="text-content">
+                    <p>Trước khi đi vào thực hành, bạn cần hiểu nền tảng lý thuyết. Học Thuyết Chuyển Hóa Nội Tâm được xây dựng trên 5 Niềm Tin Nền Tảng:</p>
+                </div>
+
+                <div class="beliefs-grid">
+                    <div class="belief-card">
+                        <div class="belief-number">NIỀM TIN #1</div>
+                        <div class="belief-title">Vạn Vật Là Năng Lượng</div>
+                        <div class="belief-desc">Mọi thứ trong vũ trụ, bao gồm cả TIỀN, đều là năng lượng rung động ở các tần số khác nhau. Tiền không phải là giấy hay số trong tài khoản - tiền là NĂNG LƯỢNG.</div>
+                    </div>
+
+                    <div class="belief-card">
+                        <div class="belief-number">NIỀM TIN #2</div>
+                        <div class="belief-title">Ý Thức Kiến Tạo Thực Tại</div>
+                        <div class="belief-desc">Tư duy và niềm tin của bạn tạo ra hoàn cảnh sống. Nếu bạn tin "tiền khó kiếm", thực tại sẽ chứng minh điều đó. Thay đổi ý thức = Thay đổi thực tại.</div>
+                    </div>
+
+                    <div class="belief-card">
+                        <div class="belief-number">NIỀM TIN #3</div>
+                        <div class="belief-title">Luật Tương Ứng (Like Attracts Like)</div>
+                        <div class="belief-desc">Bạn thu hút những gì phù hợp với tần số rung động của mình. Tần số thấp (sợ hãi, thiếu thốn) thu hút nghèo khó. Tần số cao (biết ơn, dư dả) thu hút thịnh vượng.</div>
+                    </div>
+
+                    <div class="belief-card">
+                        <div class="belief-number">NIỀM TIN #4</div>
+                        <div class="belief-title">Nghiệp Là Tần Số</div>
+                        <div class="belief-desc">Nghiệp không phải là sự trừng phạt. Nghiệp là PATTERN năng lượng lặp đi lặp lại qua thời gian. Patterns này có thể được nhận diện và CHUYỂN HÓA.</div>
+                    </div>
+
+                    <div class="belief-card">
+                        <div class="belief-number">NIỀM TIN #5</div>
+                        <div class="belief-title">Tiến Hóa Ý Thức</div>
+                        <div class="belief-desc">Bạn có khả năng nâng cao ý thức và thay đổi tần số của mình. Đây không phải là may rủi hay số mệnh - đây là SỰ LỰA CHỌN và THỰC HÀNH có ý thức.</div>
+                    </div>
+                </div>
+
+                <div class="text-content">
+                    <p>Dựa trên 5 niềm tin này, tôi phát triển một ẩn dụ quan trọng:</p>
+                </div>
+
+                <div class="highlight-box">
+                    <p><strong>BẠN LÀ "NGƯỜI NAM CHÂM SỐNG"</strong></p>
+                    <p>Giống như nam châm thu hút sắt, bạn thu hút những gì phù hợp với "từ trường" năng lượng của mình. Tiền, cơ hội, con người - tất cả đều bị hút đến hoặc đẩy ra dựa trên tần số bạn đang phát.</p>
+                    <p>Muốn thay đổi những gì bạn thu hút? Hãy thay đổi "từ trường" - tức là TẦN SỐ NỘI TÂM của bạn.</p>
+                </div>
+
+                <!-- Image placeholder -->
+                <div class="image-container">
+                    <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mjsgu0wy-y7p7or/1767177364346_l89knc_Gemini_Generated_Image_1dqlsu1dqlsu1dql.png" alt="gemini-generated-image-1dqlsu1dqlsu-0rjv">
+                    
+                </div>
+            </section>
+
+            <!-- Section 3: Lộ Trình 49 Ngày -->
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-number">3</span>
+                    <h2 class="section-title">Lộ Trình 49 Ngày Gieo Hạt Thịnh Vượng</h2>
+                </div>
+
+                <div class="text-content">
+                    <p><strong>Tại sao lại là 49 ngày?</strong></p>
+                    <p>49 ngày = 7 tuần × 7 ngày. Trong nhiều truyền thống tâm linh, số 7 đại diện cho sự hoàn chỉnh. 49 ngày là một chu kỳ hoàn chỉnh để:</p>
+                </div>
+
+                <ul class="styled-list">
+                    <li>Phá vỡ patterns cũ (cần 21 ngày để bắt đầu)</li>
+                    <li>Xây dựng thói quen mới (cần thêm 21 ngày để củng cố)</li>
+                    <li>Tích hợp và tự động hóa (7 ngày cuối để "neo" lại)</li>
+                </ul>
+
+                <div class="text-content">
+                    <p>Dưới đây là overview 7 modules bạn sẽ trải qua:</p>
+                </div>
+
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker">M0</div>
+                        <div class="timeline-content">
+                            <h4>Khởi Đầu (Ngày 1-2)</h4>
+                            <p>Đánh giá tần số hiện tại, cam kết với hành trình</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker">M1</div>
+                        <div class="timeline-content">
+                            <h4>Thanh Tẩy Vùng Đất (Ngày 3-9)</h4>
+                            <p>Nhận diện và buông bỏ niềm tin giới hạn về tiền</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker">M2</div>
+                        <div class="timeline-content">
+                            <h4>Hóa Giải Nghiệp Tiền (Ngày 10-16)</h4>
+                            <p>Chữa lành vết thương từ quá khứ và gia đình</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker">M3</div>
+                        <div class="timeline-content">
+                            <h4>Cài Đặt Tần Số (Ngày 17-23)</h4>
+                            <p>Nâng tần số với affirmations và visualization</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker">M4</div>
+                        <div class="timeline-content">
+                            <h4>Nghi Thức Triệu Phú (Ngày 24-30)</h4>
+                            <p>Xây dựng morning routine và thói quen hàng ngày</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker">M5</div>
+                        <div class="timeline-content">
+                            <h4>Hành Động Thuận Thiên (Ngày 31-37)</h4>
+                            <p>Aligned action, tạo giá trị, quản lý tài chính</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker">M6</div>
+                        <div class="timeline-content">
+                            <h4>Nhân Rộng Thịnh Vượng (Ngày 38-44)</h4>
+                            <p>Duy trì tần số, xây dựng cộng đồng, review tiến trình</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker">M7</div>
+                        <div class="timeline-content">
+                            <h4>Sứ Mệnh Phụng Sự (Ngày 45-49)</h4>
+                            <p>Con đường tiếp theo, cơ hội partnership</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image placeholder -->
+                <div class="image-container">
+                    <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mjsgu0wy-y7p7or/1767177735671_jnedmq_Gemini_Generated_Image_f37b1qf37b1qf37b.png" alt="gemini-generated-image-f37b1qf37b1q-nyro">
+                    
+                </div>
+            </section>
+
+            <!-- Section 4: Cam Kết -->
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-number">4</span>
+                    <h2 class="section-title">Cam Kết Với Bản Thân</h2>
+                </div>
+
+                <div class="text-content">
+                    <p>Trước khi bắt đầu hành trình, tôi mời bạn viết một bản cam kết thiêng liêng với chính mình. Đây không phải là cam kết với tôi hay với ai khác - đây là cam kết giữa BẠN với BẢN THÂN BẠN.</p>
+
+                    <p>Hãy điền vào form bên dưới. Khi bạn click "Ký Tên Tâm Linh", bạn đang gửi một thông điệp mạnh mẽ đến tiềm thức rằng: "Tôi nghiêm túc. Tôi sẵn sàng thay đổi."</p>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="form-title">📜 BẢN CAM KẾT THỊNH VƯỢNG</h3>
+                    
+                    <form id="commitmentForm">
+                        <div class="form-group">
+                            <label class="form-label">Họ và tên của bạn:</label>
+                            <input type="text" class="form-input" id="fullName" placeholder="Nhập họ tên của bạn" required="">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Ngày bắt đầu hành trình:</label>
+                            <input type="date" class="form-input" id="startDate" required="">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Mục tiêu tài chính trong 12 tháng tới (cụ thể):</label>
+                            <input type="text" class="form-input" id="financialGoal" placeholder="VD: Thu nhập 50 triệu/tháng, tiết kiệm 200 triệu..." required="">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Tại sao mục tiêu này quan trọng với bạn?</label>
+                            <input type="text" class="form-input" id="whyImportant" placeholder="VD: Để lo cho gia đình, để tự do du lịch..." required="">
+                        </div>
+
+                        <div class="checkbox-group">
+                            <input type="checkbox" class="checkbox-input" id="commit1" required="">
+                            <label class="checkbox-label" for="commit1">Tôi cam kết học ít nhất 1 bài mỗi ngày trong 49 ngày tới</label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <input type="checkbox" class="checkbox-input" id="commit2" required="">
+                            <label class="checkbox-label" for="commit2">Tôi cam kết thực hành các nghi thức được hướng dẫn</label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <input type="checkbox" class="checkbox-input" id="commit3" required="">
+                            <label class="checkbox-label" for="commit3">Tôi tin rằng tôi XỨNG ĐÁNG được thịnh vượng</label>
+                        </div>
+
+                        <button type="submit" class="submit-btn">✨ XÁC NHẬN NĂNG LƯỢNG ✨</button>
+
+                        <div class="success-message" id="successMessage">
+                            🎉 Chúc mừng bạn đã ký cam kết! Vũ trụ đã ghi nhận. Hành trình thịnh vượng của bạn bắt đầu từ BÂY GIỜ!
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Section 5: Hướng dẫn sử dụng -->
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-number">5</span>
+                    <h2 class="section-title">Hướng Dẫn Sử Dụng Khóa Học</h2>
+                </div>
+
+                <div class="text-content">
+                    <p><strong>Để đạt kết quả tốt nhất, hãy tuân theo các nguyên tắc sau:</strong></p><img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mjsgu0wy-y7p7or/1767177800294_n8us54_Gemini_Generated_Image_lb4usxlb4usxlb4u.png" alt="gemini-generated-image-lb4usxlb4usx-dcld">
+                </div>
+
+                <ol class="numbered-list">
+                    <li><strong>Học mỗi ngày, dù chỉ 15-30 phút.</strong> Tính nhất quán quan trọng hơn cường độ. Đừng học 3 bài 1 ngày rồi bỏ 3 ngày.</li>
+                    <li><strong>Làm bài tập ngay trong bài học.</strong> Đừng chỉ đọc - hãy VIẾT, hãy THỰC HÀNH. Bài tập được thiết kế để chuyển hóa diễn ra.</li>
+                    <li><strong>Sử dụng app GEM hàng ngày.</strong> App có các Rituals và tools hỗ trợ quá trình chuyển hóa. Chi tiết ở bên dưới.</li>
+                    <li class=""><strong>Tham gia cộng đồng.</strong> Chia sẻ hành trình, hỏi đáp, và support lẫn nhau trong forum của app.</li>
+                    <li><strong>Tin tưởng quá trình.</strong> Có những ngày bạn không "cảm thấy" thay đổi. Đó là bình thường. Tiếp tục thực hành.</li>
+                </ol>
+
+                <div class="app-box">
+                    <h4 class="app-box-title">📱 TÍCH HỢP APP GEM</h4>
+                    <p style="color: var(--text-secondary); margin-bottom: 1rem; padding: 0;">Trong suốt khóa học, bạn sẽ sử dụng các tính năng sau trong app GEM:</p>
+                    
+                    <div class="app-feature">
+                        <div class="app-feature-icon">🔥</div>
+                        <span><strong>Rituals:</strong> Burn &amp; Release, Water Manifest, Star Wish, Gratitude Flow...</span>
+                    </div>
+                    
+                    <div class="app-feature">
+                        <div class="app-feature-icon">🔮</div>
+                        <span><strong>GEM Master:</strong> Tarot, I Ching, Crystal, Affirmations, Career Guidance</span>
+                    </div>
+                    
+                    <div class="app-feature">
+                        <div class="app-feature-icon">🎯</div>
+                        <span><strong>Vision Board:</strong> Goals, Habits Tracking, Daily Score</span>
+                    </div>
+                    
+                    <div class="app-feature">
+                        <div class="app-feature-icon">👥</div>
+                        <span><strong>Community:</strong> Forum, Q&amp;A, Success Stories</span>
+                    </div>
+                </div>
+
+                <div class="text-content">
+                    <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mjsgu0wy-y7p7or/1767177901354_2npeda_Gemini_Generated_Image_1lkal81lkal81lka.png" alt="gemini-generated-image-1lkal81lkal8-wvvm"><p>Nếu bạn chưa có app GEM, hãy tải ngay tại App Store hoặc Google Play. Đăng nhập với email bạn đã dùng để mua khóa học.</p>
+                    
+                    <p><strong>Bạn đã sẵn sàng chưa?</strong></p>
+                    
+                    <p>Ở bài tiếp theo, chúng ta sẽ đánh giá tần số tiền bạc hiện tại của bạn. Đây là bước quan trọng để biết bạn đang ở đâu trước khi bắt đầu hành trình.</p>
+                </div>
+
+                <div class="highlight-box">
+                    <p>"Hành trình ngàn dặm bắt đầu từ bước chân đầu tiên. Bạn đã bước bước đầu tiên rồi đấy - bằng việc mở bài học này. Tôi tự hào về bạn."</p>
+                    <p class="author">— Jennie Uyen Chu</p>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="lesson-footer">
+            <p class="selected-for-delete">© 2025 GEM Academy | <a href="https://gemral.com">gemral.com</a></p>
+        </footer>
+
+    </div>
+
+    <script>
+        // Set default date to today
+        document.getElementById('startDate').valueAsDate = new Date();
+
+        // Form submission
+        document.getElementById('commitmentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get values
+            const name = document.getElementById('fullName').value;
+            const date = document.getElementById('startDate').value;
+            const goal = document.getElementById('financialGoal').value;
+            const why = document.getElementById('whyImportant').value;
+
+            // Save to localStorage (for reference in later lessons)
+            localStorage.setItem('gem_commitment', JSON.stringify({
+                name: name,
+                startDate: date,
+                goal: goal,
+                why: why,
+                signedAt: new Date().toISOString()
+            }));
+
+            // Show success message
+            document.getElementById('successMessage').classList.add('show');
+            
+            // Disable form
+            this.querySelectorAll('input, button').forEach(el => el.disabled = true);
+
+            // Scroll to success message
+            document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+    </script>
+

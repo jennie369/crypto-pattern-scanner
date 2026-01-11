@@ -1,0 +1,1174 @@
+<!-- ============================================
+     SECTION 1: HERO
+     GEMRAL Landing Page
+     ============================================ -->
+
+
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEMRAL - Tự Do Tài Chính Bắt Đầu Từ Tần Số Đúng</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&amp;family=Noto+Sans+Display:wght@400;500;600&amp;display=swap" rel="stylesheet">
+    
+    <style>
+        /* ============================================
+           CSS VARIABLES
+           ============================================ */
+        :root {
+            /* Colors */
+            --navy: #112250;
+            --navy-dark: #0a1632;
+            --burgundy: #9C0612;
+            --burgundy-dark: #6B0F1A;
+            --gold: #FFBD59;
+            --gold-dark: #C88F2F;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --pink: #FF6B9D;
+            --white: #ffffff;
+            --white-80: rgba(255, 255, 255, 0.8);
+            --white-60: rgba(255, 255, 255, 0.6);
+            --white-20: rgba(255, 255, 255, 0.2);
+            --white-10: rgba(255, 255, 255, 0.1);
+            --black-40: rgba(0, 0, 0, 0.4);
+            
+            /* Fonts */
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+            
+            /* Spacing */
+            --section-padding: 80px 0;
+            --container-max: 1200px;
+            --container-padding: 20px;
+        }
+        
+        /* ============================================
+           RESET & BASE
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            background: var(--navy-dark);
+            color: var(--white);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: var(--container-max);
+            margin: 0 auto;
+            padding: 0 var(--container-padding);
+        }
+        
+        /* ============================================
+           STICKY TOP BAR
+           ============================================ */
+        .sticky-top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: linear-gradient(90deg, var(--burgundy-dark), var(--burgundy));
+            padding: 10px 20px;
+            padding-right: 80px; /* Space for cart icon */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .urgency-text {
+            font-family: var(--font-heading);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--white);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .countdown-mini {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .countdown-box {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            padding: 6px 10px;
+            text-align: center;
+            min-width: 50px;
+        }
+        
+        .countdown-box span {
+            display: block;
+        }
+        
+        .countdown-box .number {
+            font-family: var(--font-heading);
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--gold);
+        }
+        
+        .countdown-box .label {
+            font-size: 9px;
+            color: var(--white-60);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-cta-small {
+            background: var(--gold);
+            color: var(--navy-dark);
+            font-family: var(--font-heading);
+            font-size: 12px;
+            font-weight: 700;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+        
+        .btn-cta-small:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(255, 189, 89, 0.4);
+        }
+        
+        /* ============================================
+           SECTION HERO
+           ============================================ */
+        .section-hero {
+            min-height: 100vh;
+            padding: 120px 0 80px;
+            background: linear-gradient(180deg, 
+                var(--navy-dark) 0%, 
+                var(--navy) 30%,
+                #1a3a6e 60%,
+                #4A1A4F 100%
+            );
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Background decoration */
+        .section-hero::before {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255, 189, 89, 0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        .section-hero::after {
+            content: '';
+            position: absolute;
+            bottom: 10%;
+            right: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 240, 255, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+        
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-family: var(--font-heading);
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 30px;
+        }
+        
+        .badge-burgundy {
+            background: linear-gradient(135deg, var(--burgundy), var(--burgundy-dark));
+            color: var(--white);
+            box-shadow: 0 4px 20px rgba(156, 6, 18, 0.4);
+        }
+        
+        /* Pulse animation */
+        .pulse-glow {
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 4px 20px rgba(156, 6, 18, 0.4); }
+            50% { box-shadow: 0 4px 40px rgba(156, 6, 18, 0.6), 0 0 60px rgba(156, 6, 18, 0.3); }
+        }
+        
+        /* Headline */
+        .hero-headline {
+            font-family: var(--font-heading);
+            font-size: 56px;
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 30px;
+            color: var(--white);
+        }
+        
+        .text-gold {
+            color: var(--gold);
+        }
+        
+        .text-cyan {
+            color: var(--cyan);
+        }
+        
+        .text-pink {
+            color: var(--pink);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, var(--gold), var(--cyan), var(--gold));
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3s linear infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+        
+        /* Subheadline */
+        .hero-subheadline {
+            font-size: 20px;
+            color: var(--white-80);
+            max-width: 800px;
+            margin: 0 auto 40px;
+            line-height: 1.7;
+        }
+        
+        .hero-subheadline strong {
+            color: var(--white);
+        }
+        
+        /* Opening Hook Box */
+        .hook-box {
+            background: rgba(17, 34, 80, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 189, 89, 0.2);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 900px;
+            margin: 0 auto 50px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        
+        .hook-question {
+            font-size: 22px;
+            font-style: italic;
+            color: var(--white);
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        
+        .hook-answer {
+            font-size: 18px;
+            color: var(--white-80);
+            line-height: 1.7;
+        }
+        
+        /* Live Viewers */
+        .live-viewers {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 30px;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .live-dot {
+            width: 10px;
+            height: 10px;
+            background: #10B981;
+            border-radius: 50%;
+            animation: blink 1s ease-in-out infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Hero Image */
+        .hero-image-wrapper {
+            margin: 50px auto;
+            max-width: 500px;
+        }
+        
+        .hero-image {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(0, 240, 255, 0.1));
+            border: 2px solid rgba(255, 189, 89, 0.3);
+            border-radius: 24px;
+            padding: 40px;
+            min-height: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gold);
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        /* Social Proof Stats Row */
+        .hero-stats-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            margin: 50px 0;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            display: block;
+            font-family: var(--font-heading);
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: var(--white-60);
+        }
+        
+        .stat-divider {
+            width: 1px;
+            height: 50px;
+            background: var(--white-20);
+        }
+        
+        /* CTA Buttons */
+        .hero-cta-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--navy-dark);
+            font-family: var(--font-heading);
+            font-size: 16px;
+            font-weight: 700;
+            padding: 18px 40px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 40px rgba(255, 189, 89, 0.4);
+        }
+        
+        .btn-primary.pulse-glow {
+            animation: btnPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes btnPulse {
+            0%, 100% { box-shadow: 0 5px 20px rgba(255, 189, 89, 0.3); }
+            50% { box-shadow: 0 10px 40px rgba(255, 189, 89, 0.5); }
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--white);
+            font-family: var(--font-heading);
+            font-size: 16px;
+            font-weight: 600;
+            padding: 18px 40px;
+            border: 2px solid var(--white-20);
+            border-radius: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: rgba(255, 189, 89, 0.1);
+        }
+        
+        /* Urgency Badge */
+        .urgency-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, var(--burgundy), var(--burgundy-dark));
+            padding: 12px 24px;
+            border-radius: 30px;
+            margin-top: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+        
+        /* Section Footer */
+        .section-footer {
+            text-align: center;
+            margin-top: 60px;
+            font-size: 13px;
+            color: var(--white-60);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        /* ============================================
+           FOMO WIDGET STICKY
+           ============================================ */
+        .fomo-widget {
+            position: fixed;
+            top: 120px;
+            right: 20px;
+            width: 180px;
+            background: rgba(17, 34, 80, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 189, 89, 0.4);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            z-index: 999;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .fomo-icon svg {
+            width: 40px;
+            height: 40px;
+            stroke: var(--gold);
+        }
+        
+        .fomo-label {
+            font-size: 11px;
+            color: var(--white-60);
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .fomo-count {
+            font-family: var(--font-heading);
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--white);
+            margin: 5px 0;
+        }
+        
+        .fomo-count .highlight {
+            color: var(--gold);
+        }
+        
+        .fomo-progress {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin: 12px 0;
+            overflow: hidden;
+        }
+        
+        .fomo-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold), var(--pink));
+            border-radius: 3px;
+            width: 98%;
+        }
+        
+        .fomo-warning {
+            font-size: 11px;
+            color: var(--pink);
+            margin-bottom: 15px;
+        }
+        
+        .btn-fomo {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--navy-dark);
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 13px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+        
+        .btn-fomo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(255, 189, 89, 0.4);
+        }
+        
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 968px) {
+            .sticky-top-bar {
+                flex-wrap: wrap;
+                gap: 10px;
+                padding: 8px 15px;
+            }
+            
+            .countdown-box {
+                min-width: 40px;
+                padding: 4px 8px;
+            }
+            
+            .countdown-box .number {
+                font-size: 14px;
+            }
+            
+            .hero-headline {
+                font-size: 36px;
+            }
+            
+            .hero-subheadline {
+                font-size: 17px;
+                padding: 0 10px;
+            }
+            
+            .hook-box {
+                padding: 25px;
+                margin: 0 15px 40px;
+            }
+            
+            .hook-question {
+                font-size: 18px;
+            }
+            
+            .hero-stats-row {
+                gap: 20px;
+            }
+            
+            .stat-number {
+                font-size: 32px;
+            }
+            
+            .stat-divider {
+                display: none;
+            }
+            
+            .hero-cta-group {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn-primary, .btn-secondary {
+                width: 100%;
+                max-width: 320px;
+            }
+            
+            .fomo-widget {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .section-hero {
+                padding: 100px 0 60px;
+            }
+            
+            .hero-headline {
+                font-size: 28px;
+            }
+            
+            .badge {
+                font-size: 11px;
+                padding: 8px 16px;
+            }
+            
+            .urgency-text {
+                font-size: 11px;
+            }
+        }
+
+        /* ============================================
+           LIVE NOTIFICATION TOAST
+           ============================================ */
+        .live-notification {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background: rgba(17, 34, 80, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: 12px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            z-index: 998;
+            max-width: 360px;
+            transform: translateX(-120%);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .live-notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .live-notification-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--cyan));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .live-notification-content {
+            flex: 1;
+        }
+
+        .live-notification-text {
+            font-size: 13px;
+            color: var(--white);
+            line-height: 1.4;
+            margin-bottom: 4px;
+        }
+
+        .live-notification-text strong {
+            color: var(--gold);
+        }
+
+        .live-notification-time {
+            font-size: 11px;
+            color: var(--white-60);
+        }
+
+        .live-notification-badge {
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .live-notification-close {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 20px;
+            height: 20px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: var(--white-60);
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .live-notification-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--white);
+        }
+
+        @media (max-width: 600px) {
+            .live-notification {
+                left: 15px;
+                right: 15px;
+                bottom: 15px;
+                max-width: none;
+            }
+        }
+    </style>
+
+
+    <!-- ============================================
+         STICKY TOP BAR
+         ============================================ -->
+    <div class="sticky-top-bar">
+        <span class="urgency-text">&nbsp;Ưu đãi Founder kết thúc:</span>
+        <div class="countdown-mini">
+            <div class="countdown-box">
+                <span class="number" id="days">05</span>
+                <span class="label">Ngày</span>
+            </div>
+            <div class="countdown-box">
+                <span class="number" id="hours">12</span>
+                <span class="label">Giờ</span>
+            </div>
+            <div class="countdown-box">
+                <span class="number" id="minutes">34</span>
+                <span class="label">Phút</span>
+            </div>
+            <div class="countdown-box">
+                <span class="number" id="seconds">56</span>
+                <span class="label">Giây</span>
+            </div>
+        </div>
+        <button class="btn-cta-small" onclick="document.getElementById('waitlistForm')?.scrollIntoView({behavior:'smooth'}) || document.querySelector('.section-waitlist')?.scrollIntoView({behavior:'smooth'})">Đăng ký</button>
+    </div>
+    
+    <!-- ============================================
+         FOMO WIDGET STICKY
+         ============================================ -->
+    <div class="fomo-widget">
+        <div class="fomo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+        </div>
+        <p class="fomo-label">Còn lại</p>
+        <p class="fomo-count"><span class="highlight" id="spots">47</span> / 100</p>
+        <div class="fomo-progress">
+            <div class="fomo-progress-bar" id="spots-progress"></div>
+        </div>
+        <p class="fomo-warning" id="fomo-urgency">🔥 Sắp hết chỗ!</p>
+        <button class="btn-fomo" onclick="document.getElementById('waitlist-form')?.scrollIntoView({behavior:'smooth'}) || document.querySelector('.section-waitlist')?.scrollIntoView({behavior:'smooth'})">Giữ chỗ</button>
+    </div>
+
+    <!-- ============================================
+         LIVE NOTIFICATION TOAST
+         ============================================ -->
+    <!-- LIVE NOTIFICATION TOAST -->
+    <div class="live-notification" id="liveNotification">
+        <button class="live-notification-close" onclick="closeLiveNotification()">×</button>
+        <div class="live-notification-avatar" id="notificationAvatar">👤</div>
+        <div class="live-notification-content">
+            <p class="live-notification-text" id="notificationText">
+                <strong>Nguyễn Văn A</strong> vừa đăng ký khóa học Trading
+            </p>
+            <span class="live-notification-time" id="notificationTime">2 phút trước</span>
+        </div>
+        <span class="live-notification-badge" id="notificationBadge">Mới</span>
+    </div>
+
+    <!-- ============================================
+         SECTION 1: HERO
+         ============================================ -->
+    <section class="section-hero">
+        <div class="container">
+            <div class="hero-content">
+                <!-- Badge -->
+                <span class="badge badge-burgundy pulse-glow">🇻🇳 Lần đầu tiên tại Việt Nam</span>
+                
+                <!-- Headline -->
+                <h1 class="hero-headline">
+                    TỰ DO TÀI CHÍNH<br>
+                    BẮT ĐẦU TỪ<br>
+                    <span class="text-gold gradient-text">TẦN SỐ ĐÚNG</span>
+                </h1>
+                
+                <!-- Subheadline -->
+                <p class="hero-subheadline">
+                    <strong>Nền tảng khóa học trading &amp; phát triển bản thân đầu tiên tại Việt Nam.</strong><br><br>
+                    Tính năng nổi bật: <span class="text-cyan">AI Scanner</span> phát hiện pattern, 
+                    <span class="text-gold">GEM Master</span> chatbot thông minh, 
+                    <span class="text-pink">Tarot &amp; Kinh Dịch</span>, Vision Board, và Khóa học trực tuyến.
+                </p>
+                
+                <!-- Live Viewers -->
+                <div class="live-viewers">
+                    <span class="live-dot"></span>
+                    <span><strong id="viewers">47</strong> người đang xem trang này</span>
+                </div>
+                
+                <!-- Opening Hook Box -->
+                <div class="hook-box">
+                    <p class="hook-question">
+                        "Bạn đã bao giờ tự hỏi... tại sao một số người dường như luôn may mắn trong cả tình yêu lẫn tiền bạc, trong khi bạn cứ mãi chật vật dù đã cố gắng rất nhiều?"
+                    </p>
+                    <p class="hook-answer">
+                        Sự thật là... <strong>thành công không đến từ may mắn</strong>. 
+                        Nó đến từ việc bạn có <span class="text-gold">ĐÚNG CÔNG CỤ</span> để đưa ra quyết định chính xác, 
+                        và <span class="text-cyan">ĐÚNG TẦN SỐ</span> để thu hút những điều tốt đẹp vào cuộc sống. 
+                        Và đó chính xác là lý do <strong>GEMRAL</strong> ra đời — để trao cho bạn cả hai thứ đó 
+                        trong một nền tảng duy nhất.</p><img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk41rftx-08q037/1767797226483_tq4kc1_gemral-landing-11.webp" alt="gemral-landing-11-ymhg">
+                </div>
+                
+                <!-- Hero Image -->
+                <div class="hero-image-wrapper">
+                    
+                </div>
+                
+                <!-- Social Proof Stats -->
+                <div class="hero-stats-row">
+                    <div class="stat-item">
+                        <span class="stat-number text-gold">10,000+</span>
+                        <span class="stat-label">Người quan tâm</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-number text-cyan">68-85%</span>
+                        <span class="stat-label">Win Rate Backtest</span>
+                    </div>
+                    <div class="stat-divider"></div>
+                    <div class="stat-item">
+                        <span class="stat-number text-pink">5+ năm</span>
+                        <span class="stat-label">Data đã kiểm chứng</span>
+                    </div>
+                </div>
+                
+                <!-- Urgency Badge -->
+                <div class="urgency-badge">
+                    🔥 <span id="today-signups">23</span> người đã đăng ký hôm nay
+                </div>
+                
+                <!-- CTA Buttons -->
+                <div class="hero-cta-group">
+                    <a href="#section-13" class="btn-primary pulse-glow" onclick="event.preventDefault(); document.getElementById('waitlistForm')?.scrollIntoView({behavior:'smooth'}) || document.querySelector('.section-waitlist')?.scrollIntoView({behavior:'smooth'})">
+                        Đăng ký nhận ưu đãi Founder
+                    </a>
+                    <a href="#section-02" class="btn-secondary" onclick="event.preventDefault(); document.getElementById('section-02')?.scrollIntoView({behavior:'smooth'}) || document.querySelector('.section-scanner')?.scrollIntoView({behavior:'smooth'})">
+                        Tìm hiểu thêm →
+                    </a>
+                </div>
+                
+                <!-- Section Footer -->
+                <div class="section-footer">gemral.com</div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- ============================================
+         JAVASCRIPT
+         ============================================ -->
+    <script>
+        // ============================================
+        // COUNTDOWN TIMER - Ưu đãi Founder kết thúc
+        // Set to 7 days from now (dynamic)
+        // ============================================
+        const OFFER_DAYS = 7; // Ưu đãi kéo dài 7 ngày
+
+        // Get or set the countdown end date in localStorage
+        function getCountdownEndDate() {
+            const storedDate = localStorage.getItem('gemral_offer_end');
+            if (storedDate) {
+                const endDate = new Date(storedDate).getTime();
+                // If still valid (in the future), use it
+                if (endDate > Date.now()) {
+                    return endDate;
+                }
+            }
+            // Otherwise, set new end date (7 days from now)
+            const newEndDate = new Date();
+            newEndDate.setDate(newEndDate.getDate() + OFFER_DAYS);
+            newEndDate.setHours(23, 59, 59, 0);
+            localStorage.setItem('gemral_offer_end', newEndDate.toISOString());
+            return newEndDate.getTime();
+        }
+
+        const launchDate = getCountdownEndDate();
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = launchDate - now;
+
+            // If countdown finished, show zeros
+            if (distance <= 0) {
+                document.getElementById('days').textContent = '00';
+                document.getElementById('hours').textContent = '00';
+                document.getElementById('minutes').textContent = '00';
+                document.getElementById('seconds').textContent = '00';
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById('days').textContent = String(days).padStart(2, '0');
+            document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+            document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+            document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+        }
+
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // ============================================
+        // LIVE VIEWERS (fluctuating)
+        // ============================================
+        let viewers = 47;
+        function updateViewers() {
+            const change = Math.floor(Math.random() * 11) - 5; // -5 to +5
+            viewers = Math.max(30, Math.min(80, viewers + change));
+            document.getElementById('viewers').textContent = viewers;
+        }
+        setInterval(updateViewers, 5000);
+
+        // ============================================
+        // SPOTS REMAINING - Auto countdown silently
+        // Stored in sessionStorage so it persists during visit
+        // ============================================
+        const TOTAL_SPOTS = 100;
+        const MIN_SPOTS = 12; // Never go below this
+
+        function getSpots() {
+            const stored = sessionStorage.getItem('gemral_spots');
+            if (stored) {
+                return Math.max(MIN_SPOTS, parseInt(stored, 10));
+            }
+            // Start with a random number between 35-55
+            const initial = Math.floor(Math.random() * 21) + 35;
+            sessionStorage.setItem('gemral_spots', initial);
+            return initial;
+        }
+
+        let spots = getSpots();
+
+        function updateSpotsDisplay() {
+            const spotsEl = document.getElementById('spots');
+            const progressEl = document.getElementById('spots-progress');
+            const urgencyEl = document.getElementById('fomo-urgency');
+
+            if (spotsEl) spotsEl.textContent = spots;
+
+            // Update progress bar (inverted - less spots = less bar)
+            if (progressEl) {
+                const percent = (spots / TOTAL_SPOTS) * 100;
+                progressEl.style.width = percent + '%';
+            }
+
+            // Update urgency message based on spots
+            if (urgencyEl) {
+                if (spots <= 15) {
+                    urgencyEl.textContent = '🔥 Gần hết chỗ!';
+                    urgencyEl.style.color = '#FF6B9D';
+                } else if (spots <= 30) {
+                    urgencyEl.textContent = '⚡ Đang giảm nhanh!';
+                    urgencyEl.style.color = '#FFBD59';
+                } else {
+                    urgencyEl.textContent = '✨ Ưu đãi có hạn';
+                    urgencyEl.style.color = 'rgba(255,255,255,0.6)';
+                }
+            }
+        }
+
+        function decreaseSpots() {
+            // Randomly decrease by 1 every 30-90 seconds
+            if (spots > MIN_SPOTS) {
+                spots--;
+                sessionStorage.setItem('gemral_spots', spots);
+                updateSpotsDisplay();
+            }
+        }
+
+        // Initial display
+        updateSpotsDisplay();
+
+        // Decrease spots at random intervals (30-90 seconds)
+        function scheduleNextDecrease() {
+            const delay = Math.floor(Math.random() * 60000) + 30000; // 30-90 seconds
+            setTimeout(() => {
+                decreaseSpots();
+                scheduleNextDecrease();
+            }, delay);
+        }
+        scheduleNextDecrease();
+
+        // ============================================
+        // TODAY SIGNUPS (increasing)
+        // ============================================
+        let signups = 23;
+        function updateSignups() {
+            if (Math.random() < 0.4) {
+                signups++;
+                document.getElementById('today-signups').textContent = signups;
+            }
+        }
+        setInterval(updateSignups, 45000);
+
+        // ============================================
+        // LIVE NOTIFICATION TOAST - Social Proof
+        // Shows random notifications of people signing up
+        // ============================================
+        const vietnameseNames = [
+            'Nguyễn Văn A.', 'Trần Thị B.', 'Lê Văn C.', 'Phạm Thị D.', 'Hoàng Văn E.',
+            'Nguyễn Thị P.', 'Trần Văn G.', 'Lê Thị H.', 'Phạm Văn T.', 'Hoàng Thị K.',
+            'Vũ Văn L.', 'Đặng Thị M.', 'Bùi Văn N.', 'Đỗ Thị O.', 'Hồ Văn P.',
+            'Ngô Thị Q.', 'Dương Văn R.', 'Lý Thị S.', 'Trương Văn T.', 'Đinh Thị U.',
+            'Thanh V.', 'Minh B.', 'Hải X.', 'Long D.', 'Hùng T.',
+            'An từ HN', 'Bình từ SG', 'Châu từ ĐN', 'Dũng từ HP', 'Em từ CT',
+            'Quang từ BD', 'Linh từ HCM', 'Trang từ HN', 'Tuấn từ NT', 'Mai từ VT'
+        ];
+
+        const notificationActions = [
+            { text: 'vừa đăng ký khóa học <strong>Trading Mastery</strong>', emoji: '📚', badge: 'Mới' },
+            { text: 'vừa đăng ký vào <strong>Danh sách chờ</strong>', emoji: '✨', badge: 'Hot' },
+            { text: 'vừa nhận ưu đãi <strong>Early Bird 10%</strong>', emoji: '🎁', badge: 'Ưu đãi' },
+            { text: 'vừa mua combo <strong>Scanner + Course</strong>', emoji: '🚀', badge: 'VIP' },
+            { text: 'vừa đăng ký dùng thử <strong>AI Scanner</strong>', emoji: '🔍', badge: 'Free' },
+            { text: 'vừa tham gia cộng đồng <strong>GEMRAL</strong>', emoji: '👥', badge: 'Mới' },
+            { text: 'vừa nhận <strong>mã giảm giá</strong> Founder', emoji: '🏷️', badge: 'Hot' },
+            { text: 'vừa upgrade lên <strong>Scanner TIER2</strong>', emoji: '⚡', badge: 'Pro' }
+        ];
+
+        const timeAgoTexts = [
+            'Vừa xong', '1 phút trước', '2 phút trước', '3 phút trước',
+            '5 phút trước', 'Vài phút trước', '10 phút trước'
+        ];
+
+        const avatarEmojis = ['👤', '👩', '👨', '🧑', '👱', '👸', '🤴', '💎', '⭐', '🌟'];
+
+        let notificationTimeout = null;
+        let isNotificationVisible = false;
+
+        function showLiveNotification() {
+            console.log('[LiveNotification] Attempting to show...');
+            if (isNotificationVisible) {
+                console.log('[LiveNotification] Already visible, skipping');
+                return;
+            }
+
+            const notification = document.getElementById('liveNotification');
+            const avatarEl = document.getElementById('notificationAvatar');
+            const textEl = document.getElementById('notificationText');
+            const timeEl = document.getElementById('notificationTime');
+            const badgeEl = document.getElementById('notificationBadge');
+
+            if (!notification) {
+                console.error('[LiveNotification] Element not found!');
+                return;
+            }
+            console.log('[LiveNotification] Element found, showing notification');
+
+            // Random data
+            const name = vietnameseNames[Math.floor(Math.random() * vietnameseNames.length)];
+            const action = notificationActions[Math.floor(Math.random() * notificationActions.length)];
+            const time = timeAgoTexts[Math.floor(Math.random() * timeAgoTexts.length)];
+            const avatar = avatarEmojis[Math.floor(Math.random() * avatarEmojis.length)];
+
+            // Update content
+            avatarEl.textContent = action.emoji || avatar;
+            textEl.innerHTML = '<strong>' + name + '</strong> ' + action.text;
+            timeEl.textContent = time;
+            badgeEl.textContent = action.badge;
+
+            // Show notification
+            notification.classList.add('show');
+            isNotificationVisible = true;
+
+            // Auto-hide after 5 seconds
+            notificationTimeout = setTimeout(() => {
+                closeLiveNotification();
+            }, 5000);
+        }
+
+        function closeLiveNotification() {
+            const notification = document.getElementById('liveNotification');
+            if (notification) {
+                notification.classList.remove('show');
+            }
+            isNotificationVisible = false;
+            if (notificationTimeout) {
+                clearTimeout(notificationTimeout);
+                notificationTimeout = null;
+            }
+        }
+
+        // Schedule notifications at random intervals (15-45 seconds)
+        function scheduleNextNotification() {
+            const delay = Math.floor(Math.random() * 30000) + 15000; // 15-45 seconds
+            setTimeout(() => {
+                showLiveNotification();
+                scheduleNextNotification();
+            }, delay);
+        }
+
+        // Start notification loop after 3 seconds (let page load first)
+        console.log('[LiveNotification] Script loaded, will show first notification in 3 seconds...');
+        setTimeout(() => {
+            console.log('[LiveNotification] Timer fired, showing first notification');
+            showLiveNotification(); // Show first one
+            scheduleNextNotification(); // Schedule next ones
+        }, 3000);
+    </script>

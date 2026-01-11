@@ -13,7 +13,8 @@ import {
   RefreshControl,
   StyleSheet,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import {
   Package,
@@ -30,11 +31,12 @@ import {
   getOrderStatusText,
   getOrderStatusColor,
 } from '../../services/orderService';
-import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
+import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
 
 const OrdersScreen = () => {
   const navigation = useNavigation();
   const { user } = useAuth();
+  const insets = useSafeAreaInsets();
 
   // ========== STATE ==========
   const [orders, setOrders] = useState([]);
@@ -165,108 +167,134 @@ const OrdersScreen = () => {
   // ========== LOADING STATE ==========
   if (loading && !refreshing) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-            <ArrowLeft size={24} color={COLORS.textPrimary} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Đơn hàng của tôi</Text>
-          <View style={{ width: 40 }} />
-        </View>
-        <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color={COLORS.gold} />
-          <Text style={styles.loadingText}>Đang tải đơn hàng...</Text>
-        </View>
-      </SafeAreaView>
+      <View style={styles.container}>
+        <LinearGradient
+          colors={GRADIENTS.background}
+          locations={GRADIENTS.backgroundLocations}
+          style={styles.gradientBg}
+        >
+          <View style={[styles.header, { paddingTop: insets.top }]}>
+            <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+              <ArrowLeft size={24} color={COLORS.textPrimary} />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Đơn hàng của tôi</Text>
+            <View style={{ width: 40 }} />
+          </View>
+          <View style={[styles.centerContainer, { paddingBottom: insets.bottom + 80 }]}>
+            <ActivityIndicator size="large" color={COLORS.gold} />
+            <Text style={styles.loadingText}>Đang tải đơn hàng...</Text>
+          </View>
+        </LinearGradient>
+      </View>
     );
   }
 
   // ========== ERROR STATE ==========
   if (error) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-            <ArrowLeft size={24} color={COLORS.textPrimary} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Đơn hàng của tôi</Text>
-          <View style={{ width: 40 }} />
-        </View>
-        <View style={styles.centerContainer}>
-          <AlertCircle size={48} color={COLORS.error} />
-          <Text style={styles.errorTitle}>Đã có lỗi xảy ra</Text>
-          <Text style={styles.errorMessage}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={loadOrders}>
-            <RefreshCw size={18} color={COLORS.gold} />
-            <Text style={styles.retryText}>Thử lại</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
+      <View style={styles.container}>
+        <LinearGradient
+          colors={GRADIENTS.background}
+          locations={GRADIENTS.backgroundLocations}
+          style={styles.gradientBg}
+        >
+          <View style={[styles.header, { paddingTop: insets.top }]}>
+            <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+              <ArrowLeft size={24} color={COLORS.textPrimary} />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Đơn hàng của tôi</Text>
+            <View style={{ width: 40 }} />
+          </View>
+          <View style={[styles.centerContainer, { paddingBottom: insets.bottom + 80 }]}>
+            <AlertCircle size={48} color={COLORS.error} />
+            <Text style={styles.errorTitle}>Đã có lỗi xảy ra</Text>
+            <Text style={styles.errorMessage}>{error}</Text>
+            <TouchableOpacity style={styles.retryButton} onPress={loadOrders}>
+              <RefreshCw size={18} color={COLORS.gold} />
+              <Text style={styles.retryText}>Thử lại</Text>
+            </TouchableOpacity>
+          </View>
+        </LinearGradient>
+      </View>
     );
   }
 
   // ========== EMPTY STATE ==========
   if (orders.length === 0) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-            <ArrowLeft size={24} color={COLORS.textPrimary} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Đơn hàng của tôi</Text>
-          <View style={{ width: 40 }} />
-        </View>
-        <View style={styles.centerContainer}>
-          <Inbox size={48} color={COLORS.textMuted} />
-          <Text style={styles.emptyTitle}>Chưa có đơn hàng</Text>
-          <Text style={styles.emptyMessage}>
-            Các đơn hàng từ Shopify sẽ hiển thị ở đây
-          </Text>
-          <TouchableOpacity style={styles.linkButton} onPress={handleLinkOrder}>
-            <LinkIcon size={18} color={COLORS.bgDarkest} />
-            <Text style={styles.linkButtonText}>Liên kết đơn hàng</Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
+      <View style={styles.container}>
+        <LinearGradient
+          colors={GRADIENTS.background}
+          locations={GRADIENTS.backgroundLocations}
+          style={styles.gradientBg}
+        >
+          <View style={[styles.header, { paddingTop: insets.top }]}>
+            <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+              <ArrowLeft size={24} color={COLORS.textPrimary} />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Đơn hàng của tôi</Text>
+            <View style={{ width: 40 }} />
+          </View>
+          <View style={[styles.centerContainer, { paddingBottom: insets.bottom + 80 }]}>
+            <Inbox size={48} color={COLORS.textMuted} />
+            <Text style={styles.emptyTitle}>Chưa có đơn hàng</Text>
+            <Text style={styles.emptyMessage}>
+              Các đơn hàng từ Shopify sẽ hiển thị ở đây
+            </Text>
+            <TouchableOpacity style={styles.linkButton} onPress={handleLinkOrder}>
+              <LinkIcon size={18} color={COLORS.bgDarkest} />
+              <Text style={styles.linkButtonText}>Liên kết đơn hàng</Text>
+            </TouchableOpacity>
+          </View>
+        </LinearGradient>
+      </View>
     );
   }
 
   // ========== MAIN RENDER ==========
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
-          <ArrowLeft size={24} color={COLORS.textPrimary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Đơn hàng của tôi</Text>
-        <TouchableOpacity onPress={handleLinkOrder} style={styles.linkIconButton}>
-          <LinkIcon size={22} color={COLORS.gold} />
-        </TouchableOpacity>
-      </View>
+    <View style={styles.container}>
+      <LinearGradient
+        colors={GRADIENTS.background}
+        locations={GRADIENTS.backgroundLocations}
+        style={styles.gradientBg}
+      >
+        <View style={[styles.header, { paddingTop: insets.top }]}>
+          <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+            <ArrowLeft size={24} color={COLORS.textPrimary} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Đơn hàng của tôi</Text>
+          <TouchableOpacity onPress={handleLinkOrder} style={styles.linkIconButton}>
+            <LinkIcon size={22} color={COLORS.gold} />
+          </TouchableOpacity>
+        </View>
 
-      <FlatList
-        data={orders}
-        keyExtractor={(item) => item.id}
-        renderItem={renderOrderItem}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={COLORS.gold}
-          />
-        }
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-      />
-    </SafeAreaView>
+        <FlatList
+          data={orders}
+          keyExtractor={(item) => item.id}
+          renderItem={renderOrderItem}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={COLORS.gold}
+            />
+          }
+          contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 80 }]}
+          showsVerticalScrollIndicator={false}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+        />
+      </LinearGradient>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.bgDarkest,
+  },
+  gradientBg: {
+    flex: 1,
   },
   header: {
     flexDirection: 'row',

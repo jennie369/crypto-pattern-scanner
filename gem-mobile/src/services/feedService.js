@@ -1505,6 +1505,110 @@ export async function trackVisibleImpressions(userId, sessionId, visiblePosts) {
 }
 
 // ============================================
+// PHASE 4: FEED BY TYPE (Hot, Trending, Latest)
+// Simple queries for FeedTabs component
+// ============================================
+
+/**
+ * Get posts sorted by hot_score (Noi bat)
+ */
+export async function getHotPosts(limit = 20, offset = 0) {
+  try {
+    const { data, error } = await supabase
+      .from('forum_posts')
+      .select(POST_SELECT_QUERY)
+      .eq('status', 'published')
+      .or('is_deleted.is.null,is_deleted.eq.false')
+      .order('hot_score', { ascending: false, nullsFirst: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) throw error;
+
+    return (data || []).map(post => ({
+      ...post,
+      author: post.profiles,
+      category: post.categories,
+    }));
+  } catch (error) {
+    console.error('[FeedService] getHotPosts error:', error);
+    return [];
+  }
+}
+
+/**
+ * Get posts sorted by trending_score (Xu huong)
+ */
+export async function getTrendingPosts(limit = 20, offset = 0) {
+  try {
+    // Only posts from last 48 hours for trending
+    const cutoff = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+
+    const { data, error } = await supabase
+      .from('forum_posts')
+      .select(POST_SELECT_QUERY)
+      .eq('status', 'published')
+      .or('is_deleted.is.null,is_deleted.eq.false')
+      .gte('created_at', cutoff)
+      .order('trending_score', { ascending: false, nullsFirst: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) throw error;
+
+    return (data || []).map(post => ({
+      ...post,
+      author: post.profiles,
+      category: post.categories,
+    }));
+  } catch (error) {
+    console.error('[FeedService] getTrendingPosts error:', error);
+    return [];
+  }
+}
+
+/**
+ * Get posts sorted by created_at (Moi nhat)
+ */
+export async function getLatestPosts(limit = 20, offset = 0) {
+  try {
+    const { data, error } = await supabase
+      .from('forum_posts')
+      .select(POST_SELECT_QUERY)
+      .eq('status', 'published')
+      .or('is_deleted.is.null,is_deleted.eq.false')
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) throw error;
+
+    return (data || []).map(post => ({
+      ...post,
+      author: post.profiles,
+      category: post.categories,
+    }));
+  } catch (error) {
+    console.error('[FeedService] getLatestPosts error:', error);
+    return [];
+  }
+}
+
+/**
+ * Refresh scores for recent posts (call after batch operations)
+ */
+export async function refreshRecentScores() {
+  try {
+    const { data, error } = await supabase.rpc('refresh_recent_post_scores');
+    if (error) {
+      console.warn('[FeedService] refreshRecentScores error:', error);
+      return 0;
+    }
+    return data || 0;
+  } catch (error) {
+    console.error('[FeedService] refreshRecentScores failed:', error);
+    return 0;
+  }
+}
+
+// ============================================
 // EXPORTS
 // ============================================
 
@@ -1517,5 +1621,10 @@ export default {
   updateFeedPreferences,
   resetAllImpressions,
   getImpressionStats,
-  trackVisibleImpressions
+  trackVisibleImpressions,
+  // Phase 4: Feed by type
+  getHotPosts,
+  getTrendingPosts,
+  getLatestPosts,
+  refreshRecentScores,
 };

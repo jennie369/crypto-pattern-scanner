@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
   },
   countText: {
     fontSize: 10,
-    color: COLORS.bgDark,
+    color: COLORS.bgDarkest,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
   },
   filterList: {

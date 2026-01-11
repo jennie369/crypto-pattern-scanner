@@ -197,6 +197,10 @@ class TierService {
         .eq('id', userId)
         .single();
 
+      // DEBUG: Log profile data to understand tier issue
+      console.log('[TierService] Profile data for user:', userId, JSON.stringify(profile, null, 2));
+      console.log('[TierService] Profile error:', profileError);
+
       if (profileError && profileError.code !== 'PGRST116') {
         console.error('[TierService] Profile error:', profileError);
       }
@@ -208,6 +212,14 @@ class TierService {
                         profile.role === 'ADMIN' ||
                         profile.scanner_tier === 'ADMIN' ||
                         profile.chatbot_tier === 'ADMIN';
+
+        console.log('[TierService] Admin check:', {
+          is_admin: profile.is_admin,
+          role: profile.role,
+          scanner_tier: profile.scanner_tier,
+          chatbot_tier: profile.chatbot_tier,
+          isAdminResult: isAdmin
+        });
 
         if (isAdmin) {
           console.log(`[TierService] User ${userId} is ADMIN - granting ADMIN access (unlimited)`);

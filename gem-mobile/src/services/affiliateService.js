@@ -1,12 +1,35 @@
 /**
- * Gemral - Affiliate Service
+ * Gemral - Affiliate Service v3.0
  * Complete Partnership Program for Mobile
- * Based on frontend/src/services/affiliate.js
+ * Reference: GEM_PARTNERSHIP_MASTER_PLAN_V3.md
+ *
+ * COMMISSION RATES v3.0:
+ * - CTV Bronze: Digital 10%, Physical 6%, Sub-Aff 2%
+ * - CTV Silver: Digital 15%, Physical 8%, Sub-Aff 2.5%
+ * - CTV Gold: Digital 20%, Physical 10%, Sub-Aff 3%
+ * - CTV Platinum: Digital 25%, Physical 12%, Sub-Aff 3.5%
+ * - CTV Diamond: Digital 30%, Physical 15%, Sub-Aff 4%
+ * - KOL: Digital/Physical 20%, Sub-Aff 3.5%
  */
 
 import { supabase } from './supabase';
 import { Share, Platform } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
+
+// Import v3.0 constants
+import {
+  CTV_TIER_CONFIG,
+  CTV_TIER_ORDER,
+  KOL_CONFIG,
+  PARTNERSHIP_ROLES,
+  getCommissionRate as getCommissionRateV3,
+  getSubAffiliateRate as getSubAffiliateRateV3,
+  getTierConfig,
+  determineTierByTotalSales,
+  calculateTierProgress,
+  formatTierDisplay,
+  isDigitalProduct,
+} from '../constants/partnershipConstants';
 
 // ========================================
 // CONSTANTS & CONFIGURATION
@@ -40,116 +63,128 @@ export const PRODUCT_TYPES = {
   'physical-product': { name: 'Sản Phẩm Vật Lý', price: null, category: 'physical' },
 };
 
-// Commission Rates
+// Commission Rates v3.0
+// Note: Use getCommissionRateV3() from partnershipConstants for actual calculations
 export const COMMISSION_RATES = {
-  affiliate: 0.03, // 3%
+  kol: { digital: 0.20, physical: 0.20 },  // KOL: 20% all products
   ctv: {
-    beginner: 0.10, // 10%
-    growing: 0.15,  // 15%
-    master: 0.20,   // 20%
-    grand: 0.30,    // 30%
+    bronze: { digital: 0.10, physical: 0.06 },   // 10% digital, 6% physical
+    silver: { digital: 0.15, physical: 0.08 },   // 15% digital, 8% physical
+    gold: { digital: 0.20, physical: 0.10 },     // 20% digital, 10% physical
+    platinum: { digital: 0.25, physical: 0.12 }, // 25% digital, 12% physical
+    diamond: { digital: 0.30, physical: 0.15 },  // 30% digital, 15% physical
   },
-  instructor: null,
 };
 
-// Tier Upgrade Thresholds (VND)
+// Sub-Affiliate Rates v3.0
+export const SUB_AFFILIATE_RATES = {
+  kol: 0.035,      // KOL: 3.5%
+  bronze: 0.02,    // 2%
+  silver: 0.025,   // 2.5%
+  gold: 0.03,      // 3%
+  platinum: 0.035, // 3.5%
+  diamond: 0.04,   // 4%
+};
+
+// Tier Upgrade Thresholds v3.0 (VND)
 export const TIER_THRESHOLDS = {
-  beginner: 0,
-  growing: 100000000,  // 100M
-  master: 300000000,   // 300M
-  grand: 600000000,    // 600M
+  bronze: 0,           // 0
+  silver: 50000000,    // 50M
+  gold: 150000000,     // 150M
+  platinum: 400000000, // 400M
+  diamond: 800000000,  // 800M
 };
 
-// KPI Targets per product type
+// KPI Targets per product type (5 tiers: bronze, silver, gold, platinum, diamond)
 export const KPI_TARGETS = {
-  'course-love': [30, 45, 60, 80],
-  'course-money': [25, 35, 50, 70],
-  'course-7days': [10, 15, 20, 30],
-  'course-trading-t1': [5, 6, 9, 25],
-  'course-trading-t2': [5, 6, 9, 25],
-  'course-trading-t3': [5, 6, 9, 25],
-  'scanner-pro': [5, 6, 9, 25],
-  'scanner-premium': [5, 6, 9, 25],
-  'scanner-vip': [5, 6, 9, 25],
+  'course-love': [30, 40, 50, 65, 80],
+  'course-money': [25, 32, 42, 55, 70],
+  'course-7days': [10, 13, 17, 23, 30],
+  'course-trading-t1': [5, 6, 8, 15, 25],
+  'course-trading-t2': [5, 6, 8, 15, 25],
+  'course-trading-t3': [5, 6, 8, 15, 25],
+  'scanner-pro': [5, 6, 8, 15, 25],
+  'scanner-premium': [5, 6, 8, 15, 25],
+  'scanner-vip': [5, 6, 8, 15, 25],
 };
 
-// Bonus Amounts per tier
+// Bonus Amounts per tier (5 tiers: bronze, silver, gold, platinum, diamond)
 export const BONUS_AMOUNTS = {
-  'course-love': [200000, 300000, 500000, 1000000],
-  'course-money': [250000, 400000, 700000, 1500000],
-  'course-7days': [500000, 1000000, 2000000, 3000000],
-  'course-trading-t1': [5000000, 7000000, 10000000, 20000000],
-  'course-trading-t2': [5000000, 7000000, 10000000, 20000000],
-  'course-trading-t3': [5000000, 7000000, 10000000, 20000000],
-  'scanner-pro': [5000000, 7000000, 10000000, 20000000],
-  'scanner-premium': [5000000, 7000000, 10000000, 20000000],
-  'scanner-vip': [5000000, 7000000, 10000000, 20000000],
+  'course-love': [200000, 250000, 400000, 700000, 1000000],
+  'course-money': [250000, 350000, 550000, 1000000, 1500000],
+  'course-7days': [500000, 750000, 1500000, 2500000, 3000000],
+  'course-trading-t1': [5000000, 6000000, 8000000, 15000000, 20000000],
+  'course-trading-t2': [5000000, 6000000, 8000000, 15000000, 20000000],
+  'course-trading-t3': [5000000, 6000000, 8000000, 15000000, 20000000],
+  'scanner-pro': [5000000, 6000000, 8000000, 15000000, 20000000],
+  'scanner-premium': [5000000, 6000000, 8000000, 15000000, 20000000],
+  'scanner-vip': [5000000, 6000000, 8000000, 15000000, 20000000],
 };
 
 // ========================================
-// CALCULATION HELPERS
+// CALCULATION HELPERS v3.0
 // ========================================
 
 /**
- * Calculate commission based on role and tier
+ * Calculate commission based on role, tier, and product type
+ * v3.0: Separate rates for digital and physical products
  */
-export function calculateCommission(saleAmount, role, ctvTier = null) {
-  if (role === 'affiliate') {
-    return saleAmount * COMMISSION_RATES.affiliate;
-  }
-  if (role === 'ctv' && ctvTier) {
-    const rate = COMMISSION_RATES.ctv[ctvTier];
-    return rate ? saleAmount * rate : 0;
-  }
-  return 0;
+export function calculateCommission(saleAmount, role, ctvTier = null, productType = 'digital') {
+  // Use v3.0 constants from partnershipConstants.js
+  const rate = getCommissionRateV3(role, ctvTier, productType);
+  return Math.round(saleAmount * rate);
+}
+
+/**
+ * Calculate sub-affiliate commission
+ * v3.0: New feature - commission from sub-affiliates
+ */
+export function calculateSubAffiliateCommission(saleAmount, role, ctvTier = null) {
+  const rate = getSubAffiliateRateV3(role, ctvTier);
+  return {
+    amount: Math.round(saleAmount * rate),
+    rate,
+    ratePercent: `${(rate * 100).toFixed(1)}%`,
+  };
 }
 
 /**
  * Get commission rate as decimal
+ * v3.0: Supports digital/physical product types
  */
-export function getCommissionRate(role, ctvTier = null) {
-  if (role === 'affiliate') return COMMISSION_RATES.affiliate;
-  if (role === 'ctv' && ctvTier) return COMMISSION_RATES.ctv[ctvTier] || 0;
-  return 0;
+export function getCommissionRate(role, ctvTier = null, productType = 'digital') {
+  return getCommissionRateV3(role, ctvTier, productType);
 }
 
 /**
  * Get KPI target for product and tier
+ * v3.0: 5 tiers (bronze, silver, gold, platinum, diamond)
  */
 export function getKPITarget(productType, ctvTier) {
   const targets = KPI_TARGETS[productType];
   if (!targets) return null;
-  const tierIndex = ['beginner', 'growing', 'master', 'grand'].indexOf(ctvTier);
-  return targets[tierIndex] || targets[0];
+  const tierIndex = CTV_TIER_ORDER.indexOf(ctvTier);
+  return targets[tierIndex >= 0 ? tierIndex : 0] || targets[0];
 }
 
 /**
  * Get bonus amount for product and tier
+ * v3.0: 5 tiers (bronze, silver, gold, platinum, diamond)
  */
 export function getBonusAmount(productType, ctvTier) {
   const bonuses = BONUS_AMOUNTS[productType];
   if (!bonuses) return null;
-  const tierIndex = ['beginner', 'growing', 'master', 'grand'].indexOf(ctvTier);
-  return bonuses[tierIndex] || bonuses[0];
+  const tierIndex = CTV_TIER_ORDER.indexOf(ctvTier);
+  return bonuses[tierIndex >= 0 ? tierIndex : 0] || bonuses[0];
 }
 
 /**
  * Get next tier upgrade info
+ * v3.0: Uses imported calculateTierProgress from partnershipConstants
  */
 export function getNextTierInfo(currentTier, totalSales) {
-  const tiers = ['beginner', 'growing', 'master', 'grand'];
-  const currentIndex = tiers.indexOf(currentTier);
-
-  if (currentIndex === tiers.length - 1) {
-    return { nextTier: null, threshold: null, remaining: 0, progress: 100 };
-  }
-
-  const nextTier = tiers[currentIndex + 1];
-  const threshold = TIER_THRESHOLDS[nextTier];
-  const remaining = Math.max(0, threshold - totalSales);
-  const progress = Math.min(100, (totalSales / threshold) * 100);
-
-  return { nextTier, threshold, remaining, progress };
+  // Use v3.0 helper from partnershipConstants.js
+  return calculateTierProgress(currentTier, totalSales);
 }
 
 // ========================================
@@ -178,8 +213,8 @@ class AffiliateService {
           .from('affiliate_profiles')
           .insert({
             user_id: user.id,
-            role: 'affiliate',
-            ctv_tier: 'beginner',
+            role: 'ctv',           // v3.0: 'ctv' instead of 'affiliate'
+            ctv_tier: 'bronze',    // v3.0: 'bronze' instead of 'beginner'
             total_sales: 0,
           })
           .select()
@@ -232,7 +267,7 @@ class AffiliateService {
           user_id: profileData.id,
           affiliate_code: profileData.affiliate_code,
           role: profileData.partnership_role,
-          ctv_tier: profileData.ctv_tier || 'beginner',
+          ctv_tier: profileData.ctv_tier || 'bronze',  // v3.0: 'bronze' default
           is_active: true,
         };
       }
@@ -252,8 +287,8 @@ class AffiliateService {
         return {
           user_id: user.id,
           affiliate_code: profileData?.affiliate_code || `GEM${user.id.slice(0, 6).toUpperCase()}`,
-          role: application.application_type || 'affiliate',
-          ctv_tier: 'beginner',
+          role: application.application_type || 'ctv',  // v3.0: 'ctv' default
+          ctv_tier: 'bronze',  // v3.0: 'bronze' default
           is_active: true,
         };
       }
@@ -644,16 +679,23 @@ class AffiliateService {
   }
 
   /**
-   * Get tier display info
+   * Get tier display info v3.0
+   * Uses Vietnamese tier names from partnershipConstants
    */
   getTierInfo(tier) {
-    const tiers = {
-      beginner: { label: 'Beginner', color: '#9CA3AF', rate: '10%' },
-      growing: { label: 'Growing', color: '#3B82F6', rate: '15%' },
-      master: { label: 'Master', color: '#FFBD59', rate: '20%' },
-      grand: { label: 'Grand Master', color: '#DC2626', rate: '30%' },
+    // Use v3.0 config from partnershipConstants
+    const config = getTierConfig(tier);
+    return {
+      label: config.name, // Vietnamese name
+      labelEn: tier.charAt(0).toUpperCase() + tier.slice(1), // English name
+      icon: config.icon,
+      color: config.color,
+      rateDigital: `${(config.commission.digital * 100).toFixed(0)}%`,
+      ratePhysical: `${(config.commission.physical * 100).toFixed(0)}%`,
+      subAffiliateRate: `${(config.subAffiliate * 100).toFixed(1)}%`,
+      // Legacy: single rate for backward compatibility
+      rate: `${(config.commission.digital * 100).toFixed(0)}%`,
     };
-    return tiers[tier] || tiers.beginner;
   }
 
   /**
@@ -730,31 +772,40 @@ class AffiliateService {
   }
 
   /**
-   * Calculate commission rate for product based on tier
+   * Calculate commission rate for product based on tier v3.0
+   * Uses digital/physical product distinction
    */
   getProductCommissionRate(productType, profile) {
-    const role = profile?.role || 'affiliate';
-    const ctvTier = profile?.ctv_tier || 'beginner';
+    const role = profile?.role || 'ctv';
+    const ctvTier = profile?.ctv_tier || 'bronze';
 
-    // Base rate by role/tier
-    let baseRate;
-    if (role === 'ctv' && ctvTier) {
-      baseRate = COMMISSION_RATES.ctv[ctvTier] || 0.10;
-    } else {
-      baseRate = COMMISSION_RATES.affiliate;
-    }
+    // Determine if product is digital or physical
+    const digitalTypes = ['course', 'subscription', 'ebook', 'digital_product', 'bundle'];
+    const isDigital = digitalTypes.includes(productType?.toLowerCase());
+    const productCategory = isDigital ? 'digital' : 'physical';
 
-    // Product type multipliers
-    const multipliers = {
-      crystal: 1.0,
-      course: 1.2,
-      subscription: 1.5,
-      bundle: 1.3,
-      book: 0.8,
-    };
+    // Get rate from v3.0 constants
+    const rate = getCommissionRateV3(role, ctvTier, productCategory);
 
-    const multiplier = multipliers[productType] || 1.0;
-    return baseRate * multiplier;
+    console.log('[Affiliate] getProductCommissionRate:', {
+      productType,
+      isDigital,
+      productCategory,
+      role,
+      ctvTier,
+      rate: rate * 100 + '%',
+    });
+
+    return rate;
+  }
+
+  /**
+   * Get sub-affiliate commission rate based on role and tier v3.0
+   */
+  getSubAffiliateRate(profile) {
+    const role = profile?.role || 'ctv';
+    const ctvTier = profile?.ctv_tier || 'bronze';
+    return getSubAffiliateRateV3(role, ctvTier);
   }
 
   /**
@@ -788,8 +839,8 @@ class AffiliateService {
         return {
           isApproved: true,
           affiliateCode: profile?.affiliate_code || null,
-          role: profile?.partnership_role || application.application_type || 'affiliate',
-          ctvTier: profile?.ctv_tier || 'beginner',
+          role: profile?.partnership_role || application.application_type || 'ctv',  // v3.0
+          ctvTier: profile?.ctv_tier || 'bronze',  // v3.0: 'bronze' default
         };
       }
 
@@ -805,7 +856,7 @@ class AffiliateService {
           isApproved: true,
           affiliateCode: profileCheck.affiliate_code,
           role: profileCheck.partnership_role,
-          ctvTier: profileCheck.ctv_tier || 'beginner',
+          ctvTier: profileCheck.ctv_tier || 'bronze',  // v3.0: 'bronze' default
         };
       }
 
@@ -863,8 +914,8 @@ class AffiliateService {
 
       // Build profile from partnership check result
       const profile = {
-        role: partnershipCheck.role,
-        ctv_tier: partnershipCheck.ctvTier,
+        role: partnershipCheck.role || 'ctv',           // v3.0 default
+        ctv_tier: partnershipCheck.ctvTier || 'bronze', // v3.0 default
         is_active: true,
         affiliate_code: partnershipCheck.affiliateCode,
       };

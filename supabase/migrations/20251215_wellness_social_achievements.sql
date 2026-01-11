@@ -305,6 +305,17 @@ ALTER TABLE wellness_streaks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE social_stats ENABLE ROW LEVEL SECURITY;
 ALTER TABLE crystal_purchases ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies first (for idempotent migration)
+DROP POLICY IF EXISTS "Users can view own wellness logs" ON wellness_activity_logs;
+DROP POLICY IF EXISTS "Users can insert own wellness logs" ON wellness_activity_logs;
+DROP POLICY IF EXISTS "Users can view own wellness streaks" ON wellness_streaks;
+DROP POLICY IF EXISTS "Users can view own social stats" ON social_stats;
+DROP POLICY IF EXISTS "Users can view own crystal purchases" ON crystal_purchases;
+DROP POLICY IF EXISTS "Admins can view all wellness logs" ON wellness_activity_logs;
+DROP POLICY IF EXISTS "Admins can view all wellness streaks" ON wellness_streaks;
+DROP POLICY IF EXISTS "Admins can view all social stats" ON social_stats;
+DROP POLICY IF EXISTS "Admins can view all crystal purchases" ON crystal_purchases;
+
 -- Users can view/manage their own data
 CREATE POLICY "Users can view own wellness logs"
   ON wellness_activity_logs FOR SELECT

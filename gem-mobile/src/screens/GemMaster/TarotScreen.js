@@ -21,7 +21,7 @@ import alertService from '../../services/alertService';
 import * as Clipboard from 'expo-clipboard';
 import { Asset } from 'expo-asset';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, RefreshCw, Share2, Layers, Star, Moon, Sun, Lock, Briefcase, DollarSign, Heart, Activity, Sparkles, ChevronDown, ChevronUp, ShoppingBag, RotateCcw, Copy } from 'lucide-react-native';
+import { ArrowLeft, RefreshCw, Share2, Layers, Star, Moon, Sun, Lock, Briefcase, DollarSign, Heart, Activity, Sparkles, ChevronDown, ChevronUp, ShoppingBag, RotateCcw, Copy, Grid3X3 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS, LAYOUT } from '../../utils/tokens';
 
@@ -519,6 +519,17 @@ const TarotScreen = ({ navigation, route }) => {
       affirmations: [...pastCard.affirmations, ...presentCard.affirmations, ...futureCard.affirmations]
         .filter((a, i, arr) => arr.indexOf(a) === i).slice(0, 4),
       advice: 'Hãy tin tưởng vào trực giác và không ngừng tiến về phía trước. Mỗi lá bài đều mang thông điệp riêng, hãy lắng nghe và áp dụng vào cuộc sống.',
+      // Fortune (1-5 stars) - based on card energy and reversed status
+      fortune: Math.max(1, Math.min(5,
+        Math.round(
+          // Base score from cards
+          (pastCard.isReversed ? 2 : 4) * 0.2 +
+          (presentCard.isReversed ? 2 : 4) * 0.4 +
+          (futureCard.isReversed ? 2 : 4) * 0.4 +
+          // Random variation
+          (Math.random() * 0.5)
+        )
+      )),
     };
   };
 
@@ -641,6 +652,16 @@ const TarotScreen = ({ navigation, route }) => {
           </View>
           <Text style={styles.spreadTitle}>Trải bài 3 lá</Text>
           <Text style={styles.spreadSubtitle}>Quá khứ - Hiện tại - Tương lai</Text>
+
+          {/* More Spreads Button */}
+          <TouchableOpacity
+            style={styles.moreSpreadsButton}
+            onPress={() => navigation.navigate('SpreadSelection')}
+            activeOpacity={0.7}
+          >
+            <Grid3X3 size={16} color={COLORS.cyan} />
+            <Text style={styles.moreSpreadsText}>Xem thêm trải bài</Text>
+          </TouchableOpacity>
 
           {/* Cards Row */}
           <View style={styles.cardsRow}>
@@ -886,6 +907,26 @@ const TarotScreen = ({ navigation, route }) => {
             <ProductRecommendations
               context={`${interpretation.summary || ''} ${interpretation.advice || ''} tâm linh năng lượng tần số`}
             />
+
+            {/* Fortune - Độ may mắn */}
+            {interpretation.fortune && (
+              <View style={styles.fortuneSection}>
+                <Text style={styles.fortuneLabel}>Độ may mắn</Text>
+                <View style={styles.starsContainer}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Text
+                      key={star}
+                      style={[
+                        styles.star,
+                        star <= interpretation.fortune && styles.starActive,
+                      ]}
+                    >
+                      ★
+                    </Text>
+                  ))}
+                </View>
+              </View>
+            )}
 
             {/* Advice */}
             <View style={styles.adviceCard}>
@@ -1134,7 +1175,24 @@ const styles = StyleSheet.create({
   spreadSubtitle: {
     fontSize: TYPOGRAPHY.fontSize.md,
     color: COLORS.textMuted,
+    marginBottom: SPACING.md,
+  },
+  moreSpreadsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: 16,
+    backgroundColor: 'rgba(0, 240, 255, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 240, 255, 0.3)',
     marginBottom: SPACING.lg,
+  },
+  moreSpreadsText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.cyan,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
   },
   cardsRow: {
     flexDirection: 'row',
@@ -1535,6 +1593,38 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.fontSize.md,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
     color: COLORS.gold,
+  },
+  // Fortune section - Độ may mắn
+  fortuneSection: {
+    backgroundColor: 'rgba(255, 189, 89, 0.08)',
+    borderRadius: GLASS.borderRadius,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.25)',
+    padding: SPACING.md,
+    marginTop: SPACING.md,
+    alignItems: 'center',
+  },
+  fortuneLabel: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.gold,
+    marginBottom: SPACING.sm,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  starsContainer: {
+    flexDirection: 'row',
+    gap: SPACING.xs,
+  },
+  star: {
+    fontSize: 24,
+    color: 'rgba(255, 189, 89, 0.3)',
+  },
+  starActive: {
+    color: COLORS.gold,
+    textShadowColor: 'rgba(255, 189, 89, 0.5)',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
 });
 

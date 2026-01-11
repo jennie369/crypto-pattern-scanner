@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 7: Boss Ladies Đã Chuyển Hóa</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800;900&family=Noto+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ============================================
+           🎨 PHẦN CẤU HÌNH - DỄ CHỈNH SỬA
+        ============================================ */
+        :root {
+            /* Màu sắc GOLD LUXURY */
+            --gold-accent: #FFBD59;
+            --gold-light: #DEBC81;
+            --burgundy-dark: #6B1F3A;
+            --burgundy-mid: #5A2838;
+            --burgundy-light: #4A1F3A;
+            --text-light: #FFFFFF;
+            --text-cream: #F5E6D3;
+            
+            /* Gradient Section 7 - Chuyển tiếp từ Section 6 */
+            --gradient-start: #0D0A11;
+            --gradient-mid: #0A080D;
+            --gradient-end: #080609;
+            
+            /* Font chữ */
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans', sans-serif;
+        }
+
+        /* ============================================
+           📝 CONFIG - Hình ảnh (THAY Ở ĐÂY)
+        ============================================ */
+        .testimonial-1-image { 
+            background-image: url('https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600'); 
+        }
+        .testimonial-2-image { 
+            background-image: url('https://images.unsplash.com/photo-1580489944761-15a19d654956?w=600'); 
+        }
+        .testimonial-3-image { 
+            background-image: url('https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=600'); 
+        }
+        .testimonial-4-image { 
+            background-image: url('https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=600'); 
+        }
+
+        /* ============================================
+           🎨 GLOBAL STYLES
+        ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--burgundy-dark);
+            color: var(--text-light);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* ============================================
+           📐 SECTION 7 CONTAINER
+        ============================================ */
+        .testimonials-section {
+            background: linear-gradient(180deg, 
+                var(--gradient-start) 0%, 
+                var(--gradient-mid) 50%,
+                var(--gradient-end) 100%
+            );
+            padding: 120px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Elegant particles */
+        .testimonials-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 15% 20%, rgba(255, 189, 89, 0.04) 0%, transparent 25%),
+                radial-gradient(circle at 85% 80%, rgba(255, 189, 89, 0.04) 0%, transparent 25%),
+                radial-gradient(circle at 50% 50%, rgba(222, 188, 129, 0.02) 0%, transparent 35%);
+            animation: elegantDrift 45s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes elegantDrift {
+            0%, 100% { transform: translate(0, 0); opacity: 1; }
+            50% { transform: translate(15px, -15px); opacity: 0.8; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ============================================
+           🎯 HEADER
+        ============================================ */
+        .testimonials-header {
+            text-align: center;
+            margin-bottom: 100px;
+            animation: fadeInDown 1.2s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-60px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .testimonials-title {
+            font-family: var(--font-heading);
+            font-size: clamp(2.5rem, 5.5vw, 4.8rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, 
+                var(--gold-accent) 0%, 
+                var(--gold-light) 50%,
+                var(--gold-accent) 100%
+            );
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 30px;
+            line-height: 1.2;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            animation: titleShimmer 5s ease-in-out infinite;
+        }
+
+        @keyframes titleShimmer {
+            0%, 100% { 
+                filter: drop-shadow(0 0 40px rgba(255, 189, 89, 0.7));
+            }
+            50% { 
+                filter: drop-shadow(0 0 70px rgba(255, 189, 89, 1));
+            }
+        }
+
+        .testimonials-subtitle {
+            font-family: var(--font-body);
+            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+            color: var(--text-cream);
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.6;
+            font-weight: 300;
+            font-style: italic;
+        }
+
+        /* ============================================
+           💼 TESTIMONIALS GRID
+        ============================================ */
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 50px;
+            margin-bottom: 100px;
+        }
+
+        .testimonial-card {
+            background: linear-gradient(135deg, 
+                rgba(255, 189, 89, 0.08) 0%, 
+                rgba(107, 31, 58, 0.12) 100%
+            );
+            border: 2px solid rgba(255, 189, 89, 0.3);
+            border-radius: 30px;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: translateY(60px);
+            animation: testimonialFadeIn 1s ease forwards;
+        }
+
+        .testimonial-card:nth-child(1) { animation-delay: 0.2s; }
+        .testimonial-card:nth-child(2) { animation-delay: 0.4s; }
+        .testimonial-card:nth-child(3) { animation-delay: 0.6s; }
+        .testimonial-card:nth-child(4) { animation-delay: 0.8s; }
+
+        @keyframes testimonialFadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-15px);
+            border-color: var(--gold-accent);
+            box-shadow: 
+                0 30px 80px rgba(255, 189, 89, 0.4),
+                0 0 120px rgba(255, 189, 89, 0.25);
+        }
+
+        /* Power glow */
+        .testimonial-card::after {
+            content: '';
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255, 189, 89, 0.15) 0%, transparent 70%);
+            animation: powerGlow 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes powerGlow {
+            0%, 100% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.3); }
+        }
+
+        /* Image Section */
+        .testimonial-image {
+            height: 350px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .testimonial-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, 
+                transparent 0%, 
+                rgba(0, 0, 0, 0.7) 100%
+            );
+        }
+
+        /* Result Tag */
+        .result-tag {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, 
+                var(--gold-accent) 0%, 
+                var(--gold-light) 100%
+            );
+            color: var(--burgundy-dark);
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-family: var(--font-heading);
+            font-size: 0.9rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 2;
+            box-shadow: 0 5px 20px rgba(255, 189, 89, 0.6);
+            animation: tagPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes tagPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Content Section */
+        .testimonial-content {
+            padding: 40px;
+        }
+
+        .testimonial-quote {
+            font-size: 1.15rem;
+            color: var(--text-cream);
+            line-height: 1.9;
+            margin-bottom: 30px;
+            font-style: italic;
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .testimonial-quote::before {
+            content: '"';
+            position: absolute;
+            left: 0;
+            top: -10px;
+            font-size: 4rem;
+            color: var(--gold-accent);
+            font-family: var(--font-heading);
+            line-height: 1;
+            opacity: 0.3;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(255, 189, 89, 0.2);
+        }
+
+        .author-icon {
+            font-size: 2.5rem;
+            filter: drop-shadow(0 0 10px rgba(255, 189, 89, 0.6));
+        }
+
+        .author-info {
+            flex: 1;
+        }
+
+        .author-name {
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            margin-bottom: 5px;
+        }
+
+        .author-title {
+            font-size: 1rem;
+            color: var(--text-cream);
+            font-weight: 600;
+        }
+
+        /* ============================================
+           📊 STATS SECTION
+        ============================================ */
+        .transformation-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            margin-bottom: 100px;
+            padding: 60px;
+            background: linear-gradient(135deg, 
+                rgba(255, 189, 89, 0.1) 0%, 
+                rgba(107, 31, 58, 0.15) 100%
+            );
+            border: 2px solid rgba(255, 189, 89, 0.3);
+            border-radius: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+            transition: all 0.4s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-10px);
+        }
+
+        .stat-number {
+            font-family: var(--font-heading);
+            font-size: 3.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, 
+                var(--gold-accent) 0%, 
+                var(--gold-light) 100%
+            );
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            line-height: 1;
+            animation: statCount 2s ease;
+        }
+
+        @keyframes statCount {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: var(--text-cream);
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        /* ============================================
+           💫 BOTTOM MESSAGE
+        ============================================ */
+        .bottom-message {
+            text-align: center;
+            padding: 70px 50px;
+            background: linear-gradient(135deg, 
+                rgba(255, 189, 89, 0.12) 0%, 
+                rgba(107, 31, 58, 0.18) 100%
+            );
+            border: 3px solid var(--gold-accent);
+            border-radius: 40px;
+            animation: messageGlow 3.5s ease-in-out infinite;
+        }
+
+        @keyframes messageGlow {
+            0%, 100% { 
+                box-shadow: 0 0 60px rgba(255, 189, 89, 0.4);
+            }
+            50% { 
+                box-shadow: 0 0 90px rgba(255, 189, 89, 0.6);
+            }
+        }
+
+        .message-icon {
+            font-size: 5rem;
+            margin-bottom: 25px;
+            filter: drop-shadow(0 0 25px rgba(255, 189, 89, 0.9));
+            animation: messageIconFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes messageIconFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        .message-quote {
+            font-family: var(--font-heading);
+            font-size: clamp(1.8rem, 4vw, 3rem);
+            font-weight: 800;
+            color: var(--gold-accent);
+            margin-bottom: 20px;
+            line-height: 1.4;
+            text-transform: uppercase;
+        }
+
+        .message-subtext {
+            font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+            color: var(--text-cream);
+            line-height: 1.7;
+            font-style: italic;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* ============================================
+           📱 RESPONSIVE
+        ============================================ */
+        @media (max-width: 1024px) {
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .transformation-stats {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 30px;
+                padding: 40px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .testimonials-section {
+                padding: 80px 20px;
+            }
+
+            .testimonial-content {
+                padding: 30px 25px;
+            }
+
+            .testimonial-image {
+                height: 300px;
+            }
+
+            .transformation-stats {
+                grid-template-columns: 1fr;
+                padding: 30px;
+            }
+
+            .stat-number {
+                font-size: 2.8rem;
+            }
+
+            .bottom-message {
+                padding: 50px 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ============================================
+         SECTION 7: TESTIMONIALS
+    ============================================ -->
+    <section class="testimonials-section">
+        <div class="container">
+            
+            <!-- Header -->
+            <div class="testimonials-header">
+                <h2 class="testimonials-title">
+                    Boss Ladies<br>
+                    Đã Chuyển Hóa
+                </h2>
+                <p class="testimonials-subtitle">
+                    Họ không cần khóa học để thành công. 
+                    Họ cần nghi thức để trở thành toàn vẹn.
+                </p>
+            </div>
+
+            <!-- Testimonials Grid -->
+            <div class="testimonials-grid">
+                
+                <!-- Testimonial 1: The CEO -->
+                <div class="testimonial-card">
+                    <div class="testimonial-image testimonial-1-image">
+                        <div class="result-tag">Tần Số x10</div>
+                    </div>
+                    <div class="testimonial-content">
+                        <p class="testimonial-quote">
+                            Tôi CEO một startup công nghệ, quản lý 50 người, nhưng lại không quản lý nổi tình yêu của chính mình. 
+                            42 ngày này dạy tôi rằng: Sức mạnh đích thực không phải chinh phục - mà là thu hút. 
+                            Giờ đây tôi không còn 'chase' nữa. Tôi chọn.
+                        </p>
+                        <div class="testimonial-author">
+                            <div class="author-icon">👑</div>
+                            <div class="author-info">
+                                <div class="author-name">Minh Khánh, 34</div>
+                                <div class="author-title">CEO Tech Startup</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 2: The Lawyer -->
+                <div class="testimonial-card">
+                    <div class="testimonial-image testimonial-2-image">
+                        <div class="result-tag">Ranh Giới = Nam Châm</div>
+                    </div>
+                    <div class="testimonial-content">
+                        <p class="testimonial-quote">
+                            Luật sư công ty, thu nhập 8 số, nhưng trong tình yêu tôi lại cho đi quá nhiều. 
+                            Module 'Ranh Giới Quyền Năng' thay đổi mọi thứ. 
+                            Tôi học được: Nói KHÔNG là cách mạnh mẽ nhất để nói CÓ với bản thân. 
+                            Bây giờ đối tác phải xứng tầm - không phải tôi hạ thấp xuống.
+                        </p>
+                        <div class="testimonial-author">
+                            <div class="author-icon">⚖️</div>
+                            <div class="author-info">
+                                <div class="author-name">Thanh Vân, 31</div>
+                                <div class="author-title">Luật Sư Công Ty</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 3: The Entrepreneur -->
+                <div class="testimonial-card">
+                    <div class="testimonial-image testimonial-3-image">
+                        <div class="result-tag">Tự Trọng = Giá Trị</div>
+                    </div>
+                    <div class="testimonial-content">
+                        <p class="testimonial-quote">
+                            Tôi xây dựng doanh nghiệp từ con số 0, nhưng lại không biết 'định giá' bản thân mình trong tình yêu. 
+                            Nghi Thức Đá Ghi Nguyện khiến tôi nhận ra: Tôi không thiếu tình yêu - tôi thiếu sự tự trọng. 
+                            Giờ tôi biết giá trị của mình. Và tôi không thương lượng.
+                        </p>
+                        <div class="testimonial-author">
+                            <div class="author-icon">✨</div>
+                            <div class="author-info">
+                                <div class="author-name">Hà My, 29</div>
+                                <div class="author-title">Doanh Nhân Thời Trang</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 4: The Doctor -->
+                <div class="testimonial-card">
+                    <div class="testimonial-image testimonial-4-image">
+                        <div class="result-tag">Chữa Lành Người Chữa Lành</div>
+                    </div>
+                    <div class="testimonial-content">
+                        <p class="testimonial-quote">
+                            Bác sĩ tim mạch, cứu người cả ngày - nhưng không cứu được trái tim mình. 
+                            42 ngày này là cuộc phẫu thuật đầu tiên tôi thực hiện trên chính mình. 
+                            Và đây là ca phẫu thuật thành công nhất trong sự nghiệp của tôi.
+                        </p>
+                        <div class="testimonial-author">
+                            <div class="author-icon">💉</div>
+                            <div class="author-info">
+                                <div class="author-name">Dr. Phương Anh, 37</div>
+                                <div class="author-title">Bác Sĩ Tim Mạch</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Transformation Stats -->
+            <div class="transformation-stats">
+                <div class="stat-item">
+                    <div class="stat-number">847</div>
+                    <div class="stat-label">Boss Ladies<br>Đã Chuyển Hóa</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">89%</div>
+                    <div class="stat-label">Tìm Thấy<br>Sự Toàn Vẹn</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">+340</div>
+                    <div class="stat-label">Tần Số Trung Bình<br>Tăng Lên</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">4.9★</div>
+                    <div class="stat-label">Đánh Giá<br>Trung Bình</div>
+                </div>
+            </div>
+
+            <!-- Bottom Message -->
+            <div class="bottom-message">
+                <div class="message-icon">👑</div>
+                <p class="message-quote">
+                    Họ Không Cần Tình Yêu<br>
+                    Để Hoàn Thiện
+                </p>
+                <p class="message-subtext">
+                    Họ cần trở thành toàn vẹn để yêu đúng người. 
+                    Đó chính là điều khác biệt giữa phụ nữ thành công và phụ nữ quyền lực.
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+</body>
+</html>

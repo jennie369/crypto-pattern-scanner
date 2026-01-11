@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 5.3: Tâm Lý Giao Dịch Chuyên Sâu | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        .section, .content-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .section p, .section-content p, p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+
+        .section ul, .section-content ul, ul {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        .section li, .section-content li, li { margin-bottom: var(--space-sm); color: var(--text-secondary); }
+        li strong { color: var(--gold); }
+
+        .image-placeholder, .image-container img {
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-placeholder, .image-container img { border-radius: 0; border: none; margin: var(--space-md) 0; }
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box h4 { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05));
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .warning-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--error);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .warning-box h4 { font-weight: 700; color: var(--error); margin-bottom: var(--space-sm); }
+        .warning-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .definition-box h4 { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); }
+
+        .success-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05));
+            border: 1px solid rgba(0, 200, 83, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .success-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .success-box h4 { font-weight: 700; color: var(--success); margin-bottom: var(--space-sm); }
+        .success-box p { color: var(--text-secondary); margin: 0; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .stats-grid {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .stat-card { border: none; border-radius: 0; padding: var(--space-md); }
+        }
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: block;
+            margin-bottom: var(--space-xs);
+            color: var(--cyan);
+        }
+        .stat-card .value.red { color: var(--error); }
+        .stat-card .value.gold { color: var(--gold); }
+        .stat-card .value.green { color: var(--success); }
+        .stat-card .label { font-size: 0.85rem; color: var(--text-muted); }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-box h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+        }
+        .summary-box ul { list-style: none; padding: 0; }
+        .summary-box li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-box li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-section {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-lg) 16px;
+                margin-top: 0;
+                border-top: 8px solid var(--bg-primary);
+            }
+        }
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-question {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin-bottom: 0;
+                border-bottom: 1px solid var(--glass-border);
+            }
+        }
+        .quiz-question h4, .question-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+            color: var(--success);
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+            color: var(--error);
+        }
+
+        .quiz-result {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+            color: var(--success);
+        }
+        .quiz-result.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+            color: var(--error);
+        }
+
+        .quiz-score {
+            text-align: center;
+            padding: var(--space-xl);
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), transparent);
+            border: 1px solid var(--purple);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-lg);
+            display: none;
+        }
+        .quiz-score.show { display: block; }
+        .quiz-score h3, .quiz-score-text { color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-score p { color: var(--text-secondary); }
+
+        .retake-btn {
+            margin-top: var(--space-md);
+            padding: var(--space-md) var(--space-xl);
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            color: var(--navy-dark);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .lesson-footer {
+                border: none;
+                border-radius: 0;
+                margin-top: 0;
+                padding: var(--space-lg) 16px;
+            }
+        }
+        .lesson-footer p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        .lesson-footer .highlight { color: var(--gold); font-weight: 600; }
+
+        strong { color: var(--gold); }
+
+        /* Additional classes for compatibility */
+        .path-card, .whale-card, .pattern-card, .example-card, .trade-result, .phase-card, .checklist {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .path-card h4, .whale-card h4, .pattern-card h4, .example-card h4 { color: var(--cyan); margin-bottom: var(--space-sm); }
+        .path-card.gold h4 { color: var(--gold); }
+        .path-card.green h4 { color: var(--success); }
+
+        .stat-row { display: flex; justify-content: space-around; flex-wrap: wrap; gap: var(--space-md); margin: var(--space-lg) 0; }
+        .stat-item { text-align: center; padding: var(--space-md); background: var(--bg-card); border-radius: var(--radius-md); flex: 1; min-width: 120px; }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--cyan); }
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: var(--space-xs); }
+
+        .whale-type-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md); margin: var(--space-lg) 0; }
+        .whale-type { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); border-top: 3px solid var(--cyan); }
+        .whale-type h4 { color: var(--text-primary); margin-bottom: var(--space-sm); }
+        .whale-type .size { color: var(--gold); font-weight: 600; }
+
+        .reason-list { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        .reason-item { display: flex; gap: var(--space-md); margin-bottom: var(--space-md); align-items: flex-start; }
+        .reason-number { background: linear-gradient(135deg, var(--cyan), var(--purple)); color: var(--navy-dark); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+        .reason-content h4 { color: var(--text-primary); margin-bottom: var(--space-xs); }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="container">
+        <header class="lesson-header">
+            <span class="tier-badge">TIER 3 - Elite</span>
+            <h1 class="lesson-title">Tâm Lý Giao Dịch Chuyên Sâu</h1>
+            <p class="lesson-subtitle">Mastery Cảm Xúc Với Hệ Thống Karma</p>
+        </header>
+
+        <section class="content-section">
+            <div class="section-icon">🧠</div>
+            <h2 class="section-title">Tâm Lý: 80% Của Trading</h2>
+            <p>Ở Tier 3 Elite, bạn đã có kỹ năng kỹ thuật. Bây giờ, thách thức lớn nhất là <strong style="color: #8B5CF6;">kiểm soát tâm lý</strong>. Nhiều trader giỏi về kỹ thuật vẫn thua vì không kiểm soát được cảm xúc.</p>
+
+            <div class="highlight-box">
+                <p style="margin-bottom: 0;"><strong>💡 Quote:</strong> "The market is a device for transferring money from the impatient to the patient." - Warren Buffett</p>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://placehold.co/700x400/112250/8B5CF6?text=Trading+Psychology+Pyramid" alt="Trading Psychology">
+                <p class="image-caption">Pyramid: Technical Skills là nền, Psychology là đỉnh</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-icon">⭐</div>
+            <h2 class="section-title">Hệ Thống Karma</h2>
+            <p>GEM sử dụng hệ thống Karma để theo dõi và cải thiện trạng thái tâm lý. Karma Score phản ánh "sức khỏe tâm lý" của bạn:</p>
+
+            <div class="karma-meter">
+                <p><strong>Karma Score: 85/100</strong> (Trade-ready)</p>
+                <div class="karma-bar">
+                    <div class="karma-fill high">85 - EXCELLENT</div>
+                </div>
+            </div>
+
+            <div class="karma-meter">
+                <p><strong>Karma Score: 55/100</strong> (Caution)</p>
+                <div class="karma-bar">
+                    <div class="karma-fill medium">55 - MEDIUM</div>
+                </div>
+            </div>
+
+            <div class="karma-meter">
+                <p><strong>Karma Score: 25/100</strong> (Do NOT trade)</p>
+                <div class="karma-bar">
+                    <div class="karma-fill low">25 - LOW</div>
+                </div>
+            </div>
+
+            <div class="highlight-box purple">
+                <p><strong>📏 Quy Tắc Karma:</strong></p>
+                <ul style="margin-bottom: 0;">
+                    <li><strong>70+ Score:</strong> Trade bình thường</li>
+                    <li><strong>50-70 Score:</strong> Giảm size, chỉ A+ setups</li>
+                    <li><strong>Dưới 50:</strong> KHÔNG TRADE - nghỉ ngơi</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-icon">😤</div>
+            <h2 class="section-title">Nhận Biết Cảm Xúc Tiêu Cực</h2>
+            <p>Đây là các cảm xúc nguy hiểm nhất trong trading:</p>
+
+            <div class="emotion-grid">
+                <div class="emotion-card">
+                    <h4>🔥 FOMO (Fear Of Missing Out)</h4>
+                    <p>Sợ bỏ lỡ cơ hội, chase giá lên. Thường dẫn đến buy high.</p>
+                </div>
+                <div class="emotion-card">
+                    <h4>😠 Revenge Trading</h4>
+                    <p>Sau khi thua, vào lệnh ngay để "gỡ". Thường thua thêm.</p>
+                </div>
+                <div class="emotion-card">
+                    <h4>🏆 Overconfidence</h4>
+                    <p>Sau winning streak, tự tin quá mức, tăng size quá lớn.</p>
+                </div>
+                <div class="emotion-card">
+                    <h4>😰 Fear (Sợ Hãi)</h4>
+                    <p>Sau losing streak, sợ vào lệnh, bỏ lỡ cơ hội tốt.</p>
+                </div>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://placehold.co/700x400/112250/EF4444?text=Negative+Emotions+Cycle" alt="Negative Emotions">
+                <p class="image-caption">Vòng xoáy cảm xúc tiêu cực trong trading</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-icon">🧘</div>
+            <h2 class="section-title">Thực Hành Chánh Niệm</h2>
+            <p>GEM khuyến nghị thực hành chánh niệm (mindfulness) trước mỗi session trading:</p>
+
+            <div class="mindfulness-step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Pause (30 giây)</h4>
+                    <p>Ngồi yên, nhắm mắt, hít thở sâu 3 lần</p>
+                </div>
+            </div>
+
+            <div class="mindfulness-step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Body Scan (1 phút)</h4>
+                    <p>Nhận biết cảm giác trong cơ thể - căng thẳng ở đâu?</p>
+                </div>
+            </div>
+
+            <div class="mindfulness-step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>Emotion Check (30 giây)</h4>
+                    <p>Hỏi: "Tôi đang cảm thấy thế nào? FOMO? Fear? Neutral?"</p>
+                </div>
+            </div>
+
+            <div class="mindfulness-step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h4>Intention Setting (30 giây)</h4>
+                    <p>Đặt ý định: "Hôm nay tôi sẽ tuân thủ rules, chấp nhận mọi kết quả"</p>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <p style="margin-bottom: 0;"><strong>⏱️ Tổng thời gian:</strong> 2.5-3 phút. Làm mỗi ngày trước khi mở chart.</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-icon">✅</div>
+            <h2 class="section-title">Positive Emotions</h2>
+            <p>Thay vì chống lại cảm xúc tiêu cực, hãy nuôi dưỡng cảm xúc tích cực:</p>
+
+            <div class="emotion-grid">
+                <div class="emotion-card positive">
+                    <h4>🎯 Discipline (Kỷ Luật)</h4>
+                    <p>Tuân thủ rules bất kể kết quả. Pride trong process, không phải profit.</p>
+                </div>
+                <div class="emotion-card positive">
+                    <h4>🧘 Detachment (Không Dính Mắc)</h4>
+                    <p>Chấp nhận uncertainty. Mỗi trade chỉ là 1 sample trong chuỗi dài.</p>
+                </div>
+                <div class="emotion-card positive">
+                    <h4>🙏 Gratitude (Biết Ơn)</h4>
+                    <p>Biết ơn cơ hội được trade. Mỗi loss là bài học, không phải thất bại.</p>
+                </div>
+                <div class="emotion-card positive">
+                    <h4>⏳ Patience (Kiên Nhẫn)</h4>
+                    <p>Chờ đợi setup đúng. Không trade là lựa chọn hợp lệ.</p>
+                </div>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://placehold.co/700x400/112250/10B981?text=Positive+Trading+Mindset" alt="Positive Mindset">
+                <p class="image-caption">Mindset tích cực của Elite Trader</p>
+            </div>
+        </section>
+
+        <section class="summary-box">
+            <h3>📝 Tóm Tắt Bài Học</h3>
+            <ul>
+                <li><strong>Psychology = 80%</strong> của trading success</li>
+                <li><strong>Karma Score 70+:</strong> Trade bình thường, dưới 50: KHÔNG trade</li>
+                <li><strong>4 cảm xúc nguy hiểm:</strong> FOMO, Revenge, Overconfidence, Fear</li>
+                <li><strong>Mindfulness routine:</strong> 3 phút trước mỗi session</li>
+                <li><strong>Nuôi dưỡng:</strong> Discipline, Detachment, Gratitude, Patience</li>
+            </ul>
+        </section>
+
+        <section class="quiz-section">
+            <h2 class="quiz-title">📝 Kiểm Tra Kiến Thức</h2>
+
+            <div class="quiz-question" data-correct="2">
+                <p class="question-text">1. Karma Score bao nhiêu thì KHÔNG NÊN trade?</p>
+                <button class="quiz-option" data-index="0">Dưới 70</button>
+                <button class="quiz-option" data-index="1">Dưới 60</button>
+                <button class="quiz-option" data-index="2">Dưới 50</button>
+                <button class="quiz-option" data-index="3">Dưới 80</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="1">
+                <p class="question-text">2. "Revenge Trading" là gì?</p>
+                <button class="quiz-option" data-index="0">Trade theo trend để "trả thù" market</button>
+                <button class="quiz-option" data-index="1">Sau khi thua, vào lệnh ngay để "gỡ"</button>
+                <button class="quiz-option" data-index="2">Trade khi thị trường sideway</button>
+                <button class="quiz-option" data-index="3">Đóng lệnh sớm để bảo vệ profit</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <p class="quiz-score-text">Bạn trả lời đúng <span id="correct-count">0</span>/2 câu hỏi!</p>
+                <button class="retake-btn" onclick="location.reload()">Làm Lại Quiz</button>
+            </div>
+        </section>
+
+        <footer class="lesson-footer">
+            <p>GEM Trading Academy - Tier 3 Elite</p>
+            <p>© 2024 GEM Trading. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 2;
+        let answeredCount = 0;
+        let correctCount = 0;
+        document.querySelectorAll('.quiz-question').forEach(q => {
+            const ci = parseInt(q.dataset.correct);
+            const opts = q.querySelectorAll('.quiz-option');
+            const res = q.querySelector('.quiz-result');
+            opts.forEach(o => {
+                o.addEventListener('click', function() {
+                    if (q.classList.contains('answered')) return;
+                    q.classList.add('answered');
+                    answeredCount++;
+                    const si = parseInt(this.dataset.index);
+                    if (si === ci) {
+                        this.classList.add('correct');
+                        res.textContent = '✓ Chính xác!';
+                        res.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        opts[ci].classList.add('correct');
+                        res.textContent = '✗ Chưa đúng.';
+                        res.className = 'quiz-result show incorrect';
+                    }
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

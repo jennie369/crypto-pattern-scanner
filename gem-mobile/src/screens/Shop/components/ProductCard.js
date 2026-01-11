@@ -1,9 +1,10 @@
 /**
  * Gemral - Product Card Component
+ * Enhanced with wishlist, rating, and sold count
  * Dark theme support
  */
 
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,15 +12,51 @@ import {
   StyleSheet,
   Dimensions,
 } from 'react-native';
-import { ShoppingBag } from 'lucide-react-native';
+import { ShoppingBag, Star } from 'lucide-react-native';
 import OptimizedImage from '../../../components/Common/OptimizedImage';
+import WishlistButton from '../../../components/shop/WishlistButton';
 import { useCart } from '../../../contexts/CartContext';
 import { COLORS, SPACING, TYPOGRAPHY, SHADOWS } from '../../../utils/tokens';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = (SCREEN_WIDTH - SPACING.md * 3) / 2;
 
-const ProductCard = ({ product, onPress, style, darkMode = true, compact = false }) => {
+// Helper to extract image URL from various Shopify formats
+const getProductImageUrl = (product) => {
+  // Try multiple image formats from Shopify
+  // 1. images array with src property
+  if (product.images?.length > 0) {
+    const firstImage = product.images[0];
+    if (typeof firstImage === 'string') return firstImage;
+    if (firstImage?.src) return firstImage.src;
+    if (firstImage?.url) return firstImage.url;
+  }
+  // 2. featuredImage object
+  if (product.featuredImage) {
+    if (typeof product.featuredImage === 'string') return product.featuredImage;
+    if (product.featuredImage?.src) return product.featuredImage.src;
+    if (product.featuredImage?.url) return product.featuredImage.url;
+  }
+  // 3. Single image property
+  if (product.image) {
+    if (typeof product.image === 'string') return product.image;
+    if (product.image?.src) return product.image.src;
+    if (product.image?.url) return product.image.url;
+  }
+  // 4. Fallback placeholder
+  return 'https://placehold.co/400x400/1a0b2e/FFBD59?text=Gemral';
+};
+
+const ProductCard = ({
+  product,
+  onPress,
+  style,
+  darkMode = true,
+  compact = false,
+  showWishlist = true,
+  showRating = true,
+  showSoldCount = false,
+}) => {
   const { addItem, loading } = useCart();
 
   // CRITICAL: Early return if product is null/undefined
@@ -34,7 +71,11 @@ const ProductCard = ({ product, onPress, style, darkMode = true, compact = false
     ? Math.round((1 - parseFloat(price) / parseFloat(comparePrice)) * 100)
     : 0;
 
-  const imageUrl = product.images?.[0]?.src || product.image || null;
+  // Rating and sold count (from product metafields or custom data)
+  const rating = product.rating || product.metafields?.rating || null;
+  const soldCount = product.soldCount || product.metafields?.sold_count || null;
+
+  const imageUrl = getProductImageUrl(product);
 
   const handleQuickAdd = async () => {
     await addItem(product, null, 1);
@@ -77,6 +118,17 @@ const ProductCard = ({ product, onPress, style, darkMode = true, compact = false
           </View>
         )}
 
+        {/* Wishlist Button - Top Right */}
+        {showWishlist && (
+          <View style={styles.wishlistContainer}>
+            <WishlistButton
+              product={product}
+              size={18}
+              showBackground={true}
+            />
+          </View>
+        )}
+
         {/* Quick Add Button */}
         <TouchableOpacity
           style={[styles.quickAddBtn, dynamicStyles.quickAddBtn]}
@@ -92,6 +144,21 @@ const ProductCard = ({ product, onPress, style, darkMode = true, compact = false
         <Text style={[styles.title, dynamicStyles.title]} numberOfLines={2}>
           {product.title}
         </Text>
+
+        {/* Rating and Sold Count Row */}
+        {(showRating && rating) || (showSoldCount && soldCount) ? (
+          <View style={styles.metaRow}>
+            {showRating && rating && (
+              <View style={styles.ratingContainer}>
+                <Star size={12} color={COLORS.gold} fill={COLORS.gold} />
+                <Text style={styles.ratingText}>{rating.toFixed(1)}</Text>
+              </View>
+            )}
+            {showSoldCount && soldCount && (
+              <Text style={styles.soldText}>Đã bán {soldCount}</Text>
+            )}
+          </View>
+        ) : null}
 
         <View style={styles.priceRow}>
           <Text style={[styles.price, dynamicStyles.price]}>{formatPrice(price)}</Text>
@@ -165,9 +232,38 @@ const styles = StyleSheet.create({
     ...SHADOWS.md,
   },
 
+  // Wishlist Button Container
+  wishlistContainer: {
+    position: 'absolute',
+    top: SPACING.sm,
+    right: SPACING.sm,
+  },
+
   // Info
   info: {
     padding: SPACING.sm,
+  },
+
+  // Meta Row (rating + sold count)
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginBottom: SPACING.xs,
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  ratingText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.gold,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  soldText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textMuted,
   },
   title: {
     fontSize: TYPOGRAPHY.fontSize.sm,
@@ -249,4 +345,12 @@ const darkStyles = StyleSheet.create({
   },
 });
 
-export default ProductCard;
+// Use memo to prevent unnecessary re-renders
+export default memo(ProductCard, (prevProps, nextProps) => {
+  // Only re-render if product id or key props change
+  return (
+    prevProps.product?.id === nextProps.product?.id &&
+    prevProps.darkMode === nextProps.darkMode &&
+    prevProps.compact === nextProps.compact
+  );
+});

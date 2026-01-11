@@ -27,6 +27,7 @@ import {
 import { WebView } from 'react-native-webview';
 import { useRoute, useNavigation, CommonActions } from '@react-navigation/native';
 import { useCourse } from '../../contexts/CourseContext';
+import { useTabBar } from '../../contexts/TabBarContext';
 import { COLORS, TYPOGRAPHY, SPACING } from '../../utils/tokens';
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 
@@ -35,6 +36,25 @@ const CourseCheckout = () => {
   const navigation = useNavigation();
   const { refresh } = useCourse();
   const { alert, AlertComponent } = useCustomAlert();
+
+  // Use TabBarContext to hide tab bar on this screen
+  let hideTabBar, showTabBar;
+  try {
+    const tabBarContext = useTabBar();
+    hideTabBar = tabBarContext.hideTabBar;
+    showTabBar = tabBarContext.showTabBar;
+  } catch (e) {
+    hideTabBar = () => {};
+    showTabBar = () => {};
+  }
+
+  // Hide tab bar when entering checkout, show when leaving
+  useEffect(() => {
+    hideTabBar(false);
+    return () => {
+      showTabBar(true);
+    };
+  }, []);
 
   const { checkoutUrl, courseId, courseTitle, productType, returnScreen } = route.params || {};
 

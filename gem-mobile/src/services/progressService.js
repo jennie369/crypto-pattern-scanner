@@ -54,6 +54,21 @@ class ProgressService {
   }
 
   /**
+   * Unmark lesson as complete (set back to not started)
+   * @param {string} userId - User UUID
+   * @param {string} lessonId - Lesson ID
+   * @param {string} courseId - Course ID
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async unmarkLessonComplete(userId, lessonId, courseId) {
+    return this.updateLessonProgress(userId, lessonId, courseId, {
+      status: 'not_started',
+      progress_percent: 0,
+      completed_at: null
+    });
+  }
+
+  /**
    * Mark lesson as in progress
    * @param {string} userId - User UUID
    * @param {string} lessonId - Lesson ID

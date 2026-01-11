@@ -1,0 +1,5 @@
+{
+  "paymentTitle": "Bank Transfer Payment",
+  "scanQR": "Scan QR code to pay",
+  "paymentSuccess": "Payment successful!"
+}

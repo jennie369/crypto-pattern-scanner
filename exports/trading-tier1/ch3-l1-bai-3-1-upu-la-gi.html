@@ -1,0 +1,1650 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bài 3.1: UPU Là Gì? | GEM Trading Academy</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Noto+Sans+Display:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       🎨 GEM DESIGN SYSTEM - V5.3 FACEBOOK-STYLE
+       Full-width components, text-only padding
+       ========================================== */
+    :root {
+      /* Colors */
+      --color-navy: #112250;
+      --color-navy-dark: #0A0F1A;
+      --color-navy-light: #1a3a6e;
+      --color-gold: #FFBD59;
+      --color-gold-dark: #E5A84D;
+      --color-burgundy: #9C0612;
+      --color-cyan: #00F0FF;
+      --color-purple: #6A5BFF;
+      --color-green: #10B981;
+      --color-red: #EF4444;
+      --color-white: #FFFFFF;
+      --color-text: #E8E8E8;
+      --color-text-secondary: rgba(255, 255, 255, 0.7);
+      --color-text-muted: rgba(255, 255, 255, 0.5);
+      
+      /* Backgrounds */
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.06);
+      --bg-glass: rgba(255, 255, 255, 0.08);
+      
+      /* Borders */
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --border-gold: rgba(255, 189, 89, 0.3);
+      
+      /* V5.3: Text-only padding */
+      --text-padding: 16px;
+      
+      /* Spacing */
+      --space-xs: 0.125rem;
+      --space-sm: 0.25rem;
+      --space-md: 0.5rem;
+      --space-lg: 0.75rem;
+      --space-xl: 1rem;
+      --space-2xl: 1.25rem;
+      --space-3xl: 1.5rem;
+      
+      /* V5.3: No container padding on mobile */
+      --container-padding: 0;
+      --card-padding: 0.75rem;
+      --table-padding: 0.375rem;
+      
+      /* Border Radius */
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      
+      /* Shadows */
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+      --shadow-glow-gold: 0 0 15px rgba(255, 189, 89, 0.3);
+      --shadow-glow-cyan: 0 0 15px rgba(0, 240, 255, 0.3);
+      
+      /* Glassmorphism */
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-blur: blur(40px);
+    }
+    
+    /* ========================================
+       V5.3: Desktop (600px+)
+       ======================================== */
+    @media (min-width: 600px) {
+      :root {
+        --text-padding: 24px;
+        --container-padding: 1.5rem;
+        --card-padding: 1rem;
+        --table-padding: 0.75rem;
+        --radius-lg: 16px;
+        --radius-xl: 24px;
+      }
+    }
+    
+    /* ==========================================
+       🔄 RESET & BASE
+       ========================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    body {
+      font-family: 'Noto Sans Display', sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      font-size: 0.9rem;
+      color: var(--color-text);
+      background: linear-gradient(180deg, var(--color-navy-dark) 0%, var(--color-navy) 50%, var(--color-navy-dark) 100%);
+      min-height: 100vh;
+    }
+    
+    @media (min-width: 600px) {
+      body {
+        font-size: 1rem;
+        line-height: 1.7;
+      }
+    }
+    
+    /* Background Bokeh Effects */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(ellipse at 20% 20%, rgba(255, 189, 89, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(0, 240, 255, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(106, 91, 255, 0.04) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      color: var(--color-white);
+    }
+    
+    /* ==========================================
+       📐 V5.3 CONTAINER - No padding mobile
+       ========================================== */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .container {
+        padding: var(--container-padding);
+      }
+    }
+    
+    /* ==========================================
+       🏷️ HEADER - V5.3 Full-width mobile
+       ========================================== */
+    .lesson-header {
+      text-align: center;
+      margin-bottom: 1px;
+      padding: var(--card-padding);
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+      background: var(--bg-card);
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid var(--border-subtle);
+      backdrop-filter: var(--glass-blur);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .lesson-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--color-green), var(--color-cyan), var(--color-green));
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-header {
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-subtle);
+        margin-bottom: var(--space-xl);
+      }
+    }
+    
+    .lesson-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      background: linear-gradient(135deg, var(--color-green), var(--color-cyan));
+      color: var(--color-navy-dark);
+      padding: var(--space-xs) var(--space-md);
+      border-radius: 50px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--space-md);
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-badge {
+        font-size: 0.85rem;
+        padding: var(--space-xs) var(--space-lg);
+      }
+    }
+    
+    .lesson-title {
+      font-size: clamp(1.3rem, 5vw, 2.2rem);
+      margin-bottom: var(--space-sm);
+      background: linear-gradient(135deg, var(--color-gold), var(--color-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+    }
+    
+    .lesson-subtitle {
+      color: var(--color-text-muted);
+      font-size: 0.85rem;
+      margin-bottom: var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-subtitle {
+        font-size: 1rem;
+      }
+    }
+    
+    .lesson-meta {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-md);
+      color: var(--color-text-muted);
+      font-size: 0.75rem;
+      flex-wrap: wrap;
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-meta {
+        gap: var(--space-xl);
+        font-size: 0.9rem;
+      }
+    }
+    
+    .lesson-meta span {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+    
+    /* ==========================================
+       📦 SECTION - V5.3 Full-width mobile
+       ========================================== */
+    .section {
+      background: var(--glass-bg);
+      border: none;
+      border-bottom: 1px solid var(--glass-border);
+      border-radius: 0;
+      padding: var(--card-padding) 0;
+      margin-bottom: 1px;
+      backdrop-filter: var(--glass-blur);
+    }
+    
+    @media (min-width: 600px) {
+      .section {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-lg);
+        padding: var(--card-padding);
+        margin-bottom: var(--space-xl);
+      }
+    }
+    
+    .section-title {
+      font-size: 1.1rem;
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+      border-bottom: 2px solid var(--color-gold);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      .section-title {
+        font-size: 1.5rem;
+        gap: var(--space-md);
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+    
+    .section-title .icon {
+      font-size: 1.2rem;
+    }
+    
+    @media (min-width: 600px) {
+      .section-title .icon {
+        font-size: 1.8rem;
+      }
+    }
+    
+    /* V5.3: Text elements get padding */
+    .section > p {
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+      margin-bottom: var(--space-md);
+    }
+    
+    @media (min-width: 600px) {
+      .section > p {
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+    
+    /* ==========================================
+       🎯 OBJECTIVE LIST - V5.3 Full-width
+       ========================================== */
+    .objective-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .objective-list li {
+      padding: var(--space-sm);
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+      margin-bottom: 1px;
+      background: rgba(16, 185, 129, 0.1);
+      border-left: 4px solid var(--color-green);
+      border-radius: 0;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 0.85rem;
+    }
+    
+    @media (min-width: 600px) {
+      .objective-list li {
+        padding: var(--space-md);
+        margin-bottom: var(--space-sm);
+        font-size: 1rem;
+        gap: var(--space-md);
+        border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        border-left: 3px solid var(--color-green);
+      }
+    }
+    
+    .objective-list .check {
+      color: var(--color-green);
+      font-size: 1rem;
+    }
+    
+    /* ==========================================
+       🖼️ IMAGE - V5.3 Full-width
+       ========================================== */
+    .image-container {
+      margin: var(--space-md) 0;
+      text-align: center;
+    }
+    
+    .image-container img {
+      width: 100%;
+      border-radius: 0;
+      box-shadow: var(--shadow-md);
+      display: block;
+    }
+    
+    @media (min-width: 600px) {
+      .image-container img {
+        border-radius: var(--radius-md);
+        border: 2px solid var(--glass-border);
+      }
+    }
+    
+    .image-caption {
+      margin-top: var(--space-sm);
+      color: var(--color-text-muted);
+      font-size: 0.75rem;
+      font-style: italic;
+      padding: 0 var(--text-padding);
+    }
+    
+    @media (min-width: 600px) {
+      .image-caption {
+        font-size: 0.9rem;
+        padding: 0;
+      }
+    }
+    
+    /* ==========================================
+       💡 HIGHLIGHT BOX - V5.3 Full-width
+       ========================================== */
+    .highlight-box {
+      padding: var(--card-padding);
+      padding-left: calc(var(--text-padding) - 4px);
+      padding-right: var(--text-padding);
+      border-radius: 0;
+      margin: var(--space-md) 0;
+      border: none;
+    }
+    
+    @media (min-width: 600px) {
+      .highlight-box {
+        border-radius: var(--radius-md);
+        padding: var(--card-padding);
+      }
+    }
+    
+    .highlight-box.default {
+      background: rgba(255, 189, 89, 0.1);
+      border-left: 4px solid var(--color-gold);
+    }
+    
+    @media (min-width: 600px) {
+      .highlight-box.default {
+        border: 1px solid rgba(255, 189, 89, 0.3);
+        border-left: 4px solid var(--color-gold);
+      }
+    }
+    
+    .highlight-box.important {
+      background: rgba(239, 68, 68, 0.1);
+      border-left: 4px solid var(--color-red);
+    }
+    
+    @media (min-width: 600px) {
+      .highlight-box.important {
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-left: 4px solid var(--color-red);
+      }
+    }
+    
+    .highlight-box.success {
+      background: rgba(16, 185, 129, 0.1);
+      border-left: 4px solid var(--color-green);
+    }
+    
+    @media (min-width: 600px) {
+      .highlight-box.success {
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        border-left: 4px solid var(--color-green);
+      }
+    }
+    
+    .highlight-box.info {
+      background: rgba(0, 240, 255, 0.1);
+      border-left: 4px solid var(--color-cyan);
+    }
+    
+    @media (min-width: 600px) {
+      .highlight-box.info {
+        border: 1px solid rgba(0, 240, 255, 0.3);
+        border-left: 4px solid var(--color-cyan);
+      }
+    }
+    
+    .highlight-box.purple {
+      background: rgba(106, 91, 255, 0.1);
+      border-left: 4px solid var(--color-purple);
+    }
+    
+    @media (min-width: 600px) {
+      .highlight-box.purple {
+        border: 1px solid rgba(106, 91, 255, 0.3);
+        border-left: 4px solid var(--color-purple);
+      }
+    }
+    
+    .highlight-box .highlight-title {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      margin-bottom: var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: 0.9rem;
+    }
+    
+    @media (min-width: 600px) {
+      .highlight-box .highlight-title {
+        font-size: 1rem;
+      }
+    }
+    
+    .highlight-box p {
+      margin-bottom: 0;
+    }
+    
+    /* ==========================================
+       🎯 DEFINITION CARD - V5.3
+       ========================================== */
+    .definition-card {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(0, 240, 255, 0.1));
+      border: none;
+      border-left: 4px solid var(--color-green);
+      border-radius: 0;
+      padding: var(--space-xl);
+      padding-left: calc(var(--text-padding) - 4px);
+      padding-right: var(--text-padding);
+      text-align: center;
+      margin: var(--space-md) 0;
+    }
+    
+    @media (min-width: 600px) {
+      .definition-card {
+        border: 2px solid var(--color-green);
+        border-radius: var(--radius-lg);
+        padding: var(--space-2xl);
+      }
+    }
+    
+    .definition-card .def-name {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--color-green);
+      margin-bottom: var(--space-xs);
+    }
+    
+    @media (min-width: 600px) {
+      .definition-card .def-name {
+        font-size: 2.5rem;
+      }
+    }
+    
+    .definition-card .def-full {
+      font-size: 1.1rem;
+      color: var(--color-text);
+      margin-bottom: var(--space-xs);
+    }
+    
+    @media (min-width: 600px) {
+      .definition-card .def-full {
+        font-size: 1.3rem;
+      }
+    }
+    
+    .definition-card .def-viet {
+      font-size: 1rem;
+      color: var(--color-gold);
+      font-weight: 600;
+    }
+    
+    @media (min-width: 600px) {
+      .definition-card .def-viet {
+        font-size: 1.1rem;
+      }
+    }
+    
+    /* ==========================================
+       📈 PATTERN FLOW - V5.3
+       ========================================== */
+    .pattern-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      margin: var(--space-md) 0;
+      background: var(--glass-border);
+    }
+    
+    @media (min-width: 600px) {
+      .pattern-flow {
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        gap: var(--space-lg);
+        background: transparent;
+      }
+    }
+    
+    .flow-phase {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-md);
+      padding-left: calc(var(--text-padding) - 4px);
+      padding-right: var(--text-padding);
+      background: var(--glass-bg);
+      border: none;
+      border-left: 4px solid var(--color-green);
+    }
+    
+    .flow-phase.pause {
+      border-left-color: var(--color-gold);
+    }
+    
+    @media (min-width: 600px) {
+      .flow-phase {
+        flex-direction: column;
+        text-align: center;
+        padding: var(--space-lg);
+        border: 2px solid var(--color-green);
+        border-radius: var(--radius-md);
+        min-width: 140px;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
+      }
+      
+      .flow-phase.pause {
+        border-color: var(--color-gold);
+        background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+      }
+      
+      .flow-phase:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-glow-cyan);
+      }
+    }
+    
+    .flow-phase .flow-icon {
+      font-size: 1.5rem;
+    }
+    
+    @media (min-width: 600px) {
+      .flow-phase .flow-icon {
+        font-size: 2rem;
+      }
+    }
+    
+    .flow-phase .flow-label {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--color-green);
+    }
+    
+    .flow-phase.pause .flow-label {
+      color: var(--color-gold);
+    }
+    
+    @media (min-width: 600px) {
+      .flow-phase .flow-label {
+        font-size: 1rem;
+      }
+    }
+    
+    .flow-phase .flow-desc {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+    }
+    
+    @media (min-width: 600px) {
+      .flow-phase .flow-desc {
+        font-size: 0.85rem;
+      }
+    }
+    
+    .flow-arrow {
+      display: none;
+      font-size: 1.5rem;
+      color: var(--color-text-muted);
+    }
+    
+    @media (min-width: 600px) {
+      .flow-arrow {
+        display: block;
+      }
+    }
+    
+    /* ==========================================
+       📊 STATS GRID - V5.3
+       ========================================== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      margin: var(--space-md) 0;
+      background: var(--glass-border);
+    }
+    
+    @media (min-width: 600px) {
+      .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--space-lg);
+        background: transparent;
+      }
+    }
+    
+    .stat-card {
+      background: var(--glass-bg);
+      border: none;
+      border-radius: 0;
+      padding: var(--space-md);
+      text-align: center;
+    }
+    
+    .stat-card.highlight {
+      background: rgba(16, 185, 129, 0.15);
+      border-left: 4px solid var(--color-green);
+    }
+    
+    @media (min-width: 600px) {
+      .stat-card {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+        padding: var(--space-lg);
+      }
+      
+      .stat-card.highlight {
+        border: 2px solid var(--color-green);
+      }
+      
+      .stat-card:hover {
+        border-color: var(--color-gold);
+        transform: translateY(-2px);
+      }
+    }
+    
+    .stat-card .stat-value {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--color-cyan);
+      margin-bottom: var(--space-xs);
+    }
+    
+    .stat-card.highlight .stat-value {
+      color: var(--color-green);
+    }
+    
+    @media (min-width: 600px) {
+      .stat-card .stat-value {
+        font-size: 1.8rem;
+      }
+    }
+    
+    .stat-card .stat-label {
+      font-size: 0.7rem;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    @media (min-width: 600px) {
+      .stat-card .stat-label {
+        font-size: 0.85rem;
+      }
+    }
+    
+    /* ==========================================
+       🔴🟢 COMPARE GRID - V5.3
+       ========================================== */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      margin: var(--space-md) 0;
+      background: var(--glass-border);
+    }
+    
+    @media (min-width: 600px) {
+      .compare-grid {
+        gap: var(--space-xl);
+        background: transparent;
+      }
+    }
+    
+    .compare-card {
+      padding: var(--space-md);
+      padding-left: calc(var(--text-padding) - 4px);
+      padding-right: var(--text-padding);
+      border-radius: 0;
+      border: none;
+      background: var(--glass-bg);
+    }
+    
+    .compare-card.upu {
+      border-left: 4px solid var(--color-green);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
+    }
+    
+    .compare-card.dpd {
+      border-left: 4px solid var(--color-red);
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05));
+    }
+    
+    @media (min-width: 600px) {
+      .compare-card {
+        padding: var(--space-xl);
+        border-radius: var(--radius-lg);
+      }
+      
+      .compare-card.upu {
+        border: 2px solid var(--color-green);
+      }
+      
+      .compare-card.dpd {
+        border: 2px solid var(--color-red);
+      }
+    }
+    
+    .compare-card .compare-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: var(--space-sm);
+    }
+    
+    .compare-card.upu .compare-title {
+      color: var(--color-green);
+    }
+    
+    .compare-card.dpd .compare-title {
+      color: var(--color-red);
+    }
+    
+    @media (min-width: 600px) {
+      .compare-card .compare-title {
+        font-size: 1.2rem;
+        margin-bottom: var(--space-md);
+      }
+    }
+    
+    .compare-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .compare-list li {
+      padding: var(--space-xs) 0;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      .compare-list li {
+        font-size: 0.9rem;
+        padding: var(--space-sm) 0;
+      }
+    }
+    
+    .compare-list li::before {
+      content: '•';
+      color: var(--color-text-muted);
+    }
+    
+    /* ==========================================
+       📝 SUMMARY BOX - V5.3 Full-width
+       ========================================== */
+    .summary-box {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(0, 240, 255, 0.1));
+      border: none;
+      border-left: 4px solid var(--color-green);
+      border-radius: 0;
+      padding: var(--card-padding) 0;
+      margin: var(--space-lg) 0;
+    }
+    
+    @media (min-width: 600px) {
+      .summary-box {
+        border: 2px solid var(--color-green);
+        border-radius: var(--radius-lg);
+        padding: var(--card-padding);
+      }
+    }
+    
+    .summary-box .summary-title {
+      font-size: 1.1rem;
+      color: var(--color-green);
+      margin-bottom: var(--space-md);
+      text-align: center;
+      padding: 0 var(--text-padding);
+    }
+    
+    @media (min-width: 600px) {
+      .summary-box .summary-title {
+        font-size: 1.3rem;
+        margin-bottom: var(--space-lg);
+        padding: 0;
+      }
+    }
+    
+    .summary-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .summary-list li {
+      padding: var(--space-sm);
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+      margin-bottom: 1px;
+      background: var(--glass-bg);
+      border-radius: 0;
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      font-size: 0.8rem;
+    }
+    
+    @media (min-width: 600px) {
+      .summary-list li {
+        padding: var(--space-md);
+        margin-bottom: var(--space-sm);
+        font-size: 0.95rem;
+        gap: var(--space-md);
+        border-radius: var(--radius-sm);
+      }
+    }
+    
+    .summary-list .number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      background: var(--color-green);
+      color: var(--color-navy-dark);
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .summary-list .number {
+        width: 28px;
+        height: 28px;
+        font-size: 0.9rem;
+      }
+    }
+    
+    /* ==========================================
+       ❓ QUIZ SECTION - V5.3 Full-width
+       ========================================== */
+    .quiz-section {
+      background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(0, 240, 255, 0.05));
+      border: none;
+      border-left: 4px solid var(--color-purple);
+      border-radius: 0;
+      padding: var(--card-padding) 0;
+      margin: var(--space-lg) 0;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-section {
+        border: 2px solid var(--color-purple);
+        border-radius: var(--radius-lg);
+        padding: var(--card-padding);
+      }
+    }
+    
+    .quiz-title {
+      font-size: 1.1rem;
+      color: var(--color-purple);
+      margin-bottom: var(--space-md);
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      padding: 0 var(--text-padding);
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-title {
+        font-size: 1.5rem;
+        margin-bottom: var(--space-xl);
+        gap: var(--space-md);
+        padding: 0;
+      }
+    }
+    
+    .quiz-question {
+      background: var(--glass-bg);
+      border: none;
+      border-radius: 0;
+      border-bottom: 1px solid var(--glass-border);
+      padding: var(--card-padding);
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+      margin-bottom: 1px;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-question {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+        padding: var(--card-padding);
+        margin-bottom: var(--space-md);
+      }
+    }
+    
+    .question-number {
+      display: inline-block;
+      background: var(--color-purple);
+      color: var(--color-white);
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: 50px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      margin-bottom: var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      .question-number {
+        font-size: 0.85rem;
+        padding: var(--space-xs) var(--space-md);
+        margin-bottom: var(--space-md);
+      }
+    }
+    
+    .question-text {
+      font-size: 0.9rem;
+      margin-bottom: var(--space-md);
+      color: var(--color-white);
+    }
+    
+    @media (min-width: 600px) {
+      .question-text {
+        font-size: 1.1rem;
+        margin-bottom: var(--space-lg);
+      }
+    }
+    
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      background: var(--glass-border);
+      margin: 0 calc(-1 * var(--text-padding));
+    }
+    
+    @media (min-width: 600px) {
+      .options {
+        gap: var(--space-sm);
+        background: transparent;
+        margin: 0;
+      }
+    }
+    
+    .option {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm);
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+      background: rgba(255, 255, 255, 0.02);
+      border: none;
+      border-radius: 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.8rem;
+    }
+    
+    @media (min-width: 600px) {
+      .option {
+        padding: var(--space-md);
+        gap: var(--space-md);
+        font-size: 0.95rem;
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-sm);
+      }
+      
+      .option:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: var(--color-gold);
+      }
+    }
+    
+    .option input[type="radio"] {
+      display: none;
+    }
+    
+    .option .radio-custom {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--color-text-muted);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+    
+    @media (min-width: 600px) {
+      .option .radio-custom {
+        width: 20px;
+        height: 20px;
+      }
+    }
+    
+    .option input[type="radio"]:checked + .radio-custom {
+      border-color: var(--color-gold);
+      background: var(--color-gold);
+    }
+    
+    .option input[type="radio"]:checked + .radio-custom::after {
+      content: '✓';
+      color: var(--color-navy-dark);
+      font-weight: bold;
+      font-size: 0.65rem;
+    }
+    
+    @media (min-width: 600px) {
+      .option input[type="radio"]:checked + .radio-custom::after {
+        font-size: 0.8rem;
+      }
+    }
+    
+    .option.correct {
+      background: rgba(16, 185, 129, 0.2);
+      border-left: 4px solid var(--color-green);
+    }
+    
+    @media (min-width: 600px) {
+      .option.correct {
+        border: 1px solid var(--color-green);
+        border-left: 4px solid var(--color-green);
+      }
+    }
+    
+    .option.incorrect {
+      background: rgba(239, 68, 68, 0.2);
+      border-left: 4px solid var(--color-red);
+    }
+    
+    @media (min-width: 600px) {
+      .option.incorrect {
+        border: 1px solid var(--color-red);
+        border-left: 4px solid var(--color-red);
+      }
+    }
+    
+    .feedback {
+      margin-top: var(--space-sm);
+      padding: var(--space-sm);
+      border-radius: var(--radius-sm);
+      display: none;
+      font-size: 0.8rem;
+    }
+    
+    @media (min-width: 600px) {
+      .feedback {
+        padding: var(--space-md);
+        font-size: 0.9rem;
+      }
+    }
+    
+    .feedback.correct {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid var(--color-green);
+      color: var(--color-green);
+      display: block;
+    }
+    
+    .feedback.incorrect {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid var(--color-red);
+      color: var(--color-red);
+      display: block;
+    }
+    
+    /* ==========================================
+       📱 FOOTER - V5.3 Full-width
+       ========================================== */
+    .lesson-footer {
+      text-align: center;
+      padding: var(--space-lg);
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-subtle);
+      margin-top: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-footer {
+        background: transparent;
+        margin-top: var(--space-lg);
+      }
+    }
+    
+    .footer-logo {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--color-gold);
+      margin-bottom: var(--space-xs);
+    }
+    
+    .footer-link {
+      color: var(--color-text-muted);
+      font-size: 0.8rem;
+    }
+    
+    .footer-link a {
+      color: var(--color-cyan);
+      text-decoration: none;
+    }
+    
+    .footer-link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <!-- ==========================================
+         🏷️ LESSON HEADER
+         ========================================== -->
+    <header class="lesson-header">
+      <span class="lesson-badge">📚 TIER 1 • Chương 3 • Bài 3.1</span>
+      <h1 class="lesson-title">UPU Là Gì?</h1>
+      <p class="lesson-subtitle">Pattern tiếp diễn xu hướng tăng mạnh nhất trong GEM Frequency Method</p>
+      <div class="lesson-meta">
+        <span>⏱️ 8 phút đọc</span>
+        <span>📝 2 câu quiz</span>
+        <span>🖼️ 4 hình minh họa</span>
+      </div>
+    </header>
+    
+    <!-- ==========================================
+         🎯 MỤC TIÊU BÀI HỌC
+         ========================================== -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">🎯</span>
+        Mục Tiêu Bài Học
+      </h2>
+      <ul class="objective-list">
+        <li>
+          <span class="check">✓</span>
+          Hiểu định nghĩa và ý nghĩa của UPU pattern
+        </li>
+        <li>
+          <span class="check">✓</span>
+          Biết UPU thuộc loại Continuation (Tiếp diễn)
+        </li>
+        <li>
+          <span class="check">✓</span>
+          Hiểu UPU tạo ra LFZ (Vùng Mua)
+        </li>
+        <li>
+          <span class="check">✓</span>
+          Nắm được thống kê: Win Rate 71%, R:R 1:2.8
+        </li>
+      </ul>
+    </section>
+    
+    <!-- ==========================================
+         📖 DEFINITION CARD
+         ========================================== -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">📖</span>
+        Định Nghĩa UPU
+      </h2>
+      
+      <div class="definition-card">
+        <div class="def-name">UPU</div>
+        <div class="def-full">Up - Pause - Up</div>
+        <div class="def-viet">Tăng - Nghỉ - Tăng</div>
+      </div>
+      
+      <p>
+        <strong style="color: var(--color-gold);">UPU</strong> là một trong 6 công thức độc quyền của GEM Frequency Method. Pattern này mô tả hành vi giá khi xu hướng tăng <strong style="color: var(--color-green);">tạm dừng để tích lũy năng lượng</strong>, sau đó tiếp tục tăng mạnh hơn.
+      </p>
+      
+      <p>
+        Khi giá đang trong xu hướng tăng và tạm nghỉ (consolidation), đây là lúc <strong style="color: var(--color-cyan);">Smart Money đang tích lũy thêm lệnh MUA</strong>. Vùng nghỉ này trở thành một <strong style="color: var(--color-green);">Low Frequency Zone (LFZ)</strong> - nơi có áp lực mua mạnh khi giá quay lại.
+      </p>
+      
+      <!-- Hình 1 -->
+      <div class="image-container">
+        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mjlppscb-le1cne/1767348056121_cpz60q_Gemini_Generated_Image_86rwih86rwih86rw.png" alt="UPU Pattern Diagram">
+        <p class="image-caption">Hình 1: Cấu trúc UPU Pattern - Up-Pause-Up</p>
+      </div>
+    </section>
+    
+    <!-- ==========================================
+         📈 CẤU TRÚC 3 PHASES
+         ========================================== -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">📈</span>
+        Cấu Trúc 3 Phases
+      </h2>
+      
+      <div class="pattern-flow">
+        <div class="flow-phase">
+          <div class="flow-icon">📈</div>
+          <div>
+            <div class="flow-label">UP (Phase 1)</div>
+            <div class="flow-desc">Giá tăng mạnh, Volume cao</div>
+          </div>
+        </div>
+        
+        <div class="flow-arrow">→</div>
+        
+        <div class="flow-phase pause">
+          <div class="flow-icon">⏸️</div>
+          <div>
+            <div class="flow-label">PAUSE (Phase 2)</div>
+            <div class="flow-desc">Tích lũy 1-5 nến → TẠO LFZ</div>
+          </div>
+        </div>
+        
+        <div class="flow-arrow">→</div>
+        
+        <div class="flow-phase">
+          <div class="flow-icon">📈</div>
+          <div>
+            <div class="flow-label">UP (Phase 3)</div>
+            <div class="flow-desc">Tiếp tục tăng, Volume tăng</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="highlight-box info">
+        <div class="highlight-title" style="color: var(--color-cyan);">💡 Điểm Mấu Chốt</div>
+        <p>
+          Vùng <strong style="color: var(--color-gold);">PAUSE</strong> (Phase 2) chính là nơi hình thành <strong style="color: var(--color-green);">LFZ (Low Frequency Zone)</strong> - vùng mua tiềm năng. Khi giá quay lại test vùng này, đây là cơ hội để vào lệnh LONG với xác suất thành công cao.
+        </p>
+      </div>
+      
+      <!-- Hình 2 -->
+      <div class="image-container">
+        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mjlppscb-le1cne/1767348149585_h0lrgw_Gemini_Generated_Image_7y8n2c7y8n2c7y8n.png" alt="LFZ Formation">
+        <p class="image-caption">Hình 2: LFZ hình thành tại vùng PAUSE</p>
+      </div>
+    </section>
+    
+    <!-- ==========================================
+         ⚖️ PHÂN LOẠI: UPU VS DPD
+         ========================================== -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">⚖️</span>
+        Phân Loại: UPU vs DPD
+      </h2>
+      
+      <p>
+        UPU thuộc nhóm <strong style="color: var(--color-cyan);">CONTINUATION</strong> (Tiếp diễn) - nghĩa là xu hướng sẽ tiếp tục theo hướng ban đầu sau khi hoàn thành pattern.
+      </p>
+      
+      <div class="compare-grid">
+        <div class="compare-card upu">
+          <div class="compare-title">🟢 UPU - Continuation Tăng</div>
+          <ul class="compare-list">
+            <li>Xu hướng TĂNG tiếp tục</li>
+            <li>Tạo ra LFZ (Vùng Mua)</li>
+            <li>Entry: LONG khi retest</li>
+            <li>Signal: BULLISH</li>
+          </ul>
+        </div>
+        
+        <div class="compare-card dpd">
+          <div class="compare-title">🔴 DPD - Continuation Giảm</div>
+          <ul class="compare-list">
+            <li>Xu hướng GIẢM tiếp tục</li>
+            <li>Tạo ra HFZ (Vùng Bán)</li>
+            <li>Entry: SHORT khi retest</li>
+            <li>Signal: BEARISH</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    
+    <!-- ==========================================
+         📊 THỐNG KÊ HIỆU SUẤT
+         ========================================== -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">📊</span>
+        Thống Kê Hiệu Suất
+      </h2>
+      
+      <div class="stats-grid">
+        <div class="stat-card highlight">
+          <div class="stat-value">71%</div>
+          <div class="stat-label">Win Rate</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">1:2.8</div>
+          <div class="stat-label">Risk:Reward</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">4H, 1D</div>
+          <div class="stat-label">Best TF</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">LONG</div>
+          <div class="stat-label">Entry Type</div>
+        </div>
+      </div>
+      
+      <div class="highlight-box purple">
+        <div class="highlight-title" style="color: var(--color-purple);">📊 Ý Nghĩa Thống Kê</div>
+        <p>
+          <strong style="color: var(--color-green);">Win Rate 71%</strong> có nghĩa cứ 10 lệnh UPU đúng chuẩn, bạn có thể thắng khoảng 7 lệnh. <strong style="color: var(--color-cyan);">R:R 1:2.8</strong> có nghĩa với mỗi 1 đồng rủi ro, bạn có thể kiếm được 2.8 đồng lợi nhuận.
+        </p>
+      </div>
+      
+      <!-- Hình 3 -->
+      <div class="image-container">
+        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mjlppscb-le1cne/1767348194646_p6tyer_Gemini_Generated_Image_ejvg2yejvg2yejvg.png" alt="UPU Statistics">
+        <p class="image-caption">Hình 3: Thống kê hiệu suất UPU Pattern</p>
+      </div>
+    </section>
+    
+    <!-- ==========================================
+         🎓 TẠI SAO UPU HIỆU QUẢ?
+         ========================================== -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">🎓</span>
+        Tại Sao UPU Hiệu Quả?
+      </h2>
+      
+      <p>
+        UPU hoạt động dựa trên <strong style="color: var(--color-gold);">hành vi Smart Money</strong>:
+      </p>
+      
+      <div class="highlight-box default">
+        <div class="highlight-title" style="color: var(--color-gold);">🧠 Logic Smart Money</div>
+        <ul class="objective-list" style="margin-top: var(--space-sm);">
+          <li>
+            <span class="check">1</span>
+            <strong>Phase 1 (UP):</strong> Smart Money bắt đầu mua, tạo xu hướng tăng ban đầu
+          </li>
+          <li>
+            <span class="check">2</span>
+            <strong>Phase 2 (PAUSE):</strong> Họ tiếp tục tích lũy âm thầm, không đẩy giá lên để tránh mua giá cao
+          </li>
+          <li>
+            <span class="check">3</span>
+            <strong>Phase 3 (UP):</strong> Sau khi tích lũy đủ, họ tiếp tục đẩy giá lên cao hơn
+          </li>
+        </ul>
+      </div>
+      
+      <p>
+        Khi giá quay lại test vùng PAUSE (LFZ), các lệnh mua chưa được khớp từ Smart Money vẫn còn đó. Đây chính là lý do LFZ có <strong style="color: var(--color-green);">xác suất bounce cao</strong>.
+      </p>
+      
+      <div class="highlight-box success">
+        <div class="highlight-title" style="color: var(--color-green);">🟢 LFZ - Low Frequency Zone</div>
+        <ul class="objective-list" style="margin-top: var(--space-sm);">
+          <li>
+            <span class="check">✓</span>
+            <strong>Ý nghĩa:</strong> Vùng có áp lực MUA mạnh từ Smart Money
+          </li>
+          <li>
+            <span class="check">✓</span>
+            <strong>Vị trí:</strong> Hình thành tại vùng PAUSE của UPU
+          </li>
+          <li>
+            <span class="check">✓</span>
+            <strong>Chiến lược:</strong> Đợi giá quay lại → Vào lệnh LONG
+          </li>
+          <li>
+            <span class="check">✓</span>
+            <strong>Stop Loss:</strong> Đặt dưới LFZ
+          </li>
+        </ul>
+      </div>
+      
+      <!-- Hình 4 -->
+      <div class="image-container">
+        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mjlppscb-le1cne/1767348231066_ftezw7_Gemini_Generated_Image_hy5mxjhy5mxjhy5m.png" alt="LFZ Entry Strategy">
+        <p class="image-caption">Hình 4: Chiến lược Entry tại LFZ</p>
+      </div>
+    </section>
+    
+    <!-- ==========================================
+         📝 TÓM TẮT
+         ========================================== -->
+    <div class="summary-box">
+      <h3 class="summary-title">📝 Tóm Tắt Bài Học</h3>
+      <ul class="summary-list">
+        <li>
+          <span class="number">1</span>
+          <span><strong>UPU = Up-Pause-Up</strong> (Tăng-Nghỉ-Tăng)</span>
+        </li>
+        <li>
+          <span class="number">2</span>
+          <span><strong>Loại:</strong> Continuation - Xu hướng tăng tiếp tục</span>
+        </li>
+        <li>
+          <span class="number">3</span>
+          <span><strong>Tạo ra:</strong> LFZ (Low Frequency Zone) - Vùng Mua</span>
+        </li>
+        <li>
+          <span class="number">4</span>
+          <span><strong>Win Rate:</strong> 71% - Cao nhất trong 6 công thức GEM</span>
+        </li>
+        <li>
+          <span class="number">5</span>
+          <span><strong>Risk:Reward:</strong> 1:2.8</span>
+        </li>
+        <li>
+          <span class="number">6</span>
+          <span><strong>Chiến lược:</strong> Đợi giá retest LFZ → Entry LONG</span>
+        </li>
+      </ul>
+    </div>
+    
+    <!-- ==========================================
+         ❓ QUIZ SECTION
+         ========================================== -->
+    <section class="quiz-section">
+      <h2 class="quiz-title">
+        <span>❓</span>
+        Kiểm Tra Kiến Thức
+      </h2>
+      
+      <!-- Câu 1 -->
+      <div class="quiz-question" id="q1">
+        <span class="question-number">Câu 1/2</span>
+        <p class="question-text">UPU thuộc loại pattern nào?</p>
+        <div class="options">
+          <label class="option" data-correct="false">
+            <input type="radio" name="q1" value="a">
+            <span class="radio-custom"></span>
+            <span>A. Reversal (Đảo chiều)</span>
+          </label>
+          <label class="option" data-correct="true">
+            <input type="radio" name="q1" value="b">
+            <span class="radio-custom"></span>
+            <span>B. Continuation (Tiếp diễn)</span>
+          </label>
+          <label class="option" data-correct="false">
+            <input type="radio" name="q1" value="c">
+            <span class="radio-custom"></span>
+            <span>C. Candlestick Pattern</span>
+          </label>
+          <label class="option" data-correct="false">
+            <input type="radio" name="q1" value="d">
+            <span class="radio-custom"></span>
+            <span>D. Chart Pattern truyền thống</span>
+          </label>
+        </div>
+        <div class="feedback" id="fb1"></div>
+      </div>
+      
+      <!-- Câu 2 -->
+      <div class="quiz-question" id="q2">
+        <span class="question-number">Câu 2/2</span>
+        <p class="question-text">UPU pattern tạo ra loại zone nào?</p>
+        <div class="options">
+          <label class="option" data-correct="false">
+            <input type="radio" name="q2" value="a">
+            <span class="radio-custom"></span>
+            <span>A. HFZ (High Frequency Zone) - Vùng Bán</span>
+          </label>
+          <label class="option" data-correct="true">
+            <input type="radio" name="q2" value="b">
+            <span class="radio-custom"></span>
+            <span>B. LFZ (Low Frequency Zone) - Vùng Mua</span>
+          </label>
+          <label class="option" data-correct="false">
+            <input type="radio" name="q2" value="c">
+            <span class="radio-custom"></span>
+            <span>C. Support Zone truyền thống</span>
+          </label>
+          <label class="option" data-correct="false">
+            <input type="radio" name="q2" value="d">
+            <span class="radio-custom"></span>
+            <span>D. Resistance Zone</span>
+          </label>
+        </div>
+        <div class="feedback" id="fb2"></div>
+      </div>
+    </section>
+    
+    <!-- ==========================================
+         🦶 FOOTER - gemral.com
+         ========================================== -->
+    <footer class="lesson-footer">
+      <div class="footer-logo">GEM Trading Academy</div>
+      <div class="footer-link">
+        <a href="https://gemral.com" target="_blank">gemral.com</a>
+      </div>
+    </footer>
+    
+  </div>
+  
+  <!-- ==========================================
+       📜 QUIZ JAVASCRIPT
+       ========================================== -->
+  <script>
+    const quizData = {
+      q1: {
+        correct: 'b',
+        explanation: {
+          correct: '✅ Chính xác! UPU (Up-Pause-Up) thuộc loại CONTINUATION vì Phase 3 tiếp tục di chuyển cùng hướng với Phase 1 (đều là UP).',
+          incorrect: '❌ Sai rồi! UPU thuộc loại CONTINUATION (Tiếp diễn) vì xu hướng tăng sẽ tiếp tục sau giai đoạn Pause. Reversal patterns là UPD và DPU.'
+        }
+      },
+      q2: {
+        correct: 'b',
+        explanation: {
+          correct: '✅ Chính xác! UPU tạo ra LFZ (Low Frequency Zone) - Vùng Mua. Trong giai đoạn Pause, Smart Money đang âm thầm tích lũy lệnh mua.',
+          incorrect: '❌ Sai rồi! UPU tạo ra LFZ (Vùng Mua) vì đây là vùng Smart Money đã tích lũy để đẩy giá lên tiếp. HFZ là vùng bán, được tạo bởi DPD và UPD.'
+        }
+      }
+    };
+    
+    document.querySelectorAll('.option').forEach(option => {
+      option.addEventListener('click', function() {
+        const questionDiv = this.closest('.quiz-question');
+        const questionId = questionDiv.id;
+        const feedbackDiv = document.getElementById('fb' + questionId.slice(1));
+        const isCorrect = this.dataset.correct === 'true';
+        
+        questionDiv.querySelectorAll('.option').forEach(opt => {
+          opt.classList.remove('correct', 'incorrect');
+        });
+        
+        if (isCorrect) {
+          this.classList.add('correct');
+          feedbackDiv.className = 'feedback correct';
+          feedbackDiv.textContent = quizData[questionId].explanation.correct;
+        } else {
+          this.classList.add('incorrect');
+          questionDiv.querySelector('.option[data-correct="true"]').classList.add('correct');
+          feedbackDiv.className = 'feedback incorrect';
+          feedbackDiv.textContent = quizData[questionId].explanation.incorrect;
+        }
+        
+        this.querySelector('input').checked = true;
+      });
+    });
+  </script>
+</body>
+</html>

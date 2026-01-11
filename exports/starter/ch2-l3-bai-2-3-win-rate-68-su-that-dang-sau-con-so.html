@@ -1,0 +1,1731 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bài 2.3: Win Rate 68% - Sự Thật Đằng Sau Con Số | GEM Trading Academy</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Noto+Sans+Display:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================
+       GEM DESIGN SYSTEM - V5.4 DESIGN TOKENS
+       ========================================== */
+
+    :root {
+      --color-navy: #112250;
+      --color-navy-dark: #0A0F1A;
+      --color-navy-light: #1a3a6e;
+      --color-gold: #FFBD59;
+      --color-gold-dark: #E5A84D;
+      --color-burgundy: #9C0612;
+      --color-cyan: #00F0FF;
+      --color-purple: #6A5BFF;
+      --color-green: #10B981;
+      --color-red: #EF4444;
+      --color-white: #FFFFFF;
+
+      --color-text: #E8E8E8;
+      --color-text-secondary: rgba(255, 255, 255, 0.7);
+      --color-text-muted: rgba(255, 255, 255, 0.5);
+
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.06);
+      --bg-glass: rgba(255, 255, 255, 0.03);
+      --color-bg-dark: #0A0F1A;
+
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --border-gold: rgba(255, 189, 89, 0.3);
+      --border-cyan: rgba(0, 240, 255, 0.3);
+      --border-green: rgba(16, 185, 129, 0.3);
+      --border-purple: rgba(106, 91, 255, 0.3);
+      --glass-border: rgba(255, 255, 255, 0.08);
+
+      --text-padding: 16px;
+      --container-padding: 0;
+
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 12px;
+      --space-lg: 16px;
+      --space-xl: 20px;
+      --space-2xl: 24px;
+      --space-3xl: 32px;
+
+      --card-padding: 12px;
+      --table-padding: 6px;
+
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+      --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.3);
+      --shadow-glow-gold: 0 0 15px rgba(255, 189, 89, 0.3);
+      --shadow-glow-cyan: 0 0 15px rgba(0, 240, 255, 0.3);
+      --shadow-glow-green: 0 0 15px rgba(16, 185, 129, 0.3);
+      --shadow-glow-purple: 0 0 15px rgba(106, 91, 255, 0.3);
+
+      --glass-blur: blur(40px);
+
+      --font-heading: 'Montserrat', sans-serif;
+      --font-body: 'Noto Sans Display', sans-serif;
+      --text-xs: 0.75rem;
+      --text-sm: 0.85rem;
+      --text-base: 0.95rem;
+      --text-lg: 1.1rem;
+      --text-xl: 1.25rem;
+      --text-2xl: 1.5rem;
+    }
+
+    @media (min-width: 600px) {
+      :root {
+        --text-padding: 0;
+        --container-padding: 1.5rem;
+        --card-padding: 16px;
+        --table-padding: 12px;
+
+        --space-sm: 10px;
+        --space-md: 16px;
+        --space-lg: 20px;
+        --space-xl: 24px;
+        --space-2xl: 32px;
+        --space-3xl: 48px;
+
+        --text-xs: 0.8rem;
+        --text-sm: 0.9rem;
+        --text-base: 1rem;
+        --text-lg: 1.15rem;
+        --text-xl: 1.3rem;
+        --text-2xl: 1.6rem;
+      }
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--color-bg-dark);
+      color: var(--color-text);
+      line-height: 1.6;
+      min-height: 100vh;
+      font-size: var(--text-base);
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        linear-gradient(180deg,
+          rgba(10, 15, 26, 1) 0%,
+          rgba(17, 34, 80, 0.8) 30%,
+          rgba(17, 34, 80, 0.8) 70%,
+          rgba(10, 15, 26, 1) 100%
+        ),
+        radial-gradient(ellipse 600px 600px at 20% 20%,
+          rgba(255, 189, 89, 0.08), transparent 70%),
+        radial-gradient(ellipse 500px 500px at 80% 80%,
+          rgba(0, 240, 255, 0.06), transparent 70%),
+        radial-gradient(ellipse 400px 400px at 50% 50%,
+          rgba(106, 91, 255, 0.04), transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: var(--container-padding);
+    }
+
+    /* ========== LESSON HEADER ========== */
+    .lesson-header {
+      text-align: center;
+      padding: var(--space-lg) var(--text-padding);
+      background: var(--bg-card);
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid var(--border-subtle);
+      backdrop-filter: var(--glass-blur);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 1px;
+    }
+
+    .lesson-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg,
+        var(--color-gold),
+        var(--color-cyan),
+        var(--color-gold)
+      );
+    }
+
+    @media (min-width: 600px) {
+      .lesson-header {
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-subtle);
+        padding: var(--space-xl) var(--card-padding);
+        margin-bottom: var(--space-lg);
+      }
+    }
+
+    .lesson-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));
+      color: var(--color-navy);
+      padding: var(--space-xs) var(--space-md);
+      border-radius: 20px;
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--space-sm);
+    }
+
+    .lesson-title {
+      font-family: var(--font-heading);
+      font-size: var(--text-2xl);
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--color-gold), var(--color-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: var(--space-sm);
+      line-height: 1.3;
+    }
+
+    .lesson-subtitle {
+      color: var(--color-text-secondary);
+      font-size: var(--text-sm);
+    }
+
+    /* ========== SECTION ========== */
+    .section {
+      background: var(--bg-glass);
+      border: none;
+      border-bottom: 1px solid var(--glass-border);
+      border-radius: 0;
+      padding: var(--card-padding) 0;
+      margin-bottom: 1px;
+      backdrop-filter: var(--glass-blur);
+    }
+
+    @media (min-width: 600px) {
+      .section {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-lg);
+        padding: var(--card-padding);
+        margin-bottom: var(--space-lg);
+      }
+    }
+
+    .section > p,
+    .section > h2,
+    .section > h3,
+    .section > ul,
+    .section > ol {
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+    }
+
+    @media (min-width: 600px) {
+      .section > p,
+      .section > h2,
+      .section > h3,
+      .section > ul,
+      .section > ol {
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+
+    .section-title {
+      font-family: var(--font-heading);
+      font-size: var(--text-xl);
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .section-title .icon {
+      font-size: 1.2em;
+    }
+
+    .section p {
+      margin-bottom: var(--space-md);
+      line-height: 1.7;
+    }
+
+    .section p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* ========== HIGHLIGHT BOX ========== */
+    .highlight-box {
+      padding: var(--card-padding);
+      padding-left: calc(var(--text-padding) - 4px);
+      padding-right: var(--text-padding);
+      border-radius: 0;
+      margin: var(--space-md) 0;
+      border: none;
+      border-left: 4px solid var(--color-gold);
+      background: linear-gradient(135deg,
+        rgba(255, 189, 89, 0.1),
+        rgba(0, 240, 255, 0.05)
+      );
+    }
+
+    @media (min-width: 600px) {
+      .highlight-box {
+        border: 1px solid var(--border-gold);
+        border-left: 4px solid var(--color-gold);
+        border-radius: var(--radius-md);
+        padding: var(--card-padding);
+      }
+    }
+
+    .highlight-box.cyan {
+      border-left-color: var(--color-cyan);
+      background: linear-gradient(135deg,
+        rgba(0, 240, 255, 0.1),
+        rgba(106, 91, 255, 0.05)
+      );
+    }
+
+    @media (min-width: 600px) {
+      .highlight-box.cyan {
+        border-color: var(--border-cyan);
+        border-left-color: var(--color-cyan);
+      }
+    }
+
+    .highlight-box.green {
+      border-left-color: var(--color-green);
+      background: linear-gradient(135deg,
+        rgba(16, 185, 129, 0.1),
+        rgba(0, 240, 255, 0.05)
+      );
+    }
+
+    @media (min-width: 600px) {
+      .highlight-box.green {
+        border-color: var(--border-green);
+        border-left-color: var(--color-green);
+      }
+    }
+
+    .highlight-box.purple {
+      border-left-color: var(--color-purple);
+      background: linear-gradient(135deg,
+        rgba(106, 91, 255, 0.1),
+        rgba(0, 240, 255, 0.05)
+      );
+    }
+
+    @media (min-width: 600px) {
+      .highlight-box.purple {
+        border-color: var(--border-purple);
+        border-left-color: var(--color-purple);
+      }
+    }
+
+    .highlight-box.red {
+      border-left-color: var(--color-red);
+      background: linear-gradient(135deg,
+        rgba(239, 68, 68, 0.1),
+        rgba(255, 189, 89, 0.05)
+      );
+    }
+
+    @media (min-width: 600px) {
+      .highlight-box.red {
+        border-color: rgba(239, 68, 68, 0.3);
+        border-left-color: var(--color-red);
+      }
+    }
+
+    .highlight-box p {
+      margin: 0;
+      font-size: var(--text-sm);
+    }
+
+    .highlight-box strong {
+      color: var(--color-gold);
+    }
+
+    .highlight-box.cyan strong {
+      color: var(--color-cyan);
+    }
+
+    .highlight-box.green strong {
+      color: var(--color-green);
+    }
+
+    .highlight-box.purple strong {
+      color: var(--color-purple);
+    }
+
+    .highlight-box.red strong {
+      color: var(--color-red);
+    }
+
+    /* ========== OBJECTIVE LIST ========== */
+    .objective-list {
+      list-style: none;
+      padding: 0;
+      margin: var(--space-md) 0;
+      background: var(--glass-border);
+    }
+
+    @media (min-width: 600px) {
+      .objective-list {
+        background: transparent;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-sm);
+      }
+    }
+
+    .objective-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      padding: var(--space-md) var(--text-padding);
+      background: var(--bg-glass);
+      border: none;
+      border-left: 4px solid var(--color-gold);
+      margin-bottom: 1px;
+      font-size: var(--text-sm);
+    }
+
+    @media (min-width: 600px) {
+      .objective-list li {
+        border: 1px solid var(--border-gold);
+        border-left: 4px solid var(--color-gold);
+        border-radius: var(--radius-sm);
+        padding: var(--space-md);
+        margin-bottom: 0;
+      }
+    }
+
+    .objective-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    .objective-list .bullet {
+      color: var(--color-gold);
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    /* ========== IMAGE PLACEHOLDER ========== */
+    .image-container {
+      margin: var(--space-md) 0;
+      text-align: center;
+    }
+
+    .image-placeholder {
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg,
+        rgba(255, 189, 89, 0.1),
+        rgba(0, 240, 255, 0.1)
+      );
+      border: 2px dashed var(--border-gold);
+      border-radius: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-muted);
+      font-size: var(--text-sm);
+      text-align: center;
+      padding: var(--space-md);
+    }
+
+    @media (min-width: 600px) {
+      .image-placeholder {
+        border-radius: var(--radius-md);
+        height: 250px;
+      }
+    }
+
+    .image-caption {
+      margin-top: var(--space-sm);
+      padding: 0 var(--text-padding);
+      color: var(--color-text-muted);
+      font-size: var(--text-xs);
+      font-style: italic;
+      text-align: center;
+    }
+
+    @media (min-width: 600px) {
+      .image-caption {
+        padding: 0;
+        font-size: var(--text-sm);
+      }
+    }
+
+    /* ========== STATS GRID ========== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      margin: var(--space-md) 0;
+      background: var(--glass-border);
+    }
+
+    @media (min-width: 600px) {
+      .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: var(--space-md);
+        background: transparent;
+      }
+    }
+
+    .stat-card {
+      background: var(--bg-glass);
+      border: none;
+      border-radius: 0;
+      padding: var(--space-lg) var(--space-md);
+      text-align: center;
+    }
+
+    @media (min-width: 600px) {
+      .stat-card {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+        padding: var(--card-padding);
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-glow-cyan);
+      }
+    }
+
+    .stat-icon {
+      font-size: 1.8rem;
+      margin-bottom: var(--space-xs);
+    }
+
+    .stat-value {
+      font-family: var(--font-heading);
+      font-size: var(--text-lg);
+      font-weight: 800;
+      color: var(--color-cyan);
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+      margin-bottom: var(--space-xs);
+    }
+
+    .stat-label {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-card.green .stat-value {
+      color: var(--color-green);
+      text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+    }
+
+    .stat-card.gold .stat-value {
+      color: var(--color-gold);
+      text-shadow: 0 0 10px rgba(255, 189, 89, 0.5);
+    }
+
+    .stat-card.purple .stat-value {
+      color: var(--color-purple);
+      text-shadow: 0 0 10px rgba(106, 91, 255, 0.5);
+    }
+
+    /* ========== PATTERN CARD ========== */
+    .pattern-card {
+      background: var(--bg-glass);
+      border: none;
+      border-left: 4px solid var(--color-purple);
+      border-radius: 0;
+      padding: var(--card-padding) var(--text-padding);
+      margin-bottom: 1px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    @media (min-width: 600px) {
+      .pattern-card {
+        border: 1px solid var(--border-purple);
+        border-left: 4px solid var(--color-purple);
+        border-radius: var(--radius-md);
+        padding: var(--card-padding);
+        margin-bottom: var(--space-sm);
+      }
+    }
+
+    .pattern-info {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .pattern-icon {
+      font-size: 1.3rem;
+    }
+
+    .pattern-name {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: var(--text-sm);
+      color: var(--color-white);
+    }
+
+    .pattern-winrate {
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: var(--text-base);
+      color: var(--color-green);
+      text-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+    }
+
+    .pattern-star {
+      color: var(--color-gold);
+      margin-left: var(--space-xs);
+    }
+
+    .patterns-container {
+      background: var(--glass-border);
+      margin: var(--space-md) 0;
+    }
+
+    @media (min-width: 600px) {
+      .patterns-container {
+        background: transparent;
+      }
+    }
+
+    /* ========== PROMISE TABLE ========== */
+    .promise-table {
+      margin: var(--space-md) 0;
+    }
+
+    .promise-row {
+      display: flex;
+      gap: 1px;
+      background: var(--glass-border);
+    }
+
+    @media (min-width: 600px) {
+      .promise-row {
+        gap: var(--space-md);
+        background: transparent;
+      }
+    }
+
+    .promise-col {
+      flex: 1;
+      padding: var(--card-padding) var(--text-padding);
+      background: var(--bg-glass);
+    }
+
+    @media (min-width: 600px) {
+      .promise-col {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+        padding: var(--card-padding);
+      }
+    }
+
+    .promise-col.dont {
+      border-left: 4px solid var(--color-red);
+    }
+
+    .promise-col.do {
+      border-left: 4px solid var(--color-green);
+    }
+
+    @media (min-width: 600px) {
+      .promise-col.dont {
+        border-color: rgba(239, 68, 68, 0.3);
+        border-left: 4px solid var(--color-red);
+      }
+
+      .promise-col.do {
+        border-color: var(--border-green);
+        border-left: 4px solid var(--color-green);
+      }
+    }
+
+    .promise-title {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: var(--text-base);
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .promise-col.dont .promise-title {
+      color: var(--color-red);
+    }
+
+    .promise-col.do .promise-title {
+      color: var(--color-green);
+    }
+
+    .promise-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .promise-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-sm);
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+    }
+
+    .promise-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    .promise-list .icon {
+      flex-shrink: 0;
+    }
+
+    .promise-col.dont .promise-list .icon {
+      color: var(--color-red);
+    }
+
+    .promise-col.do .promise-list .icon {
+      color: var(--color-green);
+    }
+
+    /* ========== DISCLAIMER BOX ========== */
+    .disclaimer-box {
+      background: linear-gradient(135deg,
+        rgba(239, 68, 68, 0.1),
+        rgba(255, 189, 89, 0.05)
+      );
+      border: none;
+      border-left: 4px solid var(--color-red);
+      border-radius: 0;
+      padding: var(--card-padding) var(--text-padding);
+      margin: var(--space-lg) 0;
+    }
+
+    @media (min-width: 600px) {
+      .disclaimer-box {
+        border: 2px solid var(--color-red);
+        border-radius: var(--radius-lg);
+        padding: var(--card-padding);
+      }
+    }
+
+    .disclaimer-title {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: var(--text-base);
+      color: var(--color-red);
+      margin-bottom: var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .disclaimer-content {
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+      line-height: 1.7;
+    }
+
+    /* ========== SUMMARY BOX ========== */
+    .summary-box {
+      background: linear-gradient(135deg,
+        rgba(255, 189, 89, 0.1),
+        rgba(0, 240, 255, 0.05)
+      );
+      border: none;
+      border-left: 4px solid var(--color-gold);
+      border-radius: 0;
+      padding: var(--card-padding) 0;
+      margin: var(--space-lg) 0;
+    }
+
+    @media (min-width: 600px) {
+      .summary-box {
+        border: 2px solid var(--color-gold);
+        border-radius: var(--radius-lg);
+        padding: var(--card-padding);
+      }
+    }
+
+    .summary-title {
+      font-family: var(--font-heading);
+      font-size: var(--text-lg);
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: 0 var(--text-padding);
+    }
+
+    @media (min-width: 600px) {
+      .summary-title {
+        padding: 0;
+      }
+    }
+
+    .key-points {
+      padding: 0 var(--text-padding);
+    }
+
+    @media (min-width: 600px) {
+      .key-points {
+        padding: 0;
+      }
+    }
+
+    .key-point {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-sm);
+      font-size: var(--text-sm);
+      line-height: 1.5;
+    }
+
+    .key-point:last-child {
+      margin-bottom: 0;
+    }
+
+    .key-point .number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));
+      color: var(--color-navy);
+      border-radius: 50%;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: var(--text-xs);
+      flex-shrink: 0;
+    }
+
+    /* ========== QUIZ SECTION ========== */
+    .quiz-section {
+      background: linear-gradient(135deg,
+        rgba(106, 91, 255, 0.15),
+        rgba(0, 240, 255, 0.05)
+      );
+      border: none;
+      border-left: 4px solid var(--color-purple);
+      border-radius: 0;
+      padding: var(--card-padding) 0;
+      margin: var(--space-lg) 0;
+    }
+
+    @media (min-width: 600px) {
+      .quiz-section {
+        border: 2px solid var(--color-purple);
+        border-radius: var(--radius-lg);
+        padding: var(--card-padding);
+      }
+    }
+
+    .quiz-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-lg);
+      padding: 0 var(--text-padding);
+    }
+
+    @media (min-width: 600px) {
+      .quiz-header {
+        padding: 0;
+      }
+    }
+
+    .quiz-icon {
+      font-size: 1.3rem;
+    }
+
+    .quiz-title {
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: var(--text-lg);
+      color: var(--color-purple);
+      margin: 0;
+    }
+
+    .quiz-question {
+      background: var(--bg-glass);
+      border: none;
+      border-radius: 0;
+      border-bottom: 1px solid var(--glass-border);
+      padding: var(--card-padding) var(--text-padding);
+      margin-bottom: 1px;
+    }
+
+    @media (min-width: 600px) {
+      .quiz-question {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+        padding: var(--card-padding);
+        margin-bottom: var(--space-lg);
+      }
+    }
+
+    .question-header {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+    }
+
+    .question-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
+      background: linear-gradient(135deg, var(--color-purple), #8B5CF6);
+      color: white;
+      border-radius: 50%;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: var(--text-xs);
+    }
+
+    @media (min-width: 600px) {
+      .question-number {
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        font-size: var(--text-sm);
+      }
+    }
+
+    .question-text {
+      font-weight: 600;
+      color: var(--color-white);
+      font-size: var(--text-sm);
+      line-height: 1.5;
+    }
+
+    @media (min-width: 600px) {
+      .question-text {
+        font-size: var(--text-base);
+      }
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      background: var(--glass-border);
+      margin: 0 calc(-1 * var(--text-padding));
+    }
+
+    @media (min-width: 600px) {
+      .quiz-options {
+        gap: var(--space-sm);
+        background: transparent;
+        margin: 0;
+      }
+    }
+
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.02);
+      border: none;
+      border-radius: 0;
+      padding: var(--space-md) var(--text-padding);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: var(--text-sm);
+    }
+
+    @media (min-width: 600px) {
+      .quiz-option {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-sm);
+        padding: var(--space-md);
+        font-size: var(--text-base);
+      }
+
+      .quiz-option:hover:not(.disabled):not(.correct):not(.incorrect) {
+        background: rgba(0, 240, 255, 0.1);
+        border-color: var(--color-cyan);
+      }
+    }
+
+    .quiz-option.disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .quiz-option.correct {
+      background: rgba(16, 185, 129, 0.2);
+      border-left: 4px solid var(--color-green);
+      pointer-events: none;
+    }
+
+    @media (min-width: 600px) {
+      .quiz-option.correct {
+        border: 1px solid var(--color-green);
+        border-left: 4px solid var(--color-green);
+      }
+    }
+
+    .quiz-option.incorrect {
+      background: rgba(239, 68, 68, 0.2);
+      border-left: 4px solid var(--color-red);
+      pointer-events: none;
+    }
+
+    @media (min-width: 600px) {
+      .quiz-option.incorrect {
+        border: 1px solid var(--color-red);
+        border-left: 4px solid var(--color-red);
+      }
+    }
+
+    .quiz-option.show-correct {
+      border-left: 4px solid var(--color-green);
+    }
+
+    @media (min-width: 600px) {
+      .quiz-option.show-correct {
+        border-color: var(--color-green);
+      }
+    }
+
+    .option-letter {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
+      background: rgba(106, 91, 255, 0.2);
+      color: var(--color-purple);
+      border-radius: 50%;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: var(--text-xs);
+    }
+
+    @media (min-width: 600px) {
+      .option-letter {
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        font-size: var(--text-sm);
+      }
+    }
+
+    .option-text {
+      flex: 1;
+      color: var(--color-text);
+    }
+
+    .option-result {
+      font-weight: 700;
+      font-size: var(--text-xs);
+      min-width: 50px;
+      text-align: right;
+    }
+
+    @media (min-width: 600px) {
+      .option-result {
+        font-size: var(--text-sm);
+        min-width: 60px;
+      }
+    }
+
+    .quiz-option.correct .option-result {
+      color: var(--color-green);
+    }
+
+    .quiz-option.incorrect .option-result {
+      color: var(--color-red);
+    }
+
+    .quiz-explanation {
+      display: none;
+      margin-top: var(--space-md);
+      padding: var(--space-md);
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 0;
+      font-size: var(--text-xs);
+      line-height: 1.6;
+      color: var(--color-text-muted);
+    }
+
+    @media (min-width: 600px) {
+      .quiz-explanation {
+        border-radius: var(--radius-sm);
+        font-size: var(--text-sm);
+      }
+    }
+
+    .quiz-explanation.show {
+      display: block;
+    }
+
+    .quiz-explanation.correct {
+      border-left: 3px solid var(--color-green);
+    }
+
+    .quiz-explanation.incorrect {
+      border-left: 3px solid var(--color-red);
+    }
+
+    .retake-btn {
+      display: none;
+      margin-top: var(--space-lg);
+      margin-left: var(--text-padding);
+      margin-right: var(--text-padding);
+      padding: var(--space-sm) var(--space-lg);
+      background: linear-gradient(135deg, var(--color-purple), #8B5CF6);
+      color: white;
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font-heading);
+      font-size: var(--text-sm);
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    @media (min-width: 600px) {
+      .retake-btn {
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      .retake-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(106, 91, 255, 0.4);
+      }
+    }
+
+    .retake-btn.show {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    /* ========== FOOTER ========== */
+    .lesson-footer {
+      text-align: center;
+      padding: var(--space-lg) var(--text-padding);
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-subtle);
+      margin-top: 0;
+    }
+
+    @media (min-width: 600px) {
+      .lesson-footer {
+        background: transparent;
+        border-top: none;
+        margin-top: var(--space-lg);
+        padding: var(--space-lg) 0;
+      }
+    }
+
+    .footer-brand {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      color: var(--color-gold);
+      font-size: var(--text-sm);
+    }
+
+    .footer-url {
+      color: var(--color-text-muted);
+      font-size: var(--text-xs);
+      margin-top: var(--space-xs);
+    }
+
+    .footer-url a {
+      color: var(--color-cyan);
+      text-decoration: none;
+    }
+
+    .footer-url a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- ============================================
+         LESSON HEADER
+         ============================================ -->
+    <header class="lesson-header">
+      <span class="lesson-badge">STARTER - Bài 2.3</span>
+      <h1 class="lesson-title">Win Rate 68% - Sự Thật Đằng Sau Con Số</h1>
+      <p class="lesson-subtitle">Transparency về kết quả thực tế và những gì bạn có thể kỳ vọng</p>
+    </header>
+
+    <!-- ============================================
+         SECTION: MỤC TIÊU BÀI HỌC
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">🎯</span>
+        Mục Tiêu Bài Học
+      </h2>
+
+      <ul class="objective-list">
+        <li>
+          <span class="bullet">✓</span>
+          <span>Hiểu nguồn gốc của con số 68% win rate và cách nó được tính toán</span>
+        </li>
+        <li>
+          <span class="bullet">✓</span>
+          <span>Biết được điều kiện cần thiết để đạt được kết quả tương tự</span>
+        </li>
+        <li>
+          <span class="bullet">✓</span>
+          <span>Hiểu rõ những gì GEM cam kết và không cam kết</span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ============================================
+         SECTION: CON SỐ 68% ĐẾN TỪ ĐÂU?
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">📊</span>
+        Con Số 68% Đến Từ Đâu?
+      </h2>
+
+      <p>Bạn có thể đã thấy nhiều "guru" trading tự xưng win rate 80%, 90%, thậm chí 99%. Và bạn cũng biết rằng phần lớn những con số đó là marketing không có cơ sở.</p>
+
+      <p>GEM khác biệt. Chúng tôi cung cấp dữ liệu <strong>có thể kiểm chứng</strong> từ backtest thực tế, với đầy đủ thông tin về điều kiện và giới hạn.</p>
+
+      <!-- Image placeholder -->
+      <div class="image-container">
+        <div class="image-placeholder">
+          📈 Hình 2.3-1: Backtest Results Infographic<br>
+          <small>Biểu đồ kết quả backtest 686 trades</small>
+        </div>
+        <p class="image-caption">Hình 1: Kết quả Backtest thực tế từ 686 trades</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">📊</div>
+          <div class="stat-value">686</div>
+          <div class="stat-label">Trades Tested</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-icon">📅</div>
+          <div class="stat-value">2023-2024</div>
+          <div class="stat-label">Thời Gian</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon">🎯</div>
+          <div class="stat-value">68%</div>
+          <div class="stat-label">Win Rate TB</div>
+        </div>
+        <div class="stat-card purple">
+          <div class="stat-icon">⚖️</div>
+          <div class="stat-value">1:2.5</div>
+          <div class="stat-label">Risk:Reward</div>
+        </div>
+      </div>
+
+      <div class="highlight-box cyan">
+        <p><strong>Chi tiết backtest:</strong> 686 trades được thực hiện trên BTC, ETH và top 20 altcoins, sử dụng timeframes 4H và 1D. Tất cả trades đều tuân theo đúng quy tắc của 6 công thức GEM Frequency.</p>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SECTION: BREAKDOWN THEO PATTERN
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">🔍</span>
+        Win Rate Theo Từng Pattern
+      </h2>
+
+      <p>Không phải pattern nào cũng có win rate giống nhau. Dưới đây là breakdown sơ bộ - chi tiết đầy đủ sẽ được giảng dạy trong khóa nâng cao.</p>
+
+      <!-- Image placeholder -->
+      <div class="image-container">
+        <div class="image-placeholder">
+          📊 Hình 2.3-2: Win Rate by Pattern (Blurred Details)<br>
+          <small>Biểu đồ win rate từng pattern với một số chi tiết bị mờ</small>
+        </div>
+        <p class="image-caption">Hình 2: Win Rate theo từng Pattern</p>
+      </div>
+
+      <div class="patterns-container">
+        <div class="pattern-card">
+          <div class="pattern-info">
+            <span class="pattern-icon">📉</span>
+            <span class="pattern-name">DPD - Down Pattern Down</span>
+          </div>
+          <div>
+            <span class="pattern-winrate">68%</span>
+            <span class="pattern-star">⭐</span>
+          </div>
+        </div>
+
+        <div class="pattern-card">
+          <div class="pattern-info">
+            <span class="pattern-icon">📈</span>
+            <span class="pattern-name">UPU - Up Pattern Up</span>
+          </div>
+          <div>
+            <span class="pattern-winrate">71%</span>
+            <span class="pattern-star">⭐⭐</span>
+          </div>
+        </div>
+
+        <div class="pattern-card">
+          <div class="pattern-info">
+            <span class="pattern-icon">🔄</span>
+            <span class="pattern-name">UPD - Up Pattern Down</span>
+          </div>
+          <div>
+            <span class="pattern-winrate">65%</span>
+          </div>
+        </div>
+
+        <div class="pattern-card">
+          <div class="pattern-info">
+            <span class="pattern-icon">🔃</span>
+            <span class="pattern-name">DPU - Down Pattern Up</span>
+          </div>
+          <div>
+            <span class="pattern-winrate">69%</span>
+            <span class="pattern-star">⭐</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="highlight-box purple">
+        <p><strong>Học chi tiết từng pattern:</strong> Cách xác định, điểm entry, stoploss, take profit cụ thể cho mỗi pattern sẽ được giảng dạy trong TIER 1 và TIER 2. Starter Course chỉ giới thiệu tổng quan.</p>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SECTION: ĐIỀU KIỆN ĐẠT ĐƯỢC
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">⚙️</span>
+        Điều Kiện Để Đạt Được Win Rate Này
+      </h2>
+
+      <p>68% không phải là con số tự động bạn sẽ đạt được chỉ vì học GEM. Đây là win rate đạt được khi <strong>áp dụng ĐÚNG phương pháp</strong>, với các điều kiện cụ thể:</p>
+
+      <ul class="objective-list">
+        <li>
+          <span class="bullet">⚠️</span>
+          <span><strong>Học đầy đủ 6 công thức:</strong> Không thể cherry-pick chỉ 1-2 công thức và kỳ vọng kết quả tương tự</span>
+        </li>
+        <li>
+          <span class="bullet">⚠️</span>
+          <span><strong>Kỷ luật tuân thủ quy tắc:</strong> Entry/Exit theo đúng điều kiện, không FOMO, không revenge trading</span>
+        </li>
+        <li>
+          <span class="bullet">⚠️</span>
+          <span><strong>Quản lý vốn đúng cách:</strong> Risk 1-2% mỗi trade, không all-in, có stoploss rõ ràng</span>
+        </li>
+        <li>
+          <span class="bullet">⚠️</span>
+          <span><strong>Kiên nhẫn chờ setup:</strong> Không ép trade khi chưa có setup, chấp nhận có ngày không có cơ hội</span>
+        </li>
+      </ul>
+
+      <div class="highlight-box red">
+        <p><strong>Thực tế:</strong> Nhiều học viên mới đạt win rate 50-55% trong 3 tháng đầu vì còn đang học và mắc lỗi. Win rate 65-70% thường đạt được sau 6+ tháng thực hành nghiêm túc.</p>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SECTION: TRANSPARENCY
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">🤝</span>
+        Những Gì Chúng Tôi Cam Kết & Không Cam Kết
+      </h2>
+
+      <!-- Image placeholder -->
+      <div class="image-container">
+        <div class="image-placeholder">
+          ✅❌ Hình 2.3-3: What We Promise vs What We Don't<br>
+          <small>Bảng so sánh cam kết và không cam kết</small>
+        </div>
+        <p class="image-caption">Hình 3: Cam kết rõ ràng của GEM Trading</p>
+      </div>
+
+      <div class="promise-table">
+        <div class="promise-row">
+          <div class="promise-col dont">
+            <h3 class="promise-title">
+              <span>❌</span>
+              Chúng Tôi KHÔNG Hứa
+            </h3>
+            <ul class="promise-list">
+              <li>
+                <span class="icon">✗</span>
+                <span>Giàu nhanh trong vài tuần/tháng</span>
+              </li>
+              <li>
+                <span class="icon">✗</span>
+                <span>100% win rate (không có hệ thống nào đạt được)</span>
+              </li>
+              <li>
+                <span class="icon">✗</span>
+                <span>Passive income hoàn toàn (trading cần thời gian)</span>
+              </li>
+              <li>
+                <span class="icon">✗</span>
+                <span>Không cần học, cứ copy là được</span>
+              </li>
+              <li>
+                <span class="icon">✗</span>
+                <span>Tỷ suất lợi nhuận X%/tháng cố định</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="promise-col do">
+            <h3 class="promise-title">
+              <span>✅</span>
+              Chúng Tôi CAM KẾT
+            </h3>
+            <ul class="promise-list">
+              <li>
+                <span class="icon">✓</span>
+                <span>Hệ thống có chứng minh, có backtest</span>
+              </li>
+              <li>
+                <span class="icon">✓</span>
+                <span>Quy tắc rõ ràng, có thể học và lặp lại</span>
+              </li>
+              <li>
+                <span class="icon">✓</span>
+                <span>Công cụ hỗ trợ (Scanner, Chatbot, Forum)</span>
+              </li>
+              <li>
+                <span class="icon">✓</span>
+                <span>Cộng đồng và support trên hành trình</span>
+              </li>
+              <li>
+                <span class="icon">✓</span>
+                <span>Transparent về kết quả và giới hạn</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SECTION: KẾT QUẢ HỌC VIÊN
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">👥</span>
+        Kết Quả Học Viên Thực Tế
+      </h2>
+
+      <p>Dưới đây là một số thống kê từ học viên thực tế (không phải cherry-picked testimonials):</p>
+
+      <!-- Image placeholder -->
+      <div class="image-container">
+        <div class="image-placeholder">
+          📊 Hình 2.3-4: Student Results Summary<br>
+          <small>Biểu đồ kết quả học viên thực tế</small>
+        </div>
+        <p class="image-caption">Hình 4: Thống kê kết quả học viên</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card green">
+          <div class="stat-icon">✅</div>
+          <div class="stat-value">65%</div>
+          <div class="stat-label">Profitable sau 6 tháng</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📈</div>
+          <div class="stat-value">8-15%</div>
+          <div class="stat-label">Monthly Return TB</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-icon">⏱️</div>
+          <div class="stat-value">3-6</div>
+          <div class="stat-label">Tháng để ổn định</div>
+        </div>
+        <div class="stat-card purple">
+          <div class="stat-icon">📚</div>
+          <div class="stat-value">200+</div>
+          <div class="stat-label">Trades/năm TB</div>
+        </div>
+      </div>
+
+      <div class="highlight-box">
+        <p><strong>Lưu ý:</strong> Kết quả phụ thuộc vào mức độ áp dụng, thời gian đầu tư học, và kỷ luật cá nhân. 35% học viên không profitable sau 6 tháng thường do: không học hết khóa, không tuân thủ quy tắc, hoặc bỏ cuộc quá sớm.</p>
+      </div>
+    </section>
+
+    <!-- ============================================
+         DISCLAIMER BOX
+         ============================================ -->
+    <div class="disclaimer-box">
+      <h3 class="disclaimer-title">
+        <span>⚠️</span>
+        Disclaimer Quan Trọng
+      </h3>
+      <div class="disclaimer-content">
+        <p>Trading cryptocurrency có rủi ro cao. Bạn có thể mất một phần hoặc toàn bộ số vốn đầu tư. Kết quả trong quá khứ không đảm bảo kết quả trong tương lai. GEM Trading Academy cung cấp giáo dục và công cụ - quyết định giao dịch cuối cùng luôn thuộc về bạn.</p>
+        <p style="margin-top: var(--space-sm);">Chỉ giao dịch với số tiền bạn có thể chấp nhận mất. Nếu bạn đang gặp khó khăn tài chính, trading không phải là giải pháp.</p>
+      </div>
+    </div>
+
+    <!-- Image placeholder -->
+    <div class="image-container">
+      <div class="image-placeholder">
+        📋 Hình 2.3-5: Disclaimer Card<br>
+        <small>Card disclaimer chuyên nghiệp</small>
+      </div>
+      <p class="image-caption">Hình 5: Disclaimer - Minh bạch về rủi ro</p>
+    </div>
+
+    <!-- ============================================
+         SUMMARY BOX
+         ============================================ -->
+    <div class="summary-box">
+      <h3 class="summary-title">
+        <span>📌</span>
+        Tóm Tắt Bài Học
+      </h3>
+      <div class="key-points">
+        <div class="key-point">
+          <span class="number">1</span>
+          <span>68% win rate đến từ backtest 686 trades trên BTC, ETH và top altcoins (2023-2024)</span>
+        </div>
+        <div class="key-point">
+          <span class="number">2</span>
+          <span>Win rate khác nhau theo từng pattern: UPU cao nhất (71%), UPD thấp nhất (65%)</span>
+        </div>
+        <div class="key-point">
+          <span class="number">3</span>
+          <span>Để đạt được kết quả này cần: học đầy đủ, kỷ luật tuân thủ, quản lý vốn đúng, kiên nhẫn</span>
+        </div>
+        <div class="key-point">
+          <span class="number">4</span>
+          <span>GEM KHÔNG hứa giàu nhanh, 100% win, hoặc passive income - chỉ cam kết hệ thống có chứng minh và support</span>
+        </div>
+        <div class="key-point">
+          <span class="number">5</span>
+          <span>65% học viên profitable sau 6 tháng khi áp dụng nghiêm túc</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================
+         QUIZ SECTION
+         ============================================ -->
+    <section class="quiz-section">
+      <div class="quiz-header">
+        <span class="quiz-icon">📝</span>
+        <h3 class="quiz-title">Kiểm Tra Kiến Thức</h3>
+      </div>
+
+      <!-- Question 1 -->
+      <div class="quiz-question" id="question1">
+        <div class="question-header">
+          <span class="question-number">1</span>
+          <span class="question-text">Con số 68% win rate của GEM được lấy từ đâu?</span>
+        </div>
+        <div class="quiz-options">
+          <div class="quiz-option" onclick="checkAnswer(this, 1, false)">
+            <span class="option-letter">A</span>
+            <span class="option-text">Ước tính từ đội ngũ marketing</span>
+            <span class="option-result"></span>
+          </div>
+          <div class="quiz-option" onclick="checkAnswer(this, 1, true)">
+            <span class="option-letter">B</span>
+            <span class="option-text">Backtest 686 trades trên BTC, ETH và top altcoins (2023-2024)</span>
+            <span class="option-result"></span>
+          </div>
+          <div class="quiz-option" onclick="checkAnswer(this, 1, false)">
+            <span class="option-letter">C</span>
+            <span class="option-text">Khảo sát ý kiến học viên</span>
+            <span class="option-result"></span>
+          </div>
+          <div class="quiz-option" onclick="checkAnswer(this, 1, false)">
+            <span class="option-letter">D</span>
+            <span class="option-text">Copy từ một hệ thống trading khác</span>
+            <span class="option-result"></span>
+          </div>
+        </div>
+        <div class="quiz-explanation" id="explanation1">
+          <strong>Giải thích:</strong> Con số 68% đến từ backtest thực tế với 686 trades được thực hiện trên BTC, ETH và top 20 altcoins trong giai đoạn 2023-2024, sử dụng timeframes 4H và 1D. Tất cả trades đều tuân theo đúng quy tắc của 6 công thức GEM Frequency.
+        </div>
+      </div>
+
+      <!-- Question 2 -->
+      <div class="quiz-question" id="question2">
+        <div class="question-header">
+          <span class="question-number">2</span>
+          <span class="question-text">GEM Trading Academy KHÔNG cam kết điều nào sau đây?</span>
+        </div>
+        <div class="quiz-options">
+          <div class="quiz-option" onclick="checkAnswer(this, 2, false)">
+            <span class="option-letter">A</span>
+            <span class="option-text">Cung cấp hệ thống có backtest chứng minh</span>
+            <span class="option-result"></span>
+          </div>
+          <div class="quiz-option" onclick="checkAnswer(this, 2, false)">
+            <span class="option-letter">B</span>
+            <span class="option-text">Hỗ trợ cộng đồng và công cụ AI</span>
+            <span class="option-result"></span>
+          </div>
+          <div class="quiz-option" onclick="checkAnswer(this, 2, true)">
+            <span class="option-letter">C</span>
+            <span class="option-text">Giàu nhanh trong vài tuần/tháng</span>
+            <span class="option-result"></span>
+          </div>
+          <div class="quiz-option" onclick="checkAnswer(this, 2, false)">
+            <span class="option-letter">D</span>
+            <span class="option-text">Quy tắc trading rõ ràng có thể lặp lại</span>
+            <span class="option-result"></span>
+          </div>
+        </div>
+        <div class="quiz-explanation" id="explanation2">
+          <strong>Giải thích:</strong> GEM Trading Academy KHÔNG hứa giàu nhanh, 100% win rate, hay passive income hoàn toàn. Chúng tôi cam kết cung cấp: hệ thống có chứng minh, quy tắc rõ ràng, công cụ hỗ trợ, và cộng đồng support. Kết quả cuối cùng phụ thuộc vào nỗ lực và kỷ luật của bạn.
+        </div>
+      </div>
+
+      <button class="retake-btn" id="retakeBtn" onclick="retakeQuiz()">
+        <span>🔄</span>
+        <span>Làm Lại Quiz</span>
+      </button>
+    </section>
+
+    <!-- ============================================
+         FOOTER
+         ============================================ -->
+    <footer class="lesson-footer">
+      <p class="footer-brand">GEM Trading Academy</p>
+      <p class="footer-url">
+        <a href="https://gemtrading.vn" target="_blank">gemtrading.vn</a>
+      </p>
+    </footer>
+
+  </div>
+
+  <script>
+    const answeredQuestions = {};
+    const totalQuestions = 2;
+
+    function checkAnswer(selectedOption, questionNumber, isCorrect) {
+      if (answeredQuestions[questionNumber]) return;
+      answeredQuestions[questionNumber] = true;
+
+      const questionDiv = document.getElementById('question' + questionNumber);
+      const options = questionDiv.querySelectorAll('.quiz-option');
+      const explanation = document.getElementById('explanation' + questionNumber);
+
+      options.forEach(opt => {
+        opt.classList.add('disabled');
+      });
+
+      if (isCorrect) {
+        selectedOption.classList.add('correct');
+        selectedOption.querySelector('.option-result').textContent = '✓ Đúng';
+        explanation.classList.add('correct');
+      } else {
+        selectedOption.classList.add('incorrect');
+        selectedOption.querySelector('.option-result').textContent = '✗ Sai';
+        explanation.classList.add('incorrect');
+
+        options.forEach(opt => {
+          if (opt.onclick && opt.onclick.toString().includes('true')) {
+            opt.classList.add('show-correct');
+            opt.querySelector('.option-result').textContent = '← Đáp án đúng';
+            opt.querySelector('.option-result').style.color = 'var(--color-green)';
+          }
+        });
+      }
+
+      explanation.classList.add('show');
+
+      if (Object.keys(answeredQuestions).length === totalQuestions) {
+        document.getElementById('retakeBtn').classList.add('show');
+      }
+    }
+
+    function retakeQuiz() {
+      for (let key in answeredQuestions) {
+        delete answeredQuestions[key];
+      }
+
+      for (let i = 1; i <= totalQuestions; i++) {
+        const questionDiv = document.getElementById('question' + i);
+        const options = questionDiv.querySelectorAll('.quiz-option');
+        const explanation = document.getElementById('explanation' + i);
+
+        options.forEach(opt => {
+          opt.classList.remove('disabled', 'correct', 'incorrect', 'show-correct');
+          opt.querySelector('.option-result').textContent = '';
+          opt.querySelector('.option-result').style.color = '';
+        });
+
+        explanation.classList.remove('show', 'correct', 'incorrect');
+      }
+
+      document.getElementById('retakeBtn').classList.remove('show');
+      document.querySelector('.quiz-section').scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>

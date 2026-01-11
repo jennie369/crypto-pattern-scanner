@@ -76,6 +76,7 @@ import {
   Fingerprint,
   Scan,
   X,
+  Globe,
 } from 'lucide-react-native';
 import { Switch } from 'react-native';
 
@@ -90,12 +91,14 @@ import { signOut, supabase } from '../../services/supabase';
 import EditProfileModal from './components/EditProfileModal';
 import ChangePasswordModal from './components/ChangePasswordModal';
 import AffiliateSection from './components/AffiliateSection';
+import MyCoursesSection from './components/MyCoursesSection';
 import { useSponsorBanners } from '../../components/SponsorBannerSection';
-import SponsorBannerCard from '../../components/SponsorBannerCard';
+import SponsorBanner from '../../components/SponsorBanner';
 import biometricService from '../../services/biometricService';
 import BiometricSetupModal from '../../components/Auth/BiometricSetupModal';
 import { getSession } from '../../services/supabase';
 import { UserBadges } from '../../components/UserBadge';
+import { UpgradeBanner } from '../../components/upgrade';
 
 
 export default function AccountScreen() {
@@ -723,15 +726,40 @@ export default function AccountScreen() {
           </Pressable>
 
           {/* ═══════════════════════════════════════════ */}
+          {/* 🚀 UPGRADE BANNER - For free users */}
+          {/* ═══════════════════════════════════════════ */}
+          <UpgradeBanner
+            banner={{
+              title: 'Nâng cấp tài khoản',
+              subtitle: 'Mở khóa tất cả tính năng premium',
+              cta_text: 'Xem các gói',
+              icon_name: 'sparkles',
+              trigger_screen: 'account_screen',
+            }}
+            tierType="scanner"
+            variant="prominent"
+            style={{ marginHorizontal: SPACING.md, marginBottom: SPACING.md }}
+          />
+
+          {/* ═══════════════════════════════════════════ */}
+          {/* 📚 MY COURSES SECTION - Admin Panel Style */}
+          {/* ═══════════════════════════════════════════ */}
+          <MyCoursesSection navigation={navigation} />
+
+          {/* ═══════════════════════════════════════════ */}
           {/* ⚡ ADMIN DASHBOARD SECTION - MAGENTA THEME */}
           {/* ═══════════════════════════════════════════ */}
           {renderAdminDashboard()}
 
           {/* ═══════════════════════════════════════════ */}
-          {/* ASSET STATS CARDS - All icons gold */}
+          {/* ASSET STATS CARDS - Touchable with navigation */}
           {/* ═══════════════════════════════════════════ */}
           <View style={styles.assetStatsContainer}>
-            <View style={styles.assetStatCard}>
+            <TouchableOpacity
+              style={styles.assetStatCard}
+              onPress={() => navigation.navigate('Wallet')}
+              activeOpacity={0.7}
+            >
               <View style={styles.assetStatIconContainer}>
                 <Gem size={24} color={COLORS.gold} />
               </View>
@@ -742,27 +770,45 @@ export default function AccountScreen() {
               <Text style={styles.assetStatSubtitle}>
                 ~ {(assetStats.gems * 200).toLocaleString()}đ
               </Text>
-            </View>
-            <View style={styles.assetStatCard}>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.assetStatCard}
+              onPress={() => navigation.navigate('Earnings')}
+              activeOpacity={0.7}
+            >
               <View style={styles.assetStatIconContainer}>
                 <DollarSign size={24} color={COLORS.gold} />
               </View>
               <Text style={styles.assetStatValue}>
-                {(assetStats.earnings / 1000).toFixed(0)}K
+                {assetStats.earnings > 0
+                  ? assetStats.earnings >= 1000
+                    ? `${(assetStats.earnings / 1000).toFixed(0)}K`
+                    : assetStats.earnings.toLocaleString()
+                  : '0'}
               </Text>
               <Text style={styles.assetStatLabel}>Thu nhập</Text>
               <Text style={styles.assetStatSubtitle}>Tháng này</Text>
-            </View>
-            <View style={styles.assetStatCard}>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.assetStatCard}
+              onPress={() => navigation.navigate('AffiliateDashboard')}
+              activeOpacity={0.7}
+            >
               <View style={styles.assetStatIconContainer}>
                 <Link2 size={24} color={COLORS.gold} />
               </View>
               <Text style={styles.assetStatValue}>
-                {(assetStats.affiliate / 1000).toFixed(0)}K
+                {assetStats.affiliate > 0
+                  ? assetStats.affiliate >= 1000
+                    ? `${(assetStats.affiliate / 1000).toFixed(0)}K`
+                    : assetStats.affiliate.toLocaleString()
+                  : '0'}
               </Text>
               <Text style={styles.assetStatLabel}>Affiliate</Text>
               <Text style={styles.assetStatSubtitle}>Hoa hồng</Text>
-            </View>
+            </TouchableOpacity>
           </View>
 
           {/* ═══════════════════════════════════════════ */}
@@ -956,38 +1002,17 @@ export default function AccountScreen() {
               </View>
               <ChevronRight size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
-          </View>
-
-          {/* ═══════════════════════════════════════════ */}
-          {/* SECTION: KHÓA HỌC CỦA TÔI - All icons gold */}
-          {/* ═══════════════════════════════════════════ */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Khóa Học Của Tôi</Text>
 
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => navigation.navigate('Courses')}
+              onPress={() => navigation.navigate('KarmaDashboard')}
             >
               <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <GraduationCap size={20} color={COLORS.gold} />
+                <Sparkles size={20} color={COLORS.gold} />
               </View>
               <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Tất cả khóa học</Text>
-                <Text style={styles.menuSubtext}>Khám phá & đăng ký khóa học</Text>
-              </View>
-              <ChevronRight size={20} color={COLORS.textMuted} />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => navigation.navigate('Courses', { filter: 'enrolled' })}
-            >
-              <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
-                <BookOpen size={20} color={COLORS.gold} />
-              </View>
-              <View style={styles.menuContent}>
-                <Text style={styles.menuText}>Đang học</Text>
-                <Text style={styles.menuSubtext}>Tiếp tục khóa học của bạn</Text>
+                <Text style={styles.menuText}>Karma Dashboard</Text>
+                <Text style={styles.menuSubtext}>Điểm karma & level của bạn</Text>
               </View>
               <ChevronRight size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
@@ -1111,6 +1136,20 @@ export default function AccountScreen() {
               </View>
               <ChevronRight size={20} color={COLORS.textMuted} />
             </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => navigation.navigate('Settings')}
+            >
+              <View style={[styles.menuIcon, { backgroundColor: 'rgba(255, 189, 89, 0.15)' }]}>
+                <Globe size={20} color={COLORS.gold} />
+              </View>
+              <View style={styles.menuContent}>
+                <Text style={styles.menuText}>Cài đặt ứng dụng</Text>
+                <Text style={styles.menuSubtext}>Ngôn ngữ, tiền tệ, giao diện</Text>
+              </View>
+              <ChevronRight size={20} color={COLORS.textMuted} />
+            </TouchableOpacity>
           </View>
 
           {/* ═══════════════════════════════════════════ */}
@@ -1160,7 +1199,7 @@ export default function AccountScreen() {
 
           {/* Sponsor Banners - distributed */}
           {sponsorBanners.map((banner) => (
-            <SponsorBannerCard
+            <SponsorBanner
               key={banner.id}
               banner={banner}
               navigation={navigation}

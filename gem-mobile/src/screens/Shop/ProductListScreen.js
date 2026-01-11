@@ -24,6 +24,7 @@ import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, GLASS } from '../../utils/token
 import { getSectionById } from '../../utils/shopConfig';
 import shopifyService from '../../services/shopifyService';
 import ProductCard from './components/ProductCard';
+import SponsorBannerSection from '../../components/SponsorBannerSection';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = (SCREEN_WIDTH - SPACING.lg * 2 - SPACING.md) / 2;
@@ -52,8 +53,10 @@ const ProductListScreen = () => {
 
       let result;
       if (filterTags && filterTags.length > 0) {
-        // Fetch theo tags array
+        // Fetch theo tags array (exact match, no fallback)
+        console.log('[ProductListScreen] Fetching with tags:', filterTags.slice(0, 5).join(', '), '...');
         result = await shopifyService.getProductsByTags(filterTags, 50, false);
+        console.log('[ProductListScreen] Found', result?.length || 0, 'products');
       } else {
         // Fetch tất cả
         result = await shopifyService.getProducts({ limit: 50 });
@@ -123,6 +126,18 @@ const ProductListScreen = () => {
     </View>
   );
 
+  // Footer with sponsor banner
+  const renderFooter = () => (
+    <View style={styles.footerContainer}>
+      <SponsorBannerSection
+        screenName="Shop"
+        navigation={navigation}
+        maxBanners={2}
+      />
+      <View style={styles.footerSpacer} />
+    </View>
+  );
+
   return (
     <LinearGradient
       colors={GRADIENTS.background}
@@ -140,13 +155,14 @@ const ProductListScreen = () => {
         ) : (
           <FlatList
             data={products}
-            keyExtractor={(item) => item.id?.toString() || item.handle}
+            keyExtractor={(item, index) => item.id?.toString() || item.handle || `product-${index}`}
             renderItem={renderProduct}
             numColumns={2}
             contentContainerStyle={styles.listContent}
             columnWrapperStyle={styles.columnWrapper}
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={renderEmpty}
+            ListFooterComponent={products.length > 0 ? renderFooter : null}
             refreshControl={
               <RefreshControl
                 refreshing={refreshing}
@@ -206,7 +222,7 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: SPACING.lg, // 16
     paddingTop: SPACING.lg, // 16
-    paddingBottom: SPACING.huge, // 32
+    paddingBottom: SPACING.lg, // Will have footer for more space
   },
   columnWrapper: {
     justifyContent: 'space-between',
@@ -249,6 +265,15 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.fontSize.base, // 13
     color: COLORS.textMuted, // rgba(255, 255, 255, 0.6)
     textAlign: 'center',
+  },
+
+  // Footer
+  footerContainer: {
+    marginTop: SPACING.lg,
+    paddingHorizontal: 0,
+  },
+  footerSpacer: {
+    height: 120, // Space for bottom tab bar
   },
 });
 

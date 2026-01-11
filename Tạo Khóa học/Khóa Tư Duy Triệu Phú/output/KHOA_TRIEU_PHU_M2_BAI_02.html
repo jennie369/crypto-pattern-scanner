@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 2.2: Bản Đồ Nghiệp Tiền Gia Đình | GEM Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==================== VARIABLES ==================== */
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        /* ==================== BACKGROUND ==================== */
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: 20%; }
+
+        /* ==================== CONTAINER ==================== */
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container {
+                padding: 0;
+            }
+        }
+
+        /* ==================== HEADER ==================== */
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--navy-dark);
+            margin-bottom: var(--space-md);
+        }
+        .lesson-chapter {
+            font-size: 0.9rem;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-lg);
+            flex-wrap: wrap;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        /* ==================== SECTION ==================== */
+        .section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section {
+                padding: 0;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .section-title {
+                padding: var(--space-lg) 16px var(--space-md) 16px;
+                margin-bottom: 0;
+            }
+        }
+
+        .section > p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .section > p {
+                padding: 0 16px;
+            }
+        }
+
+        /* ==================== HIGHLIGHT BOXES ==================== */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box-title {
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .definition-box-title {
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .definition-box p { color: var(--text-secondary); margin: 0; }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(156, 6, 18, 0.05));
+            border: 1px solid rgba(196, 30, 42, 0.4);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .warning-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--burgundy-light);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .warning-box-title {
+            font-weight: 700;
+            color: var(--burgundy-light);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .warning-box p { color: var(--text-secondary); margin: 0; }
+
+        /* ==================== IMAGE CONTAINER ==================== */
+        .image-container {
+            margin: var(--space-xl) 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-container {
+                margin: var(--space-md) 0;
+                border-radius: 0;
+                border: none;
+            }
+        }
+        .image-caption {
+            padding: var(--space-sm);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .image-caption {
+                padding: var(--space-sm) 16px;
+            }
+        }
+
+        /* ==================== FLOW STEPS ==================== */
+        .flow-steps {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .flow-steps {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .flow-step {
+            display: flex;
+            gap: var(--space-md);
+            align-items: flex-start;
+            padding: var(--space-md);
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .flow-step {
+                padding: var(--space-md) 16px;
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+            }
+        }
+        @media (min-width: 601px) {
+            .flow-step:hover {
+                border-color: var(--gold);
+                transform: translateX(8px);
+            }
+        }
+        .flow-step-number {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--navy-dark);
+        }
+        .flow-step-content { flex: 1; }
+        .flow-step-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+        }
+        .flow-step-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* ==================== GENERATION BOXES ==================== */
+        .generation-grid {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .generation-grid {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .generation-box {
+            padding: var(--space-lg);
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+        }
+        @media (max-width: 600px) {
+            .generation-box {
+                padding: var(--space-md) 16px;
+                border: none;
+                border-radius: 0;
+            }
+        }
+        .generation-box.gen-3 { border-left: 4px solid var(--purple); }
+        .generation-box.gen-2 { border-left: 4px solid var(--cyan); }
+        .generation-box.gen-1 { border-left: 4px solid var(--gold); }
+        .generation-title {
+            font-weight: 700;
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .gen-3 .generation-title { color: var(--purple); }
+        .gen-2 .generation-title { color: var(--cyan); }
+        .gen-1 .generation-title { color: var(--gold); }
+        .generation-questions {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+        .gen-question {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            padding-left: var(--space-md);
+            border-left: 2px solid var(--glass-border);
+        }
+
+        /* ==================== PATTERN TABLE ==================== */
+        .pattern-table {
+            width: 100%;
+            margin: var(--space-lg) 0;
+            border-collapse: collapse;
+            overflow: hidden;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .pattern-table {
+                border-radius: 0;
+                border: none;
+                margin: var(--space-md) 0;
+            }
+        }
+        .pattern-table th {
+            background: var(--bg-card);
+            padding: var(--space-md);
+            text-align: left;
+            font-weight: 700;
+        }
+        .pattern-table th.prosperity { color: var(--success); }
+        .pattern-table th.poverty { color: var(--error); }
+        .pattern-table td {
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border-top: 1px solid var(--glass-border);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            vertical-align: top;
+        }
+
+        /* ==================== FORM STYLES ==================== */
+        .form-section {
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .form-section {
+                padding: 0 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .form-group {
+            margin-bottom: var(--space-lg);
+        }
+        .form-label {
+            display: block;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+        }
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: var(--space-md);
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: border-color 0.3s ease;
+        }
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .form-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: var(--space-xs);
+        }
+
+        /* ==================== SUMMARY BOX ==================== */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02));
+            border: 2px solid var(--gold);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .summary-list { list-style: none; }
+        .summary-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-list li::before {
+            content: "✓";
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        /* ==================== FOOTER ==================== */
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .lesson-footer a {
+            color: var(--gold);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>🔥</span>
+                <span>Module 2</span>
+            </div>
+            <div class="lesson-chapter">Module 2 - Hóa Giải Nghiệp Tiền Bạc</div>
+            <h1 class="lesson-title">Bản Đồ Nghiệp Tiền Gia Đình</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 2.2</span></div>
+                <div class="meta-item"><span>⏱️</span><span>20 phút</span></div>
+                <div class="meta-item"><span>📝</span><span>Có bài tập</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Bạn Có Đang Sống Cuộc Đời Của Ông Bà?</h2>
+            <p>Có một sự thật đáng sợ mà ít ai nhận ra: Phần lớn những quyết định tài chính bạn đưa ra hôm nay KHÔNG PHẢI của bạn - mà là "bản sao" của những quyết định cha mẹ, ông bà đã đưa ra nhiều thập kỷ trước.</p>
+            <p>Nếu ông nội bạn mất hết tài sản vì chiến tranh và sống trong nỗi sợ "mất hết", thì cha bạn có thể thừa hưởng nỗi sợ đó và truyền tiếp cho bạn - dù bạn chưa bao giờ trải qua chiến tranh.</p>
+            <p>Đây không phải giả thuyết. Khoa học gọi nó là <strong>Epigenetics</strong> - di truyền học biểu sinh. Trải nghiệm cảm xúc mạnh có thể được "ghi" vào DNA và truyền qua nhiều thế hệ.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Nghiên Cứu Thú Vị</div>
+                <p>Một nghiên cứu năm 2013 của Đại học Emory cho thấy: Chuột bị sốc điện khi ngửi mùi cherry blossom sẽ truyền nỗi sợ mùi hương này cho CON và CHÁU của chúng - dù các thế hệ sau chưa bao giờ bị sốc điện.</p>
+                <p style="margin-top: var(--space-sm);">Tương tự, nỗi sợ về tiền bạc của ông bà có thể đang "chảy trong máu" bạn mà bạn không biết.</p>
+            </div>
+
+            <p>Tin vui là bạn CÓ THỂ nhìn thấy và chuyển hóa điều này. Và bước đầu tiên là vẽ "Bản Đồ Nghiệp Tiền Gia Đình" - công cụ bạn sẽ học trong bài này.</p>
+        </section>
+
+        <!-- SECTION 1: GIỚI THIỆU -->
+        <section class="section">
+            <h2 class="section-title"><span>🗺️</span> Vẽ Bản Đồ Dòng Họ</h2>
+            <p>Trong bài trước, bạn đã hiểu về nghiệp tiền bạc và hai loại nghiệp: cá nhân và gia đình. Bây giờ, chúng ta sẽ đi vào công việc <strong>khảo cổ năng lượng</strong> - đào sâu vào lịch sử 3 thế hệ để tìm ra các pattern tiền bạc trong dòng họ bạn.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📖</span> Bản Đồ Nghiệp Tiền Là Gì?</div>
+                <p>Đây là công cụ trực quan hóa các pattern tiền bạc qua 3 thế hệ (ông bà → cha mẹ → bạn). Nó giúp bạn <strong>NHÌN THẤY</strong> những gì bình thường ẩn trong vô thức, từ đó có thể chủ động chuyển hóa.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M2_B2_01%0AFamily+Money+Map" alt="Bản Đồ Nghiệp Tiền Gia Đình">
+                <div class="image-caption">Khám phá pattern tiền bạc qua 3 thế hệ trong gia đình bạn</div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: TẠI SAO CẦN LÀM ĐIỀU NÀY -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Tại Sao Cần Làm Điều Này?</h2>
+            <p>Nhiều người cho rằng: "Đó là chuyện của ông bà, cha mẹ, không liên quan đến tôi." Nhưng khoa học và tâm linh đều chứng minh điều ngược lại:</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Di Truyền Học Sinh Thái (Epigenetics)</div>
+                        <div class="flow-step-desc">Khoa học đã chứng minh: Trải nghiệm cảm xúc mạnh có thể được "ghi" vào DNA và truyền qua các thế hệ. Ký ức về nghèo đói, khủng hoảng tài chính của ông bà có thể đang ảnh hưởng gene của bạn.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Trường Năng Lượng Gia Đình</div>
+                        <div class="flow-step-desc">Mỗi gia đình có một "trường năng lượng tập thể". Bạn sinh ra và lớn lên trong trường này, vô thức hấp thụ các niềm tin, cảm xúc và pattern về tiền bạc.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Mô Hình Học Tập Sớm</div>
+                        <div class="flow-step-desc">Trước 7 tuổi, não bộ bạn ở trạng thái theta - giống như bị thôi miên. Bạn "tải về" mọi thứ cha mẹ nói, làm và cảm nhận về tiền mà không có bộ lọc phán đoán.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Sự Thật Quan Trọng</div>
+                <p>Theo Nguyên Lý "Trong thế nào, ngoài thế ấy" của Học Thuyết: <em>Bạn không thể thay đổi những gì bạn không nhìn thấy</em>. Vẽ bản đồ nghiệp tiền giúp bạn "bật đèn" trong căn phòng tối của vô thức.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: HÌNH MẪU -->
+        <section class="section">
+            <h2 class="section-title"><span>📋</span> Template Bản Đồ Nghiệp Tiền</h2>
+            <p>Dưới đây là template để bạn vẽ bản đồ 3 thế hệ. Hãy điền thông tin cho cả hai bên: bên nội và bên ngoại.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x600/0a1628/FFBD59?text=HINH+11%0AFamily+Money+Map+Template" alt="Hình 11: Family Money Map Template">
+                <div class="image-caption">Hình 11: Template Bản Đồ Nghiệp Tiền Gia Đình - Vẽ 3 thế hệ</div>
+            </div>
+
+            <div class="generation-grid">
+                <div class="generation-box gen-3">
+                    <div class="generation-title"><span>👴👵</span> Thế Hệ 3: Ông Bà (Nội & Ngoại)</div>
+                    <div class="generation-questions">
+                        <div class="gen-question">Hoàn cảnh kinh tế ông bà lúc sinh ra?</div>
+                        <div class="gen-question">Nghề nghiệp chính của ông bà?</div>
+                        <div class="gen-question">Có sự kiện lớn nào về tiền? (Chiến tranh, mất tài sản, đói kém...)</div>
+                        <div class="gen-question">Ông bà hay nói gì về tiền bạc?</div>
+                        <div class="gen-question">Ông bà giàu, nghèo hay trung bình?</div>
+                    </div>
+                </div>
+                <div class="generation-box gen-2">
+                    <div class="generation-title"><span>👨👩</span> Thế Hệ 2: Cha Mẹ (Bố Mẹ & Cô Chú)</div>
+                    <div class="generation-questions">
+                        <div class="gen-question">Cha mẹ bạn lớn lên trong hoàn cảnh nào?</div>
+                        <div class="gen-question">Ai là người kiếm tiền chính trong nhà?</div>
+                        <div class="gen-question">Cha mẹ có cãi nhau vì tiền không?</div>
+                        <div class="gen-question">Câu nói nào về tiền bạn nghe nhiều nhất từ cha mẹ?</div>
+                        <div class="gen-question">Cha mẹ có thất bại tài chính nào lớn?</div>
+                    </div>
+                </div>
+                <div class="generation-box gen-1">
+                    <div class="generation-title"><span>🧑</span> Thế Hệ 1: Bạn</div>
+                    <div class="generation-questions">
+                        <div class="gen-question">Ký ức đầu tiên về tiền bạc của bạn là gì?</div>
+                        <div class="gen-question">Bạn cảm thấy thế nào khi gia đình nói về tiền?</div>
+                        <div class="gen-question">Bạn có pattern gì giống cha mẹ về tiền?</div>
+                        <div class="gen-question">Bạn có thề "sẽ không như cha mẹ" điều gì?</div>
+                        <div class="gen-question">Tình trạng tài chính hiện tại của bạn?</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: TÌM PATTERN -->
+        <section class="section">
+            <h2 class="section-title"><span>🔍</span> Tìm Kiếm Pattern</h2>
+            <p>Sau khi điền thông tin, hãy tìm các pattern lặp lại qua các thế hệ. Có hai loại pattern cần tìm:</p>
+
+            <table class="pattern-table">
+                <thead>
+                    <tr>
+                        <th class="prosperity">✨ Pattern Thịnh Vượng</th>
+                        <th class="poverty">⚠️ Pattern Nghèo Khó</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Luôn có người trong nhà kinh doanh thành công</td>
+                        <td>Mỗi thế hệ đều có người nợ nần</td>
+                    </tr>
+                    <tr>
+                        <td>Gia đình có truyền thống tiết kiệm</td>
+                        <td>Tiền đến rồi đi, không ai giữ được lâu</td>
+                    </tr>
+                    <tr>
+                        <td>Nói về tiền một cách tích cực, thoải mái</td>
+                        <td>Tiền là chủ đề cấm kỵ hoặc gây xung đột</td>
+                    </tr>
+                    <tr>
+                        <td>Có bất động sản, tài sản truyền qua thế hệ</td>
+                        <td>Tài sản bị mất, lừa, hoặc bị chiếm đoạt</td>
+                    </tr>
+                    <tr>
+                        <td>Phụ nữ trong nhà độc lập tài chính</td>
+                        <td>Phụ nữ phụ thuộc tài chính, không có quyền quyết định</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/00C853?text=M2_B2_02%0AProsperity+vs+Poverty+Patterns" alt="Pattern Thịnh Vượng vs Nghèo Khó">
+                <div class="image-caption">Nhận diện các pattern để biết mình cần giữ gì và chuyển hóa gì</div>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>⚠️</span> Cảnh Báo Quan Trọng</div>
+                <p>Đây là bài tập có thể khơi dậy cảm xúc mạnh. Nếu bạn cảm thấy buồn, giận, hay đau khi làm bài này - <strong>đó là dấu hiệu tốt</strong>. Cảm xúc đang được giải phóng. Cho phép bản thân khóc nếu cần. Đừng đè nén.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 5: BÀI TẬP THỰC HÀNH -->
+        <section class="section">
+            <h2 class="section-title"><span>✍️</span> Bài Tập: Điền Bản Đồ Của Bạn</h2>
+            <p>Hãy dành thời gian điền các thông tin dưới đây. Nếu không biết chính xác, hãy viết những gì bạn nghe kể hoặc cảm nhận được.</p>
+
+            <div class="form-section">
+                <div class="form-group">
+                    <label class="form-label">👴 Ông Bà Nội - Câu chuyện tiền bạc:</label>
+                    <textarea class="form-textarea" placeholder="VD: Ông nội là công nhân, sống khá chật vật. Bà nội hay nói 'nhà mình nghèo nhưng trong sạch'..."></textarea>
+                    <div class="form-hint">Ghi lại những gì bạn biết về hoàn cảnh, nghề nghiệp, câu nói thường nghe</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">👵 Ông Bà Ngoại - Câu chuyện tiền bạc:</label>
+                    <textarea class="form-textarea" placeholder="VD: Ông ngoại làm thương mại, có lúc giàu nhưng sau đó mất hết vì chiến tranh..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">👨‍👩‍👧 Cha Mẹ - Câu chuyện tiền bạc:</label>
+                    <textarea class="form-textarea" placeholder="VD: Ba làm công chức, mẹ bán hàng online. Hay cãi nhau về việc chi tiêu. Ba hay nói 'tiền không mọc trên cây'..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">🧑 Bạn - Ký ức đầu tiên về tiền:</label>
+                    <textarea class="form-textarea" placeholder="VD: Tôi nhớ lúc 6 tuổi, xin ba 5000đ mua kẹo nhưng ba nói 'không có tiền'. Tôi cảm thấy xấu hổ vì đã xin..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">🔄 Pattern lặp lại bạn nhận ra:</label>
+                    <textarea class="form-textarea" placeholder="VD: Cả 3 thế hệ đều có pattern 'tiền đến rồi đi'. Ông ngoại mất tài sản vì chiến tranh, ba mất tiền vì bị lừa, tôi cũng hay hết tiền cuối tháng dù lương khá..."></textarea>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/6A5BFF?text=M2_B2_03%0AYour+Family+Story" alt="Câu Chuyện Gia Đình Bạn">
+                <div class="image-caption">Mỗi gia đình có một câu chuyện tiền bạc - hãy khám phá câu chuyện của bạn</div>
+            </div>
+        </section>
+
+        <!-- SECTION 6: PHÂN TÍCH KẾT QUẢ -->
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> Phân Tích Kết Quả</h2>
+            <p>Sau khi điền xong, hãy trả lời các câu hỏi phân tích này:</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Pattern Nào Lặp Lại Nhiều Nhất?</div>
+                        <div class="flow-step-desc">Liệt kê 2-3 pattern bạn thấy xuất hiện ở nhiều thế hệ. Ví dụ: "Tiền đến rồi đi", "Phụ nữ phụ thuộc", "Người kiếm được tiền thì mất sớm"...</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Câu Nói Nào Bạn Nghe Nhiều Nhất?</div>
+                        <div class="flow-step-desc">Những câu như "nhà mình không có số giàu", "tiền bạc là phù du", "người giàu thì xấu xa" đang được truyền qua bao nhiêu thế hệ?</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Bạn Đang Sống Pattern Nào?</div>
+                        <div class="flow-step-desc">So sánh tình trạng tài chính hiện tại của bạn với cha mẹ ở cùng độ tuổi. Bạn đang đi theo pattern cũ hay đã có gì khác biệt?</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Có Pattern Thịnh Vượng Nào Không?</div>
+                        <div class="flow-step-desc">Đừng chỉ tìm cái xấu! Tìm cả những pattern tốt: Ai trong dòng họ đã giàu? Họ làm gì? Bạn có thể học gì từ họ?</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🎯</span> Mục Tiêu Của Bạn</div>
+                <p>Từ bài tập này, xác định <strong>1-2 pattern chính</strong> bạn muốn chuyển hóa trong Module 2 này. Đừng cố gắng thay đổi tất cả cùng lúc - tập trung vào pattern ảnh hưởng nhất trước.</p>
+            </div>
+        </section>
+
+        <!-- REAL STORIES -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Câu Chuyện Từ Những Người Đã Vẽ Bản Đồ</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>👤</span> Câu Chuyện Của Trang (33 tuổi, Quản lý nhân sự)</div>
+                <p><strong>Khi vẽ bản đồ:</strong> Trang phát hiện một pattern đáng sợ: Ông ngoại mất việc lúc 45 tuổi và không bao giờ hồi phục. Mẹ bị cho nghỉ việc lúc 43 tuổi và phải bắt đầu lại từ đầu. Trang đang 33 tuổi và luôn có nỗi sợ mơ hồ rằng "sự nghiệp sẽ kết thúc bất ngờ".</p>
+                <p style="margin-top: var(--space-sm);"><strong>Insight từ bản đồ:</strong> Khi phỏng vấn mẹ, Trang biết thêm: Bà ngoại hay nói "Đàn bà làm gì cũng không bền, sớm muộn cũng phải về nhà nội trợ." Đây là niềm tin thế hệ đang ảnh hưởng đến cả ông ngoại và mẹ - và giờ đến lượt Trang.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Sau khi nhận ra:</strong> Trang hiểu rằng nỗi sợ "mất việc" không phải của cô - mà là của dòng họ. Cô bắt đầu làm việc để chuyển hóa niềm tin này và bây giờ đang ở vị trí cao nhất sự nghiệp - không còn sợ "kết thúc bất ngờ" nữa.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>👤</span> Câu Chuyện Của Anh Dũng (45 tuổi, Doanh nhân)</div>
+                <p><strong>Khi vẽ bản đồ:</strong> Anh Dũng nhận ra một pattern "thành công rồi mất hết" lặp lại 3 đời: Ông nội từng giàu có rồi mất hết sau 1954. Cha anh mở 2 công ty thành công nhưng đều đóng cửa sau 5-7 năm. Chính anh cũng đang ở năm thứ 6 của công ty thứ 3...</p>
+                <p style="margin-top: var(--space-sm);"><strong>Sự trùng hợp đáng sợ:</strong> Khi anh tính toán, cả 3 thế hệ đều "sập" ở khoảng năm thứ 5-7 của sự thành công. Như thể có một "lời nguyền vô hình" đang vận hành.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Sau khi chuyển hóa:</strong> Anh Dũng dành 3 tháng làm việc với các nghi thức trong Module 2. Công ty của anh bây giờ đã bước sang năm thứ 9 và đang mở rộng. Anh nói: "Tôi đã phá vỡ 'lời nguyền' 3 đời. Con tôi sẽ không phải sống pattern này nữa."</p>
+            </div>
+
+            <p>Cả hai câu chuyện đều cho thấy: Việc NHÌN THẤY pattern là bước đầu tiên và quan trọng nhất. Khi bạn thấy rõ ràng điều gì đang xảy ra, bạn đã có 50% sức mạnh để thay đổi nó.</p>
+        </section>
+
+        <!-- KEY TAKEAWAYS -->
+        <section class="section">
+            <h2 class="section-title"><span>🔑</span> 3 Điều Quan Trọng Nhất Từ Bài Này</h2>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Pattern Ẩn Trong 3 Thế Hệ</div>
+                        <div class="flow-step-desc">Nghiệp tiền bạc thường lặp lại qua 3 thế hệ. Điều ông bà trải nghiệm ảnh hưởng đến cha mẹ, và cha mẹ truyền lại cho bạn. Vẽ bản đồ 3 thế hệ giúp bạn nhìn thấy những gì bình thường ẩn trong vô thức.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Câu Nói Gia Đình Là "Code" Nghiệp</div>
+                        <div class="flow-step-desc">Những câu như "Nhà mình không có số giàu", "Tiền là nguồn gốc tội lỗi", "Người giàu thường không tốt" không chỉ là lời nói - chúng là những "code" được cài vào tiềm thức bạn từ nhỏ. Nhận diện các câu nói này là bước quan trọng để chuyển hóa.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tìm Cả Pattern Thịnh Vượng</div>
+                        <div class="flow-step-desc">Đừng chỉ tìm cái xấu! Trong dòng họ bạn chắc chắn có ai đó đã từng giàu có, thịnh vượng, hoặc có mối quan hệ lành mạnh với tiền. Tìm ra họ, học từ pattern của họ. Đây là "tài sản ẩn" của dòng họ mà bạn có thể kế thừa.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TRANSITION -->
+        <section class="section">
+            <h2 class="section-title"><span>🌉</span> Chuẩn Bị Cho Bài Tiếp Theo</h2>
+            <p>Bạn đã NHÌN THẤY các pattern nghiệp tiền trong dòng họ. Đây là bước quan trọng nhất - vì bạn không thể thay đổi những gì bạn không thấy.</p>
+            <p>Bước tiếp theo còn mạnh mẽ hơn: <strong>CẮT DÂY NGHIỆP</strong>. Trong Bài 2.3, bạn sẽ học nghi thức Tha Thứ và Cắt Dây - một nghi thức năng lượng giúp giải phóng những sợi dây ràng buộc bạn với nghiệp tiền bạc của dòng họ.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📝</span> Bài Tập Trước Bài 2.3</div>
+                <p><strong>Hoàn thành bản đồ:</strong> Nếu chưa điền đầy đủ, hãy dành thêm thời gian. Gọi điện cho cha mẹ, cô chú để hỏi thêm thông tin về các thế hệ trước.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Xác định 1 pattern chính:</strong> Chọn 1 pattern nghiệp tiền bạn muốn cắt bỏ nhất. Viết ra giấy: "Tôi chọn giải phóng pattern [tên pattern] khỏi dòng họ tôi."</p>
+                <p style="margin-top: var(--space-sm);"><strong>Chuẩn bị tâm lý:</strong> Bài 2.3 là nghi thức cảm xúc mạnh. Chuẩn bị một không gian yên tĩnh, giấy khăn nếu cần, và sẵn sàng cho việc giải phóng năng lượng cũ.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 7: TỔNG KẾT -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Tổng Kết Bài 2.2</h2>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>📌</span> Những Điều Bạn Đã Làm</div>
+                <ul class="summary-list">
+                    <li>Hiểu tại sao cần khảo sát lịch sử tiền bạc gia đình (Epigenetics, Trường năng lượng, Học tập sớm)</li>
+                    <li>Học cách sử dụng template Bản Đồ Nghiệp Tiền 3 thế hệ</li>
+                    <li>Phân biệt Pattern Thịnh Vượng và Pattern Nghèo Khó</li>
+                    <li>Điền thông tin cho bản đồ gia đình của chính mình</li>
+                    <li>Xác định 1-2 pattern chính cần chuyển hóa</li>
+                </ul>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>➡️</span> Tiếp Theo: Bài 2.3</div>
+                <p>Trong bài tiếp theo, bạn sẽ học <strong>Nghi Thức Tha Thứ - Cắt Dây Nghiệp</strong>. Đây là nghi thức mạnh mẽ để giải phóng những sợi dây năng lượng ràng buộc bạn với nghiệp tiền bạc gia đình.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x400/0a1628/00C853?text=M2_B2_04%0AReady+for+Healing" alt="Sẵn Sàng Chữa Lành">
+                <div class="image-caption">Bạn đã nhìn thấy - giờ là lúc để chữa lành và chuyển hóa</div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <p>© 2024 GEM Academy | <a href="https://gemral.com">gemral.com</a></p>
+            <p style="margin-top: var(--space-sm);">Tiếp theo: Bài 2.3 - Nghi Thức Tha Thứ: Cắt Dây Nghiệp →</p>
+        </footer>
+
+    </div>
+</body>
+</html>

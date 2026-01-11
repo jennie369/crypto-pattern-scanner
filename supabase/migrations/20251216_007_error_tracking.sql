@@ -140,6 +140,12 @@ CREATE TABLE IF NOT EXISTS ai_error_daily_stats (
 -- 4. RPC FUNCTIONS
 -- ═══════════════════════════════════════════════════════════════════════════
 
+-- Drop existing functions first (for idempotent migration)
+DROP FUNCTION IF EXISTS generate_error_hash(TEXT, TEXT, TEXT, TEXT, TEXT);
+DROP FUNCTION IF EXISTS report_error(UUID, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, JSONB, TEXT, TEXT, TEXT, BOOLEAN);
+DROP FUNCTION IF EXISTS get_error_dashboard(INT);
+DROP FUNCTION IF EXISTS get_error_pattern_details(TEXT);
+
 -- Generate error hash for grouping
 CREATE OR REPLACE FUNCTION generate_error_hash(
   p_error_type TEXT,
@@ -371,6 +377,12 @@ ALTER TABLE ai_error_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_error_patterns ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_error_daily_stats ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies first (for idempotent migration)
+DROP POLICY IF EXISTS "Admin can view error logs" ON ai_error_logs;
+DROP POLICY IF EXISTS "Anyone can report errors" ON ai_error_logs;
+DROP POLICY IF EXISTS "Admin can view error patterns" ON ai_error_patterns;
+DROP POLICY IF EXISTS "Admin can view error stats" ON ai_error_daily_stats;
+
 -- Only admin can view error data
 CREATE POLICY "Admin can view error logs"
   ON ai_error_logs FOR SELECT
@@ -410,6 +422,10 @@ CREATE POLICY "Admin can view error stats"
 -- ═══════════════════════════════════════════════════════════════════════════
 -- 6. TRIGGERS
 -- ═══════════════════════════════════════════════════════════════════════════
+
+-- Drop existing trigger and function first
+DROP TRIGGER IF EXISTS trigger_ai_error_patterns_updated ON ai_error_patterns;
+DROP FUNCTION IF EXISTS update_ai_error_patterns_timestamp();
 
 CREATE OR REPLACE FUNCTION update_ai_error_patterns_timestamp()
 RETURNS TRIGGER AS $$

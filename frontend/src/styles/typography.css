@@ -540,3 +540,28 @@
     font-size: var(--text-base);
   }
 }
+
+/* ============================================
+   DISABLE ANIMATIONS IN EDITOR/PREVIEW CONTEXTS
+   For easier content editing without distracting animations
+   ============================================ */
+
+/* Disable animations inside HTML preview/editor areas */
+.html-preview .heading-xl,
+.html-preview .animate-float,
+.html-preview [class*="animate-"],
+.wysiwyg-editor .heading-xl,
+.wysiwyg-editor .animate-float,
+.wysiwyg-editor [class*="animate-"],
+.phone-content .heading-xl,
+.phone-content .animate-float,
+.phone-content [class*="animate-"],
+[contenteditable="true"] .heading-xl,
+[contenteditable="true"] .animate-float,
+[contenteditable="true"] [class*="animate-"] {
+  animation: none !important;
+  animation-delay: 0s !important;
+  animation-duration: 0s !important;
+  animation-iteration-count: 1 !important;
+  transform: none !important;
+}

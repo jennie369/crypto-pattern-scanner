@@ -166,7 +166,7 @@ const Tooltip = ({
                   onPress={onCTA || onDismiss}
                 >
                   <Text style={styles.ctaText}>{ctaText}</Text>
-                  <ChevronRight size={18} color={COLORS.bgDark} />
+                  <ChevronRight size={18} color={COLORS.bgDarkest} />
                 </TouchableOpacity>
               </View>
             </TouchableOpacity>
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
   ctaText: {
     fontSize: TYPOGRAPHY.fontSize.md,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.bgDark,
+    color: COLORS.bgDarkest,
   },
 });
 

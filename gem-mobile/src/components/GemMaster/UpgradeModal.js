@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end'
   },
   content: {
-    backgroundColor: COLORS.bgDark,
+    backgroundColor: COLORS.bgDarkest,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingTop: SPACING.lg,

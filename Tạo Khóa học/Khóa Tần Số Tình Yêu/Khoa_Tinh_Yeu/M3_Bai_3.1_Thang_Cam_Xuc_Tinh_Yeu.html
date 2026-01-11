@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 3.1: Thang Cảm Xúc Tình Yêu | Khóa Tần Số Tình Yêu</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--burgundy); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .highlight-box.purple { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05)); border-color: rgba(106, 91, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.purple { border-left-color: var(--purple); } }
+        .highlight-box.purple .highlight-box-title { color: var(--purple); }
+
+        .highlight-box.cyan { background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 240, 255, 0.05)); border-color: rgba(0, 240, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.cyan { border-left-color: var(--cyan); } }
+        .highlight-box.cyan .highlight-box-title { color: var(--cyan); }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .example-box { background: linear-gradient(135deg, rgba(106, 91, 255, 0.1), rgba(106, 91, 255, 0.02)); border: 1px solid rgba(106, 91, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .example-box { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .example-box-title { font-weight: 700; color: var(--purple); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .frequency-level { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-md) 0; transition: all 0.3s ease; }
+        @media (max-width: 600px) { .frequency-level { border: none; border-radius: 0; padding: var(--space-md) 16px; margin: 0; border-bottom: 1px solid var(--glass-border); } }
+        @media (min-width: 601px) { .frequency-level:hover { transform: translateX(8px); } }
+        .frequency-header { display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-sm); }
+        .frequency-hz { font-size: 1.5rem; font-weight: 800; min-width: 80px; }
+        .frequency-name { font-weight: 700; color: var(--text-primary); }
+        .frequency-desc { font-size: 0.9rem; color: var(--text-muted); padding-left: calc(80px + var(--space-md)); }
+        @media (max-width: 600px) { .frequency-desc { padding-left: 0; } }
+
+        .frequency-level.level-1 { border-left: 4px solid #4a0000; }
+        .frequency-level.level-1 .frequency-hz { color: #8b0000; }
+        .frequency-level.level-2 { border-left: 4px solid #800000; }
+        .frequency-level.level-2 .frequency-hz { color: #a52a2a; }
+        .frequency-level.level-3 { border-left: 4px solid #b8860b; }
+        .frequency-level.level-3 .frequency-hz { color: #daa520; }
+        .frequency-level.level-4 { border-left: 4px solid #ffa500; }
+        .frequency-level.level-4 .frequency-hz { color: #ffc107; }
+        .frequency-level.level-5 { border-left: 4px solid #32cd32; }
+        .frequency-level.level-5 .frequency-hz { color: #90ee90; }
+        .frequency-level.level-6 { border-left: 4px solid #00ced1; }
+        .frequency-level.level-6 .frequency-hz { color: #00ffff; }
+        .frequency-level.level-7 { border-left: 4px solid #ff69b4; }
+        .frequency-level.level-7 .frequency-hz { color: #ffb6c1; }
+
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        @media (min-width: 601px) { .flow-step:hover { border-color: var(--gold); transform: translateX(8px); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .faq-item { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-md) 0; }
+        @media (max-width: 600px) { .faq-item { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; } }
+        .faq-question { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); }
+        .faq-answer { font-size: 0.95rem; color: var(--text-secondary); }
+
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>💕</span>
+                <span>Module 3</span>
+            </div>
+            <div class="lesson-chapter">Chapter 3 - Nâng Tần Số Tình Yêu</div>
+            <h1 class="lesson-title">Thang Cảm Xúc Tình Yêu</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 3.1</span></div>
+                <div class="meta-item"><span>⏱️</span><span>30 phút đọc</span></div>
+            </div>
+        </header>
+
+        <!-- SECTION 1: Opening Hook -->
+        <section class="section">
+            <h2 class="section-title"><span>💭</span> Tại Sao Có Người Thu Hút Tình Yêu, Có Người Thì Không?</h2>
+
+            <p>Bạn có bao giờ thắc mắc tại sao một số người dường như luôn có mối quan hệ hạnh phúc, trong khi những người khác cứ lặp đi lặp lại những pattern đau khổ? Tại sao có người "toát ra" năng lượng khiến người khác muốn đến gần, còn có người lại "xua đuổi" ngay cả những cơ hội tốt nhất?</p>
+
+            <p>Câu trả lời nằm ở một điều mà khoa học đã bắt đầu chứng minh: mỗi cảm xúc đều có một TẦN SỐ RUNG ĐỘNG cụ thể. Giống như đài radio, bạn chỉ bắt được sóng khi "tune" đúng tần số. Nếu bạn đang phát ở tần số sợ hãi và thiếu thốn, bạn sẽ thu hút những người và hoàn cảnh cũng rung động ở tần số đó. Nhưng khi bạn nâng tần số lên mức tình yêu và biết ơn, cuộc sống của bạn sẽ bắt đầu thay đổi theo cách kỳ diệu.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🔮</span> Nguyên Lý Cộng Hưởng</div>
+                <p>Trong vật lý, hai vật có cùng tần số sẽ cộng hưởng với nhau - chúng tự động kéo về phía nhau. Tình yêu cũng hoạt động theo nguyên lý này. Bạn sẽ thu hút người có tần số tương tự với bạn. Muốn thu hút tình yêu đẹp? Trước hết, bạn phải trở thành tình yêu đẹp.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m3-hawkins-scale.png" alt="Thang đo cảm xúc Hawkins">
+            </div>
+            <div class="image-caption">Hình 1: Thang đo cảm xúc của David Hawkins - nền tảng khoa học của tần số cảm xúc</div>
+        </section>
+
+        <!-- SECTION 2: Concept Introduction -->
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> Thang Cảm Xúc Của David Hawkins</h2>
+
+            <p>Tiến sĩ David Hawkins (1927-2012) là một bác sĩ tâm thần học và nhà nghiên cứu ý thức người Mỹ. Trong cuốn sách nổi tiếng "Power vs Force" (Sức Mạnh So Với Ép Buộc), ông đã dành hơn 20 năm nghiên cứu và đo lường tần số rung động của các cảm xúc con người. Kết quả nghiên cứu này đã trở thành nền tảng cho việc hiểu về năng lượng cảm xúc.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📖</span> Tần Số Cảm Xúc Là Gì?</div>
+                <p>Mỗi cảm xúc phát ra một tần số rung động có thể đo được bằng đơn vị Hz (Hertz). Hawkins sử dụng thang đo từ 0 đến 1000, trong đó: Cảm xúc tiêu cực như xấu hổ (20 Hz), tội lỗi (30 Hz), sợ hãi (100 Hz) có tần số thấp - chúng làm suy yếu cơ thể và tinh thần. Cảm xúc tích cực như can đảm (200 Hz), lý trí (400 Hz), tình yêu (500 Hz), biết ơn (540 Hz) có tần số cao - chúng mang lại sức mạnh và khả năng chữa lành.</p>
+            </div>
+
+            <p>Điểm quan trọng nhất trong nghiên cứu của Hawkins là ranh giới 200 Hz. Ông gọi đây là "đường phân chia" giữa Force (ép buộc) và Power (sức mạnh thực sự). Dưới 200 Hz, bạn đang sống từ sự sợ hãi và thiếu thốn - mọi thứ đều cần nỗ lực, đấu tranh. Trên 200 Hz, bạn bắt đầu sống từ sức mạnh nội tại - mọi thứ trở nên dễ dàng hơn vì bạn đang CỘI NGUỒN với năng lượng cao.</p>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>💜</span> Ứng Dụng Vào Tình Yêu</div>
+                <p>Khi áp dụng thang đo này vào lĩnh vực tình yêu, Jennie đã phát triển "7 Tầng Tâm Thức Về Tình Yêu" - một bản đồ giúp bạn hiểu bạn đang ở đâu trong hành trình tình cảm, và cần làm gì để nâng cao tần số để thu hút mối quan hệ xứng đáng.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: 7 Levels -->
+        <section class="section">
+            <h2 class="section-title"><span>💕</span> 7 Tầng Tâm Thức Về Tình Yêu</h2>
+
+            <p>Dựa trên nghiên cứu của Hawkins và hơn 10 năm kinh nghiệm coaching về tình yêu, Jennie đã phát triển 7 Tầng Tâm Thức về Tình Yêu. Mỗi tầng đại diện cho một trạng thái ý thức khác nhau trong cách bạn trải nghiệm và thu hút tình yêu.</p>
+
+            <div class="frequency-level level-1">
+                <div class="frequency-header">
+                    <span class="frequency-hz">50 Hz</span>
+                    <span class="frequency-name">Tầng 1: Tình Yêu Sợ Hãi</span>
+                </div>
+                <div class="frequency-desc">Sợ bị bỏ rơi, sợ không xứng đáng, sợ mất đi tình yêu. Người ở tầng này thường desperate, bám víu vào mối quan hệ độc hại vì sợ cô đơn. Họ chấp nhận những gì không xứng đáng chỉ vì "có còn hơn không". Tư tưởng chủ đạo: "Nếu không có ai yêu tôi, tôi sẽ không sống nổi."</div>
+            </div>
+
+            <div class="frequency-level level-2">
+                <div class="frequency-header">
+                    <span class="frequency-hz">100 Hz</span>
+                    <span class="frequency-name">Tầng 2: Tình Yêu Tức Giận</span>
+                </div>
+                <div class="frequency-desc">Oán hận người yêu cũ, tức giận vì bị tổn thương, đổ lỗi cho đối phương hoặc cho số phận. Năng lượng được hướng ra ngoài một cách tiêu cực. Tư tưởng chủ đạo: "Tất cả đàn ông/phụ nữ đều như vậy! Tôi bị phản bội/lừa dối vì người ta tệ bạc, không phải do tôi."</div>
+            </div>
+
+            <div class="frequency-level level-3">
+                <div class="frequency-header">
+                    <span class="frequency-hz">175 Hz</span>
+                    <span class="frequency-name">Tầng 3: Tình Yêu Tự Hào</span>
+                </div>
+                <div class="frequency-desc">Cần "giành được" tình yêu như chiến lợi phẩm để chứng minh giá trị bản thân. Khoe khoang mối quan hệ trên mạng xã hội. So sánh với người khác. Tư tưởng chủ đạo: "Partner của tôi phải như thế này thế kia để tôi tự hào khi đứng bên cạnh."</div>
+            </div>
+
+            <div class="frequency-level level-4">
+                <div class="frequency-header">
+                    <span class="frequency-hz">250 Hz</span>
+                    <span class="frequency-name">Tầng 4: Tình Yêu Trung Lập</span>
+                </div>
+                <div class="frequency-desc">Chấp nhận tình yêu đến hoặc đi một cách tự nhiên. "Có thì tốt, không có cũng okay." Đây là điểm chuyển tiếp quan trọng - người ở tầng này đã vượt qua ranh giới 200 Hz, bắt đầu sống từ sức mạnh thay vì sợ hãi. Họ không còn desperate nhưng cũng chưa thực sự chủ động.</div>
+            </div>
+
+            <div class="frequency-level level-5">
+                <div class="frequency-header">
+                    <span class="frequency-hz">310 Hz</span>
+                    <span class="frequency-name">Tầng 5: Tình Yêu Sẵn Sàng</span>
+                </div>
+                <div class="frequency-desc">Chủ động mở lòng đón nhận tình yêu. Sẵn sàng làm việc với bản thân để xứng đáng với mối quan hệ tốt đẹp. Optimistic nhưng không naive. Tư tưởng chủ đạo: "Tôi đang trở thành phiên bản tốt nhất của mình để sẵn sàng cho tình yêu đẹp."</div>
+            </div>
+
+            <div class="frequency-level level-6">
+                <div class="frequency-header">
+                    <span class="frequency-hz">400 Hz</span>
+                    <span class="frequency-name">Tầng 6: Tình Yêu Có Ý Thức</span>
+                </div>
+                <div class="frequency-desc">Hiểu rõ mình cần gì, muốn gì. Lựa chọn partner dựa trên sự tương thích giá trị sống, không chỉ dựa vào chemistry hay bề ngoài. Giao tiếp cởi mở và trưởng thành. Tư tưởng chủ đạo: "Tôi biết mình xứng đáng với điều gì và chọn lọc một cách có ý thức."</div>
+            </div>
+
+            <div class="frequency-level level-7">
+                <div class="frequency-header">
+                    <span class="frequency-hz">540+ Hz</span>
+                    <span class="frequency-name">Tầng 7: Tình Yêu Vô Điều Kiện</span>
+                </div>
+                <div class="frequency-desc">Yêu vì bản chất của tình yêu, không vì những gì đối phương mang lại. Cho đi không cần nhận lại. Nhìn thấy vẻ đẹp thiêng liêng trong partner và trong chính mình. Đây là trạng thái của Soulmate/Twin Flame Connection - khi hai người đến với nhau từ sự đầy đủ, không phải thiếu thốn.</div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m3-7-levels-love.png" alt="7 Tầng Tâm Thức Tình Yêu">
+            </div>
+            <div class="image-caption">Hình 2: 7 Tầng Tâm Thức về Tình Yêu - từ 50Hz đến 540Hz</div>
+        </section>
+
+        <!-- SECTION 4: Real Examples -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Câu Chuyện Thực Tế</h2>
+
+            <p>Để bạn hiểu rõ hơn về cách tần số ảnh hưởng đến tình yêu, hãy cùng nghe những câu chuyện thật từ những người đã trải nghiệm sự chuyển hóa.</p>
+
+            <div class="example-box">
+                <div class="example-box-title"><span>👩</span> Câu Chuyện Của Hương (31 tuổi) - Từ Tầng 1 Lên Tầng 5</div>
+                <p>Hương đến gặp Jennie sau khi kết thúc mối quan hệ thứ 4 liên tiếp đều kết thúc bằng việc cô bị bỏ rơi. "Tôi làm tất cả mọi thứ cho họ. Tôi hy sinh, tôi chiều chuộng. Nhưng cuối cùng họ đều rời đi," Hương khóc nức nở.</p>
+                <p style="margin-top: var(--space-sm);">Khi phân tích, Jennie nhận ra Hương đang ở Tầng 1 - Tình Yêu Sợ Hãi. Cô bám víu vì sợ cô đơn, chấp nhận những điều không xứng đáng vì nghĩ mình không đủ tốt. Năng lượng desperate của cô vô tình đẩy người ta ra xa.</p>
+                <p style="margin-top: var(--space-sm);">Sau 6 tháng làm việc với các bài học tương tự như khóa này, Hương đã nâng lên Tầng 5. "Bây giờ tôi không cần ai để cảm thấy hoàn chỉnh. Kỳ lạ là khi tôi ngừng 'cần' tình yêu, tình yêu lại tìm đến tôi. Người yêu hiện tại của tôi nói rằng anh ấy bị thu hút bởi sự tự tin và bình an của tôi."</p>
+            </div>
+
+            <div class="example-box">
+                <div class="example-box-title"><span>👨</span> Câu Chuyện Của Tuấn (38 tuổi) - Từ Tầng 2 Lên Tầng 6</div>
+                <p>Tuấn bị vợ cũ ngoại tình sau 7 năm hôn nhân. Anh mang trong mình sự oán hận sâu sắc. "Tôi ghét tất cả phụ nữ. Họ đều là những kẻ dối trá," anh nói khi gặp Jennie lần đầu. Tuấn đang ở Tầng 2 - Tình Yêu Tức Giận.</p>
+                <p style="margin-top: var(--space-sm);">Thông qua các bài tập tha thứ (Ho'oponopono) và Inner Child Healing, Tuấn dần buông bỏ được sự oán hận. Quan trọng hơn, anh nhận ra vợ cũ chỉ là tấm gương phản chiếu những gì anh cần chữa lành trong chính mình.</p>
+                <p style="margin-top: var(--space-sm);">"Bây giờ tôi ở Tầng 6. Tôi biết rõ mình cần gì ở một người bạn đời - không phải ai xinh đẹp hay giàu có, mà là người có giá trị sống phù hợp với tôi. Tôi không còn oán hận vợ cũ - thực ra tôi còn biết ơn cô ấy vì nhờ trải nghiệm đó mà tôi đã trưởng thành."</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m3-self-assessment.png" alt="Tự đánh giá tần số">
+            </div>
+            <div class="image-caption">Hình 3: Bảng tự đánh giá tần số tình yêu hiện tại</div>
+        </section>
+
+        <!-- SECTION 5: How to Raise -->
+        <section class="section">
+            <h2 class="section-title"><span>⬆️</span> Cách Nâng Tần Số Tình Yêu</h2>
+
+            <p>Tin tốt là: tần số có thể thay đổi! Bạn không "mắc kẹt" ở bất kỳ tầng nào. Dưới đây là 5 cách đã được chứng minh giúp nâng tần số tình yêu của bạn.</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Nhận Diện & Chấp Nhận</div>
+                        <div class="flow-step-desc">Không thể thay đổi những gì bạn không thừa nhận. Bước đầu tiên là nhận diện trung thực bạn đang ở tầng nào. Chấp nhận không có nghĩa là bằng lòng ở lại đó - chỉ là thừa nhận thực tại hiện tại để có điểm xuất phát rõ ràng cho sự chuyển hóa.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Chữa Lành Vết Thương Gốc</div>
+                        <div class="flow-step-desc">Cảm xúc thấp thường bắt nguồn từ những vết thương chưa được chữa lành - thường là từ thời thơ ấu. Module 1 đã giúp bạn bắt đầu quá trình này. Tiếp tục thực hành Ho'oponopono và Inner Child Healing mỗi ngày.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Thay Đổi Niềm Tin</div>
+                        <div class="flow-step-desc">Niềm tin tạo ra cảm xúc, cảm xúc tạo ra tần số. Khi bạn thay đổi niềm tin từ "Tình yêu luôn làm tôi đau" sang "Tình yêu là nguồn năng lượng nuôi dưỡng cuộc sống", tần số của bạn sẽ tự động nâng lên. Bài 3.2 sẽ dạy bạn cách làm điều này.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Thực Hành Biết Ơn</div>
+                        <div class="flow-step-desc">Biết ơn rung động ở 540 Hz - ngang với tình yêu vô điều kiện! Đây là "shortcut" nhanh nhất để nâng tần số. Mỗi ngày, viết 3 điều biết ơn về tình yêu: trong quá khứ (những bài học đã nhận), hiện tại (tình yêu đang có), và tương lai (tình yêu sắp đến).</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tiếp Xúc Với Tần Số Cao</div>
+                        <div class="flow-step-desc">Tần số có tính lây lan - bạn sẽ bị ảnh hưởng bởi những gì xung quanh. Dành thời gian với những cặp đôi có mối quan hệ lành mạnh. Đọc sách, xem phim, nghe podcast về tình yêu đích thực. Tránh xa những nội dung drama, toxic.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m3-raise-frequency.png" alt="5 cách nâng tần số">
+            </div>
+            <div class="image-caption">Hình 4: 5 cách nâng tần số tình yêu của bạn</div>
+        </section>
+
+        <!-- SECTION 6: FAQ -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">Q: Tần số có thể đo được bằng máy móc không?</div>
+                <div class="faq-answer">A: Đây là chủ đề còn nhiều tranh cãi trong khoa học. David Hawkins sử dụng phương pháp Kinesi­ology (cơ học vận động) để đo tần số. Một số nghiên cứu hiện đại cũng đang sử dụng các thiết bị như HRV (Heart Rate Variability) để đo trạng thái cảm xúc. Dù cách đo còn đang được phát triển, điều quan trọng là bạn CẢM NHẬN được sự khác biệt khi ở các trạng thái cảm xúc khác nhau.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Q: Tôi có thể nhảy từ Tầng 1 lên Tầng 7 ngay được không?</div>
+                <div class="faq-answer">A: Về lý thuyết thì có, nhưng thực tế thường là từng bước. Mỗi tầng có những bài học cần trải nghiệm. Đừng vội vàng - việc cố nhảy cóc có thể khiến bạn rơi xuống nhanh hơn. Hãy tập trung vào việc nâng lên 1-2 tầng một cách ổn định. Một người ở Tầng 4 ổn định tốt hơn người "giả vờ" ở Tầng 7 nhưng thực ra vẫn còn vết thương chưa chữa lành.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Q: Nếu tôi ở tầng cao, có nghĩa là tôi sẽ không bao giờ buồn hay giận nữa?</div>
+                <div class="faq-answer">A: Không phải! Ngay cả người ở Tầng 7 vẫn có thể trải nghiệm cảm xúc tiêu cực - đó là một phần của con người. Sự khác biệt là: người ở tầng cao không BỊ MẮC KẸT trong những cảm xúc đó. Họ cảm nhận, xử lý, và buông bỏ nhanh hơn. Họ không để cảm xúc tiêu cực điều khiển hành động và quyết định.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Q: Làm sao biết mình đã thực sự nâng tần số hay chỉ là tự lừa dối?</div>
+                <div class="faq-answer">A: Dấu hiệu thực sự của việc nâng tần số là những thay đổi trong cuộc sống: bạn bắt đầu thu hút những người và cơ hội tốt hơn, cảm thấy bình an hơn khi nghĩ về tình yêu, phản ứng với những tình huống khó khăn một cách trưởng thành hơn. Nếu chỉ là "nói cho hay" mà thực tế không thay đổi gì, đó là dấu hiệu bạn cần làm việc sâu hơn với bản thân.</div>
+            </div>
+        </section>
+
+        <!-- SECTION 7: Practice & Summary -->
+        <section class="section">
+            <h2 class="section-title"><span>✍️</span> Bài Tập Thực Hành</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📝</span> Bài Tập: Journal Tần Số (7 Ngày)</div>
+                <p>Trong 7 ngày tới, mỗi tối trước khi ngủ, viết vào journal 4 câu hỏi sau:<br><br>
+                1. Hôm nay cảm xúc chủ đạo của mình về tình yêu là gì? (xác định cụ thể: sợ hãi, oán giận, hy vọng, biết ơn...)<br>
+                2. Mình đang ở Tầng nào? (1-7)<br>
+                3. Điều gì đã kéo mình xuống hoặc nâng mình lên trong ngày hôm nay?<br>
+                4. Một điều mình biết ơn về tình yêu (quá khứ, hiện tại, hoặc tương lai)</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m3-frequency-journal.png" alt="Journal tần số">
+            </div>
+            <div class="image-caption">Hình 5: Template journal theo dõi tần số tình yêu</div>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>💎</span> Những Điều Cần Ghi Nhớ</div>
+                <ul class="summary-list">
+                    <li>Mỗi cảm xúc đều có tần số đo được - bạn không "bị mắc kẹt" ở bất kỳ trạng thái nào vĩnh viễn</li>
+                    <li>Ranh giới 200 Hz phân chia giữa Force (ép buộc) và Power (sức mạnh thực sự)</li>
+                    <li>Tình yêu vô điều kiện rung động ở 540 Hz - đây là mục tiêu chúng ta hướng đến</li>
+                    <li>Bạn thu hút người có tần số tương tự - muốn thu hút tình yêu đẹp, hãy trở thành tình yêu đẹp</li>
+                    <li>Biết ơn là "shortcut" nhanh nhất để nâng tần số - thực hành mỗi ngày</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>🚀</span> Bài Tiếp Theo</div>
+                <p>Trong Bài 3.2 - Chuyển Hóa Niềm Tin Giới Hạn, bạn sẽ học cách nhận diện và thay đổi những niềm tin đang kéo tần số của bạn xuống. Đây là một trong những công cụ mạnh mẽ nhất để nâng cấp trải nghiệm tình yêu của bạn.</p>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>

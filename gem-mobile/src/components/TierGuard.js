@@ -3,6 +3,7 @@
  * Controls access to features based on user tier
  *
  * ADMIN BYPASS: Admin users have unlimited access to ALL features
+ * MANAGER BYPASS: Manager users have unlimited access to Scanner, Chatbot, Vision Board
  */
 
 import React from 'react';
@@ -27,8 +28,11 @@ const TierGuard = ({
                   profile?.scanner_tier === 'ADMIN' ||
                   profile?.chatbot_tier === 'ADMIN';
 
-  if (isAdmin) {
-    console.log('✅ [TierGuard] Admin bypass - Full access granted');
+  // ⚡ MANAGER BYPASS - Manager has unlimited access to Scanner, Chatbot, Vision Board
+  const isManager = profile?.role === 'manager' || profile?.role === 'MANAGER';
+
+  if (isAdmin || isManager) {
+    console.log(`✅ [TierGuard] ${isAdmin ? 'Admin' : 'Manager'} bypass - Full access granted`);
     return children;
   }
 

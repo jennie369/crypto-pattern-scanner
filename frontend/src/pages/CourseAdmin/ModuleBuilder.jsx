@@ -45,6 +45,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { courseService } from '../../services/courseService';
 import { lessonService } from '../../services/lessonService';
+import { CourseNavigator } from './components';
 import './ModuleBuilder.css';
 
 // Sortable Module Item
@@ -131,10 +132,10 @@ function SortableLesson({ lesson, onEdit, onDelete }) {
       <div className="lesson-drag-handle" {...attributes} {...listeners}>
         <GripVertical size={16} />
       </div>
-      <div className="lesson-icon">
+      <div className="lesson-icon" onClick={() => onEdit(lesson)}>
         {getLessonIcon(lesson.lesson_type)}
       </div>
-      <div className="lesson-info">
+      <div className="lesson-info" onClick={() => onEdit(lesson)}>
         <span className="lesson-title">{lesson.title}</span>
         <span className="lesson-meta">
           {lesson.duration_minutes ? `${lesson.duration_minutes} phút` : ''}
@@ -169,6 +170,7 @@ export default function ModuleBuilder() {
   const [editingModule, setEditingModule] = useState(null);
   const [newModuleTitle, setNewModuleTitle] = useState('');
   const [showAddModule, setShowAddModule] = useState(false);
+  const [courseNavOpen, setCourseNavOpen] = useState(true); // Course Navigator panel
 
   // Active drag items
   const [activeId, setActiveId] = useState(null);
@@ -498,14 +500,24 @@ export default function ModuleBuilder() {
         </div>
       )}
 
-      {/* Modules List */}
-      <div className="modules-container">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-        >
+      {/* Main Layout with Navigator */}
+      <div className="builder-layout-wrapper">
+        {/* Course Navigator - Quick switch between courses */}
+        <CourseNavigator
+          currentCourseId={courseId}
+          isOpen={courseNavOpen}
+          onToggle={() => setCourseNavOpen(!courseNavOpen)}
+          position="left"
+        />
+
+        {/* Modules List */}
+        <div className="modules-container">
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
           <SortableContext
             items={modules.map(m => m.id)}
             strategy={verticalListSortingStrategy}
@@ -647,6 +659,7 @@ export default function ModuleBuilder() {
             Thêm chương mới
           </button>
         )}
+        </div>
       </div>
     </div>
   );

@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 10.6: Khung Quyết Định - GEM Trading Academy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container {
+                padding: 0;
+            }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-chapter {
+            font-size: 0.9rem;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-lg);
+            flex-wrap: wrap;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        .section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section {
+                padding: 0;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .section-title {
+                padding: var(--space-lg) 16px var(--space-md) 16px;
+                margin-bottom: 0;
+            }
+        }
+
+        .section > p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .section > p {
+                padding: 0 16px;
+            }
+        }
+
+        .section > ul, .section > ol {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .section > ul, .section > ol {
+                padding-left: calc(16px + 1.5em);
+                padding-right: 16px;
+            }
+        }
+        .section li { margin-bottom: var(--space-sm); }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box-title {
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .definition-box-title {
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .image-container {
+            margin: var(--space-xl) 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-container {
+                margin: var(--space-md) 0;
+                border-radius: 0;
+                border: none;
+            }
+        }
+        .image-caption {
+            padding: var(--space-sm);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .image-caption {
+                padding: var(--space-sm) 16px;
+            }
+        }
+
+        .pattern-flow {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .pattern-flow {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .flow-phase {
+            display: flex;
+            gap: var(--space-md);
+            align-items: flex-start;
+            padding: var(--space-md);
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .flow-phase {
+                padding: var(--space-md) 16px;
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+            }
+        }
+        .flow-phase.up { border-left-color: var(--success); }
+        .flow-phase.pause { border-left-color: var(--gold); }
+        .phase-icon {
+            font-size: 2rem;
+            min-width: 50px;
+            text-align: center;
+        }
+        .phase-content { flex: 1; }
+        .phase-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+        }
+        .flow-phase.up .phase-title { color: var(--success); }
+        .flow-phase.pause .phase-title { color: var(--gold); }
+        .phase-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .stats-grid {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .stat-card {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-md);
+            }
+        }
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--cyan), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        @media (max-width: 600px) {
+            .stat-value { font-size: 1.25rem; }
+        }
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        .stat-card.green .stat-value {
+            background: linear-gradient(135deg, var(--success), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-card.gold .stat-value {
+            background: linear-gradient(135deg, var(--gold), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .summary-list { list-style: none; }
+        .summary-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-list li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-section {
+                border: none;
+                border-radius: 0;
+                padding: 0;
+                margin-top: 0;
+                border-top: 8px solid var(--bg-primary);
+            }
+        }
+        .quiz-header {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-header {
+                padding: var(--space-lg) 16px var(--space-md);
+                margin-bottom: 0;
+            }
+        }
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+        }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-question {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin-bottom: 0;
+                border-bottom: 1px solid var(--glass-border);
+            }
+        }
+        .question-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50%;
+            font-weight: 700;
+            color: var(--navy-dark);
+            margin-bottom: var(--space-md);
+        }
+        .question-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+            line-height: 1.6;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .quiz-options {
+                gap: 1px;
+                background: var(--glass-border);
+                margin-left: -16px;
+                margin-right: -16px;
+                margin-left: calc(-16px - 4px);
+            }
+        }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .quiz-option {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid transparent;
+                padding: var(--space-md) 16px;
+            }
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+        @media (max-width: 600px) {
+            .quiz-option:hover:not(.disabled) {
+                border-left-color: var(--gold);
+            }
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+        }
+        @media (max-width: 600px) {
+            .quiz-option.correct {
+                border-left-color: var(--success) !important;
+            }
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+        }
+        @media (max-width: 600px) {
+            .quiz-option.incorrect {
+                border-left-color: var(--error) !important;
+            }
+        }
+        .quiz-option.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .option-marker {
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .quiz-option.correct .option-marker {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+        .quiz-option.incorrect .option-marker {
+            background: var(--error);
+            border-color: var(--error);
+            color: white;
+        }
+        .option-text { flex: 1; color: var(--text-secondary); }
+
+        .question-feedback {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--space-sm);
+            display: none;
+        }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+        }
+        .question-feedback.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+        }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .quiz-result {
+            text-align: center;
+            padding: var(--space-xl);
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .result-score {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--gold), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--space-md);
+        }
+
+        .quiz-buttons {
+            display: flex;
+            justify-content: center;
+            padding: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-buttons { padding: var(--space-lg) 16px; }
+        }
+        .quiz-btn {
+            padding: var(--space-md) var(--space-xl);
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            border: 2px solid var(--glass-border);
+        }
+        .quiz-btn:hover { border-color: var(--gold); }
+    </style>
+</head>
+<body>
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>🎯</span>
+                <span>Module B</span>
+            </div>
+            <div class="lesson-chapter">Chapter 10 - Cơ Hội & Lựa Chọn</div>
+            <h1 class="lesson-title">Khung Quyết Định</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 10.6</span></div>
+                <div class="meta-item"><span>⏱️</span><span>10 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <section class="content-section">
+            <!-- OPENING HOOK -->
+            <div class="content-card">
+                <h2><span class="icon">📖</span> Câu Chuyện Về Một Quyết Định Quan Trọng</h2>
+
+                <p>Năm 2019, anh Tùng - một kỹ sư phần mềm 28 tuổi - đứng trước quyết định quan trọng: có nên bỏ ra 3 tháng lương (khoảng $1,500) để học một khóa trading hay không? Gia đình phản đối, bạn bè hoài nghi, và bản thân anh cũng không chắc chắn.</p>
+
+                <p>Anh Tùng không đưa ra quyết định dựa trên cảm xúc. Thay vào đó, anh ngồi xuống và viết ra một "khung quyết định" với 5 câu hỏi then chốt: Tài chính có ổn không? Thời gian có đủ không? Mục tiêu có rõ ràng không? Rủi ro tối đa là gì? Hậu quả xấu nhất nếu thất bại là gì?</p>
+
+                <p>Sau khi trả lời từng câu một cách trung thực, anh quyết định đăng ký. 2 năm sau, anh đã có thu nhập thụ động từ trading bằng 1.5 lần lương chính - không phải vì may mắn, mà vì anh đã đưa ra quyết định dựa trên LOGIC chứ không phải cảm xúc hay áp lực.</p>
+
+                <div class="highlight-box">
+                    <p><strong>💡 Bài học từ câu chuyện:</strong> Quyết định lớn không nên dựa trên cảm xúc nhất thời (dù là hào hứng hay sợ hãi). Bạn cần một framework - một "khung quyết định" - để đánh giá mọi yếu tố một cách khách quan. Bài học này sẽ cung cấp cho bạn chính xác framework đó, để bạn có thể tự tin đưa ra quyết định phù hợp với hoàn cảnh của mình.</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2><span class="icon">🎯</span> Quyết Định Dựa Trên Logic</h2>
+
+                <p>Một quyết định tốt không dựa trên cảm xúc hay áp lực từ bên ngoài, mà dựa trên <strong>sự đánh giá khách quan</strong> về tình huống thực tế của bạn. Đây là kỹ năng quan trọng không chỉ trong trading mà còn trong cuộc sống.</p>
+
+                <div class="highlight-box">
+                    <p><strong>💡 Nguyên tắc cốt lõi:</strong> Trước khi quyết định bất cứ điều gì quan trọng (upgrade khóa học, đầu tư vào thị trường, thay đổi công việc, mua nhà...), hãy sử dụng một framework logic để đánh giá. Không có framework = quyết định dựa trên cảm xúc = hối hận sau này. Framework giúp bạn loại bỏ bias và nhìn nhận vấn đề một cách toàn diện.</p>
+                </div>
+
+                <p>Trong bài này, chúng ta sẽ xây dựng <strong>Khung Quyết Định</strong> để giúp bạn tự đánh giá xem mình nên:</p>
+                <ul>
+                    <li>Tiếp tục học miễn phí với TIER 1</li>
+                    <li>Upgrade lên TIER 2 để đi sâu hơn</li>
+                    <li>Trở thành Đối Tác để kiếm thêm thu nhập</li>
+                </ul>
+
+                <!-- HÌNH 10.6.1 -->
+                <div class="image-container">
+                    <img src="images/bai-10.6-hinh-1-decision-framework.jpg" alt="Khung quyết định logic">
+                    <div class="image-caption">Hình 10.6.1: Khung quyết định logic - 5 tiêu chí đánh giá trước khi upgrade</div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2><span class="icon">📋</span> Bước 1: Tự Đánh Giá Bản Thân</h2>
+
+                <p>Trả lời trung thực các câu hỏi sau:</p>
+
+                <div class="self-assessment">
+                    <h4>📝 Checklist Tự Đánh Giá</h4>
+
+                    <div class="assessment-question">
+                        <p>1. Tôi có đủ thời gian cam kết (tối thiểu 5-10 giờ/tuần)?</p>
+                        <div class="assessment-options">
+                            <button class="assessment-option" data-answer="yes">Có ✓</button>
+                            <button class="assessment-option" data-answer="no">Chưa ✗</button>
+                        </div>
+                    </div>
+
+                    <div class="assessment-question">
+                        <p>2. Tôi có ngân sách cho việc học (không ảnh hưởng chi tiêu thiết yếu)?</p>
+                        <div class="assessment-options">
+                            <button class="assessment-option" data-answer="yes">Có ✓</button>
+                            <button class="assessment-option" data-answer="no">Chưa ✗</button>
+                        </div>
+                    </div>
+
+                    <div class="assessment-question">
+                        <p>3. Tôi đã hoàn thành TIER 1 và hiểu các pattern cơ bản?</p>
+                        <div class="assessment-options">
+                            <button class="assessment-option" data-answer="yes">Có ✓</button>
+                            <button class="assessment-option" data-answer="no">Chưa ✗</button>
+                        </div>
+                    </div>
+
+                    <div class="assessment-question">
+                        <p>4. Tôi nghiêm túc muốn trading trở thành nguồn thu nhập?</p>
+                        <div class="assessment-options">
+                            <button class="assessment-option" data-answer="yes">Có ✓</button>
+                            <button class="assessment-option" data-answer="no">Chưa ✗</button>
+                        </div>
+                    </div>
+
+                    <div class="assessment-question">
+                        <p>5. Tôi sẵn sàng học và thực hành kiên trì trong 3-6 tháng?</p>
+                        <div class="assessment-options">
+                            <button class="assessment-option" data-answer="yes">Có ✓</button>
+                            <button class="assessment-option" data-answer="no">Chưa ✗</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2><span class="icon">🔄</span> Bước 2: Decision Flowchart</h2>
+
+                <p>Dựa trên câu trả lời, đi theo flow sau:</p>
+
+                <div class="decision-flowchart">
+                    <div class="flow-step">
+                        <div class="flow-icon">1</div>
+                        <div class="flow-content">
+                            <h4>Kiểm tra ngân sách</h4>
+                            <p>Nếu CHƯA có ngân sách → Tiếp tục học miễn phí, paper trade</p>
+                        </div>
+                    </div>
+
+                    <div class="flow-step">
+                        <div class="flow-icon">2</div>
+                        <div class="flow-content">
+                            <h4>Kiểm tra thời gian</h4>
+                            <p>Nếu CHƯA có thời gian → Chờ khi cuộc sống ổn định hơn</p>
+                        </div>
+                    </div>
+
+                    <div class="flow-step">
+                        <div class="flow-icon">3</div>
+                        <div class="flow-content">
+                            <h4>Kiểm tra nền tảng kiến thức</h4>
+                            <p>Nếu CHƯA nắm TIER 1 → Ôn lại bài cũ, paper trade thêm</p>
+                        </div>
+                    </div>
+
+                    <div class="flow-step">
+                        <div class="flow-icon">4</div>
+                        <div class="flow-content">
+                            <h4>Kiểm tra mục tiêu</h4>
+                            <p>Nếu CÓ tất cả điều kiện → Sẵn sàng upgrade!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HÌNH 10.6.2 -->
+                <div class="image-container">
+                    <img src="images/bai-10.6-hinh-2-decision-flowchart.jpg" alt="Sơ đồ quyết định chi tiết">
+                    <div class="image-caption">Hình 10.6.2: Sơ đồ quyết định chi tiết - Flow 4 bước kiểm tra ngân sách, thời gian, kiến thức, mục tiêu</div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2><span class="icon">✅</span> Bước 3: Kết Luận & Hành Động</h2>
+
+                <p>Dựa trên đánh giá, chọn kịch bản phù hợp:</p>
+
+                <div class="scenario-grid">
+                    <div class="scenario-card yes">
+                        <h4>✅ NÊN Upgrade Nếu...</h4>
+                        <ul>
+                            <li>• Đủ 4/5 tiêu chí trở lên</li>
+                            <li>• Đã paper trade ít nhất 1 tháng</li>
+                            <li>• Nghiêm túc với mục tiêu trading</li>
+                            <li>• Có ngân sách không ảnh hưởng cuộc sống</li>
+                            <li>• Muốn học nhanh hơn với mentor</li>
+                        </ul>
+                        <button class="action-button primary">→ Xem TIER 2</button>
+                    </div>
+
+                    <div class="scenario-card no">
+                        <h4>⏸️ NÊN Chờ Nếu...</h4>
+                        <ul>
+                            <li>• Dưới 3/5 tiêu chí</li>
+                            <li>• Chưa hoàn thành TIER 1</li>
+                            <li>• Tài chính chưa ổn định</li>
+                            <li>• Không có thời gian cam kết</li>
+                            <li>• Chưa chắc trading phù hợp</li>
+                        </ul>
+                        <button class="action-button secondary">→ Tiếp tục TIER 1</button>
+                    </div>
+                </div>
+
+                <div class="highlight-box cyan">
+                    <p><strong>💡 Lưu ý quan trọng:</strong> Không có gì xấu khi chưa sẵn sàng - đó là sự trung thực với bản thân. Tốt hơn là chờ đúng thời điểm khi bạn thực sự có đủ điều kiện, thay vì ép bản thân đăng ký rồi bỏ cuộc giữa chừng vì không có thời gian học hoặc stress vì tài chính. Một quyết định "chưa" hôm nay không có nghĩa là "không bao giờ" - nó chỉ có nghĩa là "chưa phải lúc này". Khi điều kiện thay đổi, bạn có thể đánh giá lại.</p>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2><span class="icon">🤔</span> Câu Hỏi Thường Gặp</h2>
+
+                <h3>Q: Nếu tôi không upgrade, có bị mất kiến thức TIER 1 không?</h3>
+                <p><strong>A:</strong> Không. TIER 1 là vĩnh viễn. Bạn có thể học đi học lại bao nhiêu lần tùy thích.</p>
+
+                <h3>Q: Giá TIER 2 có tăng không?</h3>
+                <p><strong>A:</strong> Có, giá tăng định kỳ khi thêm tính năng. Nhưng đừng để điều này áp lực bạn nếu chưa sẵn sàng.</p>
+
+                <h3>Q: Tôi có thể upgrade sau 1-2 tháng nữa không?</h3>
+                <p><strong>A:</strong> Hoàn toàn được. Khi nào bạn sẵn sàng, link upgrade vẫn còn đó.</p>
+
+                <h3>Q: Nếu upgrade rồi không hài lòng thì sao?</h3>
+                <p><strong>A:</strong> GEM có chính sách hoàn tiền 7 ngày nếu bạn không hài lòng với khóa học.</p>
+
+                <!-- HÌNH 10.6.3 -->
+                <div class="image-container">
+                    <img src="images/bai-10.6-hinh-3-faq-section.jpg" alt="Các câu hỏi thường gặp">
+                    <div class="image-caption">Hình 10.6.3: Các câu hỏi thường gặp - Giải đáp thắc mắc về upgrade và chính sách hoàn tiền</div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <h2><span class="icon">🎯</span> Checklist Cuối Cùng</h2>
+
+                <p>Trước khi quyết định, đảm bảo bạn đã:</p>
+
+                <div class="checklist-section">
+                    <h4>✅ Pre-Decision Checklist</h4>
+
+                    <div class="checklist-item">
+                        <div class="checklist-checkbox" onclick="this.classList.toggle('checked')"></div>
+                        <span class="checklist-text">Hoàn thành tất cả bài học TIER 1</span>
+                    </div>
+
+                    <div class="checklist-item">
+                        <div class="checklist-checkbox" onclick="this.classList.toggle('checked')"></div>
+                        <span class="checklist-text">Paper trade ít nhất 20-30 lệnh</span>
+                    </div>
+
+                    <div class="checklist-item">
+                        <div class="checklist-checkbox" onclick="this.classList.toggle('checked')"></div>
+                        <span class="checklist-text">Hiểu được 4 patterns cơ bản (UPU, UPD, DPU, DPD)</span>
+                    </div>
+
+                    <div class="checklist-item">
+                        <div class="checklist-checkbox" onclick="this.classList.toggle('checked')"></div>
+                        <span class="checklist-text">Đánh giá trung thực khả năng tài chính</span>
+                    </div>
+
+                    <div class="checklist-item">
+                        <div class="checklist-checkbox" onclick="this.classList.toggle('checked')"></div>
+                        <span class="checklist-text">Có kế hoạch thời gian học rõ ràng</span>
+                    </div>
+
+                    <div class="checklist-item">
+                        <div class="checklist-checkbox" onclick="this.classList.toggle('checked')"></div>
+                        <span class="checklist-text">Quyết định dựa trên logic, không phải cảm xúc</span>
+                    </div>
+                </div>
+
+                <div class="highlight-box green">
+                    <p><strong>✅ Nếu bạn tick được 5/6 mục trở lên:</strong> Bạn sẵn sàng để upgrade và tiến xa hơn trong hành trình trading! Điều này có nghĩa là bạn đã đánh giá kỹ lưỡng tình hình, có nền tảng kiến thức, có khả năng tài chính, và có kế hoạch thời gian rõ ràng. Đây là thời điểm tốt để hành động vì bạn đã chuẩn bị đầy đủ. Đừng để sự do dự làm mất lợi thế đi sớm mà bạn xứng đáng có được.</p>
+                </div>
+
+                <div class="highlight-box purple">
+                    <p><strong>⚠️ Nếu bạn tick được 3-4 mục:</strong> Bạn đang ở giai đoạn gần sẵn sàng nhưng còn thiếu một vài yếu tố. Hãy xác định cụ thể mục nào bạn chưa tick được và làm việc để cải thiện trong 2-4 tuần tới. Sau đó đánh giá lại. Đây không phải là thất bại - đây là sự chuẩn bị kỹ lưỡng.</p>
+                </div>
+
+                <div class="highlight-box red">
+                    <p><strong>🛑 Nếu bạn tick được dưới 3 mục:</strong> Bạn chưa sẵn sàng để upgrade lúc này, và điều đó hoàn toàn OK. Hãy tập trung vào TIER 1 miễn phí, paper trade thêm, ổn định tài chính, và sắp xếp thời gian. Khi nào các điều kiện cải thiện, bạn sẽ biết vì checklist này sẽ cho kết quả khác.</p>
+                </div>
+            </div>
+
+            <div class="summary-box">
+                <h3>📝 Tóm Tắt Bài Học</h3>
+                <ul>
+                    <li>Quyết định tốt dựa trên đánh giá khách quan, không phải cảm xúc</li>
+                    <li>Sử dụng checklist tự đánh giá 5 tiêu chí quan trọng</li>
+                    <li>Đi theo decision flowchart để xác định bước tiếp theo</li>
+                    <li>Không sao nếu chưa sẵn sàng - TIER 1 vẫn luôn ở đó</li>
+                    <li>Khi đủ điều kiện, hãy hành động để tận dụng lợi thế đi sớm</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="quiz-section">
+            <div class="quiz-container">
+                <h2><span class="icon">❓</span> Kiểm Tra Kiến Thức</h2>
+
+                <div class="quiz-question" data-correct="2">
+                    <p>1. Quyết định upgrade nên dựa trên điều gì?</p>
+                    <button class="quiz-option" data-index="0">A. Áp lực từ giá tăng</button>
+                    <button class="quiz-option" data-index="1">B. Vì bạn bè cũng đăng ký</button>
+                    <button class="quiz-option" data-index="2">C. Đánh giá khách quan về tài chính, thời gian và mục tiêu</button>
+                    <button class="quiz-option" data-index="3">D. Cảm xúc hứng thú nhất thời</button>
+                    <div class="quiz-result"></div>
+                </div>
+
+                <div class="quiz-question" data-correct="1">
+                    <p>2. Nếu chưa đủ điều kiện upgrade, bạn nên làm gì?</p>
+                    <button class="quiz-option" data-index="0">A. Cố gắng vay mượn để đăng ký</button>
+                    <button class="quiz-option" data-index="1">B. Tiếp tục học TIER 1, paper trade, chờ đúng thời điểm</button>
+                    <button class="quiz-option" data-index="2">C. Bỏ cuộc vì không có tiền</button>
+                    <button class="quiz-option" data-index="3">D. Tìm khóa học rẻ hơn ở nơi khác</button>
+                    <div class="quiz-result"></div>
+                </div>
+
+                <div class="quiz-question" data-correct="0">
+                    <p>3. Checklist tự đánh giá bao gồm những tiêu chí nào?</p>
+                    <button class="quiz-option" data-index="0">A. Thời gian, ngân sách, kiến thức, mục tiêu, kiên trì</button>
+                    <button class="quiz-option" data-index="1">B. Chỉ cần có tiền là đủ</button>
+                    <button class="quiz-option" data-index="2">C. Số followers trên mạng xã hội</button>
+                    <button class="quiz-option" data-index="3">D. Bằng cấp học vấn</button>
+                    <div class="quiz-result"></div>
+                </div>
+
+                <div class="quiz-score">
+                    <h3>🎉 Hoàn thành!</h3>
+                    <p>Bạn trả lời đúng <span id="correct-count">0</span>/3 câu hỏi</p>
+                    <button class="retake-btn" onclick="location.reload()">Làm lại Quiz</button>
+                </div>
+            </div>
+        </section>
+
+        <footer class="section" style="text-align: center; padding: var(--space-xl);">
+            <p style="color: var(--gold); font-weight: 600;">Hoàn thành Bài 10.6</p>
+            <p style="color: var(--text-muted);">Tiếp theo: <strong style="color: var(--text-primary);">Bài 10.7 - Các Bước Tiếp Theo</strong></p>
+        </footer>
+    </div>
+
+    <script>
+        // Quiz functionality
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+
+                    question.classList.add('answered');
+                    answeredCount++;
+
+                    const selectedIndex = parseInt(this.dataset.index);
+
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác! Bạn đã hiểu cách đưa ra quyết định logic.';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Xem lại đáp án đúng được highlight.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+
+        // Self-assessment interactivity
+        document.querySelectorAll('.assessment-option').forEach(button => {
+            button.addEventListener('click', function() {
+                const siblings = this.parentElement.querySelectorAll('.assessment-option');
+                siblings.forEach(s => s.classList.remove('selected', 'yes', 'no'));
+                this.classList.add('selected', this.dataset.answer);
+            });
+        });
+    </script>
+</body>
+</html>

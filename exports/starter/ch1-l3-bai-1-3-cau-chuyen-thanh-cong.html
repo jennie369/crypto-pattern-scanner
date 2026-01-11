@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bài 1.3: Câu Chuyện Thành Công | GEM Trading Academy</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Noto+Sans+Display:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================
+       GEM DESIGN SYSTEM - V5.4 DESIGN TOKENS
+       ========================================== */
+
+    :root {
+      --color-navy: #112250;
+      --color-navy-dark: #0A0F1A;
+      --color-navy-light: #1a3a6e;
+      --color-gold: #FFBD59;
+      --color-gold-dark: #E5A84D;
+      --color-burgundy: #9C0612;
+      --color-cyan: #00F0FF;
+      --color-purple: #6A5BFF;
+      --color-green: #10B981;
+      --color-red: #EF4444;
+      --color-white: #FFFFFF;
+
+      --color-text: #E8E8E8;
+      --color-text-secondary: rgba(255, 255, 255, 0.7);
+      --color-text-muted: rgba(255, 255, 255, 0.5);
+
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.06);
+      --bg-glass: rgba(255, 255, 255, 0.03);
+      --color-bg-dark: #0A0F1A;
+
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --border-gold: rgba(255, 189, 89, 0.3);
+      --border-cyan: rgba(0, 240, 255, 0.3);
+      --border-green: rgba(16, 185, 129, 0.3);
+      --border-purple: rgba(106, 91, 255, 0.3);
+      --glass-border: rgba(255, 255, 255, 0.08);
+
+      --text-padding: 16px;
+      --container-padding: 0;
+
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 12px;
+      --space-lg: 16px;
+      --space-xl: 20px;
+      --space-2xl: 24px;
+      --space-3xl: 32px;
+
+      --card-padding: 12px;
+      --table-padding: 6px;
+
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+      --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.3);
+      --shadow-glow-gold: 0 0 15px rgba(255, 189, 89, 0.3);
+      --shadow-glow-cyan: 0 0 15px rgba(0, 240, 255, 0.3);
+      --shadow-glow-green: 0 0 15px rgba(16, 185, 129, 0.3);
+      --shadow-glow-purple: 0 0 15px rgba(106, 91, 255, 0.3);
+
+      --glass-blur: blur(40px);
+
+      --font-heading: 'Montserrat', sans-serif;
+      --font-body: 'Noto Sans Display', sans-serif;
+      --text-xs: 0.75rem;
+      --text-sm: 0.85rem;
+      --text-base: 0.95rem;
+      --text-lg: 1.1rem;
+      --text-xl: 1.25rem;
+      --text-2xl: 1.5rem;
+    }
+
+    @media (min-width: 600px) {
+      :root {
+        --text-padding: 0;
+        --container-padding: 1.5rem;
+        --card-padding: 16px;
+        --table-padding: 12px;
+
+        --space-sm: 10px;
+        --space-md: 16px;
+        --space-lg: 20px;
+        --space-xl: 24px;
+        --space-2xl: 32px;
+        --space-3xl: 48px;
+
+        --text-xs: 0.8rem;
+        --text-sm: 0.9rem;
+        --text-base: 1rem;
+        --text-lg: 1.15rem;
+        --text-xl: 1.3rem;
+        --text-2xl: 1.6rem;
+      }
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--color-bg-dark);
+      color: var(--color-text);
+      line-height: 1.6;
+      min-height: 100vh;
+      font-size: var(--text-base);
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        linear-gradient(180deg,
+          rgba(10, 15, 26, 1) 0%,
+          rgba(17, 34, 80, 0.8) 30%,
+          rgba(17, 34, 80, 0.8) 70%,
+          rgba(10, 15, 26, 1) 100%
+        ),
+        radial-gradient(ellipse 600px 600px at 20% 20%,
+          rgba(255, 189, 89, 0.08), transparent 70%),
+        radial-gradient(ellipse 500px 500px at 80% 80%,
+          rgba(0, 240, 255, 0.06), transparent 70%),
+        radial-gradient(ellipse 400px 400px at 50% 50%,
+          rgba(106, 91, 255, 0.04), transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: var(--container-padding);
+    }
+
+    /* ========== LESSON HEADER ========== */
+    .lesson-header {
+      text-align: center;
+      padding: var(--space-lg) var(--text-padding);
+      background: var(--bg-card);
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid var(--border-subtle);
+      backdrop-filter: var(--glass-blur);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 1px;
+    }
+
+    .lesson-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg,
+        var(--color-green),
+        var(--color-cyan),
+        var(--color-green)
+      );
+    }
+
+    @media (min-width: 600px) {
+      .lesson-header {
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-subtle);
+        padding: var(--space-xl) var(--card-padding);
+        margin-bottom: var(--space-lg);
+      }
+    }
+
+    .lesson-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));
+      color: var(--color-navy);
+      padding: var(--space-xs) var(--space-md);
+      border-radius: 20px;
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--space-sm);
+    }
+
+    .lesson-title {
+      font-family: var(--font-heading);
+      font-size: var(--text-2xl);
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--color-green), var(--color-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: var(--space-sm);
+      line-height: 1.3;
+    }
+
+    .lesson-subtitle {
+      color: var(--color-text-secondary);
+      font-size: var(--text-sm);
+    }
+
+    /* ========== SECTION ========== */
+    .section {
+      background: var(--bg-glass);
+      border: none;
+      border-bottom: 1px solid var(--glass-border);
+      border-radius: 0;
+      padding: var(--card-padding) 0;
+      margin-bottom: 1px;
+      backdrop-filter: var(--glass-blur);
+    }
+
+    @media (min-width: 600px) {
+      .section {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-lg);
+        padding: var(--card-padding);
+        margin-bottom: var(--space-lg);
+      }
+    }
+
+    .section > p,
+    .section > h2,
+    .section > h3,
+    .section > ul,
+    .section > ol {
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+    }
+
+    @media (min-width: 600px) {
+      .section > p,
+      .section > h2,
+      .section > h3,
+      .section > ul,
+      .section > ol {
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+
+    .section-title {
+      font-family: var(--font-heading);
+      font-size: var(--text-xl);
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .section-title.green {
+      color: var(--color-green);
+    }
+
+    .section-title .icon {
+      font-size: 1.2em;
+    }
+
+    .section p {
+      margin-bottom: var(--space-md);
+      line-height: 1.7;
+    }
+
+    .section p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* ========== TESTIMONIAL CARD ========== */
+    .testimonial-card {
+      background: var(--bg-glass);
+      border: none;
+      border-left: 4px solid var(--color-green);
+      border-radius: 0;
+      padding: var(--card-padding) var(--text-padding);
+      margin: var(--space-lg) 0;
+      position: relative;
+    }
+
+    @media (min-width: 600px) {
+      .testimonial-card {
+        border: 1px solid var(--border-green);
+        border-left: 4px solid var(--color-green);
+        border-radius: var(--radius-lg);
+        padding: var(--card-padding);
+      }
+    }
+
+    .testimonial-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-bottom: var(--space-md);
+    }
+
+    .testimonial-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--color-green), var(--color-cyan));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .testimonial-info h3 {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: var(--text-base);
+      color: var(--color-green);
+      margin-bottom: var(--space-xs);
+    }
+
+    .testimonial-info .role {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+    }
+
+    .testimonial-content {
+      margin-bottom: var(--space-md);
+    }
+
+    .testimonial-content .journey-title {
+      font-weight: 700;
+      color: var(--color-cyan);
+      margin-bottom: var(--space-sm);
+      font-size: var(--text-sm);
+    }
+
+    .testimonial-content p {
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+      margin-bottom: var(--space-sm);
+    }
+
+    .testimonial-content p:last-child {
+      margin-bottom: 0;
+    }
+
+    .testimonial-quote {
+      background: rgba(0, 240, 255, 0.1);
+      border-left: 3px solid var(--color-cyan);
+      padding: var(--space-md);
+      margin: var(--space-md) 0;
+      font-style: italic;
+      color: var(--color-cyan);
+      font-size: var(--text-sm);
+    }
+
+    .testimonial-result {
+      background: rgba(16, 185, 129, 0.1);
+      border-radius: var(--radius-sm);
+      padding: var(--space-sm) var(--space-md);
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: var(--text-sm);
+      color: var(--color-green);
+      font-weight: 600;
+    }
+
+    .testimonial-feeling {
+      margin-top: var(--space-md);
+      padding-top: var(--space-md);
+      border-top: 1px solid var(--glass-border);
+    }
+
+    .testimonial-feeling .label {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      margin-bottom: var(--space-xs);
+    }
+
+    .testimonial-feeling .emotions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+    }
+
+    .emotion-tag {
+      background: rgba(255, 189, 89, 0.1);
+      border: 1px solid var(--border-gold);
+      border-radius: 20px;
+      padding: var(--space-xs) var(--space-sm);
+      font-size: var(--text-xs);
+      color: var(--color-gold);
+    }
+
+    /* ========== IMAGE CONTAINER ========== */
+    .image-container {
+      margin: var(--space-md) 0;
+      text-align: center;
+    }
+
+    .image-container img {
+      width: 100%;
+      height: auto;
+      border-radius: 0;
+      display: block;
+      box-shadow: var(--shadow-md);
+    }
+
+    @media (min-width: 600px) {
+      .image-container img {
+        border-radius: var(--radius-md);
+        border: 2px solid var(--glass-border);
+      }
+    }
+
+    .image-caption {
+      margin-top: var(--space-sm);
+      padding: 0 var(--text-padding);
+      color: var(--color-text-muted);
+      font-size: var(--text-xs);
+      font-style: italic;
+      text-align: center;
+    }
+
+    @media (min-width: 600px) {
+      .image-caption {
+        padding: 0;
+        font-size: var(--text-sm);
+      }
+    }
+
+    /* ========== HIGHLIGHT BOX ========== */
+    .highlight-box {
+      padding: var(--card-padding);
+      padding-left: calc(var(--text-padding) - 4px);
+      padding-right: var(--text-padding);
+      border-radius: 0;
+      margin: var(--space-md) 0;
+      border: none;
+      border-left: 4px solid var(--color-gold);
+      background: linear-gradient(135deg,
+        rgba(255, 189, 89, 0.1),
+        rgba(0, 240, 255, 0.05)
+      );
+    }
+
+    @media (min-width: 600px) {
+      .highlight-box {
+        border: 1px solid var(--border-gold);
+        border-left: 4px solid var(--color-gold);
+        border-radius: var(--radius-md);
+        padding: var(--card-padding);
+      }
+    }
+
+    .highlight-box.cyan {
+      border-left-color: var(--color-cyan);
+      background: linear-gradient(135deg,
+        rgba(0, 240, 255, 0.1),
+        rgba(106, 91, 255, 0.05)
+      );
+    }
+
+    @media (min-width: 600px) {
+      .highlight-box.cyan {
+        border-color: var(--border-cyan);
+        border-left-color: var(--color-cyan);
+      }
+    }
+
+    .highlight-box.green {
+      border-left-color: var(--color-green);
+      background: linear-gradient(135deg,
+        rgba(16, 185, 129, 0.1),
+        rgba(0, 240, 255, 0.05)
+      );
+    }
+
+    @media (min-width: 600px) {
+      .highlight-box.green {
+        border-color: var(--border-green);
+        border-left-color: var(--color-green);
+      }
+    }
+
+    .highlight-box p {
+      margin: 0;
+      font-size: var(--text-sm);
+    }
+
+    .highlight-box strong {
+      color: var(--color-gold);
+    }
+
+    .highlight-box.cyan strong {
+      color: var(--color-cyan);
+    }
+
+    .highlight-box.green strong {
+      color: var(--color-green);
+    }
+
+    /* ========== COMMON POINTS ========== */
+    .common-points {
+      background: var(--glass-border);
+      margin: var(--space-md) 0;
+    }
+
+    @media (min-width: 600px) {
+      .common-points {
+        background: transparent;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-md);
+      }
+    }
+
+    .common-point {
+      background: var(--bg-glass);
+      border: none;
+      border-left: 4px solid var(--color-cyan);
+      border-radius: 0;
+      padding: var(--card-padding) var(--text-padding);
+      margin-bottom: 1px;
+    }
+
+    @media (min-width: 600px) {
+      .common-point {
+        border: 1px solid var(--border-cyan);
+        border-left: 4px solid var(--color-cyan);
+        border-radius: var(--radius-md);
+        padding: var(--card-padding);
+        margin-bottom: 0;
+      }
+    }
+
+    .common-point .point-icon {
+      font-size: 1.5rem;
+      margin-bottom: var(--space-sm);
+    }
+
+    .common-point .point-title {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: var(--text-sm);
+      color: var(--color-cyan);
+      margin-bottom: var(--space-xs);
+    }
+
+    .common-point .point-desc {
+      font-size: var(--text-xs);
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+
+    /* ========== REFLECTION BOX ========== */
+    .reflection-box {
+      background: linear-gradient(135deg,
+        rgba(0, 240, 255, 0.1),
+        rgba(106, 91, 255, 0.05)
+      );
+      border: none;
+      border-left: 4px solid var(--color-cyan);
+      border-radius: 0;
+      padding: var(--card-padding) var(--text-padding);
+      margin: var(--space-lg) 0;
+    }
+
+    @media (min-width: 600px) {
+      .reflection-box {
+        border: 1px solid var(--border-cyan);
+        border-radius: var(--radius-lg);
+        padding: var(--card-padding);
+      }
+    }
+
+    .reflection-title {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: var(--text-lg);
+      color: var(--color-cyan);
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .reflection-questions {
+      list-style: none;
+      padding: 0;
+    }
+
+    .reflection-questions li {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+    }
+
+    .reflection-questions li:last-child {
+      margin-bottom: 0;
+    }
+
+    .reflection-questions .q-icon {
+      color: var(--color-cyan);
+      font-weight: bold;
+    }
+
+    /* ========== SUMMARY BOX ========== */
+    .summary-box {
+      background: linear-gradient(135deg,
+        rgba(16, 185, 129, 0.1),
+        rgba(0, 240, 255, 0.05)
+      );
+      border: none;
+      border-left: 4px solid var(--color-green);
+      border-radius: 0;
+      padding: var(--card-padding) 0;
+      margin: var(--space-lg) 0;
+    }
+
+    @media (min-width: 600px) {
+      .summary-box {
+        border: 2px solid var(--color-green);
+        border-radius: var(--radius-lg);
+        padding: var(--card-padding);
+      }
+    }
+
+    .summary-title {
+      font-family: var(--font-heading);
+      font-size: var(--text-lg);
+      font-weight: 700;
+      color: var(--color-green);
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: 0 var(--text-padding);
+    }
+
+    @media (min-width: 600px) {
+      .summary-title {
+        padding: 0;
+      }
+    }
+
+    .key-points {
+      padding: 0 var(--text-padding);
+    }
+
+    @media (min-width: 600px) {
+      .key-points {
+        padding: 0;
+      }
+    }
+
+    .key-point {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-sm);
+      font-size: var(--text-sm);
+      line-height: 1.5;
+    }
+
+    .key-point:last-child {
+      margin-bottom: 0;
+    }
+
+    .key-point .number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, var(--color-green), var(--color-cyan));
+      color: var(--color-navy);
+      border-radius: 50%;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: var(--text-xs);
+      flex-shrink: 0;
+    }
+
+    /* ========== QUIZ SECTION ========== */
+    .quiz-section {
+      background: linear-gradient(135deg,
+        rgba(106, 91, 255, 0.15),
+        rgba(0, 240, 255, 0.05)
+      );
+      border: none;
+      border-left: 4px solid var(--color-purple);
+      border-radius: 0;
+      padding: var(--card-padding) 0;
+      margin: var(--space-lg) 0;
+    }
+
+    @media (min-width: 600px) {
+      .quiz-section {
+        border: 2px solid var(--color-purple);
+        border-radius: var(--radius-lg);
+        padding: var(--card-padding);
+      }
+    }
+
+    .quiz-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-lg);
+      padding: 0 var(--text-padding);
+    }
+
+    @media (min-width: 600px) {
+      .quiz-header {
+        padding: 0;
+      }
+    }
+
+    .quiz-icon {
+      font-size: 1.3rem;
+    }
+
+    .quiz-title {
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: var(--text-lg);
+      color: var(--color-purple);
+      margin: 0;
+    }
+
+    .quiz-question {
+      background: var(--bg-glass);
+      border: none;
+      border-radius: 0;
+      border-bottom: 1px solid var(--glass-border);
+      padding: var(--card-padding) var(--text-padding);
+      margin-bottom: 1px;
+    }
+
+    @media (min-width: 600px) {
+      .quiz-question {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+        padding: var(--card-padding);
+        margin-bottom: var(--space-lg);
+      }
+    }
+
+    .question-header {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+    }
+
+    .question-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
+      background: linear-gradient(135deg, var(--color-purple), #8B5CF6);
+      color: white;
+      border-radius: 50%;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: var(--text-xs);
+    }
+
+    @media (min-width: 600px) {
+      .question-number {
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        font-size: var(--text-sm);
+      }
+    }
+
+    .question-text {
+      font-weight: 600;
+      color: var(--color-white);
+      font-size: var(--text-sm);
+      line-height: 1.5;
+    }
+
+    @media (min-width: 600px) {
+      .question-text {
+        font-size: var(--text-base);
+      }
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      background: var(--glass-border);
+      margin: 0 calc(-1 * var(--text-padding));
+    }
+
+    @media (min-width: 600px) {
+      .quiz-options {
+        gap: var(--space-sm);
+        background: transparent;
+        margin: 0;
+      }
+    }
+
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.02);
+      border: none;
+      border-radius: 0;
+      padding: var(--space-md) var(--text-padding);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: var(--text-sm);
+    }
+
+    @media (min-width: 600px) {
+      .quiz-option {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-sm);
+        padding: var(--space-md);
+        font-size: var(--text-base);
+      }
+
+      .quiz-option:hover:not(.disabled):not(.correct):not(.incorrect) {
+        background: rgba(0, 240, 255, 0.1);
+        border-color: var(--color-cyan);
+      }
+    }
+
+    .quiz-option.disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .quiz-option.correct {
+      background: rgba(16, 185, 129, 0.2);
+      border-left: 4px solid var(--color-green);
+      pointer-events: none;
+    }
+
+    @media (min-width: 600px) {
+      .quiz-option.correct {
+        border: 1px solid var(--color-green);
+        border-left: 4px solid var(--color-green);
+      }
+    }
+
+    .quiz-option.incorrect {
+      background: rgba(239, 68, 68, 0.2);
+      border-left: 4px solid var(--color-red);
+      pointer-events: none;
+    }
+
+    @media (min-width: 600px) {
+      .quiz-option.incorrect {
+        border: 1px solid var(--color-red);
+        border-left: 4px solid var(--color-red);
+      }
+    }
+
+    .quiz-option.show-correct {
+      border-left: 4px solid var(--color-green);
+    }
+
+    @media (min-width: 600px) {
+      .quiz-option.show-correct {
+        border-color: var(--color-green);
+      }
+    }
+
+    .option-letter {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
+      background: rgba(106, 91, 255, 0.2);
+      color: var(--color-purple);
+      border-radius: 50%;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: var(--text-xs);
+    }
+
+    @media (min-width: 600px) {
+      .option-letter {
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        font-size: var(--text-sm);
+      }
+    }
+
+    .option-text {
+      flex: 1;
+      color: var(--color-text);
+    }
+
+    .option-result {
+      font-weight: 700;
+      font-size: var(--text-xs);
+      min-width: 50px;
+      text-align: right;
+    }
+
+    @media (min-width: 600px) {
+      .option-result {
+        font-size: var(--text-sm);
+        min-width: 60px;
+      }
+    }
+
+    .quiz-option.correct .option-result {
+      color: var(--color-green);
+    }
+
+    .quiz-option.incorrect .option-result {
+      color: var(--color-red);
+    }
+
+    .quiz-explanation {
+      display: none;
+      margin-top: var(--space-md);
+      padding: var(--space-md);
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 0;
+      font-size: var(--text-xs);
+      line-height: 1.6;
+      color: var(--color-text-muted);
+    }
+
+    @media (min-width: 600px) {
+      .quiz-explanation {
+        border-radius: var(--radius-sm);
+        font-size: var(--text-sm);
+      }
+    }
+
+    .quiz-explanation.show {
+      display: block;
+    }
+
+    .quiz-explanation.correct {
+      border-left: 3px solid var(--color-green);
+    }
+
+    .quiz-explanation.incorrect {
+      border-left: 3px solid var(--color-red);
+    }
+
+    .retake-btn {
+      display: none;
+      margin-top: var(--space-lg);
+      margin-left: var(--text-padding);
+      margin-right: var(--text-padding);
+      padding: var(--space-sm) var(--space-lg);
+      background: linear-gradient(135deg, var(--color-purple), #8B5CF6);
+      color: white;
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font-heading);
+      font-size: var(--text-sm);
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    @media (min-width: 600px) {
+      .retake-btn {
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      .retake-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(106, 91, 255, 0.4);
+      }
+    }
+
+    .retake-btn.show {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    /* ========== FOOTER ========== */
+    .lesson-footer {
+      text-align: center;
+      padding: var(--space-lg) var(--text-padding);
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-subtle);
+      margin-top: 0;
+    }
+
+    @media (min-width: 600px) {
+      .lesson-footer {
+        background: transparent;
+        border-top: none;
+        margin-top: var(--space-lg);
+        padding: var(--space-lg) 0;
+      }
+    }
+
+    .footer-brand {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      color: var(--color-gold);
+      font-size: var(--text-sm);
+    }
+
+    .footer-url {
+      color: var(--color-text-muted);
+      font-size: var(--text-xs);
+      margin-top: var(--space-xs);
+    }
+
+    .footer-url a {
+      color: var(--color-cyan);
+      text-decoration: none;
+    }
+
+    .footer-url a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- ============================================
+         LESSON HEADER
+         ============================================ -->
+    <header class="lesson-header">
+      <span class="lesson-badge">STARTER - Bai 1.3</span>
+      <h1 class="lesson-title">Cau Chuyen Cua Nhung Nguoi Da Thanh Cong</h1>
+      <p class="lesson-subtitle">Nguon cam hung va bai hoc tu nhung trader thuc su</p>
+    </header>
+
+    <!-- ============================================
+         SECTION: GIOI THIEU
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title green">
+        <span class="icon">🌟</span>
+        Nhung Cau Chuyen Co That
+      </h2>
+
+      <p>O bai truoc, chung ta da noi ve 95% traders that bai. Nhung con 5% thanh cong thi sao? Ho la nhung nguoi nhu the nao? Ho bat dau tu dau? Va ho da lam gi de vuot qua nhung kho khan?</p>
+
+      <p>Trong bai hoc nay, chung ta se gap <strong>3 hoc vien thuc te</strong> cua GEM Trading Academy. Moi nguoi co mot background khac nhau, nhung tat ca deu co diem chung: ho da thay doi cuoc song nho trading.</p>
+
+      <div class="highlight-box green">
+        <p><strong>💡 Luu y quan trong:</strong> Cac cau chuyen duoi day la that, nhung ket qua trading phu thuoc vao nhieu yeu to - voi, ky luat, thoi gian hoc, dieu kien thi truong. <strong>Khong ai co the dam bao ban se co ket qua tuong tu.</strong></p>
+      </div>
+    </section>
+
+    <!-- ============================================
+         TESTIMONIAL 1: ANH NAM
+         ============================================ -->
+    <div class="testimonial-card">
+      <div class="testimonial-header">
+        <div class="testimonial-avatar">👨</div>
+        <div class="testimonial-info">
+          <h3>Anh Nam - 35 tuoi</h3>
+          <span class="role">Cuu cong nhan nha may, hien la trader</span>
+        </div>
+      </div>
+
+      <div class="testimonial-content">
+        <div class="journey-title">📍 Hanh Trinh:</div>
+        <p><strong>Truoc khi gap GEM:</strong> Lam cong nhan nha may, thu nhap 8 trieu/thang. Tang ca lien tuc van khong du cho gia dinh. Lo lang ve tuong lai, khong biet bao gio moi thoat duoc canh "chay an tung ngay".</p>
+        <p><strong>Gap GEM:</strong> Tinh co doc duoc bai viet ve GEM Frequency. Ban dau nghi ngoi, nhung quyet dinh thu vi "co mat gi dau". Hoc moi toi 1-2 tieng sau gio lam.</p>
+        <p><strong>6 thang sau:</strong> Bat dau co lai tu trading. Khong nhieu, nhung du de thay rang day khong phai lua dao. Tiep tuc ren luyen.</p>
+        <p><strong>12 thang sau:</strong> Thu nhap tu trading dat 15-20 trieu/thang. Da nghi viec nha may, lam freelance de co thoi gian trading va cham con.</p>
+      </div>
+
+      <div class="testimonial-quote">
+        "Toi khong con so hai khi nghi ve tuong lai. Lan dau tien trong doi, toi cam thay minh dang lam chu cuoc song cua chinh minh."
+      </div>
+
+      <div class="testimonial-result">
+        <span>✨</span>
+        <span>Ket qua: 15-20 trieu/thang thu nhap phu</span>
+      </div>
+
+      <div class="testimonial-feeling">
+        <div class="label">Cam xuc dat duoc:</div>
+        <div class="emotions">
+          <span class="emotion-tag">🛡️ An tam</span>
+          <span class="emotion-tag">💪 Tu tin</span>
+          <span class="emotion-tag">🌈 Hy vong</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================
+         🖼️ HINH 1: TESTIMONIAL ANH NAM
+         ============================================ -->
+    <div class="image-container">
+      <img
+        src="https://via.placeholder.com/800x600/112250/10B981?text=1.3-testimonial-nam.png"
+        alt="Testimonial Anh Nam"
+        loading="lazy"
+      />
+    </div>
+    <p class="image-caption">Hinh 1: Anh Nam - Tu cong nhan den trader</p>
+
+    <!-- ============================================
+         TESTIMONIAL 2: CHI HUONG
+         ============================================ -->
+    <div class="testimonial-card">
+      <div class="testimonial-header">
+        <div class="testimonial-avatar">👩</div>
+        <div class="testimonial-info">
+          <h3>Chi Huong - 32 tuoi</h3>
+          <span class="role">Me bim sua, trader ban thoi gian</span>
+        </div>
+      </div>
+
+      <div class="testimonial-content">
+        <div class="journey-title">📍 Hanh Trinh:</div>
+        <p><strong>Truoc khi gap GEM:</strong> Nghi viec de o nha nuoi con nho. Cam thay mat ket noi voi xa hoi, phu thuoc tai chinh vao chong. Lo lang ve viec khong dong gop gi cho gia dinh.</p>
+        <p><strong>Gap GEM:</strong> Tim hieu ve trading nhu mot cach kiem tien tai nha. Hoc tranh thu 1-2 tieng khi con ngu trua va buoi toi.</p>
+        <p><strong>4 thang sau:</strong> Van con dang hoc, chua co lai nhieu nhung da hieu ro he thong. Khong con cam thay hoang mang nhu truoc.</p>
+        <p><strong>10 thang sau:</strong> Thu nhap tu trading dat 10-15 trieu/thang. Van o nha cham con, nhung da "kiem duoc tien" va cam thay minh co gia tri.</p>
+      </div>
+
+      <div class="testimonial-quote">
+        "Trading giup toi vua la me tot, vua la nguoi kiem tien. Toi khong con cam thay minh la ganh nang cua gia dinh nua."
+      </div>
+
+      <div class="testimonial-result">
+        <span>✨</span>
+        <span>Ket qua: 10-15 trieu/thang, lam viec tai nha</span>
+      </div>
+
+      <div class="testimonial-feeling">
+        <div class="label">Cam xuc dat duoc:</div>
+        <div class="emotions">
+          <span class="emotion-tag">⚖️ Can bang</span>
+          <span class="emotion-tag">🏆 Tu hao</span>
+          <span class="emotion-tag">❤️ Tron ven</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================
+         🖼️ HINH 2: TESTIMONIAL CHI HUONG
+         ============================================ -->
+    <div class="image-container">
+      <img
+        src="https://via.placeholder.com/800x600/112250/00F0FF?text=1.3-testimonial-huong.png"
+        alt="Testimonial Chi Huong"
+        loading="lazy"
+      />
+    </div>
+    <p class="image-caption">Hinh 2: Chi Huong - Me bim sua thanh cong voi trading</p>
+
+    <!-- ============================================
+         TESTIMONIAL 3: EM MINH
+         ============================================ -->
+    <div class="testimonial-card">
+      <div class="testimonial-header">
+        <div class="testimonial-avatar">🧑</div>
+        <div class="testimonial-info">
+          <h3>Em Minh - 22 tuoi</h3>
+          <span class="role">Sinh vien nam 3, trader ban thoi gian</span>
+        </div>
+      </div>
+
+      <div class="testimonial-content">
+        <div class="journey-title">📍 Hanh Trinh:</div>
+        <p><strong>Truoc khi gap GEM:</strong> Sinh vien nam 3, muon tu lap tai chinh nhung khong biet bat dau tu dau. Di lam them quan ca phe 4 tieng/ngay, kiem 3 trieu/thang, met va khong co thoi gian hoc.</p>
+        <p><strong>Gap GEM:</strong> Thay quang cao GEM, quyet dinh thu vi "duoc hoc ky nang moi". Dung tien lam them de dang ky khoa hoc.</p>
+        <p><strong>3 thang sau:</strong> Van dang hoc, nhung da cat duoc viec lam them. Dung 2 tieng/ngay de hoc va thuc hanh trading.</p>
+        <p><strong>8 thang sau:</strong> Thu nhap tu trading dat 5-10 trieu/thang. Tu dong hoc phi, con du de tiet kiem.</p>
+      </div>
+
+      <div class="testimonial-quote">
+        "Khong can xin tien bo me nua. Toi con gui duoc tien ve nha. Day la lan dau tien toi cam thay minh thuc su truong thanh."
+      </div>
+
+      <div class="testimonial-result">
+        <span>✨</span>
+        <span>Ket qua: Tu dong hoc phi + tiet kiem</span>
+      </div>
+
+      <div class="testimonial-feeling">
+        <div class="label">Cam xuc dat duoc:</div>
+        <div class="emotions">
+          <span class="emotion-tag">🎓 Truong thanh</span>
+          <span class="emotion-tag">🙌 Doc lap</span>
+          <span class="emotion-tag">⭐ Tu hao</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================
+         🖼️ HINH 3: TESTIMONIAL EM MINH
+         ============================================ -->
+    <div class="image-container">
+      <img
+        src="https://via.placeholder.com/800x600/112250/6A5BFF?text=1.3-testimonial-minh.png"
+        alt="Testimonial Em Minh"
+        loading="lazy"
+      />
+    </div>
+    <p class="image-caption">Hinh 3: Em Minh - Sinh vien tu lap tai chinh</p>
+
+    <!-- ============================================
+         SECTION: DIEM CHUNG
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">🔗</span>
+        Diem Chung Cua Ho La Gi?
+      </h2>
+
+      <p>Ba nguoi - ba hoan canh khac nhau - nhung tat ca deu dat duoc ket qua. Hay xem ho co gi giong nhau:</p>
+
+      <div class="common-points">
+        <div class="common-point">
+          <div class="point-icon">🚫</div>
+          <div class="point-title">Khong co background tai chinh</div>
+          <div class="point-desc">Khong ai co bang cap ve tai chinh, chung khoan, hay kinh te. Ho la nhung nguoi binh thuong, bat dau tu con so 0.</div>
+        </div>
+
+        <div class="common-point">
+          <div class="point-icon">💰</div>
+          <div class="point-title">Bat dau voi von nho</div>
+          <div class="point-desc">Khong ai bat dau voi hang tram trieu. Ho bat dau voi so tien minh co the mat duoc ma khong anh huong cuoc song.</div>
+        </div>
+
+        <div class="common-point">
+          <div class="point-icon">📚</div>
+          <div class="point-title">Co HE THONG ro rang</div>
+          <div class="point-desc">Tat ca deu hoc va ap dung phuong phap GEM Frequency - mot he thong co quy tac cu the, khong phai "cam tinh" hay "du doan".</div>
+        </div>
+
+        <div class="common-point">
+          <div class="point-icon">⏰</div>
+          <div class="point-title">Kien tri va ky luat</div>
+          <div class="point-desc">Khong ai thanh cong sau 1 tuan hay 1 thang. Ho danh thoi gian 3-12 thang de hoc, thuc hanh, va ren luyen ky luat.</div>
+        </div>
+      </div>
+
+      <div class="highlight-box cyan">
+        <p><strong>💡 Thong diep:</strong> Neu ho lam duoc, <strong>ban cung co the</strong>. Khong phai vi ho dac biet gi, ma vi ho da tim duoc he thong dung va kien tri ap dung no.</p>
+      </div>
+    </section>
+
+    <!-- ============================================
+         🖼️ HINH 4: DIEM CHUNG INFOGRAPHIC
+         ============================================ -->
+    <div class="image-container">
+      <img
+        src="https://via.placeholder.com/800x600/112250/FFBD59?text=1.3-diem-chung.png"
+        alt="Diem chung cua nhung nguoi thanh cong"
+        loading="lazy"
+      />
+    </div>
+    <p class="image-caption">Hinh 4: 4 Diem Chung Cua Nhung Trader Thanh Cong</p>
+
+    <!-- ============================================
+         SECTION: REFLECTION
+         ============================================ -->
+    <section class="section">
+      <div class="reflection-box">
+        <h3 class="reflection-title">
+          <span>✍️</span>
+          Cau Hoi Cho Ban
+        </h3>
+        <ul class="reflection-questions">
+          <li>
+            <span class="q-icon">❓</span>
+            <span><strong>Cau chuyen nao giong voi hoan canh cua ban nhat?</strong> Anh Nam voi ganh nang tai chinh gia dinh? Chi Huong voi vai tro me bim sua? Hay Em Minh voi mong muon tu lap?</span>
+          </li>
+          <li>
+            <span class="q-icon">❓</span>
+            <span><strong>Dieu gi trong cau chuyen cua ho inspire ban?</strong> La su kien tri? La viec bat dau tu con so 0? Hay la cam giac dat duoc tu do?</span>
+          </li>
+          <li>
+            <span class="q-icon">❓</span>
+            <span><strong>Neu 12 thang nua, ban viet cau chuyen cua minh, no se nhu the nao?</strong> Hay tuong tuong va ghi lai.</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================================
+         🖼️ HINH 5: QUOTE WALL
+         ============================================ -->
+    <div class="image-container">
+      <img
+        src="https://via.placeholder.com/800x600/112250/00F0FF?text=1.3-quote-wall.png"
+        alt="Quote wall tu cac hoc vien"
+        loading="lazy"
+      />
+    </div>
+    <p class="image-caption">Hinh 5: Nhung loi chia se tu cong dong GEM Trading</p>
+
+    <!-- ============================================
+         SUMMARY BOX
+         ============================================ -->
+    <div class="summary-box">
+      <h3 class="summary-title">
+        <span>📝</span>
+        Tom Tat Bai Hoc
+      </h3>
+      <div class="key-points">
+        <div class="key-point">
+          <span class="number">1</span>
+          <span>Nhung nguoi thanh cong <strong>khong co gi dac biet</strong> - ho la nguoi binh thuong voi hoan canh binh thuong.</span>
+        </div>
+        <div class="key-point">
+          <span class="number">2</span>
+          <span>Ho deu bat dau voi <strong>von nho va khong co background tai chinh</strong>.</span>
+        </div>
+        <div class="key-point">
+          <span class="number">3</span>
+          <span>Diem chung: co <strong>HE THONG ro rang</strong> va <strong>kien tri ap dung</strong> trong 6-12 thang.</span>
+        </div>
+        <div class="key-point">
+          <span class="number">4</span>
+          <span>Ket qua khong chi la tien - ma con la <strong>CAM XUC</strong>: an tam, tu do, tu hao, truong thanh.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================
+         QUIZ SECTION
+         ============================================ -->
+    <section class="quiz-section" id="quizSection">
+      <div class="quiz-header">
+        <span class="quiz-icon">📝</span>
+        <h2 class="quiz-title">KIEM TRA KIEN THUC</h2>
+      </div>
+
+      <!-- Cau 1 -->
+      <div class="quiz-question" id="question1">
+        <div class="question-header">
+          <span class="question-number">1</span>
+          <span class="question-text">Diem chung cua tat ca nhung nguoi thanh cong trong bai hoc la gi?</span>
+        </div>
+
+        <div class="quiz-options">
+          <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 1)">
+            <span class="option-letter">A</span>
+            <span class="option-text">Ho deu co background tai chinh hoac kinh te</span>
+            <span class="option-result"></span>
+          </div>
+          <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 1)">
+            <span class="option-letter">B</span>
+            <span class="option-text">Ho bat dau voi so von lon hon nguoi binh thuong</span>
+            <span class="option-result"></span>
+          </div>
+          <div class="quiz-option" data-correct="true" onclick="checkAnswer(this, 1)">
+            <span class="option-letter">C</span>
+            <span class="option-text">Ho deu co he thong ro rang va kien tri ap dung trong thoi gian dai</span>
+            <span class="option-result"></span>
+          </div>
+          <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 1)">
+            <span class="option-letter">D</span>
+            <span class="option-text">Ho deu la nguoi tre va co nhieu thoi gian ranh</span>
+            <span class="option-result"></span>
+          </div>
+        </div>
+
+        <div class="quiz-explanation" id="explanation1">
+          <strong>Giai thich:</strong> Tat ca nhung nguoi thanh cong trong bai hoc deu co 4 diem chung: khong co background tai chinh, bat dau voi von nho, co HE THONG ro rang (GEM Frequency), va kien tri ap dung trong 6-12 thang.
+        </div>
+      </div>
+
+      <!-- Cau 2 -->
+      <div class="quiz-question" id="question2">
+        <div class="question-header">
+          <span class="question-number">2</span>
+          <span class="question-text">Ket qua quan trong nhat ma nhung nguoi thanh cong dat duoc la gi?</span>
+        </div>
+
+        <div class="quiz-options">
+          <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 2)">
+            <span class="option-letter">A</span>
+            <span class="option-text">Kiem duoc nhieu tien trong thoi gian ngan</span>
+            <span class="option-result"></span>
+          </div>
+          <div class="quiz-option" data-correct="true" onclick="checkAnswer(this, 2)">
+            <span class="option-letter">B</span>
+            <span class="option-text">Dat duoc cam giac tu do, an tam, va lam chu cuoc song</span>
+            <span class="option-result"></span>
+          </div>
+          <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 2)">
+            <span class="option-letter">C</span>
+            <span class="option-text">Tro thanh trieu phu nhanh chong</span>
+            <span class="option-result"></span>
+          </div>
+          <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 2)">
+            <span class="option-letter">D</span>
+            <span class="option-text">Nghi viec va lam trader toan thoi gian</span>
+            <span class="option-result"></span>
+          </div>
+        </div>
+
+        <div class="quiz-explanation" id="explanation2">
+          <strong>Giai thich:</strong> Trong moi cau chuyen, ket qua quan trong nhat khong chi la tien ma con la CAM XUC dat duoc: an tam, tu do, can bang, tu hao, truong thanh. Day la nhung gia tri thuc su cua tu do tai chinh.
+        </div>
+      </div>
+
+      <!-- Retake Button -->
+      <button class="retake-btn" id="retakeBtn" onclick="retakeQuiz()">
+        🔄 Lam Lai Quiz
+      </button>
+    </section>
+
+    <!-- ============================================
+         FOOTER
+         ============================================ -->
+    <footer class="lesson-footer">
+      <div class="footer-brand">GEM Trading Academy</div>
+      <div class="footer-url">
+        <a href="https://gemral.com" target="_blank">gemral.com</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- QUIZ JAVASCRIPT -->
+  <script>
+    const answeredQuestions = {};
+    const totalQuestions = 2;
+
+    function checkAnswer(selectedOption, questionNumber) {
+      if (answeredQuestions[questionNumber]) {
+        return;
+      }
+
+      answeredQuestions[questionNumber] = true;
+
+      const questionDiv = document.getElementById('question' + questionNumber);
+      const options = questionDiv.querySelectorAll('.quiz-option');
+      const explanation = document.getElementById('explanation' + questionNumber);
+      const isCorrect = selectedOption.getAttribute('data-correct') === 'true';
+
+      options.forEach(option => {
+        option.classList.add('disabled');
+
+        if (option.getAttribute('data-correct') === 'true') {
+          option.classList.add('show-correct');
+          if (option === selectedOption) {
+            option.classList.add('correct');
+            option.querySelector('.option-result').textContent = '✓ Dung!';
+          }
+        }
+
+        if (option === selectedOption && !isCorrect) {
+          option.classList.add('incorrect');
+          option.querySelector('.option-result').textContent = '✗ Sai';
+        }
+      });
+
+      explanation.classList.add('show');
+      explanation.classList.add(isCorrect ? 'correct' : 'incorrect');
+
+      if (Object.keys(answeredQuestions).length === totalQuestions) {
+        document.getElementById('retakeBtn').classList.add('show');
+      }
+    }
+
+    function retakeQuiz() {
+      for (let key in answeredQuestions) {
+        delete answeredQuestions[key];
+      }
+
+      for (let i = 1; i <= totalQuestions; i++) {
+        const questionDiv = document.getElementById('question' + i);
+        const options = questionDiv.querySelectorAll('.quiz-option');
+        const explanation = document.getElementById('explanation' + i);
+
+        options.forEach(option => {
+          option.classList.remove('disabled', 'correct', 'incorrect', 'show-correct');
+          option.querySelector('.option-result').textContent = '';
+        });
+
+        explanation.classList.remove('show', 'correct', 'incorrect');
+      }
+
+      document.getElementById('retakeBtn').classList.remove('show');
+      document.getElementById('quizSection').scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>

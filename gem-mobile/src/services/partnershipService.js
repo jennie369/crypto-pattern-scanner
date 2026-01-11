@@ -567,6 +567,172 @@ export const partnershipService = {
       supabase.removeChannel(subscription);
     }
   },
+
+  /**
+   * Submit CTV application (simplified - auto-approve after 3 days)
+   * v3.0: CTV is open to everyone, no course requirement
+   */
+  async submitCTVApplication(data) {
+    try {
+      const { data: user } = await supabase.auth.getUser();
+      const userId = user?.user?.id;
+
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
+
+      // Check if already has pending application
+      const { data: existing } = await supabase
+        .from('partnership_applications')
+        .select('id, status')
+        .eq('user_id', userId)
+        .eq('application_type', 'ctv')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (existing?.status === 'pending') {
+        throw new Error('Bạn đã có đơn đăng ký đang chờ duyệt');
+      }
+
+      // Check if already CTV
+      const { data: existingProfile } = await supabase
+        .from('affiliate_profiles')
+        .select('id, role')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (existingProfile?.role === 'ctv' || existingProfile?.role === 'kol') {
+        throw new Error('Bạn đã là đối tác');
+      }
+
+      // Find referrer if code provided
+      let referrerId = null;
+      if (data.referral_code) {
+        const { data: referrer } = await supabase
+          .from('affiliate_profiles')
+          .select('user_id')
+          .eq('referral_code', data.referral_code)
+          .maybeSingle();
+        referrerId = referrer?.user_id;
+      }
+
+      const applicationData = {
+        user_id: userId,
+        full_name: data.full_name,
+        email: data.email,
+        phone: data.phone,
+        application_type: 'ctv',
+        referred_by_code: data.referral_code || null,
+        reason_for_joining: data.reason || null,
+        status: 'pending',
+        // auto_approve_at will be set by database trigger
+      };
+
+      const { data: application, error } = await supabase
+        .from('partnership_applications')
+        .insert(applicationData)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Notify admins
+      await this.notifyAdminsNewApplication({
+        applicationId: application.id,
+        applicationType: 'ctv',
+        fullName: data.full_name,
+        userId,
+      });
+
+      return {
+        success: true,
+        application,
+        autoApproveAt: application.auto_approve_at,
+      };
+    } catch (err) {
+      console.error('[PartnershipService] submitCTVApplication error:', err);
+      return {
+        success: false,
+        error: err.message || 'Đăng ký thất bại',
+      };
+    }
+  },
+
+  /**
+   * Get current application status
+   * @param {string} userId
+   * @param {string} type - 'ctv' | 'kol' | null (all)
+   */
+  async getApplicationStatus(userId, type = null) {
+    try {
+      let query = supabase
+        .from('partnership_applications')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (type) {
+        query = query.eq('application_type', type);
+      }
+
+      const { data, error } = await query.limit(1).maybeSingle();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          return { exists: false };
+        }
+        throw error;
+      }
+
+      if (!data) {
+        return { exists: false };
+      }
+
+      // Calculate time until auto-approve (for CTV)
+      let timeUntilAutoApprove = null;
+      if (data.application_type === 'ctv' && data.status === 'pending' && data.auto_approve_at) {
+        const autoApproveDate = new Date(data.auto_approve_at);
+        const now = new Date();
+        timeUntilAutoApprove = Math.max(0, autoApproveDate - now);
+      }
+
+      return {
+        exists: true,
+        application: data,
+        timeUntilAutoApprove,
+      };
+    } catch (err) {
+      console.error('[PartnershipService] getApplicationStatus error:', err);
+      return { exists: false, error: err.message };
+    }
+  },
+
+  /**
+   * Get all applications for user (both CTV and KOL)
+   */
+  async getAllApplications(userId) {
+    try {
+      const { data, error } = await supabase
+        .from('partnership_applications')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      return {
+        success: true,
+        applications: data || [],
+        ctvApplication: data?.find(a => a.application_type === 'ctv'),
+        kolApplication: data?.find(a => a.application_type === 'kol'),
+      };
+    } catch (err) {
+      console.error('[PartnershipService] getAllApplications error:', err);
+      return { success: false, applications: [] };
+    }
+  },
 };
 
 export default partnershipService;

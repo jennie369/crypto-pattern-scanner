@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 6.1: 3 Con Đường Tiếp Theo | Khóa Tần Số Tình Yêu</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); color: var(--navy-dark); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .highlight-box.purple { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05)); border-color: rgba(106, 91, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.purple { border-left-color: var(--purple); } }
+        .highlight-box.purple .highlight-box-title { color: var(--purple); }
+
+        .highlight-box.cyan { background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 240, 255, 0.05)); border-color: rgba(0, 240, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.cyan { border-left-color: var(--cyan); } }
+        .highlight-box.cyan .highlight-box-title { color: var(--cyan); }
+
+        .highlight-box.green { background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05)); border-color: rgba(0, 200, 83, 0.3); }
+        @media (max-width: 600px) { .highlight-box.green { border-left-color: var(--success); } }
+        .highlight-box.green .highlight-box-title { color: var(--success); }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .path-card { background: var(--bg-card); border: 2px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-lg) 0; transition: all 0.3s ease; }
+        @media (max-width: 600px) { .path-card { border: none; border-radius: 0; padding: var(--space-lg) 16px; margin: var(--space-md) 0; border-left: 4px solid var(--gold); } }
+        @media (min-width: 601px) { .path-card:hover { transform: translateY(-4px); box-shadow: 0 8px 32px rgba(255, 189, 89, 0.2); } }
+        .path-card.gold { border-color: var(--gold); }
+        .path-card.purple { border-color: var(--purple); }
+        .path-card.cyan { border-color: var(--cyan); }
+        @media (max-width: 600px) { .path-card.purple { border-left-color: var(--purple); } .path-card.cyan { border-left-color: var(--cyan); } }
+        .path-header { display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-lg); }
+        .path-emoji { font-size: 3rem; }
+        .path-info { flex: 1; }
+        .path-title { font-size: 1.3rem; font-weight: 800; margin-bottom: var(--space-xs); }
+        .path-card.gold .path-title { color: var(--gold); }
+        .path-card.purple .path-title { color: var(--purple); }
+        .path-card.cyan .path-title { color: var(--cyan); }
+        .path-subtitle { font-size: 0.9rem; color: var(--text-muted); }
+        .path-desc { color: var(--text-secondary); margin-bottom: var(--space-lg); }
+        .path-features { list-style: none; }
+        .path-features li { display: flex; align-items: flex-start; gap: var(--space-sm); padding: var(--space-sm) 0; border-bottom: 1px solid var(--glass-border); color: var(--text-secondary); font-size: 0.95rem; }
+        .path-features li:last-child { border-bottom: none; }
+        .path-features li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+        .path-card.purple .path-features li::before { color: var(--purple); }
+        .path-card.cyan .path-features li::before { color: var(--cyan); }
+
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>🌟</span>
+                <span>Module Cuối</span>
+            </div>
+            <div class="lesson-chapter">Chapter 6 - Sứ Giả Tình Yêu</div>
+            <h1 class="lesson-title">3 Con Đường Tiếp Theo</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 6.1</span></div>
+                <div class="meta-item"><span>⏱️</span><span>15 phút đọc</span></div>
+            </div>
+        </header>
+
+        <!-- SECTION 1: Opening Hook & Chúc Mừng -->
+        <section class="section">
+            <h2 class="section-title"><span>🎉</span> Bạn Đã Hoàn Thành Một Hành Trình Phi Thường</h2>
+
+            <p>Xin chúc mừng bạn! Bạn đã hoàn thành <strong>Khóa Tần Số Tình Yêu</strong> - một hành trình mà không phải ai cũng dám bắt đầu. Bạn đã chọn đối mặt với quá khứ, chữa lành vết thương, và học cách yêu thương bản thân trước khi tìm kiếm tình yêu bên ngoài. Đây là con đường ít người chọn - và đó là lý do bạn sẽ có kết quả mà ít người có được.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📊</span> Hành Trình Của Bạn Qua 6 Module</div>
+                <p>
+                <strong>Module 0:</strong> Khám phá tần số tình yêu hiện tại của bạn<br>
+                <strong>Module 1:</strong> Chữa lành Inner Child, tha thứ, và buông bỏ quá khứ<br>
+                <strong>Module 2:</strong> Xây dựng nền tảng yêu bản thân với Mirror Work và ranh giới lành mạnh<br>
+                <strong>Module 3:</strong> Nâng tần số rung động qua thang cảm xúc và Heart Coherence<br>
+                <strong>Module 4:</strong> Chuẩn bị đón tri kỷ với visualization, tinh thể năng lượng<br>
+                <strong>Module 5:</strong> Trang bị kỹ năng giao tiếp, ngôn ngữ tình yêu, và lắng nghe sâu
+                </p>
+            </div>
+
+            <div class="highlight-box green">
+                <div class="highlight-box-title"><span>✨</span> Sự Chuyển Hóa Của Bạn</div>
+                <p>
+                Nếu bạn đã thực hành những bài tập trong khóa học này, bạn đã:<br><br>
+                ✅ <strong>Chữa lành</strong> những vết thương từ tuổi thơ và mối quan hệ cũ<br>
+                ✅ <strong>Buông bỏ</strong> những niềm tin giới hạn về tình yêu và bản thân<br>
+                ✅ <strong>Xây dựng</strong> nền tảng tự yêu thương - điều kiện tiên quyết để được yêu<br>
+                ✅ <strong>Nâng cao</strong> tần số rung động từ dưới 200Hz lên trên 400Hz<br>
+                ✅ <strong>Chuẩn bị</strong> năng lượng để thu hút và nhận ra tri kỷ<br>
+                ✅ <strong>Trang bị</strong> kỹ năng để xây dựng và duy trì mối quan hệ lành mạnh
+                </p>
+            </div>
+
+            <p>Nhưng đây chỉ là KHỞI ĐẦU. Hành trình tình yêu và phát triển bản thân là suốt đời. Câu hỏi bây giờ là: <strong>Bạn sẽ đi tiếp như thế nào?</strong> Có 3 con đường dành cho bạn...</p>
+
+            <div class="image-container">
+                <img src="images/m6-congratulations.png" alt="Chúc mừng hoàn thành khóa học">
+            </div>
+            <div class="image-caption">Hình 1: Chúc mừng bạn đã hoàn thành Khóa Tần Số Tình Yêu!</div>
+        </section>
+
+        <!-- SECTION 2: Con Đường 1 -->
+        <section class="section">
+            <h2 class="section-title"><span>🛤️</span> 3 Con Đường Dành Cho Bạn</h2>
+
+            <!-- Path 1: CTV -->
+            <div class="path-card gold">
+                <div class="path-header">
+                    <div class="path-emoji">🤝</div>
+                    <div class="path-info">
+                        <div class="path-title">Con Đường 1: Cộng Tác Viên (CTV)</div>
+                        <div class="path-subtitle">Đối Tác Phát Triển - Kiếm Thu Nhập Thụ Động</div>
+                    </div>
+                </div>
+                <div class="path-desc">
+                    Bạn đã trải nghiệm giá trị của khóa học này. Giờ đây, bạn có thể chia sẻ nó với người khác và nhận hoa hồng. Đây là cách tuyệt vời để vừa lan tỏa giá trị, vừa tạo thu nhập thụ động.
+                </div>
+                <ul class="path-features">
+                    <li><strong>Ai cũng có thể đăng ký</strong> - Không yêu cầu followers hay kinh nghiệm</li>
+                    <li><strong>5 cấp bậc phát triển:</strong> Bronze → Silver → Gold → Platinum → Diamond</li>
+                    <li><strong>Commission Digital:</strong> 10-30% tùy cấp bậc</li>
+                    <li><strong>Commission Physical:</strong> 6-15% cho sản phẩm đá, vòng tay</li>
+                    <li><strong>Sub-Affiliate:</strong> 2-4% khi bạn giới thiệu CTV mới</li>
+                    <li><strong>Link cá nhân</strong> để track doanh số và commission</li>
+                </ul>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m6-ctv-path.png" alt="Con đường CTV">
+            </div>
+            <div class="image-caption">Hình 2: Con đường CTV - 5 cấp bậc từ Bronze đến Diamond</div>
+
+            <!-- Path 2: KOL -->
+            <div class="path-card purple">
+                <div class="path-header">
+                    <div class="path-emoji">⭐</div>
+                    <div class="path-info">
+                        <div class="path-title">Con Đường 2: KOL Affiliate</div>
+                        <div class="path-subtitle">Dành Cho Người Có Ảnh Hưởng</div>
+                    </div>
+                </div>
+                <div class="path-desc">
+                    Nếu bạn có cộng đồng followers và muốn chia sẻ những giá trị bạn đã học được, chương trình KOL Affiliate là lựa chọn hoàn hảo với mức hoa hồng cao hơn.
+                </div>
+                <ul class="path-features">
+                    <li><strong>Yêu cầu:</strong> Từ 20,000 followers trở lên (BẮT BUỘC)</li>
+                    <li><strong>Commission Digital:</strong> 20% cho khóa học, ebook</li>
+                    <li><strong>Commission Physical:</strong> 20% cho sản phẩm vật lý</li>
+                    <li><strong>Sub-Affiliate:</strong> 3.5% cho CTV bạn giới thiệu</li>
+                    <li><strong>Hỗ trợ content:</strong> Nhận tài liệu marketing chuyên nghiệp</li>
+                    <li><strong>Thanh toán:</strong> Mỗi 2 tuần (Bi-weekly)</li>
+                </ul>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m6-kol-path.png" alt="Con đường KOL">
+            </div>
+            <div class="image-caption">Hình 3: Con đường KOL - Dành cho người có 20K+ followers</div>
+
+            <!-- Path 3: Instructor -->
+            <div class="path-card cyan">
+                <div class="path-header">
+                    <div class="path-emoji">🎓</div>
+                    <div class="path-info">
+                        <div class="path-title">Con Đường 3: Instructor</div>
+                        <div class="path-subtitle">Trở Thành Giảng Viên Tại GEM</div>
+                    </div>
+                </div>
+                <div class="path-desc">
+                    Nếu bạn có chuyên môn và muốn tạo khóa học riêng, đây là con đường để trở thành giảng viên chính thức tại nền tảng GEM. Đây là cơ hội xây dựng thương hiệu cá nhân và tạo thu nhập cao.
+                </div>
+                <ul class="path-features">
+                    <li><strong>Yêu cầu:</strong> Đã là CTV cấp cao + Phỏng vấn với đội ngũ GEM</li>
+                    <li><strong>Revenue Share:</strong> 40-60% doanh thu khóa học của bạn</li>
+                    <li><strong>Multiple Streams:</strong> Khóa học, coaching 1-1, workshops</li>
+                    <li><strong>Hỗ trợ production:</strong> Team hỗ trợ quay, dựng, thiết kế</li>
+                    <li><strong>Marketing support:</strong> GEM quảng bá khóa học của bạn</li>
+                    <li><strong>Mentorship:</strong> Được hướng dẫn bởi các Instructor senior</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SECTION 3: Câu Chuyện Thành Công -->
+        <section class="section">
+            <h2 class="section-title"><span>⭐</span> Câu Chuyện Thành Công</h2>
+
+            <p>Những học viên đã đi trước bạn và thành công với 3 con đường này:</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🥉</span> Hương, 32 tuổi - CTV Bronze → Gold trong 6 tháng</div>
+                <p><strong>Câu chuyện:</strong> Hương là giáo viên tiểu học, không có kinh nghiệm bán hàng hay marketing. Sau khi hoàn thành khóa học, cô đăng ký làm CTV vì <em>"Chỉ đơn giản muốn chia sẻ những gì mình đã học được với bạn bè."</em><br><br>
+
+                <strong>Kết quả sau 6 tháng:</strong><br>
+                • Từ Bronze lên Gold (doanh số đạt 150 triệu VNĐ)<br>
+                • Commission trung bình: 8-12 triệu/tháng<br>
+                • Giới thiệu được 15 CTV mới (sub-affiliate)<br><br>
+
+                <em>"Em không bán hàng - em chỉ chia sẻ câu chuyện của mình. Và những người nghe được đều muốn trải nghiệm giống em."</em></p>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>⭐</span> Minh Tú, 28 tuổi - KOL với 45K followers trên TikTok</div>
+                <p><strong>Câu chuyện:</strong> Minh Tú là content creator về lifestyle và self-help. Sau khi trải nghiệm khóa học, cô apply làm KOL Affiliate vì thấy giá trị phù hợp với audience của mình.<br><br>
+
+                <strong>Kết quả sau 4 tháng:</strong><br>
+                • Doanh số: 280 triệu VNĐ từ 120+ học viên giới thiệu<br>
+                • Commission: 56 triệu VNĐ (20%)<br>
+                • Video review khóa học: 500K+ views<br><br>
+
+                <em>"Mình không quảng cáo - mình chia sẻ hành trình thật của mình. Và audience của mình resonance với điều đó."</em></p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>🎓</span> Anh Tuấn, 38 tuổi - Từ CTV đến Instructor</div>
+                <p><strong>Câu chuyện:</strong> Anh Tuấn là life coach với chuyên môn về relationships. Anh bắt đầu từ CTV, sau 1 năm trở thành Diamond, rồi được mời trở thành Instructor để tạo khóa học riêng về "Masculine Energy & Relationships".<br><br>
+
+                <strong>Kết quả:</strong><br>
+                • Revenue share: 50% doanh thu khóa học<br>
+                • Thu nhập trung bình: 80-120 triệu/tháng<br>
+                • Thêm coaching 1-1: 5 triệu/session<br><br>
+
+                <em>"GEM cho mình platform, production support, và marketing. Mình chỉ cần tập trung vào chuyên môn. Win-win thực sự."</em></p>
+            </div>
+        </section>
+
+        <!-- SECTION 4: Bảng So Sánh -->
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> So Sánh 3 Con Đường</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💰</span> CTV - Dễ Bắt Đầu Nhất</div>
+                <p>
+                <strong>Phù hợp với:</strong> Tất cả mọi người muốn kiếm thêm thu nhập<br>
+                <strong>Yêu cầu:</strong> Không có<br>
+                <strong>Commission:</strong> 10-30% Digital | 6-15% Physical<br>
+                <strong>Thanh toán:</strong> Hàng tháng → Hàng tuần (tùy cấp)
+                </p>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>⭐</span> KOL - Hoa Hồng Cao</div>
+                <p>
+                <strong>Phù hợp với:</strong> Influencers, người có cộng đồng<br>
+                <strong>Yêu cầu:</strong> 20,000+ followers<br>
+                <strong>Commission:</strong> 20% tất cả sản phẩm<br>
+                <strong>Thanh toán:</strong> Mỗi 2 tuần
+                </p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>🎓</span> Instructor - Thu Nhập Cao Nhất</div>
+                <p>
+                <strong>Phù hợp với:</strong> Chuyên gia, người muốn tạo khóa học riêng<br>
+                <strong>Yêu cầu:</strong> CTV cấp cao + Phỏng vấn<br>
+                <strong>Revenue Share:</strong> 40-60%<br>
+                <strong>Thêm:</strong> Coaching, workshops, mentorship
+                </p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m6-3-paths-comparison.png" alt="So sánh 3 con đường">
+            </div>
+            <div class="image-caption">Hình 4: Bảng so sánh 3 con đường phát triển tại GEM</div>
+        </section>
+
+        <!-- SECTION 4: Lời Khuyên -->
+        <section class="section">
+            <h2 class="section-title"><span>💡</span> Lời Khuyên Từ Chị Jennie</h2>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>💕</span> Tâm Sự Từ Người Sáng Lập</div>
+                <p>
+                "Dù bạn chọn con đường nào - hoặc không chọn con đường nào cả - điều quan trọng nhất là bạn hãy TIẾP TỤC THỰC HÀNH những gì đã học. Khóa học chỉ là điểm khởi đầu. Sự chuyển hóa thật sự đến từ việc áp dụng mỗi ngày.<br><br>
+
+                Nếu bạn cảm thấy giá trị từ khóa học này, chia sẻ nó với người khác không chỉ giúp BẠN (về mặt tài chính) mà còn giúp NGƯỜI KHÁC có cơ hội chuyển hóa. Đây là win-win thực sự.<br><br>
+
+                Chị tin vào bạn. Chị tin vào hành trình của bạn. Và chị mong được thấy bạn nở hoa trong tình yêu và cuộc sống."<br><br>
+
+                <strong>— Jennie Uyen Chu, Founder of GEM</strong>
+                </p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m6-jennie-message.png" alt="Lời nhắn từ Jennie">
+            </div>
+            <div class="image-caption">Hình 5: Lời nhắn từ chị Jennie - Founder of GEM</div>
+        </section>
+
+        <!-- SECTION 6: FAQ -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🤔</span> Tôi không có kinh nghiệm bán hàng. Tôi có làm CTV được không?</div>
+                <p>Hoàn toàn được! CTV không phải bán hàng truyền thống. Bạn chỉ cần <strong>chia sẻ câu chuyện và trải nghiệm thật</strong> của mình. Những người resonance với câu chuyện của bạn sẽ tự tìm đến. GEM cung cấp link cá nhân để track, bạn chỉ cần chia sẻ - hệ thống lo phần còn lại.</p>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>🤔</span> Tôi có 15,000 followers - có apply KOL được không?</div>
+                <p>Yêu cầu <strong>20,000+ followers</strong> cho KOL là bắt buộc và không có ngoại lệ. Nhưng bạn hoàn toàn có thể bắt đầu với <strong>CTV</strong> trước! Với doanh số tốt, bạn có thể lên cấp nhanh (Bronze → Silver → Gold...) và khi followers đạt 20K, bạn có thể upgrade lên KOL.</p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>🤔</span> Thanh toán commission diễn ra như thế nào?</div>
+                <p><strong>CTV:</strong> Thanh toán hàng tháng (Bronze, Silver) hoặc hàng tuần (Gold, Platinum, Diamond) qua chuyển khoản ngân hàng. Minimum payout: 500,000 VNĐ.<br><br>
+                <strong>KOL:</strong> Thanh toán mỗi 2 tuần (bi-weekly) qua chuyển khoản.<br><br>
+                <strong>Instructor:</strong> Thanh toán hàng tháng theo revenue share thỏa thuận.</p>
+            </div>
+
+            <div class="highlight-box green">
+                <div class="highlight-box-title"><span>🤔</span> Nếu tôi không muốn làm CTV/KOL thì sao?</div>
+                <p>Không vấn đề gì cả! Đây là <strong>lựa chọn, không phải bắt buộc</strong>. Điều quan trọng nhất là bạn tiếp tục thực hành những gì đã học. Nếu sau này bạn đổi ý - cơ hội vẫn luôn ở đó.</p>
+            </div>
+        </section>
+
+        <!-- SUMMARY -->
+        <section class="section">
+            <div class="summary-box">
+                <h3 class="summary-title"><span>📌</span> Tóm Tắt Bài Học</h3>
+                <ul class="summary-list">
+                    <li><strong>3 con đường phát triển tại GEM:</strong> CTV (ai cũng đăng ký được), KOL (20K+ followers), Instructor (chuyên gia)</li>
+                    <li><strong>CTV:</strong> 5 cấp bậc Bronze → Silver → Gold → Platinum → Diamond, commission 10-30% Digital, 6-15% Physical</li>
+                    <li><strong>KOL:</strong> Yêu cầu 20K+ followers, commission 20% tất cả sản phẩm, thanh toán bi-weekly</li>
+                    <li><strong>Instructor:</strong> CTV cấp cao + phỏng vấn, revenue share 40-60%, được hỗ trợ production và marketing</li>
+                    <li><strong>Không bắt buộc:</strong> Bạn có thể chọn không tham gia - điều quan trọng là tiếp tục thực hành mỗi ngày</li>
+                    <li><strong>Chia sẻ giá trị:</strong> Không cần "bán hàng" - chỉ cần chia sẻ câu chuyện và trải nghiệm thật của bạn</li>
+                </ul>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>

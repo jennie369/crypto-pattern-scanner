@@ -201,6 +201,11 @@ export const POST_TEMPLATES = {
     // Pattern posts
     'Phát hiện {pattern} trên {coin}!\n\n{description}\n\nChờ confirm rồi vào.\n\n#pattern #{coin_tag}',
     '{coin} đang hình thành {pattern}. Nếu break {level}, target sẽ là {target}.\n\n#technicalanalysis',
+
+    // Posts with URLs for link preview testing
+    'Bài viết hay về phân tích {coin}! Đọc thêm tại: https://tradingview.com/symbols/{coin_tag}USD/\n\n#trading #analysis',
+    'Video hướng dẫn trade cực hay: https://youtube.com/watch?v=dQw4w9WgXcQ\n\nAi mới bắt đầu nên xem!\n\n#tutorial #trading',
+    'Tin tức crypto hôm nay:\n\nhttps://coindesk.com/markets/\n\nBTC đang có động thái lớn!\n\n#news #crypto',
   ],
 
   crystal: [
@@ -240,6 +245,10 @@ export const POST_TEMPLATES = {
 
     // Technique posts
     'Kỹ thuật {technique} cực hiệu quả:\n\n{description}\n\nAi đã thử chưa?\n\n#loatechnique',
+
+    // Posts with URLs for link preview testing
+    'Video về {technique} cực hay:\n\nhttps://youtube.com/watch?v=meditation123\n\nNên xem mỗi sáng!\n\n#loa #meditation',
+    'Bài viết hay về Law of Attraction:\n\nhttps://mindbodygreen.com/\n\nĐọc xong thấy motivated!\n\n#loa #inspiration',
   ],
 
   education: [
@@ -254,6 +263,11 @@ export const POST_TEMPLATES = {
     // Resource sharing
     'Nguồn học {topic} miễn phí:\n\n📚 {resource1}\n📚 {resource2}\n📚 {resource3}\n\nSave lại nhé!\n\n#freeresource',
     'Sách hay về {topic}:\n\n"{book_name}" - {author}\n\n{review}\n\n#bookreview',
+
+    // Posts with URLs for link preview testing
+    'Bài viết cực hay về {topic}:\n\nhttps://medium.com/swlh/\n\nĐọc xong hiểu sâu hơn nhiều!\n\n#education #mustread',
+    'Khóa học free trên Coursera:\n\nhttps://coursera.org/\n\nAi muốn học nên đăng ký ngay!\n\n#freecourse #learning',
+    'Nhiều nguồn học hay:\n\n1. https://github.com/\n2. https://stackoverflow.com/\n\nCộng đồng dev rất active!\n\n#resources #coding',
   ],
 
   wealth: [

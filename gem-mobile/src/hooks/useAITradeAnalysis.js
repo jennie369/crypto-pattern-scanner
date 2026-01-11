@@ -49,7 +49,7 @@ const useAITradeAnalysis = () => {
           isBlocked: true,
           blockInfo,
           mood: 'warning',
-          message: blockInfo.message || 'Bạn đang bị khóa giao dịch',
+          message: blockInfo.message || 'Giao dịch bị khóa. Hoàn thành bài tập hoặc chờ hết thời gian.',
           requireUnlock: blockInfo.require_unlock,
           unlockOptions: gemMasterAIService.getUnlockOptions(blockInfo.reason),
         }));
@@ -167,7 +167,7 @@ const useAITradeAnalysis = () => {
       setAIState(prev => ({
         ...prev,
         mood: 'warning',
-        message: 'Sư Phụ thấy bạn đang dời Stoploss ra xa. Đây là dấu hiệu của việc không chấp nhận thua cuộc. Hãy cân nhắc kỹ!',
+        message: 'Bạn đang dời Stoploss ra xa. Dấu hiệu không chấp nhận thua. Kỷ luật hay may mắn - chọn đi.',
         showMessage: true,
         scenario: 'sl_moved_wider',
       }));
@@ -211,7 +211,7 @@ const useAITradeAnalysis = () => {
       // Reset state
       setAIState({
         mood: 'proud',
-        message: 'Chúc mừng! Bạn đã mở khóa thành công. Hãy giao dịch kỷ luật nhé!',
+        message: 'Đã mở khóa. Lần này hãy giao dịch bằng lý trí, không phải cảm xúc.',
         isBlocked: false,
         blockInfo: null,
         requireUnlock: false,

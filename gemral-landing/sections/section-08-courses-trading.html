@@ -1,0 +1,784 @@
+<!-- ============================================
+     SECTION 8: KHÓA HỌC FREQUENCY TRADING
+     GEMRAL Landing Page
+     4 Levels Timeline: Starter → Tier 1 → Tier 2 → Tier 3
+     ============================================ -->
+
+
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEMRAL - Khóa Học Frequency Trading</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&amp;family=Noto+Sans+Display:wght@400;500;600&amp;display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1632;
+            --burgundy: #9C0612;
+            --burgundy-dark: #6B0F1A;
+            --gold: #FFBD59;
+            --gold-dark: #C88F2F;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --pink: #FF6B9D;
+            --green: #10B981;
+            --white: #ffffff;
+            --white-80: rgba(255, 255, 255, 0.8);
+            --white-60: rgba(255, 255, 255, 0.6);
+            --white-40: rgba(255, 255, 255, 0.4);
+            --white-20: rgba(255, 255, 255, 0.2);
+            --white-10: rgba(255, 255, 255, 0.1);
+            --black-40: rgba(0, 0, 0, 0.4);
+            --black-50: rgba(0, 0, 0, 0.5);
+            
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            background: var(--navy-dark);
+            color: var(--white);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Section */
+        .section-courses-trading {
+            padding: 100px 0;
+            background: linear-gradient(180deg, 
+                var(--navy) 0%,
+                #0D1B3F 40%,
+                var(--navy-dark) 100%
+            );
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .section-courses-trading::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(ellipse, rgba(0, 240, 255, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        .section-courses-trading::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(ellipse, rgba(255, 189, 89, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        /* Section Header */
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 28px;
+            border-radius: 30px;
+            font-family: var(--font-heading);
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 25px;
+        }
+        
+        .badge-cyan {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(0, 240, 255, 0.1));
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            color: var(--cyan);
+        }
+        
+        .badge svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: 42px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+        
+        .section-subtitle {
+            font-size: 18px;
+            color: var(--white-80);
+            max-width: 750px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+        
+        .text-gold { color: var(--gold); }
+        .text-cyan { color: var(--cyan); }
+        .text-pink { color: var(--pink); }
+        .text-purple { color: var(--purple); }
+        .text-green { color: var(--green); }
+        
+        /* Exclusive Tag */
+        .exclusive-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--burgundy), var(--burgundy-dark));
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 15px;
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(156, 6, 18, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(156, 6, 18, 0.8); }
+        }
+        
+        /* Timeline */
+        .timeline-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Timeline Line */
+        .timeline-line {
+            position: absolute;
+            left: 60px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, 
+                var(--cyan) 0%,
+                var(--gold) 50%,
+                var(--purple) 100%
+            );
+            border-radius: 2px;
+        }
+        
+        /* Level Cards */
+        .levels-container {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+        
+        .level-card {
+            display: flex;
+            gap: 40px;
+            background: var(--black-50);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid var(--white-10);
+            border-radius: 24px;
+            padding: 35px;
+            position: relative;
+            margin-left: 100px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .level-card:hover {
+            transform: translateX(10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        }
+        
+        .level-card.starter { border-color: rgba(255, 255, 255, 0.2); }
+        .level-card.tier1 { border-color: rgba(0, 240, 255, 0.3); }
+        .level-card.tier1:hover { border-color: var(--cyan); }
+        .level-card.tier2 { 
+            border-color: var(--gold); 
+            transform: scale(1.02);
+        }
+        .level-card.tier2:hover { 
+            transform: scale(1.02) translateX(10px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 40px rgba(255, 189, 89, 0.15);
+        }
+        .level-card.tier3 { 
+            border-color: rgba(106, 91, 255, 0.4);
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.1), var(--black-50));
+        }
+        .level-card.tier3:hover { border-color: var(--purple); }
+        
+        /* Level Indicator (Left Side) */
+        .level-indicator {
+            position: absolute;
+            left: -80px;
+            top: 50%;
+            transform: translateY(-50%);
+            text-align: center;
+        }
+        
+        .level-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background: var(--navy);
+            border-radius: 50%;
+            font-family: var(--font-heading);
+            font-size: 20px;
+            font-weight: 800;
+            border: 3px solid;
+        }
+        
+        .starter .level-number { border-color: var(--white-40); color: var(--white); }
+        .tier1 .level-number { border-color: var(--cyan); color: var(--cyan); }
+        .tier2 .level-number { border-color: var(--gold); color: var(--gold); }
+        .tier3 .level-number { border-color: var(--purple); color: var(--purple); }
+        
+        .level-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 8px;
+            color: var(--white-60);
+        }
+        
+        /* Card Badge */
+        .card-badge {
+            position: absolute;
+            top: -12px;
+            right: 30px;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-family: var(--font-heading);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .badge-popular {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--navy-dark);
+            box-shadow: 0 4px 15px rgba(255, 189, 89, 0.4);
+        }
+        
+        .badge-vip {
+            background: linear-gradient(135deg, var(--purple), #4338CA);
+            color: var(--white);
+            box-shadow: 0 4px 15px rgba(106, 91, 255, 0.4);
+        }
+        
+        /* Card Content */
+        .card-info {
+            flex: 1;
+        }
+        
+        .card-tier-name {
+            font-family: var(--font-heading);
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--white-60);
+            margin-bottom: 8px;
+        }
+        
+        .card-title {
+            font-family: var(--font-heading);
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--white);
+            margin-bottom: 12px;
+        }
+        
+        .card-description {
+            font-size: 15px;
+            color: var(--white-80);
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+        
+        /* Features List */
+        .features-list {
+            list-style: none;
+        }
+        
+        .features-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 8px 0;
+            font-size: 14px;
+            color: var(--white-80);
+        }
+        
+        .features-list li svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            margin-top: 3px;
+            stroke: var(--green);
+        }
+        
+        .feature-highlight {
+            color: var(--gold);
+            font-weight: 600;
+        }
+        
+        .bonus-tag {
+            display: inline-block;
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--green);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 700;
+            margin-left: 5px;
+        }
+        
+        /* Card Pricing */
+        .card-pricing {
+            min-width: 200px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-left: 30px;
+            border-left: 1px solid var(--white-10);
+        }
+        
+        .price-original {
+            font-size: 16px;
+            color: var(--white-40);
+            text-decoration: line-through;
+            margin-bottom: 5px;
+        }
+        
+        .price-amount {
+            font-family: var(--font-heading);
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+        
+        .price-period {
+            font-size: 13px;
+            color: var(--white-60);
+            margin-bottom: 20px;
+        }
+        
+        /* Buttons */
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-family: var(--font-heading);
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            margin-bottom: 10px;
+        }
+        
+        .btn svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--navy-dark);
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.03);
+            box-shadow: 0 5px 20px rgba(255, 189, 89, 0.4);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--white-20);
+            color: var(--white);
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+        
+        /* Stats Row */
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 60px;
+            padding: 40px;
+            background: var(--black-50);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid var(--white-10);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-family: var(--font-heading);
+            font-size: 36px;
+            font-weight: 800;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: var(--white-60);
+            margin-top: 5px;
+        }
+        
+        /* Section Footer */
+        .section-footer {
+            text-align: center;
+            margin-top: 60px;
+            font-size: 13px;
+            color: var(--white-60);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .level-card {
+                flex-direction: column;
+                margin-left: 0;
+                padding: 25px;
+            }
+            .timeline-line { display: none; }
+            .level-indicator { display: none; }
+            .card-pricing {
+                border-left: none;
+                border-top: 1px solid var(--white-10);
+                padding-left: 0;
+                padding-top: 25px;
+                margin-top: 20px;
+            }
+            .level-card.tier2 { transform: scale(1); }
+            .stats-row {
+                flex-wrap: wrap;
+                gap: 30px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .section-courses-trading { padding: 80px 0; }
+            .section-title { font-size: 32px; }
+            .card-title { font-size: 20px; }
+            .price-amount { font-size: 28px; }
+        }
+        
+        @media (max-width: 480px) {
+            .section-title { font-size: 26px; }
+            .stats-row { gap: 20px; padding: 25px; }
+            .stat-number { font-size: 28px; }
+        }
+    </style>
+
+
+    <section class="section-courses-trading">
+        <div class="container">
+            <!-- Section Header -->
+            <div class="section-header">
+                <span class="badge badge-cyan">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 3v18h18"></path>
+                        <path d="m19 9-5 5-4-4-3 3"></path>
+                    </svg>
+                    Khóa Học Trading
+                </span>
+                <h2 class="section-title">
+                    LỘ TRÌNH HỌC<br>
+                    <span class="text-cyan">FREQUENCY TRADING</span>
+                </h2>
+                <p class="section-subtitle">
+                    Từ người mới bắt đầu đến trader chuyên nghiệp — lộ trình được thiết kế khoa học 
+                    giúp bạn làm chủ phương pháp GEM Frequency Method với tỷ lệ thắng từ 68-85% 
+                    đã được kiểm chứng qua hàng nghìn giao dịch thực tế.
+                </p>
+                <div class="exclusive-tag">
+                    <span>🇻🇳</span>
+                    <span>CÔNG THỨC ĐỘC QUYỀN TẠI VIỆT NAM</span>
+                </div>
+            </div>
+            
+            <!-- Timeline -->
+            <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk41rftx-08q037/1767856120791_scfrot_gemral-landing-04.webp" alt="gemral-landing-04-d8w0" style="width: 100%; max-width: 100%; height: auto; display: block; margin: 0; padding: 0;"><div class="timeline-wrapper">
+                <div class="timeline-line"></div>
+                
+                <div class="levels-container">
+                    <!-- STARTER -->
+                    <div class="level-card starter">
+                        <div class="level-indicator">
+                            <div class="level-number">S</div>
+                            <span class="level-label">Starter</span>
+                        </div>
+                        
+                        <div class="card-info">
+                            <span class="card-tier-name">Dành Cho Người Mới</span>
+                            <h3 class="card-title">Khóa Học Cơ Bản</h3>
+                            <p class="card-description">
+                                Bước đầu tiên trên hành trình làm chủ thị trường crypto, giúp bạn hiểu rõ nền tảng 
+                                của phương pháp GEM Frequency và có thể tự tin đọc biểu đồ, nhận diện xu hướng 
+                                cơ bản trước khi bước vào các cấp độ chuyên sâu hơn.
+                            </p>
+                            <ul class="features-list">
+                                <li>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    <span>Kiến thức nền tảng về thị trường cryptocurrency và cách thức vận hành của nó</span>
+                                </li>
+                                <li>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    <span>Giới thiệu 6 công thức tần số cơ bản của phương pháp GEM Frequency</span>
+                                </li>
+                                <li>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    <span>Hướng dẫn sử dụng nền tảng giao dịch và các công cụ cần thiết</span>
+                                </li>
+                                <li>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    <span>Truy cập nhóm học viên để trao đổi và hỗ trợ lẫn nhau</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="card-pricing">
+                            <span class="price-amount text-white">299.000đ</span>
+                            <span class="price-period">Thanh toán một lần</span>
+                            <button onclick="gemralAddToCart('course-starter')" class="btn btn-primary">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                </svg>
+                                Thêm Vào Giỏ
+                            </button>
+                            <a href="https://yinyangmasters.com/products/gem-trading-course-tier-starter" target="_blank" class="btn btn-secondary">Xem Chi Tiết →</a>
+                        </div>
+                    </div>
+
+                    <!-- TIER 1 -->
+                    <div class="level-card tier1">
+                        <div class="level-indicator">
+                            <div class="level-number">1</div>
+                            <span class="level-label">Tier 1</span>
+                        </div>
+                        
+                        <div class="card-info">
+                            <span class="card-tier-name">Nâng Cao</span>
+                            <h3 class="card-title">Frequency Pro</h3>
+                            <p class="card-description">
+                                Bước tiến quan trọng giúp bạn làm chủ hoàn toàn phương pháp GEM Frequency, 
+                                với khả năng nhận diện patterns chính xác và thực hiện giao dịch có hệ thống 
+                                để đạt được kết quả ổn định và bền vững theo thời gian.
+                            </p>
+                            <ul class="features-list">
+                                <li>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    <span>Toàn bộ nội dung khóa Trading Frequency chuyên sâu với case studies thực tế</span>
+                                </li>
+                                <li>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    <span class="feature-highlight">Scanner PRO 12 tháng (trị giá 11.964.000đ) <span class="bonus-tag">MIỄN PHÍ</span></span>
+                                </li>
+                                <li>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    <span class="feature-highlight">GEM Master Chatbot PRO 12 tháng <span class="bonus-tag">MIỄN PHÍ</span></span>
+                                </li>
+                                <li>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    <span>Hỗ trợ qua nhóm riêng với các học viên cùng cấp độ</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="card-pricing">
+                            <span class="price-original">15.000.000đ</span>
+                            <span class="price-amount text-cyan">11.000.000đ</span>
+                            <span class="price-period">Thanh toán một lần</span>
+                            <button onclick="gemralAddToCart('course-tier1')" class="btn btn-primary">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                </svg>
+                                Thêm Vào Giỏ
+                            </button>
+                            <a href="https://yinyangmasters.com/products/gem-tier1" target="_blank" class="btn btn-secondary">Xem Chi Tiết →</a>
+                        </div>
+                    </div>
+
+                    <!-- TIER 2 - POPULAR -->
+                    <div class="level-card tier2">
+                        <span class="card-badge badge-popular">Phổ Biến Nhất</span>
+                        <div class="level-indicator">
+                            <div class="level-number">2</div>
+                            <span class="level-label">Tier 2</span>
+                        </div>
+                        
+                        <div class="card-info">
+                            <span class="card-tier-name">Chuyên Nghiệp</span>
+                            <h3 class="card-title">Frequency Premium</h3>
+                            <p class="card-description">
+                                Gói được chọn nhiều nhất dành cho những ai muốn đạt kết quả tối ưu trong giao dịch, 
+                                với chiến lược nâng cao, công cụ Premium và hỗ trợ ưu tiên qua nhóm riêng giúp bạn 
+                                nhanh chóng trở thành trader có lợi nhuận ổn định và bền vững.
+                            </p>
+                            <ul class="features-list">
+                                <li>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    <span>Toàn bộ nội dung Tier 1 cộng thêm chiến lược nâng cao cho trader chuyên nghiệp</span>
+                                </li>
+                                <li>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    <span class="feature-highlight">Scanner PREMIUM 12 tháng (trị giá 23.964.000đ) <span class="bonus-tag">MIỄN PHÍ</span></span>
+                                </li>
+                                <li>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    <span class="feature-highlight">GEM Master Chatbot PREMIUM 12 tháng <span class="bonus-tag">MIỄN PHÍ</span></span>
+                                </li>
+                                <li>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    <span>Hỗ trợ ưu tiên qua nhóm riêng để review và cải thiện kết quả</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="card-pricing">
+                            <span class="price-original">28.000.000đ</span>
+                            <span class="price-amount text-gold">21.000.000đ</span>
+                            <span class="price-period">Thanh toán một lần</span>
+                            <button onclick="gemralAddToCart('course-tier2')" class="btn btn-primary">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                </svg>
+                                Thêm Vào Giỏ
+                            </button>
+                            <a href="https://yinyangmasters.com/products/gem-tier2" target="_blank" class="btn btn-secondary">Xem Chi Tiết →</a>
+                        </div>
+                    </div>
+
+                    <!-- TIER 3 - VIP -->
+                    <div class="level-card tier3">
+                        <span class="card-badge badge-vip">VIP Cao Cấp</span>
+                        <div class="level-indicator">
+                            <div class="level-number">3</div>
+                            <span class="level-label">Tier 3</span>
+                        </div>
+                        
+                        <div class="card-info">
+                            <span class="card-tier-name">Cao Cấp Nhất</span>
+                            <h3 class="card-title">Frequency VIP</h3>
+                            <p class="card-description">
+                                Gói cao cấp nhất dành cho những ai muốn được đồng hành sát sao trên hành trình 
+                                trở thành trader chuyên nghiệp, với quyền truy cập VIP suốt 24 tháng, nội dung 
+                                độc quyền và hỗ trợ ưu tiên cao nhất từ đội ngũ.
+                            </p>
+                            <ul class="features-list">
+                                <li>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    <span>Toàn bộ nội dung Tier 2 cộng thêm nội dung VIP độc quyền với số lượng giới hạn</span>
+                                </li>
+                                <li>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    <span class="feature-highlight">Scanner VIP 24 tháng (trị giá 143.928.000đ) <span class="bonus-tag">MIỄN PHÍ</span></span>
+                                </li>
+                                <li>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    <span class="feature-highlight">GEM Master Chatbot PREMIUM 24 tháng <span class="bonus-tag">MIỄN PHÍ</span></span>
+                                </li>
+                                <li>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    <span>Truy cập nhóm VIP riêng với hỗ trợ ưu tiên cao nhất từ đội ngũ</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="card-pricing">
+                            <span class="price-original">90.000.000đ</span>
+                            <span class="price-amount text-purple">68.000.000đ</span>
+                            <span class="price-period">Thanh toán một lần</span>
+                            <button onclick="gemralAddToCart('course-tier3')" class="btn btn-primary">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                </svg>
+                                Thêm Vào Giỏ
+                            </button>
+                            <a href="https://yinyangmasters.com/products/gem-tier3" target="_blank" class="btn btn-secondary">Xem Chi Tiết →</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="lesson-image full-width" style="margin: 0px; padding: 0px; width: 100%; background: rgba(255, 255, 255, 0.05);">
+  <div style="background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.15); padding: 1rem 0.5rem; text-align: center; min-height: 80px;" class="">
+    
+    <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk41rftx-08q037/1767797931236_rl87vd_gemral-landing-13.webp" alt="gemral-landing-13-oolg" style="width: 100%; max-width: 100%; height: auto; display: block; margin: 0; padding: 0;">
+  </div>
+</div><div class="stats-row">
+                <div class="stat-item">
+                    <span class="stat-number text-cyan">68-85%</span>
+                    <span class="stat-label">Tỷ Lệ Thắng Backtest</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number text-gold">686+</span>
+                    <span class="stat-label">Giao Dịch Đã Kiểm C</span><span class="stat-label">hứng</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number text-pink">5+ năm</span>
+                    <span class="stat-label">Dữ Liệu Lịch Sử</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number text-purple">6</span>
+                    <span class="stat-label">Công Thức Độc Quyền</span>
+                </div>
+            </div>
+            
+            <!-- Section Footer -->
+            <div class="section-footer">gemral.com</div>
+        </div>
+    </section>

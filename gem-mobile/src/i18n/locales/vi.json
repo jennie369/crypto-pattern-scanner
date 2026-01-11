@@ -1,0 +1,165 @@
+{
+  "common": {
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "confirm": "Xác nhận",
+    "delete": "Xóa",
+    "edit": "Chỉnh sửa",
+    "done": "Xong",
+    "back": "Quay lại",
+    "next": "Tiếp theo",
+    "loading": "Đang tải...",
+    "error": "Lỗi",
+    "success": "Thành công",
+    "warning": "Cảnh báo",
+    "search": "Tìm kiếm",
+    "all": "Tất cả",
+    "none": "Không có",
+    "yes": "Có",
+    "no": "Không",
+    "ok": "OK"
+  },
+  "settings": {
+    "title": "Cài đặt",
+    "subtitle": "Tùy chỉnh ứng dụng theo ý bạn",
+
+    "sections": {
+      "languageRegion": "Ngôn ngữ & Vùng",
+      "appearance": "Giao diện",
+      "feedback": "Phản hồi",
+      "system": "Hệ thống"
+    },
+
+    "language": {
+      "title": "Ngôn ngữ",
+      "description": "Chọn ngôn ngữ hiển thị",
+      "options": {
+        "vi": "Tiếng Việt",
+        "en": "English",
+        "zh": "中文 (简体)"
+      }
+    },
+
+    "currency": {
+      "title": "Đơn vị tiền tệ",
+      "description": "Chọn đơn vị tiền tệ hiển thị",
+      "options": {
+        "VND": "VND (₫)",
+        "USD": "USD ($)"
+      }
+    },
+
+    "theme": {
+      "title": "Giao diện",
+      "description": "Chọn chế độ hiển thị",
+      "options": {
+        "dark": "Tối (Legacy)",
+        "light": "Sáng"
+      },
+      "preview": "Xem trước sẽ được áp dụng ngay"
+    },
+
+    "fontSize": {
+      "title": "Cỡ chữ",
+      "description": "Điều chỉnh kích thước chữ",
+      "options": {
+        "small": "Nhỏ",
+        "medium": "Trung bình",
+        "large": "Lớn"
+      }
+    },
+
+    "sound": {
+      "title": "Âm thanh",
+      "description": "Bật/tắt âm thanh thông báo"
+    },
+
+    "haptic": {
+      "title": "Rung phản hồi",
+      "description": "Bật/tắt rung khi tương tác"
+    },
+
+    "cache": {
+      "title": "Xóa bộ nhớ đệm",
+      "description": "Giải phóng dung lượng lưu trữ",
+      "confirm": "Bạn có chắc muốn xóa bộ nhớ đệm?",
+      "success": "Đã xóa bộ nhớ đệm thành công"
+    },
+
+    "about": {
+      "title": "Về ứng dụng",
+      "version": "Phiên bản",
+      "build": "Build",
+      "copyright": "© 2024 Gemral. All rights reserved.",
+      "terms": "Điều khoản sử dụng",
+      "privacy": "Chính sách bảo mật",
+      "contact": "Liên hệ hỗ trợ"
+    }
+  },
+
+  "tabs": {
+    "home": "Trang chủ",
+    "forum": "Cộng đồng",
+    "scanner": "Scanner",
+    "shop": "Cửa hàng",
+    "account": "Tài khoản"
+  },
+
+  "assets": {
+    "title": "Tài sản",
+    "balance": "Số dư",
+    "portfolio": "Danh mục",
+    "history": "Lịch sử"
+  },
+
+  "shop": {
+    "title": "Cửa hàng",
+    "products": "Sản phẩm",
+    "categories": "Danh mục",
+    "cart": "Giỏ hàng",
+    "checkout": "Thanh toán",
+    "price": "Giá",
+    "addToCart": "Thêm vào giỏ",
+    "buyNow": "Mua ngay"
+  },
+
+  "trading": {
+    "buy": "Mua",
+    "sell": "Bán",
+    "price": "Giá",
+    "amount": "Số lượng",
+    "total": "Tổng",
+    "profit": "Lợi nhuận",
+    "loss": "Lỗ"
+  },
+
+  "notifications": {
+    "title": "Thông báo",
+    "empty": "Không có thông báo mới",
+    "markRead": "Đánh dấu đã đọc"
+  },
+
+  "profile": {
+    "title": "Hồ sơ",
+    "edit": "Chỉnh sửa hồ sơ",
+    "followers": "Người theo dõi",
+    "following": "Đang theo dõi",
+    "posts": "Bài viết"
+  },
+
+  "auth": {
+    "login": "Đăng nhập",
+    "logout": "Đăng xuất",
+    "signup": "Đăng ký",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "forgotPassword": "Quên mật khẩu?"
+  },
+
+  "errors": {
+    "network": "Lỗi kết nối mạng",
+    "server": "Lỗi máy chủ",
+    "unknown": "Đã xảy ra lỗi không xác định",
+    "retry": "Thử lại"
+  }
+}

@@ -250,14 +250,12 @@ const CrystalRecommendationNew = ({ context, limit = 4, onQuickBuy }) => {
 
     console.log('[CrystalRec] Navigating with product:', fullProduct.id, fullProduct.title);
 
-    // Navigate to ProductDetail in Shop tab
-    navigation.navigate('Shop', {
-      screen: 'ProductDetail',
-      params: { product: fullProduct },
-    });
+    // Navigate directly to ProductDetail within current stack
+    // This keeps the back button working correctly when inside GemMasterStack
+    navigation.navigate('ProductDetail', { product: fullProduct });
   }, [navigation, normalizeImages, normalizeVariants]);
 
-  // Navigate to Shop
+  // Navigate to Shop - still use cross-tab for "View All" since user wants to browse
   const handleViewAll = useCallback(() => {
     navigation.navigate('MainTabs', {
       screen: 'Shop',

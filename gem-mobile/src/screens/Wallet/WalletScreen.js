@@ -34,7 +34,7 @@ import walletService from '../../services/walletService';
 import gemEconomyService from '../../services/gemEconomyService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSponsorBanners } from '../../components/SponsorBannerSection';
-import SponsorBannerCard from '../../components/SponsorBannerCard';
+import SponsorBanner from '../../components/SponsorBanner';
 import { interleaveBannersWithContent } from '../../utils/bannerDistribution';
 
 const WalletScreen = ({ navigation }) => {
@@ -276,9 +276,33 @@ const WalletScreen = ({ navigation }) => {
                   transaction.description?.includes('Gửi quà') ||
                   transaction.description?.includes('Send gift');
 
+                // Detect gift receives
+                const isGiftReceive = transaction.type === 'gift_received' ||
+                  transaction.type === 'receive' ||
+                  transaction.description?.includes('Nhận quà') ||
+                  transaction.description?.includes('Received gift');
+
                 // For gift sends, always show as negative
                 const displayAmount = isGiftSend && transaction.amount > 0 ? -transaction.amount : transaction.amount;
                 const isPositive = displayAmount > 0;
+
+                // Extract sender/receiver info from metadata or description
+                const metadata = transaction.metadata || {};
+                const senderName = metadata.sender_name || metadata.from_name;
+                const receiverName = metadata.receiver_name || metadata.to_name;
+                const giftName = metadata.gift_name || metadata.gift;
+
+                // Build rich description
+                let richDescription = transaction.description;
+                let subInfo = null;
+
+                if (isGiftReceive && senderName) {
+                  richDescription = `Nhận quà từ ${senderName}`;
+                  subInfo = giftName;
+                } else if (isGiftSend && receiverName) {
+                  richDescription = `Gửi quà cho ${receiverName}`;
+                  subInfo = giftName;
+                }
 
                 return (
                   <View key={transaction.id} style={styles.transactionItem}>
@@ -287,8 +311,13 @@ const WalletScreen = ({ navigation }) => {
                     </View>
                     <View style={styles.transactionInfo}>
                       <Text style={styles.transactionDescription} numberOfLines={1}>
-                        {transaction.description}
+                        {richDescription}
                       </Text>
+                      {subInfo ? (
+                        <Text style={styles.transactionSubInfo} numberOfLines={1}>
+                          {subInfo}
+                        </Text>
+                      ) : null}
                       <Text style={styles.transactionDate}>
                         {formatTransactionDate(transaction.created_at)}
                       </Text>
@@ -309,7 +338,7 @@ const WalletScreen = ({ navigation }) => {
 
           {/* Sponsor Banners - distributed after transactions */}
           {sponsorBanners.map((banner) => (
-            <SponsorBannerCard
+            <SponsorBanner
               key={banner.id}
               banner={banner}
               navigation={navigation}
@@ -363,7 +392,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: SPACING.lg,
-    paddingBottom: CONTENT_BOTTOM_PADDING + 60,
+    paddingBottom: CONTENT_BOTTOM_PADDING + 120,
   },
   balanceCard: {
     borderRadius: 14,
@@ -520,6 +549,11 @@ const styles = StyleSheet.create({
   transactionDescription: {
     fontSize: TYPOGRAPHY.fontSize.md,
     color: COLORS.textPrimary,
+  },
+  transactionSubInfo: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.gold,
+    marginTop: 2,
   },
   transactionDate: {
     fontSize: TYPOGRAPHY.fontSize.sm,

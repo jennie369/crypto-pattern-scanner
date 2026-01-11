@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 8.3: Scanner Cơ Bản - Tìm Patterns Tự Động - GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container {
+                padding: 0;
+            }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-chapter {
+            font-size: 0.9rem;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-lg);
+            flex-wrap: wrap;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        .section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section {
+                padding: 0;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .section-title {
+                padding: var(--space-lg) 16px var(--space-md) 16px;
+                margin-bottom: 0;
+            }
+        }
+
+        .section > p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .section > p {
+                padding: 0 16px;
+            }
+        }
+
+        .section > ul, .section > ol {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .section > ul, .section > ol {
+                padding-left: calc(16px + 1.5em);
+                padding-right: 16px;
+            }
+        }
+        .section li { margin-bottom: var(--space-sm); }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box-title {
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .definition-box-title {
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .image-container {
+            margin: var(--space-xl) 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-container {
+                margin: var(--space-md) 0;
+                border-radius: 0;
+                border: none;
+            }
+        }
+        .image-caption {
+            padding: var(--space-sm);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .image-caption {
+                padding: var(--space-sm) 16px;
+            }
+        }
+
+        .pattern-flow {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .pattern-flow {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .flow-phase {
+            display: flex;
+            gap: var(--space-md);
+            align-items: flex-start;
+            padding: var(--space-md);
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .flow-phase {
+                padding: var(--space-md) 16px;
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+            }
+        }
+        .flow-phase.up { border-left-color: var(--success); }
+        .flow-phase.pause { border-left-color: var(--gold); }
+        .phase-icon {
+            font-size: 2rem;
+            min-width: 50px;
+            text-align: center;
+        }
+        .phase-content { flex: 1; }
+        .phase-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+        }
+        .flow-phase.up .phase-title { color: var(--success); }
+        .flow-phase.pause .phase-title { color: var(--gold); }
+        .phase-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .stats-grid {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .stat-card {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-md);
+            }
+        }
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--cyan), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        @media (max-width: 600px) {
+            .stat-value { font-size: 1.25rem; }
+        }
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        .stat-card.green .stat-value {
+            background: linear-gradient(135deg, var(--success), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-card.gold .stat-value {
+            background: linear-gradient(135deg, var(--gold), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .summary-list { list-style: none; }
+        .summary-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-list li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-section {
+                border: none;
+                border-radius: 0;
+                padding: 0;
+                margin-top: 0;
+                border-top: 8px solid var(--bg-primary);
+            }
+        }
+        .quiz-header {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-header {
+                padding: var(--space-lg) 16px var(--space-md);
+                margin-bottom: 0;
+            }
+        }
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+        }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-question {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin-bottom: 0;
+                border-bottom: 1px solid var(--glass-border);
+            }
+        }
+        .question-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50%;
+            font-weight: 700;
+            color: var(--navy-dark);
+            margin-bottom: var(--space-md);
+        }
+        .question-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+            line-height: 1.6;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .quiz-options {
+                gap: 1px;
+                background: var(--glass-border);
+                margin-left: -16px;
+                margin-right: -16px;
+                margin-left: calc(-16px - 4px);
+            }
+        }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .quiz-option {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid transparent;
+                padding: var(--space-md) 16px;
+            }
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+        @media (max-width: 600px) {
+            .quiz-option:hover:not(.disabled) {
+                border-left-color: var(--gold);
+            }
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+        }
+        @media (max-width: 600px) {
+            .quiz-option.correct {
+                border-left-color: var(--success) !important;
+            }
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+        }
+        @media (max-width: 600px) {
+            .quiz-option.incorrect {
+                border-left-color: var(--error) !important;
+            }
+        }
+        .quiz-option.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .option-marker {
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .quiz-option.correct .option-marker {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+        .quiz-option.incorrect .option-marker {
+            background: var(--error);
+            border-color: var(--error);
+            color: white;
+        }
+        .option-text { flex: 1; color: var(--text-secondary); }
+
+        .question-feedback {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--space-sm);
+            display: none;
+        }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+        }
+        .question-feedback.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+        }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .quiz-result {
+            text-align: center;
+            padding: var(--space-xl);
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .result-score {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--gold), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--space-md);
+        }
+
+        .quiz-buttons {
+            display: flex;
+            justify-content: center;
+            padding: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-buttons { padding: var(--space-lg) 16px; }
+        }
+        .quiz-btn {
+            padding: var(--space-md) var(--space-xl);
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            border: 2px solid var(--glass-border);
+        }
+        .quiz-btn:hover { border-color: var(--gold); }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>🔍</span>
+                <span>Scanner</span>
+            </div>
+            <div class="lesson-chapter">Chapter 8 - GEM Master AI</div>
+            <h1 class="lesson-title">Scanner Cơ Bản - Tìm Patterns Tự Động</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 8.3</span></div>
+                <div class="meta-item"><span>⏱️</span><span>12 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <section class="section">
+            <h2 class="section-title"><span class="icon">🔍</span> Scanner Là Gì?</h2>
+            <p class="content-text">
+                <strong>Pattern Scanner</strong> là tính năng AI quét tự động hàng trăm coins để tìm các patterns
+                đang hình thành. Thay vì phải xem từng chart một, scanner giúp bạn tìm cơ hội trong vài giây.
+            </p>
+
+            <div class="highlight-box gold">
+                <div class="highlight-title">💡 Giá Trị Thực Sự</div>
+                <p class="content-text">
+                    Một trader bình thường mất 2-3 giờ để xem 50 charts. Scanner làm việc này trong <strong>10 giây</strong>
+                    và còn đánh giá chất lượng setup từ 1-100 điểm.
+                </p>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://placehold.co/700x400/112250/00F0FF?text=Scanner+Interface+Overview" alt="Giao diện Scanner">
+                <p class="image-caption">Hình 8.3.1: Giao diện Scanner trong ứng dụng GEM</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span class="icon">📋</span> Giới Hạn TIER 1</h2>
+            <p class="content-text">
+                Với tài khoản TIER 1, bạn có các giới hạn sau:
+            </p>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-card-title">Số Lần Quét/Ngày</div>
+                    <div class="info-card-value">50 lần</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-card-title">Số Coins Hỗ Trợ</div>
+                    <div class="info-card-value">50 coins</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-card-title">Timeframes</div>
+                    <div class="info-card-value">1 TF (4H)</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-card-title">Patterns Quét</div>
+                    <div class="info-card-value">4 patterns</div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-title">📊 4 Patterns TIER 1 Có Thể Quét</div>
+                <p class="content-text">DPD (tiếp diễn) • UPU (tiếp diễn) • UPD (đảo chiều) • DPU (đảo chiều)</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span class="icon">⚙️</span> Cách Sử Dụng Scanner</h2>
+            <p class="content-text">Làm theo 4 bước đơn giản sau:</p>
+
+            <ol class="steps-list">
+                <li>
+                    <strong>Mở Scanner</strong><br>
+                    Vào tab GEM Master → chọn "Scanner" hoặc icon kính lúp
+                </li>
+                <li>
+                    <strong>Chọn Bộ Lọc</strong><br>
+                    Pattern (UPU, DPU...), Timeframe (4H mặc định), Score tối thiểu
+                </li>
+                <li>
+                    <strong>Nhấn "Quét Ngay"</strong><br>
+                    Đợi 5-10 giây để AI phân tích tất cả coins
+                </li>
+                <li>
+                    <strong>Xem Kết Quả</strong><br>
+                    Danh sách coins có pattern, sắp xếp theo điểm chất lượng
+                </li>
+            </ol>
+
+            <div class="image-placeholder">
+                <img src="https://placehold.co/700x450/112250/FFBD59?text=Scanner+Usage+4+Steps" alt="4 bước sử dụng">
+                <p class="image-caption">Hình 8.3.2: 4 bước sử dụng Scanner cơ bản</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span class="icon">🎛️</span> Các Bộ Lọc Có Sẵn</h2>
+
+            <div class="filter-option">
+                <div class="filter-icon pattern">📊</div>
+                <div class="filter-info">
+                    <h4>Loại Pattern</h4>
+                    <p>Chọn pattern muốn tìm: UPU, UPD, DPU, DPD hoặc "Tất cả"</p>
+                </div>
+            </div>
+
+            <div class="filter-option">
+                <div class="filter-icon timeframe">⏱️</div>
+                <div class="filter-info">
+                    <h4>Timeframe</h4>
+                    <p>TIER 1 chỉ có 4H. TIER 2+ có thêm 1H, 1D, 1W...</p>
+                </div>
+            </div>
+
+            <div class="filter-option">
+                <div class="filter-icon score">⭐</div>
+                <div class="filter-info">
+                    <h4>Điểm Tối Thiểu</h4>
+                    <p>Lọc kết quả có điểm chất lượng từ X trở lên (khuyến nghị: 70+)</p>
+                </div>
+            </div>
+
+            <div class="filter-option">
+                <div class="filter-icon coin">💰</div>
+                <div class="filter-info">
+                    <h4>Nhóm Coins</h4>
+                    <p>Top 50 coins theo market cap (TIER 1 giới hạn)</p>
+                </div>
+            </div>
+
+            <div class="highlight-box green">
+                <div class="highlight-title">💡 Mẹo: Bộ Lọc Hiệu Quả Cho Người Mới</div>
+                <p class="content-text">
+                    Pattern: <strong>UPU</strong> (dễ nhất) | Timeframe: <strong>4H</strong> | Score: <strong>70+</strong><br>
+                    Kết hợp này cho ra các setup chất lượng cao, dễ trade nhất.
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span class="icon">📈</span> Đọc Hiểu Kết Quả Quét</h2>
+            <p class="content-text">Sau khi quét, bạn sẽ thấy danh sách kết quả như sau:</p>
+
+            <div class="result-card">
+                <div class="result-header">
+                    <span class="result-coin">BTC/USDT</span>
+                    <span class="result-score">Score: 85</span>
+                </div>
+                <div class="result-details">
+                    <span class="result-tag">Pattern: <span>UPU</span></span>
+                    <span class="result-tag">TF: <span>4H</span></span>
+                    <span class="result-tag">Zone: <span>$42,100 - $42,500</span></span>
+                </div>
+            </div>
+
+            <div class="result-card">
+                <div class="result-header">
+                    <span class="result-coin">ETH/USDT</span>
+                    <span class="result-score">Score: 78</span>
+                </div>
+                <div class="result-details">
+                    <span class="result-tag">Pattern: <span>DPU</span></span>
+                    <span class="result-tag">TF: <span>4H</span></span>
+                    <span class="result-tag">Zone: <span>$2,280 - $2,320</span></span>
+                </div>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-title">⭐ Ý Nghĩa Điểm Score</div>
+                <ul style="color: var(--text-secondary); padding-left: 1rem;">
+                    <li><strong>90-100:</strong> Excellent - Setup hoàn hảo, ưu tiên cao</li>
+                    <li><strong>80-89:</strong> Very Good - Setup rất tốt</li>
+                    <li><strong>70-79:</strong> Good - Setup tốt, có thể trade</li>
+                    <li><strong>60-69:</strong> Fair - Cần xem xét thêm</li>
+                    <li><strong>&lt;60:</strong> Weak - Không khuyến nghị</li>
+                </ul>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://placehold.co/700x400/112250/10B981?text=Scan+Results+Explained" alt="Giải thích kết quả">
+                <p class="image-caption">Hình 8.3.3: Cách đọc hiểu kết quả quét patterns</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span class="icon">✅</span> Quy Trình Sau Khi Quét</h2>
+            <p class="content-text">
+                Scanner chỉ là bước đầu tiên. Sau khi có kết quả, bạn cần:
+            </p>
+
+            <ol class="steps-list">
+                <li>
+                    <strong>Chọn coins có score cao nhất</strong><br>
+                    Ưu tiên score 80+ trước, sau đó đến 70+
+                </li>
+                <li>
+                    <strong>Mở chart kiểm tra</strong><br>
+                    Nhấn vào kết quả để mở chart, xác nhận bằng mắt
+                </li>
+                <li>
+                    <strong>Chạy checklist 8 điểm</strong><br>
+                    Xác nhận pattern bằng checklist đã học trong khóa
+                </li>
+                <li>
+                    <strong>Quyết định entry</strong><br>
+                    Nếu checklist đạt 7+/8, xem xét entry
+                </li>
+            </ol>
+
+            <div class="highlight-box red">
+                <div class="highlight-title">⚠️ Cảnh Báo Quan Trọng</div>
+                <p class="content-text">
+                    <strong>KHÔNG entry mù quáng</strong> chỉ dựa vào kết quả scanner!<br>
+                    Luôn xác nhận bằng mắt và chạy checklist trước khi trade.
+                </p>
+            </div>
+        </section>
+
+        <div class="summary-box">
+            <h3 class="summary-title">📝 Tóm Tắt Bài 8.3</h3>
+            <ul class="summary-list">
+                <li>Scanner quét tự động hàng trăm coins tìm patterns trong vài giây</li>
+                <li>TIER 1 giới hạn: 50 quét/ngày, 50 coins, 1 timeframe (4H)</li>
+                <li>4 bước: Mở Scanner → Chọn bộ lọc → Quét → Xem kết quả</li>
+                <li>Điểm Score từ 70+ là đáng xem xét, 80+ là ưu tiên</li>
+                <li>Luôn xác nhận bằng mắt và checklist trước khi trade</li>
+            </ul>
+        </div>
+
+        <section class="quiz-section">
+            <h2 class="quiz-title"><span class="icon">❓</span> Kiểm Tra Kiến Thức</h2>
+
+            <div class="quiz-question" data-correct="1">
+                <p class="question-text">1. TIER 1 được quét bao nhiêu coins và bao nhiêu timeframes?</p>
+                <button class="quiz-option" data-index="0">A. 100 coins, 3 timeframes</button>
+                <button class="quiz-option" data-index="1">B. 50 coins, 1 timeframe</button>
+                <button class="quiz-option" data-index="2">C. 50 coins, unlimited timeframes</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="2">
+                <p class="question-text">2. Điểm Score bao nhiêu được coi là "Good" và có thể trade?</p>
+                <button class="quiz-option" data-index="0">A. 50-60</button>
+                <button class="quiz-option" data-index="1">B. 60-69</button>
+                <button class="quiz-option" data-index="2">C. 70-79</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="0">
+                <p class="question-text">3. Sau khi có kết quả scanner, bước tiếp theo nên làm gì?</p>
+                <button class="quiz-option" data-index="0">A. Mở chart kiểm tra và chạy checklist</button>
+                <button class="quiz-option" data-index="1">B. Entry ngay lập tức</button>
+                <button class="quiz-option" data-index="2">C. Quét lại lần nữa</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <p class="score-text">Bạn trả lời đúng <span id="correct-count">0</span>/3 câu!</p>
+                <button class="retake-btn" onclick="location.reload()">Làm Lại</button>
+            </div>
+        </section>
+
+        <footer class="section" style="text-align: center; padding: var(--space-xl);">
+            <p style="color: var(--gold); font-weight: 600;">Hoàn thành Bài 8.3</p>
+            <p style="color: var(--text-muted);">Tiếp theo: <strong style="color: var(--text-primary);">Bài 8.4 - Thiết Lập Cảnh Báo</strong></p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+                    question.classList.add('answered');
+                    answeredCount++;
+
+                    const selectedIndex = parseInt(this.dataset.index);
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác!';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Xem đáp án đúng ở trên.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

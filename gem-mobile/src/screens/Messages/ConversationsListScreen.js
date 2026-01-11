@@ -18,14 +18,10 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  TextInput,
   RefreshControl,
   Animated,
-  Dimensions,
-  Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -45,12 +41,7 @@ import {
   GRADIENTS,
   SPACING,
   TYPOGRAPHY,
-  GLASS,
-  ANIMATION,
-  LAYOUT,
 } from '../../utils/tokens';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function ConversationsListScreen({ navigation }) {
   const insets = useSafeAreaInsets();
@@ -58,13 +49,12 @@ export default function ConversationsListScreen({ navigation }) {
 
   // State
   const [conversations, setConversations] = useState([]);
+  const [pinnedIds, setPinnedIds] = useState([]);
+  const [archivedIds, setArchivedIds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchFocused, setSearchFocused] = useState(false);
 
   // Animation refs
-  const searchWidthAnim = useRef(new Animated.Value(SCREEN_WIDTH - 32 - 50)).current;
   const headerOpacity = useRef(new Animated.Value(1)).current;
 
   // Subscription refs
@@ -76,8 +66,15 @@ export default function ConversationsListScreen({ navigation }) {
 
   const fetchConversations = useCallback(async () => {
     try {
-      const data = await messagingService.getConversations();
+      // Fetch conversations, pinned IDs, and archived IDs in parallel
+      const [data, pinnedData, archivedData] = await Promise.all([
+        messagingService.getConversations(),
+        messagingService.getPinnedConversationIds(),
+        messagingService.getArchivedConversationIds(),
+      ]);
       setConversations(data);
+      setPinnedIds(pinnedData?.data || pinnedData || []);
+      setArchivedIds(archivedData || []);
     } catch (error) {
       console.error('Error fetching conversations:', error);
     } finally {
@@ -139,14 +136,19 @@ export default function ConversationsListScreen({ navigation }) {
   // Swipe actions
   const handleArchive = useCallback(async (conversationId) => {
     try {
-      // TODO: Implement archive functionality
-      console.log('Archive conversation:', conversationId);
-      // Update local state to remove from list
+      await messagingService.archiveConversation(conversationId);
+      // Update local state to remove from list and add to archived
       setConversations(prev => prev.filter(c => c.id !== conversationId));
+      setArchivedIds(prev => [...prev, conversationId]);
     } catch (error) {
       console.error('Error archiving conversation:', error);
     }
   }, []);
+
+  // Navigate to archived chats
+  const handleOpenArchived = useCallback(() => {
+    navigation.navigate('ArchivedChats');
+  }, [navigation]);
 
   const handleDelete = useCallback(async (conversationId) => {
     try {
@@ -171,55 +173,45 @@ export default function ConversationsListScreen({ navigation }) {
     }
   }, [conversations]);
 
-  const handleSearchFocus = useCallback(() => {
-    setSearchFocused(true);
-    Animated.spring(searchWidthAnim, {
-      toValue: SCREEN_WIDTH - 32,
-      tension: 65,
-      friction: 11,
-      useNativeDriver: false,
-    }).start();
-  }, [searchWidthAnim]);
-
-  const handleSearchBlur = useCallback(() => {
-    setSearchFocused(false);
-    if (!searchQuery) {
-      Animated.spring(searchWidthAnim, {
-        toValue: SCREEN_WIDTH - 32 - 50,
-        tension: 65,
-        friction: 11,
-        useNativeDriver: false,
-      }).start();
+  const handlePin = useCallback(async (conversationId) => {
+    try {
+      const isPinned = pinnedIds.includes(conversationId);
+      if (isPinned) {
+        await messagingService.unpinConversation(conversationId);
+        setPinnedIds(prev => prev.filter(id => id !== conversationId));
+      } else {
+        // Check max 5 pinned
+        if (pinnedIds.length >= 5) {
+          // Could show alert here
+          console.warn('Maximum 5 pinned conversations allowed');
+          return;
+        }
+        await messagingService.pinConversation(conversationId);
+        setPinnedIds(prev => [...prev, conversationId]);
+      }
+    } catch (error) {
+      console.error('Error pinning/unpinning conversation:', error);
     }
-  }, [searchWidthAnim, searchQuery]);
+  }, [pinnedIds]);
 
   // =====================================================
   // FILTERED DATA
   // =====================================================
 
-  const filteredConversations = conversations.filter((conv) => {
-    if (!searchQuery) return true;
+  // Filter and sort conversations (exclude archived, pinned first)
+  const filteredConversations = conversations
+    .filter((conv) => !archivedIds.includes(conv.id))
+    .sort((a, b) => {
+      // Pinned conversations first
+      const aIsPinned = pinnedIds.includes(a.id);
+      const bIsPinned = pinnedIds.includes(b.id);
+      if (aIsPinned && !bIsPinned) return -1;
+      if (!aIsPinned && bIsPinned) return 1;
+      return 0; // Keep original order otherwise
+    });
 
-    const query = searchQuery.toLowerCase();
-
-    // Search by other participant name
-    const otherParticipant = conv.other_participant;
-    if (otherParticipant?.display_name?.toLowerCase().includes(query)) {
-      return true;
-    }
-
-    // Search by group name
-    if (conv.name?.toLowerCase().includes(query)) {
-      return true;
-    }
-
-    // Search by last message content
-    if (conv.latest_message?.content?.toLowerCase().includes(query)) {
-      return true;
-    }
-
-    return false;
-  });
+  // Count archived conversations
+  const archivedCount = archivedIds.length;
 
   // =====================================================
   // RENDER
@@ -227,67 +219,35 @@ export default function ConversationsListScreen({ navigation }) {
 
   const renderHeader = () => (
     <Animated.View style={[styles.header, { opacity: headerOpacity }]}>
-      {/* Search Bar */}
-      <View style={styles.searchRow}>
-        <Animated.View style={[styles.searchContainer, { width: searchWidthAnim }]}>
-          <BlurView intensity={20} style={styles.searchBlur}>
-            <Ionicons name="search" size={18} color={COLORS.textMuted} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search messages..."
-              placeholderTextColor={COLORS.textMuted}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              onFocus={handleSearchFocus}
-              onBlur={handleSearchBlur}
-            />
-            {searchQuery ? (
-              <TouchableOpacity onPress={() => setSearchQuery('')}>
-                <Ionicons name="close-circle" size={18} color={COLORS.textMuted} />
-              </TouchableOpacity>
-            ) : null}
-          </BlurView>
-        </Animated.View>
+      {/* Search Bar - Full width like Facebook */}
+      <TouchableOpacity
+        style={styles.searchContainer}
+        onPress={handleSearch}
+        activeOpacity={0.7}
+      >
+        <View style={styles.searchBar}>
+          <Ionicons name="search" size={18} color={COLORS.textMuted} />
+          <Text style={styles.searchPlaceholder}>Search</Text>
+        </View>
+      </TouchableOpacity>
 
-        {/* Action Buttons */}
-        {!searchFocused && (
-          <View style={styles.actionButtons}>
-            {/* Search Button */}
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={handleSearch}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="search-outline" size={22} color={COLORS.textSecondary} />
-            </TouchableOpacity>
-
-            {/* Create Group Button */}
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={handleCreateGroup}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="people-outline" size={22} color={COLORS.textSecondary} />
-            </TouchableOpacity>
-
-            {/* New Message Button */}
-            <TouchableOpacity
-              style={styles.newMessageButton}
-              onPress={handleNewConversation}
-              activeOpacity={0.8}
-            >
-              <LinearGradient
-                colors={[COLORS.purple, COLORS.cyan]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.newMessageGradient}
-              >
-                <Ionicons name="create-outline" size={20} color={COLORS.textPrimary} />
-              </LinearGradient>
-            </TouchableOpacity>
+      {/* Quick Actions Row - Archive badge only if has archived */}
+      {archivedCount > 0 && (
+        <TouchableOpacity
+          style={styles.archivedRow}
+          onPress={handleOpenArchived}
+          activeOpacity={0.7}
+        >
+          <View style={styles.archivedIcon}>
+            <Ionicons name="archive" size={20} color={COLORS.textSecondary} />
           </View>
-        )}
-      </View>
+          <Text style={styles.archivedText}>Archived Chats</Text>
+          <View style={styles.archivedBadge}>
+            <Text style={styles.archivedBadgeText}>{archivedCount}</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} />
+        </TouchableOpacity>
+      )}
     </Animated.View>
   );
 
@@ -330,6 +290,8 @@ export default function ConversationsListScreen({ navigation }) {
       onArchive={handleArchive}
       onDelete={handleDelete}
       onMute={handleMute}
+      onPin={handlePin}
+      isPinned={pinnedIds.includes(item.id)}
       index={index}
     />
   );
@@ -349,8 +311,14 @@ export default function ConversationsListScreen({ navigation }) {
           >
             <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.title}>Messages</Text>
-          <View style={styles.placeholder} />
+          <Text style={styles.title}>Chats</Text>
+          {/* Create Group in header */}
+          <TouchableOpacity
+            onPress={handleCreateGroup}
+            style={styles.headerAction}
+          >
+            <Ionicons name="people-outline" size={24} color={COLORS.textPrimary} />
+          </TouchableOpacity>
         </View>
         {renderHeader()}
       </View>
@@ -380,11 +348,27 @@ export default function ConversationsListScreen({ navigation }) {
         maxToRenderPerBatch={10}
         initialNumToRender={15}
         getItemLayout={(data, index) => ({
-          length: 76,
-          offset: 76 * index,
+          length: 72,
+          offset: 72 * index,
           index,
         })}
       />
+
+      {/* Floating Action Button - New Message */}
+      <TouchableOpacity
+        style={[styles.fab, { bottom: insets.bottom + 80 }]}
+        onPress={handleNewConversation}
+        activeOpacity={0.9}
+      >
+        <LinearGradient
+          colors={[COLORS.purple, COLORS.cyan]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.fabGradient}
+        >
+          <Ionicons name="create-outline" size={26} color={COLORS.textPrimary} />
+        </LinearGradient>
+      </TouchableOpacity>
     </LinearGradient>
   );
 }
@@ -413,66 +397,92 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  headerAction: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   title: {
     fontSize: TYPOGRAPHY.fontSize.xxxl,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textPrimary,
   },
-  placeholder: {
-    width: 40,
-  },
 
   header: {
     paddingHorizontal: SPACING.lg,
-    paddingBottom: SPACING.md,
+    paddingBottom: SPACING.sm,
   },
-  searchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.sm,
-  },
+
+  // Facebook-style Search Bar
   searchContainer: {
-    height: 44,
-    borderRadius: 12,
-    overflow: 'hidden',
+    marginBottom: SPACING.sm,
   },
-  searchBlur: {
-    flex: 1,
+  searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 20,
     paddingHorizontal: SPACING.md,
-    backgroundColor: 'rgba(15, 16, 48, 0.6)',
+    paddingVertical: SPACING.sm,
     gap: SPACING.sm,
   },
-  searchInput: {
+  searchPlaceholder: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+    color: COLORS.textMuted,
+  },
+
+  // Archived Row
+  archivedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.xs,
+    gap: SPACING.sm,
+  },
+  archivedIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  archivedText: {
     flex: 1,
-    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontSize: TYPOGRAPHY.fontSize.base,
+    color: COLORS.textSecondary,
+  },
+  archivedBadge: {
+    minWidth: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: COLORS.purple,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 6,
+  },
+  archivedBadgeText: {
+    fontSize: 11,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textPrimary,
   },
 
-  // Action Buttons
-  actionButtons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: SPACING.xs,
-  },
-  actionButton: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 10,
-    backgroundColor: 'rgba(15, 16, 48, 0.6)',
-  },
-
-  // New Message Button
-  newMessageButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+  // FAB - Floating Action Button
+  fab: {
+    position: 'absolute',
+    right: SPACING.lg,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
-  newMessageGradient: {
+  fabGradient: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',

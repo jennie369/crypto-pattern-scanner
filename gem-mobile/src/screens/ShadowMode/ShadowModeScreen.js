@@ -257,7 +257,7 @@ const ShadowModeScreen = () => {
             <View style={styles.statsRow}>
               <Text style={styles.statsCell}>PnL</Text>
               <Text style={[styles.statsCell, styles.statsCenter, styles.statsValue]}>
-                ${paper.total_pnl?.toFixed(0) || 0}
+                ${(paper.total_pnl?.toFixed(0) || '0').replace('.', ',')}
               </Text>
               <Text style={[
                 styles.statsCell,
@@ -265,10 +265,10 @@ const ShadowModeScreen = () => {
                 styles.statsGap,
                 { color: gaps.pnl_gap_percent < 0 ? COLORS.error : COLORS.success },
               ]}>
-                {gaps.pnl_gap_percent > 0 ? '+' : ''}{gaps.pnl_gap_percent?.toFixed(1) || 0}%
+                {gaps.pnl_gap_percent > 0 ? '+' : ''}{(gaps.pnl_gap_percent?.toFixed(1) || '0').replace('.', ',')}%
               </Text>
               <Text style={[styles.statsCell, styles.statsCenter, styles.statsValue]}>
-                ${real.total_pnl?.toFixed(0) || 0}
+                ${(real.total_pnl?.toFixed(0) || '0').replace('.', ',')}
               </Text>
             </View>
 
@@ -276,7 +276,7 @@ const ShadowModeScreen = () => {
             <View style={styles.statsRow}>
               <Text style={styles.statsCell}>Win Rate</Text>
               <Text style={[styles.statsCell, styles.statsCenter, styles.statsValue]}>
-                {paper.win_rate?.toFixed(1) || 0}%
+                {(paper.win_rate?.toFixed(1) || '0').replace('.', ',')}%
               </Text>
               <Text style={[
                 styles.statsCell,
@@ -284,10 +284,10 @@ const ShadowModeScreen = () => {
                 styles.statsGap,
                 { color: gaps.win_rate_gap < 0 ? COLORS.error : COLORS.success },
               ]}>
-                {gaps.win_rate_gap > 0 ? '+' : ''}{gaps.win_rate_gap?.toFixed(1) || 0}%
+                {gaps.win_rate_gap > 0 ? '+' : ''}{(gaps.win_rate_gap?.toFixed(1) || '0').replace('.', ',')}%
               </Text>
               <Text style={[styles.statsCell, styles.statsCenter, styles.statsValue]}>
-                {real.win_rate?.toFixed(1) || 0}%
+                {(real.win_rate?.toFixed(1) || '0').replace('.', ',')}%
               </Text>
             </View>
 
@@ -395,7 +395,7 @@ const ShadowModeScreen = () => {
                       styles.reportSeverityText,
                       { color: getSeverityColor(report.ai_severity) },
                     ]}>
-                      {report.pnl_gap_percent > 0 ? '+' : ''}{report.pnl_gap_percent?.toFixed(1)}%
+                      {report.pnl_gap_percent > 0 ? '+' : ''}{(report.pnl_gap_percent?.toFixed(1) || '0').replace('.', ',')}%
                     </Text>
                   </View>
                   <ChevronRight size={18} color={COLORS.textMuted} strokeWidth={2} />

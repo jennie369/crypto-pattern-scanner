@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 4.1: Soulmate vs Twin Flame | Khóa Tần Số Tình Yêu</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--burgundy); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .highlight-box.purple { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05)); border-color: rgba(106, 91, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.purple { border-left-color: var(--purple); } }
+        .highlight-box.purple .highlight-box-title { color: var(--purple); }
+
+        .highlight-box.cyan { background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 240, 255, 0.05)); border-color: rgba(0, 240, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.cyan { border-left-color: var(--cyan); } }
+        .highlight-box.cyan .highlight-box-title { color: var(--cyan); }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .comparison-table { margin: var(--space-lg) 0; border-radius: var(--radius-md); overflow: hidden; }
+        @media (max-width: 600px) { .comparison-table { margin: var(--space-md) 0; border-radius: 0; } }
+        .comparison-row { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+        @media (max-width: 600px) { .comparison-row { grid-template-columns: 1fr; } }
+        .comparison-header { background: linear-gradient(135deg, var(--navy), var(--navy-dark)); padding: var(--space-md); font-weight: 700; text-align: center; border-bottom: 2px solid var(--glass-border); }
+        .comparison-header.gold { border-bottom-color: var(--gold); color: var(--gold); }
+        .comparison-header.purple { border-bottom-color: var(--purple); color: var(--purple); }
+        .comparison-cell { padding: var(--space-md); background: var(--bg-card); border-bottom: 1px solid var(--glass-border); color: var(--text-secondary); font-size: 0.9rem; }
+        @media (max-width: 600px) { .comparison-cell { padding: var(--space-sm) 16px; } }
+
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        @media (min-width: 601px) { .flow-step:hover { border-color: var(--gold); transform: translateX(8px); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>💕</span>
+                <span>Module 4</span>
+            </div>
+            <div class="lesson-chapter">Chapter 4 - Sẵn Sàng Đón Tri Kỷ</div>
+            <h1 class="lesson-title">Soulmate vs Twin Flame</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 4.1</span></div>
+                <div class="meta-item"><span>⏱️</span><span>30 phút đọc</span></div>
+            </div>
+        </header>
+
+        <!-- SECTION 1: Opening Hook -->
+        <section class="section">
+            <h2 class="section-title"><span>💫</span> "Người Ấy Là Tri Kỷ Của Tôi... Hay Là Ảo Tưởng?"</h2>
+
+            <p>"Anh ấy là twin flame của em – nên mới khổ sở thế này." "Chúng tôi yêu nhau nhưng cãi nhau liên tục – chắc là twin flame." "Anh ta cứ bỏ đi rồi quay lại – đó là dấu hiệu của twin flame." Bạn đã từng nghe hoặc nói những câu này chưa?</p>
+
+            <p>Trên internet, các khái niệm "Soulmate" (Bạn Đời Tâm Hồn) và "Twin Flame" (Ngọn Lửa Song Sinh) đã trở thành trend – nhưng đáng tiếc, chúng cũng bị hiểu sai và lạm dụng để biện minh cho các mối quan hệ không lành mạnh. Kết quả? Nhiều người mắc kẹt trong những mối quan hệ độc hại vì tin rằng "đau khổ là dấu hiệu của tình yêu đích thực."</p>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>⚠️</span> Cảnh Báo Quan Trọng</div>
+                <p>Trong Học Thuyết Chuyển Hóa Nội Tâm, chúng ta tin rằng: Mọi kết nối lành mạnh – dù là soulmate, twin flame, hay bất kỳ loại nào – đều phải dựa trên sự tôn trọng, an toàn, và nâng đỡ lẫn nhau. NẾU một mối quan hệ khiến bạn liên tục đau khổ, mất ngủ, lo âu, hoặc tự ti – đó KHÔNG phải là dấu hiệu của "kết nối thiêng liêng." Đó có thể là dấu hiệu của mối quan hệ độc hại.</p>
+            </div>
+
+            <p>Bài học này sẽ giúp bạn hiểu ĐÚNG về hai khái niệm này từ góc nhìn tâm linh lành mạnh – để bạn không bỏ lỡ soulmate thực sự vì chờ đợi twin flame ảo tưởng, và cũng không mắc kẹt trong mối quan hệ độc hại vì nhầm lẫn nó với "destiny."</p>
+
+            <div class="image-container">
+                <img src="images/m4-soulmate-twinflame-intro.png" alt="Soulmate vs Twin Flame">
+            </div>
+            <div class="image-caption">Hình 1: Soulmate và Twin Flame - Hiểu đúng để không mất phương hướng</div>
+        </section>
+
+        <!-- SECTION 2: Soulmate -->
+        <section class="section">
+            <h2 class="section-title"><span>💝</span> Soulmate - Bạn Đời Tâm Hồn</h2>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>💝</span> Soulmate Là Gì?</div>
+                <p>Soulmate là những linh hồn mà bạn có "hợp đồng tâm linh" từ trước khi sinh ra. Họ đến để đồng hành, hỗ trợ, và cùng bạn trưởng thành qua các trải nghiệm của kiếp sống này. Điều quan trọng cần hiểu: Bạn có thể có NHIỀU soulmates trong đời – không chỉ một. Soulmate có thể là người yêu, nhưng cũng có thể là bạn thân, người thầy, hoặc thậm chí thành viên gia đình.</p>
+            </div>
+
+            <p>Trong Học Thuyết Chuyển Hóa Nội Tâm, soulmate là những người mà khi bạn ở bên họ, tần số năng lượng của bạn được nâng lên – không bị kéo xuống. Họ giúp bạn trở thành phiên bản tốt hơn của chính mình, không phải bằng cách "sửa" bạn, mà bằng cách chấp nhận và yêu thương bạn đúng như bạn đang là.</p>
+
+            <p><strong>5 Dấu Hiệu Nhận Biết Soulmate:</strong></p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Cảm Giác "Đã Biết Từ Lâu"</div>
+                        <div class="flow-step-desc">Khi gặp soulmate, bạn có cảm giác kỳ lạ như đã biết người này từ kiếp trước. Cuộc trò chuyện chảy tự nhiên, không gượng gạo. Họ "hiểu" bạn mà không cần bạn giải thích quá nhiều.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">An Toàn & Bình Yên</div>
+                        <div class="flow-step-desc">Soulmate mang đến cảm giác AN TOÀN – bạn có thể là chính mình, với tất cả khuyết điểm, mà không sợ bị phán xét hay bỏ rơi. Bên họ, bạn thư giãn, không phải "diễn."</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Hỗ Trợ Không Điều Kiện</div>
+                        <div class="flow-step-desc">Soulmates hỗ trợ nhau trưởng thành – cổ vũ thành công, đồng hành qua thất bại. Họ là "đội ngũ" trong cuộc sống, không phải đối thủ. Thành công của bạn là niềm vui của họ.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Giá Trị Tương Đồng</div>
+                        <div class="flow-step-desc">Soulmates thường có giá trị sống, mục tiêu, và worldview tương đồng. Không nhất thiết phải giống hệt, nhưng đủ để đi cùng hướng mà không phải thỏa hiệp những điều cốt lõi.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Mâu Thuẫn Lành Mạnh</div>
+                        <div class="flow-step-desc">Soulmates vẫn có mâu thuẫn – đó là điều bình thường. Nhưng cách họ giải quyết mâu thuẫn là LÀNH MẠNH: lắng nghe, thấu hiểu, tìm giải pháp win-win, không tấn công nhân cách hay đe dọa.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m4-soulmate-traits.png" alt="Đặc điểm Soulmate">
+            </div>
+            <div class="image-caption">Hình 2: 5 đặc điểm nhận biết Soulmate Connection</div>
+        </section>
+
+        <!-- SECTION 3: Twin Flame -->
+        <section class="section">
+            <h2 class="section-title"><span>🔥</span> Twin Flame - Ngọn Lửa Song Sinh</h2>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🔥</span> Twin Flame Là Gì?</div>
+                <p>Theo quan niệm tâm linh, Twin Flame là một linh hồn duy nhất bị tách thành hai phần trước khi sinh ra. Khi hai phần gặp lại nhau, họ tạo nên một kết nối cực kỳ mãnh liệt – như nhìn vào gương phản chiếu của chính mình. Twin flame không phải là "nửa kia hoàn hảo" của bạn – họ là phản chiếu của những gì bạn cần chữa lành trong chính mình.</p>
+            </div>
+
+            <p>Đây là nơi nhiều người hiểu sai: Twin flame connection thường ĐAU ĐỚN – không phải vì đó là "định mệnh khổ sở", mà vì họ phản chiếu những bóng tối và vết thương sâu nhất của bạn. Mục đích của twin flame không phải để bạn sống "happily ever after" – mà để CHUYỂN HÓA cả hai người.</p>
+
+            <p><strong>4 Giai Đoạn Của Twin Flame Journey:</strong></p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Recognition (Nhận Ra) – Honeymoon Phase</div>
+                        <div class="flow-step-desc">Gặp gỡ với kết nối mãnh liệt – như bị sét đánh. Cảm giác như đã đợi người này cả đời. Mọi thứ hoàn hảo. Nhưng đây chỉ là giai đoạn ngắn.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Triggering (Kích Hoạt) – Crisis Phase</div>
+                        <div class="flow-step-desc">Twin flame bắt đầu phản chiếu những vết thương của bạn. Bạn nhìn thấy ở họ những gì bạn ghét nhất ở chính mình. Mâu thuẫn nổ ra. Cảm xúc lên xuống thất thường.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Runner-Chaser (Chạy Trốn-Đuổi Theo)</div>
+                        <div class="flow-step-desc">Một người (Runner) bỏ chạy vì không thể chịu được sự mãnh liệt. Người còn lại (Chaser) đuổi theo. Giai đoạn này có thể kéo dài nhiều năm và rất đau đớn.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Reunion/Surrender (Đoàn Tụ/Buông Xả)</div>
+                        <div class="flow-step-desc">Nếu CẢ HAI đều làm inner work và chữa lành, họ có thể đoàn tụ ở trạng thái balance. Nhưng nhiều twin flames KHÔNG đoàn tụ trong kiếp này – và điều đó vẫn ok.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m4-twinflame-traits.png" alt="Đặc điểm Twin Flame">
+            </div>
+            <div class="image-caption">Hình 3: 4 giai đoạn của Twin Flame Journey</div>
+        </section>
+
+        <!-- SECTION 4: Ví Dụ Thực Tế -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Câu Chuyện Thực Tế</h2>
+
+            <p>Để hiểu rõ hơn sự khác biệt giữa soulmate và twin flame, hãy cùng theo dõi hai câu chuyện thực tế:</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💝</span> Hạnh, 38 tuổi – Tìm Thấy Soulmate Sau Khi Từ Bỏ "Twin Flame" Ảo Tưởng</div>
+                <p>Hạnh đã yêu một người đàn ông 5 năm – mối quan hệ đầy drama: yêu cuồng nhiệt, cãi nhau dữ dội, chia tay rồi tái hợp liên tục. "Tôi tin anh ấy là twin flame của tôi," Hạnh chia sẻ. "Tôi đọc đủ thứ trên internet và thấy mọi 'dấu hiệu' đều khớp: mãnh liệt, runner-chaser, đau đớn..."</p>
+                <p style="margin-top: 12px;">Nhưng sau 5 năm, Hạnh kiệt sức. Cô nhận ra: "Anh ấy không phải twin flame – anh ấy là người có attachment style avoidant, và tôi có anxious attachment. Chúng tôi kích hoạt lẫn nhau, không phải vì 'định mệnh', mà vì cả hai đều chưa chữa lành."</p>
+                <p style="margin-top: 12px;">Sau khi làm inner work, Hạnh gặp Tuấn – không có "sét đánh", nhưng có sự ấm áp, an toàn, và bình yên. "Lần đầu tiên trong đời, tôi không phải lo lắng liệu anh ấy có yêu mình không. Tôi BIẾT. Đó là soulmate của tôi."</p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>🔥</span> Linh, 33 tuổi – Trải Nghiệm Twin Flame Thực Sự</div>
+                <p>Linh gặp Hoàng trong một workshop về thiền định. Kết nối giữa họ mãnh liệt đến mức khó thở. "Tôi nhìn vào mắt anh ấy và thấy... chính mình. Mọi thứ tôi giấu kín, mọi nỗi sợ tôi trốn tránh – tôi thấy tất cả trong anh ấy."</p>
+                <p style="margin-top: 12px;">Mối quan hệ của họ trải qua đủ giai đoạn: Honeymoon, Crisis, Runner-Chaser. Hoàng bỏ đi 2 lần. Linh đau đớn, nhưng thay vì đuổi theo, cô tập trung chữa lành bản thân. "Tôi hiểu rằng Hoàng không phải để 'sở hữu' – anh ấy là gương phản chiếu để tôi nhìn thấy những gì tôi cần chữa lành."</p>
+                <p style="margin-top: 12px;">Sau 3 năm làm inner work riêng biệt, họ đoàn tụ – nhưng ở một trạng thái hoàn toàn khác. "Chúng tôi không còn drama. Chúng tôi đã chữa lành những gì cần chữa lành. Bây giờ, chúng tôi đồng hành để phục vụ một mục đích lớn hơn."</p>
+            </div>
+        </section>
+
+        <!-- SECTION 5: So Sánh -->
+        <section class="section">
+            <h2 class="section-title"><span>⚖️</span> So Sánh Chi Tiết Soulmate vs Twin Flame</h2>
+
+            <div class="comparison-table">
+                <div class="comparison-row">
+                    <div class="comparison-header">Tiêu Chí</div>
+                    <div class="comparison-header gold">💝 Soulmate</div>
+                    <div class="comparison-header purple">🔥 Twin Flame</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-cell"><strong>Số lượng</strong></div>
+                    <div class="comparison-cell">Nhiều soulmates trong đời (người yêu, bạn bè, gia đình)</div>
+                    <div class="comparison-cell">Chỉ có MỘT twin flame duy nhất (nếu có)</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-cell"><strong>Cảm giác ban đầu</strong></div>
+                    <div class="comparison-cell">Quen thuộc, thoải mái, an toàn</div>
+                    <div class="comparison-cell">Mãnh liệt, áp đảo, như "sét đánh"</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-cell"><strong>Trải nghiệm chính</strong></div>
+                    <div class="comparison-cell">Bình yên, ổn định, hỗ trợ lẫn nhau</div>
+                    <div class="comparison-cell">Lên xuống, kích hoạt vết thương, đối mặt bóng tối</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-cell"><strong>Mục đích</strong></div>
+                    <div class="comparison-cell">Đồng hành, yêu thương, cùng trưởng thành</div>
+                    <div class="comparison-cell">Chuyển hóa sâu, thức tỉnh tâm linh, phục vụ mục đích cao hơn</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-cell"><strong>Kết quả phổ biến</strong></div>
+                    <div class="comparison-cell">Thường dẫn đến mối quan hệ lâu dài, hạnh phúc</div>
+                    <div class="comparison-cell">Có thể không kết thúc bên nhau – và đó vẫn ok</div>
+                </div>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>💡</span> Sự Thật Ít Người Biết</div>
+                <p>Không phải ai cũng sẽ gặp twin flame trong kiếp này – và điều đó HOÀN TOÀN BÌNH THƯỜNG. Nhiều người có cuộc sống hạnh phúc trọn vẹn với soulmate mà không cần twin flame. Đừng bỏ qua một soulmate tuyệt vời vì chờ đợi twin flame "huyền thoại" mà bạn đọc trên internet.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m4-comparison-chart.png" alt="So sánh Soulmate và Twin Flame">
+            </div>
+            <div class="image-caption">Hình 4: Bảng so sánh chi tiết Soulmate vs Twin Flame</div>
+        </section>
+
+        <!-- SECTION 6: FAQ -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🤔</span> "Làm sao tôi biết đó là twin flame hay chỉ là mối quan hệ độc hại?"</div>
+                <p>Câu hỏi quan trọng nhất: Mối quan hệ này có giúp bạn TRƯỞNG THÀNH không? Twin flame đau đớn nhưng thúc đẩy bạn chữa lành và phát triển. Mối quan hệ độc hại chỉ khiến bạn suy kiệt, mất tự tin, xa rời chính mình. Nếu sau 1-2 năm, bạn cảm thấy tệ hơn về bản thân, ít năng lượng hơn, ít kết nối với bạn bè/gia đình hơn – đó là red flag, không phải "twin flame sign."</p>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>🤔</span> "Tôi đã bỏ lỡ soulmate vì chờ đợi twin flame chưa?"</div>
+                <p>Rất có thể. Nhiều người bỏ qua những người tốt – ổn định, yêu thương, tôn trọng – vì "không đủ mãnh liệt" hoặc "thiếu chemistry." Họ chờ đợi "sét đánh" và drama, trong khi tình yêu thực sự thường đến dưới dạng bình yên, ấm áp. Nếu bạn đang từ chối ai đó chỉ vì "không đủ exciting" – hãy xem lại.</p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>🤔</span> "Twin flame bỏ đi – tôi có nên đuổi theo không?"</div>
+                <p>Không. Nếu đó là twin flame thật sự, việc bạn cần làm là TẬP TRUNG VÀO CHỮA LÀNH BẢN THÂN. Twin flame không "chạy" vì không yêu bạn – họ chạy vì chưa sẵn sàng đối mặt với chính mình. Bạn đuổi theo chỉ kéo dài giai đoạn runner-chaser. Khi bạn chữa lành, họ cũng bắt đầu cảm nhận sự thay đổi – dù có thể không ý thức được.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🤔</span> "Soulmate có thể trở thành Twin Flame không?"</div>
+                <p>Có những quan điểm khác nhau. Một số người tin rằng soulmate và twin flame là hai loại kết nối hoàn toàn khác biệt. Một số khác tin rằng một soulmate có thể "kích hoạt" trở thành twin flame journey nếu cả hai đủ sẵn sàng cho sự chuyển hóa sâu. Điều quan trọng: đừng cố gắng "biến" ai đó thành twin flame. Hãy để mối quan hệ phát triển tự nhiên.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 7: Điều Cần Nhớ -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Điều Quan Trọng Nhất Cần Nhớ</h2>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>💎</span> Ghi Nhớ Từ Bài Học Này</div>
+                <ul class="summary-list">
+                    <li><strong>Không romanticize drama:</strong> Một mối quan hệ đau khổ liên tục KHÔNG phải dấu hiệu của twin flame – đó có thể là mối quan hệ độc hại hoặc attachment issues</li>
+                    <li><strong>Soulmate cũng tuyệt vời:</strong> Đừng coi thường soulmate. Một soulmate yêu thương, ổn định có thể mang đến hạnh phúc lớn hơn nhiều so với twin flame chaos</li>
+                    <li><strong>Tập trung vào bản thân:</strong> Thay vì tìm kiếm người "hoàn hảo", hãy trở thành phiên bản tốt nhất của chính mình. Theo nguyên lý Trong-Ngoài Tương Ứng, đúng người sẽ đến khi bạn sẵn sàng</li>
+                    <li><strong>Red flags là red flags:</strong> Dù là soulmate hay twin flame, hành vi bạo lực, kiểm soát, thao túng KHÔNG được chấp nhận. Không có "định mệnh" nào biện minh cho abuse</li>
+                    <li><strong>Tin vào trực giác:</strong> Nếu một mối quan hệ cảm thấy "sai" ở mức sâu nhất – tin vào cảm giác đó. Kết nối thực sự, dù thử thách, vẫn nên cảm thấy "đúng" ở core</li>
+                    <li><strong>Mọi kết nối đều có giá trị:</strong> Không phải mọi mối quan hệ đều phải là "forever." Một số người đến để dạy bạn bài học, rồi đi. Điều đó không có nghĩa là họ "không phải người đúng" – họ là người đúng cho GIAI ĐOẠN đó</li>
+                </ul>
+            </div>
+
+            <p>Ở bài tiếp theo, chúng ta sẽ học cách viết "Thư Gửi Tri Kỷ" – một ritual mạnh mẽ để gửi thông điệp đến người yêu tương lai của bạn, dù bạn chưa biết họ là ai.</p>
+
+            <div class="image-container">
+                <img src="images/m4-healthy-love.png" alt="Tình yêu lành mạnh">
+            </div>
+            <div class="image-caption">Hình 5: Dù là Soulmate hay Twin Flame – tình yêu lành mạnh là ưu tiên số 1</div>
+        </section>
+
+    </div>
+</body>
+</html>

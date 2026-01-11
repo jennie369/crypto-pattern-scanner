@@ -1,0 +1,96 @@
+{% comment %}
+  GEM Payment QR Snippet
+  Hiển thị QR code thanh toán cho đơn hàng chưa thanh toán
+  Sử dụng: {% render 'gem-payment-qr', order: order %}
+{% endcomment %}
+
+{% if order and order.financial_status == 'pending' %}
+<div id="gem-payment-section" style="
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 16px;
+  padding: 24px;
+  margin: 24px 0;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+">
+  <!-- Header -->
+  <div style="text-align: center; margin-bottom: 20px;">
+    <h3 style="color: #FFBD59; font-size: 20px; font-weight: 700; margin: 0 0 8px 0;">
+      💳 Thanh toán chuyển khoản
+    </h3>
+    <p style="color: #999; margin: 0; font-size: 14px;">
+      Quét mã QR hoặc chuyển khoản thủ công
+    </p>
+  </div>
+
+  <!-- QR Code -->
+  <div style="background: #fff; border-radius: 12px; padding: 16px; text-align: center; margin-bottom: 20px;">
+    <img
+      id="gem-qr-code"
+      style="max-width: 200px; height: auto;"
+      src="https://img.vietqr.io/image/VCB-1074286868-compact2.png?amount={{ order.total_price | times: 1 }}&addInfo=DH{{ order.order_number }}&accountName=CT%20TNHH%20GEM%20CAPITAL%20HOLDING"
+      alt="QR Thanh toán"
+    />
+    <p style="color: #666; font-size: 12px; margin: 8px 0 0 0;">
+      Mở app ngân hàng → Quét mã → Xác nhận
+    </p>
+  </div>
+
+  <!-- Bank Info -->
+  <div style="background: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 16px;">
+    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+      <span style="color: #999; font-size: 13px;">Ngân hàng</span>
+      <span style="color: #fff; font-size: 14px; font-weight: 500;">Vietcombank</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+      <span style="color: #999; font-size: 13px;">Số tài khoản</span>
+      <span style="color: #fff; font-size: 14px; font-weight: 500;">1074286868</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+      <span style="color: #999; font-size: 13px;">Chủ tài khoản</span>
+      <span style="color: #fff; font-size: 14px; font-weight: 500;">CT TNHH GEM CAPITAL HOLDING</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+      <span style="color: #999; font-size: 13px;">Số tiền</span>
+      <span style="color: #FFBD59; font-size: 16px; font-weight: 700;">{{ order.total_price | money }}</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+      <span style="color: #999; font-size: 13px;">Nội dung CK</span>
+      <span style="color: #FFBD59; font-size: 16px; font-weight: 700;">DH{{ order.order_number }}</span>
+    </div>
+  </div>
+
+  <!-- Warning -->
+  <div style="background: rgba(255, 189, 89, 0.1); border-left: 3px solid #FFBD59; padding: 12px; margin-top: 16px; font-size: 13px; color: #ccc;">
+    <strong style="color: #FFBD59;">Quan trọng:</strong> Vui lòng nhập chính xác nội dung chuyển khoản
+    <strong style="color: #FFBD59;">DH{{ order.order_number }}</strong> để hệ thống tự động xác nhận.
+  </div>
+
+  <!-- Status polling script -->
+  <script>
+  (function() {
+    var supabaseUrl = 'https://pgfkbcnzqozzkohwbgbk.supabase.co';
+    var orderNumber = '{{ order.order_number }}';
+
+    function checkStatus() {
+      fetch(supabaseUrl + '/functions/v1/payment-status?order=' + orderNumber)
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && data.success && data.data && data.data.is_paid) {
+            document.getElementById('gem-payment-section').innerHTML =
+              '<div style="text-align:center;padding:40px;">' +
+              '<span style="font-size:48px;">✅</span>' +
+              '<p style="color:#00F0FF;font-size:18px;font-weight:600;margin:10px 0;">Thanh toán thành công!</p>' +
+              '</div>';
+            setTimeout(function() { location.reload(); }, 2000);
+          }
+        })
+        .catch(function(err) { console.log('Status check error:', err); });
+    }
+
+    setInterval(checkStatus, 15000);
+    setTimeout(checkStatus, 5000);
+  })();
+  </script>
+</div>
+{% endif %}

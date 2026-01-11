@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tái Tạo Tư Duy Triệu Phú - GEM Academy</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Noto+Sans+Display:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ═══════════════════════════════════════════════════════════
+           CSS VARIABLES - GEM Design System
+           ═══════════════════════════════════════════════════════════ */
+        :root {
+            --primary-burgundy: #9C0612;
+            --primary-dark: #640A0C;
+            --bg-navy: #112250;
+            --bg-purple: #4A1A4F;
+            --bg-burgundy: #6B0F1A;
+            --gold-accent: #FFBD59;
+            --gold-light: #DEBC81;
+            --fire-orange: #FF4500;
+            --deep-red: #8B0000;
+            --blood-red: #5C0A0A;
+            --dark-black: #1A0000;
+            --text-light: #FFFFFF;
+            --text-dark: #2D3748;
+            --text-gold: #DEBC81;
+            --text-cream: #F5E6D3;
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           RESET & BASE
+           ═══════════════════════════════════════════════════════════ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            color: var(--text-light);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           SECTION 1: HERO - Navy → Purple
+           ═══════════════════════════════════════════════════════════ */
+        .section-1 {
+            background: linear-gradient(180deg, 
+                #112250 0%,
+                #1A1A52 25%,
+                #2A1F5F 50%,
+                #3A1A58 75%,
+                #4A1A4F 100%
+            );
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+            padding: 0;
+        }
+
+        /* Background Glow Effects */
+        .section-1::before {
+            content: '';
+            position: absolute;
+            top: -200px;
+            right: -200px;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255, 189, 89, 0.25) 0%, transparent 70%);
+            filter: blur(120px);
+            animation: pulseGlow 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .section-1::after {
+            content: '';
+            position: absolute;
+            bottom: -150px;
+            left: -150px;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(156, 6, 18, 0.25) 0%, transparent 70%);
+            filter: blur(120px);
+            animation: pulseGlow 10s ease-in-out infinite reverse;
+            pointer-events: none;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); opacity: 0.25; }
+            50% { transform: scale(1.2); opacity: 0.4; }
+        }
+
+        /* Particles Animation */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: var(--gold-accent);
+            border-radius: 50%;
+            opacity: 0;
+            animation: particleRise 12s linear infinite;
+        }
+
+        .particle:nth-child(1) { left: 10%; animation-delay: 0s; }
+        .particle:nth-child(2) { left: 25%; animation-delay: 2s; width: 4px; height: 4px; }
+        .particle:nth-child(3) { left: 40%; animation-delay: 4s; width: 6px; height: 6px; }
+        .particle:nth-child(4) { left: 60%; animation-delay: 6s; }
+        .particle:nth-child(5) { left: 75%; animation-delay: 8s; width: 7px; height: 7px; }
+        .particle:nth-child(6) { left: 90%; animation-delay: 10s; width: 4px; height: 4px; }
+
+        @keyframes particleRise {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
+        }
+
+        /* Hero Container */
+        .hero-container {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 0 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* Badge */
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, rgba(255,189,89,0.3), rgba(156,6,18,0.2));
+            border: 2px solid var(--gold-accent);
+            color: var(--gold-accent);
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        .hero-badge svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Main Headline */
+        .hero-headline {
+            font-family: var(--font-heading);
+            font-size: clamp(1.8rem, 5vw, 3.2rem);
+            font-weight: 900;
+            color: var(--text-light);
+            line-height: 1.2;
+            margin-bottom: 20px;
+            padding: 0 16px;
+            animation: fadeInUp 0.8s ease 0.2s forwards;
+            opacity: 0;
+        }
+
+        .hero-headline .highlight {
+            color: var(--gold-accent);
+            display: block;
+        }
+
+        /* Sub-headline */
+        .hero-subheadline {
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            color: var(--text-cream);
+            font-weight: 400;
+            max-width: 700px;
+            margin: 0 auto 32px;
+            line-height: 1.8;
+            padding: 0 16px;
+            animation: fadeInUp 0.8s ease 0.4s forwards;
+            opacity: 0;
+        }
+
+        /* Hero Image */
+        .hero-image-wrapper {
+            width: 100%;
+            margin: 24px 0;
+            animation: fadeInUp 0.8s ease 0.6s forwards;
+            opacity: 0;
+        }
+
+        .hero-image {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .hero-image-placeholder {
+            width: 100%;
+            aspect-ratio: 16/10;
+            background: linear-gradient(135deg, rgba(255,189,89,0.1), rgba(156,6,18,0.2));
+            border-left: 4px solid var(--gold-accent);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            color: var(--text-cream);
+        }
+
+        .hero-image-placeholder svg {
+            width: 64px;
+            height: 64px;
+            opacity: 0.6;
+        }
+
+        .hero-image-placeholder span {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        /* Stats Row */
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: rgba(255,189,89,0.2);
+            width: 100%;
+            margin: 32px 0;
+            animation: fadeInUp 0.8s ease 0.8s forwards;
+            opacity: 0;
+        }
+
+        .stat-item {
+            background: rgba(17, 34, 80, 0.8);
+            padding: 20px 16px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: var(--font-heading);
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            font-weight: 800;
+            color: var(--gold-accent);
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-cream);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+
+        /* Promise Box */
+        .hero-promise {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border-left: 4px solid var(--gold-accent);
+            padding: 24px 20px;
+            margin: 24px 0;
+            animation: fadeInUp 0.8s ease 1s forwards;
+            opacity: 0;
+        }
+
+        .promise-title {
+            font-family: var(--font-heading);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .promise-title svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .promise-text {
+            font-size: 1rem;
+            color: var(--text-cream);
+            line-height: 1.7;
+        }
+
+        /* CTA Section */
+        .hero-cta-section {
+            width: 100%;
+            padding: 32px 16px;
+            animation: fadeInUp 0.8s ease 1.2s forwards;
+            opacity: 0;
+        }
+
+        .hero-price {
+            margin-bottom: 20px;
+        }
+
+        .price-original {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.5);
+            text-decoration: line-through;
+        }
+
+        .price-current {
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 5vw, 2.8rem);
+            font-weight: 900;
+            color: var(--gold-accent);
+            display: block;
+        }
+
+        .price-note {
+            font-size: 0.85rem;
+            color: var(--text-cream);
+            margin-top: 4px;
+        }
+
+        /* CTA Button */
+        .btn-cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            max-width: 400px;
+            padding: 18px 32px;
+            background: linear-gradient(135deg, var(--gold-accent), var(--gold-light));
+            color: var(--primary-dark);
+            font-family: var(--font-heading);
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 40px rgba(255, 189, 89, 0.4);
+        }
+
+        .btn-cta:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(255, 189, 89, 0.6);
+        }
+
+        .btn-cta svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        /* Secondary CTA */
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 28px;
+            background: transparent;
+            color: var(--gold-accent);
+            border: 2px solid var(--gold-accent);
+            font-family: var(--font-heading);
+            font-size: 0.95rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-top: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 189, 89, 0.1);
+        }
+
+        /* Guarantee Badge */
+        .guarantee-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 12px 20px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            border-radius: 50px;
+        }
+
+        .guarantee-badge svg {
+            width: 20px;
+            height: 20px;
+            color: #10B981;
+        }
+
+        .guarantee-badge span {
+            font-size: 0.85rem;
+            color: #10B981;
+            font-weight: 600;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           FOMO WIDGET - Sticky Right
+           ═══════════════════════════════════════════════════════════ */
+        .fomo-widget {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(156, 6, 18, 0.95);
+            backdrop-filter: blur(20px);
+            border-left: 3px solid var(--gold-accent);
+            border-radius: 12px 0 0 12px;
+            padding: 16px 14px;
+            z-index: 1000;
+            animation: slideInRight 1s ease 2s forwards;
+            opacity: 0;
+            transform: translateY(-50%) translateX(100%);
+        }
+
+        @keyframes slideInRight {
+            to {
+                opacity: 1;
+                transform: translateY(-50%) translateX(0);
+            }
+        }
+
+        .fomo-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255,189,89,0.2);
+        }
+
+        .fomo-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .fomo-icon {
+            width: 28px;
+            height: 28px;
+            color: var(--gold-accent);
+        }
+
+        .fomo-number {
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--gold-accent);
+        }
+
+        .fomo-label {
+            font-size: 0.65rem;
+            color: var(--text-cream);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           SCROLL INDICATOR
+           ═══════════════════════════════════════════════════════════ */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-cream);
+            opacity: 0.7;
+            animation: bounce 2s infinite;
+        }
+
+        .scroll-indicator svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .scroll-indicator span {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-10px); }
+            60% { transform: translateX(-50%) translateY(-5px); }
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           RESPONSIVE - MOBILE FIRST
+           ═══════════════════════════════════════════════════════════ */
+        @media (min-width: 600px) {
+            .hero-container {
+                padding: 80px 40px;
+            }
+
+            .hero-image-placeholder {
+                border-radius: 16px;
+                border-left: none;
+                border: 2px solid rgba(255,189,89,0.3);
+            }
+
+            .hero-promise {
+                border-radius: 16px;
+                border-left: none;
+                border: 2px solid rgba(255,189,89,0.3);
+                padding: 32px;
+            }
+
+            .stat-item {
+                padding: 28px 24px;
+            }
+
+            .fomo-widget {
+                padding: 20px 18px;
+            }
+        }
+
+        @media (min-width: 968px) {
+            .hero-container {
+                padding: 100px 60px;
+            }
+
+            .hero-stats {
+                max-width: 700px;
+                margin: 40px auto;
+                border-radius: 16px;
+                overflow: hidden;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 1: HERO - KHAI MỞ HÀNH TRÌNH TRIỆU PHÚ
+     Gradient: Navy #112250 → Purple #4A1A4F
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<section class="section-1" id="hero">
+    
+    <!-- Particles Background -->
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <!-- Hero Content -->
+    <div class="hero-container">
+        
+        <!-- Badge -->
+        <div class="hero-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/>
+            </svg>
+            KHÓA HỌC TƯ DUY CHUYỂN HÓA
+        </div>
+
+        <!-- Main Headline -->
+        <h1 class="hero-headline">
+            Bạn Có Bao Giờ Tự Hỏi Tại Sao Tiền
+            <span class="highlight">Luôn Chảy Khỏi Tay Mình?</span>
+        </h1>
+
+        <!-- Sub-headline -->
+        <p class="hero-subheadline">
+            Khám phá bí mật chuyển hóa tư duy trong 49 ngày để thu hút thịnh vượng tự nhiên như nam châm. 
+            Không phải kiếm nhiều tiền hơn, mà là thay đổi cách bạn nghĩ về tiền để tiền tự tìm đến bạn.
+        </p>
+
+        <!-- Hero Image Placeholder -->
+        <div class="hero-image-wrapper">
+            <div class="hero-image-placeholder">
+                <!-- Placeholder Icon -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <span>hero-trieu-phu-49-ngay.png (800x500)</span>
+                <span style="font-size: 0.75rem; opacity: 0.5;">Hình ảnh: Con đường từ bóng tối đến ánh sáng vàng, silhouette người tiến về phía trước</span>
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="hero-stats">
+            <div class="stat-item">
+                <span class="stat-number">49</span>
+                <span class="stat-label">Ngày Chuyển Hóa</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">28</span>
+                <span class="stat-label">Bài Học Chuyên Sâu</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">7</span>
+                <span class="stat-label">Tầng Tâm Thức</span>
+            </div>
+        </div>
+
+        <!-- Promise Box -->
+        <div class="hero-promise">
+            <div class="promise-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                Lời Hứa Từ Jennie Uyen Chu
+            </div>
+            <p class="promise-text">
+                Sau 49 ngày đồng hành cùng tôi, bạn sẽ không chỉ hiểu tại sao tiền luôn né tránh mình, 
+                mà còn biết cách trở thành người nam châm sống thu hút mọi nguồn thịnh vượng một cách tự nhiên. 
+                Đây không phải là lý thuyết suông, mà là hành trình chuyển hóa từ bên trong mà hàng nghìn 
+                học viên đã trải qua và thay đổi cuộc đời.
+            </p>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="hero-cta-section">
+            <div class="hero-price">
+                <span class="price-original">₫4,990,000</span>
+                <span class="price-current">₫499,000</span>
+                <span class="price-note">Tiết kiệm 90% - Ưu đãi có hạn</span>
+            </div>
+
+            <a href="#pricing" class="btn-cta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+                Bắt Đầu Hành Trình Ngay
+            </a>
+
+            <a href="#course-content" class="btn-secondary">
+                Xem Chi Tiết Khóa Học
+            </a>
+
+            <!-- Guarantee -->
+            <div class="guarantee-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <polyline points="9 12 11 14 15 10"/>
+                </svg>
+                <span>Hoàn tiền 100% trong 7 ngày nếu không hài lòng</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div class="scroll-indicator">
+        <span>Khám phá thêm</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 12 15 18 9"/>
+        </svg>
+    </div>
+
+</section>
+
+</body>
+</html>

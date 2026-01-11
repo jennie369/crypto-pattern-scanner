@@ -9,10 +9,11 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react';
-import { View, TextInput, TouchableOpacity, StyleSheet, Keyboard, Animated } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Keyboard, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Send, Mic, MicOff, Square } from 'lucide-react-native';
+import { Send, Mic, MicOff, Square, WifiOff, CloudOff } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, INPUT, TOUCH } from '../../../utils/tokens';
+import { INPUT_AREA_BACKGROUND } from '../../../constants/gemMasterLayout';
 
 // Voice components
 import VoiceInputButton from '../../../components/GemMaster/VoiceInputButton';
@@ -34,6 +35,9 @@ const ChatInput = ({
   onVoiceRecordingStop,
   onVoiceQuotaPress,
   onVoiceError,
+  // Offline props (PHASE 1C)
+  isOffline = false,
+  queueSize = 0,
 }) => {
   const [text, setText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
@@ -142,8 +146,25 @@ const ChatInput = ({
   const showVoiceButton = voiceEnabled && !hasText && !isRecording;
   const showSendButton = hasText || isRecording;
 
+  // Dynamic placeholder based on offline state
+  const displayPlaceholder = isOffline
+    ? 'Tin nhắn sẽ gửi khi có mạng...'
+    : isRecording
+    ? 'Đang nghe...'
+    : placeholder;
+
   return (
     <View>
+      {/* Offline Indicator (PHASE 1C) */}
+      {isOffline && (
+        <View style={styles.offlineIndicator}>
+          <WifiOff size={14} color="#FF6B6B" />
+          <Text style={styles.offlineText}>
+            Ngoại tuyến{queueSize > 0 ? ` (${queueSize} tin nhắn chờ)` : ''}
+          </Text>
+        </View>
+      )}
+
       {/* Recording Indicator (above input) */}
       <RecordingIndicator
         isRecording={isRecording}
@@ -152,7 +173,7 @@ const ChatInput = ({
         interimText={interimTranscript}
       />
 
-      <View style={[styles.container, { paddingBottom: bottomPadding }]}>
+      <View style={[styles.container, { paddingBottom: bottomPadding }, isOffline && styles.containerOffline]}>
         {/* Voice Quota Badge */}
         {voiceEnabled && !isRecording && (
           <VoiceQuotaBadge
@@ -167,8 +188,8 @@ const ChatInput = ({
             style={styles.input}
             value={text}
             onChangeText={setText}
-            placeholder={isRecording ? 'Đang nghe...' : placeholder}
-            placeholderTextColor={COLORS.textMuted}
+            placeholder={displayPlaceholder}
+            placeholderTextColor={isOffline ? '#FF6B6B' : COLORS.textMuted}
             multiline
             maxLength={2000}
             editable={!disabled && !isRecording}
@@ -227,9 +248,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     paddingHorizontal: SPACING.md,
     paddingTop: SPACING.sm,
-    backgroundColor: GLASS.background,
-    borderTopWidth: GLASS.borderWidth,
-    borderTopColor: COLORS.inputBorder,
+    paddingBottom: SPACING.sm,
+    backgroundColor: INPUT_AREA_BACKGROUND, // Xem constants/gemMasterLayout.js
     gap: SPACING.sm,
   },
   inputWrapper: {
@@ -267,6 +287,25 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 107, 107, 0.15)',
     borderWidth: 1.5,
     borderColor: COLORS.error,
+  },
+  // Offline indicator styles (PHASE 1C)
+  offlineIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: SPACING.md,
+    backgroundColor: 'rgba(255, 107, 107, 0.15)',
+    gap: 6,
+  },
+  offlineText: {
+    color: '#FF6B6B',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  containerOffline: {
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 107, 107, 0.3)',
   },
 });
 

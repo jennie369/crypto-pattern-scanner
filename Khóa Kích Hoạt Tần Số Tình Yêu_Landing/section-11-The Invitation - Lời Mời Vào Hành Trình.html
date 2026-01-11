@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 11: The Invitation - Lời Mời Vào Hành Trình</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800;900&family=Noto+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ============================================
+           🎨 PHẦN CẤU HÌNH - DỄ CHỈNH SỬA
+        ============================================ */
+        :root {
+            /* Màu sắc GOLD LUXURY */
+            --gold-accent: #FFBD59;
+            --gold-light: #DEBC81;
+            --burgundy-dark: #6B1F3A;
+            --burgundy-mid: #5A2838;
+            --burgundy-light: #4A1F3A;
+            --text-light: #FFFFFF;
+            --text-cream: #F5E6D3;
+            
+            /* Gradient Section 9 - Chuyển tiếp từ Section 8 */
+            --gradient-start: #120D23;
+            --gradient-mid: #1A1230;
+            --gradient-end: #22173D;
+            
+            /* Font chữ */
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans', sans-serif;
+        }
+
+        /* ============================================
+           📝 CONFIG - CTA Link (THAY Ở ĐÂY)
+        ============================================ */
+        /* Thay #dang-ky bằng URL thực tế của bạn */
+
+        /* ============================================
+           🎨 GLOBAL STYLES
+        ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--burgundy-dark);
+            color: var(--text-light);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* ============================================
+           📐 SECTION 9 CONTAINER
+        ============================================ */
+        .invitation-section {
+            background: linear-gradient(180deg, 
+                var(--gradient-start) 0%, 
+                var(--gradient-mid) 50%,
+                var(--gradient-end) 100%
+            );
+            padding: 140px 20px;
+            position: relative;
+            overflow: hidden;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Sacred gate atmosphere */
+        .invitation-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(255, 189, 89, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 30% 30%, rgba(255, 189, 89, 0.05) 0%, transparent 35%),
+                radial-gradient(circle at 70% 70%, rgba(255, 189, 89, 0.05) 0%, transparent 35%);
+            animation: gateGlow 60s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes gateGlow {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ============================================
+           🎯 INVITATION CONTENT
+        ============================================ */
+        .invitation-content {
+            text-align: center;
+            animation: fadeInUp 1.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(60px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Sacred Icon */
+        .invitation-icon {
+            font-size: 6rem;
+            margin-bottom: 40px;
+            filter: drop-shadow(0 0 40px rgba(255, 189, 89, 1));
+            animation: iconRadiate 4s ease-in-out infinite;
+        }
+
+        @keyframes iconRadiate {
+            0%, 100% { 
+                transform: scale(1);
+                filter: drop-shadow(0 0 40px rgba(255, 189, 89, 1));
+            }
+            50% { 
+                transform: scale(1.15);
+                filter: drop-shadow(0 0 60px rgba(255, 189, 89, 1));
+            }
+        }
+
+        /* Main Title */
+        .invitation-title {
+            font-family: var(--font-heading);
+            font-size: clamp(3rem, 7vw, 6rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, 
+                var(--gold-accent) 0%, 
+                var(--gold-light) 50%,
+                var(--gold-accent) 100%
+            );
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 50px;
+            line-height: 1.2;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            animation: titleMajesty 5s ease-in-out infinite;
+        }
+
+        @keyframes titleMajesty {
+            0%, 100% { 
+                filter: drop-shadow(0 0 50px rgba(255, 189, 89, 0.8));
+            }
+            50% { 
+                filter: drop-shadow(0 0 80px rgba(255, 189, 89, 1));
+            }
+        }
+
+        /* Promise Messages */
+        .promise-messages {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            margin-bottom: 60px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .promise-item {
+            background: linear-gradient(135deg, 
+                rgba(255, 189, 89, 0.1) 0%, 
+                rgba(107, 31, 58, 0.15) 100%
+            );
+            border: 2px solid rgba(255, 189, 89, 0.3);
+            border-radius: 25px;
+            padding: 35px 45px;
+            font-size: 1.3rem;
+            color: var(--text-cream);
+            line-height: 1.8;
+            font-style: italic;
+            transition: all 0.4s ease;
+            opacity: 0;
+            transform: translateX(-30px);
+            animation: slideInPromise 0.8s ease forwards;
+        }
+
+        .promise-item:nth-child(1) { animation-delay: 0.5s; }
+        .promise-item:nth-child(2) { animation-delay: 0.7s; }
+        .promise-item:nth-child(3) { animation-delay: 0.9s; }
+
+        @keyframes slideInPromise {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .promise-item:hover {
+            transform: translateX(10px);
+            border-color: var(--gold-accent);
+            box-shadow: 0 15px 50px rgba(255, 189, 89, 0.3);
+        }
+
+        .promise-item::before {
+            content: '✨';
+            font-size: 2rem;
+            margin-right: 15px;
+            display: inline-block;
+            animation: promiseSparkle 2s ease-in-out infinite;
+        }
+
+        @keyframes promiseSparkle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.2); }
+        }
+
+        /* Question */
+        .invitation-question {
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 4.5vw, 3.5rem);
+            font-weight: 700;
+            color: var(--gold-accent);
+            margin-bottom: 60px;
+            line-height: 1.4;
+            animation: questionPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes questionPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.85; }
+        }
+
+        /* ============================================
+           🔥 CTA BUTTON - THE GATE
+        ============================================ */
+        .cta-wrapper {
+            margin-bottom: 60px;
+            animation: ctaAppear 1.2s ease 1.2s backwards;
+        }
+
+        @keyframes ctaAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 30px 80px;
+            background: linear-gradient(135deg, 
+                var(--gold-accent) 0%, 
+                var(--gold-light) 100%
+            );
+            color: var(--burgundy-dark);
+            font-family: var(--font-heading);
+            font-size: 1.6rem;
+            font-weight: 900;
+            text-decoration: none;
+            border-radius: 60px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 
+                0 20px 60px rgba(255, 189, 89, 0.6),
+                0 0 100px rgba(255, 189, 89, 0.4),
+                inset 0 2px 15px rgba(255, 255, 255, 0.4);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            animation: buttonFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes buttonFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        /* Button shimmer effect */
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 30%,
+                rgba(255, 255, 255, 0.5) 50%,
+                transparent 70%
+            );
+            animation: buttonShimmer 3s infinite;
+        }
+
+        @keyframes buttonShimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .cta-button:hover {
+            transform: translateY(-18px) scale(1.05);
+            box-shadow: 
+                0 30px 80px rgba(255, 189, 89, 0.8),
+                0 0 150px rgba(255, 189, 89, 0.6),
+                inset 0 2px 20px rgba(255, 255, 255, 0.6);
+        }
+
+        .cta-button:active {
+            transform: translateY(-15px) scale(1.02);
+        }
+
+        /* ============================================
+           ⏰ FOMO MESSAGE
+        ============================================ */
+        .fomo-message {
+            font-size: 1.15rem;
+            color: var(--gold-light);
+            font-style: italic;
+            margin-bottom: 50px;
+            animation: fomoFade 2s ease-in-out infinite;
+        }
+
+        @keyframes fomoFade {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        /* ============================================
+           🎁 GUARANTEE BADGES
+        ============================================ */
+        .guarantee-badges {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            opacity: 0;
+            animation: badgesFadeIn 1s ease 1.5s forwards;
+        }
+
+        @keyframes badgesFadeIn {
+            to { opacity: 1; }
+        }
+
+        .badge-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.1rem;
+            color: var(--text-cream);
+            font-weight: 600;
+        }
+
+        .badge-icon {
+            font-size: 2rem;
+            filter: drop-shadow(0 0 10px rgba(255, 189, 89, 0.7));
+        }
+
+        /* ============================================
+           📱 RESPONSIVE
+        ============================================ */
+        @media (max-width: 768px) {
+            .invitation-section {
+                padding: 100px 20px;
+            }
+
+            .invitation-icon {
+                font-size: 4.5rem;
+            }
+
+            .promise-item {
+                padding: 25px 30px;
+                font-size: 1.15rem;
+            }
+
+            .cta-button {
+                padding: 25px 60px;
+                font-size: 1.3rem;
+            }
+
+            .guarantee-badges {
+                flex-direction: column;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ============================================
+         SECTION 9: THE INVITATION
+    ============================================ -->
+    <section class="invitation-section">
+        <div class="container">
+            <div class="invitation-content">
+                
+                <!-- Sacred Icon -->
+                <div class="invitation-icon">🌙</div>
+
+                <!-- Main Title -->
+                <h2 class="invitation-title">
+                    42 Ngày.<br>
+                    Một Cuộc Hành Hương.<br>
+                    Một "Bạn" Mới Ở Tần Số 540 Hz.
+                </h2>
+
+                <!-- Promise Messages -->
+                <div class="promise-messages">
+                    <div class="promise-item">
+                        Đây không phải quyết định mua khóa học
+                    </div>
+                    <div class="promise-item">
+                        Đây là lời hứa bạn thề với chính mình
+                    </div>
+                    <div class="promise-item">
+                        Đây là cánh cổng dẫn đến phiên bản toàn vẹn nhất của bạn
+                    </div>
+                </div>
+
+                <!-- Question -->
+                <p class="invitation-question">
+                    Bạn Đã Sẵn Sàng Chưa?
+                </p>
+
+                <!-- CTA Button -->
+                <div class="cta-wrapper">
+                    <a href="#dang-ky" class="cta-button">
+                        Tôi Sẵn Sàng Bắt Đầu Hành Trình ✨
+                    </a>
+                </div>
+
+                <!-- FOMO Message -->
+                <p class="fomo-message">
+                    Mỗi ngày bạn chờ đợi là một ngày xa rời con người bạn có thể trở thành
+                </p>
+
+                <!-- Guarantee Badges -->
+                <div class="guarantee-badges">
+                    <div class="badge-item">
+                        <span class="badge-icon">🛡️</span>
+                        <span>Hoàn tiền 100%</span>
+                    </div>
+                    <div class="badge-item">
+                        <span class="badge-icon">🎁</span>
+                        <span>Vật phẩm thiêng liêng</span>
+                    </div>
+                    <div class="badge-item">
+                        <span class="badge-icon">🤝</span>
+                        <span>Đồng hành trọn đời</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+</body>
+</html>

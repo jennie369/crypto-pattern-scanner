@@ -22,10 +22,17 @@ const SCREEN_TO_TAB_MAP = {
   'ForumScreen': { tab: 'Home', screen: 'Forum' },
   'PostDetail': { tab: 'Home', screen: 'PostDetail' },
   'CreatePost': { tab: 'Home', screen: 'CreatePost' },
-  'Course': { tab: 'Home', screen: 'Course' },
-  'CourseDetail': { tab: 'Home', screen: 'CourseDetail' },
-  'Courses': { tab: 'Home', screen: 'Courses' },
-  'CoursesMain': { tab: 'Home', screen: 'CoursesMain' },
+
+  // Courses - ROOT level stack (not inside any tab)
+  'Courses': { root: true, screen: 'Courses' },
+  'CourseDetail': { root: true, screen: 'Courses', nestedScreen: 'CourseDetail' },
+  'CourseList': { root: true, screen: 'Courses', nestedScreen: 'CourseList' },
+  'MyCourses': { root: true, screen: 'Courses', nestedScreen: 'MyCourses' },
+  'LessonPlayer': { root: true, screen: 'Courses', nestedScreen: 'LessonPlayer' },
+
+  // Messages - ROOT level stack
+  'Messages': { root: true, screen: 'Messages' },
+  'Chat': { root: true, screen: 'Messages', nestedScreen: 'Chat' },
 
   // Shop tab screens
   'Shop': { tab: 'Shop', screen: 'ShopMain' },
@@ -62,29 +69,61 @@ const SCREEN_TO_TAB_MAP = {
  * @param {object} params - Optional navigation params
  */
 export const navigateToScreen = (navigation, screenName, params = {}) => {
+  console.log('[NavigationHelper] ========== NAVIGATE ==========');
+  console.log('[NavigationHelper] screenName:', screenName);
+  console.log('[NavigationHelper] params:', params);
+  console.log('[NavigationHelper] navigation exists:', !!navigation);
+
   if (!navigation || !screenName) {
-    console.warn('[NavigationHelper] Missing navigation or screenName');
+    console.warn('[NavigationHelper] ❌ Missing navigation or screenName');
     return;
   }
 
   const mapping = SCREEN_TO_TAB_MAP[screenName];
+  console.log('[NavigationHelper] mapping found:', mapping);
 
   if (mapping) {
-    // Screen is in our mapping, use nested navigation
-    if (mapping.screen) {
-      // Navigate to tab with specific screen
-      navigation.navigate(mapping.tab, {
-        screen: mapping.screen,
-        params: params,
-      });
-    } else {
-      // Tab without specific screen (e.g., Notifications)
-      navigation.navigate(mapping.tab, params);
+    try {
+      if (mapping.root) {
+        // ROOT level stack - navigate directly to root stack
+        if (mapping.nestedScreen) {
+          // Root stack with nested screen
+          console.log('[NavigationHelper] ✅ Navigating to ROOT stack:', mapping.screen, 'nested:', mapping.nestedScreen);
+          navigation.navigate(mapping.screen, {
+            screen: mapping.nestedScreen,
+            params: params,
+          });
+        } else {
+          // Root stack only
+          console.log('[NavigationHelper] ✅ Navigating to ROOT stack:', mapping.screen);
+          navigation.navigate(mapping.screen, params);
+        }
+      } else if (mapping.tab) {
+        // Tab navigator - navigate to tab with optional nested screen
+        if (mapping.screen) {
+          console.log('[NavigationHelper] ✅ Navigating to tab:', mapping.tab, 'screen:', mapping.screen);
+          navigation.navigate(mapping.tab, {
+            screen: mapping.screen,
+            params: params,
+          });
+        } else {
+          // Tab without specific screen (e.g., Notifications)
+          console.log('[NavigationHelper] ✅ Navigating to tab only:', mapping.tab);
+          navigation.navigate(mapping.tab, params);
+        }
+      }
+      console.log('[NavigationHelper] ✅ Navigation executed successfully');
+    } catch (error) {
+      console.error('[NavigationHelper] ❌ Navigation error:', error);
     }
   } else {
     // Unknown screen, try direct navigation (fallback)
     console.warn(`[NavigationHelper] Unknown screen: ${screenName}, trying direct navigation`);
-    navigation.navigate(screenName, params);
+    try {
+      navigation.navigate(screenName, params);
+    } catch (error) {
+      console.error('[NavigationHelper] ❌ Direct navigation error:', error);
+    }
   }
 };
 

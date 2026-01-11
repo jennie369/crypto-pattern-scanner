@@ -1,0 +1,73 @@
+{% comment %}
+  Customer Order Status Page
+  Auto-redirect pending orders to QR payment page
+{% endcomment %}
+
+{% if order.financial_status == 'pending' %}
+  {% comment %} Order chưa thanh toán - redirect đến trang QR {% endcomment %}
+  <script>
+    window.location.href = '/pages/thanh-toan?order={{ order.order_number }}';
+  </script>
+
+  <div style="text-align: center; padding: 60px 20px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+    <div style="font-size: 40px; margin-bottom: 20px;">⏳</div>
+    <h2 style="color: #FFBD59; margin-bottom: 10px;">Đang chuyển đến trang thanh toán...</h2>
+    <p style="color: #888;">Nếu không tự động chuyển, <a href="/pages/thanh-toan?order={{ order.order_number }}" style="color: #FFBD59;">nhấn vào đây</a></p>
+  </div>
+
+{% else %}
+  {% comment %} Order đã thanh toán - hiện thông tin bình thường {% endcomment %}
+  <div class="customer-order" style="max-width: 800px; margin: 0 auto; padding: 40px 20px;">
+
+    <h1 style="color: #FFBD59; margin-bottom: 30px;">Đơn hàng #{{ order.order_number }}</h1>
+
+    {% if order.financial_status == 'paid' %}
+    <div style="background: rgba(0,240,255,0.1); border-radius: 12px; padding: 20px; margin-bottom: 30px; text-align: center;">
+      <span style="font-size: 40px;">✅</span>
+      <h2 style="color: #00F0FF; margin: 10px 0;">Đã thanh toán thành công!</h2>
+      <p style="color: #888;">Cảm ơn bạn đã mua hàng tại {{ shop.name }}</p>
+    </div>
+    {% endif %}
+
+    <div style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+      <h3 style="color: #fff; margin-bottom: 15px;">Thông tin đơn hàng</h3>
+
+      <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+        <span style="color: #888;">Ngày đặt</span>
+        <span style="color: #fff;">{{ order.created_at | date: "%d/%m/%Y %H:%M" }}</span>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+        <span style="color: #888;">Trạng thái</span>
+        <span style="color: #00F0FF;">{{ order.financial_status_label }}</span>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; padding: 10px 0;">
+        <span style="color: #888;">Tổng tiền</span>
+        <span style="color: #FFBD59; font-weight: bold;">{{ order.total_price | money }}</span>
+      </div>
+    </div>
+
+    <div style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 20px;">
+      <h3 style="color: #fff; margin-bottom: 15px;">Sản phẩm</h3>
+
+      {% for line_item in order.line_items %}
+      <div style="display: flex; align-items: center; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">
+        {% if line_item.image %}
+        <img src="{{ line_item.image | img_url: '80x80' }}"
+             style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin-right: 15px;">
+        {% endif %}
+        <div style="flex: 1;">
+          <div style="color: #fff; font-weight: 500;">{{ line_item.title }}</div>
+          <div style="color: #888; font-size: 13px;">SL: {{ line_item.quantity }} × {{ line_item.price | money }}</div>
+        </div>
+        <div style="color: #FFBD59; font-weight: bold;">{{ line_item.line_price | money }}</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <a href="/" style="display: block; text-align: center; margin-top: 30px; color: #FFBD59; text-decoration: none;">
+      ← Tiếp tục mua sắm
+    </a>
+  </div>
+{% endif %}

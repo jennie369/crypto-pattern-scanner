@@ -2208,8 +2208,8 @@ export const HEXAGRAMS = {
     unicode: '䷑',
     element: 'Mộc',
     nature: 'Âm',
-    image: 'Núi có Gió',
-    lines: [0, 1, 1, 1, 0, 0],
+    image: 'Núi trên Gió',
+    lines: [0, 1, 1, 0, 0, 1],
 
     overview: {
       meaning: `Quẻ Cổ tượng trưng cho sự thối nát cần được sửa chữa. Như sâu bọ trong bát, những vấn đề cũ cần được giải quyết. Đây là quẻ về repair, correction và renovation. Dọn dẹp những gì đã hư hỏng.`,
@@ -2725,7 +2725,7 @@ export const HEXAGRAMS = {
     element: 'Hỏa',
     nature: 'Âm',
     image: 'Núi có Lửa',
-    lines: [1, 0, 0, 1, 0, 1],
+    lines: [1, 0, 1, 0, 0, 1],
 
     overview: {
       meaning: `Quẻ Bí tượng trưng cho vẻ đẹp, trang trí và grace. Như lửa chiếu sáng núi, làm đẹp cho cảnh quan. Đây là quẻ về beauty, elegance và refinement. Tuy nhiên, vẻ đẹp bề ngoài cần đi với nội dung bên trong.`,
@@ -2938,7 +2938,7 @@ export const HEXAGRAMS = {
     element: 'Thổ',
     nature: 'Dương',
     image: 'Núi chứa Trời',
-    lines: [1, 1, 1, 1, 0, 0],
+    lines: [1, 1, 1, 0, 0, 1],
     overview: {
       meaning: `Quẻ Đại Súc tượng trưng cho sự tích lũy lớn, nuôi dưỡng tài năng. Núi chứa đựng năng lượng của Trời.`,
       keywords: ['Tích lũy', 'Nuôi dưỡng', 'Kiềm chế', 'Đợi thời', 'Tiềm năng'],
@@ -3274,7 +3274,7 @@ export const HEXAGRAMS = {
     element: 'Hỏa',
     nature: 'Âm',
     image: 'Lửa trên Hồ',
-    lines: [1, 0, 1, 0, 1, 1],
+    lines: [1, 1, 0, 1, 0, 1],
     overview: {
       meaning: `Quẻ Khuê tượng trưng cho sự đối lập, khác biệt. Lửa và nước đi ngược chiều, nhưng có thể bổ sung cho nhau.`,
       keywords: ['Đối lập', 'Khác biệt', 'Bổ sung', 'Hiểu lầm', 'Hòa giải'],
@@ -3330,7 +3330,7 @@ export const HEXAGRAMS = {
     element: 'Mộc',
     nature: 'Dương',
     image: 'Sấm có Mưa',
-    lines: [0, 1, 0, 0, 1, 0],
+    lines: [0, 1, 0, 1, 0, 0],
     overview: {
       meaning: `Quẻ Giải tượng trưng cho sự giải thoát, tháo gỡ. Như sấm kèm mưa giải tỏa không khí ngột ngạt.`,
       keywords: ['Giải thoát', 'Tháo gỡ', 'Nhẹ nhõm', 'Tha thứ', 'Bắt đầu mới'],

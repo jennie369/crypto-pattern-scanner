@@ -1,0 +1,744 @@
+<!-- ============================================
+     SECTION 7: KHÓA HỌC CHUYỂN HÓA TƯ DUY
+     GEMRAL Landing Page
+     3 Courses: Tần Số Gốc, Tình Yêu, Triệu Phú
+     ============================================ -->
+
+
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEMRAL - Khóa Học Chuyển Hóa Tư Duy</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&amp;family=Noto+Sans+Display:wght@400;500;600&amp;display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1632;
+            --burgundy: #9C0612;
+            --burgundy-dark: #6B0F1A;
+            --gold: #FFBD59;
+            --gold-dark: #C88F2F;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --pink: #FF6B9D;
+            --green: #10B981;
+            --white: #ffffff;
+            --white-80: rgba(255, 255, 255, 0.8);
+            --white-60: rgba(255, 255, 255, 0.6);
+            --white-40: rgba(255, 255, 255, 0.4);
+            --white-20: rgba(255, 255, 255, 0.2);
+            --white-10: rgba(255, 255, 255, 0.1);
+            --black-40: rgba(0, 0, 0, 0.4);
+            --black-50: rgba(0, 0, 0, 0.5);
+            
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            background: var(--navy-dark);
+            color: var(--white);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Section */
+        .section-courses-mindset {
+            padding: 100px 0;
+            background: linear-gradient(180deg, 
+                var(--navy-dark) 0%,
+                #1a0a1a 30%,
+                var(--burgundy-dark) 60%,
+                var(--navy) 100%
+            );
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .section-courses-mindset::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(ellipse, rgba(156, 6, 18, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        /* Section Header */
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 28px;
+            border-radius: 30px;
+            font-family: var(--font-heading);
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 25px;
+        }
+        
+        .badge-burgundy {
+            background: linear-gradient(135deg, var(--burgundy), var(--burgundy-dark));
+            color: var(--white);
+            box-shadow: 0 4px 20px rgba(156, 6, 18, 0.4);
+        }
+        
+        .badge svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: 42px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+        
+        .section-subtitle {
+            font-size: 18px;
+            color: var(--white-80);
+            max-width: 750px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+        
+        .text-gold { color: var(--gold); }
+        .text-cyan { color: var(--cyan); }
+        .text-pink { color: var(--pink); }
+        .text-purple { color: var(--purple); }
+        
+        /* Intro Box */
+        .intro-box {
+            background: var(--black-50);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--white-10);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 60px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .intro-quote {
+            font-size: 20px;
+            font-style: italic;
+            color: var(--gold);
+            text-align: center;
+            margin-bottom: 25px;
+            line-height: 1.7;
+        }
+        
+        .intro-author {
+            text-align: center;
+            font-size: 14px;
+            color: var(--white-60);
+        }
+        
+        .intro-text {
+            font-size: 16px;
+            color: var(--white-80);
+            text-align: center;
+            max-width: 800px;
+            margin: 25px auto 0;
+            line-height: 1.8;
+        }
+        
+        /* Courses Grid */
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Course Card */
+        .course-card {
+            background: var(--black-50);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid var(--white-10);
+            border-radius: 24px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+        
+        .course-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+        }
+        
+        .course-card.featured {
+            border-color: var(--gold);
+            transform: scale(1.03);
+        }
+        
+        .course-card.featured:hover {
+            transform: scale(1.03) translateY(-10px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), 0 0 40px rgba(255, 189, 89, 0.2);
+        }
+        
+        /* Card Badge */
+        .card-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-family: var(--font-heading);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            z-index: 2;
+        }
+        
+        .badge-popular {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--navy-dark);
+        }
+        
+        .badge-new {
+            background: linear-gradient(135deg, var(--cyan), #0891b2);
+            color: var(--navy-dark);
+        }
+        
+        /* Card Image */
+        .card-image {
+            height: 200px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-image-bg {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .card-image-bg.bg-purple {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.3) 0%, rgba(156, 6, 18, 0.3) 100%);
+        }
+        
+        .card-image-bg.bg-pink {
+            background: linear-gradient(135deg, rgba(255, 107, 157, 0.3) 0%, rgba(156, 6, 18, 0.3) 100%);
+        }
+        
+        .card-image-bg.bg-gold {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.3) 0%, rgba(156, 6, 18, 0.3) 100%);
+        }
+        
+        .card-icon-large {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 50%;
+            border: 2px solid var(--white-20);
+        }
+        
+        .card-icon-large svg {
+            width: 50px;
+            height: 50px;
+        }
+        
+        /* Card Content */
+        .card-content {
+            padding: 30px;
+        }
+        
+        .card-category {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--white-60);
+            margin-bottom: 10px;
+        }
+        
+        .card-title {
+            font-family: var(--font-heading);
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--white);
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+        
+        .card-description {
+            font-size: 15px;
+            color: var(--white-80);
+            line-height: 1.7;
+            margin-bottom: 25px;
+        }
+        
+        /* Price Box */
+        .price-box {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+        
+        .price-original {
+            font-size: 16px;
+            color: var(--white-40);
+            text-decoration: line-through;
+        }
+        
+        .price-current {
+            font-family: var(--font-heading);
+            font-size: 28px;
+            font-weight: 800;
+        }
+        
+        .price-period {
+            font-size: 14px;
+            color: var(--white-60);
+        }
+        
+        /* Features List */
+        .features-list {
+            list-style: none;
+            margin-bottom: 25px;
+        }
+        
+        .features-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 0;
+            font-size: 14px;
+            color: var(--white-80);
+            border-bottom: 1px solid var(--white-10);
+        }
+        
+        .features-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .features-list li svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            margin-top: 2px;
+            stroke: var(--green);
+        }
+        
+        /* Card Actions */
+        .card-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 24px;
+            border-radius: 10px;
+            font-family: var(--font-heading);
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .btn svg {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--navy-dark);
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 20px rgba(255, 189, 89, 0.4);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--white-20);
+            color: var(--white);
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+        
+        /* Highlight Box */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(156, 6, 18, 0.2) 0%, rgba(106, 91, 255, 0.1) 100%);
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 60px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .highlight-box h3 {
+            font-family: var(--font-heading);
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 15px;
+        }
+        
+        .highlight-box p {
+            font-size: 16px;
+            color: var(--white-80);
+            max-width: 700px;
+            margin: 0 auto 25px;
+            line-height: 1.8;
+        }
+        
+        /* Section Footer */
+        .section-footer {
+            text-align: center;
+            margin-top: 60px;
+            font-size: 13px;
+            color: var(--white-60);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+            .courses-grid {
+                grid-template-columns: 1fr;
+                max-width: 500px;
+                margin: 0 auto;
+            }
+            .course-card.featured {
+                transform: scale(1);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .section-courses-mindset { padding: 80px 0; }
+            .section-title { font-size: 32px; }
+            .intro-box { padding: 30px 20px; }
+            .intro-quote { font-size: 18px; }
+            .card-content { padding: 25px; }
+            .card-title { font-size: 20px; }
+        }
+        
+        @media (max-width: 480px) {
+            .section-title { font-size: 26px; }
+            .card-image { height: 160px; }
+        }
+    </style>
+
+
+    <section class="section-courses-mindset">
+        <div class="container">
+            <!-- Section Header -->
+            <div class="section-header">
+                <span class="badge badge-burgundy">hóa Học Chuyển Hóa
+                </span>
+                <h2 class="section-title">
+                    HÀNH TRÌNH CHUYỂN HÓA<br>
+                    <span class="text-gold">TỪ BÊN TRONG</span>
+                </h2>
+                <p class="section-subtitle">
+                    Dựa trên Học Thuyết Chuyển Hóa Nội Tâm của Jennie Uyen Chu, mỗi khóa học là một hành trình 
+                    giúp bạn nhận diện và thay đổi những năng lượng tiêu cực đang kìm hãm cuộc sống của bạn.
+                </p>
+            </div>
+            
+            <!-- Intro Quote Box -->
+            <div class="intro-box">
+                <p class="intro-quote">
+                    "Bạn không cần thay đổi thế giới bên ngoài. Bạn chỉ cần thay đổi tần số bên trong — 
+                    và thế giới sẽ tự động phản chiếu sự thay đổi đó."
+                </p>
+                <p class="intro-author">— <span class="text-gold">Jennie Uyen Chu</span>, Tác giả Học Thuyết Chuyển Hóa Nội Tâm</p>
+                <p class="intro-text">
+                    Mỗi khóa học được thiết kế như một hành trình chuyển hóa có hệ thống, giúp bạn nhận diện 
+                    những năng lượng tiêu cực đã ăn sâu trong tiềm thức, rồi từng bước gieo hạt những 
+                    tần số mới tích cực để tạo ra cuộc sống bạn thực sự mong muốn.
+                </p>
+            </div><img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk41rftx-08q037/1767855836307_z75zh0_gemral-landing-05.jpg" alt="gemral-landing-05-1hwf" style="width: 100%; max-width: 100%; height: auto; display: block; margin: 0px; padding: 0px; cursor: grab;"><div class="lesson-image full-width" style="margin: 0px; padding: 0px; width: 100%; background: rgba(255, 255, 255, 0.05);">
+  
+</div><div class="lesson-image full-width" style="margin: 0px; padding: 0px; width: 100%; background: rgba(255, 255, 255, 0.05);">
+  
+</div>
+            
+            <!-- Courses Grid -->
+            <div class="courses-grid">
+                <!-- Course 1: Khai Mở Tần Số Gốc -->
+                <div class="course-card featured">
+                    <span class="card-badge badge-popular">Bán Chạy Nhất</span>
+                    <div class="card-image">
+                        <div class="card-image-bg bg-purple">
+                            <div class="card-icon-large">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="#FFBD59" stroke-width="2">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                                    <path d="M2 17l10 5 10-5"></path>
+                                    <path d="M2 12l10 5 10-5"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <span class="card-category">7 Ngày Chuyển Hóa</span>
+                        <h3 class="card-title">Khai Mở Tần Số Gốc</h3>
+                        <p class="card-description">
+                            Hành trình 7 ngày đặt nền móng cho mọi sự chuyển hóa, giúp bạn nhận diện và phá vỡ 
+                            những năng lượng tiêu cực đã ăn sâu trong tiềm thức từ thuở nhỏ, đồng thời hiểu rõ 
+                            5 Niềm Tin Nền Tảng của Học Thuyết để áp dụng vào cuộc sống hàng ngày.
+                        </p>
+                        
+                        <div class="price-box">
+                            <span class="price-original">2.990.000đ</span>
+                            <span class="price-current text-gold">1.990.000đ</span>
+                        </div>
+                        
+                        <ul class="features-list">
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>7 bài học chuyên sâu với hướng dẫn chi tiết từng bước thực hành nghi thức hàng ngày</span>
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>Hiểu rõ 5 Niềm Tin Nền Tảng của Học Thuyết và cách chúng vận hành trong cuộc sống</span>
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>Bài tập viết nhật ký có hướng dẫn giúp bạn nhận diện pattern năng lượng cá nhân</span>
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>7 Nghi Thức buổi sáng và buổi tối để duy trì tần số cao suốt cả ngày</span>
+                            </li>
+                        </ul>
+                        
+                        <div class="card-actions">
+                            <button onclick="gemralAddToCart('mindset-7days')" class="btn btn-primary">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="9" cy="21" r="1"></circle>
+                                    <circle cx="20" cy="21" r="1"></circle>
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                </svg>
+                                Thêm Vào Giỏ
+                            </button>
+                            <a href="https://yinyangmasters.com/products/khoa-hoc-7-ngay-khai-mo-tan-so-goc" target="_blank" class="btn btn-secondary">Xem Chi Tiết Khóa Học →</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course 2: Kích Hoạt Tần Số Tình Yêu -->
+                <div class="course-card">
+                    <span class="card-badge badge-new">Mới Ra Mắt</span>
+                    <div class="card-image">
+                        <div class="card-image-bg bg-pink">
+                            <div class="card-icon-large">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="#FF6B9D" stroke-width="2">
+                                    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <span class="card-category">Tình Yêu &amp; Quan Hệ</span>
+                        <h3 class="card-title">Kích Hoạt Tần Số Tình Yêu</h3>
+                        <p class="card-description">
+                            Khóa học giúp bạn hiểu sâu về tần số tình yêu và cách nó vận hành trong các mối quan hệ, 
+                            từ đó phá vỡ những năng lượng tiêu cực như "không xứng đáng được yêu" hoặc "sợ bị tổn thương" 
+                            để thu hút và duy trì mối quan hệ lành mạnh, viên mãn.
+                        </p>
+                        
+                        <div class="price-box">
+                            <span class="price-original">599.000đ</span>
+                            <span class="price-current text-pink">399.000đ</span>
+                        </div>
+                        
+                        <ul class="features-list">
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>Hiểu cơ chế tần số tình yêu và tại sao bạn thu hút những mối quan hệ hiện tại</span>
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>Nhận diện và chuyển hóa năng lượng "sợ bị bỏ rơi" và "không đủ tốt"</span>
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>Kỹ thuật nâng tần số để trở thành nam châm thu hút tình yêu đích thực</span>
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>Bài tập thực hành yêu thương bản thân trước khi yêu người khác</span>
+                            </li>
+                        </ul>
+                        
+                        <div class="card-actions">
+                            <button onclick="gemralAddToCart('mindset-love')" class="btn btn-primary">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="9" cy="21" r="1"></circle>
+                                    <circle cx="20" cy="21" r="1"></circle>
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                </svg>
+                                Thêm Vào Giỏ
+                            </button>
+                            <a href="https://yinyangmasters.com/products/khoa-hoc-kich-hoat-tan-so-tinh-yeu" target="_blank" class="btn btn-secondary">Xem Chi Tiết Khóa Học →</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course 3: Tái Tạo Tư Duy Triệu Phú -->
+                <div class="course-card">
+                    <div class="card-image">
+                        <div class="card-image-bg bg-gold">
+                            <div class="card-icon-large">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="#FFBD59" stroke-width="2">
+                                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <span class="card-category">Tài Chính &amp; Thịnh Vượng</span>
+                        <h3 class="card-title">Tái Tạo Tư Duy Triệu Phú</h3>
+                        <p class="card-description">
+                            Khóa học giúp bạn nhận diện những tần số thiếu thốn đang kìm hãm dòng chảy 
+                            thịnh vượng trong cuộc sống, rồi cài đặt tư duy giàu có theo đúng nguyên lý của 
+                            Học Thuyết Chuyển Hóa Nội Tâm để tiền bạc tự nhiên chảy về phía bạn.
+                        </p>
+                        
+                        <div class="price-box">
+                            <span class="price-original">799.000đ</span>
+                            <span class="price-current text-gold">499.000đ</span>
+                        </div>
+                        
+                        <ul class="features-list">
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>Nhận diện những niềm tin vô thức về tiền bạc đã được gieo từ thuở nhỏ</span>
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>Cài đặt tư duy thịnh vượng theo nguyên lý "Trong thế nào, ngoài thế ấy"</span>
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>Kỹ thuật gieo hạt tài chính để tạo năng lượng mới về tiền bạc</span>
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>Bài tập thực hành "Xả để Nhận" giúp mở rộng khả năng tiếp nhận</span>
+                            </li>
+                        </ul>
+                        
+                        <div class="card-actions">
+                            <button onclick="gemralAddToCart('mindset-wealth')" class="btn btn-primary">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="9" cy="21" r="1"></circle>
+                                    <circle cx="20" cy="21" r="1"></circle>
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                </svg>
+                                Thêm Vào Giỏ
+                            </button>
+                            <a href="https://yinyangmasters.com/products/khoa-hoc-tai-tao-tu-duy-trieu-phu" target="_blank" class="btn btn-secondary">Xem Chi Tiết Khóa Học →</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Highlight Box -->
+            <div class="highlight-box">
+                <h3 class="text-gold">Tại Sao Chọn Học Thuyết Chuyển Hóa Nội Tâm?</h3>
+                <p class="">
+                    Khác với những phương pháp chỉ tập trung vào hành động bên ngoài, Học Thuyết Chuyển Hóa Nội Tâm 
+                    đi vào gốc rễ vấn đề — những năng lượng tiêu cực đã được gieo từ vô thức. Khi bạn thay đổi tần số 
+                    bên trong, mọi thứ bên ngoài sẽ tự động thay đổi theo nguyên lý&nbsp;<span style="background-color: rgba(239, 68, 68, 0.15);">"Trong thế nào, ngoài thế ấy".</span></p>
+                <a href="#" class="btn btn-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path>
+                        <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path>
+                    </svg>
+                    Bắt Đầu Hành Trình
+                </a>
+            </div>
+            
+            <!-- Section Footer -->
+            <div class="section-footer">gemral.com</div>
+        </div>
+    </section>

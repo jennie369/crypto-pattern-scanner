@@ -1,0 +1,367 @@
+
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kêu Gọi Hành Động | GEM Trading Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&amp;family=Noto+Sans+Display:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+:root{--burgundy:#9C0612;--gold:#FFBD59;--gold-light:#DEBC81;--green:#2ed573;--red:#ff4757;--font-h:'Montserrat',sans-serif;--font-b:'Noto Sans Display',sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-b);color:#fff;overflow-x:hidden}
+.s12{position:relative;min-height:100vh;padding:80px 20px;background:linear-gradient(180deg,#B50816 0%,#8C0616 25%,#7C0B1B 50%,#6B0F1A 75%,#5C0A14 100%);overflow:hidden}
+.s12::before{content:'';position:absolute;top:20%;right:10%;width:500px;height:500px;background:radial-gradient(circle,rgba(255,189,89,0.12) 0%,transparent 70%);filter:blur(100px);pointer-events:none}
+.cnt{position:relative;z-index:1;max-width:1300px;margin:0 auto}
+.hdr{text-align:center;margin-bottom:50px}
+.badge{display:inline-block;background:rgba(255,189,89,0.2);border:2px solid var(--gold);color:var(--gold);padding:10px 25px;border-radius:50px;font-size:0.85rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:25px}
+.title{font-family:var(--font-h);font-size:clamp(2.2rem,4.5vw,4rem);font-weight:900;line-height:1.2;margin-bottom:20px;text-shadow:0 3px 15px rgba(0,0,0,0.4)}
+.sub{font-size:clamp(1.1rem,2vw,1.4rem);color:var(--gold-light);line-height:1.7;max-width:850px;margin:0 auto}
+.box{background:rgba(0,0,0,0.7);border:3px solid var(--gold);border-radius:30px;padding:50px 40px;margin-bottom:50px}
+.urg{background:rgba(0,0,0,0.5);border:2px solid var(--gold);border-radius:20px;padding:30px;margin-bottom:40px;text-align:center}
+.urg-lbl{display:flex;align-items:center;justify-content:center;gap:8px;font-size:1rem;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:20px}
+.timer{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:20px}
+.t-box{background:rgba(255,189,89,0.1);border:2px solid var(--gold);border-radius:15px;padding:15px 25px;min-width:90px}
+.t-val{font-family:var(--font-h);font-size:2.8rem;font-weight:900;color:var(--gold);line-height:1;margin-bottom:5px}
+.t-lbl{font-size:0.85rem;color:var(--gold-light);text-transform:uppercase}
+.urg-msg{font-size:1rem;color:var(--red);font-weight:700}
+.offer{background:rgba(0,0,0,0.4);border-radius:20px;padding:35px;margin-bottom:40px}
+.offer-ttl{font-family:var(--font-h);font-size:1.8rem;font-weight:800;color:var(--gold);text-align:center;margin-bottom:30px}
+.offer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;margin-bottom:30px}
+.offer-item{background:rgba(0,0,0,0.4);border:2px solid rgba(255,189,89,0.25);border-radius:12px;padding:20px;transition:all 0.3s}
+.offer-item:hover{border-color:var(--gold);transform:translateY(-3px)}
+.offer-hdr{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.offer-ico{width:32px;height:32px;color:var(--gold);flex-shrink:0}
+.offer-name{font-family:var(--font-h);font-size:1.1rem;font-weight:700}
+.offer-val{font-size:0.85rem;color:var(--gold-light);margin-bottom:8px}
+.offer-desc{font-size:0.9rem;color:var(--gold-light);line-height:1.5}
+.offer-total{background:linear-gradient(135deg,var(--gold),#FFD700);border-radius:12px;padding:20px;text-align:center}
+.total-lbl{font-size:0.95rem;color:var(--burgundy);font-weight:600;margin-bottom:8px}
+.total-price{display:flex;align-items:center;justify-content:center;gap:15px;margin-bottom:8px}
+.old-p{font-size:1.6rem;color:var(--burgundy);text-decoration:line-through;opacity:0.6}
+.new-p{font-family:var(--font-h);font-size:2.8rem;font-weight:900;color:var(--burgundy)}
+.savings{font-size:1rem;color:var(--burgundy);font-weight:700}
+.cta-btns{display:flex;flex-direction:column;gap:15px;max-width:550px;margin:0 auto 35px}
+.btn-pri{font-family:var(--font-h);font-size:1.25rem;font-weight:700;color:var(--burgundy);background:linear-gradient(135deg,var(--gold),#FFD700);border:none;padding:22px 40px;border-radius:50px;cursor:pointer;transition:all 0.3s;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:12px;box-shadow:0 12px 40px rgba(255,189,89,0.4)}
+.btn-pri:hover{transform:translateY(-4px);box-shadow:0 18px 50px rgba(255,189,89,0.6)}
+.btn-sec{font-family:var(--font-h);font-size:1rem;font-weight:600;color:#fff;background:transparent;border:2px solid var(--gold);padding:15px 35px;border-radius:50px;cursor:pointer;transition:all 0.3s;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-sec:hover{background:rgba(255,189,89,0.15)}
+.guar{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;margin-bottom:40px}
+.guar-card{background:rgba(0,0,0,0.4);border:2px solid rgba(46,213,115,0.4);border-radius:15px;padding:25px;text-align:center;transition:all 0.3s}
+.guar-card:hover{border-color:var(--green);transform:translateY(-3px)}
+.guar-ico{width:48px;height:48px;margin:0 auto 15px;display:block;color:var(--green)}
+.guar-ttl{font-family:var(--font-h);font-size:1.1rem;font-weight:700;color:var(--green);margin-bottom:10px}
+.guar-desc{font-size:0.9rem;color:var(--gold-light);line-height:1.5}
+.wyg{background:rgba(0,0,0,0.4);border-radius:20px;padding:40px 30px;margin-bottom:40px}
+.wyg-ttl{font-family:var(--font-h);font-size:1.8rem;font-weight:800;color:var(--gold);text-align:center;margin-bottom:30px}
+.wyg-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:15px}
+.wyg-item{background:rgba(0,0,0,0.3);border-left:3px solid var(--gold);border-radius:8px;padding:18px 20px;display:flex;gap:12px;align-items:flex-start;transition:all 0.3s}
+.wyg-item:hover{background:rgba(0,0,0,0.5);transform:translateX(3px)}
+.wyg-chk{width:20px;height:20px;color:var(--green);flex-shrink:0;margin-top:2px}
+.wyg-name{font-family:var(--font-h);font-size:1rem;font-weight:700;margin-bottom:5px}
+.wyg-desc{font-size:0.85rem;color:var(--gold-light);line-height:1.5}
+.proof{background:rgba(0,0,0,0.5);border:2px solid var(--gold);border-radius:20px;padding:35px;margin-bottom:40px}
+.proof-hdr{text-align:center;margin-bottom:25px}
+.proof-ttl{font-family:var(--font-h);font-size:1.5rem;font-weight:700;color:var(--gold);margin-bottom:8px}
+.proof-sub{font-size:0.95rem;color:var(--gold-light)}
+.proof-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:20px}
+.proof-stat{text-align:center;padding:20px;background:rgba(0,0,0,0.35);border-radius:12px}
+.proof-num{font-family:var(--font-h);font-size:2.2rem;font-weight:900;color:var(--gold);line-height:1;margin-bottom:8px}
+.proof-lbl{font-size:0.9rem;color:var(--gold-light)}
+.live{display:inline-block;width:8px;height:8px;background:var(--green);border-radius:50%;margin-right:5px;animation:blink 2s infinite}
+.rr{background:linear-gradient(135deg,rgba(46,213,115,0.15),rgba(0,0,0,0.5));border:3px solid var(--green);border-radius:20px;padding:40px 30px;text-align:center;margin-bottom:40px}
+.rr-ico{width:64px;height:64px;margin:0 auto 20px;display:block;color:var(--green)}
+.rr-ttl{font-family:var(--font-h);font-size:2rem;font-weight:900;color:var(--green);margin-bottom:15px}
+.rr-sub{font-size:1.1rem;color:#fff;line-height:1.7;max-width:750px;margin:0 auto 25px}
+.rr-feat{display:flex;justify-content:center;gap:30px;flex-wrap:wrap}
+.rr-f{display:flex;align-items:center;gap:8px;font-size:1rem;color:var(--gold-light)}
+.rr-f-ico{width:20px;height:20px;color:var(--green)}
+.trust{display:flex;justify-content:center;gap:40px;flex-wrap:wrap;padding:35px 20px;border-top:2px solid rgba(255,189,89,0.15)}
+.trust-b{display:flex;flex-direction:column;align-items:center;gap:12px}
+.trust-ico{width:48px;height:48px;color:var(--gold)}
+.trust-ttl{font-weight:700;font-size:0.9rem}
+.trust-desc{font-size:0.8rem;color:var(--gold-light);text-align:center;max-width:130px}
+.final{background:rgba(156,6,18,0.6);border:2px solid var(--red);border-radius:15px;padding:30px;text-align:center}
+.final-ttl{font-family:var(--font-h);font-size:1.5rem;font-weight:800;color:var(--red);margin-bottom:15px}
+.final-txt{font-size:1rem;color:var(--gold-light);line-height:1.7;max-width:650px;margin:0 auto}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+/* Quiz Modal */
+.quiz-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);backdrop-filter:blur(10px);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px}
+.quiz-overlay.active{display:flex}
+.quiz-modal{background:linear-gradient(180deg,#4A1A4F 0%,#6B0F1A 100%);border:3px solid var(--gold);border-radius:30px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto;padding:40px;position:relative;animation:modalSlideIn 0.4s ease-out}
+@keyframes modalSlideIn{from{transform:translateY(-50px);opacity:0}to{transform:translateY(0);opacity:1}}
+.quiz-close{position:absolute;top:15px;right:20px;background:none;border:none;color:#F5E6D3;font-size:2rem;cursor:pointer;transition:color 0.3s}
+.quiz-close:hover{color:var(--gold)}
+.quiz-header{text-align:center;margin-bottom:30px}
+.quiz-title{font-family:var(--font-h);font-size:1.8rem;font-weight:800;color:var(--gold);margin-bottom:10px}
+.quiz-progress{display:flex;justify-content:center;gap:8px;margin-bottom:20px}
+.quiz-dot{width:12px;height:12px;border-radius:50%;background:rgba(255,189,89,0.3);transition:all 0.3s}
+.quiz-dot.active{background:var(--gold);transform:scale(1.2)}
+.quiz-dot.completed{background:var(--gold)}
+.quiz-question-container{min-height:300px}
+.quiz-question{display:none}
+.quiz-question.active{display:block;animation:fadeInUp 0.4s ease-out}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+.quiz-question-text{font-family:var(--font-h);font-size:1.3rem;font-weight:700;color:#fff;text-align:center;margin-bottom:25px;line-height:1.5}
+.quiz-options{display:flex;flex-direction:column;gap:12px}
+.quiz-option{background:rgba(0,0,0,0.5);border:2px solid rgba(255,189,89,0.3);border-radius:15px;padding:18px 20px;color:#F5E6D3;font-size:1rem;cursor:pointer;transition:all 0.3s ease;text-align:left}
+.quiz-option:hover{border-color:var(--gold);background:rgba(255,189,89,0.1);transform:translateX(5px)}
+.quiz-option.selected{border-color:var(--gold);background:rgba(255,189,89,0.2)}
+.quiz-result{display:none;text-align:center;padding:20px}
+.quiz-result.active{display:block;animation:fadeInUp 0.4s ease-out}
+.result-emoji{font-size:4rem;margin-bottom:20px}
+.result-title{font-family:var(--font-h);font-size:1.8rem;font-weight:800;color:var(--gold);margin-bottom:15px}
+.result-description{color:#F5E6D3;font-size:1.1rem;line-height:1.7;margin-bottom:25px}
+.result-recommendation{background:rgba(0,0,0,0.5);border:2px solid var(--gold);border-radius:15px;padding:20px;margin-bottom:25px}
+.result-recommendation-title{font-family:var(--font-h);font-weight:700;color:var(--gold);margin-bottom:10px}
+.result-recommendation-text{color:#F5E6D3;line-height:1.6}
+.btn-result-cta{background:linear-gradient(135deg,var(--gold),#FFD700);color:var(--burgundy);font-family:var(--font-h);font-weight:700;font-size:1.1rem;padding:18px 40px;border:none;border-radius:50px;cursor:pointer;transition:all 0.3s ease;text-decoration:none;display:inline-block}
+.btn-result-cta:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(255,189,89,0.5)}
+@media(max-width:768px){.s12{padding:50px 15px}.box{padding:30px 20px}.timer{gap:12px}.t-box{min-width:70px;padding:12px 15px}.t-val{font-size:2rem}.offer-grid,.wyg-list{grid-template-columns:1fr}.trust{gap:25px}}
+</style>
+
+
+<section class="s12">
+<div class="cnt">
+<div class="hdr">
+<div class="badge"><i data-lucide="zap" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px"></i>CƠ HỘI CUỐI CÙNG</div>
+<h2 class="title">Đừng Để Ngày Mai<br>Tiếc Nuối Quyết Định Hôm Nay</h2>
+<p class="sub"><strong>2.547 nhà giao dịch</strong> đã thay đổi cuộc đời với Hệ Thống Tần Số Độc Quyền. Họ đã hành động - còn bạn thì sao?</p>
+</div>
+
+<div class="box">
+<div class="urg">
+<div class="urg-lbl"><i data-lucide="alert-circle" style="width:20px;height:20px"></i><span>ƯU ĐÃI THÀNH VIÊN SÁNG LẬP KẾT THÚC TRONG:</span></div>
+<div class="timer">
+<div class="t-box"><div class="t-val" id="days">02</div><div class="t-lbl">Ngày</div></div>
+<div class="t-box"><div class="t-val" id="hours">14</div><div class="t-lbl">Giờ</div></div>
+<div class="t-box"><div class="t-val" id="minutes">27</div><div class="t-lbl">Phút</div></div>
+<div class="t-box"><div class="t-val" id="seconds">43</div><div class="t-lbl">Giây</div></div>
+</div>
+<p class="urg-msg">Chỉ còn 147/500 suất Sáng Lập - Đăng ký ngay trước khi hết chỗ!</p>
+</div>
+
+<div class="offer">
+<h3 class="offer-ttl">Những Gì Bạn Nhận Được Hôm Nay</h3>
+<div class="offer-grid">
+<div class="offer-item">
+<div class="offer-hdr"><i data-lucide="gem" class="offer-ico"></i><div class="offer-name">6 Công Thức Tần Số</div></div>
+<div class="offer-val">Trị giá: 75 triệu đồng</div>
+<div class="offer-desc selected-for-delete">Phương pháp độc quyền đầu tiên và duy nhất tại Việt Nam với tỷ lệ thắng 68-85% qua 5 năm kiểm tra. Không có ở đâu khác.</div>
+</div>
+<div class="offer-item">
+<div class="offer-hdr"><i data-lucide="bot" class="offer-ico"></i><div class="offer-name">Công Cụ Quét GEM Tự Động Tích Hợp AI Hiện Đại</div></div>
+<div class="offer-val">Trị giá: 37 triệu/năm</div>
+<div class="offer-desc">Quét tự động 24/7, cảnh báo thời gian thực, phân tích thông minh. Cài đặt 3 phút, tiết kiệm 8 giờ/ngày.</div>
+</div>
+<div class="offer-item">
+<div class="offer-hdr"><i data-lucide="microscope" class="offer-ico"></i><div class="offer-name">Cơ Sở Dữ Liệu Kiểm Tra</div></div>
+<div class="offer-val">Trị giá: 25 triệu đồng</div>
+<div class="offer-desc">5 năm dữ liệu, 10.000+ giao dịch đã kiểm tra. Biết chính xác tỷ lệ thắng trước khi giao dịch tiền thật.</div>
+</div>
+<div class="offer-item">
+<div class="offer-hdr"><i data-lucide="users" class="offer-ico"></i><div class="offer-name">Cộng Đồng Riêng Tư</div></div>
+<div class="offer-val">Trị giá: 5 triệu/tháng</div>
+<div class="offer-desc">2.500+ nhà giao dịch cùng chí hướng, chia sẻ kiến thức, cơ hội kết nối và học hỏi lẫn nhau.</div>
+</div>
+<div class="offer-item">
+<div class="offer-hdr"><i data-lucide="headphones" class="offer-ico"></i><div class="offer-name">Master Sư Phụ AI</div></div>
+<div class="offer-val">Trị giá: 25 triệu đồng</div>
+<div class="offer-desc">Đánh giá giao dịch, tùy chỉnh chiến lược phù hợp với tài khoản của bạn.</div>
+</div>
+</div>
+<div class="offer-total">
+<div class="total-lbl">TỔNG GIÁ TRỊ:</div>
+<div class="total-price"><span class="old-p">380 triệu</span><span class="new-p">21 triệu</span></div>
+<div class="savings">Tiết kiệm 94% - Chỉ dành cho Thành Viên Sáng Lập</div>
+</div>
+</div>
+
+<div class="cta-btns">
+<a href="#pricing" class="btn-pri"><i data-lucide="sparkles" style="width:24px;height:24px"></i><span>BẮT ĐẦU NGAY - CHỈ 21 TRIỆU</span><i data-lucide="arrow-right" style="width:24px;height:24px"></i></a>
+<button class="btn-sec" onclick="openQuiz()"><i data-lucide="help-circle" style="width:18px;height:18px"></i>Làm Bài Kiểm Tra Xem Bạn Phù Hợp Chưa?</button>
+</div>
+
+<div class="guar">
+<div class="guar-card">
+<i data-lucide="shield-check" class="guar-ico"></i>
+<h4 class="guar-ttl">Hoàn Tiền 100%</h4>
+<p class="guar-desc">7 ngày không điều kiện. Không hài lòng? Gửi email 1 dòng là hoàn tiền đầy đủ.</p>
+</div>
+<div class="guar-card">
+<i data-lucide="trophy" class="guar-ico"></i>
+<h4 class="guar-ttl">Cam Kết Kết Quả</h4>
+<p class="guar-desc">Nếu làm đúng phương pháp mà chưa có lãi sau 90 ngày, chúng tôi gia hạn tư cách thành viên miễn phí thêm 6 tháng.</p>
+</div>
+<div class="guar-card">
+<i data-lucide="zap" class="guar-ico"></i>
+<h4 class="guar-ttl">Kích Hoạt Tức Thì</h4>
+<p class="guar-desc">Thanh toán xong, truy cập ngay. Không chờ đợi, bắt đầu học trong 2 phút.</p>
+</div>
+<div class="guar-card">
+<i data-lucide="lock" class="guar-ico"></i>
+<h4 class="guar-ttl">Thanh Toán An Toàn</h4>
+<p class="guar-desc">Mã hóa bảo mật 256 bit, tuân thủ tiêu chuẩn thanh toán quốc tế. Thông tin của bạn được bảo vệ tuyệt đối.</p>
+</div>
+</div>
+</div>
+
+<div class="wyg">
+<h3 class="wyg-ttl"><i data-lucide="gift" style="width:30px;height:30px;display:inline-block;vertical-align:middle;margin-right:8px"></i>Bạn Nhận Được Ngay Hôm Nay</h3>
+<div class="wyg-list">
+<div class="wyg-item"><i data-lucide="check-circle" class="wyg-chk"></i><div><div class="wyg-name">Truy Cập Trọn Đời</div><div class="wyg-desc">Trả 1 lần, học mãi mãi. Tất cả cập nhật và nội dung mới đều miễn phí.</div></div></div>
+<div class="wyg-item"><i data-lucide="check-circle" class="wyg-chk"></i><div><div class="wyg-name">150+ Bài Thực Hành</div><div class="wyg-desc">Ví dụ biểu đồ thực tế, bài tập có lời giải, kiểm tra kiến thức.</div></div></div>
+<div class="wyg-item"><i data-lucide="check-circle" class="wyg-chk"></i><div><div class="wyg-name">Mẫu Nhật Ký Giao Dịch</div><div class="wyg-desc">Bảng tính theo dõi hiệu suất, phân tích lỗi sai, cải thiện liên tục.</div></div></div>
+<div class="wyg-item"><i data-lucide="check-circle" class="wyg-chk"></i><div><div class="wyg-name">Công Cụ Tính Rủi Ro</div><div class="wyg-desc">Tính khối lượng vị thế, tỷ lệ lợi nhuận/rủi ro, rủi ro danh mục tự động.</div></div></div>
+<div class="wyg-item"><i data-lucide="check-circle" class="wyg-chk"></i><div><div class="wyg-name">Ứng Dụng Di Động</div><div class="wyg-desc">Học trên điện thoại, máy tính bảng. Nhận thông báo cảnh báo thời gian thực.</div></div></div>
+<div class="wyg-item"><i data-lucide="check-circle" class="wyg-chk"></i><div><div class="wyg-name">Chứng Nhận Hoàn Thành</div><div class="wyg-desc">Hoàn thành khóa học nhận chứng nhận chính thức từ Học Viện GEM.</div></div></div>
+</div>
+</div>
+
+<div class="proof">
+<div class="proof-hdr">
+<h3 class="proof-ttl"><i data-lucide="users" style="width:24px;height:24px;display:inline-block;vertical-align:middle;margin-right:8px"></i>Người Khác Đang Hành Động Ngay Bây Giờ</h3>
+<p class="proof-sub">Thống kê thời gian thực - Cập nhật liên tục</p>
+</div>
+<div class="proof-grid">
+<div class="proof-stat"><div class="proof-num"><span class="live"></span>37</div><div class="proof-lbl">Đang xem trang này</div></div>
+<div class="proof-stat"><div class="proof-num">89</div><div class="proof-lbl">Đăng ký hôm nay</div></div>
+<div class="proof-stat"><div class="proof-num">2.547</div><div class="proof-lbl">Tổng thành viên</div></div>
+<div class="proof-stat"><div class="proof-num" style="color:var(--red)">147/500</div><div class="proof-lbl">Suất Sáng Lập còn lại</div></div>
+</div>
+</div>
+
+<div class="rr">
+<i data-lucide="shield-check" class="rr-ico"></i>
+<h3 class="rr-ttl">Không Rủi Ro, Toàn Phần Thưởng</h3>
+<p class="rr-sub">Chúng tôi tin vào phương pháp này đến mức sẵn sàng chịu <strong>100% rủi ro</strong> cho bạn. Nếu không hài lòng vì bất kỳ lý do gì - <strong>hoàn tiền đầy đủ, không cần giải thích.</strong></p>
+<div class="rr-feat">
+<div class="rr-f"><i data-lucide="check" class="rr-f-ico"></i><span>7 ngày dùng thử</span></div>
+<div class="rr-f"><i data-lucide="check" class="rr-f-ico"></i><span>Hoàn tiền trong 24 giờ</span></div>
+<div class="rr-f"><i data-lucide="check" class="rr-f-ico"></i><span>Không cần lý do</span></div>
+</div>
+</div>
+
+<div class="cta-btns">
+<a href="#pricing" class="btn-pri"><i data-lucide="rocket" style="width:24px;height:24px"></i><span>TÔI SẴN SÀNG - BẮT ĐẦU NGAY</span><i data-lucide="arrow-right" style="width:24px;height:24px"></i></a>
+</div>
+
+<div class="trust">
+<div class="trust-b"><i data-lucide="award" class="trust-ico"></i><div class="trust-ttl">Đánh Giá Cao</div><div class="trust-desc">4.9/5 sao từ 1.200+ đánh giá</div></div>
+<div class="trust-b"><i data-lucide="shield" class="trust-ico"></i><div class="trust-ttl">Bảo Mật</div><div class="trust-desc">Mã hóa bảo mật 256 bit</div></div>
+<div class="trust-b"><i data-lucide="check-circle" class="trust-ico"></i><div class="trust-ttl">Xác Nhận</div><div class="trust-desc">Chứng nhận chất lượng</div></div>
+<div class="trust-b"><i data-lucide="headphones" class="trust-ico"></i><div class="trust-ttl">Hỗ Trợ 24/7</div><div class="trust-desc">Tiếng Việt, phản hồi nhanh</div></div>
+</div>
+
+<div class="final">
+<h4 class="final-ttl">QUAN TRỌNG: Đọc Trước Khi Rời Trang</h4>
+<p class="final-txt">Nếu bạn rời khỏi trang này mà không hành động, bạn sẽ quay lại cuộc sống giao dịch cũ: Căng thẳng, thua lỗ, không hệ thống. <strong>2.547 người đã quyết định thay đổi.</strong> Câu hỏi là: Bạn có dám bước ra khỏi vùng an toàn không? <strong class="">Thời gian đang trôi - Suất Ưu Đãi đang cạn.</strong></p>
+</div>
+</div>
+</section>
+
+<!-- Quiz Modal -->
+<div id="quizOverlay" class="quiz-overlay">
+<div class="quiz-modal">
+<button class="quiz-close" onclick="closeQuiz()">×</button>
+<div class="quiz-header">
+<h3 class="quiz-title">Bạn Đang Ở Đâu Trong Hành Trình?</h3>
+<div class="quiz-progress" id="quizProgress">
+<div class="quiz-dot active" data-step="1"></div>
+<div class="quiz-dot" data-step="2"></div>
+<div class="quiz-dot" data-step="3"></div>
+<div class="quiz-dot" data-step="4"></div>
+<div class="quiz-dot" data-step="5"></div>
+<div class="quiz-dot" data-step="6"></div>
+</div>
+</div>
+<div class="quiz-question-container" id="quizContainer">
+<div class="quiz-question active" data-question="1">
+<h4 class="quiz-question-text">Khi vào một lệnh giao dịch, bạn thường dựa vào?</h4>
+<div class="quiz-options">
+<div class="quiz-option" data-score="1" onclick="selectOption(this)">Cảm xúc, thấy biểu đồ đẹp thì vào</div>
+<div class="quiz-option" data-score="2" onclick="selectOption(this)">Nghe gợi ý từ bạn bè hoặc nhóm chat</div>
+<div class="quiz-option" data-score="3" onclick="selectOption(this)">Dùng 1-2 chỉ báo nhưng chưa nhất quán</div>
+<div class="quiz-option" data-score="4" onclick="selectOption(this)">Có hệ thống rõ ràng với quy tắc vào/ra</div>
+</div>
+</div>
+<div class="quiz-question" data-question="2">
+<h4 class="quiz-question-text">Tỷ lệ thắng của bạn trong 3 tháng gần nhất?</h4>
+<div class="quiz-options">
+<div class="quiz-option" data-score="1" onclick="selectOption(this)">Không biết / Chưa theo dõi</div>
+<div class="quiz-option" data-score="2" onclick="selectOption(this)">Dưới 40% - Thua nhiều hơn thắng</div>
+<div class="quiz-option" data-score="3" onclick="selectOption(this)">40-55% - Hòa vốn hoặc lỗ nhẹ</div>
+<div class="quiz-option" data-score="4" onclick="selectOption(this)">Trên 55% - Có lợi nhuận ổn định</div>
+</div>
+</div>
+<div class="quiz-question" data-question="3">
+<h4 class="quiz-question-text">Bạn có đặt điểm dừng lỗ cho mỗi lệnh không?</h4>
+<div class="quiz-options">
+<div class="quiz-option" data-score="1" onclick="selectOption(this)">Không bao giờ - Hy vọng nó sẽ quay lại</div>
+<div class="quiz-option" data-score="2" onclick="selectOption(this)">Thỉnh thoảng - Tùy tâm trạng</div>
+<div class="quiz-option" data-score="3" onclick="selectOption(this)">Thường xuyên - Nhưng hay dời điểm dừng</div>
+<div class="quiz-option" data-score="4" onclick="selectOption(this)">Luôn luôn - Và không bao giờ dời</div>
+</div>
+</div>
+<div class="quiz-question" data-question="4">
+<h4 class="quiz-question-text">Bạn có ghi chép nhật ký giao dịch không?</h4>
+<div class="quiz-options">
+<div class="quiz-option" data-score="1" onclick="selectOption(this)">Chưa bao giờ nghĩ đến</div>
+<div class="quiz-option" data-score="2" onclick="selectOption(this)">Đã thử nhưng không duy trì được</div>
+<div class="quiz-option" data-score="3" onclick="selectOption(this)">Có ghi nhưng không phân tích</div>
+<div class="quiz-option" data-score="4" onclick="selectOption(this)">Ghi chép đầy đủ và xem lại hàng tuần</div>
+</div>
+</div>
+<div class="quiz-question" data-question="5">
+<h4 class="quiz-question-text">Khi thua 3 lệnh liên tiếp, bạn thường?</h4>
+<div class="quiz-options">
+<div class="quiz-option" data-score="1" onclick="selectOption(this)">Gấp đôi khối lượng để gỡ lại ngay</div>
+<div class="quiz-option" data-score="2" onclick="selectOption(this)">Tiếp tục giao dịch với cảm xúc tiêu cực</div>
+<div class="quiz-option" data-score="3" onclick="selectOption(this)">Nghỉ ngơi một chút rồi quay lại</div>
+<div class="quiz-option" data-score="4" onclick="selectOption(this)">Dừng, phân tích lý do thua, rồi mới tiếp</div>
+</div>
+</div>
+<div class="quiz-question" data-question="6">
+<h4 class="quiz-question-text">Mục tiêu giao dịch của bạn là gì?</h4>
+<div class="quiz-options">
+<div class="quiz-option" data-score="1" onclick="selectOption(this)">Làm giàu nhanh - x10, x100</div>
+<div class="quiz-option" data-score="2" onclick="selectOption(this)">Kiếm thêm thu nhập phụ</div>
+<div class="quiz-option" data-score="3" onclick="selectOption(this)">Xây dựng nguồn thu nhập ổn định</div>
+<div class="quiz-option" data-score="4" onclick="selectOption(this)">Trở thành nhà giao dịch chuyên nghiệp</div>
+</div>
+</div>
+</div>
+<div class="quiz-result" id="quizResult">
+<div class="result-emoji" id="resultEmoji"></div>
+<h3 class="result-title" id="resultTitle">Kết Quả</h3>
+<p class="result-description" id="resultDescription">Mô tả kết quả</p>
+<div class="result-recommendation">
+<div class="result-recommendation-title" id="resultRecommendationTitle">Khuyến nghị cho bạn</div>
+<p class="result-recommendation-text" id="resultRecommendationText">Nội dung khuyến nghị</p>
+</div>
+<a href="#pricing" class="btn-result-cta" id="resultCTA">Xem Gói Phù Hợp</a>
+</div>
+</div>
+</div>
+
+<script>
+lucide.createIcons();
+function initCountdown(){let e=localStorage.getItem('countdownEndTime');if(!e){const t=new Date().getTime();e=t+2*24*60*60*1e3+14*60*60*1e3;localStorage.setItem('countdownEndTime',e)}else{e=Number(e)}const n=setInterval(function(){const t=new Date().getTime(),a=e-t;if(a<0){clearInterval(n);document.querySelector('.urg').innerHTML='<div style="color:var(--red);font-size:1.8rem;font-weight:900;text-align:center;padding:30px">Ưu đãi Sáng Lập đã kết thúc!<br><span style="font-size:1rem;color:var(--gold-light)">Liên hệ hỗ trợ để biết thêm chi tiết</span></div>';return}const o=Math.floor(a/864e5),r=Math.floor(a%864e5/36e5),s=Math.floor(a%36e5/6e4),i=Math.floor(a%6e4/1e3);document.getElementById('days').textContent=String(o).padStart(2,'0');document.getElementById('hours').textContent=String(r).padStart(2,'0');document.getElementById('minutes').textContent=String(s).padStart(2,'0');document.getElementById('seconds').textContent=String(i).padStart(2,'0')},1e3)}
+function updateLive(){const e=document.querySelectorAll('.proof-num');if(e[0]){const t=37+Math.floor(Math.random()*15)-7;e[0].innerHTML='<span class="live"></span>'+t}}
+initCountdown();updateLive();setInterval(updateLive,8e3);
+document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener('click',function(t){t.preventDefault();const n=document.querySelector(this.getAttribute('href'));n&&n.scrollIntoView({behavior:'smooth',block:'start'})})});
+
+// Quiz Functions
+let currentQuestion=1,totalQuestions=6,answers=[],totalScore=0;
+function openQuiz(){document.getElementById('quizOverlay').classList.add('active');document.body.style.overflow='hidden';resetQuiz()}
+function closeQuiz(){document.getElementById('quizOverlay').classList.remove('active');document.body.style.overflow=''}
+function resetQuiz(){currentQuestion=1;answers=[];totalScore=0;document.querySelectorAll('.quiz-question').forEach((q,i)=>{q.classList.remove('active');if(i===0)q.classList.add('active')});document.querySelectorAll('.quiz-option').forEach(opt=>{opt.classList.remove('selected')});document.querySelectorAll('.quiz-dot').forEach((dot,i)=>{dot.classList.remove('active','completed');if(i===0)dot.classList.add('active')});document.getElementById('quizResult').classList.remove('active');document.getElementById('quizContainer').style.display='block'}
+function selectOption(el){const question=el.closest('.quiz-question');const options=question.querySelectorAll('.quiz-option');options.forEach(opt=>opt.classList.remove('selected'));el.classList.add('selected');const score=parseInt(el.dataset.score);answers[currentQuestion-1]=score;totalScore=answers.reduce((a,b)=>a+b,0);setTimeout(()=>{if(currentQuestion<totalQuestions){goToNextQuestion()}else{showResults()}},400)}
+function goToNextQuestion(){const dots=document.querySelectorAll('.quiz-dot');dots[currentQuestion-1].classList.remove('active');dots[currentQuestion-1].classList.add('completed');dots[currentQuestion].classList.add('active');document.querySelector('.quiz-question[data-question="'+currentQuestion+'"]').classList.remove('active');currentQuestion++;document.querySelector('.quiz-question[data-question="'+currentQuestion+'"]').classList.add('active')}
+function showResults(){document.getElementById('quizContainer').style.display='none';document.querySelectorAll('.quiz-dot').forEach(dot=>{dot.classList.remove('active');dot.classList.add('completed')});const result=getResultByScore(totalScore);document.getElementById('resultEmoji').textContent=result.emoji;document.getElementById('resultTitle').textContent=result.title;document.getElementById('resultDescription').textContent=result.description;document.getElementById('resultRecommendationTitle').textContent=result.recommendationTitle;document.getElementById('resultRecommendationText').textContent=result.recommendationText;document.getElementById('resultCTA').textContent=result.ctaText;document.getElementById('resultCTA').href=result.ctaLink;document.getElementById('quizResult').classList.add('active')}
+function getResultByScore(score){if(score<=10){return{emoji:'🌱',title:'Nhà Giao Dịch Mới Bắt Đầu',description:'Bạn đang ở giai đoạn đầu của hành trình. Bạn cần xây dựng nền tảng vững chắc về tư duy, quản lý rủi ro và có một hệ thống giao dịch rõ ràng.',recommendationTitle:'Gói phù hợp: NGƯỜI MỚI hoặc TẦN SỐ CƠ BẢN',recommendationText:'Bắt đầu với nền tảng cơ bản, học 7 mẫu hình nến và xây dựng kỷ luật giao dịch. Đừng vội vàng, hãy đi từng bước chắc chắn.',ctaText:'Xem Gói Cơ Bản - 299 Ngàn',ctaLink:'#pricing'}}else if(score<=16){return{emoji:'🔥',title:'Nhà Giao Dịch Đang Phát Triển',description:'Bạn có nền tảng nhưng chưa nhất quán. Vấn đề chính là thiếu hệ thống rõ ràng và kỷ luật. Bạn cần một phương pháp đã được kiểm chứng.',recommendationTitle:'Gói phù hợp: TẦN SỐ TRADER - 78% học viên chọn',recommendationText:'Với 6 công thức Tần Số độc quyền và 15 mẫu hình, bạn sẽ có hệ thống giao dịch hoàn chỉnh để đạt tỷ lệ thắng 70-75%.',ctaText:'Xem Gói Tần Số - 21 Triệu',ctaLink:'#pricing'}}else{return{emoji:'💎',title:'Nhà Giao Dịch Nâng Cao',description:'Bạn có kỷ luật tốt và đang có lợi nhuận. Để lên cấp độ tiếp theo, bạn cần những công cụ nâng cao như dự đoán trí tuệ nhân tạo, theo dõi cá voi và kết nối với các nhà giao dịch tinh hoa.',recommendationTitle:'Gói phù hợp: ĐẾ CHẾ - Cho người muốn đột phá',recommendationText:'11 công thức Tần Số đầy đủ, Máy Quét Tinh Hoa với Dự Đoán AI, và quyền truy cập vào Nhóm Tinh Hoa sẽ giúp bạn nâng cấp lên mức chuyên nghiệp.',ctaText:'Xem Gói Đế Chế - 68 Triệu',ctaLink:'#pricing'}}}
+document.getElementById('quizOverlay').addEventListener('click',function(e){if(e.target===this)closeQuiz()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeQuiz()});
+</script>
+
+

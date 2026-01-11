@@ -1,20 +1,19 @@
 /**
- * EnhancementStatsCard - Display TIER2/3 Enhancement Statistics
+ * EnhancementStatsCard - Display Enhancement Statistics (ADMIN ONLY)
  * Shows Volume, Trend, S/R, Candle, RSI, Dynamic R:R results
+ * Only visible for ADMIN users for internal analysis
+ * Optimized UI with subtitles and conclusion section
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { FeatureLockBadge, TierBadge } from '../TierUpgradePrompt';
-import { isPremiumTier } from '../../constants/tierFeatures';
-import { PATTERN_STATES } from '../../constants/patternSignals';
+import { COLORS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
 
 /**
  * Quality Grade Badge
@@ -39,51 +38,25 @@ const QualityGradeBadge = ({ grade }) => {
 };
 
 /**
- * Pattern State Badge
- */
-const PatternStateBadge = ({ state }) => {
-  const stateInfo = PATTERN_STATES[state] || PATTERN_STATES.FRESH;
-
-  return (
-    <View style={[styles.stateBadge, { backgroundColor: stateInfo.bgColor }]}>
-      <Text style={styles.stateEmoji}>{stateInfo.emoji}</Text>
-      <Text style={[styles.stateText, { color: stateInfo.color }]}>
-        {stateInfo.label}
-      </Text>
-    </View>
-  );
-};
-
-/**
- * Enhancement Item Row
+ * Enhancement Item Row with Subtitle
  */
 const EnhancementItem = ({
   icon,
   label,
+  subtitle,
   value,
   subValue,
   color = '#FFFFFF',
   isPositive = null,
-  locked = false,
-  requiredTier = 'TIER2'
 }) => {
-  if (locked) {
-    return (
-      <View style={styles.enhancementItem}>
-        <View style={styles.enhancementLeft}>
-          <Ionicons name={icon} size={18} color="#4A5568" />
-          <Text style={[styles.enhancementLabel, { color: '#4A5568' }]}>{label}</Text>
-        </View>
-        <FeatureLockBadge requiredTier={requiredTier} />
-      </View>
-    );
-  }
-
   return (
     <View style={styles.enhancementItem}>
       <View style={styles.enhancementLeft}>
         <Ionicons name={icon} size={18} color={color} />
-        <Text style={styles.enhancementLabel}>{label}</Text>
+        <View style={styles.labelContainer}>
+          <Text style={styles.enhancementLabel}>{label}</Text>
+          <Text style={styles.enhancementSubtitle}>{subtitle}</Text>
+        </View>
       </View>
       <View style={styles.enhancementRight}>
         <Text style={[
@@ -122,7 +95,147 @@ const SignalTags = ({ signals, color = '#00FF88' }) => {
 };
 
 /**
+ * Conclusion Section based on analysis
+ */
+const ConclusionSection = ({ pattern, enhancements }) => {
+  const conclusion = useMemo(() => {
+    const volumeData = enhancements.volume || {};
+    const trendData = enhancements.trend || {};
+    const confluenceData = enhancements.confluence || {};
+    const candleData = enhancements.candle || {};
+    const rsiData = enhancements.rsi || {};
+    const score = pattern?.enhancementScore || 0;
+    const direction = pattern?.direction || 'LONG';
+
+    // Count positive signals
+    let bullishSignals = 0;
+    let bearishSignals = 0;
+    let warnings = [];
+    let strengths = [];
+
+    // Volume analysis
+    if (volumeData.isConfirmed) {
+      strengths.push('Khối lượng xác nhận xu hướng');
+      if (direction === 'LONG') bullishSignals++;
+      else bearishSignals++;
+    } else if (volumeData.score < 30) {
+      warnings.push('Khối lượng yếu, tín hiệu có thể không đáng tin cậy');
+    }
+
+    // Trend analysis
+    if (trendData.direction === 'BULLISH' && direction === 'LONG') {
+      strengths.push('Xu hướng tăng phù hợp với lệnh LONG');
+      bullishSignals++;
+    } else if (trendData.direction === 'BEARISH' && direction === 'SHORT') {
+      strengths.push('Xu hướng giảm phù hợp với lệnh SHORT');
+      bearishSignals++;
+    } else if (trendData.direction && trendData.direction !== 'NEUTRAL') {
+      warnings.push(`Xu hướng ${trendData.direction} ngược với hướng lệnh`);
+    }
+
+    // S/R Confluence
+    if (confluenceData.hasConfluence) {
+      strengths.push('Entry gần vùng hợp lưu S/R mạnh');
+    }
+
+    // Candle confirmation
+    if (candleData.hasConfirmation) {
+      strengths.push(`Nến xác nhận: ${candleData.signals?.[0] || 'có tín hiệu'}`);
+      if (direction === 'LONG') bullishSignals++;
+      else bearishSignals++;
+    }
+
+    // RSI Divergence
+    if (rsiData.hasDivergence) {
+      if (rsiData.divergenceType === 'Bullish' && direction === 'LONG') {
+        strengths.push('RSI phân kỳ tăng hỗ trợ lệnh LONG');
+        bullishSignals++;
+      } else if (rsiData.divergenceType === 'Bearish' && direction === 'SHORT') {
+        strengths.push('RSI phân kỳ giảm hỗ trợ lệnh SHORT');
+        bearishSignals++;
+      }
+    }
+
+    // RSI overbought/oversold warning
+    if (rsiData.currentRSI) {
+      if (rsiData.currentRSI > 70 && direction === 'LONG') {
+        warnings.push('RSI quá mua, cẩn thận khi vào LONG');
+      } else if (rsiData.currentRSI < 30 && direction === 'SHORT') {
+        warnings.push('RSI quá bán, cẩn thận khi vào SHORT');
+      }
+    }
+
+    // Generate recommendation
+    let recommendation = '';
+    let recommendationColor = COLORS.textMuted;
+
+    if (score >= 80) {
+      recommendation = '✅ KHUYÊN VÀO LỆNH - Nhiều tín hiệu xác nhận mạnh';
+      recommendationColor = '#00FF88';
+    } else if (score >= 60) {
+      recommendation = '⚠️ CÂN NHẮC - Tín hiệu trung bình, cần quản lý rủi ro chặt';
+      recommendationColor = COLORS.gold;
+    } else if (score >= 40) {
+      recommendation = '⚡ RỦI RO CAO - Ít tín hiệu xác nhận, trade cẩn thận';
+      recommendationColor = COLORS.warning;
+    } else {
+      recommendation = '❌ KHÔNG KHUYÊN - Thiếu xác nhận, nên chờ setup tốt hơn';
+      recommendationColor = COLORS.error;
+    }
+
+    return {
+      strengths: strengths.slice(0, 3),
+      warnings: warnings.slice(0, 2),
+      recommendation,
+      recommendationColor,
+      totalBullish: bullishSignals,
+      totalBearish: bearishSignals,
+    };
+  }, [pattern, enhancements]);
+
+  return (
+    <View style={styles.conclusionSection}>
+      <Text style={styles.conclusionTitle}>Kết Luận Phân Tích</Text>
+
+      {/* Strengths */}
+      {conclusion.strengths.length > 0 && (
+        <View style={styles.conclusionGroup}>
+          <Text style={styles.conclusionGroupTitle}>Điểm mạnh:</Text>
+          {conclusion.strengths.map((item, idx) => (
+            <View key={idx} style={styles.conclusionItem}>
+              <Ionicons name="checkmark-circle" size={14} color="#00FF88" />
+              <Text style={styles.conclusionItemText}>{item}</Text>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {/* Warnings */}
+      {conclusion.warnings.length > 0 && (
+        <View style={styles.conclusionGroup}>
+          <Text style={[styles.conclusionGroupTitle, { color: COLORS.warning }]}>Cảnh báo:</Text>
+          {conclusion.warnings.map((item, idx) => (
+            <View key={idx} style={styles.conclusionItem}>
+              <Ionicons name="warning" size={14} color={COLORS.warning} />
+              <Text style={[styles.conclusionItemText, { color: COLORS.warning }]}>{item}</Text>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {/* Recommendation */}
+      <View style={[styles.recommendationBox, { borderColor: conclusion.recommendationColor + '50' }]}>
+        <Text style={[styles.recommendationText, { color: conclusion.recommendationColor }]}>
+          {conclusion.recommendation}
+        </Text>
+      </View>
+    </View>
+  );
+};
+
+/**
  * Main Enhancement Stats Card
+ * NOTE: This is an ADMIN-ONLY feature for internal analysis
  */
 const EnhancementStatsCard = ({
   pattern,
@@ -130,8 +243,23 @@ const EnhancementStatsCard = ({
   onUpgradePress,
   expanded = true
 }) => {
-  const hasPremium = isPremiumTier(userTier);
+  // ADMIN-ONLY: Only show this card for admin users
+  const isAdmin = userTier === 'ADMIN';
+
+  // If not admin, don't render the card at all
+  if (!isAdmin) {
+    return null;
+  }
+
   const enhancements = pattern?.enhancements || {};
+
+  // Check if we have actual enhancement data
+  const hasEnhancementData = Object.keys(enhancements).length > 0 &&
+    (enhancements.volume?.score > 0 ||
+     enhancements.trend?.direction ||
+     enhancements.confluence?.score > 0 ||
+     enhancements.candle?.score > 0 ||
+     enhancements.rsi?.currentRSI);
 
   // Extract enhancement data
   const volumeData = enhancements.volume || {};
@@ -143,55 +271,78 @@ const EnhancementStatsCard = ({
 
   // Calculate overall enhancement score
   const enhancementScore = pattern?.enhancementScore || 0;
-  const qualityGrade = pattern?.qualityGrade || 'C';
+
+  // Calculate quality grade from enhancement score (NOT from pattern data)
+  // This ensures consistency between score and grade
+  const calculateGrade = (score) => {
+    if (score >= 90) return 'A+';
+    if (score >= 80) return 'A';
+    if (score >= 70) return 'B+';
+    if (score >= 60) return 'B';
+    if (score >= 40) return 'C';
+    return 'D';
+  };
+  const qualityGrade = calculateGrade(enhancementScore);
 
   return (
     <View style={styles.container}>
-      {/* Header with Grade & State */}
+      {/* Header with Admin Badge */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.title}>Enhancement Analysis</Text>
-          {hasPremium && (
-            <TierBadge tier={userTier} size="small" />
-          )}
+          <Text style={styles.title}>Phân Tích Nâng Cao</Text>
+          <View style={styles.adminBadge}>
+            <Text style={styles.adminBadgeText}>ADMIN ONLY</Text>
+          </View>
         </View>
         <View style={styles.headerRight}>
-          {pattern?.state && <PatternStateBadge state={pattern.state} />}
-          {hasPremium && qualityGrade && <QualityGradeBadge grade={qualityGrade} />}
+          {qualityGrade && <QualityGradeBadge grade={qualityGrade} />}
         </View>
       </View>
 
       {/* Enhancement Score Bar */}
-      {hasPremium && enhancementScore > 0 && (
-        <View style={styles.scoreSection}>
-          <View style={styles.scoreHeader}>
-            <Text style={styles.scoreLabel}>Enhancement Score</Text>
-            <Text style={styles.scoreValue}>{enhancementScore}/100</Text>
-          </View>
-          <View style={styles.scoreBar}>
-            <LinearGradient
-              colors={['#6A5BFF', '#00FF88']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={[styles.scoreFill, { width: `${Math.min(enhancementScore, 100)}%` }]}
-            />
-          </View>
+      <View style={styles.scoreSection}>
+        <View style={styles.scoreHeader}>
+          <Text style={styles.scoreLabel}>Điểm Tổng Hợp</Text>
+          <Text style={[
+            styles.scoreValue,
+            { color: enhancementScore >= 60 ? '#00FF88' : enhancementScore >= 40 ? COLORS.gold : COLORS.error }
+          ]}>
+            {enhancementScore}/100
+          </Text>
+        </View>
+        <View style={styles.scoreBar}>
+          <LinearGradient
+            colors={enhancementScore >= 60 ? ['#6A5BFF', '#00FF88'] : enhancementScore >= 40 ? ['#6A5BFF', '#FFBD59'] : ['#6A5BFF', '#FF4757']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={[styles.scoreFill, { width: `${Math.max(Math.min(enhancementScore, 100), 5)}%` }]}
+          />
+        </View>
+      </View>
+
+      {/* Missing Data Warning */}
+      {!hasEnhancementData && (
+        <View style={styles.missingDataWarning}>
+          <Ionicons name="information-circle" size={16} color={COLORS.warning} />
+          <Text style={styles.missingDataText}>
+            Dữ liệu phân tích nâng cao chưa được tính toán cho pattern này. Các chỉ số bên dưới có thể không chính xác.
+          </Text>
         </View>
       )}
 
-      {/* Enhancement Items */}
+      {/* Enhancement Items with Subtitles */}
       <View style={styles.enhancementList}>
         {/* Volume Confirmation */}
         <EnhancementItem
           icon="bar-chart"
           label="Volume"
-          value={hasPremium ? `${volumeData.score || 0}%` : '--'}
-          subValue={volumeData.direction}
+          subtitle="Khối lượng xác nhận xu hướng"
+          value={volumeData.score ? `${volumeData.score}%` : 'Chưa có'}
+          subValue={volumeData.direction || (volumeData.score ? null : 'Đang tính...')}
           color="#3B82F6"
           isPositive={volumeData.isConfirmed}
-          locked={!hasPremium}
         />
-        {hasPremium && volumeData.signals && (
+        {volumeData.signals && (
           <SignalTags signals={volumeData.signals} color="#3B82F6" />
         )}
 
@@ -199,34 +350,34 @@ const EnhancementStatsCard = ({
         <EnhancementItem
           icon="trending-up"
           label="Trend"
-          value={hasPremium ? (trendData.direction || '--') : '--'}
-          subValue={hasPremium ? `Strength: ${trendData.strength || 0}%` : null}
-          color={trendData.direction === 'BULLISH' ? '#00FF88' : trendData.direction === 'BEARISH' ? '#FF4757' : '#FFBD59'}
-          locked={!hasPremium}
+          subtitle="Hướng xu hướng tổng thể"
+          value={trendData.direction || 'Chưa có'}
+          subValue={trendData.strength ? `Strength: ${trendData.strength}%` : 'Đang phân tích...'}
+          color={trendData.direction === 'BULLISH' ? '#00FF88' : trendData.direction === 'BEARISH' ? '#FF4757' : '#718096'}
         />
 
         {/* S/R Confluence */}
         <EnhancementItem
           icon="git-merge"
           label="S/R Confluence"
-          value={hasPremium ? `${confluenceData.score || 0}%` : '--'}
-          subValue={hasPremium && confluenceData.nearestLevel ? `Near ${confluenceData.nearestLevel}` : null}
+          subtitle="Vùng hỗ trợ/kháng cự hợp lưu"
+          value={confluenceData.score ? `${confluenceData.score}%` : 'Chưa có'}
+          subValue={confluenceData.nearestLevel ? `Near ${confluenceData.nearestLevel}` : 'Đang tính...'}
           color="#8B5CF6"
           isPositive={confluenceData.hasConfluence}
-          locked={!hasPremium}
         />
 
         {/* Candle Confirmation */}
         <EnhancementItem
           icon="flash"
           label="Candle Signal"
-          value={hasPremium ? `${candleData.score || 0}%` : '--'}
-          subValue={candleData.hasConfirmation ? 'Confirmed' : 'Waiting'}
+          subtitle="Mẫu nến xác nhận điểm vào"
+          value={candleData.score ? `${candleData.score}%` : 'Chưa có'}
+          subValue={candleData.hasConfirmation ? 'Xác nhận' : candleData.score ? 'Chờ' : 'Đang quét...'}
           color="#FFBD59"
           isPositive={candleData.hasConfirmation}
-          locked={!hasPremium}
         />
-        {hasPremium && candleData.signals && (
+        {candleData.signals && (
           <SignalTags signals={candleData.signals} color="#FFBD59" />
         )}
 
@@ -234,69 +385,27 @@ const EnhancementStatsCard = ({
         <EnhancementItem
           icon="pulse"
           label="RSI Divergence"
-          value={hasPremium ? (rsiData.divergenceType || 'None') : '--'}
-          subValue={hasPremium && rsiData.currentRSI ? `RSI: ${rsiData.currentRSI}` : null}
+          subtitle="Phân kỳ tăng = mua, giảm = bán"
+          value={rsiData.divergenceType || 'Không có'}
+          subValue={rsiData.currentRSI ? `RSI: ${rsiData.currentRSI}` : 'Chưa tính RSI'}
           color="#EC4899"
           isPositive={rsiData.hasDivergence}
-          locked={!hasPremium}
         />
 
         {/* Dynamic R:R */}
         <EnhancementItem
           icon="swap-horizontal"
-          label="Optimized R:R"
-          value={hasPremium ? `1:${rrData.optimizedRR || pattern?.riskReward || 2}` : '--'}
-          subValue={hasPremium && rrData.originalRR ? `Original: 1:${rrData.originalRR}` : null}
+          label="R:R Tối Ưu"
+          subtitle="Tỷ lệ rủi ro/lợi nhuận tối ưu"
+          value={`1:${rrData.optimizedRR || pattern?.riskReward || 2}`}
+          subValue={rrData.originalRR ? `Gốc: 1:${rrData.originalRR}` : null}
           color="#06B6D4"
           isPositive={rrData.optimizedRR > rrData.originalRR}
-          locked={!hasPremium}
         />
       </View>
 
-      {/* Upgrade Prompt for Free/Tier1 */}
-      {!hasPremium && (
-        <TouchableOpacity
-          style={styles.upgradePrompt}
-          onPress={onUpgradePress}
-          activeOpacity={0.8}
-        >
-          <LinearGradient
-            colors={['#2D1B4E', '#1A0F2E']}
-            style={styles.upgradeGradient}
-          >
-            <Ionicons name="lock-open" size={20} color="#FFC107" />
-            <View style={styles.upgradeText}>
-              <Text style={styles.upgradeTitle}>Unlock Premium Analysis</Text>
-              <Text style={styles.upgradeSubtitle}>
-                +30-45% higher win rate with all enhancements
-              </Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#FFC107" />
-          </LinearGradient>
-        </TouchableOpacity>
-      )}
-
-      {/* Enhancement Summary for Premium */}
-      {hasPremium && pattern?.enhancementSummary && (
-        <View style={styles.summarySection}>
-          <Text style={styles.summaryTitle}>Analysis Summary</Text>
-          <View style={styles.checkList}>
-            {pattern.enhancementSummary.checks?.map((check, index) => (
-              <View key={index} style={styles.checkItem}>
-                <Ionicons
-                  name={check.passed ? "checkmark-circle" : "close-circle"}
-                  size={16}
-                  color={check.passed ? '#00FF88' : '#FF4757'}
-                />
-                <Text style={styles.checkText}>{check.name}</Text>
-                {check.score > 0 && (
-                  <Text style={styles.checkScore}>+{check.score}</Text>
-                )}
-              </View>
-            ))}
-          </View>
-        </View>
-      )}
+      {/* Conclusion Section */}
+      <ConclusionSection pattern={pattern} enhancements={enhancements} />
     </View>
   );
 };
@@ -340,22 +449,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
   },
-  // State Badge
-  stateBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    gap: 4,
-  },
-  stateEmoji: {
-    fontSize: 12,
-  },
-  stateText: {
-    fontSize: 11,
-    fontWeight: '600',
-  },
   // Score Section
   scoreSection: {
     marginBottom: 16,
@@ -375,7 +468,6 @@ const styles = StyleSheet.create({
   scoreValue: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#00FF88',
   },
   scoreBar: {
     height: 6,
@@ -403,10 +495,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+    flex: 1,
+  },
+  labelContainer: {
+    flex: 1,
   },
   enhancementLabel: {
     fontSize: 13,
-    color: '#A0AEC0',
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  enhancementSubtitle: {
+    fontSize: 10,
+    color: '#718096',
+    marginTop: 1,
   },
   enhancementRight: {
     alignItems: 'flex-end',
@@ -444,61 +546,85 @@ const styles = StyleSheet.create({
     color: '#718096',
     alignSelf: 'center',
   },
-  // Upgrade Prompt
-  upgradePrompt: {
-    marginTop: 16,
-    borderRadius: 12,
-    overflow: 'hidden',
+  // Admin Badge
+  adminBadge: {
+    backgroundColor: COLORS.error + '30',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: COLORS.error,
   },
-  upgradeGradient: {
+  adminBadgeText: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: COLORS.error,
+    letterSpacing: 0.5,
+  },
+  // Missing Data Warning
+  missingDataWarning: {
     flexDirection: 'row',
-    alignItems: 'center',
-    padding: 14,
-    gap: 12,
+    alignItems: 'flex-start',
+    gap: 8,
+    padding: 10,
+    backgroundColor: 'rgba(255, 149, 0, 0.1)',
+    borderRadius: 8,
+    marginBottom: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.warning,
   },
-  upgradeText: {
+  missingDataText: {
     flex: 1,
-  },
-  upgradeTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FFC107',
-  },
-  upgradeSubtitle: {
     fontSize: 11,
-    color: '#8E8E93',
-    marginTop: 2,
+    color: COLORS.warning,
+    lineHeight: 16,
   },
-  // Summary Section
-  summarySection: {
+  // Conclusion Section
+  conclusionSection: {
     marginTop: 16,
     paddingTop: 16,
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.1)',
   },
-  summaryTitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#A0AEC0',
+  conclusionTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.gold,
+    marginBottom: 12,
+  },
+  conclusionGroup: {
     marginBottom: 10,
   },
-  checkList: {
-    gap: 6,
-  },
-  checkItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  checkText: {
-    fontSize: 12,
-    color: '#FFFFFF',
-    flex: 1,
-  },
-  checkScore: {
+  conclusionGroupTitle: {
     fontSize: 11,
-    color: '#00FF88',
     fontWeight: '600',
+    color: '#00FF88',
+    marginBottom: 6,
+  },
+  conclusionItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 6,
+    marginBottom: 4,
+  },
+  conclusionItemText: {
+    fontSize: 12,
+    color: '#A0AEC0',
+    flex: 1,
+    lineHeight: 16,
+  },
+  recommendationBox: {
+    marginTop: 12,
+    padding: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  recommendationText: {
+    fontSize: 13,
+    fontWeight: '600',
+    textAlign: 'center',
+    lineHeight: 18,
   },
 });
 

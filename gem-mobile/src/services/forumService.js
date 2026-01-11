@@ -59,9 +59,17 @@ async function fetchSeedPosts(limit = 20, feedType = null, page = 1) {
     const from = (page - 1) * limit;
     const to = from + limit - 1;
 
-    query = query
-      .order('created_at', { ascending: false })
-      .range(from, to);
+    // Popular feed: sort by engagement (likes + comments)
+    if (feedType === 'popular') {
+      query = query
+        .order('likes_count', { ascending: false })
+        .order('comments_count', { ascending: false })
+        .order('created_at', { ascending: false });
+    } else {
+      query = query.order('created_at', { ascending: false });
+    }
+
+    query = query.range(from, to);
 
     const { data: posts, error, count } = await query;
 
@@ -135,6 +143,12 @@ const FEED_KEYWORDS = {
 
   // Earn Track 💰
   'earn': ['kiếm tiền', 'affiliate', 'cộng tác', 'CTV', 'hoa hồng', 'commission', 'referral', 'giới thiệu', 'income', 'thu nhập', 'passive', '#affiliate', '#kiemtien', '#CTV'],
+
+  // Main Feed Tabs (NEW) 📱
+  'news': ['tin tức', 'news', 'cập nhật', 'update', 'thông báo', 'announcement', 'mới nhất', 'latest', 'hot', 'breaking', '#tintuc', '#news', '#update'],
+  'academy': ['khóa học', 'course', 'học', 'learn', 'giáo dục', 'education', 'tutorial', 'hướng dẫn', 'bài học', 'lesson', 'kiến thức', 'knowledge', '#academy', '#khoahoc', '#hoctrading'],
+  'notifications': ['thông báo', 'notification', 'cập nhật', 'update', 'quan trọng', 'important', 'lưu ý', 'note', '#thongbao'],
+  'popular': [], // Popular uses engagement sorting, not keyword filter
 };
 
 // ============================================
@@ -419,7 +433,8 @@ export const forumService = {
   async getPosts(filters = {}) {
     try {
       // Increase default limit to 50 for better feed experience
-      const { category, feed = 'explore', page = 1, limit = 50, search, topic } = filters;
+      // Phase 4: Added sortBy for feed algorithm (latest, hot, trending, foryou)
+      const { category, feed = 'explore', page = 1, limit = 50, search, topic, sortBy = 'hot' } = filters;
 
       // Get current user for personalized feeds
       const { data: { user } } = await supabase.auth.getUser();
@@ -429,10 +444,12 @@ export const forumService = {
         .from('forum_posts')
         .select(`
           *,
+          reaction_counts,
           author:profiles(id, email, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role, achievement_badges),
           category:forum_categories(id, name, color),
           likes:forum_likes(user_id),
           saved:forum_saved(user_id),
+          reactions:post_reactions(user_id, reaction_type),
           tagged_products:post_products(
             id,
             product_id,
@@ -449,20 +466,22 @@ export const forumService = {
       switch (feed) {
         case 'following':
           // Posts from followed users only
-          if (user) {
+          if (currentUserId) {
             const { data: following } = await supabase
               .from('user_follows')
               .select('following_id')
-              .eq('follower_id', user.id);
+              .eq('follower_id', currentUserId);
 
             const followingIds = following?.map(f => f.following_id) || [];
             if (followingIds.length > 0) {
               query = query.in('user_id', followingIds);
             } else {
-              return []; // No following = no posts
+              // No following - return empty feed with proper format
+              return { posts: [], sessionId: null, hasMore: false, totalPosts: 0 };
             }
           } else {
-            return []; // Not logged in = no following posts
+            // Not logged in - return empty feed with proper format
+            return { posts: [], sessionId: null, hasMore: false, totalPosts: 0 };
           }
           query = query.order('created_at', { ascending: false });
           break;
@@ -564,9 +583,33 @@ export const forumService = {
 
         case 'explore':
         default:
-          // Personalized feed: mix of new + trending + user behavior
-          // Order by: recent posts with engagement boost
-          query = query.order('created_at', { ascending: false });
+          // Phase 4: Apply sortBy algorithm for explore feed
+          switch (sortBy) {
+            case 'latest':
+              // Newest posts first
+              query = query.order('created_at', { ascending: false });
+              break;
+            case 'hot':
+              // Hot score (engagement * decay)
+              query = query
+                .order('hot_score', { ascending: false, nullsFirst: false })
+                .order('created_at', { ascending: false });
+              break;
+            case 'trending':
+              // Trending score (velocity of engagement)
+              query = query
+                .order('trending_score', { ascending: false, nullsFirst: false })
+                .order('created_at', { ascending: false });
+              break;
+            case 'foryou':
+              // Personalized: Hot score for now, can add ML later
+              query = query
+                .order('hot_score', { ascending: false, nullsFirst: false })
+                .order('created_at', { ascending: false });
+              break;
+            default:
+              query = query.order('created_at', { ascending: false });
+          }
           break;
       }
 
@@ -608,7 +651,7 @@ export const forumService = {
         }
       }
 
-      // Transform data to include user_liked and user_saved status
+      // Transform data to include user_liked, user_saved, and user_reaction status
       const transformedPosts = uniquePosts.map((post) => {
         // Check if current user liked/saved this post
         const user_liked = currentUserId
@@ -618,10 +661,18 @@ export const forumService = {
           ? post.saved?.some(save => save.user_id === currentUserId)
           : false;
 
+        // NEW: Get user's reaction from post_reactions (Phase 1 Reaction System)
+        const userReactionData = currentUserId
+          ? post.reactions?.find(r => r.user_id === currentUserId)
+          : null;
+        const user_reaction = userReactionData?.reaction_type || null;
+
         return {
           ...post,
           user_liked,
           user_saved,
+          user_reaction,
+          reaction_counts: post.reaction_counts || null,
           likes_count: post.likes_count || post.likes?.length || 0,
           // Mark if this is user's own post
           is_own_post: currentUserId && post.user_id === currentUserId,
@@ -636,6 +687,15 @@ export const forumService = {
         }));
       }
 
+      // Phase 4: Add trending_rank for trending feed
+      if (sortBy === 'trending' && page === 1) {
+        transformedPosts.forEach((post, index) => {
+          if (index < 10) {
+            post.trending_rank = index + 1;
+          }
+        });
+      }
+
       // ============================================
       // UNIFIED FEED SYSTEM
       // All feeds now have: scoring, impressions tracking, ads
@@ -646,10 +706,12 @@ export const forumService = {
 
       // Fetch seed posts for feeds that need them
       // FIXED: Now passing page parameter for proper pagination
+      // FIXED: Added popular, news, academy to fetch seed posts
       const shouldFetchSeedPosts = [
         'explore', 'trading', 'patterns', 'results',
         'wellness', 'meditation', 'growth',
-        'mindful-trading', 'sieu-giau', 'earn'
+        'mindful-trading', 'sieu-giau', 'earn',
+        'popular', 'news', 'academy', 'notifications'
       ].includes(feed);
 
       let seedPosts = [];
@@ -1217,6 +1279,15 @@ export const forumService = {
         if (post.media_urls && post.media_urls.length > 0) insertData.media_urls = post.media_urls;
         if (post.hashtags && post.hashtags.length > 0) insertData.hashtags = post.hashtags;
         if (post.visibility) insertData.visibility = post.visibility;
+
+        // ========== LINK PREVIEW SUPPORT (Phase 4) ==========
+        if (post.link_preview) {
+          insertData.link_preview = post.link_preview;
+          console.log('[Forum] Adding link_preview:', post.link_preview.url);
+        }
+        if (post.extracted_urls && post.extracted_urls.length > 0) {
+          insertData.extracted_urls = post.extracted_urls;
+        }
 
         console.log('[Forum] Direct insert data:', JSON.stringify(insertData, null, 2));
 
@@ -2129,10 +2200,12 @@ export const forumService = {
         .from('forum_posts')
         .select(`
           *,
+          reaction_counts,
           author:profiles(id, email, full_name, avatar_url, scanner_tier, chatbot_tier, verified_seller, verified_trader, level_badge, role_badge, role, achievement_badges),
           category:forum_categories(id, name, color),
           likes:forum_likes(user_id),
-          saved:forum_saved(user_id)
+          saved:forum_saved(user_id),
+          reactions:post_reactions(user_id, reaction_type)
         `)
         .eq('user_id', userId)
         .or('status.eq.published,status.is.null')
@@ -2142,12 +2215,19 @@ export const forumService = {
 
       // If we found forum_posts, return them
       if (forumPosts && forumPosts.length > 0) {
-        return forumPosts.map((post) => ({
-          ...post,
-          user_liked: currentUserId ? post.likes?.some(l => l.user_id === currentUserId) : false,
-          user_saved: currentUserId ? post.saved?.some(s => s.user_id === currentUserId) : false,
-          likes_count: post.likes_count || post.likes?.length || 0,
-        }));
+        return forumPosts.map((post) => {
+          const userReactionData = currentUserId
+            ? post.reactions?.find(r => r.user_id === currentUserId)
+            : null;
+          return {
+            ...post,
+            user_liked: currentUserId ? post.likes?.some(l => l.user_id === currentUserId) : false,
+            user_saved: currentUserId ? post.saved?.some(s => s.user_id === currentUserId) : false,
+            user_reaction: userReactionData?.reaction_type || null,
+            reaction_counts: post.reaction_counts || null,
+            likes_count: post.likes_count || post.likes?.length || 0,
+          };
+        });
       }
 
       // If no forum_posts found, try seed_posts (seed users)

@@ -107,6 +107,16 @@ ALTER TABLE testimonials ENABLE ROW LEVEL SECURITY;
 ALTER TABLE feedback_prompts_log ENABLE ROW LEVEL SECURITY;
 ALTER TABLE feature_ratings ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies first (for idempotent migration)
+DROP POLICY IF EXISTS "Users create feedback" ON user_feedback;
+DROP POLICY IF EXISTS "Users view own feedback" ON user_feedback;
+DROP POLICY IF EXISTS "Admins view all feedback" ON user_feedback;
+DROP POLICY IF EXISTS "Admins update feedback" ON user_feedback;
+DROP POLICY IF EXISTS "Public view approved testimonials" ON testimonials;
+DROP POLICY IF EXISTS "Admins manage testimonials" ON testimonials;
+DROP POLICY IF EXISTS "Users manage own prompts" ON feedback_prompts_log;
+DROP POLICY IF EXISTS "Users manage own ratings" ON feature_ratings;
+
 -- Users can create and view own feedback
 CREATE POLICY "Users create feedback" ON user_feedback
   FOR INSERT WITH CHECK (user_id = auth.uid() OR user_id IS NULL);

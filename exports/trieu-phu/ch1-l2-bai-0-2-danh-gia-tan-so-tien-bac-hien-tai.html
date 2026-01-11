@@ -1,0 +1,2491 @@
+
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 0.2: Đánh Giá Tần Số Tiền Bạc Hiện Tại</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           V5.3 DESIGN TOKENS
+           ============================================ */
+        :root {
+            /* Colors */
+            --color-navy: #112250;
+            --color-gold: #FFBD59;
+            --color-burgundy: #9C0612;
+            --color-cyan: #00F0FF;
+            --color-purple: #6A5BFF;
+            --color-white: #ffffff;
+            --color-text: rgba(255, 255, 255, 0.85);
+            --color-text-muted: rgba(255, 255, 255, 0.6);
+            --color-green: #10B981;
+            --color-red: #EF4444;
+            
+            /* Backgrounds */
+            --bg-dark: #0a0a0f;
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            
+            /* Typography */
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Montserrat', sans-serif;
+            --text-xs: 0.75rem;
+            --text-sm: 0.875rem;
+            --text-base: 1rem;
+            --text-lg: 1.25rem;
+            --text-xl: 1.5rem;
+            --text-2xl: 2rem;
+            
+            /* Spacing */
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            --space-2xl: 3rem;
+            
+            /* V5.3: Text padding on mobile */
+            --text-padding: 1rem;
+            --card-padding: 1.25rem;
+            
+            /* Radius */
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            
+            /* Shadows */
+            --shadow-gold: 0 0 30px rgba(255, 189, 89, 0.15);
+            --shadow-purple: 0 0 30px rgba(106, 91, 255, 0.15);
+        }
+
+        /* ============================================
+           V5.3 BASE STYLES
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-dark);
+            color: var(--color-text);
+            line-height: 1.7;
+            min-height: 100vh;
+            font-size: var(--text-base);
+        }
+
+        /* 5-Layer Background */
+        .bg-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(106, 91, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(0, 240, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(255, 189, 89, 0.05) 0%, transparent 70%),
+                linear-gradient(180deg, #0a0a0f 0%, #112250 50%, #0a0a0f 100%);
+        }
+
+        /* V5.3: Container padding 0 on mobile */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        @media (min-width: 600px) {
+            .container {
+                padding: var(--space-lg);
+            }
+        }
+
+        /* ============================================
+           V5.3 LESSON HEADER
+           ============================================ */
+        .lesson-header {
+            background: linear-gradient(135deg, var(--color-navy) 0%, rgba(17, 34, 80, 0.8) 100%);
+            padding: var(--space-xl) var(--text-padding);
+            text-align: center;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        @media (min-width: 600px) {
+            .lesson-header {
+                border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+                padding: var(--space-2xl) var(--space-xl);
+                border: 1px solid var(--glass-border);
+                border-bottom: none;
+            }
+        }
+
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            flex-wrap: wrap;
+        }
+
+        .lesson-badge {
+            background: rgba(255, 189, 89, 0.2);
+            color: var(--color-gold);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: var(--text-xs);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .lesson-title {
+            font-family: var(--font-heading);
+            font-size: var(--text-xl);
+            font-weight: 800;
+            color: var(--color-gold);
+            margin-bottom: var(--space-sm);
+            text-shadow: 0 0 20px rgba(255, 189, 89, 0.3);
+        }
+
+        @media (min-width: 600px) {
+            .lesson-title {
+                font-size: var(--text-2xl);
+            }
+        }
+
+        .lesson-subtitle {
+            color: var(--color-text-muted);
+            font-size: var(--text-base);
+        }
+
+        /* ============================================
+           V5.3 LESSON CONTENT
+           ============================================ */
+        .lesson-content {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        @media (min-width: 600px) {
+            .lesson-content {
+                border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+                border: 1px solid var(--glass-border);
+                border-top: none;
+            }
+        }
+
+        /* ============================================
+           V5.3 SECTIONS
+           ============================================ */
+        .section {
+            padding: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section-header {
+            padding: var(--space-lg) var(--text-padding) var(--space-md);
+        }
+
+        @media (min-width: 600px) {
+            .section-header {
+                padding: var(--space-xl) var(--space-xl) var(--space-md);
+            }
+        }
+
+        .section-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--color-gold) 0%, #e5a84d 100%);
+            color: var(--color-navy);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: var(--text-sm);
+            margin-right: 0.75rem;
+        }
+
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: var(--text-lg);
+            font-weight: 700;
+            color: var(--color-white);
+            display: inline;
+        }
+
+        @media (min-width: 600px) {
+            .section-title {
+                font-size: var(--text-xl);
+            }
+        }
+
+        /* V5.3: Text content padding */
+        .text-content {
+            padding: 0 var(--text-padding) var(--space-lg);
+        }
+
+        @media (min-width: 600px) {
+            .text-content {
+                padding: 0 var(--space-xl) var(--space-xl);
+            }
+        }
+
+        .text-content p {
+            margin-bottom: var(--space-md);
+            color: var(--color-text);
+        }
+
+        .text-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* ============================================
+           V5.3 HIGHLIGHT BOX - Border-Left Mobile
+           ============================================ */
+        .highlight-box {
+            background: rgba(255, 189, 89, 0.1);
+            padding: var(--card-padding) var(--text-padding);
+            margin: var(--space-md) 0;
+            border-left: 4px solid var(--color-gold);
+            border-radius: 0;
+        }
+
+        @media (min-width: 600px) {
+            .highlight-box {
+                border-radius: var(--radius-lg);
+                border: 1px solid rgba(255, 189, 89, 0.3);
+                border-left: 4px solid var(--color-gold);
+                margin: var(--space-md) var(--space-xl);
+            }
+        }
+
+        .highlight-box p {
+            color: var(--color-white);
+            font-style: italic;
+        }
+
+        .highlight-box .author {
+            color: var(--color-gold);
+            font-weight: 600;
+            margin-top: var(--space-sm);
+            font-style: normal;
+        }
+
+        /* ============================================
+           V5.3 DEFINITION BOX - Border-Left Mobile
+           ============================================ */
+        .definition-box {
+            background: rgba(0, 240, 255, 0.1);
+            padding: var(--card-padding) var(--text-padding);
+            margin: var(--space-md) 0;
+            border-left: 4px solid var(--color-cyan);
+            border-radius: 0;
+        }
+
+        @media (min-width: 600px) {
+            .definition-box {
+                border-radius: var(--radius-lg);
+                border: 2px solid rgba(0, 240, 255, 0.3);
+                margin: var(--space-md) var(--space-xl);
+            }
+        }
+
+        .definition-box h4 {
+            color: var(--color-cyan);
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
+        }
+
+        /* ============================================
+           V5.3 IMAGE CONTAINER - Full Width Mobile
+           ============================================ */
+        .image-container {
+            width: 100%;
+            margin: var(--space-lg) 0;
+        }
+
+        @media (min-width: 600px) {
+            .image-container {
+                padding: 0 var(--space-xl);
+            }
+        }
+
+        .image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 0;
+        }
+
+        @media (min-width: 600px) {
+            .image-container img {
+                border-radius: var(--radius-lg);
+                box-shadow: var(--shadow-gold);
+            }
+        }
+
+        .image-caption {
+            text-align: center;
+            color: var(--color-text-muted);
+            font-size: var(--text-sm);
+            margin-top: 0.75rem;
+            padding: 0 var(--text-padding);
+        }
+
+        /* ============================================
+           V5.3 7 TẦNG TÂM THỨC GRID - Gap 1px Mobile
+           ============================================ */
+        .consciousness-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: var(--space-md) 0;
+        }
+
+        @media (min-width: 600px) {
+            .consciousness-grid {
+                gap: var(--space-md);
+                background: transparent;
+                margin: var(--space-md) var(--space-xl);
+            }
+        }
+
+        .level-card {
+            background: rgba(17, 34, 80, 0.6);
+            padding: var(--card-padding) var(--text-padding);
+            border-radius: 0;
+            display: flex;
+            gap: var(--space-md);
+            align-items: flex-start;
+        }
+
+        @media (min-width: 600px) {
+            .level-card {
+                border-radius: var(--radius-lg);
+                border: 1px solid var(--glass-border);
+                transition: transform 0.3s, box-shadow 0.3s;
+            }
+
+            .level-card:hover {
+                transform: translateY(-2px);
+                box-shadow: var(--shadow-gold);
+            }
+        }
+
+        .level-badge {
+            flex-shrink: 0;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: var(--text-xs);
+        }
+
+        .level-badge .level-num {
+            font-size: var(--text-lg);
+            line-height: 1;
+        }
+
+        .level-1 .level-badge { background: linear-gradient(135deg, #1a1a2e, #16213e); color: #666; }
+        .level-2 .level-badge { background: linear-gradient(135deg, #4a3f35, #5c4a3a); color: #a89078; }
+        .level-3 .level-badge { background: linear-gradient(135deg, #ff6b35, #f7c59f); color: #fff; }
+        .level-4 .level-badge { background: linear-gradient(135deg, #ffd93d, #ffb627); color: #333; }
+        .level-5 .level-badge { background: linear-gradient(135deg, #6bcb77, #4ade80); color: #fff; }
+        .level-6 .level-badge { background: linear-gradient(135deg, #4d96ff, #6bceff); color: #fff; }
+        .level-7 .level-badge { background: linear-gradient(135deg, #9d4edd, #c77dff); color: #fff; }
+
+        .level-info h4 {
+            color: var(--color-white);
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            font-size: var(--text-base);
+        }
+
+        .level-hz {
+            color: var(--color-gold);
+            font-size: var(--text-sm);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+        }
+
+        .level-desc {
+            color: var(--color-text-muted);
+            font-size: var(--text-sm);
+            line-height: 1.5;
+        }
+
+        /* ============================================
+           V5.3 TEST TẦN SỐ (15 câu) - Border-Left Mobile
+           ============================================ */
+        .frequency-test {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(0, 240, 255, 0.05));
+            border-left: 4px solid var(--color-purple);
+            border-radius: 0;
+            padding: var(--card-padding) 0;
+            margin: var(--space-lg) 0;
+        }
+
+        @media (min-width: 600px) {
+            .frequency-test {
+                border: 2px solid var(--color-purple);
+                border-radius: var(--radius-lg);
+                padding: var(--card-padding);
+                margin: var(--space-lg) var(--space-xl);
+            }
+        }
+
+        .test-header {
+            padding: 0 var(--text-padding) var(--space-md);
+            text-align: center;
+        }
+
+        @media (min-width: 600px) {
+            .test-header {
+                padding: 0 0 var(--space-md);
+            }
+        }
+
+        .test-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--space-sm);
+        }
+
+        .test-title {
+            font-family: var(--font-heading);
+            font-weight: 800;
+            font-size: var(--text-lg);
+            color: var(--color-purple);
+            margin-bottom: var(--space-xs);
+        }
+
+        .test-subtitle {
+            color: var(--color-text-muted);
+            font-size: var(--text-sm);
+        }
+
+        .test-question {
+            background: var(--glass-bg);
+            border-bottom: 1px solid var(--glass-border);
+            padding: var(--card-padding);
+            padding-left: var(--text-padding);
+            padding-right: var(--text-padding);
+        }
+
+        @media (min-width: 600px) {
+            .test-question {
+                border: 1px solid var(--glass-border);
+                border-radius: var(--radius-md);
+                margin: var(--space-sm) 0;
+            }
+        }
+
+        .test-question:last-of-type {
+            border-bottom: none;
+        }
+
+        .test-q-header {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+        }
+
+        .test-q-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--color-purple), #8B5CF6);
+            color: white;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: var(--text-xs);
+            flex-shrink: 0;
+        }
+
+        .test-q-text {
+            font-weight: 600;
+            color: var(--color-white);
+            font-size: var(--text-sm);
+            line-height: 1.5;
+        }
+
+        .test-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            background: var(--glass-border);
+            margin: 0 calc(-1 * var(--text-padding));
+        }
+
+        @media (min-width: 600px) {
+            .test-options {
+                gap: var(--space-sm);
+                background: transparent;
+                margin: 0;
+            }
+        }
+
+        .test-option {
+            background: rgba(255, 255, 255, 0.02);
+            border: none;
+            border-radius: 0;
+            padding: var(--space-md);
+            padding-left: var(--text-padding);
+            padding-right: var(--text-padding);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            font-size: var(--text-sm);
+        }
+
+        @media (min-width: 600px) {
+            .test-option {
+                border: 1px solid var(--glass-border);
+                border-radius: var(--radius-sm);
+                padding: var(--space-md);
+            }
+
+            .test-option:hover {
+                background: rgba(106, 91, 255, 0.1);
+                border-color: var(--color-purple);
+            }
+        }
+
+        .test-option.selected {
+            background: rgba(106, 91, 255, 0.2);
+            border-left: 4px solid var(--color-purple);
+        }
+
+        @media (min-width: 600px) {
+            .test-option.selected {
+                border: 2px solid var(--color-purple);
+            }
+        }
+
+        .option-radio {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--color-text-muted);
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .test-option.selected .option-radio {
+            border-color: var(--color-purple);
+            background: var(--color-purple);
+        }
+
+        .test-option.selected .option-radio::after {
+            content: "✓";
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .option-label {
+            color: var(--color-text);
+            flex: 1;
+        }
+
+        .option-score {
+            color: var(--color-text-muted);
+            font-size: var(--text-xs);
+            font-weight: 600;
+        }
+
+        /* Test Submit & Results */
+        .test-submit-area {
+            padding: var(--space-lg) var(--text-padding);
+            text-align: center;
+        }
+
+        @media (min-width: 600px) {
+            .test-submit-area {
+                padding: var(--space-lg) 0;
+            }
+        }
+
+        .test-submit-btn {
+            padding: var(--space-md) var(--space-xl);
+            background: linear-gradient(135deg, var(--color-gold) 0%, #e5a84d 100%);
+            border: none;
+            border-radius: var(--radius-md);
+            color: var(--color-navy);
+            font-family: var(--font-heading);
+            font-size: var(--text-base);
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .test-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 189, 89, 0.3);
+        }
+
+        .test-submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .test-progress {
+            color: var(--color-text-muted);
+            font-size: var(--text-sm);
+            margin-top: var(--space-sm);
+        }
+
+        /* Test Results */
+        .test-results {
+            display: none;
+            padding: var(--space-lg) var(--text-padding);
+            text-align: center;
+        }
+
+        @media (min-width: 600px) {
+            .test-results {
+                padding: var(--space-lg);
+            }
+        }
+
+        .test-results.show {
+            display: block;
+        }
+
+        .result-score {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--color-gold);
+            margin-bottom: var(--space-sm);
+        }
+
+        .result-level {
+            font-size: var(--text-lg);
+            font-weight: 700;
+            color: var(--color-white);
+            margin-bottom: var(--space-md);
+        }
+
+        .result-description {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--card-padding);
+            text-align: left;
+            margin-bottom: var(--space-md);
+        }
+
+        .result-description h4 {
+            color: var(--color-gold);
+            margin-bottom: var(--space-sm);
+        }
+
+        .result-description p {
+            color: var(--color-text);
+            font-size: var(--text-sm);
+            margin-bottom: var(--space-sm);
+        }
+
+        .result-description p:last-child {
+            margin-bottom: 0;
+        }
+
+        .retake-test-btn {
+            padding: var(--space-sm) var(--space-lg);
+            background: transparent;
+            border: 2px solid var(--color-purple);
+            border-radius: var(--radius-md);
+            color: var(--color-purple);
+            font-family: var(--font-heading);
+            font-size: var(--text-sm);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .retake-test-btn:hover {
+            background: var(--color-purple);
+            color: white;
+        }
+
+        /* ============================================
+           V5.3 TIMELINE
+           ============================================ */
+        .timeline {
+            padding: 0 var(--text-padding);
+            margin: var(--space-lg) 0;
+        }
+
+        @media (min-width: 600px) {
+            .timeline {
+                padding: 0 var(--space-xl);
+            }
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: var(--space-md);
+            padding: var(--space-md) 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .timeline-item:last-child {
+            border-bottom: none;
+        }
+
+        .timeline-marker {
+            flex-shrink: 0;
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--color-purple) 0%, #5548cc 100%);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+        }
+
+        .timeline-week {
+            font-size: var(--text-xs);
+            opacity: 0.8;
+        }
+
+        .timeline-num {
+            font-size: var(--text-lg);
+            line-height: 1;
+        }
+
+        .timeline-content h4 {
+            color: var(--color-white);
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .timeline-content p {
+            color: var(--color-text-muted);
+            font-size: var(--text-sm);
+        }
+
+        .timeline-goal {
+            display: inline-block;
+            background: rgba(255, 189, 89, 0.2);
+            color: var(--color-gold);
+            padding: 0.125rem 0.5rem;
+            border-radius: var(--radius-sm);
+            font-size: var(--text-xs);
+            font-weight: 600;
+            margin-top: var(--space-xs);
+        }
+
+        /* ============================================
+           V5.3 APP BOX
+           ============================================ */
+        .app-box {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.2) 0%, rgba(0, 240, 255, 0.1) 100%);
+            padding: var(--card-padding) var(--text-padding);
+            margin: var(--space-md) 0;
+            border-left: 4px solid var(--color-purple);
+            border-radius: 0;
+        }
+
+        @media (min-width: 600px) {
+            .app-box {
+                margin: var(--space-md) var(--space-xl);
+                border-radius: var(--radius-lg);
+                border: 1px solid rgba(106, 91, 255, 0.3);
+                border-left: 4px solid var(--color-purple);
+            }
+        }
+
+        .app-box-title {
+            color: var(--color-cyan);
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .app-steps {
+            counter-reset: app-step;
+        }
+
+        .app-step {
+            counter-increment: app-step;
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-md);
+            padding: var(--space-sm) 0;
+            color: var(--color-text);
+        }
+
+        .app-step::before {
+            content: counter(app-step);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: rgba(106, 91, 255, 0.3);
+            color: var(--color-cyan);
+            border-radius: 50%;
+            font-size: var(--text-xs);
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* ============================================
+           V5.3 QUIZ SECTION - Border-Left Mobile
+           ============================================ */
+        .quiz-section {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(0, 240, 255, 0.05));
+            border: none;
+            border-left: 4px solid var(--color-purple);
+            border-radius: 0;
+            padding: var(--card-padding) 0;
+            margin: var(--space-lg) 0;
+        }
+
+        @media (min-width: 600px) {
+            .quiz-section {
+                border: 2px solid var(--color-purple);
+                border-radius: var(--radius-lg);
+                padding: var(--card-padding);
+                margin: var(--space-lg) var(--space-xl);
+            }
+        }
+
+        .quiz-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-lg);
+            padding: 0 var(--text-padding);
+        }
+
+        @media (min-width: 600px) {
+            .quiz-header {
+                gap: var(--space-md);
+                padding: 0;
+            }
+        }
+
+        .quiz-icon {
+            font-size: 1.5rem;
+        }
+
+        .quiz-title {
+            font-family: var(--font-heading);
+            font-weight: 800;
+            font-size: var(--text-lg);
+            color: var(--color-purple);
+            margin: 0;
+        }
+
+        /* Quiz Question */
+        .quiz-question {
+            background: var(--glass-bg);
+            border: none;
+            border-radius: 0;
+            border-bottom: 1px solid var(--glass-border);
+            padding: var(--card-padding);
+            padding-left: var(--text-padding);
+            padding-right: var(--text-padding);
+            margin-bottom: 1px;
+        }
+
+        @media (min-width: 600px) {
+            .quiz-question {
+                border: 1px solid var(--glass-border);
+                border-radius: var(--radius-md);
+                padding: var(--card-padding);
+                margin-bottom: var(--space-lg);
+            }
+        }
+
+        .question-header {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+        }
+
+        .question-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--color-purple), #8B5CF6);
+            color: white;
+            border-radius: 50%;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: var(--text-xs);
+            flex-shrink: 0;
+        }
+
+        @media (min-width: 600px) {
+            .question-number {
+                width: 28px;
+                height: 28px;
+                font-size: var(--text-sm);
+            }
+        }
+
+        .question-text {
+            font-weight: 600;
+            color: var(--color-white);
+            font-size: var(--text-sm);
+            line-height: 1.5;
+        }
+
+        @media (min-width: 600px) {
+            .question-text {
+                font-size: var(--text-base);
+            }
+        }
+
+        /* Quiz Options */
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            background: var(--glass-border);
+            margin: 0 calc(-1 * var(--text-padding));
+        }
+
+        @media (min-width: 600px) {
+            .quiz-options {
+                gap: var(--space-sm);
+                background: transparent;
+                margin: 0;
+            }
+        }
+
+        .quiz-option {
+            background: rgba(255, 255, 255, 0.02);
+            border: none;
+            border-radius: 0;
+            padding: var(--space-md);
+            padding-left: var(--text-padding);
+            padding-right: var(--text-padding);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            font-size: var(--text-sm);
+        }
+
+        @media (min-width: 600px) {
+            .quiz-option {
+                border: 1px solid var(--glass-border);
+                border-radius: var(--radius-sm);
+                padding: var(--space-md);
+                font-size: var(--text-base);
+            }
+
+            .quiz-option:hover:not(.disabled):not(.correct):not(.incorrect) {
+                background: rgba(0, 240, 255, 0.1);
+                border-color: var(--color-cyan);
+            }
+        }
+
+        .quiz-option.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .quiz-option.correct {
+            background: rgba(16, 185, 129, 0.2);
+            border-left: 4px solid var(--color-green);
+            pointer-events: none;
+        }
+
+        @media (min-width: 600px) {
+            .quiz-option.correct {
+                border: 1px solid var(--color-green);
+                border-left: 4px solid var(--color-green);
+            }
+        }
+
+        .quiz-option.incorrect {
+            background: rgba(239, 68, 68, 0.2);
+            border-left: 4px solid var(--color-red);
+            pointer-events: none;
+        }
+
+        @media (min-width: 600px) {
+            .quiz-option.incorrect {
+                border: 1px solid var(--color-red);
+                border-left: 4px solid var(--color-red);
+            }
+        }
+
+        .quiz-option.show-correct {
+            border-left: 4px solid var(--color-green);
+        }
+
+        @media (min-width: 600px) {
+            .quiz-option.show-correct {
+                border-color: var(--color-green);
+            }
+        }
+
+        .option-letter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: rgba(106, 91, 255, 0.2);
+            color: var(--color-purple);
+            border-radius: 50%;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: var(--text-xs);
+            flex-shrink: 0;
+        }
+
+        @media (min-width: 600px) {
+            .option-letter {
+                width: 28px;
+                height: 28px;
+                font-size: var(--text-sm);
+            }
+        }
+
+        .option-text {
+            flex: 1;
+            color: var(--color-text);
+        }
+
+        .option-result {
+            font-weight: 700;
+            font-size: var(--text-xs);
+            min-width: 50px;
+            text-align: right;
+        }
+
+        @media (min-width: 600px) {
+            .option-result {
+                font-size: var(--text-sm);
+                min-width: 60px;
+            }
+        }
+
+        .quiz-option.correct .option-result {
+            color: var(--color-green);
+        }
+
+        .quiz-option.incorrect .option-result {
+            color: var(--color-red);
+        }
+
+        /* Quiz Explanation */
+        .quiz-explanation {
+            display: none;
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 0;
+            font-size: var(--text-xs);
+            line-height: 1.6;
+            color: var(--color-text-muted);
+        }
+
+        @media (min-width: 600px) {
+            .quiz-explanation {
+                border-radius: var(--radius-sm);
+                font-size: var(--text-sm);
+            }
+        }
+
+        .quiz-explanation.show {
+            display: block;
+        }
+
+        .quiz-explanation.correct {
+            border-left: 3px solid var(--color-green);
+        }
+
+        .quiz-explanation.incorrect {
+            border-left: 3px solid var(--color-red);
+        }
+
+        /* Retake Button */
+        .retake-btn {
+            display: none;
+            margin-top: var(--space-lg);
+            margin-left: var(--text-padding);
+            margin-right: var(--text-padding);
+            padding: var(--space-sm) var(--space-lg);
+            background: linear-gradient(135deg, var(--color-purple), #8B5CF6);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: var(--font-heading);
+            font-size: var(--text-sm);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        @media (min-width: 600px) {
+            .retake-btn {
+                margin-left: 0;
+                margin-right: 0;
+            }
+
+            .retake-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(106, 91, 255, 0.4);
+            }
+        }
+
+        .retake-btn.show {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        /* ============================================
+           V5.3 SUMMARY BOX
+           ============================================ */
+        .summary-box {
+            background: rgba(255, 189, 89, 0.1);
+            padding: var(--card-padding) var(--text-padding);
+            margin: var(--space-lg) 0;
+            border-left: 4px solid var(--color-gold);
+            border-radius: 0;
+        }
+
+        @media (min-width: 600px) {
+            .summary-box {
+                margin: var(--space-lg) var(--space-xl);
+                border-radius: var(--radius-lg);
+                border: 2px solid rgba(255, 189, 89, 0.3);
+            }
+        }
+
+        .summary-title {
+            color: var(--color-gold);
+            font-weight: 700;
+            font-size: var(--text-lg);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .summary-list {
+            list-style: none;
+        }
+
+        .summary-list li {
+            position: relative;
+            padding-left: 1.75rem;
+            margin-bottom: var(--space-sm);
+            color: var(--color-text);
+        }
+
+        .summary-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--color-gold);
+            font-weight: 700;
+        }
+
+        /* ============================================
+           V5.3 FOOTER
+           ============================================ */
+        .lesson-footer {
+            background: var(--glass-bg);
+            border-top: 1px solid var(--glass-border);
+            text-align: center;
+            padding: var(--space-xl) var(--text-padding);
+            color: var(--color-text-muted);
+            font-size: var(--text-sm);
+        }
+
+        @media (min-width: 600px) {
+            .lesson-footer {
+                background: transparent;
+                border-top: none;
+            }
+        }
+
+        .lesson-footer a {
+            color: var(--color-gold);
+            text-decoration: none;
+        }
+    </style>
+
+
+    <div class="container"><header class="lesson-header"><div class="lesson-meta"><span class="lesson-badge">Module 0</span>
+                <span class="lesson-badge">Bài 2/2</span>
+                <span class="lesson-badge">30 phút</span>
+            </div>
+            <h1 class="lesson-title">Đánh Giá Tần Số Tiền Bạc Hiện Tại</h1>
+            <p class="lesson-subtitle">Xác định vị trí năng lượng để bắt đầu hành trình chuyển hóa</p>
+        </header>
+
+        <!-- ============================================
+             LESSON CONTENT
+             ============================================ -->
+        <main class="lesson-content">
+
+            <!-- ============================================
+                 SECTION 1: 7 TẦNG TÂM THỨC VỀ TIỀN
+                 ============================================ -->
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-number">1</span>
+                    <h2 class="section-title">7 Tầng Tâm Thức Về Tiền Bạc</h2>
+                </div>
+
+                <div class="text-content">
+                    <p>Trong Học Thuyết Chuyển Hóa Nội Tâm, tôi chia ý thức về tiền bạc thành <strong>7 tầng tần số</strong>, từ thấp nhất (50 Hz) đến cao nhất (600+ Hz). Mỗi tầng phản ánh cách bạn <em>nhìn nhận, cảm nhận, và tương tác</em> với năng lượng tiền bạc.</p>
+
+                    <p><strong>Tại sao việc biết mình đang ở tầng nào lại quan trọng?</strong></p>
+                    <p>Vì bạn không thể thay đổi những gì bạn không nhận ra. Giống như GPS cần biết vị trí hiện tại để dẫn đường, bạn cần biết tầng tâm thức hiện tại để có lộ trình chuyển hóa phù hợp.</p>
+                </div>
+
+                <!-- ============================================
+                     🖼️ HÌNH 4: 7 TẦNG TÂM THỨC
+                     - Tier: 1 | Chapter: 0 | Lesson: 0.2
+                     - Nội dung: Pyramid/Ladder 7 tầng với màu gradient
+                     - Kích thước gợi ý: 800x800px (1:1)
+                     - Thay URL trong src="" để đổi hình
+                     ============================================ -->
+                <div class="image-container">
+                    
+                </div>
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mjsgvcux-gf6bzt/1767177974692_xr79pm_Gemini_Generated_Image_j68275j68275j682.png" alt="gemini-generated-image-j68275j68275-8o2n">
+
+                <div class="text-content">
+                    <p>Hãy cùng khám phá chi tiết từng tầng:</p>
+                </div>
+
+                <!-- 7 Tầng Cards -->
+                <div class="consciousness-grid">
+                    <!-- Tầng 1 -->
+                    <div class="level-card level-1">
+                        <div class="level-badge">
+                            <span class="level-num">1</span>
+                        </div>
+                        <div class="level-info">
+                            <h4>Tầng Sợ Hãi</h4>
+                            <div class="level-hz">50-100 Hz</div>
+                            <p class="level-desc">Sống trong nỗi sợ mất tiền, thiếu thốn. Luôn lo lắng "không đủ". Tránh né mọi vấn đề liên quan đến tài chính. Cảm giác bất lực, tuyệt vọng với tiền bạc.</p>
+                        </div>
+                    </div>
+
+                    <!-- Tầng 2 -->
+                    <div class="level-card level-2">
+                        <div class="level-badge">
+                            <span class="level-num">2</span>
+                        </div>
+                        <div class="level-info">
+                            <h4>Tầng Thiếu Thốn</h4>
+                            <div class="level-hz">100-175 Hz</div>
+                            <p class="level-desc">Tập trung vào sự thiếu hụt. So sánh với người khác. Đổ lỗi hoàn cảnh, gia đình, xã hội. Cảm giác tức giận, ghen tị với người giàu có.</p>
+                        </div>
+                    </div>
+
+                    <!-- Tầng 3 -->
+                    <div class="level-card level-3">
+                        <div class="level-badge">
+                            <span class="level-num">3</span>
+                        </div>
+                        <div class="level-info">
+                            <h4>Tầng Tranh Đấu</h4>
+                            <div class="level-hz">175-250 Hz</div>
+                            <p class="level-desc">Tin rằng phải "chiến đấu" để kiếm tiền. Làm việc quá sức. Hy sinh sức khỏe, gia đình. Tiền = Sự hy sinh. Cảm giác kiệt sức nhưng vẫn phải cố.</p>
+                        </div>
+                    </div>
+
+                    <!-- Tầng 4 -->
+                    <div class="level-card level-4">
+                        <div class="level-badge">
+                            <span class="level-num">4</span>
+                        </div>
+                        <div class="level-info">
+                            <h4>Tầng Chấp Nhận</h4>
+                            <div class="level-hz">250-350 Hz</div>
+                            <p class="level-desc">Bắt đầu chấp nhận trách nhiệm tài chính. Học hỏi về tiền. Tin rằng có thể thay đổi. Tầng TRUNG LẬP - điểm chuyển hóa quan trọng.</p>
+                        </div>
+                    </div>
+
+                    <!-- Tầng 5 -->
+                    <div class="level-card level-5">
+                        <div class="level-badge">
+                            <span class="level-num">5</span>
+                        </div>
+                        <div class="level-info">
+                            <h4>Tầng Sáng Tạo</h4>
+                            <div class="level-hz">350-400 Hz</div>
+                            <p class="level-desc">Thấy tiền là công cụ tạo giá trị. Tập trung vào phụng sự, đóng góp. Tiền đến từ việc giải quyết vấn đề cho người khác. Cảm giác tự tin, có mục đích.</p>
+                        </div>
+                    </div>
+
+                    <!-- Tầng 6 -->
+                    <div class="level-card level-6">
+                        <div class="level-badge">
+                            <span class="level-num">6</span>
+                        </div>
+                        <div class="level-info">
+                            <h4>Tầng Biết Ơn</h4>
+                            <div class="level-hz">400-500 Hz</div>
+                            <p class="level-desc">Sống trong trạng thái biết ơn liên tục. Tiền chảy vào một cách tự nhiên. Tin tưởng vũ trụ. Chia sẻ, cho đi mà không sợ mất. Tầng THỊ VƯỢNG TRỌN VẸN.</p>
+                        </div>
+                    </div>
+
+                    <!-- Tầng 7 -->
+                    <div class="level-card level-7">
+                        <div class="level-badge">
+                            <span class="level-num">7</span>
+                        </div>
+                        <div class="level-info">
+                            <h4>Tầng Giác Ngộ Thịnh Vượng</h4>
+                            <div class="level-hz">500-600+ Hz</div>
+                            <p class="level-desc">Không còn phân biệt "có" và "không có". Tiền chỉ là năng lượng thuần khiết đang chảy. Sứ mệnh lớn hơn bản thân. An yên tuyệt đối với mọi tình huống tài chính.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <p>"Hầu hết mọi người đang ở Tầng 1-3 mà không nhận ra. Và đó là lý do họ cứ 'đánh vật' với tiền bạc cả đời. Tin vui là: Bạn có thể di chuyển lên các tầng cao hơn thông qua THỰC HÀNH CÓ Ý THỨC."</p>
+                    <p class="author">— Jennie Uyen Chu</p>
+                </div>
+
+                <div class="definition-box">
+                    <h4>💡 Mục tiêu của khóa học này</h4>
+                    <p>Đưa bạn từ bất kỳ tầng nào lên ít nhất <strong>Tầng 5: Sáng Tạo (350-400 Hz)</strong> trong 49 ngày. Đây là tầng mà tiền bắt đầu "chảy" đến bạn một cách tự nhiên thông qua giá trị bạn tạo ra.</p>
+                </div>
+            </section>
+
+            <!-- ============================================
+                 SECTION 2: BÀI TEST TẦN SỐ (15 câu)
+                 ============================================ -->
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-number">2</span>
+                    <h2 class="section-title">Bài Test Tần Số Tiền Bạc</h2>
+                </div>
+
+                <div class="text-content">
+                    <p>Hãy trả lời trung thực 15 câu hỏi dưới đây. Không có câu trả lời đúng hay sai - chỉ có câu trả lời THẬT. Kết quả sẽ cho bạn biết tầng tâm thức hiện tại về tiền bạc.</p>
+                    <p><strong>⏱️ Thời gian: 5-7 phút</strong></p>
+                </div>
+
+                <!-- FREQUENCY TEST -->
+                <div class="frequency-test" id="frequencyTest">
+                    <div class="test-header">
+                        <div class="test-icon">📊</div>
+                        <h3 class="test-title">TRẮC NGHIỆM TẦN SỐ TIỀN BẠC</h3>
+                        <p class="test-subtitle">Chọn câu trả lời phản ánh đúng nhất suy nghĩ/cảm xúc thường ngày của bạn</p>
+                    </div>
+
+                    <!-- Câu 1 -->
+                    <div class="test-question" data-question="1">
+                        <div class="test-q-header">
+                            <span class="test-q-num">1</span>
+                            <span class="test-q-text">Khi nghĩ về tiền bạc, cảm xúc đầu tiên của bạn thường là gì?</span>
+                        </div>
+                        <div class="test-options">
+                            <div class="test-option" data-score="1" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Lo lắng, sợ hãi, bất an</span>
+                            </div>
+                            <div class="test-option" data-score="2" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Bực bội, khó chịu, tức giận</span>
+                            </div>
+                            <div class="test-option" data-score="3" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Quyết tâm, phải cố gắng hơn nữa</span>
+                            </div>
+                            <div class="test-option" data-score="4" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Bình thường, không quá lo cũng không quá vui</span>
+                            </div>
+                            <div class="test-option" data-score="5" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Hào hứng với các cơ hội, ý tưởng kiếm tiền</span>
+                            </div>
+                            <div class="test-option" data-score="6" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Biết ơn những gì đang có</span>
+                            </div>
+                            <div class="test-option" data-score="7" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Tiền chỉ là năng lượng, không gây cảm xúc mạnh</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Câu 2 -->
+                    <div class="test-question" data-question="2">
+                        <div class="test-q-header">
+                            <span class="test-q-num">2</span>
+                            <span class="test-q-text">Bạn tin rằng để có nhiều tiền, bạn phải:</span>
+                        </div>
+                        <div class="test-options">
+                            <div class="test-option" data-score="1" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">May mắn hoặc sinh ra trong gia đình giàu có</span>
+                            </div>
+                            <div class="test-option" data-score="2" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Bất chấp đạo đức hoặc lợi dụng người khác</span>
+                            </div>
+                            <div class="test-option" data-score="3" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Làm việc cực kỳ vất vả, hy sinh mọi thứ</span>
+                            </div>
+                            <div class="test-option" data-score="4" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Học hỏi kỹ năng và có kế hoạch tốt</span>
+                            </div>
+                            <div class="test-option" data-score="5" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Tạo ra giá trị và giải quyết vấn đề cho người khác</span>
+                            </div>
+                            <div class="test-option" data-score="6" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Sống đúng với mục đích, tiền sẽ tự đến</span>
+                            </div>
+                            <div class="test-option" data-score="7" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Tiền và sự thịnh vượng là trạng thái tự nhiên</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Câu 3 -->
+                    <div class="test-question" data-question="3">
+                        <div class="test-q-header">
+                            <span class="test-q-num">3</span>
+                            <span class="test-q-text">Khi nhìn thấy người giàu có, bạn thường nghĩ:</span>
+                        </div>
+                        <div class="test-options">
+                            <div class="test-option" data-score="1" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">"Mình sẽ không bao giờ được như vậy"</span>
+                            </div>
+                            <div class="test-option" data-score="2" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">"Chắc họ có mánh khóe gì đó" hoặc ghen tị</span>
+                            </div>
+                            <div class="test-option" data-score="3" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">"Mình cần phải cố gắng hơn nữa"</span>
+                            </div>
+                            <div class="test-option" data-score="4" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">"Họ đã làm được, mình cũng có thể học"</span>
+                            </div>
+                            <div class="test-option" data-score="5" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">"Tuyệt vời! Họ đang tạo ra giá trị lớn"</span>
+                            </div>
+                            <div class="test-option" data-score="6" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">"Chúc mừng họ! Sự thịnh vượng cho tất cả"</span>
+                            </div>
+                            <div class="test-option" data-score="7" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Không so sánh - mỗi người có hành trình riêng</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Câu 4 -->
+                    <div class="test-question" data-question="4">
+                        <div class="test-q-header">
+                            <span class="test-q-num">4</span>
+                            <span class="test-q-text">Khi có khoản chi tiêu bất ngờ, bạn phản ứng:</span>
+                        </div>
+                        <div class="test-options">
+                            <div class="test-option" data-score="1" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Hoảng loạn, mất ngủ, lo lắng cực độ</span>
+                            </div>
+                            <div class="test-option" data-score="2" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Tức giận, đổ lỗi cho ai đó hoặc hoàn cảnh</span>
+                            </div>
+                            <div class="test-option" data-score="3" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Căng thẳng nhưng quyết tâm làm thêm giờ</span>
+                            </div>
+                            <div class="test-option" data-score="4" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Bình tĩnh xem xét các lựa chọn, điều chỉnh ngân sách</span>
+                            </div>
+                            <div class="test-option" data-score="5" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Thấy đây là cơ hội học cách quản lý tốt hơn</span>
+                            </div>
+                            <div class="test-option" data-score="6" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Tin rằng tiền sẽ đến để cân bằng, không lo lắng</span>
+                            </div>
+                            <div class="test-option" data-score="7" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Hoàn toàn bình an - mọi thứ đều có lý do của nó</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Câu 5 -->
+                    <div class="test-question" data-question="5">
+                        <div class="test-q-header">
+                            <span class="test-q-num">5</span>
+                            <span class="test-q-text">Bạn có thói quen kiểm tra tài khoản ngân hàng không?</span>
+                        </div>
+                        <div class="test-options">
+                            <div class="test-option" data-score="1" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Tránh kiểm tra vì sợ thấy số dư</span>
+                            </div>
+                            <div class="test-option" data-score="2" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Kiểm tra và thường cảm thấy thất vọng, bực bội</span>
+                            </div>
+                            <div class="test-option" data-score="3" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Kiểm tra thường xuyên để theo dõi sát sao</span>
+                            </div>
+                            <div class="test-option" data-score="4" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Kiểm tra định kỳ để quản lý ngân sách</span>
+                            </div>
+                            <div class="test-option" data-score="5" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Kiểm tra với sự hào hứng về các kế hoạch</span>
+                            </div>
+                            <div class="test-option" data-score="6" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Kiểm tra và luôn biết ơn số dư hiện có</span>
+                            </div>
+                            <div class="test-option" data-score="7" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Số dư không ảnh hưởng đến trạng thái nội tâm</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Câu 6 -->
+                    <div class="test-question" data-question="6">
+                        <div class="test-q-header">
+                            <span class="test-q-num">6</span>
+                            <span class="test-q-text">Khi được hỏi về mục tiêu tài chính, bạn:</span>
+                        </div>
+                        <div class="test-options">
+                            <div class="test-option" data-score="1" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Không dám nghĩ đến - thấy không thực tế</span>
+                            </div>
+                            <div class="test-option" data-score="2" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Có mục tiêu nhưng không tin mình đạt được</span>
+                            </div>
+                            <div class="test-option" data-score="3" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Có mục tiêu và đang cố gắng rất vất vả</span>
+                            </div>
+                            <div class="test-option" data-score="4" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Có kế hoạch cụ thể và đang từng bước thực hiện</span>
+                            </div>
+                            <div class="test-option" data-score="5" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Mục tiêu gắn với giá trị muốn tạo ra cho đời</span>
+                            </div>
+                            <div class="test-option" data-score="6" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Tin rằng sẽ đạt được, đang tận hưởng hành trình</span>
+                            </div>
+                            <div class="test-option" data-score="7" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Mục tiêu tự nhiên trở thành hiện thực khi sẵn sàng</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Câu 7 -->
+                    <div class="test-question" data-question="7">
+                        <div class="test-q-header">
+                            <span class="test-q-num">7</span>
+                            <span class="test-q-text">Quan điểm của bạn về việc cho đi (từ thiện, giúp đỡ):</span>
+                        </div>
+                        <div class="test-options">
+                            <div class="test-option" data-score="1" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">"Mình còn chẳng đủ, cho đi sao được"</span>
+                            </div>
+                            <div class="test-option" data-score="2" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">"Cho đi thì mình mất, không ai cho lại"</span>
+                            </div>
+                            <div class="test-option" data-score="3" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">"Khi nào dư dả sẽ cho, bây giờ cần tích lũy"</span>
+                            </div>
+                            <div class="test-option" data-score="4" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">"Cho đi một phần thu nhập theo kế hoạch"</span>
+                            </div>
+                            <div class="test-option" data-score="5" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">"Cho đi là đầu tư - năng lượng sẽ quay lại"</span>
+                            </div>
+                            <div class="test-option" data-score="6" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">"Cho đi với niềm vui, không mong nhận lại"</span>
+                            </div>
+                            <div class="test-option" data-score="7" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">"Cho và nhận là một - không phân biệt"</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Câu 8 -->
+                    <div class="test-question" data-question="8">
+                        <div class="test-q-header">
+                            <span class="test-q-num">8</span>
+                            <span class="test-q-text">Bạn nghĩ gì về câu "Tiền không mua được hạnh phúc"?</span>
+                        </div>
+                        <div class="test-options">
+                            <div class="test-option" data-score="1" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Hoàn toàn đồng ý - tiền chỉ mang rắc rối</span>
+                            </div>
+                            <div class="test-option" data-score="2" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Người giàu thường không hạnh phúc</span>
+                            </div>
+                            <div class="test-option" data-score="3" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Cần tiền nhưng tiền cũng gây nhiều áp lực</span>
+                            </div>
+                            <div class="test-option" data-score="4" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Tiền là công cụ, hạnh phúc phụ thuộc vào cách dùng</span>
+                            </div>
+                            <div class="test-option" data-score="5" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Tiền tạo điều kiện để sống hạnh phúc hơn</span>
+                            </div>
+                            <div class="test-option" data-score="6" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Hạnh phúc và thịnh vượng tài chính song hành</span>
+                            </div>
+                            <div class="test-option" data-score="7" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Hạnh phúc không phụ thuộc vào có hay không có tiền</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Câu 9 -->
+                    <div class="test-question" data-question="9">
+                        <div class="test-q-header">
+                            <span class="test-q-num">9</span>
+                            <span class="test-q-text">Khi nói về tiền với người thân, bạn thường:</span>
+                        </div>
+                        <div class="test-options">
+                            <div class="test-option" data-score="1" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Tránh nói - tiền là chủ đề nhạy cảm, gây xung đột</span>
+                            </div>
+                            <div class="test-option" data-score="2" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Thường xảy ra tranh cãi, căng thẳng</span>
+                            </div>
+                            <div class="test-option" data-score="3" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Nói về sự vất vả, cần làm việc nhiều hơn</span>
+                            </div>
+                            <div class="test-option" data-score="4" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Thảo luận ngân sách, kế hoạch chi tiêu</span>
+                            </div>
+                            <div class="test-option" data-score="5" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Chia sẻ cơ hội, ý tưởng kinh doanh</span>
+                            </div>
+                            <div class="test-option" data-score="6" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Biết ơn cùng nhau, chia sẻ mục tiêu tài chính chung</span>
+                            </div>
+                            <div class="test-option" data-score="7" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Tiền là chủ đề tự nhiên, không gây cảm xúc đặc biệt</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Câu 10 -->
+                    <div class="test-question" data-question="10">
+                        <div class="test-q-header">
+                            <span class="test-q-num">10</span>
+                            <span class="test-q-text">Bạn nghĩ thế nào về tiền từ cha mẹ/gia đình:</span>
+                        </div>
+                        <div class="test-options">
+                            <div class="test-option" data-score="1" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Gia đình nghèo nên mình cũng khó giàu</span>
+                            </div>
+                            <div class="test-option" data-score="2" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Trách móc gia đình vì không lo được cho mình</span>
+                            </div>
+                            <div class="test-option" data-score="3" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Phải tự mình gánh vác, không thể trông chờ</span>
+                            </div>
+                            <div class="test-option" data-score="4" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Học từ những điều gia đình làm tốt và chưa tốt</span>
+                            </div>
+                            <div class="test-option" data-score="5" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Muốn tạo di sản tài chính tốt hơn cho thế hệ sau</span>
+                            </div>
+                            <div class="test-option" data-score="6" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Biết ơn gia đình dù hoàn cảnh thế nào</span>
+                            </div>
+                            <div class="test-option" data-score="7" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Gia đình là bài học, không định nghĩa tương lai mình</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Câu 11 -->
+                    <div class="test-question" data-question="11">
+                        <div class="test-q-header">
+                            <span class="test-q-num">11</span>
+                            <span class="test-q-text">Khi có cơ hội kinh doanh/đầu tư, bạn thường:</span>
+                        </div>
+                        <div class="test-options">
+                            <div class="test-option" data-score="1" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Sợ mất tiền nên không dám thử</span>
+                            </div>
+                            <div class="test-option" data-score="2" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Nghi ngờ - "chắc là lừa đảo"</span>
+                            </div>
+                            <div class="test-option" data-score="3" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Không có thời gian - đang làm việc quá nhiều rồi</span>
+                            </div>
+                            <div class="test-option" data-score="4" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Phân tích kỹ rủi ro và lợi ích trước khi quyết định</span>
+                            </div>
+                            <div class="test-option" data-score="5" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Hào hứng nếu phù hợp với giá trị và kỹ năng</span>
+                            </div>
+                            <div class="test-option" data-score="6" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Cởi mở đón nhận - tin rằng cơ hội đến đúng lúc</span>
+                            </div>
+                            <div class="test-option" data-score="7" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Theo trực giác - mọi thứ đều là bài học dù kết quả nào</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Câu 12 -->
+                    <div class="test-question" data-question="12">
+                        <div class="test-q-header">
+                            <span class="test-q-num">12</span>
+                            <span class="test-q-text">Bạn cảm thấy thế nào về giá trị công việc của mình:</span>
+                        </div>
+                        <div class="test-options">
+                            <div class="test-option" data-score="1" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Lương thấp nhưng không làm gì được</span>
+                            </div>
+                            <div class="test-option" data-score="2" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Bị đánh giá thấp, không được trả xứng đáng</span>
+                            </div>
+                            <div class="test-option" data-score="3" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Cần làm nhiều hơn để được trả nhiều hơn</span>
+                            </div>
+                            <div class="test-option" data-score="4" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Thu nhập tương xứng với năng lực hiện tại</span>
+                            </div>
+                            <div class="test-option" data-score="5" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Đang tạo giá trị lớn và thu nhập tăng dần</span>
+                            </div>
+                            <div class="test-option" data-score="6" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Hài lòng và biết ơn công việc hiện tại</span>
+                            </div>
+                            <div class="test-option" data-score="7" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Công việc là sứ mệnh, không đo bằng tiền</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Câu 13 -->
+                    <div class="test-question" data-question="13">
+                        <div class="test-q-header">
+                            <span class="test-q-num">13</span>
+                            <span class="test-q-text">Bạn thường mơ về tiền theo cách nào:</span>
+                        </div>
+                        <div class="test-options">
+                            <div class="test-option" data-score="1" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Ác mộng về mất tiền, nợ nần</span>
+                            </div>
+                            <div class="test-option" data-score="2" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Mơ trúng số để thoát khỏi hoàn cảnh</span>
+                            </div>
+                            <div class="test-option" data-score="3" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Mơ được tăng lương, thăng chức</span>
+                            </div>
+                            <div class="test-option" data-score="4" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Mơ về các mục tiêu tài chính cụ thể</span>
+                            </div>
+                            <div class="test-option" data-score="5" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Mơ về những dự án, ý tưởng kinh doanh</span>
+                            </div>
+                            <div class="test-option" data-score="6" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Mơ về cuộc sống đủ đầy, chia sẻ với người khác</span>
+                            </div>
+                            <div class="test-option" data-score="7" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Không mơ về tiền - nó không chiếm tâm trí</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Câu 14 -->
+                    <div class="test-question" data-question="14">
+                        <div class="test-q-header">
+                            <span class="test-q-num">14</span>
+                            <span class="test-q-text">Bạn tin điều gì về tương lai tài chính của mình:</span>
+                        </div>
+                        <div class="test-options">
+                            <div class="test-option" data-score="1" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Sẽ luôn phải lo lắng về tiền</span>
+                            </div>
+                            <div class="test-option" data-score="2" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Không thể thay đổi được - số phận rồi</span>
+                            </div>
+                            <div class="test-option" data-score="3" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Sẽ tốt hơn nếu cố gắng đủ nhiều</span>
+                            </div>
+                            <div class="test-option" data-score="4" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Có kế hoạch rõ ràng để cải thiện</span>
+                            </div>
+                            <div class="test-option" data-score="5" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Rất lạc quan - đang đi đúng hướng</span>
+                            </div>
+                            <div class="test-option" data-score="6" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Tin tưởng tuyệt đối - thịnh vượng đang đến</span>
+                            </div>
+                            <div class="test-option" data-score="7" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Tương lai là hiện tại - đã thịnh vượng rồi</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Câu 15 -->
+                    <div class="test-question" data-question="15">
+                        <div class="test-q-header">
+                            <span class="test-q-num">15</span>
+                            <span class="test-q-text">Nếu phải mô tả mối quan hệ của bạn với tiền bằng một từ:</span>
+                        </div>
+                        <div class="test-options">
+                            <div class="test-option" data-score="1" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Sợ hãi</span>
+                            </div>
+                            <div class="test-option" data-score="2" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Căng thẳng</span>
+                            </div>
+                            <div class="test-option" data-score="3" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Vất vả</span>
+                            </div>
+                            <div class="test-option" data-score="4" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Trung lập</span>
+                            </div>
+                            <div class="test-option" data-score="5" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Hào hứng</span>
+                            </div>
+                            <div class="test-option" data-score="6" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Biết ơn</span>
+                            </div>
+                            <div class="test-option" data-score="7" onclick="selectTestOption(this)">
+                                <div class="option-radio"></div>
+                                <span class="option-label">Tự do</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Area -->
+                    <div class="test-submit-area" id="testSubmitArea">
+                        <button class="test-submit-btn" id="testSubmitBtn" onclick="submitFrequencyTest()" disabled="">
+                            📊 XEM KẾT QUẢ
+                        </button>
+                        <p class="test-progress" id="testProgress">Đã trả lời: 0/15 câu</p>
+                    </div>
+
+                    <!-- Results Area -->
+                    <div class="test-results" id="testResults">
+                        <div class="result-score" id="resultScore">--</div>
+                        <div class="result-level" id="resultLevel">Đang tính toán...</div>
+                        <div class="result-description" id="resultDescription">
+                            <h4>Phân tích chi tiết</h4>
+                            <p>Kết quả sẽ hiển thị ở đây...</p>
+                        </div>
+                        <button class="retake-test-btn" onclick="retakeFrequencyTest()">🔄 Làm Lại Bài Test</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================================
+                 SECTION 3: PHÂN TÍCH KẾT QUẢ
+                 ============================================ -->
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-number">3</span>
+                    <h2 class="section-title">Ý Nghĩa Kết Quả Từng Tầng</h2>
+                </div>
+
+                <div class="text-content">
+                    <p>Sau khi làm bài test, hãy đọc kỹ phân tích cho tầng của bạn dưới đây. Nhớ rằng: <strong>Tầng hiện tại không phải là "số phận"</strong> - đó là ĐIỂM KHỞI ĐẦU để bạn biết mình cần tập trung vào đâu.</p>
+                </div>
+
+                <div class="definition-box">
+                    <h4>🎯 Điểm số và Tầng tương ứng</h4>
+                    <p><strong>15-25 điểm:</strong> Tầng 1 - Sợ Hãi (50-100 Hz)</p>
+                    <p><strong>26-40 điểm:</strong> Tầng 2 - Thiếu Thốn (100-175 Hz)</p>
+                    <p><strong>41-55 điểm:</strong> Tầng 3 - Tranh Đấu (175-250 Hz)</p>
+                    <p><strong>56-70 điểm:</strong> Tầng 4 - Chấp Nhận (250-350 Hz)</p>
+                    <p><strong>71-85 điểm:</strong> Tầng 5 - Sáng Tạo (350-400 Hz)</p>
+                    <p><strong>86-95 điểm:</strong> Tầng 6 - Biết Ơn (400-500 Hz)</p>
+                    <p><strong>96-105 điểm:</strong> Tầng 7 - Giác Ngộ (500-600+ Hz)</p>
+                </div>
+
+                <div class="highlight-box">
+                    <p><strong>💡 Lưu ý quan trọng:</strong> Hầu hết học viên bắt đầu ở Tầng 2-3. Nếu bạn ở đó, đừng lo - đó là điều bình thường! Khóa học được thiết kế để đưa bạn lên ít nhất Tầng 5 trong 49 ngày.</p>
+                </div>
+            </section>
+
+            <!-- ============================================
+                 SECTION 4: TIMELINE CHUYỂN HÓA
+                 ============================================ -->
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-number">4</span>
+                    <h2 class="section-title">Timeline Chuyển Hóa Dự Kiến</h2>
+                </div>
+
+                <div class="text-content">
+                    <p>Dựa trên kết quả test và kinh nghiệm với hàng nghìn học viên, đây là timeline chuyển hóa dự kiến cho bạn:</p>
+                </div>
+
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker">
+                            <span class="timeline-week">Tuần</span>
+                            <span class="timeline-num">1</span>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>Nhận Diện &amp; Thanh Tẩy</h4>
+                            <p>Khám phá Money Story, 7 Attraction Blocks, niềm tin giới hạn</p>
+                            <span class="timeline-goal">Mục tiêu: +0.5 Tầng</span>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker">
+                            <span class="timeline-week">Tuần</span>
+                            <span class="timeline-num">2</span>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>Hóa Giải Nghiệp</h4>
+                            <p>Family Money Map, Cord Cutting, chuyển hóa nghiệp thành phước</p>
+                            <span class="timeline-goal">Mục tiêu: +0.5 Tầng</span>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker">
+                            <span class="timeline-week">Tuần</span>
+                            <span class="timeline-num">3</span>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>Cài Đặt Tần Số Mới</h4>
+                            <p>Affirmations, Visualization, New Money Story</p>
+                            <span class="timeline-goal">Mục tiêu: +0.5 Tầng</span>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker">
+                            <span class="timeline-week">Tuần</span>
+                            <span class="timeline-num">4</span>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>Nghi Thức Triệu Phú</h4>
+                            <p>Morning Routine, 7 Daily Rituals, PAUSE Rule</p>
+                            <span class="timeline-goal">Mục tiêu: +0.5 Tầng</span>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker">
+                            <span class="timeline-week">Tuần</span>
+                            <span class="timeline-num">5</span>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>Hành Động Thuận Thiên</h4>
+                            <p>Aligned Action, tạo giá trị, 6 Jars Money Management</p>
+                            <span class="timeline-goal">Mục tiêu: Củng cố</span>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker">
+                            <span class="timeline-week">Tuần</span>
+                            <span class="timeline-num">6</span>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>Nhân Rộng Thịnh Vượng</h4>
+                            <p>Duy trì tần số, xử lý setbacks, community</p>
+                            <span class="timeline-goal">Mục tiêu: Củng cố</span>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-marker">
+                            <span class="timeline-week">Tuần</span>
+                            <span class="timeline-num">7</span>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>Sứ Mệnh Phụng Sự</h4>
+                            <p>Review 49 ngày, con đường tiếp theo, cơ hội partnership</p>
+                            <span class="timeline-goal">Mục tiêu: Tầng 5+</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <p>"Trung bình, học viên thực hành đều đặn đạt được <strong>+2 Tầng</strong> sau 49 ngày. Nếu bạn bắt đầu ở Tầng 2 (điểm thường thấy nhất), bạn có thể lên Tầng 4-5 - nơi tiền bắt đầu 'chảy' tự nhiên vào cuộc sống của bạn."</p>
+                    <p class="author">— Thống kê từ 500+ học viên GEM Academy</p>
+                </div>
+            </section>
+
+            <!-- ============================================
+                 SECTION 5: BẮT ĐẦU VỚI APP GEM
+                 ============================================ -->
+            <section class="section">
+                <div class="section-header">
+                    <span class="section-number">5</span>
+                    <h2 class="section-title">Bắt Đầu Với App GEM</h2>
+                </div>
+
+                <div class="text-content">
+                    <p>App GEM là công cụ hỗ trợ quan trọng trong suốt hành trình 49 ngày. Hãy tải app và hoàn thành các bước sau ngay hôm nay:</p>
+                </div>
+
+                <!-- ============================================
+                     🖼️ HÌNH 5: APP GEM OVERVIEW
+                     - Tier: 1 | Chapter: 0 | Lesson: 0.2
+                     - Nội dung: Screenshots các tính năng chính của app GEM
+                     - Kích thước gợi ý: 800x600px (4:3)
+                     - Thay URL trong src="" để đổi hình
+                     ============================================ -->
+                <div class="image-container">
+                    
+                </div>
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mjsgvcux-gf6bzt/1767178096158_jp9xbj_Gemini_Generated_Image_bhooxnbhooxnbhoo.png" alt="gemini-generated-image-bhooxnbhooxn-73dj">
+
+                <div class="app-box">
+                    <h4 class="app-box-title">📱 5 BƯỚC BẮT ĐẦU VỚI APP GEM</h4>
+                    <div class="app-steps">
+                        <div class="app-step">
+                            <span><strong>Tải app GEM</strong> từ App Store hoặc Google Play</span>
+                        </div>
+                        <div class="app-step">
+                            <span><strong>Đăng nhập</strong> bằng email bạn đã dùng để mua khóa học</span>
+                        </div>
+                        <div class="app-step">
+                            <span><strong>Mở tab "Rituals"</strong> - Đây là nơi bạn sẽ thực hành các nghi thức</span>
+                        </div>
+                        <div class="app-step">
+                            <span><strong>Thử "Gratitude Flow"</strong> - Nghi thức biết ơn 3 phút (miễn phí)</span>
+                        </div>
+                        <div class="app-step">
+                            <span><strong>Vào tab "GEM Master"</strong> → chọn <strong>"Tarot"</strong> → bốc 1 lá bài về tiền bạc</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-content">
+                    <p><strong>🎴 Bài tập: Bốc bài Tarot đầu tiên</strong></p>
+                    <p>Trong app GEM, vào <strong>GEM Master → Tarot</strong>, hỏi câu hỏi:</p>
+                    <p><em>"Nghiệp tiền bạc của tôi là gì?"</em></p>
+                    <p class="">Đọc câu trả lời. Đây sẽ là manh mối đầu tiên cho hành trình chuyển hóa của bạn.</p><img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mjsgvcux-gf6bzt/1767179323069_5d4gjd_B_n_sao_c_a_iphone_mockup.png" alt="b-n-sao-c-a-iphone-mockup-csx3">
+                </div>
+
+                <div class="summary-box">
+                    <h4 class="summary-title">✨ TÓM TẮT MODULE 0</h4>
+                    <ul class="summary-list">
+                        <li>Hiểu về Học Thuyết Chuyển Hóa Nội Tâm và 5 Niềm Tin Nền Tảng</li>
+                        <li>Nắm rõ 7 Tầng Tâm Thức về tiền bạc (50-600+ Hz)</li>
+                        <li>Xác định tầng hiện tại của bạn qua bài test 15 câu</li>
+                        <li>Có timeline chuyển hóa dự kiến trong 7 tuần</li>
+                        <li>Đã ký cam kết và tải app GEM</li>
+                        <li>Sẵn sàng bắt đầu Module 1: Thanh Tẩy Vùng Đất Tâm Thức</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- ============================================
+                 QUIZ SECTION - 2 CÂU
+                 ============================================ -->
+            <section class="quiz-section">
+                <div class="quiz-header">
+                    <span class="quiz-icon">📝</span>
+                    <h2 class="quiz-title">KIỂM TRA KIẾN THỨC MODULE 0</h2>
+                </div>
+
+                <!-- Câu 1 -->
+                <div class="quiz-question" id="question1">
+                    <div class="question-header">
+                        <span class="question-number">1</span>
+                        <span class="question-text">Theo Học Thuyết Chuyển Hóa Nội Tâm, điều nào sau đây KHÔNG phải là 1 trong 5 Niềm Tin Nền Tảng?</span>
+                    </div>
+
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 1)">
+                            <span class="option-letter">A</span>
+                            <span class="option-text">Vạn Vật Là Năng Lượng</span>
+                            <span class="option-result"></span>
+                        </div>
+                        <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 1)">
+                            <span class="option-letter">B</span>
+                            <span class="option-text">Ý Thức Kiến Tạo Thực Tại</span>
+                            <span class="option-result"></span>
+                        </div>
+                        <div class="quiz-option" data-correct="true" onclick="checkAnswer(this, 1)">
+                            <span class="option-letter">C</span>
+                            <span class="option-text">Tiền Là Nguồn Gốc Của Hạnh Phúc</span>
+                            <span class="option-result"></span>
+                        </div>
+                        <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 1)">
+                            <span class="option-letter">D</span>
+                            <span class="option-text">Nghiệp Là Tần Số</span>
+                            <span class="option-result"></span>
+                        </div>
+                    </div>
+
+                    <div class="quiz-explanation" id="explanation1">
+                        <strong>Giải thích:</strong> 5 Niềm Tin Nền Tảng là: (1) Vạn Vật Là Năng Lượng, (2) Ý Thức Kiến Tạo Thực Tại, (3) Luật Tương Ứng, (4) Nghiệp Là Tần Số, (5) Tiến Hóa Ý Thức. Câu "Tiền Là Nguồn Gốc Của Hạnh Phúc" KHÔNG phải là niềm tin nền tảng - thực tế, đây là một niềm tin giới hạn cần được chuyển hóa.
+                    </div>
+                </div>
+
+                <!-- Câu 2 -->
+                <div class="quiz-question" id="question2">
+                    <div class="question-header">
+                        <span class="question-number">2</span>
+                        <span class="question-text">Tầng 4 "Chấp Nhận" (250-350 Hz) được coi là điểm gì trong 7 Tầng Tâm Thức?</span>
+                    </div>
+
+                    <div class="quiz-options">
+                        <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 2)">
+                            <span class="option-letter">A</span>
+                            <span class="option-text">Điểm khởi đầu của sự thịnh vượng</span>
+                            <span class="option-result"></span>
+                        </div>
+                        <div class="quiz-option" data-correct="true" onclick="checkAnswer(this, 2)">
+                            <span class="option-letter">B</span>
+                            <span class="option-text">Điểm TRUNG LẬP - điểm chuyển hóa quan trọng</span>
+                            <span class="option-result"></span>
+                        </div>
+                        <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 2)">
+                            <span class="option-letter">C</span>
+                            <span class="option-text">Điểm cao nhất có thể đạt được</span>
+                            <span class="option-result"></span>
+                        </div>
+                        <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 2)">
+                            <span class="option-letter">D</span>
+                            <span class="option-text">Điểm mà tiền tự động chảy đến</span>
+                            <span class="option-result"></span>
+                        </div>
+                    </div>
+
+                    <div class="quiz-explanation" id="explanation2">
+                        <strong>Giải thích:</strong> Tầng 4 "Chấp Nhận" là tầng TRUNG LẬP - đây là điểm chuyển hóa quan trọng, nơi bạn bắt đầu chấp nhận trách nhiệm tài chính và tin rằng có thể thay đổi. Từ đây, bạn có thể tiến lên các tầng cao hơn (Sáng Tạo, Biết Ơn, Giác Ngộ) thay vì bị kéo xuống các tầng thấp.
+                    </div>
+                </div>
+
+                <!-- Retake Button -->
+                <button class="retake-btn" id="retakeBtn" onclick="retakeQuiz()">
+                    🔄 Làm Lại Quiz
+                </button>
+            </section>
+
+        </main>
+
+        <!-- ============================================
+             FOOTER
+             ============================================ -->
+        <footer class="lesson-footer">
+            <p>© 2024 GEM Academy | <a href="https://gemral.com">gemral.com</a></p>
+            <p style="margin-top: 0.5rem; font-size: 0.75rem;">Khóa học: Tái Tạo Tư Duy Triệu Phú | Module 0 - Bài 2/2</p>
+        </footer>
+
+    </div>
+
+    <!-- ============================================
+         JAVASCRIPT
+         ============================================ -->
+    <script>
+    (function() {
+        // ============================================
+        // FREQUENCY TEST LOGIC
+        // ============================================
+        const testAnswers = {};
+        const totalTestQuestions = 15;
+
+        window.selectTestOption = function(option) {
+            const questionDiv = option.closest('.test-question');
+            const questionNum = questionDiv.dataset.question;
+            
+            // Remove previous selection
+            questionDiv.querySelectorAll('.test-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Add selection
+            option.classList.add('selected');
+            testAnswers[questionNum] = parseInt(option.dataset.score);
+            
+            // Update progress
+            const answered = Object.keys(testAnswers).length;
+            document.getElementById('testProgress').textContent = `Đã trả lời: ${answered}/${totalTestQuestions} câu`;
+            
+            // Enable submit button if all answered
+            document.getElementById('testSubmitBtn').disabled = answered < totalTestQuestions;
+        };
+
+        window.submitFrequencyTest = function() {
+            // Calculate total score
+            let totalScore = 0;
+            for (let key in testAnswers) {
+                totalScore += testAnswers[key];
+            }
+            
+            // Determine level
+            let level, levelName, description, hz;
+            if (totalScore <= 25) {
+                level = 1; levelName = "Tầng 1: Sợ Hãi"; hz = "50-100 Hz";
+                description = `<p><strong>Điểm của bạn: ${totalScore}/105</strong></p>
+                    <p>Bạn đang ở tầng năng lượng thấp nhất về tiền bạc. Đây là tầng của nỗi sợ mất mát, thiếu thốn và bất lực. Tin vui là: Bạn có rất nhiều tiềm năng để chuyển hóa!</p>
+                    <p><strong>Ưu tiên tuần 1-2:</strong> Nhận diện và buông bỏ nỗi sợ. Module 1 "Thanh Tẩy" sẽ giúp bạn rất nhiều.</p>`;
+            } else if (totalScore <= 40) {
+                level = 2; levelName = "Tầng 2: Thiếu Thốn"; hz = "100-175 Hz";
+                description = `<p><strong>Điểm của bạn: ${totalScore}/105</strong></p>
+                    <p>Bạn đang tập trung vào sự thiếu hụt và hay so sánh với người khác. Có thể có cảm giác tức giận hoặc ghen tị với người giàu có.</p>
+                    <p><strong>Ưu tiên tuần 1-2:</strong> Chuyển từ mindset "thiếu" sang "có thể có". Module 1 & 2 sẽ giúp bạn thanh tẩy và hóa giải các block này.</p>`;
+            } else if (totalScore <= 55) {
+                level = 3; levelName = "Tầng 3: Tranh Đấu"; hz = "175-250 Hz";
+                description = `<p><strong>Điểm của bạn: ${totalScore}/105</strong></p>
+                    <p>Bạn tin rằng phải "chiến đấu" để kiếm tiền. Có thể đang làm việc quá sức và hy sinh nhiều thứ. Năng lượng này dẫn đến kiệt sức.</p>
+                    <p><strong>Ưu tiên tuần 3-4:</strong> Học cách "aligned action" - hành động thuận thiên thay vì ép buộc. Module 3-5 sẽ mở ra góc nhìn mới.</p>`;
+            } else if (totalScore <= 70) {
+                level = 4; levelName = "Tầng 4: Chấp Nhận"; hz = "250-350 Hz";
+                description = `<p><strong>Điểm của bạn: ${totalScore}/105</strong></p>
+                    <p>Tuyệt vời! Bạn đã ở tầng TRUNG LẬP - điểm chuyển hóa quan trọng. Bạn đang chấp nhận trách nhiệm và sẵn sàng học hỏi.</p>
+                    <p><strong>Ưu tiên tuần 3-5:</strong> Nâng tần số lên Sáng Tạo thông qua affirmations, visualization và aligned action.</p>`;
+            } else if (totalScore <= 85) {
+                level = 5; levelName = "Tầng 5: Sáng Tạo"; hz = "350-400 Hz";
+                description = `<p><strong>Điểm của bạn: ${totalScore}/105</strong></p>
+                    <p>Xuất sắc! Bạn đã thấy tiền là công cụ tạo giá trị. Tiền bắt đầu "chảy" tự nhiên qua việc bạn giải quyết vấn đề cho người khác.</p>
+                    <p><strong>Ưu tiên:</strong> Củng cố nghi thức, xây dựng hệ thống và chuẩn bị cho cơ hội Partnership ở Module 7.</p>`;
+            } else if (totalScore <= 95) {
+                level = 6; levelName = "Tầng 6: Biết Ơn"; hz = "400-500 Hz";
+                description = `<p><strong>Điểm của bạn: ${totalScore}/105</strong></p>
+                    <p>Bạn đang sống trong trạng thái biết ơn cao. Tiền chảy tự nhiên và bạn chia sẻ mà không sợ mất. Đây là tầng THỊNH VƯỢNG TRỌN VẸN.</p>
+                    <p><strong>Gợi ý:</strong> Xem xét cơ hội trở thành đối tác hoặc mentor để lan tỏa năng lượng này cho cộng đồng.</p>`;
+            } else {
+                level = 7; levelName = "Tầng 7: Giác Ngộ"; hz = "500-600+ Hz";
+                description = `<p><strong>Điểm của bạn: ${totalScore}/105</strong></p>
+                    <p>Hiếm có! Bạn đã đạt trạng thái an yên tuyệt đối với tiền bạc. Tiền chỉ là năng lượng đang chảy - bạn không bị ảnh hưởng bởi có hay không có.</p>
+                    <p><strong>Gợi ý:</strong> Xem xét sứ mệnh chia sẻ trí tuệ này. Bạn có thể trở thành Instructor của GEM Academy.</p>`;
+            }
+            
+            // Display results
+            document.getElementById('resultScore').textContent = `${totalScore} điểm`;
+            document.getElementById('resultLevel').textContent = `${levelName} (${hz})`;
+            document.getElementById('resultDescription').innerHTML = `<h4>Phân tích chi tiết</h4>${description}`;
+            
+            // Show results, hide submit
+            document.getElementById('testSubmitArea').style.display = 'none';
+            document.getElementById('testResults').classList.add('show');
+            
+            // Save to localStorage
+            localStorage.setItem('gem_frequency_test', JSON.stringify({
+                score: totalScore,
+                level: level,
+                levelName: levelName,
+                hz: hz,
+                takenAt: new Date().toISOString()
+            }));
+            
+            // Scroll to results
+            document.getElementById('testResults').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        };
+
+        window.retakeFrequencyTest = function() {
+            // Clear answers
+            for (let key in testAnswers) {
+                delete testAnswers[key];
+            }
+            
+            // Reset UI
+            document.querySelectorAll('.test-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            document.getElementById('testProgress').textContent = `Đã trả lời: 0/${totalTestQuestions} câu`;
+            document.getElementById('testSubmitBtn').disabled = true;
+            document.getElementById('testSubmitArea').style.display = 'block';
+            document.getElementById('testResults').classList.remove('show');
+            
+            // Scroll to test
+            document.getElementById('frequencyTest').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        // ============================================
+        // QUIZ LOGIC - V5.3 with Retake
+        // ============================================
+        const answeredQuestions = {};
+        const totalQuestions = 2;
+
+        window.checkAnswer = function(selectedOption, questionNumber) {
+            if (answeredQuestions[questionNumber]) return;
+            
+            answeredQuestions[questionNumber] = true;
+            
+            const questionDiv = document.getElementById('question' + questionNumber);
+            const options = questionDiv.querySelectorAll('.quiz-option');
+            const explanation = document.getElementById('explanation' + questionNumber);
+            const isCorrect = selectedOption.getAttribute('data-correct') === 'true';
+            
+            options.forEach(option => {
+                option.classList.add('disabled');
+                
+                if (option.getAttribute('data-correct') === 'true') {
+                    option.classList.add('show-correct');
+                    if (option === selectedOption) {
+                        option.classList.add('correct');
+                        option.querySelector('.option-result').textContent = '✓ Đúng!';
+                    }
+                }
+                
+                if (option === selectedOption && !isCorrect) {
+                    option.classList.add('incorrect');
+                    option.querySelector('.option-result').textContent = '✗ Sai';
+                }
+            });
+            
+            explanation.classList.add('show');
+            explanation.classList.add(isCorrect ? 'correct' : 'incorrect');
+            
+            if (Object.keys(answeredQuestions).length === totalQuestions) {
+                document.getElementById('retakeBtn').classList.add('show');
+            }
+        };
+
+        window.retakeQuiz = function() {
+            for (let key in answeredQuestions) {
+                delete answeredQuestions[key];
+            }
+            
+            for (let i = 1; i <= totalQuestions; i++) {
+                const questionDiv = document.getElementById('question' + i);
+                const options = questionDiv.querySelectorAll('.quiz-option');
+                const explanation = document.getElementById('explanation' + i);
+                
+                options.forEach(option => {
+                    option.classList.remove('disabled', 'correct', 'incorrect', 'show-correct');
+                    option.querySelector('.option-result').textContent = '';
+                });
+                
+                explanation.classList.remove('show', 'correct', 'incorrect');
+            }
+            
+            document.getElementById('retakeBtn').classList.remove('show');
+            document.querySelector('.quiz-section').scrollIntoView({ behavior: 'smooth' });
+        };
+    })();
+    </script>
+

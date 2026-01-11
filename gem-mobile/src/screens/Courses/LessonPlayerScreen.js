@@ -20,6 +20,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Video, ResizeMode } from 'expo-av';
+import { WebView } from 'react-native-webview';
 import {
   X,
   Play,
@@ -30,15 +31,32 @@ import {
   Volume2,
   VolumeX,
   CheckCircle,
+  Check,
   ChevronLeft,
   ChevronRight,
   FileText,
   HelpCircle,
   ArrowLeft,
 } from 'lucide-react-native';
+import { Linking } from 'react-native';
 import { useCourse } from '../../contexts/CourseContext';
+import { useTabBar } from '../../contexts/TabBarContext';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
 import LessonRenderer from './components/LessonRenderer';
+import { addXP, updateStreak, incrementLessonStats } from '../../services/learningGamificationService';
+import { supabase } from '../../services/supabase';
+import DarkAlert from '../../components/UI/DarkAlert';
+
+// URL patterns for internal navigation
+const INTERNAL_URL_PATTERNS = {
+  // Match gemral.com URLs
+  gemralCourse: /^https?:\/\/(?:www\.)?gemral\.com\/courses\/([^\/?\s]+)(?:\/lessons?\/([^\/?\s]+))?/i,
+  gemralForum: /^https?:\/\/(?:www\.)?gemral\.com\/forum\/thread\/([^\/?\s]+)/i,
+  gemralShop: /^https?:\/\/(?:www\.)?gemral\.com\/shop\/product\/([^\/?\s]+)/i,
+  // Match relative lesson links like "lesson-1-4.html" or "/courses/123/lessons/456"
+  relativeLesson: /^(?:\.\/)?lesson[_-]?(\d+)[_-]?(\d+)?\.html?$/i,
+  relativeCourse: /^\/courses\/([^\/?\s]+)(?:\/lessons?\/([^\/?\s]+))?/i,
+};
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const VIDEO_HEIGHT = (SCREEN_WIDTH * 9) / 16;
@@ -56,8 +74,30 @@ const LessonPlayerScreen = ({ navigation, route }) => {
     getCourseById,
     isLessonCompleted,
     completeLesson,
+    uncompleteLesson,
     getCompletedLessons,
   } = useCourse();
+
+  // Use TabBarContext to hide tab bar on this screen
+  let hideTabBar, showTabBar;
+  try {
+    const tabBarContext = useTabBar();
+    hideTabBar = tabBarContext.hideTabBar;
+    showTabBar = tabBarContext.showTabBar;
+  } catch (e) {
+    // TabBarContext might not be available in some navigation structures
+    hideTabBar = () => {};
+    showTabBar = () => {};
+  }
+
+  // Hide tab bar when entering lesson player, show when leaving
+  useEffect(() => {
+    hideTabBar(false); // Hide immediately without animation
+
+    return () => {
+      showTabBar(true); // Show with animation when leaving
+    };
+  }, []);
 
   // Get course and lessons from context
   const course = getCourseById(courseId);
@@ -75,6 +115,10 @@ const LessonPlayerScreen = ({ navigation, route }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [markingComplete, setMarkingComplete] = useState(false);
+  const [webViewHeight, setWebViewHeight] = useState(400);
+  const [freshLesson, setFreshLesson] = useState(null);
+  const [webViewAlert, setWebViewAlert] = useState({ visible: false, title: '', message: '' });
+  const [webViewKey, setWebViewKey] = useState(0); // Key to force WebView reload
   const controlsTimeout = useRef(null);
 
   // Check completion status from context
@@ -109,6 +153,46 @@ const LessonPlayerScreen = ({ navigation, route }) => {
       }
     };
   }, [lessonId, courseId, lesson, course]);
+
+  // Fetch fresh lesson data directly from Supabase to get content columns
+  useEffect(() => {
+    const fetchFreshLesson = async () => {
+      if (!lessonId) return;
+
+      try {
+        console.log('[LessonPlayer] Fetching fresh lesson data for:', lessonId);
+        const { data, error } = await supabase
+          .from('course_lessons')
+          .select('*')
+          .eq('id', lessonId)
+          .single();
+
+        if (error) {
+          console.error('[LessonPlayer] Supabase fetch error:', error);
+          return;
+        }
+
+        if (data) {
+          console.log('[LessonPlayer] Fresh lesson data:', {
+            id: data.id,
+            title: data.title,
+            hasContent: !!data.content,
+            contentLength: data.content?.length || 0,
+            hasHtmlContent: !!data.html_content,
+            htmlContentLength: data.html_content?.length || 0,
+          });
+          setFreshLesson(data);
+        }
+      } catch (err) {
+        console.error('[LessonPlayer] Fetch error:', err);
+      }
+    };
+
+    fetchFreshLesson();
+  }, [lessonId]);
+
+  // Use freshLesson if available, otherwise fall back to navigation params
+  const activeLesson = freshLesson || lesson;
 
   const handlePlaybackStatusUpdate = (status) => {
     if (status.isLoaded) {
@@ -198,10 +282,46 @@ const LessonPlayerScreen = ({ navigation, route }) => {
     try {
       const result = await completeLesson(courseId, lessonId);
       if (result.success) {
-        // Success feedback is implicit - UI will update
+        // Award XP for lesson completion
+        try {
+          await addXP(10, 'lesson_complete', `Hoàn thành bài: ${lesson?.title || 'Lesson'}`);
+          await incrementLessonStats();
+          await updateStreak();
+        } catch (xpError) {
+          // Don't block UI if XP fails
+          console.log('[LessonPlayer] XP award failed:', xpError);
+        }
       }
     } catch (error) {
       console.error('Error marking lesson complete:', error);
+    } finally {
+      setMarkingComplete(false);
+    }
+  };
+
+  const handleToggleComplete = async () => {
+    if (markingComplete) return;
+
+    setMarkingComplete(true);
+    try {
+      if (isCompleted) {
+        // Uncomplete the lesson
+        await uncompleteLesson(courseId, lessonId);
+      } else {
+        // Complete the lesson
+        const result = await completeLesson(courseId, lessonId);
+        if (result.success) {
+          try {
+            await addXP(10, 'lesson_complete', `Hoàn thành bài: ${lesson?.title || 'Lesson'}`);
+            await incrementLessonStats();
+            await updateStreak();
+          } catch (xpError) {
+            console.log('[LessonPlayer] XP award failed:', xpError);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling lesson complete:', error);
     } finally {
       setMarkingComplete(false);
     }
@@ -216,6 +336,112 @@ const LessonPlayerScreen = ({ navigation, route }) => {
       lesson: targetLesson,
       courseTitle,
     });
+  };
+
+  /**
+   * Handle link clicks from WebView content
+   * Intercepts internal links and navigates within app
+   * External links open in browser
+   */
+  const handleWebViewLinkPress = (url) => {
+    console.log('[LessonPlayer] Link clicked:', url);
+
+    // Check gemral.com course URLs
+    let match = url.match(INTERNAL_URL_PATTERNS.gemralCourse);
+    if (match) {
+      const [, targetCourseId, targetLessonId] = match;
+      console.log('[LessonPlayer] Internal course link:', { targetCourseId, targetLessonId });
+
+      if (targetLessonId) {
+        // Navigate to specific lesson
+        navigation.push('LessonPlayer', {
+          courseId: targetCourseId,
+          lessonId: targetLessonId,
+          courseTitle: courseTitle,
+        });
+      } else {
+        // Navigate to course detail
+        navigation.navigate('CourseDetail', { courseId: targetCourseId });
+      }
+      return false; // Prevent WebView from loading URL
+    }
+
+    // Check gemral.com forum URLs
+    match = url.match(INTERNAL_URL_PATTERNS.gemralForum);
+    if (match) {
+      const [, postId] = match;
+      console.log('[LessonPlayer] Internal forum link:', { postId });
+      navigation.navigate('PostDetail', { postId });
+      return false;
+    }
+
+    // Check gemral.com shop URLs
+    match = url.match(INTERNAL_URL_PATTERNS.gemralShop);
+    if (match) {
+      const [, productId] = match;
+      console.log('[LessonPlayer] Internal shop link:', { productId });
+      navigation.navigate('ProductDetail', { productId });
+      return false;
+    }
+
+    // Check relative course/lesson URLs (e.g., /courses/123/lessons/456)
+    match = url.match(INTERNAL_URL_PATTERNS.relativeCourse);
+    if (match) {
+      const [, targetCourseId, targetLessonId] = match;
+      console.log('[LessonPlayer] Relative course link:', { targetCourseId, targetLessonId });
+
+      if (targetLessonId) {
+        navigation.push('LessonPlayer', {
+          courseId: targetCourseId,
+          lessonId: targetLessonId,
+          courseTitle: courseTitle,
+        });
+      } else {
+        navigation.navigate('CourseDetail', { courseId: targetCourseId });
+      }
+      return false;
+    }
+
+    // Check relative lesson links (e.g., lesson-1-4.html)
+    // These are tricky - we need to find the lesson in current course
+    match = url.match(INTERNAL_URL_PATTERNS.relativeLesson);
+    if (match) {
+      const [, chapterNum, lessonNum] = match;
+      console.log('[LessonPlayer] Relative lesson link:', { chapterNum, lessonNum });
+
+      // Try to find lesson by order in current course
+      if (course?.modules && chapterNum && lessonNum) {
+        const moduleIndex = parseInt(chapterNum, 10) - 1;
+        const lessonIndex = parseInt(lessonNum, 10) - 1;
+
+        if (course.modules[moduleIndex]?.lessons?.[lessonIndex]) {
+          const targetLesson = course.modules[moduleIndex].lessons[lessonIndex];
+          navigation.push('LessonPlayer', {
+            courseId,
+            lessonId: targetLesson.id,
+            lesson: targetLesson,
+            courseTitle,
+          });
+          return false;
+        }
+      }
+
+      // If we can't find the lesson, show alert
+      Alert.alert(
+        'Không tìm thấy bài học',
+        `Không thể tìm bài học "${url}" trong khóa học này.`,
+        [{ text: 'OK' }]
+      );
+      return false;
+    }
+
+    // External URL - open in browser
+    console.log('[LessonPlayer] External link, opening browser:', url);
+    Linking.openURL(url).catch(err => {
+      console.error('[LessonPlayer] Failed to open URL:', err);
+      Alert.alert('Lỗi', 'Không thể mở link này.');
+    });
+    return false; // Prevent WebView from navigating
   };
 
   const formatTime = (millis) => {
@@ -422,8 +648,180 @@ const LessonPlayerScreen = ({ navigation, route }) => {
     </ScrollView>
   );
 
+  // Check if lesson has HTML content (not JSONB blocks)
+  const hasHtmlContent = !(activeLesson?.content_blocks && activeLesson.content_blocks.length > 0) &&
+                         (activeLesson?.content || activeLesson?.html_content || activeLesson?.article_content);
+
   // Render article content using LessonRenderer
-  const renderArticleContent = () => (
+  const renderArticleContent = () => {
+    // Guard: return loading if lesson data not ready
+    if (!lesson) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={COLORS.gold} />
+          <Text style={styles.loadingText}>Đang tải bài học...</Text>
+        </View>
+      );
+    }
+
+    // For HTML content, use a flex layout without nested ScrollView
+    if (hasHtmlContent) {
+      return (
+        <SafeAreaView style={styles.htmlArticleContainer} edges={['bottom']}>
+          {/* Compact Header */}
+          <View style={styles.htmlArticleHeaderCompact}>
+            <TouchableOpacity
+              style={styles.backBtnSmall}
+              onPress={() => navigation.goBack()}
+            >
+              <ArrowLeft size={22} color={COLORS.textPrimary} />
+            </TouchableOpacity>
+            <View style={styles.headerContentCompact}>
+              <Text style={styles.courseTitleSmall} numberOfLines={1}>{courseTitle}</Text>
+              <Text style={styles.articleTitleSmall} numberOfLines={1}>{lesson.title}</Text>
+            </View>
+          </View>
+
+          {/* Scrollable WebView Content */}
+          <WebView
+            key={`webview-${webViewKey}`}
+            originWhitelist={['*']}
+            source={{
+              html: `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+                  <script>
+                    window.alert = function(message) {
+                      if (window.ReactNativeWebView) {
+                        window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'alert', message: message }));
+                      }
+                    };
+                    window.confirm = function(message) {
+                      if (window.ReactNativeWebView) {
+                        window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'confirm', message: message }));
+                      }
+                      return true;
+                    };
+                  </script>
+                  <style>
+                    * { box-sizing: border-box; }
+                    html, body { margin: 0; padding: 0; }
+                    body {
+                      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                      font-size: 16px;
+                      line-height: 1.7;
+                      color: rgba(255, 255, 255, 0.9);
+                      background: transparent;
+                      padding: 16px;
+                      padding-bottom: 100px;
+                    }
+                    h1, h2, h3, h4, h5, h6 { color: #fff; margin: 20px 0 12px 0; font-weight: 600; }
+                    h1 { font-size: 24px; }
+                    h2 { font-size: 20px; color: #FFBD59; }
+                    h3 { font-size: 18px; }
+                    p { margin-bottom: 14px; color: rgba(255,255,255,0.85); }
+                    ul, ol { margin: 14px 0; padding-left: 24px; color: rgba(255,255,255,0.85); }
+                    li { margin-bottom: 8px; }
+                    img { max-width: 100%; height: auto; border-radius: 8px; margin: 16px 0; display: block; }
+                    a { color: #00D9FF; text-decoration: none; }
+                    strong, b { color: #fff; font-weight: 600; }
+                    em, i { font-style: italic; }
+                    code { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-family: monospace; }
+                    pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; overflow-x: auto; margin: 14px 0; }
+                    blockquote { border-left: 3px solid #FFBD59; padding-left: 12px; margin: 14px 0; color: rgba(255,255,255,0.7); font-style: italic; }
+                    table { width: 100%; border-collapse: collapse; margin: 14px 0; }
+                    th, td { border: 1px solid rgba(255,255,255,0.2); padding: 10px; text-align: left; }
+                    th { background: rgba(255,255,255,0.1); color: #fff; }
+                    hr { border: none; border-top: 1px solid rgba(255,255,255,0.2); margin: 20px 0; }
+                  </style>
+                </head>
+                <body>
+                  ${activeLesson?.content || activeLesson?.html_content || activeLesson?.article_content || ''}
+                </body>
+                </html>
+              `,
+            }}
+            style={styles.htmlWebViewFullScreen}
+            scrollEnabled={true}
+            showsVerticalScrollIndicator={true}
+            androidLayerType="hardware"
+            cacheEnabled={true}
+            injectedJavaScriptBeforeContentLoaded={`
+              window.alert = function(message) {
+                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'alert', message: message }));
+              };
+              window.confirm = function(message) {
+                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'confirm', message: message }));
+                return true;
+              };
+              true;
+            `}
+            onShouldStartLoadWithRequest={(request) => {
+              if (request.url === 'about:blank' || request.url.startsWith('data:')) {
+                return true;
+              }
+              handleWebViewLinkPress(request.url);
+              return false;
+            }}
+            onMessage={(event) => {
+              try {
+                const data = JSON.parse(event.nativeEvent.data);
+                if (data.type === 'alert' && data.message) {
+                  setWebViewAlert({
+                    visible: true,
+                    title: 'Kết quả Quiz',
+                    message: data.message,
+                  });
+                }
+              } catch (e) {
+                console.log('[LessonPlayer] WebView message parse error:', e);
+              }
+            }}
+          />
+
+          {/* Fixed Bottom Navigation */}
+          <View style={styles.htmlBottomNav}>
+            <TouchableOpacity
+              style={[styles.navBtnBottom, !prevLesson && styles.navBtnDisabled]}
+              onPress={() => navigateToLesson(prevLesson)}
+              disabled={!prevLesson}
+            >
+              <ChevronLeft size={20} color={prevLesson ? COLORS.textPrimary : COLORS.textMuted} />
+              <Text style={[styles.navBtnTextBottom, !prevLesson && styles.navBtnTextDisabled]}>Bài trước</Text>
+            </TouchableOpacity>
+
+            {/* Toggle Complete Button */}
+            <TouchableOpacity
+              style={[styles.completeToggle, isCompleted && styles.completeToggleActive]}
+              onPress={handleToggleComplete}
+              disabled={markingComplete}
+            >
+              {markingComplete ? (
+                <ActivityIndicator size="small" color={COLORS.gold} />
+              ) : isCompleted ? (
+                <Check size={26} color="#fff" strokeWidth={3} />
+              ) : (
+                <View style={styles.uncheckedIcon} />
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.navBtnBottom, styles.navBtnNext, !nextLesson && styles.navBtnDisabled]}
+              onPress={() => navigateToLesson(nextLesson)}
+              disabled={!nextLesson}
+            >
+              <Text style={[styles.navBtnTextBottom, !nextLesson && styles.navBtnTextDisabled]}>Bài tiếp</Text>
+              <ChevronRight size={20} color={nextLesson ? COLORS.textPrimary : COLORS.textMuted} />
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      );
+    }
+
+    // For JSONB blocks content, use ScrollView
+    return (
     <ScrollView
       style={styles.articleScroll}
       showsVerticalScrollIndicator={false}
@@ -452,13 +850,13 @@ const LessonPlayerScreen = ({ navigation, route }) => {
         )}
       </View>
 
-      {/* JSONB Content Blocks */}
-      {lesson.content_blocks && lesson.content_blocks.length > 0 ? (
-        <LessonRenderer blocks={lesson.content_blocks} />
-      ) : (
-        // Fallback if no content_blocks, show description
+      {/* Content: JSONB blocks */}
+      {activeLesson?.content_blocks && activeLesson.content_blocks.length > 0 && (
+        <LessonRenderer blocks={activeLesson.content_blocks} />
+      )}
+      {!(activeLesson?.content_blocks && activeLesson.content_blocks.length > 0) && (
         <View style={styles.fallbackContent}>
-          <Text style={styles.descriptionText}>{lesson.description}</Text>
+          <Text style={styles.descriptionText}>{activeLesson?.description || 'Chưa có nội dung bài học'}</Text>
         </View>
       )}
 
@@ -515,7 +913,8 @@ const LessonPlayerScreen = ({ navigation, route }) => {
       {/* Bottom padding */}
       <View style={{ height: 50 }} />
     </ScrollView>
-  );
+    );
+  };
 
   // Handle quiz type - navigate to QuizScreen
   const handleQuizLesson = () => {
@@ -529,7 +928,7 @@ const LessonPlayerScreen = ({ navigation, route }) => {
 
   // Render based on lesson type
   const renderContent = () => {
-    const lessonType = lesson.type || 'video';
+    const lessonType = activeLesson?.type || lesson?.type || 'video';
 
     switch (lessonType) {
       case 'article':
@@ -556,7 +955,7 @@ const LessonPlayerScreen = ({ navigation, route }) => {
                 <View style={styles.quizIconContainer}>
                   <HelpCircle size={64} color={COLORS.gold} />
                 </View>
-                <Text style={styles.quizTitle}>{lesson.title}</Text>
+                <Text style={styles.quizTitle}>{lesson?.title || 'Quiz'}</Text>
                 <Text style={styles.quizDescription}>
                   Bài kiểm tra để củng cố kiến thức
                 </Text>
@@ -631,6 +1030,22 @@ const LessonPlayerScreen = ({ navigation, route }) => {
     );
   }
 
+  // No lesson data
+  if (!lesson) {
+    return (
+      <LinearGradient
+        colors={GRADIENTS.background}
+        locations={GRADIENTS.backgroundLocations}
+        style={styles.container}
+      >
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={COLORS.gold} />
+          <Text style={styles.loadingText}>Đang tải bài học...</Text>
+        </View>
+      </LinearGradient>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -642,7 +1057,7 @@ const LessonPlayerScreen = ({ navigation, route }) => {
         >
           {renderContent()}
         </LinearGradient>
-      ) : lesson.type === 'quiz' ? (
+      ) : (activeLesson?.type || lesson?.type) === 'quiz' ? (
         renderContent()
       ) : (
         <LinearGradient
@@ -653,6 +1068,25 @@ const LessonPlayerScreen = ({ navigation, route }) => {
           {renderContent()}
         </LinearGradient>
       )}
+
+      {/* Dark Alert for WebView Quiz Results */}
+      <DarkAlert
+        visible={webViewAlert.visible}
+        title={webViewAlert.title}
+        message={webViewAlert.message}
+        type="info"
+        buttons={[
+          {
+            text: 'Làm lại',
+            style: 'cancel',
+            onPress: () => {
+              setWebViewKey(prev => prev + 1); // Reload WebView to reset quiz
+            },
+          },
+          { text: 'OK', style: 'default' },
+        ]}
+        onClose={() => setWebViewAlert({ visible: false, title: '', message: '' })}
+      />
     </View>
   );
 };
@@ -986,6 +1420,104 @@ const styles = StyleSheet.create({
   },
   fallbackContent: {
     paddingVertical: SPACING.lg,
+  },
+  htmlContentContainer: {
+    flex: 1,
+    minHeight: SCREEN_HEIGHT * 0.6,
+    marginVertical: SPACING.md,
+  },
+  htmlWebView: {
+    minHeight: 300,
+    backgroundColor: 'transparent',
+  },
+  htmlWebViewFlex: {
+    flex: 1,
+    minHeight: SCREEN_HEIGHT * 0.5,
+    backgroundColor: 'transparent',
+  },
+  // HTML Article Full Screen Layout
+  htmlArticleContainer: {
+    flex: 1,
+  },
+  htmlArticleHeaderCompact: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: 44, // Status bar height
+    paddingBottom: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(17, 34, 80, 0.95)',
+  },
+  backBtnSmall: {
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.xs,
+  },
+  headerContentCompact: {
+    flex: 1,
+  },
+  courseTitleSmall: {
+    fontSize: 11,
+    color: COLORS.gold,
+    marginBottom: 2,
+  },
+  articleTitleSmall: {
+    fontSize: 14,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+  },
+  htmlWebViewFullScreen: {
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+  htmlBottomNav: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(17, 34, 80, 0.98)',
+  },
+  navBtnBottom: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 8,
+  },
+  navBtnTextBottom: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    color: COLORS.textPrimary,
+  },
+  completeToggle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+  },
+  completeToggleActive: {
+    backgroundColor: '#22C55E',
+    borderColor: '#22C55E',
+  },
+  uncheckedIcon: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+    backgroundColor: 'transparent',
   },
   completedBanner: {
     flexDirection: 'row',

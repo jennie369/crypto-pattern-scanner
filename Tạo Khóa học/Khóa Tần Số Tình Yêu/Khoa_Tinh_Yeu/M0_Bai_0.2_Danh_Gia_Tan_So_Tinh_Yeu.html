@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 0.2: Đánh Giá Tần Số Tình Yêu Hiện Tại | Khóa Tần Số Tình Yêu</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--burgundy); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .section > ul, .section > ol { color: var(--text-secondary); padding-left: 1.5em; margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > ul, .section > ol { padding-left: calc(16px + 1.5em); padding-right: 16px; } }
+        .section li { margin-bottom: var(--space-sm); }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .highlight-box p:last-child { margin-bottom: 0; }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .definition-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .definition-box p:last-child { margin-bottom: 0; }
+
+        .warning-box { background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(156, 6, 18, 0.05)); border: 1px solid rgba(156, 6, 18, 0.4); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .warning-box { border: none; border-radius: 0; border-left: 4px solid var(--burgundy); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .warning-box-title { font-weight: 700; color: var(--burgundy-light); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .warning-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .warning-box p:last-child { margin-bottom: 0; }
+
+        .success-box { background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05)); border: 1px solid rgba(0, 200, 83, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .success-box { border: none; border-radius: 0; border-left: 4px solid var(--success); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .success-box-title { font-weight: 700; color: var(--success); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .success-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .success-box p:last-child { margin-bottom: 0; }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        @media (min-width: 601px) { .flow-step:hover { border-color: var(--gold); transform: translateX(8px); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .patterns-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .patterns-grid { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .pattern-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); text-align: center; transition: all 0.3s ease; }
+        @media (max-width: 600px) { .pattern-card { border: none; border-radius: 0; padding: var(--space-md); } }
+        @media (min-width: 601px) { .pattern-card:hover { border-color: var(--burgundy); transform: translateY(-4px); } }
+        .pattern-icon { font-size: 2.5rem; margin-bottom: var(--space-sm); }
+        .pattern-name { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .pattern-desc { font-size: 0.85rem; color: var(--text-muted); }
+
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+
+        .checklist { list-style: none; margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .checklist { margin: var(--space-md) 0; background: var(--glass-border); } }
+        .checklist-item { display: flex; align-items: flex-start; gap: var(--space-md); padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); margin-bottom: var(--space-sm); }
+        @media (max-width: 600px) { .checklist-item { padding: var(--space-md) 16px; border: none; border-radius: 0; margin-bottom: 0; border-left: 4px solid var(--gold); } }
+        .checklist-icon { width: 24px; height: 24px; min-width: 24px; background: var(--glass-bg); border: 2px solid var(--gold); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--gold); font-size: 0.8rem; }
+        .checklist-text { color: var(--text-secondary); flex: 1; }
+
+        .qa-item { margin-bottom: var(--space-lg); }
+        .qa-question { color: var(--cyan); font-weight: 600; margin-bottom: var(--space-sm); display: flex; align-items: flex-start; gap: var(--space-sm); }
+        .qa-answer { color: var(--text-secondary); padding-left: var(--space-lg); }
+        @media (max-width: 600px) { .qa-item { padding: 0 16px; } }
+
+        /* ==================== QUIZ SECTION ==================== */
+        .quiz-section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-top: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-section { border: none; border-radius: 0; padding: 0; margin-top: 0; border-top: 8px solid var(--bg-primary); } }
+        .quiz-header { text-align: center; margin-bottom: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-header { padding: var(--space-lg) 16px var(--space-md); margin-bottom: 0; } }
+        .quiz-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+        .quiz-question { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-question { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; margin-bottom: 0; border-bottom: 1px solid var(--glass-border); } }
+        .question-number { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; font-weight: 700; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .question-text { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-lg); line-height: 1.6; }
+
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        @media (max-width: 600px) { .quiz-options { gap: 1px; background: var(--glass-border); margin-left: -16px; margin-right: -16px; margin-left: calc(-16px - 4px); } }
+        .quiz-option { display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; transition: all 0.3s ease; }
+        @media (max-width: 600px) { .quiz-option { border: none; border-radius: 0; border-left: 4px solid transparent; padding: var(--space-md) 16px; } }
+        .quiz-option:hover:not(.disabled) { border-color: var(--gold); background: var(--bg-card); }
+        @media (max-width: 600px) { .quiz-option:hover:not(.disabled) { border-left-color: var(--gold); } }
+        .quiz-option.selected { border-color: var(--gold); background: rgba(255, 189, 89, 0.1); }
+        @media (max-width: 600px) { .quiz-option.selected { border-left-color: var(--gold); } }
+        .quiz-option.correct { border-color: var(--success) !important; background: rgba(0, 200, 83, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.correct { border-left-color: var(--success) !important; } }
+        .quiz-option.incorrect { border-color: var(--error) !important; background: rgba(255, 82, 82, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.incorrect { border-left-color: var(--error) !important; } }
+        .quiz-option.disabled { opacity: 0.7; cursor: not-allowed; }
+        .option-marker { width: 28px; height: 28px; min-width: 28px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+        .quiz-option.selected .option-marker { background: var(--gold); border-color: var(--gold); color: var(--navy-dark); }
+        .quiz-option.correct .option-marker { background: var(--success); border-color: var(--success); color: white; }
+        .quiz-option.incorrect .option-marker { background: var(--error); border-color: var(--error); color: white; }
+        .option-text { flex: 1; color: var(--text-secondary); }
+
+        .question-feedback { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--space-sm); display: none; }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); }
+        .question-feedback.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .quiz-result { text-align: center; padding: var(--space-xl); display: none; }
+        .quiz-result.show { display: block; }
+        .result-score { font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: var(--space-md); }
+        .result-text { font-size: 1.25rem; font-weight: 700; margin-bottom: var(--space-sm); }
+        .result-message { color: var(--text-muted); }
+
+        .quiz-buttons { display: flex; justify-content: center; padding: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-buttons { padding: var(--space-lg) 16px; } }
+        .quiz-btn { padding: var(--space-md) var(--space-xl); border-radius: var(--radius-md); font-weight: 700; cursor: pointer; border: none; font-family: inherit; background: var(--glass-bg); color: var(--text-primary); border: 2px solid var(--glass-border); }
+        .quiz-btn:hover { border-color: var(--gold); }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>💕</span>
+                <span>Module 0</span>
+            </div>
+            <div class="lesson-chapter">Chapter 0 - Khởi Đầu Tình Yêu Đích Thực</div>
+            <h1 class="lesson-title">Đánh Giá Tần Số Tình Yêu Hiện Tại</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 0.2</span></div>
+                <div class="meta-item"><span>⏱️</span><span>12 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>2 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- PHẦN 1: OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>💝</span> Bạn Đang Ở Đâu Trên Hành Trình Tình Yêu?</h2>
+
+            <p>Bạn đã bao giờ tự hỏi tại sao một số người dường như dễ dàng thu hút được những mối quan hệ lành mạnh, trong khi những người khác lại liên tục gặp những người sai trái? Hay tại sao có những cặp đôi sau 20 năm vẫn yêu nhau say đắm như ngày đầu, trong khi nhiều cặp khác không vượt qua được mốc 3 năm?</p>
+
+            <p>Câu trả lời không nằm ở may mắn hay số phận - nó nằm ở <strong>tần số năng lượng</strong> mà bạn đang phát ra. Giống như radio chỉ bắt được sóng cùng tần số, bạn chỉ có thể thu hút những người có tần số tương đồng với bạn. Nếu bạn đang ở tần số thấp (sợ hãi, thiếu thốn, bám víu), bạn sẽ thu hút những người cũng ở tần số đó.</p>
+
+            <p>Trong bài học này, bạn sẽ khám phá 7 tầng tâm thức về tình yêu, thực hiện bài đánh giá để biết mình đang ở đâu, và hiểu rõ hơn về ngôn ngữ tình yêu của bản thân. Đến cuối bài, bạn sẽ có một bức tranh rõ ràng về vị trí hiện tại của mình - nền tảng quan trọng để thiết kế hành trình 42 ngày phía trước.</p>
+
+            <div class="image-container">
+                <img src="images/m0-7-tang-tinh-yeu.png" alt="7 Tầng Tâm Thức về Tình Yêu">
+            </div>
+            <div class="image-caption">Hình 1: 7 Tầng Tâm Thức về Tình Yêu - Bạn đang ở tầng nào?</div>
+        </section>
+
+        <!-- PHẦN 2: CONCEPT INTRODUCTION - 7 Tầng Tâm Thức -->
+        <section class="section">
+            <h2 class="section-title"><span>🔮</span> 7 Tầng Tâm Thức Về Tình Yêu</h2>
+
+            <p>Trong quá trình nghiên cứu và làm việc với hàng nghìn học viên, tôi đã phát triển mô hình <strong>7 Tầng Tâm Thức về Tình Yêu</strong>. Mỗi tầng đại diện cho một mức năng lượng khác nhau, và cách bạn trải nghiệm tình yêu sẽ hoàn toàn khác biệt ở mỗi tầng.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📖</span> Tần Số Tình Yêu Là Gì?</div>
+                <p>Tần số tình yêu không phải là một con số trừu tượng - nó là <strong>tập hợp của những niềm tin, cảm xúc, và năng lượng mà bạn mang theo trong các mối quan hệ</strong>. Khi bạn ở tần số thấp, bạn yêu từ nỗi sợ (sợ bị bỏ rơi, sợ không xứng đáng). Khi bạn ở tần số cao, bạn yêu từ sự trọn vẹn (đầy đủ trong chính mình, cho đi mà không đòi hỏi).</p>
+                <p>Điều quan trọng cần hiểu: bạn có thể ở nhiều tầng khác nhau trong các mối quan hệ khác nhau. Với gia đình bạn có thể ở tầng 5, nhưng trong tình yêu lãng mạn lại ở tầng 2. Mục tiêu là nâng cao tần số <strong>trung bình</strong> của bạn.</p>
+            </div>
+
+            <p>Hãy cùng đi qua từng tầng để bạn có thể tự nhận diện vị trí của mình:</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tầng Phàm (50-100 Hz) - Yêu Từ Nỗi Sợ</div>
+                        <div class="flow-step-desc">Đây là tầng thấp nhất, nơi tình yêu bị chi phối hoàn toàn bởi nỗi sợ. Bạn sợ bị bỏ rơi nên trở nên bám víu. Bạn sợ mất kiểm soát nên trở nên ghen tuông và chiếm hữu. Bạn sợ không xứng đáng nên chấp nhận những mối quan hệ độc hại. Ở tầng này, bạn yêu người khác không phải vì họ là ai, mà vì bạn cần họ để lấp đầy sự trống rỗng trong mình.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tầng Quan Sát (100-200 Hz) - Bắt Đầu Nhận Ra</div>
+                        <div class="flow-step-desc">Đây là tầng của sự tỉnh thức đầu tiên. Bạn bắt đầu nhận ra những patterns lặp đi lặp lại trong các mối quan hệ. Bạn tự hỏi: "Tại sao mình luôn gặp người như vậy?" hoặc "Tại sao mọi mối tình của mình đều kết thúc giống nhau?" Ở tầng này, bạn chưa biết cách thay đổi, nhưng ít nhất bạn đã nhận ra có vấn đề - và đây là bước đầu quan trọng.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tầng Chuyển Hóa (200-300 Hz) - Đối Mặt Và Chữa Lành</div>
+                        <div class="flow-step-desc">Ở tầng này, bạn không chỉ nhận ra mà còn bắt đầu hành động. Bạn đối mặt với những vết thương quá khứ thay vì trốn chạy. Bạn thực hành tha thứ - cho người khác và cho chính mình. Bạn dũng cảm nhìn vào những góc tối trong lòng để hiểu tại sao mình phản ứng theo cách đó. Đây là tầng khó khăn nhất vì nó đòi hỏi sự dũng cảm và kiên nhẫn.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tầng Sáng Tạo (300-400 Hz) - Chủ Động Yêu Bản Thân</div>
+                        <div class="flow-step-desc">Đây là tầng mà bạn ngừng chờ đợi ai đó yêu mình và bắt đầu tự yêu mình trước. Bạn thiết lập ranh giới lành mạnh, nói "không" khi cần, và chăm sóc bản thân như chăm sóc người yêu. Bạn khám phá và theo đuổi những gì làm bạn hạnh phúc, không phụ thuộc vào người khác. Ở tầng này, bạn trở nên hấp dẫn tự nhiên vì bạn tỏa ra năng lượng của sự đầy đủ.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tầng Đồng Điệu (400-500 Hz) - Thu Hút Tự Nhiên</div>
+                        <div class="flow-step-desc">Khi bạn yêu bản thân đủ, điều kỳ diệu bắt đầu xảy ra: bạn tự nhiên thu hút những người phù hợp mà không cần cố gắng. Bạn không còn "tìm kiếm" tình yêu - tình yêu tìm đến bạn. Các mối quan hệ của bạn trở nên nhẹ nhàng hơn vì không có sự bám víu hay kỳ vọng quá mức. Bạn cho đi tự do và nhận lại một cách tự nhiên.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">6</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tầng Từ Bi (500-540 Hz) - Yêu Vô Điều Kiện</div>
+                        <div class="flow-step-desc">Đây là tầng của tình yêu thuần khiết. Bạn yêu người khác không vì họ làm gì cho bạn, mà vì bạn chọn yêu. Bạn chấp nhận người khác như họ là, không đòi hỏi họ phải thay đổi để xứng đáng với tình yêu của bạn. Bạn có thể yêu ngay cả khi không được đáp lại, vì tình yêu của bạn không phụ thuộc vào phản hồi bên ngoài.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">7</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tầng Nhất Nguyên (540+ Hz) - Hợp Nhất Với Tình Yêu Vũ Trụ</div>
+                        <div class="flow-step-desc">Ở tầng cao nhất này, bạn nhận ra rằng tình yêu không phải là thứ bạn tìm kiếm hay nhận được - tình yêu là bản chất của bạn. Bạn hiểu rằng tất cả chúng ta đều được kết nối bởi tình yêu vũ trụ, và mỗi mối quan hệ chỉ là một cách để trải nghiệm tình yêu đó. Ở tầng này, bạn không còn phân biệt giữa cho và nhận, giữa yêu và được yêu.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PHẦN 3: DEEP EXPLANATION - Tại Sao & Làm Thế Nào -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Tại Sao Việc Biết Tần Số Quan Trọng?</h2>
+
+            <p>Bạn có thể tự hỏi: "Biết mình đang ở tầng nào thì có ích gì?" Đây là câu hỏi quan trọng, và tôi muốn giải thích rõ ràng.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Nguyên Lý "Như Thu Hút Như"</div>
+                <p>Trong vật lý, các tần số tương đồng sẽ cộng hưởng với nhau. Điều này cũng đúng trong tình yêu. Nếu bạn đang ở tần số thấp (sợ hãi, thiếu thốn), bạn sẽ vô thức bị thu hút bởi những người cũng ở tần số đó - những người mang đến cho bạn đúng trải nghiệm mà bạn đang rung động.</p>
+                <p><strong>Ví dụ:</strong> Nếu bạn tin rằng "Mình không xứng đáng được yêu thương" (tần số thấp), bạn sẽ thu hút những người đối xử với bạn theo đúng niềm tin đó - người không trân trọng, người hay bỏ rơi, người không cam kết. Không phải vì bạn "xui" - mà vì năng lượng của bạn đang gửi đi tín hiệu đó.</p>
+            </div>
+
+            <p>Khi bạn biết mình đang ở tầng nào, bạn có thể:</p>
+
+            <ul>
+                <li><strong>Hiểu rõ nguồn gốc của patterns:</strong> Thay vì đổ lỗi cho người khác hay số phận, bạn nhận ra rằng patterns đến từ chính năng lượng của mình</li>
+                <li><strong>Tập trung vào đúng vấn đề:</strong> Nếu bạn đang ở tầng 1-2, việc cần làm là chữa lành vết thương. Nếu ở tầng 3-4, bạn cần tập trung vào yêu bản thân. Mỗi tầng có "bài tập" riêng</li>
+                <li><strong>Đo lường tiến trình:</strong> Sau 42 ngày, bạn có thể làm lại bài đánh giá và thấy mình đã tiến bộ đến đâu</li>
+                <li><strong>Thông cảm hơn với bản thân:</strong> Thay vì tự trách "Sao mình cứ gặp người như vậy?", bạn hiểu rằng đây là hành trình và ai cũng phải đi từ đầu</li>
+            </ul>
+
+            <div class="image-container">
+                <img src="images/m0-test-tan-so-tinh-yeu.png" alt="Bài Test Đánh Giá Tần Số">
+            </div>
+            <div class="image-caption">Hình 2: Bài Test 15 Câu Hỏi - Công cụ tự đánh giá tần số tình yêu</div>
+        </section>
+
+        <!-- PHẦN 4: REAL-WORLD EXAMPLES -->
+        <section class="section">
+            <h2 class="section-title"><span>✨</span> Câu Chuyện Thực Tế</h2>
+
+            <p>Để giúp bạn hiểu rõ hơn về các tầng tâm thức, hãy xem một số câu chuyện thực tế từ những học viên đã đi qua hành trình này.</p>
+
+            <div class="success-box">
+                <div class="success-box-title"><span>✨</span> Câu Chuyện 1: Thu - Từ Tầng 1 Đến Tầng 4</div>
+                <p>Thu, 29 tuổi, đến với khóa học sau 2 mối tình với những người đàn ông hay kiểm soát và có xu hướng bạo lực lời nói. Khi làm bài đánh giá, cô đạt 22 điểm - nằm ở Tầng 1-2.</p>
+                <p><strong>Điều Thu phát hiện:</strong> Thông qua các bài tập trong Module 1, Thu nhận ra cô lớn lên trong gia đình có cha rất nghiêm khắc và hay quát mắng. Cô đã "học" từ nhỏ rằng tình yêu = sự kiểm soát, và vô thức tìm kiếm những người đàn ông giống cha.</p>
+                <p><strong>Sau 42 ngày:</strong> Thu làm lại bài đánh giá và đạt 48 điểm - Tầng 3-4. Quan trọng hơn, cô đã kết thúc mối quan hệ độc hại hiện tại và lần đầu tiên cảm thấy bình an khi ở một mình.</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>⚠️</span> Câu Chuyện 2: Sai Lầm Phổ Biến - Trung</div>
+                <p>Trung, 35 tuổi, khi làm bài đánh giá tự cho mình điểm rất cao - 68/75. Anh tin rằng mình đã "enlightened" và vấn đề nằm ở những người phụ nữ anh gặp, không phải ở anh.</p>
+                <p><strong>Vấn đề:</strong> Trung đã đánh giá bản thân dựa trên những gì anh muốn tin, không phải thực tế. Khi được hỏi kỹ hơn, anh thừa nhận vẫn còn ghen tuông khi thấy người yêu cũ có người mới, vẫn so sánh người mới với người cũ, và vẫn tin rằng anh "quá tốt" cho những người từ chối anh.</p>
+                <p><strong>Bài học:</strong> Sự thành thật với bản thân là bước đầu tiên của mọi chuyển hóa. Nếu bạn không thừa nhận mình đang ở đâu, bạn không thể tiến lên được.</p>
+            </div>
+
+            <div class="success-box">
+                <div class="success-box-title"><span>✨</span> Câu Chuyện 3: Mai - Khám Phá Ngôn Ngữ Tình Yêu</div>
+                <p>Mai, 31 tuổi, luôn cảm thấy "không được yêu đủ" trong các mối quan hệ, dù bạn trai thường xuyên mua quà và nói lời yêu thương. Khi tìm hiểu về 5 ngôn ngữ tình yêu, cô phát hiện ngôn ngữ chính của mình là Quality Time (Thời gian chất lượng), trong khi bạn trai lại thể hiện tình yêu qua Receiving Gifts.</p>
+                <p><strong>Kết quả:</strong> Sau khi hiểu sự khác biệt này, Mai và bạn trai đã có cuộc trò chuyện cởi mở. Anh bắt đầu dành thời gian nhiều hơn - không phải lượng thời gian, mà là sự hiện diện hoàn toàn khi bên cô. Mối quan hệ của họ được cải thiện đáng kể chỉ sau 2 tuần.</p>
+            </div>
+        </section>
+
+        <!-- PHẦN 5: BÀI TEST VÀ THỰC HÀNH -->
+        <section class="section">
+            <h2 class="section-title"><span>📋</span> Bài Test Tự Đánh Giá 15 Câu Hỏi</h2>
+
+            <p>Bây giờ hãy làm bài test để xác định tần số tình yêu hiện tại của bạn. Hãy trả lời thành thật - không ai đánh giá bạn cả, đây là công cụ để bạn tự hiểu mình hơn. Cho điểm từ 1-5 cho mỗi câu (1 = Không bao giờ, 2 = Hiếm khi, 3 = Đôi khi, 4 = Thường xuyên, 5 = Luôn luôn).</p>
+
+            <h3 style="color: var(--cyan); margin: var(--space-lg) 0 var(--space-md) 0; padding: 0 16px;">Phần A: Quan Hệ Với Bản Thân (Câu 1-5)</h3>
+            <ol>
+                <li>Tôi dành thời gian chăm sóc bản thân mỗi ngày (tập thể dục, đọc sách, nghỉ ngơi đúng cách)</li>
+                <li>Tôi nói những lời tử tế với chính mình, thay vì tự chỉ trích khi mắc lỗi</li>
+                <li>Tôi tha thứ cho những lỗi lầm của mình và cho phép mình được học từ chúng</li>
+                <li>Tôi biết rõ giá trị bản thân và không để người khác đối xử tệ với mình</li>
+                <li>Tôi tin rằng mình xứng đáng được yêu thương, không cần phải làm gì để "xứng đáng"</li>
+            </ol>
+
+            <h3 style="color: var(--cyan); margin: var(--space-lg) 0 var(--space-md) 0; padding: 0 16px;">Phần B: Quan Hệ Với Người Khác (Câu 6-10)</h3>
+            <ol start="6">
+                <li>Tôi cho phép người khác thấy con người thật của mình, kể cả những điểm yếu</li>
+                <li>Tôi đặt ranh giới lành mạnh và nói "không" khi cần, mà không cảm thấy tội lỗi</li>
+                <li>Tôi giao tiếp cởi mở về cảm xúc và nhu cầu của mình, thay vì mong người khác "tự hiểu"</li>
+                <li>Tôi yêu người khác như họ là, không cố thay đổi họ theo ý mình</li>
+                <li>Tôi tin tưởng người yêu mà không ghen tuông hay kiểm soát quá mức</li>
+            </ol>
+
+            <h3 style="color: var(--cyan); margin: var(--space-lg) 0 var(--space-md) 0; padding: 0 16px;">Phần C: Quan Hệ Với Quá Khứ (Câu 11-15)</h3>
+            <ol start="11">
+                <li>Tôi đã tha thứ cho những người đã làm tổn thương tôi trong quá khứ</li>
+                <li>Tôi không mang theo oán giận, so sánh, hoặc kỳ vọng từ các mối tình cũ</li>
+                <li>Tôi đã học được bài học quý giá từ những trải nghiệm đau buồn trong tình yêu</li>
+                <li>Tôi không so sánh người mới với người cũ hay tìm kiếm "phiên bản mới" của ex</li>
+                <li>Tôi tin rằng quá khứ không định nghĩa tương lai tình yêu của tôi</li>
+            </ol>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📊</span> Cách Tính Điểm Và Ý Nghĩa</div>
+                <p><strong>60-75 điểm (Tầng 5-7):</strong> Bạn đã có nền tảng tình yêu vững chắc! Bạn yêu từ sự đầy đủ, không phải từ thiếu thốn. Khóa học này sẽ giúp bạn tinh chỉnh và nâng cao hơn nữa.</p>
+                <p><strong>45-59 điểm (Tầng 3-4):</strong> Bạn đang trên đường chuyển hóa! Bạn đã nhận ra nhiều patterns và bắt đầu thay đổi. Tiếp tục phát huy và tập trung vào việc yêu bản thân sâu hơn.</p>
+                <p><strong>30-44 điểm (Tầng 2-3):</strong> Bạn đã nhận ra cần thay đổi - đây là bước đầu quan trọng! Khóa học này sẽ cho bạn những công cụ cụ thể để chữa lành và tiến lên.</p>
+                <p><strong>15-29 điểm (Tầng 1-2):</strong> Khóa học này chính là dành cho bạn! Bạn đang mang nhiều vết thương cần được chữa lành. Hãy kiên nhẫn và tin tưởng vào hành trình.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Lưu Ý Quan Trọng Khi Tự Đánh Giá</div>
+                <p>Hãy trả lời dựa trên <strong>thực tế hành vi</strong> của bạn, không phải những gì bạn biết là đúng. Ví dụ: nếu bạn biết nên tha thứ nhưng vẫn còn oán giận trong lòng, hãy cho điểm thấp. Sự thành thật là chìa khóa để bài đánh giá có ý nghĩa.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m0-5-ngon-ngu-tinh-yeu.png" alt="5 Ngôn Ngữ Tình Yêu">
+            </div>
+            <div class="image-caption">Hình 3: 5 Ngôn Ngữ Tình Yêu - Khám phá cách bạn cho và nhận tình yêu</div>
+        </section>
+
+        <!-- PHẦN 6: 5 NGÔN NGỮ TÌNH YÊU -->
+        <section class="section">
+            <h2 class="section-title"><span>💬</span> 5 Ngôn Ngữ Tình Yêu</h2>
+
+            <p>Ngoài việc biết tần số của mình, việc hiểu <strong>ngôn ngữ tình yêu</strong> cũng cực kỳ quan trọng. Theo nghiên cứu của nhà tâm lý Gary Chapman, mỗi người có một "ngôn ngữ" chính để cho và nhận tình yêu. Khi bạn và người yêu nói cùng ngôn ngữ, tình yêu được truyền tải trọn vẹn. Khi hai người nói khác ngôn ngữ, có thể xảy ra hiểu lầm - một người cảm thấy không được yêu dù người kia đang cố gắng hết sức.</p>
+
+            <div class="patterns-grid">
+                <div class="pattern-card">
+                    <div class="pattern-icon">💬</div>
+                    <div class="pattern-name">Words of Affirmation</div>
+                    <div class="pattern-desc">Lời khen ngợi, động viên, nói "Anh yêu em" thường xuyên</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">🤝</div>
+                    <div class="pattern-name">Acts of Service</div>
+                    <div class="pattern-desc">Hành động phục vụ, giúp đỡ công việc, nấu ăn, lái xe đưa đón</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">🎁</div>
+                    <div class="pattern-name">Receiving Gifts</div>
+                    <div class="pattern-desc">Quà tặng có ý nghĩa, biểu tượng của sự quan tâm và nhớ đến</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">⏰</div>
+                    <div class="pattern-name">Quality Time</div>
+                    <div class="pattern-desc">Thời gian chất lượng, sự hiện diện hoàn toàn, chú ý không phân tâm</div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🤗</span> Physical Touch - Ngôn Ngữ Thứ 5</div>
+                <p>Ngôn ngữ thứ 5 là <strong>Physical Touch</strong> - tiếp xúc thể chất như ôm, nắm tay, vuốt ve, massage. Đây là ngôn ngữ nguyên thủy nhất, kết nối con người ở mức sâu sắc nhất. Người có ngôn ngữ này sẽ cảm thấy yêu thương nhất khi được chạm vào một cách ấm áp và an toàn.</p>
+                <p><strong>Cách xác định ngôn ngữ của bạn:</strong> Hãy tự hỏi: "Khi nào mình cảm thấy được yêu thương nhất trong mối quan hệ?" Câu trả lời sẽ tiết lộ ngôn ngữ chính của bạn. Cũng hãy nghĩ về những gì làm bạn tổn thương nhất - thường đó là khi ngôn ngữ yêu thương của bạn không được đáp ứng.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m0-gem-master-tarot-love.png" alt="GEM Master Tarot Love">
+            </div>
+            <div class="image-caption">Hình 4: Sử dụng GEM Master Tarot để nhận thông điệp về tình yêu</div>
+        </section>
+
+        <!-- PHẦN 7: PRACTICAL APPLICATION -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Áp Dụng Ngay Bây Giờ</h2>
+
+            <p>Bây giờ hãy biến kiến thức thành hành động. Đây là những việc bạn nên làm ngay sau bài học này:</p>
+
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <div class="checklist-icon">1</div>
+                    <div class="checklist-text"><strong>Làm bài test 15 câu:</strong> Lấy giấy bút hoặc app ghi chú, tự chấm điểm từng câu một cách thành thật. Ghi tổng điểm và xác định bạn đang ở tầng nào.</div>
+                </li>
+                <li class="checklist-item">
+                    <div class="checklist-icon">2</div>
+                    <div class="checklist-text"><strong>Xác định ngôn ngữ tình yêu:</strong> Trong 5 ngôn ngữ, xếp hạng từ quan trọng nhất đến ít quan trọng nhất với BẠN. Top 2 là ngôn ngữ chính của bạn.</div>
+                </li>
+                <li class="checklist-item">
+                    <div class="checklist-icon">3</div>
+                    <div class="checklist-text"><strong>Ghi nhật ký:</strong> Viết ra những insights bạn nhận được từ bài học này. Bạn nhận ra điều gì mới về bản thân? Điều gì làm bạn ngạc nhiên?</div>
+                </li>
+                <li class="checklist-item">
+                    <div class="checklist-icon">4</div>
+                    <div class="checklist-text"><strong>Bốc bài Tarot (tùy chọn):</strong> Mở app GEM → GEM Master → Tarot → Chọn "Love" → Đặt câu hỏi: "Thông điệp nào vũ trụ muốn gửi tôi về tình yêu?" → Ghi lại ý nghĩa.</div>
+                </li>
+            </ul>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📝</span> Bài Tập Phản Chiếu</div>
+                <p>Hãy viết câu trả lời cho 3 câu hỏi sau vào sổ tay:</p>
+                <p><strong>1.</strong> Nhìn vào 3 mối quan hệ gần nhất (tình yêu hoặc tình bạn thân), bạn thấy pattern nào lặp lại?</p>
+                <p><strong>2.</strong> Điều gì khiến bạn cảm thấy được yêu thương nhất? Điều gì khiến bạn cảm thấy bị tổn thương nhất trong tình yêu?</p>
+                <p><strong>3.</strong> Nếu có thể gửi một lời nhắn cho bản thân 5 năm trước về tình yêu, bạn sẽ nói gì?</p>
+            </div>
+        </section>
+
+        <!-- PHẦN 8: KEY TAKEAWAYS & TRANSITION -->
+        <section class="section">
+            <h2 class="section-title"><span>📝</span> Điểm Chính Và Bước Tiếp Theo</h2>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>🎯</span> 5 Điểm Chính Từ Bài Học</div>
+                <ul class="summary-list">
+                    <li><strong>7 Tầng Tâm Thức:</strong> Từ Phàm (50 Hz) đến Nhất Nguyên (540+ Hz) - mỗi tầng có cách yêu và trải nghiệm tình yêu khác nhau. Bạn có thể ở nhiều tầng khác nhau trong các mối quan hệ khác nhau.</li>
+                    <li><strong>Tần số quyết định thu hút:</strong> Bạn thu hút những người có tần số tương đồng. Để thay đổi người bạn gặp, trước hết phải thay đổi năng lượng bên trong.</li>
+                    <li><strong>Bài test 15 câu:</strong> Công cụ tự đánh giá giúp bạn biết mình đang ở đâu - điểm càng cao = tần số càng cao. Sự thành thật là chìa khóa.</li>
+                    <li><strong>5 Ngôn ngữ tình yêu:</strong> Hiểu ngôn ngữ của mình giúp bạn giao tiếp tốt hơn và cảm thấy được yêu thương trong mối quan hệ.</li>
+                    <li><strong>Mục tiêu 42 ngày:</strong> Nâng tần số trung bình lên tầng Đồng Điệu (400-500 Hz) - nơi tình yêu tự nhiên tìm đến bạn.</li>
+                </ul>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m0-ket-qua-tan-so.png" alt="Bảng Kết Quả Tần Số">
+            </div>
+            <div class="image-caption">Hình 5: Lưu lại kết quả của bạn để so sánh sau 42 ngày</div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🚀</span> Bước Tiếp Theo: Module 1 - Chữa Lành Quá Khứ</div>
+                <p>Chúc mừng bạn đã hoàn thành Module 0! Bạn đã có bức tranh rõ ràng về vị trí hiện tại của mình. Bây giờ, chúng ta sẽ bắt đầu hành trình thực sự.</p>
+                <p>Module 1 sẽ tập trung vào <strong>Chữa Lành Quá Khứ</strong> - bước quan trọng nhất để giải phóng bạn khỏi những patterns cũ. Bạn sẽ học cách vẽ bản đồ các mối quan hệ, chữa lành đứa trẻ bên trong, và thực hành nghi thức tha thứ.</p>
+                <p>Hãy hoàn thành bài test và quiz bên dưới trước khi tiếp tục. Tôi rất hào hứng được đồng hành cùng bạn! 💕</p>
+            </div>
+        </section>
+
+        <!-- QUIZ MODULE 0 -->
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">📝 Kiểm Tra Kiến Thức Module 0</h2>
+                <p class="quiz-subtitle">Chọn đáp án để nhận phản hồi ngay lập tức</p>
+            </div>
+
+            <div class="quiz-question" data-question="1" data-correct="C">
+                <div class="question-number">1</div>
+                <div class="question-text">Theo Học Thuyết Chuyển Hóa Nội Tâm, tình yêu vô điều kiện rung động ở tần số bao nhiêu Hz?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">200 Hz - Tầng Quan Sát</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">400 Hz - Tầng Sáng Tạo</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">540 Hz - Tầng Từ Bi</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">700 Hz - Tầng Giác Ngộ</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="2" data-correct="B">
+                <div class="question-number">2</div>
+                <div class="question-text">Nguyên lý nào trong Học Thuyết Chuyển Hóa Nội Tâm giải thích rằng "Người yêu của bạn là tấm gương phản chiếu nội tâm bạn"?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Nguyên lý Kham Nhẫn - Đón nhận mọi trải nghiệm</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Nguyên lý Phản Chiếu - Thế giới bên ngoài phản ánh bên trong</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Nguyên lý Buông Bỏ - Không bám víu vào kỳ vọng</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Nguyên lý Hiện Diện - Sống trọn vẹn trong hiện tại</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-result">
+                <div class="result-score">0/2</div>
+                <div class="result-text">Hoàn thành!</div>
+                <div class="result-message"></div>
+            </div>
+
+            <div class="quiz-buttons">
+                <button class="quiz-btn" id="retakeQuiz" style="display: none;">Làm Lại</button>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const questions = document.querySelectorAll('.quiz-question');
+            const retakeBtn = document.getElementById('retakeQuiz');
+            const resultDiv = document.querySelector('.quiz-result');
+
+            let answeredCount = 0;
+            let correctCount = 0;
+            const totalQuestions = questions.length;
+
+            const explanations = {
+                1: {
+                    correct: 'Chính xác! Tình yêu vô điều kiện rung động ở tần số 540 Hz - đây là Tầng Từ Bi, nơi bạn yêu mà không đòi hỏi đáp lại. Theo thang đo của David R. Hawkins, đây là một trong những tần số cao nhất mà con người có thể đạt được.',
+                    incorrect: 'Chưa đúng! Tình yêu vô điều kiện rung động ở 540 Hz - Tầng Từ Bi. Ở tần số này, bạn yêu người khác không vì họ làm gì cho bạn, mà vì bạn chọn yêu. Đây là tần số của sự chấp nhận hoàn toàn và yêu thương thuần khiết.'
+                },
+                2: {
+                    correct: 'Chính xác! Nguyên lý Phản Chiếu giải thích rằng thế giới bên ngoài là tấm gương của thế giới bên trong. Người bạn thu hút phản chiếu những niềm tin, vết thương, và năng lượng mà bạn đang mang trong mình. Đây là lý do tại sao việc chữa lành bên trong lại quan trọng để thay đổi các mối quan hệ bên ngoài.',
+                    incorrect: 'Chưa đúng! Đây là Nguyên lý Phản Chiếu - một trong 5 nguyên lý cốt lõi của Học Thuyết Chuyển Hóa Nội Tâm. Nguyên lý này giải thích rằng người yêu của bạn phản chiếu những gì đang diễn ra bên trong bạn. Nếu bạn luôn gặp những người không tôn trọng bạn, có thể bạn chưa thực sự tôn trọng chính mình.'
+                }
+            };
+
+            questions.forEach(question => {
+                const options = question.querySelectorAll('.quiz-option');
+                const correctAnswer = question.dataset.correct;
+                const questionNum = question.dataset.question;
+                const feedbackDiv = question.querySelector('.question-feedback');
+                const feedbackTitle = feedbackDiv.querySelector('.feedback-title');
+                const feedbackText = feedbackDiv.querySelector('.feedback-text');
+
+                options.forEach(option => {
+                    option.addEventListener('click', function() {
+                        if (question.classList.contains('answered')) return;
+
+                        question.classList.add('answered');
+                        answeredCount++;
+
+                        const selectedOption = this.dataset.option;
+                        const isCorrect = selectedOption === correctAnswer;
+
+                        options.forEach(opt => opt.classList.add('disabled'));
+                        this.classList.add('selected');
+
+                        if (isCorrect) {
+                            this.classList.add('correct');
+                            correctCount++;
+                            feedbackDiv.classList.add('correct');
+                            feedbackTitle.textContent = '✓ Chính xác!';
+                            feedbackText.textContent = explanations[questionNum].correct;
+                        } else {
+                            this.classList.add('incorrect');
+                            feedbackDiv.classList.add('incorrect');
+                            feedbackTitle.textContent = '✗ Chưa đúng!';
+                            feedbackText.textContent = explanations[questionNum].incorrect;
+                            options.forEach(opt => {
+                                if (opt.dataset.option === correctAnswer) {
+                                    opt.classList.add('correct');
+                                }
+                            });
+                        }
+
+                        feedbackDiv.classList.add('show');
+
+                        if (answeredCount === totalQuestions) {
+                            const scoreDiv = resultDiv.querySelector('.result-score');
+                            const messageDiv = resultDiv.querySelector('.result-message');
+                            scoreDiv.textContent = `${correctCount}/${totalQuestions}`;
+
+                            if (correctCount === totalQuestions) {
+                                messageDiv.textContent = '🎉 Xuất sắc! Bạn đã nắm vững kiến thức Module 0. Sẵn sàng cho Module 1 - Chữa Lành Quá Khứ!';
+                            } else if (correctCount >= 1) {
+                                messageDiv.textContent = '👍 Tốt lắm! Hãy xem lại phần bạn sai để củng cố kiến thức trước khi tiếp tục.';
+                            } else {
+                                messageDiv.textContent = '📚 Hãy đọc lại bài học để hiểu rõ hơn về 7 Tầng Tâm Thức và 5 Nguyên Lý!';
+                            }
+
+                            resultDiv.classList.add('show');
+                            retakeBtn.style.display = 'inline-block';
+                        }
+                    });
+                });
+            });
+
+            retakeBtn.addEventListener('click', function() {
+                answeredCount = 0;
+                correctCount = 0;
+
+                questions.forEach(question => {
+                    question.classList.remove('answered');
+                    const options = question.querySelectorAll('.quiz-option');
+                    const feedbackDiv = question.querySelector('.question-feedback');
+
+                    options.forEach(opt => {
+                        opt.classList.remove('selected', 'correct', 'incorrect', 'disabled');
+                    });
+                    feedbackDiv.classList.remove('show', 'correct', 'incorrect');
+                });
+
+                resultDiv.classList.remove('show');
+                retakeBtn.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

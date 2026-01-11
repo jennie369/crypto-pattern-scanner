@@ -23,6 +23,15 @@ class QuizService {
    * @param {string} lessonId - Lesson ID
    * @returns {Promise<Object|null>} Quiz with questions
    */
+  async getQuizByLesson(lessonId) {
+    return this.getQuizByLessonId(lessonId);
+  }
+
+  /**
+   * Get quiz by lesson ID (alias)
+   * @param {string} lessonId - Lesson ID
+   * @returns {Promise<Object|null>} Quiz with questions
+   */
   async getQuizByLessonId(lessonId) {
     try {
       const { data: quiz, error } = await supabase

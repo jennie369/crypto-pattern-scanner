@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 4.1: Sự Thật Mà Bạn Cần Biết</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Noto+Sans+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ==================== CSS VARIABLES ==================== */
+        :root {
+            --color-navy: #112250;
+            --color-navy-light: #1a3070;
+            --color-navy-dark: #0a1535;
+            --color-gold: #FFBD59;
+            --color-gold-light: #FFD993;
+            --color-gold-dark: #E5A030;
+            --color-cyan: #00F0FF;
+            --color-cyan-light: #80F7FF;
+            --color-purple: #6A5BFF;
+            --color-purple-light: #8B7FFF;
+            --color-green: #10B981;
+            --color-green-light: #34D399;
+            --color-green-dark: #059669;
+            --color-red: #EF4444;
+            --color-red-light: #F87171;
+
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.65);
+
+            --bg-glass: rgba(255, 255, 255, 0.08);
+            --bg-glass-hover: rgba(255, 255, 255, 0.12);
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --bg-card-solid: #1a2d5a;
+
+            --border-glass: rgba(255, 255, 255, 0.15);
+            --border-gold: rgba(255, 189, 89, 0.4);
+
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --shadow-gold: 0 4px 20px rgba(255, 189, 89, 0.25);
+            --shadow-cyan: 0 4px 20px rgba(0, 240, 255, 0.2);
+
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            --space-2xl: 3rem;
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: linear-gradient(135deg, var(--color-navy-dark) 0%, var(--color-navy) 50%, var(--color-navy-light) 100%);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+            font-size: 16px;
+            font-weight: 400;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: var(--space-lg);
+            padding-top: var(--space-xl);
+            padding-bottom: var(--space-2xl);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-container {
+                padding: 0;
+                padding-top: var(--space-md);
+                padding-bottom: var(--space-xl);
+            }
+        }
+
+        /* ==================== HEADER ==================== */
+        .lesson-header {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+            padding: var(--space-xl);
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-xl);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-header {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+                padding: var(--space-lg) var(--space-md);
+            }
+        }
+
+        .badge-container {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+            margin-bottom: var(--space-md);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            color: var(--color-navy);
+            font-family: var(--font-heading);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 50px;
+            box-shadow: var(--shadow-gold);
+        }
+
+        .badge.chapter-badge {
+            background: linear-gradient(135deg, var(--color-purple) 0%, var(--color-purple-light) 100%);
+        }
+
+        .lesson-title {
+            font-family: var(--font-heading);
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: var(--space-md);
+            line-height: 1.2;
+        }
+
+        .lesson-title .highlight {
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .lesson-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ==================== SECTIONS ==================== */
+        .section {
+            margin-bottom: var(--space-xl);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+            padding: 0 var(--space-md);
+        }
+
+        @media (min-width: 601px) {
+            .section-header {
+                padding: 0;
+            }
+        }
+
+        .section-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-gold);
+        }
+
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: clamp(1.25rem, 4vw, 1.5rem);
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .text-content {
+            padding: 0 var(--space-md);
+        }
+
+        @media (min-width: 601px) {
+            .text-content {
+                padding: 0;
+            }
+        }
+
+        .text-content p {
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+
+        /* ==================== HIGHLIGHT BOXES ==================== */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border: 1px solid var(--border-gold);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+
+        @media (max-width: 600px) {
+            .highlight-box {
+                border-radius: 0;
+                border-left: 4px solid var(--color-gold);
+                border-right: none;
+                margin-left: 0;
+                margin-right: 0;
+            }
+        }
+
+        .highlight-box.cyan {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(0, 240, 255, 0.05) 100%);
+            border-color: rgba(0, 240, 255, 0.4);
+        }
+
+        @media (max-width: 600px) {
+            .highlight-box.cyan {
+                border-left-color: var(--color-cyan);
+            }
+        }
+
+        .highlight-box.green {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        @media (max-width: 600px) {
+            .highlight-box.green {
+                border-left-color: var(--color-green);
+            }
+        }
+
+        .highlight-box.purple {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15) 0%, rgba(106, 91, 255, 0.05) 100%);
+            border-color: rgba(106, 91, 255, 0.4);
+        }
+
+        @media (max-width: 600px) {
+            .highlight-box.purple {
+                border-left-color: var(--color-purple);
+            }
+        }
+
+        .highlight-box-title {
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--color-gold);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .highlight-box.cyan .highlight-box-title { color: var(--color-cyan); }
+        .highlight-box.green .highlight-box-title { color: var(--color-green); }
+        .highlight-box.purple .highlight-box-title { color: var(--color-purple); }
+
+        .highlight-box p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        /* ==================== IMAGES ==================== */
+        .lesson-image {
+            width: 100%;
+            margin: var(--space-lg) 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 2px solid var(--border-glass);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-image {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+        }
+
+        .image-placeholder {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: linear-gradient(135deg, var(--bg-card-solid) 0%, var(--color-navy-dark) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            padding: var(--space-lg);
+            text-align: center;
+        }
+
+        .image-placeholder-icon {
+            font-size: 3rem;
+            opacity: 0.5;
+        }
+
+        .image-caption {
+            text-align: center;
+            padding: var(--space-sm) var(--space-md);
+            background: var(--bg-glass);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-style: italic;
+        }
+
+        /* ==================== CONGRATULATIONS BOX ==================== */
+        .congrats-box {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border: 2px solid var(--color-green);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .congrats-box {
+                border-radius: 0;
+                border-left: 4px solid var(--color-green);
+                border-right: none;
+            }
+        }
+
+        .congrats-icon {
+            font-size: 4rem;
+            margin-bottom: var(--space-md);
+        }
+
+        .congrats-title {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--color-green);
+            margin-bottom: var(--space-md);
+        }
+
+        .congrats-text {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            max-width: 500px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        .congrats-stats {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-xl);
+            margin-top: var(--space-lg);
+            flex-wrap: wrap;
+        }
+
+        .congrats-stat {
+            text-align: center;
+        }
+
+        .congrats-stat-number {
+            font-family: var(--font-heading);
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--color-gold);
+        }
+
+        .congrats-stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* ==================== COMPARISON BOXES ==================== */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--space-lg);
+            margin: var(--space-xl) 0;
+        }
+
+        @media (min-width: 601px) {
+            .comparison-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .comparison-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            border: 2px solid var(--border-glass);
+        }
+
+        @media (max-width: 600px) {
+            .comparison-card {
+                border-radius: 0;
+                border-right: none;
+            }
+        }
+
+        .comparison-card.negative {
+            border-left: 4px solid var(--color-red);
+        }
+
+        .comparison-card.positive {
+            border-left: 4px solid var(--color-green);
+        }
+
+        .comparison-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .comparison-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .comparison-card.negative .comparison-icon {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .comparison-card.positive .comparison-icon {
+            background: rgba(16, 185, 129, 0.2);
+        }
+
+        .comparison-title {
+            font-family: var(--font-heading);
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .comparison-card.negative .comparison-title {
+            color: var(--color-red-light);
+        }
+
+        .comparison-card.positive .comparison-title {
+            color: var(--color-green-light);
+        }
+
+        .comparison-content h4 {
+            font-family: var(--font-heading);
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: var(--space-sm);
+            margin-top: var(--space-md);
+        }
+
+        .comparison-content h4:first-child {
+            margin-top: 0;
+        }
+
+        .comparison-content p {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        /* ==================== KEY INSIGHT BOX ==================== */
+        .insight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.2) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border: 2px solid var(--color-gold);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .insight-box {
+                border-radius: 0;
+                border-left: 4px solid var(--color-gold);
+                border-right: none;
+            }
+        }
+
+        .insight-title {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-gold);
+            margin-bottom: var(--space-lg);
+        }
+
+        .insight-points {
+            display: grid;
+            gap: var(--space-md);
+            max-width: 500px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .insight-point {
+            background: var(--bg-glass);
+            padding: var(--space-md);
+            border-radius: var(--radius-sm);
+            display: flex;
+            gap: var(--space-md);
+            align-items: center;
+        }
+
+        .insight-check {
+            font-size: 1.25rem;
+            color: var(--color-green);
+        }
+
+        .insight-text {
+            font-size: 1rem;
+            color: var(--text-primary);
+        }
+
+        .insight-text s {
+            color: var(--text-muted);
+        }
+
+        .insight-conclusion {
+            margin-top: var(--space-lg);
+            padding: var(--space-lg);
+            background: var(--bg-glass);
+            border-radius: var(--radius-md);
+        }
+
+        .insight-conclusion p {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .insight-conclusion strong {
+            color: var(--color-gold);
+        }
+
+        /* ==================== REFLECTION BOX ==================== */
+        .reflection-box {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15) 0%, rgba(106, 91, 255, 0.05) 100%);
+            border: 2px solid var(--color-purple);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+
+        @media (max-width: 600px) {
+            .reflection-box {
+                border-radius: 0;
+                border-left: 4px solid var(--color-purple);
+                border-right: none;
+            }
+        }
+
+        .reflection-title {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-purple);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .reflection-questions {
+            display: grid;
+            gap: var(--space-md);
+        }
+
+        .reflection-item {
+            background: var(--bg-glass);
+            padding: var(--space-lg);
+            border-radius: var(--radius-sm);
+        }
+
+        .reflection-question {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: var(--space-sm);
+        }
+
+        .reflection-hint {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* ==================== SUMMARY BOX ==================== */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.2) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border: 2px solid var(--color-gold);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+
+        @media (max-width: 600px) {
+            .summary-box {
+                border-radius: 0;
+                border-left: 4px solid var(--color-gold);
+                border-right: none;
+            }
+        }
+
+        .summary-title {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-gold);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .summary-list {
+            list-style: none;
+        }
+
+        .summary-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-sm);
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .summary-list li::before {
+            content: '✓';
+            color: var(--color-gold);
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        /* ==================== FOOTER ==================== */
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-xl);
+            margin-top: var(--space-xl);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-footer {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+        }
+
+        .footer-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            color: var(--color-navy);
+            font-family: var(--font-heading);
+            font-size: 0.85rem;
+            font-weight: 700;
+            border-radius: 50px;
+            margin-bottom: var(--space-md);
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="lesson-container">
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="badge-container">
+                <span class="badge">STARTER</span>
+                <span class="badge chapter-badge">MODULE A</span>
+            </div>
+            <h1 class="lesson-title">Sự Thật <span class="highlight">Mà Bạn Cần Biết</span></h1>
+            <p class="lesson-subtitle">Một cuộc trò chuyện thành thật về hành trình phía trước và những lựa chọn của bạn</p>
+        </header>
+
+        <!-- SECTION 1: CHÚC MỪNG -->
+        <section class="section">
+            <div class="congrats-box">
+                <div class="congrats-icon">🎊</div>
+                <div class="congrats-title">Chúc Mừng Bạn Đã Đến Đây!</div>
+                <div class="congrats-text">
+                    Việc bạn hoàn thành đến bài này chứng minh một điều: bạn là người nghiêm túc với mục tiêu của mình. Bạn không phải là người chỉ đăng ký rồi bỏ quên. Bạn là người hành động.
+                </div>
+                <div class="congrats-stats">
+                    <div class="congrats-stat">
+                        <div class="congrats-stat-number">10+</div>
+                        <div class="congrats-stat-label">Bài học hoàn thành</div>
+                    </div>
+                    <div class="congrats-stat">
+                        <div class="congrats-stat-number">3</div>
+                        <div class="congrats-stat-label">Công cụ đã thử</div>
+                    </div>
+                    <div class="congrats-stat">
+                        <div class="congrats-stat-number">1</div>
+                        <div class="congrats-stat-label">Bài thực hành</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image 1 -->
+            <div class="lesson-image">
+                <div class="image-placeholder">
+                    <span class="image-placeholder-icon">🖼️</span>
+                    <span>Hình 1: Congratulations Welcome Visual</span>
+                    <span style="font-size: 0.8rem; opacity: 0.7;">Canva: congratulations-welcome.png (1200x675)</span>
+                </div>
+                <div class="image-caption">Chúc mừng bạn đã hoàn thành phần đầu của hành trình!</div>
+            </div>
+
+            <div class="text-content">
+                <p>Bạn là một trong những người đã chọn GEM để bắt đầu hành trình trading. Điều này không phải tình cờ. Bạn đã tìm kiếm, so sánh, và quyết định. Đó là mindset của người sẽ thành công.</p>
+
+                <p>Bây giờ, trước khi đi tiếp, hãy nói thật với nhau về những gì phía trước. Không phải để làm nản lòng bạn, mà để bạn chuẩn bị đúng cách.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: SỰ THẬT VỀ HÀNH TRÌNH -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">💡</div>
+                <h2 class="section-title">Sự Thật Về Hành Trình Phía Trước</h2>
+            </div>
+
+            <div class="text-content">
+                <p>Trading không dễ. Đây là sự thật mà nhiều người không nói với bạn khi bán khóa học. Họ hứa hẹn "làm giàu nhanh", "thu nhập thụ động dễ dàng", "chỉ cần 30 phút mỗi ngày". Nhưng thực tế thì khác.</p>
+
+                <p>Tuy nhiên, trading cũng không impossible như nhiều người nghĩ. Hàng triệu người trên thế giới đang sống từ trading. Sự khác biệt giữa người thành công và người thất bại không phải là tài năng bẩm sinh hay may mắn.</p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title">🔑 Sự Khác Biệt Quan Trọng Nhất</div>
+                <p>Những người thành công trong trading có hai thứ mà người thất bại thiếu: <strong>HỆ THỐNG đúng</strong> và <strong>HỖ TRỢ đúng</strong>. Không phải họ thông minh hơn bạn. Không phải họ kiên nhẫn hơn bạn. Họ chỉ đơn giản là có đúng công cụ và đúng người hướng dẫn.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: 2 LOẠI NGƯỜI -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">👥</div>
+                <h2 class="section-title">Hai Loại Người Trong Trading</h2>
+            </div>
+
+            <div class="text-content">
+                <p>Hãy tưởng tượng hai người bắt đầu học trading cùng một lúc. Họ có cùng mục tiêu, cùng động lực, cùng thời gian. Nhưng 12 tháng sau, kết quả hoàn toàn khác nhau.</p>
+            </div>
+
+            <!-- Comparison Grid -->
+            <div class="comparison-grid">
+                <div class="comparison-card negative">
+                    <div class="comparison-header">
+                        <div class="comparison-icon">😔</div>
+                        <div class="comparison-title">NGƯỜI A: Tự Học Lung Tung</div>
+                    </div>
+                    <div class="comparison-content">
+                        <h4>12 tháng sau:</h4>
+                        <p>Vẫn thua lỗ, hoặc may lắm hòa vốn. Đã thử nhiều phương pháp nhưng không có gì stick.</p>
+
+                        <h4>Cảm xúc:</h4>
+                        <p>Frustrated, hopeless, tự hỏi "mình có phù hợp với trading không?"</p>
+
+                        <h4>Kết quả:</h4>
+                        <p>Bỏ cuộc hoặc mất thêm vốn. Thời gian và tiền bạc đã đổ sông đổ biển.</p>
+                    </div>
+                </div>
+
+                <div class="comparison-card positive">
+                    <div class="comparison-header">
+                        <div class="comparison-icon">😊</div>
+                        <div class="comparison-title">NGƯỜI B: Đầu Tư Vào Hệ Thống</div>
+                    </div>
+                    <div class="comparison-content">
+                        <h4>12 tháng sau:</h4>
+                        <p>Profitable trader với win rate ổn định. Biết chính xác mình đang làm gì và tại sao.</p>
+
+                        <h4>Cảm xúc:</h4>
+                        <p>Confident, in control, biết rằng trading là skill có thể master.</p>
+
+                        <h4>Kết quả:</h4>
+                        <p>Từng bước tiến đến tự do tài chính. Mỗi tháng đều có progress rõ ràng.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image 2 -->
+            <div class="lesson-image">
+                <div class="image-placeholder">
+                    <span class="image-placeholder-icon">🖼️</span>
+                    <span>Hình 2: Person A vs Person B Comparison</span>
+                    <span style="font-size: 0.8rem; opacity: 0.7;">Canva: person-a-b-comparison.png (1200x675)</span>
+                </div>
+                <div class="image-caption">Sự khác biệt giữa hai con đường - Bạn chọn đường nào?</div>
+            </div>
+
+            <div class="text-content">
+                <p>Bạn có thể thấy mình ở cả hai người. Có lẽ bạn đã từng là Người A - thử đủ thứ, mất tiền, frustrated. Hoặc bạn lo sợ mình sẽ trở thành Người A. Điều đó hoàn toàn bình thường.</p>
+
+                <p>Câu hỏi quan trọng là: từ hôm nay trở đi, bạn muốn là ai?</p>
+            </div>
+        </section>
+
+        <!-- SECTION 4: KEY INSIGHT -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">💎</div>
+                <h2 class="section-title">Điều Quan Trọng Nhất Cần Hiểu</h2>
+            </div>
+
+            <div class="insight-box">
+                <div class="insight-title">Đây Không Phải Lỗi Của Bạn</div>
+                <div class="insight-points">
+                    <div class="insight-point">
+                        <span class="insight-check">✓</span>
+                        <span class="insight-text"><s>Không phải bạn không đủ giỏi</s></span>
+                    </div>
+                    <div class="insight-point">
+                        <span class="insight-check">✓</span>
+                        <span class="insight-text"><s>Không phải bạn không đủ kỷ luật</s></span>
+                    </div>
+                    <div class="insight-point">
+                        <span class="insight-check">✓</span>
+                        <span class="insight-text"><s>Không phải bạn không có tố chất</s></span>
+                    </div>
+                </div>
+                <div class="insight-conclusion">
+                    <p>Chỉ là bạn <strong>chưa có HỆ THỐNG phù hợp</strong> và <strong>chưa có HỖ TRỢ đúng đắn</strong>.</p>
+                </div>
+            </div>
+
+            <!-- Image 3 -->
+            <div class="lesson-image">
+                <div class="image-placeholder">
+                    <span class="image-placeholder-icon">🖼️</span>
+                    <span>Hình 3: "It's Not You, It's The System"</span>
+                    <span style="font-size: 0.8rem; opacity: 0.7;">Canva: its-not-you.png (1200x675)</span>
+                </div>
+                <div class="image-caption">Không phải bạn không đủ giỏi - Bạn chỉ cần đúng hệ thống</div>
+            </div>
+
+            <div class="text-content">
+                <p>Hãy nghĩ về điều này: nếu bạn muốn học lái xe, bạn có thể tự học bằng cách xem YouTube và thử nghiệm. Có thể bạn sẽ học được, nhưng mất rất nhiều thời gian, có thể gây tai nạn, và không có ai chỉnh sửa những thói quen xấu.</p>
+
+                <p>Hoặc bạn có thể đăng ký học ở trung tâm với giáo viên chuyên nghiệp. Bạn sẽ học đúng từ đầu, có người feedback, và tiết kiệm rất nhiều thời gian và rủi ro.</p>
+
+                <p>Trading cũng vậy. Sự khác biệt không phải ở "tài năng" - mà ở việc bạn có đúng hệ thống và hỗ trợ hay không.</p>
+            </div>
+
+            <div class="highlight-box green">
+                <div class="highlight-box-title">🌱 Tin Tốt Lành</div>
+                <p>Bạn đã ở đây, nghĩa là bạn đã bắt đầu đúng hướng. GEM cung cấp hệ thống và hỗ trợ - phần còn lại phụ thuộc vào quyết định của bạn về việc đi xa đến đâu.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 5: TRANSFORMATION -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">🦋</div>
+                <h2 class="section-title">Sự Chuyển Đổi Bắt Đầu Từ Đây</h2>
+            </div>
+
+            <div class="text-content">
+                <p>Bạn đã hoàn thành phần "Khám Phá" và "Trải Nghiệm" của khóa học. Bạn đã biết về GEM Frequency Method, đã thử Scanner, Chatbot, và Community. Bây giờ là lúc để quyết định bước tiếp theo.</p>
+
+                <p>Trong các bài tiếp theo, chúng tôi sẽ trình bày rõ ràng các lựa chọn của bạn. Không pressure, không manipulation, chỉ là thông tin để bạn tự quyết định.</p>
+            </div>
+
+            <!-- Image 4 -->
+            <div class="lesson-image">
+                <div class="image-placeholder">
+                    <span class="image-placeholder-icon">🖼️</span>
+                    <span>Hình 4: Transformation Visual</span>
+                    <span style="font-size: 0.8rem; opacity: 0.7;">Canva: transformation-visual.png (1200x675)</span>
+                </div>
+                <div class="image-caption">Hành trình chuyển đổi bắt đầu từ một quyết định</div>
+            </div>
+        </section>
+
+        <!-- REFLECTION -->
+        <div class="reflection-box">
+            <div class="reflection-title">🪞 Câu Hỏi Để Suy Ngẫm</div>
+            <div class="reflection-questions">
+                <div class="reflection-item">
+                    <div class="reflection-question">"Bạn muốn là Người A hay Người B?"</div>
+                    <div class="reflection-hint">Không có câu trả lời đúng hay sai - chỉ có sự lựa chọn phù hợp với hoàn cảnh của bạn.</div>
+                </div>
+                <div class="reflection-item">
+                    <div class="reflection-question">"Điều gì đang ngăn cản bạn tiến lên?"</div>
+                    <div class="reflection-hint">Là tiền? Thời gian? Sự tự tin? Hay chỉ là chưa biết bắt đầu từ đâu?</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUMMARY -->
+        <div class="summary-box">
+            <div class="summary-title">📝 Tóm Tắt Bài 4.1</div>
+            <ul class="summary-list">
+                <li>Bạn đã hoàn thành phần đầu của khóa học - đó là thành tựu đáng ghi nhận</li>
+                <li>Trading không dễ, nhưng cũng không impossible với đúng hệ thống và hỗ trợ</li>
+                <li>Sự khác biệt giữa Người A và Người B là HỆ THỐNG và HỖ TRỢ, không phải tài năng</li>
+                <li>Không phải lỗi của bạn nếu chưa thành công - chỉ là chưa có công cụ đúng</li>
+                <li>Bài tiếp theo sẽ trình bày rõ các lựa chọn để bạn quyết định</li>
+            </ul>
+        </div>
+
+        <!-- TRANSITION -->
+        <div class="highlight-box cyan">
+            <div class="highlight-box-title">➡️ Bài Tiếp Theo</div>
+            <p>Trong bài tiếp theo, chúng ta sẽ nói về "Ngã Ba Đường" - 3 con đường bạn có thể chọn từ đây. Mỗi con đường có ưu và nhược điểm riêng. Không có đường nào sai - chỉ có đường phù hợp với bạn.</p>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <span class="footer-badge">MODULE A</span>
+            <p class="footer-text">Bài 4.1: Sự Thật Mà Bạn Cần Biết | GEM Frequency Trading</p>
+        </footer>
+    </div>
+</body>
+</html>

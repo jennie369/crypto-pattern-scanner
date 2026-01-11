@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 2.1: Nghiệp Tiền Bạc Là Gì? | GEM Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==================== VARIABLES ==================== */
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        /* ==================== BACKGROUND ==================== */
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: 20%; }
+
+        /* ==================== CONTAINER ==================== */
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container {
+                padding: 0;
+            }
+        }
+
+        /* ==================== HEADER ==================== */
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--navy-dark);
+            margin-bottom: var(--space-md);
+        }
+        .lesson-chapter {
+            font-size: 0.9rem;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-lg);
+            flex-wrap: wrap;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        /* ==================== SECTION ==================== */
+        .section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section {
+                padding: 0;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .section-title {
+                padding: var(--space-lg) 16px var(--space-md) 16px;
+                margin-bottom: 0;
+            }
+        }
+
+        .section > p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .section > p {
+                padding: 0 16px;
+            }
+        }
+
+        /* ==================== HIGHLIGHT BOXES ==================== */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box-title {
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .definition-box-title {
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .definition-box p { color: var(--text-secondary); margin: 0; }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(156, 6, 18, 0.05));
+            border: 1px solid rgba(196, 30, 42, 0.4);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .warning-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--burgundy-light);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .warning-box-title {
+            font-weight: 700;
+            color: var(--burgundy-light);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .warning-box p { color: var(--text-secondary); margin: 0; }
+
+        /* ==================== IMAGE CONTAINER ==================== */
+        .image-container {
+            margin: var(--space-xl) 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-container {
+                margin: var(--space-md) 0;
+                border-radius: 0;
+                border: none;
+            }
+        }
+        .image-caption {
+            padding: var(--space-sm);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .image-caption {
+                padding: var(--space-sm) 16px;
+            }
+        }
+
+        /* ==================== FLOW STEPS ==================== */
+        .flow-steps {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .flow-steps {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .flow-step {
+            display: flex;
+            gap: var(--space-md);
+            align-items: flex-start;
+            padding: var(--space-md);
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .flow-step {
+                padding: var(--space-md) 16px;
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+            }
+        }
+        @media (min-width: 601px) {
+            .flow-step:hover {
+                border-color: var(--gold);
+                transform: translateX(8px);
+            }
+        }
+        .flow-step-number {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--navy-dark);
+        }
+        .flow-step-content { flex: 1; }
+        .flow-step-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+        }
+        .flow-step-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* ==================== CHECKLIST ==================== */
+        .checklist {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .checklist {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .checklist-item {
+            display: flex;
+            gap: var(--space-md);
+            align-items: flex-start;
+            padding: var(--space-md);
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+        }
+        @media (max-width: 600px) {
+            .checklist-item {
+                padding: var(--space-md) 16px;
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--burgundy-light);
+            }
+        }
+        .checklist-icon {
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            background: var(--burgundy);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+        .checklist-text {
+            flex: 1;
+            color: var(--text-secondary);
+        }
+
+        /* ==================== COMPARISON TABLE ==================== */
+        .comparison-container {
+            margin: var(--space-lg) 0;
+            overflow: hidden;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .comparison-container {
+                border-radius: 0;
+                border: none;
+                margin: var(--space-md) 0;
+            }
+        }
+        .comparison-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: var(--glass-border);
+        }
+        .comparison-header-item {
+            padding: var(--space-md);
+            background: var(--bg-card);
+            font-weight: 700;
+            text-align: center;
+        }
+        .comparison-header-item.personal { color: var(--cyan); }
+        .comparison-header-item.family { color: var(--purple); }
+        .comparison-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: var(--glass-border);
+        }
+        .comparison-cell {
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* ==================== APP INTEGRATION ==================== */
+        .app-box {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05));
+            border: 1px solid rgba(106, 91, 255, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .app-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .app-box-title {
+            font-weight: 700;
+            color: var(--purple);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .app-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .app-box p:last-child { margin-bottom: 0; }
+
+        /* ==================== SUMMARY BOX ==================== */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02));
+            border: 2px solid var(--gold);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .summary-list { list-style: none; }
+        .summary-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-list li::before {
+            content: "✓";
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        /* ==================== FOOTER ==================== */
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .lesson-footer a {
+            color: var(--gold);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>🔥</span>
+                <span>Module 2</span>
+            </div>
+            <div class="lesson-chapter">Module 2 - Hóa Giải Nghiệp Tiền Bạc</div>
+            <h1 class="lesson-title">Nghiệp Tiền Bạc Là Gì?</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 2.1</span></div>
+                <div class="meta-item"><span>⏱️</span><span>15 phút đọc</span></div>
+                <div class="meta-item"><span>🔮</span><span>I Ching</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Tại Sao Có Người Làm Mãi Vẫn Nghèo?</h2>
+            <p>Bạn có bao giờ tự hỏi: Tại sao có những người làm việc 14 tiếng/ngày nhưng vẫn không thể thoát khỏi vòng xoáy thiếu thốn? Trong khi một số người khác dường như "nhẹ nhàng" thu hút tiền bạc mà không cần quá nhiều nỗ lực?</p>
+            <p>Câu trả lời nằm ở một khái niệm mà ít người hiểu đúng: <strong>NGHIỆP TIỀN BẠC</strong>.</p>
+            <p>Đây không phải mê tín hay định mệnh không thể thay đổi. Nghiệp tiền bạc là một loại "tần số năng lượng" mà bạn đang phát ra 24/7 - và theo Quy Luật Thu Hút, tần số bạn phát ra là tần số bạn nhận lại.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Một Thống Kê Thú Vị</div>
+                <p>Nghiên cứu của Dr. Thomas Stanley (tác giả "The Millionaire Next Door") cho thấy: 80% triệu phú thế hệ đầu tiên đến từ gia đình trung lưu hoặc nghèo. Họ đã phá vỡ "nghiệp tiền bạc" của dòng họ.</p>
+                <p style="margin-top: var(--space-sm);">Điều này chứng minh rằng nghiệp KHÔNG PHẢI định mệnh bất di bất dịch. Bạn có thể chuyển hóa nó - và Module 2 này sẽ hướng dẫn bạn cách làm.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 1: GIỚI THIỆU -->
+        <section class="section">
+            <h2 class="section-title"><span>🌟</span> Chào Mừng Đến Module 2</h2>
+            <p>Bạn đã hoàn thành Module 1 - bước đầu tiên để thanh tẩy tâm thức. Bây giờ chúng ta sẽ đi sâu hơn vào một chủ đề quan trọng: <strong>Nghiệp Tiền Bạc</strong>.</p>
+            <p>Nhiều người đang mang theo những "khối năng lượng" từ quá khứ mà họ không hề biết. Những khối này ảnh hưởng trực tiếp đến khả năng kiếm tiền, giữ tiền và tận hưởng tiền bạc của bạn.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M2_B1_01%0AKarma+%26+Money" alt="Nghiệp và Tiền Bạc">
+                <div class="image-caption">Module 2: Hành trình hóa giải nghiệp tiền bạc bắt đầu từ đây</div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: ĐỊNH NGHĨA NGHIỆP -->
+        <section class="section">
+            <h2 class="section-title"><span>🔮</span> "Nghiệp Là Tần Số" - Định Nghĩa Mới</h2>
+            <p>Theo <strong>Học Thuyết Chuyển Hóa Nội Tâm</strong> của Jennie Uyen Chu, chúng ta có một cách hiểu khác về nghiệp:</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📖</span> Nghiệp Là Gì?</div>
+                <p><strong>Nghiệp = Tần Số Tích Lũy</strong></p>
+                <p style="margin-top: var(--space-sm);">Nghiệp không phải sự trừng phạt hay phán xét. Nghiệp đơn giản là tổng hợp các mẫu rung động (tần số) mà bạn đã tích lũy qua thời gian - từ suy nghĩ, cảm xúc, hành động và cả những gì bạn thừa hưởng từ gia đình.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x600/0a1628/FFBD59?text=HINH+10%0AKarma+%3D+Frequency" alt="Hình 10: Karma = Frequency">
+                <div class="image-caption">Hình 10: Nghiệp = Tần Số Tích Lũy - Bạn thu hút những gì bạn rung động</div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Nguyên Lý Quan Trọng</div>
+                <p>Theo Niềm Tin Nền Tảng thứ 4: <em>"Nghiệp là tần số tích lũy"</em>. Bạn thu hút những gì bạn rung động. Nếu tần số tiền bạc của bạn thấp (do nghiệp), bạn sẽ liên tục gặp khó khăn tài chính, bất kể bạn làm việc chăm chỉ đến đâu.</p>
+            </div>
+
+            <p>Hãy tưởng tượng nghiệp như một "chiếc radio" đã được cài sẵn một tần số. Dù bạn có muốn nghe nhạc khác, radio vẫn phát tần số cũ cho đến khi bạn chủ động thay đổi.</p>
+        </section>
+
+        <!-- SECTION 3: HAI LOẠI NGHIỆP -->
+        <section class="section">
+            <h2 class="section-title"><span>⚖️</span> Hai Loại Nghiệp Tiền Bạc</h2>
+            <p>Nghiệp tiền bạc chia thành hai loại chính, mỗi loại ảnh hưởng theo cách khác nhau:</p>
+
+            <div class="comparison-container">
+                <div class="comparison-header">
+                    <div class="comparison-header-item personal">🧑 Nghiệp Cá Nhân</div>
+                    <div class="comparison-header-item family">👨‍👩‍👧 Nghiệp Gia Đình</div>
+                </div>
+                <div class="comparison-body">
+                    <div class="comparison-cell">Những pattern bạn tự tạo từ trải nghiệm của chính mình</div>
+                    <div class="comparison-cell">Những pattern bạn thừa hưởng từ cha mẹ, ông bà, dòng họ</div>
+                </div>
+                <div class="comparison-body">
+                    <div class="comparison-cell">VD: Từng bị lừa mất tiền → Sợ đầu tư</div>
+                    <div class="comparison-cell">VD: Cha mẹ luôn cãi nhau vì tiền → Tiền = Xung đột</div>
+                </div>
+                <div class="comparison-body">
+                    <div class="comparison-cell">VD: Thất bại kinh doanh → "Tôi không có số làm giàu"</div>
+                    <div class="comparison-cell">VD: 3 đời đều nghèo → Vô thức tin "nhà mình số khổ"</div>
+                </div>
+                <div class="comparison-body">
+                    <div class="comparison-cell">Dễ nhận ra hơn (bạn nhớ các sự kiện)</div>
+                    <div class="comparison-cell">Khó nhận ra hơn (ẩn trong vô thức)</div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/6A5BFF?text=M2_B1_02%0APersonal+vs+Family+Karma" alt="Nghiệp Cá Nhân vs Gia Đình">
+                <div class="image-caption">Nghiệp cá nhân bạn tự tạo, nghiệp gia đình bạn thừa hưởng</div>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>⚠️</span> Lưu Ý Quan Trọng</div>
+                <p>Nghiệp gia đình <strong>KHÔNG</strong> có nghĩa là lỗi của cha mẹ hay ông bà. Họ cũng là nạn nhân của nghiệp từ thế hệ trước. Bạn không đổ lỗi - bạn chỉ đang NHẬN RA để CHUYỂN HÓA.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 4: DẤU HIỆU NGHIỆP TIỀN -->
+        <section class="section">
+            <h2 class="section-title"><span>🚨</span> 10 Dấu Hiệu Bạn Đang Mang Nghiệp Tiền Bạc</h2>
+            <p>Kiểm tra xem bạn có bao nhiêu dấu hiệu trong số này. Mỗi dấu tích là một indicator cho thấy bạn cần làm việc với nghiệp tiền bạc:</p>
+
+            <div class="checklist">
+                <div class="checklist-item">
+                    <span class="checklist-icon">1</span>
+                    <span class="checklist-text"><strong>Vòng lặp thu nhập:</strong> Dù làm gì cũng quanh quẩn ở một mức thu nhập nhất định, không bứt phá được</span>
+                </div>
+                <div class="checklist-item">
+                    <span class="checklist-icon">2</span>
+                    <span class="checklist-text"><strong>Tiền đến rồi đi:</strong> Tiền vào được bao nhiêu lại ra hết bấy nhiêu, như có lỗ thủng vô hình</span>
+                </div>
+                <div class="checklist-item">
+                    <span class="checklist-icon">3</span>
+                    <span class="checklist-text"><strong>Sợ nói về tiền:</strong> Cảm thấy khó chịu, tội lỗi hoặc xấu hổ khi nói chuyện về tiền bạc</span>
+                </div>
+                <div class="checklist-item">
+                    <span class="checklist-icon">4</span>
+                    <span class="checklist-text"><strong>Tự phá hoại:</strong> Có cơ hội kiếm tiền tốt nhưng tự mình đánh mất (trễ deadline, gây xung đột...)</span>
+                </div>
+                <div class="checklist-item">
+                    <span class="checklist-icon">5</span>
+                    <span class="checklist-text"><strong>Cảm giác không xứng đáng:</strong> Khi có tiền cảm thấy bất an, chờ đợi điều xấu sẽ xảy ra</span>
+                </div>
+                <div class="checklist-item">
+                    <span class="checklist-icon">6</span>
+                    <span class="checklist-text"><strong>Lặp lại pattern cha mẹ:</strong> Thề không sống như cha mẹ nhưng cuối cùng lại đang làm y hệt</span>
+                </div>
+                <div class="checklist-item">
+                    <span class="checklist-icon">7</span>
+                    <span class="checklist-text"><strong>Khóa cửa với cơ hội:</strong> Các cơ hội tốt luôn "suýt" đến nhưng vuột mất vào phút cuối</span>
+                </div>
+                <div class="checklist-item">
+                    <span class="checklist-icon">8</span>
+                    <span class="checklist-text"><strong>Conflict với người thân vì tiền:</strong> Mọi tranh cãi trong gia đình đều liên quan đến tiền bạc</span>
+                </div>
+                <div class="checklist-item">
+                    <span class="checklist-icon">9</span>
+                    <span class="checklist-text"><strong>Nợ nần dai dẳng:</strong> Luôn mang nợ, trả xong lại vay mới, không bao giờ sạch nợ</span>
+                </div>
+                <div class="checklist-item">
+                    <span class="checklist-icon">10</span>
+                    <span class="checklist-text"><strong>Cảm giác "số phận":</strong> Tin rằng mình sinh ra đã không có số giàu, đó là định mệnh</span>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/C41E2A?text=M2_B1_03%0A10+Signs+of+Money+Karma" alt="10 Dấu Hiệu Nghiệp Tiền">
+                <div class="image-caption">10 dấu hiệu cho thấy bạn đang mang nghiệp tiền bạc cần được hóa giải</div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📊</span> Đánh Giá Của Bạn</div>
+                <p><strong>0-2 dấu hiệu:</strong> Nghiệp tiền nhẹ - Module này sẽ giúp bạn "làm sạch" hoàn toàn</p>
+                <p style="margin-top: var(--space-xs);"><strong>3-5 dấu hiệu:</strong> Nghiệp tiền trung bình - Cần làm việc nghiêm túc qua Module 2</p>
+                <p style="margin-top: var(--space-xs);"><strong>6+ dấu hiệu:</strong> Nghiệp tiền nặng - Đây chính là chìa khóa để thay đổi cuộc đời bạn</p>
+            </div>
+        </section>
+
+        <!-- SECTION 5: NGHIỆP HOẠT ĐỘNG NHƯ THẾ NÀO -->
+        <section class="section">
+            <h2 class="section-title"><span>⚙️</span> Cơ Chế Hoạt Động Của Nghiệp Tiền</h2>
+            <p>Hiểu cơ chế này sẽ giúp bạn biết cách can thiệp và chuyển hóa:</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Sự Kiện Gốc (Root Event)</div>
+                        <div class="flow-step-desc">Một trải nghiệm mang năng lượng mạnh xảy ra (cha mẹ cãi nhau vì tiền, bạn bị lừa mất tiền, gia đình phá sản...)</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tạo Niềm Tin (Belief Formation)</div>
+                        <div class="flow-step-desc">Tâm trí trẻ con hoặc vô thức kết luận: "Tiền = Nguy hiểm", "Tiền làm tan vỡ gia đình", "Người giàu xấu xa"...</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Thiết Lập Tần Số (Frequency Lock)</div>
+                        <div class="flow-step-desc">Niềm tin này trở thành tần số rung động ổn định trong trường năng lượng của bạn - đây là "nghiệp"</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Thu Hút Thực Tại (Reality Attraction)</div>
+                        <div class="flow-step-desc">Theo quy luật "Trong thế nào, ngoài thế ấy" - bạn liên tục thu hút các tình huống xác nhận niềm tin cũ</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Vòng Lặp Nghiệp (Karmic Loop)</div>
+                        <div class="flow-step-desc">Thực tại mới củng cố niềm tin → Niềm tin mạnh hơn → Thu hút mạnh hơn → Vòng lặp khó phá vỡ</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🔑</span> Chìa Khóa Phá Vòng Lặp</div>
+                <p>Để phá vỡ vòng lặp nghiệp, bạn cần can thiệp ở <strong>Bước 2 (Niềm Tin)</strong> và <strong>Bước 3 (Tần Số)</strong>. Đó chính xác là những gì chúng ta sẽ làm trong Module 2 này!</p>
+            </div>
+        </section>
+
+        <!-- SECTION 6: TÍCH HỢP APP -->
+        <section class="section">
+            <h2 class="section-title"><span>📱</span> Thực Hành Với GEM App</h2>
+            <p>Trước khi chuyển sang bài tiếp theo, hãy sử dụng GEM App để bắt đầu quá trình khám phá nghiệp tiền của bạn:</p>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>🎴</span> GEM Master → I Ching</div>
+                <p>I Ching (Kinh Dịch) là công cụ cổ đại giúp kết nối với trí tuệ vũ trụ. Trong GEM App:</p>
+                <p><strong>1.</strong> Mở GEM Master → Chọn I Ching</p>
+                <p><strong>2.</strong> Đặt câu hỏi: <em>"Nghiệp tiền bạc nào đang ảnh hưởng tôi nhiều nhất?"</em></p>
+                <p><strong>3.</strong> Thực hiện nghi thức gieo quẻ</p>
+                <p><strong>4.</strong> Đọc kỹ lời giải và ghi chú vào journal</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/6A5BFF?text=M2_B1_04%0AGEM+I+Ching+Feature" alt="GEM I Ching Feature">
+                <div class="image-caption">Sử dụng I Ching trong GEM App để khám phá nghiệp tiền bạc</div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📝</span> Bài Tập Về Nhà</div>
+                <p><strong>1.</strong> Đếm số dấu hiệu nghiệp tiền bạn có (từ danh sách 10 dấu hiệu)</p>
+                <p style="margin-top: var(--space-xs);"><strong>2.</strong> Gieo quẻ I Ching trong GEM App với câu hỏi về nghiệp tiền</p>
+                <p style="margin-top: var(--space-xs);"><strong>3.</strong> Viết journal: <em>"Lần đầu tiên tôi cảm thấy tiêu cực về tiền bạc là khi nào? Điều gì đã xảy ra?"</em></p>
+            </div>
+        </section>
+
+        <!-- REAL STORIES -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Câu Chuyện Về Nghiệp Tiền Bạc Thực Tế</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>👤</span> Câu Chuyện Của Anh Thắng (37 tuổi, Kỹ sư xây dựng)</div>
+                <p><strong>Pattern nghiệp:</strong> Anh Thắng có thu nhập 30-40 triệu/tháng, nhưng luôn hết tiền trước ngày 20. Dù đã thử nhiều phương pháp quản lý tài chính, tiền vẫn "biến mất" một cách khó hiểu. Anh luôn phải vay mượn cuối tháng.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Khi tìm hiểu sâu:</strong> Anh nhớ lại tuổi thơ: cha anh kiếm tiền tốt nhưng thường mất hết vào cờ bạc. Mẹ anh luôn nói: "Tiền vào nhà này thì không ở được lâu đâu con." Đây là câu nói mà vô thức anh đã "cài đặt" làm chương trình mặc định.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Nhận ra để chuyển hóa:</strong> Khi anh Thắng nhận ra đây là NGHIỆP GIA ĐÌNH chứ không phải "số phận" của anh, anh bắt đầu làm việc để chuyển hóa. Sau 3 tháng thực hành các nghi thức trong Module 2, lần đầu tiên trong 10 năm, anh dư tiền cuối tháng.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>👤</span> Câu Chuyện Của Chị Hạnh (42 tuổi, Chủ salon tóc)</div>
+                <p><strong>Pattern nghiệp:</strong> Chị Hạnh mở 3 salon tóc trong 8 năm. Cả 3 đều thất bại ở năm thứ 2-3, đúng lúc đang có dấu hiệu phát triển tốt. Mỗi lần đều có "lý do khách quan": thợ chính bỏ đi, bị lừa, dịch COVID...</p>
+                <p style="margin-top: var(--space-sm);"><strong>Khi nhìn vào gia đình:</strong> Chị phát hiện pattern tương tự ở cha (đóng cửa 2 cửa hàng), chú (phá sản 1 lần), ông nội (mất đất vì tin người). 3 thế hệ đều có pattern "thành công rồi mất hết".</p>
+                <p style="margin-top: var(--space-sm);"><strong>Sau khi hóa giải:</strong> Salon thứ 4 của chị Hạnh đã bước sang năm thứ 4 và đang mở rộng chi nhánh thứ 2. Chị nói: "Lần này khác hoàn toàn. Tôi không còn cảm giác lo sợ 'chờ đợi điều xấu xảy ra' nữa. Tôi đã phá vỡ vòng lặp của 3 đời."</p>
+            </div>
+
+            <p>Cả hai câu chuyện đều cho thấy: Nghiệp tiền bạc THỰC SỰ TỒN TẠI và ảnh hưởng đến cuộc sống chúng ta. Nhưng tin vui là nó CÓ THỂ ĐƯỢC CHUYỂN HÓA khi bạn nhận ra và làm đúng cách.</p>
+        </section>
+
+        <!-- KEY TAKEAWAYS -->
+        <section class="section">
+            <h2 class="section-title"><span>🔑</span> 3 Điều Quan Trọng Nhất Từ Bài Này</h2>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Nghiệp Là Tần Số, Không Phải Số Phận</div>
+                        <div class="flow-step-desc">Nghiệp tiền bạc không phải định mệnh hay sự trừng phạt. Nó đơn giản là TẦN SỐ TÍCH LŨY - những mẫu năng lượng bạn đã tích lũy qua thời gian. Và tần số có thể thay đổi được! Đây là tin vui nhất của Module này.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Nghiệp Gia Đình Mạnh Hơn Nghiệp Cá Nhân</div>
+                        <div class="flow-step-desc">Bạn có thể đã thừa hưởng những pattern tiền bạc từ 2-3 thế hệ trước mà không hề biết. Đây là lý do nhiều người "thề không sống như cha mẹ" nhưng cuối cùng lại đang lặp lại y hệt. Nhận ra nguồn gốc là bước đầu tiên để chuyển hóa.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Vòng Lặp Có Thể Phá Vỡ</div>
+                        <div class="flow-step-desc">Nghiệp hoạt động theo cơ chế 5 bước: Sự kiện gốc → Niềm tin → Tần số → Thu hút thực tại → Vòng lặp. Để phá vỡ, bạn cần can thiệp vào bước Niềm Tin và Tần Số. Đó chính xác là những gì Module 2 sẽ hướng dẫn bạn làm trong các bài tiếp theo.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TRANSITION -->
+        <section class="section">
+            <h2 class="section-title"><span>🌉</span> Chuẩn Bị Cho Bài Tiếp Theo</h2>
+            <p>Bạn đã hiểu NGHIỆP TIỀN BẠC LÀ GÌ và cách nó hoạt động. Bước tiếp theo quan trọng hơn: NHÌN THẤY nghiệp tiền bạc cụ thể trong dòng họ BẠN.</p>
+            <p>Trong Bài 2.2, bạn sẽ học cách vẽ <strong>"Bản Đồ Nghiệp Tiền Gia Đình"</strong> - một công cụ trực quan giúp bạn thấy rõ các pattern thịnh vượng/nghèo khó qua 3 thế hệ.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📝</span> Bài Tập Trước Khi Qua Bài 2.2</div>
+                <p><strong>Thu thập thông tin:</strong> Hỏi cha mẹ, ông bà (nếu có thể) về tình hình tài chính của các thế hệ trước. Ai giàu? Ai nghèo? Có ai phá sản? Có ai thành công rồi mất hết? Có "lời nguyền" nào được nhắc đến trong gia đình?</p>
+                <p style="margin-top: var(--space-sm);"><strong>Ghi chú:</strong> Viết ra những câu nói về tiền bạc mà bạn thường nghe từ nhỏ trong gia đình. Ví dụ: "Nhà mình không có số giàu", "Tiền là nguồn gốc của mọi tội lỗi", "Người giàu thường không tốt"...</p>
+            </div>
+        </section>
+
+        <!-- SECTION 7: TỔNG KẾT -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Tổng Kết Bài 2.1</h2>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>📌</span> Những Điều Bạn Đã Học</div>
+                <ul class="summary-list">
+                    <li><strong>Định nghĩa mới:</strong> Nghiệp = Tần Số Tích Lũy (không phải sự trừng phạt)</li>
+                    <li><strong>Hai loại nghiệp:</strong> Nghiệp cá nhân (tự tạo) và Nghiệp gia đình (thừa hưởng)</li>
+                    <li><strong>10 dấu hiệu:</strong> Nhận diện các indicator của nghiệp tiền bạc</li>
+                    <li><strong>Cơ chế 5 bước:</strong> Hiểu cách nghiệp hình thành và duy trì vòng lặp</li>
+                    <li><strong>Công cụ I Ching:</strong> Sử dụng để khám phá nghiệp sâu trong vô thức</li>
+                </ul>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>➡️</span> Tiếp Theo: Bài 2.2</div>
+                <p>Trong bài tiếp theo, bạn sẽ học cách vẽ <strong>Bản Đồ Nghiệp Tiền Gia Đình</strong> - một công cụ mạnh mẽ để nhìn thấy các pattern thịnh vượng/nghèo khó qua 3 thế hệ trong dòng họ bạn.</p>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <p>© 2024 GEM Academy | <a href="https://gemral.com">gemral.com</a></p>
+            <p style="margin-top: var(--space-sm);">Tiếp theo: Bài 2.2 - Bản Đồ Nghiệp Tiền Gia Đình →</p>
+        </footer>
+
+    </div>
+</body>
+</html>

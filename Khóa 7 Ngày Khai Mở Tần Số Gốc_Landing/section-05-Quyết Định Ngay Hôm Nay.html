@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7 Ngày - Part 3</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Noto+Sans+Display:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root{--primary-burgundy:#9C0612;--primary-dark:#640A0C;--secondary-red:#761E0B;--gold-accent:#FFBD59;--gold-light:#DEBC81;--bg-navy:#112250;--text-light:#FFF;--text-gold:#DEBC81;--font-heading:'Montserrat',sans-serif;--font-body:'Noto Sans Display',sans-serif}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:var(--font-body);line-height:1.6;color:var(--text-light);overflow-x:hidden;background:#000}
+        .container{max-width:1200px;margin:0 auto;padding:0 20px}
+        h1,h2,h3,h4{font-family:var(--font-heading);font-weight:700;line-height:1.2}
+        .btn-primary{display:inline-block;background:var(--gold-accent);color:var(--bg-navy);padding:18px 50px;font-size:20px;font-weight:700;text-decoration:none;border-radius:50px;margin-top:30px;transition:all .3s;border:3px solid var(--gold-accent);box-shadow:0 10px 30px rgba(255,189,89,.4)}
+        .btn-primary:hover{background:var(--primary-burgundy);color:var(--gold-accent);transform:translateY(-3px);box-shadow:0 15px 40px rgba(255,189,89,.6)}
+        .fomo-section{padding:80px 20px;background:linear-gradient(135deg,var(--secondary-red) 0%,var(--primary-dark) 100%);color:var(--text-light);text-align:center}
+        .fomo-section h2{color:var(--gold-accent);font-size:42px;margin-bottom:30px}
+        .spots-remaining{display:inline-block;background:rgba(255,189,89,.2);border:3px solid var(--gold-accent);padding:30px 50px;border-radius:20px;margin:30px 0}
+        .spots-remaining .number{font-size:72px;font-weight:800;color:var(--gold-accent);display:block;line-height:1}
+        .spots-remaining .label{font-size:20px;color:var(--text-gold);margin-top:10px}
+        .fomo-reasons{max-width:700px;margin:40px auto;text-align:left;list-style:none}
+        .fomo-reasons li{padding:15px 0 15px 40px;position:relative;font-size:18px;color:var(--text-gold)}
+        .fomo-reasons li::before{content:"→";position:absolute;left:0;color:var(--gold-accent);font-weight:700;font-size:24px}
+        .next-batch{background:rgba(0,0,0,.3);padding:30px;border-radius:15px;margin-top:40px;max-width:600px;margin-left:auto;margin-right:auto}
+        .next-batch p{font-size:18px;color:var(--text-gold);margin-bottom:10px}
+        .next-batch .price-increase{font-size:24px;font-weight:700;color:var(--gold-accent)}
+        .trust-section{padding:60px 20px;background:linear-gradient(180deg,var(--primary-dark) 0%,#5C0A14 25%,#4D0610 50%,#3E060C 75%,#2F0508 100%);text-align:center;position:relative;overflow:hidden}
+        .trust-section::before{content:'';position:absolute;width:100%;height:100%;top:0;left:0;background:radial-gradient(circle at 50% 50%,rgba(255,189,89,.05) 0%,transparent 50%);pointer-events:none}
+        .trust-section h3{color:var(--gold-accent);font-size:28px;margin-bottom:40px;position:relative;z-index:2}
+        .trust-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:40px;max-width:1000px;margin:0 auto;position:relative;z-index:2}
+        .trust-item{padding:20px}
+        .trust-icon{font-size:48px;margin-bottom:15px;color:var(--gold-accent)}
+        .trust-item h4{color:var(--gold-accent);font-size:32px;font-weight:800;margin-bottom:5px}
+        .trust-item p{color:var(--text-gold);font-size:16px}
+        .transformation-section{padding:80px 20px;background:linear-gradient(180deg,#2F0508 0%,#3E060C 20%,#4D0509 40%,var(--primary-dark) 60%,#5C0A14 80%,#4D0610 100%);position:relative;overflow:hidden}
+        .transformation-section::before{content:'';position:absolute;width:100%;height:100%;top:0;left:0;background:radial-gradient(circle at 40% 30%,rgba(255,189,89,.06) 0%,transparent 40%),radial-gradient(circle at 60% 70%,rgba(156,6,18,.08) 0%,transparent 45%);pointer-events:none}
+        .transformation-section h2{text-align:center;color:var(--gold-accent);font-size:42px;margin-bottom:60px;position:relative;z-index:2}
+        .transformation-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:40px;max-width:1200px;margin:0 auto;position:relative;z-index:2}
+        .before-after-card{background:rgba(0,0,0,.7);backdrop-filter:blur(20px);border-radius:20px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.5);border:2px solid rgba(255,189,89,.3);transition:all .3s}
+        .before-after-card:hover{transform:translateY(-5px);border-color:var(--gold-accent);box-shadow:0 15px 40px rgba(255,189,89,.3)}
+        .ba-header{background:var(--primary-burgundy);color:var(--text-light);padding:20px;text-align:center}
+        .ba-header h3{font-size:22px;margin-bottom:5px}
+        .ba-header p{font-size:14px;color:var(--text-gold)}
+        .ba-content{display:grid;grid-template-columns:1fr 1fr}
+        .before-side,.after-side{padding:30px 20px}
+        .before-side{background:rgba(255,107,107,.15);border-right:2px dashed rgba(255,189,89,.3)}
+        .after-side{background:rgba(81,207,102,.15)}
+        .ba-label{font-weight:700;font-size:16px;margin-bottom:15px;text-align:center}
+        .before-side .ba-label{color:#ff6b6b}
+        .after-side .ba-label{color:#51cf66}
+        .ba-list{list-style:none}
+        .ba-list li{padding:8px 0 8px 25px;position:relative;font-size:14px;line-height:1.6;color:var(--text-light)}
+        .before-side .ba-list li::before{content:"❌";position:absolute;left:0;font-size:16px}
+        .after-side .ba-list li::before{content:"✅";position:absolute;left:0;font-size:16px}
+        .transformation-cta{text-align:center;margin-top:60px;position:relative;z-index:2}
+        .transformation-cta p{font-size:22px;color:var(--gold-accent);font-weight:700;margin-bottom:30px}
+        @media (max-width:768px){
+            h2{font-size:32px!important}
+            .ba-content{grid-template-columns:1fr}
+            .before-side{border-right:none;border-bottom:2px dashed rgba(255,189,89,.3)}
+            .spots-remaining .number{font-size:48px}
+        }
+    </style>
+</head>
+<body>
+
+<section class="fomo-section">
+    <div class="container">
+        <h2>Quyết Định Ngay Hôm Nay</h2>
+        <div class="spots-remaining">
+            <span class="number">12</span>
+            <p class="label">Chỗ còn lại cho đợt này</p>
+        </div>
+        <p style="font-size:20px;color:var(--text-gold);margin-bottom:40px;max-width:700px;margin-left:auto;margin-right:auto">Workshop bắt đầu trong <strong style="color:var(--gold-accent)">5 ngày nữa</strong>. Sau khi full 50 người, đợt tiếp theo sẽ không sớm hơn 3 tháng và với giá cao hơn 40%.</p>
+        <ul class="fomo-reasons">
+            <li>Mỗi phút trì hoãn = thêm một ngày sống trong tần số thấp</li>
+            <li>Giá Early Bird kết thúc sau 48h (tăng lên 11.9 triệu)</li>
+            <li>Limited seats để đảm bảo chất lượng interaction</li>
+            <li>Những người đăng ký trước nhận exclusive Pre-Workshop Prep Kit</li>
+        </ul>
+        <div class="next-batch">
+            <p>Đợt sau (tháng 3):</p>
+            <p class="price-increase">15.900.000đ (+101% so với giá hiện tại)</p>
+        </div>
+        <a href="#dang-ky" class="btn-primary" style="margin-top:50px">ĐĂNG KÝ NGAY - CHỈ CÒN 12 CHỖ</a>
+        <p style="font-size:16px;color:var(--text-gold);margin-top:30px">✓ Đăng ký an toàn với SSL encryption<br>✓ 30-day money back guarantee<br>✓ Xác nhận ngay qua email</p>
+    </div>
+</section>
+
+<section class="trust-section">
+    <div class="container">
+        <h3>Hơn 400 Người Đã Tin Tưởng</h3>
+        <div class="trust-grid">
+            <div class="trust-item">
+                <div class="trust-icon">⭐</div>
+                <h4>4.9/5.0</h4>
+                <p>Đánh giá trung bình</p>
+            </div>
+            <div class="trust-item">
+                <div class="trust-icon">👥</div>
+                <h4>487</h4>
+                <p>Học viên đã hoàn thành</p>
+            </div>
+            <div class="trust-item">
+                <div class="trust-icon">💰</div>
+                <h4>0.6%</h4>
+                <p>Tỷ lệ hoàn tiền</p>
+            </div>
+            <div class="trust-item">
+                <div class="trust-icon">🎯</div>
+                <h4>85%</h4>
+                <p>Thấy kết quả trong 30 ngày</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="transformation-section">
+    <div class="container">
+        <h2>Before & After: Transformation Thật Sự</h2>
+        <div class="transformation-grid">
+            <div class="before-after-card">
+                <div class="ba-header">
+                    <h3>Minh Anh, 32 tuổi</h3>
+                    <p>Marketing Manager - Hoàn thành 3 tháng trước</p>
+                </div>
+                <div class="ba-content">
+                    <div class="before-side">
+                        <p class="ba-label">TRƯỚC WORKSHOP</p>
+                        <ul class="ba-list">
+                            <li>Anxiety liên tục, đặc biệt về công việc</li>
+                            <li>Relationship pattern toxic lặp đi lặp lại</li>
+                            <li>Cảm giác stuck, không biết mình muốn gì</li>
+                            <li>Burnout mặc dù career đang lên</li>
+                        </ul>
+                    </div>
+                    <div class="after-side">
+                        <p class="ba-label">SAU 90 NGÀY</p>
+                        <ul class="ba-list">
+                            <li>Peaceful state là default, không còn anxiety</li>
+                            <li>Đang trong relationship healthy đầu tiên</li>
+                            <li>Clear về purpose và đang build business mới</li>
+                            <li>Energy level cao, excited về cuộc sống</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="before-after-card">
+                <div class="ba-header">
+                    <h3>Tuấn Anh, 28 tuổi</h3>
+                    <p>Software Engineer - Hoàn thành 5 tháng trước</p>
+                </div>
+                <div class="ba-content">
+                    <div class="before-side">
+                        <p class="ba-label">TRƯỚC WORKSHOP</p>
+                        <ul class="ba-list">
+                            <li>Depression on/off suốt 5 năm</li>
+                            <li>Self-worth thấp, không dám pursue goals lớn</li>
+                            <li>Isolated, ít connection với người khác</li>
+                            <li>Career stagnant dù có skill tốt</li>
+                        </ul>
+                    </div>
+                    <div class="after-side">
+                        <p class="ba-label">SAU 90 NGÀY</p>
+                        <ul class="ba-list">
+                            <li>Không còn depression episodes</li>
+                            <li>Tự tin pitch và nhận offer Senior role</li>
+                            <li>Đang build community cho developers</li>
+                            <li>Promoted + 40% salary increase</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="before-after-card">
+                <div class="ba-header">
+                    <h3>Hương Giang, 35 tuổi</h3>
+                    <p>Entrepreneur - Hoàn thành 2 tháng trước</p>
+                </div>
+                <div class="ba-content">
+                    <div class="before-side">
+                        <p class="ba-label">TRƯỚC WORKSHOP</p>
+                        <ul class="ba-list">
+                            <li>Business struggle suốt 3 năm</li>
+                            <li>Money blocks và scarcity mindset sâu</li>
+                            <li>Overworking nhưng không có results</li>
+                            <li>Relationships với gia đình và partner tense</li>
+                        </ul>
+                    </div>
+                    <div class="after-side">
+                        <p class="ba-label">SAU 90 NGÀY</p>
+                        <ul class="ba-list">
+                            <li>Revenue tăng 300% trong 2 tháng</li>
+                            <li>Abundance mindset, decisions từ trust không fear</li>
+                            <li>Work smarter với clear boundaries</li>
+                            <li>Relationships deepened và healing</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="transformation-cta">
+            <p>Transformation này có thể là của bạn. Câu hỏi duy nhất là: Bạn có sẵn sàng không?</p>
+            <a href="#dang-ky" class="btn-primary">BẮT ĐẦU TRANSFORMATION CỦA BẠN</a>
+        </div>
+    </div>
+</section>
+
+</body>
+</html>

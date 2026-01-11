@@ -35,12 +35,13 @@ export async function trackInteraction(userId, postId, interactionType, metadata
       });
 
     // Handle foreign key violation - post doesn't exist anymore
+    // Use console.log instead of warn to reduce log noise (this is expected for deleted posts)
     if (insertError && insertError.code === '23503') {
-      console.warn('[EngagementService] Post no longer exists, skipping interaction:', postId);
+      // Silent skip - don't log every deleted post reference
       return { success: false, error: 'Post not found' };
     } else if (insertError) {
       // Log but don't throw - interaction tracking shouldn't break the app
-      console.warn('[EngagementService] Upsert error:', insertError.message);
+      console.log('[EngagementService] Upsert error:', insertError.message);
       return { success: false, error: insertError.message };
     }
 

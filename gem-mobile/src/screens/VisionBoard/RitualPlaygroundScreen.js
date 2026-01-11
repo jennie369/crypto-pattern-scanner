@@ -199,6 +199,63 @@ const RITUAL_CONFIGS = {
       'Tôi kiên nhẫn chờ setup hoàn hảo',
     ],
   },
+  // ALIASES - Map alternative IDs to existing configs
+  'cleansing-breath': {
+    title: 'Thở Thanh Lọc',
+    subtitle: 'Giữ bình tĩnh khi trading',
+    icon: 'Wind',
+    prompt: 'Ghi lại cảm xúc bạn muốn thanh lọc...',
+    actionLabel: 'Thổi cảm xúc vào gió',
+    completionMessage: 'Tâm trí đã được thanh lọc và bình tĩnh',
+    gradients: {
+      background: ['#0D1B2A', '#1B263B', '#415A77'],
+      accent: ['#667EEA', '#764BA2'],
+    },
+    targetZone: 'wind',
+    transformTo: 'breeze',
+  },
+  'heart-expansion': {
+    title: 'Mở Rộng Trái Tim',
+    subtitle: 'Kết nối yêu thương',
+    icon: 'Heart',
+    prompt: 'Viết ra người hoặc điều bạn muốn gửi yêu thương...',
+    actionLabel: 'Gửi tình yêu từ trái tim',
+    completionMessage: 'Tình yêu đã được lan tỏa từ trái tim bạn',
+    gradients: {
+      background: ['#1A0A1A', '#2D152D', '#4A1F4A'],
+      accent: ['#F093FB', '#F5576C'],
+    },
+    targetZone: 'heart',
+    transformTo: 'love',
+  },
+  'water-manifest': {
+    title: 'Nghi Thức Nước',
+    subtitle: 'Nạp ý định vào nước',
+    icon: 'Wind', // Using Wind as placeholder - can create Droplets icon later
+    prompt: 'Viết ý định bạn muốn thấm vào nước...',
+    actionLabel: 'Gửi ý định vào dòng nước',
+    completionMessage: 'Ý định của bạn đã hòa vào dòng năng lượng',
+    gradients: {
+      background: ['#0A1628', '#0D2137', '#1A3A5F'],
+      accent: ['#00BCD4', '#4ECDC4'],
+    },
+    targetZone: 'water',
+    transformTo: 'ripple',
+  },
+  'moon-ritual': {
+    title: 'Nghi Thức Trăng',
+    subtitle: 'Thiết lập ý định theo chu kỳ trăng',
+    icon: 'Moon',
+    prompt: 'Viết ý định bạn muốn thiết lập dưới ánh trăng...',
+    actionLabel: 'Gửi ý định lên mặt trăng',
+    completionMessage: 'Mặt trăng đã nhận được ý định của bạn',
+    gradients: {
+      background: ['#0D0D1A', '#1A1A2E', '#2D2D4A'],
+      accent: ['#8B5CF6', '#A78BFA'],
+    },
+    targetZone: 'moon',
+    transformTo: 'glow',
+  },
 };
 
 // Particle Component - WITH CLEANUP TO PREVENT INFINITE LOOP

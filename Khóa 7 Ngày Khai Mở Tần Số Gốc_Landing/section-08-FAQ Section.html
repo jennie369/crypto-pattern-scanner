@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ Section - Dark</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Noto+Sans+Display:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root{--primary-burgundy:#9C0612;--primary-dark:#640A0C;--secondary-red:#761E0B;--gold-accent:#FFBD59;--gold-light:#DEBC81;--bg-navy:#112250;--text-light:#FFF;--text-gold:#DEBC81;--font-heading:'Montserrat',sans-serif;--font-body:'Noto Sans Display',sans-serif}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:var(--font-body);line-height:1.6;color:var(--text-light);overflow-x:hidden;background:#000}
+        .container{max-width:1200px;margin:0 auto;padding:0 20px}
+        h1,h2,h3,h4{font-family:var(--font-heading);font-weight:700;line-height:1.2}
+        
+        /* ========== FAQ SECTION ========== */
+        .gem-faq-section{padding:80px 20px;background:linear-gradient(180deg,#5C0A14 0%,var(--primary-dark) 20%,#4D0509 40%,#3E060C 60%,#2F0508 80%,#200404 100%);position:relative;overflow:hidden}
+        .gem-faq-section::before{content:'';position:absolute;width:100%;height:100%;top:0;left:0;background:radial-gradient(circle at 40% 40%,rgba(255,189,89,.08) 0%,transparent 40%),radial-gradient(circle at 60% 60%,rgba(156,6,18,.1) 0%,transparent 50%);animation:sectionPulse 18s ease-in-out infinite;pointer-events:none}
+        @keyframes sectionPulse{0%,100%{opacity:.5}50%{opacity:.8}}
+        .gem-faq-section h2{text-align:center;color:var(--gold-accent);font-size:42px;margin-bottom:50px;position:relative;z-index:2}
+        .faq-container{max-width:900px;margin:0 auto;position:relative;z-index:2}
+        .faq-item{background:rgba(0,0,0,.6);backdrop-filter:blur(15px);margin-bottom:20px;border-radius:15px;overflow:hidden;box-shadow:0 5px 15px rgba(0,0,0,.4);border:2px solid rgba(255,189,89,.3);transition:all .3s}
+        .faq-item:hover{border-color:var(--gold-accent);box-shadow:0 8px 25px rgba(255,189,89,.3);transform:translateY(-3px)}
+        .faq-question{padding:25px 30px;cursor:pointer;position:relative;font-weight:600;font-size:18px;color:var(--gold-accent);display:flex;align-items:center;justify-content:space-between;transition:all .3s}
+        .faq-question:hover{color:var(--text-light)}
+        .faq-question::after{content:'+';font-size:30px;color:var(--gold-accent);transition:transform .3s;flex-shrink:0;margin-left:20px}
+        .faq-question.active{color:var(--text-light)}
+        .faq-question.active::after{transform:rotate(45deg)}
+        .faq-answer{max-height:0;overflow:hidden;transition:max-height .3s ease;padding:0 30px;color:var(--text-gold);font-size:16px;line-height:1.8}
+        .faq-answer.active{max-height:500px;padding:0 30px 25px 30px}
+        
+        @media (max-width:768px){
+            .gem-faq-section{padding:60px 15px}
+            .gem-faq-section h2{font-size:32px;margin-bottom:40px}
+            .faq-question{font-size:16px;padding:20px 25px}
+            .faq-question::after{font-size:26px;margin-left:15px}
+            .faq-answer{font-size:15px}
+            .faq-answer.active{padding:0 25px 20px 25px}
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========== FAQ SECTION ========== -->
+<section class="gem-faq-section">
+    <div class="container">
+        <h2>❓ Câu Hỏi Thường Gặp</h2>
+
+        <div class="faq-container">
+            <div class="faq-item">
+                <div class="faq-question">
+                    Tôi không có thời gian, có áp dụng được không?
+                </div>
+                <div class="faq-answer">
+                    Chương trình được thiết kế cho người BẬN RỘN. Mỗi ngày chỉ cần 30-45 phút. Bạn có thể học vào sáng sớm hoặc tối trước khi ngủ. Hơn nữa, nếu không đầu tư thời gian thay đổi BÂY GIỜ, bạn sẽ mất cả đời để sống trong trạng thái cũ. 7 ngày đổi lấy cả cuộc đời - đó là deal đáng giá nhất.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    Khác gì với các khóa học tâm linh / mindfulness khác?
+                </div>
+                <div class="faq-answer">
+                    Hầu hết khóa học chỉ dạy lý thuyết hoặc thiền định chung chung. "7 Ngày Khai Mở" là HỆ THỐNG HOÀN CHỈNH kết hợp: (1) Khoa học tần số + tâm lý học, (2) Bài tập thực hành CỤ THỂ từng ngày, (3) Template & công cụ đo lường rõ ràng, (4) Community hỗ trợ dài hạn. Bạn không chỉ HỌC mà còn THỰC HÀNH và CHUYỂN HÓA thật sự.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    Nếu sau 7 ngày không hiệu quả thì sao?
+                </div>
+                <div class="faq-answer">
+                    Chúng tôi cam kết HOÀN TIỀN 100% - KHÔNG CẦN LÝ DO. Nếu bạn tham gia đầy đủ 7 ngày, làm đủ bài tập nhưng không cảm nhận được sự thay đổi, chỉ cần email trong vòng 14 ngày, chúng tôi hoàn lại toàn bộ tiền. Đơn giản vậy. Rủi ro = 0.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    Tôi cần có kiến thức nền tảng về tâm linh không?
+                </div>
+                <div class="faq-answer">
+                    KHÔNG. Chương trình được thiết kế cho cả người MỚI HOÀN TOÀN và người đã có kinh nghiệm. Mọi khái niệm đều được giải thích rõ ràng, dễ hiểu. Bạn chỉ cần một thứ: SẴN SÀNG THAY ĐỔI. Còn lại, chúng tôi sẽ dẫn dắt bạn từng bước.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    Hình thức học như thế nào?
+                </div>
+                <div class="faq-answer">
+                    100% ONLINE - Linh hoạt hoàn toàn. Mỗi sáng bạn nhận nội dung học + bài tập của ngày hôm đó qua email/app. Bạn học theo tốc độ riêng, không bị ràng buộc giờ giấc. Có 3 buổi live Q&A với mentor vào tối (sẽ có lịch cụ thể), nếu không tham gia được sẽ có recording.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    Tôi đã thử nhiều phương pháp nhưng đều thất bại, liệu có khác không?
+                </div>
+                <div class="faq-answer">
+                    Điều này chứng tỏ bạn MUỐN thay đổi - đó là điều quan trọng nhất. Lý do các phương pháp trước không hiệu quả thường là: (1) Thiếu hệ thống, (2) Không có accountability, (3) Không đào sâu đến gốc rễ vấn đề. "7 Ngày Khai Mở" giải quyết cả 3 điểm này. Hơn 1,200+ người đã chuyển đổi, nhiều người cũng từng thất bại trước đó.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    Sau 7 ngày, tôi có cần tiếp tục học gì nữa không?
+                </div>
+                <div class="faq-answer">
+                    7 ngày là FOUNDATION - nền tảng vững chắc. Sau đó bạn sẽ có: (1) Hệ thống 7 Nghi Thức để thực hành hàng ngày, (2) Lộ trình 49 ngày để chuyển hóa sâu hơn (tự thực hành), (3) Community để được hỗ trợ liên tục. Bạn KHÔNG CẦN mua thêm khóa học nào nữa. Tất cả đã có trong chương trình.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">
+                    Giá có tăng sau này không?
+                </div>
+                <div class="faq-answer">
+                    CÓ. Giá 1.990.000đ CHỈ DÀNH CHO 15 NGƯỜI ĐẦU TIÊN của đợt này. Sau đó sẽ tăng lên 2.990.000đ và cuối cùng là 3.990.000đ (giá chuẩn). Đây là đợt PILOT với giá ưu đãi cực lớn để thu thập feedback. Đợt tiếp theo sẽ không còn giá này nữa.
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+(function() {
+    document.querySelectorAll('.gem-faq-section .faq-question').forEach(function(question) {
+        question.addEventListener('click', function() {
+            const answer = this.nextElementSibling;
+            const isActive = this.classList.contains('active');
+
+            // Close all FAQs
+            document.querySelectorAll('.gem-faq-section .faq-question').forEach(function(q) {
+                q.classList.remove('active');
+                q.nextElementSibling.classList.remove('active');
+            });
+
+            // Open clicked FAQ if it wasn't active
+            if (!isActive) {
+                this.classList.add('active');
+                answer.classList.add('active');
+            }
+        });
+    });
+})();
+</script>
+
+</body>
+</html>

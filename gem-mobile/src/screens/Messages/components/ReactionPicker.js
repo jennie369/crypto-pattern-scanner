@@ -29,24 +29,16 @@ import {
   TYPOGRAPHY,
 } from '../../../utils/tokens';
 
+// Import reaction constants
+import { QUICK_REACTIONS, EMOJI_CATEGORIES } from '../../../constants/reactions';
+
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
-// Quick reaction emojis
-const QUICK_REACTIONS = ['❤️', '😂', '😮', '😢', '😡', '👍'];
-
-// Full emoji picker categories
-const EMOJI_CATEGORIES = {
-  recent: ['❤️', '😂', '👍', '🔥', '💯', '🙏'],
-  smileys: ['😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🥰', '😍', '🤩'],
-  gestures: ['👍', '👎', '👏', '🙌', '🤝', '🙏', '💪', '✌️', '🤞', '🤟', '🤙', '👋'],
-  hearts: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '💔', '❤️‍🔥', '💕', '💖'],
-  objects: ['🔥', '⭐', '💯', '✨', '💎', '🎯', '🚀', '💰', '📈', '📉', '💹', '🎉'],
-};
 
 const ReactionPicker = memo(({
   visible,
   onClose,
   onSelectReaction,
+  onOpenFullPicker,
   position = { x: 0, y: 0 },
   showFullPicker = false,
 }) => {
@@ -99,7 +91,7 @@ const ReactionPicker = memo(({
         style={[
           styles.quickPickerContainer,
           {
-            left: Math.max(10, Math.min(position.x - 120, SCREEN_WIDTH - 250)),
+            left: Math.max(10, Math.min(position.x - 140, SCREEN_WIDTH - 320)),
             top: position.y - 60,
             opacity: opacityAnim,
             transform: [{ scale: scaleAnim }],
@@ -117,6 +109,17 @@ const ReactionPicker = memo(({
               <Text style={styles.quickEmoji}>{emoji}</Text>
             </TouchableOpacity>
           ))}
+          {/* Plus button to open full picker */}
+          <TouchableOpacity
+            style={styles.plusButton}
+            onPress={() => {
+              onClose();
+              onOpenFullPicker?.();
+            }}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.plusButtonText}>+</Text>
+          </TouchableOpacity>
         </BlurView>
       </Animated.View>
     );
@@ -168,15 +171,15 @@ const ReactionPicker = memo(({
               <View style={styles.divider} />
 
               {/* Categories */}
-              {Object.entries(EMOJI_CATEGORIES).map(([category, emojis]) => (
-                <View key={category} style={styles.categorySection}>
+              {Object.entries(EMOJI_CATEGORIES).map(([key, category]) => (
+                <View key={key} style={styles.categorySection}>
                   <Text style={styles.categoryTitle}>
-                    {category.charAt(0).toUpperCase() + category.slice(1)}
+                    {category.title}
                   </Text>
                   <View style={styles.emojiGrid}>
-                    {emojis.map((emoji, index) => (
+                    {category.emojis.map((emoji, index) => (
                       <TouchableOpacity
-                        key={`${category}-${emoji}-${index}`}
+                        key={`${key}-${emoji}-${index}`}
                         style={styles.emojiButton}
                         onPress={() => handleSelect(emoji)}
                         activeOpacity={0.7}
@@ -223,6 +226,20 @@ const styles = StyleSheet.create({
   },
   quickEmoji: {
     fontSize: 22,
+  },
+  plusButton: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 189, 89, 0.2)',
+    borderRadius: 18,
+    marginLeft: 4,
+  },
+  plusButtonText: {
+    fontSize: 20,
+    color: COLORS.gold,
+    fontWeight: 'bold',
   },
 
   // Full Picker (modal)

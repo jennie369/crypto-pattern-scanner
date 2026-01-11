@@ -178,6 +178,68 @@ export const searchService = {
   },
 
   /**
+   * Search ONLY mutual followers for @mention tagging (privacy-safe)
+   * Only returns users where: current user follows them AND they follow current user
+   * @param {string} query - Username search query
+   * @param {number} limit - Max results
+   */
+  async searchMutualFollowers(query, limit = 10) {
+    try {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (!currentUser) {
+        console.log('[SearchService] Not logged in, returning empty');
+        return [];
+      }
+
+      // Step 1: Get users I follow
+      const { data: myFollowing } = await supabase
+        .from('user_follows')
+        .select('following_id')
+        .eq('follower_id', currentUser.id);
+
+      if (!myFollowing || myFollowing.length === 0) {
+        return [];
+      }
+
+      const myFollowingIds = myFollowing.map(f => f.following_id);
+
+      // Step 2: Get users who follow me AND are in my following list (mutual)
+      const { data: mutualFollows } = await supabase
+        .from('user_follows')
+        .select('follower_id')
+        .eq('following_id', currentUser.id)
+        .in('follower_id', myFollowingIds);
+
+      if (!mutualFollows || mutualFollows.length === 0) {
+        return [];
+      }
+
+      const mutualIds = mutualFollows.map(f => f.follower_id);
+
+      // Step 3: Get profile info for mutual followers
+      const searchTerm = (query || '').trim().toLowerCase();
+
+      let queryBuilder = supabase
+        .from('profiles')
+        .select('id, email, full_name, avatar_url')
+        .in('id', mutualIds)
+        .limit(limit);
+
+      if (searchTerm.length > 0) {
+        queryBuilder = queryBuilder.or(`full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
+      }
+
+      const { data, error } = await queryBuilder;
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('[SearchService] Mutual followers search error:', error);
+      return [];
+    }
+  },
+
+  /**
    * Search by hashtag
    * @param {string} hashtag - Hashtag without #
    * @param {number} page - Page number

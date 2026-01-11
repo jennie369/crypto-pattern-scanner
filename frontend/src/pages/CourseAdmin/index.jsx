@@ -32,6 +32,11 @@ import {
   Award,
   Play,
   ShieldAlert,
+  ArrowUpDown,
+  SortAsc,
+  SortDesc,
+  CalendarPlus,
+  CalendarClock,
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { courseService } from '../../services/courseService';
@@ -57,6 +62,7 @@ export default function CourseAdmin() {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all'); // all, published, draft
+  const [sortOrder, setSortOrder] = useState('updated_desc'); // name_asc, name_desc, updated_desc, created_desc
   const [stats, setStats] = useState({
     totalCourses: 0,
     totalStudents: 0,
@@ -117,15 +123,34 @@ export default function CourseAdmin() {
     }
   }, [fetchCourses, user]);
 
-  // Filter courses
-  const filteredCourses = courses.filter(course => {
-    const matchesSearch = course.title?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus =
-      filterStatus === 'all' ||
-      (filterStatus === 'published' && course.is_published) ||
-      (filterStatus === 'draft' && !course.is_published);
-    return matchesSearch && matchesStatus;
-  });
+  // Filter and sort courses
+  const filteredCourses = courses
+    .filter(course => {
+      const matchesSearch = course.title?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus =
+        filterStatus === 'all' ||
+        (filterStatus === 'published' && course.is_published) ||
+        (filterStatus === 'draft' && !course.is_published);
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a, b) => {
+      switch (sortOrder) {
+        case 'name_asc':
+          return (a.title || '').localeCompare(b.title || '', 'vi');
+        case 'name_desc':
+          return (b.title || '').localeCompare(a.title || '', 'vi');
+        case 'updated_desc':
+          return new Date(b.updated_at || 0) - new Date(a.updated_at || 0);
+        case 'created_desc':
+          return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+        case 'students_desc':
+          return (b.studentCount || 0) - (a.studentCount || 0);
+        case 'lessons_desc':
+          return (b.lessonCount || 0) - (a.lessonCount || 0);
+        default:
+          return 0;
+      }
+    });
 
   // Toggle publish status
   const handleTogglePublish = async (courseId, currentStatus) => {
@@ -163,15 +188,36 @@ export default function CourseAdmin() {
     });
   };
 
-  // Get tier badge
-  const getTierBadge = (tier) => {
+  // Get tier/access badge based on course access control logic (synced with Mobile App)
+  // Logic from gem-mobile/src/contexts/CourseContext.js:
+  // 1. If shopify_product_id exists -> requires purchase (show "Yêu cầu mua")
+  // 2. If tier_required = 'FREE' or null (no shopify) -> "Miễn phí"
+  // 3. If tier_required = 'TIER1/2/3' -> show that tier
+  const getAccessBadge = (course) => {
     const tiers = {
       FREE: { label: 'Miễn phí', className: 'tier-free' },
       TIER1: { label: 'Tier 1', className: 'tier-1' },
       TIER2: { label: 'Tier 2', className: 'tier-2' },
       TIER3: { label: 'Tier 3', className: 'tier-3' },
     };
-    return tiers[tier] || tiers.FREE;
+
+    // CASE 1: Shopify product linked = paid course (requires purchase)
+    // Access is granted via Shopify webhook after payment
+    if (course.shopify_product_id) {
+      // These are paid courses - show "Yêu cầu mua" badge
+      // Note: tier_required may still be set for courses that give tier access after purchase
+      return { label: 'Yêu cầu mua', className: 'tier-paid' };
+    }
+
+    // CASE 2: tier_required is explicitly set (TIER1/2/3)
+    // These require user to have that tier level (legacy/manual tier courses)
+    if (course.tier_required && tiers[course.tier_required]) {
+      return tiers[course.tier_required];
+    }
+
+    // CASE 3: No shopify_product_id AND tier_required is FREE or null
+    // These are free courses accessible to everyone
+    return tiers.FREE;
   };
 
   return (
@@ -252,6 +298,24 @@ export default function CourseAdmin() {
             className="search-input"
           />
         </div>
+
+        {/* Sort Dropdown */}
+        <div className="sort-dropdown">
+          <ArrowUpDown size={16} />
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+            className="sort-select"
+          >
+            <option value="updated_desc">Mới cập nhật</option>
+            <option value="created_desc">Mới tạo</option>
+            <option value="name_asc">Tên A → Z</option>
+            <option value="name_desc">Tên Z → A</option>
+            <option value="students_desc">Nhiều học viên nhất</option>
+            <option value="lessons_desc">Nhiều bài học nhất</option>
+          </select>
+        </div>
+
         <div className="filter-tabs">
           <button
             className={`filter-tab ${filterStatus === 'all' ? 'active' : ''}`}
@@ -316,7 +380,7 @@ export default function CourseAdmin() {
               <thead>
                 <tr>
                   <th>Khóa học</th>
-                  <th>Tier</th>
+                  <th>Quyền truy cập</th>
                   <th>Học viên</th>
                   <th>Bài học</th>
                   <th>Trạng thái</th>
@@ -326,13 +390,18 @@ export default function CourseAdmin() {
               </thead>
               <tbody>
                 {filteredCourses.map((course) => {
-                  const tierBadge = getTierBadge(course.tier_required);
+                  const accessBadge = getAccessBadge(course);
                   const userCanEdit = canEditCourse(course.created_by);
                   const userCanDelete = canDeleteCourse(course.created_by);
                   return (
                     <tr key={course.id}>
                       <td className="course-cell">
-                        <div className="course-info-cell">
+                        <div
+                          className="course-info-cell clickable"
+                          onClick={() => userCanEdit && navigate(`/courses/admin/edit/${course.id}`)}
+                          style={{ cursor: userCanEdit ? 'pointer' : 'default' }}
+                          title={userCanEdit ? 'Click để chỉnh sửa' : ''}
+                        >
                           <img
                             src={course.thumbnail_url || '/images/courses/default.png'}
                             alt={course.title}
@@ -345,8 +414,8 @@ export default function CourseAdmin() {
                         </div>
                       </td>
                       <td>
-                        <span className={`tier-badge-small ${tierBadge.className}`}>
-                          {tierBadge.label}
+                        <span className={`tier-badge-small ${accessBadge.className}`}>
+                          {accessBadge.label}
                         </span>
                       </td>
                       <td>

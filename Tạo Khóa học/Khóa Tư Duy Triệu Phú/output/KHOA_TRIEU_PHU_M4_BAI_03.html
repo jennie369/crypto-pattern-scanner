@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 4.3: Quy Tắc PAUSE - Chi Tiêu Có Ý Thức | GEM Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.5rem, 5vw, 2.25rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .definition-box p { color: var(--text-secondary); margin: 0; }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        @media (min-width: 601px) { .flow-step:hover { border-color: var(--gold); transform: translateX(8px); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .pause-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .pause-grid { grid-template-columns: repeat(5, 1fr); gap: var(--space-xs); margin: var(--space-md) 16px; } }
+        .pause-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); text-align: center; }
+        @media (max-width: 600px) { .pause-card { padding: var(--space-sm); border-radius: var(--space-sm); } }
+        .pause-letter { font-size: 2rem; font-weight: 800; color: var(--gold); margin-bottom: var(--space-xs); }
+        @media (max-width: 600px) { .pause-letter { font-size: 1.5rem; } }
+        .pause-word { font-size: 0.75rem; color: var(--cyan); text-transform: uppercase; letter-spacing: 1px; }
+        @media (max-width: 600px) { .pause-word { font-size: 0.6rem; letter-spacing: 0; } }
+
+        .spending-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .spending-grid { grid-template-columns: 1fr; gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .spending-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); text-align: center; }
+        @media (max-width: 600px) { .spending-card { border: none; border-radius: 0; padding: var(--space-md) 16px; text-align: left; display: flex; align-items: center; gap: var(--space-md); } }
+        .spending-percent { font-size: 2.5rem; font-weight: 800; margin-bottom: var(--space-sm); }
+        @media (max-width: 600px) { .spending-percent { font-size: 1.5rem; margin-bottom: 0; min-width: 60px; } }
+        .spending-percent.needs { color: var(--cyan); }
+        .spending-percent.wants { color: var(--gold); }
+        .spending-percent.savings { color: var(--success); }
+        .spending-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .spending-desc { font-size: 0.85rem; color: var(--text-muted); }
+        @media (max-width: 600px) { .spending-info { flex: 1; } }
+
+        .tracker-table { width: 100%; border-collapse: collapse; margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .tracker-table { margin: var(--space-md) 0; } }
+        .tracker-table th, .tracker-table td { padding: var(--space-md); text-align: left; border-bottom: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .tracker-table th, .tracker-table td { padding: var(--space-sm) 16px; font-size: 0.85rem; } }
+        .tracker-table th { background: var(--bg-card); color: var(--gold); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; }
+        .tracker-table td { color: var(--text-secondary); }
+        .tracker-table input { width: 100%; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--space-xs); padding: var(--space-sm); color: var(--text-primary); font-family: inherit; font-size: 0.9rem; }
+        .tracker-table input:focus { outline: none; border-color: var(--gold); }
+        .tracker-table input::placeholder { color: var(--text-muted); }
+
+        .app-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .app-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .app-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); }
+        .app-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .app-box p:last-child { margin-bottom: 0; }
+
+        .question-list { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .question-list { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .question-item { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); }
+        @media (max-width: 600px) { .question-item { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; } }
+        .question-number { font-size: 0.8rem; color: var(--cyan); text-transform: uppercase; margin-bottom: var(--space-xs); }
+        .question-text { color: var(--text-primary); font-weight: 600; }
+
+        .lesson-footer { text-align: center; padding: var(--space-xl); color: var(--text-muted); font-size: 0.85rem; }
+        .lesson-footer a { color: var(--gold); text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>⏸️</span>
+                <span>Module 4</span>
+            </div>
+            <div class="lesson-chapter">Module 4 - Nghi Thức Triệu Phú</div>
+            <h1 class="lesson-title">Quy Tắc PAUSE - Chi Tiêu Có Ý Thức</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 4.3</span></div>
+                <div class="meta-item"><span>⏱️</span><span>20 phút đọc</span></div>
+                <div class="meta-item"><span>📊</span><span>Spending Tracker</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Câu Hỏi Đáng Suy Ngẫm</h2>
+            <p>Hãy thử nhớ lại lần cuối cùng bạn mua một thứ gì đó... và sau đó hối hận. Có thể là chiếc áo xinh xinh chưa bao giờ mặc, món đồ công nghệ nằm trong tủ, hoặc những đơn hàng Shopee mà bạn quên mất mình đã đặt.</p>
+            <p>Bạn không đơn độc. Theo nghiên cứu của Đại học Chicago, trung bình một người trưởng thành hối hận về 20% các quyết định chi tiêu của mình. Với người thu nhập 15 triệu/tháng, đó là 3 triệu đồng MỖI THÁNG bay vào những thứ không thực sự cần.</p>
+            <p>Trong một năm, đó là 36 triệu - đủ cho một chuyến du lịch, một khóa học đổi đời, hoặc một khoản đầu tư sinh lời.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🧠</span> Sự Thật Về Não Bộ</div>
+                <p>Bộ não con người tiến hóa để tìm kiếm sự thỏa mãn ngay lập tức. Dopamine - hormone vui sướng - được tiết ra mạnh nhất khi bạn NGHĨ về việc mua hàng, không phải khi bạn sở hữu nó.</p>
+                <p style="margin-top: var(--space-sm);">Đó là lý do tại sao việc shopping mang lại cảm giác phấn khích, nhưng sau khi mua xong, cảm giác đó nhanh chóng biến mất - và bạn lại cần mua thứ khác để có lại cảm giác đó. Đây chính là chu kỳ chi tiêu cảm xúc.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 1: VẤN ĐỀ CHI TIÊU VÔ THỨC -->
+        <section class="section">
+            <h2 class="section-title"><span>💸</span> Chi Tiêu Vô Thức - Kẻ Thù Thầm Lặng</h2>
+            <p>Bạn có biết trung bình người Việt chi tiêu bốc đồng khoảng 15-20% thu nhập hàng tháng? Đó là những khoản chi "không định trước", thường do cảm xúc điều khiển: stress shopping, mua vì giảm giá, FOMO, v.v.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🧠</span> Chi Tiêu Cảm Xúc Là Gì?</div>
+                <p><strong>Emotional Spending</strong> là hành vi chi tiêu được thúc đẩy bởi cảm xúc (buồn, stress, cô đơn, chán, vui quá mức) thay vì nhu cầu thực sự. Đây là cách tiềm thức cố gắng "điền đầy" khoảng trống cảm xúc bằng vật chất.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M4_B3_01%0AEmotional+Spending+Cycle" alt="Chu kỳ chi tiêu cảm xúc">
+                <div class="image-caption">Stress → Mua sắm → Vui tạm thời → Hối hận → Stress → Lặp lại</div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>⚠️</span> Dấu Hiệu Chi Tiêu Vô Thức</div>
+                <p>• Mua xong mới nhớ ra mình đã mua</p>
+                <p style="margin-top: var(--space-xs);">• "Chỉ có X đồng" - nhưng cộng lại cả tháng thì nhiều</p>
+                <p style="margin-top: var(--space-xs);">• Có nhiều đồ mua về không dùng đến</p>
+                <p style="margin-top: var(--space-xs);">• Cuối tháng thắc mắc "tiền đi đâu hết rồi?"</p>
+                <p style="margin-top: var(--space-xs);">• Mua vì đang giảm giá, không phải vì cần</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: QUY TẮC PAUSE -->
+        <section class="section">
+            <h2 class="section-title"><span>⏸️</span> Quy Tắc P.A.U.S.E</h2>
+            <p>PAUSE là quy trình 5 bước giúp bạn chuyển từ chi tiêu vô thức sang chi tiêu có ý thức. Mỗi khi muốn chi tiêu (đặc biệt khoản không định trước), hãy PAUSE.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x600/0a1628/FFBD59?text=HINH+21%0APAUSE+Rule" alt="Hình 21: Quy Tắc PAUSE">
+                <div class="image-caption">Hình 21: Quy Tắc P.A.U.S.E - Chi Tiêu Có Ý Thức</div>
+            </div>
+
+            <div class="pause-grid">
+                <div class="pause-card">
+                    <div class="pause-letter">P</div>
+                    <div class="pause-word">Pause</div>
+                </div>
+                <div class="pause-card">
+                    <div class="pause-letter">A</div>
+                    <div class="pause-word">Ask</div>
+                </div>
+                <div class="pause-card">
+                    <div class="pause-letter">U</div>
+                    <div class="pause-word">Understand</div>
+                </div>
+                <div class="pause-card">
+                    <div class="pause-letter">S</div>
+                    <div class="pause-word">Source</div>
+                </div>
+                <div class="pause-card">
+                    <div class="pause-letter">E</div>
+                    <div class="pause-word">Energy</div>
+                </div>
+            </div>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">P</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">PAUSE - Dừng Lại</div>
+                        <div class="flow-step-desc">Dừng lại 10 giây trước khi thanh toán. Hít một hơi thở sâu. Đừng để xung động điều khiển.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">A</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">ASK - Hỏi Bản Thân</div>
+                        <div class="flow-step-desc">"Tôi CẦN hay tôi MUỐN?" Nhu cầu (need) là thiết yếu. Ham muốn (want) là tùy chọn. Hầu hết chi tiêu bốc đồng là "want".</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">U</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">UNDERSTAND - Hiểu Lý Do</div>
+                        <div class="flow-step-desc">"Tại sao tôi muốn mua cái này BÂY GIỜ?" Tôi đang stress? Buồn? Muốn thưởng bản thân? Muốn "flex"? Hiểu động cơ thật sự.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">S</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">SOURCE - Nguồn Tiền</div>
+                        <div class="flow-step-desc">"Tiền này đến từ đâu và sẽ ảnh hưởng gì?" Từ quỹ nào? Có ảnh hưởng tiết kiệm không? Có gây thiếu hụt cuối tháng không?</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">E</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">ENERGY - Năng Lượng</div>
+                        <div class="flow-step-desc">"Cảm xúc của tôi TRƯỚC và SAU khi mua là gì?" Nếu SAU khi mua sẽ hối hận, thất vọng → đừng mua. Nếu SAU khi mua sẽ vui thật sự, biết ơn → OK.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>⏰</span> Quy Tắc 24 Giờ</div>
+                <p>Với khoản chi từ 500K trở lên (hoặc số tiền đáng kể với bạn): Áp dụng <strong>Quy tắc 24 giờ</strong>. Chờ 24 giờ trước khi quyết định. Nếu sau 24 giờ vẫn muốn và vẫn thấy hợp lý → mua. Nếu quên mất → không cần.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: TRIGGER QUESTIONS -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> 7 Trigger Questions Trước Khi Chi</h2>
+            <p>Ghi nhớ và sử dụng những câu hỏi này mỗi khi bạn đứng trước quyết định chi tiêu:</p>
+
+            <div class="question-list">
+                <div class="question-item">
+                    <div class="question-number">Câu hỏi 1</div>
+                    <div class="question-text">"Nếu đây không phải là tiền của tôi mà là tiền của bố mẹ/con cái tôi, tôi có chi không?"</div>
+                </div>
+                <div class="question-item">
+                    <div class="question-number">Câu hỏi 2</div>
+                    <div class="question-text">"Nếu tôi phải LÀM VIỆC thêm [X] giờ để mua cái này, tôi có sẵn sàng không?"</div>
+                </div>
+                <div class="question-item">
+                    <div class="question-number">Câu hỏi 3</div>
+                    <div class="question-text">"1 năm sau, tôi có nhớ/quan tâm đến vật này không?"</div>
+                </div>
+                <div class="question-item">
+                    <div class="question-number">Câu hỏi 4</div>
+                    <div class="question-text">"Nếu không giảm giá, tôi có vẫn mua không?"</div>
+                </div>
+                <div class="question-item">
+                    <div class="question-number">Câu hỏi 5</div>
+                    <div class="question-text">"Tôi đang mua vì TÔI muốn, hay vì NGƯỜI KHÁC sẽ nghĩ gì?"</div>
+                </div>
+                <div class="question-item">
+                    <div class="question-number">Câu hỏi 6</div>
+                    <div class="question-text">"Tôi đã có thứ gì tương tự trong nhà chưa?"</div>
+                </div>
+                <div class="question-item">
+                    <div class="question-number">Câu hỏi 7</div>
+                    <div class="question-text">"Nếu dùng số tiền này để đầu tư/tiết kiệm, nó sẽ trở thành bao nhiêu sau 5 năm?"</div>
+                </div>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>💰</span> Quy Đổi Giờ Làm Việc</div>
+                <p>Một cách mạnh mẽ để đánh giá: Chia giá sản phẩm cho thu nhập/giờ của bạn. Ví dụ: Thu nhập 10 triệu/tháng, làm 200 giờ = 50K/giờ. Một cái áo 500K = 10 giờ làm việc. Bạn có sẵn sàng làm việc 10 giờ để đổi lấy cái áo đó không?</p>
+            </div>
+        </section>
+
+        <!-- SECTION 4: 50-30-20 SPENDING CATEGORIES -->
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> Quy Tắc 50-30-20</h2>
+            <p>Đây là công thức phân bổ chi tiêu được khuyến nghị bởi Senator Elizabeth Warren, giúp cân bằng giữa nhu cầu, ham muốn, và tương lai.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x600/0a1628/FFBD59?text=HINH+22%0A50-30-20+Rule" alt="Hình 22: Quy Tắc 50-30-20">
+                <div class="image-caption">Hình 22: Phân Bổ Thu Nhập Theo Quy Tắc 50-30-20</div>
+            </div>
+
+            <div class="spending-grid">
+                <div class="spending-card">
+                    <div class="spending-percent needs">50%</div>
+                    <div class="spending-info">
+                        <div class="spending-title">NEEDS - Nhu Cầu</div>
+                        <div class="spending-desc">Nhà, điện, nước, thực phẩm, bảo hiểm, di chuyển, y tế - những thứ PHẢI có để sống</div>
+                    </div>
+                </div>
+                <div class="spending-card">
+                    <div class="spending-percent wants">30%</div>
+                    <div class="spending-info">
+                        <div class="spending-title">WANTS - Ham Muốn</div>
+                        <div class="spending-desc">Giải trí, ăn ngoài, mua sắm, du lịch, sở thích - những thứ MUỐN có để vui</div>
+                    </div>
+                </div>
+                <div class="spending-card">
+                    <div class="spending-percent savings">20%</div>
+                    <div class="spending-info">
+                        <div class="spending-title">SAVINGS - Tiết Kiệm</div>
+                        <div class="spending-desc">Quỹ khẩn cấp, đầu tư, trả nợ, hưu trí - những thứ XÂY DỰNG tương lai</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🎯</span> Áp Dụng Thực Tế</div>
+                <p><strong>Ví dụ:</strong> Thu nhập 15 triệu/tháng</p>
+                <p style="margin-top: var(--space-xs);">• 50% Needs = 7.5 triệu (nhà, ăn, đi lại, điện nước)</p>
+                <p style="margin-top: var(--space-xs);">• 30% Wants = 4.5 triệu (cà phê, shopping, giải trí)</p>
+                <p style="margin-top: var(--space-xs);">• 20% Savings = 3 triệu (tiết kiệm, đầu tư)</p>
+                <p style="margin-top: var(--space-sm);"><strong>Lưu ý:</strong> Nếu Needs đang >50%, hãy tìm cách giảm (share phòng, nấu ăn tại nhà, xe buýt) hoặc tăng thu nhập.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 5: 7-DAY SPENDING TRACKER -->
+        <section class="section">
+            <h2 class="section-title"><span>📝</span> 7-Day Spending Tracker</h2>
+            <p>Tuần này, ghi lại MỌI khoản chi tiêu. Không phán xét, chỉ quan sát. Sau 7 ngày, bạn sẽ thấy rõ tiền đang đi đâu.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x400/0a1628/FFBD59?text=M4_B3_03%0ASpending+Tracker" alt="Spending Tracker">
+                <div class="image-caption">Ý thức về chi tiêu là bước đầu tiên để kiểm soát chi tiêu</div>
+            </div>
+
+            <table class="tracker-table">
+                <thead>
+                    <tr>
+                        <th>Ngày</th>
+                        <th>Khoản Chi</th>
+                        <th>Số Tiền</th>
+                        <th>N/W/S</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Thứ 2</td>
+                        <td><input type="text" placeholder="Ví dụ: Cà phê, Xăng, Shopee..."></td>
+                        <td><input type="text" placeholder="50K, 100K..."></td>
+                        <td><input type="text" placeholder="N/W/S"></td>
+                    </tr>
+                    <tr>
+                        <td>Thứ 3</td>
+                        <td><input type="text" placeholder="Khoản chi..."></td>
+                        <td><input type="text" placeholder="Số tiền..."></td>
+                        <td><input type="text" placeholder="N/W/S"></td>
+                    </tr>
+                    <tr>
+                        <td>Thứ 4</td>
+                        <td><input type="text" placeholder="Khoản chi..."></td>
+                        <td><input type="text" placeholder="Số tiền..."></td>
+                        <td><input type="text" placeholder="N/W/S"></td>
+                    </tr>
+                    <tr>
+                        <td>Thứ 5</td>
+                        <td><input type="text" placeholder="Khoản chi..."></td>
+                        <td><input type="text" placeholder="Số tiền..."></td>
+                        <td><input type="text" placeholder="N/W/S"></td>
+                    </tr>
+                    <tr>
+                        <td>Thứ 6</td>
+                        <td><input type="text" placeholder="Khoản chi..."></td>
+                        <td><input type="text" placeholder="Số tiền..."></td>
+                        <td><input type="text" placeholder="N/W/S"></td>
+                    </tr>
+                    <tr>
+                        <td>Thứ 7</td>
+                        <td><input type="text" placeholder="Khoản chi..."></td>
+                        <td><input type="text" placeholder="Số tiền..."></td>
+                        <td><input type="text" placeholder="N/W/S"></td>
+                    </tr>
+                    <tr>
+                        <td>CN</td>
+                        <td><input type="text" placeholder="Khoản chi..."></td>
+                        <td><input type="text" placeholder="Số tiền..."></td>
+                        <td><input type="text" placeholder="N/W/S"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📋</span> Cách Ghi</div>
+                <p><strong>N</strong> = Need (Nhu cầu thiết yếu)</p>
+                <p><strong>W</strong> = Want (Ham muốn, giải trí)</p>
+                <p><strong>S</strong> = Savings (Tiết kiệm, đầu tư)</p>
+                <p style="margin-top: var(--space-sm);">Cuối tuần, tính tổng mỗi loại và so với tỷ lệ 50-30-20. Bạn đang ở đâu?</p>
+            </div>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>📱</span> Tích Hợp GEM App</div>
+                <p>Thay vì ghi tay, sử dụng <strong>GEM App → Vision Board → Habits</strong> để tạo habit "Spending Tracker" và ghi nhận chi tiêu hàng ngày.</p>
+                <p>Hoặc hỏi <strong>GEM Master</strong>: "Nhắc tôi áp dụng PAUSE trước khi chi tiêu" để nhận reminder cá nhân hóa.</p>
+            </div>
+        </section>
+
+        <!-- REAL STORIES -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Câu Chuyện Thực Tế</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>👩‍💻</span> Câu Chuyện Của Thùy - Từ "Nghiện Shopee" Đến Tiết Kiệm 5 Triệu/Tháng</div>
+                <p><strong>Thùy, 27 tuổi, Nhân viên văn phòng:</strong> "Tôi từng là 'nạn nhân' của Shopee và Lazada. Mỗi lần stress đi làm về, tôi lại lướt app và đặt hàng. Đơn hàng chỉ 50K-100K nên tôi nghĩ không sao. Nhưng đến cuối tháng, sao tiền mất mà tôi không có gì đáng kể?"</p>
+                <p style="margin-top: var(--space-sm);">"Khi học về PAUSE, tôi bắt đầu áp dụng ngay. Mỗi lần muốn ấn 'Mua Ngay', tôi dừng lại 10 giây và tự hỏi: 'Mình CẦN hay MUỐN? Tại sao BÂY GIỜ?' Đa phần câu trả lời là: 'Mình muốn thôi. Và bây giờ vì... mình đang buồn.'"</p>
+                <p style="margin-top: var(--space-sm);">"Tháng đầu tiên áp dụng PAUSE, tôi 'cứu' được 3 triệu đồng khỏi những đơn hàng không cần thiết. Giờ đây, mỗi tháng tôi tiết kiệm được 5 triệu - số tiền trước đây bay vào những thứ tôi thậm chí không nhớ mình có."</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>👨‍👩‍👧</span> Câu Chuyện Của Gia Đình Anh Hùng - Từ "Tiền Đi Đâu?" Đến 50-30-20</div>
+                <p><strong>Anh Hùng, 40 tuổi, Kỹ sư:</strong> "Vợ chồng tôi thu nhập tổng cộng 50 triệu/tháng nhưng cuối tháng luôn hết tiền. Mỗi lần ngồi lại bàn về tài chính là cãi nhau vì không ai biết 'tiền đi đâu hết rồi.'"</p>
+                <p style="margin-top: var(--space-sm);">"Khi học về 50-30-20 và 7-Day Spending Tracker, chúng tôi quyết định ghi lại MỌI khoản chi trong 1 tuần. Kết quả shock: 40% thu nhập đang đi vào 'Wants' - ăn ngoài, mua sắm, giải trí - thay vì 30% như chuẩn."</p>
+                <p style="margin-top: var(--space-sm);">"Chúng tôi không cắt giảm đột ngột mà chỉ áp dụng PAUSE cho mỗi quyết định chi tiêu lớn. Sau 3 tháng, 'Wants' giảm xuống 28%, 'Savings' tăng từ 5% lên 22%. Quan trọng hơn, chúng tôi không còn cãi nhau về tiền nữa - vì mọi thứ đều minh bạch và có ý thức."</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>💡</span> Bài Học Rút Ra</div>
+                <p><strong>Từ Thùy:</strong> Chi tiêu cảm xúc thường đến từ những khoản nhỏ mà ta không để ý. Chỉ cần DỪNG LẠI 10 giây trước mỗi quyết định mua, bạn có thể tiết kiệm hàng triệu đồng mỗi tháng.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Từ gia đình anh Hùng:</strong> Ý thức về chi tiêu là bước đầu tiên. Khi biết tiền đi đâu, bạn mới có thể điều hướng nó đi đúng chỗ.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 6: KẾT HỢP VỚI BIẾT ƠN -->
+        <section class="section">
+            <h2 class="section-title"><span>🙏</span> PAUSE + Gratitude = Chi Tiêu Thịnh Vượng</h2>
+            <p>Khi kết hợp Quy tắc PAUSE với Gratitude Practice (Bài 4.2), bạn chuyển từ "chi tiêu vì thiếu" sang "chi tiêu từ sự đầy đủ".</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Trước Khi Chi - PAUSE</div>
+                        <div class="flow-step-desc">Áp dụng 5 bước PAUSE để đảm bảo đây là chi tiêu có ý thức, không phải phản ứng cảm xúc.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Khi Chi - Gratitude</div>
+                        <div class="flow-step-desc">Nếu quyết định chi, hãy chi với lòng biết ơn: "Cảm ơn vì tôi có tiền để thanh toán điều này."</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Sau Khi Chi - Trust</div>
+                        <div class="flow-step-desc">Tin tưởng rằng tiền sẽ quay lại. "Tiền đang lưu thông. Tôi đã trao đi giá trị, giá trị sẽ trở về."</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>✨</span> Tư Duy Thịnh Vượng Khi Chi Tiêu</div>
+                <p><strong>Tư duy nghèo:</strong> "Tiền đi mất rồi. Tôi lại có ít đi."</p>
+                <p style="margin-top: var(--space-sm);"><strong>Tư duy thịnh vượng:</strong> "Tiền đang lưu thông. Tôi trao đi với biết ơn, và sẽ nhận lại với sự dồi dào."</p>
+                <p style="margin-top: var(--space-sm);">Năng lượng bạn gửi kèm với tiền sẽ quyết định năng lượng tiền mang về.</p>
+            </div>
+        </section>
+
+        <!-- KEY TAKEAWAYS -->
+        <section class="section">
+            <h2 class="section-title"><span>🔑</span> Key Takeaways</h2>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">PAUSE = Công Cụ Phá Vỡ Chu Kỳ</div>
+                        <div class="flow-step-desc">Chỉ cần 10 giây dừng lại trước mỗi quyết định chi tiêu, bạn có thể phá vỡ chu kỳ chi tiêu vô thức. P-A-U-S-E: Pause, Ask, Understand, Source, Energy - 5 bước đơn giản để chi tiêu có ý thức.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">50-30-20 = Công Thức Cân Bằng</div>
+                        <div class="flow-step-desc">50% cho Needs (nhu cầu thiết yếu), 30% cho Wants (ham muốn, giải trí), 20% cho Savings (tiết kiệm, đầu tư). Đây là công thức đã được chứng minh giúp cân bằng giữa hiện tại và tương lai.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tracking = Ý Thức</div>
+                        <div class="flow-step-desc">Khi bạn ghi lại mọi khoản chi tiêu, bạn sẽ không thể chi tiêu vô thức được nữa. Ý thức về tiền là bước đầu tiên để làm chủ tiền. Những gì bạn đo lường, bạn có thể cải thiện.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TRANSITION -->
+        <section class="section">
+            <h2 class="section-title"><span>➡️</span> Bước Tiếp Theo</h2>
+            <p>Bạn đã có công cụ để chi tiêu có ý thức suốt ngày. Nhưng một ngày không chỉ có ban ngày - buổi tối là thời điểm quan trọng để "xử lý" và "lưu trữ" những gì đã xảy ra, đồng thời "lập trình" cho ngày mai.</p>
+            <p>Trong <strong>Bài 4.4</strong>, chúng ta sẽ học về <strong>Nghi Thức Cuối Ngày</strong> - cách khép lại ngày một cách có ý thức và chuẩn bị cho tiềm thức làm việc suốt đêm để thu hút thịnh vượng.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📝</span> Bài Tập Chuẩn Bị</div>
+                <p>Trong 7 ngày tới, hãy:</p>
+                <p style="margin-top: var(--space-sm);">• Ghi lại MỌI khoản chi tiêu vào bảng 7-Day Spending Tracker</p>
+                <p style="margin-top: var(--space-sm);">• Mỗi khoản, đánh dấu N (Need), W (Want), hoặc S (Savings)</p>
+                <p style="margin-top: var(--space-sm);">• Áp dụng PAUSE trước mỗi quyết định chi tiêu từ 100K trở lên</p>
+                <p style="margin-top: var(--space-sm);">• Cuối tuần, tính tổng và so sánh với tỷ lệ 50-30-20</p>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <p>© 2024 GEM Academy | Khóa học: Tái Tạo Tư Duy Triệu Phú</p>
+            <p>Module 4 - Bài 4.3: Quy Tắc PAUSE | <a href="#">Quay về danh sách bài học</a></p>
+        </footer>
+
+    </div>
+</body>
+</html>

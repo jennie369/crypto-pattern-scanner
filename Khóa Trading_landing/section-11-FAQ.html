@@ -1,0 +1,624 @@
+
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Section 11 - FAQ | GEM Trading Academy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&amp;family=Noto+Sans+Display:wght@300;400;600;700&amp;display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+:root {
+  --section-11-start:#4D0810;--section-11-mid-1:#5C0A14;--section-11-mid-2:#6B0F1A;--section-11-mid-3:#7C0B1B;--section-11-mid-4:#8C0616;--section-11-mid-5:#9C0612;--section-11-mid-6:#A50714;--section-11-end:#B50816;--primary-burgundy:#9C0612;--gold-accent:#FFBD59;--gold-light:#DEBC81;--text-light:#FFFFFF;--text-cream:#F5E6D3;--blue-accent:#4D9DE0;--font-heading:'Montserrat', sans-serif;--font-body:'Noto Sans Display', sans-serif;height:16px;display:inline-block;vertical-align:middle;margin-right:5px;"></i> FAQ';}
+* {
+  margin:0;padding:0;box-sizing:border-box;}
+body {
+  font-family:var(--font-body);color:var(--text-light);overflow-x:hidden;}
+.section-11 {
+  position:relative;min-height:100vh;padding:100px 20px;background:linear-gradient(180deg,
+var(--section-11-start) 0%,
+var(--section-11-mid-1) 15%,
+var(--section-11-mid-2) 30%,
+var(--section-11-mid-3) 45%,
+var(--section-11-mid-4) 60%,
+var(--section-11-mid-5) 75%,
+var(--section-11-mid-6) 90%,
+var(--section-11-end) 100%
+);overflow:hidden;}
+.section-11::before {
+  content:'';position:absolute;top:20%;right:10%;width:500px;height:500px;background:radial-gradient(circle, rgba(255, 189, 89, 0.12) 0%, transparent 70%);filter:blur(100px);pointer-events:none;animation:float 12s ease-in-out infinite;}
+.section-11::after {
+  content:'';position:absolute;bottom:15%;left:10%;width:600px;height:600px;background:radial-gradient(circle, rgba(181, 8, 22, 0.15) 0%, transparent 70%);filter:blur(120px);pointer-events:none;animation:float 10s ease-in-out infinite reverse;}
+.container {
+  position:relative;z-index:1;max-width:1200px;margin:0 auto;}
+.section-header {
+  text-align:center;margin-bottom:80px;animation:fadeInUp 1s ease-out;}
+.section-badge {
+  display:inline-block;background:linear-gradient(135deg, rgba(255, 189, 89, 0.3), rgba(156, 6, 18, 0.2));backdrop-filter:blur(15px);border:2px solid var(--gold-accent);color:var(--gold-accent);padding:12px 30px;border-radius:50px;font-size:0.85rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:30px;}
+.section-title {
+  font-family:var(--font-heading);font-size:clamp(2.5rem, 5vw, 4rem);font-weight:900;color:var(--text-light);line-height:1.2;margin-bottom:25px;}
+.section-subtitle {
+  font-size:clamp(1.1rem, 2vw, 1.3rem);color:var(--text-cream);max-width:800px;margin:0 auto;line-height:1.8;}
+.faq-categories {
+  margin-bottom:60px;}
+.category-section {
+  margin-bottom:50px;animation:fadeInUp 1s ease-out backwards;}
+  .category-section:nth-child(1) { animation-delay:0.2s;}
+  .category-section:nth-child(2) { animation-delay:0.3s;}
+  .category-section:nth-child(3) { animation-delay:0.4s;}
+  .category-section:nth-child(4) { animation-delay:0.5s;}
+  .category-section:nth-child(5) { animation-delay:0.6s;}
+.category-title {
+  font-family:var(--font-heading);font-size:clamp(1.5rem, 3vw, 2rem);font-weight:800;color:var(--gold-accent);margin-bottom:30px;padding-left:20px;border-left:5px solid var(--gold-accent);}
+.faq-item {
+  background:rgba(0, 0, 0, 0.6);backdrop-filter:blur(22px);border:2px solid rgba(255, 189, 89, 0.25);border-radius:20px;margin-bottom:20px;overflow:hidden;transition:all 0.3s ease;}
+.faq-item:hover {
+  border-color:rgba(255, 189, 89, 0.5);box-shadow:0 10px 30px rgba(255, 189, 89, 0.2);}
+.faq-item.active {
+  border-color:var(--gold-accent);box-shadow:0 15px 40px rgba(255, 189, 89, 0.3);}
+.faq-question {
+  display:flex;justify-content:space-between;align-items:center;padding:25px 30px;cursor:pointer;user-select:none;gap:20px;}
+.faq-question:hover {
+  background:rgba(255, 189, 89, 0.05);}
+.faq-question-text {
+  font-family:var(--font-heading);font-size:clamp(1.1rem, 2vw, 1.3rem);font-weight:700;color:var(--text-light);line-height:1.5;flex:1;}
+.faq-icon {
+  font-size:1.5rem;color:var(--gold-accent);transition:transform 0.3s ease;flex-shrink:0;}
+.faq-item.active .faq-icon {
+  transform:rotate(180deg);}
+.faq-answer {
+  max-height:0;overflow:hidden;transition:max-height 0.4s ease, padding 0.4s ease;}
+.faq-item.active .faq-answer {
+  max-height:1000px;padding:0 30px 30px 30px;}
+.faq-answer-text {
+  font-size:1.05rem;color:var(--text-cream);line-height:1.9;}
+.faq-answer-text strong {
+  color:var(--gold-accent);font-weight:700;}
+.faq-answer-text ul {
+  margin:15px 0;padding-left:25px;}
+.faq-answer-text li {
+  margin:10px 0;line-height:1.7;}
+.help-cta-section {
+  background:linear-gradient(135deg, rgba(77, 157, 224, 0.2), rgba(156, 6, 18, 0.3));border:3px solid rgba(77, 157, 224, 0.4);border-radius:30px;padding:50px 40px;text-align:center;margin-bottom:80px;animation:fadeInUp 1.2s ease-out 0.7s backwards;}
+.help-title {
+  font-family:var(--font-heading);font-size:clamp(1.8rem, 3.5vw, 2.5rem);font-weight:800;color:var(--text-light);margin-bottom:20px;}
+.help-subtitle {
+  font-size:clamp(1rem, 2vw, 1.2rem);color:var(--text-cream);margin-bottom:35px;line-height:1.8;}
+.help-buttons {
+  display:flex;justify-content:center;gap:25px;flex-wrap:wrap;}
+.help-button {
+  font-family:var(--font-heading);font-size:1.1rem;font-weight:700;padding:18px 40px;border-radius:50px;border:none;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:10px;transition:all 0.4s ease;text-transform:uppercase;letter-spacing:1px;}
+.help-button-primary {
+  background:linear-gradient(135deg, var(--blue-accent), #3B82C8);color:#fff;box-shadow:0 10px 30px rgba(77, 157, 224, 0.4);}
+.help-button-primary:hover {
+  transform:translateY(-5px) scale(1.05);box-shadow:0 15px 40px rgba(77, 157, 224, 0.6);}
+.help-button-secondary {
+  background:transparent;color:var(--blue-accent);border:3px solid var(--blue-accent);}
+.help-button-secondary:hover {
+  background:rgba(77, 157, 224, 0.1);transform:translateY(-5px) scale(1.05);box-shadow:0 10px 25px rgba(77, 157, 224, 0.3);}
+.progressive-cta {
+  background:linear-gradient(135deg, rgba(255, 189, 89, 0.25), rgba(156, 6, 18, 0.4));border:3px solid var(--gold-accent);border-radius:30px;padding:60px 40px;text-align:center;animation:fadeInUp 1.2s ease-out 0.8s backwards;}
+.progressive-title {
+  font-family:var(--font-heading);font-size:clamp(2rem, 4vw, 3rem);font-weight:900;color:var(--gold-accent);margin-bottom:25px;line-height:1.3;}
+.progressive-text {
+  font-size:clamp(1.1rem, 2vw, 1.3rem);color:var(--text-cream);margin-bottom:40px;line-height:1.8;}
+.progressive-button {
+  font-family:var(--font-heading);font-size:1.3rem;font-weight:800;padding:22px 60px;border-radius:50px;border:none;cursor:pointer;text-decoration:none;display:inline-block;transition:all 0.4s ease;text-transform:uppercase;letter-spacing:2px;background:linear-gradient(135deg, var(--gold-accent), var(--gold-light));color:#000;box-shadow:0 15px 40px rgba(255, 189, 89, 0.5);animation:pulse 2s infinite;}
+.progressive-button:hover {
+  transform:translateY(-8px) scale(1.08);box-shadow:0 20px 50px rgba(255, 189, 89, 0.7);}
+@keyframes fadeInUp {
+from {
+  opacity:0;transform:translateY(30px);}
+to {
+  opacity:1;transform:translateY(0);}
+}
+@keyframes pulse {
+0%, 100% {
+  transform:scale(1);}
+50% {
+  transform:scale(1.03);}
+}
+@keyframes float {
+0%, 100% {
+  transform:translateY(0) translateX(0);}
+50% {
+  transform:translateY(-20px) translateX(20px);}
+}
+@media (max-width:968px) {
+.section-11 {
+  padding:80px 20px;}
+.help-cta-section,
+.progressive-cta {
+  padding:40px 25px;}
+}
+@media (max-width:768px) {
+.section-11 {
+  padding:60px 15px;}
+.faq-question {
+  padding:20px;}
+.faq-item.active .faq-answer {
+  padding:0 20px 25px 20px;}
+.help-buttons {
+  flex-direction:column;}
+.help-button {
+  width:100%;justify-content:center;}
+}
+@media (max-width:400px) {
+.section-11 {
+  padding:50px 10px;}
+.category-title {
+  padding-left:15px;}
+}
+</style>
+
+
+<section class="section-11">
+<div class="container">
+<div class="section-header">
+  <div class="section-badge"><i data-lucide="help-circle" style="width:16px;height:16px;display:inline-block;vertical-align:middle;margin-right:5px;"></i> FAQ</div>
+<h1 class="section-title">20 Câu Hỏi Thường Gặp</h1>
+<p class="section-subtitle">Câu trả lời trung thực, minh bạch cho mọi thắc mắc của bạn</p>
+</div>
+<div class="faq-categories">
+<div class="category-section">
+<h2 class="category-title">📚 Về Phương Pháp</h2>
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<div class="faq-question-text">Frequency Trading Method là gì? Khác gì so với các phương pháp khác?</div>
+<div class="faq-icon">▼</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-text">
+Phương Pháp Giao Dịch Tần Số là hệ thống giao dịch dựa trên <strong class="">6 mẫu hình nến tần suất cao</strong> được tối ưu hóa riêng cho thị trường crypto Việt Nam. Khác với các phương pháp dạy chung chung, chúng tôi:<ul>
+<li><strong>Tập trung vào 6 mẫu hình cụ thể</strong> thay vì 100+ chỉ báo gây rối</li>
+<li><strong>Kiểm tra trên 10,000+ lệnh thực tế</strong> từ thị trường VN</li>
+<li><strong>Win rate 68-85%</strong> được xác minh bởi 200+ học viên</li>
+<li><strong>Hệ thống đào tạo 90 ngày</strong> từ số không đến có lãi</li>
+</ul>
+Đây không phải lý thuyết suông - đây là phương pháp đã được chứng minh hiệu quả với cộng đồng trader Việt.
+</div>
+</div>
+</div>
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<div class="faq-question-text">Tôi hoàn toàn mới với giao dịch crypto. Liệu có phù hợp không?</div>
+<div class="faq-icon">▼</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-text">
+<strong>Hoàn toàn phù hợp!</strong> 60% học viên của chúng tôi bắt đầu từ số không kiến thức. Hệ thống được thiết kế để:<ul>
+<li class=""><strong>Bắt đầu từ cơ bản</strong>: Giải thích mọi khái niệm từ đầu</li>
+<li class=""><strong>Lộ trình rõ ràng</strong>: Tuần 1-2 học lý thuyết, tuần 3-4 giao dịch mô phỏng, tuần 5+ giao dịch thật</li>
+<li class=""><strong>Hỗ trợ 1-1</strong>: Cộng đồng hoạt động hỗ trợ 24/7</li>
+<li class=""><strong>Không cần kinh nghiệm</strong>: Chỉ cần điện thoại/máy tính và internet</li>
+</ul>
+Ví dụ thực tế: Chị Hương L. - hoàn toàn mới bắt đầu, sau 60 ngày đạt win rate 72% và có lãi.
+</div>
+</div>
+</div>
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<div class="faq-question-text">Mất bao lâu để có thể có lãi?</div>
+<div class="faq-icon">▼</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-text">
+Tiến độ trung bình của học viên GEM:<ul>
+<li class=""><strong>Tháng 1</strong>: Học mẫu hình nến, kiểm tra, giao dịch mô phỏng trong app GEMRAL</li>
+<li class=""><strong>Tháng 2</strong>: Giao dịch thật với vốn nhỏ, win rate 55-65%</li>
+<li class=""><strong>Tháng 3</strong>: Win rate 65-75%, có lãi đầu tiên</li>
+<li class=""><strong>Tháng 4+</strong>: Ổn định 70%+, mở rộng vốn an toàn</li>
+</ul>
+<strong>85% học viên có lãi trong 90 ngày đầu.</strong> Tuy nhiên, kết quả phụ thuộc vào sự cam kết và kỷ luật của bạn. Người học nghiêm túc thường nhanh hơn (60 ngày), người học chậm rãi có thể mất 120 ngày.
+</div>
+</div>
+</div>
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<div class="faq-question-text">6 mẫu hình là gì? Có khó học không?</div>
+<div class="faq-icon">▼</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-text">
+6 mẫu hình cốt lõi của Phương Pháp Tần Số:<ul>
+<li class=""><strong class="">DPD</strong>: Mẫu hình phổ biến nhất, win rate 78%</li>
+<li class=""><strong class="">UPU</strong>: Mẫu hình phá vỡ, win rate 72%</li>
+<li class=""><strong class="">UPD</strong>: Đảo chiều xu hướng, win rate 70%</li>
+<li class=""><strong class="">DPU</strong>: Phá vỡ cấu trúc nâng cao, win rate 75%</li>
+<li class=""><strong class="">HFZ</strong>: Vùng tần số bán, win rate 80%</li>
+<li class=""><strong class="">LFZ</strong>: Vùng tần số mua, win rate 82%</li>
+</ul>
+<strong>Không khó!</strong> Chúng tôi dạy từ đơn giản đến phức tạp. Bạn bắt đầu với DPD (dễ nhất), thành thạo nó trước khi học tiếp. Mỗi mẫu hình có hình ảnh chi tiết + 50+ ví dụ thực tế.
+</div>
+</div>
+</div>
+</div>
+<div class="category-section">
+  <h2 class="category-title"><i data-lucide="dollar-sign" style="width:28px;height:28px;display:inline-block;vertical-align:middle;margin-right:10px;"></i> Về Giá Cả</h2>
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<div class="faq-question-text">Tại sao có 3 cấp độ giá? Cấp nào phù hợp với tôi?</div>
+<div class="faq-icon">▼</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-text">
+<strong>Cấp 1 - Nền Tảng (11M)</strong>: Phù hợp với người mới, muốn thử phương pháp trước. Có 2 công cụ cơ bản, không có mẫu hình (phải tự học và nhận diện mẫu nến).
+<br><br>
+<strong>Cấp 2 - Chuyên Nghiệp (21M)</strong>: Phù hợp với 90% học viên. Có đủ 6 mẫu hình, 8 công cụ, hỗ trợ cộng đồng. Đây là cấp giá trị tốt nhất - tiết kiệm 7M so với giá gốc.
+<br><br>
+<strong>Cấp 3 - Tinh Hoa (68M)</strong>: Cho người nghiêm túc, muốn tất cả. 11 mẫu hình (bao gồm nâng cao), 11 công cụ, cơ hội làm đối tác 40-60%. Tiết kiệm 27M so với giá gốc.
+<br><br>
+<strong>Khuyến nghị</strong>: 90% học viên chọn Cấp 2 vì đủ tất cả để có lãi. Cấp 3 cho người muốn mở rộng quy mô và làm CTV.
+</div>
+</div>
+</div>
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<div class="faq-question-text">Giá Sáng Lập Viên là gì? Có thật sự tiết kiệm không?</div>
+<div class="faq-icon">▼</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-text">
+<strong>Giá Sáng Lập Viên = Khóa giá vĩnh viễn</strong>. Sau khi bán hết 500 suất, giá sẽ tăng 25-30% và không bao giờ giảm lại.
+<br><br>
+So sánh tiết kiệm:<ul>
+<li class="">Cấp 1: 11M (Sáng lập viên) vs 15M (Thông thường) = Tiết kiệm 4M</li>
+<li class="">Cấp 2: 21M (Sáng lập viên) vs 28M (Thông thường) = Tiết kiệm 7M</li>
+<li class="">Cấp 3: 68M (Sáng lập viên) vs 95M (Thông thường) = Tiết kiệm 27M</li>
+</ul>
+<strong>Lợi ích thêm</strong>: Huy hiệu "Thành viên Sáng lập" vĩnh viễn, ưu tiên CTV/giảng viên, quyền chọn cổ phần cho top 50 sáng lập viên, truy cập sớm mọi cập nhật.
+<br><br>
+Hiện còn <strong>234/500 suất</strong>. Sau khi hết, giá tăng ngay.
+</div>
+</div>
+</div>
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<div class="faq-question-text">Có chính sách hoàn tiền không?</div>
+<div class="faq-icon">▼</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-text">
+<strong class="">Có - 7 ngày đảm bảo hoàn tiền.</strong>
+<br><br>
+Điều kiện:<ul>
+<li class="">Trong vòng 7 ngày đầu</li>
+<li class="">Đã thử học nghiêm túc (hoàn thành ít nhất 50% chương đầu)</li><li class="">Chưa sử dụng công cụ Scanner tự động trên app GEMRAL</li>
+<li class="">Phản hồi rõ ràng lý do không phù hợp</li>
+</ul>
+Chúng tôi hoàn tiền <strong>100%</strong> không giữ lại phí gì. Tuy nhiên, tỷ lệ hoàn tiền của GEM &lt;1% vì chất lượng khóa học cao và kỳ vọng được đặt rõ ràng từ đầu.
+<br><br>
+<strong>Lưu ý</strong>:Không hoàn tiền cho lý do "không có thời gian học" hoặc "tưởng sẽ giàu ngay sau 1 tuần". Giao dịch cần nỗ lực.
+</div>
+</div>
+</div>
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<div class="faq-question-text">Có thể thanh toán trả góp không?</div>
+<div class="faq-icon">▼</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-text">
+<strong>Hiện tại chưa hỗ trợ trả góp chính thức.</strong>
+<br><br>
+Lý do: Để giữ giá sáng lập viên thấp và đảm bảo sự cam kết của học viên. Trả góp thường dẫn đến tỷ lệ bỏ học cao hơn.
+<br><br>
+<strong>Giải pháp thay thế</strong>:<ul>
+<li>Bắt đầu với Cấp 1 (11M), sau đó nâng cấp lên Cấp 2/3 khi có lãi</li>
+<li class="">Tham gia các gói miễn phí trước, xem kết quả rồi quyết định</li>
+<li class="">Tham gia Cuộc thi để giành gói CAO CẤP/VIP miễn phí (khi có thông báo)</li>
+</ul>
+Nhiều học viên có lãi sau 3 tháng và hoàn vốn được chi phí khóa học.
+</div>
+</div>
+</div>
+</div>
+<div class="category-section">
+<h2 class="category-title">🤝 Về Đối Tác</h2>
+<div class="faq-item active">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<div class="faq-question-text">Chương trình CTV/Đối Tác hoạt động thế nào?</div>
+<div class="faq-icon">▼</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-text">
+<strong>3 cấp CTV dựa trên số người giới thiệu</strong>:<ul>
+<li class="selected-for-delete"><strong>Cộng tác viên (Cấp 1)</strong>: 3% hoa hồng, không yêu cầu cấp học</li>
+<li><strong>Đối tác (Cấp 2)</strong>:10-30% hoa hồng, cần cấp Chuyên Nghiệp</li>
+<li><strong>Đại Đối tác (Cấp 3)</strong>:40-60% hoa hồng, cần cấp Tinh Hoa</li>
+</ul>
+<strong>Cách hoạt động</strong>:<ul>
+<li>Bạn nhận liên kết giới thiệu riêng</li>
+<li>Chia sẻ với mạng lưới của bạn (bạn bè, mạng xã hội, cộng đồng)</li>
+<li>Mỗi người đăng ký qua liên kết = bạn nhận hoa hồng</li>
+<li>Hoa hồng trả hàng tháng, không có thời hạn</li>
+</ul>
+<strong>Thu nhập thực tế</strong>:Top CTV kiếm 30-50M/tháng từ 100+ người giới thiệu. Đối tác trung bình: 10-15M/tháng.
+</div>
+</div>
+</div>
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<div class="faq-question-text">Tôi cần bao nhiêu người giới thiệu để kiếm thu nhập đáng kể?</div>
+<div class="faq-icon">▼</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-text">
+<strong>Ước tính thu nhập CTV (cấp Đối tác 10-30%)</strong>:<ul>
+<li><strong>10 người giới thiệu/tháng</strong>:~6-8M/tháng</li>
+<li><strong>20 người giới thiệu/tháng</strong>:~12-16M/tháng</li>
+<li><strong>50 người giới thiệu/tháng</strong>:~30-40M/tháng</li>
+</ul>
+<strong>Nếu ở cấp Đại Đối tác (40-60%)</strong>:<ul>
+<li><strong>10 người giới thiệu/tháng</strong>:~15-20M/tháng</li>
+<li><strong>20 người giới thiệu/tháng</strong>:~30-40M/tháng</li>
+<li><strong>50 người giới thiệu/tháng</strong>:~75-100M/tháng</li>
+</ul>
+Ví dụ thực tế:Chị Ngọc V. - 30+ người giới thiệu trong 4 tháng, thu nhập 35M/tháng ở cấp Đại Đối tác.
+</div>
+</div>
+</div>
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<div class="faq-question-text">Có hỗ trợ tài liệu marketing cho CTV không?</div>
+<div class="faq-icon">▼</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-text">
+<strong>Có đầy đủ!</strong> Chúng tôi cung cấp:<ul>
+<li><strong>Trang đích</strong>:Trang sẵn sàng chia sẻ với theo dõi</li>
+<li><strong>Mẫu mạng xã hội</strong>:Mẫu bài đăng, tin, video ngắn</li>
+<li><strong>Tài nguyên đồ họa</strong>:Biểu ngữ, logo, đồ họa thông tin</li>
+<li><strong>Mẫu email</strong>:Chuỗi email đã được kiểm tra</li>
+<li><strong>Đoạn video</strong>:Lời chứng thực, video giải thích</li>
+<li><strong>Kịch bản</strong>:Kịch bản gọi điện, kịch bản nhắn tin</li>
+</ul>
+<strong>Đào tạo cho CTV</strong>:Khóa ngắn "Làm CTV Hiệu Quả" dạy cách xây dựng khán giả, tạo nội dung, chốt đơn. Miễn phí cho cấp Đối tác trở lên.
+</div>
+</div>
+</div>
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<div class="faq-question-text">Có cơ hội trở thành giảng viên không?</div>
+<div class="faq-icon">▼</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-text">
+<strong>Có!</strong> Lộ trình lên giảng viên GEM:<ul>
+<li><strong>Bước 1</strong>:Thành thạo phương pháp (win rate 75%+, có lãi 6+ tháng)</li>
+<li><strong>Bước 2</strong>:Hoạt động trong cộng đồng, giúp đỡ học viên mới</li>
+<li><strong>Bước 3</strong>:Ứng tuyển làm trợ giảng (hỗ trợ hỏi đáp, đánh giá lệnh)</li>
+<li><strong>Bước 4</strong>:Chương trình đào tạo giảng viên (3 tháng)</li>
+<li><strong>Bước 5</strong>:Giảng viên chính thức</li>
+</ul>
+<strong>Thu nhập giảng viên</strong>:50-100M/tháng (lương + thưởng dựa trên kết quả học viên). Sáng lập viên được ưu tiên khi có vị trí giảng viên mở.
+<br><br>
+Hiện có 3 giảng viên GEM, dự kiến tuyển thêm 5-7 người trong 2025.
+</div>
+</div>
+</div>
+</div>
+<div class="category-section">
+  <h2 class="category-title"><i data-lucide="life-buoy" style="width:28px;height:28px;display:inline-block;vertical-align:middle;margin-right:10px;"></i> Về Hỗ Trợ</h2>
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<div class="faq-question-text">Có hỗ trợ khi tôi gặp khó khăn không?</div>
+<div class="faq-icon">▼</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-text">
+<strong>Hỗ trợ đầy đủ 24/7!</strong>
+<ul>
+<li><strong>Cộng đồng Telegram</strong>:200+ trader hoạt động, phản hồi trong vòng 30 phút</li>
+<li><strong>Buổi hỏi đáp hàng tuần</strong>:Trực tiếp với giảng viên, hỏi gì cũng được</li>
+<li><strong>Đánh giá lệnh</strong>:Gửi lệnh để được đánh giá (cấp Chuyên Nghiệp+)</li>
+<li><strong>Cố vấn 1-1</strong>:Cho cấp Tinh Hoa, 2 buổi/tháng</li>
+<li><strong>Kho kiến thức</strong>:100+ bài viết, video giải đáp câu hỏi thường gặp</li>
+</ul>
+<strong>Thời gian phản hồi trung bình</strong>:&lt;1 giờ cho câu hỏi kỹ thuật, &lt;4 giờ cho câu hỏi chiến lược. Sáng lập viên được hỗ trợ ưu tiên.
+</div>
+</div>
+</div>
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<div class="faq-question-text">Nếu tôi bận, không học được liên tục thì sao?</div>
+<div class="faq-icon">▼</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-text">
+<strong>Hoàn toàn được!</strong> Khóa học truy cập trọn đời, không có hạn chót.
+<br><br>
+<strong>Học tập linh hoạt</strong>:<ul>
+<li>Học theo tốc độ của bạn - không bị ép</li>
+<li>Video theo yêu cầu - xem bất cứ lúc nào</li>
+<li>Tạm dừng/tiếp tục hành trình - không mất tiến độ</li>
+<li>Quay lại bất cứ lúc nào - cộng đồng luôn chào đón</li>
+</ul>
+<strong>Khuyến nghị</strong>:Dành ít nhất 1-2 giờ/ngày trong 90 ngày đầu để có đà tốt. Sau đó có thể giảm xuống 30 phút/ngày để duy trì.
+<br><br>
+Nhiều học viên bán thời gian (làm việc toàn thời gian + giao dịch thêm) vẫn có lãi sau 120 ngày.
+</div>
+</div>
+</div>
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<div class="faq-question-text">Công cụ/Phần mềm có khó sử dụng không?</div>
+<div class="faq-icon">▼</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-text">
+<strong>Rất dễ sử dụng!</strong> Công cụ được thiết kế cho người không rành công nghệ.
+<br><br>
+<strong>Quy trình cài đặt</strong>:<ul>
+<li><strong>Bước 1</strong>: Tải ứng dụng/truy cập cổng web (5 phút)</li>
+<li><strong>Bước 2</strong>: Kết nối API sàn giao dịch (10 phút, có video hướng dẫn)</li>
+<li><strong>Bước 3</strong>: Chạy máy quét, nhận tín hiệu (sẵn sàng!)</li>
+</ul>
+<strong>Hỗ trợ</strong>: Nếu gặp khó khăn, đội hỗ trợ kỹ thuật giúp cài đặt 1-1 qua Zoom/Telegram. Thời gian cài đặt trung bình: 30 phút.
+<br><br>
+<strong>Yêu cầu</strong>: Chỉ cần máy tính/laptop Windows/Mac, internet ổn định. Ứng dụng di động sắp ra mắt Q2 2025.
+</div>
+</div>
+</div>
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<div class="faq-question-text">Có cập nhật và nội dung mới không?</div>
+<div class="faq-icon">▼</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-text">
+<strong>Có - miễn phí mãi mãi!</strong> Giá sáng lập viên = cập nhật trọn đời.
+<br><br>
+<strong>Cập nhật hàng tháng</strong>:<ul>
+<li><strong>Phân tích thị trường</strong>: Phân tích xu hướng, cơ hội mới</li>
+<li><strong>Mẫu hình mới</strong>: Khi phát hiện mẫu hình mới hiệu quả</li>
+<li><strong>Cải tiến công cụ</strong>: Tính năng mới, sửa lỗi</li>
+<li><strong>Tinh chỉnh chiến lược</strong>: Tối ưu dựa trên thay đổi thị trường</li>
+</ul>
+<strong>Lộ trình 2025</strong>: Ứng dụng di động, máy quét AI, công cụ kiểm tra chiến lược nâng cao, kế hoạch giao dịch cá nhân hóa. Tất cả miễn phí cho Sáng lập viên.
+</div>
+</div>
+</div>
+</div>
+<div class="category-section">
+<h2 class="category-title">⚠️ Về Rủi Ro</h2>
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<div class="faq-question-text">Trading crypto có an toàn không? Tôi có thể mất hết tiền không?</div>
+<div class="faq-icon">▼</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-text">
+<strong>Trung thực</strong>:Giao dịch crypto có rủi ro cao. Bạn CÓ THỂ mất tiền nếu:<ul>
+<li>Không tuân thủ quản lý rủi ro</li>
+<li>Giao dịch với đòn bẩy quá cao</li>
+<li>Không kiểm soát cảm xúc</li>
+<li>Bỏ qua tín hiệu và giao dịch theo cảm tính</li>
+</ul>
+<strong>Tuy nhiên</strong>, với phương pháp GEM:<ul>
+<li><strong>Quản lý rủi ro nghiêm ngặt</strong>:Tối đa 2% vốn mỗi lệnh</li>
+<li><strong>Cắt lỗ bắt buộc</strong>:Không lệnh nào không có SL</li>
+<li><strong>Win rate cao</strong>:68-85% giảm thiểu thua lỗ</li>
+<li><strong>Kiểm tra kỹ</strong>:Không giao dịch mẫu hình chưa xác minh</li>
+</ul>
+<strong>85% học viên có lãi</strong> vì tuân thủ kỷ luật. 15% thua vì không tuân theo quy tắc.
+</div>
+</div>
+</div>
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<div class="faq-question-text">Tôi cần bao nhiêu vốn để bắt đầu?</div>
+<div class="faq-icon">▼</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-text">
+<strong>Khuyến nghị</strong>:<ul>
+<li><strong>Tối thiểu</strong>:$500 (12M VNĐ) - Đủ để giao dịch an toàn với rủi ro 2%</li>
+<li><strong>Thoải mái</strong>:$1,000-2,000 (24-48M VNĐ) - Đa dạng hóa được nhiều lệnh</li>
+<li><strong>Lý tưởng</strong>:$5,000+ (120M+ VNĐ) - Mở rộng nhanh, lợi nhuận đáng kể</li>
+</ul>
+<strong>Lưu ý</strong>:<ul>
+<li>Đừng dùng tiền cần thiết (tiền ăn, học phí, nợ)</li>
+<li>Bắt đầu nhỏ, tăng vốn khi có lãi</li>
+<li>Giao dịch mô phỏng 2-4 tuần trước khi dùng tiền thật</li>
+</ul>
+Nhiều học viên bắt đầu với $500, sau 3-6 tháng mở rộng lên $5,000-10,000 từ lợi nhuận.
+</div>
+</div>
+</div>
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<div class="faq-question-text">GEM có đảm bảo tôi sẽ có lãi không?</div>
+<div class="faq-icon">▼</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-text">
+<strong>KHÔNG</strong> - Chúng tôi không đảm bảo lợi nhuận vì đây là giao dịch, không phải ma thuật.
+<br><br>
+<strong>Điều chúng tôi ĐẢM BẢO</strong>:<ul>
+<li>Phương pháp đã xác minh với 200+ học viên (85% có lãi)</li>
+<li>Công cụ &amp; chiến lược chất lượng cao, không lừa đảo</li>
+<li>Hỗ trợ tốt nhất có thể</li>
+<li>Minh bạch về thắng và thua</li>
+<li>30 ngày hoàn tiền nếu không hài lòng</li>
+</ul>
+<strong>Kết quả phụ thuộc vào BẠN</strong>:<ul>
+<li>Học nghiêm túc</li>
+<li>Kiểm tra đầy đủ</li>
+<li>Tuân thủ quản lý rủi ro</li>
+<li>Kiên nhẫn và kỷ luật</li>
+</ul>
+Nếu bạn làm đủ, xác suất có lãi rất cao. Nếu bạn lười hoặc thiếu kỷ luật, khó.
+</div>
+</div>
+</div>
+<div class="faq-item">
+<div class="faq-question" onclick="toggleFAQ(this)">
+<div class="faq-question-text">Đây có phải là kế hoạch làm giàu nhanh không?</div>
+<div class="faq-icon">▼</div>
+</div>
+<div class="faq-answer">
+<div class="faq-answer-text">
+<strong>KHÔNG</strong> - GEM không hứa bạn sẽ giàu nhanh.
+<br><br>
+<strong>Thực tế</strong>:<ul>
+<li>Giao dịch cần thời gian học (90+ ngày)</li>
+<li>Cần vốn đầu tư (tối thiểu $500)</li>
+<li>Cần kỷ luật và kiên nhẫn</li>
+<li>Vẫn có rủi ro thua (30-32% lệnh sẽ thua)</li>
+</ul>
+<strong>Điều chúng tôi HỨA</strong>:<ul>
+<li>Phương pháp đã được chứng minh, không phải lý thuyết suông</li>
+<li>Nếu bạn cam kết 90 ngày, xác suất có lãi 85%</li>
+<li>ROI trung bình 45% trong 90 ngày (không phải 1000%)</li>
+<li>Kỹ năng dài hạn, không phải may mắn</li>
+</ul>
+<strong>Nếu bạn tìm kiếm</strong>: "Làm giàu 1 tháng", "không cần học", "thắng 100%" → GEM không dành cho bạn. Nếu bạn muốn kỹ năng thực sự, thu nhập ổn định → Chào mừng!
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="help-cta-section">
+<h2 class="help-title">Vẫn Chưa Tìm Được Câu Trả Lời?</h2>
+<p class="help-subtitle">Đừng ngại hỏi! Đội ngũ GEM sẵn sàng giải đáp mọi thắc mắc của bạn</p>
+<div class="help-buttons">
+<a href="https://t.me/YOUR_TELEGRAM" class="help-button help-button-primary" target="_blank">
+💬 Nhắn Tin Với Chúng Tôi
+</a>
+<a href="#book-call" class="help-button help-button-secondary">
+📞 Đặt Lịch Gọi 15 Phút
+</a>
+</div>
+</div>
+<div class="progressive-cta">
+<h2 class="progressive-title">Đã Hiểu Rõ? Sẵn Sàng Bắt Đầu?</h2>
+<p class="progressive-text">
+Bạn đã có đủ thông tin để đưa ra quyết định thông minh. Giờ là lúc chọn con đường của bạn.
+</p>
+<a href="#pricing" class="progressive-button">Xem Bảng Giá Khóa Học</a>
+</div>
+</div>
+
+    <!-- Image 01 -->
+    <div class="section-image" style="margin: 20px auto; text-align: center;">
+      <img src="landing-images/sec11-01.jpg.webp" alt="Section Image 01" style="max-width: 100%; height: auto; border-radius: 8px;">
+    </div>
+</section>
+<script>
+// FAQ Accordion functionality
+function toggleFAQ(element) {
+const faqItem = element.closest('.faq-item');const wasActive = faqItem.classList.contains('active');// Close all other FAQs
+document.querySelectorAll('.faq-item').forEach(item => {
+item.classList.remove('active');});// Toggle current FAQ
+if (!wasActive) {
+faqItem.classList.add('active');}
+}
+// Close FAQ when clicking outside
+document.addEventListener('click', function(event) {
+if (!event.target.closest('.faq-item')) {
+document.querySelectorAll('.faq-item').forEach(item => {
+item.classList.remove('active');});}
+});</script>
+<script>
+lucide.createIcons();</script>
+

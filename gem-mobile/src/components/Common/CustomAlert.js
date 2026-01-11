@@ -11,6 +11,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
+  Platform,
+  InteractionManager,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -38,12 +40,12 @@ const CustomAlert = ({
 
   const alertButtons = buttons.length > 0 ? buttons : defaultButtons;
 
-  // Get icon based on type
+  // Get icon based on type - Green for success
   const getIcon = () => {
     if (icon) return icon;
     switch (type) {
       case 'success':
-        return { name: 'checkmark-circle', color: '#00D9A5' };
+        return { name: 'checkmark-circle', color: '#10B981' }; // Green
       case 'error':
         return { name: 'close-circle', color: '#FF6B6B' };
       case 'warning':
@@ -100,9 +102,21 @@ const CustomAlert = ({
                     alertButtons.length === 1 && styles.singleButton,
                   ]}
                   onPress={() => {
-                    button.onPress?.();
+                    // CRITICAL: Close alert FIRST, then call button callback
+                    // On iOS, calling button.onPress first can close the parent modal
+                    // while this alert is still mounted, causing a race condition crash
                     if (!button.preventClose) {
                       onClose?.();
+                    }
+                    // Delay button callback to ensure alert is fully closed
+                    if (button.onPress) {
+                      if (Platform.OS === 'ios') {
+                        InteractionManager.runAfterInteractions(() => {
+                          setTimeout(() => button.onPress(), 100);
+                        });
+                      } else {
+                        setTimeout(() => button.onPress(), 50);
+                      }
                     }
                   }}
                 >
@@ -139,7 +153,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: 'rgba(255, 189, 89, 0.3)',
   },
   gradientBackground: {
     padding: 24,
@@ -156,7 +170,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#FFBD59',
     textAlign: 'center',
     marginBottom: 8,
   },
@@ -184,7 +198,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   primaryButton: {
-    backgroundColor: '#9D5CFF',
+    backgroundColor: '#FFBD59',
   },
   destructiveButton: {
     backgroundColor: 'rgba(255, 107, 107, 0.2)',
@@ -202,7 +216,8 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   primaryText: {
-    color: '#FFFFFF',
+    color: '#1a1a2e',
+    fontWeight: '700',
   },
   destructiveText: {
     color: '#FF6B6B',

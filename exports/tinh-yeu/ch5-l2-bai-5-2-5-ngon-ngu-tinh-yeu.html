@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 5.2: 5 Ngôn Ngữ Tình Yêu | Khóa Tần Số Tình Yêu</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --pink: #FF69B4;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--pink); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .highlight-box.purple { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05)); border-color: rgba(106, 91, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.purple { border-left-color: var(--purple); } }
+        .highlight-box.purple .highlight-box-title { color: var(--purple); }
+
+        .highlight-box.cyan { background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 240, 255, 0.05)); border-color: rgba(0, 240, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.cyan { border-left-color: var(--cyan); } }
+        .highlight-box.cyan .highlight-box-title { color: var(--cyan); }
+
+        .highlight-box.pink { background: linear-gradient(135deg, rgba(255, 105, 180, 0.15), rgba(255, 105, 180, 0.05)); border-color: rgba(255, 105, 180, 0.3); }
+        @media (max-width: 600px) { .highlight-box.pink { border-left-color: var(--pink); } }
+        .highlight-box.pink .highlight-box-title { color: var(--pink); }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .language-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; transition: all 0.3s ease; }
+        @media (max-width: 600px) { .language-card { border: none; border-radius: 0; padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        @media (min-width: 601px) { .language-card:hover { transform: translateY(-4px); } }
+        .language-card.words { border-left: 4px solid var(--gold); }
+        .language-card.time { border-left: 4px solid var(--cyan); }
+        .language-card.gifts { border-left: 4px solid var(--purple); }
+        .language-card.service { border-left: 4px solid var(--success); }
+        .language-card.touch { border-left: 4px solid var(--pink); }
+        .language-header { display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-md); }
+        .language-emoji { font-size: 2.5rem; }
+        .language-info { flex: 1; }
+        .language-name { font-size: 1.2rem; font-weight: 700; margin-bottom: var(--space-xs); }
+        .language-card.words .language-name { color: var(--gold); }
+        .language-card.time .language-name { color: var(--cyan); }
+        .language-card.gifts .language-name { color: var(--purple); }
+        .language-card.service .language-name { color: var(--success); }
+        .language-card.touch .language-name { color: var(--pink); }
+        .language-subtitle { font-size: 0.85rem; color: var(--text-muted); }
+        .language-desc { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        .language-examples { background: rgba(0,0,0,0.2); padding: var(--space-md); border-radius: var(--radius-md); }
+        .language-examples-title { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-sm); font-size: 0.9rem; }
+        .language-examples ul { list-style: none; color: var(--text-muted); font-size: 0.9rem; }
+        .language-examples li { padding: var(--space-xs) 0; }
+        .language-examples li::before { content: "💕 "; }
+
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>💕</span>
+                <span>Module 5</span>
+            </div>
+            <div class="lesson-chapter">Chapter 5 - Nghệ Thuật Quan Hệ Lành Mạnh</div>
+            <h1 class="lesson-title">5 Ngôn Ngữ Tình Yêu</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 5.2</span></div>
+                <div class="meta-item"><span>⏱️</span><span>30 phút đọc</span></div>
+            </div>
+        </header>
+
+        <!-- SECTION 1: Opening Hook -->
+        <section class="section">
+            <h2 class="section-title"><span>💗</span> Khi Tình Yêu "Lạc Mất" Trong Dịch Thuật</h2>
+
+            <p>Năm 1992, Tiến sĩ Gary Chapman - một chuyên gia tư vấn hôn nhân với 35 năm kinh nghiệm tại Winston-Salem, North Carolina - nhận ra một pattern đáng kinh ngạc. Trong hàng nghìn cặp đôi ông tư vấn, phần lớn đều nói: <em>"Tôi yêu họ, nhưng họ không hiểu"</em> hoặc <em>"Họ nói yêu tôi, nhưng tôi không cảm nhận được."</em></p>
+
+            <p>Điều gì đang xảy ra? Sau nhiều năm nghiên cứu, Chapman phát hiện: <strong>Con người thể hiện và nhận tình yêu qua 5 "ngôn ngữ" khác nhau.</strong> Khi hai người yêu nhau bằng hai ngôn ngữ khác nhau mà không biết, tình yêu như được gửi qua email nhưng người nhận lại chờ thư tay.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📖</span> "The 5 Love Languages" - Bestseller 30 năm</div>
+                <p>Cuốn sách của Gary Chapman đã bán hơn <strong>20 triệu bản</strong>, được dịch sang <strong>50 ngôn ngữ</strong>, và nằm trong danh sách bestseller của New York Times suốt 30 năm. Concept này đã cứu vãn hàng triệu mối quan hệ trên thế giới vì nó giải thích một sự thật đơn giản nhưng sâu sắc: <strong>Bạn có thể yêu ai đó hết lòng, nhưng nếu bạn "nói" sai ngôn ngữ, họ sẽ không bao giờ "nghe" được.</strong></p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>🔬</span> Góc Nhìn Khoa Học Năng Lượng</div>
+                <p>Từ góc độ Học Thuyết Chuyển Hóa Nội Tâm, 5 Ngôn Ngữ Tình Yêu chính là 5 <strong>kênh rung động</strong> mà năng lượng tình yêu được truyền đi. Mỗi người "điều chỉnh" để nhận sóng ở một tần số khác nhau. Khi bạn phát ở tần số 540Hz (tình yêu vô điều kiện) nhưng phát qua kênh "Service" - trong khi đối tác chỉ nhận qua kênh "Words" - năng lượng đó không được tiếp nhận, dù nó vẫn tồn tại. Hiểu ngôn ngữ tình yêu = điều chỉnh đúng kênh truyền.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m5-love-languages-intro.png" alt="5 ngôn ngữ tình yêu">
+            </div>
+            <div class="image-caption">Hình 1: 5 Ngôn Ngữ Tình Yêu - Mỗi người yêu theo cách riêng</div>
+        </section>
+
+        <!-- SECTION 2: 5 Ngôn Ngữ Chi Tiết -->
+        <section class="section">
+            <h2 class="section-title"><span>💬</span> 5 Ngôn Ngữ Tình Yêu Chi Tiết</h2>
+
+            <p>Mỗi ngôn ngữ có đặc điểm riêng, cách nhận biết, và cách "nói" để đối tác thực sự "nghe" được tình yêu của bạn:</p>
+
+            <!-- Language 1: Words of Affirmation -->
+            <div class="language-card words">
+                <div class="language-header">
+                    <div class="language-emoji">💬</div>
+                    <div class="language-info">
+                        <div class="language-name">1. Words of Affirmation</div>
+                        <div class="language-subtitle">Lời Khẳng Định & Khen Ngợi</div>
+                    </div>
+                </div>
+                <div class="language-desc">
+                    Người có ngôn ngữ này cần <strong>NGHE</strong> tình yêu. Với họ, lời nói có sức mạnh to lớn - một câu khen có thể khiến họ hạnh phúc cả ngày, nhưng một câu chê cũng có thể phá hủy cả tuần. <em>"Anh nghĩ trong đầu"</em> không đủ - họ cần nghe thành lời.
+                </div>
+                <div class="language-examples">
+                    <div class="language-examples-title">✅ Cách Nói Đúng:</div>
+                    <ul>
+                        <li>"Anh yêu em" - nói thường xuyên, không chỉ dịp đặc biệt</li>
+                        <li>Khen cụ thể: "Em nấu món này ngon quá, anh thích cách em nêm gia vị"</li>
+                        <li>Gửi tin nhắn yêu thương giữa ngày: "Đang họp mà nhớ em"</li>
+                        <li>Viết note dán trên gương, trong cặp táp, hoặc lunchbox</li>
+                        <li>Khen họ trước mặt người khác: "Vợ anh giỏi lắm"</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Language 2: Quality Time -->
+            <div class="language-card time">
+                <div class="language-header">
+                    <div class="language-emoji">⏰</div>
+                    <div class="language-info">
+                        <div class="language-name">2. Quality Time</div>
+                        <div class="language-subtitle">Thời Gian Chất Lượng</div>
+                    </div>
+                </div>
+                <div class="language-desc">
+                    <strong>Hiện diện trọn vẹn</strong> - đó là thứ họ cần. Không phải chỉ ngồi cạnh nhau, mà là 100% chú ý, không điện thoại, không phân tâm. Với họ, thời gian là món quà quý giá nhất bạn có thể tặng, vì thời gian không thể mua lại được.
+                </div>
+                <div class="language-examples">
+                    <div class="language-examples-title">✅ Cách Dành Thời Gian:</div>
+                    <ul>
+                        <li>Đặt điện thoại xuống, nhìn vào mắt khi nói chuyện</li>
+                        <li>Date night cố định hàng tuần - không cancel vì công việc</li>
+                        <li>Làm hoạt động CÙNG nhau: nấu ăn, đi dạo, xem phim</li>
+                        <li>Lắng nghe họ kể về ngày của họ (không check điện thoại)</li>
+                        <li>Du lịch hai người, không có ai khác</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Language 3: Receiving Gifts -->
+            <div class="language-card gifts">
+                <div class="language-header">
+                    <div class="language-emoji">🎁</div>
+                    <div class="language-info">
+                        <div class="language-name">3. Receiving Gifts</div>
+                        <div class="language-subtitle">Nhận Quà Tặng</div>
+                    </div>
+                </div>
+                <div class="language-desc">
+                    Đừng hiểu sai! Đây KHÔNG phải vì vật chất. Với họ, quà tặng là <strong>BIỂU TƯỢNG hữu hình của tình yêu</strong> - bằng chứng rằng bạn nghĩ đến họ, nhớ sở thích của họ, và dành thời gian chọn lựa. Món quà 50K có tâm đáng giá hơn túi xách 50 triệu không có tình.
+                </div>
+                <div class="language-examples">
+                    <div class="language-examples-title">✅ Quà Tặng Ý Nghĩa:</div>
+                    <ul>
+                        <li>Quà nhỏ bất ngờ: bông hoa khi đi làm về, món ăn yêu thích</li>
+                        <li>Nhớ những thứ họ từng nhắc: "Em thấy cái áo đẹp quá" → mua tặng</li>
+                        <li>Mang về quà khi đi công tác - dù chỉ là nam châm, móc khóa</li>
+                        <li>Handmade: thiệp tự viết, album ảnh, scrapbook kỷ niệm</li>
+                        <li>KHÔNG BAO GIỜ quên sinh nhật, Valentine, kỷ niệm</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m5-love-languages-grid.png" alt="5 ngôn ngữ chi tiết">
+            </div>
+            <div class="image-caption">Hình 2: 5 Ngôn Ngữ Tình Yêu - Mỗi ngôn ngữ có cách thể hiện riêng</div>
+
+            <!-- Language 4: Acts of Service -->
+            <div class="language-card service">
+                <div class="language-header">
+                    <div class="language-emoji">🛠️</div>
+                    <div class="language-info">
+                        <div class="language-name">4. Acts of Service</div>
+                        <div class="language-subtitle">Hành Động Phục Vụ</div>
+                    </div>
+                </div>
+                <div class="language-desc">
+                    <em>"Hành động hơn lời nói"</em> - đây là motto của họ. Với người có ngôn ngữ này, <strong>việc bạn LÀM</strong> cho họ chính là tình yêu. Nấu cơm, rửa chén, đổ xăng xe, sửa bóng đèn - những việc "nhỏ" này với họ không nhỏ chút nào. Mỗi hành động là một lời nói "anh yêu em".
+                </div>
+                <div class="language-examples">
+                    <div class="language-examples-title">✅ Hành Động Thể Hiện:</div>
+                    <ul>
+                        <li>Nấu ăn, rửa chén, dọn nhà - ĐẶC BIỆT khi họ mệt mỏi</li>
+                        <li>Làm việc TRƯỚC KHI được yêu cầu (proactive, không reactive)</li>
+                        <li>Sửa chữa đồ đạc, thay bóng đèn, đổi bánh xe</li>
+                        <li>Chăm sóc họ khi ốm: nấu cháo, mua thuốc, massage</li>
+                        <li>Đảm nhận việc nhà để họ nghỉ ngơi cuối tuần</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Language 5: Physical Touch -->
+            <div class="language-card touch">
+                <div class="language-header">
+                    <div class="language-emoji">🤗</div>
+                    <div class="language-info">
+                        <div class="language-name">5. Physical Touch</div>
+                        <div class="language-subtitle">Tiếp Xúc Thể Chất</div>
+                    </div>
+                </div>
+                <div class="language-desc">
+                    Với người có ngôn ngữ này, <strong>CHẠM</strong> là cách họ kết nối sâu nhất. Không chỉ trong lúc thân mật - mà là ôm, nắm tay, vuốt tóc, massage trong cuộc sống thường ngày. Thiếu tiếp xúc, họ cảm thấy xa cách dù đang ở ngay cạnh bạn.
+                </div>
+                <div class="language-examples">
+                    <div class="language-examples-title">✅ Tiếp Xúc Hàng Ngày:</div>
+                    <ul>
+                        <li>Ôm họ khi gặp và khi tạm biệt - ôm THẬT, không phải tap-tap</li>
+                        <li>Nắm tay khi đi cạnh nhau, khi lái xe, khi xem phim</li>
+                        <li>Ngồi sát nhau trên sofa, không ngồi hai đầu</li>
+                        <li>Massage vai, xoa lưng khi họ mệt</li>
+                        <li>Vuốt tóc, chạm vai khi nói chuyện, hôn trán</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: Ví Dụ Thực Tế -->
+        <section class="section">
+            <h2 class="section-title"><span>💑</span> Câu Chuyện Thực Tế</h2>
+
+            <p>Hiểu lý thuyết là một chuyện, nhưng thấy nó hoạt động trong thực tế mới thuyết phục. Đây là hai câu chuyện từ các học viên của GEM:</p>
+
+            <div class="highlight-box pink">
+                <div class="highlight-box-title"><span>👩</span> Hạnh, 35 tuổi - Giáo viên, TP.HCM</div>
+                <p><strong>Tình huống:</strong> Hạnh kết hôn 8 năm với Tuấn, một kỹ sư IT. Cô luôn cảm thấy <em>"chồng không yêu mình"</em> dù Tuấn không bao giờ quên sinh nhật, luôn sửa mọi thứ trong nhà, và làm việc nhà đều đặn. Hạnh khao khát những lời ngọt ngào, tin nhắn yêu thương, nhưng Tuấn rất kiệm lời.<br><br>
+
+                <strong>Phát hiện:</strong> Sau khi học về 5 Love Languages, Hạnh nhận ra: Ngôn ngữ của cô là <strong>Words of Affirmation</strong>, nhưng ngôn ngữ của Tuấn là <strong>Acts of Service</strong>. Tuấn đang yêu cô hết lòng - bằng ngôn ngữ của ANH ẤY. Mỗi lần anh sửa bóng đèn, đổ xăng xe, nấu cơm - đó là cách anh nói "anh yêu em".<br><br>
+
+                <strong>Giải pháp:</strong> Hạnh chia sẻ với Tuấn về concept này. Cô nói: <em>"Em cần nghe anh nói yêu em, dù chỉ qua tin nhắn."</em> Tuấn - dù lúc đầu thấy awkward - bắt đầu gửi tin nhắn đơn giản mỗi ngày: "Anh nhớ em", "Làm việc nhớ ăn trưa nhé". Đồng thời, Hạnh học cách nhận ra tình yêu qua hành động của Tuấn.<br><br>
+
+                <strong>Kết quả:</strong> Sau 6 tháng, Hạnh cảm thấy được yêu thương hơn bao giờ hết. <em>"Anh ấy vẫn là người đàn ông ít nói, nhưng giờ em hiểu anh ấy đang nói 'yêu em' theo cách của anh ấy - và anh ấy cũng học nói theo cách của em."</em></p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>👨</span> Đức, 40 tuổi - Doanh nhân, Hà Nội</div>
+                <p><strong>Tình huống:</strong> Đức và vợ (Linh) suýt ly hôn sau 10 năm. Anh luôn mua quà đắt tiền cho vợ: túi xách, điện thoại, trang sức. Nhưng Linh than phiền: <em>"Anh chẳng bao giờ ở nhà, lúc nào cũng công việc."</em> Đức tức giận vì cảm thấy sự cố gắng của mình không được ghi nhận.<br><br>
+
+                <strong>Phát hiện:</strong> Ngôn ngữ của Đức là <strong>Receiving Gifts</strong> - anh yêu bằng cách tặng quà. Nhưng ngôn ngữ của Linh là <strong>Quality Time</strong> - cô cần sự hiện diện, không phải vật chất. Túi xách Chanel với Linh không có ý nghĩa gì nếu Đức vắng mặt cả tháng.<br><br>
+
+                <strong>Giải pháp:</strong> Đức quyết định dành mỗi tối thứ 7 cho date night với vợ - KHÔNG có điện thoại, KHÔNG có công việc. Anh cũng dành 30 phút mỗi tối nói chuyện với Linh, không xem TV, không check email. Thay vì mua quà đắt tiền, anh dành thời gian cùng vợ nấu ăn, đi dạo, xem phim.<br><br>
+
+                <strong>Kết quả:</strong> <em>"Vợ tôi giờ hạnh phúc hơn khi tôi ở nhà cả tối thứ 7 so với khi tôi tặng cô ấy chiếc túi 50 triệu. Tôi đã lãng phí bao nhiêu tiền, trong khi thứ cô ấy cần là THỜI GIAN - thứ miễn phí."</em></p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m5-identify-language.png" alt="Nhận biết ngôn ngữ tình yêu">
+            </div>
+            <div class="image-caption">Hình 3: Câu chuyện thực tế - Khi hiểu đúng ngôn ngữ</div>
+        </section>
+
+        <!-- SECTION 4: Cách Nhận Biết Ngôn Ngữ -->
+        <section class="section">
+            <h2 class="section-title"><span>🔍</span> Cách Nhận Biết Ngôn Ngữ Của Bạn</h2>
+
+            <p>Không chắc ngôn ngữ tình yêu của mình là gì? Có 3 cách để nhận biết:</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>1️⃣</span> Hỏi: Bạn Phàn Nàn Điều Gì?</div>
+                <p>Điều bạn than phiền nhiều nhất trong mối quan hệ chính là manh mối. Lời phàn nàn thường là <strong>ngôn ngữ tình yêu bị thiếu hụt</strong>:<br><br>
+                <strong>"Anh/em chẳng bao giờ nói yêu"</strong> → Words of Affirmation<br>
+                <strong>"Anh/em lúc nào cũng bận, không có thời gian"</strong> → Quality Time<br>
+                <strong>"Anh/em không bao giờ nhớ sinh nhật, kỷ niệm"</strong> → Receiving Gifts<br>
+                <strong>"Em phải làm hết mọi thứ trong nhà"</strong> → Acts of Service<br>
+                <strong>"Anh/em không bao giờ ôm, chạm vào em"</strong> → Physical Touch</p>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>2️⃣</span> Hỏi: Bạn Yêu Cầu Điều Gì?</div>
+                <p>Những gì bạn thường yêu cầu từ đối tác cũng tiết lộ ngôn ngữ của bạn:<br><br>
+                <strong>"Nói cho em nghe em có đẹp không?"</strong> → Words<br>
+                <strong>"Tuần này mình đi đâu chơi đi?"</strong> → Quality Time<br>
+                <strong>"Đi công tác nhớ mua quà về cho em nhé!"</strong> → Gifts<br>
+                <strong>"Anh giúp em dọn nhà được không?"</strong> → Acts of Service<br>
+                <strong>"Ôm em đi", "Nắm tay em đi"</strong> → Physical Touch</p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>3️⃣</span> Hỏi: Bạn Thể Hiện Tình Yêu Như Thế Nào?</div>
+                <p>Cách bạn yêu người khác thường phản ánh ngôn ngữ của chính bạn:<br><br>
+                Hay <strong>khen ngợi, động viên</strong> người khác → Words<br>
+                Hay <strong>dành thời gian riêng</strong> cho người yêu thương → Quality Time<br>
+                Hay <strong>tặng quà, mang đồ về</strong> cho người thân → Gifts<br>
+                Hay <strong>nấu ăn, làm việc giúp</strong> người khác → Acts of Service<br>
+                Hay <strong>ôm, nắm tay, massage</strong> người thân → Physical Touch</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📝</span> Làm Bài Test Chính Thức</div>
+                <p>Nếu vẫn không chắc, bạn có thể làm bài test chính thức tại <strong>5lovelanguages.com</strong>. Test chỉ mất 5-10 phút và cho kết quả chi tiết với điểm số cho từng ngôn ngữ. Mời đối tác làm cùng để so sánh!</p>
+            </div>
+        </section>
+
+        <!-- SECTION 5: Áp Dụng Thực Hành -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Áp Dụng Vào Thực Tế</h2>
+
+            <p>Biết ngôn ngữ tình yêu chỉ là bước đầu. Quan trọng là ÁP DỤNG đúng cách:</p>
+
+            <div class="highlight-box" style="background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05)); border-color: rgba(0, 200, 83, 0.3);">
+                <div class="highlight-box-title" style="color: var(--success);"><span>⭐</span> Nguyên Tắc Vàng</div>
+                <p><strong>YÊU BẰNG NGÔN NGỮ CỦA HỌ, không phải của bạn.</strong><br><br>
+
+                Đây là insight quan trọng nhất của toàn bộ concept. Bạn đang "nói" bằng ngôn ngữ của MÌNH - nhưng họ chỉ "nghe" được ngôn ngữ của HỌ. Muốn tình yêu đến được đích, bạn phải chuyển sang ngôn ngữ của đối tác.<br><br>
+
+                • Ngôn ngữ của bạn là Words, của họ là Touch? → Ôm nhiều hơn, nói ít hơn.<br>
+                • Ngôn ngữ của bạn là Gifts, của họ là Quality Time? → Dành thời gian, đừng mua quà.<br>
+                • Ngôn ngữ của bạn là Service, của họ là Words? → Nói "anh yêu em", đừng chỉ rửa chén.</p>
+            </div>
+
+            <div class="highlight-box pink">
+                <div class="highlight-box-title"><span>💬</span> Bài Tập: Cuộc Trò Chuyện Ngôn Ngữ</div>
+                <p>Tối nay, hãy nói chuyện với đối tác (hoặc người thân) bằng những câu hỏi sau:<br><br>
+
+                <strong>Câu 1:</strong> <em>"Khi nào em/anh cảm thấy được yêu thương nhất?"</em><br>
+                <strong>Câu 2:</strong> <em>"Điều gì làm em/anh cảm thấy được quan tâm?"</em><br>
+                <strong>Câu 3:</strong> <em>"Em/anh thích anh/em thể hiện tình yêu như thế nào?"</em><br><br>
+
+                Hoặc đơn giản hơn: Cùng nhau làm bài test tại 5lovelanguages.com và chia sẻ kết quả!</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m5-love-language-application.png" alt="Ứng dụng ngôn ngữ tình yêu">
+            </div>
+            <div class="image-caption">Hình 4: Yêu bằng ngôn ngữ của họ - Chìa khóa hạnh phúc</div>
+        </section>
+
+        <!-- SECTION 6: Lưu Ý Quan Trọng -->
+        <section class="section">
+            <h2 class="section-title"><span>⚠️</span> Lưu Ý Quan Trọng</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>1️⃣</span> Bạn Có Thể Có Nhiều Ngôn Ngữ</div>
+                <p>Hầu hết mọi người có <strong>1-2 ngôn ngữ chính</strong> (primary) và các ngôn ngữ khác ở mức thấp hơn. Ví dụ: Primary là Words (12 điểm), Secondary là Quality Time (9 điểm), các ngôn ngữ khác 3-5 điểm. Đừng bỏ qua ngôn ngữ secondary!</p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>2️⃣</span> Ngôn Ngữ Có Thể Thay Đổi Theo Thời Gian</div>
+                <p>Ngôn ngữ tình yêu không cố định suốt đời. Hoàn cảnh cuộc sống có thể thay đổi nó:<br><br>
+
+                • Người mới có con có thể chuyển từ Quality Time sang <strong>Acts of Service</strong> (cần giúp đỡ việc nhà).<br>
+                • Người xa cách lâu có thể chuyển sang <strong>Physical Touch</strong> (thiếu tiếp xúc).<br>
+                • Người trầm cảm có thể cần <strong>Words of Affirmation</strong> nhiều hơn bình thường.<br><br>
+
+                Hãy <strong>check-in định kỳ</strong> (6-12 tháng/lần) với đối tác để cập nhật.</p>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>3️⃣</span> KHÔNG Dùng Để Biện Minh</div>
+                <p>Đây là sai lầm phổ biến nhất! ĐỪNG BAO GIỜ nói:<br><br>
+
+                ❌ <em>"Tại ngôn ngữ của anh không phải Words nên anh không nói yêu được!"</em><br>
+                ❌ <em>"Em là người Gifts, nên anh phải mua quà cho em!"</em><br><br>
+
+                5 Love Languages là công cụ để BẠN hiểu đối tác và nỗ lực yêu theo ngôn ngữ của họ - KHÔNG phải để bắt họ chiều theo ngôn ngữ của bạn. Tình yêu đòi hỏi học ngôn ngữ mới, dù không tự nhiên với bạn.</p>
+            </div>
+
+            <div class="highlight-box" style="background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border-color: rgba(255, 189, 89, 0.3);">
+                <div class="highlight-box-title"><span>4️⃣</span> Áp Dụng Cho TẤT CẢ Mối Quan Hệ</div>
+                <p>5 Ngôn Ngữ Tình Yêu không chỉ cho tình yêu đôi lứa. Bạn có thể áp dụng với:<br><br>
+
+                <strong>Con cái:</strong> Mỗi đứa con có ngôn ngữ khác nhau. Đứa cần ôm, đứa cần khen.<br>
+                <strong>Cha mẹ:</strong> Cha mẹ già có thể cần Quality Time (thăm họ) hoặc Acts of Service (giúp đỡ).<br>
+                <strong>Bạn bè:</strong> Bạn thân có thể cần Words (động viên) hoặc Gifts (nhớ sinh nhật).<br>
+                <strong>Đồng nghiệp:</strong> Sếp khen bạn (Words) vs tăng lương (Gifts) - bạn cần gì hơn?</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m5-love-language-notes.png" alt="Lưu ý quan trọng">
+            </div>
+            <div class="image-caption">Hình 5: 4 lưu ý quan trọng khi áp dụng 5 Ngôn Ngữ Tình Yêu</div>
+        </section>
+
+        <!-- SECTION 7: FAQ -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🤔</span> Nếu hai người có ngôn ngữ khác nhau hoàn toàn thì sao?</div>
+                <p>Đây là tình huống phổ biến! Giải pháp là <strong>cả hai đều học ngôn ngữ của đối tác</strong>. Bạn yêu bằng ngôn ngữ của họ, họ yêu bằng ngôn ngữ của bạn. Lúc đầu sẽ awkward - như học ngoại ngữ mới - nhưng dần dần sẽ tự nhiên. Quan trọng là cả hai đều NỖ LỰC.</p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>🤔</span> Chồng/vợ tôi không tin vào concept này, làm sao?</div>
+                <p>Đừng ép họ phải "tin". Thay vào đó, hãy <strong>bạn thay đổi trước</strong>. Quan sát xem họ phàn nàn điều gì, yêu cầu điều gì → đó là ngôn ngữ của họ. Bắt đầu yêu bằng ngôn ngữ đó. Khi họ thấy kết quả (cảm thấy được yêu hơn), họ sẽ tự tìm hiểu.</p>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>🤔</span> Tôi đang độc thân, concept này có hữu ích không?</div>
+                <p>Tuyệt đối có! <strong>Hiểu ngôn ngữ của bạn</strong> giúp bạn biết mình cần gì trong mối quan hệ tương lai - và tránh những mối quan hệ không tương thích. Khi hẹn hò, bạn có thể quan sát ngôn ngữ của đối phương sớm để biết có match không.</p>
+            </div>
+
+            <div class="highlight-box pink">
+                <div class="highlight-box-title"><span>🤔</span> Ngôn ngữ tình yêu có liên quan gì đến tần số?</div>
+                <p>Trong Học Thuyết Chuyển Hóa Nội Tâm, mỗi ngôn ngữ tình yêu có thể xem là một <strong>kênh truyền năng lượng</strong>. Khi bạn phát tình yêu 540Hz nhưng phát qua "kênh Service" - trong khi đối tác chỉ nhận qua "kênh Words" - năng lượng đó không được tiếp nhận, dù vẫn tồn tại. Hiểu ngôn ngữ = <strong>điều chỉnh đúng kênh</strong> để năng lượng tình yêu được truyền đi hiệu quả.</p>
+            </div>
+        </section>
+
+        <!-- SUMMARY -->
+        <section class="section">
+            <div class="summary-box">
+                <h3 class="summary-title"><span>📌</span> Tóm Tắt Bài Học</h3>
+                <ul class="summary-list">
+                    <li><strong>5 Ngôn Ngữ Tình Yêu:</strong> Words of Affirmation, Quality Time, Receiving Gifts, Acts of Service, Physical Touch</li>
+                    <li><strong>Nguyên nhân:</strong> Mỗi người "nói" và "nghe" tình yêu qua ngôn ngữ khác nhau - nếu khác nhau mà không biết, sẽ cảm thấy không được yêu</li>
+                    <li><strong>Cách nhận biết:</strong> Quan sát điều bạn phàn nàn, yêu cầu, và cách bạn thể hiện tình yêu với người khác</li>
+                    <li><strong>Nguyên tắc vàng:</strong> YÊU BẰNG NGÔN NGỮ CỦA HỌ, không phải của bạn - như học ngoại ngữ mới</li>
+                    <li><strong>Linh hoạt:</strong> Có thể có nhiều ngôn ngữ, và ngôn ngữ có thể thay đổi theo hoàn cảnh cuộc sống</li>
+                    <li><strong>Mở rộng:</strong> Áp dụng cho tất cả mối quan hệ: đôi lứa, cha mẹ, con cái, bạn bè, đồng nghiệp</li>
+                </ul>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>

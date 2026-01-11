@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 9.2: Bản Đồ Hành Trình Của Bạn - GEM Trading Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>:root{--navy:#112250;--navy-dark:#0a1628;--gold:#FFBD59;--gold-dark:#E5A73D;--cyan:#00F0FF;--purple:#6A5BFF;--burgundy:#9C0612;--success:#00C853;--error:#FF5252;--bg-primary:#0a1628;--bg-card:rgba(17,34,80,0.6);--text-primary:#FFFFFF;--text-secondary:rgba(255,255,255,0.85);--text-muted:rgba(255,255,255,0.6);--glass-bg:rgba(17,34,80,0.4);--glass-border:rgba(255,189,89,0.2);--space-xs:4px;--space-sm:8px;--space-md:16px;--space-lg:24px;--space-xl:32px;--radius-md:12px;--radius-lg:16px}*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}body{font-family:'Montserrat',sans-serif;background:var(--bg-primary);color:var(--text-primary);line-height:1.6}img{max-width:100%;height:auto;display:block}.background-container{position:fixed;inset:0;z-index:-1}.bg-layer-base{position:absolute;inset:0;background:linear-gradient(180deg,var(--navy-dark) 0%,var(--navy) 50%,var(--navy-dark) 100%)}.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.3}.orb-1{width:400px;height:400px;background:var(--gold);top:-100px;right:-100px}.orb-2{width:300px;height:300px;background:var(--cyan);bottom:20%;left:-100px}.orb-3{width:250px;height:250px;background:var(--success);bottom:-50px;right:20%}.lesson-container{max-width:800px;margin:0 auto;padding:1.5rem}@media(max-width:600px){.lesson-container{padding:0}}.lesson-header{text-align:center;padding:var(--space-xl);margin-bottom:var(--space-xl);background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);box-shadow:0 4px 24px rgba(0,0,0,0.2)}@media(max-width:600px){.lesson-header{padding:var(--space-lg) 16px;margin-bottom:0;border:none;border-radius:0;box-shadow:none;border-bottom:8px solid var(--bg-primary)}}.lesson-badge{display:inline-flex;align-items:center;gap:var(--space-sm);padding:var(--space-sm) var(--space-md);background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:50px;font-size:0.75rem;font-weight:700;text-transform:uppercase;margin-bottom:var(--space-md);color:var(--navy-dark)}.lesson-chapter{font-size:0.9rem;color:var(--gold);font-weight:600;margin-bottom:var(--space-sm);text-transform:uppercase;letter-spacing:2px}.lesson-title{font-size:clamp(1.75rem,5vw,2.5rem);font-weight:800;margin-bottom:var(--space-md);background:linear-gradient(135deg,var(--text-primary),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.lesson-meta{display:flex;justify-content:center;gap:var(--space-lg);flex-wrap:wrap;color:var(--text-muted);font-size:0.85rem}.meta-item{display:flex;align-items:center;gap:var(--space-xs)}.section{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);box-shadow:0 4px 24px rgba(0,0,0,0.2);padding:var(--space-xl);margin-bottom:var(--space-lg)}@media(max-width:600px){.section{padding:0;margin-bottom:0;border:none;border-radius:0;box-shadow:none;border-bottom:8px solid var(--bg-primary)}}.section-title{font-size:1.5rem;font-weight:700;color:var(--gold);margin-bottom:var(--space-lg);display:flex;align-items:center;gap:var(--space-sm)}@media(max-width:600px){.section-title{padding:var(--space-lg) 16px var(--space-md) 16px;margin-bottom:0}}.section>p{color:var(--text-secondary);margin-bottom:var(--space-md)}@media(max-width:600px){.section>p{padding:0 16px}}.section>ul,.section>ol{color:var(--text-secondary);padding-left:1.5em;margin-bottom:var(--space-md)}@media(max-width:600px){.section>ul,.section>ol{padding-left:calc(16px + 1.5em);padding-right:16px}}.section li{margin-bottom:var(--space-sm)}.highlight-box{background:linear-gradient(135deg,rgba(255,189,89,0.15),rgba(255,189,89,0.05));border:1px solid rgba(255,189,89,0.3);border-radius:var(--radius-md);padding:var(--space-lg);margin:var(--space-lg) 0}@media(max-width:600px){.highlight-box{border:none;border-radius:0;border-left:4px solid var(--gold);padding:var(--space-md) 16px;margin:var(--space-md) 0}}.highlight-box-title{font-weight:700;color:var(--gold);margin-bottom:var(--space-sm);display:flex;align-items:center;gap:var(--space-sm)}.highlight-box p{color:var(--text-secondary);margin:0}.definition-box{background:linear-gradient(135deg,rgba(0,240,255,0.1),rgba(0,240,255,0.02));border:1px solid rgba(0,240,255,0.2);border-radius:var(--radius-md);padding:var(--space-lg);margin:var(--space-lg) 0}@media(max-width:600px){.definition-box{border:none;border-radius:0;border-left:4px solid var(--cyan);padding:var(--space-md) 16px;margin:var(--space-md) 0}}.definition-box-title{font-weight:700;color:var(--cyan);margin-bottom:var(--space-sm);display:flex;align-items:center;gap:var(--space-sm)}.image-container{margin:var(--space-xl) 0;border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--glass-border)}@media(max-width:600px){.image-container{margin:var(--space-md) 0;border-radius:0;border:none}}.image-caption{padding:var(--space-sm);font-size:0.85rem;color:var(--text-muted);font-style:italic;text-align:center}@media(max-width:600px){.image-caption{padding:var(--space-sm) 16px}}.pattern-flow{display:flex;flex-direction:column;gap:var(--space-md);margin:var(--space-lg) 0}@media(max-width:600px){.pattern-flow{gap:1px;background:var(--glass-border);margin:var(--space-md) 0}}.flow-phase{display:flex;gap:var(--space-md);align-items:flex-start;padding:var(--space-md);background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius-md);transition:all 0.3s ease}@media(max-width:600px){.flow-phase{padding:var(--space-md) 16px;border:none;border-radius:0;border-left:4px solid var(--gold)}}.flow-phase.up{border-left-color:var(--success)}.flow-phase.pause{border-left-color:var(--gold)}.phase-icon{font-size:2rem;min-width:50px;text-align:center}.phase-content{flex:1}.phase-title{font-weight:700;color:var(--text-primary);margin-bottom:var(--space-xs)}.flow-phase.up .phase-title{color:var(--success)}.flow-phase.pause .phase-title{color:var(--gold)}.phase-desc{font-size:0.9rem;color:var(--text-muted)}.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-md);margin:var(--space-lg) 0}@media(max-width:600px){.stats-grid{gap:1px;background:var(--glass-border);margin:var(--space-md) 0}}.stat-card{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius-md);padding:var(--space-lg);text-align:center}@media(max-width:600px){.stat-card{border:none;border-radius:0;padding:var(--space-md)}}.stat-value{font-size:1.75rem;font-weight:800;background:linear-gradient(135deg,var(--cyan),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}@media(max-width:600px){.stat-value{font-size:1.25rem}}.stat-label{font-size:0.75rem;color:var(--text-muted);text-transform:uppercase}.stat-card.green .stat-value{background:linear-gradient(135deg,var(--success),var(--success));-webkit-background-clip:text;-webkit-text-fill-color:transparent}.stat-card.gold .stat-value{background:linear-gradient(135deg,var(--gold),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}.summary-box{background:linear-gradient(135deg,rgba(0,200,83,0.1),rgba(0,200,83,0.02));border:2px solid var(--success);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0}@media(max-width:600px){.summary-box{border:none;border-radius:0;border-left:4px solid var(--success);padding:var(--space-lg) 16px;margin:var(--space-md) 0}}.summary-title{font-size:1.25rem;font-weight:700;color:var(--success);margin-bottom:var(--space-lg);display:flex;align-items:center;gap:var(--space-sm)}.summary-list{list-style:none}.summary-list li{display:flex;align-items:flex-start;gap:var(--space-sm);margin-bottom:var(--space-md);color:var(--text-secondary)}.summary-list li::before{content:"✓";color:var(--success);font-weight:700}.quiz-section{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin-top:var(--space-xl)}@media(max-width:600px){.quiz-section{border:none;border-radius:0;padding:0;margin-top:0;border-top:8px solid var(--bg-primary)}}.quiz-header{text-align:center;margin-bottom:var(--space-xl)}@media(max-width:600px){.quiz-header{padding:var(--space-lg) 16px var(--space-md);margin-bottom:0}}.quiz-title{font-size:1.5rem;font-weight:700;color:var(--gold);margin-bottom:var(--space-sm)}.quiz-subtitle{color:var(--text-muted);font-size:0.9rem}.quiz-question{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius-md);padding:var(--space-lg);margin-bottom:var(--space-lg)}@media(max-width:600px){.quiz-question{border:none;border-radius:0;border-left:4px solid var(--purple);padding:var(--space-md) 16px;margin-bottom:0;border-bottom:1px solid var(--glass-border)}}.question-number{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:50%;font-weight:700;color:var(--navy-dark);margin-bottom:var(--space-md)}.question-text{font-weight:600;color:var(--text-primary);margin-bottom:var(--space-lg);line-height:1.6}.quiz-options{display:flex;flex-direction:column;gap:var(--space-sm)}@media(max-width:600px){.quiz-options{gap:1px;background:var(--glass-border);margin-left:-16px;margin-right:-16px;margin-left:calc(-16px - 4px)}}.quiz-option{display:flex;align-items:center;gap:var(--space-md);padding:var(--space-md);background:var(--glass-bg);border:2px solid var(--glass-border);border-radius:var(--radius-md);cursor:pointer;transition:all 0.3s ease}@media(max-width:600px){.quiz-option{border:none;border-radius:0;border-left:4px solid transparent;padding:var(--space-md) 16px}}.quiz-option:hover:not(.disabled){border-color:var(--gold);background:var(--bg-card)}@media(max-width:600px){.quiz-option:hover:not(.disabled){border-left-color:var(--gold)}}.quiz-option.correct{border-color:var(--success)!important;background:rgba(0,200,83,0.15)!important}@media(max-width:600px){.quiz-option.correct{border-left-color:var(--success)!important}}.quiz-option.incorrect{border-color:var(--error)!important;background:rgba(255,82,82,0.15)!important}@media(max-width:600px){.quiz-option.incorrect{border-left-color:var(--error)!important}}.quiz-option.disabled{opacity:0.7;cursor:not-allowed}.option-marker{width:28px;height:28px;min-width:28px;background:var(--glass-bg);border:2px solid var(--glass-border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem}.quiz-option.correct .option-marker{background:var(--success);border-color:var(--success);color:white}.quiz-option.incorrect .option-marker{background:var(--error);border-color:var(--error);color:white}.option-text{flex:1;color:var(--text-secondary)}.question-feedback{margin-top:var(--space-md);padding:var(--space-md);border-radius:var(--space-sm);display:none}@media(max-width:600px){.question-feedback{margin:var(--space-md) 0 0 0;padding:var(--space-md) 16px}}.question-feedback.show{display:block}.question-feedback.correct{background:rgba(0,200,83,0.15);border-left:4px solid var(--success)}.question-feedback.incorrect{background:rgba(255,82,82,0.15);border-left:4px solid var(--error)}.feedback-title{font-weight:700;margin-bottom:var(--space-xs)}.question-feedback.correct .feedback-title{color:var(--success)}.question-feedback.incorrect .feedback-title{color:var(--error)}.feedback-text{font-size:0.9rem;color:var(--text-secondary)}.quiz-result{text-align:center;padding:var(--space-xl);display:none}.quiz-result.show{display:block}.result-score{font-size:3rem;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:var(--space-md)}.quiz-buttons{display:flex;justify-content:center;padding:var(--space-lg)}@media(max-width:600px){.quiz-buttons{padding:var(--space-lg) 16px}}.quiz-btn{padding:var(--space-md) var(--space-xl);border-radius:var(--radius-md);font-weight:700;cursor:pointer;border:none;font-family:inherit;background:var(--glass-bg);color:var(--text-primary);border:2px solid var(--glass-border)}.quiz-btn:hover{border-color:var(--gold)}</style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>🗺️</span>
+                <span>Module A</span>
+            </div>
+            <div class="lesson-chapter">Chapter 9 - Hành Trình Chuyển Hóa</div>
+            <h1 class="lesson-title">Bản Đồ Hành Trình Của Bạn</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 9.2</span></div>
+                <div class="meta-item"><span>⏱️</span><span>10 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- Section 1: Opening Hook -->
+        <section class="section">
+            <h2 class="section-title"><span>🗺️</span> Nhìn Lại Hành Trình Đã Qua</h2>
+            <p>Khi bạn leo một ngọn núi, đôi khi bạn cần dừng lại và nhìn xuống để thấy mình đã đi được bao xa. Đó chính là điều chúng ta sẽ làm trong bài học này. Từ ngày đầu tiên mở khóa học với biết bao câu hỏi trong đầu, đến hôm nay bạn đã đi qua 8 chapters với hàng chục bài học chi tiết. Mỗi bài học là một bước tiến, mỗi quiz là một lần củng cố, và mỗi ngày thực hành là một lần bạn trở nên mạnh mẽ hơn.</p>
+            <p>Bản đồ hành trình không chỉ cho thấy bạn đã ở đâu, mà còn cho thấy bạn đang ở đâu và sẽ đi đến đâu. Trong bài học này, tôi sẽ vẽ cho bạn một bức tranh toàn cảnh về hành trình trading của bạn, từ điểm xuất phát cho đến những đỉnh cao còn đang chờ đợi phía trước.</p>
+        </section>
+
+        <!-- Section 2: Mục Tiêu -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Mục Tiêu Bài Học</h2>
+            <div class="definition-box">
+                <div class="definition-box-title">📋 Sau bài học này, bạn sẽ:</div>
+                <p>Hiểu rõ lộ trình học tập 7 giai đoạn từ người mới đến trader chuyên nghiệp. Nhận ra vị trí hiện tại của mình trên bản đồ và những gì còn phía trước. Biết được những con số ấn tượng về khối lượng kiến thức đã tiếp thu trong TIER 1.</p>
+            </div>
+        </section>
+
+        <!-- Section 3: Lộ Trình 7 Giai Đoạn -->
+        <section class="section">
+            <h2 class="section-title"><span>📍</span> Lộ Trình 7 Giai Đoạn Từ A Đến Z</h2>
+            <p>GEM Trading Academy được thiết kế theo một lộ trình 7 giai đoạn, mỗi giai đoạn xây dựng nền tảng cho giai đoạn tiếp theo. Không có đường tắt, không có bước nhảy vọt. Chỉ có sự tiến bộ từng bước một, chắc chắn và bền vững.</p>
+
+            <div class="pattern-flow">
+                <div class="flow-phase up">
+                    <div class="phase-icon">1️⃣</div>
+                    <div class="phase-content">
+                        <div class="phase-title">Giai Đoạn 1: Kiến Thức Nền Tảng (Chapter 1-2)</div>
+                        <div class="phase-desc">Bạn bắt đầu bằng việc hiểu thị trường crypto hoạt động như thế nào, candlestick là gì, và các khái niệm cơ bản về giao dịch. Đây là nền móng mà mọi thứ khác được xây dựng trên đó. Không có nền móng vững, ngôi nhà sẽ sụp đổ.</div>
+                    </div>
+                </div>
+                <div class="flow-phase up">
+                    <div class="phase-icon">2️⃣</div>
+                    <div class="phase-content">
+                        <div class="phase-title">Giai Đoạn 2: GEM Patterns (Chapter 3-5)</div>
+                        <div class="phase-desc">Đây là trái tim của phương pháp GEM. Bạn học 4 patterns cốt lõi: UPU (tiếp diễn tăng), DPD (tiếp diễn giảm), UPD (đảo chiều giảm), và DPU (đảo chiều tăng). Mỗi pattern có cấu trúc rõ ràng, Win Rate đã backtest, và chiến lược entry cụ thể.</div>
+                    </div>
+                </div>
+                <div class="flow-phase up">
+                    <div class="phase-icon">3️⃣</div>
+                    <div class="phase-content">
+                        <div class="phase-title">Giai Đoạn 3: Classic Patterns (Chapter 6)</div>
+                        <div class="phase-desc">Bổ sung kiến thức với các patterns kinh điển như Flag, Pennant, Triangle, Head & Shoulders, và Double Top/Bottom. Những patterns này giúp bạn nhận diện nhiều cơ hội hơn và xác nhận signals từ GEM patterns.</div>
+                    </div>
+                </div>
+                <div class="flow-phase up">
+                    <div class="phase-icon">4️⃣</div>
+                    <div class="phase-content">
+                        <div class="phase-title">Giai Đoạn 4: Thực Hành (Chapter 7)</div>
+                        <div class="phase-desc">Lý thuyết không có giá trị nếu không được thực hành. Bạn học paper trading, cách sử dụng GEM App để ghi trades, viết Trading Journal, và backtesting chiến lược. Đây là giai đoạn biến kiến thức thành kỹ năng thực sự.</div>
+                    </div>
+                </div>
+                <div class="flow-phase up">
+                    <div class="phase-icon">5️⃣</div>
+                    <div class="phase-content">
+                        <div class="phase-title">Giai Đoạn 5: Công Cụ AI (Chapter 8)</div>
+                        <div class="phase-desc">GEM Master AI là trợ thủ đắc lực của bạn. Bạn học cách sử dụng Chatbot để giải đáp thắc mắc, Scanner để tìm patterns tự động, và Alerts để không bỏ lỡ cơ hội. Công cụ tốt + trader giỏi = kết quả xuất sắc.</div>
+                    </div>
+                </div>
+                <div class="flow-phase pause">
+                    <div class="phase-icon">6️⃣</div>
+                    <div class="phase-content">
+                        <div class="phase-title">Giai Đoạn 6: Module A & B (Chapter 9-10) ← BẠN ĐANG Ở ĐÂY</div>
+                        <div class="phase-desc">Hành trình chuyển hóa và các cơ hội phát triển. Đây không chỉ là kiến thức mà là sự thay đổi từ bên trong, giúp bạn sẵn sàng cho những bước tiến lớn hơn trong tương lai.</div>
+                    </div>
+                </div>
+                <div class="flow-phase">
+                    <div class="phase-icon">7️⃣</div>
+                    <div class="phase-content">
+                        <div class="phase-title">Giai Đoạn 7: TIER 2 & 3 (Tương Lai)</div>
+                        <div class="phase-desc">Nâng cao kỹ năng với 11 patterns mới, Multi-Timeframe Analysis, Zone Detection AI, Whale Tracking, và Portfolio Management. Đây là nơi bạn sẽ đến khi đã thành thạo TIER 1.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HÌNH 9.2.1 -->
+            <div class="image-container">
+                <img src="images/bai-9.2-hinh-1-lo-trinh-7-giai-doan.jpg" alt="Lộ trình 7 giai đoạn từ người mới đến trader chuyên nghiệp">
+                <div class="image-caption">Hình 9.2.1: Lộ trình 7 giai đoạn từ người mới đến trader chuyên nghiệp trong GEM Trading Academy</div>
+            </div>
+        </section>
+
+        <!-- Section 4: 8 Chapters Đã Hoàn Thành -->
+        <section class="section">
+            <h2 class="section-title"><span>📚</span> 8 Chapters Bạn Đã Chinh Phục</h2>
+            <p>Hãy cùng điểm lại chi tiết 8 chapters mà bạn đã hoàn thành trong TIER 1. Mỗi chapter là một khối kiến thức quan trọng, và bạn đã nắm vững tất cả.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">Chapter 1-2: Kiến Thức Nền Tảng</div>
+                <p>Hiểu về thị trường crypto, cách đọc candlestick, khái niệm support/resistance, và tại sao 90% trader thua lỗ. Bạn đã có cái nhìn đúng đắn về trading từ những bài đầu tiên. Đây là nền móng mà mọi kiến thức sau này được xây dựng trên đó. Không có nền tảng vững, bạn sẽ dễ bị lung lay khi thị trường biến động mạnh.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">Chapter 3: UPU Pattern (5 bài)</div>
+                <p>Pattern tiếp diễn tăng mạnh nhất với Win Rate 68%. Bạn biết cách nhận diện cấu trúc 3 phases, vẽ LFZ, và 3 chiến lược entry từ Aggressive đến Conservative. Đây là pattern đầu tiên và quan trọng nhất vì nó xuất hiện thường xuyên trong uptrend. Khi master được UPU, bạn đã có công cụ để kiếm tiền trong thị trường tăng.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">Chapter 4: UPD Pattern (6 bài)</div>
+                <p>Pattern đảo chiều giảm với Win Rate 65%. Bạn hiểu cách giá chuyển từ trend tăng sang giảm, cách vẽ HFZ, và khi nào nên short. Đây là công cụ giúp bạn kiếm tiền ngay cả khi thị trường giảm. Biết nhận diện đỉnh giúp bạn tránh mua vào lúc giá cao và bảo vệ lợi nhuận đã có.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">Chapter 5: DPU Pattern (6 bài)</div>
+                <p>Pattern đảo chiều tăng với Win Rate 66%. Bạn biết cách nhận diện đáy thị trường và tìm cơ hội mua khi giá sẵn sàng phục hồi. Đây là pattern "săn đáy" an toàn nhất với xác suất cao. Khi kết hợp với LFZ và checklist, bạn có thể mua được giá tốt nhất trong đợt tăng mới.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title">Chapter 6: Classic Patterns (6 bài)</div>
+                <p>6 patterns kinh điển bổ sung: Flag, Pennant, Triangle (Ascending/Descending/Symmetrical), Head & Shoulders, và Double Top/Bottom. Đây là vũ khí bổ sung cho kho tàng của bạn.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title">Chapter 7: Paper Trading & Backtesting (5 bài)</div>
+                <p>Thực hành không rủi ro với paper trading, sử dụng GEM App, viết Trading Journal chuyên nghiệp, backtest chiến lược, và chuẩn bị chuyển sang real trading.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title">Chapter 8: GEM Master AI (5 bài)</div>
+                <p>Sử dụng Chatbot hỏi đáp 24/7, Scanner tìm patterns tự động với 50 scans/ngày, và Alerts thông báo khi có cơ hội. Công nghệ AI phục vụ trading của bạn.</p>
+            </div>
+
+            <!-- HÌNH 9.2.2 -->
+            <div class="image-container">
+                <img src="images/bai-9.2-hinh-2-tong-hop-8-chapters.jpg" alt="Tổng hợp 8 chapters đã hoàn thành trong TIER 1">
+                <div class="image-caption">Hình 9.2.2: Tổng hợp 8 chapters bạn đã chinh phục trong TIER 1 - từ kiến thức nền tảng đến GEM Master AI</div>
+            </div>
+        </section>
+
+        <!-- Section 5: Thống Kê Ấn Tượng -->
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> Những Con Số Ấn Tượng</h2>
+            <p>Đôi khi chúng ta cần nhìn vào con số để thấy được khối lượng công việc đã hoàn thành. Dưới đây là những gì bạn đã đạt được trong TIER 1.</p>
+
+            <div class="stats-grid">
+                <div class="stat-card green">
+                    <div class="stat-value">8</div>
+                    <div class="stat-label">Chapters</div>
+                </div>
+                <div class="stat-card gold">
+                    <div class="stat-value">40+</div>
+                    <div class="stat-label">Bài Học</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">10</div>
+                    <div class="stat-label">Patterns</div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">📈 Chi Tiết Thống Kê</div>
+                <p>Bạn đã học 4 GEM patterns cốt lõi với tổng Win Rate trung bình 67%. Bạn đã học thêm 6 Classic patterns bổ trợ. Tổng cộng 10 công cụ nhận diện cơ hội trên chart. Khoảng 8-10 giờ nội dung học tập chất lượng. 50+ câu quiz kiểm tra kiến thức. Và quan trọng nhất là bạn đã có một hệ thống trading hoàn chỉnh, từ nhận diện pattern đến quản lý vốn. Đây là nền tảng kiến thức mà nhiều trader tự học mất 2-3 năm mới tích lũy được.</p>
+            </div>
+
+            <!-- HÌNH 9.2.3 -->
+            <div class="image-container">
+                <img src="images/bai-9.2-hinh-3-thong-ke-tier-1.jpg" alt="Thống kê ấn tượng sau TIER 1">
+                <div class="image-caption">Hình 9.2.3: Những con số ấn tượng - 8 chapters, 40+ bài học, 10 patterns, 50+ câu quiz</div>
+            </div>
+        </section>
+
+        <!-- Section 6: Vị Trí Hiện Tại -->
+        <section class="section">
+            <h2 class="section-title"><span>📍</span> Bạn Đang Ở Đâu Trên Bản Đồ</h2>
+            <p>Hiện tại bạn đang ở giai đoạn 6/7, tức là đã đi được 85% chặng đường của TIER 1. Đây là vị trí đáng tự hào vì bạn đã vượt qua phần khó nhất: học kiến thức mới và hình thành thói quen mới.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title">✅ Những Gì Bạn Đã Đạt Được</div>
+                <p>Kiến thức và kỹ năng để bắt đầu trading có phương pháp, với Win Rate tiềm năng 60-70%. Một hệ thống giao dịch hoàn chỉnh từ A đến Z. Thói quen paper trade, ghi journal, và sử dụng công cụ AI. Tư duy của một trader chuyên nghiệp thay vì gambler.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">🔮 Những Gì Đang Chờ Phía Trước</div>
+                <p>TIER 2 với 11 patterns mới nâng Win Rate lên 75-85%. Multi-Timeframe Analysis để xác nhận setup mạnh hơn. Zone Detection AI tự động xác định LFZ/HFZ. GEM Scanner nâng cấp với 200 scans/ngày và 3 timeframes. TIER 3 với Whale Tracking, Portfolio Management, và các chiến lược chuyên nghiệp. Nhưng trước hết, hãy master TIER 1 thật vững vì đây là nền tảng cho tất cả.</p>
+            </div>
+
+            <!-- HÌNH 9.2.4 -->
+            <div class="image-container">
+                <img src="images/bai-9.2-hinh-4-vi-tri-hien-tai.jpg" alt="Vị trí hiện tại của bạn trên bản đồ - giai đoạn 6/7">
+                <div class="image-caption">Hình 9.2.4: Bạn đang ở giai đoạn 6/7 - đã đi được 85% chặng đường TIER 1, sẵn sàng cho những bước tiến tiếp theo</div>
+            </div>
+        </section>
+
+        <!-- Section: Ví Dụ Cột Mốc Hành Trình -->
+        <section class="section">
+            <h2 class="section-title"><span>🏆</span> Ví Dụ Cột Mốc Hành Trình</h2>
+            <p>Để bạn hình dung rõ hơn về những thành tựu cụ thể trên hành trình, hãy xem các cột mốc điển hình mà học viên GEM thường đạt được.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">🏆 Cột Mốc Tuần 1-2: Nền Tảng Vững Chắc</div>
+                <p>Hoàn thành Chapter 1-2 với tất cả quiz đạt 80% trở lên. Hiểu rõ candlestick và có thể đọc được basic price action. Cài đặt TradingView và làm quen với giao diện. Bắt đầu quan sát chart mỗi ngày 15-30 phút để tạo thói quen. Đây là giai đoạn xây móng, đừng vội vàng muốn trade ngay.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">🏆 Cột Mốc Tháng 1: Pattern Recognition</div>
+                <p>Hoàn thành Chapter 3-5 và nhận diện được 4 GEM patterns trên chart real-time. Bắt đầu paper trade với ít nhất 10 trades được ghi nhận. Win Rate paper trade đạt tối thiểu 50% dù còn nhiều mistakes. Có thói quen ghi Trading Journal sau mỗi trade. Đây là giai đoạn bạn bắt đầu "nhìn thấy" patterns thay vì chỉ "biết" về chúng.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">🏆 Cột Mốc Tháng 2-3: Consistency</div>
+                <p>Paper trade được ít nhất 50 trades với Win Rate ổn định 55-65%. Biết cách sử dụng GEM Scanner để tìm patterns tự động. Có thể backtest một chiến lược và đánh giá kết quả. Tâm lý ổn định hơn, không còn FOMO hay panic như trước. Đây là giai đoạn bạn đang hình thành bản năng của một trader có hệ thống.</p>
+            </div>
+        </section>
+
+        <!-- Section: Câu Hỏi Thường Gặp -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp</h2>
+            <p>Dưới đây là những câu hỏi phổ biến nhất mà học viên thường hỏi về bản đồ hành trình và lộ trình học tập.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title">Q1: Tôi có thể bỏ qua chapter nào không?</div>
+                <p>Không nên bỏ qua bất kỳ chapter nào vì mỗi chapter được thiết kế để xây dựng nền tảng cho chapter tiếp theo. Nếu bạn bỏ qua Chapter 1-2, bạn sẽ thiếu kiến thức nền tảng về candlestick và price action. Nếu bỏ qua Chapter 7 về Paper Trading, bạn sẽ không có kinh nghiệm thực hành trước khi dùng tiền thật. Nếu bỏ qua Chapter 8 về AI Tools, bạn sẽ mất đi công cụ hỗ trợ mạnh mẽ. Hãy học tuần tự và hoàn thành đầy đủ.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title">Q2: Nên học lại chapter nào?</div>
+                <p>Nếu bạn cảm thấy chưa tự tin, hãy ưu tiên học lại Chapter 3-5 về GEM Patterns vì đây là cốt lõi của phương pháp. Tiếp theo là Chapter 7 về Paper Trading và Backtesting để củng cố kỹ năng thực hành. Cuối cùng, nếu Win Rate chưa đạt 60%, hãy xem lại các bài về Entry Strategy và Risk Management. Một cách tốt để biết cần ôn lại chỗ nào là review Trading Journal và xem mình hay sai ở đâu.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title">Q3: Làm sao biết mình sẵn sàng cho TIER 2?</div>
+                <p>Bạn sẵn sàng cho TIER 2 khi đáp ứng được các tiêu chí sau: Paper trade ít nhất 100 trades với Win Rate ổn định trên 55%. Có thể nhận diện được 4 GEM patterns trong vòng 30 giây khi nhìn vào chart. Đã có Trading Journal ít nhất 30 ngày liên tục. Không còn FOMO hay revenge trade trong 2 tuần gần nhất. Hiểu rõ Risk Management và luôn đặt SL trước khi entry. Khi đạt được tất cả điều này, bạn đã sẵn sàng cho những kiến thức nâng cao hơn.</p>
+            </div>
+        </section>
+
+        <!-- Section 7: Tiếp Theo -->
+        <section class="section">
+            <h2 class="section-title"><span>🚀</span> Bước Tiếp Theo Trên Bản Đồ</h2>
+            <p>Sau khi hoàn thành Module A (Chapter 9), bạn sẽ tiến vào Module B (Chapter 10) để tìm hiểu về các cơ hội phát triển trong cộng đồng GEM. Sau đó, nếu đã đạt các tiêu chí trong checklist sẵn sàng, bạn có thể nâng cấp lên TIER 2.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">📍 Lưu Ý Quan Trọng</div>
+                <p>Bản đồ chỉ có giá trị khi bạn di chuyển trên đó. Đừng chỉ nhìn bản đồ mà hãy đi từng bước. Mỗi ngày thực hành paper trade, mỗi tuần review journal, mỗi tháng đánh giá tiến bộ. Đó là cách bạn thực sự tiến lên trên bản đồ này, không chỉ là đọc và quên. Hành động nhất quán mỗi ngày quan trọng hơn nỗ lực lớn nhưng không đều đặn.</p>
+            </div>
+        </section>
+
+        <!-- Section 8: Tóm Tắt -->
+        <div class="summary-box">
+            <h3 class="summary-title">📝 Tóm Tắt Bài 9.2</h3>
+            <ul class="summary-list">
+                <li>Lộ trình học tập GEM có 7 giai đoạn: từ kiến thức nền tảng đến TIER 2 và 3, mỗi giai đoạn xây dựng nền tảng cho giai đoạn sau.</li>
+                <li>Bạn đã hoàn thành 8 chapters với 40+ bài học, tích lũy được 10 patterns (4 GEM + 6 Classic) làm công cụ trading.</li>
+                <li>Hiện tại bạn đang ở giai đoạn 6/7, tức là đã đi được 85% chặng đường TIER 1.</li>
+                <li>Phía trước là TIER 2 với 11 patterns mới, Multi-Timeframe Analysis, và GEM Scanner nâng cấp.</li>
+                <li>Bản đồ có giá trị khi bạn di chuyển trên đó bằng việc thực hành hàng ngày, không chỉ đọc và quên.</li>
+            </ul>
+        </div>
+
+        <!-- Quiz Section -->
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">🎯 Kiểm Tra Kiến Thức</h2>
+                <p class="quiz-subtitle">Trả lời 3 câu hỏi để củng cố bài học</p>
+            </div>
+
+            <div class="quiz-question" id="question-1">
+                <div class="question-number">1</div>
+                <p class="question-text">Lộ trình học tập GEM Trading Academy có bao nhiêu giai đoạn chính?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(1, 'A')">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">7 giai đoạn: từ kiến thức nền tảng đến TIER 2 & 3</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(1, 'B')">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">3 giai đoạn: cơ bản, trung cấp, nâng cao</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(1, 'C')">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">5 giai đoạn: 5 chapters chính</span>
+                    </div>
+                </div>
+                <div class="question-feedback" id="feedback-1">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" id="question-2">
+                <div class="question-number">2</div>
+                <p class="question-text">Trong TIER 1, bạn đã học tổng cộng bao nhiêu patterns?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(2, 'A')">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">4 patterns (chỉ GEM patterns)</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(2, 'B')">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">10 patterns (4 GEM + 6 Classic)</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(2, 'C')">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">15 patterns (tất cả các loại)</span>
+                    </div>
+                </div>
+                <div class="question-feedback" id="feedback-2">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" id="question-3">
+                <div class="question-number">3</div>
+                <p class="question-text">Hiện tại bạn đang ở giai đoạn nào trên lộ trình 7 giai đoạn?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(3, 'A')">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Giai đoạn 3/7 - giữa chặng đường</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(3, 'B')">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Giai đoạn 6/7 - gần hoàn thành TIER 1 (85%)</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(3, 'C')">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Giai đoạn 7/7 - đã hoàn thành tất cả</span>
+                    </div>
+                </div>
+                <div class="question-feedback" id="feedback-3">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-result" id="quiz-result">
+                <div class="result-score"><span id="score">0</span>/3</div>
+                <p style="color: var(--text-secondary);" id="result-message"></p>
+            </div>
+
+            <div class="quiz-buttons">
+                <button class="quiz-btn" onclick="location.reload()">Làm Lại Quiz</button>
+            </div>
+        </section>
+
+        <footer class="section" style="text-align: center; padding: var(--space-xl);">
+            <p style="color: var(--gold); font-weight: 600;">Hoàn thành Bài 9.2: Bản Đồ Hành Trình Của Bạn</p>
+            <p style="color: var(--text-muted); margin-top: var(--space-md);">Tiếp theo: <strong style="color: var(--text-primary);">Bài 9.3 - Sự Thay Đổi Thực Sự</strong></p>
+        </footer>
+    </div>
+
+    <script>
+        const correctAnswers = {
+            1: 'A',
+            2: 'B',
+            3: 'B'
+        };
+
+        const explanations = {
+            1: {
+                correct: 'Chính xác! Lộ trình GEM Trading Academy có 7 giai đoạn: (1) Kiến thức nền tảng, (2) GEM Patterns, (3) Classic Patterns, (4) Thực hành, (5) Công cụ AI, (6) Module A & B, và (7) TIER 2 & 3. Mỗi giai đoạn xây dựng nền tảng cho giai đoạn tiếp theo.',
+                incorrect: 'Chưa đúng. Lộ trình có 7 giai đoạn đầy đủ, không phải 3 hay 5. Các giai đoạn bao gồm: Kiến thức nền tảng, GEM Patterns, Classic Patterns, Thực hành, Công cụ AI, Module A & B, và TIER 2 & 3. Thiết kế này đảm bảo bạn có nền tảng vững chắc trước khi tiến lên.'
+            },
+            2: {
+                correct: 'Chính xác! Trong TIER 1, bạn đã học tổng cộng 10 patterns: 4 GEM patterns cốt lõi (UPU, DPD, UPD, DPU) với Win Rate 65-70%, và 6 Classic patterns bổ trợ (Flag, Pennant, Triangle, Head & Shoulders, Double Top/Bottom). Đây là bộ công cụ hoàn chỉnh để nhận diện cơ hội trên chart.',
+                incorrect: 'Chưa đúng. Bạn không chỉ học 4 GEM patterns, mà còn có 6 Classic patterns bổ trợ ở Chapter 6. Tổng cộng là 10 patterns, tạo thành bộ công cụ đa dạng để nhận diện nhiều loại cơ hội khác nhau trên thị trường.'
+            },
+            3: {
+                correct: 'Chính xác! Hiện tại bạn đang ở giai đoạn 6/7, tức là Module A & B (Chapter 9-10). Điều này có nghĩa là bạn đã đi được khoảng 85% chặng đường TIER 1. Bạn đã vượt qua phần khó nhất là học kiến thức mới và chỉ còn một chút nữa là hoàn thành.',
+                incorrect: 'Chưa đúng. Bạn không ở giữa chặng đường hay đã hoàn thành tất cả. Hiện tại bạn đang ở giai đoạn 6/7, tức là Chapter 9-10 (Module A & B), đã đi được 85% chặng đường TIER 1. Giai đoạn 7 là TIER 2 & 3, còn ở phía trước.'
+            }
+        };
+
+        let answeredQuestions = 0;
+        let correctCount = 0;
+
+        function checkAnswer(questionNum, selectedAnswer) {
+            const questionEl = document.getElementById(`question-${questionNum}`);
+            if (questionEl.classList.contains('answered')) return;
+
+            questionEl.classList.add('answered');
+            answeredQuestions++;
+
+            const options = questionEl.querySelectorAll('.quiz-option');
+            options.forEach(opt => opt.classList.add('disabled'));
+
+            const isCorrect = selectedAnswer === correctAnswers[questionNum];
+            const feedbackEl = document.getElementById(`feedback-${questionNum}`);
+            const feedbackTitle = feedbackEl.querySelector('.feedback-title');
+            const feedbackText = feedbackEl.querySelector('.feedback-text');
+
+            options.forEach(opt => {
+                const marker = opt.querySelector('.option-marker').textContent;
+                if (marker === correctAnswers[questionNum]) {
+                    opt.classList.add('correct');
+                } else if (marker === selectedAnswer && !isCorrect) {
+                    opt.classList.add('incorrect');
+                }
+            });
+
+            if (isCorrect) {
+                correctCount++;
+                feedbackEl.classList.add('show', 'correct');
+                feedbackTitle.textContent = '✓ Chính xác!';
+                feedbackText.textContent = explanations[questionNum].correct;
+            } else {
+                feedbackEl.classList.add('show', 'incorrect');
+                feedbackTitle.textContent = '✗ Chưa đúng';
+                feedbackText.textContent = explanations[questionNum].incorrect;
+            }
+
+            if (answeredQuestions === 3) {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            const resultEl = document.getElementById('quiz-result');
+            const scoreEl = document.getElementById('score');
+            const messageEl = document.getElementById('result-message');
+
+            scoreEl.textContent = correctCount;
+            resultEl.classList.add('show');
+
+            if (correctCount === 3) {
+                messageEl.textContent = 'Xuất sắc! Bạn đã nắm rõ bản đồ hành trình của mình!';
+            } else if (correctCount === 2) {
+                messageEl.textContent = 'Tốt lắm! Hãy ôn lại lộ trình để nhớ vị trí của mình.';
+            } else {
+                messageEl.textContent = 'Hãy đọc lại bài học để hiểu rõ hơn về bản đồ hành trình.';
+            }
+        }
+    </script>
+</body>
+</html>

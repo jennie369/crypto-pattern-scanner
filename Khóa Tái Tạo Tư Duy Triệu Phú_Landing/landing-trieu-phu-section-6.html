@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 6: Kết Quả Đạt Được - GEM Academy</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Noto+Sans+Display:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ═══════════════════════════════════════════════════════════
+           CSS VARIABLES - GEM Design System
+           ═══════════════════════════════════════════════════════════ */
+        :root {
+            --primary-burgundy: #9C0612;
+            --primary-dark: #640A0C;
+            --deep-gold: #C88F2F;
+            --dark-brown: #2A1410;
+            --gold-accent: #FFBD59;
+            --gold-light: #DEBC81;
+            --cyan-accent: #00F0FF;
+            --green-success: #10B981;
+            --text-light: #FFFFFF;
+            --text-cream: #F5E6D3;
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            color: var(--text-light);
+            line-height: 1.7;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           SECTION 6: BENEFITS - Gold → Dark Brown
+           ═══════════════════════════════════════════════════════════ */
+        .section-6 {
+            background: linear-gradient(180deg,
+                #221408 0%,
+                #1E1208 15%,
+                #1A1006 30%,
+                #160E05 45%,
+                #140C05 60%,
+                #120A04 75%,
+                #0F0803 90%,
+                #0A0502 100%
+            );
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+            padding: 80px 0;
+        }
+
+        /* Background Effects */
+        .section-6::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 300px;
+            background: radial-gradient(ellipse at top, rgba(255, 189, 89, 0.3) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .section-6::after {
+            content: '';
+            position: absolute;
+            bottom: 20%;
+            right: -100px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255, 189, 89, 0.15) 0%, transparent 70%);
+            filter: blur(100px);
+            pointer-events: none;
+        }
+
+        /* Container */
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Section Header */
+        .section-header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 0 16px;
+        }
+
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, rgba(255,189,89,0.3), rgba(16,185,129,0.2));
+            border: 2px solid var(--green-success);
+            color: var(--green-success);
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .section-badge svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: clamp(1.8rem, 4.5vw, 3rem);
+            font-weight: 900;
+            color: var(--text-light);
+            line-height: 1.2;
+            margin-bottom: 16px;
+        }
+
+        .section-title .highlight {
+            color: var(--gold-accent);
+        }
+
+        .section-subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            color: var(--text-cream);
+            font-weight: 400;
+            max-width: 750px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        /* 7 Results Grid */
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1px;
+            background: rgba(255, 189, 89, 0.15);
+            margin: 40px 0;
+        }
+
+        .result-card {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            padding: 28px 20px;
+            display: flex;
+            gap: 16px;
+            transition: all 0.4s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .result-card:hover {
+            background: rgba(0, 0, 0, 0.7);
+            border-left-color: var(--green-success);
+            transform: translateX(4px);
+        }
+
+        .result-icon {
+            width: 56px;
+            height: 56px;
+            min-width: 56px;
+            background: linear-gradient(135deg, rgba(16,185,129,0.3), rgba(255,189,89,0.2));
+            border: 2px solid rgba(16, 185, 129, 0.4);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s ease;
+        }
+
+        .result-card:hover .result-icon {
+            background: var(--green-success);
+            border-color: var(--green-success);
+        }
+
+        .result-icon svg {
+            width: 28px;
+            height: 28px;
+            color: var(--green-success);
+            transition: all 0.4s ease;
+        }
+
+        .result-card:hover .result-icon svg {
+            color: var(--text-light);
+        }
+
+        .result-content h4 {
+            font-family: var(--font-heading);
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            margin-bottom: 8px;
+        }
+
+        .result-content p {
+            font-size: 0.95rem;
+            color: var(--text-cream);
+            line-height: 1.7;
+        }
+
+        /* Image Placeholder */
+        .image-wrapper {
+            width: 100%;
+            margin: 40px 0;
+        }
+
+        .image-placeholder {
+            width: 100%;
+            aspect-ratio: 16/10;
+            background: linear-gradient(135deg, rgba(255,189,89,0.15), rgba(42,20,16,0.5));
+            border-left: 4px solid var(--gold-accent);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            color: var(--text-cream);
+        }
+
+        .image-placeholder svg {
+            width: 56px;
+            height: 56px;
+            opacity: 0.5;
+        }
+
+        .image-placeholder .img-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .image-placeholder .img-desc {
+            font-size: 0.75rem;
+            opacity: 0.6;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        /* ROI Section */
+        .roi-section {
+            margin: 60px 0;
+        }
+
+        .roi-box {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            border: 2px solid var(--gold-accent);
+            padding: 32px 20px;
+            text-align: center;
+        }
+
+        .roi-title {
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .roi-title svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .roi-comparison {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .roi-invest {
+            text-align: center;
+        }
+
+        .roi-label {
+            font-size: 0.85rem;
+            color: var(--text-cream);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .roi-amount {
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 5vw, 2.8rem);
+            font-weight: 900;
+        }
+
+        .roi-invest .roi-amount {
+            color: var(--gold-accent);
+        }
+
+        .roi-arrow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .roi-arrow svg {
+            width: 32px;
+            height: 32px;
+            color: var(--green-success);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-8px); }
+            60% { transform: translateY(-4px); }
+        }
+
+        .roi-arrow span {
+            font-size: 0.75rem;
+            color: var(--green-success);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .roi-return {
+            text-align: center;
+        }
+
+        .roi-return .roi-amount {
+            color: var(--green-success);
+        }
+
+        .roi-desc {
+            font-size: 1rem;
+            color: var(--text-cream);
+            line-height: 1.8;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Bonus Section */
+        .bonus-section {
+            margin: 60px 0;
+        }
+
+        .bonus-title {
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            text-align: center;
+            margin-bottom: 32px;
+            padding: 0 16px;
+        }
+
+        .bonus-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            padding: 0 16px;
+        }
+
+        .bonus-card {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 189, 89, 0.3);
+            padding: 24px 20px;
+            display: flex;
+            gap: 16px;
+            transition: all 0.4s ease;
+            border-radius: 16px;
+        }
+
+        .bonus-card:hover {
+            background: rgba(0, 0, 0, 0.7);
+            border-color: var(--gold-accent);
+            transform: translateY(-4px);
+        }
+
+        .bonus-icon {
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            background: linear-gradient(135deg, var(--gold-accent), var(--primary-burgundy));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bonus-icon svg {
+            width: 24px;
+            height: 24px;
+            color: var(--text-light);
+        }
+
+        .bonus-content h4 {
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+
+        .bonus-content .bonus-value {
+            font-size: 0.85rem;
+            color: var(--gold-accent);
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .bonus-content p {
+            font-size: 0.9rem;
+            color: var(--text-cream);
+            line-height: 1.6;
+        }
+
+        /* Guarantee Box */
+        .guarantee-box {
+            background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(0,0,0,0.5));
+            border: 2px solid var(--green-success);
+            padding: 32px 20px;
+            margin: 40px 0;
+            text-align: center;
+        }
+
+        .guarantee-icon {
+            width: 64px;
+            height: 64px;
+            background: var(--green-success);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+
+        .guarantee-icon svg {
+            width: 32px;
+            height: 32px;
+            color: var(--text-light);
+        }
+
+        .guarantee-title {
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--green-success);
+            margin-bottom: 12px;
+        }
+
+        .guarantee-text {
+            font-size: 1rem;
+            color: var(--text-cream);
+            line-height: 1.8;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* CTA Section */
+        .section-cta {
+            text-align: center;
+            padding: 40px 16px;
+        }
+
+        .cta-text {
+            font-size: 1.1rem;
+            color: var(--text-cream);
+            margin-bottom: 24px;
+            line-height: 1.8;
+        }
+
+        .btn-cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px 36px;
+            background: linear-gradient(135deg, var(--gold-accent), var(--gold-light));
+            color: var(--primary-dark);
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 40px rgba(255, 189, 89, 0.3);
+        }
+
+        .btn-cta:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(255, 189, 89, 0.5);
+        }
+
+        .btn-cta svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Responsive */
+        @media (min-width: 600px) {
+            .section-6 {
+                padding: 100px 40px;
+            }
+
+            .image-placeholder {
+                border-radius: 16px;
+                border-left: none;
+                border: 2px solid rgba(255, 189, 89, 0.2);
+            }
+
+            .roi-box {
+                border-radius: 20px;
+                padding: 40px;
+            }
+
+            .roi-comparison {
+                flex-direction: row;
+                justify-content: center;
+                gap: 40px;
+            }
+
+            .roi-arrow {
+                flex-direction: row;
+            }
+
+            .roi-arrow svg {
+                transform: rotate(-90deg);
+                animation: none;
+            }
+
+            .bonus-grid {
+                grid-template-columns: repeat(2, 1fr);
+                padding: 0;
+            }
+
+            .guarantee-box {
+                border-radius: 20px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .results-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 968px) {
+            .section-6 {
+                padding: 100px 60px;
+            }
+
+            .results-grid {
+                border-radius: 20px;
+                overflow: hidden;
+            }
+
+            .bonus-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 6: BENEFITS - KẾT QUẢ ĐẠT ĐƯỢC
+     Gradient: Deep Gold #C88F2F → Dark Brown #2A1410
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<section class="section-6" id="benefits">
+    <div class="container">
+        
+        <!-- Section Header -->
+        <div class="section-header">
+            <div class="section-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                KẾT QUẢ CAM KẾT
+            </div>
+            <h2 class="section-title">
+                <span class="highlight">7 Kết Quả</span> Bạn Sẽ Đạt Được
+                <br>Sau 49 Ngày Chuyển Hóa
+            </h2>
+            <p class="section-subtitle">
+                Đây không phải là những lời hứa suông. Mỗi kết quả đều được xây dựng trên nền tảng khoa học 
+                về tâm lý và năng lượng, đã được hàng nghìn học viên kiểm chứng trong thực tế.
+            </p>
+        </div>
+
+        <!-- 7 Results Grid -->
+        <div class="results-grid">
+            
+            <div class="result-card">
+                <div class="result-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                </div>
+                <div class="result-content">
+                    <h4>Bình An Với Tài Chính</h4>
+                    <p>Bạn sẽ không còn lo lắng về tiền bạc mỗi đêm nữa. Thay vào đó, bạn sẽ cảm thấy bình 
+                       an và tự tin với tình hình tài chính của mình, dù đang ở mức nào đi chăng nữa.</p>
+                </div>
+            </div>
+
+            <div class="result-card">
+                <div class="result-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                        <line x1="9" y1="9" x2="9.01" y2="9"/>
+                        <line x1="15" y1="9" x2="15.01" y2="9"/>
+                    </svg>
+                </div>
+                <div class="result-content">
+                    <h4>Tự Tin Với Bản Thân</h4>
+                    <p>Bạn sẽ tin tưởng vào khả năng kiếm tiền và quản lý tiền của mình. Cảm giác tự ti 
+                       và xấu hổ về tài chính sẽ được thay thế bằng sự tự tin và lòng tự trọng.</p>
+                </div>
+            </div>
+
+            <div class="result-card">
+                <div class="result-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/>
+                    </svg>
+                </div>
+                <div class="result-content">
+                    <h4>Nhận Diện Niềm Tin Giới Hạn</h4>
+                    <p>Bạn sẽ nhận ra những niềm tin vô hình đang ngăn cản bạn thịnh vượng và có công cụ 
+                       để chuyển hóa chúng thành những niềm tin hỗ trợ cho sự giàu có của mình.</p>
+                </div>
+            </div>
+
+            <div class="result-card">
+                <div class="result-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                        <line x1="1" y1="10" x2="23" y2="10"/>
+                    </svg>
+                </div>
+                <div class="result-content">
+                    <h4>Hệ Thống Quản Lý Tiền</h4>
+                    <p>Bạn sẽ có hệ thống quản lý tài chính rõ ràng với phương pháp 6 lọ, biết chính xác 
+                       tiền đi đâu và có kế hoạch cụ thể cho từng mục tiêu tài chính.</p>
+                </div>
+            </div>
+
+            <div class="result-card">
+                <div class="result-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                </div>
+                <div class="result-content">
+                    <h4>Nghi Thức Buổi Sáng</h4>
+                    <p>Bạn sẽ có nghi thức buổi sáng 15 phút để duy trì tần số thịnh vượng mỗi ngày, giúp 
+                       bạn bắt đầu ngày mới với năng lượng cao và thu hút cơ hội đến với mình.</p>
+                </div>
+            </div>
+
+            <div class="result-card">
+                <div class="result-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                </div>
+                <div class="result-content">
+                    <h4>Cộng Đồng Hỗ Trợ</h4>
+                    <p>Bạn sẽ có cộng đồng những người cùng chí hướng để chia sẻ hành trình, nhận được sự 
+                       hỗ trợ và động viên khi cần, không còn cảm thấy cô đơn trong việc cải thiện tài chính.</p>
+                </div>
+            </div>
+
+            <div class="result-card">
+                <div class="result-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                </div>
+                <div class="result-content">
+                    <h4>Hào Hứng Với Tương Lai</h4>
+                    <p>Thay vì sợ hãi, bạn sẽ hào hứng khi nghĩ đến tương lai tài chính. Bạn sẽ có mục 
+                       tiêu rõ ràng và tin tưởng vào khả năng đạt được chúng trong tầm tay.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Image Placeholder -->
+        <div class="image-wrapper">
+            <div class="image-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <span class="img-name">results-7-outcomes.png (800x500)</span>
+                <span class="img-desc">Hình ảnh: 7 icons kết quả xếp vòng tròn, mỗi icon một màu, trung tâm là số 49</span>
+            </div>
+        </div>
+
+        <!-- ROI Section -->
+        <div class="roi-section">
+            <div class="roi-box">
+                <h3 class="roi-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="1" x2="12" y2="23"/>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                    Đầu Tư Thông Minh Nhất Cho Bản Thân
+                </h3>
+                
+                <div class="roi-comparison">
+                    <div class="roi-invest">
+                        <div class="roi-label">Đầu Tư Hôm Nay</div>
+                        <div class="roi-amount">₫499,000</div>
+                    </div>
+                    
+                    <div class="roi-arrow">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                            <polyline points="12 5 19 12 12 19"/>
+                        </svg>
+                        <span>ROI Trọn Đời</span>
+                    </div>
+                    
+                    <div class="roi-return">
+                        <div class="roi-label">Tư Duy Triệu Phú</div>
+                        <div class="roi-amount">Vô Giá</div>
+                    </div>
+                </div>
+
+                <p class="roi-desc">
+                    Chỉ với số tiền bằng một bữa ăn tối ở nhà hàng, bạn sẽ nhận được tư duy triệu phú 
+                    theo bạn suốt đời. Đây là khoản đầu tư có ROI cao nhất bạn từng thực hiện cho bản thân.
+                </p>
+            </div>
+        </div>
+
+        <!-- Image Placeholder 2 -->
+        <div class="image-wrapper">
+            <div class="image-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <span class="img-name">roi-investment.png (800x500)</span>
+                <span class="img-desc">Hình ảnh: So sánh ROI - một bên ₫499K, một bên biểu đồ tăng trưởng vô hạn</span>
+            </div>
+        </div>
+
+        <!-- Bonus Section -->
+        <div class="bonus-section">
+            <h3 class="bonus-title">Bonus Đặc Biệt Khi Đăng Ký Hôm Nay</h3>
+            
+            <div class="bonus-grid">
+                
+                <div class="bonus-card">
+                    <div class="bonus-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                    </div>
+                    <div class="bonus-content">
+                        <h4>Nghi Thức Buổi Sáng 15 Phút</h4>
+                        <div class="bonus-value">Trị giá ₫990,000</div>
+                        <p>Hướng dẫn chi tiết 7 bước để bắt đầu ngày mới với tần số thịnh vượng cao nhất.</p>
+                    </div>
+                </div>
+
+                <div class="bonus-card">
+                    <div class="bonus-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                        </svg>
+                    </div>
+                    <div class="bonus-content">
+                        <h4>Workbook Bài Tập Thực Hành</h4>
+                        <div class="bonus-value">Trị giá ₫490,000</div>
+                        <p>50+ bài tập thực hành giúp bạn áp dụng kiến thức vào cuộc sống hàng ngày.</p>
+                    </div>
+                </div>
+
+                <div class="bonus-card">
+                    <div class="bonus-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </div>
+                    <div class="bonus-content">
+                        <h4>Truy Cập Cộng Đồng VIP</h4>
+                        <div class="bonus-value">Trị giá ₫1,990,000/năm</div>
+                        <p>Kết nối với cộng đồng học viên và nhận hỗ trợ từ team GEM Academy 24/7.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Guarantee Box -->
+        <div class="guarantee-box">
+            <div class="guarantee-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <polyline points="9 12 11 14 15 10"/>
+                </svg>
+            </div>
+            <h3 class="guarantee-title">Cam Kết Hoàn Tiền 100% Trong 7 Ngày</h3>
+            <p class="guarantee-text">
+                Chúng tôi hoàn toàn tin tưởng vào giá trị của khóa học. Nếu trong 7 ngày đầu tiên bạn 
+                cảm thấy không hài lòng vì bất kỳ lý do gì, chúng tôi sẽ hoàn tiền 100% mà không hỏi 
+                bất kỳ câu hỏi nào. Bạn không có gì để mất, chỉ có thịnh vượng để nhận được.
+            </p>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="section-cta">
+            <p class="cta-text">
+                Hàng nghìn người đã thay đổi cuộc đời nhờ phương pháp này. Bạn có muốn là người tiếp theo?
+            </p>
+            <a href="#testimonials" class="btn-cta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                Xem Câu Chuyện Thành Công
+            </a>
+        </div>
+
+    </div>
+</section>
+
+</body>
+</html>

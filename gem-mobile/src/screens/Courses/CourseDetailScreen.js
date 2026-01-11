@@ -58,7 +58,7 @@ const TIER_LABELS = {
 
 const CourseDetailScreen = ({ navigation, route }) => {
   const { courseId } = route.params;
-  const { profile } = useAuth();
+  const { profile, isAdmin } = useAuth();
   const { alert, AlertComponent } = useCustomAlert();
 
   // Use CourseContext
@@ -66,12 +66,14 @@ const CourseDetailScreen = ({ navigation, route }) => {
     getCourseById,
     isEnrolled,
     isCourseLocked,
+    getCourseLockReason,
     getProgress,
     getCompletedLessons,
     getNextLesson,
     enrollInCourse,
     refresh,
     refreshing,
+    fetchCourseWithModules,
   } = useCourse();
 
   // Local state
@@ -88,65 +90,84 @@ const CourseDetailScreen = ({ navigation, route }) => {
 
   // Get course data from context
   const course = getCourseById(courseId);
-  const enrolled = isEnrolled(courseId);
+  const enrolledInDb = isEnrolled(courseId);
   const locked = course ? isCourseLocked(course) : false;
+  const lockReason = course ? getCourseLockReason(course) : null;
   const progress = getProgress(courseId);
   const completedLessonIds = getCompletedLessons(courseId);
   const nextLesson = getNextLesson(courseId);
+
+  // Admin bypass - admins can access all courses without enrollment
+  const enrolled = isAdmin || enrolledInDb;
 
   // Get all lessons flattened
   const lessons = course?.modules?.flatMap(m => m.lessons || []) || [];
 
   useEffect(() => {
-    if (course) {
-      setLoading(false);
-      // Auto-expand first module
-      if (course.modules?.length > 0) {
-        setExpandedModules({ 0: true });
-      }
+    const loadCourseData = async () => {
+      if (course) {
+        // Check if course has modules loaded - if not, fetch them
+        if (!course.modules || course.modules.length === 0) {
+          console.log('[CourseDetail] Course has no modules, fetching fresh data...');
+          const freshCourse = await fetchCourseWithModules(courseId);
+          if (freshCourse?.modules?.length > 0) {
+            console.log('[CourseDetail] Fetched', freshCourse.modules.length, 'modules');
+          }
+        }
 
-      // Run entrance animations
-      Animated.parallel([
-        // Hero image zoom out
-        Animated.spring(thumbnailScaleAnim, {
-          toValue: 1,
-          tension: 20,
-          friction: 7,
-          useNativeDriver: true,
-        }),
-        // Content fade and slide
-        Animated.sequence([
-          Animated.delay(200),
-          Animated.parallel([
-            Animated.timing(contentFadeAnim, {
-              toValue: 1,
-              duration: 400,
-              useNativeDriver: true,
-            }),
-            Animated.spring(contentSlideAnim, {
+        setLoading(false);
+        // Auto-expand first module
+        if (course.modules?.length > 0) {
+          setExpandedModules({ 0: true });
+        }
+
+        // Run entrance animations
+        Animated.parallel([
+          // Hero image zoom out
+          Animated.spring(thumbnailScaleAnim, {
+            toValue: 1,
+            tension: 20,
+            friction: 7,
+            useNativeDriver: true,
+          }),
+          // Content fade and slide
+          Animated.sequence([
+            Animated.delay(200),
+            Animated.parallel([
+              Animated.timing(contentFadeAnim, {
+                toValue: 1,
+                duration: 400,
+                useNativeDriver: true,
+              }),
+              Animated.spring(contentSlideAnim, {
+                toValue: 0,
+                tension: 50,
+                friction: 8,
+                useNativeDriver: true,
+              }),
+            ]),
+          ]),
+          // Button slide up
+          Animated.sequence([
+            Animated.delay(400),
+            Animated.spring(buttonSlideAnim, {
               toValue: 0,
               tension: 50,
               friction: 8,
               useNativeDriver: true,
             }),
           ]),
-        ]),
-        // Button slide up
-        Animated.sequence([
-          Animated.delay(400),
-          Animated.spring(buttonSlideAnim, {
-            toValue: 0,
-            tension: 50,
-            friction: 8,
-            useNativeDriver: true,
-          }),
-        ]),
-      ]).start();
-    } else {
-      // Course not found, might need to refresh
-      refresh().then(() => setLoading(false));
-    }
-  }, [courseId, course]);
+        ]).start();
+      } else {
+        // Course not found, might need to refresh
+        console.log('[CourseDetail] Course not found, refreshing...');
+        await refresh();
+        setLoading(false);
+      }
+    };
+
+    loadCourseData();
+  }, [courseId, course?.id]);
 
   const handleEnroll = async () => {
     setEnrolling(true);
@@ -478,15 +499,28 @@ const CourseDetailScreen = ({ navigation, route }) => {
 
   const renderEnrollButton = () => {
     if (enrolled) {
+      // Get the first lesson if nextLesson is not available
+      const targetLesson = nextLesson || lessons[0];
+
       return (
         <TouchableOpacity
-          style={styles.continueBtn}
-          onPress={() => nextLesson && handleLessonPress(nextLesson)}
+          style={[styles.continueBtn, !targetLesson && styles.continueBtnDisabled]}
+          onPress={() => {
+            if (targetLesson) {
+              handleLessonPress(targetLesson);
+            } else {
+              alert({
+                type: 'info',
+                title: 'Chưa có bài học',
+                message: 'Khóa học này chưa có nội dung. Vui lòng quay lại sau.',
+              });
+            }
+          }}
           activeOpacity={0.8}
         >
           <Play size={20} color="#112250" />
           <Text style={styles.continueBtnText}>
-            {progress >= 100 ? 'Xem lại' : 'Tiếp tục học'}
+            {!targetLesson ? 'Chưa có bài học' : progress >= 100 ? 'Xem lại' : 'Tiếp tục học'}
           </Text>
         </TouchableOpacity>
       );
@@ -505,7 +539,11 @@ const CourseDetailScreen = ({ navigation, route }) => {
           <>
             <Lock size={20} color={COLORS.textPrimary} />
             <Text style={styles.enrollBtnTextLocked}>
-              Yêu cầu {TIER_LABELS[course.tier_required]}
+              {lockReason?.type === 'tier'
+                ? `Yêu cầu ${TIER_LABELS[lockReason.requiredTier] || lockReason.requiredTier}`
+                : lockReason?.type === 'payment'
+                  ? 'Yêu cầu mua khóa học'
+                  : `Yêu cầu ${TIER_LABELS[course.tier_required] || 'Upgrade'}`}
             </Text>
           </>
         ) : (
@@ -832,6 +870,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexDirection: 'row',
     gap: SPACING.sm,
+  },
+  continueBtnDisabled: {
+    backgroundColor: 'rgba(255, 189, 89, 0.5)',
   },
   continueBtnText: {
     fontSize: TYPOGRAPHY.fontSize.lg,

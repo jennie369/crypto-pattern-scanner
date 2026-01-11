@@ -13,6 +13,13 @@ import QuizScreen from '../screens/Courses/QuizScreen';
 import CertificateScreen from '../screens/Courses/CertificateScreen';
 import CourseCheckout from '../screens/Courses/CourseCheckout';
 
+// Gamification screens
+import {
+  CourseAchievementsScreen,
+  DailyQuestsScreen,
+  LeaderboardScreen,
+} from '../screens/Gamification';
+
 const Stack = createNativeStackNavigator();
 
 const CourseStack = () => {
@@ -57,6 +64,29 @@ const CourseStack = () => {
           presentation: 'fullScreenModal',
           animation: 'slide_from_bottom',
           gestureEnabled: false, // Prevent accidental swipe back during checkout
+        }}
+      />
+
+      {/* Gamification Screens */}
+      <Stack.Screen
+        name="CourseAchievements"
+        component={CourseAchievementsScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+      <Stack.Screen
+        name="DailyQuests"
+        component={DailyQuestsScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+      <Stack.Screen
+        name="Leaderboard"
+        component={LeaderboardScreen}
+        options={{
+          animation: 'slide_from_right',
         }}
       />
     </Stack.Navigator>

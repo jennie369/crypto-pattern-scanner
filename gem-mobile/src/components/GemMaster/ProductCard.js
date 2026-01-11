@@ -133,10 +133,9 @@ const ProductCard = ({ product, onPress, compact = false, showCTA = true, onQuic
       }
 
       if (fullProduct) {
-        navigation.navigate('Shop', {
-          screen: 'ProductDetail',
-          params: { product: fullProduct }
-        });
+        // Navigate directly to ProductDetail within current stack
+        // This keeps the back button working correctly
+        navigation.navigate('ProductDetail', { product: fullProduct });
       } else {
         // Navigate to Shop tab main screen to search
         navigation.navigate('Shop', {

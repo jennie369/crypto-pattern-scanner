@@ -2,7 +2,39 @@
  * GEM Mobile - Formatters Utility
  * Centralized number formatting functions
  * Issue #19: Fix confidence decimals
+ *
+ * VIETNAMESE NUMBER FORMAT:
+ * - Decimal separator: comma (,) instead of dot (.)
+ * - Thousands separator: dot (.) instead of comma (,)
+ * - Example: $259,174.55 (EN) → $259.174,55 (VI)
  */
+
+/**
+ * Convert English decimal format to Vietnamese format
+ * @param {string} numStr - Number string in English format (e.g., "1,234.56")
+ * @returns {string} Number string in Vietnamese format (e.g., "1.234,56")
+ */
+const toVietnameseFormat = (numStr) => {
+  if (!numStr) return '0';
+  // Replace dot with temporary placeholder, then comma with dot, then placeholder with comma
+  return numStr.replace(/\./g, '#DECIMAL#').replace(/,/g, '.').replace(/#DECIMAL#/g, ',');
+};
+
+/**
+ * Format a number with Vietnamese locale (comma as decimal, dot as thousands)
+ * @param {number} value - Number to format
+ * @param {number} decimals - Number of decimal places
+ * @returns {string} Formatted number in Vietnamese format
+ */
+const formatNumberVI = (value, decimals = 2) => {
+  if (value === null || value === undefined || isNaN(value)) return '0';
+  const fixed = parseFloat(value).toFixed(decimals);
+  const parts = fixed.split('.');
+  // Add thousand separators (dots in Vietnamese)
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  // Join with comma as decimal separator
+  return parts.length > 1 ? parts.join(',') : parts[0];
+};
 
 /**
  * Format confidence percentage
@@ -12,16 +44,16 @@
  */
 export const formatConfidence = (value, decimals = 1) => {
   if (typeof value !== 'number' || isNaN(value)) return '0%';
-  return `${value.toFixed(decimals)}%`;
+  return `${formatNumberVI(value, decimals)}%`;
 };
 
 /**
  * Format percent - generic percentage formatter
- * 82.87204730831974 → "82.9%"
+ * 82.87204730831974 → "82,9%"
  */
 export const formatPercent = (value, decimals = 1) => {
   if (value === null || value === undefined || isNaN(value)) return '0%';
-  return `${parseFloat(value).toFixed(decimals)}%`;
+  return `${formatNumberVI(value, decimals)}%`;
 };
 
 /**
@@ -29,18 +61,20 @@ export const formatPercent = (value, decimals = 1) => {
  */
 export const formatDecimal = (value, decimals = 2) => {
   if (value === null || value === undefined || isNaN(value)) return '0';
-  return parseFloat(value).toFixed(decimals);
+  return formatNumberVI(value, decimals);
 };
 
 /**
- * Add thousand separators to a number string
- * @param {string} numStr - Number string to format
- * @returns {string} Number with thousand separators
+ * Add thousand separators to a number string (Vietnamese format)
+ * @param {string} numStr - Number string to format (English format input)
+ * @returns {string} Number with Vietnamese thousand separators
  */
 const addThousandSeparators = (numStr) => {
   const parts = numStr.split('.');
-  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  return parts.join('.');
+  // Add dots as thousand separators (Vietnamese style)
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  // Join with comma as decimal separator (Vietnamese style)
+  return parts.length > 1 ? parts.join(',') : parts[0];
 };
 
 /**
@@ -79,16 +113,16 @@ export const formatPrice = (price, withSeparators = true) => {
 
 /**
  * Format currency amount (always with thousand separators)
- * For amounts like $100.00, $9,040.00
+ * For amounts like $100,00 / $9.040,00 (Vietnamese format)
  * @param {number} amount - Amount value
  * @param {number} decimals - Number of decimal places (default: 2)
  * @returns {string} Formatted amount string
  */
 export const formatCurrency = (amount, decimals = 2) => {
   if (amount === null || amount === undefined || typeof amount !== 'number' || isNaN(amount)) {
-    return '0.00';
+    return '0,00';
   }
-  return addThousandSeparators(amount.toFixed(decimals));
+  return formatNumberVI(amount, decimals);
 };
 
 /**
@@ -109,7 +143,7 @@ export const formatPriceWithCurrency = (price, currency = '$') => {
 export const formatPercentChange = (value) => {
   if (typeof value !== 'number' || isNaN(value)) return '0%';
   const sign = value >= 0 ? '+' : '';
-  return `${sign}${value.toFixed(2)}%`;
+  return `${sign}${formatNumberVI(value, 2)}%`;
 };
 
 /**
@@ -121,13 +155,13 @@ export const formatLargeNumber = (num) => {
   if (typeof num !== 'number' || isNaN(num)) return '0';
 
   if (num >= 1e9) {
-    return (num / 1e9).toFixed(2) + 'B';
+    return formatNumberVI(num / 1e9, 2) + 'B';
   } else if (num >= 1e6) {
-    return (num / 1e6).toFixed(2) + 'M';
+    return formatNumberVI(num / 1e6, 2) + 'M';
   } else if (num >= 1e3) {
-    return (num / 1e3).toFixed(2) + 'K';
+    return formatNumberVI(num / 1e3, 2) + 'K';
   }
-  return num.toFixed(2);
+  return formatNumberVI(num, 2);
 };
 
 /**
@@ -164,7 +198,7 @@ export const formatRiskReward = (entry, stopLoss, takeProfit) => {
   if (risk === 0) return '0:∞';
 
   const rr = reward / risk;
-  return `1:${rr.toFixed(2)}`;
+  return `1:${formatNumberVI(rr, 2)}`;
 };
 
 /**

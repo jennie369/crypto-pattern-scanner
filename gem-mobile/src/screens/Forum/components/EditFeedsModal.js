@@ -203,7 +203,7 @@ const EditFeedsModal = ({
                     onCreateNew?.();
                   }}
                 >
-                  <Plus size={18} color={COLORS.bgDark} />
+                  <Plus size={18} color={COLORS.bgDarkest} />
                   <Text style={styles.emptyButtonText}>Tạo Feed</Text>
                 </TouchableOpacity>
               </View>
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
   emptyButtonText: {
     fontSize: TYPOGRAPHY.fontSize.md,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.bgDark,
+    color: COLORS.bgDarkest,
   },
 });
 

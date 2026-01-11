@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 2: Nỗi Đau Tài Chính - GEM Academy</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Noto+Sans+Display:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ═══════════════════════════════════════════════════════════
+           CSS VARIABLES - GEM Design System
+           ═══════════════════════════════════════════════════════════ */
+        :root {
+            --primary-burgundy: #9C0612;
+            --primary-dark: #640A0C;
+            --bg-navy: #112250;
+            --bg-purple: #4A1A4F;
+            --bg-burgundy: #6B0F1A;
+            --gold-accent: #FFBD59;
+            --gold-light: #DEBC81;
+            --fire-orange: #FF4500;
+            --deep-red: #8B0000;
+            --blood-red: #5C0A0A;
+            --text-light: #FFFFFF;
+            --text-cream: #F5E6D3;
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            color: var(--text-light);
+            line-height: 1.7;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           SECTION 2: PAIN POINTS - Purple → Burgundy
+           ═══════════════════════════════════════════════════════════ */
+        .section-2 {
+            background: linear-gradient(180deg,
+                #4A1A4F 0%,
+                #551A4A 20%,
+                #5F1A43 40%,
+                #681A3C 60%,
+                #6B0F1A 100%
+            );
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+            padding: 80px 0;
+        }
+
+        /* Background Glow */
+        .section-2::before {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: -100px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(156, 6, 18, 0.3) 0%, transparent 70%);
+            filter: blur(100px);
+            pointer-events: none;
+        }
+
+        .section-2::after {
+            content: '';
+            position: absolute;
+            bottom: 10%;
+            right: -100px;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(255, 189, 89, 0.15) 0%, transparent 70%);
+            filter: blur(80px);
+            pointer-events: none;
+        }
+
+        /* Container */
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Section Header */
+        .section-header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 0 16px;
+        }
+
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, rgba(156,6,18,0.4), rgba(74,26,79,0.3));
+            border: 2px solid rgba(156, 6, 18, 0.6);
+            color: var(--text-cream);
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .section-badge svg {
+            width: 18px;
+            height: 18px;
+            color: var(--gold-accent);
+        }
+
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: clamp(1.8rem, 4.5vw, 3rem);
+            font-weight: 900;
+            color: var(--text-light);
+            line-height: 1.2;
+            margin-bottom: 16px;
+        }
+
+        .section-title .highlight {
+            color: var(--gold-accent);
+        }
+
+        .section-subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            color: var(--text-cream);
+            font-weight: 400;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        /* Storytelling Block */
+        .storytelling-block {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border-left: 4px solid var(--gold-accent);
+            padding: 32px 20px;
+            margin: 40px 0;
+        }
+
+        .storytelling-text {
+            font-size: 1.1rem;
+            color: var(--text-cream);
+            line-height: 1.9;
+            font-style: italic;
+        }
+
+        .storytelling-text strong {
+            color: var(--gold-accent);
+            font-style: normal;
+        }
+
+        /* Statistics Box */
+        .stats-highlight {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            background: linear-gradient(135deg, rgba(156,6,18,0.5), rgba(100,10,12,0.6));
+            border: 2px solid rgba(255, 189, 89, 0.3);
+            padding: 24px 20px;
+            margin: 40px 0;
+            text-align: center;
+        }
+
+        .stats-highlight svg {
+            width: 48px;
+            height: 48px;
+            color: var(--gold-accent);
+            flex-shrink: 0;
+        }
+
+        .stats-content {
+            text-align: left;
+        }
+
+        .stats-number {
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 5vw, 2.8rem);
+            font-weight: 900;
+            color: var(--gold-accent);
+        }
+
+        .stats-label {
+            font-size: 0.95rem;
+            color: var(--text-cream);
+            line-height: 1.5;
+        }
+
+        /* Pain Points Grid */
+        .pain-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1px;
+            background: rgba(156, 6, 18, 0.3);
+            margin: 40px 0;
+        }
+
+        .pain-card {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(15px);
+            padding: 28px 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            transition: all 0.4s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .pain-card:hover {
+            background: rgba(0, 0, 0, 0.7);
+            border-left-color: var(--primary-burgundy);
+        }
+
+        .pain-icon {
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            background: linear-gradient(135deg, rgba(156,6,18,0.6), rgba(100,10,12,0.8));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pain-icon svg {
+            width: 24px;
+            height: 24px;
+            color: var(--gold-accent);
+        }
+
+        .pain-content h3 {
+            font-family: var(--font-heading);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+
+        .pain-content p {
+            font-size: 0.95rem;
+            color: var(--text-cream);
+            line-height: 1.7;
+        }
+
+        /* Image Placeholder */
+        .image-wrapper {
+            width: 100%;
+            margin: 40px 0;
+        }
+
+        .image-placeholder {
+            width: 100%;
+            aspect-ratio: 16/10;
+            background: linear-gradient(135deg, rgba(156,6,18,0.2), rgba(74,26,79,0.3));
+            border-left: 4px solid var(--gold-accent);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            color: var(--text-cream);
+        }
+
+        .image-placeholder svg {
+            width: 56px;
+            height: 56px;
+            opacity: 0.5;
+        }
+
+        .image-placeholder .img-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .image-placeholder .img-desc {
+            font-size: 0.75rem;
+            opacity: 0.6;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        /* Question Box */
+        .question-box {
+            background: rgba(255, 189, 89, 0.1);
+            border: 2px solid rgba(255, 189, 89, 0.3);
+            border-radius: 0;
+            padding: 28px 20px;
+            margin: 40px 0;
+            text-align: center;
+        }
+
+        .question-box h3 {
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            margin-bottom: 12px;
+        }
+
+        .question-box p {
+            font-size: 1rem;
+            color: var(--text-cream);
+            line-height: 1.8;
+        }
+
+        /* CTA Section */
+        .section-cta {
+            text-align: center;
+            padding: 40px 16px;
+        }
+
+        .cta-text {
+            font-size: 1.1rem;
+            color: var(--text-cream);
+            margin-bottom: 24px;
+            line-height: 1.8;
+        }
+
+        .btn-cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px 36px;
+            background: linear-gradient(135deg, var(--gold-accent), var(--gold-light));
+            color: var(--primary-dark);
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 40px rgba(255, 189, 89, 0.3);
+        }
+
+        .btn-cta:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(255, 189, 89, 0.5);
+        }
+
+        .btn-cta svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Responsive */
+        @media (min-width: 600px) {
+            .section-2 {
+                padding: 100px 40px;
+            }
+
+            .storytelling-block {
+                border-radius: 16px;
+                border-left: none;
+                border: 2px solid rgba(255, 189, 89, 0.3);
+                padding: 40px;
+            }
+
+            .stats-highlight {
+                border-radius: 16px;
+            }
+
+            .image-placeholder {
+                border-radius: 16px;
+                border-left: none;
+                border: 2px solid rgba(255, 189, 89, 0.2);
+            }
+
+            .question-box {
+                border-radius: 16px;
+            }
+
+            .pain-card {
+                padding: 32px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .pain-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 968px) {
+            .section-2 {
+                padding: 100px 60px;
+            }
+
+            .pain-grid {
+                border-radius: 16px;
+                overflow: hidden;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 2: PAIN POINTS - NỖI ĐAU TÀI CHÍNH
+     Gradient: Purple #4A1A4F → Burgundy #6B0F1A
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<section class="section-2" id="pain-points">
+    <div class="container">
+        
+        <!-- Section Header -->
+        <div class="section-header">
+            <div class="section-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                THỨC TỈNH
+            </div>
+            <h2 class="section-title">
+                Bạn Có Đang Mắc Kẹt Trong
+                <span class="highlight">Vòng Xoáy Tiền Bạc?</span>
+            </h2>
+            <p class="section-subtitle">
+                Hàng triệu người đang âm thầm chịu đựng những nỗi đau tài chính mỗi ngày mà không biết 
+                nguyên nhân thực sự đến từ đâu và làm thế nào để thoát ra.
+            </p>
+        </div>
+
+        <!-- Storytelling Block -->
+        <div class="storytelling-block">
+            <p class="storytelling-text">
+                <strong>Bạn không cô đơn trong hành trình này.</strong> Mỗi đêm, có hàng nghìn người 
+                nằm thao thức vì lo lắng về tiền bạc. Họ tự hỏi tại sao dù đã làm việc chăm chỉ 
+                nhưng cuối tháng vẫn không còn gì. Họ cảm thấy xấu hổ khi phải từ chối lời mời đi 
+                chơi của bạn bè vì "tháng này hơi eo hẹp". Họ sợ hãi khi nghĩ đến tương lai, 
+                không biết liệu có đủ tiền cho con đi học hay chăm sóc cha mẹ già.
+            </p>
+        </div>
+
+        <!-- Statistics Highlight -->
+        <div class="stats-highlight">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                <line x1="12" y1="22.08" x2="12" y2="12"/>
+            </svg>
+            <div class="stats-content">
+                <span class="stats-number">78%</span>
+                <span class="stats-label">người Việt Nam thiếu kỹ năng quản lý tài chính cá nhân cơ bản, theo khảo sát năm 2024</span>
+            </div>
+        </div>
+
+        <!-- Image Placeholder 1 -->
+        <div class="image-wrapper">
+            <div class="image-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <span class="img-name">pain-money-stress.png (800x500)</span>
+                <span class="img-desc">Hình ảnh: Người ngồi bàn đầy hóa đơn, đầu cúi xuống, ánh sáng mờ, tone màu xám-đỏ</span>
+            </div>
+        </div>
+
+        <!-- Pain Points Grid -->
+        <div class="pain-grid">
+            
+            <!-- Pain 1 -->
+            <div class="pain-card">
+                <div class="pain-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M16 16s-1.5-2-4-2-4 2-4 2"/>
+                        <line x1="9" y1="9" x2="9.01" y2="9"/>
+                        <line x1="15" y1="9" x2="15.01" y2="9"/>
+                    </svg>
+                </div>
+                <div class="pain-content">
+                    <h3>Lo Lắng Thường Trực Về Tiền</h3>
+                    <p>Bạn thức dậy mỗi sáng với cảm giác nặng nề, tự hỏi liệu tiền có đủ trả hóa đơn không, 
+                       và cảm giác này theo bạn suốt cả ngày khiến bạn không thể tập trung làm việc hiệu quả.</p>
+                </div>
+            </div>
+
+            <!-- Pain 2 -->
+            <div class="pain-card">
+                <div class="pain-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        <line x1="9" y1="12" x2="15" y2="12"/>
+                    </svg>
+                </div>
+                <div class="pain-content">
+                    <h3>Tiền Vào Rồi Tiền Ra</h3>
+                    <p>Dù lương có tăng bao nhiêu, cuối tháng bạn vẫn không còn gì để tiết kiệm. Tiền như 
+                       có chân, cứ chảy đi đâu mất mà bạn không hiểu tại sao lại như vậy mãi.</p>
+                </div>
+            </div>
+
+            <!-- Pain 3 -->
+            <div class="pain-card">
+                <div class="pain-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                        <line x1="1" y1="10" x2="23" y2="10"/>
+                        <line x1="6" y1="16" x2="6.01" y2="16"/>
+                        <line x1="10" y1="16" x2="12" y2="16"/>
+                    </svg>
+                </div>
+                <div class="pain-content">
+                    <h3>Mãi Không Thể Tiết Kiệm</h3>
+                    <p>Bạn đã thử nhiều cách tiết kiệm nhưng luôn thất bại. Mỗi lần định bỏ tiền vào tiết kiệm 
+                       thì lại có việc gì đó phát sinh, và bạn cảm thấy bất lực trước vòng xoáy này.</p>
+                </div>
+            </div>
+
+            <!-- Pain 4 -->
+            <div class="pain-card">
+                <div class="pain-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <line x1="17" y1="11" x2="23" y2="11"/>
+                    </svg>
+                </div>
+                <div class="pain-content">
+                    <h3>Xấu Hổ Với Người Thân</h3>
+                    <p>Bạn ngại ngùng khi từ chối lời mời đi chơi, sợ người khác biết tình hình tài chính của mình. 
+                       Cảm giác này khiến bạn thu mình lại và đánh mất nhiều cơ hội kết nối quan trọng.</p>
+                </div>
+            </div>
+
+            <!-- Pain 5 -->
+            <div class="pain-card">
+                <div class="pain-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                </div>
+                <div class="pain-content">
+                    <h3>Sợ Hãi Tương Lai</h3>
+                    <p>Bạn không dám nghĩ đến việc nghỉ hưu, lo lắng không đủ tiền cho con học đại học, 
+                       và cảm thấy tương lai như một bức tường đen tối không có lối thoát nào phía trước.</p>
+                </div>
+            </div>
+
+            <!-- Pain 6 -->
+            <div class="pain-card">
+                <div class="pain-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/>
+                        <line x1="16" y1="8" x2="2" y2="22"/>
+                        <line x1="17.5" y1="15" x2="9" y2="15"/>
+                    </svg>
+                </div>
+                <div class="pain-content">
+                    <h3>Tự Trách Bản Thân</h3>
+                    <p>Bạn tin rằng mình kém cỏi trong việc quản lý tiền, rằng đây là lỗi của mình, và bạn 
+                       không đủ thông minh hay may mắn để giàu có như những người khác xung quanh.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Image Placeholder 2 -->
+        <div class="image-wrapper">
+            <div class="image-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <span class="img-name">pain-limiting-beliefs.png (800x500)</span>
+                <span class="img-desc">Hình ảnh: Xích sắt quấn quanh ví tiền, biểu tượng niềm tin giới hạn trói buộc tài chính</span>
+            </div>
+        </div>
+
+        <!-- Question Box -->
+        <div class="question-box">
+            <h3>Nhưng Đây Có Thực Sự Là Lỗi Của Bạn?</h3>
+            <p>
+                Điều đáng ngạc nhiên là những nỗi đau này không phải do bạn kém cỏi hay thiếu nỗ lực. 
+                Nguyên nhân thực sự nằm sâu trong tiềm thức, trong những niềm tin giới hạn về tiền bạc 
+                mà bạn đã vô tình tiếp nhận từ gia đình, xã hội và trải nghiệm quá khứ từ khi còn nhỏ.
+            </p>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="section-cta">
+            <p class="cta-text">
+                Tin vui là bạn hoàn toàn có thể thay đổi điều này. Khóa học 49 ngày sẽ giúp bạn 
+                nhận diện, thanh tẩy và tái lập trình tư duy về tiền bạc từ gốc rễ.
+            </p>
+            <a href="#transformation" class="btn-cta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 16 16 12 12 8"/>
+                    <line x1="8" y1="12" x2="16" y2="12"/>
+                </svg>
+                Khám Phá Giải Pháp
+            </a>
+        </div>
+
+    </div>
+</section>
+
+</body>
+</html>

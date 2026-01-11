@@ -39,6 +39,8 @@ const ScanResultsSection = ({
   const [showOnlyWithPatterns, setShowOnlyWithPatterns] = useState(true);
   // Changed: Only ONE coin can be expanded at a time (string instead of Set)
   const [expandedCoin, setExpandedCoin] = useState(null);
+  // Section toggle - collapsed/expanded
+  const [sectionCollapsed, setSectionCollapsed] = useState(false);
 
   // Filter results - only coins with patterns by default
   const filteredResults = useMemo(() => {
@@ -93,6 +95,7 @@ const ScanResultsSection = ({
 
   // Toggle accordion - ONLY ONE coin open at a time
   // Also selects the coin on chart when expanding
+  // Note: Removed LayoutAnimation to prevent Android crashes
   const toggleCoin = useCallback((symbol) => {
     if (expandedCoin === symbol) {
       // Close if already open
@@ -143,18 +146,36 @@ const ScanResultsSection = ({
 
   return (
     <View style={styles.container}>
-      {/* Header with stats */}
-      <View style={styles.header}>
+      {/* Header with stats - Tappable for collapse/expand */}
+      <TouchableOpacity
+        style={styles.header}
+        onPress={() => setSectionCollapsed(!sectionCollapsed)}
+        activeOpacity={0.7}
+      >
         <View style={styles.headerLeft}>
-          <BarChart2 size={20} color={COLORS.gold} />
+          <BarChart2 size={20} color={COLORS.textPrimary} />
           <Text style={styles.headerTitle}>Kết Quả Scan</Text>
+          {/* Collapse/Expand indicator */}
+          {sectionCollapsed ? (
+            <ChevronDown size={18} color={COLORS.textMuted} />
+          ) : (
+            <ChevronUp size={18} color={COLORS.textMuted} />
+          )}
         </View>
         <View style={styles.statsContainer}>
+          {/* Show scanned coins / total with patterns */}
           <View style={styles.statBadge}>
             <CheckCircle size={14} color="#22C55E" />
             <Text style={styles.statValue}>{stats.withPatterns}</Text>
             <Text style={styles.statLabel}>coins</Text>
           </View>
+          {/* Show total scanned if more than with patterns */}
+          {stats.total > stats.withPatterns && (
+            <View style={[styles.statBadge, styles.statBadgeMuted]}>
+              <Text style={styles.statValueMuted}>/{stats.total}</Text>
+              <Text style={styles.statLabelMuted}>đã quét</Text>
+            </View>
+          )}
           <View style={styles.statBadge}>
             <TrendingUp size={14} color="#22C55E" />
             <Text style={[styles.statValue, styles.greenText]}>{stats.longPatterns}</Text>
@@ -164,8 +185,11 @@ const ScanResultsSection = ({
             <Text style={[styles.statValue, styles.redText]}>{stats.shortPatterns}</Text>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
 
+      {/* Collapsible Content */}
+      {!sectionCollapsed && (
+        <>
       {/* Controls Row */}
       <View style={styles.controlsRow}>
         {/* Filter Toggle */}
@@ -197,12 +221,17 @@ const ScanResultsSection = ({
         </Text>
       </View>
 
-      {/* Coin Accordions */}
+      {/* Coin Accordions - Inline ScrollView for independent scrolling */}
       <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
+        style={styles.accordionScrollView}
+        contentContainerStyle={styles.accordionContainer}
         nestedScrollEnabled={true}
+        showsVerticalScrollIndicator={true}
+        scrollEventThrottle={16}
+        decelerationRate="fast"
+        overScrollMode="always"
+        bounces={true}
+        keyboardShouldPersistTaps="handled"
       >
         {Object.entries(groupedByCoin).map(([symbol, data]) => (
           <CoinAccordion
@@ -228,21 +257,20 @@ const ScanResultsSection = ({
           </View>
         )}
       </ScrollView>
+        </>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: COLORS.bgDark,
+    backgroundColor: 'rgba(15, 16, 48, 0.6)',
     marginTop: SPACING.md,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.3)',
+    borderColor: 'rgba(106, 91, 255, 0.25)',
     overflow: 'hidden',
-    minHeight: 1000, // FIXED: 5x increase from 200
-    maxHeight: 3000, // FIXED: 5x increase from 600
   },
 
   loadingContainer: {
@@ -271,8 +299,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(106, 91, 255, 0.2)',
-    backgroundColor: 'rgba(106, 91, 255, 0.1)',
+    borderBottomColor: 'rgba(106, 91, 255, 0.15)',
+    backgroundColor: 'rgba(106, 91, 255, 0.08)',
   },
 
   headerLeft: {
@@ -296,7 +324,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: 'rgba(106, 91, 255, 0.15)',
     paddingHorizontal: SPACING.sm,
     paddingVertical: 4,
     borderRadius: 6,
@@ -305,7 +333,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.gold,
+    color: COLORS.textPrimary,
   },
 
   statLabel: {
@@ -313,12 +341,28 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
   },
 
+  // Muted badge for total scanned count
+  statBadgeMuted: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: 2,
+  },
+  statValueMuted: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    color: COLORS.textMuted,
+  },
+  statLabelMuted: {
+    fontSize: 9,
+    color: COLORS.textMuted,
+    opacity: 0.7,
+  },
+
   greenText: {
-    color: '#22C55E',
+    color: COLORS.success,
   },
 
   redText: {
-    color: '#EF4444',
+    color: COLORS.error,
   },
 
   controlsRow: {
@@ -328,7 +372,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.05)',
+    borderBottomColor: 'rgba(106, 91, 255, 0.1)',
   },
 
   filterButton: {
@@ -337,15 +381,15 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingVertical: 6,
     paddingHorizontal: SPACING.sm,
-    backgroundColor: GLASS.background,
+    backgroundColor: 'rgba(106, 91, 255, 0.1)',
     borderRadius: 6,
     borderWidth: 1,
     borderColor: 'transparent',
   },
 
   filterButtonActive: {
-    backgroundColor: 'rgba(255, 189, 89, 0.1)',
-    borderColor: COLORS.gold,
+    backgroundColor: 'rgba(106, 91, 255, 0.2)',
+    borderColor: 'rgba(106, 91, 255, 0.5)',
   },
 
   filterText: {
@@ -354,7 +398,7 @@ const styles = StyleSheet.create({
   },
 
   filterTextActive: {
-    color: COLORS.gold,
+    color: COLORS.purple,
   },
 
   expandControls: {
@@ -368,7 +412,7 @@ const styles = StyleSheet.create({
     gap: 2,
     paddingVertical: 4,
     paddingHorizontal: SPACING.sm,
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: 'rgba(106, 91, 255, 0.1)',
     borderRadius: 4,
   },
 
@@ -380,16 +424,18 @@ const styles = StyleSheet.create({
   patternTotal: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.purple,
+    color: COLORS.textMuted,
   },
 
-  scrollView: {
-    flex: 1,
+  accordionScrollView: {
+    minHeight: 200,
+    maxHeight: 450,
   },
 
-  scrollContent: {
+  accordionContainer: {
     padding: SPACING.sm,
-    paddingBottom: 500, // FIXED: 5x increase from 100
+    paddingBottom: SPACING.xl,
+    flexGrow: 1,
   },
 
   emptyContainer: {

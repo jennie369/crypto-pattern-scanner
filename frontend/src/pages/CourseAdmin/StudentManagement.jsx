@@ -78,8 +78,23 @@ export default function StudentManagement() {
       setCourse(courseData);
 
       // Fetch enrolled students
-      const enrolledStudents = await enrollmentService.getEnrolledStudents(courseId);
-      setStudents(enrolledStudents || []);
+      const result = await enrollmentService.getCourseStudents(courseId, { limit: 1000 });
+      const enrolledStudents = result.students || [];
+
+      // Transform to expected format
+      const transformedStudents = enrolledStudents.map(s => ({
+        id: s.id,
+        user: {
+          full_name: s.name,
+          email: s.email,
+          avatar_url: s.avatar,
+        },
+        progress: s.progress || 0,
+        enrolled_at: s.enrolledAt,
+        last_activity: s.lastAccessedAt,
+      }));
+
+      setStudents(transformedStudents);
 
       // Calculate stats
       if (enrolledStudents?.length > 0) {

@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 4.4: Nghi Thức Cuối Ngày | GEM Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.5rem, 5vw, 2.25rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .definition-box p { color: var(--text-secondary); margin: 0; }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        @media (min-width: 601px) { .flow-step:hover { border-color: var(--gold); transform: translateX(8px); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .journal-box { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .journal-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .journal-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-md); }
+        .journal-prompt { color: var(--text-secondary); margin-bottom: var(--space-sm); font-size: 0.95rem; }
+        .journal-textarea { width: 100%; min-height: 80px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-md); color: var(--text-primary); font-family: inherit; font-size: 0.95rem; resize: vertical; }
+        .journal-textarea:focus { outline: none; border-color: var(--gold); }
+        .journal-textarea::placeholder { color: var(--text-muted); }
+
+        .meditation-box { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05)); border: 1px solid rgba(106, 91, 255, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .meditation-box { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .meditation-box-title { font-weight: 700; color: var(--purple); margin-bottom: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); }
+        .meditation-script { color: var(--text-secondary); font-style: italic; line-height: 1.8; }
+        .meditation-script p { margin-bottom: var(--space-md); }
+        .pause-indicator { color: var(--purple); font-weight: 600; font-style: normal; }
+
+        .app-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .app-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .app-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); }
+        .app-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .app-box p:last-child { margin-bottom: 0; }
+
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+
+        /* Quiz styles */
+        .quiz-section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-top: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-section { border: none; border-radius: 0; padding: 0; margin-top: 0; border-top: 8px solid var(--bg-primary); } }
+        .quiz-header { text-align: center; margin-bottom: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-header { padding: var(--space-lg) 16px var(--space-md); margin-bottom: 0; } }
+        .quiz-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+        .quiz-question { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-question { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; margin-bottom: 0; border-bottom: 1px solid var(--glass-border); } }
+        .question-number { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; font-weight: 700; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .question-text { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-lg); line-height: 1.6; }
+
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        @media (max-width: 600px) { .quiz-options { gap: 1px; background: var(--glass-border); margin-left: calc(-16px - 4px); margin-right: -16px; } }
+        .quiz-option { display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; transition: all 0.3s ease; }
+        @media (max-width: 600px) { .quiz-option { border: none; border-radius: 0; border-left: 4px solid transparent; padding: var(--space-md) 16px; } }
+        .quiz-option:hover:not(.disabled) { border-color: var(--gold); background: var(--bg-card); }
+        @media (max-width: 600px) { .quiz-option:hover:not(.disabled) { border-left-color: var(--gold); } }
+        .quiz-option.selected { border-color: var(--gold); background: rgba(255, 189, 89, 0.1); }
+        @media (max-width: 600px) { .quiz-option.selected { border-left-color: var(--gold); } }
+        .quiz-option.correct { border-color: var(--success) !important; background: rgba(0, 200, 83, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.correct { border-left-color: var(--success) !important; } }
+        .quiz-option.incorrect { border-color: var(--error) !important; background: rgba(255, 82, 82, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.incorrect { border-left-color: var(--error) !important; } }
+        .quiz-option.disabled { opacity: 0.7; cursor: not-allowed; }
+        .option-marker { width: 28px; height: 28px; min-width: 28px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+        .quiz-option.selected .option-marker { background: var(--gold); border-color: var(--gold); color: var(--navy-dark); }
+        .quiz-option.correct .option-marker { background: var(--success); border-color: var(--success); color: white; }
+        .quiz-option.incorrect .option-marker { background: var(--error); border-color: var(--error); color: white; }
+        .option-text { flex: 1; color: var(--text-secondary); }
+
+        .question-feedback { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--space-sm); display: none; }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); }
+        .question-feedback.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .quiz-result { text-align: center; padding: var(--space-xl); display: none; }
+        .quiz-result.show { display: block; }
+        .result-score { font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: var(--space-md); }
+        .result-text { font-size: 1.25rem; font-weight: 700; margin-bottom: var(--space-sm); }
+        .result-message { color: var(--text-muted); }
+
+        .quiz-buttons { display: flex; justify-content: center; padding: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-buttons { padding: var(--space-lg) 16px; } }
+        .quiz-btn { padding: var(--space-md) var(--space-xl); border-radius: var(--radius-md); font-weight: 700; cursor: pointer; border: none; font-family: inherit; background: var(--glass-bg); color: var(--text-primary); border: 2px solid var(--glass-border); }
+        .quiz-btn:hover { border-color: var(--gold); }
+
+        .lesson-footer { text-align: center; padding: var(--space-xl); color: var(--text-muted); font-size: 0.85rem; }
+        .lesson-footer a { color: var(--gold); text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>🌙</span>
+                <span>Module 4</span>
+            </div>
+            <div class="lesson-chapter">Module 4 - Nghi Thức Triệu Phú</div>
+            <h1 class="lesson-title">Nghi Thức Cuối Ngày</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 4.4</span></div>
+                <div class="meta-item"><span>⏱️</span><span>20 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Bạn Đang "Đi Ngủ" Với Gì?</h2>
+            <p>Mỗi đêm, khi bạn nhắm mắt đi ngủ, tiềm thức của bạn không ngủ. Nó tiếp tục làm việc, xử lý mọi thứ bạn đã trải nghiệm trong ngày - và quan trọng nhất là những gì bạn nghĩ NGAY TRƯỚC khi ngủ.</p>
+            <p>Thử nghĩ xem: Tối qua, bạn đã làm gì trong 30 phút cuối trước khi ngủ? Lướt Facebook? Xem tin tức? Lo lắng về công việc ngày mai? Hay check email?</p>
+            <p>Nếu bạn mang theo lo âu, stress, hoặc thông tin tiêu cực vào giấc ngủ - tiềm thức sẽ "tiêu hóa" những thứ đó suốt đêm. Và khi bạn thức dậy, bạn sẽ cảm thấy mệt mỏi dù đã ngủ đủ giấc.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🧠</span> Nghiên Cứu Về Giấc Ngủ</div>
+                <p>Nghiên cứu từ Đại học Harvard cho thấy não bộ "replay" và củng cố những trải nghiệm trong ngày khi chúng ta ngủ. Đặc biệt, những gì xảy ra trong 20 phút cuối trước khi ngủ có ảnh hưởng mạnh mẽ nhất đến quá trình này.</p>
+                <p style="margin-top: var(--space-sm);">Điều này giải thích tại sao những người thực hành gratitude và visualization trước khi ngủ thường thức dậy với năng lượng tích cực hơn - tiềm thức của họ đã được "lập trình" suốt đêm với tần số cao.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 1: TẠI SAO CUỐI NGÀY QUAN TRỌNG -->
+        <section class="section">
+            <h2 class="section-title"><span>🌙</span> Tại Sao Cuối Ngày Quan Trọng?</h2>
+            <p>Nếu buổi sáng là lúc "lập trình" ngày mới, thì buổi tối là lúc "xử lý" và "lưu trữ" những gì đã xảy ra. Nghi thức cuối ngày giúp bạn "close the loop" - khép lại ngày một cách có ý thức.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🧠</span> Khoa Học Về Giấc Ngủ</div>
+                <p>Trong khi ngủ, não bộ xử lý và lưu trữ thông tin của ngày. Những gì bạn nghĩ/cảm nhận trước khi ngủ sẽ được tiềm thức "tiêu hóa" suốt đêm. Nếu bạn mang theo lo lắng, stress → tiềm thức xử lý tiêu cực. Nếu bạn mang theo biết ơn, thịnh vượng → tiềm thức củng cố tích cực.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M4_B4_01%0ANight+Routine+Science" alt="Khoa học giấc ngủ">
+                <div class="image-caption">Tiềm thức hoạt động mạnh khi ngủ - hãy "lập trình" nó với những điều tích cực</div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>⚠️</span> Thói Quen Phá Hoại Giấc Ngủ</div>
+                <p>• Xem tin tức tiêu cực trước ngủ</p>
+                <p style="margin-top: var(--space-xs);">• Check email công việc và lo lắng</p>
+                <p style="margin-top: var(--space-xs);">• Scroll mạng xã hội không giới hạn</p>
+                <p style="margin-top: var(--space-xs);">• Nghĩ về những việc chưa hoàn thành</p>
+                <p style="margin-top: var(--space-xs);">• Ánh sáng xanh từ màn hình ảnh hưởng melatonin</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: NIGHT ROUTINE 10 PHÚT -->
+        <section class="section">
+            <h2 class="section-title"><span>⏰</span> Night Routine 10 Phút</h2>
+            <p>Đây là routine tối giản nhưng hiệu quả cao. Thực hiện 10-30 phút trước khi ngủ.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M4_B4_02%0ANight+Routine+10+Min" alt="Night Routine 10 Phút">
+                <div class="image-caption">10 phút trước ngủ quyết định chất lượng 8 giờ tiềm thức làm việc</div>
+            </div>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tắt Màn Hình (0:00)</div>
+                        <div class="flow-step-desc">Để điện thoại ở chế độ "Do Not Disturb" hoặc tắt hẳn. Không check thêm gì nữa. Đây là thời gian cho bạn.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Financial Review (2 phút)</div>
+                        <div class="flow-step-desc">Nhìn lại chi tiêu trong ngày. Áp dụng PAUSE retrospective: "Có khoản nào là chi tiêu cảm xúc không? Tôi có hài lòng với cách tôi sử dụng tiền hôm nay không?"</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">3 Wins (2 phút)</div>
+                        <div class="flow-step-desc">Liệt kê 3 chiến thắng nhỏ trong ngày. Không cần lớn lao - hoàn thành 1 task, giữ được PAUSE, có cuộc trò chuyện tốt đều là wins.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Gratitude (2 phút)</div>
+                        <div class="flow-step-desc">3 điều biết ơn trong ngày - đặc biệt liên quan đến tiền bạc nếu có thể. "Tôi biết ơn vì..." Cảm nhận thật sâu.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Intention cho Ngày Mai (2 phút)</div>
+                        <div class="flow-step-desc">"Ngày mai, tôi chọn cảm nhận [cảm xúc]." Ví dụ: "Ngày mai, tôi chọn cảm nhận sự dồi dào và tự tin." Đặt ý định cho giấc ngủ xử lý.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">6</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Release (2 phút)</div>
+                        <div class="flow-step-desc">Nếu có gì lo lắng, viết ra giấy. Nói: "Tôi giao việc này cho Vũ Trụ xử lý trong đêm. Tôi buông bỏ và tin tưởng." Rồi đặt giấy sang một bên.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: JOURNALING TEMPLATE -->
+        <section class="section">
+            <h2 class="section-title"><span>📝</span> Night Journal Template</h2>
+            <p>Sử dụng template này để journaling trước khi ngủ. Có thể viết vào sổ tay hoặc ngay tại đây.</p>
+
+            <div class="journal-box">
+                <div class="journal-title">🌙 Nhật Ký Cuối Ngày</div>
+
+                <div class="journal-prompt">📊 Financial Review: Chi tiêu hôm nay như thế nào?</div>
+                <textarea class="journal-textarea" placeholder="Ví dụ: Hôm nay tôi chi X triệu. Có 1 khoản mua cà phê không cần thiết..."></textarea>
+
+                <div class="journal-prompt" style="margin-top: var(--space-md);">🏆 3 Chiến Thắng Nhỏ Hôm Nay:</div>
+                <textarea class="journal-textarea" placeholder="1. ...\n2. ...\n3. ..."></textarea>
+
+                <div class="journal-prompt" style="margin-top: var(--space-md);">🙏 3 Điều Biết Ơn (đặc biệt về tài chính):</div>
+                <textarea class="journal-textarea" placeholder="1. Tôi biết ơn vì...\n2. Tôi biết ơn vì...\n3. Tôi biết ơn vì..."></textarea>
+
+                <div class="journal-prompt" style="margin-top: var(--space-md);">✨ Ý Định Cho Ngày Mai:</div>
+                <textarea class="journal-textarea" placeholder="Ngày mai, tôi chọn cảm nhận..."></textarea>
+
+                <div class="journal-prompt" style="margin-top: var(--space-md);">🎈 Những Gì Tôi Buông Bỏ (nếu có):</div>
+                <textarea class="journal-textarea" placeholder="Tôi buông bỏ... Tôi giao cho Vũ Trụ..."></textarea>
+            </div>
+        </section>
+
+        <!-- SECTION 4: SLEEP MEDITATION -->
+        <section class="section">
+            <h2 class="section-title"><span>🧘</span> Sleep Meditation (5 phút)</h2>
+            <p>Thực hiện meditation ngắn này khi đã nằm trên giường, sẵn sàng ngủ.</p>
+
+            <div class="meditation-box">
+                <div class="meditation-box-title"><span>🔮</span> Script: Thịnh Vượng Trong Giấc Mơ</div>
+                <div class="meditation-script">
+                    <p>Nằm thoải mái. Nhắm mắt. Thả lỏng toàn bộ cơ thể...</p>
+                    <p>Hít vào... 2... 3... 4... Thở ra... 2... 3... 4... 5... 6...</p>
+                    <p><span class="pause-indicator">[Lặp lại 5 lần]</span></p>
+
+                    <p>Nhìn lại ngày hôm nay như một bộ phim... Nhìn thấy những khoảnh khắc đẹp... những chiến thắng nhỏ... những điều biết ơn...</p>
+                    <p>Nói trong tâm: "Cảm ơn ngày hôm nay. Tôi đã làm hết sức. Tôi xứng đáng nghỉ ngơi."</p>
+                    <p><span class="pause-indicator">[Tạm dừng]</span></p>
+
+                    <p>Bây giờ, thả tất cả những gì đã xảy ra... Để nó trôi đi như dòng nước...</p>
+                    <p>Nói: "Tôi buông bỏ tất cả. Tôi tin tưởng vào sự hoàn hảo của cuộc sống."</p>
+                    <p><span class="pause-indicator">[Tạm dừng]</span></p>
+
+                    <p>Tưởng tượng một luồng ánh sáng vàng kim - màu của thịnh vượng - đang bao bọc lấy bạn...</p>
+                    <p>Nói: "Trong giấc ngủ, tôi đang thu hút thịnh vượng. Tiềm thức tôi đang làm việc cho sự dồi dào."</p>
+                    <p>"Khi tôi thức dậy, tôi là người thịnh vượng hơn."</p>
+                    <p><span class="pause-indicator">[Tạm dừng]</span></p>
+
+                    <p>Để giấc ngủ đến tự nhiên... an toàn... được bảo vệ... thịnh vượng...</p>
+                    <p>Chúc ngủ ngon.</p>
+                </div>
+            </div>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>📱</span> Tích Hợp GEM App</div>
+                <p><strong>Vision Board → Daily Score:</strong> Trước khi ngủ, ghi lại điểm năng lượng của ngày (1-10). Theo dõi xu hướng qua thời gian.</p>
+                <p><strong>Vision Board → Habits:</strong> Check-in habit "Night Routine" để duy trì streak.</p>
+                <p><strong>Rituals → Heart Expansion:</strong> Sử dụng ritual mở rộng tim trước khi ngủ nếu cần thư giãn sâu hơn.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 5: TỔNG KẾT MODULE 4 -->
+        <section class="section">
+            <h2 class="section-title"><span>🎓</span> Tổng Kết Module 4</h2>
+            <p>Chúc mừng! Bạn đã hoàn thành Module 4 - "Nghi Thức Triệu Phú". Bây giờ bạn có HỆ THỐNG nghi thức từ sáng đến tối để duy trì tần số thịnh vượng.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M4_B4_03%0AModule+4+Complete" alt="Hoàn thành Module 4">
+                <div class="image-caption">Nghi thức hàng ngày = Tự động hóa tư duy thịnh vượng</div>
+            </div>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>📋</span> Hệ Thống Nghi Thức Hoàn Chỉnh</div>
+                <ul class="summary-list">
+                    <li><strong>Bài 4.1 - Morning Routine:</strong> 7 nghi thức buổi sáng, routine 15 phút, trigger + reward</li>
+                    <li><strong>Bài 4.2 - Gratitude Practice:</strong> Financial gratitude, journaling, nghi thức ví tiền, meditation 5 phút</li>
+                    <li><strong>Bài 4.3 - PAUSE Rule:</strong> 5 bước PAUSE, 7 trigger questions, quy tắc 50-30-20, spending tracker</li>
+                    <li><strong>Bài 4.4 - Night Routine:</strong> Routine 10 phút, financial review, 3 wins, sleep meditation</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🚀</span> Tiếp Theo: Module 5 - Hành Động Thuận Thiên</div>
+                <p>Module 5 sẽ chuyển từ "tư duy" sang "hành động". Bạn sẽ học về Aligned Action, cách tạo giá trị, quản lý tài chính thực tế với hệ thống 6 Lọ, và đầu tư vào bản thân.</p>
+                <p style="margin-top: var(--space-sm);">Nhớ: <strong>Tư duy + Hành động = Kết quả thực tế.</strong></p>
+            </div>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>📱</span> Cam Kết 21 Ngày</div>
+                <p>Tạo 2 habits trong <strong>GEM App → Vision Board → Habits</strong>:</p>
+                <p>• <strong>Morning Ritual</strong> - Check-in mỗi sáng</p>
+                <p>• <strong>Night Ritual</strong> - Check-in mỗi tối</p>
+                <p>Mục tiêu: <strong>21 ngày liên tục</strong> để biến nghi thức thành thói quen tự động.</p>
+            </div>
+        </section>
+
+        <!-- REAL STORIES -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Câu Chuyện Thực Tế</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>👨‍💼</span> Câu Chuyện Của Cường - Từ Mất Ngủ Đến Giấc Ngủ Thịnh Vượng</div>
+                <p><strong>Cường, 45 tuổi, Giám đốc kinh doanh:</strong> "Với công việc áp lực, tôi thường xuyên mất ngủ. Mỗi đêm tôi nằm lo lắng về doanh số, về nhân viên, về khách hàng. Sáng dậy mệt mỏi, lại bắt đầu một ngày căng thẳng."</p>
+                <p style="margin-top: var(--space-sm);">"Khi học về Night Routine, tôi bắt đầu áp dụng bài Release - ghi những lo lắng ra giấy và nói: 'Tôi giao việc này cho Vũ Trụ xử lý trong đêm.' Ban đầu tôi nghĩ nó ngốc nghếch, nhưng kỳ lạ là sau khi viết ra, tôi thấy nhẹ nhõm hơn."</p>
+                <p style="margin-top: var(--space-sm);">"Sau 2 tuần, giấc ngủ của tôi cải thiện rõ rệt. Tôi ngủ sâu hơn, thức dậy sảng khoái hơn. Và điều thú vị là nhiều vấn đề tôi lo lắng... tự có giải pháp xuất hiện vào sáng hôm sau, như thể tiềm thức đã làm việc suốt đêm để tìm ra câu trả lời."</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>👩‍🎓</span> Câu Chuyện Của Yến - Sinh Viên Với Giấc Mơ Thịnh Vượng</div>
+                <p><strong>Yến, 23 tuổi, Sinh viên năm cuối:</strong> "Tôi từng là người hay mơ ác mộng, đặc biệt khi stress về thi cử và tương lai. Mỗi đêm tôi lướt TikTok đến 1-2 giờ sáng rồi mới ngủ, và luôn thức dậy trong trạng thái mệt mỏi."</p>
+                <p style="margin-top: var(--space-sm);">"Khi học về Sleep Meditation trong khóa học, tôi quyết định thay đổi. Thay vì lướt điện thoại, tôi dành 5 phút cuối để làm meditation 'Thịnh Vượng Trong Giấc Mơ'. Tôi hình dung ánh sáng vàng kim bao bọc lấy mình và nói: 'Trong giấc ngủ, tôi đang thu hút thịnh vượng.'"</p>
+                <p style="margin-top: var(--space-sm);">"Điều kỳ diệu là ác mộng biến mất. Thay vào đó, tôi bắt đầu có những giấc mơ tích cực - mơ thấy mình thành công, mơ thấy cơ hội đến. Và thực tế, sau khi tốt nghiệp, tôi nhận được offer từ công ty mơ ước - đúng như những gì tôi đã hình dung trong những giấc mơ đó!"</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>💡</span> Bài Học Rút Ra</div>
+                <p><strong>Từ Cường:</strong> Việc "giao nộp" lo lắng cho Vũ Trụ trước khi ngủ không chỉ giúp ngủ ngon hơn, mà còn cho phép tiềm thức làm việc tìm giải pháp trong khi bạn nghỉ ngơi.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Từ Yến:</strong> Những gì bạn đưa vào tâm trí trước khi ngủ sẽ ảnh hưởng đến cả giấc mơ và thực tại. Thay vì mang theo nội dung tiêu cực từ mạng xã hội, hãy mang theo hình ảnh của cuộc sống thịnh vượng bạn muốn có.</p>
+            </div>
+        </section>
+
+        <!-- KEY TAKEAWAYS -->
+        <section class="section">
+            <h2 class="section-title"><span>🔑</span> Key Takeaways Module 4</h2>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Morning + Night = Vòng Tròn Hoàn Chỉnh</div>
+                        <div class="flow-step-desc">Buổi sáng lập trình ngày mới, buổi tối xử lý và lưu trữ những gì đã xảy ra. Khi có cả hai nghi thức, bạn tạo ra một vòng tròn hoàn chỉnh của sự tiến hóa ý thức.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tiềm Thức Làm Việc Khi Bạn Ngủ</div>
+                        <div class="flow-step-desc">Não bộ không "tắt" khi ngủ - nó xử lý và củng cố thông tin. Những gì bạn nghĩ trước khi ngủ sẽ được tiềm thức "tiêu hóa" suốt đêm. Hãy đưa vào những điều tích cực.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Release = Giải Phóng = Tự Do</div>
+                        <div class="flow-step-desc">Ghi lo lắng ra giấy và "giao nộp" cho Vũ Trụ là cách mạnh mẽ để giải phóng gánh nặng tâm lý. Bạn không cần mang theo mọi thứ vào giấc ngủ - hãy để Vũ Trụ giúp bạn.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- QUIZ SECTION -->
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">📝 Quiz Module 4</h2>
+                <p class="quiz-subtitle">Kiểm tra kiến thức - Click để chọn đáp án</p>
+            </div>
+
+            <!-- Question 1 -->
+            <div class="quiz-question" data-correct="3">
+                <div class="question-number">1</div>
+                <div class="question-text">Trong Quy Tắc P.A.U.S.E, chữ "E" đại diện cho điều gì và tại sao nó quan trọng?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="0">
+                        <div class="option-marker">A</div>
+                        <div class="option-text">Evaluate - Đánh giá giá trị sản phẩm</div>
+                    </div>
+                    <div class="quiz-option" data-option="1">
+                        <div class="option-marker">B</div>
+                        <div class="option-text">Expense - Xác định nguồn chi</div>
+                    </div>
+                    <div class="quiz-option" data-option="2">
+                        <div class="option-marker">C</div>
+                        <div class="option-text">Exchange - Cân nhắc đổi chác</div>
+                    </div>
+                    <div class="quiz-option" data-option="3">
+                        <div class="option-marker">D</div>
+                        <div class="option-text">Energy - Dự đoán cảm xúc trước và sau khi mua</div>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text">E = ENERGY - Dự đoán cảm xúc TRƯỚC và SAU khi mua. Nếu bạn dự đoán SAU khi mua sẽ hối hận, thất vọng → đừng mua. Đây là cách ngăn chặn chi tiêu cảm xúc.</div>
+                </div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="quiz-question" data-correct="1">
+                <div class="question-number">2</div>
+                <div class="question-text">Theo quy tắc 50-30-20, bạn nên phân bổ bao nhiêu phần trăm thu nhập cho TIẾT KIỆM và ĐẦU TƯ?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="0">
+                        <div class="option-marker">A</div>
+                        <div class="option-text">10%</div>
+                    </div>
+                    <div class="quiz-option" data-option="1">
+                        <div class="option-marker">B</div>
+                        <div class="option-text">20%</div>
+                    </div>
+                    <div class="quiz-option" data-option="2">
+                        <div class="option-marker">C</div>
+                        <div class="option-text">30%</div>
+                    </div>
+                    <div class="quiz-option" data-option="3">
+                        <div class="option-marker">D</div>
+                        <div class="option-text">50%</div>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text">Quy tắc 50-30-20: 50% cho Needs (nhu cầu thiết yếu), 30% cho Wants (ham muốn, giải trí), 20% cho Savings (tiết kiệm, đầu tư). 20% tối thiểu cho tương lai!</div>
+                </div>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="quiz-question" data-correct="2">
+                <div class="question-number">3</div>
+                <div class="question-text">Tại sao nghi thức cuối ngày quan trọng cho việc xây dựng tư duy thịnh vượng?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="0">
+                        <div class="option-marker">A</div>
+                        <div class="option-text">Vì ban đêm là lúc tiền chảy vào tài khoản</div>
+                    </div>
+                    <div class="quiz-option" data-option="1">
+                        <div class="option-marker">B</div>
+                        <div class="option-text">Vì cần đếm tiền mỗi tối để biết còn bao nhiêu</div>
+                    </div>
+                    <div class="quiz-option" data-option="2">
+                        <div class="option-marker">C</div>
+                        <div class="option-text">Vì tiềm thức xử lý và củng cố thông tin trong khi ngủ</div>
+                    </div>
+                    <div class="quiz-option" data-option="3">
+                        <div class="option-marker">D</div>
+                        <div class="option-text">Vì buổi tối là lúc duy nhất có thời gian rảnh</div>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text">Trong khi ngủ, tiềm thức XỬ LÝ và LƯU TRỮ thông tin của ngày. Nếu bạn mang theo biết ơn, thịnh vượng vào giấc ngủ, tiềm thức sẽ củng cố những niềm tin tích cực này suốt đêm.</div>
+                </div>
+            </div>
+
+            <div class="quiz-result">
+                <div class="result-score"></div>
+                <div class="result-text"></div>
+                <div class="result-message"></div>
+            </div>
+
+            <div class="quiz-buttons">
+                <button class="quiz-btn" onclick="resetQuiz()">🔄 Làm lại Quiz</button>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <p>© 2024 GEM Academy | Khóa học: Tái Tạo Tư Duy Triệu Phú</p>
+            <p>Module 4 - Bài 4.4: Nghi Thức Cuối Ngày | <a href="#">Quay về danh sách bài học</a></p>
+        </footer>
+
+    </div>
+
+    <script>
+        let answeredQuestions = 0;
+        const totalQuestions = 3;
+        let correctAnswers = 0;
+
+        document.querySelectorAll('.quiz-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const question = this.closest('.quiz-question');
+                if (question.classList.contains('answered')) return;
+
+                const correctIndex = parseInt(question.dataset.correct);
+                const selectedIndex = parseInt(this.dataset.option);
+                const feedback = question.querySelector('.question-feedback');
+                const feedbackTitle = feedback.querySelector('.feedback-title');
+
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.add('disabled');
+                });
+
+                this.classList.add('selected');
+
+                if (selectedIndex === correctIndex) {
+                    this.classList.add('correct');
+                    feedback.classList.add('correct');
+                    feedbackTitle.textContent = '✓ Chính xác!';
+                    correctAnswers++;
+                } else {
+                    this.classList.add('incorrect');
+                    feedback.classList.add('incorrect');
+                    feedbackTitle.textContent = '✗ Chưa đúng!';
+                    question.querySelectorAll('.quiz-option')[correctIndex].classList.add('correct');
+                }
+
+                feedback.classList.add('show');
+                question.classList.add('answered');
+                answeredQuestions++;
+
+                if (answeredQuestions === totalQuestions) {
+                    showResult();
+                }
+            });
+        });
+
+        function showResult() {
+            const resultDiv = document.querySelector('.quiz-result');
+            const scoreDiv = resultDiv.querySelector('.result-score');
+            const textDiv = resultDiv.querySelector('.result-text');
+            const messageDiv = resultDiv.querySelector('.result-message');
+
+            scoreDiv.textContent = `${correctAnswers}/${totalQuestions}`;
+
+            if (correctAnswers === totalQuestions) {
+                textDiv.textContent = '🏆 Xuất sắc!';
+                messageDiv.textContent = 'Bạn đã nắm vững Nghi Thức Triệu Phú. Hãy thực hành mỗi ngày!';
+            } else if (correctAnswers >= 2) {
+                textDiv.textContent = '👍 Tốt lắm!';
+                messageDiv.textContent = 'Bạn hiểu khá tốt. Ôn lại những phần chưa chắc chắn nhé.';
+            } else {
+                textDiv.textContent = '📚 Cần ôn tập thêm';
+                messageDiv.textContent = 'Hãy đọc lại Module 4 để nắm vững các nghi thức.';
+            }
+
+            resultDiv.classList.add('show');
+        }
+
+        function resetQuiz() {
+            answeredQuestions = 0;
+            correctAnswers = 0;
+
+            document.querySelectorAll('.quiz-question').forEach(question => {
+                question.classList.remove('answered');
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('selected', 'correct', 'incorrect', 'disabled');
+                });
+                const feedback = question.querySelector('.question-feedback');
+                feedback.classList.remove('show', 'correct', 'incorrect');
+            });
+
+            document.querySelector('.quiz-result').classList.remove('show');
+        }
+    </script>
+</body>
+</html>

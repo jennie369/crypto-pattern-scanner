@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 1.1: Bản Đồ Các Mối Quan Hệ Quá Khứ | Khóa Tần Số Tình Yêu</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250; --navy-dark: #0a1628; --gold: #FFBD59; --gold-dark: #E5A73D;
+            --cyan: #00F0FF; --purple: #6A5BFF; --burgundy: #9C0612; --burgundy-light: #C41E2A;
+            --success: #00C853; --error: #FF5252; --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6); --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85); --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4); --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 32px;
+            --radius-md: 12px; --radius-lg: 16px;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        img { max-width: 100%; height: auto; display: block; }
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--burgundy); bottom: -50px; right: 20%; }
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+        .section > ul, .section > ol { color: var(--text-secondary); padding-left: 1.5em; margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > ul, .section > ol { padding-left: calc(16px + 1.5em); padding-right: 16px; } }
+        .section li { margin-bottom: var(--space-sm); }
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .definition-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .warning-box { background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(156, 6, 18, 0.05)); border: 1px solid rgba(156, 6, 18, 0.4); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .warning-box { border: none; border-radius: 0; border-left: 4px solid var(--burgundy); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .warning-box-title { font-weight: 700; color: var(--burgundy-light); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .warning-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .success-box { background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05)); border: 1px solid rgba(0, 200, 83, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .success-box { border: none; border-radius: 0; border-left: 4px solid var(--success); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .success-box-title { font-weight: 700; color: var(--success); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .success-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .quote-box { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05)); border: 1px solid rgba(106, 91, 255, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; font-style: italic; }
+        @media (max-width: 600px) { .quote-box { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .quote-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .quote-author { color: var(--purple); font-weight: 600; font-style: normal; }
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        @media (min-width: 601px) { .flow-step:hover { border-color: var(--gold); transform: translateX(8px); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+        .patterns-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .patterns-grid { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .pattern-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); text-align: center; transition: all 0.3s ease; }
+        @media (max-width: 600px) { .pattern-card { border: none; border-radius: 0; padding: var(--space-md); } }
+        @media (min-width: 601px) { .pattern-card:hover { border-color: var(--burgundy); transform: translateY(-4px); } }
+        .pattern-icon { font-size: 2.5rem; margin-bottom: var(--space-sm); }
+        .pattern-name { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .pattern-desc { font-size: 0.85rem; color: var(--text-muted); }
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+        .checklist { list-style: none; margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .checklist { margin: var(--space-md) 0; background: var(--glass-border); } }
+        .checklist-item { display: flex; align-items: flex-start; gap: var(--space-md); padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); margin-bottom: var(--space-sm); }
+        @media (max-width: 600px) { .checklist-item { padding: var(--space-md) 16px; border: none; border-radius: 0; margin-bottom: 0; border-left: 4px solid var(--gold); } }
+        .checklist-icon { width: 24px; height: 24px; min-width: 24px; background: var(--glass-bg); border: 2px solid var(--gold); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--gold); font-size: 0.8rem; }
+        .checklist-text { color: var(--text-secondary); flex: 1; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>💔</span>
+                <span>Module 1</span>
+            </div>
+            <div class="lesson-chapter">Chapter 1 - Chữa Lành Vết Thương Quá Khứ</div>
+            <h1 class="lesson-title">Bản Đồ Các Mối Quan Hệ Quá Khứ</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 1.1</span></div>
+                <div class="meta-item"><span>⏱️</span><span>10 phút đọc</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🔍</span> Khi Quá Khứ Tiếp Tục Lặp Lại</h2>
+
+            <p>Bạn có bao giờ tự hỏi tại sao mình cứ thu hút những mối quan hệ giống nhau đến kỳ lạ? Dù đã thề với lòng rằng sẽ không bao giờ lặp lại sai lầm cũ, nhưng rồi bạn vẫn thấy mình trong một mối quan hệ với những vấn đề quen thuộc đến đau lòng. Người yêu mới có khuôn mặt khác, tên khác, nhưng cách họ đối xử với bạn lại giống hệt những người trước đó.</p>
+
+            <p>Có lẽ bạn đã trải qua cảm giác này nhiều lần: hy vọng rằng lần này sẽ khác, tin rằng mình đã thay đổi, nhưng cuối cùng lại đứng trước cùng một bức tường đau thương. Điều này không phải là xui xẻo hay số phận nghiệt ngã, mà là một cơ chế rất cụ thể đang vận hành trong tiềm thức của bạn, và điều kỳ diệu là bạn hoàn toàn có thể thay đổi nó khi hiểu được cách nó hoạt động.</p>
+
+            <div class="quote-box">
+                <p>"What you don't heal, you repeat. What you don't transform, you transmit."</p>
+                <p class="quote-author">— Điều không chữa lành sẽ lặp lại. Điều không chuyển hóa sẽ truyền tiếp cho thế hệ sau.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m1-what-you-dont-heal-quote.png" alt="Quote về chữa lành">
+            </div>
+            <div class="image-caption">Hình 1: "What you don't heal, you repeat" - Nguyên lý quan trọng nhất của hành trình chữa lành</div>
+        </section>
+
+        <!-- CONCEPT INTRODUCTION -->
+        <section class="section">
+            <h2 class="section-title"><span>🗺️</span> Bản Đồ Quan Hệ Là Gì?</h2>
+
+            <p>Bản Đồ Quan Hệ là công cụ giúp bạn nhìn tổng thể tất cả các mối quan hệ quan trọng trong cuộc đời mình theo một góc nhìn mới. Thay vì chỉ nhớ lại từng mối quan hệ riêng lẻ với những kỷ niệm vui buồn, bạn sẽ đặt tất cả chúng cạnh nhau để tìm ra những patterns ẩn giấu mà bấy lâu nay bạn không nhận ra.</p>
+
+            <p>Hãy tưởng tượng mỗi mối quan hệ là một mảnh ghép. Khi nhìn từng mảnh riêng lẻ, bạn chỉ thấy một phần nhỏ của bức tranh. Nhưng khi ghép tất cả lại với nhau, bạn sẽ thấy một hình ảnh hoàn chỉnh về cách bạn yêu thương và muốn được yêu thương. Đây chính là bước đầu tiên và quan trọng nhất của hành trình chữa lành, bởi vì bạn không thể thay đổi những gì bạn không nhìn thấy.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📖</span> Định Nghĩa: Patterns Trong Quan Hệ</div>
+                <p><strong>Patterns</strong> là những mô hình hành vi, cảm xúc hoặc hoàn cảnh lặp đi lặp lại trong các mối quan hệ khác nhau của bạn. Chúng hoạt động như một "kịch bản ngầm" trong tiềm thức, khiến bạn vô thức thu hút hoặc tạo ra những tình huống tương tự nhau dù với những người khác nhau.</p>
+                <p>Ví dụ: Nếu bạn luôn yêu những người không sẵn sàng cam kết, đó là một pattern. Nếu bạn luôn là người cho đi nhiều hơn nhận lại, đó cũng là một pattern. Những patterns này không phải ngẫu nhiên mà xuất phát từ những vết thương chưa được chữa lành trong quá khứ.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m1-relationship-map-template.png" alt="Template Bản Đồ Quan Hệ">
+            </div>
+            <div class="image-caption">Hình 2: Template Bản Đồ Quan Hệ - Công cụ nhìn tổng thể các mối quan hệ trong đời bạn</div>
+        </section>
+
+        <!-- DEEP EXPLANATION - WHAT, WHY, HOW -->
+        <section class="section">
+            <h2 class="section-title"><span>🔬</span> Hiểu Sâu Về Cơ Chế Patterns</h2>
+
+            <p>Để thực sự phá vỡ những patterns đau thương, bạn cần hiểu rõ chúng hoạt động như thế nào ở cả ba cấp độ: WHAT (điều gì đang xảy ra), WHY (tại sao lại xảy ra), và HOW (cơ chế hoạt động cụ thể).</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🎯</span> WHAT - Điều Gì Đang Xảy Ra?</div>
+                <p>Tiềm thức của bạn đang tái tạo những tình huống quen thuộc từ quá khứ, đặc biệt là từ thời thơ ấu. Nếu bạn lớn lên với cảm giác không được yêu thương đủ, tiềm thức sẽ tìm kiếm những người khiến bạn có cảm giác tương tự, không phải vì bạn thích bị đau khổ, mà vì đó là "vùng an toàn" của bạn. Điều quen thuộc, dù đau đớn, vẫn cảm thấy "an toàn" hơn điều xa lạ.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>❓</span> WHY - Tại Sao Lại Như Vậy?</div>
+                <p>Theo Học Thuyết Chuyển Hóa Nội Tâm, những vết thương chưa được chữa lành sẽ tạo ra các "hình tư tưởng" - những cấu trúc năng lượng trong trường khí của bạn. Những hình tư tưởng này hoạt động như những nam châm vô hình, thu hút những người và tình huống có năng lượng tương tự. Đây là nguyên lý "Trong-Ngoài Tương Ứng": thế giới bên ngoài phản chiếu thế giới bên trong của bạn.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>⚙️</span> HOW - Cơ Chế Hoạt Động</div>
+                <p>Cơ chế này hoạt động qua 4 giai đoạn: <strong>1. Trigger</strong> - Một sự kiện hoặc người kích hoạt vết thương cũ. <strong>2. Reaction</strong> - Bạn phản ứng theo "kịch bản cũ" một cách vô thức. <strong>3. Confirmation</strong> - Phản ứng của bạn tạo ra kết quả xác nhận niềm tin tiêu cực sẵn có. <strong>4. Reinforcement</strong> - Pattern được củng cố và lặp lại mạnh mẽ hơn lần sau. Vòng lặp này sẽ tiếp tục cho đến khi bạn có ý thức can thiệp và thay đổi.</p>
+            </div>
+
+            <p>Điều quan trọng cần hiểu là patterns không phải lỗi của bạn. Chúng là cơ chế tự vệ mà tiềm thức phát triển để bảo vệ bạn khỏi nỗi đau. Vấn đề là những cơ chế này có thể hữu ích khi bạn còn nhỏ, nhưng trở thành rào cản khi bạn trưởng thành và muốn có những mối quan hệ lành mạnh.</p>
+
+            <div class="image-container">
+                <img src="images/m1-patterns-recognition.png" alt="Nhận Diện Patterns">
+            </div>
+            <div class="image-caption">Hình 3: Vòng lặp Pattern - Từ Trigger đến Reinforcement</div>
+
+            <p>Ví dụ, một người lớn lên với cha mẹ hay vắng mặt có thể phát triển pattern "chọn người không available". Tiềm thức đã quen với việc khao khát sự chú ý từ người không có mặt, nên khi trưởng thành, họ vô thức bị thu hút bởi những người có đặc điểm tương tự: bận rộn, xa cách về mặt cảm xúc, hoặc đã có người yêu khác.</p>
+        </section>
+
+        <!-- 4 ATTACHMENT STYLES -->
+        <section class="section">
+            <h2 class="section-title"><span>🔗</span> 4 Kiểu Gắn Bó (Attachment Styles)</h2>
+
+            <p>Theo lý thuyết Attachment của John Bowlby và Mary Ainsworth, cách bạn được yêu thương trong những năm đầu đời tạo ra một "kiểu gắn bó" ảnh hưởng sâu sắc đến tất cả các mối quan hệ sau này. Hiểu được kiểu gắn bó của mình là chìa khóa để giải mã nhiều patterns trong tình yêu.</p>
+
+            <div class="image-container">
+                <img src="images/m1-4-attachment-styles.png" alt="4 Kiểu Gắn Bó">
+            </div>
+            <div class="image-caption">Hình 4: 4 Kiểu Gắn Bó - Nhận diện kiểu của bạn để hiểu patterns sâu hơn</div>
+
+            <div class="patterns-grid">
+                <div class="pattern-card">
+                    <div class="pattern-icon">🛡️</div>
+                    <div class="pattern-name">Secure (An Toàn)</div>
+                    <div class="pattern-desc">Thoải mái với sự thân mật, tin tưởng người khác, không lo lắng quá mức về mối quan hệ. Có thể độc lập nhưng cũng sẵn sàng phụ thuộc lành mạnh.</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">😰</div>
+                    <div class="pattern-name">Anxious (Lo Lắng)</div>
+                    <div class="pattern-desc">Cần nhiều sự xác nhận, sợ bị bỏ rơi, lo lắng khi partner không reply ngay. Thường cho đi nhiều hơn để giữ người yêu ở bên.</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">🏃</div>
+                    <div class="pattern-name">Avoidant (Né Tránh)</div>
+                    <div class="pattern-desc">Né tránh sự thân mật, đề cao sự độc lập, khó chia sẻ cảm xúc sâu. Thường rút lui khi mối quan hệ trở nên quá gần gũi.</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">🌀</div>
+                    <div class="pattern-name">Disorganized (Hỗn Loạn)</div>
+                    <div class="pattern-desc">Vừa muốn gần vừa muốn xa, hành vi không nhất quán, thường do trauma thời thơ ấu. Sợ hãi nhưng đồng thời khao khát sự gần gũi.</div>
+                </div>
+            </div>
+
+            <div class="success-box">
+                <div class="success-box-title"><span>✨</span> Tin Vui Quan Trọng</div>
+                <p>Attachment style KHÔNG cố định suốt đời! Nghiên cứu cho thấy bạn hoàn toàn có thể phát triển từ bất kỳ kiểu nào sang <strong>Secure Attachment</strong> thông qua healing có ý thức, trị liệu, hoặc có những mối quan hệ lành mạnh với người có Secure Attachment. Đây chính là mục tiêu cốt lõi của Module 1 đến Module 3 trong khóa học này.</p>
+            </div>
+        </section>
+
+        <!-- REAL-WORLD EXAMPLES -->
+        <section class="section">
+            <h2 class="section-title"><span>💫</span> Câu Chuyện Thực Tế</h2>
+
+            <p>Để hiểu rõ hơn cách patterns hoạt động trong thực tế, hãy cùng xem ba câu chuyện từ những học viên đã trải qua hành trình vẽ Bản Đồ Quan Hệ.</p>
+
+            <div class="success-box">
+                <div class="success-box-title"><span>🌟</span> Câu Chuyện 1: Hà - Phá Vỡ Pattern "Người Cứu Rỗi"</div>
+                <p>Hà, 32 tuổi, nhận ra qua Bản Đồ Quan Hệ rằng cô luôn yêu những người đàn ông có vấn đề: nghiện rượu, thất nghiệp, hoặc trầm cảm. Ban đầu cô nghĩ mình chỉ là người tốt bụng, nhưng khi nhìn lại cả 5 mối quan hệ trước đó, cô thấy một pattern rõ ràng. Cô phát hiện pattern này bắt nguồn từ việc cô luôn phải chăm sóc bố mẹ khi còn nhỏ. Việc "cứu" ai đó khiến cô cảm thấy có giá trị. Sau khi nhận ra điều này, Hà bắt đầu hành trình chữa lành Inner Child và dần dần thu hút được người đàn ông lành mạnh, tự lập.</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>⚠️</span> Câu Chuyện 2: Tuấn - Pattern "Sợ Bị Bỏ Rơi"</div>
+                <p>Tuấn, 28 tuổi, luôn ghen tuông cực độ trong các mối quan hệ. Anh kiểm tra điện thoại người yêu, nghi ngờ mỗi khi cô đi chơi với bạn bè, và thường xuyên cần được xác nhận tình cảm. Kết quả là người yêu nào cũng cảm thấy ngột ngạt và rời đi - chính xác điều Tuấn sợ nhất. Qua Bản Đồ Quan Hệ, Tuấn phát hiện pattern này bắt nguồn từ việc mẹ anh đột ngột bỏ đi khi anh 5 tuổi. Nỗi sợ bị bỏ rơi đã trở thành một "lời tiên tri tự ứng nghiệm" trong tất cả các mối quan hệ của anh.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>💡</span> Câu Chuyện 3: Linh - Từ Né Tránh Đến An Toàn</div>
+                <p>Linh, 35 tuổi, có kiểu gắn bó Avoidant điển hình. Cô cảm thấy ngột ngạt mỗi khi ai đó đến gần, thường xuyên tìm lý do để kết thúc mối quan hệ ngay khi nó bắt đầu nghiêm túc. "Tôi nghĩ mình thích tự do," cô nói. Nhưng qua Bản Đồ Quan Hệ, Linh nhận ra rằng cô đang né tránh sự thân mật vì sợ bị tổn thương như khi còn nhỏ. Sau 6 tháng làm việc với các bài tập chữa lành, Linh đã có thể mở lòng và hiện đang trong một mối quan hệ lành mạnh đầu tiên trong đời.</p>
+            </div>
+        </section>
+
+        <!-- COMMON QUESTIONS -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🤔</span> "Nhìn lại quá khứ có phải là đắm chìm trong đau khổ?"</div>
+                <p>Hoàn toàn không. Mục đích của việc nhìn lại là để HIỂU, không phải để đau khổ thêm. Chúng ta nhìn lại như một người quan sát khách quan, không phải như nạn nhân. Khi bạn hiểu được patterns của mình, bạn có quyền lực để thay đổi chúng. Nỗi đau chỉ kéo dài khi bạn né tránh nó; khi bạn đối mặt với ý thức, nó sẽ được giải phóng.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🤔</span> "Tôi đã cố gắng quên đi quá khứ rồi, tại sao cần nhớ lại?"</div>
+                <p>Có sự khác biệt lớn giữa "quên" và "chữa lành". Khi bạn cố quên, ký ức vẫn tồn tại trong tiềm thức và tiếp tục ảnh hưởng đến hành vi của bạn một cách vô thức. Chỉ khi nào bạn đưa những ký ức này lên ý thức, xử lý cảm xúc liên quan, và rút ra bài học, thì chúng mới thực sự được giải phóng và không còn kiểm soát bạn nữa.</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>⚠️</span> Lưu Ý Quan Trọng</div>
+                <p>Nhận ra patterns không phải để tự trách móc hay đổ lỗi cho bản thân. Bạn không "sai" khi có những patterns này - chúng là cách tiềm thức bảo vệ bạn khi còn nhỏ. Nhưng bây giờ bạn đã trưởng thành, bạn có quyền lựa chọn những cách khác để tự bảo vệ mình, những cách lành mạnh hơn và mang lại hạnh phúc nhiều hơn.</p>
+            </div>
+        </section>
+
+        <!-- PRACTICAL APPLICATION -->
+        <section class="section">
+            <h2 class="section-title"><span>📝</span> Bài Tập Thực Hành</h2>
+
+            <p>Bây giờ đến lượt bạn vẽ Bản Đồ Quan Hệ của chính mình. Hãy dành 20-30 phút yên tĩnh cho bài tập này, chuẩn bị một cuốn sổ hoặc giấy trắng, và bắt đầu với tâm thế quan sát không phán xét.</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Liệt Kê 5-7 Mối Quan Hệ Quan Trọng</div>
+                        <div class="flow-step-desc">Bao gồm: Bố mẹ (hoặc người nuôi dưỡng), 2-3 mối tình quan trọng nhất, 1-2 người bạn thân đã từng làm bạn tổn thương hoặc bạn đã làm họ tổn thương. Viết tên mỗi người vào một vòng tròn trên giấy.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Ghi 3 Điều Cho Mỗi Người</div>
+                        <div class="flow-step-desc">Với mỗi người, viết: (1) Điều tốt đẹp họ mang lại cho bạn, (2) Vết thương hoặc nỗi đau họ gây ra, (3) Bài học bạn rút ra từ mối quan hệ này. Hãy viết thật thành thật, đây là bản đồ cá nhân của riêng bạn.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tìm Patterns Lặp Lại</div>
+                        <div class="flow-step-desc">Nhìn tổng thể bản đồ và trả lời: Có điểm gì giống nhau giữa những người này không? Bạn có vai trò gì lặp lại trong các mối quan hệ? Có cảm xúc nào cứ xuất hiện đi xuất hiện lại? Dùng bút màu khác để khoanh các điểm tương đồng.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Xác Định Kiểu Gắn Bó</div>
+                        <div class="flow-step-desc">Dựa trên 4 kiểu gắn bó đã học, bạn nghĩ mình thuộc kiểu nào? Có thể bạn có đặc điểm của nhiều kiểu - điều này hoàn toàn bình thường. Ghi lại những đặc điểm nổi bật nhất.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tích Hợp GEM Master</div>
+                        <div class="flow-step-desc">Mở app GEM và hỏi: "Patterns nào trong quá khứ đang ảnh hưởng đến tình yêu của tôi?" hoặc bốc 1 lá Tarot để nhận thông điệp từ tiềm thức. Ghi chép insights vào sổ tay.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m1-journaling-template.png" alt="Template Ghi Chép">
+            </div>
+            <div class="image-caption">Hình 5: Template Ghi Chép - Sử dụng cấu trúc này để phân tích mỗi mối quan hệ</div>
+        </section>
+
+        <!-- KEY TAKEAWAYS -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Tổng Kết Bài Học</h2>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>📌</span> Những Điểm Chính Cần Nhớ</div>
+                <ul class="summary-list">
+                    <li>"What you don't heal, you repeat" - Điều không chữa lành sẽ lặp lại, đây là nguyên lý cốt lõi của hành trình chữa lành quan hệ</li>
+                    <li>Patterns là những mô hình lặp lại trong các mối quan hệ, chúng xuất phát từ những vết thương chưa được xử lý trong quá khứ</li>
+                    <li>Bản Đồ Quan Hệ giúp bạn nhìn tổng thể và phát hiện những patterns ẩn giấu mà bạn không nhận ra khi nhìn từng mối quan hệ riêng lẻ</li>
+                    <li>4 Kiểu Gắn Bó (Secure, Anxious, Avoidant, Disorganized) ảnh hưởng sâu sắc đến cách bạn yêu và muốn được yêu</li>
+                    <li>Tin vui: Attachment style có thể thay đổi! Bạn hoàn toàn có khả năng phát triển sang Secure Attachment thông qua healing có ý thức</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- TRANSITION -->
+        <section class="section">
+            <h2 class="section-title"><span>🚀</span> Bước Tiếp Theo</h2>
+
+            <p>Bạn đã hoàn thành bước đầu tiên quan trọng: nhìn nhận và nhận diện patterns của mình. Trong bài tiếp theo, chúng ta sẽ đi sâu vào <strong>Inner Child Healing</strong> - chữa lành đứa trẻ bên trong. Đây là gốc rễ của hầu hết các patterns trong tình yêu trưởng thành, và khi bạn chữa lành Inner Child, bạn sẽ thấy các mối quan hệ của mình thay đổi một cách kỳ diệu.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💕</span> Lời Nhắn Từ Jennie</div>
+                <p>Việc nhìn lại quá khứ có thể không dễ dàng, nhưng đây là hành động dũng cảm nhất bạn có thể làm cho bản thân. Mỗi pattern bạn nhận ra hôm nay là một bước tiến trên con đường đến với tình yêu đích thực. Hãy tự hào về bản thân vì bạn đã sẵn sàng đối mặt với quá khứ để tạo ra một tương lai tốt đẹp hơn.</p>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,659 @@
+<!-- ============================================
+     SECTION 10: TESTIMONIALS
+     GEMRAL Landing Page
+     4 Testimonial Cards với quotes dài
+     ============================================ -->
+
+
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEMRAL - Câu Chuyện Thành Công</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&amp;family=Noto+Sans+Display:wght@400;500;600&amp;display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1632;
+            --burgundy: #9C0612;
+            --burgundy-dark: #6B0F1A;
+            --gold: #FFBD59;
+            --gold-dark: #C88F2F;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --pink: #FF6B9D;
+            --green: #10B981;
+            --white: #ffffff;
+            --white-90: rgba(255, 255, 255, 0.9);
+            --white-80: rgba(255, 255, 255, 0.8);
+            --white-60: rgba(255, 255, 255, 0.6);
+            --white-40: rgba(255, 255, 255, 0.4);
+            --white-20: rgba(255, 255, 255, 0.2);
+            --white-10: rgba(255, 255, 255, 0.1);
+            --black-40: rgba(0, 0, 0, 0.4);
+            --black-50: rgba(0, 0, 0, 0.5);
+            
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            background: var(--navy-dark);
+            color: var(--white);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Section */
+        .section-testimonials {
+            padding: 100px 0;
+            background: linear-gradient(180deg, 
+                var(--navy-dark) 0%,
+                var(--navy) 50%,
+                var(--navy-dark) 100%
+            );
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .section-testimonials::before {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: -200px;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(ellipse, rgba(255, 189, 89, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        .section-testimonials::after {
+            content: '';
+            position: absolute;
+            bottom: 10%;
+            right: -200px;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(ellipse, rgba(0, 240, 255, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        /* Section Header */
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 28px;
+            border-radius: 30px;
+            font-family: var(--font-heading);
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 25px;
+        }
+        
+        .badge-gold {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.2), rgba(255, 189, 89, 0.1));
+            border: 1px solid rgba(255, 189, 89, 0.4);
+            color: var(--gold);
+        }
+        
+        .badge svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: 42px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+        
+        .section-subtitle {
+            font-size: 18px;
+            color: var(--white-80);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+        
+        .text-gold { color: var(--gold); }
+        .text-cyan { color: var(--cyan); }
+        .text-pink { color: var(--pink); }
+        .text-purple { color: var(--purple); }
+        .text-green { color: var(--green); }
+        
+        /* Testimonials Grid */
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Testimonial Card */
+        .testimonial-card {
+            background: var(--black-50);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid var(--white-10);
+            border-radius: 24px;
+            padding: 35px;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .testimonial-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255, 189, 89, 0.3);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* Quote Icon */
+        .quote-icon {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            opacity: 0.15;
+        }
+        
+        .quote-icon svg {
+            width: 60px;
+            height: 60px;
+            stroke: var(--gold);
+        }
+        
+        /* Header */
+        .testimonial-header {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+        
+        .testimonial-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: 3px solid var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.2), rgba(106, 91, 255, 0.2));
+            flex-shrink: 0;
+        }
+        
+        .avatar-initials {
+            font-family: var(--font-heading);
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--gold);
+        }
+        
+        .testimonial-info h4 {
+            font-family: var(--font-heading);
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 4px;
+        }
+        
+        .testimonial-info .role {
+            font-size: 14px;
+            color: var(--white-60);
+            margin-bottom: 8px;
+        }
+        
+        /* Star Rating */
+        .star-rating {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .star-rating svg {
+            width: 16px;
+            height: 16px;
+            fill: var(--gold);
+            stroke: var(--gold);
+        }
+        
+        /* Quote */
+        .testimonial-quote {
+            font-size: 15px;
+            font-style: italic;
+            line-height: 1.8;
+            color: var(--white-90);
+            margin-bottom: 25px;
+            padding-left: 20px;
+            border-left: 3px solid var(--gold);
+            position: relative;
+        }
+        
+        /* Result Badge */
+        .result-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-family: var(--font-heading);
+            font-size: 13px;
+            font-weight: 700;
+        }
+        
+        .result-badge svg {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .badge-success {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: var(--green);
+        }
+        
+        /* Video CTA Box */
+        .video-cta-box {
+            background: var(--black-50);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 189, 89, 0.3);
+            border-radius: 24px;
+            padding: 50px;
+            margin-top: 60px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .video-cta-box h3 {
+            font-family: var(--font-heading);
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .video-cta-box h3 svg {
+            width: 32px;
+            height: 32px;
+            stroke: var(--gold);
+        }
+        
+        .video-cta-box p {
+            font-size: 16px;
+            color: var(--white-80);
+            margin-bottom: 25px;
+        }
+        
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-family: var(--font-heading);
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .btn svg {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--navy-dark);
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 25px rgba(255, 189, 89, 0.4);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--white-20);
+            color: var(--white);
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+        
+        /* Stats Row */
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 50px;
+            padding: 35px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            border: 1px solid var(--white-10);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-family: var(--font-heading);
+            font-size: 36px;
+            font-weight: 800;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: var(--white-60);
+            margin-top: 5px;
+        }
+        
+        /* Section Footer */
+        .section-footer {
+            text-align: center;
+            margin-top: 60px;
+            font-size: 13px;
+            color: var(--white-60);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-row {
+                flex-wrap: wrap;
+                gap: 30px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .section-testimonials { padding: 80px 0; }
+            .section-title { font-size: 32px; }
+            .testimonial-card { padding: 25px; }
+            .testimonial-avatar { width: 60px; height: 60px; }
+            .avatar-initials { font-size: 20px; }
+            .video-cta-box { padding: 35px 25px; }
+            .video-cta-box h3 { font-size: 22px; }
+        }
+        
+        @media (max-width: 480px) {
+            .section-title { font-size: 26px; }
+            .stat-number { font-size: 28px; }
+            .stats-row { gap: 20px; padding: 25px; }
+        }
+    </style>
+
+
+    <section class="section-testimonials">
+        <div class="container">
+            <!-- Section Header -->
+            <div class="section-header">
+                <span class="badge badge-gold">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                    Học Viên Chia Sẻ
+                </span>
+                <h2 class="section-title">
+                    CÂU CHUYỆN THÀNH CÔNG<br>
+                    <span class="text-gold">TỪ CỘNG ĐỒNG GEMRAL</span>
+                </h2>
+                <p class="section-subtitle">
+                    Những chia sẻ thực tế từ học viên đã trải nghiệm hành trình chuyển hóa cùng GEMRAL, 
+                    từ người mới bắt đầu đến trader có kinh nghiệm đều tìm thấy giá trị phù hợp với mình.
+                </p>
+            </div>
+            
+            <!-- Testimonials Grid -->
+            <div class="testimonials-grid">
+                <!-- Testimonial 1 -->
+                <div class="testimonial-card">
+                    <div class="quote-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="1">
+                            <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V21"></path>
+                            <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"></path>
+                        </svg>
+                    </div>
+                    
+                    <div class="testimonial-header">
+                        <div class="testimonial-avatar">
+                            <span class="avatar-initials">MT</span>
+                        </div>
+                        <div class="testimonial-info">
+                            <h4>Minh Tuấn</h4>
+                            <p class="role">Nhân viên IT, Hà Nội</p>
+                            <div class="star-rating">
+                                <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <blockquote class="testimonial-quote">
+                        "Trước khi biết GEMRAL, tôi đã thua gần 50 triệu trong 6 tháng trading theo cảm tính mà không có hệ thống rõ ràng. 
+                        Sau khi học Frequency Method và sử dụng Scanner, 3 tháng đầu tôi đã hòa vốn và tháng thứ 4 bắt đầu có lợi nhuận ổn định. 
+                        Bây giờ trung bình mỗi tháng tôi kiếm thêm 15-20 triệu từ trading part-time bên cạnh công việc chính tại công ty."
+                    </blockquote>
+                    
+                    <div class="result-badge badge-success">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        +45% ROI trong 90 ngày
+                    </div>
+                </div>
+                
+                <!-- Testimonial 2 -->
+                <div class="testimonial-card">
+                    <div class="quote-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="1">
+                            <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V21"></path>
+                            <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"></path>
+                        </svg>
+                    </div>
+                    
+                    <div class="testimonial-header">
+                        <div class="testimonial-avatar">
+                            <span class="avatar-initials">TH</span>
+                        </div>
+                        <div class="testimonial-info">
+                            <h4>Thu Hương</h4>
+                            <p class="role">Chủ shop online, TP.HCM</p>
+                            <div class="star-rating">
+                                <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <blockquote class="testimonial-quote">
+                        "GEM Master thực sự thay đổi cách tôi nhìn nhận cuộc sống và công việc kinh doanh của mình. 
+                        Những lần rút Tarot và gieo quẻ Kinh Dịch giúp tôi bình tĩnh hơn khi đưa ra quyết định kinh doanh quan trọng. 
+                        Kết hợp với Scanner, tôi có thêm nguồn thu nhập thụ động từ trading mà không mất nhiều thời gian theo dõi thị trường 
+                        vì hệ thống đã làm phần lớn công việc phân tích thay tôi."
+                    </blockquote>
+                    
+                    <div class="result-badge badge-success">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        Thu nhập tăng 80%
+                    </div>
+                </div>
+                
+                <!-- Testimonial 3 -->
+                <div class="testimonial-card">
+                    <div class="quote-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="1">
+                            <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V21"></path>
+                            <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"></path>
+                        </svg>
+                    </div>
+                    
+                    <div class="testimonial-header">
+                        <div class="testimonial-avatar">
+                            <span class="avatar-initials">QH</span>
+                        </div>
+                        <div class="testimonial-info">
+                            <h4>Quang Hải</h4>
+                            <p class="role">Trader Full-time, Đà Nẵng</p>
+                            <div class="star-rating">
+                                <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <blockquote class="testimonial-quote">
+                        "Tôi đã trade được 3 năm và thử qua nhiều phương pháp khác nhau như ICT, SMC, Wyckoff nhưng kết quả vẫn không ổn định. 
+                        Frequency Method cho tôi một góc nhìn hoàn toàn mới về thị trường mà trước đây tôi chưa từng nghĩ đến. 
+                        Scanner giúp tôi không bỏ lỡ bất kỳ setup nào và quan trọng nhất là có kỷ luật trading rõ ràng, 
+                        không còn giao dịch theo cảm xúc như trước đây nữa."
+                    </blockquote>
+                    
+                    <div class="result-badge badge-success">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        Win rate từ 45% lên 72%
+                    </div>
+                </div>
+                
+                <!-- Testimonial 4 -->
+                <div class="testimonial-card">
+                    <div class="quote-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="1">
+                            <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V21"></path>
+                            <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"></path>
+                        </svg>
+                    </div>
+                    
+                    <div class="testimonial-header">
+                        <div class="testimonial-avatar">
+                            <span class="avatar-initials">NA</span>
+                        </div>
+                        <div class="testimonial-info">
+                            <h4>Ngọc Anh</h4>
+                            <p class="role">Mẹ bỉm sữa, Bình Dương</p>
+                            <div class="star-rating">
+                                <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <blockquote class="testimonial-quote">
+                        "Là mẹ của 2 bé nhỏ, tôi không có nhiều thời gian rảnh để ngồi trước màn hình phân tích thị trường. 
+                        Scanner cho tôi tín hiệu rõ ràng và cụ thể, chỉ cần check app 15 phút buổi sáng và buổi tối là đủ. 
+                        Khóa học Chuyển Hóa giúp tôi cân bằng hơn rất nhiều trong vai trò làm mẹ và đồng thời vẫn có thể 
+                        tạo thu nhập phụ để đóng góp vào tài chính gia đình."
+                    </blockquote>
+                    
+                    <div class="result-badge badge-success">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        +18 triệu/tháng part-time
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stats Row -->
+            <div class="stats-row">
+                <div class="stat-item">
+                    <span class="stat-number text-gold">500+</span>
+                    <span class="stat-label">Học viên đã tham gia</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number text-cyan">4.8/5</span>
+                    <span class="stat-label">Đánh giá trung bình</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number text-pink">92%</span>
+                    <span class="stat-label">Hài lòng với kết quả</span>
+                </div>
+            </div>
+            
+            <!-- Video CTA Box -->
+            <div class="video-cta-box">
+                <h3>
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    Xem Thêm Chia Sẻ Từ Học Viên
+                </h3>
+                <p>
+                    Hơn 50 câu chuyện thực tế từ học viên đã trải nghiệm hành trình chuyển hóa cùng GEMRAL, 
+                    từ những người mới bắt đầu đến trader có kinh nghiệm lâu năm.
+                </p><img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk41rftx-08q037/1767798880233_rzsx99_gemral-landing-10.webp" alt="gemral-landing-10-elb5" style="width: 100%; max-width: 100%; height: auto; display: block; margin: 0; padding: 0;">
+                
+            </div>
+            
+            <!-- Section Footer -->
+            <div class="section-footer">gemral.com</div>
+        </div>
+    </section>

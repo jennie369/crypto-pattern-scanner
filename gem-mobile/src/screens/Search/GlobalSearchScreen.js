@@ -367,7 +367,7 @@ const GlobalSearchScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.bgDark,
+    backgroundColor: COLORS.bgDarkest,
   },
   searchContainer: {
     flexDirection: 'row',

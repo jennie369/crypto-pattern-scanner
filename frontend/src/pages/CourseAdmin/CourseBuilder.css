@@ -168,12 +168,25 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
+   LAYOUT WRAPPER (with Course Navigator)
+   ═══════════════════════════════════════════════════════════ */
+
+.builder-layout-wrapper {
+  display: flex;
+  min-height: calc(100vh - 200px);
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════
    FORM LAYOUT - 2 Column Desktop
    ═══════════════════════════════════════════════════════════ */
 
 .builder-form {
+  flex: 1;
   max-width: 1200px;
   margin: 0 auto;
+  padding: 0 var(--space-4);
+  overflow-y: auto;
 }
 
 .form-grid {
@@ -821,6 +834,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  text-align: center;
   justify-content: center;
   gap: var(--space-3);
   width: 100%;
@@ -844,14 +858,29 @@
 }
 
 .dropzone-text {
-  font-size: var(--text-lg);
+  font-size: var(--text-base);
   color: var(--text-secondary);
   font-weight: var(--font-medium);
+  margin: 0;
+  line-height: 1.4;
 }
 
 .dropzone-hint {
   font-size: var(--text-sm);
   color: var(--text-muted);
+  margin: 0;
+  margin-top: var(--space-1);
+}
+
+/* Drag over state */
+.thumbnail-dropzone.drag-over {
+  border-color: var(--brand-gold);
+  background: rgba(255, 189, 89, 0.15);
+  transform: scale(1.02);
+}
+
+.thumbnail-dropzone.drag-over svg {
+  color: var(--brand-gold);
 }
 
 .thumbnail-preview {

@@ -29,6 +29,7 @@ import TabNavigator from './TabNavigator';
 import ProfileFullScreen from '../screens/tabs/ProfileFullScreen';
 import MessagesStack from './MessagesStack';
 import CourseStack from './CourseStack';
+import CallStack from './CallStack';
 
 // Auth context
 import { useAuth } from '../contexts/AuthContext';
@@ -114,6 +115,15 @@ function MainStack() {
         component={CourseStack}
         options={{
           animation: 'slide_from_right',
+        }}
+      />
+      {/* Call Stack - Audio/Video calls */}
+      <Stack.Screen
+        name="Call"
+        component={CallStack}
+        options={{
+          animation: 'slide_from_bottom',
+          presentation: 'fullScreenModal',
         }}
       />
     </Stack.Navigator>

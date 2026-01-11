@@ -1,0 +1,360 @@
+<!--
+  SHOPIFY THANK YOU PAGE ENHANCEMENT
+  Location: Settings → Checkout → Order status page → Additional scripts
+
+  Features:
+  - Dynamic VietQR code
+  - Countdown timer 24h
+  - Copy buttons for bank info
+  - Real-time status polling
+-->
+
+{% if checkout.transactions.size == 0 or checkout.financial_status == 'pending' %}
+<!-- Payment Pending - Show Bank Transfer Info -->
+<style>
+  .gem-payment-box {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border-radius: 16px;
+    padding: 24px;
+    margin: 24px 0;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  .gem-payment-header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .gem-payment-title {
+    color: #FFBD59;
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+  }
+
+  .gem-payment-subtitle {
+    color: #999;
+    margin: 0;
+    font-size: 14px;
+  }
+
+  .gem-qr-container {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .gem-qr-image {
+    max-width: 200px;
+    height: auto;
+  }
+
+  .gem-qr-tip {
+    color: #666;
+    font-size: 12px;
+    margin: 8px 0 0 0;
+  }
+
+  .gem-countdown-box {
+    background: rgba(255, 189, 89, 0.1);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .gem-countdown-label {
+    color: #999;
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .gem-countdown-timer {
+    color: #FFBD59;
+    font-size: 28px;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+  }
+
+  .gem-countdown-timer.urgent {
+    color: #ff4444;
+  }
+
+  .gem-countdown-note {
+    color: #999;
+    font-size: 11px;
+    margin: 4px 0 0 0;
+  }
+
+  .gem-bank-info {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  .gem-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .gem-info-row:last-child {
+    border-bottom: none;
+  }
+
+  .gem-info-label {
+    color: #999;
+    font-size: 13px;
+  }
+
+  .gem-info-value {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .gem-info-value.highlight {
+    color: #FFBD59;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .gem-copy-btn {
+    background: transparent;
+    border: 1px solid #FFBD59;
+    color: #FFBD59;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    transition: all 0.2s;
+  }
+
+  .gem-copy-btn:hover {
+    background: #FFBD59;
+    color: #1a1a2e;
+  }
+
+  .gem-warning-box {
+    background: rgba(255, 189, 89, 0.1);
+    border-left: 3px solid #FFBD59;
+    padding: 12px;
+    margin-top: 16px;
+    font-size: 13px;
+    color: #ccc;
+  }
+
+  .gem-warning-box strong {
+    color: #FFBD59;
+  }
+
+  .gem-status-box {
+    text-align: center;
+    padding: 16px;
+    margin-top: 16px;
+  }
+
+  .gem-status-pending {
+    color: #FFBD59;
+    font-size: 14px;
+  }
+
+  .gem-status-paid {
+    color: #00F0FF;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .gem-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 16px 0;
+  }
+</style>
+
+<div class="gem-payment-box" id="gem-payment-section">
+  <!-- Header -->
+  <div class="gem-payment-header">
+    <h3 class="gem-payment-title">Thanh toán chuyển khoản</h3>
+    <p class="gem-payment-subtitle">Quét mã QR hoặc chuyển khoản thủ công</p>
+  </div>
+
+  <!-- QR Code -->
+  <div class="gem-qr-container">
+    <img
+      id="gem-qr-code"
+      class="gem-qr-image"
+      src="https://img.vietqr.io/image/VCB-1074286868-compact2.png?amount={{ checkout.total_price | times: 1 }}&addInfo=DH{{ order.order_number }}&accountName=CT%20TNHH%20GEM%20CAPITAL%20HOLDING"
+      alt="QR Thanh toán"
+    />
+    <p class="gem-qr-tip">Mở app ngân hàng → Quét mã → Xác nhận</p>
+  </div>
+
+  <!-- Countdown -->
+  <div class="gem-countdown-box">
+    <div class="gem-countdown-label">Thời gian thanh toán còn lại</div>
+    <div class="gem-countdown-timer" id="gem-countdown">24:00:00</div>
+    <p class="gem-countdown-note">Đơn hàng sẽ tự động hủy khi hết thời gian</p>
+  </div>
+
+  <div class="gem-divider"></div>
+
+  <!-- Bank Info -->
+  <div class="gem-bank-info">
+    <div class="gem-info-row">
+      <span class="gem-info-label">Ngân hàng</span>
+      <span class="gem-info-value">Vietcombank</span>
+    </div>
+    <div class="gem-info-row">
+      <span class="gem-info-label">Số tài khoản</span>
+      <span class="gem-info-value">
+        1074286868
+        <button class="gem-copy-btn" onclick="gemCopy('1074286868', 'Số TK')">Copy</button>
+      </span>
+    </div>
+    <div class="gem-info-row">
+      <span class="gem-info-label">Chủ tài khoản</span>
+      <span class="gem-info-value">CT TNHH GEM CAPITAL HOLDING</span>
+    </div>
+    <div class="gem-info-row">
+      <span class="gem-info-label">Số tiền</span>
+      <span class="gem-info-value highlight">
+        {{ checkout.total_price | money }}
+        <button class="gem-copy-btn" onclick="gemCopy('{{ checkout.total_price | times: 1 }}', 'Số tiền')">Copy</button>
+      </span>
+    </div>
+    <div class="gem-info-row">
+      <span class="gem-info-label">Nội dung CK</span>
+      <span class="gem-info-value highlight">
+        DH{{ order.order_number }}
+        <button class="gem-copy-btn" onclick="gemCopy('DH{{ order.order_number }}', 'Nội dung')">Copy</button>
+      </span>
+    </div>
+  </div>
+
+  <!-- Warning -->
+  <div class="gem-warning-box">
+    <strong>Quan trọng:</strong> Vui lòng nhập chính xác nội dung chuyển khoản <strong>DH{{ order.order_number }}</strong> để hệ thống tự động xác nhận thanh toán.
+  </div>
+
+  <!-- Status -->
+  <div class="gem-status-box" id="gem-status">
+    <span class="gem-status-pending">Đang chờ thanh toán...</span>
+  </div>
+</div>
+
+<script>
+(function() {
+  // Countdown Timer
+  var orderCreated = new Date('{{ order.created_at | date: "%Y-%m-%dT%H:%M:%S" }}Z');
+  var expiresAt = new Date(orderCreated.getTime() + 24 * 60 * 60 * 1000);
+
+  function updateCountdown() {
+    var now = new Date();
+    var diff = expiresAt - now;
+
+    if (diff <= 0) {
+      document.getElementById('gem-countdown').textContent = 'Hết hạn';
+      document.getElementById('gem-countdown').classList.add('urgent');
+      return;
+    }
+
+    var hours = Math.floor(diff / (1000 * 60 * 60));
+    var mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    var secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+    var timeStr =
+      hours.toString().padStart(2, '0') + ':' +
+      mins.toString().padStart(2, '0') + ':' +
+      secs.toString().padStart(2, '0');
+
+    document.getElementById('gem-countdown').textContent = timeStr;
+
+    // Add urgent class if less than 1 hour
+    if (hours < 1) {
+      document.getElementById('gem-countdown').classList.add('urgent');
+    }
+  }
+
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+  // Check payment status periodically via Supabase Edge Function
+  function checkPaymentStatus() {
+    // Replace with your actual Supabase URL
+    var supabaseUrl = 'https://pgfkbcnzqozzkohwbgbk.supabase.co';
+    var orderNumber = '{{ order.order_number }}';
+
+    fetch(supabaseUrl + '/functions/v1/payment-status?order=' + orderNumber)
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data && data.success && data.data) {
+          if (data.data.is_paid) {
+            document.getElementById('gem-status').innerHTML =
+              '<span class="gem-status-paid">Thanh toán thành công!</span>';
+            // Reload page after 2 seconds to show updated order status
+            setTimeout(function() { location.reload(); }, 2000);
+          } else if (data.data.is_verifying) {
+            document.getElementById('gem-status').innerHTML =
+              '<span class="gem-status-pending">Đang xác minh thanh toán...</span>';
+          }
+        }
+      })
+      .catch(function(err) {
+        console.log('Payment status check error:', err);
+      });
+  }
+
+  // Poll every 15 seconds
+  setInterval(checkPaymentStatus, 15000);
+  // Initial check after 5 seconds
+  setTimeout(checkPaymentStatus, 5000);
+})();
+
+// Copy to clipboard function
+function gemCopy(text, label) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function() {
+      alert('Đã copy ' + label + ': ' + text);
+    }).catch(function() {
+      gemCopyFallback(text, label);
+    });
+  } else {
+    gemCopyFallback(text, label);
+  }
+}
+
+function gemCopyFallback(text, label) {
+  var input = document.createElement('input');
+  input.style.position = 'fixed';
+  input.style.opacity = '0';
+  input.value = text;
+  document.body.appendChild(input);
+  input.select();
+  try {
+    document.execCommand('copy');
+    alert('Đã copy ' + label + ': ' + text);
+  } catch (err) {
+    alert('Không thể copy. Vui lòng copy thủ công: ' + text);
+  }
+  document.body.removeChild(input);
+}
+</script>
+
+{% else %}
+<!-- Payment Completed -->
+<div style="background: rgba(0, 240, 255, 0.1); border-radius: 12px; padding: 20px; margin: 20px 0; text-align: center;">
+  <span style="font-size: 48px;">&#10004;</span>
+  <p style="color: #00F0FF; font-size: 18px; font-weight: 600; margin: 10px 0 0 0;">
+    Thanh toán đã hoàn tất!
+  </p>
+</div>
+{% endif %}

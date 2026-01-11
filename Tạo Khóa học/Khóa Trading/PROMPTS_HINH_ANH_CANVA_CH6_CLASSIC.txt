@@ -1,0 +1,1258 @@
+═══════════════════════════════════════════════════════════════════════════════
+TIER 1 - CHƯƠNG 6: CLASSIC PATTERNS
+PROMPTS CHI TIẾT TẠO HÌNH ẢNH - BÀI 6.1 ĐẾN 6.6
+═══════════════════════════════════════════════════════════════════════════════
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 6.1: TỔNG QUAN CLASSIC PATTERNS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 6.1.1: CLASSIC PATTERNS OVERVIEW
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK, KHÔNG dùng đường line
+- Nến xanh: #00C853 - SOLID FILLED (tô đặc)
+- Nến đỏ: #EF4444 - SOLID FILLED (tô đặc)
+
+📋 DESIGN SYSTEM GENERAL:
+┌─────────────────┬───────────────────────────────────────┐
+│ Element         │ Specification                         │
+├─────────────────┼───────────────────────────────────────┤
+│ Background      │ Navy gradient #112250 → #1a1a2e       │
+│ Primary Text    │ White #FFFFFF                         │
+│ Accent Gold     │ #FFBD59                               │
+│ Accent Cyan     │ #00F0FF                               │
+│ Accent Purple   │ #6A5BFF                               │
+│ Success Green   │ #10B981                               │
+│ Error Red       │ #EF4444                               │
+│ Border Radius   │ 12px cho cards                        │
+└─────────────────┴───────────────────────────────────────┘
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 6.1" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "CLASSIC PATTERNS OVERVIEW" (White, bold)                        │
+│ - Subtitle: "6 Patterns cổ điển quan trọng nhất"                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN CONTENT - 6 PATTERN GRID (3x2):                                         │
+│                                                                              │
+│ ┌───────────────────┐ ┌───────────────────┐ ┌───────────────────┐           │
+│ │ 🚩 FLAG           │ │ ▽ PENNANT         │ │ △ TRIANGLE        │           │
+│ │ [Mini candlestick │ │ [Mini candlestick │ │ [Mini candlestick │           │
+│ │ chart showing     │ │ chart showing     │ │ chart showing     │           │
+│ │ flag pattern]     │ │ pennant pattern]  │ │ triangle pattern] │           │
+│ │ Continuation      │ │ Continuation      │ │ Continuation      │           │
+│ └───────────────────┘ └───────────────────┘ └───────────────────┘           │
+│                                                                              │
+│ ┌───────────────────┐ ┌───────────────────┐ ┌───────────────────┐           │
+│ │ 👤 HEAD&SHOULDERS │ │ 🔝 DOUBLE TOP     │ │ 🔻 DOUBLE BOTTOM  │           │
+│ │ [Mini candlestick │ │ [Mini candlestick │ │ [Mini candlestick │           │
+│ │ chart showing     │ │ chart showing     │ │ chart showing     │           │
+│ │ H&S pattern]      │ │ double top]       │ │ double bottom]    │           │
+│ │ Reversal          │ │ Reversal          │ │ Reversal          │           │
+│ └───────────────────┘ └───────────────────┘ └───────────────────┘           │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ INFO BOX:                                                                    │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📊 TẠI SAO HỌC CLASSIC PATTERNS?                                        │ │
+│ │ • Được kiểm chứng hàng thập kỷ                                          │ │
+│ │ • Áp dụng được trên mọi timeframe                                       │ │
+│ │ • Kết hợp tốt với GEM Patterns                                          │ │
+│ │ • Win rate 60-75% khi trade đúng cách                                   │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🕯️ QUY TẮC VẼ NẾN CANDLESTICK:
+- Nến TĂNG (bullish): Màu #00C853, thân TÔ ĐẶC (SOLID FILLED)
+- Nến GIẢM (bearish): Màu #EF4444, thân TÔ ĐẶC (SOLID FILLED)
+- Pattern lines: Màu vàng #FFBD59 dashed
+
+
+📐 HÌNH 6.1.2: PATTERNS CLASSIFICATION
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 6.1" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "PHÂN LOẠI PATTERNS" (White, bold)                               │
+│ - Subtitle: "Continuation vs Reversal"                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ TWO-COLUMN LAYOUT:                                                           │
+│                                                                              │
+│ ┌──────────────────────────┐  ┌──────────────────────────┐                  │
+│ │ 📈 CONTINUATION          │  │ 🔄 REVERSAL              │                  │
+│ │ (Tiếp diễn xu hướng)     │  │ (Đảo chiều xu hướng)     │                  │
+│ │                          │  │                          │                  │
+│ │ [Arrow going same dir]   │  │ [Arrow changing dir]     │                  │
+│ │                          │  │                          │                  │
+│ │ • Flag                   │  │ • Head & Shoulders       │                  │
+│ │ • Pennant                │  │ • Inverse H&S            │                  │
+│ │ • Ascending Triangle     │  │ • Double Top             │                  │
+│ │ • Descending Triangle    │  │ • Double Bottom          │                  │
+│ │ • Symmetrical Triangle   │  │ • Triple Top/Bottom      │                  │
+│ │                          │  │                          │                  │
+│ │ Border: Green #10B981    │  │ Border: Cyan #00F0FF     │                  │
+│ └──────────────────────────┘  └──────────────────────────┘                  │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ KEY DIFFERENCE BOX:                                                          │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 🔑 SỰ KHÁC BIỆT CHÍNH:                                                  │ │
+│ │                                                                         │ │
+│ │ CONTINUATION: Trade theo hướng trend hiện tại                           │ │
+│ │ → Pullback = Cơ hội vào lệnh                                            │ │
+│ │                                                                         │ │
+│ │ REVERSAL: Trade ngược hướng trend hiện tại                              │ │
+│ │ → Cần xác nhận mạnh trước khi vào lệnh                                  │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Tip: "💡 Continuation patterns có win rate cao hơn Reversal"              │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+📐 HÌNH 6.1.3: PATTERNS WIN RATES
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Style: Data visualization / Bar chart
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 6.1" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "WIN RATE CÁC PATTERNS" (White, bold)                            │
+│ - Subtitle: "Thống kê hiệu quả thực tế"                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BAR CHART (Horizontal):                                                      │
+│                                                                              │
+│ FLAG               ████████████████████ 75%  ⭐⭐⭐⭐⭐                       │
+│ PENNANT            ███████████████████ 72%   ⭐⭐⭐⭐⭐                       │
+│ ASC. TRIANGLE      █████████████████ 68%     ⭐⭐⭐⭐                         │
+│ DESC. TRIANGLE     █████████████████ 67%     ⭐⭐⭐⭐                         │
+│ SYM. TRIANGLE      ██████████████ 60%        ⭐⭐⭐                           │
+│ HEAD & SHOULDERS   █████████████████ 67%     ⭐⭐⭐⭐                         │
+│ DOUBLE TOP         ██████████████ 62%        ⭐⭐⭐                           │
+│ DOUBLE BOTTOM      ███████████████ 65%       ⭐⭐⭐⭐                         │
+│                                                                              │
+│ Legend: Green = Continuation | Cyan = Reversal                              │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ KEY INSIGHTS:                                                                │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📊 NHẬN XÉT:                                                            │ │
+│ │ • Flag & Pennant: Win rate cao nhất (70%+)                              │ │
+│ │ • Triangle: Cần volume confirmation                                     │ │
+│ │ • H&S: Rất reliable khi breakout neckline                               │ │
+│ │ • Double Top/Bottom: Cần patience để xác nhận                           │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Data source: "Backtest 5000+ patterns | 2018-2024"                        │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 6.2: FLAG & PENNANT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 6.2.1: FLAG PATTERN STRUCTURE
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK, KHÔNG dùng đường line
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 6.2" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "FLAG PATTERN STRUCTURE" (White, bold)                           │
+│ - Subtitle: "Bull Flag & Bear Flag"                                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ TWO-COLUMN LAYOUT:                                                           │
+│                                                                              │
+│ ┌──────────────────────────┐  ┌──────────────────────────┐                  │
+│ │ 🐂 BULL FLAG             │  │ 🐻 BEAR FLAG             │                  │
+│ │                          │  │                          │                  │
+│ │ [Candlestick chart:      │  │ [Candlestick chart:      │                  │
+│ │ Strong UP move (pole)    │  │ Strong DOWN move (pole)  │                  │
+│ │ → Down-sloping channel   │  │ → Up-sloping channel     │                  │
+│ │ → Breakout UP]           │  │ → Breakout DOWN]         │                  │
+│ │                          │  │                          │                  │
+│ │ POLE: Nến xanh mạnh      │  │ POLE: Nến đỏ mạnh        │                  │
+│ │ FLAG: Channel đi xuống   │  │ FLAG: Channel đi lên     │                  │
+│ │ BREAK: Tiếp tục tăng     │  │ BREAK: Tiếp tục giảm     │                  │
+│ │                          │  │                          │                  │
+│ │ Signal: LONG             │  │ Signal: SHORT            │                  │
+│ │ Border: Green            │  │ Border: Red              │                  │
+│ └──────────────────────────┘  └──────────────────────────┘                  │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ FLAG ANATOMY:                                                                │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 🔍 CÁC THÀNH PHẦN:                                                      │ │
+│ │                                                                         │ │
+│ │ 1. POLE (Cột cờ): Impulse move mạnh, 5-10 nến cùng hướng               │ │
+│ │ 2. FLAG (Lá cờ): Pullback channel nghiêng ngược hướng pole             │ │
+│ │ 3. BREAKOUT: Giá phá vỡ channel theo hướng pole                        │ │
+│ │                                                                         │ │
+│ │ Duration: Flag thường kéo dài 1-3 tuần                                  │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Win Rate: "Flag Pattern: 75% win rate"                                    │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🕯️ QUY TẮC VẼ NẾN CANDLESTICK:
+- POLE: Nến SOLID FILLED momentum mạnh
+- FLAG: Nến nhỏ trong channel, mix colors
+- BREAKOUT: Nến lớn SOLID FILLED
+
+
+📐 HÌNH 6.2.2: PENNANT PATTERN STRUCTURE
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 6.2" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "PENNANT PATTERN STRUCTURE" (White, bold)                        │
+│ - Subtitle: "Bullish & Bearish Pennant"                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ TWO-COLUMN LAYOUT:                                                           │
+│                                                                              │
+│ ┌──────────────────────────┐  ┌──────────────────────────┐                  │
+│ │ 🐂 BULLISH PENNANT       │  │ 🐻 BEARISH PENNANT       │                  │
+│ │                          │  │                          │                  │
+│ │ [Candlestick chart:      │  │ [Candlestick chart:      │                  │
+│ │ Strong UP move (pole)    │  │ Strong DOWN move (pole)  │                  │
+│ │ → Symmetrical triangle   │  │ → Symmetrical triangle   │                  │
+│ │ → Breakout UP]           │  │ → Breakout DOWN]         │                  │
+│ │                          │  │                          │                  │
+│ │ POLE: Nến xanh mạnh      │  │ POLE: Nến đỏ mạnh        │                  │
+│ │ PENNANT: Tam giác nhỏ    │  │ PENNANT: Tam giác nhỏ    │                  │
+│ │ BREAK: Tiếp tục tăng     │  │ BREAK: Tiếp tục giảm     │                  │
+│ │                          │  │                          │                  │
+│ │ Signal: LONG             │  │ Signal: SHORT            │                  │
+│ │ Border: Green            │  │ Border: Red              │                  │
+│ └──────────────────────────┘  └──────────────────────────┘                  │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ PENNANT ANATOMY:                                                             │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 🔍 CÁC THÀNH PHẦN:                                                      │ │
+│ │                                                                         │ │
+│ │ 1. POLE: Impulse move mạnh (giống Flag)                                 │ │
+│ │ 2. PENNANT: Symmetrical triangle (converging trendlines)               │ │
+│ │ 3. BREAKOUT: Phá vỡ theo hướng pole với volume                         │ │
+│ │                                                                         │ │
+│ │ Duration: Pennant thường ngắn hơn Flag (1-2 tuần)                       │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Win Rate: "Pennant Pattern: 72% win rate"                                 │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+📐 HÌNH 6.2.3: FLAG VS PENNANT COMPARISON
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 6.2" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "FLAG VS PENNANT" (White, bold)                                  │
+│ - Subtitle: "So sánh chi tiết"                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ SIDE-BY-SIDE:                                                                │
+│                                                                              │
+│ ┌─────────────────────────┐  ┌─────────────────────────┐                    │
+│ │ 🚩 FLAG                 │  │ ▽ PENNANT               │                    │
+│ │                         │  │                         │                    │
+│ │ [Chart with parallel    │  │ [Chart with converging  │                    │
+│ │ channel lines]          │  │ triangle lines]         │                    │
+│ │                         │  │                         │                    │
+│ │ Shape: Parallel channel │  │ Shape: Triangle         │                    │
+│ │ Slope: Against pole     │  │ Slope: Converging       │                    │
+│ │ Duration: 1-3 weeks     │  │ Duration: 1-2 weeks     │                    │
+│ └─────────────────────────┘  └─────────────────────────┘                    │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ COMPARISON TABLE:                                                            │
+│ ┌─────────────────┬──────────────────┬──────────────────┐                   │
+│ │ Feature         │ FLAG             │ PENNANT          │                   │
+│ ├─────────────────┼──────────────────┼──────────────────┤                   │
+│ │ Shape           │ Parallel lines   │ Converging lines │                   │
+│ │ Slope           │ Against trend    │ Symmetrical      │                   │
+│ │ Duration        │ Longer           │ Shorter          │                   │
+│ │ Volume          │ Decreasing       │ Decreasing       │                   │
+│ │ Breakout        │ Same direction   │ Same direction   │                   │
+│ │ Win Rate        │ 75%              │ 72%              │                   │
+│ └─────────────────┴──────────────────┴──────────────────┘                   │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ KEY SIMILARITY:                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ ✅ ĐIỂM CHUNG: Cả hai đều là continuation patterns                      │ │
+│ │ → Trade theo hướng pole (impulse move ban đầu)                          │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+📐 HÌNH 6.2.4: FLAG PENNANT ENTRY
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 6.2" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "CHIẾN LƯỢC VÀO LỆNH" (White, bold)                              │
+│ - Subtitle: "Entry cho Flag & Pennant"                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN CHART:                                                                  │
+│                                                                              │
+│ [Bull Flag pattern với CANDLESTICKS]                                        │
+│                                                                              │
+│ POLE: 7-10 nến xanh SOLID FILLED đi lên mạnh                                │
+│ FLAG: Channel đi xuống với nến nhỏ                                          │
+│                                                                              │
+│ ENTRY METHODS:                                                               │
+│                                                                              │
+│ ENTRY 1 - BREAKOUT (Cyan marker "1"):                                       │
+│ - Vị trí: Khi giá break trên flag resistance                               │
+│ - Label: "Entry 1: Breakout"                                                │
+│ - "Đợi nến close trên resistance"                                           │
+│                                                                              │
+│ ENTRY 2 - RETEST (Gold marker "2"):                                         │
+│ - Vị trí: Khi giá retest flag resistance                                    │
+│ - Label: "Entry 2: Retest"                                                  │
+│ - "Safer entry sau khi break"                                               │
+│                                                                              │
+│ SL: Dưới flag low (đường đỏ)                                                │
+│ TP: Measured move = Pole height                                             │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ ENTRY RULES BOX:                                                             │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📋 QUY TẮC VÀO LỆNH:                                                    │ │
+│ │                                                                         │ │
+│ │ ✓ Entry: Break trên resistance (close candle)                           │ │
+│ │ ✓ SL: Dưới flag/pennant low                                             │ │
+│ │ ✓ TP: Measured move = Pole height từ breakout point                     │ │
+│ │ ✓ Volume: Phải tăng khi breakout                                        │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 6.3: TRIANGLE PATTERNS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 6.3.1: ASCENDING TRIANGLE
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK, KHÔNG dùng đường line
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 6.3" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "ASCENDING TRIANGLE" (White, bold)                               │
+│ - Subtitle: "Tam giác tăng - Bullish Pattern"                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN CHART:                                                                  │
+│                                                                              │
+│ [Candlestick chart showing Ascending Triangle]                              │
+│                                                                              │
+│ STRUCTURE:                                                                   │
+│ - Horizontal resistance line (flat top)                                     │
+│ - Rising support line (higher lows)                                         │
+│ - Price squeezing into apex                                                 │
+│ - Breakout to the upside                                                    │
+│                                                                              │
+│ ANNOTATIONS:                                                                 │
+│ - "Flat Resistance" (Gold dashed line)                                      │
+│ - "Rising Support" (Green dashed line)                                      │
+│ - "Higher Lows" với arrows                                                  │
+│ - "Breakout" với arrow up                                                   │
+│                                                                              │
+│ Entry: Above resistance với volume                                          │
+│ SL: Below recent higher low                                                 │
+│ TP: Height of triangle từ breakout                                          │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ PATTERN RULES:                                                               │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📐 CẤU TRÚC ASCENDING TRIANGLE:                                         │ │
+│ │                                                                         │ │
+│ │ • Resistance: Flat (horizontal) - Giá test nhiều lần                    │ │
+│ │ • Support: Rising (đi lên) - Higher lows liên tiếp                      │ │
+│ │ • Bias: BULLISH - 68% breakout lên                                      │ │
+│ │ • Volume: Giảm dần, spike khi break                                     │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Signal: "📈 LONG khi break resistance"                                    │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🕯️ QUY TẮC VẼ NẾN CANDLESTICK:
+- Nến trong triangle: Mix xanh/đỏ, kích thước nhỏ dần
+- Breakout: Nến xanh lớn SOLID FILLED
+- Nến TĂNG: #00C853, Nến GIẢM: #EF4444
+
+
+📐 HÌNH 6.3.2: DESCENDING TRIANGLE
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 6.3" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "DESCENDING TRIANGLE" (White, bold)                              │
+│ - Subtitle: "Tam giác giảm - Bearish Pattern"                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN CHART:                                                                  │
+│                                                                              │
+│ [Candlestick chart showing Descending Triangle]                             │
+│                                                                              │
+│ STRUCTURE:                                                                   │
+│ - Falling resistance line (lower highs)                                     │
+│ - Horizontal support line (flat bottom)                                     │
+│ - Price squeezing into apex                                                 │
+│ - Breakout to the downside                                                  │
+│                                                                              │
+│ ANNOTATIONS:                                                                 │
+│ - "Falling Resistance" (Red dashed line)                                    │
+│ - "Flat Support" (Gold dashed line)                                         │
+│ - "Lower Highs" với arrows                                                  │
+│ - "Breakdown" với arrow down                                                │
+│                                                                              │
+│ Entry: Below support với volume                                             │
+│ SL: Above recent lower high                                                 │
+│ TP: Height of triangle từ breakdown                                         │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ PATTERN RULES:                                                               │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📐 CẤU TRÚC DESCENDING TRIANGLE:                                        │ │
+│ │                                                                         │ │
+│ │ • Resistance: Falling (đi xuống) - Lower highs liên tiếp               │ │
+│ │ • Support: Flat (horizontal) - Giá test nhiều lần                       │ │
+│ │ • Bias: BEARISH - 67% breakdown xuống                                   │ │
+│ │ • Volume: Giảm dần, spike khi break                                     │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Signal: "📉 SHORT khi break support"                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+📐 HÌNH 6.3.3: SYMMETRICAL TRIANGLE
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 6.3" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "SYMMETRICAL TRIANGLE" (White, bold)                             │
+│ - Subtitle: "Tam giác cân - Neutral Pattern"                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN CHART:                                                                  │
+│                                                                              │
+│ [Candlestick chart showing Symmetrical Triangle]                            │
+│                                                                              │
+│ STRUCTURE:                                                                   │
+│ - Falling resistance line (lower highs)                                     │
+│ - Rising support line (higher lows)                                         │
+│ - Converging trendlines → Apex                                              │
+│ - Breakout có thể cả 2 hướng                                                │
+│                                                                              │
+│ ANNOTATIONS:                                                                 │
+│ - "Lower Highs" (Red dashed line)                                           │
+│ - "Higher Lows" (Green dashed line)                                         │
+│ - "Apex" tại điểm hội tụ                                                    │
+│ - "Breakout?" với 2 arrows (up & down)                                      │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ PATTERN RULES:                                                               │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📐 CẤU TRÚC SYMMETRICAL TRIANGLE:                                       │ │
+│ │                                                                         │ │
+│ │ • Resistance: Falling - Lower highs                                     │ │
+│ │ • Support: Rising - Higher lows                                         │ │
+│ │ • Bias: NEUTRAL - Chờ breakout để xác định                              │ │
+│ │ • Key: Trade theo hướng trend TRƯỚC khi vào triangle                    │ │
+│ │                                                                         │ │
+│ │ 📊 THỐNG KÊ:                                                            │ │
+│ │ • Trong uptrend: 60% break lên                                          │ │
+│ │ • Trong downtrend: 60% break xuống                                      │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Tip: "💡 Đợi breakout confirmation trước khi vào lệnh"                    │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+📐 HÌNH 6.3.4: TRIANGLE BREAKOUT CONFIRMATION
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 6.3" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "XÁC NHẬN BREAKOUT" (White, bold)                                │
+│ - Subtitle: "Triangle Breakout Confirmation"                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN CONTENT - 4 CONFIRMATION SIGNALS:                                       │
+│                                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 1. CLOSE CONFIRMATION                                                   │ │
+│ │ [Chart: Nến close hoàn toàn ngoài trendline]                            │ │
+│ │ "Nến phải CLOSE ngoài trendline, không chỉ wick"                        │ │
+│ │ ✓ Valid: Close outside | ✗ Invalid: Only wick                          │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 2. VOLUME CONFIRMATION                                                  │ │
+│ │ [Chart: Volume bars - low trong triangle, spike khi break]             │ │
+│ │ "Volume phải tăng ít nhất 50% khi breakout"                             │ │
+│ │ ✓ High volume = Valid | ✗ Low volume = Fake                            │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 3. RETEST CONFIRMATION                                                  │ │
+│ │ [Chart: Price retests broken trendline as support/resistance]          │ │
+│ │ "Retest trendline đã break = Entry an toàn hơn"                         │ │
+│ │ ✓ Retest hold = Strong | ✗ Retest fail = Fake breakout                 │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 4. MEASURED MOVE TARGET                                                 │ │
+│ │ [Chart: Height measurement from base to apex]                          │ │
+│ │ "Target = Height of triangle từ breakout point"                         │ │
+│ │ Formula: TP = Breakout Price ± Triangle Height                         │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 6.4: HEAD & SHOULDERS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 6.4.1: HEAD & SHOULDERS STRUCTURE
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK, KHÔNG dùng đường line
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 6.4" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "HEAD & SHOULDERS PATTERN" (White, bold)                         │
+│ - Subtitle: "Bearish Reversal Pattern"                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN CHART:                                                                  │
+│                                                                              │
+│ [Candlestick chart showing Head & Shoulders]                                │
+│                                                                              │
+│ STRUCTURE:                                                                   │
+│ - Left Shoulder: Nến xanh lên → pullback                                    │
+│ - Head: Nến xanh higher high → pullback to neckline                         │
+│ - Right Shoulder: Nến xanh lower high → breakdown                           │
+│ - Neckline: Connecting the lows                                             │
+│                                                                              │
+│ ANNOTATIONS:                                                                 │
+│ - "Left Shoulder" với icon 💪                                               │
+│ - "HEAD" với icon 👤 (highest point)                                        │
+│ - "Right Shoulder" với icon 💪                                              │
+│ - "NECKLINE" (Gold dashed line connecting lows)                             │
+│ - "BREAKDOWN" với arrow pointing down                                       │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ PATTERN ANATOMY:                                                             │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📐 CẤU TRÚC HEAD & SHOULDERS:                                           │ │
+│ │                                                                         │ │
+│ │ 1. LEFT SHOULDER: Peak đầu tiên trong uptrend                           │ │
+│ │ 2. HEAD: Higher peak (đỉnh cao nhất)                                    │ │
+│ │ 3. RIGHT SHOULDER: Lower peak (thấp hơn head)                           │ │
+│ │ 4. NECKLINE: Đường nối 2 đáy giữa các peaks                             │ │
+│ │                                                                         │ │
+│ │ Signal: SHORT khi price breaks neckline                                 │ │
+│ │ Target: Neckline - Head height                                          │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Win Rate: "H&S: 67% win rate | R:R typically 1:2"                         │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🕯️ QUY TẮC VẼ NẾN CANDLESTICK:
+- Shoulders & Head: Nến xanh #00C853 SOLID đi lên
+- Pullbacks: Nến đỏ #EF4444 SOLID đi xuống
+- Breakdown: Nến đỏ lớn với volume
+
+
+📐 HÌNH 6.4.2: INVERSE HEAD & SHOULDERS
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 6.4" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "INVERSE HEAD & SHOULDERS" (White, bold)                         │
+│ - Subtitle: "Bullish Reversal Pattern"                                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN CHART:                                                                  │
+│                                                                              │
+│ [Candlestick chart showing Inverse H&S - upside down version]               │
+│                                                                              │
+│ STRUCTURE:                                                                   │
+│ - Left Shoulder: Nến đỏ xuống → bounce                                      │
+│ - Head: Nến đỏ lower low → bounce to neckline                               │
+│ - Right Shoulder: Nến đỏ higher low → breakout                              │
+│ - Neckline: Connecting the highs                                            │
+│                                                                              │
+│ ANNOTATIONS:                                                                 │
+│ - "Left Shoulder" (inverted)                                                │
+│ - "HEAD" (lowest point)                                                     │
+│ - "Right Shoulder" (inverted)                                               │
+│ - "NECKLINE" (Gold dashed line connecting highs)                            │
+│ - "BREAKOUT" với arrow pointing up                                          │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ COMPARISON BOX:                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 🔄 SO SÁNH H&S VS INVERSE H&S:                                          │ │
+│ │                                                                         │ │
+│ │ H&S (Regular):    Xuất hiện sau UPTREND → SHORT signal                  │ │
+│ │ Inverse H&S:      Xuất hiện sau DOWNTREND → LONG signal                 │ │
+│ │                                                                         │ │
+│ │ Cả hai đều trade khi break neckline với volume                          │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Signal: "📈 LONG khi break neckline"                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+📐 HÌNH 6.4.3: NECKLINE IMPORTANCE
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 6.4" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "TẦM QUAN TRỌNG CỦA NECKLINE" (White, bold)                      │
+│ - Subtitle: "Key level trong H&S Pattern"                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN CHART:                                                                  │
+│                                                                              │
+│ [H&S pattern với focus on neckline]                                         │
+│                                                                              │
+│ NECKLINE TYPES:                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ TYPE 1: HORIZONTAL NECKLINE                                             │ │
+│ │ [Mini chart: Flat neckline]                                             │ │
+│ │ "Mạnh nhất, dễ xác định"                                                │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ TYPE 2: ASCENDING NECKLINE                                              │ │
+│ │ [Mini chart: Upward sloping neckline]                                   │ │
+│ │ "H&S: Bearish yếu hơn | Inv H&S: Bullish mạnh hơn"                      │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ TYPE 3: DESCENDING NECKLINE                                             │ │
+│ │ [Mini chart: Downward sloping neckline]                                 │ │
+│ │ "H&S: Bearish mạnh hơn | Inv H&S: Bullish yếu hơn"                      │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ KEY INSIGHT:                                                                 │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 🎯 LƯU Ý:                                                               │ │
+│ │ • Pattern CHƯA VALID cho đến khi neckline bị break                      │ │
+│ │ • Break phải có volume confirmation                                     │ │
+│ │ • Retest neckline sau break = Entry tốt hơn                             │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+📐 HÌNH 6.4.4: H&S ENTRY STRATEGY
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 6.4" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "CHIẾN LƯỢC VÀO LỆNH H&S" (White, bold)                          │
+│ - Subtitle: "Entry, SL, TP cho Head & Shoulders"                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN CHART:                                                                  │
+│                                                                              │
+│ [H&S Pattern với entry markers]                                             │
+│                                                                              │
+│ ENTRY 1 - AGGRESSIVE (Cyan "1"):                                            │
+│ - Position: At right shoulder peak                                          │
+│ - "Entry sớm, risk cao, reward cao"                                         │
+│                                                                              │
+│ ENTRY 2 - STANDARD (Gold "2"):                                              │
+│ - Position: At neckline break                                               │
+│ - "Entry phổ biến nhất"                                                     │
+│                                                                              │
+│ ENTRY 3 - CONSERVATIVE (Green "3"):                                         │
+│ - Position: At neckline retest                                              │
+│ - "Entry an toàn nhất, nhưng có thể miss"                                   │
+│                                                                              │
+│ SL: Above right shoulder                                                    │
+│ TP: Measured move = Head height from neckline                               │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ TRADE SETUP BOX:                                                             │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📋 TRADE SETUP:                                                         │ │
+│ │                                                                         │ │
+│ │ Entry:  Break neckline với volume tăng                                  │ │
+│ │ SL:     Above right shoulder + buffer                                   │ │
+│ │ TP:     Neckline - (Head to Neckline distance)                          │ │
+│ │ R:R:    Typically 1:2 to 1:3                                            │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 6.5: DOUBLE TOP / BOTTOM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 6.5.1: DOUBLE TOP STRUCTURE
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK, KHÔNG dùng đường line
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 6.5" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "DOUBLE TOP PATTERN" (White, bold)                               │
+│ - Subtitle: "M Pattern - Bearish Reversal"                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN CHART:                                                                  │
+│                                                                              │
+│ [Candlestick chart showing Double Top - M shape]                            │
+│                                                                              │
+│ STRUCTURE:                                                                   │
+│ - First Peak: Uptrend reaches high, pullback                                │
+│ - Second Peak: Same level as first peak, fail to break                      │
+│ - Neckline: Low between two peaks                                           │
+│ - Breakdown: Below neckline                                                 │
+│                                                                              │
+│ ANNOTATIONS:                                                                 │
+│ - "PEAK 1" (equal to Peak 2)                                                │
+│ - "PEAK 2" (equal to Peak 1)                                                │
+│ - "NECKLINE" (Gold dashed line at the low)                                  │
+│ - "M SHAPE" label                                                           │
+│ - "BREAKDOWN" với arrow down                                                │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ PATTERN RULES:                                                               │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📐 CẤU TRÚC DOUBLE TOP:                                                 │ │
+│ │                                                                         │ │
+│ │ 1. Xuất hiện sau UPTREND                                                │ │
+│ │ 2. Hai peaks tương đương (tolerance 1-3%)                               │ │
+│ │ 3. Pullback tạo neckline (support)                                      │ │
+│ │ 4. Peak 2 fail to break Peak 1 → Weakness signal                        │ │
+│ │                                                                         │ │
+│ │ Signal: SHORT khi break neckline                                        │ │
+│ │ Target: Neckline - Pattern height                                       │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Win Rate: "Double Top: 62% win rate"                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🕯️ QUY TẮC VẼ NẾN CANDLESTICK:
+- Peaks: Nến xanh #00C853 SOLID → rejection
+- Pullback: Nến đỏ #EF4444 SOLID
+- Breakdown: Nến đỏ lớn với volume
+
+
+📐 HÌNH 6.5.2: DOUBLE BOTTOM STRUCTURE
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 6.5" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "DOUBLE BOTTOM PATTERN" (White, bold)                            │
+│ - Subtitle: "W Pattern - Bullish Reversal"                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN CHART:                                                                  │
+│                                                                              │
+│ [Candlestick chart showing Double Bottom - W shape]                         │
+│                                                                              │
+│ STRUCTURE:                                                                   │
+│ - First Low: Downtrend reaches low, bounce                                  │
+│ - Second Low: Same level as first low, fail to break                        │
+│ - Neckline: High between two lows                                           │
+│ - Breakout: Above neckline                                                  │
+│                                                                              │
+│ ANNOTATIONS:                                                                 │
+│ - "LOW 1" (equal to Low 2)                                                  │
+│ - "LOW 2" (equal to Low 1)                                                  │
+│ - "NECKLINE" (Gold dashed line at the high)                                 │
+│ - "W SHAPE" label                                                           │
+│ - "BREAKOUT" với arrow up                                                   │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ PATTERN RULES:                                                               │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📐 CẤU TRÚC DOUBLE BOTTOM:                                              │ │
+│ │                                                                         │ │
+│ │ 1. Xuất hiện sau DOWNTREND                                              │ │
+│ │ 2. Hai lows tương đương (tolerance 1-3%)                                │ │
+│ │ 3. Bounce tạo neckline (resistance)                                     │ │
+│ │ 4. Low 2 fail to break Low 1 → Strength signal                          │ │
+│ │                                                                         │ │
+│ │ Signal: LONG khi break neckline                                         │ │
+│ │ Target: Neckline + Pattern height                                       │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Win Rate: "Double Bottom: 65% win rate"                                   │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+📐 HÌNH 6.5.3: DOUBLE TOP/BOTTOM ENTRY
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 6.5" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "CHIẾN LƯỢC VÀO LỆNH" (White, bold)                              │
+│ - Subtitle: "Entry cho Double Top/Bottom"                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ TWO-COLUMN LAYOUT:                                                           │
+│                                                                              │
+│ ┌──────────────────────────┐  ┌──────────────────────────┐                  │
+│ │ DOUBLE TOP (SHORT)       │  │ DOUBLE BOTTOM (LONG)     │                  │
+│ │                          │  │                          │                  │
+│ │ [Chart: Double Top với   │  │ [Chart: Double Bottom    │                  │
+│ │ entry, SL, TP markers]   │  │ với entry, SL, TP]       │                  │
+│ │                          │  │                          │                  │
+│ │ Entry: Break neckline    │  │ Entry: Break neckline    │                  │
+│ │ SL: Above Peak 2         │  │ SL: Below Low 2          │                  │
+│ │ TP: Pattern height       │  │ TP: Pattern height       │                  │
+│ │                          │  │                          │                  │
+│ │ Border: Red              │  │ Border: Green            │                  │
+│ └──────────────────────────┘  └──────────────────────────┘                  │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ ENTRY RULES:                                                                 │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📋 QUY TẮC VÀO LỆNH:                                                    │ │
+│ │                                                                         │ │
+│ │ ✓ KHÔNG trade tại peak/low thứ 2 (chưa xác nhận)                        │ │
+│ │ ✓ Đợi neckline break với volume                                         │ │
+│ │ ✓ Retest neckline = Entry an toàn hơn                                   │ │
+│ │ ✓ Pattern height = Khoảng cách từ peak/low đến neckline                 │ │
+│ │                                                                         │ │
+│ │ ⚠️ FALSE BREAKOUT RISK:                                                 │ │
+│ │ • Volume thấp khi break = Có thể fake                                   │ │
+│ │ • Dùng close confirmation, không trade intrabar                         │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Tip: "💡 Patience là key - Đợi confirmation"                              │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+📐 HÌNH 6.5.4: DOUBLE PATTERN TARGETS
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 6.5" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "MEASURED MOVE TARGET" (White, bold)                             │
+│ - Subtitle: "Cách tính target cho Double Patterns"                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN CHART:                                                                  │
+│                                                                              │
+│ [Double Bottom pattern với measured move]                                   │
+│                                                                              │
+│ MEASUREMENTS:                                                                │
+│ - Pattern Height: Distance from Low to Neckline                             │
+│ - Labeled: "H = Pattern Height"                                             │
+│ - Arrow showing measurement                                                 │
+│                                                                              │
+│ TARGET CALCULATION:                                                          │
+│ - TP = Neckline + H (cho Double Bottom)                                     │
+│ - TP = Neckline - H (cho Double Top)                                        │
+│ - Dashed line at target level                                               │
+│                                                                              │
+│ EXAMPLE:                                                                     │
+│ - Neckline: $50,000                                                         │
+│ - Low: $45,000                                                              │
+│ - H = $50,000 - $45,000 = $5,000                                            │
+│ - Target = $50,000 + $5,000 = $55,000                                       │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ FORMULA BOX:                                                                 │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📐 CÔNG THỨC:                                                           │ │
+│ │                                                                         │ │
+│ │ DOUBLE BOTTOM:                                                          │ │
+│ │ Target = Neckline + (Neckline - Low)                                    │ │
+│ │                                                                         │ │
+│ │ DOUBLE TOP:                                                             │ │
+│ │ Target = Neckline - (Peak - Neckline)                                   │ │
+│ │                                                                         │ │
+│ │ R:R: Typically 1:1 to 1:2                                               │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 6.6: TỔNG KẾT CLASSIC PATTERNS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 6.6.1: PATTERN SUMMARY TABLE
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Style: Table / Infographic
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 6.6" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "BẢNG TỔNG HỢP PATTERNS" (White, bold)                           │
+│ - Subtitle: "Quick Reference Guide"                                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ SUMMARY TABLE:                                                               │
+│                                                                              │
+│ ┌──────────────┬──────────┬──────────┬──────────┬──────────┐                │
+│ │ Pattern      │ Type     │ Signal   │ Win Rate │ R:R      │                │
+│ ├──────────────┼──────────┼──────────┼──────────┼──────────┤                │
+│ │ Flag         │ Cont.    │ LONG/SH  │ 75%      │ 1:2      │                │
+│ │ Pennant      │ Cont.    │ LONG/SH  │ 72%      │ 1:2      │                │
+│ │ Asc Triangle │ Cont.    │ LONG     │ 68%      │ 1:1.5    │                │
+│ │ Desc Triangle│ Cont.    │ SHORT    │ 67%      │ 1:1.5    │                │
+│ │ Sym Triangle │ Neutral  │ Either   │ 60%      │ 1:1.5    │                │
+│ │ H&S          │ Reversal │ SHORT    │ 67%      │ 1:2      │                │
+│ │ Inv H&S      │ Reversal │ LONG     │ 67%      │ 1:2      │                │
+│ │ Double Top   │ Reversal │ SHORT    │ 62%      │ 1:1      │                │
+│ │ Double Bottom│ Reversal │ LONG     │ 65%      │ 1:1      │                │
+│ └──────────────┴──────────┴──────────┴──────────┴──────────┘                │
+│                                                                              │
+│ Legend:                                                                      │
+│ Green rows = Continuation | Cyan rows = Reversal                            │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ KEY TAKEAWAY:                                                                │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 🎯 TOP 3 PATTERNS BY WIN RATE:                                          │ │
+│ │ 1. Flag (75%) - Continuation, easiest to trade                          │ │
+│ │ 2. Pennant (72%) - Similar to Flag, shorter duration                    │ │
+│ │ 3. Ascending Triangle (68%) - Bullish bias                              │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+📐 HÌNH 6.6.2: PATTERN SELECTION GUIDE
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Style: Flowchart / Decision tree
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 6.6" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "HƯỚNG DẪN CHỌN PATTERN" (White, bold)                           │
+│ - Subtitle: "Pattern Selection Flowchart"                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ DECISION FLOWCHART:                                                          │
+│                                                                              │
+│                    ┌─────────────────┐                                       │
+│                    │ Market Trend?   │                                       │
+│                    └────────┬────────┘                                       │
+│                             │                                                │
+│          ┌──────────────────┼──────────────────┐                             │
+│          │                  │                  │                             │
+│          ▼                  ▼                  ▼                             │
+│    ┌──────────┐      ┌──────────┐      ┌──────────┐                         │
+│    │ UPTREND  │      │ RANGING  │      │DOWNTREND │                         │
+│    └────┬─────┘      └────┬─────┘      └────┬─────┘                         │
+│         │                 │                 │                                │
+│         ▼                 ▼                 ▼                                │
+│  ┌────────────┐   ┌────────────┐   ┌────────────┐                           │
+│  │ Look for:  │   │ Look for:  │   │ Look for:  │                           │
+│  │ • Bull Flag│   │ • Triangles│   │ • Bear Flag│                           │
+│  │ • Pennant  │   │ • Ranges   │   │ • Pennant  │                           │
+│  │ • Asc Tri  │   │ • Wait for │   │ • Desc Tri │                           │
+│  │            │   │   breakout │   │            │                           │
+│  │ OR watch:  │   │            │   │ OR watch:  │                           │
+│  │ • H&S      │   │            │   │ • Inv H&S  │                           │
+│  │ • Double   │   │            │   │ • Double   │                           │
+│  │   Top      │   │            │   │   Bottom   │                           │
+│  └────────────┘   └────────────┘   └────────────┘                           │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ RECOMMENDATION:                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 💡 KHUYÊN DÙNG:                                                         │ │
+│ │ • Beginners: Focus on Flag & Pennant (highest win rate)                 │ │
+│ │ • Intermediate: Add Triangles                                           │ │
+│ │ • Advanced: Trade all patterns including reversals                      │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+📐 HÌNH 6.6.3: PATTERN COMBINATIONS
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 6.6" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "KẾT HỢP CLASSIC + GEM PATTERNS" (White, bold)                   │
+│ - Subtitle: "Power Combinations"                                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ COMBINATION 1:                                                               │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 🔥 BULL FLAG + UPU = SUPER LONG                                         │ │
+│ │ [Chart: Bull Flag forming at LFZ zone]                                  │ │
+│ │ "Flag tại LFZ = Double confluence = Higher probability"                 │ │
+│ │ Win Rate boost: +15%                                                    │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│ COMBINATION 2:                                                               │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 🔥 BEAR FLAG + UPD = SUPER SHORT                                        │ │
+│ │ [Chart: Bear Flag forming at HFZ zone]                                  │ │
+│ │ "Flag tại HFZ = Double confluence = Higher probability"                 │ │
+│ │ Win Rate boost: +12%                                                    │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│ COMBINATION 3:                                                               │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 🔥 DOUBLE BOTTOM + DPU = REVERSAL CONFIRMATION                          │ │
+│ │ [Chart: Double Bottom với DPU pattern overlay]                          │ │
+│ │ "Classic reversal + GEM reversal = Strong confirmation"                 │ │
+│ │ Win Rate boost: +18%                                                    │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ KEY INSIGHT:                                                                 │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 🎯 CONFLUENCE = HIGHER PROBABILITY                                      │ │
+│ │                                                                         │ │
+│ │ Khi Classic Pattern + GEM Pattern cùng xuất hiện:                       │ │
+│ │ → Win rate tăng 10-20%                                                  │ │
+│ │ → Confidence cao hơn                                                    │ │
+│ │ → Có thể tăng position size                                             │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Message: "🎓 Master cả Classic + GEM = Trader hoàn chỉnh"                 │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════
+TỔNG KẾT CHƯƠNG 6: CLASSIC PATTERNS
+═══════════════════════════════════════════════════════════════════════════════
+
+Tổng số hình: 19 hình
+- Bài 6.1: 3 hình (Overview, Classification, Win Rates)
+- Bài 6.2: 4 hình (Flag, Pennant, Comparison, Entry)
+- Bài 6.3: 4 hình (Asc Triangle, Desc Triangle, Sym Triangle, Breakout)
+- Bài 6.4: 4 hình (H&S, Inv H&S, Neckline, Entry Strategy)
+- Bài 6.5: 4 hình (Double Top, Double Bottom, Entry, Targets)
+- Bài 6.6: 3 hình (Summary Table, Selection Guide, Combinations)
+
+Tất cả hình đều có:
+✅ ENFORCE notes về size ratio và font
+✅ DESIGN SYSTEM GENERAL table
+✅ NỘI DUNG HÌNH chi tiết
+✅ QUY TẮC VẼ NẾN CANDLESTICK (cho hình có chart)
+
+GEM TRADING ACADEMY - 2025

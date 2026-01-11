@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 3.4: Bài Tập Thực Hành Đầu Tiên</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Noto+Sans+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ==================== CSS VARIABLES ==================== */
+        :root {
+            /* Colors */
+            --color-navy: #112250;
+            --color-navy-light: #1a3070;
+            --color-navy-dark: #0a1535;
+            --color-gold: #FFBD59;
+            --color-gold-light: #FFD993;
+            --color-gold-dark: #E5A030;
+            --color-cyan: #00F0FF;
+            --color-cyan-light: #80F7FF;
+            --color-purple: #6A5BFF;
+            --color-purple-light: #8B7FFF;
+            --color-green: #10B981;
+            --color-green-light: #34D399;
+            --color-green-dark: #059669;
+            --color-red: #EF4444;
+            --color-red-light: #F87171;
+            --color-red-dark: #DC2626;
+
+            /* Text Colors */
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.65);
+
+            /* Backgrounds */
+            --bg-glass: rgba(255, 255, 255, 0.08);
+            --bg-glass-hover: rgba(255, 255, 255, 0.12);
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --bg-card-solid: #1a2d5a;
+
+            /* Borders */
+            --border-glass: rgba(255, 255, 255, 0.15);
+            --border-gold: rgba(255, 189, 89, 0.4);
+
+            /* Shadows */
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --shadow-gold: 0 4px 20px rgba(255, 189, 89, 0.25);
+            --shadow-cyan: 0 4px 20px rgba(0, 240, 255, 0.2);
+
+            /* Fonts */
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+
+            /* Spacing */
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            --space-2xl: 3rem;
+
+            /* Border Radius */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+        }
+
+        /* ==================== BASE STYLES ==================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: linear-gradient(135deg, var(--color-navy-dark) 0%, var(--color-navy) 50%, var(--color-navy-light) 100%);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+            font-size: 16px;
+            font-weight: 400;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ==================== LESSON CONTAINER ==================== */
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: var(--space-lg);
+            padding-top: var(--space-xl);
+            padding-bottom: var(--space-2xl);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-container {
+                padding: 0;
+                padding-top: var(--space-md);
+                padding-bottom: var(--space-xl);
+            }
+        }
+
+        /* ==================== HEADER ==================== */
+        .lesson-header {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+            padding: var(--space-xl);
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-xl);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-header {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+                padding: var(--space-lg) var(--space-md);
+            }
+        }
+
+        .badge-container {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+            margin-bottom: var(--space-md);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            color: var(--color-navy);
+            font-family: var(--font-heading);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 50px;
+            box-shadow: var(--shadow-gold);
+        }
+
+        .badge.chapter-badge {
+            background: linear-gradient(135deg, var(--color-cyan) 0%, #00c4cc 100%);
+            box-shadow: var(--shadow-cyan);
+        }
+
+        .badge.practice-badge {
+            background: linear-gradient(135deg, var(--color-green) 0%, var(--color-green-dark) 100%);
+        }
+
+        .lesson-title {
+            font-family: var(--font-heading);
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: var(--space-md);
+            line-height: 1.2;
+        }
+
+        .lesson-title .highlight {
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .lesson-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ==================== SECTIONS ==================== */
+        .section {
+            margin-bottom: var(--space-xl);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+            padding: 0 var(--space-md);
+        }
+
+        @media (min-width: 601px) {
+            .section-header {
+                padding: 0;
+            }
+        }
+
+        .section-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-gold);
+        }
+
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: clamp(1.25rem, 4vw, 1.5rem);
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* ==================== TEXT CONTENT ==================== */
+        .text-content {
+            padding: 0 var(--space-md);
+        }
+
+        @media (min-width: 601px) {
+            .text-content {
+                padding: 0;
+            }
+        }
+
+        .text-content p {
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+
+        /* ==================== HIGHLIGHT BOXES ==================== */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border: 1px solid var(--border-gold);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+
+        @media (max-width: 600px) {
+            .highlight-box {
+                border-radius: 0;
+                border-left: 4px solid var(--color-gold);
+                border-right: none;
+                margin-left: 0;
+                margin-right: 0;
+            }
+        }
+
+        .highlight-box.cyan {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(0, 240, 255, 0.05) 100%);
+            border-color: rgba(0, 240, 255, 0.4);
+        }
+
+        @media (max-width: 600px) {
+            .highlight-box.cyan {
+                border-left-color: var(--color-cyan);
+            }
+        }
+
+        .highlight-box.green {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        @media (max-width: 600px) {
+            .highlight-box.green {
+                border-left-color: var(--color-green);
+            }
+        }
+
+        .highlight-box.purple {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15) 0%, rgba(106, 91, 255, 0.05) 100%);
+            border-color: rgba(106, 91, 255, 0.4);
+        }
+
+        @media (max-width: 600px) {
+            .highlight-box.purple {
+                border-left-color: var(--color-purple);
+            }
+        }
+
+        .highlight-box-title {
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--color-gold);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .highlight-box.cyan .highlight-box-title {
+            color: var(--color-cyan);
+        }
+
+        .highlight-box.green .highlight-box-title {
+            color: var(--color-green);
+        }
+
+        .highlight-box.purple .highlight-box-title {
+            color: var(--color-purple);
+        }
+
+        .highlight-box p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        /* ==================== IMAGES ==================== */
+        .lesson-image {
+            width: 100%;
+            margin: var(--space-lg) 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 2px solid var(--border-glass);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-image {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+                margin-left: 0;
+                margin-right: 0;
+            }
+        }
+
+        .lesson-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .image-placeholder {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: linear-gradient(135deg, var(--bg-card-solid) 0%, var(--color-navy-dark) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            padding: var(--space-lg);
+            text-align: center;
+        }
+
+        .image-placeholder-icon {
+            font-size: 3rem;
+            opacity: 0.5;
+        }
+
+        .image-caption {
+            text-align: center;
+            padding: var(--space-sm) var(--space-md);
+            background: var(--bg-glass);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-style: italic;
+        }
+
+        /* ==================== SETUP BOX ==================== */
+        .setup-box {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15) 0%, rgba(106, 91, 255, 0.05) 100%);
+            border: 2px solid var(--color-purple);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .setup-box {
+                border-radius: 0;
+                border-left: 4px solid var(--color-purple);
+                border-right: none;
+            }
+        }
+
+        .setup-title {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-purple);
+            margin-bottom: var(--space-lg);
+        }
+
+        .setup-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-md);
+        }
+
+        @media (max-width: 600px) {
+            .setup-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .setup-item {
+            background: var(--bg-glass);
+            padding: var(--space-md);
+            border-radius: var(--radius-sm);
+        }
+
+        .setup-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: var(--space-xs);
+        }
+
+        .setup-value {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* ==================== STEP CARDS ==================== */
+        .step-section {
+            margin: var(--space-xl) 0;
+        }
+
+        .step-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+            position: relative;
+        }
+
+        @media (max-width: 600px) {
+            .step-card {
+                border-radius: 0;
+                border-left: 4px solid var(--color-cyan);
+                border-right: none;
+            }
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .step-number {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--color-cyan) 0%, #00c4cc 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--color-navy);
+            flex-shrink: 0;
+        }
+
+        .step-info h3 {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+        }
+
+        .step-info p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .step-content {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+
+        .step-content p {
+            margin-bottom: var(--space-md);
+        }
+
+        .step-content ul {
+            list-style: none;
+            margin: var(--space-md) 0;
+        }
+
+        .step-content ul li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-sm);
+        }
+
+        .step-content ul li::before {
+            content: '•';
+            color: var(--color-cyan);
+            font-weight: bold;
+            font-size: 1.25rem;
+            line-height: 1.5;
+        }
+
+        /* ==================== ACTION BOX ==================== */
+        .action-box {
+            background: var(--bg-card-solid);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-md) 0;
+            border: 1px dashed var(--color-gold);
+        }
+
+        @media (max-width: 600px) {
+            .action-box {
+                border-radius: 0;
+            }
+        }
+
+        .action-title {
+            font-family: var(--font-heading);
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--color-gold);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .action-list {
+            list-style: none;
+        }
+
+        .action-list li {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-sm);
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .action-list li::before {
+            content: '□';
+            color: var(--color-gold);
+            font-size: 1rem;
+        }
+
+        /* ==================== QUESTION BOXES ==================== */
+        .question-box {
+            background: var(--bg-glass);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-md) 0;
+            border-left: 4px solid var(--color-purple);
+        }
+
+        @media (max-width: 600px) {
+            .question-box {
+                border-radius: 0;
+            }
+        }
+
+        .question-title {
+            font-size: 0.85rem;
+            color: var(--color-purple);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+        }
+
+        .question-text {
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-style: italic;
+        }
+
+        /* ==================== FORUM TEMPLATE ==================== */
+        .forum-template {
+            background: var(--bg-card-solid);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+            border: 1px solid var(--color-green);
+        }
+
+        @media (max-width: 600px) {
+            .forum-template {
+                border-radius: 0;
+                border-left: 4px solid var(--color-green);
+                border-right: none;
+            }
+        }
+
+        .forum-template-title {
+            font-family: var(--font-heading);
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--color-green);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .forum-template-content {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .forum-template-content .tag {
+            color: var(--color-cyan);
+            font-weight: 600;
+        }
+
+        .forum-template-content .placeholder {
+            color: var(--color-gold);
+            font-style: italic;
+        }
+
+        /* ==================== REFLECTION BOX ==================== */
+        .reflection-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border: 2px solid var(--color-gold);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+
+        @media (max-width: 600px) {
+            .reflection-box {
+                border-radius: 0;
+                border-left: 4px solid var(--color-gold);
+                border-right: none;
+            }
+        }
+
+        .reflection-title {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .reflection-questions {
+            display: grid;
+            gap: var(--space-md);
+        }
+
+        .reflection-item {
+            background: var(--bg-glass);
+            padding: var(--space-md);
+            border-radius: var(--radius-sm);
+            display: flex;
+            gap: var(--space-md);
+            align-items: center;
+        }
+
+        .reflection-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .reflection-text {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        /* ==================== CELEBRATION BOX ==================== */
+        .celebration-box {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border: 2px solid var(--color-green);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .celebration-box {
+                border-radius: 0;
+                border-left: 4px solid var(--color-green);
+                border-right: none;
+            }
+        }
+
+        .celebration-icon {
+            font-size: 4rem;
+            margin-bottom: var(--space-md);
+        }
+
+        .celebration-title {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--color-green);
+            margin-bottom: var(--space-md);
+        }
+
+        .celebration-text {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* ==================== SUMMARY BOX ==================== */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.2) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border: 2px solid var(--color-gold);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+
+        @media (max-width: 600px) {
+            .summary-box {
+                border-radius: 0;
+                border-left: 4px solid var(--color-gold);
+                border-right: none;
+            }
+        }
+
+        .summary-title {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-gold);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .summary-list {
+            list-style: none;
+        }
+
+        .summary-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-sm);
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .summary-list li::before {
+            content: '✓';
+            color: var(--color-gold);
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        /* ==================== QUIZ SECTION ==================== */
+        .quiz-section {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+
+        @media (max-width: 600px) {
+            .quiz-section {
+                border-radius: 0;
+                border-left: 4px solid var(--color-purple);
+                border-right: none;
+            }
+        }
+
+        .quiz-title {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-purple);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .quiz-question {
+            background: var(--bg-card-solid);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+
+        @media (max-width: 600px) {
+            .quiz-question {
+                border-radius: 0;
+            }
+        }
+
+        .question-number {
+            font-family: var(--font-heading);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--color-purple);
+            margin-bottom: var(--space-sm);
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+            line-height: 1.5;
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: var(--space-sm);
+        }
+
+        .quiz-option {
+            background: var(--bg-glass);
+            border: 2px solid var(--border-glass);
+            border-radius: var(--radius-sm);
+            padding: var(--space-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--color-purple);
+            background: rgba(106, 91, 255, 0.1);
+        }
+
+        .quiz-option.correct {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: var(--color-green);
+        }
+
+        .quiz-option.incorrect {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--color-red);
+        }
+
+        .quiz-option.disabled {
+            cursor: default;
+            opacity: 0.7;
+        }
+
+        .option-letter {
+            width: 32px;
+            height: 32px;
+            background: var(--bg-glass);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .quiz-option.correct .option-letter {
+            background: var(--color-green);
+            color: white;
+        }
+
+        .quiz-option.incorrect .option-letter {
+            background: var(--color-red);
+            color: white;
+        }
+
+        .option-text {
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .feedback {
+            display: none;
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: rgba(16, 185, 129, 0.15);
+            border-left: 4px solid var(--color-green);
+            color: var(--text-secondary);
+        }
+
+        .feedback.incorrect {
+            background: rgba(239, 68, 68, 0.15);
+            border-left: 4px solid var(--color-red);
+            color: var(--text-secondary);
+        }
+
+        .retake-btn {
+            display: none;
+            width: 100%;
+            padding: var(--space-md) var(--space-lg);
+            background: linear-gradient(135deg, var(--color-purple) 0%, var(--color-purple-light) 100%);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: var(--space-lg);
+        }
+
+        .retake-btn.show {
+            display: block;
+        }
+
+        .retake-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* ==================== FOOTER ==================== */
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-xl);
+            margin-top: var(--space-xl);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-footer {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+        }
+
+        .footer-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            color: var(--color-navy);
+            font-family: var(--font-heading);
+            font-size: 0.85rem;
+            font-weight: 700;
+            border-radius: 50px;
+            margin-bottom: var(--space-md);
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="lesson-container">
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="badge-container">
+                <span class="badge">STARTER</span>
+                <span class="badge chapter-badge">CHAPTER 3</span>
+                <span class="badge practice-badge">THỰC HÀNH</span>
+            </div>
+            <h1 class="lesson-title">Bài Tập Thực Hành <span class="highlight">Đầu Tiên</span></h1>
+            <p class="lesson-subtitle">Kết hợp Scanner, Chatbot, và Community trong một trải nghiệm hoàn chỉnh. Bạn sẽ tự mình làm và cảm nhận sức mạnh của GEM ecosystem!</p>
+        </header>
+
+        <!-- INTRO -->
+        <section class="section">
+            <div class="text-content">
+                <p>Đây là bài học quan trọng nhất của Chapter 3. Thay vì chỉ đọc và học lý thuyết, bạn sẽ thực hành ngay với những công cụ đã được giới thiệu. Đừng lo - bài tập này được thiết kế để bạn thành công, không phải để kiểm tra bạn.</p>
+
+                <p>Mục tiêu không phải là tìm được setup hoàn hảo hay win trade đầu tiên. Mục tiêu là bạn trải nghiệm quy trình, làm quen với công cụ, và cảm thấy "mình có thể làm được". Một small win để build confidence cho hành trình phía trước.</p>
+            </div>
+
+            <!-- Setup Box -->
+            <div class="setup-box">
+                <div class="setup-title">THIẾT LẬP BÀI TẬP</div>
+                <div class="setup-grid">
+                    <div class="setup-item">
+                        <div class="setup-label">Coin</div>
+                        <div class="setup-value">BTC/USDT</div>
+                    </div>
+                    <div class="setup-item">
+                        <div class="setup-label">Timeframe</div>
+                        <div class="setup-value">4H</div>
+                    </div>
+                    <div class="setup-item">
+                        <div class="setup-label">Mục Tiêu</div>
+                        <div class="setup-value">Tìm Pattern</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title">💡 Tại Sao BTC/USDT 4H?</div>
+                <p>BTC là coin có thanh khoản cao nhất, patterns rõ ràng nhất. Timeframe 4H cho đủ thời gian để quan sát mà không quá nhanh hay quá chậm. Đây là setup tốt nhất cho người mới bắt đầu thực hành.</p>
+            </div>
+        </section>
+
+        <!-- STEP 1 -->
+        <section class="step-section">
+            <div class="step-card">
+                <div class="step-header">
+                    <div class="step-number">1</div>
+                    <div class="step-info">
+                        <h3>Mở Chart Trên TradingView</h3>
+                        <p>Chuẩn bị chart để quan sát</p>
+                    </div>
+                </div>
+                <div class="step-content">
+                    <p>Bước đầu tiên là mở chart BTC/USDT trên TradingView. Nếu bạn chưa có tài khoản TradingView, đây là lúc tốt để đăng ký (miễn phí). TradingView là platform chart phổ biến nhất và được hầu hết traders sử dụng.</p>
+
+                    <div class="action-box">
+                        <div class="action-title">✅ Checklist Bước 1</div>
+                        <ul class="action-list">
+                            <li>Mở TradingView.com hoặc app</li>
+                            <li>Tìm kiếm "BTCUSDT" hoặc "BTC/USDT"</li>
+                            <li>Chọn timeframe 4H (4 giờ)</li>
+                            <li>Zoom out để thấy khoảng 100-200 nến</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Image 1 -->
+                <div class="lesson-image">
+                    <div class="image-placeholder">
+                        <span class="image-placeholder-icon">🖼️</span>
+                        <span>Hình 1: TradingView Chart Setup</span>
+                        <span style="font-size: 0.8rem; opacity: 0.7;">Canva: tradingview-setup.png (1200x675)</span>
+                    </div>
+                    <div class="image-caption">Cách mở và setup chart BTC/USDT 4H trên TradingView</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 2 -->
+        <section class="step-section">
+            <div class="step-card">
+                <div class="step-header">
+                    <div class="step-number">2</div>
+                    <div class="step-info">
+                        <h3>Quan Sát Chart</h3>
+                        <p>Tìm nơi giá "nghỉ ngơi"</p>
+                    </div>
+                </div>
+                <div class="step-content">
+                    <p>Bây giờ hãy nhìn chart và tìm những vùng mà giá có vẻ "nghỉ ngơi" - tức là di chuyển sideways, không tăng mạnh cũng không giảm mạnh. Những nến ở vùng này thường nhỏ hơn và nằm gần nhau.</p>
+
+                    <p>Đừng cố phân tích quá sâu. Chỉ cần nhìn và hỏi bản thân: "Chỗ nào giá pause, không có xu hướng rõ ràng?" Đó có thể là vùng consolidation - nơi market đang "tích lũy năng lượng" trước khi di chuyển mạnh.</p>
+
+                    <div class="highlight-box">
+                        <div class="highlight-box-title">🔍 Dấu Hiệu Của Vùng Consolidation</div>
+                        <p>Nến nhỏ, nằm sideways, giá dao động trong một range hẹp. Có thể thấy các mức hỗ trợ và kháng cự gần nhau. Đây là những vùng tiềm năng mà GEM Scanner sẽ giúp bạn xác nhận.</p>
+                    </div>
+                </div>
+
+                <!-- Image 2 -->
+                <div class="lesson-image">
+                    <div class="image-placeholder">
+                        <span class="image-placeholder-icon">🖼️</span>
+                        <span>Hình 2: What to Look For - Consolidation Zone</span>
+                        <span style="font-size: 0.8rem; opacity: 0.7;">Canva: consolidation-zone.png (1200x675)</span>
+                    </div>
+                    <div class="image-caption">Ví dụ vùng giá "nghỉ ngơi" trên chart - những gì bạn cần tìm</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 3 -->
+        <section class="step-section">
+            <div class="step-card">
+                <div class="step-header">
+                    <div class="step-number">3</div>
+                    <div class="step-info">
+                        <h3>Sử Dụng GEM Scanner</h3>
+                        <p>Để công cụ làm việc cho bạn</p>
+                    </div>
+                </div>
+                <div class="step-content">
+                    <p>Giờ là lúc để GEM Scanner phát huy tác dụng. Thay vì tự mình phân tích từng pattern (việc này cần kinh nghiệm và mất thời gian), Scanner sẽ quét và cho bạn biết có pattern nào đáng chú ý không.</p>
+
+                    <div class="action-box">
+                        <div class="action-title">✅ Checklist Bước 3</div>
+                        <ul class="action-list">
+                            <li>Mở GEM Pattern Scanner trong app</li>
+                            <li>Chọn coin: BTC/USDT</li>
+                            <li>Chọn timeframe: 4H</li>
+                            <li>Nhấn "Quét" và đợi kết quả</li>
+                        </ul>
+                    </div>
+
+                    <p>Kết quả có thể là:</p>
+                    <ul>
+                        <li><strong>Có pattern:</strong> Scanner phát hiện pattern tiềm năng - tuyệt vời! Ghi nhận pattern đó.</li>
+                        <li><strong>Không có pattern:</strong> Không sao cả! Điều này có nghĩa là chưa có setup rõ ràng - tốt hơn là entry vào một trade không có edge.</li>
+                    </ul>
+                </div>
+
+                <!-- Image 3 -->
+                <div class="lesson-image">
+                    <div class="image-placeholder">
+                        <span class="image-placeholder-icon">🖼️</span>
+                        <span>Hình 3: Scanner Results Example</span>
+                        <span style="font-size: 0.8rem; opacity: 0.7;">Canva: scanner-results.png (1200x675)</span>
+                    </div>
+                    <div class="image-caption">Ví dụ kết quả quét từ GEM Scanner</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 4 -->
+        <section class="step-section">
+            <div class="step-card">
+                <div class="step-header">
+                    <div class="step-number">4</div>
+                    <div class="step-info">
+                        <h3>Hỏi GEM Master Chatbot</h3>
+                        <p>Hiểu rõ hơn về kết quả</p>
+                    </div>
+                </div>
+                <div class="step-content">
+                    <p>Dù Scanner có tìm thấy pattern hay không, đây là cơ hội để bạn hỏi GEM Master về kết quả. Chatbot sẽ giúp bạn hiểu ý nghĩa của kết quả và bước tiếp theo nên làm gì.</p>
+
+                    <div class="question-box">
+                        <div class="question-title">Câu hỏi gợi ý #1</div>
+                        <div class="question-text">"Kết quả scanner vừa quét BTC/USDT 4H có ý nghĩa gì?"</div>
+                    </div>
+
+                    <div class="question-box">
+                        <div class="question-title">Câu hỏi gợi ý #2</div>
+                        <div class="question-text">"Scanner không tìm thấy pattern. Điều này có nghĩa gì và tôi nên làm gì tiếp theo?"</div>
+                    </div>
+
+                    <div class="question-box">
+                        <div class="question-title">Câu hỏi gợi ý #3</div>
+                        <div class="question-text">"Giải thích pattern [tên pattern] mà scanner vừa phát hiện cho tôi?"</div>
+                    </div>
+                </div>
+
+                <!-- Image 4 -->
+                <div class="lesson-image">
+                    <div class="image-placeholder">
+                        <span class="image-placeholder-icon">🖼️</span>
+                        <span>Hình 4: Chatbot Conversation Example</span>
+                        <span style="font-size: 0.8rem; opacity: 0.7;">Canva: chatbot-conversation.png (1200x675)</span>
+                    </div>
+                    <div class="image-caption">Ví dụ cuộc trò chuyện hỏi GEM Master về kết quả scanner</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEP 5 -->
+        <section class="step-section">
+            <div class="step-card">
+                <div class="step-header">
+                    <div class="step-number">5</div>
+                    <div class="step-info">
+                        <h3>Chia Sẻ Lên Forum</h3>
+                        <p>Kết nối với cộng đồng</p>
+                    </div>
+                </div>
+                <div class="step-content">
+                    <p>Bước cuối cùng - và cũng quan trọng không kém - là chia sẻ kết quả thực hành của bạn lên GEM Forum. Đừng ngại vì bạn là newbie. Mọi người đều từng ở vị trí của bạn, và community rất welcome những member mới tham gia!</p>
+
+                    <div class="forum-template">
+                        <div class="forum-template-title">📝 Template Post Forum (Copy và điền vào)</div>
+                        <div class="forum-template-content">
+                            <span class="tag">#FirstPractice</span> <span class="tag">#StarterCourse</span><br><br>
+
+                            Vừa hoàn thành bài thực hành đầu tiên!<br><br>
+
+                            <strong>Coin:</strong> BTC/USDT<br>
+                            <strong>Timeframe:</strong> 4H<br>
+                            <strong>Kết quả Scanner:</strong> <span class="placeholder">[Pattern found / No pattern]</span><br><br>
+
+                            <strong>Điều tôi học được:</strong><br>
+                            <span class="placeholder">[Viết 1-2 câu về những gì bạn học được]</span><br><br>
+
+                            <strong>Câu hỏi:</strong><br>
+                            <span class="placeholder">[Nếu có thắc mắc gì, hỏi ở đây]</span><br><br>
+
+                            Cảm ơn cộng đồng GEM! 🙌
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image 5 -->
+                <div class="lesson-image">
+                    <div class="image-placeholder">
+                        <span class="image-placeholder-icon">🖼️</span>
+                        <span>Hình 5: Forum Post Template</span>
+                        <span style="font-size: 0.8rem; opacity: 0.7;">Canva: forum-post-template.png (1200x675)</span>
+                    </div>
+                    <div class="image-caption">Ví dụ bài post chia sẻ kết quả thực hành trên forum</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- REFLECTION -->
+        <div class="reflection-box">
+            <div class="reflection-title">🪞 Reflection Time</div>
+            <div class="reflection-questions">
+                <div class="reflection-item">
+                    <span class="reflection-icon">💭</span>
+                    <span class="reflection-text">Bạn cảm thấy thế nào sau khi hoàn thành bài tập này?</span>
+                </div>
+                <div class="reflection-item">
+                    <span class="reflection-icon">❓</span>
+                    <span class="reflection-text">Điều gì còn chưa rõ và cần tìm hiểu thêm?</span>
+                </div>
+                <div class="reflection-item">
+                    <span class="reflection-icon">📈</span>
+                    <span class="reflection-text">Bạn muốn học sâu hơn về phần nào trong GEM Method?</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- CELEBRATION -->
+        <div class="celebration-box">
+            <div class="celebration-icon">🎉</div>
+            <div class="celebration-title">Chúc Mừng! Bạn Đã Hoàn Thành!</div>
+            <div class="celebration-text">Bạn vừa hoàn thành bài thực hành đầu tiên với GEM ecosystem. Đây là bước đầu tiên trên hành trình trading của bạn. Dù kết quả scanner thế nào, việc bạn thực hành đã là một chiến thắng!</div>
+        </div>
+
+        <!-- Image 6 -->
+        <div class="lesson-image">
+            <div class="image-placeholder">
+                <span class="image-placeholder-icon">🖼️</span>
+                <span>Hình 6: Celebration / Success Visual</span>
+                <span style="font-size: 0.8rem; opacity: 0.7;">Canva: celebration-success.png (1200x675)</span>
+            </div>
+            <div class="image-caption">Bạn đã hoàn thành Chapter 3 - Trải Nghiệm Công Cụ GEM!</div>
+        </div>
+
+        <!-- SUMMARY -->
+        <div class="summary-box">
+            <div class="summary-title">📝 Tóm Tắt Bài 3.4</div>
+            <ul class="summary-list">
+                <li>Thực hành với BTC/USDT 4H - setup tốt nhất cho người mới</li>
+                <li>5 bước: Mở chart → Quan sát → Scanner → Chatbot → Chia sẻ</li>
+                <li>Không có kết quả nào là "sai" - việc thực hành là chiến thắng</li>
+                <li>Chia sẻ lên forum với hashtag #FirstPractice để kết nối</li>
+                <li>Small win → Build confidence → Ready for more!</li>
+            </ul>
+        </div>
+
+        <!-- TRANSITION -->
+        <div class="highlight-box cyan">
+            <div class="highlight-box-title">➡️ Chapter Tiếp Theo</div>
+            <p>Bạn đã hoàn thành Chapter 3 - Trải Nghiệm Công Cụ GEM! Giờ bạn biết cách sử dụng Scanner, Chatbot, và Community. Trong Chapter tiếp theo, chúng ta sẽ nói về những sự thật quan trọng và lựa chọn phía trước. Đây là lúc để bạn quyết định mình muốn đi đến đâu trên hành trình trading này.</p>
+        </div>
+
+        <!-- QUIZ SECTION -->
+        <section class="quiz-section" id="quizSection">
+            <h3 class="quiz-title">🧠 Kiểm Tra Kiến Thức</h3>
+
+            <!-- Question 1 -->
+            <div class="quiz-question" id="question1">
+                <div class="question-number">Câu hỏi 1/2</div>
+                <div class="question-text">Mục tiêu chính của bài thực hành đầu tiên là gì?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 1, false)">
+                        <span class="option-letter">A</span>
+                        <span class="option-text">Tìm được setup hoàn hảo để trade ngay</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 1, false)">
+                        <span class="option-letter">B</span>
+                        <span class="option-text">Win trade đầu tiên với lợi nhuận cao</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 1, true)">
+                        <span class="option-letter">C</span>
+                        <span class="option-text">Trải nghiệm quy trình và build confidence</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 1, false)">
+                        <span class="option-letter">D</span>
+                        <span class="option-text">Chứng minh bạn đã thành thạo GEM Method</span>
+                    </div>
+                </div>
+                <div class="feedback correct" id="feedback1-correct">
+                    ✅ Chính xác! Mục tiêu là trải nghiệm quy trình và build confidence - không phải win trade hay tìm setup hoàn hảo. Small win để bạn cảm thấy "mình có thể làm được".
+                </div>
+                <div class="feedback incorrect" id="feedback1-incorrect">
+                    ❌ Không đúng. Bài thực hành này không nhằm tìm setup hoàn hảo hay win trade. Mục tiêu là trải nghiệm quy trình, làm quen với công cụ, và build confidence cho hành trình phía trước.
+                </div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="quiz-question" id="question2">
+                <div class="question-number">Câu hỏi 2/2</div>
+                <div class="question-text">Nếu Scanner không tìm thấy pattern nào, điều này có nghĩa gì?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 2, false)">
+                        <span class="option-letter">A</span>
+                        <span class="option-text">Bạn đã làm sai bước nào đó</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 2, false)">
+                        <span class="option-letter">B</span>
+                        <span class="option-text">Scanner không hoạt động đúng</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 2, true)">
+                        <span class="option-letter">C</span>
+                        <span class="option-text">Chưa có setup rõ ràng - đó là thông tin có giá trị</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 2, false)">
+                        <span class="option-letter">D</span>
+                        <span class="option-text">Bạn cần upgrade lên tier cao hơn</span>
+                    </div>
+                </div>
+                <div class="feedback correct" id="feedback2-correct">
+                    ✅ Chính xác! Không có pattern có nghĩa là chưa có setup rõ ràng - đây là thông tin có giá trị! Tốt hơn là entry vào một trade không có edge. Scanner hoạt động đúng khi nói "không có gì".
+                </div>
+                <div class="feedback incorrect" id="feedback2-incorrect">
+                    ❌ Không đúng. Việc Scanner không tìm thấy pattern là bình thường và có giá trị - nó có nghĩa là chưa có setup rõ ràng để trade. Đây là thông tin quan trọng giúp bạn tránh trade khi không có edge.
+                </div>
+            </div>
+
+            <button class="retake-btn" id="retakeBtn" onclick="retakeQuiz()">🔄 Làm Lại Quiz</button>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <span class="footer-badge">STARTER COURSE</span>
+            <p class="footer-text">Bài 3.4: Bài Tập Thực Hành Đầu Tiên | GEM Frequency Trading</p>
+        </footer>
+    </div>
+
+    <script>
+        // Quiz state management
+        const answeredQuestions = {};
+        const totalQuestions = 2;
+
+        function checkAnswer(selectedOption, questionNumber, isCorrect) {
+            // Prevent re-answering
+            if (answeredQuestions[questionNumber]) {
+                return;
+            }
+
+            // Mark question as answered
+            answeredQuestions[questionNumber] = true;
+
+            // Get all options for this question
+            const questionDiv = document.getElementById(`question${questionNumber}`);
+            const options = questionDiv.querySelectorAll('.quiz-option');
+
+            // Disable all options
+            options.forEach(option => {
+                option.classList.add('disabled');
+            });
+
+            // Mark selected option
+            if (isCorrect) {
+                selectedOption.classList.add('correct');
+                document.getElementById(`feedback${questionNumber}-correct`).classList.add('show');
+            } else {
+                selectedOption.classList.add('incorrect');
+                document.getElementById(`feedback${questionNumber}-incorrect`).classList.add('show');
+
+                // Find and highlight correct answer
+                options.forEach(option => {
+                    const optionText = option.querySelector('.option-text').textContent;
+                    if (questionNumber === 1 && optionText.includes('Trải nghiệm quy trình')) {
+                        option.classList.add('correct');
+                    }
+                    if (questionNumber === 2 && optionText.includes('Chưa có setup rõ ràng')) {
+                        option.classList.add('correct');
+                    }
+                });
+            }
+
+            // Check if all questions answered
+            if (Object.keys(answeredQuestions).length === totalQuestions) {
+                document.getElementById('retakeBtn').classList.add('show');
+            }
+        }
+
+        function retakeQuiz() {
+            // Reset state
+            for (let key in answeredQuestions) {
+                delete answeredQuestions[key];
+            }
+
+            // Reset UI
+            for (let i = 1; i <= totalQuestions; i++) {
+                const questionDiv = document.getElementById(`question${i}`);
+                const options = questionDiv.querySelectorAll('.quiz-option');
+
+                options.forEach(option => {
+                    option.classList.remove('disabled', 'correct', 'incorrect');
+                });
+
+                document.getElementById(`feedback${i}-correct`).classList.remove('show');
+                document.getElementById(`feedback${i}-incorrect`).classList.remove('show');
+            }
+
+            // Hide retake button
+            document.getElementById('retakeBtn').classList.remove('show');
+
+            // Scroll to quiz section
+            document.getElementById('quizSection').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

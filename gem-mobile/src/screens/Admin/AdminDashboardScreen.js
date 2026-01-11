@@ -40,6 +40,8 @@ import {
   PieChart,
   Clock,
   History,
+  ShoppingBag,
+  Star,
 } from 'lucide-react-native';
 
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
@@ -49,7 +51,10 @@ import { useAuth } from '../../contexts/AuthContext';
 import subscriptionExpirationService from '../../services/subscriptionExpirationService';
 
 const AdminDashboardScreen = ({ navigation }) => {
-  const { isAdmin } = useAuth();
+  const { isAdmin, isManager } = useAuth();
+
+  // Manager can access admin dashboard but with limited sections
+  const hasAdminAccess = isAdmin || isManager;
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState({
@@ -69,10 +74,10 @@ const AdminDashboardScreen = ({ navigation }) => {
   });
 
   useEffect(() => {
-    if (isAdmin) {
+    if (hasAdminAccess) {
       loadStats();
     }
-  }, [isAdmin]);
+  }, [hasAdminAccess]);
 
   const loadStats = async () => {
     try {
@@ -195,8 +200,8 @@ const AdminDashboardScreen = ({ navigation }) => {
     return new Intl.NumberFormat('vi-VN').format(amount) + 'đ';
   };
 
-  // Redirect if not admin
-  if (!isAdmin) {
+  // Redirect if not admin or manager
+  if (!hasAdminAccess) {
     return (
       <LinearGradient colors={GRADIENTS.background} style={styles.gradient}>
         <SafeAreaView style={styles.container}>
@@ -255,13 +260,13 @@ const AdminDashboardScreen = ({ navigation }) => {
                 Quản lý hệ thống Gemral
               </Text>
             </View>
-            <View style={styles.adminBadge}>
-              <Text style={styles.adminBadgeText}>ADMIN</Text>
+            <View style={[styles.adminBadge, isManager && styles.managerBadge]}>
+              <Text style={[styles.adminBadgeText, isManager && styles.managerBadgeText]}>{isAdmin ? 'ADMIN' : 'MANAGER'}</Text>
             </View>
           </View>
 
-          {/* Pending Actions Alert */}
-          {(stats.pendingApplications > 0 || stats.pendingWithdrawals > 0) && (
+          {/* Pending Actions Alert - ADMIN ONLY */}
+          {isAdmin && (stats.pendingApplications > 0 || stats.pendingWithdrawals > 0) && (
             <View style={styles.alertCard}>
               <Text style={styles.alertTitle}>Cần xử lý</Text>
               <View style={styles.alertItems}>
@@ -293,398 +298,382 @@ const AdminDashboardScreen = ({ navigation }) => {
             </View>
           )}
 
-          {/* Stats Overview */}
-          <Text style={styles.sectionTitle}>Tổng Quan</Text>
-          <View style={styles.statsGrid}>
-            <View style={styles.statCard}>
-              <Users size={20} color={COLORS.gold} />
-              <Text style={styles.statValue}>{stats.totalUsers}</Text>
-              <Text style={styles.statLabel}>Tổng Users</Text>
-            </View>
-
-            <View style={styles.statCard}>
-              <Users size={20} color={COLORS.gold} />
-              <Text style={styles.statValue}>{stats.activeAffiliates}</Text>
-              <Text style={styles.statLabel}>Affiliates (3%)</Text>
-            </View>
-
-            <View style={styles.statCard}>
-              <Users size={20} color={COLORS.gold} />
-              <Text style={styles.statValue}>{stats.activeCTVs}</Text>
-              <Text style={styles.statLabel}>CTVs (10-30%)</Text>
-            </View>
-
-            <View style={styles.statCard}>
-              <Users size={20} color={COLORS.gold} />
-              <Text style={styles.statValue}>{stats.activeAffiliates + stats.activeCTVs}</Text>
-              <Text style={styles.statLabel}>Tổng Đối tác</Text>
-            </View>
-          </View>
-
-          {/* Financial Stats */}
-          <Text style={styles.sectionTitle}>Tài Chính</Text>
-          <View style={styles.financialCards}>
-            <View style={styles.financialCard}>
-              <View style={styles.financialIconContainer}>
-                <TrendingUp size={18} color={COLORS.gold} />
-              </View>
-              <View style={styles.financialInfo}>
-                <Text style={styles.financialLabel}>Doanh thu tháng này</Text>
-                <Text style={styles.financialValue}>
-                  {formatCurrency(stats.monthlyRevenue)}
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.financialCard}>
-              <View style={styles.financialIconContainer}>
-                <DollarSign size={18} color={COLORS.gold} />
-              </View>
-              <View style={styles.financialInfo}>
-                <Text style={styles.financialLabel}>Tổng hoa hồng đã trả</Text>
-                <Text style={styles.financialValue}>
-                  {formatCurrency(stats.totalCommission)}
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Quick Actions */}
-          <Text style={styles.sectionTitle}>Quản Lý</Text>
-          <View style={styles.actionsContainer}>
-            <TouchableOpacity
-              style={styles.actionCard}
-              onPress={() => navigation.navigate('AdminApplications')}
-              activeOpacity={0.8}
-            >
-              <View style={styles.actionIcon}>
-                <FileEdit size={18} color={COLORS.gold} />
-              </View>
-              <View style={styles.actionContent}>
-                <Text style={styles.actionTitle}>Duyệt Đơn Đăng Ký</Text>
-                <Text style={styles.actionSubtitle}>
-                  {stats.pendingApplications} đơn chờ xử lý
-                </Text>
-              </View>
-              {stats.pendingApplications > 0 && (
-                <View style={styles.actionBadge}>
-                  <Text style={styles.actionBadgeText}>
-                    {stats.pendingApplications}
-                  </Text>
+          {/* Stats Overview - ADMIN ONLY */}
+          {isAdmin && (
+            <>
+              <Text style={styles.sectionTitle}>Tổng Quan</Text>
+              <View style={styles.statsGrid}>
+                <View style={styles.statCard}>
+                  <Users size={20} color={COLORS.gold} />
+                  <Text style={styles.statValue}>{stats.totalUsers}</Text>
+                  <Text style={styles.statLabel}>Tổng Users</Text>
                 </View>
-              )}
-              <ChevronRight size={16} color={COLORS.textMuted} />
-            </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.actionCard}
-              onPress={() => navigation.navigate('AdminWithdrawals')}
-              activeOpacity={0.8}
-            >
-              <View style={styles.actionIcon}>
-                <CreditCard size={18} color={COLORS.gold} />
-              </View>
-              <View style={styles.actionContent}>
-                <Text style={styles.actionTitle}>Xử Lý Rút Tiền</Text>
-                <Text style={styles.actionSubtitle}>
-                  {stats.pendingWithdrawals} yêu cầu chờ
-                </Text>
-              </View>
-              {stats.pendingWithdrawals > 0 && (
-                <View style={styles.actionBadge}>
-                  <Text style={styles.actionBadgeText}>
-                    {stats.pendingWithdrawals}
-                  </Text>
+                <View style={styles.statCard}>
+                  <Users size={20} color={COLORS.gold} />
+                  <Text style={styles.statValue}>{stats.activeAffiliates}</Text>
+                  <Text style={styles.statLabel}>Affiliates (3%)</Text>
                 </View>
-              )}
-              <ChevronRight size={16} color={COLORS.textMuted} />
-            </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.actionCard}
-              onPress={() => navigation.navigate('AdminUsers')}
-              activeOpacity={0.8}
-            >
-              <View style={styles.actionIcon}>
-                <Users size={18} color={COLORS.gold} />
-              </View>
-              <View style={styles.actionContent}>
-                <Text style={styles.actionTitle}>Quản Lý Users</Text>
-                <Text style={styles.actionSubtitle}>
-                  Xem & chỉnh sửa thông tin users
-                </Text>
-              </View>
-              <ChevronRight size={16} color={COLORS.textMuted} />
-            </TouchableOpacity>
+                <View style={styles.statCard}>
+                  <Users size={20} color={COLORS.gold} />
+                  <Text style={styles.statValue}>{stats.activeCTVs}</Text>
+                  <Text style={styles.statLabel}>CTVs (10-30%)</Text>
+                </View>
 
-            <TouchableOpacity
-              style={styles.actionCard}
-              onPress={() => navigation.navigate('AdminReports')}
-              activeOpacity={0.8}
-            >
-              <View style={styles.actionIcon}>
-                <BarChart3 size={18} color={COLORS.gold} />
+                <View style={styles.statCard}>
+                  <Users size={20} color={COLORS.gold} />
+                  <Text style={styles.statValue}>{stats.activeAffiliates + stats.activeCTVs}</Text>
+                  <Text style={styles.statLabel}>Tổng Đối tác</Text>
+                </View>
               </View>
-              <View style={styles.actionContent}>
-                <Text style={styles.actionTitle}>Báo Cáo & Thống Kê</Text>
-                <Text style={styles.actionSubtitle}>Chi tiết doanh thu & hiệu suất</Text>
-              </View>
-              <ChevronRight size={16} color={COLORS.textMuted} />
-            </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.actionCard}
-              onPress={() => navigation.navigate('AdminNotifications')}
-              activeOpacity={0.8}
-            >
-              <View style={styles.actionIcon}>
-                <Bell size={18} color={COLORS.gold} />
-              </View>
-              <View style={styles.actionContent}>
-                <Text style={styles.actionTitle}>Gửi Thông Báo</Text>
-                <Text style={styles.actionSubtitle}>Thông báo hệ thống đến users</Text>
-              </View>
-              <ChevronRight size={16} color={COLORS.textMuted} />
-            </TouchableOpacity>
+              {/* Financial Stats - Side by side */}
+              <Text style={styles.sectionTitle}>Tài Chính</Text>
+              <View style={styles.financialRow}>
+                <View style={styles.financialCardCompact}>
+                  <TrendingUp size={20} color={COLORS.gold} />
+                  <Text style={styles.financialValueCompact}>
+                    {formatCurrency(stats.monthlyRevenue)}
+                  </Text>
+                  <Text style={styles.financialLabelCompact}>Doanh thu tháng</Text>
+                </View>
 
-            <TouchableOpacity
-              style={styles.actionCard}
-              onPress={() => navigation.navigate('AdminSponsorBanners')}
-              activeOpacity={0.8}
-            >
-              <View style={styles.actionIcon}>
-                <ImageIcon size={18} color={COLORS.gold} />
+                <View style={styles.financialCardCompact}>
+                  <DollarSign size={20} color={COLORS.gold} />
+                  <Text style={styles.financialValueCompact}>
+                    {formatCurrency(stats.totalCommission)}
+                  </Text>
+                  <Text style={styles.financialLabelCompact}>Hoa hồng đã trả</Text>
+                </View>
               </View>
-              <View style={styles.actionContent}>
-                <Text style={styles.actionTitle}>Quản Lý Banner</Text>
-                <Text style={styles.actionSubtitle}>Banner quảng cáo Portfolio</Text>
-              </View>
-              <ChevronRight size={16} color={COLORS.textMuted} />
-            </TouchableOpacity>
-          </View>
+            </>
+          )}
 
-          {/* Content Hub & Push Notifications Section */}
+          {/* ========== QUICK ACTIONS GRID - ADMIN ONLY ========== */}
+          {isAdmin && (
+            <>
+              <Text style={styles.sectionTitle}>Quản Lý Chính</Text>
+              <View style={styles.gridContainer}>
+                {/* Duyệt Đơn */}
+                <TouchableOpacity
+                  style={styles.gridCard}
+                  onPress={() => navigation.navigate('AdminApplications')}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.gridIconWrapper}>
+                    <FileEdit size={22} color={COLORS.gold} />
+                    {stats.pendingApplications > 0 && (
+                      <View style={styles.gridBadge}>
+                        <Text style={styles.gridBadgeText}>{stats.pendingApplications}</Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text style={styles.gridTitle}>Duyệt Đơn</Text>
+                  <Text style={styles.gridSubtitle}>{stats.pendingApplications} chờ</Text>
+                </TouchableOpacity>
+
+                {/* Rút Tiền */}
+                <TouchableOpacity
+                  style={styles.gridCard}
+                  onPress={() => navigation.navigate('AdminWithdrawals')}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.gridIconWrapper}>
+                    <CreditCard size={22} color={COLORS.gold} />
+                    {stats.pendingWithdrawals > 0 && (
+                      <View style={styles.gridBadge}>
+                        <Text style={styles.gridBadgeText}>{stats.pendingWithdrawals}</Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text style={styles.gridTitle}>Rút Tiền</Text>
+                  <Text style={styles.gridSubtitle}>{stats.pendingWithdrawals} chờ</Text>
+                </TouchableOpacity>
+
+                {/* Quản Lý Users */}
+                <TouchableOpacity
+                  style={styles.gridCard}
+                  onPress={() => navigation.navigate('AdminUsers')}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.gridIconWrapper}>
+                    <Users size={22} color={COLORS.gold} />
+                  </View>
+                  <Text style={styles.gridTitle}>Users</Text>
+                  <Text style={styles.gridSubtitle}>{stats.totalUsers} users</Text>
+                </TouchableOpacity>
+
+                {/* Báo Cáo */}
+                <TouchableOpacity
+                  style={styles.gridCard}
+                  onPress={() => navigation.navigate('AdminReports')}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.gridIconWrapper}>
+                    <BarChart3 size={22} color={COLORS.gold} />
+                  </View>
+                  <Text style={styles.gridTitle}>Báo Cáo</Text>
+                  <Text style={styles.gridSubtitle}>Thống kê</Text>
+                </TouchableOpacity>
+
+                {/* Thông Báo */}
+                <TouchableOpacity
+                  style={styles.gridCard}
+                  onPress={() => navigation.navigate('AdminNotifications')}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.gridIconWrapper}>
+                    <Bell size={22} color={COLORS.gold} />
+                  </View>
+                  <Text style={styles.gridTitle}>Thông Báo</Text>
+                  <Text style={styles.gridSubtitle}>Gửi notify</Text>
+                </TouchableOpacity>
+
+                {/* Upgrade */}
+                <TouchableOpacity
+                  style={styles.gridCard}
+                  onPress={() => navigation.navigate('AdminUpgrade')}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.gridIconWrapper}>
+                    <TrendingUp size={22} color={COLORS.gold} />
+                  </View>
+                  <Text style={styles.gridTitle}>Upgrade</Text>
+                  <Text style={styles.gridSubtitle}>Tiers & Plan</Text>
+                </TouchableOpacity>
+
+                {/* Waitlist Leads */}
+                <TouchableOpacity
+                  style={styles.gridCard}
+                  onPress={() => navigation.navigate('WaitlistLeads')}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.gridIconWrapper}>
+                    <Send size={22} color={COLORS.gold} />
+                  </View>
+                  <Text style={styles.gridTitle}>Waitlist</Text>
+                  <Text style={styles.gridSubtitle}>Landing Leads</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* ========== BANNERS & DISPLAY - ADMIN ONLY ========== */}
+              <Text style={styles.sectionTitle}>Banners & Hiển Thị</Text>
+              <View style={styles.gridContainer}>
+                <TouchableOpacity
+                  style={styles.gridCard}
+                  onPress={() => navigation.navigate('AdminSponsorBanners')}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.gridIconWrapper}>
+                    <ImageIcon size={22} color={COLORS.gold} />
+                  </View>
+                  <Text style={styles.gridTitle}>Portfolio</Text>
+                  <Text style={styles.gridSubtitle}>Banner QC</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.gridCard}
+                  onPress={() => navigation.navigate('AdminShopBanners')}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.gridIconWrapper}>
+                    <ShoppingBag size={22} color={COLORS.gold} />
+                  </View>
+                  <Text style={styles.gridTitle}>Shop</Text>
+                  <Text style={styles.gridSubtitle}>Carousel</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.gridCard}
+                  onPress={() => navigation.navigate('AdminCourseHighlights')}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.gridIconWrapper}>
+                    <Star size={22} color={COLORS.gold} />
+                  </View>
+                  <Text style={styles.gridTitle}>Courses</Text>
+                  <Text style={styles.gridSubtitle}>Nổi bật</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.gridCard}
+                  onPress={() => navigation.navigate('AdminGiftCatalog')}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.gridIconWrapper}>
+                    <Gift size={22} color={COLORS.gold} />
+                  </View>
+                  <Text style={styles.gridTitle}>Quà Tặng</Text>
+                  <Text style={styles.gridSubtitle}>Catalog</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
+
+          {/* ========== CONTENT HUB ========== */}
           <Text style={styles.sectionTitle}>Content Hub & Push</Text>
-          <View style={styles.actionsContainer}>
+          <View style={styles.gridContainer}>
             <TouchableOpacity
-              style={styles.actionCard}
+              style={styles.gridCard}
               onPress={() => navigation.navigate('ContentDashboard')}
               activeOpacity={0.8}
             >
-              <View style={styles.actionIcon}>
-                <LayoutDashboard size={18} color={COLORS.gold} />
+              <View style={styles.gridIconWrapper}>
+                <LayoutDashboard size={22} color={COLORS.gold} />
               </View>
-              <View style={styles.actionContent}>
-                <Text style={styles.actionTitle}>Content Hub</Text>
-                <Text style={styles.actionSubtitle}>Dashboard tổng quan nội dung</Text>
-              </View>
-              <ChevronRight size={16} color={COLORS.textMuted} />
+              <Text style={styles.gridTitle}>Hub</Text>
+              <Text style={styles.gridSubtitle}>Dashboard</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.actionCard}
+              style={styles.gridCard}
               onPress={() => navigation.navigate('PushEditor')}
               activeOpacity={0.8}
             >
-              <View style={styles.actionIcon}>
-                <BellRing size={18} color={COLORS.gold} />
+              <View style={styles.gridIconWrapper}>
+                <BellRing size={22} color={COLORS.gold} />
               </View>
-              <View style={styles.actionContent}>
-                <Text style={styles.actionTitle}>Tạo Push Notification</Text>
-                <Text style={styles.actionSubtitle}>Gửi thông báo đẩy đến users</Text>
-              </View>
-              <ChevronRight size={16} color={COLORS.textMuted} />
+              <Text style={styles.gridTitle}>Push</Text>
+              <Text style={styles.gridSubtitle}>Notification</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.actionCard}
+              style={styles.gridCard}
               onPress={() => navigation.navigate('TemplateLibrary')}
               activeOpacity={0.8}
             >
-              <View style={styles.actionIcon}>
-                <FileText size={18} color={COLORS.gold} />
+              <View style={styles.gridIconWrapper}>
+                <FileText size={22} color={COLORS.gold} />
               </View>
-              <View style={styles.actionContent}>
-                <Text style={styles.actionTitle}>Thư Viện Templates</Text>
-                <Text style={styles.actionSubtitle}>Push & Post templates</Text>
-              </View>
-              <ChevronRight size={16} color={COLORS.textMuted} />
+              <Text style={styles.gridTitle}>Templates</Text>
+              <Text style={styles.gridSubtitle}>Thư viện</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.actionCard}
+              style={styles.gridCard}
               onPress={() => navigation.navigate('ContentAnalytics')}
               activeOpacity={0.8}
             >
-              <View style={styles.actionIcon}>
-                <PieChart size={18} color={COLORS.gold} />
+              <View style={styles.gridIconWrapper}>
+                <PieChart size={22} color={COLORS.gold} />
               </View>
-              <View style={styles.actionContent}>
-                <Text style={styles.actionTitle}>Analytics</Text>
-                <Text style={styles.actionSubtitle}>Thống kê push & content</Text>
-              </View>
-              <ChevronRight size={16} color={COLORS.textMuted} />
+              <Text style={styles.gridTitle}>Analytics</Text>
+              <Text style={styles.gridSubtitle}>Thống kê</Text>
             </TouchableOpacity>
-          </View>
 
-          {/* Auto-Post & Content Calendar Section */}
-          <Text style={styles.sectionTitle}>Nội Dung & Auto-Post</Text>
-          <View style={styles.actionsContainer}>
             <TouchableOpacity
-              style={styles.actionCard}
+              style={styles.gridCard}
               onPress={() => navigation.navigate('ContentCalendar')}
               activeOpacity={0.8}
             >
-              <View style={styles.actionIcon}>
-                <Calendar size={18} color={COLORS.gold} />
+              <View style={styles.gridIconWrapper}>
+                <Calendar size={22} color={COLORS.gold} />
               </View>
-              <View style={styles.actionContent}>
-                <Text style={styles.actionTitle}>Lịch Nội Dung</Text>
-                <Text style={styles.actionSubtitle}>Quản lý & lên lịch bài đăng</Text>
-              </View>
-              <ChevronRight size={16} color={COLORS.textMuted} />
+              <Text style={styles.gridTitle}>Calendar</Text>
+              <Text style={styles.gridSubtitle}>Lịch đăng</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.actionCard}
+              style={styles.gridCard}
               onPress={() => navigation.navigate('AutoPostLogs')}
               activeOpacity={0.8}
             >
-              <View style={styles.actionIcon}>
-                <Send size={18} color={COLORS.gold} />
+              <View style={styles.gridIconWrapper}>
+                <Send size={22} color={COLORS.gold} />
               </View>
-              <View style={styles.actionContent}>
-                <Text style={styles.actionTitle}>Nhật Ký Auto-Post</Text>
-                <Text style={styles.actionSubtitle}>Theo dõi đăng bài tự động</Text>
-              </View>
-              <ChevronRight size={16} color={COLORS.textMuted} />
+              <Text style={styles.gridTitle}>Auto-Post</Text>
+              <Text style={styles.gridSubtitle}>Nhật ký</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.actionCard}
+              style={styles.gridCard}
               onPress={() => navigation.navigate('PlatformSettings')}
               activeOpacity={0.8}
             >
-              <View style={styles.actionIcon}>
-                <Settings2 size={18} color={COLORS.gold} />
+              <View style={styles.gridIconWrapper}>
+                <Settings2 size={22} color={COLORS.gold} />
               </View>
-              <View style={styles.actionContent}>
-                <Text style={styles.actionTitle}>Kết Nối Nền Tảng</Text>
-                <Text style={styles.actionSubtitle}>Facebook, TikTok, YouTube...</Text>
-              </View>
-              <ChevronRight size={16} color={COLORS.textMuted} />
+              <Text style={styles.gridTitle}>Platforms</Text>
+              <Text style={styles.gridSubtitle}>Kết nối</Text>
             </TouchableOpacity>
-          </View>
 
-          {/* Seed Content & AI Bot Section */}
-          <Text style={styles.sectionTitle}>Seed Content & AI Bot</Text>
-          <View style={styles.actionsContainer}>
             <TouchableOpacity
-              style={styles.actionCard}
+              style={styles.gridCard}
               onPress={() => navigation.navigate('AdminSeedContent')}
               activeOpacity={0.8}
             >
-              <View style={styles.actionIcon}>
-                <Bot size={18} color={COLORS.gold} />
+              <View style={styles.gridIconWrapper}>
+                <Bot size={22} color={COLORS.gold} />
               </View>
-              <View style={styles.actionContent}>
-                <Text style={styles.actionTitle}>Quản Lý Seed Content</Text>
-                <Text style={styles.actionSubtitle}>Users, posts, AI bot 24/7</Text>
-              </View>
-              <ChevronRight size={16} color={COLORS.textMuted} />
+              <Text style={styles.gridTitle}>Seed</Text>
+              <Text style={styles.gridSubtitle}>AI Bot</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Gift Catalog Section */}
-          <Text style={styles.sectionTitle}>Quản lý Quà tặng</Text>
-          <View style={styles.actionsContainer}>
-            <TouchableOpacity
-              style={styles.actionCard}
-              onPress={() => navigation.navigate('AdminGiftCatalog')}
-              activeOpacity={0.8}
-            >
-              <View style={styles.actionIcon}>
-                <Gift size={18} color={COLORS.gold} />
-              </View>
-              <View style={styles.actionContent}>
-                <Text style={styles.actionTitle}>Danh mục quà</Text>
-                <Text style={styles.actionSubtitle}>Thêm, sửa, xóa quà tặng</Text>
-              </View>
-              <ChevronRight size={16} color={COLORS.textMuted} />
-            </TouchableOpacity>
-          </View>
+          {/* ========== SUBSCRIPTION SECTION - ADMIN ONLY ========== */}
+          {isAdmin && (
+            <>
+              <Text style={styles.sectionTitle}>Subscription</Text>
 
-          {/* Subscription Expiration Section */}
-          <Text style={styles.sectionTitle}>Quản Lý Subscription</Text>
-
-          {/* Expiring Alert Card */}
-          {stats.totalExpiring > 0 && (
-            <View style={[styles.alertCard, { borderLeftWidth: 3, borderLeftColor: COLORS.gold }]}>
-              <View style={styles.alertItems}>
-                <TouchableOpacity
-                  style={styles.alertItem}
-                  onPress={() => navigation.navigate('AdminExpiringUsers')}
-                >
-                  <Clock size={18} color={COLORS.gold} />
-                  <Text style={styles.alertItemText}>
-                    {stats.totalExpiring} subscriptions sắp hết hạn (7 ngày)
-                  </Text>
-                  <ChevronRight size={18} color={COLORS.textMuted} />
-                </TouchableOpacity>
-                {stats.expiringToday > 0 && (
-                  <View style={[styles.alertItem, { backgroundColor: 'rgba(255, 107, 107, 0.2)' }]}>
-                    <Clock size={18} color={COLORS.error} />
-                    <Text style={[styles.alertItemText, { color: COLORS.error }]}>
-                      {stats.expiringToday} hết hạn HÔM NAY!
-                    </Text>
-                  </View>
-                )}
-              </View>
-            </View>
-          )}
-
-          <View style={styles.actionsContainer}>
-            <TouchableOpacity
-              style={styles.actionCard}
-              onPress={() => navigation.navigate('AdminExpiringUsers')}
-              activeOpacity={0.8}
-            >
-              <View style={styles.actionIcon}>
-                <Clock size={18} color={COLORS.gold} />
-              </View>
-              <View style={styles.actionContent}>
-                <Text style={styles.actionTitle}>Users Sắp Hết Hạn</Text>
-                <Text style={styles.actionSubtitle}>
-                  Xem & gia hạn subscription users
-                </Text>
-              </View>
+              {/* Expiring Alert */}
               {stats.totalExpiring > 0 && (
-                <View style={styles.actionBadge}>
-                  <Text style={styles.actionBadgeText}>
-                    {stats.totalExpiring}
-                  </Text>
+                <View style={[styles.alertCard, { borderLeftWidth: 3, borderLeftColor: COLORS.gold }]}>
+                  <View style={styles.alertItems}>
+                    <TouchableOpacity
+                      style={styles.alertItem}
+                      onPress={() => navigation.navigate('AdminExpiringUsers')}
+                    >
+                      <Clock size={18} color={COLORS.gold} />
+                      <Text style={styles.alertItemText}>
+                        {stats.totalExpiring} sắp hết hạn (7 ngày)
+                      </Text>
+                      <ChevronRight size={18} color={COLORS.textMuted} />
+                    </TouchableOpacity>
+                    {stats.expiringToday > 0 && (
+                      <View style={[styles.alertItem, { backgroundColor: 'rgba(255, 107, 107, 0.2)' }]}>
+                        <Clock size={18} color={COLORS.error} />
+                        <Text style={[styles.alertItemText, { color: COLORS.error }]}>
+                          {stats.expiringToday} hết hạn HÔM NAY!
+                        </Text>
+                      </View>
+                    )}
+                  </View>
                 </View>
               )}
-              <ChevronRight size={16} color={COLORS.textMuted} />
-            </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.actionCard}
-              onPress={() => navigation.navigate('AdminExpirationLogs')}
-              activeOpacity={0.8}
-            >
-              <View style={styles.actionIcon}>
-                <History size={18} color={COLORS.gold} />
+              <View style={styles.gridContainer}>
+                <TouchableOpacity
+                  style={styles.gridCard}
+                  onPress={() => navigation.navigate('AdminExpiringUsers')}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.gridIconWrapper}>
+                    <Clock size={22} color={COLORS.gold} />
+                    {stats.totalExpiring > 0 && (
+                      <View style={styles.gridBadge}>
+                        <Text style={styles.gridBadgeText}>{stats.totalExpiring}</Text>
+                      </View>
+                    )}
+                  </View>
+                  <Text style={styles.gridTitle}>Hết Hạn</Text>
+                  <Text style={styles.gridSubtitle}>Gia hạn</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.gridCard}
+                  onPress={() => navigation.navigate('AdminExpirationLogs')}
+                  activeOpacity={0.8}
+                >
+                  <View style={styles.gridIconWrapper}>
+                    <History size={22} color={COLORS.gold} />
+                  </View>
+                  <Text style={styles.gridTitle}>Revoke</Text>
+                  <Text style={styles.gridSubtitle}>Lịch sử</Text>
+                </TouchableOpacity>
               </View>
-              <View style={styles.actionContent}>
-                <Text style={styles.actionTitle}>Lịch Sử Revoke</Text>
-                <Text style={styles.actionSubtitle}>
-                  Xem subscriptions đã bị hủy
-                </Text>
-              </View>
-              <ChevronRight size={16} color={COLORS.textMuted} />
-            </TouchableOpacity>
-          </View>
+            </>
+          )}
 
           {/* Bottom Spacing */}
           <View style={{ height: 100 }} />
@@ -773,10 +762,16 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 16,
   },
+  managerBadge: {
+    backgroundColor: '#3B82F6', // Blue for Manager
+  },
   adminBadgeText: {
     fontSize: 12,
     fontWeight: '700',
     color: '#000',
+  },
+  managerBadgeText: {
+    color: '#FFF', // White text for Manager badge
   },
 
   // Alert Card
@@ -844,7 +839,32 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  // Financial Cards
+  // Financial Cards - Compact Row
+  financialRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: SPACING.md,
+  },
+  financialCardCompact: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    padding: SPACING.md,
+    alignItems: 'center',
+  },
+  financialValueCompact: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginTop: 8,
+  },
+  financialLabelCompact: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  // Legacy financial styles (kept for compatibility)
   financialCards: {
     gap: 8,
     marginBottom: SPACING.sm,
@@ -879,7 +899,63 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  // Actions
+  // Grid Layout (NEW - Compact 3-column grid)
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginBottom: SPACING.md,
+  },
+  gridCard: {
+    width: '31%',
+    aspectRatio: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    padding: SPACING.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  gridIconWrapper: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+    position: 'relative',
+  },
+  gridBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: COLORS.burgundy,
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  gridBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+  },
+  gridTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    textAlign: 'center',
+  },
+  gridSubtitle: {
+    fontSize: 10,
+    color: COLORS.textMuted,
+    marginTop: 2,
+    textAlign: 'center',
+  },
+
+  // Actions (Legacy - kept for compatibility)
   actionsContainer: {
     gap: 8,
   },

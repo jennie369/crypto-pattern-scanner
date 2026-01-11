@@ -7,6 +7,8 @@
 class BinanceService {
   constructor() {
     this.ws = null;
+    this.singleSymbolWs = null; // Single symbol WebSocket for detail screens
+    this.currentWsSymbol = null;
     this.subscribers = new Map();
     this.prices = new Map();
     this.reconnectAttempts = 0;
@@ -197,11 +199,18 @@ class BinanceService {
     };
 
     this.ws.onerror = (error) => {
-      console.error('[Binance] WebSocket error:', error);
+      // WebSocket errors in React Native don't have detailed messages
+      const readyState = this.ws?.readyState;
+      if (readyState !== WebSocket.CLOSING && readyState !== WebSocket.CLOSED) {
+        console.warn('[Binance] WebSocket error (state:', readyState, ')');
+      }
     };
 
-    this.ws.onclose = () => {
-      console.log('[Binance] WebSocket closed');
+    this.ws.onclose = (event) => {
+      // Only log if unexpected close
+      if (event?.code && event.code !== 1000 && event.code !== 1001) {
+        console.log('[Binance] WebSocket closed (code:', event.code, ')');
+      }
       this.attemptReconnect(symbols);
     };
   }
@@ -220,9 +229,16 @@ class BinanceService {
     }
     this.subscribers.get(symbol).push(callback);
 
+    // If we have cached price, send immediately
     if (this.prices.has(symbol)) {
       callback(this.prices.get(symbol));
+    } else {
+      // Fetch initial price via REST API immediately (don't wait for WebSocket)
+      this.fetchAndNotifyPrice(symbol, callback);
     }
+
+    // Auto-connect WebSocket for this symbol if not connected
+    this.ensureWebSocketForSymbol(symbol);
 
     return () => {
       const callbacks = this.subscribers.get(symbol);
@@ -231,6 +247,107 @@ class BinanceService {
         if (index > -1) callbacks.splice(index, 1);
       }
     };
+  }
+
+  /**
+   * Fetch price via REST API and notify callback immediately
+   */
+  async fetchAndNotifyPrice(symbol, callback) {
+    try {
+      const url = `${this.futuresBaseUrl}/ticker/24hr?symbol=${symbol}`;
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data && data.lastPrice) {
+        const priceData = {
+          symbol: symbol,
+          price: parseFloat(data.lastPrice),
+          priceChange: parseFloat(data.priceChange || 0),
+          priceChangePercent: parseFloat(data.priceChangePercent || 0),
+          high: parseFloat(data.highPrice || 0),
+          low: parseFloat(data.lowPrice || 0),
+          volume: parseFloat(data.volume || 0),
+          timestamp: Date.now(),
+        };
+
+        this.prices.set(symbol, priceData);
+        callback(priceData);
+      }
+    } catch (error) {
+      console.error(`[Binance] fetchAndNotifyPrice error for ${symbol}:`, error);
+    }
+  }
+
+  /**
+   * Ensure WebSocket is connected for a specific symbol
+   * Creates a dedicated connection for single symbol real-time updates
+   */
+  ensureWebSocketForSymbol(symbol) {
+    // If main WebSocket is already handling this symbol, skip
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      return;
+    }
+
+    // Create/update single symbol WebSocket connection
+    if (!this.singleSymbolWs || this.singleSymbolWs.readyState !== WebSocket.OPEN || this.currentWsSymbol !== symbol) {
+      // Close existing single symbol connection
+      if (this.singleSymbolWs) {
+        this.singleSymbolWs.close();
+      }
+
+      this.currentWsSymbol = symbol;
+      const wsUrl = `wss://fstream.binance.com/ws/${symbol.toLowerCase()}@ticker`;
+      console.log(`[Binance] Connecting single symbol WebSocket for ${symbol}...`);
+
+      this.singleSymbolWs = new WebSocket(wsUrl);
+
+      this.singleSymbolWs.onopen = () => {
+        console.log(`[Binance] Single symbol WebSocket connected for ${symbol}`);
+      };
+
+      this.singleSymbolWs.onmessage = (event) => {
+        try {
+          const ticker = JSON.parse(event.data);
+          if (ticker.s) {
+            const priceData = {
+              symbol: ticker.s,
+              price: parseFloat(ticker.c),
+              priceChange: parseFloat(ticker.p),
+              priceChangePercent: parseFloat(ticker.P),
+              high: parseFloat(ticker.h),
+              low: parseFloat(ticker.l),
+              volume: parseFloat(ticker.v),
+              timestamp: ticker.E,
+            };
+
+            this.prices.set(ticker.s, priceData);
+            this.notifySubscribers(ticker.s, priceData);
+          }
+        } catch (error) {
+          console.error('[Binance] Single WS parse error:', error);
+        }
+      };
+
+      this.singleSymbolWs.onerror = (error) => {
+        // WebSocket errors in React Native don't have detailed messages
+        // Only log if it's unexpected (not during intentional close)
+        const readyState = this.singleSymbolWs?.readyState;
+        if (readyState !== WebSocket.CLOSING && readyState !== WebSocket.CLOSED) {
+          console.warn(`[Binance] WebSocket error for ${symbol} (state: ${readyState})`);
+        }
+      };
+
+      this.singleSymbolWs.onclose = (event) => {
+        // Only log if unexpected close (code 1000 = normal, 1001 = going away)
+        if (event?.code && event.code !== 1000 && event.code !== 1001) {
+          console.log(`[Binance] WebSocket closed for ${symbol} (code: ${event.code})`);
+        }
+        // Reconnect after delay if still subscribed
+        if (this.subscribers.has(symbol) && this.subscribers.get(symbol).length > 0) {
+          setTimeout(() => this.ensureWebSocketForSymbol(symbol), 3000);
+        }
+      };
+    }
   }
 
   notifySubscribers(symbol, priceData) {
@@ -248,6 +365,11 @@ class BinanceService {
     if (this.ws) {
       this.ws.close();
       this.ws = null;
+    }
+    if (this.singleSymbolWs) {
+      this.singleSymbolWs.close();
+      this.singleSymbolWs = null;
+      this.currentWsSymbol = null;
     }
   }
 

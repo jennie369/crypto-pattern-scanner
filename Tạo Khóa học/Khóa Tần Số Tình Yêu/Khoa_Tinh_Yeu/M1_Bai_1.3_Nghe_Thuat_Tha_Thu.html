@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 1.3: Nghệ Thuật Tha Thứ | Khóa Tần Số Tình Yêu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root{--navy:#112250;--navy-dark:#0a1628;--gold:#FFBD59;--gold-dark:#E5A73D;--cyan:#00F0FF;--purple:#6A5BFF;--burgundy:#9C0612;--burgundy-light:#C41E2A;--success:#00C853;--error:#FF5252;--bg-primary:#0a1628;--bg-card:rgba(17,34,80,0.6);--text-primary:#FFFFFF;--text-secondary:rgba(255,255,255,0.85);--text-muted:rgba(255,255,255,0.6);--glass-bg:rgba(17,34,80,0.4);--glass-border:rgba(255,189,89,0.2);--space-xs:4px;--space-sm:8px;--space-md:16px;--space-lg:24px;--space-xl:32px;--radius-md:12px;--radius-lg:16px}*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}body{font-family:'Montserrat',sans-serif;background:var(--bg-primary);color:var(--text-primary);line-height:1.6}img{max-width:100%;height:auto;display:block}.background-container{position:fixed;inset:0;z-index:-1}.bg-layer-base{position:absolute;inset:0;background:linear-gradient(180deg,var(--navy-dark) 0%,var(--navy) 50%,var(--navy-dark) 100%)}.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.3}.orb-1{width:400px;height:400px;background:var(--gold);top:-100px;right:-100px}.orb-2{width:300px;height:300px;background:var(--cyan);bottom:20%;left:-100px}.orb-3{width:250px;height:250px;background:var(--burgundy);bottom:-50px;right:20%}.lesson-container{max-width:800px;margin:0 auto;padding:1.5rem}@media(max-width:600px){.lesson-container{padding:0}}.lesson-header{text-align:center;padding:var(--space-xl);margin-bottom:var(--space-xl);background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);box-shadow:0 4px 24px rgba(0,0,0,0.2)}@media(max-width:600px){.lesson-header{padding:var(--space-lg) 16px;margin-bottom:0;border:none;border-radius:0;box-shadow:none;border-bottom:8px solid var(--bg-primary)}}.lesson-badge{display:inline-flex;align-items:center;gap:var(--space-sm);padding:var(--space-sm) var(--space-md);background:linear-gradient(135deg,var(--burgundy),var(--burgundy-light));border-radius:50px;font-size:0.75rem;font-weight:700;text-transform:uppercase;margin-bottom:var(--space-md)}.lesson-chapter{font-size:0.9rem;color:var(--gold);font-weight:600;margin-bottom:var(--space-sm);text-transform:uppercase;letter-spacing:2px}.lesson-title{font-size:clamp(1.75rem,5vw,2.5rem);font-weight:800;margin-bottom:var(--space-md);background:linear-gradient(135deg,var(--text-primary),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.lesson-meta{display:flex;justify-content:center;gap:var(--space-lg);flex-wrap:wrap;color:var(--text-muted);font-size:0.85rem}.meta-item{display:flex;align-items:center;gap:var(--space-xs)}.section{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);box-shadow:0 4px 24px rgba(0,0,0,0.2);padding:var(--space-xl);margin-bottom:var(--space-lg)}@media(max-width:600px){.section{padding:0;margin-bottom:0;border:none;border-radius:0;box-shadow:none;border-bottom:8px solid var(--bg-primary)}}.section-title{font-size:1.5rem;font-weight:700;color:var(--gold);margin-bottom:var(--space-lg);display:flex;align-items:center;gap:var(--space-sm)}@media(max-width:600px){.section-title{padding:var(--space-lg) 16px var(--space-md) 16px;margin-bottom:0}}.section>p{color:var(--text-secondary);margin-bottom:var(--space-md)}@media(max-width:600px){.section>p{padding:0 16px}}.section>ul,.section>ol{color:var(--text-secondary);padding-left:1.5em;margin-bottom:var(--space-md)}@media(max-width:600px){.section>ul,.section>ol{padding-left:calc(16px + 1.5em);padding-right:16px}}.section li{margin-bottom:var(--space-sm)}.highlight-box{background:linear-gradient(135deg,rgba(255,189,89,0.15),rgba(255,189,89,0.05));border:1px solid rgba(255,189,89,0.3);border-radius:var(--radius-md);padding:var(--space-lg);margin:var(--space-lg) 0}@media(max-width:600px){.highlight-box{border:none;border-radius:0;border-left:4px solid var(--gold);padding:var(--space-md) 16px;margin:var(--space-md) 0}}.highlight-box-title{font-weight:700;color:var(--gold);margin-bottom:var(--space-sm);display:flex;align-items:center;gap:var(--space-sm)}.highlight-box p{color:var(--text-secondary);margin:0;margin-bottom:var(--space-sm)}.definition-box{background:linear-gradient(135deg,rgba(0,240,255,0.1),rgba(0,240,255,0.02));border:1px solid rgba(0,240,255,0.2);border-radius:var(--radius-md);padding:var(--space-lg);margin:var(--space-lg) 0}@media(max-width:600px){.definition-box{border:none;border-radius:0;border-left:4px solid var(--cyan);padding:var(--space-md) 16px;margin:var(--space-md) 0}}.definition-box-title{font-weight:700;color:var(--cyan);margin-bottom:var(--space-sm);display:flex;align-items:center;gap:var(--space-sm)}.definition-box p{color:var(--text-secondary);margin-bottom:var(--space-sm)}.warning-box{background:linear-gradient(135deg,rgba(156,6,18,0.2),rgba(156,6,18,0.05));border:1px solid rgba(156,6,18,0.4);border-radius:var(--radius-md);padding:var(--space-lg);margin:var(--space-lg) 0}@media(max-width:600px){.warning-box{border:none;border-radius:0;border-left:4px solid var(--burgundy);padding:var(--space-md) 16px;margin:var(--space-md) 0}}.warning-box-title{font-weight:700;color:var(--burgundy-light);margin-bottom:var(--space-sm);display:flex;align-items:center;gap:var(--space-sm)}.warning-box p{color:var(--text-secondary);margin-bottom:var(--space-sm)}.success-box{background:linear-gradient(135deg,rgba(0,200,83,0.15),rgba(0,200,83,0.05));border:1px solid rgba(0,200,83,0.3);border-radius:var(--radius-md);padding:var(--space-lg);margin:var(--space-lg) 0}@media(max-width:600px){.success-box{border:none;border-radius:0;border-left:4px solid var(--success);padding:var(--space-md) 16px;margin:var(--space-md) 0}}.success-box-title{font-weight:700;color:var(--success);margin-bottom:var(--space-sm);display:flex;align-items:center;gap:var(--space-sm)}.success-box p{color:var(--text-secondary);margin-bottom:var(--space-sm)}.quote-box{background:linear-gradient(135deg,rgba(106,91,255,0.15),rgba(106,91,255,0.05));border:1px solid rgba(106,91,255,0.3);border-radius:var(--radius-md);padding:var(--space-lg);margin:var(--space-lg) 0;font-style:italic}@media(max-width:600px){.quote-box{border:none;border-radius:0;border-left:4px solid var(--purple);padding:var(--space-md) 16px;margin:var(--space-md) 0}}.quote-box p{color:var(--text-secondary);margin-bottom:var(--space-sm)}.quote-author{color:var(--purple);font-weight:600;font-style:normal}.image-container{margin:var(--space-xl) 0;border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--glass-border)}@media(max-width:600px){.image-container{margin:var(--space-md) 0;border-radius:0;border:none}}.image-caption{padding:var(--space-sm);font-size:0.85rem;color:var(--text-muted);font-style:italic;text-align:center}@media(max-width:600px){.image-caption{padding:var(--space-sm) 16px}}.flow-steps{display:flex;flex-direction:column;gap:var(--space-md);margin:var(--space-lg) 0}@media(max-width:600px){.flow-steps{gap:1px;background:var(--glass-border);margin:var(--space-md) 0}}.flow-step{display:flex;gap:var(--space-md);align-items:flex-start;padding:var(--space-md);background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius-md);transition:all 0.3s ease}@media(max-width:600px){.flow-step{padding:var(--space-md) 16px;border:none;border-radius:0;border-left:4px solid var(--gold)}}@media(min-width:601px){.flow-step:hover{border-color:var(--gold);transform:translateX(8px)}}.flow-step-number{width:40px;height:40px;min-width:40px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;color:var(--navy-dark)}.flow-step-content{flex:1}.flow-step-title{font-weight:700;color:var(--text-primary);margin-bottom:var(--space-xs)}.flow-step-desc{font-size:0.9rem;color:var(--text-muted)}.patterns-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--space-md);margin:var(--space-lg) 0}@media(max-width:600px){.patterns-grid{gap:1px;background:var(--glass-border);margin:var(--space-md) 0}}.pattern-card{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius-md);padding:var(--space-lg);text-align:center;transition:all 0.3s ease}@media(max-width:600px){.pattern-card{border:none;border-radius:0;padding:var(--space-md)}}@media(min-width:601px){.pattern-card:hover{border-color:var(--burgundy);transform:translateY(-4px)}}.pattern-icon{font-size:2.5rem;margin-bottom:var(--space-sm)}.pattern-name{font-weight:700;color:var(--text-primary);margin-bottom:var(--space-xs)}.pattern-desc{font-size:0.85rem;color:var(--text-muted)}.summary-box{background:linear-gradient(135deg,rgba(255,189,89,0.1),rgba(255,189,89,0.02));border:2px solid var(--gold);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0}@media(max-width:600px){.summary-box{border:none;border-radius:0;border-left:4px solid var(--gold);padding:var(--space-lg) 16px;margin:var(--space-md) 0}}.summary-title{font-size:1.25rem;font-weight:700;color:var(--gold);margin-bottom:var(--space-lg);display:flex;align-items:center;gap:var(--space-sm)}.summary-list{list-style:none}.summary-list li{display:flex;align-items:flex-start;gap:var(--space-sm);margin-bottom:var(--space-md);color:var(--text-secondary)}.summary-list li::before{content:"✓";color:var(--gold);font-weight:700}
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge"><span>💔</span><span>Module 1</span></div>
+            <div class="lesson-chapter">Chapter 1 - Chữa Lành Vết Thương Quá Khứ</div>
+            <h1 class="lesson-title">Nghệ Thuật Tha Thứ</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 1.3</span></div>
+                <div class="meta-item"><span>⏱️</span><span>10 phút đọc</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🕊️</span> Gánh Nặng Bạn Đang Mang</h2>
+
+            <p>Bạn có biết rằng giữ oán giận trong lòng giống như đang uống thuốc độc mỗi ngày nhưng mong người khác chết? Mỗi lần bạn nghĩ đến người đã làm tổn thương mình với sự tức giận và oán hận, cơ thể bạn tiết ra cortisol - hormone stress làm suy yếu hệ miễn dịch, tăng nguy cơ bệnh tim, và quan trọng nhất trong bối cảnh khóa học này, nó giữ tần số rung động của bạn ở mức thấp nhất.</p>
+
+            <p>Nhiều người nghĩ rằng tha thứ là một món quà họ cho người đã làm tổn thương mình, nhưng thực ra tha thứ là món quà lớn nhất bạn có thể cho chính bản thân. Khi bạn tha thứ, bạn không giải phóng người kia - bạn giải phóng CHÍNH MÌNH khỏi nhà tù của quá khứ. Và chỉ khi bạn tự do khỏi quá khứ, bạn mới có thể mở lòng đón nhận tình yêu mới ở tần số cao hơn.</p>
+
+            <div class="quote-box">
+                <p>"Resentment is like drinking poison and waiting for the other person to die."</p>
+                <p class="quote-author">— Nelson Mandela (Oán giận như uống thuốc độc nhưng mong người khác chết)</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m1-forgiveness-quote.png" alt="Forgiveness Quote">
+            </div>
+            <div class="image-caption">Hình 1: Tha thứ - Giải phóng bản thân khỏi gánh nặng oán giận</div>
+        </section>
+
+        <!-- CONCEPT INTRODUCTION -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Tha Thứ Thực Sự Là Gì?</h2>
+
+            <p>Trước khi học cách tha thứ, chúng ta cần hiểu rõ tha thứ THỰC SỰ là gì và KHÔNG phải là gì. Có rất nhiều hiểu lầm về tha thứ khiến mọi người không thể hoặc không muốn tha thứ, và những hiểu lầm này đang cầm tù họ trong nỗi đau quá khứ.</p>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>❌</span> Tha Thứ KHÔNG PHẢI Là...</div>
+                <p><strong>Chấp nhận hành vi sai trái:</strong> Tha thứ không có nghĩa là những gì họ làm là đúng hoặc chấp nhận được. Bạn có thể tha thứ mà vẫn biết rõ hành vi đó là sai.</p>
+                <p><strong>Quên đi những gì đã xảy ra:</strong> Bạn sẽ luôn nhớ, nhưng ký ức đó sẽ không còn gây đau đớn như trước. Tha thứ là thay đổi mối quan hệ của bạn với ký ức, không phải xóa bỏ nó.</p>
+                <p><strong>Cho phép họ tiếp tục tổn thương bạn:</strong> Tha thứ không có nghĩa là bạn phải quay lại với họ hoặc để họ tiếp tục hành vi độc hại. Bạn có thể tha thứ từ xa.</p>
+                <p><strong>Yếu đuối hay nhu nhược:</strong> Ngược lại, tha thứ đòi hỏi sức mạnh và lòng dũng cảm to lớn. Giữ oán giận mới là dễ dàng; buông bỏ mới là khó.</p>
+            </div>
+
+            <div class="success-box">
+                <div class="success-box-title"><span>✅</span> Tha Thứ THỰC SỰ Là...</div>
+                <p><strong>Giải phóng bản thân:</strong> Tha thứ là quyết định không để quá khứ kiểm soát hiện tại và tương lai của bạn nữa.</p>
+                <p><strong>Lấy lại quyền lực:</strong> Khi giữ oán giận, bạn đang cho người đó quyền lực tiếp tục làm tổn thương bạn dù họ không có mặt. Tha thứ là lấy lại quyền lực đó.</p>
+                <p><strong>Hành động yêu thương bản thân:</strong> Bạn xứng đáng được tự do, được bình an. Tha thứ là cách bạn yêu thương chính mình.</p>
+                <p><strong>Nâng tần số rung động:</strong> Oán giận có tần số khoảng 75 Hz, trong khi tha thứ và bình an có tần số 540+ Hz. Tha thứ là cách nhanh nhất để nâng tần số tình yêu.</p>
+            </div>
+        </section>
+
+        <!-- DEEP EXPLANATION - HO'OPONOPONO -->
+        <section class="section">
+            <h2 class="section-title"><span>🌺</span> Ho'oponopono - Phương Pháp Hawaii</h2>
+
+            <p>Ho'oponopono là phương pháp tha thứ cổ xưa của người Hawaii, được Dr. Ihaleakala Hew Len làm nổi tiếng toàn cầu khi ông sử dụng nó để chữa lành cả một khu bệnh viện tâm thần mà không cần gặp trực tiếp bệnh nhân. Phương pháp này dựa trên niềm tin rằng chúng ta chịu trách nhiệm 100% cho mọi thứ xảy ra trong thực tại của mình, và khi chữa lành bản thân, chúng ta chữa lành cả thế giới xung quanh.</p>
+
+            <div class="image-container">
+                <img src="images/m1-hooponopono-4-cau.png" alt="Ho'oponopono 4 Câu">
+            </div>
+            <div class="image-caption">Hình 2: Ho'oponopono - 4 Câu Thần Chú Chữa Lành mạnh mẽ của người Hawaii</div>
+
+            <div class="patterns-grid">
+                <div class="pattern-card">
+                    <div class="pattern-icon">🙏</div>
+                    <div class="pattern-name">Tôi Xin Lỗi</div>
+                    <div class="pattern-desc">Nhận trách nhiệm về phần năng lượng của mình trong tình huống, không đổ lỗi</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">💕</div>
+                    <div class="pattern-name">Xin Tha Thứ</div>
+                    <div class="pattern-desc">Mở lòng nhận sự tha thứ từ vũ trụ, từ Nguồn, từ Thượng Đế</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">🙏</div>
+                    <div class="pattern-name">Cảm Ơn</div>
+                    <div class="pattern-desc">Biết ơn bài học mà trải nghiệm đau đớn này mang lại cho bạn</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">❤️</div>
+                    <div class="pattern-name">Tôi Yêu Bạn</div>
+                    <div class="pattern-desc">Gửi tình yêu vô điều kiện đến bản thân, người kia, và tình huống</div>
+                </div>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🧘</span> Cách Thực Hành Ho'oponopono Chi Tiết</div>
+                <p><strong>Bước 1:</strong> Ngồi yên tĩnh, nhắm mắt, hít thở sâu vài lần để tĩnh tâm.</p>
+                <p><strong>Bước 2:</strong> Nghĩ đến người hoặc tình huống cần tha thứ. Cho phép cảm xúc dâng lên - đau đớn, tức giận, buồn bã - tất cả đều được phép.</p>
+                <p><strong>Bước 3:</strong> Lặp lại 4 câu một cách chậm rãi, cảm nhận từng từ: "Tôi xin lỗi. Xin hãy tha thứ cho tôi. Cảm ơn bạn. Tôi yêu bạn."</p>
+                <p><strong>Bước 4:</strong> Tiếp tục lặp lại cho đến khi cảm thấy một sự chuyển đổi - có thể là nhẹ nhõm, bình an, hoặc nước mắt tuôn rơi.</p>
+                <p><strong>Lưu ý:</strong> Bạn không nói những câu này với người kia, mà nói với chính mình, với tiềm thức, với vũ trụ. Đây là cuộc đối thoại nội tâm.</p>
+            </div>
+        </section>
+
+        <!-- REAL-WORLD EXAMPLES -->
+        <section class="section">
+            <h2 class="section-title"><span>💫</span> Câu Chuyện Thực Tế</h2>
+
+            <p>Để thấy được sức mạnh thực sự của tha thứ, hãy cùng xem ba câu chuyện từ những học viên đã trải qua hành trình này.</p>
+
+            <div class="success-box">
+                <div class="success-box-title"><span>🌟</span> Câu Chuyện 1: Hương - 10 Năm Oán Giận</div>
+                <p>Hương, 38 tuổi, đã giữ oán giận với người chồng cũ suốt 10 năm sau khi anh ngoại tình và bỏ đi. Cô không thể có mối quan hệ mới nào vì "đàn ông nào cũng như nhau". Khi bắt đầu thực hành Ho'oponopono, Hương khóc suốt 3 ngày đầu tiên vì những cảm xúc bị nén chặt bấy lâu nay trào ra. Sau 21 ngày thực hành, cô mô tả cảm giác như "có ai đó tháo bỏ tảng đá 100 kg khỏi ngực". 6 tháng sau, Hương gặp được người đàn ông mới - điều cô không thể tưởng tượng được khi còn ôm oán giận.</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>⚠️</span> Câu Chuyện 2: Nam - Tha Thứ Cho Cha</div>
+                <p>Nam, 35 tuổi, lớn lên với người cha hay đánh đập và mắng nhiếc. Anh thề sẽ không bao giờ tha thứ cho cha. Nhưng mối quan hệ của anh với phụ nữ luôn thất bại - anh hoặc quá hung dữ, hoặc quá xa cách. Khi làm bài tập tha thứ, Nam nhận ra rằng anh không tha thứ cho cha không phải đang trừng phạt cha, mà đang trừng phạt chính mình. Cha anh không biết gì về nỗi oán giận này - chỉ có Nam là người mang gánh nặng mỗi ngày. Sau khi tha thứ, anh lần đầu tiên có thể nói chuyện với cha mà không cảm thấy tức giận, và mối quan hệ với bạn gái cũng cải thiện đáng kể.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>💡</span> Câu Chuyện 3: Thảo - Tha Thứ Cho Chính Mình</div>
+                <p>Thảo, 29 tuổi, không thể tha thứ cho bản thân vì đã phá thai khi còn trẻ. Cô tin mình không xứng đáng được hạnh phúc, không xứng đáng làm mẹ. Nỗi tội lỗi này ảnh hưởng đến mọi mối quan hệ - cô luôn cảm thấy mình không đủ tốt. Khi thực hành Ho'oponopono với chính mình, Thảo nhận ra rằng đứa trẻ trong cô - người đã đưa ra quyết định khó khăn đó - cũng cần được yêu thương và tha thứ. Cô viết thư xin lỗi đứa bé chưa kịp chào đời, và cảm thấy được giải thoát lần đầu tiên sau 8 năm.</p>
+            </div>
+        </section>
+
+        <!-- DANH SÁCH THA THỨ -->
+        <section class="section">
+            <h2 class="section-title"><span>📋</span> Lập Danh Sách Tha Thứ</h2>
+
+            <p>Để tha thứ hiệu quả, bạn cần biết rõ mình cần tha thứ ai. Hãy lập một danh sách đầy đủ - đây không phải để đào bới đau khổ, mà để xác định rõ những gánh nặng bạn đang mang và lần lượt buông bỏ chúng.</p>
+
+            <div class="image-container">
+                <img src="images/m1-forgiveness-list-template.png" alt="Template Danh Sách Tha Thứ">
+            </div>
+            <div class="image-caption">Hình 3: Template Danh Sách Tha Thứ - 4 nhóm người cần tha thứ</div>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Người Yêu Cũ</div>
+                        <div class="flow-step-desc">Viết tên tất cả những người đã làm bạn tổn thương trong tình yêu: phản bội, bỏ rơi, lừa dối, bạo lực tình cảm. Với mỗi người, ghi lại điều họ đã làm và cảm xúc bạn vẫn còn giữ.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Cha Mẹ / Gia Đình</div>
+                        <div class="flow-step-desc">Những tổn thương từ thời thơ ấu thường là sâu nhất. Cha mẹ không hoàn hảo, và có thể họ đã vô tình làm tổn thương bạn. Ghi lại những điều cụ thể mà bạn vẫn còn oán giận.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Bạn Bè / Đồng Nghiệp</div>
+                        <div class="flow-step-desc">Những người đã phản bội tin tưởng, nói xấu sau lưng, lợi dụng bạn. Dù không phải tình yêu lãng mạn, những tổn thương này vẫn ảnh hưởng đến khả năng tin tưởng người khác.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">CHÍNH BẢN THÂN - Quan Trọng Nhất!</div>
+                        <div class="flow-step-desc">Nhiều người quên rằng họ cần tha thứ cho chính mình. Những lỗi lầm, những quyết định sai, những lần bạn làm tổn thương người khác hoặc chính mình. Đây thường là bước khó nhất nhưng quan trọng nhất.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CORD CUTTING -->
+        <section class="section">
+            <h2 class="section-title"><span>✂️</span> Ritual Cắt Dây Nghiệp (Cord Cutting)</h2>
+
+            <p>Khi bạn có mối liên kết cảm xúc sâu sắc với ai đó - đặc biệt là người yêu cũ - một "dây năng lượng" vô hình được tạo ra giữa hai người. Dây này kết nối ở các vùng chakra khác nhau: tim (tình yêu), bụng dưới (tình dục), cổ họng (giao tiếp). Dù đã chia tay, dây này vẫn tồn tại và liên tục tiêu hao năng lượng của bạn, đồng thời ngăn bạn mở lòng với người mới.</p>
+
+            <div class="image-container">
+                <img src="images/m1-cord-cutting.png" alt="Cord Cutting Visualization">
+            </div>
+            <div class="image-caption">Hình 4: Cord Cutting - Cắt dây năng lượng với người cũ để giải phóng và tiến về phía trước</div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🧘</span> Hướng Dẫn Cắt Dây Nghiệp Chi Tiết</div>
+                <p><em>Ngồi thoải mái, nhắm mắt. Hít thở sâu 5-7 lần để vào trạng thái thiền...</em></p>
+                <p><em>Tưởng tượng bạn đang đứng trong một không gian trắng sáng. Gọi [tên người] đến đứng đối diện bạn...</em></p>
+                <p><em>Nhìn thấy những sợi dây năng lượng - có thể màu đen, xám, hoặc đỏ - kết nối giữa hai người ở các vùng: tim, bụng, cổ họng...</em></p>
+                <p><em>Nói với người đó (trong tâm hoặc thành lời): "Tôi tha thứ cho bạn những gì bạn đã làm. Tôi giải phóng bạn. Tôi giải phóng chính mình. Cảm ơn bạn vì những bài học."</em></p>
+                <p><em>Tưởng tượng một lưỡi kiếm ánh sáng vàng (hoặc mời Đại Thiên Thần Michael) cắt đứt tất cả các dây kết nối...</em></p>
+                <p><em>Nhìn những dây bị cắt rơi xuống, tan biến vào ánh sáng. Nhìn [tên người] quay đi, đi vào ánh sáng và biến mất...</em></p>
+                <p><em>Cảm nhận sự nhẹ nhõm, tự do. Đặt tay lên tim và nói: "Tôi tự do. Tôi sẵn sàng cho tình yêu mới."</em></p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📱</span> Tích Hợp App GEM</div>
+                <p>Sau khi thực hành Cord Cutting, hãy vào app GEM → Ritual <strong>"Letter to Universe"</strong> để viết thư tha thứ và "gửi" lá thư này đến vũ trụ. Đây là cách symbolic để đánh dấu sự hoàn tất của quá trình tha thứ và giải phóng.</p>
+            </div>
+        </section>
+
+        <!-- COMMON QUESTIONS -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🤔</span> "Họ đã làm tổn thương tôi quá nặng nề, làm sao tôi có thể tha thứ?"</div>
+                <p>Tha thứ không có nghĩa là những gì họ làm là được chấp nhận. Bạn không tha thứ VÌ họ - bạn tha thứ CHO chính mình. Hãy nhớ: giữ oán giận như uống thuốc độc mong người khác chết. Bạn xứng đáng được tự do, dù họ có xứng đáng được tha thứ hay không.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🤔</span> "Tôi đã cố tha thứ nhiều lần rồi nhưng vẫn còn đau, vậy là thất bại phải không?"</div>
+                <p>Không hề! Tha thứ là một hành trình, không phải một sự kiện xảy ra một lần. Đôi khi bạn cần tha thứ cùng một người nhiều lần cho nhiều khía cạnh khác nhau của vết thương. Mỗi lần bạn thực hành tha thứ, dù chưa hoàn toàn, bạn đều đang bóc đi một lớp đau đớn. Hãy kiên nhẫn với bản thân.</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>⚠️</span> Lưu Ý Quan Trọng</div>
+                <p>Nếu vết thương quá sâu (lạm dụng tình dục, bạo lực nghiêm trọng, trauma lớn), quá trình tha thứ có thể cần sự hỗ trợ của chuyên gia tâm lý. Không có gì sai khi cần sự giúp đỡ - đó là dấu hiệu của sức mạnh, không phải yếu đuối.</p>
+            </div>
+        </section>
+
+        <!-- KEY TAKEAWAYS -->
+        <section class="section">
+            <h2 class="section-title"><span>📝</span> Tổng Kết Bài Học</h2>
+
+            <div class="image-container">
+                <img src="images/m1-freedom-from-past.png" alt="Freedom from Past">
+            </div>
+            <div class="image-caption">Hình 5: Tự do khỏi quá khứ - Món quà của tha thứ</div>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>🎯</span> Những Điểm Chính Cần Nhớ</div>
+                <ul class="summary-list">
+                    <li>Tha thứ là giải phóng BẢN THÂN khỏi gánh nặng oán giận, không phải chấp nhận hành vi sai trái của người khác</li>
+                    <li>Ho'oponopono: 4 câu thần chú mạnh mẽ - "Tôi xin lỗi. Xin tha thứ cho tôi. Cảm ơn bạn. Tôi yêu bạn."</li>
+                    <li>Lập danh sách tha thứ gồm 4 nhóm: Người yêu cũ, Gia đình, Bạn bè, và quan trọng nhất - Chính bản thân</li>
+                    <li>Cord Cutting giúp cắt dây năng lượng với người cũ, giải phóng năng lượng bị kẹt và mở lòng cho người mới</li>
+                    <li>Tha thứ là hành trình liên tục, không phải sự kiện một lần - hãy kiên nhẫn và nhẹ nhàng với bản thân</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- TRANSITION -->
+        <section class="section">
+            <h2 class="section-title"><span>🚀</span> Bước Tiếp Theo</h2>
+
+            <p>Bạn đã học được nghệ thuật tha thứ - công cụ mạnh mẽ nhất để giải phóng quá khứ. Trong bài cuối của Module 1, chúng ta sẽ thực hiện <strong>Ritual Đốt Bỏ Quá Khứ</strong> - một nghi thức symbolic nhưng cực kỳ powerful để đánh dấu sự hoàn tất của giai đoạn chữa lành và chuẩn bị sẵn sàng cho chương mới của tình yêu.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💕</span> Lời Nhắn Từ Jennie</div>
+                <p>Tha thứ có thể là điều khó khăn nhất bạn từng làm, nhưng cũng là điều giải phóng nhất. Mỗi lần bạn chọn tha thứ thay vì giữ oán giận, bạn đang chọn tự do thay vì nhà tù, chọn ánh sáng thay vì bóng tối, chọn tình yêu thay vì sợ hãi. Bạn xứng đáng được tự do. Bạn xứng đáng được yêu thương.</p>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>

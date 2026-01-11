@@ -277,10 +277,12 @@ class TooltipService {
    */
   getTooltipsForScreen(screenName, options = {}) {
     const { tier = 'free', role = 'user', showOnceOnly = false } = options;
+    const normalizedScreenName = screenName?.toLowerCase() || '';
 
     return Object.values(TOOLTIPS).filter((tooltip) => {
-      // Must match screen
-      if (tooltip?.screen !== screenName) return false;
+      // Must match screen (case-insensitive)
+      const tooltipScreen = tooltip?.screen?.toLowerCase() || '';
+      if (tooltipScreen !== normalizedScreenName) return false;
 
       // Check tier requirement
       if (tooltip?.tier) {

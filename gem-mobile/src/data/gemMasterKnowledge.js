@@ -369,7 +369,22 @@ export const SCENARIOS = {
     healing: [
       'Viết danh sách 10 điều tốt đẹp tiền có thể mang lại',
       'Tha thứ cho bản thân vì đã phán xét người giàu',
-      'Khẳng định: "Tiền là công cụ trung lập, tôi dùng nó cho điều tốt đẹp"',
+    ],
+    affirmations: [
+      'Tiền là công cụ trung lập, tôi dùng nó cho điều tốt đẹp',
+      'Tôi xứng đáng có sự thịnh vượng và dồi dào',
+      'Giàu có giúp tôi giúp đỡ nhiều người hơn',
+    ],
+    actionSteps: [
+      'Viết 10 điều tốt đẹp tiền có thể mang lại cho cuộc sống',
+      'Liệt kê 5 người giàu có mà bạn ngưỡng mộ và tìm hiểu câu chuyện của họ',
+      'Donate một khoản nhỏ cho từ thiện để cảm nhận niềm vui khi cho đi',
+      'Viết thư tha thứ cho bản thân về những suy nghĩ tiêu cực về tiền',
+    ],
+    rituals: [
+      'Sáng: Đọc 3 affirmation tiền bạc trước gương 5 phút',
+      'Tối: Viết gratitude journal về 3 điều liên quan đến tiền bạn biết ơn',
+      'Tuần: Tẩy tịnh ví/thẻ ATM bằng nước muối và đặt ý định mới',
     ],
     crystal: 'Thạch Anh Vàng',
     course: 'course_money',
@@ -388,7 +403,22 @@ export const SCENARIOS = {
     healing: [
       'Ghi chép gratitude về những gì bạn ĐANG có',
       'Tập cho đi dù là số nhỏ để phá vỡ tư duy khan hiếm',
-      'Khẳng định: "Vũ trụ luôn cung cấp đủ cho tôi"',
+    ],
+    affirmations: [
+      'Vũ trụ luôn cung cấp đủ cho tôi',
+      'Tôi có đủ và hơn thế nữa',
+      'Sự dồi dào là quyền tự nhiên của tôi',
+    ],
+    actionSteps: [
+      'Viết gratitude journal về 5 điều bạn ĐANG có mỗi tối',
+      'Cho đi 10% thu nhập để phá vỡ tư duy khan hiếm',
+      'Tính toán chi tiết tài chính để thấy thực tế không đáng sợ như tưởng tượng',
+      'Ngừng check tài khoản ngân hàng liên tục - đặt lịch 1 lần/tuần',
+    ],
+    rituals: [
+      'Sáng: Thiền 5 phút hình dung mình đang sống trong dồi dào',
+      'Tối: Viết 3 điều biết ơn về tiền bạc hôm nay',
+      'Tuần: Donate một khoản nhỏ và cảm nhận niềm vui khi cho đi',
     ],
     crystal: 'Thạch Anh Vàng',
     course: 'course_money',
@@ -407,7 +437,22 @@ export const SCENARIOS = {
     healing: [
       'Thực hành cảm giác "đã có" thay vì "muốn có"',
       'Ngừng kiểm tra tài khoản liên tục',
-      'Khẳng định: "Tôi ĐÃ giàu có trong tâm thức"',
+    ],
+    affirmations: [
+      'Tôi ĐÃ giàu có trong tâm thức',
+      'Tiền tự động chảy về phía tôi một cách nhẹ nhàng',
+      'Tôi cảm nhận sự dồi dào ngay bây giờ, không cần chờ đợi',
+    ],
+    actionSteps: [
+      'Viết journal như thể bạn ĐÃ đạt được mục tiêu tài chính',
+      'Chỉ check tài khoản 1 lần/tuần vào ngày cố định',
+      'Thực hành "acting as if" - sống như đã giàu (mindset, không phải chi tiêu)',
+      'Tạo vision board về cuộc sống thịnh vượng ĐÃ có',
+    ],
+    rituals: [
+      'Sáng: Thiền 5 phút với cảm giác "đã có" - feel abundance NOW',
+      'Tối: Cảm ơn cho những gì đã có như thể đó là tất cả bạn cần',
+      'Tuần: Tặng quà/donate để phá vỡ năng lượng "muốn" và "thiếu"',
     ],
     crystal: 'Thạch Anh Vàng',
     course: 'course_money',
@@ -426,7 +471,22 @@ export const SCENARIOS = {
     healing: [
       'Liệt kê 5 người giàu mà bạn ngưỡng mộ',
       'Tha thứ cho người đã làm tổn thương bạn vì tiền',
-      'Khẳng định: "Sự giàu có của người khác không lấy đi của tôi"',
+    ],
+    affirmations: [
+      'Sự giàu có của người khác không lấy đi của tôi',
+      'Có đủ thịnh vượng cho tất cả mọi người',
+      'Tôi chúc phúc cho sự thành công của người khác và thu hút sự thành công cho mình',
+    ],
+    actionSteps: [
+      'Liệt kê 5 người giàu mà bạn ngưỡng mộ - tìm hiểu câu chuyện của họ',
+      'Viết thư tha thứ (không gửi) cho người đã làm tổn thương bạn vì tiền',
+      'Mỗi lần thấy người thành công, nói "Chúc mừng bạn" trong tâm',
+      'Thay thế phán xét bằng tò mò: "Họ làm thế nào để thành công?"',
+    ],
+    rituals: [
+      'Sáng: Blessing meditation - gửi năng lượng tốt đẹp cho 3 người giàu',
+      'Tối: Viết 3 điều bạn học được từ người thành công hôm nay',
+      'Tuần: Đọc sách/podcast về người giàu có tấm lòng thiện',
     ],
     crystal: 'Thạch Anh Vàng',
     course: 'course_money',
@@ -445,7 +505,22 @@ export const SCENARIOS = {
     healing: [
       'Bắt đầu từ bước nhỏ nhất - tiết kiệm 10k/ngày',
       'Tìm 1 tấm gương vượt khó về tài chính',
-      'Khẳng định: "Mỗi ngày tôi đang tiến gần hơn đến tự do tài chính"',
+    ],
+    affirmations: [
+      'Mỗi ngày tôi đang tiến gần hơn đến tự do tài chính',
+      'Tôi có khả năng thay đổi tình hình tài chính của mình',
+      'Mỗi bước nhỏ đều đưa tôi đến thành công lớn',
+    ],
+    actionSteps: [
+      'Tiết kiệm 10,000đ mỗi ngày vào một chỗ riêng',
+      'Tìm và đọc câu chuyện của 3 người đã vượt khó tài chính',
+      'Viết ra 1 mục tiêu tài chính nhỏ và khả thi trong 30 ngày',
+      'Unfollow các trang gây cảm giác tiêu cực về tiền',
+    ],
+    rituals: [
+      'Sáng: Đọc 1 affirmation về tiền bạc 5 lần trước gương',
+      'Tối: Viết 1 điều biết ơn về tiền bạc dù nhỏ nhất',
+      'Tuần: Đánh giá tiến bộ và celebrate 1 thành tựu nhỏ',
     ],
     crystal: 'Cây Tài Lộc',
     course: 'course_money',
@@ -464,7 +539,22 @@ export const SCENARIOS = {
     healing: [
       'Viết thư tha thứ cho bản thân về quyết định tài chính cũ',
       'Nhìn nhận bài học thay vì mất mát',
-      'Khẳng định: "Mỗi mất mát dạy tôi cách giữ gìn tốt hơn"',
+    ],
+    affirmations: [
+      'Mỗi mất mát dạy tôi cách giữ gìn tốt hơn',
+      'Tôi tha thứ cho bản thân và những người liên quan',
+      'Tôi đủ khả năng tạo lại sự thịnh vượng',
+    ],
+    actionSteps: [
+      'Viết thư tha thứ cho bản thân về quyết định cũ (không gửi)',
+      'Liệt kê 5 bài học quý giá từ trải nghiệm mất mát',
+      'Tạo kế hoạch tài chính mới với các bài học đã rút ra',
+      'Tìm 1 mentor hoặc coach về tài chính',
+    ],
+    rituals: [
+      'Sáng: Thiền tha thứ 5 phút - gửi yêu thương cho bản thân',
+      'Tối: Viết 3 điều biết ơn từ những gì bạn VẪN CÒN',
+      'Tuần: Đốt thư tha thứ như nghi thức buông bỏ quá khứ',
     ],
     crystal: 'Thạch Anh Hồng',
     course: 'course_money',
@@ -540,7 +630,22 @@ export const SCENARIOS = {
     healing: [
       'Viết ra TẤT CẢ các khoản nợ - đối mặt thay vì trốn tránh',
       'Tạo kế hoạch trả nợ cụ thể (snowball hoặc avalanche method)',
-      'Khẳng định: "Mỗi ngày tôi đang tiến gần hơn đến tự do tài chính"',
+    ],
+    affirmations: [
+      'Mỗi ngày tôi đang tiến gần hơn đến tự do tài chính',
+      'Tôi đủ sức phá vỡ vòng xoáy nợ nần',
+      'Tôi xứng đáng sống không nợ nần',
+    ],
+    actionSteps: [
+      'Liệt kê TẤT CẢ khoản nợ với số tiền cụ thể',
+      'Chọn snowball (trả nợ nhỏ trước) hoặc avalanche (trả lãi cao trước)',
+      'Cắt thẻ tín dụng hoặc đóng băng chúng trong thời gian trả nợ',
+      'Tìm thêm 1 nguồn thu nhập phụ để tăng tốc trả nợ',
+    ],
+    rituals: [
+      'Sáng: Đọc kế hoạch trả nợ và visualize mình debt-free',
+      'Tối: Đánh dấu số tiền đã trả hôm nay (dù nhỏ)',
+      'Tuần: Celebrate mỗi khi trả xong 1 khoản nợ',
     ],
     crystal: 'Hematite',
     course: 'course_money',
@@ -693,7 +798,22 @@ export const SCENARIOS = {
     healing: [
       'Viết 20 điều bạn yêu về bản thân',
       'Thực hành self-love mỗi ngày',
-      'Khẳng định: "Tôi xứng đáng có tình yêu đích thực"',
+    ],
+    affirmations: [
+      'Tôi xứng đáng có tình yêu đích thực',
+      'Tôi đáng được yêu thương vô điều kiện',
+      'Tôi là món quà quý giá cho người đúng',
+    ],
+    actionSteps: [
+      'Viết 20 điều bạn yêu về bản thân - đọc mỗi sáng',
+      'Mỗi ngày làm 1 việc tử tế cho bản thân',
+      'Viết thư gửi inner child - nói rằng bạn xứng đáng được yêu',
+      'Liệt kê 5 người yêu thương bạn và cách họ thể hiện',
+    ],
+    rituals: [
+      'Sáng: Mirror work - nhìn vào mắt mình và nói "Tôi yêu bạn, bạn xứng đáng"',
+      'Tối: Tự ôm mình và nói lời yêu thương với bản thân',
+      'Tuần: Tắm thảo mộc hoặc spa tại nhà để nuôi dưỡng bản thân',
     ],
     crystal: 'Thạch Anh Hồng',
     course: 'course_love',
@@ -712,7 +832,22 @@ export const SCENARIOS = {
     healing: [
       'Chữa lành inner child bị bỏ rơi',
       'Xây dựng sự an toàn từ bên trong',
-      'Khẳng định: "Tôi an toàn trong tình yêu"',
+    ],
+    affirmations: [
+      'Tôi an toàn trong tình yêu',
+      'Người đúng sẽ ở lại với tôi',
+      'Tôi là đủ, dù có hay không có ai bên cạnh',
+    ],
+    actionSteps: [
+      'Viết thư gửi inner child về trải nghiệm bị bỏ rơi',
+      'Xây dựng hệ thống support ngoài mối quan hệ',
+      'Luyện tập "Tôi ổn khi ở một mình" - time alone có chủ đích',
+      'Nói với đối tác về nỗi sợ của bạn một cách chân thành',
+    ],
+    rituals: [
+      'Sáng: Self-soothing meditation - ôm gối và tự trấn an',
+      'Tối: Journaling về "Điều tốt đẹp nào đã xảy ra hôm nay?"',
+      'Tuần: Hẹn hò với bản thân - đi xem phim/cafe một mình',
     ],
     crystal: 'Thạch Anh Hồng',
     course: 'course_love',

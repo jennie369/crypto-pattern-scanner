@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 3.4: Visualization - Thấy Trước Để Sống Trước | GEM Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==================== VARIABLES ==================== */
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        /* ==================== BACKGROUND ==================== */
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: 20%; }
+
+        /* ==================== CONTAINER ==================== */
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container {
+                padding: 0;
+            }
+        }
+
+        /* ==================== HEADER ==================== */
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--navy-dark);
+            margin-bottom: var(--space-md);
+        }
+        .lesson-chapter {
+            font-size: 0.9rem;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .lesson-title {
+            font-size: clamp(1.5rem, 5vw, 2.25rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-lg);
+            flex-wrap: wrap;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        /* ==================== SECTION ==================== */
+        .section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section {
+                padding: 0;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .section-title {
+                padding: var(--space-lg) 16px var(--space-md) 16px;
+                margin-bottom: 0;
+            }
+        }
+
+        .section > p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .section > p {
+                padding: 0 16px;
+            }
+        }
+
+        /* ==================== HIGHLIGHT BOXES ==================== */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box-title {
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .definition-box-title {
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .definition-box p { color: var(--text-secondary); margin: 0; }
+
+        /* ==================== IMAGE CONTAINER ==================== */
+        .image-container {
+            margin: var(--space-xl) 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-container {
+                margin: var(--space-md) 0;
+                border-radius: 0;
+                border: none;
+            }
+        }
+        .image-caption {
+            padding: var(--space-sm);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .image-caption {
+                padding: var(--space-sm) 16px;
+            }
+        }
+
+        /* ==================== FLOW STEPS ==================== */
+        .flow-steps {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .flow-steps {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .flow-step {
+            display: flex;
+            gap: var(--space-md);
+            align-items: flex-start;
+            padding: var(--space-md);
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .flow-step {
+                padding: var(--space-md) 16px;
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+            }
+        }
+        @media (min-width: 601px) {
+            .flow-step:hover {
+                border-color: var(--gold);
+                transform: translateX(8px);
+            }
+        }
+        .flow-step-number {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--navy-dark);
+        }
+        .flow-step-content { flex: 1; }
+        .flow-step-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+        }
+        .flow-step-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* ==================== MEDITATION SCRIPT ==================== */
+        .meditation-box {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05));
+            border: 1px solid rgba(106, 91, 255, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .meditation-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .meditation-box-title {
+            font-weight: 700;
+            color: var(--purple);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .meditation-script {
+            color: var(--text-secondary);
+            font-style: italic;
+            line-height: 1.8;
+        }
+        .meditation-script p {
+            margin-bottom: var(--space-md);
+        }
+        .pause-indicator {
+            color: var(--purple);
+            font-weight: 600;
+            font-style: normal;
+        }
+
+        /* ==================== APP BOX ==================== */
+        .app-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .app-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .app-box-title {
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .app-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .app-box p:last-child { margin-bottom: 0; }
+
+        /* ==================== SUMMARY BOX ==================== */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02));
+            border: 2px solid var(--gold);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .summary-list { list-style: none; }
+        .summary-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-list li::before {
+            content: "✓";
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        /* ==================== CRYSTAL GRID ==================== */
+        .crystal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .crystal-grid {
+                grid-template-columns: 1fr;
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .crystal-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .crystal-card {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                text-align: left;
+                padding: var(--space-md) 16px;
+            }
+        }
+        .crystal-emoji {
+            font-size: 2.5rem;
+            margin-bottom: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .crystal-emoji {
+                font-size: 1.5rem;
+                display: inline;
+                margin-right: var(--space-sm);
+            }
+        }
+        .crystal-name {
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-xs);
+        }
+        @media (max-width: 600px) {
+            .crystal-name {
+                display: inline;
+            }
+        }
+        .crystal-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        @media (max-width: 600px) {
+            .crystal-desc {
+                display: block;
+                margin-top: var(--space-xs);
+            }
+        }
+
+        /* ==================== QUIZ SECTION ==================== */
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-section {
+                border: none;
+                border-radius: 0;
+                padding: 0;
+                margin-top: 0;
+                border-top: 8px solid var(--bg-primary);
+            }
+        }
+        .quiz-header {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-header {
+                padding: var(--space-lg) 16px var(--space-md);
+                margin-bottom: 0;
+            }
+        }
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+        }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-question {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin-bottom: 0;
+                border-bottom: 1px solid var(--glass-border);
+            }
+        }
+        .question-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50%;
+            font-weight: 700;
+            color: var(--navy-dark);
+            margin-bottom: var(--space-md);
+        }
+        .question-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+            line-height: 1.6;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .quiz-options {
+                gap: 1px;
+                background: var(--glass-border);
+                margin-left: calc(-16px - 4px);
+                margin-right: -16px;
+            }
+        }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .quiz-option {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid transparent;
+                padding: var(--space-md) 16px;
+            }
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+        @media (max-width: 600px) {
+            .quiz-option:hover:not(.disabled) {
+                border-left-color: var(--gold);
+            }
+        }
+        .quiz-option.selected {
+            border-color: var(--gold);
+            background: rgba(255, 189, 89, 0.1);
+        }
+        @media (max-width: 600px) {
+            .quiz-option.selected {
+                border-left-color: var(--gold);
+            }
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+        }
+        @media (max-width: 600px) {
+            .quiz-option.correct {
+                border-left-color: var(--success) !important;
+            }
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+        }
+        @media (max-width: 600px) {
+            .quiz-option.incorrect {
+                border-left-color: var(--error) !important;
+            }
+        }
+        .quiz-option.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .option-marker {
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .quiz-option.selected .option-marker {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: var(--navy-dark);
+        }
+        .quiz-option.correct .option-marker {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+        .quiz-option.incorrect .option-marker {
+            background: var(--error);
+            border-color: var(--error);
+            color: white;
+        }
+        .option-text { flex: 1; color: var(--text-secondary); }
+
+        .question-feedback {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--space-sm);
+            display: none;
+        }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+        }
+        .question-feedback.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+        }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .quiz-result {
+            text-align: center;
+            padding: var(--space-xl);
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .result-score {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--gold), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--space-md);
+        }
+        .result-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
+        }
+        .result-message { color: var(--text-muted); }
+
+        .quiz-buttons {
+            display: flex;
+            justify-content: center;
+            padding: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-buttons { padding: var(--space-lg) 16px; }
+        }
+        .quiz-btn {
+            padding: var(--space-md) var(--space-xl);
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            border: 2px solid var(--glass-border);
+        }
+        .quiz-btn:hover { border-color: var(--gold); }
+
+        /* ==================== FOOTER ==================== */
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .lesson-footer a {
+            color: var(--gold);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>✨</span>
+                <span>Module 3</span>
+            </div>
+            <div class="lesson-chapter">Module 3 - Cài Đặt Tần Số Thịnh Vượng</div>
+            <h1 class="lesson-title">Visualization - Thấy Trước Để Sống Trước</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 3.4</span></div>
+                <div class="meta-item"><span>⏱️</span><span>25 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Vận Động Viên Olympic Biết Điều Gì Mà Bạn Chưa Biết?</h2>
+            <p>Năm 2014, một nghiên cứu được công bố về các vận động viên Olympic đã tiết lộ một bí mật đáng kinh ngạc: 90% những người giành huy chương đều sử dụng VISUALIZATION như một phần bắt buộc trong quá trình luyện tập.</p>
+            <p>Michael Phelps - vận động viên giành nhiều huy chương vàng Olympic nhất lịch sử - đã chia sẻ rằng mỗi tối trước khi ngủ, anh đều "bơi" trong tâm trí mình. Anh thấy từng cú đập tay, từng nhịp thở, từng mili-giây trên đồng hồ. Và khi bước xuống hồ bơi thật, não anh đã "biết" chính xác phải làm gì vì nó đã "trải nghiệm" thành công hàng nghìn lần.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Điều Thú Vị Nhất</div>
+                <p>Kỹ thuật Visualization không chỉ dành cho thể thao. Nó hoạt động TƯƠNG TỰ với tiền bạc và thịnh vượng tài chính. Khi bạn "thấy trước" mình đang sống cuộc sống sung túc, não bộ bắt đầu tìm cách biến điều đó thành hiện thực.</p>
+                <p style="margin-top: var(--space-sm);">Đây là bài học cuối cùng và QUAN TRỌNG NHẤT của Module 3. Nếu bạn chỉ có thể chọn MỘT công cụ để thực hành, hãy chọn Visualization.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 1: KHOA HỌC VỀ VISUALIZATION -->
+        <section class="section">
+            <h2 class="section-title"><span>🧠</span> Khoa Học Về Visualization</h2>
+            <p>Visualization không phải mơ mộng viển vông. Đây là kỹ thuật được khoa học thần kinh chứng minh có tác dụng THẬT SỰ lên não bộ và khả năng hiện thực hóa mục tiêu.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📖</span> Visualization Là Gì?</div>
+                <p><strong>Visualization</strong> (Hình dung sáng tạo) là kỹ thuật sử dụng trí tưởng tượng để tạo ra hình ảnh tinh thần chi tiết về kết quả bạn muốn đạt được. Não bộ không phân biệt được giữa trải nghiệm thật và trải nghiệm được hình dung sống động - nên nó tạo ra những thay đổi thần kinh tương đương.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M3_B4_01%0ABrain+Visualization+Science" alt="Khoa học về Visualization">
+                <div class="image-caption">Khi bạn hình dung, não bộ kích hoạt cùng vùng như khi thực sự trải nghiệm</div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🔬</span> Nghiên Cứu Khoa Học</div>
+                <p><strong>Nghiên cứu tại Đại học Cleveland (2004):</strong> Những người CHỈ tưởng tượng tập gym (không tập thật) đã tăng 13.5% sức mạnh cơ bắp, trong khi nhóm tập thật tăng 30%. Điều này chứng minh não bộ tạo ra thay đổi vật lý THẬT từ hình ảnh tinh thần.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Theo 7 Tầng Tâm Thức:</strong> Visualization là công cụ của Tầng 4 - Tầng Sáng Tạo (500-700 Hz). Tại đây, bạn đang "sống trước" trong thực tại bạn muốn tạo ra.</p>
+            </div>
+
+            <p>Khi kết hợp với <strong>cảm xúc mãnh liệt</strong>, visualization trở thành công cụ mạnh nhất để "lập trình" tiềm thức và tạo sự đồng điệu tần số với những gì bạn muốn thu hút.</p>
+        </section>
+
+        <!-- SECTION 2: 6 BƯỚC QUANTUM CREATING -->
+        <section class="section">
+            <h2 class="section-title"><span>⚛️</span> 6 Bước Quantum Creating</h2>
+            <p>Đây là quy trình Visualization nâng cao, kết hợp khoa học lượng tử với luật hấp dẫn. Mỗi bước được thiết kế để đưa bạn sâu hơn vào trạng thái kiến tạo.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x600/0a1628/FFBD59?text=HINH+17%0AQuantum+Creating+6+Steps" alt="Hình 17: 6 Bước Quantum Creating">
+                <div class="image-caption">Hình 17: Quy trình Quantum Creating - Thấy Trước Để Sống Trước</div>
+            </div>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">RELAX - Thư Giãn Sâu</div>
+                        <div class="flow-step-desc">Thả lỏng cơ thể, hít thở sâu, đưa sóng não từ Beta (thức) xuống Alpha/Theta (thư giãn sâu). Đây là "cửa sổ" vào tiềm thức. Thực hiện 3-5 phút.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">INTEND - Đặt Ý Định Rõ Ràng</div>
+                        <div class="flow-step-desc">Tuyên bố rõ ràng điều bạn muốn tạo ra. Ví dụ: "Tôi đặt ý định trải nghiệm sự thịnh vượng tài chính - thu nhập $10,000/tháng từ công việc tôi yêu thích."</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">VISUALIZE - Hình Dung Chi Tiết</div>
+                        <div class="flow-step-desc">Nhắm mắt và "thấy" bản thân đã đạt được mục tiêu. Xem chi tiết: Bạn đang ở đâu? Mặc gì? Xung quanh có gì? Sử dụng TẤT CẢ 5 giác quan.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">FEEL - Cảm Nhận Cảm Xúc</div>
+                        <div class="flow-step-desc">Đây là bước QUAN TRỌNG NHẤT! Cảm nhận cảm xúc như đã đạt được: vui sướng, biết ơn, tự do, hạnh phúc. Cảm xúc là "nhiên liệu" cho manifestation.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">RELEASE - Buông Bỏ</div>
+                        <div class="flow-step-desc">Thả cảnh tượng vào Vũ Trụ. Không bám víu, không lo lắng "khi nào" hoặc "như thế nào". Tin tưởng rằng nó đang trên đường đến.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">6</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">ACT - Hành Động Thuận Dòng</div>
+                        <div class="flow-step-desc">Trở về thực tại và thực hiện "inspired actions" - những hành động đến từ trực giác. Vũ Trụ sẽ gửi cơ hội, nhiệm vụ của bạn là nhận ra và hành động.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>⚡</span> Quy Tắc 17 Giây</div>
+                <p>Abraham-Hicks dạy rằng: Giữ một suy nghĩ thuần khiết trong <strong>17 giây</strong> sẽ kích hoạt rung động. Giữ trong <strong>68 giây</strong> (17 x 4) sẽ bắt đầu manifestation. Đó là lý do Quantum Creating cần được thực hành tối thiểu 5-10 phút mỗi ngày.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: SCRIPT MEDITATION -->
+        <section class="section">
+            <h2 class="section-title"><span>🧘</span> Script Visualization 20 Phút</h2>
+            <p>Sử dụng script này mỗi sáng sau khi thức dậy hoặc trước khi ngủ. Đọc chậm rãi hoặc ghi âm lại để nghe.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/6A5BFF?text=M3_B4_02%0AMeditation+Scene" alt="Không gian Thiền định">
+                <div class="image-caption">Tìm một không gian yên tĩnh để thực hành visualization</div>
+            </div>
+
+            <div class="meditation-box">
+                <div class="meditation-box-title"><span>🔮</span> Script: Thịnh Vượng Tài Chính (20 phút)</div>
+                <div class="meditation-script">
+                    <p><strong>PHẦN 1: THƯ GIÃN (5 phút)</strong></p>
+                    <p>Ngồi hoặc nằm thoải mái. Nhắm mắt lại. Hít vào sâu qua mũi... 2... 3... 4... Giữ... 2... 3... 4... Thở ra từ từ qua miệng... 2... 3... 4... 5... 6...</p>
+                    <p><span class="pause-indicator">[Lặp lại 5 lần]</span></p>
+                    <p>Cảm nhận cơ thể bạn đang thả lỏng từng phần. Bắt đầu từ đỉnh đầu... trán... mắt... hàm... vai... cánh tay... bàn tay... ngực... bụng... hông... đùi... bắp chân... bàn chân...</p>
+                    <p>Bạn đang chìm sâu vào trạng thái thư giãn hoàn toàn. Mọi lo lắng tan biến. Mọi căng thẳng rời đi...</p>
+                    <p><span class="pause-indicator">[Tạm dừng 30 giây]</span></p>
+
+                    <p><strong>PHẦN 2: ĐẶT Ý ĐỊNH (2 phút)</strong></p>
+                    <p>Bây giờ, hãy đặt ý định trong tâm: "Tôi đặt ý định trải nghiệm sự thịnh vượng tài chính hoàn toàn. Tiền chảy đến tôi dễ dàng và dồi dào từ nhiều nguồn. Tôi xứng đáng với cuộc sống sung túc."</p>
+                    <p>Lặp lại trong tâm: "Tôi là nam châm thu hút thịnh vượng..."</p>
+                    <p><span class="pause-indicator">[Tạm dừng 30 giây]</span></p>
+
+                    <p><strong>PHẦN 3: HÌNH DUNG (8 phút)</strong></p>
+                    <p>Bây giờ, hãy tưởng tượng bạn đang thức dậy vào một buổi sáng tuyệt đẹp trong tương lai - một tương lai mà bạn đã đạt được thịnh vượng tài chính hoàn toàn...</p>
+                    <p>Nhìn xung quanh phòng ngủ của bạn. Nó trông như thế nào? Có thể bạn đang ở trong ngôi nhà mơ ước... giường rộng rãi thoải mái... ánh nắng rọi qua cửa sổ lớn...</p>
+                    <p><span class="pause-indicator">[Tạm dừng 1 phút để hình dung chi tiết]</span></p>
+                    <p>Bạn đứng dậy, bước đến cửa sổ. Nhìn ra ngoài - cảnh đẹp tuyệt vời. Có thể là vườn xanh mát... hoặc view thành phố lung linh... hoặc biển xanh bao la...</p>
+                    <p>Bạn mỉm cười. Cảm nhận sự biết ơn dâng trào. Mọi hóa đơn đã được thanh toán. Tài khoản ngân hàng dư dả. Bạn tự do - tự do tài chính hoàn toàn.</p>
+                    <p><span class="pause-indicator">[Tạm dừng 1 phút]</span></p>
+                    <p>Bạn mở điện thoại, kiểm tra tài khoản. Nhìn thấy những con số tuyệt vời. Tiền vào đều đặn từ nhiều nguồn. Bạn không còn lo lắng về tiền nữa. Bạn CHỦ ĐỘNG với tiền.</p>
+                    <p>Bạn nghĩ về những gì bạn có thể làm hôm nay. Không phải vì phải làm, mà vì MUỐN làm. Công việc của bạn mang lại giá trị cho người khác và tiền chảy về như phần thưởng xứng đáng.</p>
+                    <p><span class="pause-indicator">[Tạm dừng 2 phút để sống trong cảnh này]</span></p>
+
+                    <p><strong>PHẦN 4: CẢM XÚC (3 phút)</strong></p>
+                    <p>Bây giờ, hãy CẢM NHẬN thật sâu... Cảm xúc của sự TỰ DO... Không còn nợ nần, không còn áp lực tiền bạc...</p>
+                    <p>Cảm nhận sự BIẾT ƠN... Biết ơn vũ trụ đã ban cho bạn sự thịnh vượng này...</p>
+                    <p>Cảm nhận sự VUI SƯỚNG... Vui sướng vì bạn có thể cho đi, chia sẻ, giúp đỡ người khác...</p>
+                    <p>Cảm nhận sự TỰ HÀO... Tự hào vì bạn đã làm được điều này...</p>
+                    <p>Để những cảm xúc này tràn ngập toàn bộ cơ thể bạn... từ trái tim lan ra khắp mọi tế bào...</p>
+                    <p><span class="pause-indicator">[Tạm dừng 1 phút trong cảm xúc]</span></p>
+
+                    <p><strong>PHẦN 5: BUÔNG BỎ & TRỞ VỀ (2 phút)</strong></p>
+                    <p>Bây giờ, hãy thả cảnh tượng này vào Vũ Trụ... Như thả một quả bóng bay... Bạn biết rằng nó đang trên đường đến với bạn... Bạn tin tưởng hoàn toàn...</p>
+                    <p>Nói trong tâm: "Xin được, hoặc điều gì tốt đẹp hơn. Tôi tin tưởng vào sự dẫn dắt của Vũ Trụ."</p>
+                    <p>Từ từ ý thức về cơ thể vật lý... ngón tay... ngón chân... Hít thở sâu... Khi sẵn sàng, mở mắt ra...</p>
+                    <p>Chào ngày mới với tâm thế của một người đã thịnh vượng.</p>
+                </div>
+            </div>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>📱</span> Tích Hợp GEM App</div>
+                <p>Mở <strong>GEM App → Rituals → Star Wish</strong> sau khi hoàn thành meditation để "gửi" nguyện ước thịnh vượng của bạn lên vũ trụ.</p>
+                <p>Hoặc sử dụng <strong>GEM Master → Affirmations</strong> để nhận affirmations thịnh vượng hàng ngày phù hợp với năng lượng hiện tại của bạn.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 4: CRYSTALS FOR PROSPERITY -->
+        <section class="section">
+            <h2 class="section-title"><span>💎</span> Công Cụ Hỗ Trợ: Crystals</h2>
+            <p>Tinh thể là "bộ khuếch đại tần số" tự nhiên. Khi sử dụng trong visualization, chúng giúp tăng cường năng lượng ý định của bạn.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x600/0a1628/FFBD59?text=HINH+18%0ACrystals+for+Prosperity" alt="Hình 18: Crystals cho Thịnh Vượng">
+                <div class="image-caption">Hình 18: 6 Tinh Thể Hỗ Trợ Thịnh Vượng Tài Chính</div>
+            </div>
+
+            <div class="crystal-grid">
+                <div class="crystal-card">
+                    <div class="crystal-emoji">🟢</div>
+                    <div class="crystal-name">Green Aventurine</div>
+                    <div class="crystal-desc">"Đá của Cơ Hội" - Thu hút may mắn, cơ hội kinh doanh</div>
+                </div>
+                <div class="crystal-card">
+                    <div class="crystal-emoji">🟡</div>
+                    <div class="crystal-name">Citrine</div>
+                    <div class="crystal-desc">"Đá Thương Gia" - Kích hoạt ý chí, tự tin với tiền bạc</div>
+                </div>
+                <div class="crystal-card">
+                    <div class="crystal-emoji">🟤</div>
+                    <div class="crystal-name">Tiger Eye</div>
+                    <div class="crystal-desc">"Đá Quyết Đoán" - Tầm nhìn xa, quyết định tài chính sáng suốt</div>
+                </div>
+                <div class="crystal-card">
+                    <div class="crystal-emoji">⚫</div>
+                    <div class="crystal-name">Pyrite</div>
+                    <div class="crystal-desc">"Vàng của Kẻ Ngốc" - Biểu tượng thịnh vượng, bảo vệ tài sản</div>
+                </div>
+                <div class="crystal-card">
+                    <div class="crystal-emoji">🟣</div>
+                    <div class="crystal-name">Amethyst</div>
+                    <div class="crystal-desc">"Đá Thanh Tịnh" - Giảm chi tiêu bốc đồng, quyết định sáng suốt</div>
+                </div>
+                <div class="crystal-card">
+                    <div class="crystal-emoji">🔵</div>
+                    <div class="crystal-name">Lapis Lazuli</div>
+                    <div class="crystal-desc">"Đá của Vua" - Tự tin, uy quyền, thu hút thành công</div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>✨</span> Cách Sử Dụng Crystal Trong Visualization</div>
+                <p><strong>1.</strong> Cầm crystal trong tay khi thực hành meditation</p>
+                <p style="margin-top: var(--space-xs);"><strong>2.</strong> Đặt trên Solar Plexus (vùng dạ dày) - chakra của ý chí và sức mạnh cá nhân</p>
+                <p style="margin-top: var(--space-xs);"><strong>3.</strong> Đặt trên bàn làm việc hoặc góc tài chính trong nhà</p>
+                <p style="margin-top: var(--space-xs);"><strong>4.</strong> "Lập trình" crystal bằng cách nói ý định thịnh vượng vào nó</p>
+            </div>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>📱</span> GEM Master Crystal</div>
+                <p>Mở <strong>GEM Master → Crystal</strong> để nhận đề xuất tinh thể phù hợp với năng lượng và mục tiêu tài chính hiện tại của bạn. AI sẽ phân tích và đề xuất crystal tối ưu nhất.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 5: TỔNG KẾT MODULE 3 -->
+        <section class="section">
+            <h2 class="section-title"><span>🎓</span> Tổng Kết Module 3</h2>
+            <p>Chúc mừng! Bạn đã hoàn thành Module 3 - "Cài Đặt Tần Số Thịnh Vượng". Đây là module quan trọng nhất trong hành trình chuyển hóa tư duy triệu phú.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M3_B4_03%0AModule+3+Complete" alt="Hoàn thành Module 3">
+                <div class="image-caption">Bạn đã nâng cấp "phần mềm" tâm thức - sẵn sàng cho tần số thịnh vượng!</div>
+            </div>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>📋</span> Những Gì Bạn Đã Học</div>
+                <ul class="summary-list">
+                    <li><strong>Bài 3.1:</strong> Thang Cảm Xúc 22 bậc và mapping với 7 Tầng Tâm Thức - hiểu cách "đọc" tần số hiện tại</li>
+                    <li><strong>Bài 3.2:</strong> Viết lại Money Story - từ câu chuyện cũ giới hạn sang câu chuyện mới thịnh vượng</li>
+                    <li><strong>Bài 3.3:</strong> 50 Affirmations Thịnh Vượng theo 3 cấp độ và lịch thực hành 21 ngày</li>
+                    <li><strong>Bài 3.4:</strong> Visualization với 6 bước Quantum Creating và meditation 20 phút</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🚀</span> Tiếp Theo: Module 4 - Nghi Thức Triệu Phú</div>
+                <p>Trong Module 4, bạn sẽ học cách biến những công cụ này thành <strong>NGHI THỨC HÀNG NGÀY</strong> - tự động hóa tư duy thịnh vượng để nó trở thành "bản năng thứ hai" của bạn.</p>
+                <p style="margin-top: var(--space-sm);">Các bài học bao gồm: Sức mạnh nghi thức buổi sáng, Biết ơn tài chính, Quy tắc PAUSE trước khi chi tiêu, và Nghi thức cuối ngày.</p>
+            </div>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>📱</span> Bài Tập Trước Khi Sang Module 4</div>
+                <p><strong>1.</strong> Thực hành Visualization meditation (script 20 phút) ít nhất 3 lần trong tuần này</p>
+                <p><strong>2.</strong> Sử dụng <strong>GEM Master → Crystal</strong> để chọn 1 tinh thể hỗ trợ cho giai đoạn tiếp theo</p>
+                <p><strong>3.</strong> Viết lại Money Story mới trong <strong>Vision Board → Goals</strong></p>
+                <p><strong>4.</strong> Tiếp tục thực hành Affirmations hàng ngày (Bài 3.3)</p>
+            </div>
+        </section>
+
+        <!-- REAL STORIES -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Những Người Đã Biến Visualization Thành Hiện Thực</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>👤</span> Câu Chuyện Của Hà (34 tuổi, Nhân viên hành chính)</div>
+                <p><strong>Điểm khởi đầu:</strong> Hà có lương 12 triệu/tháng, sống vừa đủ qua ngày. Cô mơ ước có một căn hộ riêng nhưng nghĩ rằng "với lương này thì bao giờ mới mua nổi". Cô bắt đầu thực hành Visualization sau khi học khóa này.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Cách thực hành:</strong> Mỗi sáng trước khi thức dậy (khi não còn ở trạng thái theta), Hà dành 10 phút hình dung mình đang mở cửa căn hộ mơ ước. Cô "thấy" tường trắng, ban công nhỏ với cây xanh, ánh nắng rọi vào phòng khách. Cô CẢM NHẬN sự tự hào khi nói với bạn bè "Tới nhà mình chơi nhé!"</p>
+                <p style="margin-top: var(--space-sm);"><strong>Kết quả sau 8 tháng:</strong> Một loạt sự kiện "ngẫu nhiên" xảy ra: công ty tái cơ cấu, Hà được thăng chức với lương 20 triệu. Một người bạn giới thiệu dự án căn hộ đang khuyến mãi lớn. Ngân hàng vừa ra gói vay ưu đãi cho nhân viên văn phòng. Tất cả "xếp hàng" hoàn hảo. Hà đã dọn vào căn hộ mới 3 tháng trước - đúng như những gì cô đã hình dung.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>👤</span> Câu Chuyện Của Anh Minh (41 tuổi, Chủ tiệm sửa xe)</div>
+                <p><strong>Điểm khởi đầu:</strong> Anh Minh có tiệm sửa xe nhỏ, doanh thu khoảng 30-40 triệu/tháng, lợi nhuận chỉ 10-15 triệu. Anh muốn mở rộng nhưng không đủ vốn và luôn cảm thấy "bí bách" trong kinh doanh.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Cách thực hành:</strong> Anh dùng script Visualization 20 phút mỗi tối. Trong đó, anh hình dung mình đứng trong một garage lớn hơn gấp 3 lần hiện tại, với 5 nhân viên đang làm việc, khách hàng xếp hàng chờ. Anh "thấy" bảng doanh thu tháng hiển thị 150 triệu. Anh CẢM NHẬN sự tự hào khi biết mình đã xây dựng được đội ngũ.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Kết quả sau 14 tháng:</strong> Anh Minh bây giờ có 2 tiệm sửa xe. Tiệm thứ hai mở được nhờ một nhà đầu tư (là khách hàng cũ) đề nghị hợp tác. Tổng doanh thu 2 tiệm: 180 triệu/tháng - vượt cả mục tiêu anh đã hình dung. Anh nói: "Kỳ lạ nhất là những cơ hội cứ tự đến, như thể ai đó đã sắp xếp sẵn."</p>
+            </div>
+
+            <p>Cả hai câu chuyện đều có điểm chung: Họ thực hành KIÊN TRÌ và ĐÚNG CÁCH - đặc biệt là phần CẢM XÚC. Không phải chỉ "nhìn" hình ảnh, mà phải SỐNG trong hình ảnh đó với cảm xúc mãnh liệt.</p>
+        </section>
+
+        <!-- KEY TAKEAWAYS -->
+        <section class="section">
+            <h2 class="section-title"><span>🔑</span> 3 Điều Quan Trọng Nhất Về Visualization</h2>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Não Không Phân Biệt Thật - Giả Khi Có Cảm Xúc Mãnh Liệt</div>
+                        <div class="flow-step-desc">Đây là nguyên lý khoa học thần kinh đã được chứng minh. Khi bạn hình dung với cảm xúc đủ mạnh, não kích hoạt CÙNG vùng như khi bạn thực sự trải nghiệm điều đó. Điều này giải thích tại sao vận động viên Olympic "tập" trong tâm trí - và nó hoạt động tương tự với thịnh vượng tài chính.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Thời Điểm Tốt Nhất: Sáng Sớm Và Tối Trước Ngủ</div>
+                        <div class="flow-step-desc">Khi bạn vừa thức dậy hoặc sắp ngủ, sóng não ở trạng thái Alpha/Theta - đây là "cửa sổ" vào tiềm thức. Những gì bạn hình dung lúc này được "ghi" trực tiếp vào tiềm thức mà không bị ý thức kiểm duyệt hay nghi ngờ. Đây là lý do script 20 phút được thiết kế để dùng vào những thời điểm này.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">BUÔNG BỎ Sau Khi Hình Dung - Đừng Bám Víu</div>
+                        <div class="flow-step-desc">Đây là bước mà nhiều người bỏ qua và làm giảm hiệu quả của Visualization. Sau khi hình dung xong, bạn phải BUÔNG ra - không lo lắng "khi nào" hoặc "như thế nào". Hãy tin tưởng rằng vũ trụ đang làm việc. Nếu bạn cứ đào bới hạt giống lên để xem nó mọc chưa, nó sẽ không bao giờ mọc được.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- QUIZ SECTION -->
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">📝 Quiz Module 3</h2>
+                <p class="quiz-subtitle">Kiểm tra kiến thức - Click để chọn đáp án</p>
+            </div>
+
+            <!-- Question 1 -->
+            <div class="quiz-question" data-correct="2">
+                <div class="question-number">1</div>
+                <div class="question-text">Trong 6 bước Quantum Creating, bước nào được coi là QUAN TRỌNG NHẤT vì nó là "nhiên liệu" cho manifestation?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="0">
+                        <div class="option-marker">A</div>
+                        <div class="option-text">RELAX - Thư giãn sâu</div>
+                    </div>
+                    <div class="quiz-option" data-option="1">
+                        <div class="option-marker">B</div>
+                        <div class="option-text">VISUALIZE - Hình dung chi tiết</div>
+                    </div>
+                    <div class="quiz-option" data-option="2">
+                        <div class="option-marker">C</div>
+                        <div class="option-text">FEEL - Cảm nhận cảm xúc</div>
+                    </div>
+                    <div class="quiz-option" data-option="3">
+                        <div class="option-marker">D</div>
+                        <div class="option-text">ACT - Hành động thuận dòng</div>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text">CẢM XÚC là bước quan trọng nhất! Abraham-Hicks và các nhà nghiên cứu luật hấp dẫn đều đồng ý: Cảm xúc là "nhiên liệu" cho manifestation. Hình ảnh + Cảm xúc mãnh liệt = Tín hiệu mạnh gửi đến Vũ Trụ.</div>
+                </div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="quiz-question" data-correct="1">
+                <div class="question-number">2</div>
+                <div class="question-text">Theo "Quy Tắc 17 Giây" của Abraham-Hicks, điều gì xảy ra khi bạn giữ một suy nghĩ thuần khiết trong 68 giây?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="0">
+                        <div class="option-marker">A</div>
+                        <div class="option-text">Kích hoạt rung động ban đầu</div>
+                    </div>
+                    <div class="quiz-option" data-option="1">
+                        <div class="option-marker">B</div>
+                        <div class="option-text">Bắt đầu quá trình manifestation</div>
+                    </div>
+                    <div class="quiz-option" data-option="2">
+                        <div class="option-marker">C</div>
+                        <div class="option-text">Đạt đến trạng thái thiền sâu</div>
+                    </div>
+                    <div class="quiz-option" data-option="3">
+                        <div class="option-marker">D</div>
+                        <div class="option-text">Hoàn thành toàn bộ visualization</div>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text">17 giây kích hoạt rung động. 68 giây (17 x 4) BẮT ĐẦU quá trình manifestation. Đó là lý do Quantum Creating cần thực hành tối thiểu 5-10 phút mỗi ngày để đảm bảo hiệu quả.</div>
+                </div>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="quiz-question" data-correct="0">
+                <div class="question-number">3</div>
+                <div class="question-text">Tại sao Visualization được coi là công cụ của Tầng 4 - Tầng Sáng Tạo trong 7 Tầng Tâm Thức?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="0">
+                        <div class="option-marker">A</div>
+                        <div class="option-text">Vì ở đây bạn đang "sống trước" trong thực tại bạn muốn tạo ra</div>
+                    </div>
+                    <div class="quiz-option" data-option="1">
+                        <div class="option-marker">B</div>
+                        <div class="option-text">Vì Tầng 4 là tầng cao nhất có thể đạt được</div>
+                    </div>
+                    <div class="quiz-option" data-option="2">
+                        <div class="option-marker">C</div>
+                        <div class="option-text">Vì chỉ ở Tầng 4 mới có thể thực hành meditation</div>
+                    </div>
+                    <div class="quiz-option" data-option="3">
+                        <div class="option-marker">D</div>
+                        <div class="option-text">Vì Visualization chỉ hoạt động ở tần số 500-700 Hz</div>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text">Tầng 4 - Tầng Sáng Tạo (500-700 Hz) là nơi bạn "SỐNG TRƯỚC" trong thực tại bạn muốn kiến tạo. Đây là nguyên lý cốt lõi: Khi bạn đã "là" người thịnh vượng trong tâm thức, thực tại bên ngoài sẽ đồng điệu theo.</div>
+                </div>
+            </div>
+
+            <div class="quiz-result">
+                <div class="result-score"></div>
+                <div class="result-text"></div>
+                <div class="result-message"></div>
+            </div>
+
+            <div class="quiz-buttons">
+                <button class="quiz-btn" onclick="resetQuiz()">🔄 Làm lại Quiz</button>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <p>© 2024 GEM Academy | Khóa học: Tái Tạo Tư Duy Triệu Phú</p>
+            <p>Module 3 - Bài 3.4: Visualization | <a href="#">Quay về danh sách bài học</a></p>
+        </footer>
+
+    </div>
+
+    <script>
+        // Quiz functionality - Instant feedback
+        let answeredQuestions = 0;
+        const totalQuestions = 3;
+        let correctAnswers = 0;
+
+        document.querySelectorAll('.quiz-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const question = this.closest('.quiz-question');
+                if (question.classList.contains('answered')) return;
+
+                const correctIndex = parseInt(question.dataset.correct);
+                const selectedIndex = parseInt(this.dataset.option);
+                const feedback = question.querySelector('.question-feedback');
+                const feedbackTitle = feedback.querySelector('.feedback-title');
+
+                // Disable all options
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.add('disabled');
+                });
+
+                // Mark selected
+                this.classList.add('selected');
+
+                // Check answer
+                if (selectedIndex === correctIndex) {
+                    this.classList.add('correct');
+                    feedback.classList.add('correct');
+                    feedbackTitle.textContent = '✓ Chính xác!';
+                    correctAnswers++;
+                } else {
+                    this.classList.add('incorrect');
+                    feedback.classList.add('incorrect');
+                    feedbackTitle.textContent = '✗ Chưa đúng!';
+                    // Show correct answer
+                    question.querySelectorAll('.quiz-option')[correctIndex].classList.add('correct');
+                }
+
+                feedback.classList.add('show');
+                question.classList.add('answered');
+                answeredQuestions++;
+
+                // Check if all questions answered
+                if (answeredQuestions === totalQuestions) {
+                    showResult();
+                }
+            });
+        });
+
+        function showResult() {
+            const resultDiv = document.querySelector('.quiz-result');
+            const scoreDiv = resultDiv.querySelector('.result-score');
+            const textDiv = resultDiv.querySelector('.result-text');
+            const messageDiv = resultDiv.querySelector('.result-message');
+
+            scoreDiv.textContent = `${correctAnswers}/${totalQuestions}`;
+
+            if (correctAnswers === totalQuestions) {
+                textDiv.textContent = '🏆 Xuất sắc!';
+                messageDiv.textContent = 'Bạn đã nắm vững kiến thức Module 3. Tần số thịnh vượng đang được cài đặt!';
+            } else if (correctAnswers >= 2) {
+                textDiv.textContent = '👍 Tốt lắm!';
+                messageDiv.textContent = 'Bạn hiểu khá tốt về Visualization. Hãy ôn lại những phần chưa chắc chắn.';
+            } else {
+                textDiv.textContent = '📚 Cần ôn tập thêm';
+                messageDiv.textContent = 'Hãy đọc lại các bài trong Module 3 để nắm vững kiến thức về cài đặt tần số.';
+            }
+
+            resultDiv.classList.add('show');
+        }
+
+        function resetQuiz() {
+            answeredQuestions = 0;
+            correctAnswers = 0;
+
+            document.querySelectorAll('.quiz-question').forEach(question => {
+                question.classList.remove('answered');
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('selected', 'correct', 'incorrect', 'disabled');
+                });
+                const feedback = question.querySelector('.question-feedback');
+                feedback.classList.remove('show', 'correct', 'incorrect');
+            });
+
+            document.querySelector('.quiz-result').classList.remove('show');
+        }
+    </script>
+</body>
+</html>

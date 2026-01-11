@@ -146,15 +146,28 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
+   LAYOUT WRAPPER (with Course Navigator)
+   ═══════════════════════════════════════════════════════════ */
+
+.builder-layout-wrapper {
+  display: flex;
+  min-height: calc(100vh - 180px);
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════
    MODULES CONTAINER
    ═══════════════════════════════════════════════════════════ */
 
 .modules-container {
+  flex: 1;
   max-width: 1000px;
   margin: 0 auto;
+  padding: 0 var(--space-4);
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
+  overflow-y: auto;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -393,6 +406,13 @@
   background: rgba(255, 189, 89, 0.15);
   border-radius: var(--radius-lg);
   color: var(--brand-gold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.lesson-icon:hover {
+  background: rgba(255, 189, 89, 0.25);
+  transform: scale(1.05);
 }
 
 .lesson-info {
@@ -400,12 +420,18 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
+  cursor: pointer;
+}
+
+.lesson-info:hover .lesson-title {
+  color: var(--brand-gold);
 }
 
 .lesson-title {
   font-size: var(--text-base);
   font-weight: var(--font-semibold);
   color: var(--text-primary);
+  transition: color var(--transition-fast);
 }
 
 .lesson-meta {

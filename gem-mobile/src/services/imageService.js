@@ -5,7 +5,7 @@
 
 import { Image } from 'react-native';
 import * as ImageManipulator from 'expo-image-manipulator';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { supabase } from './supabase';
 import { IMAGE_SPECS, STORAGE_BUCKET } from '../constants/imageConstants';
 import { calculateFitDimensions, getThumbnailDimensions, calculateAspectRatio } from '../utils/imageUtils';

@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 4.2: Nghi Thức Biết Ơn Tài Chính | GEM Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.5rem, 5vw, 2.25rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .definition-box p { color: var(--text-secondary); margin: 0; }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        @media (min-width: 601px) { .flow-step:hover { border-color: var(--gold); transform: translateX(8px); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .gratitude-list { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .gratitude-list { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .gratitude-item { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); }
+        @media (max-width: 600px) { .gratitude-item { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; } }
+        .gratitude-category { font-size: 0.8rem; color: var(--cyan); text-transform: uppercase; letter-spacing: 1px; margin-bottom: var(--space-xs); }
+        .gratitude-text { color: var(--text-primary); font-style: italic; }
+
+        .journal-box { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .journal-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .journal-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-md); }
+        .journal-prompt { color: var(--text-secondary); margin-bottom: var(--space-sm); font-size: 0.95rem; }
+        .journal-textarea { width: 100%; min-height: 100px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-md); color: var(--text-primary); font-family: inherit; font-size: 0.95rem; resize: vertical; }
+        .journal-textarea:focus { outline: none; border-color: var(--gold); }
+        .journal-textarea::placeholder { color: var(--text-muted); }
+
+        .app-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .app-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .app-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); }
+        .app-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .app-box p:last-child { margin-bottom: 0; }
+
+        .meditation-box { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05)); border: 1px solid rgba(106, 91, 255, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .meditation-box { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .meditation-box-title { font-weight: 700; color: var(--purple); margin-bottom: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); }
+        .meditation-script { color: var(--text-secondary); font-style: italic; line-height: 1.8; }
+        .meditation-script p { margin-bottom: var(--space-md); }
+        .pause-indicator { color: var(--purple); font-weight: 600; font-style: normal; }
+
+        .lesson-footer { text-align: center; padding: var(--space-xl); color: var(--text-muted); font-size: 0.85rem; }
+        .lesson-footer a { color: var(--gold); text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>🙏</span>
+                <span>Module 4</span>
+            </div>
+            <div class="lesson-chapter">Module 4 - Nghi Thức Triệu Phú</div>
+            <h1 class="lesson-title">Nghi Thức Biết Ơn Tài Chính</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 4.2</span></div>
+                <div class="meta-item"><span>⏱️</span><span>20 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>Journaling</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Một Thí Nghiệm Thú Vị</h2>
+            <p>Có một thí nghiệm đơn giản mà bạn có thể thử ngay bây giờ: Hãy nghĩ về số dư trong tài khoản ngân hàng của bạn hoặc số tiền trong ví bạn hiện tại.</p>
+            <p>Bạn cảm thấy thế nào? Nếu bạn cảm thấy lo lắng, thiếu thốn, hoặc muốn có nhiều hơn - đó là tần số của sự thiếu hụt. Và theo Quy Luật Thu Hút, tần số thiếu hụt sẽ thu hút thêm sự thiếu hụt.</p>
+            <p>Bây giờ, hãy thử nghĩ khác: "Cảm ơn vì tôi có [số tiền đó]. Đây là nền tảng và còn nhiều hơn đang trên đường đến." Bạn có cảm nhận được sự khác biệt về năng lượng không?</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Bí Mật Của Người Giàu</div>
+                <p>Những người giàu có không biết ơn VÌ họ có nhiều tiền. Họ CÓ nhiều tiền VÌ họ đã biết ơn từ khi còn ít.</p>
+                <p style="margin-top: var(--space-sm);">Oprah Winfrey, một trong những người phụ nữ giàu nhất thế giới, viết nhật ký biết ơn mỗi ngày từ khi còn nghèo khó. Bà nói: "Biết ơn là điều duy nhất tôi làm hàng ngày đã thay đổi cuộc đời tôi hoàn toàn."</p>
+            </div>
+        </section>
+
+        <!-- SECTION 1: GRATITUDE = TẦN SỐ CAO NHẤT -->
+        <section class="section">
+            <h2 class="section-title"><span>🙏</span> Gratitude = Tần Số Cao Nhất</h2>
+            <p>Trong tất cả các cảm xúc trên Thang Cảm Xúc (Bài 3.1), <strong>Gratitude (Biết Ơn)</strong> và <strong>Love (Yêu Thương)</strong> có tần số cao nhất - ngang với Tầng 6 "Từ Bi" trong 7 Tầng Tâm Thức.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>⚡</span> Tại Sao Biết Ơn Thu Hút Thịnh Vượng?</div>
+                <p>Theo Nguyên Lý "Trong Thế Nào, Ngoài Thế Ấy" của Học Thuyết: Khi bạn CẢM THẤY biết ơn với những gì đang có, bạn đang rung động ở tần số "đã có" thay vì "thiếu thốn". Vũ Trụ phản chiếu lại: bạn nhận được NHIỀU HƠN những gì để biết ơn.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M4_B2_01%0AGratitude+Frequency" alt="Tần số biết ơn">
+                <div class="image-caption">Biết ơn = Rung động ở tần số "đã có" → Thu hút thêm</div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🔬</span> Nghiên Cứu Khoa Học</div>
+                <p><strong>Nghiên cứu của Robert Emmons (UC Davis):</strong> Những người viết nhật ký biết ơn mỗi ngày trong 10 tuần báo cáo cảm thấy hạnh phúc hơn 25%, lạc quan hơn về tương lai, và thậm chí tập thể dục nhiều hơn 1.5 giờ/tuần.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Hiệu ứng domino:</strong> Biết ơn → Tần số cao → Sức khỏe tốt hơn → Năng suất cao hơn → Thu nhập tăng.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: FINANCIAL GRATITUDE PRACTICE -->
+        <section class="section">
+            <h2 class="section-title"><span>💰</span> Financial Gratitude Practice</h2>
+            <p>Đây là phiên bản "biết ơn" được thiết kế đặc biệt cho TÀI CHÍNH. Thay vì biết ơn chung chung, bạn tập trung vào những khía cạnh liên quan đến tiền bạc.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M4_B2_02%0AFinancial+Gratitude" alt="Financial Gratitude Practice">
+                <div class="image-caption">Chuyển từ "tôi thiếu tiền" sang "tôi biết ơn những gì tiền đã mang lại"</div>
+            </div>
+
+            <p>Đọc các ví dụ sau và cảm nhận sự khác biệt về năng lượng:</p>
+
+            <div class="gratitude-list">
+                <div class="gratitude-item">
+                    <div class="gratitude-category">Thu nhập</div>
+                    <div class="gratitude-text">"Tôi biết ơn vì tôi có công việc/nguồn thu nhập. Tiền đang chảy vào cuộc đời tôi, dù ít hay nhiều."</div>
+                </div>
+                <div class="gratitude-item">
+                    <div class="gratitude-category">Chi tiêu</div>
+                    <div class="gratitude-text">"Tôi biết ơn vì tôi có tiền để thanh toán hóa đơn điện, nước. Nghĩa là tôi đang được sống trong nhà có điện, có nước sạch."</div>
+                </div>
+                <div class="gratitude-item">
+                    <div class="gratitude-category">Thức ăn</div>
+                    <div class="gratitude-text">"Tôi biết ơn vì tôi có tiền mua thực phẩm. Tôi chưa bao giờ phải đói. Đó là sự thịnh vượng."</div>
+                </div>
+                <div class="gratitude-item">
+                    <div class="gratitude-category">Tài sản</div>
+                    <div class="gratitude-text">"Tôi biết ơn chiếc điện thoại này - nó kết nối tôi với thế giới, giúp tôi học hỏi, làm việc."</div>
+                </div>
+                <div class="gratitude-item">
+                    <div class="gratitude-category">Cơ hội</div>
+                    <div class="gratitude-text">"Tôi biết ơn vì đang được học khóa học này. Đây là đầu tư vào bản thân - và ai đó đã tạo ra cơ hội này cho tôi."</div>
+                </div>
+                <div class="gratitude-item">
+                    <div class="gratitude-category">Quá khứ</div>
+                    <div class="gratitude-text">"Tôi biết ơn tất cả những gì tiền đã mang lại cho tôi trong quá khứ - học phí, trải nghiệm, kỷ niệm."</div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Bí Mật Của Người Thịnh Vượng</div>
+                <p>Người thịnh vượng không biết ơn vì họ có nhiều tiền. Họ CÓ nhiều tiền vì họ đã biết ơn từ khi còn ít. Đây là mindset đi trước, thực tại đi sau.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: GRATITUDE JOURNALING -->
+        <section class="section">
+            <h2 class="section-title"><span>📝</span> Gratitude Journaling</h2>
+            <p>Mỗi ngày, dành 5 phút để viết nhật ký biết ơn tài chính. Dưới đây là template và không gian để bạn thực hành ngay.</p>
+
+            <div class="journal-box">
+                <div class="journal-title">📅 Nhật Ký Biết Ơn Tài Chính Hôm Nay</div>
+
+                <div class="journal-prompt">1. Hôm nay, tôi biết ơn vì tiền đã giúp tôi...</div>
+                <textarea class="journal-textarea" placeholder="Ví dụ: Mua được cà phê ngon, thanh toán hóa đơn internet..."></textarea>
+
+                <div class="journal-prompt" style="margin-top: var(--space-md);">2. Một nguồn thu nhập tôi biết ơn...</div>
+                <textarea class="journal-textarea" placeholder="Ví dụ: Công việc hiện tại, khách hàng trung thành, dự án mới..."></textarea>
+
+                <div class="journal-prompt" style="margin-top: var(--space-md);">3. Một kỹ năng kiếm tiền tôi biết ơn mình có...</div>
+                <textarea class="journal-textarea" placeholder="Ví dụ: Biết dùng máy tính, giao tiếp tốt, chăm chỉ..."></textarea>
+
+                <div class="journal-prompt" style="margin-top: var(--space-md);">4. Tiền sắp tới đường đến với tôi, và tôi biết ơn trước vì...</div>
+                <textarea class="journal-textarea" placeholder="Ví dụ: Dự án sắp hoàn thành, khách hàng mới đang quan tâm..."></textarea>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>⚡</span> Power Tip: Biết Ơn Trước</div>
+                <p>Câu hỏi số 4 là kỹ thuật nâng cao: <strong>Biết ơn TRƯỚC</strong> khi tiền đến. Đây là cách "sống trước" trong thực tại thịnh vượng - bạn đang gửi tín hiệu mạnh mẽ đến Vũ Trụ rằng bạn ĐÃ nhận được.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 4: NGHI THỨC BIẾT ƠN VÍ TIỀN -->
+        <section class="section">
+            <h2 class="section-title"><span>👛</span> Nghi Thức Biết Ơn Ví Tiền</h2>
+            <p>Đây là nghi thức đơn giản nhưng cực kỳ mạnh mẽ. Mỗi lần mở ví lấy tiền hoặc thanh toán, bạn biến khoảnh khắc đó thành nghi thức biết ơn.</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Khi Nhận Tiền</div>
+                        <div class="flow-step-desc">Trước khi cất tiền vào ví, cầm tờ tiền, nhìn nó và nói (trong tâm hoặc thì thầm): "Cảm ơn em đã đến. Chào mừng em. Mời thêm bạn bè đến nhé!"</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Khi Chi Tiền</div>
+                        <div class="flow-step-desc">Trước khi đưa tiền đi, nói: "Cảm ơn em đã ở với tôi. Hãy đi và mang lại giá trị cho người nhận, rồi quay về với bạn bè nhiều hơn."</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Khi Thanh Toán Online</div>
+                        <div class="flow-step-desc">Trước khi nhấn "Thanh toán", đặt tay lên tim và nói: "Tôi biết ơn vì có tiền để thanh toán điều này. Tiền đang lưu thông và sẽ quay về."</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Khi Nhìn Số Dư</div>
+                        <div class="flow-step-desc">Khi kiểm tra tài khoản ngân hàng, dù số dư bao nhiêu, nói: "Cảm ơn. Đây là nền tảng. Còn nhiều hơn đang trên đường đến."</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🔄</span> Nguyên Lý Lưu Thông</div>
+                <p>Tiền cũng như năng lượng - nó cần CHẢY. Khi bạn chi tiền với sự biết ơn (thay vì tiếc nuối), bạn đang giữ dòng chảy thịnh vượng mở. Khi bạn chi tiền với sự sợ hãi thiếu hụt, bạn đang tạo "tắc nghẽn" năng lượng.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 5: GRATITUDE MEDITATION -->
+        <section class="section">
+            <h2 class="section-title"><span>🧘</span> Gratitude Meditation (5 phút)</h2>
+            <p>Sử dụng meditation ngắn này mỗi sáng hoặc trước khi ngủ để kích hoạt năng lượng biết ơn tài chính.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/6A5BFF?text=M4_B2_03%0AGratitude+Meditation" alt="Gratitude Meditation">
+                <div class="image-caption">5 phút biết ơn mỗi ngày = Thay đổi tần số cả cuộc đời</div>
+            </div>
+
+            <div class="meditation-box">
+                <div class="meditation-box-title"><span>🔮</span> Script: Gratitude Meditation Tài Chính (5 phút)</div>
+                <div class="meditation-script">
+                    <p>Ngồi thoải mái. Nhắm mắt. Đặt một tay lên tim.</p>
+                    <p>Hít vào sâu... thở ra chậm...</p>
+                    <p><span class="pause-indicator">[Lặp lại 3 lần]</span></p>
+
+                    <p>Bây giờ, hãy nghĩ về TẤT CẢ những gì tiền đã mang lại cho bạn trong cuộc đời...</p>
+                    <p>Những bữa ăn... mái nhà... quần áo... học phí... trải nghiệm... kỷ niệm...</p>
+                    <p>Cảm nhận sự biết ơn dâng lên trong tim...</p>
+                    <p><span class="pause-indicator">[Tạm dừng 30 giây]</span></p>
+
+                    <p>Nghĩ về người đã từng cho bạn tiền... trả lương cho bạn... mua hàng từ bạn...</p>
+                    <p>Gửi lời cảm ơn đến họ trong tâm...</p>
+                    <p>"Cảm ơn. Cảm ơn. Cảm ơn."</p>
+                    <p><span class="pause-indicator">[Tạm dừng 30 giây]</span></p>
+
+                    <p>Bây giờ, tưởng tượng tiền đang chảy về phía bạn... từ nhiều nguồn...</p>
+                    <p>Nhìn thấy dòng tiền màu vàng kim chảy vào cuộc đời bạn...</p>
+                    <p>Nói trong tâm: "Cảm ơn. Tôi đón nhận. Tôi xứng đáng."</p>
+                    <p><span class="pause-indicator">[Tạm dừng 30 giây]</span></p>
+
+                    <p>Đặt một tay lên ví hoặc điện thoại (nếu có app ngân hàng)...</p>
+                    <p>Nói: "Tiền yêu tôi. Tiền tìm đến tôi. Tôi là nam châm thịnh vượng."</p>
+                    <p>Cảm nhận sự biết ơn và tin tưởng hoàn toàn...</p>
+                    <p><span class="pause-indicator">[Tạm dừng 30 giây]</span></p>
+
+                    <p>Hít vào sự thịnh vượng... Thở ra sự biết ơn...</p>
+                    <p>Khi sẵn sàng, mở mắt.</p>
+                    <p>Bạn vừa nâng cao tần số tài chính. Chào ngày mới!</p>
+                </div>
+            </div>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>📱</span> Tích Hợp GEM App</div>
+                <p><strong>Rituals → Gratitude Flow:</strong> Sử dụng ritual có sẵn với hướng dẫn bằng âm thanh.</p>
+                <p><strong>Vision Board → Daily Score:</strong> Sau khi hoàn thành Gratitude Practice, ghi lại điểm năng lượng của ngày.</p>
+                <p><strong>GEM Master:</strong> Hỏi "Cho tôi affirmation biết ơn tài chính hôm nay" để nhận gợi ý cá nhân hóa.</p>
+            </div>
+        </section>
+
+        <!-- REAL STORIES -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Câu Chuyện Thực Tế</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>👩‍💼</span> Câu Chuyện Của Hương - Từ Nợ Nần Đến Tự Do Tài Chính</div>
+                <p><strong>Hương, 38 tuổi, Kế toán:</strong> "3 năm trước, tôi nợ 500 triệu từ việc đầu tư thất bại. Mỗi ngày thức dậy tôi chỉ nghĩ đến nợ nần và cảm thấy tuyệt vọng. Mối quan hệ với tiền của tôi là một vòng xoáy tiêu cực."</p>
+                <p style="margin-top: var(--space-sm);">"Khi học về Gratitude Practice tài chính, tôi nghĩ: 'Làm sao tôi biết ơn được khi nợ chồng chất?' Nhưng tôi quyết định thử. Mỗi sáng, tôi viết: 'Cảm ơn vì tôi vẫn có việc làm. Cảm ơn vì tôi vẫn có thể kiếm tiền. Cảm ơn vì mỗi ngày tôi đang tiến gần hơn đến tự do.'"</p>
+                <p style="margin-top: var(--space-sm);">"Ban đầu tôi không cảm nhận được gì. Nhưng sau 2 tuần, tôi bắt đầu thấy khác. Thay vì sợ hãi khi nhìn số nợ, tôi bắt đầu thấy nó như một bài học. Rồi kỳ lạ là các cơ hội bắt đầu đến - công việc phụ, khách hàng mới, thậm chí một khoản hoàn thuế bất ngờ. Trong 18 tháng, tôi trả hết nợ và bắt đầu có tiết kiệm."</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>👨‍🎓</span> Câu Chuyện Của Nam - Sinh Viên Với 500K/Tháng</div>
+                <p><strong>Nam, 22 tuổi, Sinh viên:</strong> "Khi còn sinh viên, tôi chỉ có 500K tiền tiêu vặt mỗi tháng. Bạn bè đi chơi, đi ăn, còn tôi phải tính toán từng đồng. Tôi từng rất mặc cảm và hay than phiền về việc 'không có tiền.'"</p>
+                <p style="margin-top: var(--space-sm);">"Khi học về nghi thức ví tiền, tôi bắt đầu áp dụng dù chỉ có 500K. Mỗi khi chi tiền ăn sáng, tôi nói thầm: 'Cảm ơn vì tôi có tiền ăn sáng hôm nay. Nhiều người không có điều này.' Khi nhận tiền bố mẹ gửi, tôi nói: 'Cảm ơn em đã đến. Mời thêm bạn bè nhé!'"</p>
+                <p style="margin-top: var(--space-sm);">"Điều kỳ diệu xảy ra: tôi bắt đầu tìm được công việc part-time với mức lương tốt, được học bổng bất ngờ, và bố mẹ cũng gửi thêm tiền hơn vì thấy tôi 'có chí hướng'. 500K thành 3 triệu/tháng chỉ trong 6 tháng. Không phải phép màu - đó là tần số!"</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>💡</span> Bài Học Rút Ra</div>
+                <p><strong>Từ Hương:</strong> Biết ơn không phải đợi đến khi "có gì đó" để biết ơn. Biết ơn ngay cả trong khó khăn là cách mạnh mẽ nhất để thay đổi tần số và thu hút sự thay đổi.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Từ Nam:</strong> Số lượng tiền bạn có không quan trọng - CÁCH bạn đối xử với tiền mới quan trọng. Biết ơn 500K như thể nó là 50 triệu, và 500K sẽ trở thành 50 triệu.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 6: THỰC HÀNH HÀNG NGÀY -->
+        <section class="section">
+            <h2 class="section-title"><span>📅</span> Thực Hành Hàng Ngày</h2>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">🌅</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Buổi Sáng (2 phút)</div>
+                        <div class="flow-step-desc">Trong Morning Routine, nghĩ 3 điều biết ơn liên quan đến tài chính. Hoặc làm Gratitude Meditation 5 phút.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">☀️</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Trong Ngày</div>
+                        <div class="flow-step-desc">Áp dụng Nghi Thức Ví Tiền mỗi khi chi tiêu hoặc nhận tiền. Biến mỗi giao dịch thành cơ hội biết ơn.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">🌙</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Buổi Tối (5 phút)</div>
+                        <div class="flow-step-desc">Viết Gratitude Journal - 4 câu hỏi về biết ơn tài chính trong ngày. Đặc biệt chú ý câu 4: Biết ơn trước.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🎯</span> Thử Thách 7 Ngày</div>
+                <p>Cam kết thực hiện Gratitude Practice tài chính trong 7 ngày liên tục. Theo dõi sự thay đổi về cảm xúc với tiền bạc và những "trùng hợp may mắn" xuất hiện. Ghi chép vào GEM App → Vision Board.</p>
+            </div>
+        </section>
+
+        <!-- KEY TAKEAWAYS -->
+        <section class="section">
+            <h2 class="section-title"><span>🔑</span> Key Takeaways</h2>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Biết Ơn = Tần Số Cao Nhất</div>
+                        <div class="flow-step-desc">Biết ơn và yêu thương có tần số cao nhất trong tất cả cảm xúc. Khi bạn biết ơn những gì đang có, bạn rung động ở tần số "đã có" thay vì "thiếu thốn" - và Vũ Trụ phản chiếu lại bằng sự dồi dào.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Biết Ơn TRƯỚC Khi Nhận</div>
+                        <div class="flow-step-desc">Kỹ thuật nâng cao là biết ơn TRƯỚC khi điều tốt đẹp đến. Đây là cách "sống trước" trong thực tại thịnh vượng và gửi tín hiệu mạnh mẽ đến Vũ Trụ rằng bạn đã nhận được.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Nghi Thức Ví Tiền = Chuyển Hóa Mỗi Giao Dịch</div>
+                        <div class="flow-step-desc">Mỗi khi chi tiền hoặc nhận tiền, hãy biến khoảnh khắc đó thành nghi thức biết ơn. Năng lượng bạn gửi kèm với tiền sẽ quyết định năng lượng tiền mang về.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TRANSITION -->
+        <section class="section">
+            <h2 class="section-title"><span>➡️</span> Bước Tiếp Theo</h2>
+            <p>Bạn đã học cách biến mỗi khoảnh khắc với tiền bạc thành cơ hội nâng cao tần số. Nhưng làm thế nào để kiểm soát những khoảnh khắc CHI TIÊU một cách có ý thức, tránh sa vào vòng xoáy chi tiêu cảm xúc?</p>
+            <p>Trong <strong>Bài 4.3</strong>, chúng ta sẽ học về <strong>Quy Tắc PAUSE</strong> - một công cụ mạnh mẽ giúp bạn chi tiêu có ý thức và thoát khỏi chu kỳ chi tiêu vô thức.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📝</span> Bài Tập Chuẩn Bị</div>
+                <p>Trước khi chuyển sang bài tiếp theo, hãy thực hành ngay:</p>
+                <p style="margin-top: var(--space-sm);">• Mở ví và nói với tiền: "Cảm ơn các em đã ở với tôi"</p>
+                <p style="margin-top: var(--space-sm);">• Kiểm tra số dư tài khoản và nói: "Cảm ơn. Đây là nền tảng."</p>
+                <p style="margin-top: var(--space-sm);">• Viết 3 điều biết ơn về tài chính ngay bây giờ</p>
+                <p style="margin-top: var(--space-sm);">• Đặt reminder "Gratitude Journal" trong điện thoại cho tối nay</p>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <p>© 2024 GEM Academy | Khóa học: Tái Tạo Tư Duy Triệu Phú</p>
+            <p>Module 4 - Bài 4.2: Nghi Thức Biết Ơn Tài Chính | <a href="#">Quay về danh sách bài học</a></p>
+        </footer>
+
+    </div>
+</body>
+</html>

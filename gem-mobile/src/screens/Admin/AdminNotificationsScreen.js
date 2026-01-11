@@ -175,8 +175,13 @@ export default function AdminNotificationsScreen({ navigation }) {
 
   const sendNotification = async () => {
     setSending(true);
+    let debugInfo = [];
+
     try {
+      debugInfo.push('Starting broadcast...');
+
       // Try the new admin_send_broadcast RPC first (from 20251130_fix_notifications_system.sql)
+      console.log('[AdminNotifications] Calling admin_send_broadcast RPC...');
       const { data: rpcResult, error: rpcError } = await supabase.rpc(
         'admin_send_broadcast',
         {
@@ -186,9 +191,21 @@ export default function AdminNotificationsScreen({ navigation }) {
         }
       );
 
+      console.log('[AdminNotifications] RPC Result:', rpcResult, 'Error:', rpcError);
+
       if (!rpcError && rpcResult?.success) {
+        debugInfo.push(`RPC success: ${rpcResult.sent_count} users`);
+
+        // Also try Edge Function for push notifications
+        await sendPushViaEdgeFunction(null, title.trim(), body.trim(), debugInfo);
+
         // RPC worked - show success
-        showAlert('Thành công', rpcResult.message || `Đã gửi thông báo đến ${rpcResult.sent_count} người dùng`, [{ text: 'OK' }], 'success');
+        showAlert(
+          'Thành công',
+          `${rpcResult.message || `Đã gửi thông báo đến ${rpcResult.sent_count} người dùng`}\n\n[Debug: ${debugInfo.join(' → ')}]`,
+          [{ text: 'OK' }],
+          'success'
+        );
 
         // Clear form
         setTitle('');
@@ -202,9 +219,12 @@ export default function AdminNotificationsScreen({ navigation }) {
       }
 
       // If RPC failed, fall back to old method
+      const rpcErrorMsg = rpcError?.message || rpcResult?.error || 'Unknown error';
+      debugInfo.push(`RPC failed: ${rpcErrorMsg}`);
       console.warn('[AdminNotifications] New RPC failed, using fallback:', rpcError);
 
       // 1. Save to system_notifications
+      console.log('[AdminNotifications] Fallback: inserting to system_notifications...');
       const { data: notif, error: saveError } = await supabase
         .from('system_notifications')
         .insert({
@@ -218,11 +238,23 @@ export default function AdminNotificationsScreen({ navigation }) {
         .single();
 
       if (saveError) {
-        // If table doesn't exist, try direct forum_notifications insert
-        if (saveError.code === 'PGRST205' || saveError.code === '42P01') {
-          console.warn('[AdminNotifications] system_notifications not found, using forum_notifications');
-          await manualBroadcast(null);
-          showAlert('Thành công', 'Đã gửi thông báo đến tất cả người dùng', [{ text: 'OK' }], 'success');
+        debugInfo.push(`system_notifications error: ${saveError.code}`);
+        console.error('[AdminNotifications] Save error:', saveError);
+
+        // If table doesn't exist or RLS blocks, try direct forum_notifications insert
+        if (saveError.code === 'PGRST205' || saveError.code === '42P01' || saveError.code === '42501') {
+          console.warn('[AdminNotifications] system_notifications not found or blocked, using forum_notifications');
+          debugInfo.push('Using forum_notifications fallback');
+
+          const broadcastCount = await manualBroadcast(null);
+          await sendPushViaEdgeFunction(null, title.trim(), body.trim(), debugInfo);
+
+          showAlert(
+            'Thành công',
+            `Đã gửi thông báo đến ${broadcastCount || 'tất cả'} người dùng\n\n[Debug: ${debugInfo.join(' → ')}]`,
+            [{ text: 'OK' }],
+            'success'
+          );
           setTitle('');
           setBody('');
           loadHistory();
@@ -233,7 +265,10 @@ export default function AdminNotificationsScreen({ navigation }) {
         throw saveError;
       }
 
+      debugInfo.push(`Saved to system_notifications: ${notif.id}`);
+
       // 2. Insert notification to all target users (old RPC)
+      console.log('[AdminNotifications] Calling broadcast_notification_to_users...');
       const { data: insertCount, error: broadcastError } = await supabase.rpc(
         'broadcast_notification_to_users',
         {
@@ -245,34 +280,17 @@ export default function AdminNotificationsScreen({ navigation }) {
       );
 
       if (broadcastError) {
-        // Function might not exist
+        debugInfo.push(`broadcast_notification_to_users failed: ${broadcastError.message}`);
         console.error('[AdminNotifications] Broadcast RPC error:', broadcastError);
         // Fallback: manual insert
         await manualBroadcast(notif.id);
+        debugInfo.push('Manual insert done');
+      } else {
+        debugInfo.push(`Broadcast RPC: ${insertCount} users`);
       }
 
       // 3. Call Edge Function to send push notifications
-      try {
-        const { data: pushResult, error: pushError } = await supabase.functions.invoke(
-          'broadcast-notification',
-          {
-            body: {
-              notification_id: notif.id,
-              title: title.trim(),
-              body: body.trim(),
-              target_audience: targetAudience,
-            },
-          }
-        );
-
-        if (pushError) {
-          console.warn('[AdminNotifications] Push notification error:', pushError);
-        } else {
-          console.log('[AdminNotifications] Push sent:', pushResult);
-        }
-      } catch (pushErr) {
-        console.warn('[AdminNotifications] Edge function not available:', pushErr);
-      }
+      await sendPushViaEdgeFunction(notif.id, title.trim(), body.trim(), debugInfo);
 
       // 4. Update status to sent
       await supabase
@@ -285,7 +303,12 @@ export default function AdminNotificationsScreen({ navigation }) {
         .eq('id', notif.id);
 
       // Success
-      showAlert('Thành công', `Đã gửi thông báo đến ${insertCount || 'tất cả'} người dùng`, [{ text: 'OK' }], 'success');
+      showAlert(
+        'Thành công',
+        `Đã gửi thông báo đến ${insertCount || 'tất cả'} người dùng\n\n[Debug: ${debugInfo.join(' → ')}]`,
+        [{ text: 'OK' }],
+        'success'
+      );
 
       // Clear form
       setTitle('');
@@ -296,10 +319,48 @@ export default function AdminNotificationsScreen({ navigation }) {
       loadStats();
 
     } catch (error) {
+      debugInfo.push(`Error: ${error.message}`);
       console.error('[AdminNotifications] Send error:', error);
-      showAlert('Lỗi', 'Không thể gửi thông báo. Vui lòng thử lại.', [{ text: 'OK' }], 'error');
+      showAlert(
+        'Lỗi',
+        `Không thể gửi thông báo: ${error.message}\n\n[Debug: ${debugInfo.join(' → ')}]`,
+        [{ text: 'OK' }],
+        'error'
+      );
     } finally {
       setSending(false);
+    }
+  };
+
+  // Helper: Send push via Edge Function
+  const sendPushViaEdgeFunction = async (notificationId, notifTitle, notifBody, debugInfo) => {
+    try {
+      console.log('[AdminNotifications] Calling broadcast-notification Edge Function...');
+      const { data: pushResult, error: pushError } = await supabase.functions.invoke(
+        'broadcast-notification',
+        {
+          body: {
+            notification_id: notificationId,
+            title: notifTitle,
+            body: notifBody,
+            target_audience: targetAudience,
+          },
+        }
+      );
+
+      if (pushError) {
+        debugInfo.push(`Edge Function error: ${pushError.message}`);
+        console.warn('[AdminNotifications] Push notification error:', pushError);
+      } else if (pushResult?.success) {
+        debugInfo.push(`Push sent: ${pushResult.sent || 0} devices`);
+        console.log('[AdminNotifications] Push sent:', pushResult);
+      } else {
+        debugInfo.push(`Push result: ${JSON.stringify(pushResult)}`);
+        console.log('[AdminNotifications] Push result:', pushResult);
+      }
+    } catch (pushErr) {
+      debugInfo.push(`Edge Function unavailable: ${pushErr.message}`);
+      console.warn('[AdminNotifications] Edge function not available:', pushErr);
     }
   };
 
@@ -307,6 +368,7 @@ export default function AdminNotificationsScreen({ navigation }) {
   const manualBroadcast = async (notificationId) => {
     try {
       // Try notificationService.sendBroadcastNotification first (uses 'notifications' table with user_id = NULL)
+      console.log('[AdminNotifications] Trying notificationService.sendBroadcastNotification...');
       const result = await notificationService.sendBroadcastNotification({
         title: title.trim(),
         message: body.trim(),
@@ -316,18 +378,27 @@ export default function AdminNotificationsScreen({ navigation }) {
 
       if (result.success) {
         console.log('[AdminNotifications] Broadcast via notificationService success');
-        return;
+        return 1; // At least 1 broadcast record created
       }
 
       // If that fails, fall back to manual insert into forum_notifications
-      console.warn('[AdminNotifications] notificationService broadcast failed, using manual insert');
+      console.warn('[AdminNotifications] notificationService broadcast failed:', result.error);
+      console.log('[AdminNotifications] Falling back to manual insert into forum_notifications...');
 
       // Get all user IDs
-      const { data: users } = await supabase
+      const { data: users, error: usersError } = await supabase
         .from('profiles')
         .select('id');
 
-      if (!users || users.length === 0) return;
+      if (usersError) {
+        console.error('[AdminNotifications] Failed to get users:', usersError);
+        return 0;
+      }
+
+      if (!users || users.length === 0) {
+        console.warn('[AdminNotifications] No users found');
+        return 0;
+      }
 
       // Insert notifications in batches into forum_notifications with is_broadcast flag
       const notifications = users.map(u => ({
@@ -341,14 +412,22 @@ export default function AdminNotificationsScreen({ navigation }) {
 
       // Insert in chunks of 100
       const chunkSize = 100;
+      let insertedCount = 0;
       for (let i = 0; i < notifications.length; i += chunkSize) {
         const chunk = notifications.slice(i, i + chunkSize);
-        await supabase.from('forum_notifications').insert(chunk);
+        const { error: insertError } = await supabase.from('forum_notifications').insert(chunk);
+        if (!insertError) {
+          insertedCount += chunk.length;
+        } else {
+          console.warn('[AdminNotifications] Chunk insert error:', insertError);
+        }
       }
 
-      console.log('[AdminNotifications] Manual broadcast complete:', users.length);
+      console.log('[AdminNotifications] Manual broadcast complete:', insertedCount, 'of', users.length);
+      return insertedCount;
     } catch (error) {
       console.error('[AdminNotifications] Manual broadcast error:', error);
+      return 0;
     }
   };
 

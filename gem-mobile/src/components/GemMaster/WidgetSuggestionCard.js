@@ -48,6 +48,17 @@ const WIDGET_TO_LIFE_AREA = {
 // Widget types that require the inline form flow (affirmation + action plan selection)
 const REQUIRES_FORM_FLOW = ['CRYSTAL_GRID', 'crystal', 'CROSS_DOMAIN_CARD'];
 
+// Default rituals for each life area (auto-selected when none provided)
+const DEFAULT_RITUALS = {
+  finance: { id: 'gratitude-flow', title: 'Dòng Chảy Biết Ơn', subtitle: 'Thu hút thịnh vượng', color: '#FFD700' },
+  crypto: { id: 'cleansing-breath', title: 'Thở Thanh Lọc', subtitle: 'Giữ bình tĩnh khi trading', color: '#667EEA' },
+  career: { id: 'letter-to-universe', title: 'Thư Gửi Vũ Trụ', subtitle: 'Gửi ước nguyện sự nghiệp', color: '#9D4EDD' },
+  health: { id: 'cleansing-breath', title: 'Thở Thanh Lọc', subtitle: 'Thải độc cơ thể', color: '#667EEA' },
+  relationships: { id: 'heart-expansion', title: 'Mở Rộng Trái Tim', subtitle: 'Tăng tần số yêu thương', color: '#F093FB' },
+  personal: { id: 'letter-to-universe', title: 'Thư Gửi Vũ Trụ', subtitle: 'Gửi ước mơ phát triển', color: '#9D4EDD' },
+  spiritual: { id: 'heart-expansion', title: 'Mở Rộng Trái Tim', subtitle: 'Kết nối yêu thương', color: '#F093FB' },
+};
+
 const WidgetSuggestionCard = ({
   widgets,
   suggestionMessage,
@@ -129,10 +140,10 @@ const WidgetSuggestionCard = ({
     return COLORS.gold;
   };
 
-  // Navigate to VisionBoard using helper
+  // Navigate to VisionBoard using helper - scroll to Goals section
   const navigateToVisionBoard = useCallback(() => {
     hideAlert();
-    navigateToScreen(navigation, 'VisionBoard');
+    navigateToScreen(navigation, 'VisionBoard', { scrollToSection: 'goals' });
   }, [navigation]);
 
   // Navigate to Shop for upgrade using helper
@@ -214,18 +225,51 @@ const WidgetSuggestionCard = ({
         } else if (normalizedType === WIDGET_TYPES.GOAL || normalizedType === 'goal') {
           // For goals, extract title from goalTitle (legacy) or goalText or w.title
           const goalTitle = widgetData.goalTitle || widgetData.goalText || w.title || 'Mục tiêu mới';
+          const goalLifeArea = widgetData.lifeArea || 'personal';
+
+          // Extract affirmations from widget data
+          const affirmations = Array.isArray(widgetData.affirmations)
+            ? widgetData.affirmations
+            : [];
+
+          // Extract action steps from widget data (actionSteps, habits, steps, etc.)
+          const rawSteps = widgetData.actionSteps || widgetData.steps || widgetData.habits || [];
+          const steps = Array.isArray(rawSteps)
+            ? rawSteps.map((step, idx) => ({
+                id: `step_${Date.now()}_${idx}`,
+                title: typeof step === 'string' ? step : (step.text || step.title || step.name || ''),
+                action_type: step.action_type || (idx < 2 ? 'daily' : idx < 3 ? 'weekly' : 'monthly'),
+                completed: false,
+              }))
+            : [];
+
+          // Auto-select a default ritual based on life area (so goals always have at least 1 ritual)
+          const defaultRitual = DEFAULT_RITUALS[goalLifeArea] || DEFAULT_RITUALS.personal;
+          const rituals = widgetData.rituals && widgetData.rituals.length > 0
+            ? widgetData.rituals
+            : [defaultRitual];
+
           content = {
-            lifeArea: widgetData.lifeArea || 'personal', // Add lifeArea for grouping
+            lifeArea: goalLifeArea,
+            title: goalTitle, // Store title directly for easy access
             goals: [{
               id: `goal_${Date.now()}`,
               title: goalTitle,
               completed: false,
               timeline: widgetData.timeline || widgetData.targetDate || null,
-              lifeArea: widgetData.lifeArea || 'personal',
-              // Also store extra data for financial goals
+              lifeArea: goalLifeArea,
               targetAmount: widgetData.targetAmount || null,
               currentAmount: widgetData.currentAmount || 0,
+              rituals: rituals, // Include rituals in goal object
             }],
+            // Include affirmations directly in content for VisionBoard to read
+            affirmations: affirmations.length > 0 ? affirmations : undefined,
+            // Include action steps directly in content for VisionBoard to read
+            steps: steps.length > 0 ? steps : undefined,
+            // Also store crystals if available
+            crystals: widgetData.crystalRecommendations || widgetData.crystals || undefined,
+            // Store rituals at content level for easy access
+            rituals: rituals,
           };
         } else if (normalizedType === WIDGET_TYPES.STEPS || normalizedType === 'habit' || normalizedType === 'steps') {
           // For habits/steps, also check for widgetData.habits (legacy from ACTION_CHECKLIST)
@@ -534,10 +578,10 @@ const styles = StyleSheet.create({
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.bgMid,
   },
-  // Modal styles - Dark theme
+  // Modal styles - Dark theme with gold accents
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -546,7 +590,7 @@ const styles = StyleSheet.create({
     maxWidth: 340,
   },
   modalContent: {
-    backgroundColor: COLORS.bgCard || '#1a1a2e',
+    backgroundColor: COLORS.glassBg || '#1a1a2e',
     borderRadius: SPACING.lg,
     padding: SPACING.xl,
     borderWidth: 1,

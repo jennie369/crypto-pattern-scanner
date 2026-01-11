@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 5.3: Red Flags & Green Flags | Khóa Tần Số Tình Yêu</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--success); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--error); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--gold); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--error), var(--success)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .highlight-box.green { background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05)); border-color: rgba(0, 200, 83, 0.3); }
+        @media (max-width: 600px) { .highlight-box.green { border-left-color: var(--success); } }
+        .highlight-box.green .highlight-box-title { color: var(--success); }
+
+        .highlight-box.red { background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05)); border-color: rgba(255, 82, 82, 0.3); }
+        @media (max-width: 600px) { .highlight-box.red { border-left-color: var(--error); } }
+        .highlight-box.red .highlight-box-title { color: var(--error); }
+
+        .highlight-box.purple { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05)); border-color: rgba(106, 91, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.purple { border-left-color: var(--purple); } }
+        .highlight-box.purple .highlight-box-title { color: var(--purple); }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .flags-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flags-grid { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+
+        .flag-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .flag-card { border: none; border-radius: 0; padding: var(--space-md) 16px; } }
+        @media (min-width: 601px) { .flag-card:hover { transform: translateY(-4px); } }
+        .flag-card.red { border-left: 4px solid var(--error); }
+        .flag-card.green { border-left: 4px solid var(--success); }
+        .flag-emoji { font-size: 1.5rem; margin-bottom: var(--space-sm); }
+        .flag-title { font-size: 1rem; font-weight: 700; margin-bottom: var(--space-sm); }
+        .flag-card.red .flag-title { color: var(--error); }
+        .flag-card.green .flag-title { color: var(--success); }
+        .flag-desc { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .checklist { list-style: none; margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .checklist { margin: var(--space-md) 0; padding: 0 16px; } }
+        .checklist li { display: flex; align-items: flex-start; gap: var(--space-sm); padding: var(--space-sm) 0; border-bottom: 1px solid var(--glass-border); color: var(--text-secondary); }
+        .checklist li:last-child { border-bottom: none; }
+        .checklist.red li::before { content: "🚩"; font-size: 1rem; }
+        .checklist.green li::before { content: "✅"; font-size: 1rem; }
+
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>💕</span>
+                <span>Module 5</span>
+            </div>
+            <div class="lesson-chapter">Chapter 5 - Nghệ Thuật Quan Hệ Lành Mạnh</div>
+            <h1 class="lesson-title">Red Flags & Green Flags</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 5.3</span></div>
+                <div class="meta-item"><span>⏱️</span><span>25 phút đọc</span></div>
+            </div>
+        </header>
+
+        <!-- SECTION 1: Opening Hook -->
+        <section class="section">
+            <h2 class="section-title"><span>🚦</span> Khi Trái Tim Bỏ Lỡ Những Tín Hiệu Cảnh Báo</h2>
+
+            <p><em>"Em biết từ lúc đầu có gì đó không đúng. Anh ấy quá hoàn hảo, quá nhanh, quá mãnh liệt. Nhưng em đã bỏ qua tất cả vì... em yêu."</em> - Đây là lời chia sẻ của Nhung, 32 tuổi, sau 3 năm trong một mối quan hệ toxic. Cô không thiếu thông minh - cô là giám đốc marketing. Nhưng cô đã bỏ qua mọi red flags vì <strong>"love is blind"</strong>.</p>
+
+            <p>Theo nghiên cứu từ Journal of Personality and Social Psychology, <strong>73% người</strong> đã từng ở trong mối quan hệ độc hại sau này thừa nhận họ <em>đã thấy dấu hiệu cảnh báo từ đầu</em> - nhưng chọn bỏ qua. Tại sao? Vì khi yêu, não bộ tiết ra dopamine và oxytocin - khiến chúng ta "mù" trước những tín hiệu nguy hiểm.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🧠</span> Góc Nhìn Khoa Học Năng Lượng</div>
+                <p>Từ góc độ Học Thuyết Chuyển Hóa Nội Tâm, red flags là <strong>tín hiệu năng lượng thấp</strong> - rung động dưới 200Hz (sợ hãi, giận dữ, kiểm soát). Green flags là <strong>tín hiệu năng lượng cao</strong> - rung động trên 400Hz (tôn trọng, chấp nhận, tình yêu thật). Khi bạn ở tần số thấp (thiếu tự tin, desperate), bạn không "nghe" được red flags. Khi ở tần số cao (tự yêu, đủ đầy), bạn nhận ra chúng ngay lập tức.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🎯</span> Mục Tiêu Bài Học</div>
+                <p>Bài học này sẽ giúp bạn:<br><br>
+                ✅ Nhận biết <strong>10 Red Flags nghiêm trọng nhất</strong> - những dấu hiệu KHÔNG nên bỏ qua<br>
+                ✅ Nhận biết <strong>10 Green Flags</strong> - những dấu hiệu của đối tác lành mạnh<br>
+                ✅ Hiểu <strong>Yellow Flags</strong> - những dấu hiệu cần quan sát thêm<br>
+                ✅ Quan trọng nhất: <strong>Tự kiểm tra bản thân</strong> - bạn có phải red flag cho người khác không?</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m5-red-green-flags-intro.png" alt="Red Flags và Green Flags">
+            </div>
+            <div class="image-caption">Hình 1: Nhận biết tín hiệu - Bảo vệ trái tim của bạn</div>
+        </section>
+
+        <!-- SECTION 2: Red Flags -->
+        <section class="section">
+            <h2 class="section-title" style="color: var(--error);"><span>🚩</span> 10 Red Flags Nghiêm Trọng Nhất</h2>
+
+            <p>Đây là những dấu hiệu cảnh báo mà bạn KHÔNG nên bỏ qua:</p>
+
+            <div class="flags-grid">
+                <div class="flag-card red">
+                    <div class="flag-emoji">😤</div>
+                    <div class="flag-title">1. Kiểm Soát & Ghen Tuông Quá Mức</div>
+                    <div class="flag-desc">Muốn biết bạn ở đâu 24/7, kiểm tra điện thoại, không cho bạn gặp bạn bè/gia đình, ghen tuông vô cớ.</div>
+                </div>
+
+                <div class="flag-card red">
+                    <div class="flag-emoji">🎭</div>
+                    <div class="flag-title">2. Love Bombing</div>
+                    <div class="flag-desc">Quá nhanh, quá mãnh liệt lúc đầu: "Anh chưa bao giờ yêu ai như em", tặng quà đắt tiền, muốn cam kết ngay. Đây có thể là thao túng.</div>
+                </div>
+
+                <div class="flag-card red">
+                    <div class="flag-emoji">🔄</div>
+                    <div class="flag-title">3. Không Nhận Lỗi</div>
+                    <div class="flag-desc">Mọi vấn đề đều là lỗi của bạn hoặc người khác. Không bao giờ xin lỗi thật lòng. Biện minh cho mọi hành vi.</div>
+                </div>
+
+                <div class="flag-card red">
+                    <div class="flag-emoji">🗣️</div>
+                    <div class="flag-title">4. Nói Xấu Tất Cả Người Yêu Cũ</div>
+                    <div class="flag-desc">"Tất cả người yêu cũ đều điên/xấu/có vấn đề." Nếu ai cũng là "crazy ex", có thể VẤN ĐỀ nằm ở họ.</div>
+                </div>
+
+                <div class="flag-card red">
+                    <div class="flag-emoji">😶</div>
+                    <div class="flag-title">5. Silent Treatment</div>
+                    <div class="flag-desc">Im lặng trừng phạt, không nói chuyện nhiều ngày để "dạy cho bạn một bài học". Đây là hình thức bạo lực tình cảm.</div>
+                </div>
+
+                <div class="flag-card red">
+                    <div class="flag-emoji">🔥</div>
+                    <div class="flag-title">6. Nóng Giận Không Kiểm Soát</div>
+                    <div class="flag-desc">Dễ nổi cáu với những chuyện nhỏ, đập phá đồ đạc, la hét, đe dọa. Hôm nay đập đồ, mai có thể đánh người.</div>
+                </div>
+
+                <div class="flag-card red">
+                    <div class="flag-emoji">📱</div>
+                    <div class="flag-title">7. Giấu Giếm & Nói Dối</div>
+                    <div class="flag-desc">Không cho bạn biết về cuộc sống, che giấu điện thoại, bị bắt gặp nói dối nhiều lần. Thiếu minh bạch = thiếu tin tưởng.</div>
+                </div>
+
+                <div class="flag-card red">
+                    <div class="flag-emoji">🎯</div>
+                    <div class="flag-title">8. Gaslighting</div>
+                    <div class="flag-desc">"Em nhớ nhầm rồi", "Anh có nói thế đâu", "Em đang làm quá lên". Khiến bạn nghi ngờ chính nhận thức của mình.</div>
+                </div>
+
+                <div class="flag-card red">
+                    <div class="flag-emoji">😈</div>
+                    <div class="flag-title">9. Thiếu Tôn Trọng</div>
+                    <div class="flag-desc">Chê bai, hạ thấp bạn (đặc biệt trước mặt người khác), không tôn trọng ranh giới bạn đặt ra, bỏ qua ý kiến của bạn.</div>
+                </div>
+
+                <div class="flag-card red">
+                    <div class="flag-emoji">💸</div>
+                    <div class="flag-title">10. Lợi Dụng Tài Chính</div>
+                    <div class="flag-desc">Vay tiền không trả, ép bạn chi trả mọi thứ, kiểm soát tài chính của bạn, hoặc giấu giếm tình hình tài chính.</div>
+                </div>
+            </div>
+
+            <div class="highlight-box red">
+                <div class="highlight-box-title"><span>⚠️</span> Lưu Ý Quan Trọng</div>
+                <p>Một red flag đơn lẻ có thể là accident. Nhưng nếu bạn thấy <strong>NHIỀU red flags</strong> hoặc một flag <strong>LẶP ĐI LẶP LẠI</strong> - đây là pattern, không phải tai nạn. Hãy tin vào trực giác của bạn!</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m5-red-flags-detailed.png" alt="10 Red Flags chi tiết">
+            </div>
+            <div class="image-caption">Hình 2: 10 Red Flags nghiêm trọng nhất cần nhận biết</div>
+        </section>
+
+        <!-- SECTION 3: Green Flags -->
+        <section class="section">
+            <h2 class="section-title" style="color: var(--success);"><span>💚</span> 10 Green Flags Của Đối Tác Lành Mạnh</h2>
+
+            <p>Đây là những dấu hiệu tích cực cho thấy bạn đang gặp một người tốt:</p>
+
+            <div class="flags-grid">
+                <div class="flag-card green">
+                    <div class="flag-emoji">👂</div>
+                    <div class="flag-title">1. Lắng Nghe Thật Sự</div>
+                    <div class="flag-desc">Chú ý khi bạn nói, nhớ những chi tiết nhỏ, hỏi lại để hiểu rõ hơn. Không chỉ chờ đến lượt mình nói.</div>
+                </div>
+
+                <div class="flag-card green">
+                    <div class="flag-emoji">🙏</div>
+                    <div class="flag-title">2. Tôn Trọng Ranh Giới</div>
+                    <div class="flag-desc">Khi bạn nói "không", họ tôn trọng mà không ép. Không push bạn làm điều bạn không muốn.</div>
+                </div>
+
+                <div class="flag-card green">
+                    <div class="flag-emoji">💬</div>
+                    <div class="flag-title">3. Giao Tiếp Mở & Trung Thực</div>
+                    <div class="flag-desc">Chia sẻ cảm xúc, suy nghĩ một cách trung thực. Không giấu giếm, không nói dối. Sẵn sàng thảo luận vấn đề khó.</div>
+                </div>
+
+                <div class="flag-card green">
+                    <div class="flag-emoji">🤝</div>
+                    <div class="flag-title">4. Nhận Lỗi & Xin Lỗi Thật</div>
+                    <div class="flag-desc">Khi sai, họ nhận lỗi và xin lỗi thật lòng. Không đổ lỗi cho bạn hay hoàn cảnh. Có hành động sửa đổi.</div>
+                </div>
+
+                <div class="flag-card green">
+                    <div class="flag-emoji">🎉</div>
+                    <div class="flag-title">5. Ủng Hộ Thành Công Của Bạn</div>
+                    <div class="flag-desc">Vui mừng thật sự khi bạn thành công. Không ghen tị hay hạ thấp. Khuyến khích bạn phát triển.</div>
+                </div>
+
+                <div class="flag-card green">
+                    <div class="flag-emoji">👨‍👩‍👧</div>
+                    <div class="flag-title">6. Có Quan Hệ Tốt Với Gia Đình/Bạn Bè</div>
+                    <div class="flag-desc">Duy trì các mối quan hệ lành mạnh khác. Không cô lập bản thân. Gia đình/bạn bè họ nói tốt về họ.</div>
+                </div>
+
+                <div class="flag-card green">
+                    <div class="flag-emoji">📊</div>
+                    <div class="flag-title">7. Nhất Quán Giữa Lời Nói & Hành Động</div>
+                    <div class="flag-desc">"Walk the talk" - Nói gì làm nấy. Không hứa suông. Bạn có thể tin vào lời họ nói.</div>
+                </div>
+
+                <div class="flag-card green">
+                    <div class="flag-emoji">🌱</div>
+                    <div class="flag-title">8. Sẵn Sàng Phát Triển</div>
+                    <div class="flag-desc">Nhận feedback và cải thiện. Không defensive. Đầu tư vào bản thân: học hỏi, therapy nếu cần.</div>
+                </div>
+
+                <div class="flag-card green">
+                    <div class="flag-emoji">⚖️</div>
+                    <div class="flag-title">9. Độc Lập Lành Mạnh</div>
+                    <div class="flag-desc">Có cuộc sống riêng: sở thích, bạn bè, mục tiêu. Không phụ thuộc hoàn toàn vào bạn để được hạnh phúc.</div>
+                </div>
+
+                <div class="flag-card green">
+                    <div class="flag-emoji">😊</div>
+                    <div class="flag-title">10. Làm Bạn Cảm Thấy An Toàn</div>
+                    <div class="flag-desc">Bên họ, bạn cảm thấy có thể là chính mình mà không sợ bị phán xét. Bạn cảm thấy bình yên, không lo lắng.</div>
+                </div>
+            </div>
+
+            <div class="highlight-box green">
+                <div class="highlight-box-title"><span>✨</span> Test Quan Trọng</div>
+                <p><strong>Hỏi bạn bè thân/gia đình:</strong> "Mọi người thấy anh/cô ấy thế nào?" Người ngoài thường thấy rõ hơn vì không bị "love blinded". Nếu nhiều người lo lắng về mối quan hệ của bạn - hãy lắng nghe.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m5-green-flags-detailed.png" alt="10 Green Flags chi tiết">
+            </div>
+            <div class="image-caption">Hình 3: 10 Green Flags của đối tác lành mạnh</div>
+        </section>
+
+        <!-- SECTION 4: Yellow Flags -->
+        <section class="section">
+            <h2 class="section-title" style="color: var(--gold);"><span>⚠️</span> Yellow Flags - Cần Theo Dõi</h2>
+
+            <p>Không phải mọi thứ đều đen trắng. Có những "cờ vàng" - những dấu hiệu cần QUAN SÁT THÊM trước khi kết luận:</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🟡</span> Ví Dụ Yellow Flags</div>
+                <ul class="checklist" style="list-style: none;">
+                    <li style="color: var(--text-secondary);"><strong>Mới chia tay gần đây:</strong> Có thể họ chưa heal xong - nhưng cũng có thể đã sẵn sàng. Quan sát thêm.</li>
+                    <li style="color: var(--text-secondary);"><strong>Bận rộn công việc:</strong> Có thể họ đang trong giai đoạn áp lực - nhưng cũng có thể đó là cách họ tránh né commitment.</li>
+                    <li style="color: var(--text-secondary);"><strong>Khác biệt văn hóa/tôn giáo:</strong> Có thể là thử thách - nhưng cũng có thể giải quyết được nếu cả hai tôn trọng.</li>
+                    <li style="color: var(--text-secondary);"><strong>Introvert/Extrovert:</strong> Có thể gây hiểu lầm - nhưng cũng có thể bổ sung cho nhau tốt đẹp.</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>🔍</span> Cách Xử Lý Yellow Flags</div>
+                <p>
+                1. <strong>Quan sát theo thời gian</strong> - Không kết luận vội. Cho thêm thời gian để thấy pattern.<br><br>
+                2. <strong>Hỏi trực tiếp</strong> - Giao tiếp mở để hiểu nguyên nhân đằng sau.<br><br>
+                3. <strong>Xem họ phản ứng thế nào</strong> - Khi bạn nêu concern, họ defensive hay sẵn sàng thảo luận?<br><br>
+                4. <strong>Tin trực giác</strong> - Nếu có gì đó "off" - dù chưa rõ là gì - hãy chú ý.
+                </p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m5-yellow-flags.png" alt="Yellow Flags cần theo dõi">
+            </div>
+            <div class="image-caption">Hình 4: Yellow Flags - Quan sát thêm trước khi kết luận</div>
+        </section>
+
+        <!-- SECTION 5: Ví Dụ Thực Tế -->
+        <section class="section">
+            <h2 class="section-title"><span>💑</span> Câu Chuyện Thực Tế</h2>
+
+            <p>Hiểu lý thuyết là một chuyện, nhưng thấy nó hoạt động trong thực tế mới thuyết phục. Đây là hai câu chuyện từ các học viên của GEM:</p>
+
+            <div class="highlight-box red">
+                <div class="highlight-box-title"><span>👩</span> Ngọc, 29 tuổi - Kế toán, Đà Nẵng</div>
+                <p><strong>Câu chuyện:</strong> Ngọc gặp Minh qua app hẹn hò. Tuần đầu tiên, anh ấy nhắn tin liên tục, gọi điện 3-4 lần/ngày, tặng hoa mỗi ngày, và nói <em>"Anh chưa bao giờ yêu ai như em"</em>. Ngọc cảm thấy như đang trong phim tình cảm.<br><br>
+
+                <strong>Red Flags cô bỏ qua:</strong><br>
+                🚩 <strong>Love Bombing</strong> - Quá mãnh liệt, quá nhanh<br>
+                🚩 <strong>Kiểm soát</strong> - Muốn biết cô ở đâu 24/7, không thích cô đi với bạn<br>
+                🚩 <strong>Nói xấu ex</strong> - "Tất cả người yêu cũ đều điên"<br>
+                🚩 <strong>Gaslighting</strong> - Khi cô nêu concern, anh ấy nói "Em nghĩ nhiều quá"<br><br>
+
+                <strong>Kết quả:</strong> Sau 8 tháng, Ngọc phát hiện Minh có 2 người yêu khác cùng lúc. Khi đối mặt, anh ấy nói <em>"Tại em không đủ tốt nên anh phải tìm người khác."</em><br><br>
+
+                <strong>Bài học:</strong> <em>"Giờ nhìn lại, tất cả dấu hiệu đều ở đó từ ngày đầu. Nhưng em quá hạnh phúc để thấy. Nếu ai đó 'quá hoàn hảo' ngay từ đầu - hãy CẢNH GIÁC, không phải vui mừng."</em></p>
+            </div>
+
+            <div class="highlight-box green">
+                <div class="highlight-box-title"><span>👨</span> Phong, 36 tuổi - Kiến trúc sư, Hà Nội</div>
+                <p><strong>Câu chuyện:</strong> Sau khi ly hôn, Phong rất sợ hẹn hò lại. Anh học về red/green flags và đặt ra tiêu chuẩn rõ ràng. Khi gặp Hà qua bạn giới thiệu, anh quan sát cẩn thận thay vì "fall in love at first sight".<br><br>
+
+                <strong>Green Flags anh nhận ra:</strong><br>
+                💚 <strong>Nhất quán</strong> - Hà nói gì làm nấy, không hứa suông<br>
+                💚 <strong>Tôn trọng ranh giới</strong> - Khi Phong cần không gian, cô ấy không push<br>
+                💚 <strong>Nhận lỗi</strong> - Khi sai, cô ấy xin lỗi thật lòng và sửa đổi<br>
+                💚 <strong>Quan hệ tốt</strong> - Bạn bè và gia đình cô ấy nói tốt về cô ấy<br>
+                💚 <strong>Ủng hộ</strong> - Vui mừng thật sự khi Phong thăng chức<br><br>
+
+                <strong>Kết quả:</strong> Phong và Hà đã kết hôn 2 năm. <em>"Lần này tôi không 'yêu mù quáng' - tôi yêu có ý thức. Tôi chọn người có green flags thay vì chọn người khiến tim đập nhanh. Kết quả? Bình yên hơn bao giờ hết."</em></p>
+            </div>
+        </section>
+
+        <!-- SECTION 6: Tự Kiểm Tra -->
+        <section class="section">
+            <h2 class="section-title"><span>🪞</span> Và Bạn? Bạn Có Phải Red Flag Không?</h2>
+
+            <p>Đừng chỉ tìm flags ở người khác - hãy tự kiểm tra bản thân. Đây là câu hỏi quan trọng nhất của bài học này. Tất cả chúng ta đều có thể cải thiện:</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🔍</span> Checklist Tự Vấn - Bạn Là Red Flag?</div>
+                <p>
+                <strong>Về giao tiếp:</strong><br>
+                • Bạn có dùng <strong>silent treatment</strong> (im lặng trừng phạt) khi giận?<br>
+                • Bạn có <strong>nói xấu tất cả người yêu cũ</strong> - "họ đều điên/xấu"?<br>
+                • Bạn có <strong>gaslighting</strong> - "Em nhớ nhầm rồi", "Anh có nói thế đâu"?<br><br>
+
+                <strong>Về kiểm soát:</strong><br>
+                • Bạn có <strong>ghen tuông vô cớ</strong>, muốn kiểm tra điện thoại đối tác?<br>
+                • Bạn có <strong>không thích</strong> khi đối tác đi chơi với bạn bè?<br>
+                • Bạn có cảm thấy <strong>bất an</strong> khi không biết họ đang làm gì?<br><br>
+
+                <strong>Về trách nhiệm:</strong><br>
+                • Bạn có <strong>đổ lỗi cho người khác</strong> khi sai, không nhận lỗi?<br>
+                • Bạn có <strong>ghen tị</strong> khi đối tác thành công?<br>
+                • Bạn có <strong>phụ thuộc cảm xúc</strong> hoàn toàn vào đối tác?<br>
+                </p>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>💪</span> Tin Tốt: Red Flags Có Thể Được Chữa Lành</div>
+                <p>Nếu bạn nhận ra mình có một số red flags - <strong>KHÔNG SAO CẢ</strong>. Quan trọng là bạn NHẬN RA và SẴN SÀNG SỬA ĐỔI.<br><br>
+
+                Nhiều red flags bắt nguồn từ <strong>vết thương chưa lành</strong>: kiểm soát thường đến từ bất an, gaslighting từ việc được nuôi dạy bởi cha mẹ gaslighting, im lặng trừng phạt từ việc không được dạy cách giao tiếp lành mạnh.<br><br>
+
+                Hành trình khóa học này - đặc biệt Module 1 (Chữa lành), Module 2 (Yêu bản thân), Module 3 (Nâng tần số) - đang giúp bạn <strong>chữa lành và trở thành green flag</strong> cho người khác.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m5-self-check.png" alt="Tự kiểm tra bản thân">
+            </div>
+            <div class="image-caption">Hình 5: Tự kiểm tra - Trở thành "Green Flag" cho người khác</div>
+        </section>
+
+        <!-- SECTION 7: FAQ -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🤔</span> Một red flag có đủ để kết thúc mối quan hệ không?</div>
+                <p>Tùy thuộc vào mức độ nghiêm trọng. Một số red flags là <strong>dealbreakers ngay lập tức</strong>: bạo lực, ngoại tình, nghiện (ma túy, cờ bạc). Những cái khác (như giao tiếp kém, không nhận lỗi) có thể được cải thiện NẾU họ nhận ra và NỖ LỰC thay đổi. Câu hỏi quan trọng: <strong>"Họ có thừa nhận vấn đề và muốn thay đổi không?"</strong> Nếu không - đó là red flag lớn nhất.</p>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>🤔</span> Tôi thấy red flags nhưng vẫn yêu họ. Làm sao?</div>
+                <p>Đây là tình huống rất phổ biến vì <strong>não bộ khi yêu tiết dopamine</strong> - giống như nghiện. Bạn biết họ không tốt, nhưng vẫn khao khát họ. Giải pháp:<br><br>
+
+                1. <strong>Viết ra tất cả red flags</strong> - nhìn thấy trên giấy giúp bạn tỉnh táo hơn.<br>
+                2. <strong>Nói chuyện với người tin tưởng</strong> - bạn bè/gia đình thường thấy rõ hơn.<br>
+                3. <strong>Tạm xa cách</strong> - No contact 2-4 tuần để dopamine giảm và bạn suy nghĩ được rõ ràng hơn.<br>
+                4. <strong>Tìm hỗ trợ chuyên gia</strong> - therapist có thể giúp bạn hiểu pattern của mình.</p>
+            </div>
+
+            <div class="highlight-box" style="background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 240, 255, 0.05)); border-color: rgba(0, 240, 255, 0.3);">
+                <div class="highlight-box-title" style="color: var(--cyan);"><span>🤔</span> Làm sao biết ai đó là green flag thật hay chỉ giả vờ?</div>
+                <p>Bí quyết: <strong>THỜI GIAN và STRESS</strong>. Người giả vờ thường không giữ được mặt nạ quá 3-6 tháng, đặc biệt khi gặp stress. Quan sát họ trong các tình huống:<br><br>
+
+                • Họ phản ứng thế nào khi <strong>mệt mỏi, áp lực</strong>?<br>
+                • Họ đối xử thế nào với <strong>người phục vụ, nhân viên</strong>?<br>
+                • Họ phản ứng thế nào khi <strong>bạn từ chối</strong> điều gì đó?<br>
+                • Họ làm gì khi <strong>nghĩ không ai nhìn</strong>?<br><br>
+
+                Green flags thật = <strong>nhất quán qua thời gian</strong>. Đừng vội cam kết trước 6 tháng quen biết.</p>
+            </div>
+
+            <div class="highlight-box" style="background: linear-gradient(135deg, rgba(255, 105, 180, 0.15), rgba(255, 105, 180, 0.05)); border-color: rgba(255, 105, 180, 0.3);">
+                <div class="highlight-box-title" style="color: #FF69B4;"><span>🤔</span> Người yêu có red flag nhưng muốn thay đổi - có nên cho cơ hội?</div>
+                <p>Có thể, NẾU họ đáp ứng <strong>3 điều kiện</strong>:<br><br>
+
+                1. <strong>TỰ NHẬN RA</strong> vấn đề (không phải bạn phải chỉ ra mãi).<br>
+                2. <strong>HÀNH ĐỘNG CỤ THỂ</strong> để thay đổi (đi therapy, đọc sách, thực hành hàng ngày) - không chỉ nói "anh sẽ cố".<br>
+                3. <strong>KIÊN TRÌ</strong> thay đổi qua thời gian (ít nhất 3-6 tháng), không chỉ 1-2 tuần rồi quay lại như cũ.<br><br>
+
+                Nếu họ không đáp ứng được cả 3 điều kiện trên, bạn đang hy vọng vào <strong>tiềm năng</strong> thay vì <strong>thực tế</strong>. Đó là một trong những sai lầm phổ biến nhất.</p>
+            </div>
+        </section>
+
+        <!-- SUMMARY -->
+        <section class="section">
+            <div class="summary-box">
+                <h3 class="summary-title"><span>📌</span> Tóm Tắt Bài Học</h3>
+                <ul class="summary-list">
+                    <li><strong>Red Flags (10 dấu hiệu nghiêm trọng):</strong> Kiểm soát, Love bombing, Không nhận lỗi, Gaslighting, Nóng giận, Silent treatment, Nói xấu tất cả ex, Giấu giếm, Thiếu tôn trọng, Lợi dụng tài chính</li>
+                    <li><strong>Green Flags (10 dấu hiệu tích cực):</strong> Lắng nghe, Tôn trọng ranh giới, Nhận lỗi thật, Ủng hộ thành công của bạn, Nhất quán lời nói & hành động, Có quan hệ tốt với gia đình/bạn bè</li>
+                    <li><strong>Yellow Flags:</strong> Cần quan sát thêm, giao tiếp mở, không kết luận vội</li>
+                    <li><strong>Nguyên tắc vàng:</strong> Nhiều red flags hoặc lặp lại = Pattern, không phải tai nạn. Tin trực giác của bạn!</li>
+                    <li><strong>Hỏi người ngoài:</strong> Bạn bè/gia đình thường thấy rõ hơn vì không bị "love blinded"</li>
+                    <li><strong>Tự kiểm tra:</strong> Bạn cũng có thể có red flags - hãy nhận ra và chữa lành để trở thành green flag cho người khác</li>
+                </ul>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>

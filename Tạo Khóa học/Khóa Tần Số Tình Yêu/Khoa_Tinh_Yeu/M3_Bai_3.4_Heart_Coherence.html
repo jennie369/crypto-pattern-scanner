@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 3.4: Heart Coherence - Kỹ Thuật Tim Mạch | Khóa Tần Số Tình Yêu</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--burgundy); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .highlight-box.purple { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05)); border-color: rgba(106, 91, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.purple { border-left-color: var(--purple); } }
+        .highlight-box.purple .highlight-box-title { color: var(--purple); }
+
+        .highlight-box.cyan { background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 240, 255, 0.05)); border-color: rgba(0, 240, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.cyan { border-left-color: var(--cyan); } }
+        .highlight-box.cyan .highlight-box-title { color: var(--cyan); }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        @media (min-width: 601px) { .flow-step:hover { border-color: var(--gold); transform: translateX(8px); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .patterns-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .patterns-grid { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .pattern-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); text-align: center; transition: all 0.3s ease; }
+        @media (max-width: 600px) { .pattern-card { border: none; border-radius: 0; padding: var(--space-md); } }
+        @media (min-width: 601px) { .pattern-card:hover { border-color: var(--gold); transform: translateY(-4px); } }
+        .pattern-icon { font-size: 2.5rem; margin-bottom: var(--space-sm); }
+        .pattern-name { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .pattern-desc { font-size: 0.85rem; color: var(--text-muted); }
+
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+
+        /* ==================== QUIZ SECTION ==================== */
+        .quiz-section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-top: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-section { border: none; border-radius: 0; padding: 0; margin-top: 0; border-top: 8px solid var(--bg-primary); } }
+        .quiz-header { text-align: center; margin-bottom: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-header { padding: var(--space-lg) 16px var(--space-md); margin-bottom: 0; } }
+        .quiz-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+        .quiz-question { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-question { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; margin-bottom: 0; border-bottom: 1px solid var(--glass-border); } }
+        .question-number { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; font-weight: 700; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .question-text { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-lg); line-height: 1.6; }
+
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        @media (max-width: 600px) { .quiz-options { gap: 1px; background: var(--glass-border); margin-left: -16px; margin-right: -16px; margin-left: calc(-16px - 4px); } }
+        .quiz-option { display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; transition: all 0.3s ease; }
+        @media (max-width: 600px) { .quiz-option { border: none; border-radius: 0; border-left: 4px solid transparent; padding: var(--space-md) 16px; } }
+        .quiz-option:hover:not(.disabled) { border-color: var(--gold); background: var(--bg-card); }
+        @media (max-width: 600px) { .quiz-option:hover:not(.disabled) { border-left-color: var(--gold); } }
+        .quiz-option.selected { border-color: var(--gold); background: rgba(255, 189, 89, 0.1); }
+        @media (max-width: 600px) { .quiz-option.selected { border-left-color: var(--gold); } }
+        .quiz-option.correct { border-color: var(--success) !important; background: rgba(0, 200, 83, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.correct { border-left-color: var(--success) !important; } }
+        .quiz-option.incorrect { border-color: var(--error) !important; background: rgba(255, 82, 82, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.incorrect { border-left-color: var(--error) !important; } }
+        .quiz-option.disabled { opacity: 0.7; cursor: not-allowed; }
+        .option-marker { width: 28px; height: 28px; min-width: 28px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+        .quiz-option.selected .option-marker { background: var(--gold); border-color: var(--gold); color: var(--navy-dark); }
+        .quiz-option.correct .option-marker { background: var(--success); border-color: var(--success); color: white; }
+        .quiz-option.incorrect .option-marker { background: var(--error); border-color: var(--error); color: white; }
+        .option-text { flex: 1; color: var(--text-secondary); }
+
+        .question-feedback { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--space-sm); display: none; }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); }
+        .question-feedback.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .quiz-result { text-align: center; padding: var(--space-xl); display: none; }
+        .quiz-result.show { display: block; }
+        .result-score { font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: var(--space-md); }
+        .result-text { font-size: 1.25rem; font-weight: 700; margin-bottom: var(--space-sm); }
+        .result-message { color: var(--text-muted); }
+
+        .quiz-buttons { display: flex; justify-content: center; padding: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-buttons { padding: var(--space-lg) 16px; } }
+        .quiz-btn { padding: var(--space-md) var(--space-xl); border-radius: var(--radius-md); font-weight: 700; cursor: pointer; border: none; font-family: inherit; background: var(--glass-bg); color: var(--text-primary); border: 2px solid var(--glass-border); }
+        .quiz-btn:hover { border-color: var(--gold); }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>💕</span>
+                <span>Module 3</span>
+            </div>
+            <div class="lesson-chapter">Chapter 3 - Nâng Tần Số Tình Yêu</div>
+            <h1 class="lesson-title">Heart Coherence - Đồng Bộ Trái Tim</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 3.4</span></div>
+                <div class="meta-item"><span>⏱️</span><span>30 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- SECTION 1: Opening Hook -->
+        <section class="section">
+            <h2 class="section-title"><span>❤️</span> Trái Tim Có "Não Bộ" Riêng?</h2>
+
+            <p>Có một khám phá khoa học sẽ thay đổi hoàn toàn cách bạn hiểu về tình yêu: Trái tim bạn không chỉ là một máy bơm – nó có "não bộ" riêng với hơn 40,000 tế bào thần kinh, có khả năng học hỏi, ghi nhớ, và thậm chí ra quyết định độc lập với não bộ trong đầu.</p>
+
+            <p>Còn đây là điều thú vị hơn: Trái tim phát ra trường điện từ mạnh gấp 60 lần và rộng gấp 5,000 lần so với não bộ. Trường điện từ này có thể được đo từ cách xa 1-3 mét – và nó ảnh hưởng trực tiếp đến những người xung quanh bạn. Đây chính là cơ sở khoa học giải thích tại sao bạn có thể "cảm nhận" năng lượng của một người khi họ bước vào phòng, ngay cả trước khi nhìn thấy họ.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>💓</span> Heart Coherence Là Gì?</div>
+                <p>Heart Coherence (Đồng Bộ Trái Tim) là trạng thái khi nhịp tim, hơi thở, cảm xúc, và não bộ hoạt động hài hòa với nhau như một dàn nhạc giao hưởng. Trong trạng thái này, sóng HRV (Heart Rate Variability) của bạn trở nên mượt mà, nhịp nhàng – và theo Học Thuyết Chuyển Hóa Nội Tâm, đây là lúc bạn rung động ở tần số cao nhất của tình yêu. HeartMath Institute – viện nghiên cứu hàng đầu thế giới về tim-não – đã chứng minh rằng Heart Coherence có thể được học và thực hành bởi bất kỳ ai.</p>
+            </div>
+
+            <p>Trong Học Thuyết Chuyển Hóa Nội Tâm, Heart Coherence là "công nghệ" tối ưu để nâng tần số năng lượng. Khi bạn ở trạng thái coherence, bạn không chỉ cảm thấy tốt hơn – bạn đang phát ra tần số tình yêu ảnh hưởng đến mọi người xung quanh, và theo nguyên lý Trong-Ngoài Tương Ứng, thu hút những trải nghiệm phù hợp với tần số đó.</p>
+
+            <div class="image-container">
+                <img src="images/m3-heartmath-intro.png" alt="HeartMath Institute">
+            </div>
+            <div class="image-caption">Hình 1: Trường điện từ của trái tim mạnh gấp 60 lần não bộ</div>
+        </section>
+
+        <!-- SECTION 2: Khoa Học HeartMath -->
+        <section class="section">
+            <h2 class="section-title"><span>🔬</span> Khoa Học Đằng Sau HeartMath Institute</h2>
+
+            <p>HeartMath Institute được thành lập năm 1991 tại California bởi Doc Childre, với sứ mệnh nghiên cứu mối quan hệ giữa tim, não, và cảm xúc. Sau hơn 30 năm nghiên cứu với hàng nghìn bài báo khoa học được peer-reviewed, họ đã khám phá ra những điều đáng kinh ngạc:</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🧠</span> Heart-Brain Communication</div>
+                <p>Tim gửi nhiều thông tin đến não hơn não gửi đến tim. Có một "đường cao tốc thần kinh" từ tim lên não gọi là dây thần kinh phế vị (vagus nerve). Khi tim ở trạng thái coherence, nó gửi tín hiệu "tất cả ổn" lên não, giúp não hoạt động tối ưu. Ngược lại, khi tim "loạn nhịp" do stress, não nhận tín hiệu "nguy hiểm" và chuyển sang chế độ sinh tồn – lúc này bạn không thể tư duy sáng suốt hay cảm nhận tình yêu.</p>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>📊</span> HRV - Thước Đo Coherence</div>
+                <p>Heart Rate Variability (Biến thiên nhịp tim) là khoảng cách thời gian giữa các nhịp tim liên tiếp. Trái với suy nghĩ thông thường, nhịp tim khỏe mạnh KHÔNG đều đặn như metronome – nó có biến thiên nhẹ. Tuy nhiên, biến thiên này có thể "hỗn loạn" (incoherent) hoặc "hài hòa" (coherent). Khi bạn ở trạng thái coherence, đồ thị HRV của bạn giống như một làn sóng êm đềm, nhịp nhàng – đây là dấu hiệu của sức khỏe tim mạch và tinh thần tối ưu.</p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>⚡</span> Electromagnetic Field</div>
+                <p>Trường điện từ của tim có thể ảnh hưởng đến HRV của người khác đứng gần bạn. Trong một nghiên cứu, khi một người ở trạng thái coherence ngồi cạnh người khác, HRV của người thứ hai cũng bắt đầu đồng bộ – ngay cả khi họ không giao tiếp trực tiếp. Đây là cơ sở khoa học của "năng lượng tình yêu" – bạn thực sự có thể ảnh hưởng đến cảm xúc của người khác qua trường điện từ của tim.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: Lợi Ích -->
+        <section class="section">
+            <h2 class="section-title"><span>✨</span> 4 Lợi Ích Đã Được Chứng Minh</h2>
+
+            <p>Khi bạn thực hành Heart Coherence đều đặn, nghiên cứu của HeartMath cho thấy những thay đổi đo lường được:</p>
+
+            <div class="patterns-grid">
+                <div class="pattern-card">
+                    <div class="pattern-icon">🧘</div>
+                    <div class="pattern-name">Giảm Stress 50%</div>
+                    <div class="pattern-desc">Cortisol (hormone stress) giảm trung bình 23%, DHEA (hormone trẻ hóa) tăng 100% sau 30 ngày thực hành</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">💭</div>
+                    <div class="pattern-name">IQ Tăng 15-20 Điểm</div>
+                    <div class="pattern-desc">Não bộ hoạt động tối ưu khi nhận tín hiệu coherent từ tim – cải thiện khả năng tập trung, sáng tạo, và ra quyết định</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">💕</div>
+                    <div class="pattern-name">Kết Nối Sâu Hơn</div>
+                    <div class="pattern-desc">Trường điện từ coherent của bạn "đồng bộ" với người khác, tạo ra sự kết nối tự nhiên và tin tưởng</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">🌟</div>
+                    <div class="pattern-name">Trực Giác Mạnh Mẽ</div>
+                    <div class="pattern-desc">Nghiên cứu cho thấy tim có thể "cảm nhận" thông tin 4-7 giây TRƯỚC KHI não nhận ra – đây là cơ sở khoa học của trực giác</div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m3-coherence-benefits.png" alt="Lợi ích Heart Coherence">
+            </div>
+            <div class="image-caption">Hình 2: 4 lợi ích chính của trạng thái Heart Coherence</div>
+        </section>
+
+        <!-- SECTION 4: Quick Coherence Technique -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Quick Coherence Technique - 60 Giây Thay Đổi Tần Số</h2>
+
+            <p>HeartMath đã phát triển kỹ thuật "Quick Coherence" – có thể thực hiện trong 60 giây để đạt trạng thái coherence. Đây là kỹ thuật bạn có thể dùng bất cứ lúc nào: trước cuộc họp quan trọng, khi cảm thấy lo lắng, trước khi gặp người yêu, hoặc khi cần lấy lại bình tĩnh.</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Heart Focus (Tập Trung Vào Tim)</div>
+                        <div class="flow-step-desc">Đặt tay lên ngực, vùng tim. Hướng toàn bộ sự chú ý vào khu vực này – như thể bạn có một "con mắt" ở đó. Việc đặt tay tạo ra feedback xúc giác, giúp bạn dễ tập trung hơn. Duy trì sự chú ý này trong 10-15 giây.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Heart Breathing (Thở Qua Tim)</div>
+                        <div class="flow-step-desc">Tưởng tượng bạn đang thở QUA tim – hơi thở vào và ra qua vùng ngực. Thở chậm và sâu: 5-6 giây hít vào, 5-6 giây thở ra (khoảng 5-6 nhịp thở mỗi phút). Nhịp thở này được gọi là "Resonance Frequency" – tần số cộng hưởng tối ưu cho HRV.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Heart Feeling (Cảm Nhận Tích Cực) ⭐ QUAN TRỌNG NHẤT</div>
+                        <div class="flow-step-desc">Trong khi tiếp tục thở, gợi lên một cảm xúc tích cực – biết ơn, yêu thương, hoặc trân trọng. KHÔNG CHỈ NGHĨ về cảm xúc – bạn phải CẢM NHẬN nó trong cơ thể. Nhớ lại khuôn mặt của người bạn yêu thương, hoặc khoảnh khắc khiến bạn cảm thấy biết ơn sâu sắc. Để cảm xúc này tỏa ra từ tim.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>⚡</span> Tại Sao Bước 3 Là Chìa Khóa?</div>
+                <p>Bước 1 và 2 giúp bạn "mở cửa", nhưng bước 3 là "nhiên liệu" cho coherence. Nghiên cứu HeartMath cho thấy: chỉ tập trung và thở chậm tạo ra coherence CƠ BẢN, nhưng khi thêm cảm xúc tích cực (đặc biệt là biết ơn và yêu thương), mức độ coherence TĂNG GẤP 2-3 LẦN. Cảm xúc là "tín hiệu" mà tim gửi đến não – cảm xúc tích cực = tín hiệu coherent.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m3-quick-coherence.png" alt="Quick Coherence Technique">
+            </div>
+            <div class="image-caption">Hình 3: 3 bước của Quick Coherence Technique</div>
+        </section>
+
+        <!-- SECTION 5: Ví Dụ Thực Tế -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Câu Chuyện Chuyển Hóa Thực Tế</h2>
+
+            <p>Để hiểu rõ hơn sức mạnh của Heart Coherence, hãy cùng theo dõi hành trình của hai học viên đã áp dụng kỹ thuật này:</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💝</span> Thu, 36 tuổi – Từ lo âu đến bình yên trong tình yêu</div>
+                <p>Thu mắc chứng lo âu trong các mối quan hệ – luôn sợ bị bỏ rơi, liên tục check điện thoại xem người yêu có nhắn tin không, và thường xuyên gây hấn vì những điều nhỏ nhặt. Điều này đã phá hủy 2 mối quan hệ liên tiếp.</p>
+                <p style="margin-top: 12px;">"Khi học Heart Coherence, tôi không tin nó sẽ hiệu quả," Thu chia sẻ. "Nhưng tôi thử mỗi sáng và mỗi tối, chỉ 60 giây mỗi lần. Sau 2 tuần, điều kỳ lạ xảy ra: khi người yêu mới không trả lời tin nhắn ngay, thay vì hoảng loạn, tôi tự động đặt tay lên tim và thở. Cảm giác lo âu... tan biến."</p>
+                <p style="margin-top: 12px;">Sau 3 tháng thực hành đều đặn, Thu nhận ra: "Heart Coherence không chỉ giúp tôi bình tĩnh hơn – nó thay đổi cách tôi PHẢN ỨNG với mọi thứ. Tôi không còn phụ thuộc vào việc người khác làm gì để cảm thấy an toàn. Sự an toàn đến từ bên trong tim tôi."</p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>💙</span> Nam, 44 tuổi – Kết nối lại với vợ sau 15 năm hôn nhân</div>
+                <p>Nam và vợ đã cưới 15 năm, nhưng những năm gần đây họ như "hai người xa lạ sống chung nhà". Không cãi nhau, nhưng cũng không còn cảm xúc. Nam mô tả: "Chúng tôi như hai đồng nghiệp nuôi con chung."</p>
+                <p style="margin-top: 12px;">Nam bắt đầu thực hành Heart Coherence, không nói với vợ. Mỗi tối trước khi ngủ, anh đặt tay lên tim, thở chậm, và gợi lên hình ảnh vợ trong ngày cưới – khoảnh khắc anh cảm thấy yêu cô nhất. "Ban đầu, tôi không cảm thấy gì cả," anh thú nhận. "Nhưng tôi kiên trì. Sau khoảng 10 ngày, một điều lạ xảy ra: khi tôi làm vậy, tim tôi thực sự ấm lên. Và ngày hôm sau, tôi thấy mình muốn ôm vợ – điều tôi đã không làm cả năm."</p>
+                <p style="margin-top: 12px;">2 tháng sau, Nam chia sẻ kỹ thuật với vợ. Họ bắt đầu thực hành cùng nhau – ngồi đối diện, đặt tay lên tim nhau, và thở đồng bộ. "Đó là những khoảnh khắc kết nối sâu nhất chúng tôi có trong 15 năm. Không cần nói gì – chỉ cần cảm nhận tim nhau. Tình yêu đã trở lại."</p>
+            </div>
+        </section>
+
+        <!-- SECTION 6: Thiền Heart Coherence -->
+        <section class="section">
+            <h2 class="section-title"><span>🧘</span> Thiền Heart Coherence 5 Phút</h2>
+
+            <p>Dưới đây là hướng dẫn thiền Heart Coherence chi tiết bạn có thể thực hành mỗi ngày. Script này kết hợp Quick Coherence với affirmations để tối đa hóa hiệu quả:</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🕯️</span> Script Thiền Heart Coherence 5 Phút</div>
+                <p>
+                <strong>0:00-1:00 | Chuẩn Bị:</strong> Ngồi thoải mái, lưng thẳng. Nhắm mắt hoặc nhìn xuống. Đặt một hoặc hai tay lên vùng tim. Hít thở sâu 3 lần để thư giãn cơ thể. Buông bỏ mọi suy nghĩ về quá khứ và tương lai – chỉ có khoảnh khắc này.<br><br>
+                <strong>1:00-2:00 | Heart Focus:</strong> Hướng toàn bộ sự chú ý vào vùng tim. Tưởng tượng có một ánh sáng ấm áp màu hồng hoặc vàng kim tỏa ra từ tim. Mỗi nhịp đập, ánh sáng này mạnh mẽ hơn, rộng lớn hơn.<br><br>
+                <strong>2:00-3:00 | Heart Breathing:</strong> Bắt đầu thở qua tim. Hít vào 5 giây – tưởng tượng hơi thở mang theo năng lượng yêu thương chảy vào tim. Thở ra 5 giây – ánh sáng từ tim tỏa ra khắp cơ thể. Duy trì nhịp thở này.<br><br>
+                <strong>3:00-4:30 | Heart Feeling:</strong> Gợi lên cảm xúc yêu thương. Nhớ lại khuôn mặt của người bạn yêu thương nhất – có thể là cha mẹ, con cái, hoặc thú cưng. Nhớ lại một khoảnh khắc khiến bạn cảm thấy biết ơn sâu sắc. CẢM NHẬN tình yêu và biết ơn đó trong tim. Để cảm xúc này lan tỏa khắp cơ thể.<br><br>
+                <strong>4:30-5:00 | Self-Love Affirmation:</strong> Giữ nguyên cảm xúc yêu thương, gửi tình yêu này đến bản thân. Nói thầm trong tim: "Tôi yêu thương và chấp nhận bản thân hoàn toàn. Tôi xứng đáng được yêu." Từ từ mở mắt, mang theo cảm giác này vào ngày mới.
+                </p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m3-meditation-guide.png" alt="Hướng dẫn thiền Heart Coherence">
+            </div>
+            <div class="image-caption">Hình 4: Thiền Heart Coherence 5 phút mỗi ngày</div>
+        </section>
+
+        <!-- SECTION 7: FAQ -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🤔</span> "Làm sao tôi biết mình đã đạt trạng thái coherence?"</div>
+                <p>Có một số dấu hiệu: (1) Cảm giác ấm áp, lan tỏa ở vùng ngực, (2) Hơi thở tự nhiên chậm lại và sâu hơn, (3) Cơ thể thư giãn, vai hạ xuống, (4) Tâm trí yên tĩnh, ít suy nghĩ xao lạc, (5) Cảm giác "mở rộng" – như thể bạn lớn hơn cơ thể vật lý. Ban đầu, bạn có thể không nhận ra rõ ràng – nhưng sau vài tuần thực hành, những dấu hiệu này trở nên rõ rệt hơn.</p>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>🤔</span> "Tôi không thể gợi lên cảm xúc tích cực. Phải làm sao?"</div>
+                <p>Nếu bạn đang ở trạng thái stress hoặc trầm cảm, việc gợi lên cảm xúc tích cực có thể khó khăn. Thử những cách sau: (1) Bắt đầu với điều nhỏ nhất – biết ơn vì có không khí để thở, có mái nhà, (2) Nhớ lại khoảnh khắc với thú cưng hoặc em bé – cảm xúc với động vật và trẻ em thường dễ tiếp cận hơn, (3) Tưởng tượng một cảnh thiên nhiên đẹp – biển, núi, rừng. Điều quan trọng là bắt đầu với bất cứ cảm xúc tích cực NHỎ NHẤTnào – rồi dần mở rộng.</p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>🤔</span> "Nên thực hành bao lâu và bao nhiêu lần mỗi ngày?"</div>
+                <p>HeartMath khuyến nghị: Tối thiểu 3 lần mỗi ngày x 60 giây mỗi lần (Quick Coherence). Lý tưởng: 2 lần x 5 phút (sáng và tối). Để có kết quả tối ưu: Thêm 1 phiên 15-20 phút mỗi ngày. Quan trọng hơn thời lượng là CONSISTENCY (sự nhất quán) – 60 giây mỗi ngày trong 30 ngày hiệu quả hơn 30 phút một lần rồi bỏ.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🤔</span> "Heart Coherence có thể thay thế thiền định không?"</div>
+                <p>Heart Coherence là một DẠNG thiền định – tập trung vào tim thay vì hơi thở hay mantras. Nó có ưu điểm là dễ tiếp cận hơn cho người mới vì có "anchor" rõ ràng (tay trên tim) và mục tiêu cụ thể (cảm xúc tích cực). Bạn có thể thực hành Heart Coherence như thiền định độc lập, hoặc kết hợp với các phương pháp thiền khác. Nhiều người thấy Heart Coherence là "cửa ngõ" dẫn họ vào thiền định sâu hơn.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 8: Tổng Kết Module 3 -->
+        <section class="section">
+            <h2 class="section-title"><span>🎓</span> Tổng Kết Module 3 - Nâng Tần Số Tình Yêu</h2>
+
+            <p>Chúc mừng bạn đã hoàn thành Module 3! Đây là module quan trọng giúp bạn CHỦĐỘNG điều chỉnh năng lượng tình yêu của mình – thay vì để ngoại cảnh quyết định tần số của bạn.</p>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>📋</span> Những Gì Bạn Đã Học Trong Module 3</div>
+                <ul class="summary-list">
+                    <li><strong>Bài 3.1:</strong> 7 Tầng Tâm Thức về Tình Yêu (50Hz - 540Hz) dựa trên thang Hawkins và cách đánh giá tần số hiện tại của bạn</li>
+                    <li><strong>Bài 3.2:</strong> Kỹ thuật "The Work" của Byron Katie – 4 câu hỏi để chuyển hóa niềm tin giới hạn và kỹ thuật Turnaround</li>
+                    <li><strong>Bài 3.3:</strong> 30 Affirmations cho tình yêu theo 3 cấp độ (Stepping Stones, Building, Mastery) và 5 nguyên tắc viết affirmations hiệu quả</li>
+                    <li><strong>Bài 3.4:</strong> Heart Coherence – kỹ thuật đồng bộ trái tim của HeartMath để phát ra tần số tình yêu mạnh mẽ nhất</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🎯</span> Cam Kết 7 Ngày Tiếp Theo</div>
+                <p>Mỗi ngày trong 7 ngày tới: (1) Sáng: 60 giây Quick Coherence ngay khi thức dậy, (2) Tối: 5 phút thiền Heart Coherence trước ngủ. Kết hợp với 3 affirmations bạn đã chọn ở Bài 3.3. Ghi chép cảm xúc và thay đổi bạn nhận thấy. Đây là nền tảng chuẩn bị cho Module 4 – Sẵn Sàng Đón Tri Kỷ.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m3-module-summary.png" alt="Tổng kết Module 3">
+            </div>
+            <div class="image-caption">Hình 5: Roadmap hoàn chỉnh Module 3 - Nâng Tần Số Tình Yêu</div>
+        </section>
+
+        <!-- QUIZ SECTION - Module 3 -->
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">📝 Kiểm Tra Kiến Thức Module 3</h2>
+                <p class="quiz-subtitle">Chọn đáp án để nhận phản hồi ngay lập tức</p>
+            </div>
+
+            <div class="quiz-question" data-question="1" data-correct="C">
+                <div class="question-number">1</div>
+                <div class="question-text">Theo thang đo của David Hawkins, tình yêu vô điều kiện rung động ở tần số bao nhiêu?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">200 Hz</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">400 Hz</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">540 Hz</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">700 Hz</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="2" data-correct="D">
+                <div class="question-number">2</div>
+                <div class="question-text">Kỹ thuật "The Work" của Byron Katie bao gồm bao nhiêu câu hỏi cốt lõi?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">2 câu hỏi</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">3 câu hỏi</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">5 câu hỏi</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">4 câu hỏi</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="3" data-correct="B">
+                <div class="question-number">3</div>
+                <div class="question-text">Trong Quick Coherence Technique, bước thứ 3 quan trọng nhất là gì?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Đặt tay lên tim</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Gợi lên cảm xúc tích cực (biết ơn, yêu thương)</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Thở sâu và chậm</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Nhắm mắt và thư giãn</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-result">
+                <div class="result-score">0/3</div>
+                <div class="result-text">Hoàn thành!</div>
+                <div class="result-message"></div>
+            </div>
+
+            <div class="quiz-buttons">
+                <button class="quiz-btn" id="retakeQuiz" style="display: none;">Làm Lại</button>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const questions = document.querySelectorAll('.quiz-question');
+            const retakeBtn = document.getElementById('retakeQuiz');
+            const resultDiv = document.querySelector('.quiz-result');
+
+            let answeredCount = 0;
+            let correctCount = 0;
+            const totalQuestions = questions.length;
+
+            const explanations = {
+                1: {
+                    correct: 'Chính xác! Theo thang đo của David Hawkins, tình yêu vô điều kiện rung động ở 540 Hz - một trong những tần số cao nhất của cảm xúc con người.',
+                    incorrect: 'Sai rồi! Tình yêu vô điều kiện rung động ở 540 Hz theo thang đo của David Hawkins. Đây là mục tiêu tần số mà chúng ta hướng đến.'
+                },
+                2: {
+                    correct: 'Chính xác! The Work của Byron Katie có 4 câu hỏi: (1) Điều đó có thật không? (2) Bạn có chắc chắn tuyệt đối? (3) Bạn phản ứng thế nào khi tin vào điều đó? (4) Bạn sẽ là ai nếu không có niềm tin đó?',
+                    incorrect: 'Sai rồi! The Work có 4 câu hỏi cốt lõi để thẩm vấn niềm tin giới hạn, cộng với bước Turnaround để đảo ngược niềm tin.'
+                },
+                3: {
+                    correct: 'Chính xác! Bước 3 - Heart Feeling - gợi lên cảm xúc tích cực (biết ơn, yêu thương) là bước quan trọng nhất. Cảm xúc này là "chìa khóa" kích hoạt trạng thái coherence.',
+                    incorrect: 'Sai rồi! Bước quan trọng nhất là Heart Feeling - gợi lên và CẢM NHẬN cảm xúc tích cực. Các bước khác hỗ trợ nhưng cảm xúc là yếu tố quyết định.'
+                }
+            };
+
+            questions.forEach(question => {
+                const options = question.querySelectorAll('.quiz-option');
+                const correctAnswer = question.dataset.correct;
+                const questionNum = question.dataset.question;
+                const feedbackDiv = question.querySelector('.question-feedback');
+                const feedbackTitle = feedbackDiv.querySelector('.feedback-title');
+                const feedbackText = feedbackDiv.querySelector('.feedback-text');
+
+                options.forEach(option => {
+                    option.addEventListener('click', function() {
+                        if (question.classList.contains('answered')) return;
+
+                        question.classList.add('answered');
+                        answeredCount++;
+
+                        const selectedOption = this.dataset.option;
+                        const isCorrect = selectedOption === correctAnswer;
+
+                        options.forEach(opt => opt.classList.add('disabled'));
+                        this.classList.add('selected');
+
+                        if (isCorrect) {
+                            this.classList.add('correct');
+                            correctCount++;
+                            feedbackDiv.classList.add('correct');
+                            feedbackTitle.textContent = '✓ Chính xác!';
+                            feedbackText.textContent = explanations[questionNum].correct;
+                        } else {
+                            this.classList.add('incorrect');
+                            feedbackDiv.classList.add('incorrect');
+                            feedbackTitle.textContent = '✗ Sai rồi!';
+                            feedbackText.textContent = explanations[questionNum].incorrect;
+                            options.forEach(opt => {
+                                if (opt.dataset.option === correctAnswer) {
+                                    opt.classList.add('correct');
+                                }
+                            });
+                        }
+
+                        feedbackDiv.classList.add('show');
+
+                        if (answeredCount === totalQuestions) {
+                            const scoreDiv = resultDiv.querySelector('.result-score');
+                            const messageDiv = resultDiv.querySelector('.result-message');
+                            scoreDiv.textContent = `${correctCount}/${totalQuestions}`;
+
+                            if (correctCount === totalQuestions) {
+                                messageDiv.textContent = '🎉 Xuất sắc! Bạn đã sẵn sàng cho Module 4 - Sẵn Sàng Đón Tri Kỷ!';
+                            } else if (correctCount >= 2) {
+                                messageDiv.textContent = '👍 Tốt lắm! Xem lại các bài học trong Module 3 để nắm vững kiến thức nhé!';
+                            } else {
+                                messageDiv.textContent = '📚 Hãy đọc lại các bài học trong Module 3 để hiểu sâu hơn!';
+                            }
+
+                            resultDiv.classList.add('show');
+                            retakeBtn.style.display = 'inline-block';
+                        }
+                    });
+                });
+            });
+
+            retakeBtn.addEventListener('click', function() {
+                answeredCount = 0;
+                correctCount = 0;
+
+                questions.forEach(question => {
+                    question.classList.remove('answered');
+                    const options = question.querySelectorAll('.quiz-option');
+                    const feedbackDiv = question.querySelector('.question-feedback');
+
+                    options.forEach(opt => {
+                        opt.classList.remove('selected', 'correct', 'incorrect', 'disabled');
+                    });
+                    feedbackDiv.classList.remove('show', 'correct', 'incorrect');
+                });
+
+                resultDiv.classList.remove('show');
+                retakeBtn.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

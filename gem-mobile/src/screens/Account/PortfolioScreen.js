@@ -62,13 +62,52 @@ import CustomAlert from '../../components/CustomAlert';
 import deepLinkHandler from '../../services/deepLinkHandler';
 import { navigateToScreen } from '../../utils/navigationHelper';
 
-// Coin logo URL helper (using CryptoCompare)
-const getCoinLogoUrl = (symbol) => {
-  const baseSymbol = symbol?.replace(/USDT$/i, '').toUpperCase() || 'BTC';
-  return `https://www.cryptocompare.com/media/37746238/${baseSymbol.toLowerCase()}.png`;
+// Coin logo URLs mapping - direct CoinGecko image IDs
+const COIN_LOGO_IDS = {
+  'BTC': '1',        // Bitcoin
+  'ETH': '279',      // Ethereum
+  'BNB': '825',      // BNB
+  'SOL': '4128',     // Solana
+  'XRP': '44',       // Ripple
+  'ADA': '975',      // Cardano
+  'DOGE': '5',       // Dogecoin
+  'DOT': '6636',     // Polkadot
+  'MATIC': '4713',   // Polygon
+  'SHIB': '11939',   // Shiba Inu
+  'AVAX': '5805',    // Avalanche
+  'LINK': '877',     // Chainlink
+  'LTC': '2',        // Litecoin
+  'UNI': '7083',     // Uniswap
+  'ATOM': '1481',    // Cosmos
+  'XLM': '512',      // Stellar
+  'ETC': '1321',     // Ethereum Classic
+  'NEAR': '6535',    // NEAR
+  'ALGO': '4030',    // Algorand
+  'TRX': '1958',     // Tron
+  'APT': '10688',    // Aptos
+  'ARB': '11841',    // Arbitrum
+  'OP': '11840',     // Optimism
+  'SUI': '14101',    // Sui
+  'PEPE': '24478',   // Pepe
+  'WIF': '28752',    // dogwifhat
+  'USDT': '325',     // Tether
+  'USDC': '3408',    // USD Coin
 };
 
-const FALLBACK_LOGO = 'https://assets.coingecko.com/coins/images/1/small/bitcoin.png';
+// Get coin logo URL
+const getCoinLogoUrl = (symbol) => {
+  const baseSymbol = symbol?.replace(/USDT$/i, '').toUpperCase() || 'BTC';
+  const coinId = COIN_LOGO_IDS[baseSymbol];
+
+  if (coinId) {
+    return `https://s2.coinmarketcap.com/static/img/coins/64x64/${coinId}.png`;
+  }
+
+  // Fallback to symbol-based URL
+  return `https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${baseSymbol.toLowerCase()}.png`;
+};
+
+const FALLBACK_LOGO = 'https://s2.coinmarketcap.com/static/img/coins/64x64/1.png'; // BTC
 
 export default function PortfolioScreen({ navigation }) {
   const { user, profile } = useAuth();
@@ -320,6 +359,29 @@ export default function PortfolioScreen({ navigation }) {
     }).format(value);
   };
 
+  // Format quantity with appropriate decimals based on value
+  const formatQuantity = (value) => {
+    if (!value && value !== 0) return '--';
+    // For whole numbers or large quantities, show fewer decimals
+    if (value >= 1000) return formatCurrency(value, 2);
+    if (value >= 1) return formatCurrency(value, 4);
+    // For small quantities (fractions), show more decimals
+    if (value >= 0.0001) return formatCurrency(value, 6);
+    return formatCurrency(value, 8);
+  };
+
+  // Format price with appropriate decimals
+  const formatPriceValue = (value) => {
+    if (!value && value !== 0) return '--';
+    // High value coins - show 2 decimals
+    if (value >= 1000) return formatCurrency(value, 2);
+    // Medium value - show 4 decimals
+    if (value >= 1) return formatCurrency(value, 4);
+    // Low value coins - show more decimals
+    if (value >= 0.0001) return formatCurrency(value, 6);
+    return formatCurrency(value, 8);
+  };
+
   // formatPrice is now imported from utils/formatters
 
   const getRealTimePrice = (symbol) => {
@@ -510,8 +572,14 @@ export default function PortfolioScreen({ navigation }) {
                 {portfolio.map((item) => {
                   const realTimePrice = getRealTimePrice(item.symbol);
                   const priceChange = getRealTimePriceChange(item.symbol);
-                  const displayPrice = realTimePrice || item.currentPrice;
+                  const displayPrice = realTimePrice || item.currentPrice || item.avg_buy_price || 0;
                   const isPositive = priceChange >= 0;
+
+                  // Calculate values correctly
+                  const totalValue = item.quantity * displayPrice;
+                  const costBasis = item.quantity * (item.avg_buy_price || 0);
+                  const pnl = totalValue - costBasis;
+                  const pnlPercent = costBasis > 0 ? (pnl / costBasis) * 100 : 0;
 
                   return (
                     <TouchableOpacity
@@ -524,26 +592,27 @@ export default function PortfolioScreen({ navigation }) {
                         source={{ uri: getCoinLogoUrl(item.symbol) }}
                         style={styles.coinLogo}
                         defaultSource={{ uri: FALLBACK_LOGO }}
+                        onError={() => console.log(`[Portfolio] Logo failed for ${item.symbol}`)}
                       />
                       <View style={styles.coinInfo}>
                         <Text style={styles.coinSymbol}>{item.symbol}</Text>
-                        <Text style={styles.coinQuantity}>{formatCurrency(item.quantity, 4)} coins</Text>
+                        <Text style={styles.coinQuantity}>{formatQuantity(item.quantity)} coins</Text>
                       </View>
                       <View style={styles.coinPriceSection}>
-                        <Text style={styles.coinPrice}>${formatPrice(displayPrice)}</Text>
+                        <Text style={styles.coinPrice}>${formatPriceValue(displayPrice)}</Text>
                         <View style={[
                           styles.coinChangeBadge,
                           { backgroundColor: isPositive ? `${COLORS.success}15` : `${COLORS.error}15` }
                         ]}>
                           <Text style={[styles.coinChangeText, { color: isPositive ? COLORS.success : COLORS.error }]}>
-                            {isPositive ? '+' : ''}{priceChange.toFixed(2)}%
+                            {isPositive ? '+' : ''}{parseFloat(priceChange || 0).toFixed(2)}%
                           </Text>
                         </View>
                       </View>
                       <View style={styles.coinValue}>
-                        <Text style={styles.coinTotalValue}>${formatCurrency(item.quantity * displayPrice)}</Text>
-                        <Text style={[styles.coinPnl, { color: item.pnl >= 0 ? COLORS.success : COLORS.error }]}>
-                          {item.pnlPercent >= 0 ? '+' : ''}{formatCurrency(item.pnlPercent)}%
+                        <Text style={styles.coinTotalValue}>${formatCurrency(totalValue)}</Text>
+                        <Text style={[styles.coinPnl, { color: pnl >= 0 ? COLORS.success : COLORS.error }]}>
+                          {pnlPercent >= 0 ? '+' : ''}{formatCurrency(pnlPercent)}%
                         </Text>
                       </View>
                       <TouchableOpacity

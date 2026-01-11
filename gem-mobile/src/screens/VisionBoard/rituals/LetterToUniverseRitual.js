@@ -1,125 +1,113 @@
 /**
  * LetterToUniverseRitual - Thư Gửi Vũ Trụ
- * Vision Board 2.0 - GALAXY COSMIC Animation
- *
- * REDESIGN v3: Galaxy/Cosmic style with:
- * - Shooting stars falling slowly
- * - God rays emanating from center
- * - Nebula gradient purple/pink/blue
- * - Soft glow effects
- * - 20-22 second animation timeline
- *
- * Created: December 11, 2025
+ * Cosmic Glassmorphism Redesign
+ * Phases: Write → Sending → Received
+ * Features: Shooting stars, God rays, Nebula clouds, Letter animation
  */
 
-import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
+import React, { useState, useRef, useEffect, useCallback, memo, useMemo } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
-  Animated,
-  Dimensions,
   TextInput,
-  Easing,
-  Vibration,
+  Dimensions,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import {
-  ArrowLeft,
-  Send,
-  Sparkles,
-  Check,
-} from 'lucide-react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSpring,
+  withRepeat,
+  withSequence,
+  withDelay,
+  runOnJS,
+  Easing,
+  cancelAnimation,
+  interpolate,
+} from 'react-native-reanimated';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Send, Sparkles, Star, Mail } from 'lucide-react-native';
+
 import { useAuth } from '../../../contexts/AuthContext';
 import { completeRitual } from '../../../services/ritualService';
 
+// Cosmic Components
+import {
+  CosmicBackground,
+  GlassCard,
+  GlassInputCard,
+  GlowButton,
+  ParticleField,
+  CompletionCelebration,
+  InstructionText,
+  TitleText,
+  SubtitleText,
+  RitualHeader,
+  COSMIC_COLORS,
+  COSMIC_SPACING,
+  COSMIC_RADIUS,
+  HAPTIC_PATTERNS,
+  COSMIC_TIMING,
+} from '../../../components/Rituals/cosmic';
+
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-// ============ GALAXY COLORS ============
-const GALAXY = {
-  nebulaPurple: '#8B5CF6',
-  nebulaPink: '#EC4899',
-  nebulaBlue: '#3B82F6',
-  nebulaCyan: '#06B6D4',
-  starWhite: '#FFFFFF',
-  starGold: '#FFD700',
-  lightCore: '#FFF8E1',
-  spaceBlack: '#05040B',
-  spaceDark: '#0F0A1F',
-};
+const THEME = COSMIC_COLORS.ritualThemes.letter;
 
-// ============ CONFIG ============
 const CONFIG = {
   xpReward: 25,
-  animationDuration: 22000, // 22 seconds total
+  animationDuration: 20000, // 20 seconds
+  maxChars: 500,
 };
 
-// ============ SHOOTING STAR COMPONENT ============
+// ============================================
+// SHOOTING STAR COMPONENT
+// ============================================
+
 const ShootingStar = memo(({ delay, startX, startY, duration = 2500 }) => {
-  const position = useRef(new Animated.ValueXY({ x: startX, y: startY })).current;
-  const opacity = useRef(new Animated.Value(0)).current;
+  const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
+  const opacity = useSharedValue(0);
 
   useEffect(() => {
-    let isMounted = true;
-    let animation = null;
-
-    const timer = setTimeout(() => {
-      if (!isMounted) return;
-
-      animation = Animated.parallel([
-        // Fade in then out
-        Animated.sequence([
-          Animated.timing(opacity, {
-            toValue: 1,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-          Animated.timing(opacity, {
-            toValue: 0,
-            duration: duration - 300,
-            useNativeDriver: true,
-          }),
-        ]),
-        // Move diagonally down-right
-        Animated.timing(position, {
-          toValue: { x: startX + 250, y: startY + 350 },
-          duration: duration,
-          easing: Easing.out(Easing.quad),
-          useNativeDriver: true,
-        }),
-      ]);
-
-      animation.start();
-    }, delay);
+    // Start animation after delay
+    translateX.value = withDelay(delay,
+      withTiming(250, { duration, easing: Easing.out(Easing.quad) })
+    );
+    translateY.value = withDelay(delay,
+      withTiming(350, { duration, easing: Easing.out(Easing.quad) })
+    );
+    opacity.value = withDelay(delay,
+      withSequence(
+        withTiming(1, { duration: 300 }),
+        withTiming(0, { duration: duration - 300 })
+      )
+    );
 
     return () => {
-      isMounted = false;
-      clearTimeout(timer);
-      if (animation) animation.stop();
-      opacity.stopAnimation();
-      position.stopAnimation();
+      cancelAnimation(translateX);
+      cancelAnimation(translateY);
+      cancelAnimation(opacity);
     };
-  }, [delay, startX, startY, duration]);
+  }, [delay, duration]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [
+      { translateX: startX + translateX.value },
+      { translateY: startY + translateY.value },
+      { rotate: '45deg' },
+    ],
+  }));
 
   return (
-    <Animated.View
-      style={[
-        styles.shootingStar,
-        {
-          opacity,
-          transform: [
-            { translateX: position.x },
-            { translateY: position.y },
-            { rotate: '45deg' },
-          ],
-        },
-      ]}
-    >
-      {/* Star head */}
+    <Animated.View style={[styles.shootingStar, animatedStyle]}>
       <View style={styles.starHead} />
-      {/* Tail gradient */}
       <LinearGradient
         colors={['rgba(255,255,255,0.9)', 'rgba(255,255,255,0.3)', 'transparent']}
         start={{ x: 0, y: 0.5 }}
@@ -130,69 +118,46 @@ const ShootingStar = memo(({ delay, startX, startY, duration = 2500 }) => {
   );
 });
 
-// ============ GOD RAYS COMPONENT ============
+// ============================================
+// GOD RAYS COMPONENT
+// ============================================
+
 const GodRays = memo(({ visible }) => {
-  const rotation = useRef(new Animated.Value(0)).current;
-  const scale = useRef(new Animated.Value(0)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
-  const rotationLoopRef = useRef(null);
+  const rotation = useSharedValue(0);
+  const scale = useSharedValue(0);
+  const opacity = useSharedValue(0);
 
   useEffect(() => {
-    let isMounted = true;
-
-    if (visible && isMounted) {
-      // Fade in
-      Animated.timing(opacity, {
-        toValue: 0.5,
-        duration: 2500,
-        useNativeDriver: true,
-      }).start();
-
-      // Scale up
-      Animated.spring(scale, {
-        toValue: 1,
-        friction: 10,
-        tension: 30,
-        useNativeDriver: true,
-      }).start();
-
-      // Slow rotation
-      rotationLoopRef.current = Animated.loop(
-        Animated.timing(rotation, {
-          toValue: 1,
-          duration: 40000, // 40 giây xoay 1 vòng
-          easing: Easing.linear,
-          useNativeDriver: true,
-        })
+    if (visible) {
+      opacity.value = withTiming(0.5, { duration: 2500 });
+      scale.value = withSpring(1, { damping: 15, stiffness: 30 });
+      rotation.value = withRepeat(
+        withTiming(360, { duration: 40000, easing: Easing.linear }),
+        -1
       );
-      rotationLoopRef.current.start();
     }
 
     return () => {
-      isMounted = false;
-      if (rotationLoopRef.current) rotationLoopRef.current.stop();
-      rotation.stopAnimation();
-      scale.stopAnimation();
-      opacity.stopAnimation();
+      cancelAnimation(rotation);
+      cancelAnimation(scale);
+      cancelAnimation(opacity);
     };
   }, [visible]);
 
-  const spin = rotation.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
+  const containerStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [
+      { scale: scale.value },
+      { rotate: `${rotation.value}deg` },
+    ],
+  }));
 
   if (!visible) return null;
 
   const rays = Array.from({ length: 12 }, (_, i) => (
     <View
       key={i}
-      style={[
-        styles.ray,
-        {
-          transform: [{ rotate: `${i * 30}deg` }],
-        },
-      ]}
+      style={[styles.ray, { transform: [{ rotate: `${i * 30}deg` }] }]}
     >
       <LinearGradient
         colors={['rgba(255,248,225,0.7)', 'rgba(255,248,225,0.2)', 'transparent']}
@@ -202,69 +167,46 @@ const GodRays = memo(({ visible }) => {
   ));
 
   return (
-    <Animated.View
-      style={[
-        styles.godRaysContainer,
-        {
-          opacity,
-          transform: [{ scale }, { rotate: spin }],
-        },
-      ]}
-    >
+    <Animated.View style={[styles.godRaysContainer, containerStyle]}>
       {rays}
-      {/* Center glow */}
       <View style={styles.centerGlow} />
     </Animated.View>
   );
 });
 
-// ============ NEBULA CLOUD COMPONENT ============
+// ============================================
+// NEBULA CLOUD COMPONENT
+// ============================================
+
 const NebulaCloud = memo(({ color, size, x, y, delay }) => {
-  const opacity = useRef(new Animated.Value(0)).current;
-  const scale = useRef(new Animated.Value(0.5)).current;
-  const pulseLoopRef = useRef(null);
+  const opacity = useSharedValue(0);
+  const scale = useSharedValue(0.5);
 
   useEffect(() => {
-    let isMounted = true;
-
-    const timer = setTimeout(() => {
-      if (!isMounted) return;
-
-      // Fade in
-      Animated.timing(opacity, {
-        toValue: 0.35,
-        duration: 3500,
-        useNativeDriver: true,
-      }).start();
-
-      // Pulse animation
-      pulseLoopRef.current = Animated.loop(
-        Animated.sequence([
-          Animated.timing(scale, {
-            toValue: 1.15,
-            duration: 5000,
-            easing: Easing.inOut(Easing.sin),
-            useNativeDriver: true,
-          }),
-          Animated.timing(scale, {
-            toValue: 0.85,
-            duration: 5000,
-            easing: Easing.inOut(Easing.sin),
-            useNativeDriver: true,
-          }),
-        ])
-      );
-      pulseLoopRef.current.start();
-    }, delay);
+    opacity.value = withDelay(delay,
+      withTiming(0.35, { duration: 3500 })
+    );
+    scale.value = withDelay(delay,
+      withRepeat(
+        withSequence(
+          withTiming(1.15, { duration: 5000, easing: Easing.inOut(Easing.sin) }),
+          withTiming(0.85, { duration: 5000, easing: Easing.inOut(Easing.sin) })
+        ),
+        -1,
+        true
+      )
+    );
 
     return () => {
-      isMounted = false;
-      clearTimeout(timer);
-      if (pulseLoopRef.current) pulseLoopRef.current.stop();
-      opacity.stopAnimation();
-      scale.stopAnimation();
+      cancelAnimation(opacity);
+      cancelAnimation(scale);
     };
   }, [delay]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ scale: scale.value }],
+  }));
 
   return (
     <Animated.View
@@ -277,49 +219,153 @@ const NebulaCloud = memo(({ color, size, x, y, delay }) => {
           backgroundColor: color,
           left: x,
           top: y,
-          opacity,
-          transform: [{ scale }],
         },
+        animatedStyle,
       ]}
     />
   );
 });
 
-// ============ TWINKLING STAR COMPONENT ============
-const TwinklingStar = memo(({ x, y, size, delay }) => {
-  const opacity = useRef(new Animated.Value(0)).current;
-  const twinkleLoopRef = useRef(null);
+// ============================================
+// COSMIC LETTER COMPONENT
+// ============================================
+
+const CosmicLetter = memo(({ visible, onComplete }) => {
+  const translateY = useSharedValue(0);
+  const rotate = useSharedValue(0);
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(1);
+  const glowScale = useSharedValue(1);
+  const glowOpacity = useSharedValue(0.4);
 
   useEffect(() => {
-    let isMounted = true;
-
-    const timer = setTimeout(() => {
-      if (!isMounted) return;
-
-      twinkleLoopRef.current = Animated.loop(
-        Animated.sequence([
-          Animated.timing(opacity, {
-            toValue: 1,
-            duration: 1200 + Math.random() * 800,
-            useNativeDriver: true,
-          }),
-          Animated.timing(opacity, {
-            toValue: 0.15,
-            duration: 1200 + Math.random() * 800,
-            useNativeDriver: true,
-          }),
-        ])
+    if (visible) {
+      // Phase 1: Slow lift with gentle rotation (0-3.5s)
+      translateY.value = withTiming(-180, {
+        duration: 3500,
+        easing: Easing.out(Easing.cubic),
+      });
+      rotate.value = withTiming(7, {
+        duration: 3500,
+        easing: Easing.inOut(Easing.sin),
+      });
+      glowOpacity.value = withTiming(1, { duration: 2500 });
+      glowScale.value = withRepeat(
+        withSequence(
+          withTiming(1.2, { duration: 800 }),
+          withTiming(1, { duration: 800 })
+        ),
+        -1,
+        true
       );
-      twinkleLoopRef.current.start();
-    }, delay);
+
+      // Phase 2: Transform into light (3.5-6.5s)
+      scale.value = withDelay(3500,
+        withTiming(0.2, {
+          duration: 3000,
+          easing: Easing.in(Easing.cubic),
+        })
+      );
+      opacity.value = withDelay(3500,
+        withTiming(0, { duration: 2800 }, (finished) => {
+          if (finished && onComplete) {
+            runOnJS(onComplete)();
+          }
+        })
+      );
+    }
 
     return () => {
-      isMounted = false;
-      clearTimeout(timer);
-      if (twinkleLoopRef.current) twinkleLoopRef.current.stop();
-      opacity.stopAnimation();
+      cancelAnimation(translateY);
+      cancelAnimation(rotate);
+      cancelAnimation(scale);
+      cancelAnimation(opacity);
+      cancelAnimation(glowScale);
+      cancelAnimation(glowOpacity);
+    };
+  }, [visible, onComplete]);
+
+  const letterStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [
+      { translateY: translateY.value },
+      { rotate: `${rotate.value}deg` },
+      { scale: scale.value },
+    ],
+  }));
+
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: glowOpacity.value,
+    transform: [{ scale: glowScale.value }],
+  }));
+
+  if (!visible) return null;
+
+  return (
+    <Animated.View style={[styles.cosmicLetter, letterStyle]}>
+      <Animated.View style={[styles.letterGlow, glowStyle]} />
+      <View style={styles.letterEnvelope}>
+        <LinearGradient
+          colors={[THEME.primary, THEME.secondary, '#7C3AED']}
+          style={styles.letterGradient}
+        >
+          <Mail size={32} color="#FFF" />
+        </LinearGradient>
+      </View>
+    </Animated.View>
+  );
+});
+
+// ============================================
+// TWINKLING STARS FIELD
+// ============================================
+
+// OPTIMIZED: Reduced count from 50 to 20 for performance
+const TwinklingStarsField = memo(({ visible, count = 20 }) => {
+  const stars = useMemo(() => {
+    return Array.from({ length: count }, (_, i) => ({
+      id: i,
+      x: Math.random() * SCREEN_WIDTH,
+      y: Math.random() * SCREEN_HEIGHT * 0.7,
+      size: 1.5 + Math.random() * 2.5,
+      delay: Math.random() * 3000,
+    }));
+  }, [count]);
+
+  if (!visible) return null;
+
+  return (
+    <View style={styles.twinklingField}>
+      {stars.map((star) => (
+        <TwinklingStar key={star.id} {...star} />
+      ))}
+    </View>
+  );
+});
+
+const TwinklingStar = memo(({ x, y, size, delay }) => {
+  const opacity = useSharedValue(0.2);
+
+  useEffect(() => {
+    opacity.value = withDelay(delay,
+      withRepeat(
+        withSequence(
+          withTiming(1, { duration: 1200 + Math.random() * 800 }),
+          withTiming(0.2, { duration: 1200 + Math.random() * 800 })
+        ),
+        -1,
+        true
+      )
+    );
+
+    return () => {
+      cancelAnimation(opacity);
     };
   }, [delay]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+  }));
 
   return (
     <Animated.View
@@ -330,359 +376,198 @@ const TwinklingStar = memo(({ x, y, size, delay }) => {
           top: y,
           width: size,
           height: size,
-          opacity,
         },
+        animatedStyle,
       ]}
     />
   );
 });
 
-// ============ COSMIC LETTER COMPONENT ============
-const CosmicLetter = memo(({ visible, onComplete }) => {
-  const translateY = useRef(new Animated.Value(0)).current;
-  const rotate = useRef(new Animated.Value(0)).current;
-  const scale = useRef(new Animated.Value(1)).current;
-  const opacity = useRef(new Animated.Value(1)).current;
-  const glowOpacity = useRef(new Animated.Value(0.4)).current;
+// ============================================
+// MAIN COMPONENT
+// ============================================
 
-  useEffect(() => {
-    let isMounted = true;
-    let phase1Animation = null;
-    let phase2Timer = null;
-
-    if (visible && isMounted) {
-      // Phase 1: Slow lift with gentle rotation (0-3.5s)
-      phase1Animation = Animated.parallel([
-        Animated.timing(translateY, {
-          toValue: -180,
-          duration: 3500,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.timing(rotate, {
-          toValue: 1,
-          duration: 3500,
-          easing: Easing.inOut(Easing.sin),
-          useNativeDriver: true,
-        }),
-        Animated.timing(glowOpacity, {
-          toValue: 1,
-          duration: 2500,
-          useNativeDriver: true,
-        }),
-      ]);
-      phase1Animation.start();
-
-      // Phase 2: Transform into light (3.5-6.5s)
-      phase2Timer = setTimeout(() => {
-        if (!isMounted) return;
-
-        Animated.parallel([
-          Animated.timing(scale, {
-            toValue: 0.2,
-            duration: 3000,
-            easing: Easing.in(Easing.cubic),
-            useNativeDriver: true,
-          }),
-          Animated.timing(opacity, {
-            toValue: 0,
-            duration: 2800,
-            useNativeDriver: true,
-          }),
-          Animated.timing(glowOpacity, {
-            toValue: 0.6,
-            duration: 1500,
-            useNativeDriver: true,
-          }),
-        ]).start(() => {
-          if (isMounted && onComplete) {
-            onComplete();
-          }
-        });
-      }, 3500);
-    }
-
-    return () => {
-      isMounted = false;
-      if (phase1Animation) phase1Animation.stop();
-      if (phase2Timer) clearTimeout(phase2Timer);
-      translateY.stopAnimation();
-      rotate.stopAnimation();
-      scale.stopAnimation();
-      opacity.stopAnimation();
-      glowOpacity.stopAnimation();
-    };
-  }, [visible, onComplete]);
-
-  const rotateInterpolate = rotate.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '7deg'],
-  });
-
-  if (!visible) return null;
-
-  return (
-    <Animated.View
-      style={[
-        styles.cosmicLetter,
-        {
-          opacity,
-          transform: [
-            { translateY },
-            { rotate: rotateInterpolate },
-            { scale },
-          ],
-        },
-      ]}
-    >
-      {/* Glow behind letter */}
-      <Animated.View
-        style={[
-          styles.letterGlow,
-          { opacity: glowOpacity },
-        ]}
-      />
-      {/* Letter envelope */}
-      <View style={styles.letterEnvelope}>
-        <LinearGradient
-          colors={[GALAXY.lightCore, GALAXY.starGold, '#FFA500']}
-          style={styles.letterGradient}
-        >
-          <Send size={28} color="#FFF" style={{ transform: [{ rotate: '-20deg' }] }} />
-        </LinearGradient>
-      </View>
-    </Animated.View>
-  );
-});
-
-// ============ MAIN COMPONENT ============
-export default function LetterToUniverseRitual({ navigation }) {
+const LetterToUniverseRitual = ({ navigation }) => {
   const { user } = useAuth();
 
   // State
+  const [phase, setPhase] = useState('write'); // write, sending, received
   const [wish, setWish] = useState('');
-  const [phase, setPhase] = useState('input'); // input, animating, complete
+  const [inputFocused, setInputFocused] = useState(false);
+  const [isSoundOn, setIsSoundOn] = useState(true);
+  const [xpEarned, setXpEarned] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [showCelebration, setShowCelebration] = useState(false);
+
+  // Animation states
   const [showLetter, setShowLetter] = useState(false);
   const [showGodRays, setShowGodRays] = useState(false);
   const [showNebula, setShowNebula] = useState(false);
-  const [showStars, setShowStars] = useState(false);
+  const [showTwinklingStars, setShowTwinklingStars] = useState(false);
   const [showShootingStars, setShowShootingStars] = useState(false);
   const [showMessage, setShowMessage] = useState(false);
-  const [xpEarned, setXpEarned] = useState(0);
 
-  const messageOpacity = useRef(new Animated.Value(0)).current;
+  // Animation values
+  const contentOpacity = useSharedValue(1);
+  const messageOpacity = useSharedValue(0);
 
-  // Generate shooting stars data
-  const shootingStars = [
-    { delay: 8000, startX: -30, startY: 80, duration: 2800 },
-    { delay: 9800, startX: 80, startY: 30, duration: 2400 },
-    { delay: 11500, startX: SCREEN_WIDTH - 120, startY: 60, duration: 2600 },
-    { delay: 13200, startX: 150, startY: 120, duration: 3000 },
-    { delay: 15000, startX: SCREEN_WIDTH - 180, startY: 100, duration: 2700 },
-    { delay: 17000, startX: 20, startY: 180, duration: 2900 },
-  ];
-
-  // Generate nebula clouds
-  const nebulaClouds = [
-    { color: 'rgba(139, 92, 246, 0.25)', size: 320, x: -80, y: 80, delay: 10000 },
-    { color: 'rgba(236, 72, 153, 0.2)', size: 280, x: SCREEN_WIDTH - 180, y: 180, delay: 11500 },
-    { color: 'rgba(59, 130, 246, 0.18)', size: 220, x: 30, y: SCREEN_HEIGHT - 450, delay: 12500 },
-    { color: 'rgba(6, 182, 212, 0.15)', size: 200, x: SCREEN_WIDTH - 120, y: SCREEN_HEIGHT - 350, delay: 13500 },
-  ];
-
-  // Generate twinkling stars
-  const twinklingStars = Array.from({ length: 60 }, (_, i) => ({
-    id: i,
-    x: Math.random() * SCREEN_WIDTH,
-    y: Math.random() * SCREEN_HEIGHT * 0.75,
-    size: 1.5 + Math.random() * 2.5,
-    delay: 15000 + Math.random() * 3500,
+  // Content animation style
+  const contentAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: contentOpacity.value,
   }));
 
-  // Background stars (static)
-  const backgroundStars = Array.from({ length: 120 }, (_, i) => ({
-    id: i,
-    x: Math.random() * SCREEN_WIDTH,
-    y: Math.random() * SCREEN_HEIGHT,
-    size: 0.8 + Math.random() * 1.8,
-    opacity: 0.15 + Math.random() * 0.35,
+  const messageAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: messageOpacity.value,
   }));
 
+  // Shooting stars data
+  const shootingStars = useMemo(() => [
+    { delay: 6000, startX: -30, startY: 80, duration: 2800 },
+    { delay: 7500, startX: 80, startY: 30, duration: 2400 },
+    { delay: 9000, startX: SCREEN_WIDTH - 120, startY: 60, duration: 2600 },
+    { delay: 10500, startX: 150, startY: 120, duration: 3000 },
+    { delay: 12000, startX: SCREEN_WIDTH - 180, startY: 100, duration: 2700 },
+    { delay: 14000, startX: 20, startY: 180, duration: 2900 },
+  ], []);
+
+  // Nebula clouds data
+  const nebulaClouds = useMemo(() => [
+    { color: 'rgba(168, 85, 247, 0.25)', size: 320, x: -80, y: 80, delay: 8000 },
+    { color: 'rgba(236, 72, 153, 0.2)', size: 280, x: SCREEN_WIDTH - 180, y: 180, delay: 9000 },
+    { color: 'rgba(139, 92, 246, 0.18)', size: 220, x: 30, y: SCREEN_HEIGHT - 450, delay: 10000 },
+    { color: 'rgba(124, 58, 237, 0.15)', size: 200, x: SCREEN_WIDTH - 120, y: SCREEN_HEIGHT - 350, delay: 11000 },
+  ], []);
+
+  // Handlers
   const handleSendWish = useCallback(async () => {
     if (!wish.trim()) return;
 
-    setPhase('animating');
-    Vibration.vibrate(30);
+    HAPTIC_PATTERNS.cosmic.letterSend();
+    setPhase('sending');
 
-    // Start letter animation
+    // Start animation timeline
     setShowLetter(true);
 
-    // Timeline của animation
-    // 6.5s: God rays xuất hiện (after letter fades)
+    // 5s: God rays appear (after letter starts fading)
     setTimeout(() => {
       setShowGodRays(true);
-      Vibration.vibrate(20);
-    }, 6500);
+      HAPTIC_PATTERNS.tap();
+    }, 5000);
 
-    // 8s: Shooting stars bắt đầu
-    setTimeout(() => setShowShootingStars(true), 8000);
+    // 6s: Shooting stars begin
+    setTimeout(() => setShowShootingStars(true), 6000);
 
-    // 10s: Nebula xuất hiện
-    setTimeout(() => setShowNebula(true), 10000);
+    // 8s: Nebula clouds appear
+    setTimeout(() => setShowNebula(true), 8000);
 
-    // 15s: Twinkling stars
-    setTimeout(() => setShowStars(true), 15000);
+    // 12s: Twinkling stars appear
+    setTimeout(() => setShowTwinklingStars(true), 12000);
 
-    // 18s: Message hiện
+    // 15s: Success message
     setTimeout(() => {
       setShowMessage(true);
-      Animated.timing(messageOpacity, {
-        toValue: 1,
-        duration: 2000,
-        useNativeDriver: true,
-      }).start();
-    }, 18000);
+      messageOpacity.value = withTiming(1, { duration: 2000 });
+      HAPTIC_PATTERNS.cosmic.wishGranted();
+    }, 15000);
 
-    // 22s: Complete
+    // 18s: Complete
     setTimeout(async () => {
-      setPhase('complete');
+      setPhase('received');
+      setShowCelebration(true);
 
       try {
         if (user?.id) {
-          const result = await completeRitual(user.id, 'letter-to-universe', wish);
+          const result = await completeRitual(user.id, 'letter-to-universe', {
+            wish,
+          });
           setXpEarned(result?.xpEarned || CONFIG.xpReward);
+          setStreak(result?.newStreak || 1);
         } else {
           setXpEarned(CONFIG.xpReward);
+          setStreak(1);
         }
       } catch (err) {
-        console.error('[LetterToUniverse] Complete error:', err);
+        console.error('[LetterToUniverseRitual] Complete error:', err);
         setXpEarned(CONFIG.xpReward);
+        setStreak(1);
       }
-    }, CONFIG.animationDuration);
+    }, 18000);
   }, [wish, user]);
 
   const handleLetterComplete = useCallback(() => {
-    // Letter has transformed into light
     setShowLetter(false);
   }, []);
 
-  const handleFinish = useCallback(() => {
+  const handleBack = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
 
-  const handleCancel = useCallback(() => {
+  const handleContinue = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
 
-  // ============ RENDER INPUT PHASE ============
-  if (phase === 'input') {
-    return (
-      <LinearGradient
-        colors={[GALAXY.spaceBlack, GALAXY.spaceDark, '#1a0b2e']}
-        style={styles.container}
-      >
-        {/* Background stars */}
-        {backgroundStars.map((star) => (
-          <View
-            key={star.id}
-            style={[
-              styles.bgStar,
-              {
-                left: star.x,
-                top: star.y,
-                width: star.size,
-                height: star.size,
-                opacity: star.opacity,
-              },
-            ]}
-          />
-        ))}
-
-        {/* Header */}
-        <SafeAreaView edges={['top']} style={styles.header}>
-          <TouchableOpacity onPress={handleCancel} style={styles.backButton}>
-            <ArrowLeft size={24} color="#fff" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Thư Gửi Vũ Trụ</Text>
-          <View style={{ width: 40 }} />
-        </SafeAreaView>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.title}>Thư Gửi Vũ Trụ</Text>
-          <Text style={styles.subtitle}>
-            Viết điều ước của bạn và gửi lên những vì sao
-          </Text>
-
-          <View style={styles.inputWrapper}>
-            <TextInput
-              style={styles.wishInput}
-              placeholder="Điều ước của bạn..."
-              placeholderTextColor="rgba(255,255,255,0.35)"
-              multiline
-              value={wish}
-              onChangeText={setWish}
-              maxLength={500}
-              textAlignVertical="top"
-            />
-            <Text style={styles.charCount}>{wish.length}/500</Text>
-          </View>
-
-          <TouchableOpacity
-            style={[
-              styles.sendButton,
-              !wish.trim() && styles.sendButtonDisabled,
-            ]}
-            onPress={handleSendWish}
-            disabled={!wish.trim()}
-          >
-            <LinearGradient
-              colors={wish.trim() ? [GALAXY.nebulaPurple, GALAXY.nebulaPink] : ['#333', '#222']}
-              style={styles.sendButtonGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
-              <Send size={20} color="#FFF" />
-              <Text style={styles.sendButtonText}>Gửi Điều Ước</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
-            <Text style={styles.cancelText}>Hủy</Text>
-          </TouchableOpacity>
-        </View>
-      </LinearGradient>
-    );
-  }
-
-  // ============ RENDER ANIMATION & COMPLETE PHASE ============
-  return (
-    <LinearGradient
-      colors={[GALAXY.spaceBlack, GALAXY.spaceDark, '#1a0b2e']}
-      style={styles.container}
+  // Render Write Phase
+  const renderWritePhase = () => (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.keyboardAvoid}
     >
-      {/* Background stars (static) */}
-      {backgroundStars.map((star) => (
-        <View
-          key={`bg-${star.id}`}
-          style={[
-            styles.bgStar,
-            {
-              left: star.x,
-              top: star.y,
-              width: star.size,
-              height: star.size,
-              opacity: star.opacity,
-            },
-          ]}
-        />
-      ))}
+      <Animated.View style={[styles.writeContainer, contentAnimatedStyle]}>
+        <View style={styles.iconContainer}>
+          <View style={styles.mailIconWrapper}>
+            <View style={styles.mailIconGlow} />
+            <Mail size={60} color={THEME.primary} strokeWidth={1.5} />
+          </View>
+        </View>
 
+        <View style={styles.textContainer}>
+          <TitleText text="Thư Gửi Vũ Trụ" color={THEME.primary} />
+          <SubtitleText text="Viết điều ước và gửi lên những vì sao" />
+        </View>
+
+        <GlassInputCard
+          focused={inputFocused}
+          glowColor={THEME.glow}
+          style={styles.inputCard}
+        >
+          <TextInput
+            style={styles.wishInput}
+            placeholder="Điều ước của bạn..."
+            placeholderTextColor={COSMIC_COLORS.text.hint}
+            multiline
+            value={wish}
+            onChangeText={setWish}
+            onFocus={() => setInputFocused(true)}
+            onBlur={() => setInputFocused(false)}
+            maxLength={CONFIG.maxChars}
+            textAlignVertical="top"
+          />
+          <Text style={styles.charCount}>{wish.length}/{CONFIG.maxChars}</Text>
+        </GlassInputCard>
+
+        <GlowButton
+          label="Gửi Điều Ước"
+          icon={<Send />}
+          variant="letter"
+          size="large"
+          fullWidth
+          disabled={!wish.trim()}
+          onPress={handleSendWish}
+          style={styles.sendButton}
+        />
+      </Animated.View>
+    </KeyboardAvoidingView>
+  );
+
+  // Render Sending Phase
+  const renderSendingPhase = () => (
+    <View style={styles.sendingContainer}>
       {/* Nebula clouds */}
       {showNebula && nebulaClouds.map((cloud, i) => (
         <NebulaCloud key={`nebula-${i}`} {...cloud} />
       ))}
 
-      {/* God rays from center */}
+      {/* God rays */}
       <GodRays visible={showGodRays} />
 
       {/* Shooting stars */}
@@ -690,10 +575,8 @@ export default function LetterToUniverseRitual({ navigation }) {
         <ShootingStar key={`shooting-${i}`} {...star} />
       ))}
 
-      {/* Twinkling stars */}
-      {showStars && twinklingStars.map((star) => (
-        <TwinklingStar key={`twinkle-${star.id}`} {...star} />
-      ))}
+      {/* Twinkling stars - OPTIMIZED: reduced from 60 to 20 */}
+      <TwinklingStarsField visible={showTwinklingStars} count={20} />
 
       {/* Cosmic letter animation */}
       <CosmicLetter
@@ -701,159 +584,149 @@ export default function LetterToUniverseRitual({ navigation }) {
         onComplete={handleLetterComplete}
       />
 
-      {/* Completion message */}
+      {/* Success message */}
       {showMessage && (
-        <Animated.View
-          style={[
-            styles.messageContainer,
-            { opacity: messageOpacity },
-          ]}
-        >
+        <Animated.View style={[styles.messageContainer, messageAnimatedStyle]}>
           <View style={styles.messageIconWrap}>
             <View style={styles.messageIconGlow} />
-            <Sparkles size={36} color={GALAXY.starGold} />
+            <Sparkles size={40} color={THEME.primary} />
           </View>
           <Text style={styles.messageTitle}>Điều Ước Đã Được Gửi</Text>
           <Text style={styles.messageSubtitle}>
             Vũ trụ đã nhận được thông điệp của bạn
           </Text>
-
-          {phase === 'complete' && (
-            <>
-              <View style={styles.xpBadge}>
-                <Sparkles size={14} color={GALAXY.starGold} />
-                <Text style={styles.xpText}>+{xpEarned || CONFIG.xpReward} XP</Text>
-              </View>
-
-              <TouchableOpacity
-                style={styles.finishButton}
-                onPress={handleFinish}
-              >
-                <LinearGradient
-                  colors={[GALAXY.nebulaPurple, GALAXY.nebulaBlue]}
-                  style={styles.finishButtonGradient}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                >
-                  <Check size={20} color="#FFF" />
-                  <Text style={styles.finishButtonText}>Hoàn Thành</Text>
-                </LinearGradient>
-              </TouchableOpacity>
-            </>
-          )}
         </Animated.View>
       )}
-    </LinearGradient>
+    </View>
   );
-}
 
-// ============ STYLES ============
+  // Main render
+  return (
+    <GestureHandlerRootView style={styles.container}>
+      <CosmicBackground
+        variant="letter"
+        starDensity="high"
+        showNebula={phase === 'sending'}
+        showSpotlight={phase === 'sending'}
+        spotlightIntensity={0.5}
+      >
+        {/* Sparkle particles - OPTIMIZED: reduced count */}
+        <ParticleField
+          variant={phase === 'sending' ? 'sparkles' : 'stars'}
+          count={phase === 'sending' ? 20 : 12}
+          speed={phase === 'sending' ? 'medium' : 'slow'}
+          density="low"
+          direction="up"
+        />
+
+        <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+          {/* Header */}
+          <RitualHeader
+            title="Thư Gửi Vũ Trụ"
+            icon={<Mail />}
+            iconColor={THEME.primary}
+            onBack={phase === 'write' ? handleBack : undefined}
+            showSound={true}
+            soundEnabled={isSoundOn}
+            onSoundToggle={() => setIsSoundOn(!isSoundOn)}
+          />
+
+          {/* Content */}
+          <View style={styles.content}>
+            {phase === 'write' && renderWritePhase()}
+            {(phase === 'sending' || phase === 'received') && renderSendingPhase()}
+          </View>
+        </SafeAreaView>
+
+        {/* Celebration overlay */}
+        <CompletionCelebration
+          ritualType="letter"
+          xpEarned={xpEarned}
+          streakCount={streak}
+          isNewRecord={streak > 0}
+          message="Điều ước của bạn đã bay đến những vì sao. Hãy tin tưởng và để vũ trụ làm việc."
+          visible={showCelebration}
+          onContinue={handleContinue}
+          showVisionBoardButton={true}
+          showReflectionButton={true}
+        />
+      </CosmicBackground>
+    </GestureHandlerRootView>
+  );
+};
+
+// ============================================
+// STYLES
+// ============================================
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    position: 'relative',
+  },
+  safeArea: {
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: COSMIC_SPACING.lg,
+  },
+  keyboardAvoid: {
+    flex: 1,
   },
 
-  // Header
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#fff',
-  },
-
-  // Background stars
-  bgStar: {
-    position: 'absolute',
-    backgroundColor: '#FFF',
-    borderRadius: 10,
-  },
-
-  // Input phase
-  inputContainer: {
+  // Write phase
+  writeContainer: {
     flex: 1,
     justifyContent: 'center',
+    paddingBottom: COSMIC_SPACING.xxl,
+  },
+  iconContainer: {
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingBottom: 100,
+    marginBottom: COSMIC_SPACING.lg,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#fff',
-    marginBottom: 8,
-    textAlign: 'center',
+  mailIconWrapper: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(168, 85, 247, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  subtitle: {
-    fontSize: 16,
-    color: 'rgba(255,255,255,0.6)',
-    textAlign: 'center',
-    marginBottom: 32,
+  mailIconGlow: {
+    position: 'absolute',
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    backgroundColor: 'rgba(168, 85, 247, 0.2)',
   },
-  inputWrapper: {
-    width: '100%',
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(139, 92, 246, 0.25)',
-    marginBottom: 24,
+  textContainer: {
+    alignItems: 'center',
+    marginBottom: COSMIC_SPACING.lg,
+  },
+  inputCard: {
+    marginBottom: COSMIC_SPACING.lg,
   },
   wishInput: {
-    minHeight: 160,
-    padding: 18,
-    color: '#fff',
+    minHeight: 140,
     fontSize: 16,
+    color: COSMIC_COLORS.text.primary,
     lineHeight: 24,
+    textAlignVertical: 'top',
   },
   charCount: {
     textAlign: 'right',
-    paddingRight: 16,
-    paddingBottom: 12,
     fontSize: 12,
-    color: 'rgba(255,255,255,0.35)',
+    color: COSMIC_COLORS.text.muted,
+    marginTop: COSMIC_SPACING.xs,
   },
   sendButton: {
-    width: '100%',
-    borderRadius: 14,
-    overflow: 'hidden',
-    marginBottom: 12,
+    marginTop: COSMIC_SPACING.md,
   },
-  sendButtonDisabled: {
-    opacity: 0.45,
-  },
-  sendButtonGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    gap: 10,
-  },
-  sendButtonText: {
-    color: '#FFF',
-    fontSize: 17,
-    fontWeight: '600',
-  },
-  cancelButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-  },
-  cancelText: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 15,
+
+  // Sending phase
+  sendingContainer: {
+    flex: 1,
+    position: 'relative',
   },
 
   // Shooting star
@@ -862,15 +735,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  // OPTIMIZED: Removed shadow for performance
   starHead: {
     width: 5,
     height: 5,
     borderRadius: 2.5,
     backgroundColor: '#FFF',
-    shadowColor: '#FFF',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
   },
   starTail: {
     width: 100,
@@ -885,7 +755,7 @@ const styles = StyleSheet.create({
     width: 450,
     height: 450,
     left: SCREEN_WIDTH / 2 - 225,
-    top: SCREEN_HEIGHT / 2 - 280,
+    top: SCREEN_HEIGHT / 2 - 300,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -900,66 +770,68 @@ const styles = StyleSheet.create({
     height: 225,
     borderRadius: 3,
   },
+  // OPTIMIZED: Reduced shadowRadius from 50 to 15
   centerGlow: {
     position: 'absolute',
     width: 70,
     height: 70,
     borderRadius: 35,
-    backgroundColor: GALAXY.lightCore,
-    shadowColor: GALAXY.lightCore,
+    backgroundColor: THEME.primary,
+    shadowColor: THEME.primary,
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 50,
+    shadowOpacity: 0.8,
+    shadowRadius: 15,
   },
 
-  // Nebula cloud
+  // Nebula cloud - OPTIMIZED: Removed heavy shadow
   nebulaCloud: {
     position: 'absolute',
-    shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 80,
   },
 
-  // Twinkling star
+  // Twinkling stars - OPTIMIZED: Removed shadow
+  twinklingField: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  },
   twinklingStar: {
     position: 'absolute',
     backgroundColor: '#FFF',
     borderRadius: 10,
-    shadowColor: '#FFF',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 5,
   },
 
   // Cosmic letter
   cosmicLetter: {
     position: 'absolute',
-    left: SCREEN_WIDTH / 2 - 45,
-    top: SCREEN_HEIGHT / 2 - 45,
-    width: 90,
-    height: 90,
+    left: SCREEN_WIDTH / 2 - 50,
+    top: SCREEN_HEIGHT / 2 - 50,
+    width: 100,
+    height: 100,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // OPTIMIZED: Reduced shadowRadius from 50 to 15
   letterGlow: {
     position: 'absolute',
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    backgroundColor: 'rgba(255, 248, 225, 0.35)',
-    shadowColor: '#FFD700',
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: 'rgba(168, 85, 247, 0.35)',
+    shadowColor: THEME.primary,
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 50,
+    shadowOpacity: 0.8,
+    shadowRadius: 15,
   },
+  // OPTIMIZED: Reduced shadowRadius from 25 to 10
   letterEnvelope: {
-    width: 70,
-    height: 55,
-    borderRadius: 12,
+    width: 80,
+    height: 65,
+    borderRadius: 16,
     overflow: 'hidden',
     shadowColor: '#FFF',
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.9,
-    shadowRadius: 25,
+    shadowOpacity: 0.8,
+    shadowRadius: 10,
   },
   letterGradient: {
     flex: 1,
@@ -972,69 +844,36 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    top: SCREEN_HEIGHT / 2 - 120,
+    top: SCREEN_HEIGHT / 2 - 100,
     alignItems: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: COSMIC_SPACING.lg,
   },
   messageIconWrap: {
     position: 'relative',
-    marginBottom: 16,
+    marginBottom: COSMIC_SPACING.md,
   },
   messageIconGlow: {
     position: 'absolute',
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: 'rgba(255, 215, 0, 0.15)',
-    top: -22,
-    left: -22,
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: 'rgba(168, 85, 247, 0.2)',
+    top: -25,
+    left: -25,
   },
   messageTitle: {
     fontSize: 26,
     fontWeight: '700',
-    color: '#fff',
-    marginTop: 8,
+    color: COSMIC_COLORS.text.primary,
+    marginTop: COSMIC_SPACING.sm,
     textAlign: 'center',
   },
   messageSubtitle: {
     fontSize: 16,
-    color: 'rgba(255,255,255,0.65)',
-    marginTop: 8,
+    color: COSMIC_COLORS.text.secondary,
+    marginTop: COSMIC_SPACING.xs,
     textAlign: 'center',
   },
-  xpBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: 'rgba(255, 215, 0, 0.15)',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 215, 0, 0.25)',
-  },
-  xpText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: GALAXY.starGold,
-  },
-  finishButton: {
-    marginTop: 28,
-    borderRadius: 14,
-    overflow: 'hidden',
-  },
-  finishButtonGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 40,
-    gap: 10,
-  },
-  finishButtonText: {
-    color: '#FFF',
-    fontSize: 17,
-    fontWeight: '600',
-  },
 });
+
+export default LetterToUniverseRitual;

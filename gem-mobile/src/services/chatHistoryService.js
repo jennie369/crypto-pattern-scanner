@@ -54,17 +54,25 @@ const generatePreview = (messages) => {
  */
 const createConversation = async (userId, messages = []) => {
   try {
-    const title = messages.length > 0 ? generateTitle(messages) : 'New Chat';
-    const preview = generatePreview(messages);
+    // Ensure messages is a valid array - Supabase requires non-empty JSON
+    const validMessages = Array.isArray(messages) && messages.length > 0
+      ? messages
+      : []; // Empty array is valid JSON, but we need to ensure it's properly formatted
+
+    const title = validMessages.length > 0 ? generateTitle(validMessages) : 'New Chat';
+    const preview = generatePreview(validMessages);
+
+    // For empty messages, we still need valid JSON - use empty array
+    const messagesJson = validMessages.length > 0 ? validMessages : [];
 
     const { data, error } = await supabase
       .from(TABLE_NAME)
       .insert({
         user_id: userId,
-        messages: messages,
+        messages: messagesJson,
         title: title,
         preview: preview,
-        message_count: messages.length,
+        message_count: validMessages.length,
         last_message_at: new Date().toISOString(),
         is_archived: false,
       })
@@ -90,16 +98,38 @@ const createConversation = async (userId, messages = []) => {
  */
 const saveConversation = async (conversationId, messages, userId) => {
   try {
-    const title = generateTitle(messages);
-    const preview = generatePreview(messages);
+    // Validate messages array - skip save if invalid
+    if (!Array.isArray(messages)) {
+      console.warn('[ChatHistory] Invalid messages array, skipping save');
+      return null;
+    }
+
+    // Ensure messages are serializable (remove any functions, circular refs)
+    const cleanMessages = messages.map(m => ({
+      id: m?.id || '',
+      type: m?.type || 'user',
+      text: m?.text || '',
+      timestamp: m?.timestamp || new Date().toISOString(),
+      ...(m?.quickActions && { quickActions: m.quickActions }),
+      ...(m?.data && { data: m.data }),
+    })).filter(m => m.text); // Only keep messages with text
+
+    // Skip save if no valid messages
+    if (cleanMessages.length === 0) {
+      console.warn('[ChatHistory] No valid messages to save, skipping');
+      return null;
+    }
+
+    const title = generateTitle(cleanMessages);
+    const preview = generatePreview(cleanMessages);
 
     const { data, error } = await supabase
       .from(TABLE_NAME)
       .update({
-        messages: messages,
+        messages: cleanMessages,
         title: title,
         preview: preview,
-        message_count: messages.length,
+        message_count: cleanMessages.length,
         last_message_at: new Date().toISOString(),
       })
       .eq('id', conversationId)
@@ -109,7 +139,7 @@ const saveConversation = async (conversationId, messages, userId) => {
 
     if (error) throw error;
 
-    console.log('[ChatHistory] Saved conversation:', conversationId, 'messages:', messages.length);
+    console.log('[ChatHistory] Saved conversation:', conversationId, 'messages:', cleanMessages.length);
     return data;
   } catch (error) {
     console.error('[ChatHistory] Save error:', error);

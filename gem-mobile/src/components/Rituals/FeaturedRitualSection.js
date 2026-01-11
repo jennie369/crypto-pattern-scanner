@@ -146,6 +146,16 @@ const RITUAL_LIBRARY = [
     tags: ['biết ơn', 'thịnh vượng'],
     gradient: ['#FFD700', '#FFA500'],
   },
+  {
+    id: 'star-wish',
+    title: 'Ước Nguyện Sao Băng',
+    subtitle: 'Chọn ngôi sao và gửi điều ước',
+    icon: 'Star',
+    duration: '3-5 phút',
+    type: 'intention',
+    tags: ['sao băng', 'ước nguyện'],
+    gradient: ['#FFFFFF', '#C0C0C0'],
+  },
 ];
 
 // Animated Sparkle Component

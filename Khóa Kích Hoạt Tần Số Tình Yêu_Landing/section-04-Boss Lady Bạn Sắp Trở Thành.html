@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section: The Possibility - Boss Lady Bạn Sắp Trở Thành</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800;900&family=Noto+Sans+Display:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ============================================
+           🎨 PHẦN CẤU HÌNH - DỄ CHỈNH SỬA
+        ============================================ */
+        :root {
+            /* Màu sắc chính */
+            --primary-burgundy: #9C0612;
+            --primary-dark: #640A0C;
+            --gold-accent: #FFBD59;
+            --gold-light: #DEBC81;
+            --bg-navy: #112250;
+            --text-light: #FFFFFF;
+            --text-cream: #F5E6D3;
+            --text-gold: #DEBC81;
+            
+            /* Gradient Section - Tiếp từ Mirror Section */
+            --gradient-start: #640A0C;  /* Dark burgundy từ Mirror */
+            --gradient-mid-1: #7A0E15;  /* Burgundy sang đỏ */
+            --gradient-mid-2: #8B0000;  /* Dark red */
+            --gradient-mid-3: #5C0A0A;  /* Blood red */
+            --gradient-end: #3D0606;    /* Deep black red */
+            
+            /* Font chữ */
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+        }
+
+        /* ============================================
+           📝 CONFIG IMAGES - Thay đổi ảnh tại đây
+        ============================================ */
+        
+        /* 🖼️ IMAGE 1: Hero Boss Lady (Recommended: 800x1000px) */
+        .hero-boss-lady-img {
+            background-image: url('https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=1200&q=80');
+            /* Ảnh phụ nữ CEO powerful - suit đen/váy lụa - penthouse/luxury office */
+        }
+        
+        /* 🖼️ IMAGE 2: Power Icon */
+        .dimension-img-power {
+            background-image: url('https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&q=80');
+            /* Ảnh về quyền lực - phụ nữ confident, boardroom */
+        }
+        
+        /* 🖼️ IMAGE 3: Magnetism Icon */
+        .dimension-img-magnetism {
+            background-image: url('https://images.unsplash.com/photo-1580489944761-15a19d654956?w=600&q=80');
+            /* Ảnh về quyến rũ - phụ nữ elegant, captivating */
+        }
+        
+        /* 🖼️ IMAGE 4: Wealth Icon */
+        .dimension-img-wealth {
+            background-image: url('https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?w=600&q=80');
+            /* Ảnh về giàu có - luxury lifestyle, abundance */
+        }
+        
+        /* 🖼️ IMAGE 5: Influence Icon */
+        .dimension-img-influence {
+            background-image: url('https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&q=80');
+            /* Ảnh về ảnh hưởng - speaker, mentor, leadership */
+        }
+        
+        /* 🖼️ IMAGE 6: Love Icon */
+        .dimension-img-love {
+            background-image: url('https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=600&q=80');
+            /* Ảnh về tình yêu tự chủ - couple on terms, power couple */
+        }
+        
+        /* Shared dimension image styles */
+        .dimension-visual {
+            width: 100%;
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid var(--gold-accent);
+        }
+        
+        .dimension-visual::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg,
+                rgba(156, 6, 18, 0.4) 0%,
+                rgba(100, 10, 12, 0.5) 100%
+            );
+        }
+
+        /* ============================================
+           🎨 GLOBAL STYLES
+        ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            color: var(--text-light);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+        }
+
+        /* ============================================
+           📐 SECTION POSSIBILITY CONTAINER
+        ============================================ */
+        #possibility-section {
+            background: linear-gradient(180deg,
+                var(--gradient-start) 0%,
+                var(--gradient-mid-1) 20%,
+                var(--gradient-mid-2) 40%,
+                var(--gradient-mid-3) 70%,
+                var(--gradient-end) 100%
+            );
+            padding: 140px 20px 120px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ============================================
+           ✨ ANIMATED BACKGROUND EFFECTS
+        ============================================ */
+        
+        /* Golden particles floating up */
+        .gold-particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: var(--gold-accent);
+            border-radius: 50%;
+            opacity: 0;
+            animation: goldFloat 12s ease-in-out infinite;
+            box-shadow: 0 0 20px var(--gold-accent);
+        }
+
+        .gold-particle:nth-child(1) { left: 15%; animation-delay: 0s; }
+        .gold-particle:nth-child(2) { left: 30%; animation-delay: 2s; animation-duration: 14s; }
+        .gold-particle:nth-child(3) { left: 45%; animation-delay: 1s; animation-duration: 11s; }
+        .gold-particle:nth-child(4) { left: 60%; animation-delay: 3s; animation-duration: 13s; }
+        .gold-particle:nth-child(5) { left: 75%; animation-delay: 4s; animation-duration: 15s; }
+        .gold-particle:nth-child(6) { left: 85%; animation-delay: 2.5s; }
+
+        @keyframes goldFloat {
+            0% {
+                bottom: -50px;
+                opacity: 0;
+                transform: translateX(0) scale(1);
+            }
+            20% {
+                opacity: 1;
+            }
+            80% {
+                opacity: 0.8;
+            }
+            100% {
+                bottom: 110%;
+                opacity: 0;
+                transform: translateX(100px) scale(0.3);
+            }
+        }
+
+        /* Light rays */
+        .light-ray {
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(to bottom,
+                transparent 0%,
+                var(--gold-accent) 50%,
+                transparent 100%
+            );
+            opacity: 0.15;
+            animation: rayShine 8s ease-in-out infinite;
+        }
+
+        .light-ray:nth-child(7) { left: 20%; animation-delay: 0s; }
+        .light-ray:nth-child(8) { left: 50%; animation-delay: 2s; }
+        .light-ray:nth-child(9) { left: 80%; animation-delay: 4s; }
+
+        @keyframes rayShine {
+            0%, 100% { opacity: 0.1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Glow orbs */
+        .possibility-glow {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.12;
+            animation: possibilityPulse 15s ease-in-out infinite;
+        }
+
+        .possibility-glow-1 {
+            width: 700px;
+            height: 700px;
+            background: var(--gold-accent);
+            top: 20%;
+            right: -250px;
+        }
+
+        .possibility-glow-2 {
+            width: 600px;
+            height: 600px;
+            background: var(--primary-burgundy);
+            bottom: 10%;
+            left: -200px;
+            animation-delay: 5s;
+        }
+
+        @keyframes possibilityPulse {
+            0%, 100% {
+                opacity: 0.1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.18;
+                transform: scale(1.3);
+            }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ============================================
+           🎯 HEADER SECTION
+        ============================================ */
+        .possibility-header {
+            text-align: center;
+            margin-bottom: 120px;
+            animation: fadeInDown 1.2s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-80px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .crown-icon {
+            font-size: 6rem;
+            margin-bottom: 40px;
+            display: inline-block;
+            animation: crownFloat 4s ease-in-out infinite;
+            filter: drop-shadow(0 0 40px var(--gold-accent));
+        }
+
+        @keyframes crownFloat {
+            0%, 100% {
+                transform: translateY(0) rotate(-5deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(5deg);
+            }
+        }
+
+        .possibility-title {
+            font-family: var(--font-heading);
+            font-size: clamp(2.5rem, 6vw, 5.5rem);
+            font-weight: 900;
+            background: linear-gradient(135deg,
+                var(--gold-accent) 0%,
+                var(--gold-light) 50%,
+                var(--gold-accent) 100%
+            );
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 35px;
+            line-height: 1.2;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            animation: titleGlow 4s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% {
+                filter: drop-shadow(0 0 40px rgba(255, 189, 89, 0.6));
+            }
+            50% {
+                filter: drop-shadow(0 0 70px rgba(255, 189, 89, 1));
+            }
+        }
+
+        .possibility-subtitle {
+            font-family: var(--font-body);
+            font-size: clamp(1.3rem, 2.8vw, 2rem);
+            color: var(--text-cream);
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.6;
+            font-style: italic;
+            font-weight: 300;
+        }
+
+        /* ============================================
+           👑 HERO VISUAL SECTION
+        ============================================ */
+        .boss-lady-hero {
+            max-width: 1200px;
+            margin: 0 auto 120px;
+            position: relative;
+            animation: heroAppear 1.5s ease;
+        }
+
+        @keyframes heroAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .hero-frame {
+            position: relative;
+            border-radius: 40px;
+            overflow: hidden;
+            border: 4px solid var(--gold-accent);
+            box-shadow:
+                0 40px 100px rgba(255, 189, 89, 0.4),
+                0 0 150px rgba(255, 189, 89, 0.25);
+            animation: frameGlow 5s ease-in-out infinite;
+        }
+
+        @keyframes frameGlow {
+            0%, 100% {
+                box-shadow:
+                    0 40px 100px rgba(255, 189, 89, 0.4),
+                    0 0 150px rgba(255, 189, 89, 0.25);
+            }
+            50% {
+                box-shadow:
+                    0 50px 120px rgba(255, 189, 89, 0.6),
+                    0 0 180px rgba(255, 189, 89, 0.4);
+            }
+        }
+
+        .hero-image {
+            width: 100%;
+            height: 600px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .hero-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg,
+                rgba(156, 6, 18, 0.5) 0%,
+                rgba(100, 10, 12, 0.6) 100%
+            );
+        }
+
+        .hero-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 60px;
+            background: linear-gradient(to top,
+                rgba(0, 0, 0, 0.9) 0%,
+                transparent 100%
+            );
+            z-index: 2;
+        }
+
+        .hero-quote {
+            font-family: var(--font-heading);
+            font-size: clamp(1.8rem, 4vw, 3.5rem);
+            font-weight: 800;
+            color: var(--gold-accent);
+            line-height: 1.3;
+            text-transform: uppercase;
+            text-align: center;
+            animation: quoteGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes quoteGlow {
+            0%, 100% {
+                text-shadow: 0 0 30px rgba(255, 189, 89, 0.8);
+            }
+            50% {
+                text-shadow: 0 0 50px rgba(255, 189, 89, 1);
+            }
+        }
+
+        /* ============================================
+           💎 5 DIMENSIONS GRID
+        ============================================ */
+        .dimensions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 50px;
+            margin-bottom: 120px;
+        }
+
+        .dimension-card {
+            background: linear-gradient(135deg,
+                rgba(255, 189, 89, 0.1) 0%,
+                rgba(156, 6, 18, 0.15) 100%
+            );
+            border: 3px solid var(--gold-accent);
+            border-radius: 30px;
+            padding: 50px;
+            position: relative;
+            transition: all 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: translateY(80px);
+            animation: dimensionFadeIn 1s ease forwards;
+        }
+
+        .dimension-card:nth-child(1) { animation-delay: 0.2s; }
+        .dimension-card:nth-child(2) { animation-delay: 0.4s; }
+        .dimension-card:nth-child(3) { animation-delay: 0.6s; }
+        .dimension-card:nth-child(4) { animation-delay: 0.8s; }
+        .dimension-card:nth-child(5) { animation-delay: 1s; }
+
+        @keyframes dimensionFadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dimension-card:hover {
+            transform: translateY(-15px) scale(1.03);
+            border-color: var(--gold-light);
+            box-shadow:
+                0 35px 80px rgba(255, 189, 89, 0.5),
+                0 0 150px rgba(255, 189, 89, 0.3);
+        }
+
+        /* Sacred glow effect */
+        .dimension-card::before {
+            content: '';
+            position: absolute;
+            top: -60%;
+            left: -60%;
+            width: 220%;
+            height: 220%;
+            background: radial-gradient(circle, rgba(255, 189, 89, 0.2) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.7s ease;
+            animation: dimensionGlow 8s ease-in-out infinite;
+        }
+
+        .dimension-card:hover::before {
+            opacity: 1;
+        }
+
+        @keyframes dimensionGlow {
+            0%, 100% {
+                transform: rotate(0deg) scale(1);
+            }
+            50% {
+                transform: rotate(180deg) scale(1.2);
+            }
+        }
+
+        .dimension-number {
+            font-family: var(--font-heading);
+            font-size: 5rem;
+            font-weight: 900;
+            color: var(--gold-accent);
+            opacity: 0.2;
+            position: absolute;
+            top: 20px;
+            right: 30px;
+        }
+
+        .dimension-icon {
+            font-size: 4.5rem;
+            margin-bottom: 25px;
+            display: inline-block;
+            filter: drop-shadow(0 0 25px rgba(255, 189, 89, 0.9));
+            animation: iconPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes iconPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.15);
+            }
+        }
+
+        .dimension-title {
+            font-family: var(--font-heading);
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--gold-accent);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .dimension-traits {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .dimension-traits li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 1.05rem;
+            color: var(--text-cream);
+            line-height: 1.7;
+        }
+
+        .dimension-traits li::before {
+            content: '✦';
+            color: var(--gold-accent);
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            animation: starTwinkle 2s ease-in-out infinite;
+        }
+
+        @keyframes starTwinkle {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scale(0.8);
+            }
+        }
+
+        /* ============================================
+           🎯 FINAL REVELATION
+        ============================================ */
+        .revelation-section {
+            background: linear-gradient(135deg,
+                rgba(255, 189, 89, 0.15) 0%,
+                rgba(156, 6, 18, 0.25) 100%
+            );
+            border: 4px solid var(--gold-accent);
+            border-radius: 40px;
+            padding: 90px 70px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            animation: revelationAppear 1.2s ease 1.5s both;
+        }
+
+        @keyframes revelationAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Shine effect */
+        .revelation-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg,
+                transparent 35%,
+                rgba(255, 189, 89, 0.15) 50%,
+                transparent 65%
+            );
+            animation: revelationShine 4s linear infinite;
+        }
+
+        @keyframes revelationShine {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .revelation-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .revelation-icon {
+            font-size: 6rem;
+            margin-bottom: 40px;
+            filter: drop-shadow(0 0 40px var(--gold-accent));
+            animation: revelationFloat 4s ease-in-out infinite;
+        }
+
+        @keyframes revelationFloat {
+            0%, 100% {
+                transform: translateY(0) rotate(-10deg);
+            }
+            50% {
+                transform: translateY(-25px) rotate(10deg);
+            }
+        }
+
+        .revelation-quote {
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 5vw, 4.5rem);
+            font-weight: 900;
+            color: var(--gold-accent);
+            line-height: 1.3;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            animation: quotePulse 3s ease-in-out infinite;
+        }
+
+        @keyframes quotePulse {
+            0%, 100% {
+                filter: drop-shadow(0 0 40px rgba(255, 189, 89, 0.7));
+            }
+            50% {
+                filter: drop-shadow(0 0 70px rgba(255, 189, 89, 1));
+            }
+        }
+
+        .revelation-text {
+            font-size: clamp(1.1rem, 2.2vw, 1.7rem);
+            color: var(--text-cream);
+            line-height: 1.7;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+           💎 BOTTOM CTA SECTION
+        ============================================ */
+        .bottom-cta {
+            margin-top: 100px;
+            text-align: center;
+            padding: 80px 60px;
+            background: linear-gradient(135deg, 
+                rgba(255, 189, 89, 0.1) 0%, 
+                rgba(107, 31, 58, 0.15) 100%
+            );
+            border: 3px solid var(--gold-accent);
+            border-radius: 40px;
+            animation: ctaPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes ctaPulse {
+            0%, 100% { 
+                border-color: var(--gold-accent);
+                box-shadow: 0 0 60px rgba(255, 189, 89, 0.4);
+            }
+            50% { 
+                border-color: var(--gold-light);
+                box-shadow: 0 0 90px rgba(255, 189, 89, 0.6);
+            }
+        }
+
+        .cta-quote {
+            font-family: var(--font-heading);
+            font-size: clamp(1.8rem, 4vw, 3.5rem);
+            font-weight: 800;
+            color: var(--gold-accent);
+            margin-bottom: 30px;
+            line-height: 1.4;
+            text-transform: uppercase;
+        }
+
+        .cta-subtext {
+            font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+            color: var(--text-cream);
+            margin-bottom: 40px;
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 25px 60px;
+            background: linear-gradient(135deg, 
+                var(--gold-accent) 0%, 
+                var(--gold-light) 100%
+            );
+            color: var(--burgundy-dark);
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            font-weight: 800;
+            text-decoration: none;
+            border-radius: 50px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 
+                0 15px 50px rgba(255, 189, 89, 0.5),
+                inset 0 2px 10px rgba(255, 255, 255, 0.3);
+            transition: all 0.4s ease;
+            animation: buttonFloat 2s ease-in-out infinite;
+        }
+
+        @keyframes buttonFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .cta-button:hover {
+            transform: translateY(-12px) scale(1.05);
+            box-shadow: 
+                0 20px 70px rgba(255, 189, 89, 0.7),
+                inset 0 2px 15px rgba(255, 255, 255, 0.5);
+        }
+        /* 
+============================================
+           📱 RESPONSIVE DESIGN
+        ============================================ */
+        @media (max-width: 1024px) {
+            #possibility-section {
+                padding: 100px 20px 80px;
+            }
+
+            .dimensions-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .hero-image {
+                height: 500px;
+            }
+
+            .hero-overlay {
+                padding: 40px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            #possibility-section {
+                padding: 80px 15px 60px;
+            }
+
+            .possibility-header {
+                margin-bottom: 80px;
+            }
+
+            .boss-lady-hero {
+                margin-bottom: 80px;
+            }
+
+            .dimension-card {
+                padding: 40px 30px;
+            }
+
+            .dimension-icon {
+                font-size: 3.5rem;
+            }
+
+            .dimension-title {
+                font-size: 1.6rem;
+            }
+
+            .hero-image {
+                height: 400px;
+            }
+
+            .hero-overlay {
+                padding: 30px 20px;
+            }
+
+            .revelation-section {
+                padding: 60px 40px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dimension-card {
+                padding: 30px 20px;
+            }
+
+            .dimension-number {
+                font-size: 3.5rem;
+                top: 15px;
+                right: 20px;
+            }
+
+            .revelation-section {
+                padding: 50px 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!--
+    ============================================
+    SECTION: THE POSSIBILITY - BOSS LADY IDENTITY
+    
+    📍 VỊ TRÍ: Sau Section Mirror, trước Testimonial
+    
+    🎨 GRADIENT: Dark Burgundy → Deep Black Red
+    
+    ✏️ CUSTOMIZE:
+    - Line 64-120: Thay 6 ảnh (hero + 5 dimensions)
+    - Line 550-850: Chỉnh 5 dimension cards
+    - Line 880-950: Thay revelation text
+    ============================================
+    -->
+    <section id="possibility-section">
+        
+        <!-- Animated Background Effects -->
+        <div class="gold-particle"></div>
+        <div class="gold-particle"></div>
+        <div class="gold-particle"></div>
+        <div class="gold-particle"></div>
+        <div class="gold-particle"></div>
+        <div class="gold-particle"></div>
+        
+        <div class="light-ray"></div>
+        <div class="light-ray"></div>
+        <div class="light-ray"></div>
+        
+        <div class="possibility-glow possibility-glow-1"></div>
+        <div class="possibility-glow possibility-glow-2"></div>
+        
+        <div class="container">
+            
+            <!-- Header -->
+            <div class="possibility-header">
+                <div class="crown-icon">👑</div>
+                <h2 class="possibility-title">
+                    Boss Lady<br>
+                    Bạn Sắp Trở Thành
+                </h2>
+                <p class="possibility-subtitle">
+                    Không phải người phụ nữ được yêu.<br>
+                    Mà là người phụ nữ được ngưỡng mộ.
+                </p>
+            </div>
+
+            <!-- Hero Visual -->
+            <div class="boss-lady-hero">
+                <div class="hero-frame">
+                    <div class="hero-image hero-boss-lady-img">
+                        <div class="hero-overlay">
+                            <p class="hero-quote">
+                                Phiên Bản Quyền Lực Của Bạn
+                            </p>
+                            <p class="hero-description">
+                                Cô ấy tự tin, quyến rũ, thành công và được yêu đúng cách. 
+                                Không phải vì cô ấy hoàn hảo. Mà vì cô ấy đã chuyển hóa tần số.
+                            </p>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5 Dimensions Grid -->
+            <div class="dimensions-grid">
+                
+                <!-- Dimension 1: QUYỀN LỰC -->
+                <div class="dimension-card">
+                    <div class="dimension-number">01</div>
+                    
+                    <!-- 🖼️ Dimension Image -->
+                    <div class="dimension-visual dimension-img-power"></div>
+                    
+                    <div class="dimension-icon">🔥</div>
+                    <h3 class="dimension-title">Quyền Lực Nội Tâm</h3>
+                    <ul class="dimension-traits">
+                        <li>Bạn bước vào phòng, năng lượng đã nói thay lời</li>
+                        <li>Bạn đưa ra quyết định nhanh, dứt khoát, không xin phép ai</li>
+                        <li>Bạn nói "Không" như một nữ hoàng - thanh lịch nhưng không thương lượng</li>
+                    </ul>
+                </div>
+
+                <!-- Dimension 2: TỰ TIN QUYẾN RŨ -->
+                <div class="dimension-card">
+                    <div class="dimension-number">02</div>
+                    
+                    <!-- 🖼️ Dimension Image -->
+                    <div class="dimension-visual dimension-img-magnetism"></div>
+                    
+                    <div class="dimension-icon">✨</div>
+                    <h3 class="dimension-title">Tự Tin Quyến Rũ</h3>
+                    <ul class="dimension-traits">
+                        <li>Bạn biết mình đẹp - không cần ai xác nhận</li>
+                        <li>Bạn ăn mặc để thể hiện bản ngã, không để làm hài lòng</li>
+                        <li>Bạn tỏa sáng tự nhiên, không cần cố gắng thu hút</li>
+                        <li>Đàn ông đến vì bị cuốn hút - họ không còn là lựa chọn duy nhất</li>
+                    </ul>
+                </div>
+
+                <!-- Dimension 3: GIÀU CÓ & THỊNH VƯỢNG -->
+                <div class="dimension-card">
+                    <div class="dimension-number">03</div>
+                    
+                    <!-- 🖼️ Dimension Image -->
+                    <div class="dimension-visual dimension-img-wealth"></div>
+                    
+                    <div class="dimension-icon">💎</div>
+                    <h3 class="dimension-title">Giàu Có & Thịnh Vượng</h3>
+                    <ul class="dimension-traits">
+                        <li>Bạn biết giá trị của mình và định giá tương xứng</li>
+                        <li>Tiền bạc chảy đến bạn như một dòng năng lượng tự nhiên</li>
+                        <li>Bạn đầu tư vào bản thân không ngần ngại</li>
+                        <li>Bạn sống trong sự thịnh vượng, không còn tư duy thiếu hụt</li>
+                    </ul>
+                </div>
+
+                <!-- Dimension 4: TÀI NĂNG & ẢNH HƯỞNG -->
+                <div class="dimension-card">
+                    <div class="dimension-number">04</div>
+                    
+                    <!-- 🖼️ Dimension Image -->
+                    <div class="dimension-visual dimension-img-influence"></div>
+                    
+                    <div class="dimension-icon">🌟</div>
+                    <h3 class="dimension-title">Tài Năng & Ảnh Hưởng</h3>
+                    <ul class="dimension-traits">
+                        <li>Bạn biết mình giỏi và không cần khiêm tốn giả tạo</li>
+                        <li>Người khác tìm đến xin lời khuyên, học hỏi từ bạn</li>
+                        <li>Bạn xây dựng sự nghiệp từ chính năng lượng đích thực</li>
+                        <li>Bạn truyền cảm hứng mà không cần cố gắng</li>
+                    </ul>
+                </div>
+
+                <!-- Dimension 5: TÌNH YÊU THEO CHUẨN MỰC -->
+                <div class="dimension-card">
+                    <div class="dimension-number">05</div>
+                    
+                    <!-- 🖼️ Dimension Image -->
+                    <div class="dimension-visual dimension-img-love"></div>
+                    
+                    <div class="dimension-icon">💖</div>
+                    <h3 class="dimension-title">Tình Yêu Theo Chuẩn Mực Của Bạn</h3>
+                    <ul class="dimension-traits">
+                        <li>Bạn không "tìm" tình yêu - bạn chọn lọc tình yêu</li>
+                        <li>Bạn yêu mà vẫn giữ được đế chế của riêng mình</li>
+                        <li>Người bạn đời phải phù hợp tần số của bạn - không phải bạn hạ thấp xuống</li>
+                        <li>Bạn là phần thưởng, không phải người đi xin được chọn</li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <!-- Final Revelation -->
+            <div class="revelation-section">
+                <div class="revelation-content">
+                    <div class="revelation-icon">✨</div>
+                    <p class="revelation-quote">
+                        "Bạn Không Tham Gia Khóa Học.<br>
+                        Bạn Đang Trở Thành Phiên Bản Đẳng Cấp Hơn Của Chính Mình."
+                    </p>
+                    <p class="revelation-text">
+                        Boss Lady không chỉ yêu đúng người. Boss Lady còn sống đúng đời.<br>
+                        Bạn không cần thêm thành tựu. Bạn cần <strong style="color: var(--gold-accent);">CHUYỂN HÓA</strong> tần số.
+                    </p>
+
+
+            <!-- Bottom CTA -->
+            <div class="bottom-cta">
+                <p class="cta-quote">
+                    Đây Có Phải<br>
+                    Bạn Muốn Trở Thành?
+                </p>
+                <p class="cta-subtext">
+                    42 ngày chuyển hóa. 7 module chữa lành. 1 phiên bản hoàn toàn mới ở tần số 540 Hz.
+                </p>
+                <a href="#dang-ky" class="cta-button">
+                    Tôi Sẵn Sàng Chuyển Hóa ✨
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- JavaScript -->
+    <script>
+        (function() {
+            'use strict';
+            
+            // Intersection Observer for scroll animations
+            const observerOptions = {
+                threshold: 0.15,
+                rootMargin: '0px 0px -80px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, observerOptions);
+
+            // Observe dimension cards
+            document.querySelectorAll('.dimension-card').forEach(card => {
+                observer.observe(card);
+            });
+
+            // Observe revelation section
+            const revelation = document.querySelector('.revelation-section');
+            if (revelation) {
+                observer.observe(revelation);
+            }
+
+            console.log('✅ Boss Lady Possibility section initialized');
+            
+        })();
+    </script>
+
+</body>
+</html>
+
+<!--
+============================================
+🎯 HƯỚNG DẪN PASTE VÀO SHOPIFY
+============================================
+
+📍 VỊ TRÍ:
+- Sau: Section Mirror (5 Patterns)
+- Trước: Section Testimonials
+
+📋 BƯỚC LÀM:
+1. Copy code từ <section id="possibility-section"> đến </section>
+2. Paste vào Shopify HTML editor
+3. Save & Preview
+
+✏️ ĐỂ THAY ẢNH:
+Line 64-120 trong CSS:
+- .hero-boss-lady-img: Ảnh hero chính
+- .dimension-img-power: Ảnh quyền lực
+- .dimension-img-magnetism: Ảnh quyến rũ
+- .dimension-img-wealth: Ảnh giàu có
+- .dimension-img-influence: Ảnh ảnh hưởng
+- .dimension-img-love: Ảnh tình yêu
+
+🎨 GRADIENT FLOW:
+Nhận từ Mirror: #640A0C (Dark Burgundy)
+Chuyển qua: Dark Red → Blood Red
+Kết thúc: #3D0606 (Deep Black Red)
+Chuẩn bị cho Testimonial section
+
+✅ ĐÃ INCLUDE:
+- 6 placeholder images có thể thay dễ dàng
+- Animations phức tạp (particles, rays, glow)
+- Responsive 100% mobile
+- Hover effects mượt mà
+- JavaScript scroll triggers
+- Code scoped với ID unique
+
+🎯 IMPACT:
+- Bán "danh tính mới" thay vì tri thức
+- Visual mạnh về Boss Lady aesthetic
+- FOMO qua "họ muốn trở thành bạn"
+- 5 chiều kích quyền lực rõ ràng
+-->

@@ -382,7 +382,137 @@ export function optimizeRiskReward(pattern, candles, timeframe = '15m', qualityS
   };
 }
 
+// ============================================================
+// TIMEFRAME-SPECIFIC RR CONFIGURATION
+// ============================================================
+
+/**
+ * Timeframe-specific stop loss and R:R configuration
+ * SL multiplier is % of entry price for stop loss distance
+ * Higher timeframes have larger SL to account for more volatility
+ */
+const TIMEFRAME_RR_CONFIG = {
+  '1m': { slMultiplier: 0.3, defaultRR: 3, description: 'Scalping' },
+  '5m': { slMultiplier: 0.4, defaultRR: 3, description: 'Intraday Fast' },
+  '15m': { slMultiplier: 0.6, defaultRR: 3, description: 'Intraday' },
+  '30m': { slMultiplier: 0.8, defaultRR: 3, description: 'Swing Intraday' },
+  '1h': { slMultiplier: 1.0, defaultRR: 3, description: 'Position' },
+  '4h': { slMultiplier: 1.5, defaultRR: 3, description: 'Swing' },
+  '1d': { slMultiplier: 2.5, defaultRR: 3, description: 'Long Term' },
+  '1w': { slMultiplier: 5.0, defaultRR: 3, description: 'Investment' },
+};
+
+/**
+ * Get RR configuration for a timeframe
+ * @param {string} timeframe - Timeframe string
+ * @returns {Object} Configuration { slMultiplier, defaultRR, description }
+ */
+export function getTimeframeRRConfig(timeframe) {
+  return TIMEFRAME_RR_CONFIG[timeframe] || TIMEFRAME_RR_CONFIG['1h'];
+}
+
+/**
+ * Calculate R:R levels based on timeframe
+ * Returns entry, stop loss, and 3 take profit levels
+ *
+ * @param {number} entry - Entry price
+ * @param {Object} zone - Zone object with zone_high, zone_low
+ * @param {string} timeframe - Timeframe string
+ * @param {string} direction - 'LONG' or 'SHORT'
+ * @param {number|null} customRR - Custom R:R ratio (overrides default)
+ * @returns {Object} { entry, stopLoss, takeProfit1, takeProfit2, takeProfit3, rrRatio, timeframe }
+ */
+export function calculateRRByTimeframe(entry, zone, timeframe, direction, customRR = null) {
+  const config = TIMEFRAME_RR_CONFIG[timeframe] || TIMEFRAME_RR_CONFIG['1h'];
+  const rrRatio = customRR || config.defaultRR;
+
+  // Calculate SL distance based on timeframe multiplier
+  const slDistance = entry * (config.slMultiplier / 100);
+
+  // Calculate TP distance based on R:R ratio
+  const tpDistance = slDistance * rrRatio;
+
+  let stopLoss, takeProfit1, takeProfit2, takeProfit3;
+
+  if (direction === 'LONG') {
+    // LONG: SL below entry, TPs above entry
+    // Use zone_low as a reference point - SL should be below zone
+    stopLoss = Math.max(entry - slDistance, (zone?.zone_low || entry) * 0.995);
+
+    // 3 TP levels: 50%, 100%, 150% of target distance
+    takeProfit1 = entry + (tpDistance * 0.5);   // TP1 at 50% of full target
+    takeProfit2 = entry + tpDistance;            // TP2 at 100% (1:RR ratio)
+    takeProfit3 = entry + (tpDistance * 1.5);   // TP3 at 150% of target
+  } else {
+    // SHORT: SL above entry, TPs below entry
+    // Use zone_high as a reference point - SL should be above zone
+    stopLoss = Math.min(entry + slDistance, (zone?.zone_high || entry) * 1.005);
+
+    // 3 TP levels: 50%, 100%, 150% of target distance
+    takeProfit1 = entry - (tpDistance * 0.5);   // TP1 at 50% of full target
+    takeProfit2 = entry - tpDistance;            // TP2 at 100% (1:RR ratio)
+    takeProfit3 = entry - (tpDistance * 1.5);   // TP3 at 150% of target
+  }
+
+  return {
+    entry,
+    stopLoss: Number(stopLoss.toFixed(8)),
+    takeProfit1: Number(takeProfit1.toFixed(8)),
+    takeProfit2: Number(takeProfit2.toFixed(8)),
+    takeProfit3: Number(takeProfit3.toFixed(8)),
+    rrRatio,
+    timeframe,
+    slDistancePercent: config.slMultiplier,
+    tpDistancePercent: config.slMultiplier * rrRatio,
+  };
+}
+
+/**
+ * Calculate suggested position sizing based on account balance and risk percentage
+ * @param {number} accountBalance - Total account balance
+ * @param {number} riskPercent - Risk percentage (1-5%)
+ * @param {number} entry - Entry price
+ * @param {number} stopLoss - Stop loss price
+ * @param {number} leverage - Leverage (default 10x)
+ * @returns {Object} { positionSize, quantity, margin, riskAmount }
+ */
+export function calculatePositionSize(accountBalance, riskPercent, entry, stopLoss, leverage = 10) {
+  // Risk amount in USDT
+  const riskAmount = accountBalance * (riskPercent / 100);
+
+  // Distance to stop loss as percentage
+  const slDistance = Math.abs(entry - stopLoss);
+  const slPercent = slDistance / entry;
+
+  // Position value that would risk exactly riskAmount at stopLoss
+  // With leverage, the position value is margin * leverage
+  // The loss at SL would be: positionValue * slPercent
+  // We want: positionValue * slPercent = riskAmount
+  // So: positionValue = riskAmount / slPercent
+  const positionValue = riskAmount / slPercent;
+
+  // Margin needed = positionValue / leverage
+  const margin = positionValue / leverage;
+
+  // Quantity = positionValue / entry
+  const quantity = positionValue / entry;
+
+  return {
+    positionSize: Number(margin.toFixed(2)),
+    margin: Number(margin.toFixed(2)),
+    positionValue: Number(positionValue.toFixed(2)),
+    quantity: Number(quantity.toFixed(8)),
+    riskAmount: Number(riskAmount.toFixed(2)),
+    riskPercent,
+    leverage,
+    slPercent: Number((slPercent * 100).toFixed(2)),
+  };
+}
+
 export default {
   calculateATR,
-  optimizeRiskReward
+  optimizeRiskReward,
+  calculateRRByTimeframe,
+  getTimeframeRRConfig,
+  calculatePositionSize,
 };

@@ -193,7 +193,7 @@ const ShadowReportScreen = () => {
               <View style={styles.tableRow}>
                 <Text style={styles.tableCell}>Lợi nhuận</Text>
                 <Text style={[styles.tableCell, styles.tableCenter, styles.tableValue]}>
-                  ${report.paper_total_pnl?.toFixed(0) || 0}
+                  ${(report.paper_total_pnl?.toFixed(0) || '0').replace('.', ',')}
                 </Text>
                 <Text style={[
                   styles.tableCell,
@@ -201,10 +201,10 @@ const ShadowReportScreen = () => {
                   styles.tableGap,
                   { color: report.pnl_gap_percent < 0 ? COLORS.error : COLORS.success },
                 ]}>
-                  {report.pnl_gap_percent > 0 ? '+' : ''}{report.pnl_gap_percent?.toFixed(1) || 0}%
+                  {report.pnl_gap_percent > 0 ? '+' : ''}{(report.pnl_gap_percent?.toFixed(1) || '0').replace('.', ',')}%
                 </Text>
                 <Text style={[styles.tableCell, styles.tableCenter, styles.tableValue]}>
-                  ${report.real_total_pnl?.toFixed(0) || 0}
+                  ${(report.real_total_pnl?.toFixed(0) || '0').replace('.', ',')}
                 </Text>
               </View>
 
@@ -212,7 +212,7 @@ const ShadowReportScreen = () => {
               <View style={styles.tableRow}>
                 <Text style={styles.tableCell}>Tỷ lệ thắng</Text>
                 <Text style={[styles.tableCell, styles.tableCenter, styles.tableValue]}>
-                  {report.paper_win_rate?.toFixed(1) || 0}%
+                  {(report.paper_win_rate?.toFixed(1) || '0').replace('.', ',')}%
                 </Text>
                 <Text style={[
                   styles.tableCell,
@@ -220,10 +220,10 @@ const ShadowReportScreen = () => {
                   styles.tableGap,
                   { color: report.win_rate_gap < 0 ? COLORS.error : COLORS.success },
                 ]}>
-                  {report.win_rate_gap > 0 ? '+' : ''}{report.win_rate_gap?.toFixed(1) || 0}%
+                  {report.win_rate_gap > 0 ? '+' : ''}{(report.win_rate_gap?.toFixed(1) || '0').replace('.', ',')}%
                 </Text>
                 <Text style={[styles.tableCell, styles.tableCenter, styles.tableValue]}>
-                  {report.real_win_rate?.toFixed(1) || 0}%
+                  {(report.real_win_rate?.toFixed(1) || '0').replace('.', ',')}%
                 </Text>
               </View>
 
@@ -243,11 +243,11 @@ const ShadowReportScreen = () => {
               <View style={styles.tableRow}>
                 <Text style={styles.tableCell}>TB thắng</Text>
                 <Text style={[styles.tableCell, styles.tableCenter, { color: COLORS.success }]}>
-                  +${report.paper_avg_win?.toFixed(0) || 0}
+                  +${(report.paper_avg_win?.toFixed(0) || '0').replace('.', ',')}
                 </Text>
                 <Text style={[styles.tableCell, styles.tableCenter, styles.tableGap]}>-</Text>
                 <Text style={[styles.tableCell, styles.tableCenter, { color: COLORS.success }]}>
-                  +${report.real_avg_win?.toFixed(0) || 0}
+                  +${(report.real_avg_win?.toFixed(0) || '0').replace('.', ',')}
                 </Text>
               </View>
 
@@ -255,11 +255,11 @@ const ShadowReportScreen = () => {
               <View style={styles.tableRow}>
                 <Text style={styles.tableCell}>TB thua</Text>
                 <Text style={[styles.tableCell, styles.tableCenter, { color: COLORS.error }]}>
-                  ${report.paper_avg_loss?.toFixed(0) || 0}
+                  ${(report.paper_avg_loss?.toFixed(0) || '0').replace('.', ',')}
                 </Text>
                 <Text style={[styles.tableCell, styles.tableCenter, styles.tableGap]}>-</Text>
                 <Text style={[styles.tableCell, styles.tableCenter, { color: COLORS.error }]}>
-                  ${report.real_avg_loss?.toFixed(0) || 0}
+                  ${(report.real_avg_loss?.toFixed(0) || '0').replace('.', ',')}
                 </Text>
               </View>
             </View>

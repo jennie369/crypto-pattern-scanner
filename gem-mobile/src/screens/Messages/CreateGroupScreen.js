@@ -20,6 +20,8 @@ import {
   Image,
   ActivityIndicator,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -258,7 +260,16 @@ export default function CreateGroupScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+      >
+      <ScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         {/* Group Name */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Group Name</Text>
@@ -339,7 +350,8 @@ export default function CreateGroupScreen({ navigation }) {
             </Text>
           </View>
         )}
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
       {AlertComponent}
     </LinearGradient>
   );

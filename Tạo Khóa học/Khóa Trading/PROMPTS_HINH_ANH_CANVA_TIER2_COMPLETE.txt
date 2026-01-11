@@ -1,0 +1,908 @@
+================================================================================
+                         TIER 2 - NÂNG CAO (43 bài)
+                    PROMPTS HÌNH ẢNH CHI TIẾT ĐẦY ĐỦ
+================================================================================
+
+═══════════════════════════════════════════════════════════════════════════════
+CHƯƠNG 2: LFZ MASTERY - VÙNG TẦN SỐ THẤP
+═══════════════════════════════════════════════════════════════════════════════
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 2.1: LFZ LÀ GÌ?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: LFZ DEFINITION
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+LFZ Zone      | Green trans   | #10B981 (30% opacity)
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "TIER 2"
+- Màu nền: Purple (#6A5BFF)
+
+Tiêu đề: "LFZ - LOW FREQUENCY ZONE"
+
+═══════════════════════════════════════════════════════════════
+DEFINITION BOX:
+═══════════════════════════════════════════════════════════════
+┌────────────────────────────────────────────────────────────┐
+│ 📊 LFZ = LOW FREQUENCY ZONE                                │
+│ ════════════════════════════════════════════════════════════│
+│ • Định nghĩa: Vùng có tần suất giao dịch THẤP              │
+│ • Hình thành: Từ patterns UPU, DPU                         │
+│ • Loại: DEMAND ZONE (Vùng mua)                             │
+│ • Action: LONG khi giá chạm LFZ                            │
+│ • Màu sắc: XANH LÁ (#10B981) với 30% opacity               │
+└────────────────────────────────────────────────────────────┘
+
+DIAGRAM:
+Biểu đồ nến với LFZ zone được highlight màu xanh lá
+- Entry Line: Đỉnh zone (nơi vào LONG)
+- Stop Line: Đáy zone (SL phía dưới)
+- Arrows: Giá đi lên từ LFZ
+
+⚠️ QUY TẮC VẼ NẾN CANDLESTICK - BẮT BUỘC:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  • NẾN XANH (Bullish): FILL MÀU XANH ĐẶC (#00C853), opacity 100%           │
+│  • NẾN ĐỎ (Bearish): FILL MÀU ĐỎ ĐẶC (#EF4444), opacity 100%               │
+│  • CẢ HAI đều là hình chữ nhật SOLID FILLED, không outline rỗng            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: LFZ FORMATION PROCESS
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+⚠️ ENFORCE: Vẽ BIỂU ĐỒ NẾN CANDLESTICK thực tế
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+⚠️ QUY TẮC VẼ NẾN CANDLESTICK - BẮT BUỘC:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  • NẾN XANH (Bullish): FILL MÀU XANH ĐẶC (#00C853), opacity 100%           │
+│  • NẾN ĐỎ (Bearish): FILL MÀU ĐỎ ĐẶC (#EF4444), opacity 100%               │
+│  • CẢ HAI đều là hình chữ nhật SOLID FILLED, không outline rỗng            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+NỘI DUNG HÌNH:
+HEADER: Badge "QUÁ TRÌNH", Tiêu đề "LFZ HÌNH THÀNH NHƯ THẾ NÀO?"
+
+FORMATION DIAGRAM (biểu đồ nến candlestick):
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│  PATTERN UPU TẠO LFZ:                                        │
+│                                                              │
+│         📈 PHASE 1          📊 PHASE 2          📈 PHASE 3  │
+│         (UP)                (PAUSE)              (UP)        │
+│                                                              │
+│                         ┌──────────────┐                     │
+│                         │   LFZ ZONE   │         ↗           │
+│              ↗          │   (Xanh lá)  │      ↗              │
+│           ↗             └──────────────┘   ↗                 │
+│        ↗                                ↗                    │
+│     ↗                                                        │
+│                                                              │
+│  [Nến xanh solid]      [Nến nhỏ sideway]    [Nến xanh solid] │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+KEY POINTS:
+• Smart Money TÍCH LŨY trong Phase 2
+• Lệnh mua CHƯA KHỚP còn nằm ở vùng này
+• Khi giá quay lại → Lực mua mạnh!
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: LFZ QUALITY INDICATORS
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+HEADER: Badge "CHẤT LƯỢNG", Tiêu đề "DẤU HIỆU LFZ CHẤT LƯỢNG CAO"
+
+5 INDICATORS GRID:
+┌─────────────────────────────────────────────────────────────┐
+│  ① FRESH ZONE (Chưa test)                                   │
+│     • Giá chưa quay lại zone này                            │
+│     • Độ mạnh: ★★★★★                                         │
+│     Viền: Green                                             │
+├─────────────────────────────────────────────────────────────┤
+│  ② STRONG DEPARTURE (Ra đi mạnh)                            │
+│     • Giá rời zone bằng nến lớn                             │
+│     • Volume cao khi breakout                               │
+│     Viền: Cyan                                              │
+├─────────────────────────────────────────────────────────────┤
+│  ③ SMALL PAUSE (Zone nhỏ gọn)                               │
+│     • Range < 2%                                            │
+│     • 1-5 nến trong zone                                    │
+│     Viền: Purple                                            │
+├─────────────────────────────────────────────────────────────┤
+│  ④ LOW VOLUME IN ZONE                                       │
+│     • Volume giảm dần trong pause                           │
+│     • Ít giao dịch = Ít người biết                          │
+│     Viền: Gold                                              │
+├─────────────────────────────────────────────────────────────┤
+│  ⑤ MULTI-TF ALIGNMENT                                       │
+│     • Trùng với zone ở TF lớn hơn                           │
+│     • Confluence signals                                    │
+│     Viền: Green                                             │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 2.2: CÁCH VẼ LFZ CHÍNH XÁC
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: LFZ DRAWING STEP BY STEP
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+⚠️ ENFORCE: Vẽ BIỂU ĐỒ NẾN CANDLESTICK thực tế
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Nến xanh      | Green solid   | #00C853
+Nến đỏ        | Red solid     | #EF4444
+LFZ Zone      | Green trans   | #10B981 (30%)
+Entry Line    | Green bright  | #10B981
+Stop Line     | Red           | #EF4444
+Text body     | Trắng         | #FFFFFF
+
+⚠️ QUY TẮC VẼ NẾN CANDLESTICK - BẮT BUỘC:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  • NẾN XANH (Bullish): FILL MÀU XANH ĐẶC (#00C853), opacity 100%           │
+│  • NẾN ĐỎ (Bearish): FILL MÀU ĐỎ ĐẶC (#EF4444), opacity 100%               │
+│  • CẢ HAI đều là hình chữ nhật SOLID FILLED, không outline rỗng            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+NỘI DUNG HÌNH:
+HEADER: Badge "HƯỚNG DẪN", Tiêu đề "5 BƯỚC VẼ LFZ CHÍNH XÁC"
+
+5 STEPS với biểu đồ nến:
+┌─────────────────────────────────────────────────────────────┐
+│  BƯỚC 1: Xác định Phase 2 (PAUSE)                           │
+│  ─────────────────────────────────                          │
+│  • Tìm vùng sideway sau uptrend                             │
+│  • 1-5 nến nhỏ, range hẹp                                   │
+│                                                              │
+│  BƯỚC 2: Vẽ đường ENTRY (Đỉnh zone)                         │
+│  ─────────────────────────────────                          │
+│  • Lấy đỉnh cao nhất của các nến pause                      │
+│  • Đây là điểm entry LONG                                   │
+│  [Đường ngang màu xanh lá]                                  │
+│                                                              │
+│  BƯỚC 3: Vẽ đường STOP (Đáy zone)                           │
+│  ─────────────────────────────────                          │
+│  • Lấy đáy thấp nhất của các nến pause                      │
+│  • Đây là vùng đặt Stop Loss                                │
+│  [Đường ngang màu đỏ]                                       │
+│                                                              │
+│  BƯỚC 4: Tô màu zone                                        │
+│  ─────────────────────────────────                          │
+│  • Fill màu xanh lá 30% opacity                             │
+│  • Từ Entry đến Stop                                        │
+│                                                              │
+│  BƯỚC 5: Kiểm tra độ dày                                    │
+│  ─────────────────────────────────                          │
+│  • Zone < 2% = Lý tưởng                                     │
+│  • Zone 2-3% = Chấp nhận được                               │
+│  • Zone > 3% = Cân nhắc lại                                 │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: LFZ DRAWING EXAMPLE BTC
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+⚠️ ENFORCE: Vẽ BIỂU ĐỒ NẾN CANDLESTICK thực tế
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+⚠️ QUY TẮC VẼ NẾN CANDLESTICK - BẮT BUỘC:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  • NẾN XANH (Bullish): FILL MÀU XANH ĐẶC (#00C853), opacity 100%           │
+│  • NẾN ĐỎ (Bearish): FILL MÀU ĐỎ ĐẶC (#EF4444), opacity 100%               │
+│  • CẢ HAI đều là hình chữ nhật SOLID FILLED, không outline rỗng            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+NỘI DUNG HÌNH:
+HEADER: Badge "VÍ DỤ", Tiêu đề "VẼ LFZ - BTC/USDT H4"
+
+REAL CHART EXAMPLE với biểu đồ nến candlestick:
+┌─────────────────────────────────────────────────────────────┐
+│  TRỤC GIÁ:        BIỂU ĐỒ NẾN CANDLESTICK                   │
+│  $44,000                                                     │
+│  $43,500                    ↗ ↗ ↗                           │
+│  $43,000              ┌──────────┐  [Phase 3]               │
+│  $42,500     ← Entry ─┤  LFZ     │                          │
+│  $42,000     ← Stop  ─┤  ZONE    │ [Phase 2]                │
+│  $41,500              └──────────┘                          │
+│  $41,000         ↗                                          │
+│  $40,500      ↗    [Phase 1]                                │
+│  $40,000   ↗                                                │
+│                                                              │
+│  [Nến xanh solid - uptrend mạnh]                            │
+│  [3 nến nhỏ sideway trong zone]                             │
+│  [Nến xanh solid - breakout]                                │
+│                                                              │
+│  📊 THÔNG TIN:                                              │
+│  • Entry: $42,500                                           │
+│  • Stop: $42,000 (SL: $41,800)                              │
+│  • Zone size: 1.2% ✅ (Lý tưởng)                            │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: LFZ COMMON MISTAKES
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+HEADER: Badge "SAI LẦM", Tiêu đề "5 LỖI THƯỜNG GẶP KHI VẼ LFZ"
+
+5 MISTAKES:
+┌─────────────────────────────────────────────────────────────┐
+│  ❌ SAI LẦM 1: Zone quá rộng                                │
+│     • > 3% = Risk quá cao                                   │
+│     • R:R không tốt                                         │
+│                                                              │
+│  ❌ SAI LẦM 2: Không có Phase 1 rõ ràng                     │
+│     • Uptrend yếu → Zone yếu                                │
+│     • Cần ít nhất +2% move trước pause                      │
+│                                                              │
+│  ❌ SAI LẦM 3: Dùng zone đã bị test nhiều lần               │
+│     • > 2 lần test = Zone yếu                               │
+│     • Fresh zone mới là mạnh nhất                           │
+│                                                              │
+│  ❌ SAI LẦM 4: Vẽ zone ở wicks thay vì bodies               │
+│     • Nên focus vào thân nến                                │
+│     • Wicks chỉ để tham khảo                                │
+│                                                              │
+│  ❌ SAI LẦM 5: Không check Volume                           │
+│     • Volume cao trong pause = Không phải zone              │
+│     • Volume thấp = Smart Money tích lũy                    │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 2.3-2.6: LFZ NÂNG CAO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BÀI 2.3: LFZ LIFECYCLE
+📐 HÌNH 1: Zone Freshness Stages
+📐 HÌNH 2: Zone Decay Process
+📐 HÌNH 3: When to Remove Zone
+
+BÀI 2.4: CHIẾN LƯỢC ENTRY LFZ
+📐 HÌNH 1: Entry Confirmation Candles
+📐 HÌNH 2: Position Sizing for LFZ
+📐 HÌNH 3: Multi-Entry Strategy
+
+BÀI 2.5: LFZ ĐA KHUNG THỜI GIAN
+📐 HÌNH 1: Multi-TF Zone Stacking
+📐 HÌNH 2: Zone Priority Chart
+📐 HÌNH 3: Confluence Trading Setup
+
+BÀI 2.6: VÍ DỤ THỰC TẾ LFZ
+📐 HÌNH 1: Case Study ETH
+📐 HÌNH 2: Case Study SOL
+📐 HÌNH 3: Win/Loss Analysis
+
+
+═══════════════════════════════════════════════════════════════════════════════
+CHƯƠNG 3: TRIANGLE PATTERNS NÂNG CAO
+═══════════════════════════════════════════════════════════════════════════════
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 3.1: ASCENDING TRIANGLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: ASCENDING TRIANGLE ANATOMY
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+⚠️ ENFORCE: Vẽ BIỂU ĐỒ NẾN CANDLESTICK thực tế
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Bullish       | Green         | #10B981
+Nến xanh      | Green solid   | #00C853
+Nến đỏ        | Red solid     | #EF4444
+Resistance    | Red line      | #EF4444
+Support       | Green line    | #10B981
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+
+⚠️ QUY TẮC VẼ NẾN CANDLESTICK - BẮT BUỘC:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  • NẾN XANH (Bullish): FILL MÀU XANH ĐẶC (#00C853), opacity 100%           │
+│  • NẾN ĐỎ (Bearish): FILL MÀU ĐỎ ĐẶC (#EF4444), opacity 100%               │
+│  • CẢ HAI đều là hình chữ nhật SOLID FILLED, không outline rỗng            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "PATTERN"
+- Màu nền: Green (#10B981)
+
+Tiêu đề: "ASCENDING TRIANGLE - TAM GIÁC TĂNG"
+
+═══════════════════════════════════════════════════════════════
+ANATOMY DIAGRAM với biểu đồ nến candlestick:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│         ═══════════════════ RESISTANCE (Flat)  ───→         │
+│                         ╱   ╲                                │
+│                       ╱       ╲ Breakout!                    │
+│                     ╱   ╱       ╲                            │
+│                   ╱   ╱                                      │
+│                 ╱   ╱    Higher Lows                         │
+│               ╱   ╱                                          │
+│             ╱   ╱   ← SUPPORT (Rising)                       │
+│           ╱   ╱                                              │
+│         ╱                                                    │
+│                                                              │
+│  📊 ĐẶC ĐIỂM:                                               │
+│  • Resistance: Đường ngang (flat)                           │
+│  • Support: Đường dốc lên (higher lows)                     │
+│  • Loại: BULLISH CONTINUATION                               │
+│  • Win Rate: 75%                                            │
+│  • Target: Chiều cao tam giác                               │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: ASCENDING TRIANGLE ENTRY STRATEGY
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+⚠️ ENFORCE: Vẽ BIỂU ĐỒ NẾN CANDLESTICK thực tế
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+⚠️ QUY TẮC VẼ NẾN CANDLESTICK - BẮT BUỘC:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  • NẾN XANH (Bullish): FILL MÀU XANH ĐẶC (#00C853), opacity 100%           │
+│  • NẾN ĐỎ (Bearish): FILL MÀU ĐỎ ĐẶC (#EF4444), opacity 100%               │
+│  • CẢ HAI đều là hình chữ nhật SOLID FILLED, không outline rỗng            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+NỘI DUNG HÌNH:
+HEADER: Badge "ENTRY", Tiêu đề "CHIẾN LƯỢC ENTRY ASCENDING TRIANGLE"
+
+2 STRATEGIES với biểu đồ nến candlestick:
+┌─────────────────────────────────────────────────────────────┐
+│  STRATEGY 1: BREAKOUT ENTRY                                 │
+│  ═════════════════════════════════════════════════════════  │
+│                                                              │
+│         ═══════════════ Resistance                          │
+│                    ↗ ← Entry: Breakout + Retest             │
+│                  ╱ ╲                                         │
+│                ╱    ↘ SL: Dưới nến breakout                 │
+│              ╱                                               │
+│            ╱   ← Support rising                              │
+│                                                              │
+│  • Entry: Khi nến đóng TRÊN resistance                      │
+│  • Xác nhận: Volume tăng                                    │
+│  • SL: Dưới nến breakout hoặc support                       │
+│  • TP: Chiều cao tam giác measured up                       │
+│                                                              │
+│  STRATEGY 2: RETEST ENTRY (An toàn hơn)                     │
+│  ═════════════════════════════════════════════════════════  │
+│                                                              │
+│         ═══════════════ Resistance                          │
+│                    ↗                                         │
+│                  ↗   ← Entry: Retest thành công             │
+│         ───────╱ ↘ SL: Dưới resistance cũ                   │
+│               ╱                                              │
+│                                                              │
+│  • Entry: Sau khi breakout + quay lại test                  │
+│  • Xác nhận: Rejection candle                               │
+│  • SL: Nhỏ hơn (risk thấp hơn)                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: ASCENDING TRIANGLE REAL EXAMPLE
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+⚠️ ENFORCE: Vẽ BIỂU ĐỒ NẾN CANDLESTICK thực tế
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+⚠️ QUY TẮC VẼ NẾN CANDLESTICK - BẮT BUỘC:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  • NẾN XANH (Bullish): FILL MÀU XANH ĐẶC (#00C853), opacity 100%           │
+│  • NẾN ĐỎ (Bearish): FILL MÀU ĐỎ ĐẶC (#EF4444), opacity 100%               │
+│  • CẢ HAI đều là hình chữ nhật SOLID FILLED, không outline rỗng            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+NỘI DUNG HÌNH:
+HEADER: Badge "VÍ DỤ", Tiêu đề "ASCENDING TRIANGLE - ETH/USDT D1"
+
+CHART với biểu đồ nến candlestick đầy đủ:
+- Trục giá bên trái
+- Nến xanh solid và nến đỏ solid
+- Resistance line (đỏ)
+- Support rising line (xanh)
+- Entry, SL, TP markers
+- Volume bars bên dưới
+
+INFO BOX:
+• Coin: ETH/USDT
+• Timeframe: D1
+• Pattern Duration: 21 ngày
+• Breakout: $2,150
+• Target: $2,450 (+14%)
+• Result: ✅ WIN
+
+FOOTER: "GEM TRADING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 3.2: DESCENDING TRIANGLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: DESCENDING TRIANGLE ANATOMY
+📐 HÌNH 2: DESCENDING ENTRY STRATEGY
+📐 HÌNH 3: DESCENDING REAL EXAMPLE
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 3.3: SYMMETRICAL TRIANGLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: SYMMETRICAL TRIANGLE ANATOMY
+📐 HÌNH 2: BREAKOUT DIRECTION PREDICTION
+📐 HÌNH 3: SYMMETRICAL REAL EXAMPLE
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 3.4: WEDGE PATTERNS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: RISING WEDGE ANATOMY
+📐 HÌNH 2: FALLING WEDGE ANATOMY
+📐 HÌNH 3: WEDGE VS TRIANGLE COMPARISON
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 3.5: TRIANGLE PATTERNS TỔNG HỢP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: ALL TRIANGLE PATTERNS COMPARISON
+📐 HÌNH 2: TRIANGLE + GEM ZONES CONFLUENCE
+📐 HÌNH 3: TRIANGLE TRADING CHECKLIST
+
+
+═══════════════════════════════════════════════════════════════════════════════
+CHƯƠNG 4: MULTI-TIMEFRAME ANALYSIS
+═══════════════════════════════════════════════════════════════════════════════
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 4.1: NGUYÊN TẮC MULTI-TF
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: MULTI-TF CONCEPT
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+HTF           | Purple        | #6A5BFF
+MTF           | Cyan          | #00F0FF
+LTF           | Green         | #10B981
+Text body     | Trắng         | #FFFFFF
+
+NỘI DUNG HÌNH:
+HEADER: Badge "MULTI-TF", Tiêu đề "PHÂN TÍCH ĐA KHUNG THỜI GIAN"
+
+3-TIER TIMEFRAME SYSTEM:
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │  🔮 HTF - HIGH TIMEFRAME (D1, W1)                        ││
+│  │  ═══════════════════════════════════════════════════════ ││
+│  │  • Mục đích: Xác định XU HƯỚNG CHÍNH                     ││
+│  │  • Câu hỏi: Thị trường đang BULLISH hay BEARISH?         ││
+│  │  • Zones ở đây = MẠNH NHẤT                               ││
+│  │  Viền: Purple (#6A5BFF)                                  ││
+│  └─────────────────────────────────────────────────────────┘│
+│                          ↓                                   │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │  📊 MTF - MEDIUM TIMEFRAME (H4, H8)                      ││
+│  │  ═══════════════════════════════════════════════════════ ││
+│  │  • Mục đích: Tìm ZONES và PATTERNS                       ││
+│  │  • Câu hỏi: Có zone nào phù hợp để trade?                ││
+│  │  • Đây là TF chính để phân tích                          ││
+│  │  Viền: Cyan (#00F0FF)                                    ││
+│  └─────────────────────────────────────────────────────────┘│
+│                          ↓                                   │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │  🎯 LTF - LOW TIMEFRAME (H1, M15)                        ││
+│  │  ═══════════════════════════════════════════════════════ ││
+│  │  • Mục đích: Timing ENTRY chính xác                      ││
+│  │  • Câu hỏi: Entry point tối ưu ở đâu?                    ││
+│  │  • Fine-tune SL/TP                                       ││
+│  │  Viền: Green (#10B981)                                   ││
+│  └─────────────────────────────────────────────────────────┘│
+│                                                              │
+│  💡 NGUYÊN TẮC: Trade theo hướng HTF, entry tại MTF zone,   │
+│                 timing bằng LTF                             │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: TIMEFRAME COMBINATIONS
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+HEADER: Badge "COMBO", Tiêu đề "CÁC TỔ HỢP TIMEFRAME HIỆU QUẢ"
+
+COMBINATION TABLE:
+┌─────────────────────────────────────────────────────────────┐
+│  📊 TỔ HỢP 1: SWING TRADING (3-7 ngày)                      │
+│  ═══════════════════════════════════════════════════════    │
+│  HTF: Weekly | MTF: Daily | LTF: H4                         │
+│  Phù hợp: Người đi làm, ít thời gian                        │
+├─────────────────────────────────────────────────────────────┤
+│  📊 TỔ HỢP 2: INTRADAY (1-3 ngày) ⭐ PHỔ BIẾN               │
+│  ═══════════════════════════════════════════════════════    │
+│  HTF: Daily | MTF: H4 | LTF: H1                             │
+│  Phù hợp: Balance giữa tần suất và chất lượng               │
+├─────────────────────────────────────────────────────────────┤
+│  📊 TỔ HỢP 3: SCALPING (vài giờ)                            │
+│  ═══════════════════════════════════════════════════════    │
+│  HTF: H4 | MTF: H1 | LTF: M15                               │
+│  Phù hợp: Trader có nhiều thời gian, kinh nghiệm cao        │
+└─────────────────────────────────────────────────────────────┘
+
+💡 GỢI Ý: TIER 2 nên dùng Tổ hợp 2 (D1/H4/H1)
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: MULTI-TF CONFLUENCE
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+⚠️ ENFORCE: Vẽ BIỂU ĐỒ NẾN CANDLESTICK thực tế
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+⚠️ QUY TẮC VẼ NẾN CANDLESTICK - BẮT BUỘC:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  • NẾN XANH (Bullish): FILL MÀU XANH ĐẶC (#00C853), opacity 100%           │
+│  • NẾN ĐỎ (Bearish): FILL MÀU ĐỎ ĐẶC (#EF4444), opacity 100%               │
+│  • CẢ HAI đều là hình chữ nhật SOLID FILLED, không outline rỗng            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+NỘI DUNG HÌNH:
+HEADER: Badge "CONFLUENCE", Tiêu đề "KHI ZONES TRÙNG NHAU = SIÊU MẠNH"
+
+3 CHARTS STACKED với biểu đồ nến candlestick:
+┌─────────────────────────────────────────────────────────────┐
+│  DAILY CHART:                                                │
+│  ──────────────                                              │
+│  [Biểu đồ nến candlestick với LFZ zone màu xanh nhạt]        │
+│  📍 LFZ Zone: $41,500 - $42,000                              │
+│                                                              │
+│  H4 CHART:                                                   │
+│  ──────────────                                              │
+│  [Biểu đồ nến candlestick với LFZ zone trùng]                │
+│  📍 LFZ Zone: $41,700 - $42,000                              │
+│                                                              │
+│  H1 CHART:                                                   │
+│  ──────────────                                              │
+│  [Biểu đồ nến candlestick với entry timing]                  │
+│  📍 Entry: $41,800 | Bullish engulfing                       │
+│                                                              │
+│  ════════════════════════════════════════════════════════   │
+│  💎 CONFLUENCE ZONE: $41,700 - $42,000                       │
+│  ⭐ Độ mạnh: ★★★★★ (D1 + H4 trùng nhau)                      │
+│  ════════════════════════════════════════════════════════   │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 4.2-4.5: MULTI-TF NÂNG CAO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BÀI 4.2: ZONE STACKING
+📐 HÌNH 1: Zone Stacking Concept
+📐 HÌNH 2: Priority Zones Chart
+📐 HÌNH 3: Stacking Example BTC
+
+BÀI 4.3: TREND ALIGNMENT
+📐 HÌNH 1: Trade With The Trend
+📐 HÌNH 2: Counter-Trend Warnings
+📐 HÌNH 3: Trend + Zone Alignment
+
+BÀI 4.4: ENTRY TIMING
+📐 HÌNH 1: LTF Entry Techniques
+📐 HÌNH 2: Confirmation Candles
+📐 HÌNH 3: Timing vs Zone Trading
+
+BÀI 4.5: MULTI-TF CASE STUDIES
+📐 HÌNH 1: Full Analysis Example 1
+📐 HÌNH 2: Full Analysis Example 2
+📐 HÌNH 3: Common Mistakes
+
+
+═══════════════════════════════════════════════════════════════════════════════
+CHƯƠNG 5: ZONE GRADING SYSTEM
+═══════════════════════════════════════════════════════════════════════════════
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 5.1: HỆ THỐNG CHẤM ĐIỂM ZONE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: ZONE GRADING SCORECARD
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Grade A       | Green         | #10B981
+Grade B       | Cyan          | #00F0FF
+Grade C       | Gold          | #FFBD59
+Grade D       | Red           | #EF4444
+Text body     | Trắng         | #FFFFFF
+
+NỘI DUNG HÌNH:
+HEADER: Badge "GRADING", Tiêu đề "HỆ THỐNG CHẤM ĐIỂM ZONE"
+
+GRADING CRITERIA TABLE:
+┌─────────────────────────────────────────────────────────────┐
+│  📊 5 TIÊU CHÍ CHẤM ĐIỂM (Mỗi tiêu chí: 0-20 điểm)          │
+│  ════════════════════════════════════════════════════════   │
+│                                                              │
+│  ① FRESHNESS (Độ tươi) - 20 điểm                            │
+│     • Fresh (chưa test): 20đ                                │
+│     • 1 lần test: 10đ                                       │
+│     • 2+ lần test: 0đ                                       │
+│                                                              │
+│  ② DEPARTURE STRENGTH (Ra đi mạnh) - 20 điểm                │
+│     • Nến lớn, volume cao: 20đ                              │
+│     • Nến trung bình: 10đ                                   │
+│     • Nến yếu: 0đ                                           │
+│                                                              │
+│  ③ ZONE SIZE (Kích thước) - 20 điểm                         │
+│     • < 1.5%: 20đ                                           │
+│     • 1.5-2.5%: 10đ                                         │
+│     • > 2.5%: 0đ                                            │
+│                                                              │
+│  ④ MULTI-TF ALIGNMENT - 20 điểm                             │
+│     • Trùng 2+ TF: 20đ                                      │
+│     • Trùng 1 TF: 10đ                                       │
+│     • Không trùng: 0đ                                       │
+│                                                              │
+│  ⑤ TREND ALIGNMENT - 20 điểm                                │
+│     • Cùng hướng trend: 20đ                                 │
+│     • Neutral: 10đ                                          │
+│     • Ngược trend: 0đ                                       │
+│                                                              │
+│  ════════════════════════════════════════════════════════   │
+│  TỔNG: 100 điểm                                             │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: ZONE GRADES EXPLANATION
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+HEADER: Badge "GRADES", Tiêu đề "Ý NGHĨA CÁC GRADE"
+
+GRADE CARDS:
+┌─────────────────────────────────────────────────────────────┐
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │ ⭐ GRADE A (80-100 điểm)                                 ││
+│  │ ═════════════════════════════════════════════════════   ││
+│  │ • Độ tin cậy: 80%+                                       ││
+│  │ • Action: TRADE ngay khi có xác nhận                     ││
+│  │ • Position: Full size (1-2% risk)                        ││
+│  │ Viền: Green (#10B981)                                    ││
+│  └─────────────────────────────────────────────────────────┘│
+│                                                              │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │ ✅ GRADE B (60-79 điểm)                                  ││
+│  │ ═════════════════════════════════════════════════════   ││
+│  │ • Độ tin cậy: 65-80%                                     ││
+│  │ • Action: Trade với xác nhận mạnh                        ││
+│  │ • Position: 75% size (0.75-1.5% risk)                    ││
+│  │ Viền: Cyan (#00F0FF)                                     ││
+│  └─────────────────────────────────────────────────────────┘│
+│                                                              │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │ ⚠️ GRADE C (40-59 điểm)                                  ││
+│  │ ═════════════════════════════════════════════════════   ││
+│  │ • Độ tin cậy: 50-65%                                     ││
+│  │ • Action: Chỉ trade nếu có confluence mạnh               ││
+│  │ • Position: 50% size (0.5-1% risk)                       ││
+│  │ Viền: Gold (#FFBD59)                                     ││
+│  └─────────────────────────────────────────────────────────┘│
+│                                                              │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │ ❌ GRADE D (< 40 điểm)                                   ││
+│  │ ═════════════════════════════════════════════════════   ││
+│  │ • Độ tin cậy: < 50%                                      ││
+│  │ • Action: KHÔNG TRADE                                    ││
+│  │ • Reason: Risk quá cao                                   ││
+│  │ Viền: Red (#EF4444)                                      ││
+│  └─────────────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: ZONE GRADING EXAMPLE
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+HEADER: Badge "VÍ DỤ", Tiêu đề "CHẤM ĐIỂM ZONE THỰC TẾ"
+
+EXAMPLE SCORECARD:
+┌─────────────────────────────────────────────────────────────┐
+│  📊 BTC/USDT H4 - LFZ ZONE                                  │
+│  ════════════════════════════════════════════════════════   │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │ TIÊU CHÍ           │ ĐÁNH GIÁ              │ ĐIỂM      ││
+│  │════════════════════│═══════════════════════│═══════════││
+│  │ ① Freshness        │ Fresh (chưa test)     │ 20/20     ││
+│  │ ② Departure        │ Nến lớn, volume ok    │ 15/20     ││
+│  │ ③ Zone Size        │ 1.8% (acceptable)     │ 10/20     ││
+│  │ ④ Multi-TF         │ Trùng với D1 zone     │ 20/20     ││
+│  │ ⑤ Trend            │ Cùng hướng uptrend    │ 20/20     ││
+│  │════════════════════│═══════════════════════│═══════════││
+│  │ TỔNG ĐIỂM          │                       │ 85/100    ││
+│  └─────────────────────────────────────────────────────────┘│
+│                                                              │
+│  ⭐ GRADE: A                                                 │
+│  ✅ DECISION: TRADE với full position                       │
+│  📍 Entry: $42,500 | SL: $41,800 | TP: $44,500              │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 5.2-5.5: ZONE GRADING NÂNG CAO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BÀI 5.2: FRESHNESS ANALYSIS
+📐 HÌNH 1: Zone Age Tracking
+📐 HÌNH 2: Test Count Impact
+📐 HÌNH 3: Fresh Zone Priority
+
+BÀI 5.3: DEPARTURE STRENGTH
+📐 HÌNH 1: Strong vs Weak Departure
+📐 HÌNH 2: Volume Analysis
+📐 HÌNH 3: Candle Size Metrics
+
+BÀI 5.4: POSITION SIZING BY GRADE
+📐 HÌNH 1: Risk Allocation Table
+📐 HÌNH 2: Grade-Based Sizing
+📐 HÌNH 3: Portfolio Balance
+
+BÀI 5.5: ZONE GRADING PRACTICE
+📐 HÌNH 1: Practice Exercise 1
+📐 HÌNH 2: Practice Exercise 2
+📐 HÌNH 3: Common Grading Mistakes
+
+
+═══════════════════════════════════════════════════════════════════════════════
+CHƯƠNG 6: QUẢN LÝ RỦI RO NÂNG CAO
+═══════════════════════════════════════════════════════════════════════════════
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 6.1: POSITION SIZING NÂNG CAO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: POSITION SIZING FORMULA
+📐 HÌNH 2: POSITION CALCULATOR
+📐 HÌNH 3: EXAMPLES WITH DIFFERENT ACCOUNT SIZES
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 6.2-6.5: RISK MANAGEMENT NÂNG CAO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BÀI 6.2: DRAWDOWN MANAGEMENT
+📐 HÌNH 1: Max Drawdown Limits
+📐 HÌNH 2: Recovery Time Chart
+📐 HÌNH 3: Drawdown Action Plan
+
+BÀI 6.3: CORRELATION RISK
+📐 HÌNH 1: Crypto Correlation Matrix
+📐 HÌNH 2: Portfolio Diversification
+📐 HÌNH 3: Sector Allocation
+
+BÀI 6.4: SCALING STRATEGIES
+📐 HÌNH 1: Scaling In Technique
+📐 HÌNH 2: Scaling Out Technique
+📐 HÌNH 3: Partial Profit Taking
+
+BÀI 6.5: RISK DASHBOARD
+📐 HÌNH 1: Personal Risk Dashboard
+📐 HÌNH 2: Daily Risk Checklist
+📐 HÌNH 3: Weekly Risk Review
+
+
+═══════════════════════════════════════════════════════════════════════════════
+CHƯƠNG 7-8: MODULE A & B (TIER 2)
+═══════════════════════════════════════════════════════════════════════════════
+
+(Format tương tự Module A & B của TIER 1, điều chỉnh nội dung cho TIER 2:
+- Tổng kết 15 patterns đã học
+- So sánh TIER 1 vs TIER 2 achievements
+- TIER 3 preview: AI Signals, Whale Tracking
+- Partner program với higher commission tiers)
+
+CHƯƠNG 7: MODULE A - TIER 2
+📐 HÌNH 1: Before/After Tier 2
+📐 HÌNH 2: 15 Patterns Mastery
+📐 HÌNH 3: Multi-TF Skills Acquired
+📐 HÌNH 4: Zone Grading Mastery
+
+CHƯƠNG 8: MODULE B - TIER 2
+📐 HÌNH 1: Three Paths (Continue/Upgrade/Partner)
+📐 HÌNH 2: TIER 3 Elite Preview
+📐 HÌNH 3: Advanced Partner Program
+📐 HÌNH 4: Next Steps CTA

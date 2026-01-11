@@ -1,0 +1,781 @@
+<!-- ============================================
+     SECTION 5: FREQUENCY PATTERNS (ĐÃ SỬA)
+     GEMRAL Landing Page
+     6 Pattern Cards - Tập trung giá trị thực tế
+     ============================================ -->
+
+
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEMRAL - Frequency Patterns Section</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&amp;family=Noto+Sans+Display:wght@400;500;600&amp;display=swap" rel="stylesheet">
+    
+    <style>
+        /* ============================================
+           CSS VARIABLES
+           ============================================ */
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1632;
+            --burgundy: #9C0612;
+            --burgundy-dark: #6B0F1A;
+            --gold: #FFBD59;
+            --gold-dark: #C88F2F;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --pink: #FF6B9D;
+            --green: #10B981;
+            --red: #EF4444;
+            --white: #ffffff;
+            --white-80: rgba(255, 255, 255, 0.8);
+            --white-60: rgba(255, 255, 255, 0.6);
+            --white-20: rgba(255, 255, 255, 0.2);
+            --white-10: rgba(255, 255, 255, 0.1);
+            --black-40: rgba(0, 0, 0, 0.4);
+            
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            background: var(--navy-dark);
+            color: var(--white);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* ============================================
+           SECTION FREQUENCY PATTERNS
+           ============================================ */
+        .section-patterns {
+            padding: 100px 0;
+            background: linear-gradient(180deg, 
+                var(--navy-dark) 0%,
+                #0F1E40 30%,
+                #14234A 70%,
+                var(--navy) 100%
+            );
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .section-patterns::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(255, 189, 89, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 189, 89, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+        }
+        
+        .section-patterns::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(106, 91, 255, 0.08) 0%, transparent 60%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-family: var(--font-heading);
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 25px;
+        }
+        
+        .badge-gold {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--navy-dark);
+            box-shadow: 0 4px 20px rgba(255, 189, 89, 0.4);
+        }
+        
+        .exclusive-tag {
+            display: inline-block;
+            background: var(--burgundy);
+            color: var(--white);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(156, 6, 18, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(156, 6, 18, 0.8); }
+        }
+        
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: 42px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+        
+        .section-subtitle {
+            font-size: 18px;
+            color: var(--white-80);
+            max-width: 750px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+        
+        .text-gold { color: var(--gold); }
+        .text-cyan { color: var(--cyan); }
+        .text-green { color: var(--green); }
+        .text-red { color: var(--red); }
+        .text-purple { color: var(--purple); }
+        
+        .patterns-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .pattern-card {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 189, 89, 0.2);
+            border-radius: 20px;
+            padding: 30px 25px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+        
+        .pattern-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .pattern-card.bullish::before {
+            background: linear-gradient(90deg, var(--green), var(--cyan));
+        }
+        
+        .pattern-card.bearish::before {
+            background: linear-gradient(90deg, var(--red), var(--pink));
+        }
+        
+        .pattern-card.zone::before {
+            background: linear-gradient(90deg, var(--gold), var(--purple));
+        }
+        
+        .pattern-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(255, 189, 89, 0.5);
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.4),
+                0 0 30px rgba(255, 189, 89, 0.1);
+        }
+        
+        .pattern-card:hover::before {
+            opacity: 1;
+        }
+        
+        .pattern-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 189, 89, 0.1);
+            border-radius: 50%;
+            border: 2px solid rgba(255, 189, 89, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .pattern-card:hover .pattern-icon {
+            background: rgba(255, 189, 89, 0.2);
+            border-color: var(--gold);
+            transform: scale(1.1);
+        }
+        
+        .pattern-icon svg {
+            width: 40px;
+            height: 40px;
+            stroke: var(--gold);
+        }
+        
+        .pattern-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+        
+        .badge-bullish {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--green);
+            border: 1px solid var(--green);
+        }
+        
+        .badge-bearish {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--red);
+            border: 1px solid var(--red);
+        }
+        
+        .badge-zone {
+            background: rgba(106, 91, 255, 0.2);
+            color: var(--purple);
+            border: 1px solid var(--purple);
+        }
+        
+        .pattern-card h3 {
+            font-family: var(--font-heading);
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--gold);
+            margin-bottom: 8px;
+        }
+        
+        .pattern-tagline {
+            font-size: 14px;
+            color: var(--cyan);
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .pattern-card > p {
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--white-80);
+            margin-bottom: 20px;
+        }
+        
+        .pattern-stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding-top: 15px;
+            border-top: 1px solid var(--white-10);
+        }
+        
+        .pattern-stat {
+            text-align: center;
+        }
+        
+        .pattern-stat-value {
+            display: block;
+            font-family: var(--font-heading);
+            font-size: 20px;
+            font-weight: 700;
+        }
+        
+        .pattern-stat-label {
+            font-size: 11px;
+            color: var(--white-60);
+            text-transform: uppercase;
+        }
+        
+        /* Paper Trading Box */
+        .paper-trading-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(106, 91, 255, 0.1));
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid rgba(0, 240, 255, 0.3);
+            border-radius: 24px;
+            padding: 40px;
+            margin-top: 60px;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+        
+        .paper-trading-icon {
+            width: 120px;
+            height: 120px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 240, 255, 0.1);
+            border-radius: 50%;
+            border: 3px solid var(--cyan);
+        }
+        
+        .paper-trading-icon svg {
+            width: 60px;
+            height: 60px;
+            stroke: var(--cyan);
+        }
+        
+        .paper-trading-content h3 {
+            font-family: var(--font-heading);
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 15px;
+        }
+        
+        .paper-trading-content p {
+            font-size: 16px;
+            line-height: 1.7;
+            color: var(--white-80);
+            margin-bottom: 20px;
+        }
+        
+        .paper-trading-features {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .pt-feature {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: var(--white);
+        }
+        
+        .pt-feature svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--green);
+        }
+        
+        /* Method Box */
+        .method-box {
+            background: rgba(17, 34, 80, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 189, 89, 0.3);
+            border-radius: 24px;
+            padding: 50px 40px;
+            margin-top: 40px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .method-box h3 {
+            font-family: var(--font-heading);
+            font-size: 26px;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .method-steps {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 20px;
+        }
+        
+        .method-step {
+            text-align: center;
+            padding: 20px 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            border: 1px solid var(--white-10);
+            transition: all 0.3s ease;
+        }
+        
+        .method-step:hover {
+            border-color: var(--gold);
+            transform: translateY(-5px);
+        }
+        
+        .step-number {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gold);
+            color: var(--navy-dark);
+            border-radius: 50%;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 18px;
+            margin: 0 auto 12px;
+        }
+        
+        .step-text {
+            font-size: 13px;
+            color: var(--white-80);
+            line-height: 1.5;
+        }
+        
+        .method-quote {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 189, 89, 0.1);
+            border-radius: 12px;
+        }
+        
+        .method-quote p {
+            font-style: italic;
+            color: var(--gold);
+            font-size: 16px;
+        }
+        
+        .section-footer {
+            text-align: center;
+            margin-top: 60px;
+            font-size: 13px;
+            color: var(--white-60);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 1100px) {
+            .patterns-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .method-steps {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .section-patterns { padding: 80px 0; }
+            .section-title { font-size: 32px; }
+            .patterns-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .paper-trading-box {
+                flex-direction: column;
+                text-align: center;
+                padding: 30px 25px;
+            }
+            .paper-trading-features { justify-content: center; }
+            .method-steps { grid-template-columns: 1fr 1fr; }
+            .method-box { padding: 35px 25px; }
+        }
+        
+        @media (max-width: 480px) {
+            .section-title { font-size: 26px; }
+            .method-steps { grid-template-columns: 1fr; }
+            .pattern-stats { flex-wrap: wrap; gap: 15px; }
+        }
+    </style>
+
+
+    <section class="section-patterns">
+        <div class="container">
+            <!-- Section Header -->
+            <div class="section-header">
+                <span class="badge badge-gold">🎯 GEM Frequency Method</span>
+                <div class="exclusive-tag">🇻🇳 ĐỘC QUYỀN TẠI VIỆT NAM</div>
+                <h2 class="section-title">
+                    6 CÔNG THỨC TẦN SỐ<br>
+                    <span class="text-gold">TÍN HIỆU VÀO LỆNH CHUẨN XÁC NHẤT</span>
+                </h2>
+                <p class="section-subtitle">
+                    6 mẫu nến đặc biệt được phát triển độc quyền bởi Gem Trading — 
+                    đây là những dấu hiệu mua/bán rõ ràng nhất mà bạn có thể học và áp dụng ngay. 
+                    Không cần kinh nghiệm, không cần đoán mò — chỉ cần nhận diện đúng pattern là vào lệnh.</p><img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk41rftx-08q037/1767797643308_dcxxqt_gemral-landing-08.webp" alt="gemral-landing-08-hxyf">
+            </div>
+            
+            <!-- Patterns Grid: 6 Cards -->
+            <div class="patterns-grid">
+                <!-- Pattern 1: DPD -->
+                <div class="pattern-card bullish">
+                    <div class="pattern-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                            <path d="M3 17l6-6 4 4 8-8"></path>
+                            <path d="M17 7h4v4"></path>
+                        </svg>
+                    </div>
+                    <span class="pattern-badge badge-bullish">Tín Hiệu Mua</span>
+                    <h3>DPD</h3>
+                    <p class="pattern-tagline">Điểm Mua Vàng Trong Xu Hướng Tăng</p>
+                    <p>
+                        Mẫu nến cho bạn biết chính xác khi nào nên MUA VÀO — 
+                        điểm entry tối ưu với rủi ro thấp nhất và tiềm năng lợi nhuận cao nhất trong sóng tăng.
+                    </p>
+                    <div class="pattern-stats">
+                        <div class="pattern-stat">
+                            <span class="pattern-stat-value text-green">72%</span>
+                            <span class="pattern-stat-label">Tỷ Lệ Thắng</span>
+                        </div>
+                        <div class="pattern-stat">
+                            <span class="pattern-stat-value text-cyan">2.5:1</span>
+                            <span class="pattern-stat-label">Lời/Lỗ</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pattern 2: UPU -->
+                <div class="pattern-card bearish">
+                    <div class="pattern-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                            <path d="M3 7l6 6 4-4 8 8"></path>
+                            <path d="M17 17h4v-4"></path>
+                        </svg>
+                    </div>
+                    <span class="pattern-badge badge-bearish">Tín Hiệu Bán</span>
+                    <h3>UPU</h3>
+                    <p class="pattern-tagline">Điểm Bán Đỉnh Trong Xu Hướng Giảm</p>
+                    <p>
+                        Mẫu nến báo hiệu thời điểm BÁN RA hoàn hảo — 
+                        giúp bạn thoát hàng ở đỉnh hoặc mở vị thế Short khi thị trường chuẩn bị đảo chiều.
+                    </p>
+                    <div class="pattern-stats">
+                        <div class="pattern-stat">
+                            <span class="pattern-stat-value text-red">68%</span>
+                            <span class="pattern-stat-label">Tỷ Lệ Thắng</span>
+                        </div>
+                        <div class="pattern-stat">
+                            <span class="pattern-stat-value text-cyan">2.2:1</span>
+                            <span class="pattern-stat-label">Lời/Lỗ</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pattern 3: UPD -->
+                <div class="pattern-card bullish">
+                    <div class="pattern-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                            <path d="M2 20l5-5 5 5 10-15"></path>
+                        </svg>
+                    </div>
+                    <span class="pattern-badge badge-bullish">Tín Hiệu Mua</span>
+                    <h3>UPD</h3>
+                    <p class="pattern-tagline">Bắt Đáy Chính Xác Sau Điều Chỉnh</p>
+                    <p>
+                        Pattern giúp bạn MUA VÀO đúng đáy khi giá vừa điều chỉnh xong — 
+                        cơ hội vàng cho những ai đã bỏ lỡ đợt tăng trước đó.
+                    </p>
+                    <div class="pattern-stats">
+                        <div class="pattern-stat">
+                            <span class="pattern-stat-value text-green">75%</span>
+                            <span class="pattern-stat-label">Tỷ Lệ Thắng</span>
+                        </div>
+                        <div class="pattern-stat">
+                            <span class="pattern-stat-value text-cyan">2.8:1</span>
+                            <span class="pattern-stat-label">Lời/Lỗ</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pattern 4: DPU -->
+                <div class="pattern-card bearish">
+                    <div class="pattern-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                            <path d="M22 4l-5 5-5-5-10 15"></path>
+                        </svg>
+                    </div>
+                    <span class="pattern-badge badge-bearish">Tín Hiệu Bán</span>
+                    <h3>DPU</h3>
+                    <p class="pattern-tagline">Bán Đỉnh Sau Nhịp Hồi Phục</p>
+                    <p>
+                        Mẫu nến cho phép bạn BÁN RA ở mức giá cao nhất có thể khi thị trường hồi phục tạm thời — 
+                        lý tưởng để chốt lời hoặc mở Short.
+                    </p>
+                    <div class="pattern-stats">
+                        <div class="pattern-stat">
+                            <span class="pattern-stat-value text-red">70%</span>
+                            <span class="pattern-stat-label">Tỷ Lệ Thắng</span>
+                        </div>
+                        <div class="pattern-stat">
+                            <span class="pattern-stat-value text-cyan">2.4:1</span>
+                            <span class="pattern-stat-label">Lời/Lỗ</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pattern 5: HFZ -->
+                <div class="pattern-card zone">
+                    <div class="pattern-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="8" rx="2"></rect>
+                            <path d="M12 11v8"></path>
+                            <path d="M8 19l4-4 4 4"></path>
+                        </svg>
+                    </div>
+                    <span class="pattern-badge badge-zone">Vùng Kháng Cự</span>
+                    <h3>HFZ</h3>
+                    <p class="pattern-tagline">Vùng Giá Sẽ Bật Xuống</p>
+                    <p>
+                        Hệ thống tự động đánh dấu những vùng giá quan trọng mà thị trường có khả năng cao sẽ QUAY ĐẦU GIẢM — 
+                        giúp bạn tránh mua đỉnh.
+                    </p>
+                    <div class="pattern-stats">
+                        <div class="pattern-stat">
+                            <span class="pattern-stat-value text-purple">85%</span>
+                            <span class="pattern-stat-label">Độ Chính Xác</span>
+                        </div>
+                        <div class="pattern-stat">
+                            <span class="pattern-stat-value text-cyan">Tự Động</span>
+                            <span class="pattern-stat-label">Nhận Diện</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pattern 6: LFZ -->
+                <div class="pattern-card zone">
+                    <div class="pattern-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                            <rect x="3" y="13" width="18" height="8" rx="2"></rect>
+                            <path d="M12 13V5"></path>
+                            <path d="M8 5l4 4 4-4"></path>
+                        </svg>
+                    </div>
+                    <span class="pattern-badge badge-zone">Vùng Hỗ Trợ</span>
+                    <h3>LFZ</h3>
+                    <p class="pattern-tagline">Vùng Giá Sẽ Bật Lên</p>
+                    <p>
+                        Hệ thống tự động đánh dấu những vùng giá quan trọng mà thị trường có khả năng cao sẽ QUAY ĐẦU TĂNG — 
+                        giúp bạn tìm điểm mua đáy.
+                    </p>
+                    <div class="pattern-stats">
+                        <div class="pattern-stat">
+                            <span class="pattern-stat-value text-purple">83%</span>
+                            <span class="pattern-stat-label">Độ Chính Xác</span>
+                        </div>
+                        <div class="pattern-stat">
+                            <span class="pattern-stat-value text-cyan">Tự Động</span>
+                            <span class="pattern-stat-label">Nhận Diện</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Paper Trading Box -->
+            <div class="paper-trading-box">
+                <div class="paper-trading-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                        <path d="M12 2v4"></path>
+                        <path d="M12 18v4"></path>
+                        <path d="m4.93 4.93 2.83 2.83"></path>
+                        <path d="m16.24 16.24 2.83 2.83"></path>
+                        <path d="M2 12h4"></path>
+                        <path d="M18 12h4"></path>
+                        <path d="m4.93 19.07 2.83-2.83"></path>
+                        <path d="m16.24 7.76 2.83-2.83"></path>
+                        <circle cx="12" cy="12" r="4"></circle>
+                    </svg>
+                </div>
+                <div class="paper-trading-content">
+                    <h3><span class="text-cyan">Paper Trading</span> — Thực Hành Không Mất Tiền Thật</h3>
+                    <p>
+                        Trước khi giao dịch bằng tiền thật, bạn có thể luyện tập với tài khoản ảo để làm quen với 6 công thức tần số. 
+                        Thực hành bao nhiêu cũng được, hoàn toàn miễn phí, không rủi ro — cho đến khi bạn tự tin 100% với phương pháp.
+                    </p>
+                    <div class="paper-trading-features">
+                        <div class="pt-feature">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Tiền ảo không giới hạn</span>
+                        </div>
+                        <div class="pt-feature">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Dữ liệu thị trường thực</span>
+                        </div>
+                        <div class="pt-feature">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Theo dõi kết quả chi tiết</span>
+                        </div>
+                        <div class="pt-feature">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            <span>Luyện tập đến khi tự tin</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Method Box -->
+            <div class="method-box">
+                <h3 class="text-gold">Quy Trình 5 Bước Đơn Giản</h3>
+                <div class="method-steps">
+                    <div class="method-step">
+                        <span class="step-number">1</span>
+                        <p class="step-text">Scanner phát hiện vùng giá quan trọng (HFZ/LFZ)</p>
+                    </div>
+                    <div class="method-step">
+                        <span class="step-number">2</span>
+                        <p class="step-text">Chờ giá quay về test vùng đó</p>
+                    </div>
+                    <div class="method-step">
+                        <span class="step-number">3</span>
+                        <p class="step-text">Nhận diện mẫu nến xác nhận (DPD, UPU...)</p>
+                    </div>
+                    <div class="method-step">
+                        <span class="step-number">4</span>
+                        <p class="step-text">Vào lệnh theo Entry/Stop/Target có sẵn</p>
+                    </div>
+                    <div class="method-step">
+                        <span class="step-number">5</span>
+                        <p class="step-text">Quản lý vốn 1-2% mỗi lệnh</p>
+                    </div>
+                </div>
+                <div class="method-quote">
+                    <p>"Trong thế nào, ngoài thế ấy" — Khi bạn có hệ thống rõ ràng, tâm lý sẽ ổn định, quyết định sẽ chính xác hơn.</p>
+                </div>
+            </div>
+            
+            <!-- Section Footer -->
+            <div class="section-footer">gemral.com</div>
+        </div>
+    </section>

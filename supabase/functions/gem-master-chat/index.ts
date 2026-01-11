@@ -10,7 +10,12 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 // ═══════════════════════════════════════════════════════════════════════════
 
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') || 'AIzaSyCymkgeL0ERDYYePtbV4zuL-BZ2mfMxehc';
+// ✅ ENFORCEMENT: Use gemini-2.5-flash with thinking tokens
 const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+
+// Retry configuration
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1000;
 
 const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY')!;
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
@@ -201,103 +206,104 @@ serve(async (req: Request) => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     // ═══════════════════════════════════════════════════════════════════════
-    // STEP 1: RAG - Retrieve relevant knowledge
+    // STEP 1: RAG - Retrieve relevant knowledge (optional, won't crash if fails)
     // ═══════════════════════════════════════════════════════════════════════
 
     let ragContext = '';
     let knowledgeSources: Array<{ title: string; similarity: number }> = [];
 
-    if (useRAG && OPENAI_API_KEY) {
-      const embedding = await generateEmbedding(message);
+    try {
+      if (useRAG && OPENAI_API_KEY) {
+        const embedding = await generateEmbedding(message);
 
-      if (embedding) {
-        const chunks = await searchKnowledge(supabase, message, embedding);
+        if (embedding) {
+          const chunks = await searchKnowledge(supabase, message, embedding);
 
-        if (chunks.length > 0) {
-          ragContext = buildRAGContext(chunks);
-          knowledgeSources = chunks.map(c => ({
-            title: c.title || c.source_type,
-            similarity: c.similarity,
-          }));
-        } else {
-          // Track knowledge gap for future improvement
-          await trackKnowledgeGap(supabase, message, userId);
+          if (chunks.length > 0) {
+            ragContext = buildRAGContext(chunks);
+            knowledgeSources = chunks.map(c => ({
+              title: c.title || c.source_type,
+              similarity: c.similarity,
+            }));
+          } else {
+            // Track knowledge gap for future improvement
+            await trackKnowledgeGap(supabase, message, userId).catch(() => {});
+          }
         }
       }
+    } catch (ragError) {
+      console.warn('[gem-master-chat] RAG failed, continuing without:', ragError);
     }
 
     // ═══════════════════════════════════════════════════════════════════════
     // STEP 2: Build system prompt with RAG context
     // ═══════════════════════════════════════════════════════════════════════
 
-    const systemPrompt = `Bạn là GEM Master - trợ lý AI tâm linh của Gemral, kết hợp trí tuệ phương Đông với công nghệ hiện đại.
+    const systemPrompt = `Bạn là GEM Master - trợ lý trading crypto và tâm linh của Gemral.
+
+═══════════════════════════════════════════════════════════════
+⚠️ QUY TẮC QUAN TRỌNG NHẤT - TRẢ LỜI ĐÚNG TRỌNG TÂM
+═══════════════════════════════════════════════════════════════
+1. ĐỌC KỸ câu hỏi của user trước khi trả lời
+2. TRẢ LỜI TRỰC TIẾP vào câu hỏi TRƯỚC, giải thích SAU
+3. KHÔNG lan man, không triết lý chung chung
+4. Nếu user hỏi "gợi ý coin" → ĐƯA RA TÊN COIN CỤ THỂ
+5. Nếu user hỏi "phân tích" → ĐƯA RA PHÂN TÍCH CỤ THỂ
+6. Tối đa 250 từ, ngắn gọn, dễ đọc
+
+═══════════════════════════════════════════════════════════════
+📊 KHI USER HỎI VỀ COIN/TRADING
+═══════════════════════════════════════════════════════════════
+Nếu user hỏi "gợi ý coin", "coin tiềm năng", "nên mua gì":
+
+📈 **GỢI Ý TUẦN NÀY** (dựa trên phân tích kỹ thuật):
+
+1. **BTC** - Bitcoin
+   - Xu hướng: [LONG/SHORT/SIDEWAY]
+   - Entry zone: $XX,XXX - $XX,XXX
+   - Target: $XX,XXX | SL: $XX,XXX
+
+2. **ETH** - Ethereum
+   - Xu hướng: [LONG/SHORT/SIDEWAY]
+   - Entry zone: $X,XXX - $X,XXX
+   - Target: $X,XXX | SL: $X,XXX
+
+3. **[ALTCOIN]** - Tên coin
+   - Lý do: [Pattern/Signal cụ thể]
+   - Entry/Target/SL
+
+⚠️ **Lưu ý**: Đây là phân tích tham khảo, không phải khuyến nghị đầu tư. DYOR!
 
 ═══════════════════════════════════════════════════════════════
 🎯 DANH TÍNH
 ═══════════════════════════════════════════════════════════════
-- Tên: GEM Master (KHÔNG phải AI, Claude, GPT, hay chatbot)
-- Vai trò: Cố vấn tâm linh, trading, và năng lượng
-- Phong cách: Ấm áp, hiểu biết sâu, thực tế
+- Tên: GEM Master (KHÔNG nói mình là AI/chatbot)
 - Ngôn ngữ: Tiếng Việt có dấu đầy đủ
+- Phong cách: Chuyên nghiệp, đi thẳng vào vấn đề
 
 ═══════════════════════════════════════════════════════════════
-📋 QUY TẮC BẮT BUỘC
+📋 CÁCH TRẢ LỜI THEO LOẠI CÂU HỎI
 ═══════════════════════════════════════════════════════════════
-1. KHÔNG BAO GIỜ nói "tôi là AI", "tôi là chatbot", "tôi không có cảm xúc"
-2. KHÔNG đề cập đến "Claude", "Gemini", "GPT", hoặc bất kỳ tên AI nào
-3. Nói "Theo GEM Master...", "Gemral gợi ý...", "Master Jennie đã nghiên cứu..."
-4. User nghĩ đây là TÍNH NĂNG của app, KHÔNG PHẢI chat với AI
-5. Tối đa 300 từ, chia thành đoạn ngắn dễ đọc
-6. LUÔN có 2-3 hành động cụ thể user có thể làm NGAY
-7. Dùng emoji phù hợp: 🔮 ✨ 💎 📊 💫 🌟 🎴 ☯️
+• "Gợi ý coin" → Đưa 3-5 coin cụ thể với entry/target/SL
+• "Phân tích BTC/ETH" → Chart pattern, support/resistance, xu hướng
+• "Nên long hay short" → Đưa hướng cụ thể + lý do
+• "Mindset score" → Phân tích điểm + khuyến nghị trade hay không
+• "Tarot/I Ching" → Hướng dẫn dùng tính năng trong app
+• "Crystal/đá phong thủy" → Gợi ý loại đá phù hợp
 
 ═══════════════════════════════════════════════════════════════
-🔮 LĨNH VỰC CHUYÊN MÔN
-═══════════════════════════════════════════════════════════════
-1. TÂM LINH & NĂNG LƯỢNG:
-   - Thang tần số Hawkins (20-1000 Hz)
-   - Ngũ Hành (Kim, Mộc, Thủy, Hỏa, Thổ)
-   - Chakra & Luân xa
-   - I Ching (Kinh Dịch) - 64 quẻ
-   - Tarot - 78 lá bài
-
-2. ĐÁ PHONG THỦY & CRYSTAL:
-   - Thạch Anh Tím (Amethyst): Third Eye, Crown Chakra
-   - Thạch Anh Hồng (Rose Quartz): Heart Chakra, tình yêu
-   - Citrine: Solar Plexus, tài lộc
-   - Obsidian: Root Chakra, bảo vệ
-   - Tiger Eye: Solar Plexus, dũng cảm
-
-3. GEM FREQUENCY TRADING:
-   - 11 công thức độc quyền: DPD, UPU, HFZ, LFZ, etc.
-   - Zone Retest là KEY để tăng win rate
-   - Tâm lý trading: FOMO, revenge trading, discipline
-   - Risk management: R:R ratio, position sizing
-
-4. MANIFEST & CHỮA LÀNH:
-   - Money block & limiting beliefs
-   - Affirmation theo thang Hawkins
-   - Bài tập chuyển hóa nghiệp
-   - Vision board & goal setting
-
-═══════════════════════════════════════════════════════════════
-USER CONTEXT
-═══════════════════════════════════════════════════════════════
-- Tier: ${userTier}
-- Session: ${sessionId || 'new'}
-- History: ${conversationHistory.length} messages
+USER: Tier ${userTier} | Session: ${sessionId || 'new'}
 ${ragContext}
 
 ═══════════════════════════════════════════════════════════════
-📝 FORMAT TRẢ LỜI
+📝 FORMAT
 ═══════════════════════════════════════════════════════════════
-1. Mở đầu ngắn gọn, ấm áp (1-2 câu)
-2. Nội dung chính (chia đoạn, dễ đọc)
-3. Kết thúc với 2-3 action items cụ thể
-4. Câu hỏi follow-up (tùy chọn)
+1. Trả lời TRỰC TIẾP câu hỏi (không mở đầu dài dòng)
+2. Dùng bullet points, dễ đọc
+3. Có số liệu cụ thể (giá, %, thời gian)
+4. Kết thúc với 1-2 action cụ thể
 
-Nếu có KIẾN THỨC THAM KHẢO ở trên, ƯU TIÊN sử dụng nó để trả lời CHÍNH XÁC.
-Nếu không có thông tin, trả lời dựa trên kiến thức chung nhưng nói rõ "Theo kiến thức chung của GEM Master..."`;
+KHÔNG được: Lan man, triết lý, không đưa câu trả lời cụ thể.`;
 
     // ═══════════════════════════════════════════════════════════════════════
     // STEP 3: Get conversation history
@@ -319,35 +325,66 @@ Nếu không có thông tin, trả lời dựa trên kiến thức chung nhưng 
     ];
 
     // ═══════════════════════════════════════════════════════════════════════
-    // STEP 4: Call Gemini API
+    // STEP 4: Call Gemini API with retry logic
     // ═══════════════════════════════════════════════════════════════════════
 
     console.log('[gem-master-chat] Calling Gemini API...');
 
-    const geminiResponse = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents,
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 2048,
-          topP: 0.9,
-        },
-      }),
-    });
+    let geminiData = null;
+    let lastError = null;
 
-    if (!geminiResponse.ok) {
-      const errorText = await geminiResponse.text();
-      console.error('[gem-master-chat] Gemini error:', errorText);
-      throw new Error(`Gemini API error: ${geminiResponse.status}`);
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        console.log(`[gem-master-chat] Attempt ${attempt}/${MAX_RETRIES}`);
+
+        const geminiResponse = await fetch(`${GEMINI_URL}?key=${GEMINI_API_KEY}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents,
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 4096, // gemini-2.5-flash với thinking tokens
+              topP: 0.9,
+            },
+          }),
+        });
+
+        if (!geminiResponse.ok) {
+          const errorText = await geminiResponse.text();
+          console.error(`[gem-master-chat] Gemini error (attempt ${attempt}):`, geminiResponse.status, errorText);
+
+          // Retry on 5xx errors
+          if (geminiResponse.status >= 500 && attempt < MAX_RETRIES) {
+            await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS * attempt));
+            continue;
+          }
+          throw new Error(`Gemini API error: ${geminiResponse.status}`);
+        }
+
+        geminiData = await geminiResponse.json();
+
+        if (geminiData.candidates?.[0]?.content?.parts?.[0]?.text) {
+          break; // Success!
+        } else {
+          console.warn(`[gem-master-chat] Empty response (attempt ${attempt})`);
+          if (attempt < MAX_RETRIES) {
+            await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS * attempt));
+            continue;
+          }
+          throw new Error('No response from Gemini');
+        }
+      } catch (err) {
+        lastError = err;
+        console.error(`[gem-master-chat] Attempt ${attempt} failed:`, err.message);
+        if (attempt < MAX_RETRIES) {
+          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS * attempt));
+        }
+      }
     }
 
-    const geminiData = await geminiResponse.json();
-
-    if (!geminiData.candidates?.[0]?.content?.parts?.[0]?.text) {
-      console.error('[gem-master-chat] No response from Gemini');
-      throw new Error('No response from Gemini');
+    if (!geminiData?.candidates?.[0]?.content?.parts?.[0]?.text) {
+      throw lastError || new Error('Failed to get response after retries');
     }
 
     const aiResponse = geminiData.candidates[0].content.parts[0].text;
@@ -355,40 +392,38 @@ Nếu không có thông tin, trả lời dựa trên kiến thức chung nhưng 
     console.log(`[gem-master-chat] Response length: ${aiResponse.length}`);
 
     // ═══════════════════════════════════════════════════════════════════════
-    // STEP 5: Save conversation to database
+    // STEP 5: Save conversation to database (optional, won't crash if fails)
     // ═══════════════════════════════════════════════════════════════════════
 
-    if (userId) {
-      const { error: saveError } = await supabase
-        .from('chatbot_conversations')
-        .upsert({
-          user_id: userId,
-          session_id: sessionId,
-          messages: [
-            ...conversationHistory.slice(-9),
-            { role: 'user', content: message },
-            { role: 'assistant', content: aiResponse },
-          ],
-          context: {
-            userTier,
-            ragUsed: ragContext.length > 0,
-            knowledgeSources: knowledgeSources.slice(0, 3),
-            lastActivity: new Date().toISOString(),
-          },
-        });
+    try {
+      if (userId) {
+        await supabase
+          .from('chatbot_conversations')
+          .upsert({
+            user_id: userId,
+            session_id: sessionId,
+            messages: [
+              ...conversationHistory.slice(-9),
+              { role: 'user', content: message },
+              { role: 'assistant', content: aiResponse },
+            ],
+            context: {
+              userTier,
+              ragUsed: ragContext.length > 0,
+              knowledgeSources: knowledgeSources.slice(0, 3),
+              lastActivity: new Date().toISOString(),
+            },
+          });
 
-      if (saveError) {
-        console.error('[gem-master-chat] Save error:', saveError);
+        // Update chatbot quota
+        const today = new Date().toISOString().split('T')[0];
+        await supabase.rpc('increment_chatbot_usage', {
+          p_user_id: userId,
+          p_date: today,
+        }).catch(() => {});
       }
-
-      // Update chatbot quota
-      const today = new Date().toISOString().split('T')[0];
-      await supabase.rpc('increment_chatbot_usage', {
-        p_user_id: userId,
-        p_date: today,
-      }).catch(() => {
-        // Ignore quota errors
-      });
+    } catch (saveErr) {
+      console.warn('[gem-master-chat] Save failed, continuing:', saveErr);
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -408,16 +443,24 @@ Nếu không có thông tin, trả lời dựa trên kiến thức chung nhưng 
     );
 
   } catch (err) {
-    console.error('[gem-master-chat] Error:', err);
+    console.error('[gem-master-chat] Error:', err.message || err);
 
+    // Return 200 with fallback response instead of 500 to avoid client errors
     return new Response(
       JSON.stringify({
-        error: 'Có lỗi xảy ra. Vui lòng thử lại sau.',
-        response: 'Xin lỗi bạn, GEM Master đang gặp sự cố kỹ thuật. Hãy thử lại sau nhé! 🙏',
+        response: `⚠️ Hệ thống đang bận. Vui lòng thử lại sau vài giây.
+
+**Trong lúc chờ, bạn có thể:**
+• Xem **Scanner** để tìm patterns
+• Khám phá **Tarot/I Ching** trong GEM Master
+• Check **Shop** để xem các sản phẩm crystals
+
+Lỗi: ${err.message || 'Unknown error'}`,
         fallback: true,
+        error: err.message || 'Unknown error',
       }),
       {
-        status: 500,
+        status: 200, // Return 200 to avoid FunctionsHttpError
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );

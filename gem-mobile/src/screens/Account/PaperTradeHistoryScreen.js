@@ -43,6 +43,15 @@ import {
   ChevronDown,
   ChevronUp,
   PlayCircle,
+  Clock,
+  Gem,
+  Brain,
+  Scale,
+  Percent,
+  Layers,
+  Timer,
+  CheckCircle,
+  XCircle,
 } from 'lucide-react-native';
 
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
@@ -50,6 +59,69 @@ import { formatPrice } from '../../utils/formatters';
 import { useAuth } from '../../contexts/AuthContext';
 import paperTradeService from '../../services/paperTradeService';
 import SponsorBannerSection from '../../components/SponsorBannerSection';
+
+// Vietnamese pattern names mapping (same as PatternDetailScreen)
+const PATTERN_NAMES_VI = {
+  // GEM Frequency patterns (keep uppercase)
+  'dpu': 'DPU',
+  'dpd': 'DPD',
+  'upu': 'UPU',
+  'upd': 'UPD',
+  'hfz': 'HFZ',
+  'lfz': 'LFZ',
+  // Classic patterns
+  'reversal': 'Đảo Chiều',
+  'double_top': 'Hai Đỉnh',
+  'double_bottom': 'Hai Đáy',
+  'head_shoulders': 'Vai Đầu Vai',
+  'inverse_head_shoulders': 'Vai Đầu Vai Ngược',
+  'triangle': 'Tam Giác',
+  'ascending_triangle': 'Tam Giác Tăng',
+  'descending_triangle': 'Tam Giác Giảm',
+  'symmetrical_triangle': 'Tam Giác Đối Xứng',
+  'symmetric_triangle': 'Tam Giác Đối Xứng',
+  'wedge': 'Nêm',
+  'rising_wedge': 'Nêm Tăng',
+  'falling_wedge': 'Nêm Giảm',
+  'flag': 'Cờ',
+  'bull_flag': 'Cờ Tăng',
+  'bear_flag': 'Cờ Giảm',
+  'channel': 'Kênh Giá',
+  'support_bounce': 'Nảy Hỗ Trợ',
+  'resistance_reject': 'Từ Chối Kháng Cự',
+  'breakout': 'Phá Vỡ',
+  'pullback': 'Hồi Về',
+  'continuation': 'Tiếp Diễn',
+};
+
+// Abbreviations that should stay uppercase
+const UPPERCASE_PATTERNS = ['DPU', 'DPD', 'UPU', 'UPD', 'HFZ', 'LFZ', 'H&S', 'HS'];
+
+// Get Vietnamese pattern name
+const getPatternNameVI = (patternType) => {
+  if (!patternType) return 'N/A';
+  const key = patternType.toLowerCase();
+
+  // Check dictionary first
+  if (PATTERN_NAMES_VI[key]) {
+    return PATTERN_NAMES_VI[key];
+  }
+
+  // Check if it's an abbreviation that should stay uppercase
+  const upperType = patternType.toUpperCase();
+  if (UPPERCASE_PATTERNS.includes(upperType)) {
+    return upperType;
+  }
+
+  // Fallback: return as-is
+  return patternType;
+};
+
+// Capitalize first letter
+const capitalizeFirst = (str) => {
+  if (!str) return '';
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+};
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -96,6 +168,10 @@ export default function PaperTradeHistoryScreen({ navigation }) {
   const [newInitialBalance, setNewInitialBalance] = useState('');
   const [settingsLoading, setSettingsLoading] = useState(false);
 
+  // Diagnostic state
+  const [diagnosticReport, setDiagnosticReport] = useState(null);
+  const [diagnosing, setDiagnosing] = useState(false);
+
   // Expanded trade cards state
   const [expandedIds, setExpandedIds] = useState(new Set());
 
@@ -117,8 +193,8 @@ export default function PaperTradeHistoryScreen({ navigation }) {
     if (!user?.id) return;
 
     try {
-      // Load from paperTradeService (AsyncStorage) - this has complete trade data with exit prices
-      await paperTradeService.init();
+      // Load from paperTradeService with CLOUD SYNC (user.id for cloud data)
+      await paperTradeService.init(user.id);
 
       // Auto-recalculate balance to fix any corrupted data
       await paperTradeService.recalculateBalance();
@@ -132,7 +208,7 @@ export default function PaperTradeHistoryScreen({ navigation }) {
       const openPositions = paperTradeService.getOpenPositions(user.id);
       const historyData = paperTradeService.getTradeHistory(user.id, 100);
 
-      // Transform open positions to match UI expectations
+      // Transform open positions to match UI expectations (COMPLETE DATA)
       const openTradeData = openPositions.map(trade => ({
         id: trade.id,
         symbol: trade.symbol,
@@ -152,9 +228,19 @@ export default function PaperTradeHistoryScreen({ navigation }) {
         status: 'OPEN',
         stop_loss: trade.stopLoss,
         take_profit: trade.takeProfit,
+        // Additional fields for complete info display
+        margin: trade.margin || trade.positionSize,
+        position_value: trade.positionValue || (trade.margin || trade.positionSize) * (trade.leverage || 10),
+        leverage: trade.leverage || 10,
+        confidence: trade.confidence || trade.patternData?.confidence || 75,
+        risk_reward: trade.riskRewardRatio || trade.patternData?.riskReward || '1:2',
+        win_rate: trade.patternData?.winRate || 65,
+        trade_mode: trade.tradeMode || 'pattern',
+        ai_score: trade.aiScore || null,
+        holding_time: trade.holdingTime || null,
       }));
 
-      // Transform closed trades to match UI expectations
+      // Transform closed trades to match UI expectations (COMPLETE DATA)
       const closedTradeData = historyData.map(trade => ({
         id: trade.id,
         symbol: trade.symbol,
@@ -174,6 +260,16 @@ export default function PaperTradeHistoryScreen({ navigation }) {
         status: 'CLOSED',
         stop_loss: trade.stopLoss,
         take_profit: trade.takeProfit,
+        // Additional fields for complete info display
+        margin: trade.margin || trade.positionSize,
+        position_value: trade.positionValue || (trade.margin || trade.positionSize) * (trade.leverage || 10),
+        leverage: trade.leverage || 10,
+        confidence: trade.confidence || trade.patternData?.confidence || 75,
+        risk_reward: trade.riskRewardRatio || trade.patternData?.riskReward || '1:2',
+        win_rate: trade.patternData?.winRate || 65,
+        trade_mode: trade.tradeMode || 'pattern',
+        ai_score: trade.aiScore || null,
+        holding_time: trade.holdingTime || null,
       }));
 
       // Combine: open positions first, then closed trades
@@ -224,7 +320,7 @@ export default function PaperTradeHistoryScreen({ navigation }) {
     alert({
       type: 'warning',
       title: 'Xác Nhận Reset',
-      message: `Bạn có chắc muốn reset tài khoản Paper Trade?\n\nTất cả lệnh đang mở và lịch sử giao dịch sẽ bị xóa.\nSố dư sẽ được reset về $${initialBalance.toLocaleString()}.`,
+      message: `Bạn có chắc muốn reset tài khoản Paper Trade?\n\nTất cả lệnh đang mở và lịch sử giao dịch sẽ bị xóa.\nSố dư sẽ được reset về $${initialBalance.toLocaleString('vi-VN')}.`,
       buttons: [
         { text: 'Hủy', style: 'cancel' },
         {
@@ -262,7 +358,7 @@ export default function PaperTradeHistoryScreen({ navigation }) {
     alert({
       type: 'warning',
       title: 'Reset Về Mặc Định',
-      message: 'Bạn có chắc muốn reset về mặc định?\n\nVốn ban đầu: $10,000\nTất cả lệnh và lịch sử sẽ bị xóa.',
+      message: `Bạn có chắc muốn reset về mặc định?\n\nVốn ban đầu: $${DEFAULT_INITIAL_BALANCE.toLocaleString('vi-VN')}\nTất cả lệnh và lịch sử sẽ bị xóa.`,
       buttons: [
         { text: 'Hủy', style: 'cancel' },
         {
@@ -277,7 +373,7 @@ export default function PaperTradeHistoryScreen({ navigation }) {
               alert({
                 type: 'success',
                 title: 'Thành Công',
-                message: 'Đã reset về mặc định ($10,000).',
+                message: `Đã reset về mặc định ($${DEFAULT_INITIAL_BALANCE.toLocaleString('vi-VN')}).`,
               });
             } catch (error) {
               console.error('[PaperTrade] Reset to default error:', error);
@@ -297,7 +393,10 @@ export default function PaperTradeHistoryScreen({ navigation }) {
 
   // Set new initial balance
   const handleSetInitialBalance = async (resetAccount = false) => {
-    const amount = parseFloat(newInitialBalance.replace(/,/g, ''));
+    // Parse number - handle both Vietnamese (10.000,50) and US (10,000.50) formats
+    // Remove dots (Vietnamese thousands separator) and commas (US thousands separator)
+    const cleanedValue = newInitialBalance.replace(/\./g, '').replace(/,/g, '');
+    const amount = parseFloat(cleanedValue);
 
     if (isNaN(amount) || amount <= 0) {
       alert({ type: 'error', title: 'Lỗi', message: 'Vui lòng nhập số tiền hợp lệ.' });
@@ -310,42 +409,186 @@ export default function PaperTradeHistoryScreen({ navigation }) {
     }
 
     if (amount > 10000000) {
-      alert({ type: 'error', title: 'Lỗi', message: 'Số tiền tối đa là $10,000,000.' });
+      alert({ type: 'error', title: 'Lỗi', message: 'Số tiền tối đa là $10.000.000.' });
       return;
     }
 
-    const confirmMessage = resetAccount
-      ? `Đặt vốn ban đầu: $${amount.toLocaleString()}\n\nTất cả lệnh và lịch sử sẽ bị xóa.`
-      : `Đặt vốn ban đầu: $${amount.toLocaleString()}\n\nSố dư hiện tại sẽ được điều chỉnh theo sự thay đổi.`;
+    // Helper function to execute the balance change
+    const executeBalanceChange = async () => {
+      try {
+        setSettingsLoading(true);
+        await paperTradeService.setInitialBalance(amount, resetAccount);
+        await loadData();
+
+        if (resetAccount) {
+          setSettingsModalVisible(false);
+        }
+
+        alert({
+          type: 'success',
+          title: 'Thành Công',
+          message: resetAccount
+            ? `Đã reset tài khoản với vốn ban đầu $${amount.toLocaleString('vi-VN')}.`
+            : `Vốn ban đầu đã được đặt thành $${amount.toLocaleString('vi-VN')}.`,
+        });
+      } catch (error) {
+        console.error('[PaperTrade] Set initial balance error:', error);
+        alert({
+          type: 'error',
+          title: 'Lỗi',
+          message: error.message || 'Không thể đặt số tiền.',
+        });
+      } finally {
+        setSettingsLoading(false);
+      }
+    };
+
+    // Reset case needs confirmation since it deletes data
+    if (resetAccount) {
+      alert({
+        type: 'warning',
+        title: 'Xác Nhận Reset',
+        message: `Đặt vốn ban đầu: $${amount.toLocaleString('vi-VN')}\n\nTất cả lệnh và lịch sử sẽ bị xóa.`,
+        buttons: [
+          { text: 'Hủy', style: 'cancel' },
+          {
+            text: 'Xác Nhận Reset',
+            style: 'destructive',
+            onPress: executeBalanceChange,
+          },
+        ],
+      });
+    } else {
+      // Non-destructive: execute directly
+      await executeBalanceChange();
+    }
+  };
+
+  // Quick set buttons
+  const quickSetAmounts = [1000, 5000, 10000, 50000, 100000];
+
+  // Diagnostic function
+  const handleRunDiagnostic = async () => {
+    if (!user?.id) {
+      alert({ type: 'error', title: 'Lỗi', message: 'Không tìm thấy user ID. Vui lòng đăng nhập lại.' });
+      return;
+    }
+
+    setDiagnosing(true);
+    try {
+      const report = await paperTradeService.diagnoseDataStorage(user.id);
+      setDiagnosticReport(report);
+
+      // Build detailed message
+      let messageLines = ['Kết quả chẩn đoán:\n'];
+
+      // Cloud data
+      if (report.supabase?.hasData) {
+        messageLines.push(`☁️ Cloud: ${report.supabase.totalTrades || 0} lệnh`);
+        if (report.supabase.balance) {
+          messageLines.push(`   Số dư: $${report.supabase.balance.toLocaleString('vi-VN')}`);
+        }
+      } else if (report.supabase?.error) {
+        messageLines.push(`☁️ Cloud: Lỗi - ${report.supabase.error}`);
+      } else {
+        messageLines.push('☁️ Cloud: Không có dữ liệu');
+      }
+
+      // User-specific storage
+      if (report.userSpecificStorage?.hasData) {
+        messageLines.push(`📱 Local (User): ${report.userSpecificStorage.positions + report.userSpecificStorage.history} lệnh`);
+      }
+
+      // Legacy storage
+      if (report.legacyStorage?.hasData) {
+        messageLines.push(`📦 Legacy: ${report.legacyStorage.positions + report.legacyStorage.history} lệnh`);
+        if (report.legacyStorage.balance) {
+          messageLines.push(`   Số dư: $${report.legacyStorage.balance.toLocaleString('vi-VN')}`);
+        }
+      }
+
+      messageLines.push('\n💡 ' + report.recommendation);
+
+      const hasAnyData = report.supabase?.hasData || report.legacyStorage?.hasData || report.userSpecificStorage?.hasData;
+
+      alert({
+        type: hasAnyData ? 'info' : 'warning',
+        title: hasAnyData ? 'Tìm Thấy Dữ Liệu' : 'Không Tìm Thấy',
+        message: messageLines.join('\n'),
+      });
+    } catch (error) {
+      console.error('[Diagnostic] Error:', error);
+      alert({ type: 'error', title: 'Lỗi', message: error.message });
+    } finally {
+      setDiagnosing(false);
+    }
+  };
+
+  // Attempt data recovery
+  const handleAttemptRecovery = async () => {
+    if (!user?.id) {
+      alert({ type: 'error', title: 'Lỗi', message: 'Không tìm thấy user ID. Vui lòng đăng nhập lại.' });
+      return;
+    }
 
     alert({
-      type: 'warning',
-      title: 'Xác Nhận',
-      message: confirmMessage,
+      type: 'info',
+      title: 'Khôi Phục Dữ Liệu',
+      message: 'Hệ thống sẽ tìm kiếm và khôi phục dữ liệu từ tất cả các nguồn lưu trữ (Cloud, Local, Legacy).',
       buttons: [
         { text: 'Hủy', style: 'cancel' },
         {
-          text: 'Xác Nhận',
+          text: 'Khôi Phục',
           onPress: async () => {
+            setDiagnosing(true);
             try {
-              setSettingsLoading(true);
-              await paperTradeService.setInitialBalance(amount, resetAccount);
-              await loadData();
-              setSettingsModalVisible(false);
-              alert({
-                type: 'success',
-                title: 'Thành Công',
-                message: `Vốn ban đầu đã được đặt thành $${amount.toLocaleString()}.`,
-              });
+              const result = await paperTradeService.attemptDataRecovery(user.id);
+
+              if (result.success) {
+                await loadData();
+
+                // Format source name in Vietnamese
+                let sourceName = 'Cloud (Supabase)';
+                if (result.source === 'user_specific_storage') {
+                  sourceName = 'Local Storage (User)';
+                } else if (result.source === 'legacy_storage') {
+                  sourceName = 'Legacy Storage';
+                } else if (result.source === 'balance_only') {
+                  sourceName = 'Cài đặt số dư';
+                }
+
+                // Build message
+                let message = `Đã khôi phục từ ${sourceName}:\n\n` +
+                  `📈 Lệnh đang mở: ${result.data.positions || 0}\n` +
+                  `📋 Lệnh chờ: ${result.data.pending || 0}\n` +
+                  `📊 Lịch sử: ${result.data.history || 0}\n` +
+                  `💰 Số dư: $${(result.data.balance || 0).toLocaleString('vi-VN')}`;
+
+                if (result.note) {
+                  message += `\n\n⚠️ ${result.note}`;
+                }
+
+                if (result.syncedToCloud) {
+                  message += '\n\n☁️ Đã đồng bộ lên Cloud';
+                }
+
+                alert({
+                  type: 'success',
+                  title: 'Khôi Phục Thành Công!',
+                  message,
+                });
+              } else {
+                alert({
+                  type: 'error',
+                  title: 'Không Thể Khôi Phục',
+                  message: result.error || 'Không tìm thấy dữ liệu để khôi phục.',
+                });
+              }
             } catch (error) {
-              console.error('[PaperTrade] Set initial balance error:', error);
-              alert({
-                type: 'error',
-                title: 'Lỗi',
-                message: error.message || 'Không thể đặt số tiền.',
-              });
+              console.error('[Recovery] Error:', error);
+              alert({ type: 'error', title: 'Lỗi', message: error.message });
             } finally {
-              setSettingsLoading(false);
+              setDiagnosing(false);
             }
           },
         },
@@ -353,8 +596,29 @@ export default function PaperTradeHistoryScreen({ navigation }) {
     });
   };
 
-  // Quick set buttons
-  const quickSetAmounts = [1000, 5000, 10000, 50000, 100000];
+  // Force refresh from cloud
+  const handleForceRefreshCloud = async () => {
+    if (!user?.id) {
+      alert({ type: 'error', title: 'Lỗi', message: 'Không tìm thấy user ID. Vui lòng đăng nhập lại.' });
+      return;
+    }
+
+    setDiagnosing(true);
+    try {
+      await paperTradeService.forceRefreshFromCloud(user.id);
+      await loadData();
+      alert({
+        type: 'success',
+        title: 'Đã Đồng Bộ',
+        message: 'Đã tải lại dữ liệu từ Cloud thành công.',
+      });
+    } catch (error) {
+      console.error('[ForceRefresh] Error:', error);
+      alert({ type: 'error', title: 'Lỗi', message: error.message });
+    } finally {
+      setDiagnosing(false);
+    }
+  };
 
   const getFilteredTrades = () => {
     switch (filter) {
@@ -378,15 +642,17 @@ export default function PaperTradeHistoryScreen({ navigation }) {
   const formatCurrency = (value) => {
     if (!value && value !== 0) return '--';
     const sign = value >= 0 ? '+' : '';
-    return sign + new Intl.NumberFormat('en-US', {
+    // Vietnamese format: dot for thousands, comma for decimals
+    return sign + new Intl.NumberFormat('vi-VN', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(value);
+    }).format(Math.abs(value));
   };
 
   const formatCurrencySimple = (value) => {
     if (!value && value !== 0) return '--';
-    return new Intl.NumberFormat('en-US', {
+    // Vietnamese format: dot for thousands, comma for decimals
+    return new Intl.NumberFormat('vi-VN', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(value);
@@ -397,7 +663,8 @@ export default function PaperTradeHistoryScreen({ navigation }) {
   const formatPercent = (value) => {
     if (!value && value !== 0) return '--';
     const sign = value >= 0 ? '+' : '';
-    return sign + value.toFixed(2) + '%';
+    // Vietnamese format: comma for decimals
+    return sign + value.toFixed(2).replace('.', ',') + '%';
   };
 
   const formatDate = (dateString) => {
@@ -409,6 +676,24 @@ export default function PaperTradeHistoryScreen({ navigation }) {
       hour: '2-digit',
       minute: '2-digit',
     });
+  };
+
+  // Calculate holding time between two dates
+  const calculateHoldingTime = (openedAt, closedAt) => {
+    if (!openedAt) return '--';
+    const opened = new Date(openedAt);
+    const closed = closedAt ? new Date(closedAt) : new Date();
+    const diffMs = closed - opened;
+
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+    if (hours >= 24) {
+      const days = Math.floor(hours / 24);
+      return `${days}d ${hours % 24}h`;
+    }
+
+    return `${hours}h ${minutes}m`;
   };
 
   const filteredTrades = getFilteredTrades();
@@ -433,7 +718,7 @@ export default function PaperTradeHistoryScreen({ navigation }) {
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Lịch Sử Paper Trade</Text>
           <TouchableOpacity onPress={handleOpenSettings} style={styles.settingsButton}>
-            <Settings size={22} color={COLORS.gold} />
+            <Settings size={22} color={COLORS.textMuted} />
           </TouchableOpacity>
         </View>
 
@@ -448,30 +733,30 @@ export default function PaperTradeHistoryScreen({ navigation }) {
           {/* Stats Cards */}
           <View style={styles.statsRow}>
             <View style={styles.statCard}>
-              <BarChart3 size={20} color={COLORS.purple} />
+              <BarChart3 size={20} color={COLORS.textMuted} />
               <Text style={styles.statValue}>{stats.openTrades}</Text>
               <Text style={styles.statLabel}>Đang Mở</Text>
             </View>
             <View style={styles.statCard}>
-              <BarChart3 size={20} color={COLORS.cyan} />
+              <BarChart3 size={20} color={COLORS.textMuted} />
               <Text style={styles.statValue}>{stats.totalTrades}</Text>
               <Text style={styles.statLabel}>Đã Đóng</Text>
             </View>
             <View style={styles.statCard}>
-              <Target size={20} color={COLORS.gold} />
-              <Text style={styles.statValue}>{stats.winRate.toFixed(1)}%</Text>
+              <Target size={20} color={COLORS.textMuted} />
+              <Text style={styles.statValue}>{stats.winRate.toFixed(1).replace('.', ',')}%</Text>
               <Text style={styles.statLabel}>Win Rate</Text>
             </View>
           </View>
 
           <View style={styles.statsRow}>
             <View style={styles.statCard}>
-              <Award size={20} color={COLORS.success} />
+              <Award size={20} color={COLORS.textMuted} />
               <Text style={[styles.statValue, { color: COLORS.success }]}>{stats.wins}</Text>
               <Text style={styles.statLabel}>Thắng</Text>
             </View>
             <View style={styles.statCard}>
-              <TrendingDown size={20} color={COLORS.error} />
+              <TrendingDown size={20} color={COLORS.textMuted} />
               <Text style={[styles.statValue, { color: COLORS.error }]}>{stats.losses}</Text>
               <Text style={styles.statLabel}>Thua</Text>
             </View>
@@ -485,33 +770,43 @@ export default function PaperTradeHistoryScreen({ navigation }) {
                 <Settings size={12} color={COLORS.textMuted} style={{ marginLeft: 4 }} />
               </View>
               <Text style={styles.balanceLabel}>Vốn Ban Đầu</Text>
-              <Text style={styles.balanceValue}>${initialBalance.toLocaleString()}</Text>
+              <Text style={styles.balanceValue}>${initialBalance.toLocaleString('vi-VN')}</Text>
             </TouchableOpacity>
             <View style={[styles.balanceCard, styles.currentBalanceCard]}>
-              <Wallet size={18} color={COLORS.gold} />
+              <Wallet size={18} color={COLORS.textMuted} />
               <Text style={styles.balanceLabel}>Số Dư Hiện Tại</Text>
-              <Text style={[styles.balanceValue, { color: COLORS.gold }]}>
-                ${currentBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              <Text style={styles.balanceValue}>
+                ${currentBalance.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </Text>
             </View>
           </View>
 
           {/* Total PnL Card */}
           <View style={styles.pnlCard}>
-            <Text style={styles.pnlLabel}>Tổng P&L</Text>
-            <Text style={[
-              styles.pnlValue,
-              { color: stats.totalPnl >= 0 ? COLORS.success : COLORS.error }
-            ]}>
+            <Text style={styles.pnlLabel}>Tổng Lãi/Lỗ</Text>
+            <Text
+              style={[
+                styles.pnlValue,
+                { color: stats.totalPnl >= 0 ? COLORS.success : COLORS.error }
+              ]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.6}
+            >
               {formatCurrency(stats.totalPnl)} USDT
             </Text>
-            <Text style={styles.pnlAvg}>
+            <Text style={styles.pnlAvg} numberOfLines={1} adjustsFontSizeToFit>
               Trung bình: {formatCurrency(stats.avgPnl)} / lệnh
             </Text>
           </View>
 
-          {/* Filter Tabs */}
-          <View style={styles.filterRow}>
+          {/* Filter Tabs - Horizontal Scrollable */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.filterScrollView}
+            contentContainerStyle={styles.filterRow}
+          >
             {FILTERS.map((f) => (
               <TouchableOpacity
                 key={f.key}
@@ -526,12 +821,12 @@ export default function PaperTradeHistoryScreen({ navigation }) {
                 </Text>
               </TouchableOpacity>
             ))}
-          </View>
+          </ScrollView>
 
           {/* Trade List */}
           {filteredTrades.length === 0 ? (
             <View style={styles.emptyState}>
-              <BarChart3 size={50} color={COLORS.textMuted} />
+              <BarChart3 size={40} color={COLORS.textMuted} />
               <Text style={styles.emptyText}>Không có lệnh nào</Text>
             </View>
           ) : (
@@ -581,57 +876,178 @@ export default function PaperTradeHistoryScreen({ navigation }) {
                       </View>
                     </View>
 
-                    {/* Expanded Content */}
+                    {/* Expanded Content - COMPLETE INFO like PatternDetailScreen */}
                     {isExpanded && (
                       <View style={styles.expandedContent}>
-                        {/* Price Info */}
-                        <View style={styles.tradeDetails}>
-                          <View style={styles.tradeDetailRow}>
-                            <Text style={styles.tradeDetailLabel}>Giá vào</Text>
-                            <Text style={styles.tradeDetailValue}>${formatPrice(trade.entry_price)}</Text>
+                        {/* Trade Mode Badge */}
+                        <View style={styles.tradeModeBadge}>
+                          {trade.trade_mode === 'custom' ? (
+                            <Brain size={14} color={COLORS.textMuted} />
+                          ) : (
+                            <Gem size={14} color={COLORS.textMuted} />
+                          )}
+                          <Text style={styles.tradeModeBadgeText}>
+                            {trade.trade_mode === 'custom' ? 'Custom Mode' : 'GEM Pattern'}
+                          </Text>
+                        </View>
+
+                        {/* Price Levels Section */}
+                        <View style={styles.priceLevelsSection}>
+                          <View style={styles.priceLevel}>
+                            <Text style={styles.priceLevelLabel}>Giá vào lệnh</Text>
+                            <Text style={styles.priceLevelValue}>
+                              ${formatPrice(trade.entry_price)}
+                            </Text>
                           </View>
-                          <View style={styles.tradeDetailRow}>
-                            <Text style={styles.tradeDetailLabel}>{isOpen ? 'Giá hiện tại' : 'Giá ra'}</Text>
-                            <Text style={[styles.tradeDetailValue, isOpen && { color: pnlColor }]}>
+                          <View style={styles.priceLevel}>
+                            <Text style={styles.priceLevelLabel}>{isOpen ? 'Giá hiện tại' : 'Giá ra'}</Text>
+                            <Text style={styles.priceLevelValue}>
                               ${formatPrice(isOpen ? trade.current_price : trade.exit_price)}
                             </Text>
                           </View>
-                          <View style={styles.tradeDetailRow}>
-                            <Text style={styles.tradeDetailLabel}>Khối lượng</Text>
-                            <Text style={styles.tradeDetailValue}>{formatCurrencySimple(trade.position_size)} USDT</Text>
+                          <View style={styles.priceLevel}>
+                            <Text style={[styles.priceLevelLabel, { color: COLORS.success }]}>Chốt lời</Text>
+                            <Text style={[styles.priceLevelValue, { color: COLORS.success }]}>
+                              ${formatPrice(trade.take_profit)}
+                            </Text>
+                          </View>
+                          <View style={styles.priceLevel}>
+                            <Text style={[styles.priceLevelLabel, { color: COLORS.error }]}>Cắt lỗ</Text>
+                            <Text style={[styles.priceLevelValue, { color: COLORS.error }]}>
+                              ${formatPrice(trade.stop_loss)}
+                            </Text>
                           </View>
                         </View>
 
-                        {/* SL/TP for open trades */}
-                        {isOpen && (
-                          <View style={styles.slTpRow}>
-                            <View style={styles.slTpItem}>
-                              <Text style={[styles.tradeDetailLabel, { color: COLORS.error }]}>SL</Text>
-                              <Text style={[styles.tradeDetailValue, { color: COLORS.error }]}>
-                                ${formatPrice(trade.stop_loss)}
-                              </Text>
-                            </View>
-                            <View style={styles.slTpItem}>
-                              <Text style={[styles.tradeDetailLabel, { color: COLORS.success }]}>TP</Text>
-                              <Text style={[styles.tradeDetailValue, { color: COLORS.success }]}>
-                                ${formatPrice(trade.take_profit)}
+                        {/* Trade Info Grid - Same as PatternDetailScreen */}
+                        <View style={styles.tradeInfoGrid}>
+                          <View style={styles.tradeInfoItem}>
+                            <Clock size={12} color={COLORS.textMuted} />
+                            <Text style={styles.tradeInfoLabel}>Mở lệnh lúc</Text>
+                            <Text style={styles.tradeInfoValue}>{formatDate(trade.opened_at)}</Text>
+                          </View>
+                          <View style={styles.tradeInfoItem}>
+                            <DollarSign size={12} color={COLORS.textMuted} />
+                            <Text style={styles.tradeInfoLabel}>Ký quỹ</Text>
+                            <Text style={styles.tradeInfoValue}>${formatCurrencySimple(trade.margin)}</Text>
+                          </View>
+                          <View style={styles.tradeInfoItem}>
+                            <Layers size={12} color={COLORS.textMuted} />
+                            <Text style={styles.tradeInfoLabel}>Giá trị lệnh</Text>
+                            <Text style={styles.tradeInfoValue}>${formatCurrencySimple(trade.position_value)}</Text>
+                          </View>
+                          <View style={styles.tradeInfoItem}>
+                            <Target size={12} color={COLORS.textMuted} />
+                            <Text style={styles.tradeInfoLabel}>Pattern</Text>
+                            <Text style={styles.tradeInfoValue}>
+                              {getPatternNameVI(trade.pattern_type)}
+                            </Text>
+                          </View>
+                          <View style={styles.tradeInfoItem}>
+                            <Timer size={12} color={COLORS.textMuted} />
+                            <Text style={styles.tradeInfoLabel}>Khung TG</Text>
+                            <Text style={styles.tradeInfoValue}>{trade.timeframe?.toUpperCase() || '4H'}</Text>
+                          </View>
+                          <View style={styles.tradeInfoItem}>
+                            <Scale size={12} color={COLORS.textMuted} />
+                            <Text style={styles.tradeInfoLabel}>Đòn bẩy</Text>
+                            <Text style={styles.tradeInfoValue}>{trade.leverage}x</Text>
+                          </View>
+                          <View style={styles.tradeInfoItem}>
+                            <Percent size={12} color={COLORS.textMuted} />
+                            <Text style={styles.tradeInfoLabel}>Độ tin cậy</Text>
+                            <Text style={styles.tradeInfoValue}>{trade.confidence}%</Text>
+                          </View>
+                          <View style={styles.tradeInfoItem}>
+                            <BarChart3 size={12} color={COLORS.textMuted} />
+                            <Text style={styles.tradeInfoLabel}>Tỷ lệ R:R</Text>
+                            <Text style={styles.tradeInfoValue}>{trade.risk_reward}</Text>
+                          </View>
+                          <View style={styles.tradeInfoItem}>
+                            <Award size={12} color={COLORS.textMuted} />
+                            <Text style={styles.tradeInfoLabel}>Win Rate</Text>
+                            <Text style={styles.tradeInfoValue}>{trade.win_rate}%</Text>
+                          </View>
+                        </View>
+
+                        {/* AI Score for Custom Mode */}
+                        {trade.trade_mode === 'custom' && trade.ai_score !== null && (
+                          <View style={styles.aiScoreRow}>
+                            <Brain size={14} color={COLORS.textMuted} />
+                            <Text style={styles.aiScoreLabel}>Điểm AI đánh giá</Text>
+                            <View style={[
+                              styles.aiScoreBadge,
+                              {
+                                backgroundColor:
+                                  trade.ai_score >= 80 ? COLORS.success + '30' :
+                                  trade.ai_score >= 60 ? COLORS.gold + '30' :
+                                  trade.ai_score >= 40 ? COLORS.warning + '30' : COLORS.error + '30'
+                              }
+                            ]}>
+                              <Text style={[
+                                styles.aiScoreValue,
+                                {
+                                  color:
+                                    trade.ai_score >= 80 ? COLORS.success :
+                                    trade.ai_score >= 60 ? COLORS.gold :
+                                    trade.ai_score >= 40 ? COLORS.warning : COLORS.error
+                                }
+                              ]}>
+                                {trade.ai_score}/100
                               </Text>
                             </View>
                           </View>
                         )}
 
-                        {/* P/L Percent & Date Footer */}
+                        {/* Result & Exit Info for closed trades */}
+                        {!isOpen && (
+                          <View style={styles.closedInfoSection}>
+                            <View style={styles.resultRow}>
+                              {trade.result === 'WIN' ? (
+                                <CheckCircle size={16} color={COLORS.success} />
+                              ) : (
+                                <XCircle size={16} color={COLORS.error} />
+                              )}
+                              <Text style={[
+                                styles.resultText,
+                                { color: trade.result === 'WIN' ? COLORS.success : COLORS.error }
+                              ]}>
+                                {trade.result === 'WIN' ? 'THẮNG' : 'THUA'}
+                              </Text>
+                              <View style={styles.exitReasonBadge}>
+                                <Text style={styles.exitReasonText}>
+                                  {trade.exit_reason === 'STOP_LOSS' ? 'Chạm SL' :
+                                   trade.exit_reason === 'TAKE_PROFIT' ? 'Chạm TP' : 'Đóng tay'}
+                                </Text>
+                              </View>
+                            </View>
+                            <View style={styles.holdingTimeRow}>
+                              <Timer size={12} color={COLORS.textMuted} />
+                              <Text style={styles.holdingTimeLabel}>Thời gian giữ:</Text>
+                              <Text style={styles.holdingTimeValue}>
+                                {trade.holding_time || calculateHoldingTime(trade.opened_at, trade.closed_at)}
+                              </Text>
+                            </View>
+                            <Text style={styles.closedAtText}>
+                              Đóng lúc: {formatDate(trade.closed_at)}
+                            </Text>
+                          </View>
+                        )}
+
+                        {/* P&L Footer */}
                         <View style={styles.tradeFooter}>
-                          <Text style={[styles.tradePnlPercent, { color: pnlColor }]}>
-                            {formatPercent(trade.pnl_percent)}
-                          </Text>
-                          <Text style={styles.tradeDate}>
-                            {isOpen ? `Mở: ${formatDate(trade.opened_at)}` : formatDate(trade.closed_at)}
-                          </Text>
-                          {(trade.pnl || 0) > 0 ? (
-                            <TrendingUp size={16} color={COLORS.success} />
+                          <View style={styles.pnlSummary}>
+                            <Text style={styles.pnlSummaryLabel}>
+                              {isOpen ? 'Lãi/Lỗ Chưa Chốt' : 'Lãi/Lỗ Đã Chốt'}
+                            </Text>
+                            <Text style={[styles.pnlSummaryValue, { color: pnlColor }]}>
+                              {formatCurrency(trade.pnl)} USDT ({formatPercent(trade.pnl_percent)})
+                            </Text>
+                          </View>
+                          {(trade.pnl || 0) >= 0 ? (
+                            <TrendingUp size={20} color={COLORS.success} />
                           ) : (
-                            <TrendingDown size={16} color={COLORS.error} />
+                            <TrendingDown size={20} color={COLORS.error} />
                           )}
                         </View>
                       </View>
@@ -679,12 +1095,12 @@ export default function PaperTradeHistoryScreen({ navigation }) {
                   <View style={styles.currentSettingsCard}>
                     <View style={styles.settingsRow}>
                       <Text style={styles.settingsLabel}>Vốn ban đầu:</Text>
-                      <Text style={styles.settingsValue}>${initialBalance.toLocaleString()}</Text>
+                      <Text style={styles.settingsValue}>${initialBalance.toLocaleString('vi-VN')}</Text>
                     </View>
                     <View style={styles.settingsRow}>
                       <Text style={styles.settingsLabel}>Số dư hiện tại:</Text>
                       <Text style={[styles.settingsValue, { color: COLORS.gold }]}>
-                        ${currentBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        ${currentBalance.toLocaleString('vi-VN', { minimumFractionDigits: 2 })}
                       </Text>
                     </View>
                     <View style={styles.settingsRow}>
@@ -775,7 +1191,7 @@ export default function PaperTradeHistoryScreen({ navigation }) {
                     <View style={styles.resetButtonContent}>
                       <Text style={styles.resetButtonText}>Reset Tài Khoản</Text>
                       <Text style={styles.resetButtonDesc}>
-                        Xóa tất cả lệnh, giữ nguyên vốn ban đầu (${initialBalance.toLocaleString()})
+                        Xóa tất cả lệnh, giữ nguyên vốn ban đầu (${initialBalance.toLocaleString('vi-VN')})
                       </Text>
                     </View>
                   </TouchableOpacity>
@@ -789,10 +1205,81 @@ export default function PaperTradeHistoryScreen({ navigation }) {
                     <View style={styles.resetButtonContent}>
                       <Text style={styles.resetButtonTextDanger}>Reset Về Mặc Định</Text>
                       <Text style={styles.resetButtonDesc}>
-                        Reset tất cả về $10,000 ban đầu
+                        Reset tất cả về ${DEFAULT_INITIAL_BALANCE.toLocaleString('vi-VN')} ban đầu
                       </Text>
                     </View>
                   </TouchableOpacity>
+                </View>
+
+                {/* Data Recovery Section */}
+                <View style={styles.settingsSection}>
+                  <Text style={styles.settingsSectionTitle}>🔧 Khắc Phục Sự Cố</Text>
+
+                  <TouchableOpacity
+                    style={[styles.resetButton, diagnosing && styles.buttonDisabled]}
+                    onPress={handleForceRefreshCloud}
+                    disabled={diagnosing}
+                  >
+                    {diagnosing ? (
+                      <ActivityIndicator size="small" color={COLORS.info} />
+                    ) : (
+                      <RefreshCw size={18} color={COLORS.info} />
+                    )}
+                    <View style={styles.resetButtonContent}>
+                      <Text style={[styles.resetButtonText, { color: COLORS.info }]}>Đồng Bộ Từ Cloud</Text>
+                      <Text style={styles.resetButtonDesc}>
+                        Tải lại dữ liệu từ Supabase
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.resetButton, diagnosing && styles.buttonDisabled, { borderColor: 'rgba(76, 175, 80, 0.3)' }]}
+                    onPress={handleAttemptRecovery}
+                    disabled={diagnosing}
+                  >
+                    <RefreshCw size={18} color={COLORS.success} />
+                    <View style={styles.resetButtonContent}>
+                      <Text style={[styles.resetButtonText, { color: COLORS.success }]}>Khôi Phục Dữ Liệu</Text>
+                      <Text style={styles.resetButtonDesc}>
+                        Tìm và khôi phục từ tất cả nguồn (Cloud, Local, Legacy)
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.resetButton, diagnosing && styles.buttonDisabled, { borderColor: 'rgba(158, 158, 158, 0.3)' }]}
+                    onPress={handleRunDiagnostic}
+                    disabled={diagnosing}
+                  >
+                    <BarChart3 size={18} color={COLORS.textMuted} />
+                    <View style={styles.resetButtonContent}>
+                      <Text style={[styles.resetButtonText, { color: COLORS.textMuted }]}>Chẩn Đoán</Text>
+                      <Text style={styles.resetButtonDesc}>
+                        Kiểm tra dữ liệu trong các nguồn lưu trữ
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  {/* Show diagnostic report if available */}
+                  {diagnosticReport && (
+                    <View style={styles.diagnosticReport}>
+                      <Text style={styles.diagnosticTitle}>Kết Quả Chẩn Đoán:</Text>
+                      <Text style={styles.diagnosticText}>
+                        • Cloud: {diagnosticReport.supabase?.totalTrades || 0} lệnh
+                        {diagnosticReport.supabase?.error ? ` (Lỗi: ${diagnosticReport.supabase.error})` : ''}
+                      </Text>
+                      <Text style={styles.diagnosticText}>
+                        • User Storage: {diagnosticReport.userSpecificStorage?.positions || 0} vị thế, {diagnosticReport.userSpecificStorage?.history || 0} lịch sử
+                      </Text>
+                      <Text style={styles.diagnosticText}>
+                        • Legacy Storage: {diagnosticReport.legacyStorage?.positions || 0} vị thế, {diagnosticReport.legacyStorage?.history || 0} lịch sử
+                      </Text>
+                      <Text style={[styles.diagnosticText, { color: COLORS.gold, marginTop: 8 }]}>
+                        💡 {diagnosticReport.recommendation}
+                      </Text>
+                    </View>
+                  )}
                 </View>
 
                 {/* Info Note */}
@@ -834,47 +1321,47 @@ const styles = StyleSheet.create({
   // Stats
   statsRow: {
     flexDirection: 'row',
-    gap: SPACING.sm,
-    marginBottom: SPACING.sm,
+    gap: SPACING.xs,
+    marginBottom: SPACING.xs,
   },
   statCard: {
     flex: 1,
     backgroundColor: GLASS.background,
-    borderRadius: 14,
-    padding: SPACING.md,
+    borderRadius: 10,
+    padding: SPACING.sm,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   statValue: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: '700',
     color: COLORS.textPrimary,
-    marginTop: 8,
+    marginTop: 4,
   },
   statLabel: {
-    fontSize: 11,
+    fontSize: 10,
     color: COLORS.textMuted,
-    marginTop: 4,
+    marginTop: 2,
   },
 
   // Balance Row
   balanceRow: {
     flexDirection: 'row',
-    gap: SPACING.sm,
-    marginTop: SPACING.sm,
+    gap: SPACING.xs,
+    marginTop: SPACING.xs,
   },
   balanceCard: {
     flex: 1,
     backgroundColor: GLASS.background,
-    borderRadius: 14,
-    padding: SPACING.md,
+    borderRadius: 10,
+    padding: SPACING.sm,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   currentBalanceCard: {
-    borderColor: 'rgba(255, 189, 89, 0.3)',
+    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   balanceLabel: {
     fontSize: 10,
@@ -892,52 +1379,58 @@ const styles = StyleSheet.create({
   // PnL Card
   pnlCard: {
     backgroundColor: GLASS.background,
-    borderRadius: GLASS.borderRadius,
-    padding: SPACING.lg,
-    marginVertical: SPACING.md,
+    borderRadius: 12,
+    padding: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    marginVertical: SPACING.sm,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255, 189, 89, 0.3)',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   pnlLabel: {
-    fontSize: 12,
+    fontSize: 11,
     color: COLORS.textMuted,
   },
   pnlValue: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: '700',
-    marginVertical: 8,
+    marginVertical: 4,
+    width: '100%',
+    textAlign: 'center',
   },
   pnlAvg: {
-    fontSize: 12,
+    fontSize: 11,
     color: COLORS.textMuted,
   },
 
   // Filter
+  filterScrollView: {
+    marginBottom: SPACING.md,
+  },
   filterRow: {
     flexDirection: 'row',
-    gap: 8,
-    marginBottom: SPACING.lg,
+    gap: 6,
+    paddingRight: SPACING.lg,
   },
   filterButton: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   filterButtonActive: {
-    backgroundColor: 'rgba(106, 91, 255, 0.2)',
-    borderColor: COLORS.purple,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   filterButtonText: {
-    fontSize: 12,
+    fontSize: 11,
     color: COLORS.textMuted,
     fontWeight: '500',
   },
   filterButtonTextActive: {
-    color: COLORS.purple,
+    color: COLORS.textPrimary,
   },
 
   // Empty State
@@ -957,36 +1450,34 @@ const styles = StyleSheet.create({
   tradeList: {},
   tradeCard: {
     backgroundColor: GLASS.background,
-    borderRadius: 14,
+    borderRadius: 12,
     padding: SPACING.sm,
     paddingHorizontal: SPACING.md,
     marginBottom: SPACING.xs,
     borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   tradeCardOpen: {
-    borderColor: 'rgba(106, 91, 255, 0.5)',
-    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.25)',
+    borderWidth: 1,
   },
   expandedContent: {
     marginTop: SPACING.sm,
     paddingTop: SPACING.sm,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.08)',
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
   },
   openBadge: {
-    backgroundColor: 'rgba(106, 91, 255, 0.3)',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: COLORS.purple,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
   },
   openBadgeText: {
-    fontSize: 9,
-    fontWeight: '700',
-    color: COLORS.purple,
-    letterSpacing: 0.5,
+    fontSize: 8,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    letterSpacing: 0.3,
   },
   slTpRow: {
     flexDirection: 'row',
@@ -1061,10 +1552,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: SPACING.xs,
-    paddingTop: SPACING.xs,
+    marginTop: SPACING.sm,
+    paddingTop: SPACING.sm,
+    paddingHorizontal: SPACING.xs,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    borderRadius: 8,
+    padding: SPACING.sm,
   },
   tradeDate: {
     fontSize: 11,
@@ -1085,11 +1580,11 @@ const styles = StyleSheet.create({
   // Modal Styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    backgroundColor: 'rgba(0, 0, 0, 0.95)',
     justifyContent: 'flex-end',
   },
   modalContainer: {
-    backgroundColor: COLORS.background,
+    backgroundColor: '#0D0B14',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: '90%',
@@ -1127,11 +1622,11 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   currentSettingsCard: {
-    backgroundColor: GLASS.background,
+    backgroundColor: 'rgba(20, 18, 30, 0.95)',
     borderRadius: 14,
     padding: SPACING.md,
     borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
+    borderColor: 'rgba(106, 91, 255, 0.3)',
   },
   settingsRow: {
     flexDirection: 'row',
@@ -1153,7 +1648,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: GLASS.background,
+    backgroundColor: 'rgba(20, 18, 30, 0.95)',
     borderRadius: 12,
     paddingHorizontal: SPACING.md,
     borderWidth: 1,
@@ -1179,9 +1674,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   quickSetButtonActive: {
     backgroundColor: 'rgba(106, 91, 255, 0.2)',
@@ -1236,7 +1731,7 @@ const styles = StyleSheet.create({
   resetButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: GLASS.background,
+    backgroundColor: 'rgba(20, 18, 30, 0.95)',
     paddingVertical: 14,
     paddingHorizontal: SPACING.md,
     borderRadius: 12,
@@ -1248,7 +1743,7 @@ const styles = StyleSheet.create({
   resetButtonDanger: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: GLASS.background,
+    backgroundColor: 'rgba(20, 18, 30, 0.95)',
     paddingVertical: 14,
     paddingHorizontal: SPACING.md,
     borderRadius: 12,
@@ -1279,7 +1774,7 @@ const styles = StyleSheet.create({
   infoNote: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: 'rgba(255, 189, 89, 0.1)',
+    backgroundColor: 'rgba(255, 189, 89, 0.2)',
     padding: SPACING.md,
     borderRadius: 10,
     gap: 8,
@@ -1290,5 +1785,189 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: COLORS.warning,
     lineHeight: 16,
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // EXPANDED CARD STYLES - Complete info like PatternDetailScreen
+  // ═══════════════════════════════════════════════════════════
+
+  // Trade Mode Badge
+  tradeModeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 6,
+    marginBottom: SPACING.xs,
+  },
+  tradeModeBadgeText: {
+    fontSize: 10,
+    fontWeight: '500',
+    color: COLORS.textMuted,
+  },
+
+  // Price Levels Section
+  priceLevelsSection: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    borderRadius: 10,
+    padding: SPACING.sm,
+    marginBottom: SPACING.sm,
+  },
+  priceLevel: {
+    flex: 1,
+    minWidth: '45%',
+    alignItems: 'center',
+    paddingVertical: 6,
+  },
+  priceLevelLabel: {
+    fontSize: 10,
+    color: COLORS.textMuted,
+    marginBottom: 2,
+  },
+  priceLevelValue: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+  },
+
+  // Trade Info Grid
+  tradeInfoGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 4,
+    marginBottom: SPACING.sm,
+  },
+  tradeInfoItem: {
+    width: '32%',
+    backgroundColor: 'rgba(0, 0, 0, 0.15)',
+    borderRadius: 8,
+    padding: 8,
+    alignItems: 'center',
+    gap: 2,
+  },
+  tradeInfoLabel: {
+    fontSize: 9,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+  },
+  tradeInfoValue: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    textAlign: 'center',
+  },
+
+  // AI Score Row
+  aiScoreRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.sm,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    borderRadius: 8,
+    marginBottom: SPACING.sm,
+  },
+  aiScoreLabel: {
+    flex: 1,
+    fontSize: 11,
+    color: COLORS.textMuted,
+  },
+  aiScoreBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  aiScoreValue: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+
+  // Closed Trade Info Section
+  closedInfoSection: {
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    borderRadius: 10,
+    padding: SPACING.sm,
+    marginBottom: SPACING.sm,
+  },
+  resultRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 6,
+  },
+  resultText: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  exitReasonBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+  },
+  exitReasonText: {
+    fontSize: 10,
+    color: COLORS.textMuted,
+  },
+  holdingTimeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 4,
+  },
+  holdingTimeLabel: {
+    fontSize: 10,
+    color: COLORS.textMuted,
+  },
+  holdingTimeValue: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: COLORS.textPrimary,
+  },
+  closedAtText: {
+    fontSize: 10,
+    color: COLORS.textMuted,
+  },
+
+  // P&L Summary
+  pnlSummary: {
+    flex: 1,
+  },
+  pnlSummaryLabel: {
+    fontSize: 10,
+    color: COLORS.textMuted,
+    marginBottom: 2,
+  },
+  pnlSummaryValue: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+
+  // Diagnostic Report Styles
+  diagnosticReport: {
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderRadius: 10,
+    padding: SPACING.md,
+    marginTop: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  diagnosticTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.sm,
+  },
+  diagnosticText: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+    lineHeight: 18,
   },
 });

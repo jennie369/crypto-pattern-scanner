@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 1 - Hero: Tại Sao Bạn Giỏi Mọi Thứ... Trừ Tình Yêu?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Noto+Sans+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           PHẦN CẤU HÌNH - DỄ CHỈNH SỬA
+        ============================================ */
+        :root {
+            /* Màu sắc GOLD LUXURY */
+            --gold-accent: #FFBD59;
+            --gold-light: #DEBC81;
+            --burgundy-dark: #6B1F3A;
+            --burgundy-mid: #5A2838;
+            --burgundy-light: #4A1F3A;
+            --deep-black: #0A0A0A;
+            --text-light: #FFFFFF;
+            --text-cream: #F5E6D3;
+            
+            /* Gradient Section 1 */
+            --gradient-start: #2D1B3D;
+            --gradient-mid: #3D2832;
+            --gradient-end: #4A1F3A;
+            
+            /* Font chữ */
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+        }
+
+        /* ============================================
+           HÌNH ẢNH - THAY ĐỔI TẠI ĐÂY
+        ============================================ */
+        .hero-section {
+            /* Background image - thay URL này */
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(255, 189, 89, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(222, 188, 129, 0.12) 0%, transparent 50%),
+                linear-gradient(135deg, 
+                    rgba(45, 27, 61, 0.95) 0%, 
+                    rgba(61, 40, 50, 0.9) 50%, 
+                    rgba(74, 31, 58, 0.95) 100%),
+                url('https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=1600&q=80');
+            /* Boss lady nhìn ra cửa sổ thành phố đêm - professional, powerful */
+        }
+
+        /* ============================================
+           CSS CHÍNH
+        ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            color: var(--text-light);
+            overflow-x: hidden;
+            background: var(--deep-black);
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            padding: 120px 20px 80px;
+            overflow: hidden;
+        }
+
+        /* Animated gradient overlay */
+        .gradient-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(45deg, var(--neon-pink) 0%, transparent 50%),
+                linear-gradient(135deg, var(--electric-purple) 0%, transparent 50%),
+                linear-gradient(225deg, var(--cyber-blue) 0%, transparent 50%);
+            opacity: 0.1;
+            animation: gradientShift 15s ease infinite;
+            z-index: 0;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+            }
+            25% {
+                transform: translate(10%, -10%) scale(1.1);
+            }
+            50% {
+                transform: translate(-5%, 5%) scale(0.95);
+            }
+            75% {
+                transform: translate(-10%, 10%) scale(1.05);
+            }
+        }
+
+        /* Neon grid background */
+        .neon-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(255, 0, 110, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(131, 56, 236, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.3;
+            animation: gridMove 20s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes gridMove {
+            0% {
+                transform: perspective(500px) rotateX(60deg) translateY(0);
+            }
+            100% {
+                transform: perspective(500px) rotateX(60deg) translateY(50px);
+            }
+        }
+
+        /* Gradient overlay chuyển tiếp cho section sau */
+        .hero-section::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 200px;
+            background: linear-gradient(to bottom, 
+                transparent 0%, 
+                var(--gradient-end) 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Animated particles background */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: var(--gold-accent);
+            border-radius: 50%;
+            opacity: 0;
+            box-shadow: 0 0 10px var(--gold-accent),
+                        0 0 20px var(--gold-light);
+            animation: particleFloat 8s infinite ease-in-out;
+        }
+
+        @keyframes particleFloat {
+            0%, 100% {
+                opacity: 0;
+                transform: translateY(0) translateX(0);
+            }
+            50% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(50px);
+            }
+        }
+
+        /* Content container */
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            animation: fadeInUp 1.2s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Accent line - decorative */
+        .accent-line {
+            width: 120px;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                var(--gold-accent) 20%, 
+                var(--gold-light) 50%,
+                var(--gold-accent) 80%,
+                transparent);
+            margin: 0 auto 40px;
+            box-shadow: 
+                0 0 20px rgba(255, 189, 89, 0.6),
+                0 0 40px rgba(255, 189, 89, 0.3);
+            position: relative;
+            animation: expandLine 1.5s ease-out 0.5s both;
+        }
+
+        .accent-line::before,
+        .accent-line::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--gold-accent);
+            box-shadow: 0 0 15px var(--gold-accent);
+            animation: dotPulse 2s ease-in-out infinite;
+        }
+
+        .accent-line::before {
+            left: -15px;
+        }
+
+        .accent-line::after {
+            right: -15px;
+            animation-delay: 1s;
+        }
+
+        @keyframes dotPulse {
+            0%, 100% {
+                transform: translateY(-50%) scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: translateY(-50%) scale(1.5);
+                opacity: 0.6;
+            }
+        }
+
+        @keyframes expandLine {
+            from {
+                width: 0;
+                opacity: 0;
+            }
+            to {
+                width: 80px;
+                opacity: 1;
+            }
+        }
+
+        /* Main headline */
+        .hero-headline {
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 40px;
+            color: var(--text-light);
+            letter-spacing: -0.03em;
+            text-shadow: 
+                0 0 20px rgba(255, 189, 89, 0.4),
+                0 5px 15px rgba(0, 0, 0, 0.5);
+            animation: fadeInUp 1.2s ease-out 0.3s both;
+        }
+
+        .hero-headline .highlight {
+            color: var(--gold-accent);
+            position: relative;
+            display: inline-block;
+            filter: drop-shadow(0 0 25px rgba(255, 189, 89, 0.6));
+        }
+
+        .hero-headline .highlight::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background: linear-gradient(90deg, 
+                var(--gold-accent), 
+                var(--gold-light));
+            opacity: 0.25;
+            z-index: -1;
+            filter: blur(15px);
+            transform: scaleX(0);
+            transform-origin: left;
+            animation: underlineExpand 1s ease-out 1.5s both;
+        }
+
+        @keyframes underlineExpand {
+            to {
+                transform: scaleX(1);
+            }
+        }
+
+        /* Subheadline container */
+        .hero-subheadline {
+            max-width: 900px;
+            margin: 0 auto 50px;
+            animation: fadeInUp 1.2s ease-out 0.6s both;
+        }
+
+        /* Pain point questions */
+        .pain-question {
+            font-size: clamp(1.1rem, 2vw, 1.4rem);
+            line-height: 1.7;
+            color: var(--text-cream);
+            margin-bottom: 25px;
+            padding-left: 30px;
+            position: relative;
+            opacity: 0;
+            animation: fadeInLeft 0.8s ease-out forwards;
+        }
+
+        .pain-question:nth-child(1) { animation-delay: 1s; }
+        .pain-question:nth-child(2) { animation-delay: 1.3s; }
+        .pain-question:nth-child(3) { animation-delay: 1.6s; }
+        .pain-question:nth-child(4) { animation-delay: 1.9s; }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Quote mark decoration */
+        .pain-question::before {
+            content: '"';
+            position: absolute;
+            left: 0;
+            top: -5px;
+            font-size: 2rem;
+            color: var(--gold-accent);
+            font-family: Georgia, serif;
+            line-height: 1;
+            filter: drop-shadow(0 0 10px var(--gold-accent));
+        }
+
+        /* Scroll indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 2s both;
+            z-index: 2;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .scroll-text {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--gold-accent);
+            font-weight: 500;
+        }
+
+        .scroll-arrow {
+            width: 24px;
+            height: 40px;
+            border: 2px solid var(--gold-accent);
+            border-radius: 12px;
+            position: relative;
+            box-shadow: 0 0 15px rgba(255, 189, 89, 0.4);
+        }
+
+        .scroll-arrow::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 8px;
+            background: var(--gold-accent);
+            border-radius: 2px;
+            box-shadow: 0 0 10px var(--gold-accent);
+            animation: scrollDown 2s infinite;
+        }
+
+        @keyframes scrollDown {
+            0%, 100% {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+            50% {
+                transform: translateX(-50%) translateY(16px);
+                opacity: 0;
+            }
+        }
+
+        /* Decorative elements */
+        .deco-circle {
+            position: absolute;
+            border: 3px solid;
+            border-radius: 50%;
+            opacity: 0.3;
+            filter: blur(1px);
+        }
+
+        .deco-circle-1 {
+            width: 500px;
+            height: 500px;
+            top: 5%;
+            right: -150px;
+            border-color: var(--gold-accent);
+            box-shadow: 
+                0 0 40px rgba(255, 189, 89, 0.3),
+                inset 0 0 40px rgba(222, 188, 129, 0.2);
+            animation: rotateCircle 30s linear infinite, pulse 4s ease-in-out infinite, float 6s ease-in-out infinite;
+        }
+
+        .deco-circle-2 {
+            width: 350px;
+            height: 350px;
+            bottom: 15%;
+            left: -100px;
+            border-color: var(--gold-light);
+            box-shadow: 
+                0 0 40px rgba(222, 188, 129, 0.3),
+                inset 0 0 40px rgba(255, 189, 89, 0.2);
+            animation: rotateCircle 25s linear infinite reverse, pulse 4s ease-in-out infinite 2s, float 8s ease-in-out infinite 1s;
+        }
+
+        .deco-circle-3 {
+            width: 250px;
+            height: 250px;
+            top: 40%;
+            left: 10%;
+            border-color: var(--gold-accent);
+            box-shadow: 
+                0 0 40px rgba(255, 189, 89, 0.3),
+                inset 0 0 40px rgba(222, 188, 129, 0.2);
+            animation: rotateCircle 20s linear infinite, pulse 4s ease-in-out infinite 1s, float 7s ease-in-out infinite 2s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+            }
+            25% {
+                transform: translateY(-20px) translateX(10px);
+            }
+            50% {
+                transform: translateY(-10px) translateX(-10px);
+            }
+            75% {
+                transform: translateY(-30px) translateX(5px);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.4;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.6;
+                transform: scale(1.08);
+            }
+        }
+
+        @keyframes rotateCircle {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 100px 15px 60px;
+                background-attachment: scroll;
+            }
+
+            .pain-question {
+                padding-left: 25px;
+                margin-bottom: 20px;
+            }
+
+            .deco-circle {
+                display: none;
+            }
+
+            .scroll-indicator {
+                bottom: 30px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-headline {
+                margin-bottom: 30px;
+            }
+
+            .pain-question {
+                font-size: 1rem;
+            }
+
+            .scroll-indicator {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- SECTION 1: HERO -->
+    <section class="hero-section">
+        <!-- Neon grid background -->
+        <div class="neon-grid"></div>
+        
+        <!-- Animated gradient overlay -->
+        <div class="gradient-overlay"></div>
+
+        <!-- Animated particles -->
+        <div class="particles" id="particles"></div>
+
+        <!-- Decorative circles -->
+        <div class="deco-circle deco-circle-1"></div>
+        <div class="deco-circle deco-circle-2"></div>
+        <div class="deco-circle deco-circle-3"></div>
+
+        <!-- Main content -->
+        <div class="hero-content">
+            <div class="accent-line"></div>
+            
+            <h1 class="hero-headline">
+                Tại Sao Bạn Giỏi <span class="highlight">Mọi Thứ...</span><br>
+                Trừ Tình Yêu?
+            </h1>
+
+            <div class="hero-subheadline">
+                <p class="pain-question">
+                    Có phải bạn thành công trong sự nghiệp, nhưng lại lặp đi lặp lại cùng một kịch bản thất bại trong tình yêu?
+                </p>
+                <p class="pain-question">
+                    Có phải bạn xinh đẹp, tài năng, tự lập... nhưng vẫn cảm thấy "thiếu" một điều gì đó sâu bên trong?
+                </p>
+                <p class="pain-question">
+                    Có phải bạn chỉ thu hút được những người không xứng tầm - hoặc người xứng tầm lại không thấy giá trị của bạn?
+                </p>
+                <p class="pain-question">
+                    42 ngày chuyển hóa năng lượng từ bên trong - Hành trình nâng tần số tình yêu lên 540 Hz để thu hút tri kỷ đích thực.
+                </p>
+            </div>
+        </div>
+
+        <!-- Scroll indicator -->
+        <div class="scroll-indicator">
+            <span class="scroll-text">Khám phá</span>
+            <div class="scroll-arrow"></div>
+        </div>
+    </section>
+
+    <script>
+        // Generate animated particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 30;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 6) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('load', createParticles);
+
+        // Parallax effect on scroll
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const heroSection = document.querySelector('.hero-section');
+            if (heroSection) {
+                heroSection.style.backgroundPositionY = scrolled * 0.5 + 'px';
+            }
+        });
+    </script>
+</body>
+</html>

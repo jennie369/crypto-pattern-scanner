@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 5.1: 4 Phong Cách Giao Tiếp | Khóa Tần Số Tình Yêu</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --pink: #FF69B4;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--burgundy); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .highlight-box.purple { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05)); border-color: rgba(106, 91, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.purple { border-left-color: var(--purple); } }
+        .highlight-box.purple .highlight-box-title { color: var(--purple); }
+
+        .highlight-box.cyan { background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 240, 255, 0.05)); border-color: rgba(0, 240, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.cyan { border-left-color: var(--cyan); } }
+        .highlight-box.cyan .highlight-box-title { color: var(--cyan); }
+
+        .highlight-box.green { background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05)); border-color: rgba(0, 200, 83, 0.3); }
+        @media (max-width: 600px) { .highlight-box.green { border-left-color: var(--success); } }
+        .highlight-box.green .highlight-box-title { color: var(--success); }
+
+        .highlight-box.pink { background: linear-gradient(135deg, rgba(255, 105, 180, 0.15), rgba(255, 105, 180, 0.05)); border-color: rgba(255, 105, 180, 0.3); }
+        @media (max-width: 600px) { .highlight-box.pink { border-left-color: var(--pink); } }
+        .highlight-box.pink .highlight-box-title { color: var(--pink); }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .style-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .style-grid { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+
+        .style-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .style-card { border: none; border-radius: 0; padding: var(--space-md) 16px; } }
+        @media (min-width: 601px) { .style-card:hover { transform: translateY(-4px); } }
+        .style-card.passive { border-left: 4px solid var(--cyan); }
+        .style-card.aggressive { border-left: 4px solid var(--error); }
+        .style-card.passive-aggressive { border-left: 4px solid var(--purple); }
+        .style-card.assertive { border-left: 4px solid var(--success); }
+        .style-emoji { font-size: 2rem; margin-bottom: var(--space-sm); }
+        .style-name { font-size: 1.1rem; font-weight: 700; margin-bottom: var(--space-sm); }
+        .style-card.passive .style-name { color: var(--cyan); }
+        .style-card.aggressive .style-name { color: var(--error); }
+        .style-card.passive-aggressive .style-name { color: var(--purple); }
+        .style-card.assertive .style-name { color: var(--success); }
+        .style-desc { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .style-example { font-size: 0.85rem; color: var(--text-muted); font-style: italic; padding: var(--space-sm); background: rgba(0,0,0,0.2); border-radius: var(--radius-md); }
+
+        .comparison-table { margin: var(--space-lg) 0; border-radius: var(--radius-md); overflow: hidden; }
+        @media (max-width: 600px) { .comparison-table { margin: var(--space-md) 0; border-radius: 0; } }
+        .comparison-row { display: grid; grid-template-columns: 1fr 1fr; }
+        @media (max-width: 600px) { .comparison-row { grid-template-columns: 1fr; } }
+        .comparison-header { background: linear-gradient(135deg, var(--navy), var(--navy-dark)); padding: var(--space-md); font-weight: 700; text-align: center; border-bottom: 2px solid var(--glass-border); }
+        .comparison-header.good { border-bottom-color: var(--success); color: var(--success); }
+        .comparison-header.bad { border-bottom-color: var(--error); color: var(--error); }
+        .comparison-cell { padding: var(--space-md); background: var(--bg-card); border-bottom: 1px solid var(--glass-border); color: var(--text-secondary); font-size: 0.9rem; }
+        @media (max-width: 600px) { .comparison-cell { padding: var(--space-sm) 16px; } }
+
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        @media (min-width: 601px) { .flow-step:hover { border-color: var(--gold); transform: translateX(8px); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .faq-item { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .faq-item { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin-bottom: 1px; } }
+        .faq-question { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); }
+        .faq-answer { color: var(--text-secondary); font-size: 0.95rem; }
+
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>💕</span>
+                <span>Module 5</span>
+            </div>
+            <div class="lesson-chapter">Chapter 5 - Nghệ Thuật Quan Hệ Lành Mạnh</div>
+            <h1 class="lesson-title">4 Phong Cách Giao Tiếp</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 5.1</span></div>
+                <div class="meta-item"><span>⏱️</span><span>25 phút đọc</span></div>
+            </div>
+        </header>
+
+        <!-- SECTION 1: Opening Hook -->
+        <section class="section">
+            <h2 class="section-title"><span>💬</span> Khi Lời Nói Trở Thành Vũ Khí Hoặc Cầu Nối</h2>
+
+            <p>Bạn có bao giờ nói một điều gì đó và ngay lập tức hối hận? Hay im lặng nuốt nỗi buồn vào trong rồi bùng nổ sau đó? Tiến sĩ John Gottman - nhà nghiên cứu hôn nhân hàng đầu thế giới - sau 40 năm nghiên cứu hơn 3,000 cặp đôi, đã tìm ra một sự thật gây sốc: ông có thể dự đoán liệu một cặp đôi sẽ ly hôn hay không chỉ sau 15 phút quan sát họ GIAO TIẾP với nhau - với độ chính xác lên đến 94%.</p>
+
+            <p>Giao tiếp không chỉ là trao đổi thông tin - đó là nghệ thuật kết nối hai tâm hồn. Và giống như mọi nghệ thuật, nó có thể được học và trau dồi. Trong bài học này, bạn sẽ khám phá 4 phong cách giao tiếp, nhận diện phong cách hiện tại của mình, và quan trọng nhất - học cách chuyển đổi sang phong cách LÀNH MẠNH nhất.</p>
+
+            <div class="highlight-box pink">
+                <div class="highlight-box-title"><span>💗</span> Học Thuyết Chuyển Hóa Nội Tâm</div>
+                <p>Giao tiếp là sự "phản chiếu" nội tâm. Theo nguyên lý "Trong-Ngoài Tương Ứng", cách bạn giao tiếp với người khác phản ánh cách bạn đối xử với chính mình. Người giao tiếp thụ động thường có lòng tự trọng thấp. Người giao tiếp gây hấn thường đang chạy trốn nỗi đau bên trong. Khi bạn chữa lành nội tâm, cách giao tiếp của bạn tự nhiên trở nên lành mạnh hơn.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m5-communication-intro.png" alt="4 phong cách giao tiếp">
+            </div>
+            <div class="image-caption">Hình 1: 4 phong cách giao tiếp trong các mối quan hệ</div>
+        </section>
+
+        <!-- SECTION 2: Tại Sao Quan Trọng -->
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> Tại Sao Giao Tiếp Quyết Định Tất Cả</h2>
+
+            <p>Trước khi đi vào 4 phong cách, hãy hiểu TẠI SAO giao tiếp lại quan trọng đến vậy trong tình yêu:</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🔬</span> Số Liệu Từ Nghiên Cứu</div>
+                <p>• 65% các cặp đôi ly hôn cho biết "vấn đề giao tiếp" là nguyên nhân chính<br>
+                • Các cặp đôi hạnh phúc có tỷ lệ tương tác tích cực/tiêu cực là 5:1 (Gottman Ratio)<br>
+                • 93% giao tiếp là phi ngôn ngữ (giọng nói, ngôn ngữ cơ thể, ánh mắt)<br>
+                • Chỉ mất 7 giây để một cuộc trò chuyện trở nên căng thẳng do cách nói sai</p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>🎯</span> Giao Tiếp = Tần Số Năng Lượng</div>
+                <p>Mỗi lời nói mang một tần số năng lượng. Lời nói gây hấn, chỉ trích mang tần số thấp (fear, anger). Lời nói yêu thương, tôn trọng mang tần số cao (love, acceptance). Khi hai người giao tiếp, họ đang trao đổi năng lượng - và chất lượng của cuộc trao đổi này quyết định chất lượng của mối quan hệ.</p>
+            </div>
+
+            <p>Tin tốt là: phong cách giao tiếp KHÔNG PHẢI bẩm sinh. Đây là kỹ năng có thể học được. Dù bạn lớn lên trong gia đình có cách giao tiếp không lành mạnh, bạn vẫn có thể thay đổi - và bắt đầu từ hôm nay.</p>
+        </section>
+
+        <!-- SECTION 3: 4 Phong Cách -->
+        <section class="section">
+            <h2 class="section-title"><span>🎭</span> 4 Phong Cách Giao Tiếp</h2>
+
+            <p>Có 4 phong cách giao tiếp cơ bản. Hầu hết mọi người có xu hướng sử dụng một phong cách chính, nhưng có thể chuyển đổi tùy tình huống và đối tượng:</p>
+
+            <div class="style-grid">
+                <div class="style-card passive">
+                    <div class="style-emoji">🐑</div>
+                    <div class="style-name">Passive - Thụ Động</div>
+                    <div class="style-desc">Tránh xung đột bằng mọi giá. Không nói ra nhu cầu của mình. Thường đồng ý với mọi thứ dù không muốn. Để người khác quyết định. Thường nuốt nỗi buồn vào trong và tích tụ oán giận ngầm.</div>
+                    <div class="style-example">"Ừ, tùy anh thôi..." (trong khi thực sự không đồng ý và sau đó ấm ức)</div>
+                </div>
+
+                <div class="style-card aggressive">
+                    <div class="style-emoji">🦁</div>
+                    <div class="style-name">Aggressive - Gây Hấn</div>
+                    <div class="style-desc">Áp đặt ý kiến lên người khác. Không tôn trọng cảm xúc của người khác. Thường đổ lỗi, chỉ trích, la mắng, hoặc sử dụng lời nói làm tổn thương. "Tôi đúng, bạn sai."</div>
+                    <div class="style-example">"Anh/em đúng, cô/anh sai! Tại sao lúc nào cũng thế? Anh/em chán lắm rồi!"</div>
+                </div>
+
+                <div class="style-card passive-aggressive">
+                    <div class="style-emoji">🦊</div>
+                    <div class="style-name">Passive-Aggressive - Thụ Động Gây Hấn</div>
+                    <div class="style-desc">Bên ngoài đồng ý nhưng bên trong tức giận. Thể hiện sự bất mãn bằng cách gián tiếp: im lặng trừng phạt, mỉa mai, "quên" cố ý, sabotage ngầm. Phong cách này khó nhận diện nhất.</div>
+                    <div class="style-example">"Em không có vấn đề gì cả!" (nhưng lạnh nhạt và không nói chuyện 3 ngày)</div>
+                </div>
+
+                <div class="style-card assertive">
+                    <div class="style-emoji">🦅</div>
+                    <div class="style-name">Assertive - Quyết Đoán</div>
+                    <div class="style-desc">Nói rõ nhu cầu và cảm xúc một cách tôn trọng. Lắng nghe quan điểm người khác. Tìm giải pháp win-win. TÔN TRỌNG bản thân VÀ đối phương. Đây là phong cách LÀNH MẠNH nhất.</div>
+                    <div class="style-example">"Em cảm thấy buồn khi anh về muộn mà không báo. Em cần biết để không lo lắng. Lần sau anh có thể nhắn tin được không?"</div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m5-4-styles-overview.png" alt="So sánh 4 phong cách">
+            </div>
+            <div class="image-caption">Hình 2: So sánh trực quan 4 phong cách giao tiếp</div>
+        </section>
+
+        <!-- SECTION 4: Ví Dụ Thực Tế -->
+        <section class="section">
+            <h2 class="section-title"><span>👥</span> Câu Chuyện Thực Tế</h2>
+
+            <p>Phong cách giao tiếp ảnh hưởng đến mối quan hệ như thế nào? Đây là hai câu chuyện từ học viên:</p>
+
+            <div class="highlight-box pink">
+                <div class="highlight-box-title"><span>🌸</span> Thảo - 33 Tuổi, Passive-Aggressive → Assertive</div>
+                <p>Thảo từng là "master" của im lặng trừng phạt. "Mỗi khi bạn trai làm điều gì khiến tôi buồn, tôi không nói thẳng - tôi im lặng, trả lời cộc lốc, và chờ anh ấy tự nhận ra. Đôi khi mất cả tuần. Khi học về giao tiếp Assertive, tôi nhận ra mình đang 'trừng phạt' anh ấy vì điều anh ấy không biết! Lần đầu tiên tôi thử I-Statement, tay run bần bật: 'Anh ơi, khi anh hủy hẹn phút chót hôm qua mà không giải thích, em cảm thấy không được ưu tiên. Em cần biết kế hoạch để sắp xếp. Lần sau anh có thể báo sớm hơn được không?' Anh ấy im lặng một lúc rồi nói: 'Cảm ơn em vì nói ra. Anh không biết em cảm thấy vậy.' Đó là bước ngoặt trong mối quan hệ của chúng tôi."</p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>💙</span> Quang - 40 Tuổi, Aggressive → Assertive</div>
+                <p>Quang lớn lên trong gia đình mà cha hay la mắng. "Tôi học được rằng để được lắng nghe, phải nói to hơn. Khi vợ làm điều gì tôi không thích, phản ứng tự động của tôi là chỉ trích, đổ lỗi. 'Tại sao em lúc nào cũng thế?' 'Em không bao giờ nghĩ đến tôi!' Vợ tôi thu mình lại, không nói gì - và điều đó càng khiến tôi tức giận hơn. Khi học về Assertive, tôi nhận ra: tôi đang la mắng vì tôi KHÔNG BIẾT CÁCH thể hiện cảm xúc khác. Tôi tập từng ngày - hít thở sâu trước khi nói, dùng 'Anh cảm thấy...' thay vì 'Em lúc nào cũng...'. Khó vô cùng. Nhưng sau 3 tháng, vợ tôi bắt đầu mở lòng trở lại. Cô ấy nói: 'Em thấy anh thay đổi. Em tin tưởng anh hơn.' Đó là phần thưởng lớn nhất."</p>
+            </div>
+
+            <p>Điểm chung của cả hai câu chuyện: thay đổi phong cách giao tiếp KHÔNG DỄ - nhưng hoàn toàn CÓ THỂ làm được. Và kết quả xứng đáng với nỗ lực.</p>
+        </section>
+
+        <!-- SECTION 5: Assertive Chi Tiết -->
+        <section class="section">
+            <h2 class="section-title"><span>✅</span> Assertive - Phong Cách Vàng</h2>
+
+            <p>Assertive (Quyết Đoán) là phong cách giao tiếp lành mạnh nhất - và đây là TIN TỐT: đây là kỹ năng có thể học được!</p>
+
+            <div class="highlight-box green">
+                <div class="highlight-box-title"><span>🌟</span> Đặc Điểm Của Người Assertive</div>
+                <p>• Nói "không" khi cần mà không cảm thấy tội lỗi<br>
+                • Thể hiện cảm xúc một cách bình tĩnh và rõ ràng<br>
+                • Lắng nghe và tôn trọng quan điểm người khác (dù không đồng ý)<br>
+                • Không đổ lỗi, không chỉ trích nhân cách - chỉ nói về hành vi cụ thể<br>
+                • Tập trung vào giải pháp thay vì ai đúng ai sai<br>
+                • Sử dụng "I statements" thay vì "You statements"<br>
+                • Tôn trọng bản thân VÀ tôn trọng đối phương cùng lúc</p>
+            </div>
+
+            <div class="comparison-table">
+                <div class="comparison-row">
+                    <div class="comparison-header bad">❌ "You Statement" (Đổ Lỗi)</div>
+                    <div class="comparison-header good">✅ "I Statement" (Assertive)</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-cell">"Anh lúc nào cũng về muộn!"</div>
+                    <div class="comparison-cell">"Em cảm thấy lo lắng khi anh về muộn mà không báo."</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-cell">"Em không bao giờ lắng nghe!"</div>
+                    <div class="comparison-cell">"Anh cảm thấy không được lắng nghe khi em nhìn điện thoại lúc anh đang nói."</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-cell">"Tại sao anh hay quên thế?"</div>
+                    <div class="comparison-cell">"Em cần sự tin cậy về việc anh nhớ những cam kết của chúng ta."</div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m5-assertive-details.png" alt="Phong cách Assertive">
+            </div>
+            <div class="image-caption">Hình 3: I-Statement - Công thức giao tiếp quyết đoán</div>
+        </section>
+
+        <!-- SECTION 6: Công Thức I-Statement -->
+        <section class="section">
+            <h2 class="section-title"><span>📝</span> Công Thức I-Statement</h2>
+
+            <p>I-Statement là công cụ giao tiếp assertive mạnh mẽ nhất. Thay vì đổ lỗi cho đối phương (You Statement), bạn tập trung vào cảm xúc và nhu cầu của MÌNH. Công thức gồm 4 phần:</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Mô Tả Hành Vi (Không Phán Xét)</div>
+                        <div class="flow-step-desc">"Khi anh/em [hành vi cụ thể]..." - Mô tả hành vi bạn quan sát được, không phán xét hay gán nhãn. Tránh: "lúc nào cũng", "không bao giờ". VD: "Khi anh về muộn 2 tiếng mà không báo trước..."</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Nói Cảm Xúc Của Bạn</div>
+                        <div class="flow-step-desc">"...em/anh cảm thấy [cảm xúc]..." - Thể hiện cảm xúc THẬT của bạn. Dùng từ cảm xúc: buồn, lo lắng, thất vọng, tổn thương - KHÔNG dùng "bị coi thường", "bị phớt lờ" (đây là phán xét). VD: "...em cảm thấy lo lắng và buồn..."</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Giải Thích Nhu Cầu</div>
+                        <div class="flow-step-desc">"...vì em/anh cần [nhu cầu]..." - Giải thích nhu cầu đằng sau cảm xúc. VD: "...vì em cần biết anh an toàn và cần được tôn trọng thời gian của mình..."</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Đề Xuất Giải Pháp</div>
+                        <div class="flow-step-desc">"Em/Anh mong muốn [yêu cầu cụ thể]." - Nói rõ bạn muốn gì để cải thiện. Đề xuất giải pháp cụ thể, khả thi. VD: "Lần sau nếu anh bị muộn, anh có thể nhắn tin cho em được không?"</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>💡</span> Ví Dụ Hoàn Chỉnh</div>
+                <p><strong>Tình huống:</strong> Bạn đời quên ngày kỷ niệm.<br><br>
+                <strong>I-Statement:</strong> "Khi anh quên ngày kỷ niệm của chúng ta <em>(hành vi)</em>, em cảm thấy buồn và không được trân trọng <em>(cảm xúc)</em>, vì ngày này rất quan trọng với em và em cần cảm thấy mình đặc biệt với anh <em>(nhu cầu)</em>. Lần sau, em mong anh có thể đặt reminder hoặc chúng ta cùng lên kế hoạch trước nhé? <em>(đề xuất)</em>"</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m5-i-statement-formula.png" alt="Công thức I-Statement">
+            </div>
+            <div class="image-caption">Hình 4: Công thức 4 bước I-Statement</div>
+        </section>
+
+        <!-- SECTION 7: Bài Tập -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Bài Tập Thực Hành</h2>
+
+            <p>Hãy thử chuyển đổi những câu sau từ phong cách không lành mạnh sang Assertive:</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📌</span> Tình Huống 1: Aggressive → Assertive</div>
+                <p><strong>❌ Aggressive:</strong> "Anh lúc nào cũng chỉ nghĩ đến bản thân! Anh ích kỷ quá!"<br><br>
+                <strong>✅ Assertive:</strong> "Khi anh đưa ra quyết định mua xe mà không hỏi ý em, em cảm thấy bị gạt ra ngoài và không được tôn trọng, vì em cũng muốn có tiếng nói trong những quyết định lớn của gia đình. Những quyết định quan trọng như vậy, chúng ta có thể bàn bạc trước được không?"</p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>📌</span> Tình Huống 2: Passive → Assertive</div>
+                <p><strong>❌ Passive:</strong> "Dạ vâng... tùy anh..." (trong khi thực sự không muốn, rồi ấm ức trong lòng)<br><br>
+                <strong>✅ Assertive:</strong> "Em hiểu anh muốn đi du lịch cuối tuần này, và em cũng thích ý tưởng đó. Nhưng hiện tại em đang có deadline quan trọng và cần nghỉ ngơi để hoàn thành. Chúng ta có thể dời lại tuần sau được không? Hoặc anh có thể đi với bạn bè, em sẽ đi cùng lần sau?"</p>
+            </div>
+
+            <div class="highlight-box" style="background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05)); border-color: rgba(106, 91, 255, 0.3);">
+                <div class="highlight-box-title" style="color: var(--purple);"><span>📌</span> Tình Huống 3: Passive-Aggressive → Assertive</div>
+                <p><strong>❌ Passive-Aggressive:</strong> "Ừ, không sao đâu." (rồi im lặng trừng phạt 3 ngày, trả lời cộc lốc)<br><br>
+                <strong>✅ Assertive:</strong> "Thật ra em có hơi buồn vì chuyện vừa rồi - khi anh nói chuyện với cô bạn đó cả buổi tối mà quên em ngồi bên cạnh. Em cần thời gian để sắp xếp cảm xúc, nhưng em muốn nói chuyện với anh tối nay để giải quyết. Anh có thời gian không?"</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m5-practice-scenarios.png" alt="Bài tập thực hành">
+            </div>
+            <div class="image-caption">Hình 5: Chuyển đổi từ giao tiếp không lành mạnh sang Assertive</div>
+        </section>
+
+        <!-- SECTION 8: FAQ -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">Assertive có phải là "quá thẳng thắn" và có thể làm người khác khó chịu?</div>
+                <div class="faq-answer">Không! Assertive KHÔNG phải nói thẳng một cách thô lỗ. Assertive là nói thẳng một cách TÔN TRỌNG. Sự khác biệt nằm ở cách nói: thay vì đổ lỗi ("Anh sai rồi!"), bạn chia sẻ cảm xúc ("Em cảm thấy buồn khi..."). Người nhận không cảm thấy bị tấn công mà cảm thấy được chia sẻ.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Tôi quen giao tiếp passive từ nhỏ - có thể thay đổi không?</div>
+                <div class="faq-answer">Hoàn toàn có thể! Phong cách giao tiếp là thói quen - và mọi thói quen đều có thể thay đổi với sự luyện tập có ý thức. Bắt đầu từ những tình huống nhỏ: nói "không" với điều nhỏ, thể hiện ý kiến trong cuộc trò chuyện thường ngày. Dần dần, não sẽ tạo "đường mòn thần kinh" mới cho cách giao tiếp assertive.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Nếu tôi assertive mà đối phương vẫn aggressive thì sao?</div>
+                <div class="faq-answer">Bạn không thể kiểm soát cách người khác phản ứng - nhưng bạn có thể kiểm soát cách bạn giao tiếp. Nếu đối phương aggressive, hãy bình tĩnh nói: "Anh/em hiểu là anh/em đang khó chịu. Nhưng em cần chúng ta nói chuyện trong bình tĩnh để giải quyết vấn đề. Chúng ta có thể nói chuyện lại khi cả hai bình tĩnh hơn không?" Đây cũng là assertive - đặt ranh giới cho cuộc trò chuyện.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">I-Statement nghe có vẻ "kịch" và không tự nhiên?</div>
+                <div class="faq-answer">Ban đầu sẽ cảm thấy vậy - giống như học bất kỳ kỹ năng mới nào! Khi mới học đi xe đạp, bạn cũng cảm thấy "không tự nhiên". Nhưng sau khi luyện tập, nó trở thành phản xạ. Không cần theo công thức cứng nhắc - điều quan trọng là TƯ DUY: tập trung vào cảm xúc và nhu cầu của mình thay vì đổ lỗi cho người khác.</div>
+            </div>
+
+            <div class="summary-box">
+                <h3 class="summary-title"><span>📌</span> Tóm Tắt Bài Học</h3>
+                <ul class="summary-list">
+                    <li>4 phong cách giao tiếp: Passive (Thụ Động), Aggressive (Gây Hấn), Passive-Aggressive, Assertive (Quyết Đoán)</li>
+                    <li>Assertive là phong cách lành mạnh nhất - tôn trọng bản thân VÀ đối phương</li>
+                    <li>Sử dụng "I-Statement" thay vì "You-Statement" để tránh đổ lỗi</li>
+                    <li>Công thức I-Statement: Hành vi + Cảm xúc + Nhu cầu + Đề xuất giải pháp</li>
+                    <li>Phong cách giao tiếp là thói quen - có thể thay đổi với luyện tập có ý thức</li>
+                    <li>Bắt đầu từ tình huống nhỏ, dần dần áp dụng cho tình huống khó hơn</li>
+                </ul>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>

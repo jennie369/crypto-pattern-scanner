@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 3: Hành Trình Chuyển Hóa 49 Ngày - GEM Academy</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Noto+Sans+Display:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ═══════════════════════════════════════════════════════════
+           CSS VARIABLES - GEM Design System
+           ═══════════════════════════════════════════════════════════ */
+        :root {
+            --primary-burgundy: #9C0612;
+            --primary-dark: #640A0C;
+            --bg-burgundy: #6B0F1A;
+            --blood-red: #3D0606;
+            --gold-accent: #FFBD59;
+            --gold-light: #DEBC81;
+            --cyan-accent: #00F0FF;
+            --green-success: #10B981;
+            --text-light: #FFFFFF;
+            --text-cream: #F5E6D3;
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            color: var(--text-light);
+            line-height: 1.7;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           SECTION 3: TRANSFORMATION - Burgundy → Blood Red
+           ═══════════════════════════════════════════════════════════ */
+        .section-3 {
+            background: linear-gradient(180deg,
+                #6B0F1A 0%,
+                #7C0B1B 12.5%,
+                #8C0616 25%,
+                #9C0612 37.5%,
+                #A00510 50%,
+                #8C0616 62.5%,
+                #640A0C 75%,
+                #540808 87.5%,
+                #3D0606 100%
+            );
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+            padding: 80px 0;
+        }
+
+        /* Battle Pulse Effect */
+        .section-3::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center, rgba(156, 6, 18, 0.15) 0%, transparent 70%);
+            animation: battlePulse 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes battlePulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.7; }
+        }
+
+        .section-3::after {
+            content: '';
+            position: absolute;
+            top: 30%;
+            right: -100px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255, 189, 89, 0.15) 0%, transparent 70%);
+            filter: blur(100px);
+            pointer-events: none;
+        }
+
+        /* Container */
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Section Header */
+        .section-header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 0 16px;
+        }
+
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, rgba(255,189,89,0.3), rgba(156,6,18,0.3));
+            border: 2px solid var(--gold-accent);
+            color: var(--gold-accent);
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .section-badge svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: clamp(1.8rem, 4.5vw, 3rem);
+            font-weight: 900;
+            color: var(--text-light);
+            line-height: 1.2;
+            margin-bottom: 16px;
+        }
+
+        .section-title .highlight {
+            color: var(--gold-accent);
+        }
+
+        .section-subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            color: var(--text-cream);
+            font-weight: 400;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        /* Timeline Section */
+        .timeline-section {
+            margin: 50px 0;
+        }
+
+        .timeline-title {
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            text-align: center;
+            margin-bottom: 32px;
+            padding: 0 16px;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 0;
+        }
+
+        /* Timeline Line */
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, 
+                var(--primary-burgundy) 0%,
+                var(--gold-accent) 50%,
+                var(--green-success) 100%
+            );
+        }
+
+        .timeline-item {
+            position: relative;
+            padding: 20px 20px 20px 56px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(15px);
+            border-left: 4px solid transparent;
+            margin-bottom: 1px;
+            transition: all 0.4s ease;
+        }
+
+        .timeline-item:hover {
+            background: rgba(0, 0, 0, 0.6);
+            border-left-color: var(--gold-accent);
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 10px;
+            top: 24px;
+            width: 24px;
+            height: 24px;
+            background: var(--primary-burgundy);
+            border: 3px solid var(--gold-accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .timeline-dot span {
+            font-family: var(--font-heading);
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+        }
+
+        .timeline-week {
+            font-family: var(--font-heading);
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--cyan-accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .timeline-module {
+            font-family: var(--font-heading);
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 6px;
+        }
+
+        .timeline-desc {
+            font-size: 0.9rem;
+            color: var(--text-cream);
+            line-height: 1.6;
+        }
+
+        /* Image Placeholder */
+        .image-wrapper {
+            width: 100%;
+            margin: 40px 0;
+        }
+
+        .image-placeholder {
+            width: 100%;
+            aspect-ratio: 16/10;
+            background: linear-gradient(135deg, rgba(156,6,18,0.3), rgba(61,6,6,0.5));
+            border-left: 4px solid var(--gold-accent);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            color: var(--text-cream);
+        }
+
+        .image-placeholder svg {
+            width: 56px;
+            height: 56px;
+            opacity: 0.5;
+        }
+
+        .image-placeholder .img-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .image-placeholder .img-desc {
+            font-size: 0.75rem;
+            opacity: 0.6;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        /* Before/After Comparison */
+        .comparison-section {
+            margin: 60px 0;
+        }
+
+        .comparison-title {
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            text-align: center;
+            margin-bottom: 32px;
+            padding: 0 16px;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1px;
+            background: rgba(255, 189, 89, 0.2);
+        }
+
+        .comparison-card {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            padding: 28px 20px;
+        }
+
+        .comparison-card.before {
+            border-left: 4px solid var(--primary-burgundy);
+        }
+
+        .comparison-card.after {
+            border-left: 4px solid var(--green-success);
+        }
+
+        .comparison-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-heading);
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            padding: 8px 16px;
+            border-radius: 50px;
+        }
+
+        .comparison-card.before .comparison-label {
+            background: rgba(156, 6, 18, 0.4);
+            color: #FF6B6B;
+        }
+
+        .comparison-card.after .comparison-label {
+            background: rgba(16, 185, 129, 0.3);
+            color: var(--green-success);
+        }
+
+        .comparison-label svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .comparison-list {
+            list-style: none;
+        }
+
+        .comparison-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+            font-size: 0.95rem;
+            color: var(--text-cream);
+            line-height: 1.6;
+        }
+
+        .comparison-list li svg {
+            width: 20px;
+            height: 20px;
+            min-width: 20px;
+            margin-top: 2px;
+        }
+
+        .comparison-card.before .comparison-list li svg {
+            color: #FF6B6B;
+        }
+
+        .comparison-card.after .comparison-list li svg {
+            color: var(--green-success);
+        }
+
+        /* 7 Tầng Tâm Thức */
+        .consciousness-section {
+            margin: 60px 0;
+        }
+
+        .consciousness-title {
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            text-align: center;
+            margin-bottom: 16px;
+            padding: 0 16px;
+        }
+
+        .consciousness-intro {
+            font-size: 1rem;
+            color: var(--text-cream);
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 32px;
+            padding: 0 16px;
+            line-height: 1.8;
+        }
+
+        .consciousness-levels {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1px;
+            background: rgba(255, 189, 89, 0.15);
+        }
+
+        .level-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .level-card:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .level-badge {
+            width: 56px;
+            height: 56px;
+            min-width: 56px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-heading);
+        }
+
+        .level-badge .level-num {
+            font-size: 1.2rem;
+            font-weight: 900;
+        }
+
+        .level-badge .level-hz {
+            font-size: 0.6rem;
+            opacity: 0.8;
+        }
+
+        .level-1 { background: linear-gradient(135deg, #2D2D2D, #1A1A1A); color: #888; }
+        .level-2 { background: linear-gradient(135deg, #4A1A4F, #2A0A2F); color: #9B59B6; }
+        .level-3 { background: linear-gradient(135deg, #8B0000, #5C0000); color: #FF6B6B; }
+        .level-4 { background: linear-gradient(135deg, #F39C12, #D68910); color: #FFF; }
+        .level-5 { background: linear-gradient(135deg, #27AE60, #1E8449); color: #FFF; }
+        .level-6 { background: linear-gradient(135deg, #3498DB, #2980B9); color: #FFF; }
+        .level-7 { background: linear-gradient(135deg, #FFBD59, #F1C40F); color: #1A1A1A; }
+
+        .level-content h4 {
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+
+        .level-content p {
+            font-size: 0.85rem;
+            color: var(--text-cream);
+            line-height: 1.5;
+        }
+
+        /* Target Highlight */
+        .level-card.target {
+            background: rgba(255, 189, 89, 0.15);
+            border-left: 4px solid var(--gold-accent);
+        }
+
+        .target-badge {
+            font-size: 0.65rem;
+            background: var(--gold-accent);
+            color: #1A1A1A;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 700;
+            margin-left: 8px;
+        }
+
+        /* Promise Box */
+        .promise-box {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 189, 89, 0.3);
+            padding: 32px 20px;
+            margin: 50px 0;
+            text-align: center;
+        }
+
+        .promise-box h3 {
+            font-family: var(--font-heading);
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .promise-box h3 svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .promise-box p {
+            font-size: 1rem;
+            color: var(--text-cream);
+            line-height: 1.8;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* CTA Section */
+        .section-cta {
+            text-align: center;
+            padding: 40px 16px;
+        }
+
+        .btn-cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px 36px;
+            background: linear-gradient(135deg, var(--gold-accent), var(--gold-light));
+            color: var(--primary-dark);
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 40px rgba(255, 189, 89, 0.3);
+        }
+
+        .btn-cta:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(255, 189, 89, 0.5);
+        }
+
+        .btn-cta svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Responsive */
+        @media (min-width: 600px) {
+            .section-3 {
+                padding: 100px 40px;
+            }
+
+            .timeline::before {
+                left: 30px;
+            }
+
+            .timeline-item {
+                padding-left: 76px;
+            }
+
+            .timeline-dot {
+                left: 20px;
+                width: 28px;
+                height: 28px;
+            }
+
+            .image-placeholder {
+                border-radius: 16px;
+                border-left: none;
+                border: 2px solid rgba(255, 189, 89, 0.2);
+            }
+
+            .comparison-card {
+                padding: 36px;
+                border-left: none;
+                border-radius: 0;
+            }
+
+            .comparison-card.before {
+                border-bottom: 4px solid var(--primary-burgundy);
+            }
+
+            .comparison-card.after {
+                border-bottom: 4px solid var(--green-success);
+            }
+
+            .promise-box {
+                border-radius: 16px;
+                padding: 40px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .comparison-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .comparison-card.before,
+            .comparison-card.after {
+                border-bottom: none;
+            }
+
+            .comparison-card.before {
+                border-right: 4px solid var(--primary-burgundy);
+            }
+
+            .comparison-card.after {
+                border-left: 4px solid var(--green-success);
+            }
+        }
+
+        @media (min-width: 968px) {
+            .section-3 {
+                padding: 100px 60px;
+            }
+
+            .consciousness-levels {
+                border-radius: 16px;
+                overflow: hidden;
+            }
+
+            .comparison-grid {
+                border-radius: 16px;
+                overflow: hidden;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 3: TRANSFORMATION - HÀNH TRÌNH 49 NGÀY CHUYỂN HÓA
+     Gradient: Burgundy #6B0F1A → Blood Red #3D0606
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<section class="section-3" id="transformation">
+    <div class="container">
+        
+        <!-- Section Header -->
+        <div class="section-header">
+            <div class="section-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/>
+                </svg>
+                CHUYỂN HÓA
+            </div>
+            <h2 class="section-title">
+                Hành Trình <span class="highlight">49 Ngày</span>
+                <br>Từ Thiếu Thốn Đến Thịnh Vượng
+            </h2>
+            <p class="section-subtitle">
+                Mỗi tuần là một bước tiến quan trọng trong hành trình chuyển hóa tư duy về tiền bạc, 
+                được thiết kế khoa học để đảm bảo sự thay đổi bền vững từ gốc rễ tiềm thức.
+            </p>
+        </div>
+
+        <!-- Timeline -->
+        <div class="timeline-section">
+            <h3 class="timeline-title">Lộ Trình 7 Tuần Chuyển Hóa</h3>
+            
+            <div class="timeline">
+                
+                <!-- Week 1 -->
+                <div class="timeline-item">
+                    <div class="timeline-dot"><span>1</span></div>
+                    <div class="timeline-week">Tuần 1 - Ngày 1-9</div>
+                    <div class="timeline-module">Khởi Đầu & Thanh Tẩy</div>
+                    <div class="timeline-desc">
+                        Bạn sẽ khám phá câu chuyện tiền bạc của mình, nhận diện 7 khối cản trở thu hút, 
+                        và bắt đầu quá trình thanh tẩy những niềm tin giới hạn đã ăn sâu vào tiềm thức.
+                    </div>
+                </div>
+
+                <!-- Week 2 -->
+                <div class="timeline-item">
+                    <div class="timeline-dot"><span>2</span></div>
+                    <div class="timeline-week">Tuần 2 - Ngày 10-16</div>
+                    <div class="timeline-module">Hóa Giải Nghiệp Tiền Bạc</div>
+                    <div class="timeline-desc">
+                        Khám phá bản đồ nghiệp tiền của gia đình, thực hiện nghi thức tha thứ và cắt dây nghiệp, 
+                        chuyển hóa những gánh nặng tài chính từ quá khứ thành nguồn phước lành cho tương lai.
+                    </div>
+                </div>
+
+                <!-- Week 3 -->
+                <div class="timeline-item">
+                    <div class="timeline-dot"><span>3</span></div>
+                    <div class="timeline-week">Tuần 3 - Ngày 17-23</div>
+                    <div class="timeline-module">Cài Đặt Tần Số Thịnh Vượng</div>
+                    <div class="timeline-desc">
+                        Học cách di chuyển lên thang cảm xúc, viết lại câu chuyện tiền bạc mới, thực hành 
+                        affirmations và visualization để nâng tần số tiềm thức lên mức thịnh vượng.
+                    </div>
+                </div>
+
+                <!-- Week 4 -->
+                <div class="timeline-item">
+                    <div class="timeline-dot"><span>4</span></div>
+                    <div class="timeline-week">Tuần 4 - Ngày 24-30</div>
+                    <div class="timeline-module">Xây Dựng Nghi Thức Triệu Phú</div>
+                    <div class="timeline-desc">
+                        Thiết lập nghi thức buổi sáng 15 phút, thực hành biết ơn tài chính, học quy tắc 
+                        PAUSE trước khi chi tiêu, và tạo thói quen review tài chính mỗi ngày.
+                    </div>
+                </div>
+
+                <!-- Week 5 -->
+                <div class="timeline-item">
+                    <div class="timeline-dot"><span>5</span></div>
+                    <div class="timeline-week">Tuần 5 - Ngày 31-37</div>
+                    <div class="timeline-module">Hành Động Thuận Thiên</div>
+                    <div class="timeline-desc">
+                        Phân biệt hành động thuận dòng và cưỡng ép, khám phá Ikigai cá nhân, tìm hiểu 7 
+                        nguồn thu nhập, và xây dựng hệ thống quản lý tài chính cơ bản 6 lọ.
+                    </div>
+                </div>
+
+                <!-- Week 6 -->
+                <div class="timeline-item">
+                    <div class="timeline-dot"><span>6</span></div>
+                    <div class="timeline-week">Tuần 6 - Ngày 38-44</div>
+                    <div class="timeline-module">Nhân Rộng Thịnh Vượng</div>
+                    <div class="timeline-desc">
+                        Học cách duy trì tần số cao, xử lý khi tần số rớt, xây dựng cộng đồng thịnh vượng, 
+                        và review toàn bộ hành trình 49 ngày để củng cố kết quả đạt được.
+                    </div>
+                </div>
+
+                <!-- Week 7 -->
+                <div class="timeline-item">
+                    <div class="timeline-dot"><span>7</span></div>
+                    <div class="timeline-week">Tuần 7 - Ngày 45-49</div>
+                    <div class="timeline-module">Sứ Mệnh Phụng Sự</div>
+                    <div class="timeline-desc">
+                        Chuyển hóa bản sắc từ người nhận thành người cho đi, khám phá cơ hội đối tác để 
+                        vừa lan tỏa giá trị vừa tạo thu nhập thụ động từ hành trình tâm linh.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Image Placeholder 1 -->
+        <div class="image-wrapper">
+            <div class="image-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <span class="img-name">transformation-timeline-49-days.png (800x500)</span>
+                <span class="img-desc">Hình ảnh: Roadmap 7 tuần với icons, gradient từ đỏ sang vàng, milestones nổi bật</span>
+            </div>
+        </div>
+
+        <!-- Before/After Comparison -->
+        <div class="comparison-section">
+            <h3 class="comparison-title">Sự Khác Biệt Rõ Ràng Trước và Sau 49 Ngày</h3>
+            
+            <div class="comparison-grid">
+                
+                <!-- Before -->
+                <div class="comparison-card before">
+                    <div class="comparison-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="15" y1="9" x2="9" y2="15"/>
+                            <line x1="9" y1="9" x2="15" y2="15"/>
+                        </svg>
+                        Trước Khóa Học
+                    </div>
+                    <ul class="comparison-list">
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="15" y1="9" x2="9" y2="15"/>
+                                <line x1="9" y1="9" x2="15" y2="15"/>
+                            </svg>
+                            <span>Lo lắng về tiền bạc mỗi ngày, mất ngủ vì suy nghĩ về hóa đơn và nợ nần chưa trả</span>
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="15" y1="9" x2="9" y2="15"/>
+                                <line x1="9" y1="9" x2="15" y2="15"/>
+                            </svg>
+                            <span>Tiền vào rồi tiền ra, không hiểu tại sao không thể tiết kiệm được dù đã cố gắng</span>
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="15" y1="9" x2="9" y2="15"/>
+                                <line x1="9" y1="9" x2="15" y2="15"/>
+                            </svg>
+                            <span>Cảm thấy bất lực và tự trách mình không đủ giỏi trong việc kiếm tiền</span>
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="15" y1="9" x2="9" y2="15"/>
+                                <line x1="9" y1="9" x2="15" y2="15"/>
+                            </svg>
+                            <span>Sợ hãi khi nghĩ đến tương lai, không dám mơ ước lớn vì thiếu niềm tin</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- After -->
+                <div class="comparison-card after">
+                    <div class="comparison-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                        Sau 49 Ngày
+                    </div>
+                    <ul class="comparison-list">
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span>Bình an với tài chính, ngủ ngon giấc và thức dậy với năng lượng tích cực mỗi sáng</span>
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span>Có hệ thống quản lý tiền rõ ràng, tiền tự động được phân bổ vào đúng nơi</span>
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span>Tự tin và yêu thương bản thân, biết mình xứng đáng được thịnh vượng</span>
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span>Hào hứng với tương lai, có mục tiêu tài chính rõ ràng và kế hoạch đạt được</span>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Image Placeholder 2 -->
+        <div class="image-wrapper">
+            <div class="image-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <span class="img-name">before-after-mindset.png (800x500)</span>
+                <span class="img-desc">Hình ảnh: Chia đôi trái/phải - Trái: người buồn với ví rỗng, Phải: người vui với ánh sáng vàng</span>
+            </div>
+        </div>
+
+        <!-- 7 Tầng Tâm Thức -->
+        <div class="consciousness-section">
+            <h3 class="consciousness-title">7 Tầng Tâm Thức Về Tiền Bạc</h3>
+            <p class="consciousness-intro">
+                Mỗi người đang ở một tầng tâm thức khác nhau về tiền bạc. Khóa học này sẽ giúp bạn 
+                di chuyển từ tầng hiện tại lên tầng Sáng Tạo, nơi bạn trở thành người nam châm sống thu hút thịnh vượng.
+            </p>
+
+            <div class="consciousness-levels">
+                
+                <div class="level-card">
+                    <div class="level-badge level-1">
+                        <span class="level-num">1</span>
+                        <span class="level-hz">20Hz</span>
+                    </div>
+                    <div class="level-content">
+                        <h4>Tầng Xấu Hổ</h4>
+                        <p>Cảm thấy tội lỗi và xấu hổ về tiền bạc, né tránh mọi cuộc trò chuyện về tài chính.</p>
+                    </div>
+                </div>
+
+                <div class="level-card">
+                    <div class="level-badge level-2">
+                        <span class="level-num">2</span>
+                        <span class="level-hz">100Hz</span>
+                    </div>
+                    <div class="level-content">
+                        <h4>Tầng Sợ Hãi</h4>
+                        <p>Sống trong lo lắng thường trực về tiền, sợ mất việc, sợ không đủ tiền sống.</p>
+                    </div>
+                </div>
+
+                <div class="level-card">
+                    <div class="level-badge level-3">
+                        <span class="level-num">3</span>
+                        <span class="level-hz">175Hz</span>
+                    </div>
+                    <div class="level-content">
+                        <h4>Tầng Tức Giận</h4>
+                        <p>Giận dữ với người giàu, với hệ thống, với chính mình vì không kiếm được tiền.</p>
+                    </div>
+                </div>
+
+                <div class="level-card">
+                    <div class="level-badge level-4">
+                        <span class="level-num">4</span>
+                        <span class="level-hz">250Hz</span>
+                    </div>
+                    <div class="level-content">
+                        <h4>Tầng Trung Lập</h4>
+                        <p>Chấp nhận thực tại, không còn phản ứng tiêu cực nhưng cũng chưa có động lực thay đổi.</p>
+                    </div>
+                </div>
+
+                <div class="level-card">
+                    <div class="level-badge level-5">
+                        <span class="level-num">5</span>
+                        <span class="level-hz">310Hz</span>
+                    </div>
+                    <div class="level-content">
+                        <h4>Tầng Sẵn Sàng</h4>
+                        <p>Bắt đầu có ý chí học hỏi và thay đổi, sẵn sàng đầu tư vào bản thân để phát triển.</p>
+                    </div>
+                </div>
+
+                <div class="level-card target">
+                    <div class="level-badge level-6">
+                        <span class="level-num">6</span>
+                        <span class="level-hz">400Hz</span>
+                    </div>
+                    <div class="level-content">
+                        <h4>Tầng Sáng Tạo <span class="target-badge">MỤC TIÊU</span></h4>
+                        <p>Nhìn thấy cơ hội khắp nơi, tạo ra giá trị và tiền bạc chảy đến một cách tự nhiên.</p>
+                    </div>
+                </div>
+
+                <div class="level-card">
+                    <div class="level-badge level-7">
+                        <span class="level-num">7</span>
+                        <span class="level-hz">540Hz+</span>
+                    </div>
+                    <div class="level-content">
+                        <h4>Tầng Cho Đi</h4>
+                        <p>Thịnh vượng dư dả, niềm vui đến từ việc cho đi và giúp người khác cũng thịnh vượng.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Image Placeholder 3 -->
+        <div class="image-wrapper">
+            <div class="image-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <span class="img-name">7-tang-tam-thuc.png (800x800)</span>
+                <span class="img-desc">Hình ảnh: Thang 7 tầng dọc với gradient màu, tầng 6 được highlight với mũi tên "MỤC TIÊU"</span>
+            </div>
+        </div>
+
+        <!-- Promise Box -->
+        <div class="promise-box">
+            <h3>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <polyline points="9 12 11 14 15 10"/>
+                </svg>
+                Cam Kết Của Chúng Tôi
+            </h3>
+            <p>
+                Sau 49 ngày đồng hành, bạn sẽ không chỉ hiểu lý thuyết mà còn trải nghiệm sự chuyển hóa thực sự 
+                trong cách bạn nghĩ, cảm và hành động với tiền bạc. Nếu bạn thực hành đầy đủ các bài tập và 
+                không cảm thấy bất kỳ thay đổi nào, chúng tôi cam kết hoàn tiền 100% trong vòng 7 ngày đầu tiên.
+            </p>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="section-cta">
+            <a href="#course-content" class="btn-cta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                </svg>
+                Xem Chi Tiết Nội Dung
+            </a>
+        </div>
+
+    </div>
+</section>
+
+</body>
+</html>

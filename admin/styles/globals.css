@@ -1,0 +1,190 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom colors */
+:root {
+  --primary: #FFBD59;
+  --primary-dark: #FF8C00;
+  --bg-dark: #0D1B2A;
+  --bg-light: #1B2838;
+}
+
+/* Base styles */
+body {
+  @apply bg-gray-900 text-white;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-800;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-600 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500;
+}
+
+/* Custom utilities */
+@layer utilities {
+  .bg-gray-750 {
+    background-color: #1f2937;
+  }
+
+  .bg-gray-850 {
+    background-color: #111827;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+/* Animation utilities */
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Form styles */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="search"],
+textarea,
+select {
+  @apply bg-gray-700 border-gray-600 text-white placeholder-gray-400;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="search"]:focus,
+textarea:focus,
+select:focus {
+  @apply ring-2 ring-amber-500 border-transparent;
+}
+
+/* Button styles */
+.btn-primary {
+  @apply px-4 py-2 bg-amber-500 text-gray-900 rounded-lg font-medium hover:bg-amber-400 transition-colors;
+}
+
+.btn-secondary {
+  @apply px-4 py-2 bg-gray-700 text-gray-300 rounded-lg font-medium hover:bg-gray-600 transition-colors;
+}
+
+.btn-danger {
+  @apply px-4 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-400 transition-colors;
+}
+
+/* Card styles */
+.card {
+  @apply bg-gray-800 rounded-xl p-6;
+}
+
+.card-hover {
+  @apply card hover:bg-gray-750 transition-colors cursor-pointer;
+}
+
+/* Badge styles */
+.badge {
+  @apply px-2 py-1 text-xs font-medium rounded-full;
+}
+
+.badge-success {
+  @apply badge bg-green-500/20 text-green-500;
+}
+
+.badge-warning {
+  @apply badge bg-yellow-500/20 text-yellow-500;
+}
+
+.badge-danger {
+  @apply badge bg-red-500/20 text-red-500;
+}
+
+.badge-info {
+  @apply badge bg-blue-500/20 text-blue-500;
+}
+
+/* Chart container */
+.chart-container {
+  @apply bg-gray-800 rounded-xl p-4;
+  min-height: 300px;
+}
+
+/* Table styles */
+.table-wrapper {
+  @apply bg-gray-800 rounded-xl overflow-hidden;
+}
+
+.table-wrapper table {
+  @apply w-full;
+}
+
+.table-wrapper th {
+  @apply px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider bg-gray-900;
+}
+
+.table-wrapper td {
+  @apply px-6 py-4 text-sm text-gray-300;
+}
+
+.table-wrapper tbody tr {
+  @apply border-t border-gray-700 hover:bg-gray-750 transition-colors;
+}
+
+/* Modal styles */
+.modal-backdrop {
+  @apply fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center;
+}
+
+.modal-content {
+  @apply bg-gray-800 rounded-xl shadow-xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto;
+}
+
+.modal-header {
+  @apply p-6 border-b border-gray-700;
+}
+
+.modal-body {
+  @apply p-6;
+}
+
+.modal-footer {
+  @apply p-6 border-t border-gray-700 flex justify-end space-x-3;
+}

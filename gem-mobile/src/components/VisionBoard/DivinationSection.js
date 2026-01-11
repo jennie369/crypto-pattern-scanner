@@ -25,6 +25,7 @@ import {
   ScrollView,
   PanResponder,
   ActivityIndicator,
+  LayoutAnimation,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
@@ -43,8 +44,12 @@ import {
   Calendar,
   BookOpen,
   ArrowLeft,
+  Check,
+  CheckSquare,
+  Square,
 } from 'lucide-react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
+import * as Haptics from 'expo-haptics';
 
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, SHADOWS } from '../../utils/tokens';
 import { getCardImage, getCardImageByName } from '../../assets/tarot';
@@ -77,7 +82,10 @@ const DivinationCard = memo(({
   reading,
   onPress,
   onDelete,
+  onLongPress,
   index,
+  selectionMode = false,
+  isSelected = false,
 }) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -104,6 +112,20 @@ const DivinationCard = memo(({
       toValue: 1,
       useNativeDriver: true,
     }).start();
+  };
+
+  const handleLongPress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    onLongPress?.(reading);
+  };
+
+  const handlePress = () => {
+    if (selectionMode) {
+      // In selection mode, tap toggles selection
+      onLongPress?.(reading);
+    } else {
+      onPress?.(reading);
+    }
   };
 
   // Get display info based on reading type
@@ -171,11 +193,17 @@ const DivinationCard = memo(({
         activeOpacity={0.9}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
-        onPress={() => onPress?.(reading)}
+        onPress={handlePress}
+        onLongPress={handleLongPress}
+        delayLongPress={400}
         style={styles.cardTouchable}
       >
         {/* Card Container with Glassmorphism */}
-        <View style={[styles.card, { borderColor: `${display.color}30` }]}>
+        <View style={[
+          styles.card,
+          { borderColor: `${display.color}30` },
+          isSelected && styles.cardSelected,
+        ]}>
           {/* Full-bleed Image Area */}
           <View style={styles.cardImageArea}>
             {display.image ? (
@@ -228,15 +256,25 @@ const DivinationCard = memo(({
             </View>
           </View>
 
-          {/* Delete button (corner) */}
-          {onDelete && (
-            <TouchableOpacity
-              style={styles.cardDeleteBtn}
-              onPress={() => onDelete(reading?.id)}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              <Trash2 size={14} color="#E74C3C" />
-            </TouchableOpacity>
+          {/* Selection checkbox OR Delete button (corner) */}
+          {selectionMode ? (
+            <View style={[styles.selectionCheckbox, isSelected && styles.selectionCheckboxSelected]}>
+              {isSelected ? (
+                <Check size={14} color="#FFFFFF" />
+              ) : (
+                <View style={styles.selectionCheckboxEmpty} />
+              )}
+            </View>
+          ) : (
+            onDelete && (
+              <TouchableOpacity
+                style={styles.cardDeleteBtn}
+                onPress={() => onDelete(reading)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Trash2 size={14} color="#E74C3C" />
+              </TouchableOpacity>
+            )
           )}
         </View>
       </TouchableOpacity>
@@ -529,7 +567,7 @@ const DivinationDetailModal = memo(({
               <TouchableOpacity
                 style={[styles.actionBtn, styles.actionBtnDanger]}
                 onPress={() => {
-                  onDelete?.(reading?.id);
+                  onDelete?.(reading);
                   onClose?.();
                 }}
               >
@@ -569,6 +607,7 @@ const DivinationSection = memo(({
   onNavigateToTarot,
   onNavigateToIChing,
   onDelete,
+  onDeleteMultiple,
   onCreateRitual,
   loading = false,
 }) => {
@@ -578,6 +617,10 @@ const DivinationSection = memo(({
   const [selectedReading, setSelectedReading] = useState(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [showDetailModal, setShowDetailModal] = useState(false);
+
+  // Multi-select state
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedItems, setSelectedItems] = useState(new Set());
 
   // Animation
   const expandAnim = useRef(new Animated.Value(0)).current;
@@ -633,6 +676,60 @@ const DivinationSection = memo(({
     }
   }, [filteredReadings]);
 
+  // Handle long press to enter selection mode or toggle selection
+  const handleLongPress = useCallback((reading) => {
+    if (!selectionMode) {
+      // Enter selection mode and select this item
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setSelectionMode(true);
+      setSelectedItems(new Set([reading.id]));
+    } else {
+      // Toggle selection
+      setSelectedItems(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(reading.id)) {
+          newSet.delete(reading.id);
+          // Exit selection mode if no items selected
+          if (newSet.size === 0) {
+            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+            setSelectionMode(false);
+          }
+        } else {
+          newSet.add(reading.id);
+        }
+        return newSet;
+      });
+    }
+  }, [selectionMode]);
+
+  // Cancel selection mode
+  const handleCancelSelection = useCallback(() => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setSelectionMode(false);
+    setSelectedItems(new Set());
+  }, []);
+
+  // Delete selected items
+  const handleDeleteSelected = useCallback(() => {
+    if (selectedItems.size === 0) return;
+
+    // Get full reading objects for selected IDs
+    const selectedReadings = filteredReadings.filter(r => selectedItems.has(r.id));
+
+    if (onDeleteMultiple) {
+      onDeleteMultiple(selectedReadings);
+    }
+
+    // Reset selection mode
+    handleCancelSelection();
+  }, [selectedItems, filteredReadings, onDeleteMultiple, handleCancelSelection]);
+
+  // Select all visible items
+  const handleSelectAll = useCallback(() => {
+    const allIds = new Set(filteredReadings.map(r => r.id));
+    setSelectedItems(allIds);
+  }, [filteredReadings]);
+
   // Rotate chevron
   const chevronRotate = rotateAnim.interpolate({
     inputRange: [0, 1],
@@ -663,7 +760,7 @@ const DivinationSection = memo(({
             style={styles.emptyGradient}
           >
             <Sparkles size={32} color="#E91E63" />
-            <Text style={styles.emptyTitle}>Trải bài & Gieo quẻ</Text>
+            <Text style={styles.emptyTitle}>Lịch sử trải bài & Gieo quẻ</Text>
             <Text style={styles.emptySubtitle}>
               Chạm vào đây để bắt đầu trải bài Tarot hoặc gieo quẻ Kinh Dịch
             </Text>
@@ -687,7 +784,7 @@ const DivinationSection = memo(({
           </View>
           <View style={styles.headerTextContainer}>
             <View style={styles.headerTitleRow}>
-              <Text style={styles.headerTitle}>Trải bài & Gieo quẻ</Text>
+              <Text style={styles.headerTitle}>Lịch sử trải bài & Gieo quẻ</Text>
               <View style={styles.countBadge}>
                 <Text style={styles.countBadgeText}>{readings.length}</Text>
               </View>
@@ -706,6 +803,39 @@ const DivinationSection = memo(({
       {/* Expanded Content */}
       {isExpanded && (
         <Animated.View style={styles.expandedContent}>
+          {/* Selection Mode Bar */}
+          {selectionMode && (
+            <View style={styles.selectionBar}>
+              <View style={styles.selectionBarLeft}>
+                <TouchableOpacity
+                  style={styles.selectionBarBtn}
+                  onPress={handleCancelSelection}
+                >
+                  <X size={18} color="#FFFFFF" />
+                </TouchableOpacity>
+                <Text style={styles.selectionBarText}>
+                  {selectedItems.size} đã chọn
+                </Text>
+              </View>
+              <View style={styles.selectionBarRight}>
+                <TouchableOpacity
+                  style={styles.selectionBarBtn}
+                  onPress={handleSelectAll}
+                >
+                  <CheckSquare size={18} color="#FFFFFF" />
+                  <Text style={styles.selectionBarBtnText}>Chọn tất cả</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.selectionBarBtn, styles.selectionBarDeleteBtn]}
+                  onPress={handleDeleteSelected}
+                >
+                  <Trash2 size={18} color="#E74C3C" />
+                  <Text style={[styles.selectionBarBtnText, { color: '#E74C3C' }]}>Xóa</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
           {/* Filter Chips */}
           <View style={styles.filterRow}>
             {FILTER_TYPES.map((filter) => {
@@ -765,6 +895,9 @@ const DivinationSection = memo(({
                   index={index}
                   onPress={handleCardPress}
                   onDelete={onDelete}
+                  onLongPress={handleLongPress}
+                  selectionMode={selectionMode}
+                  isSelected={selectedItems.has(reading?.id)}
                 />
               ))}
 
@@ -1074,6 +1207,78 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  cardSelected: {
+    borderColor: '#E91E63',
+    borderWidth: 2,
+  },
+  selectionCheckbox: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  selectionCheckboxSelected: {
+    backgroundColor: '#E91E63',
+    borderColor: '#E91E63',
+  },
+  selectionCheckboxEmpty: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: 'transparent',
+  },
+
+  // Selection Bar
+  selectionBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(233, 30, 99, 0.2)',
+    borderRadius: 12,
+    padding: SPACING.sm,
+    marginBottom: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(233, 30, 99, 0.4)',
+  },
+  selectionBarLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  selectionBarRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  selectionBarText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: '#FFFFFF',
+  },
+  selectionBarBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  selectionBarBtnText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    color: '#FFFFFF',
+  },
+  selectionBarDeleteBtn: {
+    backgroundColor: 'rgba(231, 76, 60, 0.2)',
   },
 
   // Add New Card

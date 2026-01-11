@@ -1,0 +1,444 @@
+/**
+ * GEM Mobile - Compression & Inducement Onboarding Modal
+ * 3-step educational walkthrough for compression, inducement, and look right
+ *
+ * Phase 2C: Compression + Inducement + Look Right
+ */
+
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Modal,
+  TouchableOpacity,
+  Dimensions,
+  Animated,
+} from 'react-native';
+import {
+  Activity,
+  AlertTriangle,
+  ArrowRight,
+  ChevronRight,
+  ChevronLeft,
+  X,
+  Check,
+  Award,
+  Star,
+  TrendingDown,
+  TrendingUp,
+  Eye,
+} from 'lucide-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { COLORS, SPACING, BORDER_RADIUS } from '../../utils/tokens';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+// Storage key
+const ONBOARDING_KEY = '@gem_compression_inducement_onboarding';
+
+// Onboarding slides
+const SLIDES = [
+  {
+    id: 'compression',
+    title: 'Compression',
+    subtitle: 'Năng lượng tích tụ!',
+    icon: Activity,
+    color: COLORS.gold,
+    content: [
+      'Khi giá nén lại (triangle/wedge) tiến vào zone',
+      'Momentum giảm = Bên còn lại kiệt sức',
+      'Năng lượng tích tụ = Explosive move sắp tới',
+      'High probability reversal!',
+    ],
+    tip: 'Descending Triangle vào LFZ = BULLISH. Ascending Triangle vào HFZ = BEARISH.',
+  },
+  {
+    id: 'inducement',
+    title: 'Inducement / Stop Hunt',
+    subtitle: 'Smart Money in action!',
+    icon: AlertTriangle,
+    color: COLORS.error,
+    content: [
+      'Smart Money grab liquidity trước khi move',
+      '1. Giá break qua S/R tạm thời',
+      '2. Kích hoạt stop loss của retail',
+      '3. SM absorb liquidity → Đảo chiều mạnh',
+    ],
+    tip: 'Wick dài + close ngược lại = Inducement. Đợi reversal confirmation trước khi entry!',
+  },
+  {
+    id: 'look_right',
+    title: 'Look To The Right',
+    subtitle: 'Xác nhận zone còn valid!',
+    icon: ArrowRight,
+    color: COLORS.success,
+    content: [
+      'Sau khi tìm zone, PHẢI check bên phải chart',
+      'Zone còn intact = TRADE ✓',
+      'Giá đã close qua zone = SKIP ✗',
+      'Zone đã bị phá = Không còn valid!',
+    ],
+    tip: 'FRESH > TESTED > BROKEN. Chỉ trade zone FRESH hoặc TESTED với confidence cao.',
+  },
+];
+
+/**
+ * Check if onboarding should be shown
+ */
+export const shouldShowCompressionOnboarding = async () => {
+  try {
+    const seen = await AsyncStorage.getItem(ONBOARDING_KEY);
+    return !seen;
+  } catch {
+    return true;
+  }
+};
+
+/**
+ * Reset onboarding (for testing)
+ */
+export const resetCompressionOnboarding = async () => {
+  try {
+    await AsyncStorage.removeItem(ONBOARDING_KEY);
+  } catch (error) {
+    console.error('Error resetting onboarding:', error);
+  }
+};
+
+/**
+ * Mark onboarding as completed
+ */
+const markOnboardingComplete = async () => {
+  try {
+    await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
+  } catch (error) {
+    console.error('Error marking onboarding complete:', error);
+  }
+};
+
+/**
+ * Single slide component
+ */
+const Slide = ({ slide }) => {
+  const IconComponent = slide.icon;
+
+  return (
+    <View style={[styles.slide, { width: SCREEN_WIDTH - 48 }]}>
+      {/* Icon */}
+      <View style={[styles.iconContainer, { backgroundColor: slide.color + '20' }]}>
+        <IconComponent
+          size={48}
+          color={slide.color}
+        />
+      </View>
+
+      {/* Title */}
+      <Text style={styles.slideTitle}>{slide.title}</Text>
+      <Text style={[styles.slideSubtitle, { color: slide.color }]}>
+        {slide.subtitle}
+      </Text>
+
+      {/* Content */}
+      <View style={styles.contentList}>
+        {slide.content.map((item, i) => (
+          <View key={i} style={styles.contentItem}>
+            <Check size={16} color={slide.color} />
+            <Text style={styles.contentText}>{item}</Text>
+          </View>
+        ))}
+      </View>
+
+      {/* Tip */}
+      <View style={[styles.tipContainer, { borderLeftColor: slide.color }]}>
+        <Text style={styles.tipText}>{slide.tip}</Text>
+      </View>
+    </View>
+  );
+};
+
+/**
+ * Main Onboarding Modal
+ */
+const CompressionOnboarding = ({
+  visible,
+  onComplete,
+  onSkip,
+}) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const fadeAnim = useState(new Animated.Value(0))[0];
+
+  useEffect(() => {
+    if (visible) {
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [visible]);
+
+  const handleNext = () => {
+    if (currentIndex < SLIDES.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      handleComplete();
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  };
+
+  const handleComplete = async () => {
+    await markOnboardingComplete();
+    onComplete?.();
+  };
+
+  const handleSkip = async () => {
+    await markOnboardingComplete();
+    onSkip?.();
+  };
+
+  const currentSlide = SLIDES[currentIndex];
+  const isLastSlide = currentIndex === SLIDES.length - 1;
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      statusBarTranslucent
+    >
+      <Animated.View style={[styles.overlay, { opacity: fadeAnim }]}>
+        <View style={styles.container}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.stepText}>
+              {currentIndex + 1} / {SLIDES.length}
+            </Text>
+            <TouchableOpacity onPress={handleSkip} style={styles.skipButton}>
+              <X size={20} color={COLORS.textSecondary} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Slide content */}
+          <Slide slide={currentSlide} />
+
+          {/* Progress dots */}
+          <View style={styles.dotsContainer}>
+            {SLIDES.map((slide, i) => (
+              <View
+                key={i}
+                style={[
+                  styles.dot,
+                  i === currentIndex && [
+                    styles.dotActive,
+                    { backgroundColor: currentSlide.color },
+                  ],
+                ]}
+              />
+            ))}
+          </View>
+
+          {/* Navigation buttons */}
+          <View style={styles.footer}>
+            {currentIndex > 0 ? (
+              <TouchableOpacity onPress={handlePrev} style={styles.navButton}>
+                <ChevronLeft size={20} color={COLORS.textPrimary} />
+                <Text style={styles.navButtonText}>Trước</Text>
+              </TouchableOpacity>
+            ) : (
+              <View style={styles.navButtonPlaceholder} />
+            )}
+
+            <TouchableOpacity
+              onPress={handleNext}
+              style={[
+                styles.nextButton,
+                { backgroundColor: currentSlide.color },
+              ]}
+            >
+              <Text style={styles.nextButtonText}>
+                {isLastSlide ? 'Hoàn thành' : 'Tiếp'}
+              </Text>
+              {!isLastSlide && <ChevronRight size={20} color={COLORS.bgDarkest} />}
+              {isLastSlide && <Award size={20} color={COLORS.bgDarkest} />}
+            </TouchableOpacity>
+          </View>
+
+          {/* Reward hint */}
+          {isLastSlide && (
+            <View style={styles.rewardHint}>
+              <Star size={14} color={COLORS.gold} fill={COLORS.gold} />
+              <Text style={styles.rewardText}>+40 GEM khi hoàn thành!</Text>
+            </View>
+          )}
+        </View>
+      </Animated.View>
+    </Modal>
+  );
+};
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: SPACING.lg,
+  },
+  container: {
+    backgroundColor: COLORS.glassBg,
+    borderRadius: BORDER_RADIUS.xl,
+    padding: SPACING.lg,
+    width: '100%',
+    maxWidth: 400,
+    borderWidth: 1,
+    borderColor: COLORS.gold + '30',
+  },
+
+  // Header
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+  },
+  stepText: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+  },
+  skipButton: {
+    padding: 8,
+    margin: -8,
+  },
+
+  // Slide
+  slide: {
+    alignItems: 'center',
+    paddingVertical: SPACING.md,
+  },
+  iconContainer: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SPACING.md,
+  },
+  slideTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: SPACING.xs,
+    textAlign: 'center',
+  },
+  slideSubtitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: SPACING.lg,
+    textAlign: 'center',
+  },
+
+  // Content list
+  contentList: {
+    width: '100%',
+    gap: SPACING.sm,
+    marginBottom: SPACING.lg,
+  },
+  contentItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: SPACING.sm,
+  },
+  contentText: {
+    color: COLORS.textPrimary,
+    fontSize: 13,
+    flex: 1,
+    lineHeight: 18,
+  },
+
+  // Tip
+  tipContainer: {
+    width: '100%',
+    borderLeftWidth: 3,
+    paddingLeft: SPACING.sm,
+    paddingVertical: SPACING.xs,
+  },
+  tipText: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+    fontStyle: 'italic',
+  },
+
+  // Dots
+  dotsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: SPACING.xs,
+    marginVertical: SPACING.lg,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: COLORS.textMuted,
+  },
+  dotActive: {
+    width: 24,
+  },
+
+  // Footer
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  navButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    padding: SPACING.sm,
+  },
+  navButtonText: {
+    color: COLORS.textPrimary,
+    fontSize: 14,
+  },
+  navButtonPlaceholder: {
+    width: 80,
+  },
+  nextButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
+    borderRadius: BORDER_RADIUS.md,
+  },
+  nextButtonText: {
+    color: COLORS.bgDarkest,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
+  // Reward hint
+  rewardHint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.xs,
+    marginTop: SPACING.md,
+  },
+  rewardText: {
+    color: COLORS.gold,
+    fontSize: 12,
+    fontWeight: '500',
+  },
+});
+
+CompressionOnboarding.displayName = 'CompressionOnboarding';
+
+export default CompressionOnboarding;

@@ -1,0 +1,1999 @@
+================================================================================
+              DANH SÁCH HÌNH ẢNH CHO CANVA - GEM TRADING ACADEMY
+                          (Tất cả 3 Tier - 125 bài học)
+================================================================================
+
+================================================================================
+                              TIER 1 - CƠ BẢN (45 bài)
+================================================================================
+
+---
+CHƯƠNG 3: UPU PATTERN MASTERY
+---
+
+Bài 3.2: Cấu Trúc 3 Phases Của UPU
+HÌNH 1
+Tên: UPU 3 Phases Diagram
+Nội dung: Sơ đồ 3 giai đoạn của pattern UPU - Phase 1 (Uptrend), Phase 2 (Pullback), Phase 3 (Up tiếp)
+
+HÌNH 2
+Tên: UPU Real Chart Example
+Nội dung: Ví dụ thực tế UPU trên chart crypto với annotations rõ ràng
+
+HÌNH 3
+Tên: UPU vs Other Patterns
+Nội dung: So sánh UPU với các patterns khác (UPD, DPU, DPD)
+
+HÌNH 4
+Tên: UPU Psychology Diagram
+Nội dung: Tâm lý traders tại mỗi phase của UPU
+
+---
+
+Bài 3.3: Cách Vẽ LFZ Từ UPU
+HÌNH 1
+Tên: LFZ Drawing Steps
+Nội dung: Quy trình 4 bước vẽ LFZ từ UPU
+
+HÌNH 2
+Tên: Entry and Stop Levels
+Nội dung: Vị trí Entry và Stop Loss trong LFZ
+
+HÌNH 3
+Tên: Zone Thickness Examples
+Nội dung: So sánh độ dày zone khác nhau
+
+HÌNH 4
+Tên: TradingView LFZ Drawing
+Nội dung: Hướng dẫn vẽ LFZ trên TradingView
+
+---
+
+Bài 3.4: Chiến Lược Entry Cho UPU
+HÌNH 1
+Tên: UPU Entry Flow 5 Bước
+Nội dung: Sơ đồ quy trình entry 5 bước cho UPU
+
+HÌNH 2
+Tên: Bullish Candlestick Patterns
+Nội dung: Các mẫu nến xác nhận bullish phổ biến
+
+HÌNH 3
+Tên: SOL Entry Example Chart
+Nội dung: Ví dụ thực tế entry UPU trên SOL/USDT H4
+
+HÌNH 4
+Tên: Common Entry Mistakes
+Nội dung: Minh họa các sai lầm phổ biến khi entry UPU
+
+---
+
+Bài 3.5: Checklist Xác Nhận UPU
+HÌNH 1
+Tên: UPU Checklist 8 Points
+Nội dung: Checklist 8 điểm xác nhận UPU - In ra và dán cạnh màn hình!
+
+HÌNH 2
+Tên: Common UPU Mistakes
+Nội dung: 5 lỗi phổ biến khi giao dịch UPU - Hãy tránh xa!
+
+HÌNH 3
+Tên: Good vs Bad UPU Setup
+Nội dung: So sánh setup UPU tốt (trái) và setup xấu (phải)
+
+---
+
+Bài 3.6: Ví Dụ Thực Tế UPU
+HÌNH 1
+Tên: SOL UPU Example H4 Chart
+Nội dung: Pattern UPU trên SOL/USDT H4 - Phân tích đầy đủ 3 phases
+
+HÌNH 2
+Tên: BNB UPU Example 1D Chart
+Nội dung: Pattern UPU trên BNB/USDT Daily - Setup swing trade
+
+HÌNH 3
+Tên: BNB Entry Confirmation
+Nội dung: Nến xác nhận Bullish Engulfing tại LFZ của BNB
+
+---
+CHƯƠNG 4: UPD PATTERN
+---
+
+Bài 4.1: UPD Là Gì?
+HÌNH 1
+Tên: UPD Pattern Definition
+Nội dung: Định nghĩa và cấu trúc cơ bản của UPD pattern
+
+HÌNH 2
+Tên: UPD Market Context
+Nội dung: Bối cảnh thị trường phù hợp cho UPD
+
+HÌNH 3
+Tên: UPD Psychology
+Nội dung: Tâm lý đám đông trong UPD pattern
+
+---
+
+Bài 4.2: UPD Cấu Trúc 3 Phases
+HÌNH 1
+Tên: UPD 3 Phases Breakdown
+Nội dung: Chi tiết 3 giai đoạn của UPD - Up, Pullback, Down
+
+HÌNH 2
+Tên: UPD Zone Identification
+Nội dung: Cách xác định zone trong UPD
+
+HÌNH 3
+Tên: UPD Entry Timing
+Nội dung: Thời điểm entry tối ưu trong UPD
+
+---
+
+Bài 4.3: Tại Sao UPD Mạnh?
+HÌNH 1
+Tên: UPD Supply Zone
+Nội dung: Giải thích supply zone mạnh trong UPD
+
+HÌNH 2
+Tên: UPD Institutional Flow
+Nội dung: Dòng tiền tổ chức trong UPD pattern
+
+HÌNH 3
+Tên: UPD Win Rate Stats
+Nội dung: Thống kê win rate của UPD pattern
+
+---
+
+Bài 4.4: Chiến Lược Entry UPD
+HÌNH 1
+Tên: UPD Entry Strategy
+Nội dung: Chiến lược vào lệnh Short cho UPD
+
+HÌNH 2
+Tên: UPD Stop Loss Placement
+Nội dung: Vị trí đặt Stop Loss cho UPD
+
+HÌNH 3
+Tên: UPD Take Profit Levels
+Nội dung: Các mức Take Profit cho UPD
+
+HÌNH 4
+Tên: UPD Entry Confirmation
+Nội dung: Các tín hiệu xác nhận entry UPD
+
+---
+
+Bài 4.5: UPD Phân Biệt Với DPD
+HÌNH 1
+Tên: UPD vs DPD Comparison
+Nội dung: So sánh chi tiết UPD và DPD
+
+HÌNH 2
+Tên: Pattern Recognition Guide
+Nội dung: Hướng dẫn nhận diện nhanh UPD vs DPD
+
+HÌNH 3
+Tên: Common Confusion Points
+Nội dung: Các điểm dễ nhầm lẫn giữa 2 patterns
+
+---
+
+Bài 4.6: Ví Dụ Thực Tế UPD
+HÌNH 1
+Tên: BTC UPD Example
+Nội dung: Ví dụ UPD trên BTC/USDT
+
+HÌNH 2
+Tên: ETH UPD Trade Setup
+Nội dung: Setup trade UPD trên ETH/USDT
+
+HÌNH 3
+Tên: UPD Trade Result
+Nội dung: Kết quả trade UPD thực tế
+
+---
+CHƯƠNG 5: DPU PATTERN
+---
+
+Bài 5.1: DPU Là Gì?
+HÌNH 1
+Tên: DPU Pattern Definition
+Nội dung: Định nghĩa DPU - Down, Pullback, Up
+
+HÌNH 2
+Tên: DPU Market Context
+Nội dung: Điều kiện thị trường cho DPU
+
+HÌNH 3
+Tên: DPU vs Other Patterns
+Nội dung: So sánh DPU với patterns khác
+
+---
+
+Bài 5.2: DPU Cấu Trúc 3 Phases
+HÌNH 1
+Tên: DPU 3 Phases Diagram
+Nội dung: Chi tiết 3 giai đoạn của DPU
+
+HÌNH 2
+Tên: DPU Demand Zone
+Nội dung: Cách xác định demand zone trong DPU
+
+HÌNH 3
+Tên: DPU Volume Analysis
+Nội dung: Phân tích volume trong DPU
+
+---
+
+Bài 5.3: DPU Cách Vẽ LFZ
+HÌNH 1
+Tên: DPU LFZ Drawing
+Nội dung: Hướng dẫn vẽ LFZ cho DPU pattern
+
+HÌNH 2
+Tên: DPU Zone Boundaries
+Nội dung: Xác định biên zone cho DPU
+
+HÌNH 3
+Tên: DPU Multi Timeframe
+Nội dung: DPU trên nhiều khung thời gian
+
+---
+
+Bài 5.4: DPU Chiến Lược Entry
+HÌNH 1
+Tên: DPU Entry Strategy
+Nội dung: Chiến lược entry Long cho DPU
+
+HÌNH 2
+Tên: DPU Risk Reward
+Nội dung: Tính toán Risk:Reward cho DPU
+
+HÌNH 3
+Tên: DPU Confirmation Signals
+Nội dung: Tín hiệu xác nhận entry DPU
+
+HÌNH 4
+Tên: DPU Position Sizing
+Nội dung: Tính khối lượng cho trade DPU
+
+---
+
+Bài 5.5: DPU Checklist
+HÌNH 1
+Tên: DPU Checklist
+Nội dung: Checklist xác nhận DPU pattern
+
+HÌNH 2
+Tên: DPU Common Mistakes
+Nội dung: Lỗi phổ biến khi trade DPU
+
+HÌNH 3
+Tên: DPU Best Practices
+Nội dung: Best practices cho DPU trading
+
+---
+
+Bài 5.6: DPU Ví Dụ Thực Tế
+HÌNH 1
+Tên: AVAX DPU Example
+Nội dung: Ví dụ DPU trên AVAX/USDT
+
+HÌNH 2
+Tên: LINK DPU Trade
+Nội dung: Trade DPU thực tế trên LINK
+
+HÌNH 3
+Tên: DPU Trade Results
+Nội dung: Kết quả các trade DPU
+
+---
+CHƯƠNG 6: CLASSIC PATTERNS
+---
+
+Bài 6.1: Tổng Quan Classic Patterns
+HÌNH 1
+Tên: Classic Patterns Overview
+Nội dung: Tổng quan 6 classic patterns
+
+HÌNH 2
+Tên: Patterns Classification
+Nội dung: Phân loại continuation vs reversal
+
+HÌNH 3
+Tên: Patterns Win Rates
+Nội dung: So sánh win rate các patterns
+
+---
+
+Bài 6.2: Flag & Pennant
+HÌNH 1
+Tên: Flag Pattern Structure
+Nội dung: Cấu trúc Bull Flag và Bear Flag
+
+HÌNH 2
+Tên: Pennant Pattern Structure
+Nội dung: Cấu trúc Bullish và Bearish Pennant
+
+HÌNH 3
+Tên: Flag vs Pennant Comparison
+Nội dung: So sánh Flag và Pennant
+
+HÌNH 4
+Tên: Flag Pennant Entry
+Nội dung: Điểm entry cho Flag và Pennant
+
+---
+
+Bài 6.3: Triangle Patterns
+HÌNH 1
+Tên: Ascending Triangle
+Nội dung: Cấu trúc Ascending Triangle
+
+HÌNH 2
+Tên: Descending Triangle
+Nội dung: Cấu trúc Descending Triangle
+
+HÌNH 3
+Tên: Symmetrical Triangle
+Nội dung: Cấu trúc Symmetrical Triangle
+
+HÌNH 4
+Tên: Triangle Breakout
+Nội dung: Xác nhận breakout triangle
+
+---
+
+Bài 6.4: Head & Shoulders
+HÌNH 1
+Tên: Head Shoulders Structure
+Nội dung: Cấu trúc Head & Shoulders pattern
+
+HÌNH 2
+Tên: Inverse Head Shoulders
+Nội dung: Inverse Head & Shoulders
+
+HÌNH 3
+Tên: Neckline Importance
+Nội dung: Tầm quan trọng của Neckline
+
+HÌNH 4
+Tên: H&S Entry Strategy
+Nội dung: Chiến lược entry cho H&S
+
+---
+
+Bài 6.5: Double Top/Bottom
+HÌNH 1
+Tên: Double Top Structure
+Nội dung: Cấu trúc Double Top pattern
+
+HÌNH 2
+Tên: Double Bottom Structure
+Nội dung: Cấu trúc Double Bottom pattern
+
+HÌNH 3
+Tên: Double Top Bottom Entry
+Nội dung: Điểm entry cho Double patterns
+
+HÌNH 4
+Tên: Double Pattern Targets
+Nội dung: Tính target cho Double patterns
+
+---
+
+Bài 6.6: Tổng Kết Classic Patterns
+HÌNH 1
+Tên: Pattern Summary Table
+Nội dung: Bảng tổng kết tất cả classic patterns
+
+HÌNH 2
+Tên: Pattern Selection Guide
+Nội dung: Hướng dẫn chọn pattern phù hợp
+
+HÌNH 3
+Tên: Pattern Combinations
+Nội dung: Kết hợp patterns với GEM zones
+
+---
+CHƯƠNG 7: PAPER TRADING
+---
+
+Bài 7.1: Paper Trading Là Gì?
+HÌNH 1
+Tên: Paper Trading Benefits
+Nội dung: Lợi ích của paper trading
+
+HÌNH 2
+Tên: Paper vs Real Trading
+Nội dung: So sánh paper và real trading
+
+HÌNH 3
+Tên: Paper Trading Platforms
+Nội dung: Các nền tảng paper trading
+
+---
+
+Bài 7.2: GEM Paper Trade Guide
+HÌNH 1
+Tên: GEM Paper Trade Setup
+Nội dung: Hướng dẫn setup paper trade trên GEM
+
+HÌNH 2
+Tên: Paper Trade Interface
+Nội dung: Giao diện paper trade
+
+HÌNH 3
+Tên: Paper Trade Tracking
+Nội dung: Theo dõi kết quả paper trade
+
+---
+
+Bài 7.3: Trading Journal
+HÌNH 1
+Tên: Trading Journal Template
+Nội dung: Mẫu trading journal
+
+HÌNH 2
+Tên: Journal Entry Example
+Nội dung: Ví dụ ghi chép journal
+
+HÌNH 3
+Tên: Journal Analysis
+Nội dung: Phân tích journal để cải thiện
+
+---
+
+Bài 7.4: Backtesting Cơ Bản
+HÌNH 1
+Tên: Backtesting Process
+Nội dung: Quy trình backtesting
+
+HÌNH 2
+Tên: Backtesting Tools
+Nội dung: Công cụ backtesting
+
+HÌNH 3
+Tên: Backtesting Results
+Nội dung: Đọc kết quả backtesting
+
+---
+
+Bài 7.5: Paper To Real Transition
+HÌNH 1
+Tên: Transition Checklist
+Nội dung: Checklist chuyển từ paper sang real
+
+HÌNH 2
+Tên: Risk Management Start
+Nội dung: Quản lý rủi ro khi bắt đầu real
+
+HÌNH 3
+Tên: First Real Trade Guide
+Nội dung: Hướng dẫn trade thật đầu tiên
+
+---
+CHƯƠNG 8: GEM MASTER AI
+---
+
+Bài 8.1: GEM Master AI Intro
+HÌNH 1
+Tên: GEM Master AI Interface
+Nội dung: Giao diện GEM Master AI
+
+HÌNH 2
+Tên: AI Features Overview
+Nội dung: Tổng quan tính năng AI
+
+HÌNH 3
+Tên: AI vs Manual Trading
+Nội dung: So sánh AI và trading thủ công
+
+---
+
+Bài 8.2: Chatbot Hỏi Đáp
+HÌNH 1
+Tên: Chatbot Interface
+Nội dung: Giao diện chatbot GEM
+
+HÌNH 2
+Tên: Chatbot Examples
+Nội dung: Ví dụ hỏi đáp với chatbot
+
+HÌNH 3
+Tên: Chatbot Tips
+Nội dung: Tips sử dụng chatbot hiệu quả
+
+---
+
+Bài 8.3: Scanner Cơ Bản
+HÌNH 1
+Tên: Scanner Interface
+Nội dung: Giao diện Scanner
+
+HÌNH 2
+Tên: Scanner Filters
+Nội dung: Các bộ lọc Scanner
+
+HÌNH 3
+Tên: Scanner Results
+Nội dung: Đọc kết quả Scanner
+
+---
+
+Bài 8.4: Thiết Lập Cảnh Báo
+HÌNH 1
+Tên: Alert Setup
+Nội dung: Hướng dẫn thiết lập cảnh báo
+
+HÌNH 2
+Tên: Alert Types
+Nội dung: Các loại cảnh báo
+
+HÌNH 3
+Tên: Alert Notification
+Nội dung: Nhận thông báo cảnh báo
+
+---
+
+Bài 8.5: Tổng Kết & Tier 2 Preview
+HÌNH 1
+Tên: Tier 1 Summary
+Nội dung: Tổng kết Tier 1
+
+HÌNH 2
+Tên: Tier 2 Preview
+Nội dung: Xem trước nội dung Tier 2
+
+HÌNH 3
+Tên: Learning Path
+Nội dung: Lộ trình học tiếp theo
+
+---
+CHƯƠNG 9: MODULE A - TRANSFORMATION
+---
+
+Bài 9.1: Con Người Cũ vs Mới
+HÌNH 1
+Tên: Old vs New Trader
+Nội dung: So sánh trader cũ và mới
+
+HÌNH 2
+Tên: Transformation Journey
+Nội dung: Hành trình chuyển đổi
+
+HÌNH 3
+Tên: Mindset Shift
+Nội dung: Thay đổi tư duy
+
+---
+
+Bài 9.2: Bản Đồ Hành Trình
+HÌNH 1
+Tên: Learning Roadmap
+Nội dung: Bản đồ hành trình học tập
+
+HÌNH 2
+Tên: Milestones
+Nội dung: Các cột mốc quan trọng
+
+HÌNH 3
+Tên: Progress Tracking
+Nội dung: Theo dõi tiến độ
+
+---
+
+Bài 9.3: Sự Thay Đổi Thực Sự
+HÌNH 1
+Tên: Real Change Evidence
+Nội dung: Bằng chứng thay đổi thực sự
+
+HÌNH 2
+Tên: Before After Results
+Nội dung: Kết quả trước và sau
+
+HÌNH 3
+Tên: Testimonials
+Nội dung: Chia sẻ từ học viên
+
+---
+
+Bài 9.4: Điều Khiến Bạn Khác Biệt
+HÌNH 1
+Tên: Your Edge
+Nội dung: Lợi thế cạnh tranh của bạn
+
+HÌNH 2
+Tên: Knowledge Stack
+Nội dung: Kiến thức đã tích lũy
+
+HÌNH 3
+Tên: Competitive Advantage
+Nội dung: Lợi thế so với traders khác
+
+---
+CHƯƠNG 10: MODULE B - OPPORTUNITIES
+---
+
+Bài 10.1: Ngã Ba Đường
+HÌNH 1
+Tên: 3 Paths Ahead
+Nội dung: Ngã ba đường sau khi hoàn thành TIER 1
+
+HÌNH 2
+Tên: Take Action Today
+Nội dung: Hành động là chìa khóa thành công
+
+---
+
+Bài 10.2: Công Cụ Tăng Tốc
+HÌNH 1
+Tên: GEM Tool Ecosystem
+Nội dung: Hệ sinh thái công cụ GEM
+
+HÌNH 2
+Tên: AI Chatbot Demo
+Nội dung: Demo AI Chatbot
+
+HÌNH 3
+Tên: Scanner Results
+Nội dung: Kết quả Scanner
+
+HÌNH 4
+Tên: Pricing Comparison
+Nội dung: So sánh giá các gói
+
+HÌNH 5
+Tên: Tier Learning Path
+Nội dung: Lộ trình học tập theo Tier
+
+---
+
+Bài 10.3: Cơ Hội Đối Tác
+HÌNH 1
+Tên: GEM Partnership Programs
+Nội dung: Hai chương trình đối tác của GEM (CTV & KOL)
+
+HÌNH 2
+Tên: Income Examples
+Nội dung: Ví dụ thu nhập từ chương trình CTV
+
+---
+
+Bài 10.4: Câu Chuyện Thành Công
+HÌNH 1
+Tên: Minh Trading Results
+Nội dung: Kết quả trading của Minh
+
+HÌNH 2
+Tên: Lan Work Life Balance
+Nội dung: Câu chuyện cân bằng cuộc sống của Lan
+
+HÌNH 3
+Tên: Hung Student Success
+Nội dung: Thành công của sinh viên Hùng
+
+HÌNH 4
+Tên: Your Story Starts Here
+Nội dung: Câu chuyện của bạn bắt đầu từ đây
+
+---
+
+Bài 10.5: Lợi Thế Đi Sớm
+HÌNH 1
+Tên: Early vs Late Comparison
+Nội dung: So sánh người đi sớm và đi trễ
+
+HÌNH 2
+Tên: Price Timeline
+Nội dung: Timeline giá qua các giai đoạn
+
+HÌNH 3
+Tên: Early Bird Bonuses
+Nội dung: Ưu đãi cho người đăng ký sớm
+
+HÌNH 4
+Tên: Cost of Waiting
+Nội dung: Chi phí cơ hội khi chờ đợi
+
+---
+
+Bài 10.6: Khung Quyết Định
+HÌNH 1
+Tên: Decision Framework
+Nội dung: Khung quyết định 5 bước
+
+HÌNH 2
+Tên: Decision Flowchart
+Nội dung: Sơ đồ quyết định
+
+HÌNH 3
+Tên: FAQ Section
+Nội dung: Các câu hỏi thường gặp
+
+---
+
+Bài 10.7: Các Bước Tiếp Theo
+HÌNH 1
+Tên: TIER 1 Complete
+Nội dung: Chứng nhận hoàn thành TIER 1
+
+HÌNH 2
+Tên: 3 Paths Forward
+Nội dung: Ba con đường để tiếp tục
+
+HÌNH 3
+Tên: Support Resources
+Nội dung: Các tài nguyên hỗ trợ học viên
+
+================================================================================
+                          TIER 2 - NÂNG CAO (43 bài)
+================================================================================
+
+---
+CHƯƠNG 1: HFZ (HIGH FREQUENCY ZONE)
+---
+
+Bài 1.1: HFZ Là Gì?
+HÌNH 1
+Tên: HFZ Definition
+Nội dung: Định nghĩa và đặc điểm HFZ
+
+HÌNH 2
+Tên: HFZ vs LFZ
+Nội dung: So sánh HFZ và LFZ
+
+HÌNH 3
+Tên: HFZ Identification
+Nội dung: Cách nhận diện HFZ
+
+---
+
+Bài 1.2: Cách Vẽ HFZ
+HÌNH 1
+Tên: HFZ Drawing Steps
+Nội dung: 5 bước vẽ HFZ
+
+HÌNH 2
+Tên: HFZ Zone Boundaries
+Nội dung: Xác định biên HFZ
+
+HÌNH 3
+Tên: HFZ TradingView Guide
+Nội dung: Vẽ HFZ trên TradingView
+
+HÌNH 4
+Tên: HFZ Common Mistakes
+Nội dung: Lỗi phổ biến khi vẽ HFZ
+
+---
+
+Bài 1.3: Zone Lifecycle
+HÌNH 1
+Tên: Zone Lifecycle Stages
+Nội dung: Các giai đoạn trong vòng đời zone
+
+HÌNH 2
+Tên: Fresh vs Tested Zone
+Nội dung: Zone fresh và zone đã test
+
+HÌNH 3
+Tên: Zone Invalidation
+Nội dung: Khi nào zone bị vô hiệu
+
+---
+
+Bài 1.4: Chiến Lược Entry HFZ
+HÌNH 1
+Tên: HFZ Entry Strategy
+Nội dung: Chiến lược entry tại HFZ
+
+HÌNH 2
+Tên: HFZ Stop Loss
+Nội dung: Đặt SL cho HFZ trade
+
+HÌNH 3
+Tên: HFZ Take Profit
+Nội dung: Các mức TP cho HFZ
+
+HÌNH 4
+Tên: HFZ Entry Example
+Nội dung: Ví dụ entry HFZ thực tế
+
+---
+
+Bài 1.5: HFZ Đa Khung Thời Gian
+HÌNH 1
+Tên: HFZ Multi Timeframe
+Nội dung: HFZ trên nhiều timeframe
+
+HÌNH 2
+Tên: HTF LTF Alignment
+Nội dung: Căn chỉnh HTF và LTF
+
+HÌNH 3
+Tên: MTF Entry Precision
+Nội dung: Entry chính xác với MTF
+
+---
+
+Bài 1.6: Ví Dụ Thực Tế HFZ
+HÌNH 1
+Tên: BTC HFZ Example
+Nội dung: HFZ trade trên BTC
+
+HÌNH 2
+Tên: ETH HFZ Trade
+Nội dung: HFZ trade trên ETH
+
+HÌNH 3
+Tên: HFZ Trade Results
+Nội dung: Kết quả trades HFZ
+
+---
+CHƯƠNG 2: LFZ NÂNG CAO
+---
+
+Bài 2.1: LFZ Là Gì? (Nâng cao)
+HÌNH 1
+Tên: LFZ Advanced Concepts
+Nội dung: Khái niệm LFZ nâng cao
+
+HÌNH 2
+Tên: LFZ Quality Grading
+Nội dung: Đánh giá chất lượng LFZ
+
+HÌNH 3
+Tên: LFZ Market Context
+Nội dung: LFZ trong bối cảnh thị trường
+
+---
+
+Bài 2.2: Cách Vẽ LFZ (Nâng cao)
+HÌNH 1
+Tên: LFZ Advanced Drawing
+Nội dung: Kỹ thuật vẽ LFZ nâng cao
+
+HÌNH 2
+Tên: LFZ Refinement
+Nội dung: Tinh chỉnh zone LFZ
+
+HÌNH 3
+Tên: LFZ Multi Asset
+Nội dung: LFZ trên nhiều tài sản
+
+---
+
+Bài 2.3: Xác Nhận Entry LFZ
+HÌNH 1
+Tên: LFZ Entry Confirmations
+Nội dung: Các tín hiệu xác nhận entry LFZ
+
+HÌNH 2
+Tên: LFZ Candlestick Signals
+Nội dung: Tín hiệu nến tại LFZ
+
+HÌNH 3
+Tên: LFZ Volume Confirmation
+Nội dung: Xác nhận bằng volume
+
+---
+
+Bài 2.4: So Sánh HFZ vs LFZ
+HÌNH 1
+Tên: HFZ LFZ Comparison
+Nội dung: Bảng so sánh chi tiết HFZ và LFZ
+
+HÌNH 2
+Tên: When to Use Each
+Nội dung: Khi nào dùng HFZ vs LFZ
+
+HÌNH 3
+Tên: Combined Strategy
+Nội dung: Kết hợp HFZ và LFZ
+
+---
+
+Bài 2.5: LFZ Với Classic Patterns
+HÌNH 1
+Tên: LFZ Pattern Combo
+Nội dung: Kết hợp LFZ với classic patterns
+
+HÌNH 2
+Tên: LFZ Triangle Confluence
+Nội dung: LFZ + Triangle confluence
+
+HÌNH 3
+Tên: LFZ H&S Confluence
+Nội dung: LFZ + Head & Shoulders
+
+---
+
+Bài 2.6: Ví Dụ Thực Tế LFZ
+HÌNH 1
+Tên: SOL LFZ Example
+Nội dung: LFZ trade trên SOL
+
+HÌNH 2
+Tên: MATIC LFZ Trade
+Nội dung: LFZ trade trên MATIC
+
+HÌNH 3
+Tên: LFZ Trade Analysis
+Nội dung: Phân tích trades LFZ
+
+---
+CHƯƠNG 3: TRIANGLE PATTERNS (NÂNG CAO)
+---
+
+Bài 3.1: Ascending Triangle
+HÌNH 1
+Tên: Ascending Triangle Structure
+Nội dung: Cấu trúc chi tiết Ascending Triangle
+
+HÌNH 2
+Tên: Ascending Triangle Entry
+Nội dung: Entry strategy cho Ascending Triangle
+
+HÌNH 3
+Tên: Ascending Triangle Target
+Nội dung: Tính target cho Ascending Triangle
+
+---
+
+Bài 3.2: Descending Triangle
+HÌNH 1
+Tên: Descending Triangle Structure
+Nội dung: Cấu trúc chi tiết Descending Triangle
+
+HÌNH 2
+Tên: Descending Triangle Entry
+Nội dung: Entry strategy cho Descending Triangle
+
+HÌNH 3
+Tên: Descending Triangle Target
+Nội dung: Tính target cho Descending Triangle
+
+---
+
+Bài 3.3: Symmetrical Triangle
+HÌNH 1
+Tên: Symmetrical Triangle Structure
+Nội dung: Cấu trúc Symmetrical Triangle
+
+HÌNH 2
+Tên: Symmetrical Breakout Direction
+Nội dung: Dự đoán hướng breakout
+
+HÌNH 3
+Tên: Symmetrical Triangle Entry
+Nội dung: Entry strategy cho Symmetrical Triangle
+
+---
+
+Bài 3.4: Triangles Với GEM Zones
+HÌNH 1
+Tên: Triangle Zone Confluence
+Nội dung: Confluence Triangle + GEM zones
+
+HÌNH 2
+Tên: Triangle at HFZ
+Nội dung: Triangle hình thành tại HFZ
+
+HÌNH 3
+Tên: Triangle at LFZ
+Nội dung: Triangle hình thành tại LFZ
+
+---
+
+Bài 3.5: Ví Dụ Thực Tế Triangles
+HÌNH 1
+Tên: BTC Triangle Example
+Nội dung: Triangle trade trên BTC
+
+HÌNH 2
+Tên: ETH Triangle Trade
+Nội dung: Triangle trade trên ETH
+
+HÌNH 3
+Tên: Triangle Win Rate Stats
+Nội dung: Thống kê win rate triangles
+
+---
+CHƯƠNG 4: MULTI-TIMEFRAME ANALYSIS
+---
+
+Bài 4.1: Nguyên Tắc Đa Khung Thời Gian
+HÌNH 1
+Tên: MTF Principles
+Nội dung: Nguyên tắc cơ bản MTF
+
+HÌNH 2
+Tên: Timeframe Hierarchy
+Nội dung: Phân cấp timeframe
+
+HÌNH 3
+Tên: MTF Benefits
+Nội dung: Lợi ích của MTF analysis
+
+---
+
+Bài 4.2: Hệ Thống 3 Khung Thời Gian
+HÌNH 1
+Tên: 3 Timeframe System
+Nội dung: Hệ thống HTF-MTF-LTF
+
+HÌNH 2
+Tên: Timeframe Selection
+Nội dung: Chọn timeframe phù hợp
+
+HÌNH 3
+Tên: 3TF Workflow
+Nội dung: Quy trình làm việc 3TF
+
+---
+
+Bài 4.3: Zone Hierarchy
+HÌNH 1
+Tên: Zone Hierarchy Diagram
+Nội dung: Sơ đồ phân cấp zones
+
+HÌNH 2
+Tên: HTF Zone Priority
+Nội dung: Ưu tiên zone HTF
+
+HÌNH 3
+Tên: Zone Nesting
+Nội dung: Zone lồng nhau
+
+---
+
+Bài 4.4: Entry Chính Xác Trên LTF
+HÌNH 1
+Tên: LTF Entry Precision
+Nội dung: Entry chính xác trên LTF
+
+HÌNH 2
+Tên: LTF Confirmation
+Nội dung: Xác nhận trên LTF
+
+HÌNH 3
+Tên: LTF Stop Placement
+Nội dung: Đặt SL trên LTF
+
+---
+
+Bài 4.5: Ví Dụ Thực Tế Multi-TF
+HÌNH 1
+Tên: BTC MTF Analysis
+Nội dung: Phân tích MTF trên BTC
+
+HÌNH 2
+Tên: SOL MTF Trade
+Nội dung: Trade MTF trên SOL
+
+HÌNH 3
+Tên: MTF Trade Results
+Nội dung: Kết quả trades MTF
+
+---
+CHƯƠNG 5: ZONE GRADING
+---
+
+Bài 5.1: Hệ Thống Chấm Điểm Zone
+HÌNH 1
+Tên: Zone Scoring System
+Nội dung: Hệ thống chấm điểm zone
+
+HÌNH 2
+Tên: Scoring Criteria
+Nội dung: Tiêu chí chấm điểm
+
+HÌNH 3
+Tên: Score Interpretation
+Nội dung: Đọc hiểu điểm số
+
+---
+
+Bài 5.2: Odds Enhancers
+HÌNH 1
+Tên: Odds Enhancers List
+Nội dung: Danh sách các odds enhancers
+
+HÌNH 2
+Tên: Enhancer Examples
+Nội dung: Ví dụ odds enhancers
+
+HÌNH 3
+Tên: Combined Enhancers
+Nội dung: Kết hợp nhiều enhancers
+
+---
+
+Bài 5.3: Zone Scoring Worksheet
+HÌNH 1
+Tên: Scoring Worksheet
+Nội dung: Mẫu worksheet chấm điểm zone
+
+HÌNH 2
+Tên: Worksheet Example
+Nội dung: Ví dụ điền worksheet
+
+HÌNH 3
+Tên: Worksheet Analysis
+Nội dung: Phân tích từ worksheet
+
+---
+
+Bài 5.4: Filter Zones Với Scanner
+HÌNH 1
+Tên: Scanner Zone Filter
+Nội dung: Lọc zones bằng scanner
+
+HÌNH 2
+Tên: Filter Settings
+Nội dung: Cài đặt bộ lọc
+
+HÌNH 3
+Tên: Filter Results
+Nội dung: Kết quả sau khi lọc
+
+---
+
+Bài 5.5: Ví Dụ Thực Tế Zone Grading
+HÌNH 1
+Tên: Zone Grading Example 1
+Nội dung: Ví dụ chấm điểm zone #1
+
+HÌNH 2
+Tên: Zone Grading Example 2
+Nội dung: Ví dụ chấm điểm zone #2
+
+HÌNH 3
+Tên: Grading Comparison
+Nội dung: So sánh zones khác chất lượng
+
+---
+CHƯƠNG 6: RISK MANAGEMENT NÂNG CAO
+---
+
+Bài 6.1: Công Thức Tính Khối Lượng
+HÌNH 1
+Tên: Position Sizing Formula
+Nội dung: Công thức tính position size
+
+HÌNH 2
+Tên: Position Calculator
+Nội dung: Máy tính position size
+
+HÌNH 3
+Tên: Position Examples
+Nội dung: Ví dụ tính position
+
+---
+
+Bài 6.2: Đặt Stop Loss Đúng Cách
+HÌNH 1
+Tên: Stop Loss Strategies
+Nội dung: Các chiến lược đặt SL
+
+HÌNH 2
+Tên: SL Behind Zone
+Nội dung: SL sau zone
+
+HÌNH 3
+Tên: SL ATR Based
+Nội dung: SL dựa trên ATR
+
+---
+
+Bài 6.3: Chiến Lược Take Profit
+HÌNH 1
+Tên: Take Profit Strategies
+Nội dung: Các chiến lược TP
+
+HÌNH 2
+Tên: Partial TP
+Nội dung: Chốt lời từng phần
+
+HÌNH 3
+Tên: Trailing Stop
+Nội dung: Trailing stop strategy
+
+---
+
+Bài 6.4: Quy Tắc Nhìn Sang Phải
+HÌNH 1
+Tên: Look Right Rule
+Nội dung: Quy tắc nhìn sang phải
+
+HÌNH 2
+Tên: Right Side Analysis
+Nội dung: Phân tích bên phải chart
+
+HÌNH 3
+Tên: Obstacles Identification
+Nội dung: Nhận diện chướng ngại
+
+---
+
+Bài 6.5: Tổng Kết & Tier 3 Preview
+HÌNH 1
+Tên: Tier 2 Summary
+Nội dung: Tổng kết Tier 2
+
+HÌNH 2
+Tên: Tier 3 Preview
+Nội dung: Xem trước Tier 3
+
+HÌNH 3
+Tên: Advanced Path
+Nội dung: Lộ trình nâng cao
+
+---
+CHƯƠNG 7: MODULE A - TIER 2
+---
+
+Bài 7.1: Con Người Cũ vs Mới (Tier 2)
+HÌNH 1
+Tên: Tier 2 Transformation
+Nội dung: Sự chuyển đổi sau Tier 2
+
+HÌNH 2
+Tên: Advanced Trader Mindset
+Nội dung: Tư duy trader nâng cao
+
+HÌNH 3
+Tên: Skill Upgrade
+Nội dung: Nâng cấp kỹ năng
+
+---
+
+Bài 7.2: Bản Đồ Hành Trình (Tier 2)
+HÌNH 1
+Tên: Tier 2 Roadmap
+Nội dung: Bản đồ hành trình Tier 2
+
+HÌNH 2
+Tên: Tier 2 Milestones
+Nội dung: Cột mốc Tier 2
+
+HÌNH 3
+Tên: Progress Assessment
+Nội dung: Đánh giá tiến độ
+
+---
+
+Bài 7.3: Sự Thay Đổi Thực Sự (Tier 2)
+HÌNH 1
+Tên: Real Results Tier 2
+Nội dung: Kết quả thực tế Tier 2
+
+HÌNH 2
+Tên: Before After Trading
+Nội dung: Trading trước và sau Tier 2
+
+HÌNH 3
+Tên: Advanced Strategies Applied
+Nội dung: Áp dụng strategies nâng cao
+
+---
+
+Bài 7.4: Điều Khiến Bạn Khác Biệt (Tier 2)
+HÌNH 1
+Tên: Tier 2 Edge
+Nội dung: Lợi thế của học viên Tier 2
+
+HÌNH 2
+Tên: Advanced Knowledge
+Nội dung: Kiến thức nâng cao đã có
+
+HÌNH 3
+Tên: Competitive Position
+Nội dung: Vị thế cạnh tranh
+
+---
+CHƯƠNG 8: MODULE B - TIER 2
+---
+
+Bài 8.1: Ngã Ba Đường (Tier 2)
+HÌNH 1
+Tên: 3 Paths Tier 2
+Nội dung: 3 con đường sau Tier 2
+
+HÌNH 2
+Tên: Path Selection Guide
+Nội dung: Hướng dẫn chọn đường
+
+HÌNH 3
+Tên: Decision Points
+Nội dung: Các điểm quyết định
+
+---
+
+Bài 8.2: Công Cụ Tăng Tốc (Tier 2)
+HÌNH 1
+Tên: Advanced Tools
+Nội dung: Công cụ nâng cao
+
+HÌNH 2
+Tên: AI Enhanced Trading
+Nội dung: Trading với AI
+
+HÌNH 3
+Tên: Tool Integration
+Nội dung: Tích hợp các công cụ
+
+---
+
+Bài 8.3: Cơ Hội Đối Tác (Tier 2)
+HÌNH 1
+Tên: CTV 5 Tier System
+Nội dung: Hệ thống CTV 5 tier
+
+HÌNH 2
+Tên: KOL Affiliate Program
+Nội dung: Chương trình KOL Affiliate
+
+HÌNH 3
+Tên: Partner Income Examples
+Nội dung: Ví dụ thu nhập đối tác
+
+---
+
+Bài 8.4: Câu Chuyện Thành Công (Tier 2)
+HÌNH 1
+Tên: Tier 2 Success Story 1
+Nội dung: Câu chuyện thành công #1
+
+HÌNH 2
+Tên: Tier 2 Success Story 2
+Nội dung: Câu chuyện thành công #2
+
+HÌNH 3
+Tên: Results Compilation
+Nội dung: Tổng hợp kết quả
+
+---
+
+Bài 8.5: Lợi Thế Đi Sớm (Tier 2)
+HÌNH 1
+Tên: Early Tier 3 Benefits
+Nội dung: Lợi ích đăng ký Tier 3 sớm
+
+HÌNH 2
+Tên: Price Increase Timeline
+Nội dung: Timeline tăng giá
+
+HÌNH 3
+Tên: Early Access Bonuses
+Nội dung: Bonus cho người đăng ký sớm
+
+---
+
+Bài 8.6: Khung Quyết Định (Tier 2)
+HÌNH 1
+Tên: Framework Quyet Dinh
+Nội dung: Khung quyết định 5 bước
+
+HÌNH 2
+Tên: Ma Tran Quyet Dinh
+Nội dung: Ma trận so sánh 3 lựa chọn
+
+HÌNH 3
+Tên: Checklist Tu Danh Gia
+Nội dung: Checklist tự đánh giá
+
+HÌNH 4
+Tên: Quyet Dinh Dung Dan
+Nội dung: Quyết định đúng đắn = Thời điểm đúng + Thông tin đầy đủ
+
+---
+
+Bài 8.7: Các Bước Tiếp Theo (Tier 2)
+HÌNH 1
+Tên: Tier 2 Completion Certificate
+Nội dung: Chứng nhận hoàn thành Tier 2
+
+HÌNH 2
+Tên: Next Steps Action Plan
+Nội dung: Kế hoạch hành động tiếp theo
+
+HÌNH 3
+Tên: Your Journey Continues
+Nội dung: Hành trình của bạn tiếp tục
+
+================================================================================
+                            TIER 3 - ELITE (37 bài)
+================================================================================
+
+---
+CHƯƠNG 1: FLAG & PENNANT MASTERY
+---
+
+Bài 1.1: Flag Là Gì?
+HÌNH 1
+Tên: Flag Pattern Anatomy
+Nội dung: Giải phẫu chi tiết Flag pattern
+
+HÌNH 2
+Tên: Flag Formation Process
+Nội dung: Quá trình hình thành Flag
+
+HÌNH 3
+Tên: Flag Psychology
+Nội dung: Tâm lý đằng sau Flag pattern
+
+---
+
+Bài 1.2: Bullish & Bearish Flag
+HÌNH 1
+Tên: Bullish Flag Structure
+Nội dung: Cấu trúc Bullish Flag
+
+HÌNH 2
+Tên: Bearish Flag Structure
+Nội dung: Cấu trúc Bearish Flag
+
+HÌNH 3
+Tên: Flag Direction Identification
+Nội dung: Nhận diện hướng Flag
+
+---
+
+Bài 1.3: Pennant Pattern
+HÌNH 1
+Tên: Pennant Anatomy
+Nội dung: Giải phẫu Pennant pattern
+
+HÌNH 2
+Tên: Bullish Pennant
+Nội dung: Bullish Pennant structure
+
+HÌNH 3
+Tên: Bearish Pennant
+Nội dung: Bearish Pennant structure
+
+---
+
+Bài 1.4: Flag Pennant Trading
+HÌNH 1
+Tên: Flag Pennant Entry
+Nội dung: Điểm entry cho Flag/Pennant
+
+HÌNH 2
+Tên: Flag Pennant Stop Loss
+Nội dung: Đặt SL cho Flag/Pennant
+
+HÌNH 3
+Tên: Flag Pennant Target
+Nội dung: Tính target cho Flag/Pennant
+
+---
+
+Bài 1.5: Flag Pennant Ví Dụ
+HÌNH 1
+Tên: BTC Flag Example
+Nội dung: Ví dụ Flag trên BTC
+
+HÌNH 2
+Tên: ETH Pennant Trade
+Nội dung: Trade Pennant trên ETH
+
+HÌNH 3
+Tên: Flag Pennant Results
+Nội dung: Kết quả trades
+
+---
+CHƯƠNG 2: CANDLESTICK MASTERY
+---
+
+Bài 2.1: Doji & Spinning Top
+HÌNH 1
+Tên: Doji Types
+Nội dung: Các loại Doji
+
+HÌNH 2
+Tên: Spinning Top
+Nội dung: Spinning Top candle
+
+HÌNH 3
+Tên: Doji Interpretation
+Nội dung: Ý nghĩa của Doji
+
+---
+
+Bài 2.2: Engulfing Patterns
+HÌNH 1
+Tên: Bullish Engulfing
+Nội dung: Bullish Engulfing pattern
+
+HÌNH 2
+Tên: Bearish Engulfing
+Nội dung: Bearish Engulfing pattern
+
+HÌNH 3
+Tên: Engulfing Entry
+Nội dung: Entry với Engulfing
+
+---
+
+Bài 2.3: Hammer & Shooting Star
+HÌNH 1
+Tên: Hammer Pattern
+Nội dung: Hammer candle
+
+HÌNH 2
+Tên: Shooting Star
+Nội dung: Shooting Star candle
+
+HÌNH 3
+Tên: Hammer Star Entry
+Nội dung: Entry với Hammer/Shooting Star
+
+---
+
+Bài 2.4: Three Methods
+HÌNH 1
+Tên: Rising Three Methods
+Nội dung: Rising Three Methods pattern
+
+HÌNH 2
+Tên: Falling Three Methods
+Nội dung: Falling Three Methods pattern
+
+HÌNH 3
+Tên: Three Methods Trading
+Nội dung: Trading Three Methods
+
+---
+
+Bài 2.5: Candlesticks Xác Nhận
+HÌNH 1
+Tên: Candlestick Confirmation
+Nội dung: Nến xác nhận entry
+
+HÌNH 2
+Tên: Candlestick at Zones
+Nội dung: Nến tại GEM zones
+
+HÌNH 3
+Tên: Candlestick Scoring
+Nội dung: Chấm điểm candlestick signals
+
+---
+
+Bài 2.6: Candlesticks Ví Dụ
+HÌNH 1
+Tên: Candlestick Trade 1
+Nội dung: Ví dụ trade với candlestick #1
+
+HÌNH 2
+Tên: Candlestick Trade 2
+Nội dung: Ví dụ trade với candlestick #2
+
+HÌNH 3
+Tên: Candlestick Results
+Nội dung: Kết quả trades candlestick
+
+---
+CHƯƠNG 3: AI SIGNALS
+---
+
+Bài 3.1: AI Brain Giới Thiệu
+HÌNH 1
+Tên: AI Brain Overview
+Nội dung: Tổng quan AI Brain
+
+HÌNH 2
+Tên: AI Architecture
+Nội dung: Kiến trúc AI system
+
+HÌNH 3
+Tên: AI Features
+Nội dung: Các tính năng AI
+
+---
+
+Bài 3.2: AI Signals Đọc Hiểu
+HÌNH 1
+Tên: AI Signal Reading
+Nội dung: Cách đọc AI signals
+
+HÌNH 2
+Tên: Signal Strength
+Nội dung: Độ mạnh của signal
+
+HÌNH 3
+Tên: Signal Filtering
+Nội dung: Lọc signals chất lượng
+
+---
+
+Bài 3.3: AI Cảnh Báo
+HÌNH 1
+Tên: AI Alert Setup
+Nội dung: Thiết lập cảnh báo AI
+
+HÌNH 2
+Tên: Alert Types
+Nội dung: Các loại cảnh báo
+
+HÌNH 3
+Tên: Alert Actions
+Nội dung: Hành động khi nhận alert
+
+---
+
+Bài 3.4: AI + Con Người
+HÌNH 1
+Tên: AI Human Collaboration
+Nội dung: Kết hợp AI và phân tích con người
+
+HÌNH 2
+Tên: AI Override
+Nội dung: Khi nào override AI
+
+HÌNH 3
+Tên: Hybrid Strategy
+Nội dung: Chiến lược hybrid AI-Human
+
+---
+
+Bài 3.5: AI Signals Ví Dụ
+HÌNH 1
+Tên: AI Signal Trade 1
+Nội dung: Trade theo AI signal #1
+
+HÌNH 2
+Tên: AI Signal Trade 2
+Nội dung: Trade theo AI signal #2
+
+HÌNH 3
+Tên: AI Signal Results
+Nội dung: Kết quả trades AI
+
+---
+CHƯƠNG 4: WHALE TRACKING
+---
+
+Bài 4.1: Whale Là Ai?
+HÌNH 1
+Tên: Whale Definition
+Nội dung: Định nghĩa Whale trong crypto
+
+HÌNH 2
+Tên: Whale Impact
+Nội dung: Tác động của Whale lên giá
+
+HÌNH 3
+Tên: Whale vs Retail
+Nội dung: So sánh Whale và Retail traders
+
+---
+
+Bài 4.2: Phát Hiện Lệnh Lớn
+HÌNH 1
+Tên: Large Order Detection
+Nội dung: Phát hiện lệnh lớn
+
+HÌNH 2
+Tên: Order Flow Reading
+Nội dung: Đọc order flow
+
+HÌNH 3
+Tên: Whale Footprints
+Nội dung: Dấu chân của Whale
+
+---
+
+Bài 4.3: Order Flow Analysis
+HÌNH 1
+Tên: Order Flow Basics
+Nội dung: Cơ bản về order flow
+
+HÌNH 2
+Tên: Bid Ask Analysis
+Nội dung: Phân tích bid/ask
+
+HÌNH 3
+Tên: Order Flow Patterns
+Nội dung: Patterns trong order flow
+
+---
+
+Bài 4.4: Tích Hợp Whale Data
+HÌNH 1
+Tên: Whale Data Integration
+Nội dung: Tích hợp data whale vào trading
+
+HÌNH 2
+Tên: Whale Zone Confluence
+Nội dung: Whale data + GEM zones
+
+HÌNH 3
+Tên: Whale Trading Strategy
+Nội dung: Chiến lược trade theo whale
+
+---
+
+Bài 4.5: Whale Ví Dụ
+HÌNH 1
+Tên: Whale Trade Example 1
+Nội dung: Ví dụ trade theo whale #1
+
+HÌNH 2
+Tên: Whale Trade Example 2
+Nội dung: Ví dụ trade theo whale #2
+
+HÌNH 3
+Tên: Whale Trade Results
+Nội dung: Kết quả trades whale
+
+---
+CHƯƠNG 5: PORTFOLIO & PSYCHOLOGY
+---
+
+Bài 5.1: Quản Lý Danh Mục
+HÌNH 1
+Tên: Portfolio Allocation
+Nội dung: Phân bổ danh mục
+
+HÌNH 2
+Tên: Diversification Strategy
+Nội dung: Chiến lược đa dạng hóa
+
+HÌNH 3
+Tên: Portfolio Rebalancing
+Nội dung: Tái cân bằng danh mục
+
+---
+
+Bài 5.2: Kiểm Soát Drawdown
+HÌNH 1
+Tên: Drawdown Management
+Nội dung: Quản lý drawdown
+
+HÌNH 2
+Tên: Drawdown Recovery
+Nội dung: Phục hồi từ drawdown
+
+HÌNH 3
+Tên: Drawdown Rules
+Nội dung: Quy tắc kiểm soát drawdown
+
+---
+
+Bài 5.3: Tâm Lý Chuyên Sâu
+HÌNH 1
+Tên: Trading Psychology Deep
+Nội dung: Tâm lý trading chuyên sâu
+
+HÌNH 2
+Tên: Emotional Control
+Nội dung: Kiểm soát cảm xúc
+
+HÌNH 3
+Tên: Mental Framework
+Nội dung: Framework tâm lý
+
+---
+
+Bài 5.4: Chiến Lược Nâng Cao
+HÌNH 1
+Tên: Advanced Strategies
+Nội dung: Các chiến lược nâng cao
+
+HÌNH 2
+Tên: Strategy Combination
+Nội dung: Kết hợp nhiều strategies
+
+HÌNH 3
+Tên: Elite Trading Approach
+Nội dung: Cách tiếp cận Elite trading
+
+---
+
+Bài 5.5: Tốt Nghiệp & Đối Tác
+HÌNH 1
+Tên: Elite Trader Certificate
+Nội dung: Chứng chỉ Elite Trader
+
+HÌNH 2
+Tên: CTV 5 Tier Commission
+Nội dung: Bảng hoa hồng CTV 5 tier
+
+HÌNH 3
+Tên: Partner Success Stories
+Nội dung: Câu chuyện thành công của partners
+
+---
+CHƯƠNG 6: MODULE A - TIER 3
+---
+
+Bài 6.1: Con Người Cũ vs Mới (Elite)
+HÌNH 1
+Tên: Elite Transformation
+Nội dung: Sự chuyển đổi thành Elite Trader
+
+HÌNH 2
+Tên: Elite Mindset
+Nội dung: Tư duy Elite Trader
+
+HÌNH 3
+Tên: Elite Skills
+Nội dung: Kỹ năng Elite Trader
+
+---
+
+Bài 6.2: Bản Đồ Hành Trình (Elite)
+HÌNH 1
+Tên: Elite Roadmap
+Nội dung: Bản đồ hành trình Elite
+
+HÌNH 2
+Tên: Elite Milestones
+Nội dung: Cột mốc Elite Trader
+
+HÌNH 3
+Tên: Mastery Path
+Nội dung: Con đường đến mastery
+
+---
+
+Bài 6.3: Sự Thay Đổi Thực Sự (Elite)
+HÌNH 1
+Tên: Elite Real Change
+Nội dung: Thay đổi thực sự của Elite
+
+HÌNH 2
+Tên: Elite Results
+Nội dung: Kết quả Elite Traders
+
+HÌNH 3
+Tên: Elite Impact
+Nội dung: Tác động lên cuộc sống
+
+---
+
+Bài 6.4: Điều Khiến Bạn Khác Biệt (Elite)
+HÌNH 1
+Tên: Elite Trader Badge
+Nội dung: Badge Elite Trader
+
+HÌNH 2
+Tên: Elite vs Others
+Nội dung: So sánh Elite và traders khác
+
+HÌNH 3
+Tên: Your Future Path
+Nội dung: Con đường tương lai của Elite
+
+---
+CHƯƠNG 7: MODULE B - TIER 3
+---
+
+Bài 7.1: Ngã Ba Đường (Elite)
+HÌNH 1
+Tên: 3 Paths Crossroad
+Nội dung: Ngã ba đường - 3 lựa chọn phía trước
+
+HÌNH 2
+Tên: Path Options
+Nội dung: 3 con đường: Trading, Partner, Hybrid
+
+---
+
+Bài 7.2: Công Cụ Tăng Tốc (Elite)
+HÌNH 1
+Tên: Elite Tools
+Nội dung: Công cụ dành cho Elite
+
+HÌNH 2
+Tên: Elite Features
+Nội dung: Tính năng Elite exclusive
+
+HÌNH 3
+Tên: Elite Community
+Nội dung: Cộng đồng Elite Members
+
+---
+
+Bài 7.3: Cơ Hội Đối Tác (Elite)
+HÌNH 1
+Tên: CTV 5 Tier Official
+Nội dung: Bảng hoa hồng CTV 5 tier chính thức
+
+HÌNH 2
+Tên: KOL Affiliate Requirements
+Nội dung: Yêu cầu và lợi ích KOL Affiliate
+
+HÌNH 3
+Tên: Sub Affiliate System
+Nội dung: Hệ thống Sub-Affiliate
+
+---
+
+Bài 7.4: Câu Chuyện Thành Công (Elite)
+HÌNH 1
+Tên: Elite Success Story 1
+Nội dung: Câu chuyện thành công Trading Focus
+
+HÌNH 2
+Tên: Elite Success Story 2
+Nội dung: Câu chuyện Hybrid (Trading + Affiliate)
+
+HÌNH 3
+Tên: Elite Success Story 3
+Nội dung: Câu chuyện Pure Affiliate
+
+---
+
+Bài 7.5: Lợi Thế Đi Sớm (Elite)
+HÌNH 1
+Tên: Early Mover Advantage
+Nội dung: Lợi thế của người hành động sớm
+
+HÌNH 2
+Tên: Time Value
+Nội dung: Giá trị của thời gian
+
+HÌNH 3
+Tên: Act Now CTA
+Nội dung: Hành động ngay hôm nay
+
+---
+
+Bài 7.6: Khung Quyết Định (Elite)
+HÌNH 1
+Tên: Elite Decision Framework
+Nội dung: Framework quyết định cho Elite
+
+HÌNH 2
+Tên: Self Assessment
+Nội dung: Tự đánh giá profile
+
+HÌNH 3
+Tên: Profile Recommendations
+Nội dung: Gợi ý theo profile
+
+---
+
+Bài 7.7: Các Bước Tiếp Theo (Elite)
+HÌNH 1
+Tên: Graduation Certificate
+Nội dung: Chứng nhận Elite Trader - GEM Trading Academy
+
+HÌNH 2
+Tên: 30 Day Action Plan
+Nội dung: Kế hoạch hành động 30 ngày
+
+HÌNH 3
+Tên: Your Elite Journey Begins
+Nội dung: Hành trình Elite của bạn bắt đầu từ đây!
+
+================================================================================
+                              TỔNG KẾT
+================================================================================
+
+Tổng số hình ảnh cần tạo:
+- TIER 1: ~150 hình
+- TIER 2: ~130 hình
+- TIER 3: ~110 hình
+- TỔNG CỘNG: ~390 hình
+
+Kích thước khuyến nghị:
+- Hình chính: 800x500 px
+- Hình phụ: 700x400 px
+- Hình nhỏ: 600x300 px
+
+Color palette:
+- Navy: #112250
+- Gold: #FFBD59
+- Cyan: #00F0FF
+- Purple: #6A5BFF / #8B5CF6
+- Green: #10B981
+- Red: #EF4444
+
+================================================================================

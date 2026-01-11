@@ -4,7 +4,7 @@
  * FIXED: Full screen modal, proper scroll, Apply button visible
  */
 
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef, memo } from 'react';
 import {
   View,
   Text,
@@ -18,7 +18,6 @@ import {
   Platform,
   StatusBar,
   Dimensions,
-  Animated,
 } from 'react-native';
 import CustomAlert, { useCustomAlert } from '../../../components/CustomAlert';
 import {
@@ -41,6 +40,96 @@ import { tierAccessService } from '../../../services/tierAccessService';
 import { MULTI_TF_TIMEFRAMES, checkMultiTFAccess } from '../../../services/multiTimeframeScanner';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const ITEM_HEIGHT = 58; // Fixed height for getItemLayout optimization
+
+// Memoized Coin Item Component for better scroll performance
+const CoinItem = memo(({
+  item,
+  isSelected,
+  isFavorite,
+  ticker,
+  multiSelect,
+  onPress,
+  onToggleFavorite,
+  onToggleCoin,
+}) => {
+  const priceChange = ticker?.priceChangePercent || 0;
+  const isPositive = priceChange >= 0;
+
+  // Format volume
+  const formatVolume = (vol) => {
+    if (!vol || isNaN(vol)) return '0';
+    if (vol >= 1e9) return (vol / 1e9).toFixed(2) + 'B';
+    if (vol >= 1e6) return (vol / 1e6).toFixed(2) + 'M';
+    if (vol >= 1e3) return (vol / 1e3).toFixed(2) + 'K';
+    return vol.toFixed(2);
+  };
+
+  return (
+    <TouchableOpacity
+      style={[styles.coinItem, isSelected && styles.coinItemSelected]}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
+      {/* Left: Favorite + Checkbox */}
+      <TouchableOpacity
+        style={styles.favoriteBtn}
+        onPress={onToggleFavorite}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+      >
+        <Star
+          size={20}
+          color={isFavorite ? COLORS.gold : COLORS.textMuted}
+          fill={isFavorite ? COLORS.gold : 'transparent'}
+        />
+      </TouchableOpacity>
+
+      {multiSelect && (
+        <TouchableOpacity
+          style={styles.checkbox}
+          onPress={onToggleCoin}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          {isSelected ? (
+            <CheckSquare size={24} color={COLORS.gold} />
+          ) : (
+            <Square size={24} color={COLORS.textMuted} />
+          )}
+        </TouchableOpacity>
+      )}
+
+      {/* Middle: Symbol + Volume */}
+      <View style={styles.coinInfo}>
+        <View style={styles.symbolRow}>
+          <Text style={styles.coinSymbol}>{item.symbol}</Text>
+          <Text style={styles.perpLabel}>Vĩnh cửu</Text>
+        </View>
+        <Text style={styles.volumeText}>
+          KL {formatVolume(ticker?.quoteVolume)} USDT
+        </Text>
+      </View>
+
+      {/* Right: Price + % Change */}
+      <View style={styles.priceInfo}>
+        <Text style={styles.priceText}>{formatPrice(ticker?.price)}</Text>
+        <Text style={[
+          styles.changeText,
+          isPositive ? styles.changePositive : styles.changeNegative,
+        ]}>
+          {isPositive ? '+' : ''}{priceChange.toFixed(2)}%
+        </Text>
+      </View>
+    </TouchableOpacity>
+  );
+}, (prevProps, nextProps) => {
+  // Custom comparison for memo - only re-render when these change
+  return (
+    prevProps.isSelected === nextProps.isSelected &&
+    prevProps.isFavorite === nextProps.isFavorite &&
+    prevProps.ticker?.price === nextProps.ticker?.price &&
+    prevProps.ticker?.priceChangePercent === nextProps.ticker?.priceChangePercent
+  );
+});
 
 const CoinSelector = ({
   selected = 'BTCUSDT',
@@ -78,14 +167,8 @@ const CoinSelector = ({
   const MAX_TIMEFRAMES = 3; // Limit to 3 timeframes per scan
   const MAX_COINS_PER_SCAN = 10; // Limit 10 coins per scan
 
-  // Auto-hide header on scroll - use height animation for proper layout
-  const scrollY = useRef(new Animated.Value(0)).current;
-  const headerHeight = useRef(new Animated.Value(110)).current; // Full height when visible
-  const headerOpacity = useRef(new Animated.Value(1)).current;
-  const isHeaderHidden = useRef(false);
-  const lastScrollY = useRef(0);
-  const HEADER_FULL_HEIGHT = 110; // Actual content height (search 36 + tf 28 + tabs 24 + gaps ~22)
-  const HEADER_COLLAPSED_HEIGHT = 0;
+  // FlatList ref for scroll optimization
+  const flatListRef = useRef(null);
 
   // Show ALL timeframes but mark which are locked for FREE/TIER1
   const allTimeframes = useMemo(() => {
@@ -121,17 +204,6 @@ const CoinSelector = ({
     }
   };
 
-  // formatPrice is now imported from utils/formatters
-
-  // Format volume (KL = Khối lượng)
-  const formatVolume = (vol) => {
-    if (!vol || isNaN(vol)) return '0';
-    if (vol >= 1e9) return (vol / 1e9).toFixed(2) + 'B';
-    if (vol >= 1e6) return (vol / 1e6).toFixed(2) + 'M';
-    if (vol >= 1e3) return (vol / 1e3).toFixed(2) + 'K';
-    return vol.toFixed(2);
-  };
-
   // Filter coins
   const filteredCoins = useMemo(() => {
     let coins = [...allCoins];
@@ -164,15 +236,16 @@ const CoinSelector = ({
     }
     setSearchQuery('');
     setActiveTab('all');
-    // Reset header animation state
-    headerHeight.setValue(HEADER_FULL_HEIGHT);
-    headerOpacity.setValue(1);
-    isHeaderHidden.current = false;
-    lastScrollY.current = 0;
     setModalVisible(true);
   };
 
-  const closeModal = () => {
+  const closeModal = (saveSelection = true) => {
+    // IMPORTANT: Always save selection when closing modal
+    // This ensures coins aren't lost when user clicks X button
+    if (saveSelection && multiSelect && onCoinsChange && tempSelected.length > 0) {
+      console.log('[CoinSelector] Saving selection on close:', tempSelected.length, 'coins');
+      onCoinsChange(tempSelected);
+    }
     setModalVisible(false);
   };
 
@@ -180,7 +253,7 @@ const CoinSelector = ({
     if (multiSelect && onCoinsChange) {
       onCoinsChange(tempSelected);
     }
-    closeModal();
+    closeModal(false); // Don't save again, already saved above
   };
 
   // Toggle timeframe selection
@@ -216,24 +289,29 @@ const CoinSelector = ({
   const handleScanNow = () => {
     if (tempSelected.length === 0) return;
 
+    // Store the selection before closing
+    const coinsToScan = [...tempSelected];
+    const timeframesToScan = [...selectedTimeframes];
+
     // Apply the selection first
     if (multiSelect && onCoinsChange) {
-      onCoinsChange(tempSelected);
+      onCoinsChange(coinsToScan);
     }
 
     // Notify parent about selected timeframes
     if (onTimeframesChange) {
-      onTimeframesChange(selectedTimeframes);
+      onTimeframesChange(timeframesToScan);
     }
 
-    // Close modal
-    closeModal();
+    // Close modal without saving again
+    closeModal(false);
 
     // Trigger scan with the selected coins AND timeframes
     if (onScanNow) {
       // Small delay to ensure modal is closed before scan starts
       setTimeout(() => {
-        onScanNow(tempSelected, selectedTimeframes);
+        console.log('[CoinSelector] Triggering scan with:', coinsToScan.length, 'coins,', timeframesToScan.length, 'timeframes');
+        onScanNow(coinsToScan, timeframesToScan);
       }, 100);
     }
   };
@@ -273,128 +351,40 @@ const CoinSelector = ({
     setTempSelected([]);
   };
 
-  // Handle scroll to auto-hide/show header
-  const handleScroll = useCallback((event) => {
-    const currentY = event.nativeEvent.contentOffset.y;
-    const diff = currentY - lastScrollY.current;
+  // getItemLayout for FlatList optimization - fixed height items
+  const getItemLayout = useCallback((data, index) => ({
+    length: ITEM_HEIGHT,
+    offset: ITEM_HEIGHT * index,
+    index,
+  }), []);
 
-    // Hide when scrolling down past threshold
-    if (currentY > 60 && diff > 5 && !isHeaderHidden.current) {
-      isHeaderHidden.current = true;
-      Animated.parallel([
-        Animated.timing(headerHeight, {
-          toValue: HEADER_COLLAPSED_HEIGHT,
-          duration: 200,
-          useNativeDriver: false, // height can't use native driver
-        }),
-        Animated.timing(headerOpacity, {
-          toValue: 0,
-          duration: 150,
-          useNativeDriver: false,
-        }),
-      ]).start();
-    }
-    // Show when scrolling up or near top
-    else if ((diff < -8 || currentY < 30) && isHeaderHidden.current) {
-      isHeaderHidden.current = false;
-      Animated.parallel([
-        Animated.timing(headerHeight, {
-          toValue: HEADER_FULL_HEIGHT,
-          duration: 200,
-          useNativeDriver: false,
-        }),
-        Animated.timing(headerOpacity, {
-          toValue: 1,
-          duration: 150,
-          useNativeDriver: false,
-        }),
-      ]).start();
-    }
-
-    lastScrollY.current = currentY;
-  }, []);
-
-  // Expand header manually
-  const expandHeader = useCallback(() => {
-    isHeaderHidden.current = false;
-    Animated.parallel([
-      Animated.timing(headerHeight, {
-        toValue: HEADER_FULL_HEIGHT,
-        duration: 200,
-        useNativeDriver: false,
-      }),
-      Animated.timing(headerOpacity, {
-        toValue: 1,
-        duration: 150,
-        useNativeDriver: false,
-      }),
-    ]).start();
-  }, []);
-
-  const toggleFavorite = async (symbol) => {
+  const toggleFavorite = useCallback(async (symbol) => {
     const newFavorites = await favoritesService.toggleFavorite(symbol);
     setFavorites(newFavorites);
-  };
+  }, []);
 
+  // Memoized render function using the CoinItem component
   const renderCoinItem = useCallback(({ item }) => {
     const isSelected = multiSelect ? tempSelected.includes(item.symbol) : item.symbol === selected;
     const isFavorite = favorites.includes(item.symbol);
-    const ticker = tickerData[item.symbol] || {};
-    const priceChange = ticker.priceChangePercent || 0;
-    const isPositive = priceChange >= 0;
+    const ticker = tickerData[item.symbol];
 
     return (
-      <TouchableOpacity
-        style={[styles.coinItem, isSelected && styles.coinItemSelected]}
+      <CoinItem
+        item={item}
+        isSelected={isSelected}
+        isFavorite={isFavorite}
+        ticker={ticker}
+        multiSelect={multiSelect}
         onPress={() => handleCoinSelect(item)}
-        activeOpacity={0.7}
-      >
-        {/* Left: Favorite + Checkbox */}
-        <TouchableOpacity
-          style={styles.favoriteBtn}
-          onPress={() => toggleFavorite(item.symbol)}
-        >
-          <Star
-            size={18}
-            color={isFavorite ? COLORS.gold : COLORS.textMuted}
-            fill={isFavorite ? COLORS.gold : 'transparent'}
-          />
-        </TouchableOpacity>
-
-        {multiSelect && (
-          <View style={styles.checkbox}>
-            {isSelected ? (
-              <CheckSquare size={20} color={COLORS.gold} />
-            ) : (
-              <Square size={20} color={COLORS.textMuted} />
-            )}
-          </View>
-        )}
-
-        {/* Middle: Symbol + Volume */}
-        <View style={styles.coinInfo}>
-          <View style={styles.symbolRow}>
-            <Text style={styles.coinSymbol}>{item.symbol}</Text>
-            <Text style={styles.perpLabel}>Vĩnh cửu</Text>
-          </View>
-          <Text style={styles.volumeText}>
-            KL {formatVolume(ticker.quoteVolume)} USDT
-          </Text>
-        </View>
-
-        {/* Right: Price + % Change */}
-        <View style={styles.priceInfo}>
-          <Text style={styles.priceText}>{formatPrice(ticker.price)}</Text>
-          <Text style={[
-            styles.changeText,
-            isPositive ? styles.changePositive : styles.changeNegative,
-          ]}>
-            {isPositive ? '+' : ''}{priceChange.toFixed(2)}%
-          </Text>
-        </View>
-      </TouchableOpacity>
+        onToggleFavorite={() => toggleFavorite(item.symbol)}
+        onToggleCoin={() => toggleCoin(item.symbol)}
+      />
     );
-  }, [multiSelect, tempSelected, selected, favorites, tickerData]);
+  }, [multiSelect, tempSelected, selected, favorites, tickerData, handleCoinSelect, toggleFavorite, toggleCoin]);
+
+  // Key extractor for FlatList
+  const keyExtractor = useCallback((item) => item.symbol, []);
 
   const displayText = useMemo(() => {
     if (multiSelect) {
@@ -440,14 +430,8 @@ const CoinSelector = ({
               </View>
             </View>
 
-            {/* Collapsible Section - Search, Timeframes, Tabs */}
-            <Animated.View style={[
-              styles.collapsibleSection,
-              {
-                height: headerHeight,
-                opacity: headerOpacity,
-              }
-            ]}>
+            {/* Header Section - Search, Timeframes, Tabs */}
+            <View style={styles.collapsibleSection}>
               {/* Compact Search + Timeframes Row */}
               <View style={styles.compactRow}>
                 {/* Search - smaller */}
@@ -476,7 +460,7 @@ const CoinSelector = ({
                 )}
               </View>
 
-              {/* Timeframe Buttons - Single row, compact */}
+              {/* Timeframe Buttons - Single row, IMPROVED TOUCH */}
               <View style={styles.timeframeRowCompact}>
                 {allTimeframes.map((tf) => {
                   const isSelected = selectedTimeframes.includes(tf.value);
@@ -492,9 +476,11 @@ const CoinSelector = ({
                         isLocked && styles.tfBtnLocked,
                       ]}
                       onPress={() => toggleTimeframe(tf.value, isLocked)}
-                      activeOpacity={0.7}
+                      activeOpacity={0.6}
+                      delayPressIn={0}
+                      hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
                     >
-                      {isLocked && <Lock size={9} color={COLORS.textMuted} />}
+                      {isLocked && <Lock size={10} color={COLORS.textMuted} />}
                       <Text style={[
                         styles.tfBtnText,
                         isSelected && styles.tfBtnTextActive,
@@ -507,11 +493,14 @@ const CoinSelector = ({
                 })}
               </View>
 
-              {/* Tabs + Clear - Single compact row */}
+              {/* Tabs + Clear - IMPROVED TOUCH TARGETS */}
               <View style={styles.tabsRowCompact}>
                 <TouchableOpacity
                   style={[styles.tabCompact, activeTab === 'all' && styles.tabCompactActive]}
                   onPress={() => setActiveTab('all')}
+                  activeOpacity={0.6}
+                  delayPressIn={0}
+                  hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
                 >
                   <Text style={[styles.tabTextCompact, activeTab === 'all' && styles.tabTextCompactActive]}>
                     All ({allCoins.length})
@@ -520,8 +509,11 @@ const CoinSelector = ({
                 <TouchableOpacity
                   style={[styles.tabCompact, activeTab === 'favorites' && styles.tabCompactActive]}
                   onPress={() => setActiveTab('favorites')}
+                  activeOpacity={0.6}
+                  delayPressIn={0}
+                  hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
                 >
-                  <Star size={12} color={activeTab === 'favorites' ? COLORS.gold : COLORS.textMuted} />
+                  <Star size={14} color={activeTab === 'favorites' ? COLORS.gold : COLORS.textMuted} />
                   <Text style={[styles.tabTextCompact, activeTab === 'favorites' && styles.tabTextCompactActive]}>
                     ({favorites.length})
                   </Text>
@@ -529,46 +521,28 @@ const CoinSelector = ({
                 <TouchableOpacity
                   style={[styles.tabCompact, activeTab === 'recent' && styles.tabCompactActive]}
                   onPress={() => setActiveTab('recent')}
+                  activeOpacity={0.6}
+                  delayPressIn={0}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                  <Clock size={12} color={activeTab === 'recent' ? COLORS.gold : COLORS.textMuted} />
+                  <Clock size={16} color={activeTab === 'recent' ? COLORS.gold : COLORS.textMuted} />
                 </TouchableOpacity>
 
                 {/* Clear button on same row */}
                 {multiSelect && tempSelected.length > 0 && (
-                  <TouchableOpacity style={styles.clearBtnCompact} onPress={clearSelection}>
-                    <X size={12} color={COLORS.error} />
+                  <TouchableOpacity
+                    style={styles.clearBtnCompact}
+                    onPress={clearSelection}
+                    activeOpacity={0.6}
+                    delayPressIn={0}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <X size={14} color={COLORS.error} />
                     <Text style={styles.clearBtnText}>Xóa</Text>
                   </TouchableOpacity>
                 )}
               </View>
-            </Animated.View>
-
-            {/* Collapsed indicator - tap to expand - inverse of header */}
-            <Animated.View
-              style={[
-                styles.expandBar,
-                {
-                  height: headerHeight.interpolate({
-                    inputRange: [0, HEADER_FULL_HEIGHT],
-                    outputRange: [36, 0],
-                    extrapolate: 'clamp',
-                  }),
-                  opacity: headerHeight.interpolate({
-                    inputRange: [0, 30],
-                    outputRange: [1, 0],
-                    extrapolate: 'clamp',
-                  }),
-                }
-              ]}
-            >
-              <TouchableOpacity onPress={expandHeader} activeOpacity={0.7} style={styles.expandBarTouchable}>
-                <Search size={14} color={COLORS.gold} />
-                <Text style={styles.expandBarText}>
-                  {searchQuery || 'Tìm kiếm'} • {selectedTimeframes.length} TF • {tempSelected.length} coins
-                </Text>
-                <ChevronDown size={14} color={COLORS.gold} />
-              </TouchableOpacity>
-            </Animated.View>
+            </View>
 
             {/* Coins List Container */}
             <View style={styles.coinsListContainer}>
@@ -579,17 +553,25 @@ const CoinSelector = ({
                 </View>
               ) : (
                 <FlatList
+                  ref={flatListRef}
                   data={filteredCoins}
                   renderItem={renderCoinItem}
-                  keyExtractor={(item) => item.symbol}
+                  keyExtractor={keyExtractor}
+                  getItemLayout={getItemLayout}
                   style={styles.coinsList}
                   contentContainerStyle={styles.coinsListContent}
                   showsVerticalScrollIndicator={true}
-                  initialNumToRender={25}
-                  maxToRenderPerBatch={30}
-                  windowSize={10}
-                  onScroll={handleScroll}
-                  scrollEventThrottle={16}
+                  // Performance optimizations
+                  initialNumToRender={15}
+                  maxToRenderPerBatch={10}
+                  updateCellsBatchingPeriod={50}
+                  windowSize={5}
+                  removeClippedSubviews={true}
+                  // Better touch handling
+                  keyboardShouldPersistTaps="handled"
+                  keyboardDismissMode="on-drag"
+                  // Disable momentum for smoother feel
+                  decelerationRate="fast"
                   ListEmptyComponent={
                     <View style={styles.emptyContainer}>
                       <Text style={styles.emptyText}>Không tìm thấy coin</Text>
@@ -716,11 +698,11 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
   },
 
-  // Collapsible Section
+  // Header Section (search, timeframes, tabs)
   collapsibleSection: {
     backgroundColor: '#0F1030',
     paddingHorizontal: SPACING.md,
-    overflow: 'hidden',
+    paddingBottom: SPACING.xs,
   },
   compactRow: {
     flexDirection: 'row',
@@ -758,7 +740,7 @@ const styles = StyleSheet.create({
     color: COLORS.gold,
   },
 
-  // Compact Timeframe Buttons
+  // Compact Timeframe Buttons - IMPROVED TOUCH TARGETS
   timeframeRowCompact: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -768,13 +750,16 @@ const styles = StyleSheet.create({
   tfBtnCompact: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 5,
+    justifyContent: 'center',
+    minHeight: 28, // Reduced for compact display
+    minWidth: 36,
+    paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 6,
     backgroundColor: 'rgba(20, 18, 35, 0.9)',
     borderWidth: 1,
     borderColor: 'rgba(106, 91, 255, 0.2)',
-    gap: 3,
+    gap: 2,
   },
   tfBtnActive: {
     backgroundColor: 'rgba(106, 91, 255, 0.3)',
@@ -789,7 +774,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   tfBtnText: {
-    fontSize: 12,
+    fontSize: 12, // Compact size
     fontWeight: '600',
     color: COLORS.textSecondary,
   },
@@ -800,25 +785,28 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
   },
 
-  // Compact Tabs Row
+  // Compact Tabs Row - IMPROVED TOUCH TARGETS
   tabsRowCompact: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: SPACING.sm,
+    gap: SPACING.xs,
   },
   tabCompact: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: 6,
+    justifyContent: 'center',
+    minHeight: 36, // Minimum touch target
+    minWidth: 44, // Minimum touch target
+    paddingVertical: 8, // Increased from 4
+    paddingHorizontal: 12, // Increased from 8
+    borderRadius: 8,
     gap: 4,
   },
   tabCompactActive: {
     backgroundColor: 'rgba(106, 91, 255, 0.2)',
   },
   tabTextCompact: {
-    fontSize: 11,
+    fontSize: 13, // Increased from 11 for readability
     fontWeight: '600',
     color: COLORS.textMuted,
   },
@@ -828,36 +816,18 @@ const styles = StyleSheet.create({
   clearBtnCompact: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     marginLeft: 'auto',
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    gap: 3,
+    minHeight: 36, // Minimum touch target
+    paddingVertical: 8, // Increased from 4
+    paddingHorizontal: 12, // Increased from 8
+    borderRadius: 8,
+    gap: 4,
   },
   clearBtnText: {
-    fontSize: 11,
+    fontSize: 13, // Increased from 11
     fontWeight: '600',
     color: COLORS.error,
-  },
-
-  // Expand Bar (when collapsed) - height controlled by animation
-  expandBar: {
-    backgroundColor: 'rgba(106, 91, 255, 0.15)',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(106, 91, 255, 0.3)',
-    overflow: 'hidden',
-  },
-  expandBarTouchable: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    height: 36,
-  },
-  expandBarText: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    fontWeight: '500',
   },
 
   // Legacy styles (keep for compatibility)
@@ -903,9 +873,9 @@ const styles = StyleSheet.create({
   coinItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    height: ITEM_HEIGHT, // Fixed height for getItemLayout optimization
     paddingVertical: 8,
     paddingHorizontal: 8,
-    marginBottom: 1,
     backgroundColor: 'rgba(20, 18, 35, 0.6)',
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.05)',
@@ -914,11 +884,20 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 189, 89, 0.1)',
   },
   favoriteBtn: {
-    padding: 6,
-    marginRight: 4,
+    padding: 10, // Increased from 6 for better touch target
+    marginRight: 2,
+    minWidth: 38, // Ensure minimum touch area
+    minHeight: 38,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   checkbox: {
-    marginRight: SPACING.sm,
+    padding: 8, // Added padding for better touch target
+    marginRight: SPACING.xs,
+    minWidth: 36, // Ensure minimum touch area
+    minHeight: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   coinInfo: {
     flex: 1,
@@ -1041,15 +1020,17 @@ const styles = StyleSheet.create({
   timeframeButtonsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: SPACING.sm,
+    gap: 6,
   },
   timeframeButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 8,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 6,
     backgroundColor: 'rgba(20, 18, 35, 0.9)',
     borderWidth: 1,
     borderColor: 'rgba(106, 91, 255, 0.2)',
+    minWidth: 40,
+    alignItems: 'center',
   },
   timeframeButtonActive: {
     backgroundColor: 'rgba(106, 91, 255, 0.3)',
@@ -1060,7 +1041,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(100, 100, 100, 0.2)',
   },
   timeframeButtonText: {
-    fontSize: TYPOGRAPHY.fontSize.md,
+    fontSize: 13,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
     color: COLORS.textSecondary,
   },
@@ -1078,7 +1059,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 2,
   },
   timeframeButtonTextLocked: {
     color: COLORS.textMuted,

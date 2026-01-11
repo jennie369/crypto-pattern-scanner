@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 7.4: Điều Khiến Bạn Khác Biệt - GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        .section, .content-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .section p, .section-content p, p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+
+        .section ul, .section-content ul, ul {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        .section li, .section-content li, li { margin-bottom: var(--space-sm); color: var(--text-secondary); }
+        li strong { color: var(--gold); }
+
+        .image-placeholder, .image-container img {
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-placeholder, .image-container img { border-radius: 0; border: none; margin: var(--space-md) 0; }
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box h4 { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05));
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .warning-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--error);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .warning-box h4 { font-weight: 700; color: var(--error); margin-bottom: var(--space-sm); }
+        .warning-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .definition-box h4 { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); }
+
+        .success-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05));
+            border: 1px solid rgba(0, 200, 83, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .success-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .success-box h4 { font-weight: 700; color: var(--success); margin-bottom: var(--space-sm); }
+        .success-box p { color: var(--text-secondary); margin: 0; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .stats-grid {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .stat-card { border: none; border-radius: 0; padding: var(--space-md); }
+        }
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: block;
+            margin-bottom: var(--space-xs);
+            color: var(--cyan);
+        }
+        .stat-card .value.red { color: var(--error); }
+        .stat-card .value.gold { color: var(--gold); }
+        .stat-card .value.green { color: var(--success); }
+        .stat-card .label { font-size: 0.85rem; color: var(--text-muted); }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-box h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+        }
+        .summary-box ul { list-style: none; padding: 0; }
+        .summary-box li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-box li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-section {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-lg) 16px;
+                margin-top: 0;
+                border-top: 8px solid var(--bg-primary);
+            }
+        }
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-question {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin-bottom: 0;
+                border-bottom: 1px solid var(--glass-border);
+            }
+        }
+        .quiz-question h4, .question-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+            color: var(--success);
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+            color: var(--error);
+        }
+
+        .quiz-result {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+            color: var(--success);
+        }
+        .quiz-result.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+            color: var(--error);
+        }
+
+        .quiz-score {
+            text-align: center;
+            padding: var(--space-xl);
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), transparent);
+            border: 1px solid var(--purple);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-lg);
+            display: none;
+        }
+        .quiz-score.show { display: block; }
+        .quiz-score h3, .quiz-score-text { color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-score p { color: var(--text-secondary); }
+
+        .retake-btn {
+            margin-top: var(--space-md);
+            padding: var(--space-md) var(--space-xl);
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            color: var(--navy-dark);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .lesson-footer {
+                border: none;
+                border-radius: 0;
+                margin-top: 0;
+                padding: var(--space-lg) 16px;
+            }
+        }
+        .lesson-footer p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        .lesson-footer .highlight { color: var(--gold); font-weight: 600; }
+
+        strong { color: var(--gold); }
+
+        /* Additional classes for compatibility */
+        .path-card, .whale-card, .pattern-card, .example-card, .trade-result, .phase-card, .checklist {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .path-card h4, .whale-card h4, .pattern-card h4, .example-card h4 { color: var(--cyan); margin-bottom: var(--space-sm); }
+        .path-card.gold h4 { color: var(--gold); }
+        .path-card.green h4 { color: var(--success); }
+
+        .stat-row { display: flex; justify-content: space-around; flex-wrap: wrap; gap: var(--space-md); margin: var(--space-lg) 0; }
+        .stat-item { text-align: center; padding: var(--space-md); background: var(--bg-card); border-radius: var(--radius-md); flex: 1; min-width: 120px; }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--cyan); }
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: var(--space-xs); }
+
+        .whale-type-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md); margin: var(--space-lg) 0; }
+        .whale-type { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); border-top: 3px solid var(--cyan); }
+        .whale-type h4 { color: var(--text-primary); margin-bottom: var(--space-sm); }
+        .whale-type .size { color: var(--gold); font-weight: 600; }
+
+        .reason-list { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        .reason-item { display: flex; gap: var(--space-md); margin-bottom: var(--space-md); align-items: flex-start; }
+        .reason-number { background: linear-gradient(135deg, var(--cyan), var(--purple)); color: var(--navy-dark); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+        .reason-content h4 { color: var(--text-primary); margin-bottom: var(--space-xs); }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="container">
+        <header class="lesson-header">
+            <span class="lesson-badge">⭐ Module A - Chương 7</span>
+            <h1 class="lesson-title">Bài 7.4: Điều Khiến Bạn Khác Biệt</h1>
+            <p class="lesson-subtitle">Your Edge - Lợi thế cạnh tranh của trader GEM Method</p>
+        </header>
+
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon gold">🏆</div>
+                <div class="card-meta">
+                    <h3>Lợi Thế Của Bạn</h3>
+                    <span>Your Competitive Edge</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Hoàn thành TIER 2, bạn đã có những lợi thế mà <strong>95% traders</strong> không có. Đây là những edge thực sự trong thị trường.</p>
+
+                <div class="edge-grid">
+                    <div class="edge-card">
+                        <div class="edge-number">24</div>
+                        <div class="edge-label">Patterns<br>đã master</div>
+                    </div>
+                    <div class="edge-card">
+                        <div class="edge-number">3</div>
+                        <div class="edge-label">Timeframes<br>phân tích</div>
+                    </div>
+                    <div class="edge-card">
+                        <div class="edge-number">10</div>
+                        <div class="edge-label">Zone scoring<br>criteria</div>
+                    </div>
+                    <div class="edge-card">
+                        <div class="edge-number">1:2+</div>
+                        <div class="edge-label">Average<br>R:R ratio</div>
+                    </div>
+                </div>
+
+                <div class="quote-box">
+                    <div class="quote-text">"Edge không phải là biết nhiều hơn, mà là làm đúng những gì đã biết."</div>
+                    <div class="quote-author">— GEM Method</div>
+                </div>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x350/112250/FFBD59?text=Your+Trading+Edge" alt="Your Edge">
+                    <p class="image-caption">Hình 7.4.1: Lợi thế cạnh tranh của GEM Trader</p>
+                </div>
+            </div>
+        </article>
+
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon green">✅</div>
+                <div class="card-meta">
+                    <h3>5 Lợi Thế Cụ Thể</h3>
+                    <span>So với 95% retail traders</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="advantage-grid">
+                    <div class="advantage-card">
+                        <div class="advantage-icon">📊</div>
+                        <div class="advantage-content">
+                            <h4>Systematic Method</h4>
+                            <p>Có phương pháp rõ ràng thay vì trade random. Mỗi trade có lý do cụ thể dựa trên pattern và zone.</p>
+                        </div>
+                    </div>
+
+                    <div class="advantage-card">
+                        <div class="advantage-icon">🎯</div>
+                        <div class="advantage-content">
+                            <h4>High-Quality Zones</h4>
+                            <p>Chỉ trade tại các zone được chấm điểm cao, không phải random S/R như đa số traders.</p>
+                        </div>
+                    </div>
+
+                    <div class="advantage-card">
+                        <div class="advantage-icon">📈</div>
+                        <div class="advantage-content">
+                            <h4>Multi-Timeframe Confluence</h4>
+                            <p>Phân tích từ HTF xuống LTF, entry tại điểm có nhiều yếu tố hội tụ.</p>
+                        </div>
+                    </div>
+
+                    <div class="advantage-card">
+                        <div class="advantage-icon">💰</div>
+                        <div class="advantage-content">
+                            <h4>Professional Risk Management</h4>
+                            <p>Position sizing đúng công thức, SL có logic, R:R tối thiểu 1:2.</p>
+                        </div>
+                    </div>
+
+                    <div class="advantage-card">
+                        <div class="advantage-icon">🧠</div>
+                        <div class="advantage-content">
+                            <h4>Trading Psychology</h4>
+                            <p>Hiểu về mindset, có framework để xử lý cảm xúc và duy trì kỷ luật.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon purple">📊</div>
+                <div class="card-meta">
+                    <h3>Thống Kê Thực Tế</h3>
+                    <span>Tại sao đa số traders thất bại</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Nghiên cứu cho thấy <strong>90-95% retail traders</strong> thua lỗ. Nguyên nhân chính:</p>
+
+                <ul class="styled-list">
+                    <li><strong>70%:</strong> Không có trading plan rõ ràng</li>
+                    <li><strong>65%:</strong> Risk quá nhiều mỗi trade (>5%)</li>
+                    <li><strong>60%:</strong> Không có stop loss hoặc di chuyển SL</li>
+                    <li><strong>55%:</strong> Overtrade do FOMO/revenge</li>
+                    <li><strong>50%:</strong> Không review và học từ mistakes</li>
+                </ul>
+
+                <p><strong>Bạn đã khác:</strong></p>
+                <ul class="styled-list green">
+                    <li>✓ Có systematic trading plan (GEM Method)</li>
+                    <li>✓ Risk management với 1-2% rule</li>
+                    <li>✓ SL logic dựa trên zone + buffer</li>
+                    <li>✓ Entry rules rõ ràng, không FOMO</li>
+                    <li>✓ Journaling và review habits</li>
+                </ul>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x300/112250/10B981?text=Why+Traders+Fail+Statistics" alt="Statistics">
+                    <p class="image-caption">Hình 7.4.2: Nguyên nhân thất bại và cách bạn đã vượt qua</p>
+                </div>
+            </div>
+        </article>
+
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon cyan">🚀</div>
+                <div class="card-meta">
+                    <h3>Maximize Your Edge</h3>
+                    <span>Tối đa hóa lợi thế</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Để biến edge thành profit thực sự:</p>
+
+                <ul class="styled-list gold">
+                    <li><strong>Stick to the method:</strong> Không deviate khỏi GEM Method, không mix với indicators/methods khác</li>
+                    <li><strong>Trade your edge:</strong> Chỉ trade khi setup đúng 100%, không trade "gần đúng"</li>
+                    <li><strong>Let profits run:</strong> Sử dụng Multi-TP strategy, trailing stop</li>
+                    <li><strong>Cut losses quick:</strong> SL hit = accept và move on, không hesitate</li>
+                    <li><strong>Journal everything:</strong> Data là king - track để optimize</li>
+                </ul>
+
+                <div class="cta-box">
+                    <h4>🎯 Remember This</h4>
+                    <p>Edge không nằm ở việc đúng 100% trades. Edge nằm ở việc khi đúng bạn earn nhiều hơn khi sai bạn lose. Với win rate 50% và R:R 1:2, bạn đã có positive expectancy.</p>
+                </div>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x350/112250/00F0FF?text=Maximize+Your+Edge" alt="Maximize Edge">
+                    <p class="image-caption">Hình 7.4.3: Framework tối đa hóa lợi thế trading</p>
+                </div>
+            </div>
+        </article>
+
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon gold">🌟</div>
+                <div class="card-meta">
+                    <h3>Module A Complete!</h3>
+                    <span>Hành trình chuyển hóa hoàn tất</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Chúc mừng! Bạn đã hoàn thành <strong>Module A - Hành Trình Chuyển Hóa</strong>. Những điều bạn đã học:</p>
+
+                <ul class="styled-list green">
+                    <li>Con Người Cũ vs Con Người Mới - Sự chuyển hóa cần thiết</li>
+                    <li>Bản Đồ Hành Trình - Biết mình đang ở đâu và cần đi đâu</li>
+                    <li>Sự Thay Đổi Thực Sự - Từ kiến thức đến hành động và thói quen</li>
+                    <li>Điều Khiến Bạn Khác Biệt - Edge thực sự của bạn</li>
+                </ul>
+
+                <p>Tiếp theo: <strong>Module B - Cơ Hội & Lựa Chọn</strong> sẽ mở ra những cơ hội phát triển sự nghiệp trading của bạn.</p>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x300/112250/8B5CF6?text=Module+A+Complete" alt="Module A Complete">
+                    <p class="image-caption">Hình 7.4.4: Module A Complete - Ready for Module B</p>
+                </div>
+            </div>
+        </article>
+
+        <div class="summary-box">
+            <h3>📝 Tóm Tắt Module A</h3>
+            <ul class="summary-list">
+                <li>Bạn có 5 lợi thế chính: Method, Zones, MTF, Risk Mgt, Psychology</li>
+                <li>90-95% traders thua vì không có những điều bạn đã học</li>
+                <li>Edge = Win khi đúng > Lose khi sai (không phải đúng 100%)</li>
+                <li>Maximize edge: Stick to method, trade your edge, journal everything</li>
+                <li>Với WR 50% + R:R 1:2 = Positive expectancy đã có</li>
+            </ul>
+        </div>
+
+        <section class="quiz-section">
+            <h3>🎯 Kiểm Tra Kiến Thức</h3>
+
+            <div class="quiz-question" data-correct="2">
+                <p><strong>Câu 1:</strong> Lợi thế (Edge) trong trading nghĩa là gì?</p>
+                <button class="quiz-option" data-index="0">Đúng 100% mọi trade</button>
+                <button class="quiz-option" data-index="1">Biết trước thị trường sẽ đi đâu</button>
+                <button class="quiz-option" data-index="2">Khi đúng earn nhiều hơn khi sai lose</button>
+                <button class="quiz-option" data-index="3">Có nhiều tiền hơn người khác</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="0">
+                <p><strong>Câu 2:</strong> Để maximize edge, điều quan trọng nhất là gì?</p>
+                <button class="quiz-option" data-index="0">Stick to method, không deviate</button>
+                <button class="quiz-option" data-index="1">Trade nhiều hơn</button>
+                <button class="quiz-option" data-index="2">Tăng size mỗi khi thắng</button>
+                <button class="quiz-option" data-index="3">Mix nhiều methods khác nhau</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="1">
+                <p><strong>Câu 3:</strong> Với win rate 50% và R:R 1:2, kỳ vọng của bạn là gì?</p>
+                <button class="quiz-option" data-index="0">Thua trong dài hạn</button>
+                <button class="quiz-option" data-index="1">Positive expectancy - có lợi nhuận</button>
+                <button class="quiz-option" data-index="2">Breakeven</button>
+                <button class="quiz-option" data-index="3">Không xác định được</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <div class="score-text"><span id="correct-count">0</span>/3</div>
+                <div class="score-label">Câu trả lời đúng</div>
+                <button class="retake-btn" onclick="location.reload()">Làm lại Quiz</button>
+            </div>
+        </section>
+
+        <footer class="lesson-footer">
+            <div class="footer-logo">GEM Trading Academy</div>
+            <p class="footer-text">Module A Complete - Hành Trình Chuyển Hóa</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+                    question.classList.add('answered');
+                    answeredCount++;
+                    const selectedIndex = parseInt(this.dataset.index);
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác!';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Xem đáp án đúng ở trên.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,970 @@
+═══════════════════════════════════════════════════════════════════════════════
+TIER 1 - CHƯƠNG 4: UPD PATTERN MASTERY
+PROMPTS CHI TIẾT TẠO HÌNH ẢNH - BÀI 4.2 ĐẾN 4.6
+═══════════════════════════════════════════════════════════════════════════════
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 4.2: UPD CẤU TRÚC 3 PHASES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 4.2.1: UPD 3 PHASES BREAKDOWN
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK, KHÔNG dùng đường line
+- Nến xanh: #00C853 - SOLID FILLED (tô đặc)
+- Nến đỏ: #EF4444 - SOLID FILLED (tô đặc)
+
+📋 DESIGN SYSTEM GENERAL:
+┌─────────────────┬───────────────────────────────────────┐
+│ Element         │ Specification                         │
+├─────────────────┼───────────────────────────────────────┤
+│ Background      │ Navy gradient #112250 → #1a1a2e       │
+│ Primary Text    │ White #FFFFFF                         │
+│ Accent Gold     │ #FFBD59                               │
+│ Accent Cyan     │ #00F0FF                               │
+│ Accent Purple   │ #6A5BFF                               │
+│ Success Green   │ #10B981                               │
+│ Error Red       │ #EF4444                               │
+│ Border Radius   │ 12px cho cards                        │
+│ Shadow          │ 0 4px 20px rgba(0,0,0,0.3)            │
+└─────────────────┴───────────────────────────────────────┘
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 4.2" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "UPD 3 PHASES BREAKDOWN" (White, bold)                           │
+│ - Subtitle: "Phân tích chi tiết cấu trúc Up-Pause-Down"                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ CHART AREA (70% height):                                                     │
+│                                                                              │
+│ PHASE 1 - UP (Màu xanh #10B981):                                            │
+│ - 5-7 nến CANDLESTICK xanh (#00C853) SOLID FILLED đi lên                    │
+│ - Nến có thân dày, bấc ngắn                                                 │
+│ - Mũi tên xanh chỉ hướng lên                                                │
+│ - Label: "PHASE 1: UP" + "Xu hướng tăng mạnh"                               │
+│ - Box viền xanh bao quanh vùng này                                          │
+│                                                                              │
+│ PHASE 2 - PAUSE (Màu vàng #FFBD59):                                         │
+│ - 3-5 nến CANDLESTICK nhỏ đi ngang                                          │
+│ - Nến có thân ngắn, bấc dài (uncertainty)                                   │
+│ - Vùng HFZ được highlight màu đỏ nhạt rgba(239,68,68,0.2)                   │
+│ - Label: "PHASE 2: PAUSE" + "HFZ - High Frequency Zone"                     │
+│ - Đường ngang đánh dấu resistance                                           │
+│                                                                              │
+│ PHASE 3 - DOWN (Màu đỏ #EF4444):                                            │
+│ - 5-7 nến CANDLESTICK đỏ (#EF4444) SOLID FILLED đi xuống                    │
+│ - Nến có thân dày, momentum mạnh                                            │
+│ - Mũi tên đỏ chỉ hướng xuống                                                │
+│ - Label: "PHASE 3: DOWN" + "Đảo chiều giảm mạnh"                            │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM INFO:                                                                 │
+│ - Icon: Candlestick + "Pattern: UPD - BEARISH REVERSAL"                     │
+│ - Tagline: "Nhận diện đỉnh để SHORT chính xác"                              │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🕯️ QUY TẮC VẼ NẾN CANDLESTICK:
+- Nến TĂNG (bullish): Màu #00C853, thân TÔ ĐẶC (SOLID FILLED), bấc trên/dưới
+- Nến GIẢM (bearish): Màu #EF4444, thân TÔ ĐẶC (SOLID FILLED), bấc trên/dưới
+- KHÔNG vẽ nến rỗng (hollow) - tất cả phải SOLID
+- Chiều cao thân nến thể hiện momentum (dài = mạnh, ngắn = yếu)
+
+
+📐 HÌNH 4.2.2: UPD ZONE IDENTIFICATION
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK, KHÔNG dùng đường line
+
+📋 DESIGN SYSTEM GENERAL: (Giống bảng trên)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 4.2" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "4 BƯỚC XÁC ĐỊNH HFZ" (White, bold)                              │
+│ - Subtitle: "High Frequency Zone trong UPD Pattern"                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN CONTENT - 4 BƯỚC (Grid 2x2):                                           │
+│                                                                              │
+│ ┌─────────────────────┐  ┌─────────────────────┐                            │
+│ │ BƯỚC 1              │  │ BƯỚC 2              │                            │
+│ │ 🔍 Xác định UP      │  │ 📊 Tìm PAUSE        │                            │
+│ │                     │  │                     │                            │
+│ │ [Mini chart:        │  │ [Mini chart:        │                            │
+│ │ 5 nến xanh đi lên]  │  │ nến consolidation]  │                            │
+│ │                     │  │                     │                            │
+│ │ "Xu hướng tăng      │  │ "Vùng tích lũy      │                            │
+│ │ trước đó rõ ràng"   │  │ đi ngang"           │                            │
+│ └─────────────────────┘  └─────────────────────┘                            │
+│                                                                              │
+│ ┌─────────────────────┐  ┌─────────────────────┐                            │
+│ │ BƯỚC 3              │  │ BƯỚC 4              │                            │
+│ │ 📍 Đánh dấu HFZ     │  │ ✅ Xác nhận Zone    │                            │
+│ │                     │  │                     │                            │
+│ │ [Mini chart:        │  │ [Mini chart:        │                            │
+│ │ HFZ box highlight]  │  │ complete pattern]   │                            │
+│ │                     │  │                     │                            │
+│ │ "Vẽ zone từ high    │  │ "2+ test vào zone   │                            │
+│ │ đến low của PAUSE"  │  │ = HFZ valid"        │                            │
+│ └─────────────────────┘  └─────────────────────┘                            │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Tip box: "💡 HFZ càng được test nhiều lần → Signal càng mạnh"             │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🕯️ QUY TẮC VẼ NẾN CANDLESTICK:
+- Tất cả mini charts đều dùng nến CANDLESTICK SOLID FILLED
+- Nến xanh #00C853, nến đỏ #EF4444
+- Vùng HFZ: highlight màu đỏ nhạt rgba(239,68,68,0.2)
+
+
+📐 HÌNH 4.2.3: UPD ENTRY TIMING
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK, KHÔNG dùng đường line
+
+📋 DESIGN SYSTEM GENERAL: (Giống bảng trên)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 4.2" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "3 THỜI ĐIỂM ENTRY TỐI ƯU" (White, bold)                         │
+│ - Subtitle: "Khi nào vào lệnh SHORT trong UPD?"                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ CHART với 3 ENTRY POINTS:                                                    │
+│                                                                              │
+│ [Full UPD Pattern với candlesticks]                                         │
+│                                                                              │
+│ ENTRY 1 - AGGRESSIVE (Cyan #00F0FF):                                        │
+│ - Vị trí: Ngay tại HFZ khi giá chạm lần đầu                                 │
+│ - Marker: Số "1" trong circle cyan                                          │
+│ - Label: "Entry 1: Aggressive"                                              │
+│ - Note: "Risk cao, reward cao"                                              │
+│                                                                              │
+│ ENTRY 2 - STANDARD (Gold #FFBD59):                                          │
+│ - Vị trí: Sau nến xác nhận bearish                                          │
+│ - Marker: Số "2" trong circle gold                                          │
+│ - Label: "Entry 2: Standard"                                                │
+│ - Note: "Cân bằng risk/reward"                                              │
+│                                                                              │
+│ ENTRY 3 - CONSERVATIVE (Green #10B981):                                     │
+│ - Vị trí: Sau khi break support                                             │
+│ - Marker: Số "3" trong circle green                                         │
+│ - Label: "Entry 3: Conservative"                                            │
+│ - Note: "Risk thấp, reward thấp hơn"                                        │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ COMPARISON TABLE:                                                            │
+│ ┌──────────────┬──────────┬──────────┬──────────┐                           │
+│ │ Entry Type   │ Risk     │ Reward   │ Win Rate │                           │
+│ ├──────────────┼──────────┼──────────┼──────────┤                           │
+│ │ Aggressive   │ Cao      │ Cao      │ 55%      │                           │
+│ │ Standard     │ Trung    │ Trung    │ 68%      │                           │
+│ │ Conservative │ Thấp     │ Thấp     │ 75%      │                           │
+│ └──────────────┴──────────┴──────────┴──────────┘                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Recommendation: "⭐ Khuyên dùng: Standard Entry cho beginners"            │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🕯️ QUY TẮC VẼ NẾN CANDLESTICK:
+- Nến TĂNG: #00C853 SOLID FILLED
+- Nến GIẢM: #EF4444 SOLID FILLED
+- Entry points đánh dấu bằng circle + số
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 4.3: TẠI SAO UPD MẠNH?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 4.3.1: UPD SUPPLY ZONE
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK, KHÔNG dùng đường line
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 4.3" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "HFZ = SUPPLY ZONE" (White, bold)                                │
+│ - Subtitle: "Tại sao HFZ trong UPD là vùng cung mạnh?"                      │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN CHART:                                                                  │
+│                                                                              │
+│ [UPD Pattern với CANDLESTICKS]                                              │
+│                                                                              │
+│ SUPPLY ZONE AREA (Highlight đỏ):                                            │
+│ - Vùng HFZ được tô màu đỏ nhạt rgba(239,68,68,0.3)                          │
+│ - Label: "SUPPLY ZONE" với icon 📦                                          │
+│ - Mũi tên: "Sellers control" chỉ xuống                                      │
+│                                                                              │
+│ ANNOTATIONS:                                                                 │
+│ - "Unfilled orders từ institutions"                                         │
+│ - "Pending sell orders chờ fill"                                            │
+│ - "Giá quay lại → bị rejection"                                             │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ EXPLANATION BOX:                                                             │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📊 TẠI SAO SUPPLY ZONE MẠNH?                                            │ │
+│ │                                                                         │ │
+│ │ 1. Institutions bán một phần → giá giảm                                 │ │
+│ │ 2. Còn lại unfilled orders tại HFZ                                      │ │
+│ │ 3. Khi giá quay lại → orders được fill                                  │ │
+│ │ 4. Áp lực bán → giá tiếp tục giảm                                       │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Key insight: "💡 HFZ = Nơi Smart Money đặt lệnh bán"                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🕯️ QUY TẮC VẼ NẾN CANDLESTICK:
+- Nến TĂNG: #00C853 SOLID FILLED
+- Nến GIẢM: #EF4444 SOLID FILLED
+- Supply zone: rgba(239,68,68,0.3)
+
+
+📐 HÌNH 4.3.2: UPD INSTITUTIONAL FLOW
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Diagram style: Professional flow chart
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 4.3" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "DÒNG TIỀN TỔ CHỨC TRONG UPD" (White, bold)                      │
+│ - Subtitle: "Wyckoff Distribution trong UPD Pattern"                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ FLOW DIAGRAM (Horizontal):                                                   │
+│                                                                              │
+│ ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                    │
+│ │ PHASE 1      │───▶│ PHASE 2      │───▶│ PHASE 3      │                    │
+│ │              │    │              │    │              │                    │
+│ │ 📈 MARKUP    │    │ ⏸️ DISTRIB   │    │ 📉 MARKDOWN  │                    │
+│ │              │    │              │    │              │                    │
+│ │ [Chart:      │    │ [Chart:      │    │ [Chart:      │                    │
+│ │ Nến xanh     │    │ Nến sideway] │    │ Nến đỏ       │                    │
+│ │ đi lên]      │    │              │    │ đi xuống]    │                    │
+│ │              │    │              │    │              │                    │
+│ │ "Institutions│    │ "Bán dần    │    │ "Retail      │                    │
+│ │ đẩy giá lên" │    │ cho retail"  │    │ bị trap"     │                    │
+│ └──────────────┘    └──────────────┘    └──────────────┘                    │
+│       ▲                   │                   │                              │
+│       │                   ▼                   ▼                              │
+│  BUY PRESSURE        SELLING TO          PANIC SELLING                      │
+│                      RETAIL                                                  │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ KEY INSIGHT BOX:                                                             │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 🎯 SMART MONEY CYCLE:                                                   │ │
+│ │ Accumulation → Markup → Distribution → Markdown                         │ │
+│ │                                                                         │ │
+│ │ UPD = Distribution + Markdown phases                                    │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🕯️ QUY TẮC VẼ NẾN CANDLESTICK trong mini charts:
+- Phase 1: Nến xanh #00C853 SOLID FILLED đi lên
+- Phase 2: Nến hỗn hợp đi ngang
+- Phase 3: Nến đỏ #EF4444 SOLID FILLED đi xuống
+
+
+📐 HÌNH 4.3.3: UPD WIN RATE STATS
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Style: Data visualization / Infographic
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 4.3" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "UPD PATTERN STATISTICS" (White, bold)                           │
+│ - Subtitle: "Thống kê hiệu quả thực tế"                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN STATS (3 Circle Gauges):                                                │
+│                                                                              │
+│ ┌───────────────┐ ┌───────────────┐ ┌───────────────┐                       │
+│ │   ◐ 68%       │ │   ◐ 1:2.5     │ │   ◐ 72%       │                       │
+│ │               │ │               │ │               │                       │
+│ │   WIN RATE    │ │    R:R        │ │  ACCURACY     │                       │
+│ │               │ │               │ │  (với HFZ)    │                       │
+│ │  (Green ring) │ │  (Gold ring)  │ │  (Cyan ring)  │                       │
+│ └───────────────┘ └───────────────┘ └───────────────┘                       │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ COMPARISON TABLE:                                                            │
+│ ┌────────────────┬──────────┬──────────┬──────────┐                         │
+│ │ Pattern        │ Win Rate │ R:R      │ Rank     │                         │
+│ ├────────────────┼──────────┼──────────┼──────────┤                         │
+│ │ UPD            │ 68%      │ 1:2.5    │ ⭐⭐⭐⭐⭐ │                         │
+│ │ UPU            │ 72%      │ 1:2.0    │ ⭐⭐⭐⭐⭐ │                         │
+│ │ DPU            │ 65%      │ 1:2.2    │ ⭐⭐⭐⭐   │                         │
+│ │ DPD            │ 70%      │ 1:1.8    │ ⭐⭐⭐⭐   │                         │
+│ └────────────────┴──────────┴──────────┴──────────┘                         │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ HIGHLIGHT BOX:                                                               │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📊 KẾT LUẬN: UPD là pattern SHORT mạnh nhất trong 4 GEM Patterns       │ │
+│ │ → Lý tưởng cho xu hướng giảm và đảo chiều từ đỉnh                       │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Data source: "Backtest 1000+ trades | 2020-2024"                          │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 4.4: CHIẾN LƯỢC ENTRY UPD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 4.4.1: UPD ENTRY STRATEGY
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK, KHÔNG dùng đường line
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 4.4" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "CHIẾN LƯỢC VÀO LỆNH SHORT" (White, bold)                        │
+│ - Subtitle: "Entry Strategy cho UPD Pattern"                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ CHART AREA:                                                                  │
+│                                                                              │
+│ [Full UPD Pattern với CANDLESTICKS]                                         │
+│                                                                              │
+│ PHASE 1 (UP): Nến xanh #00C853 SOLID đi lên                                 │
+│ PHASE 2 (PAUSE): Nến consolidation tại HFZ                                  │
+│ - HFZ box highlight đỏ nhạt                                                 │
+│ - Entry point marker: ⬇️ "SHORT ENTRY"                                      │
+│                                                                              │
+│ PHASE 3 (DOWN): Nến đỏ #EF4444 SOLID đi xuống                               │
+│                                                                              │
+│ ENTRY CHECKLIST (Right side):                                               │
+│ ☑️ Giá chạm HFZ                                                             │
+│ ☑️ Nến xác nhận bearish                                                     │
+│ ☑️ Volume tăng khi reject                                                   │
+│ ☑️ RSI > 70 (overbought)                                                    │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ ACTION BOX:                                                                  │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 🎯 HÀNH ĐỘNG:                                                           │ │
+│ │ 1. Đợi giá chạm HFZ                                                     │ │
+│ │ 2. Chờ nến xác nhận (Bearish Engulfing, Shooting Star)                  │ │
+│ │ 3. Vào lệnh SHORT khi nến close dưới entry trigger                      │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🕯️ QUY TẮC VẼ NẾN CANDLESTICK:
+- Nến TĂNG: #00C853 SOLID FILLED
+- Nến GIẢM: #EF4444 SOLID FILLED
+- Nến xác nhận: Highlight border gold #FFBD59
+
+
+📐 HÌNH 4.4.2: UPD STOP LOSS PLACEMENT
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK, KHÔNG dùng đường line
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 4.4" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "ĐẶT STOP LOSS CHO UPD" (White, bold)                            │
+│ - Subtitle: "SL trên HFZ + Buffer"                                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ CHART AREA:                                                                  │
+│                                                                              │
+│ [UPD Pattern với CANDLESTICKS]                                              │
+│                                                                              │
+│ HFZ ZONE:                                                                    │
+│ - Box highlight đỏ nhạt                                                     │
+│ - Đường ngang: "HFZ HIGH" (màu vàng dashed)                                 │
+│                                                                              │
+│ STOP LOSS LINE:                                                              │
+│ - Đường đỏ solid TRÊN HFZ HIGH                                              │
+│ - Label: "SL = HFZ HIGH + Buffer (0.5-1%)"                                  │
+│ - Icon: 🛑                                                                  │
+│                                                                              │
+│ ENTRY LINE:                                                                  │
+│ - Đường cyan tại entry point                                                │
+│ - Label: "ENTRY"                                                            │
+│                                                                              │
+│ BUFFER ZONE:                                                                 │
+│ - Vùng giữa HFZ HIGH và SL                                                  │
+│ - Highlight màu cam nhạt                                                    │
+│ - Label: "BUFFER 0.5-1%"                                                    │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ SL RULES BOX:                                                                │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📏 QUY TẮC ĐẶT SL:                                                      │ │
+│ │ • SL = HFZ High + Buffer (0.5-1% tùy TF)                                │ │
+│ │ • TF 1H: Buffer 0.5% | TF 4H: Buffer 0.7% | TF 1D: Buffer 1%            │ │
+│ │ • KHÔNG BAO GIỜ di chuyển SL ra xa hơn                                  │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Warning: "⚠️ SL là bảo hiểm - Luôn đặt TRƯỚC khi vào lệnh"               │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🕯️ QUY TẮC VẼ NẾN CANDLESTICK:
+- Nến TĂNG: #00C853 SOLID FILLED
+- Nến GIẢM: #EF4444 SOLID FILLED
+
+
+📐 HÌNH 4.4.3: UPD TAKE PROFIT LEVELS
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK, KHÔNG dùng đường line
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 4.4" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "3 MỨC TAKE PROFIT" (White, bold)                                │
+│ - Subtitle: "TP1, TP2, TP3 cho UPD Pattern"                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ CHART AREA:                                                                  │
+│                                                                              │
+│ [UPD Pattern với CANDLESTICKS - Đầy đủ phases]                              │
+│                                                                              │
+│ ENTRY & SL:                                                                  │
+│ - Entry line: Cyan dashed                                                   │
+│ - SL line: Red solid (trên HFZ)                                             │
+│                                                                              │
+│ TAKE PROFIT LEVELS (Lines going down):                                       │
+│                                                                              │
+│ TP1 (Green #10B981):                                                         │
+│ - Line: Green dashed                                                        │
+│ - Label: "TP1: 1:1 R:R | Chốt 40%"                                          │
+│ - Icon: 💰                                                                  │
+│                                                                              │
+│ TP2 (Gold #FFBD59):                                                          │
+│ - Line: Gold dashed                                                         │
+│ - Label: "TP2: 1:2 R:R | Chốt 40%"                                          │
+│ - Icon: 💰💰                                                                │
+│                                                                              │
+│ TP3 (Cyan #00F0FF):                                                          │
+│ - Line: Cyan dashed                                                         │
+│ - Label: "TP3: 1:3+ R:R | Chốt 20%"                                         │
+│ - Icon: 💰💰💰                                                              │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ TP STRATEGY BOX:                                                             │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 🎯 CHIẾN LƯỢC CHỐT LỜI:                                                 │ │
+│ │ • TP1 (40%): Đảm bảo có lãi, di SL về entry                             │ │
+│ │ • TP2 (40%): Lock thêm profit, trailing stop                            │ │
+│ │ • TP3 (20%): Để chạy, target swing low                                  │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🕯️ QUY TẮC VẼ NẾN CANDLESTICK:
+- Nến TĂNG: #00C853 SOLID FILLED
+- Nến GIẢM: #EF4444 SOLID FILLED
+
+
+📐 HÌNH 4.4.4: UPD ENTRY CONFIRMATION
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK, KHÔNG dùng đường line
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 4.4" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "NẾN XÁC NHẬN BEARISH" (White, bold)                             │
+│ - Subtitle: "Confirmation candles cho UPD Entry"                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN CONTENT - 4 Candle Types:                                               │
+│                                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 1. BEARISH ENGULFING                                                    │ │
+│ │ [Diagram: Nến xanh nhỏ + Nến đỏ lớn bao trùm]                           │ │
+│ │ "Nến đỏ bao trùm hoàn toàn nến xanh trước"                              │ │
+│ │ Strength: ⭐⭐⭐⭐⭐                                                      │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 2. SHOOTING STAR                                                        │ │
+│ │ [Diagram: Nến với thân nhỏ dưới, bấc dài trên]                          │ │
+│ │ "Bấc trên dài > 2x thân, thân ở dưới"                                   │ │
+│ │ Strength: ⭐⭐⭐⭐                                                        │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 3. EVENING STAR                                                         │ │
+│ │ [Diagram: Nến xanh + Doji + Nến đỏ lớn]                                 │ │
+│ │ "3 nến: Xanh lớn → Doji → Đỏ lớn"                                       │ │
+│ │ Strength: ⭐⭐⭐⭐⭐                                                      │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 4. BEARISH PIN BAR                                                      │ │
+│ │ [Diagram: Nến với bấc trên rất dài, thân nhỏ đỏ]                        │ │
+│ │ "Rejection từ HFZ, bấc trên > 3x thân"                                  │ │
+│ │ Strength: ⭐⭐⭐⭐                                                        │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Tip: "💡 Đợi nến CLOSE hoàn toàn trước khi vào lệnh"                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🕯️ QUY TẮC VẼ NẾN CANDLESTICK:
+- Tất cả nến diagram phải SOLID FILLED
+- Nến xanh: #00C853
+- Nến đỏ: #EF4444
+- Highlight viền gold cho nến quan trọng
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 4.5: UPD PHÂN BIỆT VỚI DPD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 4.5.1: UPD VS DPD COMPARISON
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK, KHÔNG dùng đường line
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 4.5" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "UPD VS DPD: SO SÁNH CHI TIẾT" (White, bold)                     │
+│ - Subtitle: "Phân biệt 2 pattern SHORT"                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ SIDE-BY-SIDE COMPARISON:                                                     │
+│                                                                              │
+│ ┌─────────────────────────┐  ┌─────────────────────────┐                    │
+│ │ UPD PATTERN             │  │ DPD PATTERN             │                    │
+│ │                         │  │                         │                    │
+│ │ [Chart: UP→PAUSE→DOWN]  │  │ [Chart: DOWN→PAUSE→DOWN]│                    │
+│ │ Nến xanh → ngang → đỏ   │  │ Nến đỏ → ngang → đỏ     │                    │
+│ │                         │  │                         │                    │
+│ │ Type: REVERSAL          │  │ Type: CONTINUATION      │                    │
+│ │ Signal: Đảo chiều giảm  │  │ Signal: Tiếp tục giảm   │                    │
+│ │                         │  │                         │                    │
+│ │ Zone: HFZ (Supply)      │  │ Zone: HFZ (Supply)      │                    │
+│ │ Context: Sau uptrend    │  │ Context: Trong downtrend│                    │
+│ └─────────────────────────┘  └─────────────────────────┘                    │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ COMPARISON TABLE:                                                            │
+│ ┌─────────────────┬──────────────────┬──────────────────┐                   │
+│ │ Tiêu chí        │ UPD              │ DPD              │                   │
+│ ├─────────────────┼──────────────────┼──────────────────┤                   │
+│ │ Phase 1         │ UP (tăng)        │ DOWN (giảm)      │                   │
+│ │ Phase 2         │ PAUSE            │ PAUSE            │                   │
+│ │ Phase 3         │ DOWN             │ DOWN             │                   │
+│ │ Loại            │ Đảo chiều        │ Tiếp diễn        │                   │
+│ │ Win Rate        │ 68%              │ 70%              │                   │
+│ │ R:R             │ 1:2.5            │ 1:1.8            │                   │
+│ └─────────────────┴──────────────────┴──────────────────┘                   │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Key: "🔑 Sự khác biệt nằm ở PHASE 1"                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🕯️ QUY TẮC VẼ NẾN CANDLESTICK:
+- Nến TĂNG: #00C853 SOLID FILLED
+- Nến GIẢM: #EF4444 SOLID FILLED
+- Nến PAUSE: Mix hoặc doji
+
+
+📐 HÌNH 4.5.2: PATTERN RECOGNITION GUIDE
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 4.5" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "HƯỚNG DẪN NHẬN DIỆN NHANH" (White, bold)                        │
+│ - Subtitle: "Quick Pattern Recognition"                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ DECISION FLOWCHART:                                                          │
+│                                                                              │
+│                    ┌─────────────────┐                                       │
+│                    │ Bạn thấy PAUSE  │                                       │
+│                    │ Zone (HFZ/LFZ)  │                                       │
+│                    └────────┬────────┘                                       │
+│                             │                                                │
+│                             ▼                                                │
+│              ┌──────────────────────────────┐                                │
+│              │ PHASE 1 (trước PAUSE) là gì? │                                │
+│              └──────────────┬───────────────┘                                │
+│                             │                                                │
+│          ┌──────────────────┼──────────────────┐                             │
+│          │                  │                  │                             │
+│          ▼                  ▼                  ▼                             │
+│    ┌──────────┐      ┌──────────┐      ┌──────────┐                         │
+│    │ UP (📈)  │      │ DOWN (📉)│      │ DOWN (📉)│                         │
+│    └────┬─────┘      └────┬─────┘      └────┬─────┘                         │
+│         │                 │                 │                                │
+│         ▼                 ▼                 ▼                                │
+│  ┌────────────┐   ┌────────────┐   ┌────────────┐                           │
+│  │ PHASE 3?   │   │ PHASE 3?   │   │ PHASE 3?   │                           │
+│  │ DOWN → UPD │   │ UP → DPU   │   │ DOWN → DPD │                           │
+│  │ UP → UPU   │   │            │   │            │                           │
+│  └────────────┘   └────────────┘   └────────────┘                           │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ QUICK REFERENCE:                                                             │
+│ ┌───────┬───────────────────┬────────────────┐                              │
+│ │Pattern│ Phase 1 → Phase 3 │ Trade Type     │                              │
+│ ├───────┼───────────────────┼────────────────┤                              │
+│ │ UPU   │ UP → UP           │ LONG (Cont.)   │                              │
+│ │ UPD   │ UP → DOWN         │ SHORT (Rev.)   │                              │
+│ │ DPU   │ DOWN → UP         │ LONG (Rev.)    │                              │
+│ │ DPD   │ DOWN → DOWN       │ SHORT (Cont.)  │                              │
+│ └───────┴───────────────────┴────────────────┘                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+📐 HÌNH 4.5.3: COMMON CONFUSION POINTS
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 4.5" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "ĐIỂM DỄ NHẦM LẪN" (White, bold)                                 │
+│ - Subtitle: "Common Mistakes khi phân biệt patterns"                        │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MISTAKE 1:                                                                   │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ ❌ SAI: Nhầm pullback nhỏ với Phase 1                                   │ │
+│ │                                                                         │ │
+│ │ [Chart: Downtrend với pullback nhỏ]                                     │ │
+│ │                                                                         │ │
+│ │ ✅ ĐÚNG: Phase 1 phải là xu hướng RÕ RÀNG, không phải noise            │ │
+│ │ "Tối thiểu 5-7 nến cùng hướng"                                          │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│ MISTAKE 2:                                                                   │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ ❌ SAI: Không xác định đúng điểm bắt đầu Phase 1                        │ │
+│ │                                                                         │ │
+│ │ [Chart: Pattern với 2 cách đánh dấu Phase 1]                            │ │
+│ │                                                                         │ │
+│ │ ✅ ĐÚNG: Phase 1 bắt đầu từ swing high/low gần nhất                    │ │
+│ │ "Không lấy toàn bộ trend dài"                                           │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+│ MISTAKE 3:                                                                   │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ ❌ SAI: Gọi tất cả consolidation là PAUSE                               │ │
+│ │                                                                         │ │
+│ │ [Chart: True PAUSE vs Random consolidation]                             │ │
+│ │                                                                         │ │
+│ │ ✅ ĐÚNG: PAUSE phải tạo Zone rõ ràng (HFZ/LFZ)                         │ │
+│ │ "Có test và hold tại vùng giá cụ thể"                                   │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Tip: "💡 Khi không chắc → Không trade. Chỉ trade pattern RÕ RÀNG"        │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 4.6: VÍ DỤ THỰC TẾ UPD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 4.6.1: BTC UPD EXAMPLE
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK, KHÔNG dùng đường line
+- Style: Realistic trading chart với annotations
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 4.6" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "BTC/USDT - UPD THỰC TẾ" (White, bold)                           │
+│ - Subtitle: "Ví dụ trade SHORT trên Bitcoin"                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ CHART INFO BAR:                                                              │
+│ - Pair: "BTC/USDT" | TF: "4H" | Date: "Nov 2024"                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN CHART:                                                                  │
+│                                                                              │
+│ [Full candlestick chart showing UPD pattern]                                │
+│                                                                              │
+│ PHASE 1 - UP:                                                                │
+│ - 8-10 nến xanh #00C853 SOLID FILLED                                        │
+│ - Price từ $62,000 → $69,000                                                │
+│ - Box màu xanh với label "PHASE 1: UP"                                      │
+│                                                                              │
+│ PHASE 2 - PAUSE:                                                             │
+│ - 5-6 nến sideway                                                           │
+│ - HFZ box highlight đỏ nhạt                                                 │
+│ - Range: $68,500 - $69,500                                                  │
+│ - Label: "HFZ ZONE"                                                         │
+│                                                                              │
+│ PHASE 3 - DOWN:                                                              │
+│ - 8-10 nến đỏ #EF4444 SOLID FILLED                                          │
+│ - Price từ $69,000 → $61,000                                                │
+│ - Box màu đỏ với label "PHASE 3: DOWN"                                      │
+│                                                                              │
+│ TRADE MARKERS:                                                               │
+│ - Entry: Arrow + "SHORT @ $68,800"                                          │
+│ - SL: Red line @ $69,700 + "SL -1.3%"                                       │
+│ - TP1: Green line @ $66,000 + "TP1 +4%"                                     │
+│ - TP2: Gold line @ $63,000 + "TP2 +8.4%"                                    │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ RESULT BOX:                                                                  │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📊 KẾT QUẢ:                                                             │ │
+│ │ Entry: $68,800 | SL: $69,700 | TP1: $66,000 | TP2: $63,000              │ │
+│ │ R:R = 1:3.2 | Profit: +8.4% | Duration: 3 days                          │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+🕯️ QUY TẮC VẼ NẾN CANDLESTICK:
+- Nến TĂNG: #00C853 SOLID FILLED
+- Nến GIẢM: #EF4444 SOLID FILLED
+- Chart style: Dark theme với giá hiển thị bên phải
+
+
+📐 HÌNH 4.6.2: ETH UPD TRADE SETUP
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Chart: PHẢI dùng CANDLESTICK, KHÔNG dùng đường line
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 4.6" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "ETH/USDT - SETUP SHORT" (White, bold)                           │
+│ - Subtitle: "Step-by-step trade execution"                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ CHART INFO BAR:                                                              │
+│ - Pair: "ETH/USDT" | TF: "1H" | Date: "Dec 2024"                            │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ MAIN CHART với STEP ANNOTATIONS:                                             │
+│                                                                              │
+│ [Full candlestick chart]                                                    │
+│                                                                              │
+│ STEP 1 (Cyan circle):                                                        │
+│ - Vị trí: Đầu Phase 1 (UP)                                                  │
+│ - Label: "① Xác định xu hướng UP"                                           │
+│                                                                              │
+│ STEP 2 (Cyan circle):                                                        │
+│ - Vị trí: Tại HFZ                                                           │
+│ - Label: "② Đánh dấu HFZ Zone"                                              │
+│ - HFZ box highlight                                                         │
+│                                                                              │
+│ STEP 3 (Cyan circle):                                                        │
+│ - Vị trí: Tại nến rejection                                                 │
+│ - Label: "③ Đợi nến xác nhận"                                               │
+│ - Nến Shooting Star highlighted                                             │
+│                                                                              │
+│ STEP 4 (Cyan circle):                                                        │
+│ - Vị trí: Entry point                                                       │
+│ - Label: "④ Vào SHORT"                                                      │
+│ - Arrow marker                                                              │
+│                                                                              │
+│ STEP 5 (Cyan circle):                                                        │
+│ - Vị trí: SL và TP lines                                                    │
+│ - Label: "⑤ Đặt SL & TP"                                                    │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ EXECUTION BOX:                                                               │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 📋 EXECUTION CHECKLIST:                                                 │ │
+│ │ ☑️ UP trend rõ ràng (8+ nến xanh)                                       │ │
+│ │ ☑️ HFZ formed (consolidation 4+ nến)                                    │ │
+│ │ ☑️ Bearish confirmation (Shooting Star)                                 │ │
+│ │ ☑️ Entry @ $2,450 | SL @ $2,510 | TP1 @ $2,350                          │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+📐 HÌNH 4.6.3: UPD TRADE RESULT
+─────────────────────────────────────
+
+⚠️ ENFORCE:
+- Size ratio: 9:16 (dọc) hoặc 1:1 (vuông)
+- Font: Phải hỗ trợ tiếng Việt có dấu
+- Style: Result summary / Infographic
+
+📋 DESIGN SYSTEM GENERAL: (Navy #112250, Gold #FFBD59, Cyan #00F0FF)
+
+📝 NỘI DUNG HÌNH:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ HEADER:                                                                      │
+│ - Badge: "BÀI 4.6" (Gold #FFBD59)                                           │
+│ - Tiêu đề: "KẾT QUẢ TRADE THỰC TẾ" (White, bold)                            │
+│ - Subtitle: "Real trading results"                                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ TRADE SUMMARY CARD:                                                          │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ 🎯 ETH/USDT SHORT - UPD PATTERN                                         │ │
+│ │                                                                         │ │
+│ │ Entry:     $2,450                                                       │ │
+│ │ Stop Loss: $2,510 (-2.4%)                                               │ │
+│ │ TP1:       $2,350 (+4.1%) ✅ HIT                                        │ │
+│ │ TP2:       $2,280 (+6.9%) ✅ HIT                                        │ │
+│ │ TP3:       $2,200 (+10.2%) ✅ HIT                                       │ │
+│ │                                                                         │ │
+│ │ Final R:R: 1:4.2                                                        │ │
+│ │ Duration:  18 hours                                                     │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ PROFIT BREAKDOWN:                                                            │
+│                                                                              │
+│ ┌────────────────────────────────────────────────────────────────┐          │
+│ │ POSITION SIZE: $1,000                                          │          │
+│ │                                                                │          │
+│ │ TP1 (40%): $400 × 4.1% = +$16.40                              │          │
+│ │ TP2 (40%): $400 × 6.9% = +$27.60                              │          │
+│ │ TP3 (20%): $200 × 10.2% = +$20.40                             │          │
+│ │ ─────────────────────────────────────                          │          │
+│ │ TOTAL PROFIT: +$64.40 (+6.44%)                                │          │
+│ │                                                                │          │
+│ │ [Progress bar: Green 100%]                                     │          │
+│ └────────────────────────────────────────────────────────────────┘          │
+│                                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ KEY TAKEAWAYS:                                                               │
+│ ┌─────────────────────────────────────────────────────────────────────────┐ │
+│ │ ✅ Pattern identification: Perfect UPD setup                            │ │
+│ │ ✅ Entry timing: Waited for confirmation candle                         │ │
+│ │ ✅ Risk management: SL never moved, all TPs hit                         │ │
+│ │ ✅ Profit taking: Scaled out at multiple levels                         │ │
+│ └─────────────────────────────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ BOTTOM:                                                                      │
+│ - Message: "🎓 Thực hành trên Paper Trading trước khi dùng tiền thật"       │
+│ - Logo: "GEM TRADING ACADEMY"                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════
+TỔNG KẾT CHƯƠNG 4: UPD PATTERN
+═══════════════════════════════════════════════════════════════════════════════
+
+Tổng số hình: 16 hình
+- Bài 4.2: 3 hình (3 Phases, Zone ID, Entry Timing)
+- Bài 4.3: 3 hình (Supply Zone, Institutional Flow, Win Rate Stats)
+- Bài 4.4: 4 hình (Entry Strategy, SL Placement, TP Levels, Confirmation)
+- Bài 4.5: 3 hình (UPD vs DPD, Recognition Guide, Confusion Points)
+- Bài 4.6: 3 hình (BTC Example, ETH Setup, Trade Result)
+
+Tất cả hình đều có:
+✅ ENFORCE notes về size ratio và font
+✅ DESIGN SYSTEM GENERAL table
+✅ NỘI DUNG HÌNH chi tiết
+✅ QUY TẮC VẼ NẾN CANDLESTICK (cho hình có chart)
+
+GEM TRADING ACADEMY - 2025

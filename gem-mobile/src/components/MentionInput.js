@@ -109,9 +109,9 @@ const MentionInput = ({
   const searchUsers = async (query) => {
     setLoading(true);
     try {
-      // If empty query, show popular/recent users
+      // Only search mutual followers for privacy (users who follow me AND I follow them)
       const searchQuery = query || '';
-      const results = await searchService.searchUsers(searchQuery, 8);
+      const results = await searchService.searchMutualFollowers(searchQuery, 8);
       setSuggestions(results);
       setShowSuggestions(results.length > 0);
     } catch (error) {

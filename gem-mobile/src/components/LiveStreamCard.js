@@ -208,7 +208,7 @@ export const LiveStreamsSectionHeader = ({
       </View>
       {onSeeAll && (
         <TouchableOpacity onPress={onSeeAll}>
-          <Text style={sectionStyles.seeAll}>Xem tat ca</Text>
+          <Text style={sectionStyles.seeAll}>Xem tất cả</Text>
         </TouchableOpacity>
       )}
     </View>

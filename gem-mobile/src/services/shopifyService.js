@@ -452,18 +452,20 @@ class ShopifyService {
         return [];
       }
 
-      // Filter products that have ANY of the specified tags
+      // Filter products that have ANY of the specified tags (EXACT match)
       const filtered = allProducts.filter(product => {
         // Handle tags as array
         if (product.tags && Array.isArray(product.tags)) {
           const productTags = product.tags.map(t => t.toLowerCase().trim());
-          const hasMatch = normalizedTags.some(tag => productTags.some(pt => pt.includes(tag) || tag.includes(pt)));
+          // Use exact match (===) instead of includes() to avoid false positives
+          const hasMatch = normalizedTags.some(tag => productTags.some(pt => pt === tag));
           return hasMatch;
         }
         // Handle tags as comma-separated string
         if (product.tags && typeof product.tags === 'string') {
           const productTags = product.tags.split(',').map(t => t.toLowerCase().trim());
-          const hasMatch = normalizedTags.some(tag => productTags.some(pt => pt.includes(tag) || tag.includes(pt)));
+          // Use exact match (===) instead of includes() to avoid false positives
+          const hasMatch = normalizedTags.some(tag => productTags.some(pt => pt === tag));
           return hasMatch;
         }
         return false;

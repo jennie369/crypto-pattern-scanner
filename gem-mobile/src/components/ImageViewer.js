@@ -22,7 +22,7 @@ import {
   Platform,
 } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -480,13 +480,16 @@ const ImageViewer = ({
           )}
 
           {/* Facebook-style Post Content Overlay - Scrollable text area */}
+          {/* Wrapped in Animated.View to sync with dismiss gesture */}
           {showOverlay && postContent && (
-            <PostOverlay
-              authorName={authorName}
-              postContent={postContent}
-              overlayExpanded={overlayExpanded}
-              toggleOverlay={toggleOverlay}
-            />
+            <Animated.View style={animatedImageStyle}>
+              <PostOverlay
+                authorName={authorName}
+                postContent={postContent}
+                overlayExpanded={overlayExpanded}
+                toggleOverlay={toggleOverlay}
+              />
+            </Animated.View>
           )}
 
           {/* Swipe hint */}
@@ -679,7 +682,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     maxHeight: SCREEN_HEIGHT * 0.65,
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
@@ -691,7 +694,6 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.md,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.15)',
-    backgroundColor: 'rgba(0, 0, 0, 0.95)',
   },
   postOverlayScroll: {
     maxHeight: SCREEN_HEIGHT * 0.50,
@@ -778,5 +780,8 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
   },
 });
+
+// Named export for compatibility (PostDetailScreen uses this)
+export { ImageViewer as ImageGallery };
 
 export default ImageViewer;

@@ -11,7 +11,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Shadow } from 'react-native-shadow-2';
 import { Home, ShoppingCart, BarChart2, Star, Bell, Box } from 'lucide-react-native';
-import { useFocusEffect, StackActions } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTabBar } from '../contexts/TabBarContext';
 import { forumService } from '../services/forumService';
@@ -49,10 +49,31 @@ const Tokens = {
 };
 
 export default function GlassBottomTab({ state, descriptors, navigation }) {
-  // Get safe area insets for Android gesture navigation bar
+  // Get safe area insets for navigation bar
   const insets = useSafeAreaInsets();
-  // Calculate bottom padding: use insets.bottom for gesture nav, minimum 8px for 3-button nav
-  const bottomPadding = Math.max(insets.bottom, 8);
+
+  // Calculate bottom padding based on platform:
+  // - iOS: Use insets.bottom (handles notch/home indicator)
+  // - Android: Use insets.bottom, but add extra padding for 3-button nav
+  //   when insets.bottom is 0 (system nav bar not detected as safe area)
+  const getBottomPadding = () => {
+    if (Platform.OS === 'ios') {
+      // iOS: Trust safe area insets (handles notch, home indicator)
+      return Math.max(insets.bottom, 8);
+    } else {
+      // Android: Safe area might not detect 3-button navigation bar
+      // If insets.bottom is 0, add default padding for nav bar (~48dp)
+      // If insets.bottom > 0, it's gesture navigation, use that value
+      if (insets.bottom > 0) {
+        return insets.bottom;
+      }
+      // For 3-button navigation where insets.bottom is 0
+      // Add extra padding to ensure tab bar is above system nav
+      return 16; // Minimum padding when nav bar is sticky-immersive
+    }
+  };
+
+  const bottomPadding = getBottomPadding();
 
   // Get tab bar visibility and double-tap event emitter from context
   let tabBarTranslateY;
@@ -149,7 +170,23 @@ export default function GlassBottomTab({ state, descriptors, navigation }) {
         if (hasNestedScreens) {
           // There are nested screens, pop to the root of this tab
           console.log('[GlassBottomTab] Popping to top for tab:', routeName, 'nested index:', tabState?.index);
-          navigation.dispatch(StackActions.popToTop());
+          try {
+            // Navigate to the first route in the tab's stack instead of popToTop
+            // This is more reliable across different navigator configurations
+            const firstRoute = tabState.routeNames?.[0] || tabState.routes?.[0]?.name;
+            if (firstRoute) {
+              navigation.navigate(routeName, { screen: firstRoute });
+            } else {
+              // Fallback: use goBack multiple times or just navigate to tab
+              // Avoid popToTop as it may not be handled
+              console.log('[GlassBottomTab] No first route found, navigating to tab root');
+              navigation.navigate(routeName);
+            }
+          } catch (e) {
+            console.warn('[GlassBottomTab] Navigation error:', e.message);
+            // Fallback: just navigate to the tab
+            navigation.navigate(routeName);
+          }
         } else if (isDoubleTap) {
           // Double-tap on tab's home screen
           console.log('[GlassBottomTab] Double-tap detected on tab:', routeName);

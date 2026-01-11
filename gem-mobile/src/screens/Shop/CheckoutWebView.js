@@ -14,6 +14,7 @@ import {
 import { WebView } from 'react-native-webview';
 import { useRoute, useNavigation, CommonActions } from '@react-navigation/native';
 import { useCart } from '../../contexts/CartContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { COLORS } from '../../utils/tokens';
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import deepLinkHandler from '../../services/deepLinkHandler';
@@ -22,6 +23,7 @@ const CheckoutWebView = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { completeCheckout } = useCart();
+  const { user, profile } = useAuth();
   const { checkoutUrl } = route.params;
   const { alert, AlertComponent } = useCustomAlert();
 
@@ -30,6 +32,9 @@ const CheckoutWebView = () => {
   const [cancelConfirmed, setCancelConfirmed] = useState(false);
   const [affiliateCode, setAffiliateCode] = useState(null);
   const webViewRef = useRef(null);
+
+  // Get user_id for tracking (enables webhook to match user directly)
+  const userId = user?.id || null;
 
   // Get affiliate code from deep link handler on mount
   useEffect(() => {
@@ -121,64 +126,78 @@ const CheckoutWebView = () => {
   }, [checkoutCompleted, cancelConfirmed, navigation]);
 
   // JavaScript to inject into WebView
-  // Pass affiliate code via string interpolation
+  // Pass affiliate code and user_id via string interpolation
   const injectedJavaScript = `
     (function() {
       console.log('[WebView] JavaScript injected successfully');
 
       // ============================================
-      // PART 0: AFFILIATE CODE TRACKING
+      // PART 0: USER & AFFILIATE TRACKING
       // ============================================
       const affiliateCode = '${affiliateCode || ''}';
-      if (affiliateCode) {
-        console.log('[WebView] Affiliate code present:', affiliateCode);
+      const userId = '${userId || ''}';
 
-        // Try to inject affiliate code into checkout notes/attributes
-        function injectAffiliateCode() {
+      console.log('[WebView] Tracking data:', { affiliateCode, userId });
+
+      // Try to inject tracking data into checkout attributes
+      function injectTrackingData() {
+        const form = document.querySelector('form[action*="checkout"]');
+        if (!form) return;
+
+        // ========================================
+        // INJECT USER_ID (for direct user matching in webhook)
+        // ========================================
+        if (userId && !document.querySelector('input[name="checkout[attributes][user_id]"]')) {
+          const userIdField = document.createElement('input');
+          userIdField.type = 'hidden';
+          userIdField.name = 'checkout[attributes][user_id]';
+          userIdField.value = userId;
+          form.appendChild(userIdField);
+          console.log('[WebView] ✅ Injected user_id:', userId);
+        }
+
+        // ========================================
+        // INJECT SOURCE (always mark as mobile_app)
+        // ========================================
+        if (!document.querySelector('input[name="checkout[attributes][source]"]')) {
+          const sourceField = document.createElement('input');
+          sourceField.type = 'hidden';
+          sourceField.name = 'checkout[attributes][source]';
+          sourceField.value = 'mobile_app';
+          form.appendChild(sourceField);
+          console.log('[WebView] ✅ Injected source: mobile_app');
+        }
+
+        // ========================================
+        // INJECT AFFILIATE CODE (if present)
+        // ========================================
+        if (affiliateCode) {
           // Method 1: Look for note textarea and append
           const noteTextarea = document.querySelector('textarea[name="checkout[note]"]');
           if (noteTextarea) {
             const existingNote = noteTextarea.value;
             if (!existingNote.includes('partner_id:')) {
-              noteTextarea.value = existingNote + (existingNote ? '\\n' : '') + 'partner_id:' + affiliateCode + '|source:mobile_app';
-              console.log('[WebView] Injected affiliate code into note textarea');
+              noteTextarea.value = existingNote + (existingNote ? '\\n' : '') + 'partner_id:' + affiliateCode;
+              console.log('[WebView] ✅ Injected partner_id into note');
             }
           }
 
-          // Method 2: Try to find and fill hidden attribute fields
-          const partnerIdField = document.querySelector('input[name="checkout[attributes][partner_id]"]');
-          if (partnerIdField) {
+          // Method 2: Hidden attribute field
+          if (!document.querySelector('input[name="checkout[attributes][partner_id]"]')) {
+            const partnerIdField = document.createElement('input');
+            partnerIdField.type = 'hidden';
+            partnerIdField.name = 'checkout[attributes][partner_id]';
             partnerIdField.value = affiliateCode;
-            console.log('[WebView] Set partner_id hidden field');
-          } else {
-            // Create hidden field if it doesn't exist
-            const form = document.querySelector('form[action*="checkout"]');
-            if (form) {
-              // Check if we already added this field
-              if (!document.querySelector('input[name="checkout[attributes][partner_id]"]')) {
-                const hiddenField = document.createElement('input');
-                hiddenField.type = 'hidden';
-                hiddenField.name = 'checkout[attributes][partner_id]';
-                hiddenField.value = affiliateCode;
-                form.appendChild(hiddenField);
-
-                const sourceField = document.createElement('input');
-                sourceField.type = 'hidden';
-                sourceField.name = 'checkout[attributes][source]';
-                sourceField.value = 'mobile_app';
-                form.appendChild(sourceField);
-
-                console.log('[WebView] Created hidden fields for affiliate tracking');
-              }
-            }
+            form.appendChild(partnerIdField);
+            console.log('[WebView] ✅ Injected partner_id hidden field:', affiliateCode);
           }
         }
-
-        // Run immediately and on DOM changes
-        injectAffiliateCode();
-        const affiliateObserver = new MutationObserver(injectAffiliateCode);
-        affiliateObserver.observe(document.body, { childList: true, subtree: true });
       }
+
+      // Run immediately and on DOM changes
+      injectTrackingData();
+      const trackingObserver = new MutationObserver(injectTrackingData);
+      trackingObserver.observe(document.body, { childList: true, subtree: true });
 
       // ============================================
       // PART 1: HIDE SHOPIFY HEADER/NAVIGATION

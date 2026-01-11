@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 5.3: Tại Sao Nên Bắt Đầu Ngay?</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Noto+Sans+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-navy: #112250;
+            --color-navy-light: #1a3070;
+            --color-navy-dark: #0a1535;
+            --color-gold: #FFBD59;
+            --color-gold-light: #FFD993;
+            --color-gold-dark: #E5A030;
+            --color-cyan: #00F0FF;
+            --color-purple: #6A5BFF;
+            --color-purple-light: #8B7FFF;
+            --color-green: #10B981;
+            --color-green-light: #34D399;
+            --color-red: #EF4444;
+
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.65);
+
+            --bg-glass: rgba(255, 255, 255, 0.08);
+            --bg-card-solid: #1a2d5a;
+            --border-glass: rgba(255, 255, 255, 0.15);
+            --border-gold: rgba(255, 189, 89, 0.4);
+
+            --shadow-gold: 0 4px 20px rgba(255, 189, 89, 0.25);
+
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            --space-2xl: 3rem;
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-body);
+            background: linear-gradient(135deg, var(--color-navy-dark) 0%, var(--color-navy) 50%, var(--color-navy-light) 100%);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+            font-size: 16px;
+        }
+
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: var(--space-lg);
+            padding-top: var(--space-xl);
+            padding-bottom: var(--space-2xl);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-container {
+                padding: 0;
+                padding-top: var(--space-md);
+                padding-bottom: var(--space-xl);
+            }
+        }
+
+        .lesson-header {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+            padding: var(--space-xl);
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-xl);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-header {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+                padding: var(--space-lg) var(--space-md);
+            }
+        }
+
+        .badge-container { display: flex; justify-content: center; gap: var(--space-sm); flex-wrap: wrap; margin-bottom: var(--space-md); }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            color: var(--color-navy);
+            font-family: var(--font-heading);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-radius: 50px;
+        }
+
+        .badge.chapter-badge { background: linear-gradient(135deg, var(--color-green) 0%, var(--color-green-light) 100%); }
+
+        .lesson-title {
+            font-family: var(--font-heading);
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+        }
+
+        .lesson-title .highlight {
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .lesson-subtitle { font-size: 1.1rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto; }
+
+        .section { margin-bottom: var(--space-xl); }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+            padding: 0 var(--space-md);
+        }
+
+        @media (min-width: 601px) { .section-header { padding: 0; } }
+
+        .section-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .section-title { font-family: var(--font-heading); font-size: clamp(1.25rem, 4vw, 1.5rem); font-weight: 700; }
+
+        .text-content { padding: 0 var(--space-md); }
+        @media (min-width: 601px) { .text-content { padding: 0; } }
+        .text-content p { margin-bottom: var(--space-md); color: var(--text-secondary); line-height: 1.8; }
+
+        .lesson-image {
+            width: 100%;
+            margin: var(--space-lg) 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 2px solid var(--border-glass);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-image { border-radius: 0; border-left: none; border-right: none; }
+        }
+
+        .image-placeholder {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: linear-gradient(135deg, var(--bg-card-solid) 0%, var(--color-navy-dark) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            padding: var(--space-lg);
+            text-align: center;
+        }
+
+        .image-placeholder-icon { font-size: 3rem; opacity: 0.5; }
+        .image-caption { text-align: center; padding: var(--space-sm); background: var(--bg-glass); color: var(--text-muted); font-size: 0.85rem; font-style: italic; }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border: 1px solid var(--border-gold);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+
+        @media (max-width: 600px) {
+            .highlight-box { border-radius: 0; border-left: 4px solid var(--color-gold); border-right: none; }
+        }
+
+        .highlight-box.cyan { background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(0, 240, 255, 0.05) 100%); border-color: rgba(0, 240, 255, 0.4); }
+        @media (max-width: 600px) { .highlight-box.cyan { border-left-color: var(--color-cyan); } }
+
+        .highlight-box.green { background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%); border-color: rgba(16, 185, 129, 0.4); }
+        @media (max-width: 600px) { .highlight-box.green { border-left-color: var(--color-green); } }
+
+        .highlight-box.red { background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%); border-color: rgba(239, 68, 68, 0.4); }
+        @media (max-width: 600px) { .highlight-box.red { border-left-color: var(--color-red); } }
+
+        .highlight-box-title { font-family: var(--font-heading); font-size: 1rem; font-weight: 700; color: var(--color-gold); margin-bottom: var(--space-sm); }
+        .highlight-box.cyan .highlight-box-title { color: var(--color-cyan); }
+        .highlight-box.green .highlight-box-title { color: var(--color-green); }
+        .highlight-box.red .highlight-box-title { color: var(--color-red); }
+        .highlight-box p { color: var(--text-secondary); font-size: 0.95rem; margin: 0; }
+
+        /* REASON CARDS */
+        .reason-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-lg) 0;
+        }
+
+        @media (max-width: 600px) { .reason-card { border-radius: 0; border-left: 4px solid var(--color-gold); border-right: none; } }
+
+        .reason-card.bonus { border-left-color: var(--color-green); }
+        .reason-card.market { border-left-color: var(--color-cyan); }
+        .reason-card.compound { border-left-color: var(--color-purple); }
+
+        .reason-header { display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-lg); }
+        .reason-icon { font-size: 2.5rem; }
+        .reason-title-group { flex: 1; }
+        .reason-number { font-family: var(--font-heading); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: var(--space-xs); }
+        .reason-card.bonus .reason-number { color: var(--color-green); }
+        .reason-card.market .reason-number { color: var(--color-cyan); }
+        .reason-card.compound .reason-number { color: var(--color-purple); }
+        .reason-title { font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; }
+
+        .reason-content p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        .reason-content ul { list-style: none; margin-top: var(--space-md); }
+        .reason-content ul li { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: var(--space-sm); padding-left: var(--space-lg); position: relative; }
+        .reason-content ul li::before { content: '✓'; position: absolute; left: 0; color: var(--color-green); font-weight: bold; }
+
+        /* COMPARISON GRID */
+        .comparison-grid {
+            display: grid;
+            gap: var(--space-md);
+        }
+
+        @media (min-width: 601px) { .comparison-grid { grid-template-columns: 1fr 1fr; } }
+
+        .comparison-card {
+            background: var(--bg-card-solid);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+
+        @media (max-width: 600px) { .comparison-card { border-radius: 0; } }
+
+        .comparison-card.now { border-top: 4px solid var(--color-green); }
+        .comparison-card.later { border-top: 4px solid var(--color-red); }
+
+        .comparison-emoji { font-size: 3rem; margin-bottom: var(--space-sm); }
+        .comparison-label { font-family: var(--font-heading); font-size: 0.9rem; font-weight: 700; margin-bottom: var(--space-md); }
+        .comparison-card.now .comparison-label { color: var(--color-green); }
+        .comparison-card.later .comparison-label { color: var(--color-red); }
+        .comparison-timeline { font-size: 0.8rem; color: var(--text-muted); margin-bottom: var(--space-sm); }
+        .comparison-result { font-size: 0.95rem; color: var(--text-secondary); }
+        .comparison-result strong { color: var(--text-primary); }
+
+        /* TRUST CARD */
+        .trust-card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, var(--bg-glass) 100%);
+            border: 2px solid var(--color-green);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+
+        @media (max-width: 600px) { .trust-card { border-radius: 0; border-left: 4px solid var(--color-green); border-right: none; } }
+
+        .trust-title { font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: var(--color-green); margin-bottom: var(--space-lg); text-align: center; }
+
+        .trust-grid { display: grid; gap: var(--space-md); }
+        @media (min-width: 601px) { .trust-grid { grid-template-columns: 1fr 1fr; } }
+
+        .trust-section { padding: var(--space-md); }
+        .trust-section h4 { font-family: var(--font-heading); font-size: 0.9rem; font-weight: 700; margin-bottom: var(--space-sm); }
+        .trust-section.dont h4 { color: var(--color-red); }
+        .trust-section.do h4 { color: var(--color-green); }
+
+        .trust-section ul { list-style: none; }
+        .trust-section ul li { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: var(--space-sm); padding-left: var(--space-lg); position: relative; }
+        .trust-section.dont ul li::before { content: '✗'; position: absolute; left: 0; color: var(--color-red); font-weight: bold; }
+        .trust-section.do ul li::before { content: '✓'; position: absolute; left: 0; color: var(--color-green); font-weight: bold; }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.2) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border: 2px solid var(--color-gold);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) { .summary-box { border-radius: 0; border-left: 4px solid var(--color-gold); border-right: none; } }
+        .summary-title { font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: var(--color-gold); margin-bottom: var(--space-md); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-sm); color: var(--text-secondary); font-size: 0.95rem; }
+        .summary-list li::before { content: '✓'; color: var(--color-gold); font-weight: bold; }
+
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) { .lesson-footer { border-radius: 0; border-left: none; border-right: none; } }
+        .footer-badge { display: inline-block; padding: 8px 20px; background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%); color: var(--color-navy); font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700; border-radius: 50px; margin-bottom: var(--space-md); }
+        .footer-text { color: var(--text-muted); font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="badge-container">
+                <span class="badge">STARTER</span>
+                <span class="badge chapter-badge">MODULE B</span>
+            </div>
+            <h1 class="lesson-title">Tại Sao Nên <span class="highlight">Bắt Đầu Ngay?</span></h1>
+            <p class="lesson-subtitle">3 lý do logic - Không phải pressure tactics</p>
+        </header>
+
+        <!-- INTRO -->
+        <section class="section">
+            <div class="text-content">
+                <p>Trước khi đi vào nội dung, chúng tôi muốn nói rõ một điều: <strong>Đây không phải là bài sales pitch với fake urgency.</strong> Chúng tôi không có những chiêu trò như "chỉ còn 5 slot" hay "hết hạn trong 24h". Bạn có thể quyết định khi nào bạn sẵn sàng.</p>
+
+                <p>Nhưng chúng tôi cũng muốn chia sẻ một số lý do logic để bạn cân nhắc. Đây là những sự thật về timing và compound effect mà bạn nên biết trước khi đưa ra quyết định.</p>
+            </div>
+        </section>
+
+        <!-- LÝ DO 1: BONUS PROGRAM -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">🎁</div>
+                <h2 class="section-title">3 Lý Do Logic Để Bắt Đầu Sớm</h2>
+            </div>
+
+            <div class="reason-card bonus">
+                <div class="reason-header">
+                    <div class="reason-icon">🎁</div>
+                    <div class="reason-title-group">
+                        <div class="reason-number">Lý Do #1</div>
+                        <div class="reason-title">Bonus Program Đặc Biệt</div>
+                    </div>
+                </div>
+
+                <div class="reason-content">
+                    <p>Những người đăng ký sớm thường nhận được nhiều bonus hơn. Đây không phải là fake urgency, mà là cách chúng tôi cảm ơn những người tin tưởng và hành động nhanh.</p>
+
+                    <ul>
+                        <li><strong>Early bird discount:</strong> Giảm 10-20% cho người đăng ký sớm</li>
+                        <li><strong>Bonus resources:</strong> Checklist, templates, mind maps</li>
+                        <li><strong>Free 1-on-1 onboarding call:</strong> Session riêng với mentor</li>
+                        <li><strong>Exclusive community access:</strong> Group VIP với support priority</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="lesson-image">
+                <div class="image-placeholder">
+                    <span class="image-placeholder-icon">🖼️</span>
+                    <span>Hình 1: Bonus Package Visual</span>
+                    <span style="font-size: 0.8rem; opacity: 0.7;">Canva: bonus-package.png (1200x675)</span>
+                </div>
+                <div class="image-caption">Gói bonus dành cho người đăng ký sớm</div>
+            </div>
+
+            <!-- LÝ DO 2: MARKET TIMING -->
+            <div class="reason-card market">
+                <div class="reason-header">
+                    <div class="reason-icon">🚀</div>
+                    <div class="reason-title-group">
+                        <div class="reason-number">Lý Do #2</div>
+                        <div class="reason-title">Market Timing Opportunity</div>
+                    </div>
+                </div>
+
+                <div class="reason-content">
+                    <p>Thị trường crypto ở Việt Nam đang trong giai đoạn phát triển mạnh. Binance và các tổ chức lớn đang hợp tác với chính phủ để đưa crypto vào dòng chính. Đây là thời điểm lý tưởng để học và chuẩn bị.</p>
+
+                    <ul>
+                        <li>Crypto market đang phát triển mạnh ở Việt Nam</li>
+                        <li>Các tổ chức lớn đang mở rộng tại VN</li>
+                        <li>Regulatory framework đang được xây dựng</li>
+                        <li>Cơ hội cho early adopters lớn hơn bao giờ hết</li>
+                    </ul>
+
+                    <p style="font-style: italic; margin-top: var(--space-md);"><strong>"Học bây giờ, profit khi thị trường boom"</strong> - đây là mindset của những traders thông minh.</p>
+                </div>
+            </div>
+
+            <div class="lesson-image">
+                <div class="image-placeholder">
+                    <span class="image-placeholder-icon">🖼️</span>
+                    <span>Hình 2: Market Timing Opportunity</span>
+                    <span style="font-size: 0.8rem; opacity: 0.7;">Canva: market-timing.png (1200x675)</span>
+                </div>
+                <div class="image-caption">Thị trường crypto Việt Nam đang trong giai đoạn tăng trưởng</div>
+            </div>
+
+            <!-- LÝ DO 3: COMPOUND EFFECT -->
+            <div class="reason-card compound">
+                <div class="reason-header">
+                    <div class="reason-icon">🏆</div>
+                    <div class="reason-title-group">
+                        <div class="reason-number">Lý Do #3</div>
+                        <div class="reason-title">Compound Effect - Sức Mạnh Của Thời Gian</div>
+                    </div>
+                </div>
+
+                <div class="reason-content">
+                    <p>Đây là lý do quan trọng nhất và hoàn toàn logic. Trading skill là một compound asset - càng bắt đầu sớm, bạn càng có lợi thế. Mỗi ngày trì hoãn là một ngày bạn mất đi cơ hội tích lũy kinh nghiệm.</p>
+                </div>
+            </div>
+
+            <div class="comparison-grid">
+                <div class="comparison-card now">
+                    <div class="comparison-emoji">👤 Person A</div>
+                    <div class="comparison-label">Bắt Đầu Hôm Nay</div>
+                    <div class="comparison-timeline">12 tháng sau...</div>
+                    <div class="comparison-result">
+                        <strong>Profitable</strong>, có kinh nghiệm, mạng lưới rộng, đã qua learning curve, compound knowledge đang tích lũy
+                    </div>
+                </div>
+
+                <div class="comparison-card later">
+                    <div class="comparison-emoji">👤 Person B</div>
+                    <div class="comparison-label">Chờ 3 Tháng Nữa</div>
+                    <div class="comparison-timeline">12 tháng sau...</div>
+                    <div class="comparison-result">
+                        Mất <strong>3 tháng compound learning</strong>, mất các cơ hội thị trường, bắt đầu từ đầu khi Person A đã tiến xa
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">📊 Chênh Lệch Có Thể Là Hàng Chục Triệu</div>
+                <p>3 tháng không chỉ là 90 ngày. Đó là 90 ngày practice, 90 ngày market observation, hàng trăm patterns nhận diện. Compound effect trong trading skill là rất thực. Đây không phải là pressure - đây là sự thật về cách skill development hoạt động.</p>
+            </div>
+        </section>
+
+        <!-- ĐIỀU CHÚNG TÔI KHÔNG LÀM -->
+        <section class="section">
+            <div class="trust-card">
+                <div class="trust-title">🤝 Cam Kết Của Chúng Tôi</div>
+
+                <div class="trust-grid">
+                    <div class="trust-section dont">
+                        <h4>❌ Điều Chúng Tôi KHÔNG Làm:</h4>
+                        <ul>
+                            <li>"Chỉ còn 5 slot" (khi thực tế không giới hạn)</li>
+                            <li>"Hết hạn trong 24h" (fake countdown)</li>
+                            <li>Pressure tactics, guilt tripping</li>
+                            <li>FOMO manipulation</li>
+                            <li>Hứa hẹn kết quả phi thực tế</li>
+                        </ul>
+                    </div>
+
+                    <div class="trust-section do">
+                        <h4>✅ Điều Chúng Tôi CAM KẾT:</h4>
+                        <ul>
+                            <li>Bạn quyết định khi bạn sẵn sàng</li>
+                            <li>Offer vẫn còn (bonus có thể thay đổi)</li>
+                            <li>Không bao giờ bị ép</li>
+                            <li>Honest numbers, realistic expectations</li>
+                            <li>Support dù bạn chọn option nào</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lesson-image">
+                <div class="image-placeholder">
+                    <span class="image-placeholder-icon">🖼️</span>
+                    <span>Hình 3: Person A vs Person B Comparison</span>
+                    <span style="font-size: 0.8rem; opacity: 0.7;">Canva: person-comparison.png (1200x675)</span>
+                </div>
+                <div class="image-caption">Compound effect: Bắt đầu sớm vs Chờ đợi</div>
+            </div>
+        </section>
+
+        <div class="lesson-image">
+            <div class="image-placeholder">
+                <span class="image-placeholder-icon">🖼️</span>
+                <span>Hình 4: "What We Don't Do" Trust Card</span>
+                <span style="font-size: 0.8rem; opacity: 0.7;">Canva: trust-commitment.png (1200x675)</span>
+            </div>
+            <div class="image-caption">Cam kết của GEM - Không fake urgency, không manipulation</div>
+        </div>
+
+        <div class="highlight-box cyan">
+            <div class="highlight-box-title">💬 Chia Sẻ Từ Học Viên</div>
+            <p><em>"Tôi ước mình bắt đầu sớm hơn. 6 tháng đầu tôi cứ chờ đợi 'thời điểm hoàn hảo'. Khi tôi nhìn lại, những tháng đó là những tháng tôi có thể đã tích lũy kinh nghiệm. Không có thời điểm hoàn hảo - chỉ có thời điểm bạn quyết định hành động."</em> - Trader M., đã học GEM được 14 tháng</p>
+        </div>
+
+        <div class="summary-box">
+            <div class="summary-title">📝 Tóm Tắt Bài 5.3</div>
+            <ul class="summary-list">
+                <li><strong>Lý do 1:</strong> Bonus program với discounts và resources cho người đăng ký sớm</li>
+                <li><strong>Lý do 2:</strong> Market timing - crypto VN đang phát triển mạnh</li>
+                <li><strong>Lý do 3:</strong> Compound effect - mỗi ngày trì hoãn là mất cơ hội tích lũy</li>
+                <li>Chúng tôi KHÔNG dùng fake urgency hay pressure tactics</li>
+                <li>Bạn quyết định khi bạn sẵn sàng - chúng tôi chỉ share sự thật</li>
+            </ul>
+        </div>
+
+        <div class="highlight-box cyan">
+            <div class="highlight-box-title">➡️ Bài Tiếp Theo (Bài Cuối)</div>
+            <p>Trong bài cuối cùng, chúng ta sẽ cùng nhìn lại các lựa chọn và bước tiếp theo cụ thể để bạn bắt đầu hành trình trading của mình.</p>
+        </div>
+
+        <footer class="lesson-footer">
+            <span class="footer-badge">MODULE B</span>
+            <p class="footer-text">Bài 5.3: Tại Sao Nên Bắt Đầu Ngay? | GEM Frequency Trading</p>
+        </footer>
+    </div>
+</body>
+</html>

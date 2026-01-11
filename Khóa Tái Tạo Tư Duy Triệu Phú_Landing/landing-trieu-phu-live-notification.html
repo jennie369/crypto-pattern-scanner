@@ -1,0 +1,310 @@
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     LIVE NOTIFICATION - Thông báo người vừa đăng ký (Social Proof)
+     Dán vào cuối <body> hoặc tạo section riêng trong Shopify
+     ═══════════════════════════════════════════════════════════════════════════ -->
+
+<style>
+    /* Live Notification Container */
+    .live-notification {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        z-index: 9998;
+        max-width: 320px;
+        background: linear-gradient(135deg, rgba(17, 34, 80, 0.95), rgba(26, 26, 46, 0.95));
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 189, 89, 0.3);
+        border-radius: 16px;
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        transform: translateX(-120%);
+        opacity: 0;
+        transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        font-family: 'Noto Sans Display', sans-serif;
+    }
+
+    .live-notification.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    /* Avatar */
+    .notif-avatar {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #FFBD59, #9C0612);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .notif-avatar svg {
+        width: 24px;
+        height: 24px;
+        color: #FFFFFF;
+    }
+
+    /* Live indicator */
+    .live-indicator {
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        width: 14px;
+        height: 14px;
+        background: #10B981;
+        border: 2px solid #112250;
+        border-radius: 50%;
+        animation: liveIndicatorPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes liveIndicatorPulse {
+        0%, 100% { 
+            transform: scale(1); 
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+        }
+        50% { 
+            transform: scale(1.1); 
+            box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+        }
+    }
+
+    /* Content */
+    .notif-content {
+        flex: 1;
+    }
+
+    .notif-name {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #FFFFFF;
+        margin-bottom: 2px;
+    }
+
+    .notif-action {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.7);
+        line-height: 1.4;
+    }
+
+    .notif-action strong {
+        color: #FFBD59;
+        font-weight: 600;
+    }
+
+    .notif-time {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.5);
+        margin-top: 4px;
+    }
+
+    .notif-time svg {
+        width: 12px;
+        height: 12px;
+    }
+
+    /* Close Button */
+    .notif-close {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    .live-notification:hover .notif-close {
+        opacity: 1;
+    }
+
+    .notif-close:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .notif-close svg {
+        width: 12px;
+        height: 12px;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Verified Badge */
+    .verified-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: rgba(16, 185, 129, 0.2);
+        color: #10B981;
+        font-size: 0.65rem;
+        font-weight: 600;
+        padding: 2px 6px;
+        border-radius: 10px;
+        margin-left: 6px;
+    }
+
+    .verified-badge svg {
+        width: 10px;
+        height: 10px;
+    }
+
+    /* Responsive */
+    @media (max-width: 400px) {
+        .live-notification {
+            left: 10px;
+            right: 10px;
+            max-width: none;
+            bottom: 10px;
+        }
+    }
+</style>
+
+<!-- Live Notification HTML -->
+<div class="live-notification" id="liveNotification">
+    <div class="notif-avatar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+        </svg>
+        <div class="live-indicator"></div>
+    </div>
+    
+    <div class="notif-content">
+        <div class="notif-name">
+            <span id="notifName">Nguyễn Thị M.</span>
+            <span class="verified-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                Xác thực
+            </span>
+        </div>
+        <div class="notif-action">
+            vừa đăng ký <strong>Tái Tạo Tư Duy Triệu Phú</strong>
+        </div>
+        <div class="notif-time">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span id="notifTime">2 phút trước</span> • <span id="notifLocation">Hồ Chí Minh</span>
+        </div>
+    </div>
+
+    <button class="notif-close" onclick="hideNotification()" aria-label="Đóng">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+    </button>
+</div>
+
+<script>
+    // Fake data for notifications
+    const notifications = [
+        { name: "Nguyễn Thị M.", location: "Hồ Chí Minh", time: "vừa xong" },
+        { name: "Trần Văn H.", location: "Hà Nội", time: "1 phút trước" },
+        { name: "Lê Thị K.", location: "Đà Nẵng", time: "2 phút trước" },
+        { name: "Phạm Minh T.", location: "Cần Thơ", time: "3 phút trước" },
+        { name: "Hoàng Thị L.", location: "Bình Dương", time: "4 phút trước" },
+        { name: "Võ Văn A.", location: "Hải Phòng", time: "5 phút trước" },
+        { name: "Đặng Thị N.", location: "Nha Trang", time: "6 phút trước" },
+        { name: "Bùi Thanh D.", location: "Huế", time: "7 phút trước" },
+        { name: "Ngô Thị P.", location: "Vũng Tàu", time: "8 phút trước" },
+        { name: "Lý Văn Q.", location: "Đồng Nai", time: "9 phút trước" },
+        { name: "Mai Thị S.", location: "Long An", time: "10 phút trước" },
+        { name: "Hồ Minh V.", location: "Bắc Ninh", time: "11 phút trước" },
+        { name: "Trịnh Thị Y.", location: "Quảng Ninh", time: "12 phút trước" },
+        { name: "Đỗ Văn B.", location: "Thanh Hóa", time: "13 phút trước" },
+        { name: "Cao Thị E.", location: "Nghệ An", time: "14 phút trước" }
+    ];
+
+    let currentIndex = 0;
+    let notificationTimeout;
+    let hideTimeout;
+    let isPaused = false;
+
+    const notificationEl = document.getElementById('liveNotification');
+    const nameEl = document.getElementById('notifName');
+    const timeEl = document.getElementById('notifTime');
+    const locationEl = document.getElementById('notifLocation');
+
+    function showNotification() {
+        if (isPaused) return;
+
+        // Update content
+        const data = notifications[currentIndex];
+        nameEl.textContent = data.name;
+        timeEl.textContent = data.time;
+        locationEl.textContent = data.location;
+
+        // Show notification
+        notificationEl.classList.add('show');
+
+        // Hide after 5 seconds
+        hideTimeout = setTimeout(() => {
+            hideNotification();
+        }, 5000);
+
+        // Move to next
+        currentIndex = (currentIndex + 1) % notifications.length;
+    }
+
+    function hideNotification() {
+        notificationEl.classList.remove('show');
+        clearTimeout(hideTimeout);
+
+        // Show next notification after random delay (8-15 seconds)
+        const delay = Math.random() * 7000 + 8000;
+        notificationTimeout = setTimeout(showNotification, delay);
+    }
+
+    function pauseNotifications() {
+        isPaused = true;
+        clearTimeout(notificationTimeout);
+        clearTimeout(hideTimeout);
+        notificationEl.classList.remove('show');
+    }
+
+    // Pause on hover
+    notificationEl.addEventListener('mouseenter', () => {
+        clearTimeout(hideTimeout);
+    });
+
+    notificationEl.addEventListener('mouseleave', () => {
+        hideTimeout = setTimeout(() => {
+            hideNotification();
+        }, 2000);
+    });
+
+    // Start notifications after page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if user has dismissed notifications this session
+        if (sessionStorage.getItem('notificationsDismissed') !== 'true') {
+            // Start after 5 seconds
+            setTimeout(() => {
+                showNotification();
+            }, 5000);
+        }
+    });
+
+    // Optional: Dismiss permanently for session
+    function dismissNotifications() {
+        pauseNotifications();
+        sessionStorage.setItem('notificationsDismissed', 'true');
+    }
+</script>

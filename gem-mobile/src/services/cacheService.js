@@ -6,7 +6,19 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import NetInfo from '@react-native-community/netinfo';
+
+// NetInfo import with fallback for when native module is not linked
+let NetInfo = null;
+try {
+  NetInfo = require('@react-native-community/netinfo').default;
+} catch (e) {
+  console.warn('[CacheService] NetInfo not available, assuming always online');
+  // Mock NetInfo when not available
+  NetInfo = {
+    fetch: async () => ({ isConnected: true, isInternetReachable: true }),
+    addEventListener: () => () => {}, // Returns unsubscribe function
+  };
+}
 
 // Cache keys
 const CACHE_KEYS = {

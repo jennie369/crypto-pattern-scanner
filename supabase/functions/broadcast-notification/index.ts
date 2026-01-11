@@ -154,13 +154,22 @@ serve(async (req) => {
       const batch = messages.slice(i, i + BATCH_SIZE);
 
       try {
+        // Build headers - add Expo Access Token if available (for production)
+        const expoHeaders: Record<string, string> = {
+          'Accept': 'application/json',
+          'Accept-Encoding': 'gzip, deflate',
+          'Content-Type': 'application/json',
+        };
+
+        // Add authentication if EXPO_ACCESS_TOKEN is set
+        const expoAccessToken = Deno.env.get('EXPO_ACCESS_TOKEN');
+        if (expoAccessToken) {
+          expoHeaders['Authorization'] = `Bearer ${expoAccessToken}`;
+        }
+
         const response = await fetch(EXPO_PUSH_URL, {
           method: 'POST',
-          headers: {
-            'Accept': 'application/json',
-            'Accept-Encoding': 'gzip, deflate',
-            'Content-Type': 'application/json',
-          },
+          headers: expoHeaders,
           body: JSON.stringify(batch),
         });
 

@@ -4,8 +4,8 @@
 -- Purpose: Track user tutorial completion and feature discovery
 -- ============================================================
 
--- 1. User tutorials completion tracking
-CREATE TABLE IF NOT EXISTS user_tutorials (
+-- 1. Feature tutorial completions tracking (renamed to avoid conflict with user_tutorials)
+CREATE TABLE IF NOT EXISTS feature_tutorial_completions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
   feature VARCHAR(50) NOT NULL,
@@ -17,8 +17,8 @@ CREATE TABLE IF NOT EXISTS user_tutorials (
 );
 
 -- Index for quick lookup
-CREATE INDEX IF NOT EXISTS idx_user_tutorials_user ON user_tutorials(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_tutorials_feature ON user_tutorials(feature);
+CREATE INDEX IF NOT EXISTS idx_feature_tutorial_user ON feature_tutorial_completions(user_id);
+CREATE INDEX IF NOT EXISTS idx_feature_tutorial_feature ON feature_tutorial_completions(feature);
 
 -- 2. Feature discovery prompts (admin-defined tooltips)
 CREATE TABLE IF NOT EXISTS feature_discovery_prompts (
@@ -39,11 +39,16 @@ CREATE TABLE IF NOT EXISTS feature_discovery_prompts (
 );
 
 -- 3. RLS Policies
-ALTER TABLE user_tutorials ENABLE ROW LEVEL SECURITY;
+ALTER TABLE feature_tutorial_completions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE feature_discovery_prompts ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies first
+DROP POLICY IF EXISTS "Users manage own feature tutorials" ON feature_tutorial_completions;
+DROP POLICY IF EXISTS "Anyone can read feature prompts" ON feature_discovery_prompts;
+DROP POLICY IF EXISTS "Admins manage feature prompts" ON feature_discovery_prompts;
+
 -- Users can manage their own tutorials
-CREATE POLICY "Users manage own tutorials" ON user_tutorials
+CREATE POLICY "Users manage own feature tutorials" ON feature_tutorial_completions
   FOR ALL USING (user_id = auth.uid());
 
 -- Everyone can read feature prompts
@@ -69,6 +74,7 @@ INSERT INTO feature_discovery_prompts (feature, title, description, screen, icon
 ON CONFLICT (feature) DO NOTHING;
 
 -- 5. Function to check if user should see a tutorial
+DROP FUNCTION IF EXISTS should_show_tutorial(UUID, VARCHAR);
 CREATE OR REPLACE FUNCTION should_show_tutorial(
   p_user_id UUID,
   p_feature VARCHAR(50)
@@ -77,7 +83,7 @@ RETURNS BOOLEAN AS $$
 BEGIN
   -- Check if user has already completed/skipped this tutorial
   IF EXISTS (
-    SELECT 1 FROM user_tutorials
+    SELECT 1 FROM feature_tutorial_completions
     WHERE user_id = p_user_id AND feature = p_feature
   ) THEN
     RETURN false;
@@ -96,31 +102,32 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- 6. Function to get next tutorial for user
+DROP FUNCTION IF EXISTS get_next_tutorial(UUID);
 CREATE OR REPLACE FUNCTION get_next_tutorial(p_user_id UUID)
 RETURNS TABLE (
-  feature VARCHAR(50),
-  title VARCHAR(200),
-  description TEXT,
-  screen VARCHAR(100),
-  icon VARCHAR(50),
-  cta_text VARCHAR(100),
-  tooltip_position VARCHAR(50)
+  out_feature VARCHAR(50),
+  out_title VARCHAR(200),
+  out_description TEXT,
+  out_screen VARCHAR(100),
+  out_icon VARCHAR(50),
+  out_cta_text VARCHAR(100),
+  out_tooltip_position VARCHAR(50)
 ) AS $$
 BEGIN
   RETURN QUERY
   SELECT
-    fdp.feature,
-    fdp.title,
-    fdp.description,
-    fdp.screen,
-    fdp.icon,
-    fdp.cta_text,
-    fdp.tooltip_position
+    fdp.feature::VARCHAR(50),
+    fdp.title::VARCHAR(200),
+    fdp.description::TEXT,
+    fdp.screen::VARCHAR(100),
+    fdp.icon::VARCHAR(50),
+    fdp.cta_text::VARCHAR(100),
+    fdp.tooltip_position::VARCHAR(50)
   FROM feature_discovery_prompts fdp
   WHERE fdp.is_active = true
     AND NOT EXISTS (
-      SELECT 1 FROM user_tutorials ut
-      WHERE ut.user_id = p_user_id AND ut.feature = fdp.feature
+      SELECT 1 FROM feature_tutorial_completions ftc
+      WHERE ftc.user_id = p_user_id AND ftc.feature = fdp.feature
     )
   ORDER BY fdp.priority DESC
   LIMIT 1;

@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 2.3: Thiết Lập Ranh Giới Lành Mạnh | Khóa Tần Số Tình Yêu</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--burgundy); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .section > ul, .section > ol { color: var(--text-secondary); padding-left: 1.5em; margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > ul, .section > ol { padding-left: calc(16px + 1.5em); padding-right: 16px; } }
+        .section li { margin-bottom: var(--space-sm); }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .highlight-box.purple { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05)); border-color: rgba(106, 91, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.purple { border-left-color: var(--purple); } }
+        .highlight-box.purple .highlight-box-title { color: var(--purple); }
+
+        .highlight-box.cyan { background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 240, 255, 0.05)); border-color: rgba(0, 240, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.cyan { border-left-color: var(--cyan); } }
+        .highlight-box.cyan .highlight-box-title { color: var(--cyan); }
+
+        .highlight-box.red { background: linear-gradient(135deg, rgba(156, 6, 18, 0.15), rgba(156, 6, 18, 0.05)); border-color: rgba(156, 6, 18, 0.3); }
+        @media (max-width: 600px) { .highlight-box.red { border-left-color: var(--burgundy); } }
+        .highlight-box.red .highlight-box-title { color: var(--burgundy-light); }
+
+        .highlight-box.green { background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05)); border-color: rgba(0, 200, 83, 0.3); }
+        @media (max-width: 600px) { .highlight-box.green { border-left-color: var(--success); } }
+        .highlight-box.green .highlight-box-title { color: var(--success); }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .example-box { background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02)); border: 1px solid rgba(0, 200, 83, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .example-box { border: none; border-radius: 0; border-left: 4px solid var(--success); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .example-box-title { font-weight: 700; color: var(--success); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .patterns-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .patterns-grid { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .pattern-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); text-align: center; transition: all 0.3s ease; }
+        @media (max-width: 600px) { .pattern-card { border: none; border-radius: 0; padding: var(--space-md); } }
+        @media (min-width: 601px) { .pattern-card:hover { border-color: var(--gold); transform: translateY(-4px); } }
+        .pattern-icon { font-size: 2.5rem; margin-bottom: var(--space-sm); }
+        .pattern-name { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .pattern-desc { font-size: 0.85rem; color: var(--text-muted); }
+
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        @media (min-width: 601px) { .flow-step:hover { border-color: var(--gold); transform: translateX(8px); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .comparison-table { margin: var(--space-lg) 0; border-radius: var(--radius-md); overflow: hidden; }
+        @media (max-width: 600px) { .comparison-table { margin: var(--space-md) 0; border-radius: 0; } }
+        .comparison-row { display: grid; grid-template-columns: 1fr 1fr; }
+        .comparison-header { background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); padding: var(--space-md); font-weight: 700; text-align: center; }
+        .comparison-header.green { background: linear-gradient(135deg, #00805a, var(--success)); }
+        .comparison-cell { padding: var(--space-md); background: var(--bg-card); border-bottom: 1px solid var(--glass-border); color: var(--text-secondary); font-size: 0.9rem; }
+        .comparison-cell.red { border-left: 3px solid var(--error); }
+        .comparison-cell.green { border-left: 3px solid var(--success); }
+
+        .faq-item { margin-bottom: var(--space-lg); }
+        .faq-question { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); }
+        .faq-answer { color: var(--text-secondary); }
+
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>💕</span>
+                <span>Module 2</span>
+            </div>
+            <div class="lesson-chapter">Chapter 2 - Yêu Thương Bản Thân</div>
+            <h1 class="lesson-title">Thiết Lập Ranh Giới Lành Mạnh</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 2.3</span></div>
+                <div class="meta-item"><span>⏱️</span><span>30 phút đọc</span></div>
+            </div>
+        </header>
+
+        <!-- SECTION 1: Opening Hook -->
+        <section class="section">
+            <h2 class="section-title"><span>🛡️</span> Tại Sao Người "Tốt" Lại Thường Bị Tổn Thương?</h2>
+
+            <p>Bạn có phải là người luôn sẵn sàng giúp đỡ mọi người? Người không bao giờ từ chối bất cứ điều gì? Người mà ai cũng khen "dễ thương quá, tốt bụng quá"? Nếu câu trả lời là có, thì đây là tin xấu: bạn đang là mục tiêu hoàn hảo cho những người lợi dụng. Và tin tốt? Bài học này sẽ giúp bạn thay đổi điều đó.</p>
+
+            <p>Ranh giới không phải là xây bức tường ngăn cách bạn với thế giới. Ranh giới là hàng rào bảo vệ giúp bạn phân biệt rõ ràng: đây là những gì tôi chấp nhận, đây là những gì tôi không chấp nhận. Người có ranh giới rõ ràng không phải là người ích kỷ - họ là người biết tự yêu thương bản thân đủ để bảo vệ năng lượng thiêng liêng của mình.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🔮</span> Ranh Giới Là Gì?</div>
+                <p>Ranh giới (boundaries) là những giới hạn bạn đặt ra để bảo vệ sức khỏe tinh thần, cảm xúc, và thể chất của mình trong các mối quan hệ. Ranh giới lành mạnh cho phép bạn nói "CÓ" với những gì nuôi dưỡng bạn và "KHÔNG" với những gì drain năng lượng của bạn - mà không cảm thấy tội lỗi.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m2-boundaries-definition.png" alt="Ranh giới lành mạnh">
+            </div>
+            <div class="image-caption">Hình 1: Ranh giới là hàng rào bảo vệ, không phải bức tường ngăn cách</div>
+        </section>
+
+        <!-- SECTION 2: 4 Loại Ranh Giới -->
+        <section class="section">
+            <h2 class="section-title"><span>📋</span> 4 Loại Ranh Giới Cơ Bản</h2>
+
+            <p>Ranh giới không chỉ là chuyện nói "không" với người khác. Có nhiều loại ranh giới khác nhau, và bạn cần thiết lập chúng trong nhiều khía cạnh của cuộc sống để thực sự bảo vệ được bản thân.</p>
+
+            <div class="patterns-grid">
+                <div class="pattern-card">
+                    <div class="pattern-icon">🚶</div>
+                    <div class="pattern-name">Ranh Giới Thể Chất</div>
+                    <div class="pattern-desc">Không gian cá nhân, touch preferences, quyền riêng tư cơ thể. Ai có thể chạm vào bạn và như thế nào.</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">💭</div>
+                    <div class="pattern-name">Ranh Giới Cảm Xúc</div>
+                    <div class="pattern-desc">Bảo vệ cảm xúc khỏi bị manipulate, không chịu trách nhiệm cho cảm xúc của người khác.</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">⏰</div>
+                    <div class="pattern-name">Ranh Giới Thời Gian</div>
+                    <div class="pattern-desc">Cách bạn sử dụng thời gian, ưu tiên, từ chối commitment quá tải.</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">💰</div>
+                    <div class="pattern-name">Ranh Giới Tài Chính</div>
+                    <div class="pattern-desc">Tiền bạc, cho vay, chia sẻ chi phí, không bị lợi dụng tài chính.</div>
+                </div>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>💜</span> Tại Sao Ranh Giới Quan Trọng Với Tình Yêu?</div>
+                <p>Người không có ranh giới rõ ràng thường thu hút những mối quan hệ độc hại - narcissist, người kiểm soát, người lợi dụng. Tại sao? Vì khi bạn không biết giới hạn của mình, người khác cũng không biết - và những người có ý đồ xấu sẽ khai thác điều này. Ranh giới rõ ràng là nền tảng của mọi mối quan hệ lành mạnh - bao gồm cả mối quan hệ với chính bạn.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m2-4-types-boundaries.png" alt="4 loại ranh giới">
+            </div>
+            <div class="image-caption">Hình 2: 4 loại ranh giới cần thiết lập trong cuộc sống</div>
+        </section>
+
+        <!-- SECTION 3: Real Examples -->
+        <section class="section">
+            <h2 class="section-title"><span>💫</span> Những Câu Chuyện Thực Tế</h2>
+
+            <div class="example-box">
+                <div class="example-box-title"><span>👩</span> Câu Chuyện Của Ngọc</div>
+                <p>Ngọc, 30 tuổi, được mọi người khen là "dễ thương, không bao giờ từ chối ai". Cô là người đầu tiên mọi người gọi khi cần giúp đỡ - mượn tiền, trông con, làm việc thay. Cô luôn đồng ý vì sợ bị ghét. Kết quả: cô kiệt sức, không có thời gian cho bản thân, và thầm oán giận những người cô "giúp đỡ".</p>
+                <p style="margin-top: var(--space-sm);">Khi học về ranh giới, Ngọc nhận ra mình đang cho đi từ sự cạn kiệt, không phải từ sự tràn đầy. Lần đầu tiên cô nói "không" với yêu cầu mượn tiền của đồng nghiệp, cô run rẩy và gần như khóc. Nhưng sau đó, cô cảm thấy một sự nhẹ nhõm kỳ lạ. "Tôi nhận ra rằng những người thực sự yêu thương tôi không hề giận khi tôi nói không", Ngọc chia sẻ. "Và những người giận... có lẽ họ chỉ yêu những gì tôi cho họ, không phải yêu tôi."</p>
+            </div>
+
+            <div class="example-box">
+                <div class="example-box-title"><span>👨</span> Câu Chuyện Của Bình</div>
+                <p>Bình, 35 tuổi, có mối quan hệ rất gắn bó với mẹ - có lẽ quá gắn bó. Mẹ anh gọi điện mỗi ngày, đôi khi 5-6 lần, hỏi đủ thứ từ anh ăn gì đến anh đi đâu với ai. Mẹ cũng thường đến nhà anh không báo trước và dọn dẹp lại mọi thứ theo ý bà. Bạn gái của Bình cảm thấy khó chịu, nhưng Bình sợ làm mẹ buồn nên không nói gì.</p>
+                <p style="margin-top: var(--space-sm);">Sau khi bạn gái chia tay vì "anh không có không gian cho em, mẹ anh mới là người phụ nữ số 1", Bình mới nhận ra vấn đề. Anh bắt đầu thiết lập ranh giới với mẹ - nhẹ nhàng nhưng kiên định. "Con yêu mẹ, nhưng con cần mẹ gọi trước khi đến nhà con", "Con sẽ gọi cho mẹ mỗi tối, nhưng ban ngày con bận làm việc". Ban đầu mẹ anh phản đối dữ dội, nhưng sau vài tháng, mối quan hệ của họ thực sự tốt hơn - ít phụ thuộc hơn, nhưng yêu thương hơn.</p>
+            </div>
+
+            <div class="example-box">
+                <div class="example-box-title"><span>👩‍🦱</span> Câu Chuyện Của Thanh</div>
+                <p>Thanh, 28 tuổi, có người bạn thân từ thời đại học hay "vay" tiền - và không bao giờ trả. Tổng số tiền đã lên đến gần 50 triệu. Mỗi lần bạn hỏi vay, Thanh đều cho vì "bạn thân mà", dù biết rằng tiền sẽ không bao giờ được trả. Thanh cảm thấy bị lợi dụng nhưng không dám nói vì sợ mất tình bạn.</p>
+                <p style="margin-top: var(--space-sm);">Khi học về ranh giới tài chính, Thanh nhận ra đây là mối quan hệ một chiều - cô cho đi mà không nhận được sự tôn trọng. Cô quyết định nói rõ: "Tớ không thể cho cậu mượn tiền nữa cho đến khi cậu trả những khoản trước." Người bạn giận dữ và không nói chuyện với cô trong nhiều tháng. Nhưng Thanh nhận ra: "Nếu tình bạn 10 năm có thể bị phá vỡ chỉ vì tôi ngừng cho vay tiền, thì đó không phải là tình bạn - đó là giao dịch. Và tôi xứng đáng hơn thế."</p>
+            </div>
+        </section>
+
+        <!-- SECTION 4: Signs of Weak Boundaries -->
+        <section class="section">
+            <h2 class="section-title"><span>⚠️</span> Dấu Hiệu Ranh Giới Yếu</h2>
+
+            <p>Nhiều người lớn lên không được dạy về ranh giới, hoặc bị phạt khi cố thiết lập chúng. "Con phải nghe lời người lớn", "Con không được ích kỷ", "Con phải hy sinh cho gia đình" - những thông điệp này khiến chúng ta tin rằng có ranh giới là sai. Dưới đây là những dấu hiệu cho thấy ranh giới của bạn cần được củng cố:</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Khó Nói "KHÔNG"</div>
+                        <div class="flow-step-desc">Bạn đồng ý làm mọi thứ người khác yêu cầu, dù không muốn và không có thời gian. Bạn sợ bị ghét, bị đánh giá là người xấu nếu từ chối.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Cảm Thấy Có Lỗi Khi Ưu Tiên Bản Thân</div>
+                        <div class="flow-step-desc">Khi bạn dành thời gian cho bản thân hoặc từ chối một yêu cầu, bạn cảm thấy ích kỷ và tội lỗi. Bạn tin rằng người tốt phải luôn hy sinh.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Để Người Khác Quyết Định Thay</div>
+                        <div class="flow-step-desc">Bạn để người khác quyết định mọi thứ - đi đâu, ăn gì, làm gì. Ý kiến của bạn không quan trọng bằng việc làm hài lòng người khác.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Chấp Nhận Hành Vi Không Tôn Trọng</div>
+                        <div class="flow-step-desc">Bạn cho phép người khác nói xấu, phớt lờ, hoặc đối xử tệ với bạn mà không phản đối. Bạn tự thuyết phục mình "họ không cố ý".</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Kiệt Sức Và Oán Giận</div>
+                        <div class="flow-step-desc">Bạn thường xuyên cảm thấy kiệt sức sau khi giao tiếp với một số người. Bạn thầm oán giận họ, nhưng không nói ra vì sợ conflict.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box red">
+                <div class="highlight-box-title"><span>⚠️</span> Hậu Quả Của Ranh Giới Yếu</div>
+                <p>Kiệt sức (burnout), oán giận tích tụ, mất bản sắc cá nhân, thu hút những người lợi dụng, cảm giác bất lực trong các mối quan hệ, và trong trường hợp nghiêm trọng - bị abuse về tinh thần hoặc thể chất mà không nhận ra.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m2-weak-boundaries-signs.png" alt="Dấu hiệu ranh giới yếu">
+            </div>
+            <div class="image-caption">Hình 3: 5 dấu hiệu cảnh báo ranh giới của bạn cần củng cố</div>
+        </section>
+
+        <!-- SECTION 5: How to Set Boundaries -->
+        <section class="section">
+            <h2 class="section-title"><span>💪</span> Cách Thiết Lập Ranh Giới</h2>
+
+            <p>Thiết lập ranh giới là một kỹ năng - bạn có thể học và cải thiện. Bước đầu tiên là nhận ra rằng bạn có QUYỀN có ranh giới, và việc bảo vệ bản thân không phải là ích kỷ. Dưới đây là quy trình 4 bước thực hành:</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Nhận Diện Cảm Xúc</div>
+                        <div class="flow-step-desc">Khi bạn cảm thấy khó chịu, oán giận, hoặc bị lợi dụng - đó là dấu hiệu ranh giới đang bị xâm phạm. Cơ thể và cảm xúc là hệ thống cảnh báo của bạn. Hãy lắng nghe chúng thay vì phớt lờ.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Xác Định Ranh Giới Cần Thiết</div>
+                        <div class="flow-step-desc">Hỏi bản thân: "Tao cần gì để cảm thấy thoải mái và được tôn trọng trong tình huống này?" Viết ra ranh giới cụ thể - càng rõ ràng càng tốt. "Tao cần họ không gọi điện sau 9h tối" thay vì "Tao cần họ tôn trọng tao hơn".</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Truyền Đạt Rõ Ràng</div>
+                        <div class="flow-step-desc">Sử dụng công thức: "Khi bạn [hành vi], tôi cảm thấy [cảm xúc]. Tôi cần [ranh giới của bạn]." Nói bình tĩnh, không defensive, không giải thích quá nhiều. Bạn không cần convince họ - bạn chỉ cần thông báo.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Giữ Vững Và Enforce</div>
+                        <div class="flow-step-desc">Khi ranh giới bị vi phạm, hãy nhắc lại một cách kiên định. Nếu tiếp tục bị phớt lờ, áp dụng consequences (như giảm thời gian gặp mặt, không trả lời tin nhắn ngay). Ranh giới không có consequences chỉ là gợi ý.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>💬</span> Script Thực Hành</div>
+                <p><strong>Tình huống:</strong> Mẹ hay gọi điện vào lúc bạn đang làm việc và nói chuyện rất lâu, khiến bạn bị trễ công việc.<br><br>
+                <strong>Ranh giới:</strong> "Mẹ ơi, con yêu mẹ và muốn nói chuyện với mẹ. Nhưng từ 9h-5h con đang làm việc nên không thể nghe điện thoại lâu. Con sẽ gọi lại cho mẹ vào buổi tối lúc 7h, được không ạ? Lúc đó con có thể nói chuyện thoải mái với mẹ."</p>
+            </div>
+        </section>
+
+        <!-- SECTION 6: Boundaries vs Walls -->
+        <section class="section">
+            <h2 class="section-title"><span>⚖️</span> Ranh Giới vs Bức Tường</h2>
+
+            <p>Một hiểu lầm phổ biến là nghĩ ranh giới giống như xây bức tường để không cho ai vào. Nhưng đây là hai điều hoàn toàn khác nhau. Hãy phân biệt rõ:</p>
+
+            <div class="comparison-table">
+                <div class="comparison-row">
+                    <div class="comparison-header">🧱 Bức Tường (Không Lành Mạnh)</div>
+                    <div class="comparison-header green">🚪 Ranh Giới (Lành Mạnh)</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-cell red">Không cho ai vào, đóng cửa hoàn toàn</div>
+                    <div class="comparison-cell green">Có cửa để mở khi bạn chọn</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-cell red">Dựa trên sợ hãi và tổn thương</div>
+                    <div class="comparison-cell green">Dựa trên tự tôn trọng và rõ ràng</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-cell red">Ngăn cản mọi kết nối</div>
+                    <div class="comparison-cell green">Cho phép kết nối lành mạnh</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-cell red">Cứng nhắc, không thể thay đổi</div>
+                    <div class="comparison-cell green">Linh hoạt, điều chỉnh theo context</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-cell red">"Tao không cần ai cả"</div>
+                    <div class="comparison-cell green">"Tao cần sự tôn trọng"</div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m2-boundaries-vs-walls.png" alt="Ranh giới vs Bức tường">
+            </div>
+            <div class="image-caption">Hình 4: Ranh giới cho phép kết nối lành mạnh, bức tường ngăn cản mọi thứ</div>
+
+            <div class="highlight-box green">
+                <div class="highlight-box-title"><span>✨</span> Ranh Giới Là Biểu Hiện Của Tình Yêu</div>
+                <p>Khi bạn có ranh giới rõ ràng, bạn có thể cho đi tình yêu từ sự tràn đầy, không phải từ sự cạn kiệt. Ranh giới cho phép bạn xuất hiện hoàn toàn trong các mối quan hệ vì bạn không còn oán giận hay kiệt sức. Paradox của ranh giới: bạn có thể yêu thương nhiều hơn khi bạn bảo vệ bản thân tốt hơn.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 7: Common Questions -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Những Thắc Mắc Thường Gặp</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">Nếu tôi thiết lập ranh giới, họ sẽ ghét tôi thì sao?</div>
+                <div class="faq-answer">Người thực sự yêu thương bạn sẽ tôn trọng ranh giới của bạn sau khi được giải thích. Người phản đối ranh giới của bạn thường là người hưởng lợi từ việc bạn không có ranh giới. Hãy tự hỏi: bạn muốn được yêu vì bạn luôn nói "có", hay được yêu vì bạn là bạn?</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Làm sao phân biệt ranh giới lành mạnh với ích kỷ?</div>
+                <div class="faq-answer">Ích kỷ là lấy đi của người khác mà không quan tâm đến họ. Ranh giới là bảo vệ những gì bạn có để có thể cho đi một cách bền vững. Người ích kỷ nghĩ "chỉ có tao quan trọng". Người có ranh giới nghĩ "tao CŨNG quan trọng, không chỉ có người khác".</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Tôi đã 30/40 tuổi rồi, liệu có quá muộn để học ranh giới không?</div>
+                <div class="faq-answer">Không bao giờ là quá muộn. Bạn đã dành cả đời để học cách không có ranh giới - việc "unlearn" sẽ mất thời gian, nhưng hoàn toàn có thể. Bắt đầu từ những việc nhỏ, và kiên nhẫn với bản thân. Mỗi lần bạn đặt ranh giới thành công, việc tiếp theo sẽ dễ dàng hơn.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Làm sao đặt ranh giới với cha mẹ/người lớn tuổi mà không bất hiếu?</div>
+                <div class="faq-answer">Ranh giới không phải là bất hiếu - đó là tôn trọng lẫn nhau. Bạn có thể yêu thương cha mẹ đồng thời có ranh giới với họ. Thể hiện ranh giới với sự tôn trọng: "Con yêu mẹ, và con cần..." Nhớ rằng một mối quan hệ lành mạnh tốt hơn một mối quan hệ phụ thuộc có vẻ "gắn bó".</div>
+            </div>
+        </section>
+
+        <!-- SECTION 8: Key Takeaways -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Những Điểm Cốt Lõi</h2>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>💎</span> Ghi Nhớ Từ Bài Học Này</div>
+                <ul class="summary-list">
+                    <li>Ranh giới là hàng rào bảo vệ cho phép bạn nói "có" với điều nuôi dưỡng và "không" với điều làm cạn kiệt, không phải bức tường ngăn cách</li>
+                    <li>Có 4 loại ranh giới cơ bản: thể chất, cảm xúc, thời gian, và tài chính - bạn cần thiết lập cả 4 để bảo vệ toàn diện</li>
+                    <li>Quy trình 4 bước: Nhận diện cảm xúc → Xác định ranh giới → Truyền đạt rõ ràng → Giữ vững và enforce với consequences</li>
+                    <li>Người phản đối ranh giới của bạn thường là người hưởng lợi từ việc bạn không có ranh giới - đây là thước đo tốt để biết ai thực sự yêu thương bạn</li>
+                    <li>"Không" là một câu trả lời hoàn chỉnh - bạn không cần giải thích dài dòng hay convince người khác về ranh giới của mình</li>
+                    <li>Ranh giới rõ ràng là nền tảng của mọi mối quan hệ lành mạnh - kể cả mối quan hệ với chính bạn</li>
+                </ul>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m2-practice-boundaries.png" alt="Thực hành ranh giới">
+            </div>
+            <div class="image-caption">Hình 5: Bắt đầu nhỏ - mỗi lần nói "không" là một chiến thắng</div>
+        </section>
+
+        <!-- SECTION 9: Transition -->
+        <section class="section">
+            <h2 class="section-title"><span>🌟</span> Bước Tiếp Theo</h2>
+
+            <p>Bạn đã học về Mirror Work, 7 Hành Vi Tinh Tấn, và Thiết Lập Ranh Giới. Đây đều là những công cụ mạnh mẽ để xây dựng tình yêu bản thân từ bên trong ra bên ngoài. Nhưng có một thực hành đặc biệt giúp củng cố tất cả những điều này: Solo Date - nghệ thuật hẹn hò với chính mình.</p>
+
+            <p>Trong bài học cuối cùng của Module 2, chúng ta sẽ khám phá cách biến việc dành thời gian một mình thành một ritual thiêng liêng, để bạn thực sự tận hưởng company của chính mình.</p>
+
+            <div class="highlight-box green">
+                <div class="highlight-box-title"><span>✨</span> Bài Tập Thực Hành Hôm Nay</div>
+                <p>Tuần này, hãy nói "KHÔNG" với ít nhất 1 điều bạn không thực sự muốn làm. Bắt đầu với những việc nhỏ, ít rủi ro - như từ chối một lời mời đi cafe khi bạn mệt, hoặc không trả lời tin nhắn ngay lập tức. Quan sát cảm xúc của bạn trước, trong, và sau khi nói không. Ghi chép lại trong journal. Đây là bước đầu tiên để xây dựng cơ ranh giới.</p>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>

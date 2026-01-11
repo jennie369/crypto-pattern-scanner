@@ -1,10 +1,19 @@
 /**
- * Affiliate Section Component
+ * Affiliate Section Component v3.0
+ * GEM Partnership System - Reference: GEM_PARTNERSHIP_OFFICIAL_POLICY_V3.md
+ *
  * Handles 4 scenarios:
- * 1. No partnership, no application - Show registration options
+ * 1. No partnership, no application - Show registration options (CTV + KOL)
  * 2. Has pending application - Show pending status
  * 3. Application rejected - Show rejection info
  * 4. Has partnership (approved) - Show affiliate code & stats
+ *
+ * v3.0 Changes:
+ * - Removed "Affiliate 3%" option (migrated to CTV Bronze)
+ * - CTV now has 5 tiers: Bronze, Silver, Gold, Platinum, Diamond
+ * - CTV no longer requires course purchase
+ * - Added KOL program (requires 20K+ followers)
+ * - Vietnamese tier names
  */
 
 import React, { useState, useEffect } from 'react';
@@ -32,10 +41,17 @@ import {
   ChevronRight,
   Unlock,
   Lock,
+  Star,
 } from 'lucide-react-native';
 
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../../utils/tokens';
 import { partnershipService } from '../../../services/partnershipService';
+import {
+  CTV_TIER_CONFIG,
+  KOL_CONFIG,
+  formatTierDisplay,
+  getTierConfig,
+} from '../../../constants/partnershipConstants';
 
 export default function AffiliateSection({ user, navigation }) {
   const { alert, AlertComponent } = useCustomAlert();
@@ -91,23 +107,14 @@ export default function AffiliateSection({ user, navigation }) {
     }
   };
 
+  // v3.0: CTV no longer requires course purchase - open to everyone
   const handleCtvRegister = () => {
-    if (!partnershipStatus?.is_ctv_eligible) {
-      alert({
-        type: 'warning',
-        title: 'Chưa đủ điều kiện',
-        message: 'Bạn cần mua ít nhất 1 khóa học để đăng ký CTV 4 Cấp',
-        buttons: [
-          { text: 'Đóng', style: 'cancel' },
-          {
-            text: 'Xem Khóa Học',
-            onPress: () => navigation.navigate('Courses'),
-          },
-        ]
-      });
-      return;
-    }
     navigation.navigate('PartnershipRegistration', { type: 'ctv' });
+  };
+
+  // v3.0: KOL requires 20K+ followers
+  const handleKolRegister = () => {
+    navigation.navigate('PartnershipRegistration', { type: 'kol' });
   };
 
   const formatCurrency = (amount) => {
@@ -136,10 +143,15 @@ export default function AffiliateSection({ user, navigation }) {
                      partnershipStatus?.application_status === 'approved';
 
   if (isApproved) {
-    const isAffiliate = partnershipStatus.partnership_role === 'affiliate' ||
-                        partnershipStatus.application_type === 'affiliate';
-    const tierNames = ['Beginner', 'Growing', 'Master', 'Grand'];
-    const tierName = isAffiliate ? 'Affiliate' : tierNames[(partnershipStatus.ctv_tier || 1) - 1];
+    // v3.0: Get role and tier from partnershipStatus
+    const role = partnershipStatus.partnership_role || partnershipStatus.application_type || 'ctv';
+    const isKol = role === 'kol';
+    const ctvTier = partnershipStatus.ctv_tier || 'bronze';
+
+    // v3.0: Use Vietnamese tier names from constants
+    const tierConfig = getTierConfig(ctvTier);
+    const tierName = isKol ? 'KOL' : `${tierConfig.icon} ${tierConfig.name}`;
+    const tierColor = isKol ? '#9C27B0' : tierConfig.color;
 
     // Generate fallback affiliate code if not set
     const affiliateCode = partnershipStatus.affiliate_code ||
@@ -153,7 +165,7 @@ export default function AffiliateSection({ user, navigation }) {
     return (
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>
-          {isAffiliate ? 'Chương Trình Affiliate' : 'Chương Trình CTV 4 Cấp'}
+          {isKol ? 'Chương Trình KOL Affiliate' : 'Chương Trình CTV 5 Cấp'}
         </Text>
 
         <View style={styles.partnerCard}>
@@ -164,8 +176,8 @@ export default function AffiliateSection({ user, navigation }) {
               <Text style={styles.codeLabel}>Mã giới thiệu của bạn</Text>
               <Text style={styles.codeValue}>{affiliateCode}</Text>
             </View>
-            <View style={styles.tierBadge}>
-              <Text style={styles.tierText}>{tierName}</Text>
+            <View style={[styles.tierBadge, { backgroundColor: `${tierColor}30` }]}>
+              <Text style={[styles.tierText, { color: tierColor }]}>{tierName}</Text>
             </View>
           </View>
 
@@ -258,6 +270,7 @@ export default function AffiliateSection({ user, navigation }) {
 
   // ═══════════════════════════════════════════════════════════════
   // SCENARIO 1: No partnership, no application - Show registration
+  // v3.0: 2 programs - CTV (5 tiers) + KOL (20K+ followers)
   // ═══════════════════════════════════════════════════════════════
   if (!partnershipStatus?.has_partnership && !partnershipStatus?.has_application) {
     return (
@@ -276,70 +289,66 @@ export default function AffiliateSection({ user, navigation }) {
             </View>
           </View>
 
-          {/* Program Options */}
+          {/* Program Options v3.0 */}
           <View style={styles.programsContainer}>
-            {/* Affiliate Option */}
+            {/* CTV Option - Open to everyone */}
             <View style={styles.programCard}>
               <View style={styles.programHeader}>
-                <Text style={styles.programTitle}>Affiliate</Text>
+                <Text style={styles.programTitle}>CTV 5 Cấp</Text>
                 <View style={styles.rateBadge}>
-                  <Text style={styles.rateText}>3%</Text>
+                  <Text style={styles.rateText}>10-30%</Text>
                 </View>
               </View>
-              <Text style={styles.programDesc}>Hoa hồng cố định cho mọi đơn hàng</Text>
+              <Text style={styles.programDesc}>Đối Tác Phát Triển - Ai cũng được tham gia</Text>
               <View style={styles.programFeatures}>
-                <Text style={styles.featureText}>• Đăng ký miễn phí</Text>
-                <Text style={styles.featureText}>• Không yêu cầu mua hàng</Text>
-                <Text style={styles.featureText}>• Phù hợp cho tất cả</Text>
+                <Text style={styles.featureText}>• Digital: 10% → 30%</Text>
+                <Text style={styles.featureText}>• Physical: 6% → 15%</Text>
+                <Text style={styles.featureText}>• Sub-affiliate: 2% → 4%</Text>
+                <Text style={styles.featureText}>• Tự động duyệt sau 3 ngày</Text>
               </View>
+
+              {/* v3.0: CTV open to everyone */}
+              <View style={styles.eligibleBadge}>
+                <Unlock size={14} color={COLORS.success} />
+                <Text style={styles.eligibleText}>Mở cho tất cả!</Text>
+              </View>
+
               <TouchableOpacity
-                style={styles.programButton}
-                onPress={() => navigation.navigate('PartnershipRegistration', { type: 'affiliate' })}
+                style={[styles.programButton, styles.ctvButton]}
+                onPress={handleCtvRegister}
               >
-                <Text style={styles.programButtonText}>Đăng Ký Affiliate</Text>
+                <Text style={styles.programButtonText}>Đăng Ký CTV</Text>
                 <ChevronRight size={18} color={COLORS.textPrimary} />
               </TouchableOpacity>
             </View>
 
-            {/* CTV Option */}
-            <View style={[styles.programCard, styles.ctvCard]}>
+            {/* KOL Option - Requires 20K+ followers */}
+            <View style={[styles.programCard, styles.kolCard]}>
               <View style={styles.programHeader}>
-                <Text style={styles.programTitle}>CTV 4 Cấp</Text>
-                <View style={[styles.rateBadge, styles.ctvBadge]}>
-                  <Text style={styles.rateText}>10-30%</Text>
+                <Text style={styles.programTitle}>KOL Affiliate</Text>
+                <View style={[styles.rateBadge, styles.kolBadge]}>
+                  <Text style={[styles.rateText, { color: '#9C27B0' }]}>20%</Text>
                 </View>
               </View>
-              <Text style={styles.programDesc}>Hoa hồng cao theo cấp bậc</Text>
+              <Text style={styles.programDesc}>Dành cho Influencer & Content Creator</Text>
               <View style={styles.programFeatures}>
-                <Text style={styles.featureText}>• Digital: 10% → 30%</Text>
-                <Text style={styles.featureText}>• Physical: 3% → 15%</Text>
-                <Text style={styles.featureText}>• KPI Bonus hàng tháng</Text>
+                <Text style={styles.featureText}>• Hoa hồng 20% tất cả sản phẩm</Text>
+                <Text style={styles.featureText}>• Sub-affiliate: 3.5%</Text>
+                <Text style={styles.featureText}>• Thanh toán 2 lần/tháng</Text>
+                <Text style={styles.featureText}>• Marketing kit đặc biệt</Text>
               </View>
 
-              {/* Eligibility Badge */}
-              {partnershipStatus?.is_ctv_eligible ? (
-                <View style={styles.eligibleBadge}>
-                  <Unlock size={14} color={COLORS.success} />
-                  <Text style={styles.eligibleText}>Bạn đủ điều kiện!</Text>
-                </View>
-              ) : (
-                <View style={styles.notEligibleBadge}>
-                  <Lock size={14} color={COLORS.textMuted} />
-                  <Text style={styles.notEligibleText}>Cần mua khóa học</Text>
-                </View>
-              )}
+              {/* KOL Requirement */}
+              <View style={styles.kolRequirementBadge}>
+                <Star size={14} color="#9C27B0" />
+                <Text style={styles.kolRequirementText}>Yêu cầu: 20,000+ followers</Text>
+              </View>
 
               <TouchableOpacity
-                style={[
-                  styles.programButton,
-                  styles.ctvButton,
-                  !partnershipStatus?.is_ctv_eligible && styles.buttonDisabled,
-                ]}
-                onPress={handleCtvRegister}
+                style={[styles.programButton, styles.kolButton]}
+                onPress={handleKolRegister}
               >
-                <Text style={styles.programButtonText}>
-                  {partnershipStatus?.is_ctv_eligible ? 'Đăng Ký CTV' : 'Mua Khóa Học'}
-                </Text>
+                <Text style={styles.programButtonText}>Đăng Ký KOL</Text>
                 <ChevronRight size={18} color={COLORS.textPrimary} />
               </TouchableOpacity>
             </View>
@@ -351,10 +360,23 @@ export default function AffiliateSection({ user, navigation }) {
 
   // ═══════════════════════════════════════════════════════════════
   // SCENARIO 2: Has pending application
+  // v3.0: Updated type display
   // ═══════════════════════════════════════════════════════════════
   if (partnershipStatus?.has_application && partnershipStatus?.application_status === 'pending') {
-    const appType = partnershipStatus.application_type === 'affiliate' ? 'Affiliate' : 'CTV 4 Cấp';
+    // v3.0: Map application type to display name
+    const appTypeDisplay = {
+      ctv: 'CTV 5 Cấp',
+      kol: 'KOL Affiliate',
+      affiliate: 'CTV 5 Cấp',  // Legacy mapping
+    };
+    const appType = appTypeDisplay[partnershipStatus.application_type] || 'CTV 5 Cấp';
     const appDate = new Date(partnershipStatus.application_date).toLocaleDateString('vi-VN');
+
+    // v3.0: Show auto-approve info for CTV
+    const isCTV = partnershipStatus.application_type === 'ctv' || partnershipStatus.application_type === 'affiliate';
+    const autoApproveDate = partnershipStatus.auto_approve_at
+      ? new Date(partnershipStatus.auto_approve_at).toLocaleDateString('vi-VN')
+      : null;
 
     return (
       <View style={styles.section}>
@@ -517,6 +539,9 @@ const styles = StyleSheet.create({
   ctvCard: {
     borderColor: 'rgba(106, 91, 255, 0.3)',
   },
+  kolCard: {
+    borderColor: 'rgba(156, 39, 176, 0.3)',
+  },
   programHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -536,6 +561,9 @@ const styles = StyleSheet.create({
   },
   ctvBadge: {
     backgroundColor: 'rgba(106, 91, 255, 0.2)',
+  },
+  kolBadge: {
+    backgroundColor: 'rgba(156, 39, 176, 0.2)',
   },
   rateText: {
     fontSize: TYPOGRAPHY.fontSize.sm,
@@ -595,6 +623,24 @@ const styles = StyleSheet.create({
   },
   ctvButton: {
     backgroundColor: COLORS.purple,
+  },
+  kolButton: {
+    backgroundColor: '#9C27B0',
+  },
+  kolRequirementBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(156, 39, 176, 0.15)',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 6,
+    borderRadius: 8,
+    marginBottom: SPACING.md,
+    gap: 6,
+  },
+  kolRequirementText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+    color: '#9C27B0',
   },
   buttonDisabled: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',

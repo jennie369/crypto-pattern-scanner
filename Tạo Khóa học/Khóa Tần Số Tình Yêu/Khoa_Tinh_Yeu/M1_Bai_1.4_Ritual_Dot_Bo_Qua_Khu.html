@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 1.4: Ritual Đốt Bỏ Quá Khứ | Khóa Tần Số Tình Yêu</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--burgundy); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .section > ul, .section > ol { color: var(--text-secondary); padding-left: 1.5em; margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > ul, .section > ol { padding-left: calc(16px + 1.5em); padding-right: 16px; } }
+        .section li { margin-bottom: var(--space-sm); }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; margin-bottom: var(--space-sm); }
+
+        .highlight-box.purple { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05)); border-color: rgba(106, 91, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.purple { border-left-color: var(--purple); } }
+        .highlight-box.purple .highlight-box-title { color: var(--purple); }
+
+        .highlight-box.cyan { background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 240, 255, 0.05)); border-color: rgba(0, 240, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.cyan { border-left-color: var(--cyan); } }
+        .highlight-box.cyan .highlight-box-title { color: var(--cyan); }
+
+        .highlight-box.red { background: linear-gradient(135deg, rgba(156, 6, 18, 0.15), rgba(156, 6, 18, 0.05)); border-color: rgba(156, 6, 18, 0.3); }
+        @media (max-width: 600px) { .highlight-box.red { border-left-color: var(--burgundy); } }
+        .highlight-box.red .highlight-box-title { color: var(--burgundy-light); }
+
+        .highlight-box.green { background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05)); border-color: rgba(0, 200, 83, 0.3); }
+        @media (max-width: 600px) { .highlight-box.green { border-left-color: var(--success); } }
+        .highlight-box.green .highlight-box-title { color: var(--success); }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .definition-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        @media (min-width: 601px) { .flow-step:hover { border-color: var(--gold); transform: translateX(8px); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .patterns-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .patterns-grid { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .pattern-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); text-align: center; transition: all 0.3s ease; }
+        @media (max-width: 600px) { .pattern-card { border: none; border-radius: 0; padding: var(--space-md); } }
+        @media (min-width: 601px) { .pattern-card:hover { border-color: var(--burgundy); transform: translateY(-4px); } }
+        .pattern-icon { font-size: 2.5rem; margin-bottom: var(--space-sm); }
+        .pattern-name { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .pattern-desc { font-size: 0.85rem; color: var(--text-muted); }
+
+        .checklist { list-style: none; margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .checklist { margin: var(--space-md) 0; padding: 0 16px !important; } }
+        .checklist li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); padding: var(--space-md); background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .checklist li { border-radius: var(--space-sm); } }
+        .checklist li::before { content: "☐"; color: var(--gold); font-size: 1.2rem; }
+
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+
+        /* ==================== QUIZ SECTION ==================== */
+        .quiz-section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-top: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-section { border: none; border-radius: 0; padding: 0; margin-top: 0; border-top: 8px solid var(--bg-primary); } }
+        .quiz-header { text-align: center; margin-bottom: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-header { padding: var(--space-lg) 16px var(--space-md); margin-bottom: 0; } }
+        .quiz-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+        .quiz-question { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-question { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; margin-bottom: 0; border-bottom: 1px solid var(--glass-border); } }
+        .question-number { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; font-weight: 700; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .question-text { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-lg); line-height: 1.6; }
+
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        @media (max-width: 600px) { .quiz-options { gap: 1px; background: var(--glass-border); margin-left: -16px; margin-right: -16px; margin-left: calc(-16px - 4px); } }
+        .quiz-option { display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; transition: all 0.3s ease; }
+        @media (max-width: 600px) { .quiz-option { border: none; border-radius: 0; border-left: 4px solid transparent; padding: var(--space-md) 16px; } }
+        .quiz-option:hover:not(.disabled) { border-color: var(--gold); background: var(--bg-card); }
+        @media (max-width: 600px) { .quiz-option:hover:not(.disabled) { border-left-color: var(--gold); } }
+        .quiz-option.selected { border-color: var(--gold); background: rgba(255, 189, 89, 0.1); }
+        @media (max-width: 600px) { .quiz-option.selected { border-left-color: var(--gold); } }
+        .quiz-option.correct { border-color: var(--success) !important; background: rgba(0, 200, 83, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.correct { border-left-color: var(--success) !important; } }
+        .quiz-option.incorrect { border-color: var(--error) !important; background: rgba(255, 82, 82, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.incorrect { border-left-color: var(--error) !important; } }
+        .quiz-option.disabled { opacity: 0.7; cursor: not-allowed; }
+        .option-marker { width: 28px; height: 28px; min-width: 28px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+        .quiz-option.selected .option-marker { background: var(--gold); border-color: var(--gold); color: var(--navy-dark); }
+        .quiz-option.correct .option-marker { background: var(--success); border-color: var(--success); color: white; }
+        .quiz-option.incorrect .option-marker { background: var(--error); border-color: var(--error); color: white; }
+        .option-text { flex: 1; color: var(--text-secondary); }
+
+        .question-feedback { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--space-sm); display: none; }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); }
+        .question-feedback.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .quiz-result { text-align: center; padding: var(--space-xl); display: none; }
+        .quiz-result.show { display: block; }
+        .result-score { font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: var(--space-md); }
+        .result-text { font-size: 1.25rem; font-weight: 700; margin-bottom: var(--space-sm); }
+        .result-message { color: var(--text-muted); }
+
+        .quiz-buttons { display: flex; justify-content: center; padding: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-buttons { padding: var(--space-lg) 16px; } }
+        .quiz-btn { padding: var(--space-md) var(--space-xl); border-radius: var(--radius-md); font-weight: 700; cursor: pointer; border: none; font-family: inherit; background: var(--glass-bg); color: var(--text-primary); border: 2px solid var(--glass-border); }
+        .quiz-btn:hover { border-color: var(--gold); }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>💕</span>
+                <span>Module 1</span>
+            </div>
+            <div class="lesson-chapter">Chapter 1 - Chữa Lành Vết Thương Quá Khứ</div>
+            <h1 class="lesson-title">Ritual Đốt Bỏ Quá Khứ</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 1.4</span></div>
+                <div class="meta-item"><span>⏱️</span><span>10 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🔥</span> Khi Ngọn Lửa Chuyển Hóa</h2>
+
+            <p>Bạn đã bao giờ ngồi bên đống lửa trại, nhìn ngọn lửa nhảy múa, và cảm thấy một sự bình an kỳ lạ lan tỏa trong lòng? Trong hàng ngàn năm, các nền văn minh trên thế giới đã sử dụng ngọn lửa như công cụ chuyển hóa tâm linh mạnh mẽ nhất. Người Inca có Fire Ceremony, người Celtic có Beltane, người Hindu có Agni Hotra. Tất cả đều hiểu rằng lửa không chỉ đốt cháy vật chất - nó chuyển hóa năng lượng, giải phóng những gì bị giam cầm, và tạo không gian cho cái mới ra đời.</p>
+
+            <p>Hôm nay, bạn sẽ học cách thực hiện Ritual Đốt Bỏ Quá Khứ - nghi thức thiêng liêng đánh dấu sự kết thúc của giai đoạn chữa lành trong Module 1 và mở ra cánh cửa cho tình yêu mới trong cuộc đời bạn. Đây không chỉ là một bài tập - đây là một trải nghiệm chuyển hóa mà nhiều học viên mô tả là "điểm chuyển đổi" quan trọng nhất trong hành trình của họ.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🔥</span> Fire Ceremony - Nghi Lễ Lửa Là Gì?</div>
+                <p>Fire Ceremony là nghi lễ thiêng liêng sử dụng năng lượng chuyển hóa của lửa để giải phóng những ràng buộc năng lượng, vết thương cảm xúc, và niềm tin cũ không còn phục vụ sự phát triển của bạn. Khi bạn đốt một biểu tượng vật lý của quá khứ - tờ giấy viết những nỗi đau - bạn đang gửi tín hiệu mạnh mẽ đến tiềm thức: "Tôi sẵn sàng buông bỏ. Chương này đã kết thúc."</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m1-ritual-fire-transformation.png" alt="Fire Ceremony">
+            </div>
+            <div class="image-caption">Hình 1: Lửa - Nguyên tố chuyển hóa mạnh mẽ nhất trong tự nhiên, được sử dụng qua nhiều thế kỷ trong các nghi lễ healing</div>
+        </section>
+
+        <!-- WHY IT WORKS -->
+        <section class="section">
+            <h2 class="section-title"><span>🧠</span> Tại Sao Ritual Đốt Bỏ Hiệu Quả?</h2>
+
+            <p>Có thể bạn tự hỏi: "Đốt một tờ giấy thì có gì đặc biệt? Tại sao điều đơn giản như vậy lại có sức mạnh thay đổi?" Câu trả lời nằm ở cách não bộ và tiềm thức của chúng ta hoạt động.</p>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>🧠</span> Khoa Học Đằng Sau Ritual</div>
+                <p><strong>1. Symbolic Closure:</strong> Não bộ phản ứng mạnh mẽ với các hành động biểu tượng. Khi bạn viết ra nỗi đau và đốt nó đi, bạn đang tạo một "closure" - sự kết thúc tâm lý mà chỉ suy nghĩ không thể tạo ra. Đây là lý do nghi lễ tang ma quan trọng - chúng giúp não bộ "đóng lại" một chương.</p>
+                <p><strong>2. Externalization:</strong> Khi bạn viết nỗi đau ra giấy, bạn đang "đưa nó ra ngoài" cơ thể. Nó không còn chỉ tồn tại trong đầu bạn - nó trở thành một vật thể có thể nhìn thấy, chạm vào, và quan trọng nhất - có thể phá hủy.</p>
+                <p><strong>3. Multi-sensory Experience:</strong> Ritual kích hoạt nhiều giác quan - nhìn ngọn lửa, nghe tiếng lửa cháy, ngửi mùi khói - tạo ra ấn tượng sâu đậm hơn trong não bộ so với chỉ "nghĩ" về việc buông bỏ.</p>
+            </div>
+
+            <div class="highlight-box green">
+                <div class="highlight-box-title"><span>✨</span> Câu Chuyện: Lan - Đốt Bỏ 15 Năm Đau Khổ</div>
+                <p>Lan, 40 tuổi, đã mang vết thương từ cuộc hôn nhân thất bại suốt 15 năm. Cô đã đọc sách, đi therapy, thử mọi phương pháp. Nhưng chỉ khi thực hiện Fire Ceremony - viết tên chồng cũ, viết những lời anh đã nói, viết nỗi đau, rồi đốt tất cả - cô mới cảm thấy được giải thoát thực sự. "Nhìn ngọn lửa thiêu đốt những từ đó, tôi cảm thấy một phần mình cũng được giải thoát theo," Lan chia sẻ. "Sáng hôm sau, lần đầu tiên trong 15 năm, tôi thức dậy mà không nghĩ đến anh ta."</p>
+            </div>
+        </section>
+
+        <!-- THỜI ĐIỂM THỰC HIỆN -->
+        <section class="section">
+            <h2 class="section-title"><span>🌙</span> Thời Điểm Thực Hiện Tốt Nhất</h2>
+
+            <p>Năng lượng của mặt trăng ảnh hưởng đến nước trong cơ thể chúng ta - và cơ thể người có đến 60% là nước. Chọn đúng thời điểm sẽ khuếch đại sức mạnh của nghi lễ gấp nhiều lần, giống như lướt sóng thay vì bơi ngược dòng.</p>
+
+            <div class="image-container">
+                <img src="images/m1-moon-phases-ritual.png" alt="Các pha trăng">
+            </div>
+            <div class="image-caption">Hình 2: Chọn pha trăng phù hợp để khuếch đại sức mạnh của nghi lễ buông bỏ</div>
+
+            <div class="patterns-grid">
+                <div class="pattern-card">
+                    <div class="pattern-icon">🌑</div>
+                    <div class="pattern-name">Trăng Tối (New Moon)</div>
+                    <div class="pattern-desc">Gieo hạt ý định mới, bắt đầu hành trình - tốt cho việc viết mục tiêu</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">🌓</div>
+                    <div class="pattern-name">Trăng Thượng Huyền</div>
+                    <div class="pattern-desc">Xây dựng, thu hút năng lượng tích cực - tốt cho manifestation</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">🌕</div>
+                    <div class="pattern-name">Trăng Tròn (Full Moon)</div>
+                    <div class="pattern-desc">Năng lượng cao nhất, hoàn thành - tốt để release những gì đã sẵn sàng</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">🌗</div>
+                    <div class="pattern-name">Trăng Khuyết (Waning)</div>
+                    <div class="pattern-desc"><strong>LÝ TƯỞNG NHẤT</strong> cho buông bỏ, thanh lọc, giải phóng quá khứ</div>
+                </div>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>💡</span> Lời Khuyên Từ Jennie</div>
+                <p>Trăng khuyết (từ sau trăng tròn đến trăng tối) là thời điểm lý tưởng nhất để thực hiện Ritual Đốt Bỏ. Đây là giai đoạn mặt trăng đang "co lại", hỗ trợ năng lượng giải phóng và thanh lọc. Tuy nhiên, nếu bạn cảm thấy sẵn sàng - hãy làm ngay. <strong>Ý định mạnh mẽ quan trọng hơn thời điểm hoàn hảo.</strong></p>
+            </div>
+        </section>
+
+        <!-- CHUẨN BỊ -->
+        <section class="section">
+            <h2 class="section-title"><span>🕯️</span> Chuẩn Bị Không Gian Thiêng</h2>
+
+            <p>Việc chuẩn bị kỹ lưỡng giúp bạn tạo ra một "container" năng lượng an toàn và mạnh mẽ cho quá trình chuyển hóa. Đừng vội vàng bước này - sự chuẩn bị cũng là một phần của nghi lễ.</p>
+
+            <div class="image-container">
+                <img src="images/m1-ritual-preparation.png" alt="Chuẩn bị nghi lễ">
+            </div>
+            <div class="image-caption">Hình 3: Không gian thiêng liêng cho nghi lễ chuyển hóa - đơn giản nhưng có ý nghĩa</div>
+
+            <ul class="checklist">
+                <li>Giấy trắng và bút (mực đen hoặc xanh đậm - tránh mực đỏ)</li>
+                <li>Bát hoặc đĩa chịu nhiệt, hoặc bếp lửa an toàn ngoài trời</li>
+                <li>Nến trắng hoặc nến thơm (tùy chọn - để tạo không khí)</li>
+                <li>Tinh dầu xông: Sage, Palo Santo, hoặc Trầm Hương (để thanh tẩy không gian)</li>
+                <li>Ly nước sạch (uống sau nghi lễ để thanh lọc)</li>
+                <li>Tinh thể: Rose Quartz (tình yêu), Clear Quartz (khuếch đại), hoặc Black Tourmaline (bảo vệ)</li>
+                <li>Nhạc thiền nhẹ nhàng (tùy chọn - 528 Hz hoặc 432 Hz)</li>
+                <li>Chăn ấm để quấn người sau nghi lễ (cơ thể có thể lạnh do release năng lượng)</li>
+            </ul>
+
+            <div class="highlight-box red">
+                <div class="highlight-box-title"><span>⚠️</span> Lưu Ý An Toàn - Quan Trọng!</div>
+                <p>Luôn thực hiện nghi lễ lửa ở nơi thông thoáng, xa vật dễ cháy. Chuẩn bị sẵn nước hoặc cát để dập lửa nếu cần. Không bao giờ để lửa cháy không giám sát. Nếu ở trong nhà, mở cửa sổ để khói thoát ra. An toàn là ưu tiên hàng đầu - không có nghi lễ nào quan trọng hơn sự an toàn của bạn.</p>
+            </div>
+        </section>
+
+        <!-- 5 BƯỚC THỰC HIỆN -->
+        <section class="section">
+            <h2 class="section-title"><span>📝</span> 5 Bước Thực Hiện Ritual Đốt Bỏ</h2>
+
+            <p>Đây là quy trình đầy đủ để thực hiện Ritual Đốt Bỏ Quá Khứ. Hãy dành ít nhất 30-45 phút trong không gian riêng tư, không bị quấy rầy. Tắt điện thoại hoặc để chế độ im lặng.</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Thanh Tẩy Không Gian (5 phút)</div>
+                        <div class="flow-step-desc">Đốt Sage hoặc Trầm Hương, di chuyển theo chiều kim đồng hồ xung quanh phòng. Mở cửa sổ để năng lượng cũ thoát ra. Nói (thành lời hoặc trong tâm): "Tôi thanh tẩy không gian này của mọi năng lượng không phục vụ sự chữa lành của tôi. Chỉ có tình yêu và ánh sáng được phép ở đây."</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Thiền Kết Nối (5-10 phút)</div>
+                        <div class="flow-step-desc">Ngồi thoải mái, nhắm mắt, thở sâu 7 lần. Đặt một tay lên tim, một tay lên bụng. Cảm nhận nhịp đập. Hình dung ánh sáng hồng bao phủ toàn bộ cơ thể. Cầu nguyện hoặc nói ý định: "Tôi sẵn sàng giải phóng tất cả những gì không còn phục vụ tình yêu cao nhất của tôi. Tôi buông bỏ với lòng biết ơn."</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Viết Ra Quá Khứ (10-15 phút)</div>
+                        <div class="flow-step-desc">Trên giấy trắng, viết ra TẤT CẢ những gì bạn muốn buông bỏ: tên người đã làm bạn tổn thương, sự kiện đau buồn, niềm tin giới hạn ("Tôi không xứng đáng được yêu"), lời nói họ đã nói, cảm xúc tiêu cực. Viết tự do, không cần đúng ngữ pháp. Cho phép cảm xúc chảy ra - nếu muốn khóc, hãy khóc. Đây là lúc để release.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Nghi Thức Đốt Bỏ (5-10 phút)</div>
+                        <div class="flow-step-desc">Đọc to những gì bạn viết - lần cuối cùng cho phép những từ này tồn tại. Nói: "Tôi biết ơn những bài học này đã dạy tôi. Và giờ tôi giải phóng tất cả với tình yêu. Tôi tự do." Châm lửa đốt tờ giấy trong bát chịu nhiệt. Nhìn ngọn lửa thiêu đốt từng chữ, từng câu, từng nỗi đau. Hít thở sâu khi nhìn lửa cháy.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Đón Nhận & Ghi Nhận (5-10 phút)</div>
+                        <div class="flow-step-desc">Sau khi tro nguội, rải tro ra thiên nhiên (vườn, cây, đất) - trả lại cho Mẹ Đất. Uống ly nước sạch để thanh lọc nội tâm. Viết trên tờ giấy mới 3 điều bạn đón nhận vào cuộc sống: "Tôi đón nhận tình yêu đích thực. Tôi đón nhận sự bình an. Tôi đón nhận niềm vui." Cảm ơn bản thân đã có can đảm buông bỏ.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>✨</span> Những Câu Khẳng Định Khi Đốt</div>
+                <p>"Tôi giải phóng [tên/sự kiện] với tình yêu và lòng biết ơn."</p>
+                <p>"Tôi tự do. Tôi được chữa lành. Trái tim tôi mở ra đón nhận tình yêu mới."</p>
+                <p>"Quá khứ không định nghĩa tôi. Tôi là người tạo ra tương lai của mình."</p>
+                <p>"Tôi xứng đáng được yêu thương vô điều kiện."</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m1-5-steps-ritual.png" alt="5 bước ritual">
+            </div>
+            <div class="image-caption">Hình 4: Quy trình 5 bước Ritual Đốt Bỏ Quá Khứ - từ thanh tẩy đến đón nhận</div>
+        </section>
+
+        <!-- TỔNG KẾT MODULE 1 -->
+        <section class="section">
+            <h2 class="section-title"><span>🎓</span> Tổng Kết Module 1</h2>
+
+            <p>Chúc mừng bạn đã hoàn thành Module 1 - Chữa Lành Vết Thương Quá Khứ! Đây là nền tảng quan trọng nhất cho hành trình nâng tần số tình yêu của bạn. Bạn đã đi được một chặng đường dài, và tôi rất tự hào về bạn.</p>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>📋</span> Những Gì Bạn Đã Học Trong Module 1</div>
+                <ul class="summary-list">
+                    <li><strong>Bài 1.1:</strong> Vẽ Bản Đồ Quan Hệ Quá Khứ - nhận diện patterns và kiểu gắn bó của bạn, hiểu cơ chế lặp lại</li>
+                    <li><strong>Bài 1.2:</strong> Inner Child Healing - hiểu 5 vết thương gốc và thực hành Re-parenting để chữa lành đứa trẻ bên trong</li>
+                    <li><strong>Bài 1.3:</strong> Nghệ Thuật Tha Thứ - Ho'oponopono 4 câu và kỹ thuật Cord Cutting giải phóng dây năng lượng</li>
+                    <li><strong>Bài 1.4:</strong> Ritual Đốt Bỏ - nghi lễ thiêng liêng khép lại chương quá khứ và mở ra tương lai mới</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>🌟</span> Cam Kết Với Bản Thân</div>
+                <p>Hãy dành thời gian thực hành mỗi bài học trong Module này trước khi chuyển sang Module 2. Chữa lành không phải cuộc đua - đó là hành trình yêu thương bản thân từng ngày. Nếu cần, hãy quay lại và làm lại các bài tập. Bạn xứng đáng được chữa lành hoàn toàn.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🚀</span> Bước Tiếp Theo: Module 2 - Yêu Thương Bản Thân</div>
+                <p>Trong Module 2, bạn sẽ học cách xây dựng mối quan hệ tình yêu quan trọng nhất trong đời - mối quan hệ với chính mình. Từ Mirror Work đến Solo Date, từ thiết lập ranh giới đến 7 hành vi tự yêu thương, bạn sẽ nâng tần số tình yêu lên tầm cao mới.</p>
+            </div>
+        </section>
+
+        <!-- QUIZ SECTION - Module 1 -->
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">📝 Kiểm Tra Kiến Thức Module 1</h2>
+                <p class="quiz-subtitle">Chọn đáp án để nhận phản hồi ngay lập tức</p>
+            </div>
+
+            <div class="quiz-question" data-question="1" data-correct="B">
+                <div class="question-number">1</div>
+                <div class="question-text">Kiểu gắn bó nào thường lo lắng khi partner không reply tin nhắn?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Secure Attachment (An toàn)</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Anxious Attachment (Lo âu)</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Avoidant Attachment (Né tránh)</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Disorganized Attachment (Hỗn loạn)</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="2" data-correct="C">
+                <div class="question-number">2</div>
+                <div class="question-text">Ho'oponopono có bao nhiêu câu thần chú chữa lành?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">2 câu</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">3 câu</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">4 câu</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">5 câu</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="3" data-correct="D">
+                <div class="question-number">3</div>
+                <div class="question-text">Tha thứ KHÔNG PHẢI là gì?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Giải phóng bản thân khỏi năng lượng tiêu cực</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Cho phép mình tiến về phía trước</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Một hành động yêu thương bản thân</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Chấp nhận rằng hành vi sai là đúng</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-result">
+                <div class="result-score">0/3</div>
+                <div class="result-text">Hoàn thành!</div>
+                <div class="result-message"></div>
+            </div>
+
+            <div class="quiz-buttons">
+                <button class="quiz-btn" id="retakeQuiz" style="display: none;">Làm Lại</button>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const questions = document.querySelectorAll('.quiz-question');
+            const retakeBtn = document.getElementById('retakeQuiz');
+            const resultDiv = document.querySelector('.quiz-result');
+
+            let answeredCount = 0;
+            let correctCount = 0;
+            const totalQuestions = questions.length;
+
+            const explanations = {
+                1: {
+                    correct: 'Chính xác! Người có kiểu gắn bó Lo âu (Anxious) thường lo lắng khi partner không reply, sợ bị bỏ rơi và cần sự xác nhận liên tục.',
+                    incorrect: 'Sai rồi! Đây là đặc điểm của kiểu gắn bó Lo âu (Anxious Attachment) - họ thường lo lắng về sự xa cách và cần reassurance thường xuyên.'
+                },
+                2: {
+                    correct: 'Chính xác! Ho\'oponopono có 4 câu thần chú: "I\'m sorry" (Tôi xin lỗi), "Please forgive me" (Xin hãy tha thứ cho tôi), "Thank you" (Cảm ơn), và "I love you" (Tôi yêu bạn).',
+                    incorrect: 'Sai rồi! Ho\'oponopono có 4 câu thần chú: Tôi xin lỗi - Xin hãy tha thứ cho tôi - Cảm ơn - Tôi yêu bạn.'
+                },
+                3: {
+                    correct: 'Chính xác! Tha thứ KHÔNG có nghĩa là chấp nhận hành vi sai là đúng. Tha thứ là giải phóng bản thân khỏi gánh nặng oán hận, không phải biện minh cho những gì đã xảy ra.',
+                    incorrect: 'Sai rồi! Tha thứ không có nghĩa là chấp nhận hành vi sai. Tha thứ là món quà cho chính bạn - giải phóng bạn khỏi năng lượng tiêu cực và cho phép bạn tiến về phía trước.'
+                }
+            };
+
+            questions.forEach(question => {
+                const options = question.querySelectorAll('.quiz-option');
+                const correctAnswer = question.dataset.correct;
+                const questionNum = question.dataset.question;
+                const feedbackDiv = question.querySelector('.question-feedback');
+                const feedbackTitle = feedbackDiv.querySelector('.feedback-title');
+                const feedbackText = feedbackDiv.querySelector('.feedback-text');
+
+                options.forEach(option => {
+                    option.addEventListener('click', function() {
+                        if (question.classList.contains('answered')) return;
+
+                        question.classList.add('answered');
+                        answeredCount++;
+
+                        const selectedOption = this.dataset.option;
+                        const isCorrect = selectedOption === correctAnswer;
+
+                        options.forEach(opt => opt.classList.add('disabled'));
+                        this.classList.add('selected');
+
+                        if (isCorrect) {
+                            this.classList.add('correct');
+                            correctCount++;
+                            feedbackDiv.classList.add('correct');
+                            feedbackTitle.textContent = '✓ Chính xác!';
+                            feedbackText.textContent = explanations[questionNum].correct;
+                        } else {
+                            this.classList.add('incorrect');
+                            feedbackDiv.classList.add('incorrect');
+                            feedbackTitle.textContent = '✗ Sai rồi!';
+                            feedbackText.textContent = explanations[questionNum].incorrect;
+                            options.forEach(opt => {
+                                if (opt.dataset.option === correctAnswer) {
+                                    opt.classList.add('correct');
+                                }
+                            });
+                        }
+
+                        feedbackDiv.classList.add('show');
+
+                        if (answeredCount === totalQuestions) {
+                            const scoreDiv = resultDiv.querySelector('.result-score');
+                            const messageDiv = resultDiv.querySelector('.result-message');
+                            scoreDiv.textContent = `${correctCount}/${totalQuestions}`;
+
+                            if (correctCount === totalQuestions) {
+                                messageDiv.textContent = '🎉 Xuất sắc! Bạn đã sẵn sàng cho Module 2 - Yêu Thương Bản Thân!';
+                            } else if (correctCount >= 2) {
+                                messageDiv.textContent = '👍 Tốt lắm! Xem lại các bài học trong Module 1 để nắm vững kiến thức nhé!';
+                            } else {
+                                messageDiv.textContent = '📚 Hãy đọc lại các bài học trong Module 1 để hiểu sâu hơn!';
+                            }
+
+                            resultDiv.classList.add('show');
+                            retakeBtn.style.display = 'inline-block';
+                        }
+                    });
+                });
+            });
+
+            retakeBtn.addEventListener('click', function() {
+                answeredCount = 0;
+                correctCount = 0;
+
+                questions.forEach(question => {
+                    question.classList.remove('answered');
+                    const options = question.querySelectorAll('.quiz-option');
+                    const feedbackDiv = question.querySelector('.question-feedback');
+
+                    options.forEach(opt => {
+                        opt.classList.remove('selected', 'correct', 'incorrect', 'disabled');
+                    });
+                    feedbackDiv.classList.remove('show', 'correct', 'incorrect');
+                });
+
+                resultDiv.classList.remove('show');
+                retakeBtn.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1821 @@
+
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 1.2: 7 Khối Cản Trở Thu Hút | GEM Academy</title>
+    
+    <!-- ============================================
+         🖼️ IMAGE CONFIGURATION
+         TIER: Triệu Phú | MODULE: 1 | LESSON: 1.2
+         Hình 7: 7 Attraction Blocks (800x600px)
+         + Các hình minh họa bổ sung
+         ============================================ -->
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&amp;family=Noto+Sans+Display:wght@400;500;600&amp;display=swap" rel="stylesheet">
+    
+    <style>
+        /* ==========================================
+           🎨 GEM DESIGN SYSTEM - V5.3 DESIGN TOKENS
+           Facebook-Style Full-Width Layout
+           ========================================== */
+        :root {
+            /* ========== COLORS ========== */
+            --color-navy: #112250;
+            --color-navy-dark: #0A0F1A;
+            --color-navy-light: #1a3a6e;
+            --color-gold: #FFBD59;
+            --color-gold-dark: #E5A84D;
+            --color-burgundy: #9C0612;
+            --color-cyan: #00F0FF;
+            --color-purple: #6A5BFF;
+            --color-green: #10B981;
+            --color-red: #EF4444;
+            --color-orange: #F97316;
+            --color-white: #FFFFFF;
+            --color-text: #E8E8E8;
+            --color-text-secondary: rgba(255, 255, 255, 0.7);
+            --color-text-muted: rgba(255, 255, 255, 0.5);
+            
+            /* ========== BACKGROUNDS ========== */
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --bg-card-hover: rgba(255, 255, 255, 0.06);
+            --bg-glass: rgba(255, 255, 255, 0.08);
+            --color-bg-dark: #0A0F1A;
+            
+            /* ========== BORDERS ========== */
+            --border-subtle: rgba(255, 255, 255, 0.1);
+            --border-gold: rgba(255, 189, 89, 0.3);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            
+            /* ========== V5.3 TEXT-ONLY PADDING ========== */
+            --text-padding: 16px;
+            
+            /* ========== TYPOGRAPHY ========== */
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', 'Montserrat', sans-serif;
+            
+            --text-xs: 0.75rem;
+            --text-sm: 0.875rem;
+            --text-base: 1rem;
+            --text-lg: 1.125rem;
+            --text-xl: 1.25rem;
+            --text-2xl: 1.5rem;
+            --text-3xl: 1.875rem;
+            
+            /* ========== SPACING ========== */
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            --space-2xl: 3rem;
+            
+            /* ========== BORDERS & RADIUS ========== */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-full: 9999px;
+            
+            /* ========== SHADOWS ========== */
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --shadow-glow-gold: 0 0 20px rgba(255, 189, 89, 0.3);
+            --shadow-glow-cyan: 0 0 20px rgba(0, 240, 255, 0.3);
+            
+            /* ========== CARD PADDING ========== */
+            --card-padding: 1.25rem;
+        }
+        
+        /* ==========================================
+           🔄 CSS RESET & BASE
+           ========================================== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        html {
+            font-size: 16px;
+            -webkit-text-size-adjust: 100%;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            font-size: var(--text-base);
+            line-height: 1.7;
+            color: var(--color-text);
+            background: linear-gradient(
+                180deg,
+                var(--color-bg-dark) 0%,
+                var(--color-navy) 30%,
+                var(--color-navy) 70%,
+                var(--color-bg-dark) 100%
+            );
+            min-height: 100vh;
+        }
+        
+        /* Background Bokeh Effects */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse 600px 600px at 20% 20%, 
+                    rgba(255, 189, 89, 0.08), transparent 70%),
+                radial-gradient(ellipse 500px 500px at 80% 80%, 
+                    rgba(0, 240, 255, 0.06), transparent 70%),
+                radial-gradient(ellipse 400px 400px at 50% 50%, 
+                    rgba(106, 91, 255, 0.04), transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        /* ==========================================
+           📦 CONTAINER - V5.3
+           ========================================== */
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0;
+        }
+        
+        @media (min-width: 600px) {
+            .container {
+                padding: var(--space-lg);
+            }
+        }
+        
+        /* ==========================================
+           🏷️ LESSON HEADER
+           ========================================== */
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl) var(--text-padding);
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(156, 6, 18, 0.1));
+            border-bottom: 1px solid var(--glass-border);
+        }
+        
+        @media (min-width: 600px) {
+            .lesson-header {
+                padding: var(--space-2xl);
+                border-radius: var(--radius-lg);
+                margin-bottom: var(--space-lg);
+                border: 1px solid var(--glass-border);
+            }
+        }
+        
+        .lesson-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));
+            color: var(--color-navy);
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: var(--text-sm);
+            padding: var(--space-xs) var(--space-md);
+            border-radius: var(--radius-full);
+            margin-bottom: var(--space-md);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .lesson-title {
+            font-family: var(--font-heading);
+            font-size: var(--text-2xl);
+            font-weight: 800;
+            color: var(--color-gold);
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 10px rgba(255, 189, 89, 0.3);
+        }
+        
+        @media (min-width: 600px) {
+            .lesson-title {
+                font-size: var(--text-3xl);
+            }
+        }
+        
+        .lesson-subtitle {
+            color: var(--color-text-secondary);
+            font-size: var(--text-base);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-lg);
+            margin-top: var(--space-md);
+            flex-wrap: wrap;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            font-size: var(--text-sm);
+            color: var(--color-text-muted);
+        }
+        
+        /* ==========================================
+           📑 SECTION
+           ========================================== */
+        .section {
+            padding: var(--space-lg) 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        
+        @media (min-width: 600px) {
+            .section {
+                padding: var(--space-xl) 0;
+            }
+        }
+        
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: var(--text-lg);
+            font-weight: 700;
+            color: var(--color-gold);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: 0 var(--text-padding);
+        }
+        
+        @media (min-width: 600px) {
+            .section-title {
+                font-size: var(--text-xl);
+                padding: 0;
+            }
+        }
+        
+        .section-title .icon {
+            font-size: 1.25em;
+        }
+        
+        /* ==========================================
+           📝 TEXT ELEMENTS - V5.3 PADDING
+           ========================================== */
+        .section p {
+            padding: 0 var(--text-padding);
+            margin-bottom: var(--space-md);
+        }
+        
+        @media (min-width: 600px) {
+            .section p {
+                padding: 0;
+            }
+        }
+        
+        .section ul, .section ol {
+            padding-left: calc(var(--text-padding) + 1.5rem);
+            padding-right: var(--text-padding);
+            margin-bottom: var(--space-md);
+        }
+        
+        @media (min-width: 600px) {
+            .section ul, .section ol {
+                padding-left: 1.5rem;
+                padding-right: 0;
+            }
+        }
+        
+        .section li {
+            margin-bottom: var(--space-sm);
+            color: var(--color-text-secondary);
+        }
+        
+        .section li strong {
+            color: var(--color-gold);
+        }
+        
+        /* ==========================================
+           📦 HIGHLIGHT BOX - V5.3
+           ========================================== */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(106, 91, 255, 0.05));
+            border: none;
+            border-left: 4px solid var(--color-cyan);
+            border-radius: 0;
+            padding: var(--card-padding);
+            padding-left: calc(var(--text-padding) - 4px);
+            padding-right: var(--text-padding);
+            margin: var(--space-lg) 0;
+        }
+        
+        @media (min-width: 600px) {
+            .highlight-box {
+                border: 1px solid rgba(0, 240, 255, 0.3);
+                border-radius: var(--radius-md);
+                padding: var(--card-padding);
+            }
+        }
+        
+        .highlight-box p {
+            padding: 0 !important;
+            margin: 0;
+            color: var(--color-text);
+        }
+        
+        .highlight-box strong {
+            color: var(--color-cyan);
+        }
+        
+        /* ==========================================
+           📖 DEFINITION BOX - V5.3
+           ========================================== */
+        .definition-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(0, 240, 255, 0.05));
+            border: none;
+            border-left: 4px solid var(--color-gold);
+            border-radius: 0;
+            padding: var(--card-padding);
+            padding-left: calc(var(--text-padding) - 4px);
+            padding-right: var(--text-padding);
+            margin: var(--space-lg) 0;
+            text-align: center;
+        }
+        
+        @media (min-width: 600px) {
+            .definition-box {
+                border: 2px solid var(--color-gold);
+                border-radius: var(--radius-lg);
+                padding: var(--card-padding);
+            }
+        }
+        
+        .definition-box .term {
+            font-family: var(--font-heading);
+            font-size: var(--text-xl);
+            font-weight: 800;
+            color: var(--color-gold);
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .definition-box .meaning {
+            font-size: var(--text-lg);
+            color: var(--color-cyan);
+            font-weight: 600;
+        }
+        
+        .definition-box .description {
+            margin-top: var(--space-sm);
+            color: var(--color-text-secondary);
+            font-size: var(--text-sm);
+        }
+        
+        /* ==========================================
+           🖼️ IMAGE - V5.3
+           ========================================== */
+        .image-container {
+            width: 100%;
+            margin: var(--space-lg) 0;
+            border-radius: 0;
+            overflow: hidden;
+        }
+        
+        @media (min-width: 600px) {
+            .image-container {
+                border-radius: var(--radius-md);
+                box-shadow: var(--shadow-md);
+            }
+        }
+        
+        .image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .image-caption {
+            text-align: center;
+            font-size: var(--text-sm);
+            color: var(--color-text-muted);
+            padding: var(--space-sm) var(--text-padding);
+            font-style: italic;
+        }
+        
+        @media (min-width: 600px) {
+            .image-caption {
+                padding: var(--space-sm) 0;
+            }
+        }
+        
+        /* ==========================================
+           🚫 BLOCK CARDS - V5.3
+           ========================================== */
+        .block-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            margin: var(--space-md) 0;
+            background: var(--glass-border);
+        }
+        
+        @media (min-width: 600px) {
+            .block-cards {
+                gap: var(--space-md);
+                background: transparent;
+            }
+        }
+        
+        .block-card {
+            background: var(--bg-glass);
+            border: none;
+            border-radius: 0;
+            padding: var(--card-padding);
+            padding-left: var(--text-padding);
+            padding-right: var(--text-padding);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        @media (min-width: 600px) {
+            .block-card {
+                border: 1px solid var(--glass-border);
+                border-radius: var(--radius-md);
+                padding: var(--card-padding);
+                transition: transform 0.3s, box-shadow 0.3s;
+            }
+            
+            .block-card:hover {
+                transform: translateY(-3px);
+                box-shadow: var(--shadow-glow-gold);
+            }
+        }
+        
+        .block-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+        }
+        
+        .block-card.block-1::before { background: #EF4444; }
+        .block-card.block-2::before { background: #F97316; }
+        .block-card.block-3::before { background: #FBBF24; }
+        .block-card.block-4::before { background: #10B981; }
+        .block-card.block-5::before { background: #06B6D4; }
+        .block-card.block-6::before { background: #6366F1; }
+        .block-card.block-7::before { background: #A855F7; }
+        
+        @media (min-width: 600px) {
+            .block-card::before {
+                display: none;
+            }
+            
+            .block-card.block-1 { border-left: 4px solid #EF4444; }
+            .block-card.block-2 { border-left: 4px solid #F97316; }
+            .block-card.block-3 { border-left: 4px solid #FBBF24; }
+            .block-card.block-4 { border-left: 4px solid #10B981; }
+            .block-card.block-5 { border-left: 4px solid #06B6D4; }
+            .block-card.block-6 { border-left: 4px solid #6366F1; }
+            .block-card.block-7 { border-left: 4px solid #A855F7; }
+        }
+        
+        .block-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-sm);
+        }
+        
+        .block-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-family: var(--font-heading);
+            font-weight: 800;
+            font-size: var(--text-sm);
+            color: var(--color-white);
+            flex-shrink: 0;
+        }
+        
+        .block-1 .block-number { background: linear-gradient(135deg, #EF4444, #DC2626); }
+        .block-2 .block-number { background: linear-gradient(135deg, #F97316, #EA580C); }
+        .block-3 .block-number { background: linear-gradient(135deg, #FBBF24, #F59E0B); }
+        .block-4 .block-number { background: linear-gradient(135deg, #10B981, #059669); }
+        .block-5 .block-number { background: linear-gradient(135deg, #06B6D4, #0891B2); }
+        .block-6 .block-number { background: linear-gradient(135deg, #6366F1, #4F46E5); }
+        .block-7 .block-number { background: linear-gradient(135deg, #A855F7, #9333EA); }
+        
+        .block-title {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: var(--text-base);
+            color: var(--color-gold);
+        }
+        
+        .block-subtitle {
+            font-size: var(--text-xs);
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .block-desc {
+            color: var(--color-text-secondary);
+            font-size: var(--text-sm);
+            margin-bottom: var(--space-sm);
+            line-height: 1.6;
+        }
+        
+        .block-signs {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--radius-sm);
+            padding: var(--space-sm) var(--space-md);
+            margin-top: var(--space-sm);
+        }
+        
+        .block-signs-label {
+            font-size: var(--text-xs);
+            color: var(--color-cyan);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: var(--space-xs);
+        }
+        
+        .block-signs-list {
+            font-size: var(--text-xs);
+            color: var(--color-text-muted);
+            font-style: italic;
+        }
+        
+        /* ==========================================
+           📊 TEST SECTION - V5.3
+           ========================================== */
+        .test-container {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(0, 240, 255, 0.05));
+            border: none;
+            border-left: 4px solid var(--color-purple);
+            border-radius: 0;
+            padding: var(--card-padding);
+            padding-left: calc(var(--text-padding) - 4px);
+            padding-right: var(--text-padding);
+            margin: var(--space-lg) 0;
+        }
+        
+        @media (min-width: 600px) {
+            .test-container {
+                border: 2px solid var(--color-purple);
+                border-radius: var(--radius-lg);
+                padding: var(--space-xl);
+            }
+        }
+        
+        .test-title {
+            font-family: var(--font-heading);
+            font-size: var(--text-lg);
+            font-weight: 700;
+            color: var(--color-purple);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .test-intro {
+            color: var(--color-text-secondary);
+            font-size: var(--text-sm);
+            margin-bottom: var(--space-lg);
+        }
+        
+        .test-question {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--radius-sm);
+            padding: var(--space-md);
+            margin-bottom: var(--space-md);
+        }
+        
+        .question-header {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-sm);
+        }
+        
+        .question-number {
+            background: var(--color-purple);
+            color: var(--color-white);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: var(--text-xs);
+            flex-shrink: 0;
+        }
+        
+        .question-text {
+            color: var(--color-text);
+            font-size: var(--text-sm);
+            line-height: 1.5;
+        }
+        
+        .question-block-tag {
+            font-size: var(--text-xs);
+            color: var(--color-text-muted);
+            margin-top: var(--space-xs);
+        }
+        
+        .answer-options {
+            display: flex;
+            gap: var(--space-sm);
+            margin-top: var(--space-sm);
+        }
+        
+        .answer-btn {
+            flex: 1;
+            padding: var(--space-sm);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--color-text-secondary);
+            font-family: var(--font-body);
+            font-size: var(--text-xs);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .answer-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--color-purple);
+        }
+        
+        .answer-btn.selected {
+            background: rgba(106, 91, 255, 0.3);
+            border-color: var(--color-purple);
+            color: var(--color-white);
+        }
+        
+        .test-submit-btn {
+            display: block;
+            width: 100%;
+            padding: var(--space-md);
+            background: linear-gradient(135deg, var(--color-purple), #5a4bef);
+            color: var(--color-white);
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: var(--text-base);
+            cursor: pointer;
+            margin-top: var(--space-lg);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .test-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(106, 91, 255, 0.4);
+        }
+        
+        .test-submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* ==========================================
+           📊 TEST RESULTS - V5.3
+           ========================================== */
+        .test-results {
+            display: none;
+            margin-top: var(--space-lg);
+            padding-top: var(--space-lg);
+            border-top: 1px solid var(--glass-border);
+        }
+        
+        .test-results.show {
+            display: block;
+        }
+        
+        .results-title {
+            font-family: var(--font-heading);
+            font-size: var(--text-lg);
+            font-weight: 700;
+            color: var(--color-gold);
+            margin-bottom: var(--space-md);
+            text-align: center;
+        }
+        
+        .result-bars {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+        
+        .result-bar {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .result-label {
+            width: 120px;
+            font-size: var(--text-xs);
+            color: var(--color-text-secondary);
+            flex-shrink: 0;
+        }
+        
+        .result-track {
+            flex: 1;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .result-fill {
+            height: 100%;
+            border-radius: var(--radius-sm);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: var(--space-sm);
+        }
+        
+        .result-fill.bar-1 { background: linear-gradient(90deg, #EF4444, #DC2626); }
+        .result-fill.bar-2 { background: linear-gradient(90deg, #F97316, #EA580C); }
+        .result-fill.bar-3 { background: linear-gradient(90deg, #FBBF24, #F59E0B); }
+        .result-fill.bar-4 { background: linear-gradient(90deg, #10B981, #059669); }
+        .result-fill.bar-5 { background: linear-gradient(90deg, #06B6D4, #0891B2); }
+        .result-fill.bar-6 { background: linear-gradient(90deg, #6366F1, #4F46E5); }
+        .result-fill.bar-7 { background: linear-gradient(90deg, #A855F7, #9333EA); }
+        
+        .result-score {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: var(--text-xs);
+            color: var(--color-white);
+        }
+        
+        .main-block-result {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.2), rgba(156, 6, 18, 0.1));
+            border-radius: var(--radius-md);
+            padding: var(--card-padding);
+            margin-top: var(--space-lg);
+            text-align: center;
+        }
+        
+        .main-block-label {
+            font-size: var(--text-xs);
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: var(--space-xs);
+        }
+        
+        .main-block-name {
+            font-family: var(--font-heading);
+            font-size: var(--text-xl);
+            font-weight: 800;
+            color: var(--color-gold);
+            margin-bottom: var(--space-sm);
+        }
+        
+        .main-block-desc {
+            color: var(--color-text-secondary);
+            font-size: var(--text-sm);
+        }
+        
+        .retake-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            background: transparent;
+            border: 1px solid var(--color-purple);
+            color: var(--color-purple);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-sm);
+            font-family: var(--font-heading);
+            font-weight: 600;
+            font-size: var(--text-sm);
+            cursor: pointer;
+            margin-top: var(--space-lg);
+            transition: all 0.3s;
+        }
+        
+        .retake-btn:hover {
+            background: rgba(106, 91, 255, 0.2);
+        }
+        
+        /* ==========================================
+           📊 INFO GRID - V5.3
+           ========================================== */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1px;
+            margin: var(--space-md) 0;
+            background: var(--glass-border);
+        }
+        
+        @media (min-width: 600px) {
+            .info-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: var(--space-md);
+                background: transparent;
+            }
+        }
+        
+        .info-card {
+            background: var(--bg-glass);
+            border: none;
+            border-radius: 0;
+            padding: var(--card-padding);
+            padding-left: var(--text-padding);
+            padding-right: var(--text-padding);
+        }
+        
+        @media (min-width: 600px) {
+            .info-card {
+                border: 1px solid var(--glass-border);
+                border-radius: var(--radius-md);
+                padding: var(--card-padding);
+            }
+        }
+        
+        .info-card .info-icon {
+            font-size: 1.5rem;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .info-card .info-title {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            color: var(--color-gold);
+            font-size: var(--text-sm);
+            margin-bottom: var(--space-xs);
+        }
+        
+        .info-card .info-text {
+            color: var(--color-text-secondary);
+            font-size: var(--text-sm);
+            line-height: 1.6;
+        }
+        
+        /* ==========================================
+           💡 TIP BOX - V5.3
+           ========================================== */
+        .tip-box {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(0, 240, 255, 0.05));
+            border: none;
+            border-left: 4px solid var(--color-green);
+            border-radius: 0;
+            padding: var(--card-padding);
+            padding-left: calc(var(--text-padding) - 4px);
+            padding-right: var(--text-padding);
+            margin: var(--space-lg) 0;
+        }
+        
+        @media (min-width: 600px) {
+            .tip-box {
+                border: 1px solid rgba(16, 185, 129, 0.3);
+                border-radius: var(--radius-md);
+                padding: var(--card-padding);
+            }
+        }
+        
+        .tip-box p {
+            padding: 0 !important;
+            margin: 0;
+            color: var(--color-text);
+            font-size: var(--text-sm);
+        }
+        
+        .tip-box strong {
+            color: var(--color-green);
+        }
+        
+        .tip-box ul {
+            margin-top: var(--space-sm);
+            padding-left: 1.5rem;
+        }
+        
+        .tip-box li {
+            color: var(--color-text-secondary);
+            font-size: var(--text-sm);
+            margin-bottom: var(--space-xs);
+        }
+        
+        /* ==========================================
+           ⚙️ MECHANISM BOX - V5.3
+           ========================================== */
+        .mechanism-box {
+            background: linear-gradient(135deg, rgba(156, 6, 18, 0.15), rgba(255, 189, 89, 0.05));
+            border: none;
+            border-left: 4px solid var(--color-burgundy);
+            border-radius: 0;
+            padding: var(--card-padding);
+            padding-left: calc(var(--text-padding) - 4px);
+            padding-right: var(--text-padding);
+            margin: var(--space-lg) 0;
+        }
+        
+        @media (min-width: 600px) {
+            .mechanism-box {
+                border: 1px solid rgba(156, 6, 18, 0.3);
+                border-radius: var(--radius-md);
+                padding: var(--card-padding);
+            }
+        }
+        
+        .mechanism-title {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            color: var(--color-gold);
+            font-size: var(--text-base);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .mechanism-flow {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+        
+        @media (min-width: 600px) {
+            .mechanism-flow {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+        }
+        
+        .mechanism-step {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: var(--radius-sm);
+            padding: var(--space-sm) var(--space-md);
+            text-align: center;
+            flex: 1;
+        }
+        
+        .mechanism-step-label {
+            font-size: var(--text-xs);
+            color: var(--color-cyan);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .mechanism-step-text {
+            font-size: var(--text-sm);
+            color: var(--color-text);
+            margin-top: var(--space-xs);
+        }
+        
+        .mechanism-arrow {
+            text-align: center;
+            color: var(--color-gold);
+            font-size: var(--text-lg);
+        }
+        
+        @media (min-width: 600px) {
+            .mechanism-arrow {
+                transform: rotate(0deg);
+            }
+        }
+        
+        /* ==========================================
+           🎯 FOOTER
+           ========================================== */
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl) var(--text-padding);
+            color: var(--color-text-muted);
+            font-size: var(--text-sm);
+            border-top: 1px solid var(--glass-border);
+            margin-top: var(--space-lg);
+        }
+        
+        .lesson-footer a {
+            color: var(--color-gold);
+            text-decoration: none;
+        }
+        
+        .lesson-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+
+
+    <div class="container">
+        
+        <!-- ============================================
+             LESSON HEADER
+             ============================================ -->
+        <header class="lesson-header">
+            <span class="lesson-badge">Module 1 • Bài 1.2</span>
+            <h1 class="lesson-title">7 Khối Cản Trở Thu Hút</h1>
+            <p class="lesson-subtitle">Nhận diện những "bức tường vô hình" đang ngăn tiền bạc đến với bạn</p>
+            <div class="lesson-meta">
+                <span class="meta-item">⏱️ 30 phút</span>
+                <span class="meta-item">📋 Bài test đánh giá</span>
+                <span class="meta-item">🎯 7 Attraction Blocks</span>
+            </div>
+        </header>
+        
+        <!-- ============================================
+             SECTION 1: ATTRACTION BLOCKS LÀ GÌ
+             ============================================ -->
+        <section class="section">
+            <h2 class="section-title">
+                <span class="icon">🚫</span>
+                Attraction Blocks Là Gì?
+            </h2>
+            
+            <p>Trong bài trước, bạn đã khám phá Money Story - kịch bản tiền bạc tiềm thức của mình. Hôm nay, chúng ta sẽ đi sâu hơn để nhận diện <strong>7 Khối Cản Trở Thu Hút</strong> (Attraction Blocks) - những "bức tường năng lượng" đang ngăn tiền bạc và thịnh vượng đến với bạn.</p>
+            
+            <div class="definition-box">
+                <div class="term">ATTRACTION BLOCKS</div>
+                <div class="meaning">= Khối Cản Trở Thu Hút</div>
+                <div class="description">Những pattern năng lượng tiêu cực được hình thành từ niềm tin, cảm xúc và trải nghiệm quá khứ, hoạt động như "bộ lọc" ngăn bạn tiếp nhận những gì bạn mong muốn</div>
+            </div>
+            
+            <!-- ============================================
+                 🖼️ HÌNH 7A: ATTRACTION BLOCKS CONCEPT
+                 - Bài: 1.2 | Section: Attraction Blocks Là Gì
+                 - Nội dung: Visual concept về blocks
+                   + Hình người với 7 "bức tường" bao quanh
+                   + Mũi tên tiền/cơ hội bị chặn lại
+                   + Visual: energy field bị block
+                   + Text: "Khối cản trở = Bộ lọc vô hình"
+                 - Kích thước: 800x500px (tỷ lệ 16:10)
+                 - Style: Navy background, energy visualization
+                 ============================================ -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mjsk51b7-s8xmmc/1767179992758_fqjyyl_Gemini_Generated_Image_ts1cbets1cbets1c.png" alt="gemini-generated-image-ts1cbets1cbe-gq5x">
+            </div>
+            
+            
+            <div class="highlight-box">
+                <p><strong>💡 Quan trọng:</strong> Attraction Blocks không phải là "sự trừng phạt" hay "lỗi của bạn". Chúng là cơ chế bảo vệ được tiềm thức tạo ra dựa trên những trải nghiệm quá khứ. Vấn đề là chúng đã lỗi thời và không còn phục vụ bạn nữa.</p>
+            </div>
+        </section>
+        
+        <!-- ============================================
+             SECTION 2: 7 KHỐI CẢN TRỞ CHI TIẾT
+             ============================================ -->
+        <section class="section">
+            <h2 class="section-title">
+                <span class="icon">🔢</span>
+                7 Khối Cản Trở Thu Hút
+            </h2>
+            
+            <p>Dưới đây là 7 Attraction Blocks phổ biến nhất. Hầu hết mọi người đều có ít nhất 2-3 blocks đang hoạt động. Đọc kỹ và đánh dấu những block bạn nhận ra ở bản thân.</p>
+            
+            <!-- ============================================
+                 🖼️ HÌNH 7: 7 ATTRACTION BLOCKS
+                 - Bài: 1.2 | Section: 7 Khối Cản Trở
+                 - Nội dung: Infographic 7 blocks với icons
+                   + 1. Không Xứng Đáng (Red) - broken heart
+                   + 2. Tội Lỗi & Xấu Hổ (Orange) - mask
+                   + 3. Sợ Hãi (Yellow) - fear face
+                   + 4. Oán Giận (Green) - angry face
+                   + 5. Thiếu Tin Tưởng (Cyan) - question mark
+                   + 6. Giới Hạn (Indigo) - chains
+                   + 7. Hy Sinh (Purple) - cross/sacrifice
+                   + Circular/hexagonal layout
+                 - Kích thước: 800x600px (tỷ lệ 4:3)
+                 - Style: 7 colored icons với gradient
+                 ============================================ -->
+            <div class="image-container"><img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mjsk51b7-s8xmmc/1767180123008_lesdq6_Gemini_Generated_Image_15qnrt15qnrt15qn.png" alt="gemini-generated-image-15qnrt15qnrt-ucg7">
+                
+            </div>
+            
+            
+            <div class="block-cards">
+                
+                <!-- BLOCK 1 -->
+                <div class="block-card block-1">
+                    <div class="block-header">
+                        <div class="block-number">1</div>
+                        <div>
+                            <div class="block-title">Khối Không Xứng Đáng</div>
+                            <div class="block-subtitle">Unworthiness Block</div>
+                        </div>
+                    </div>
+                    <div class="block-desc">
+                        Cảm giác sâu thẳm rằng bạn không xứng đáng có tiền, không đủ tốt để giàu có, hoặc cần phải "làm gì đó" để được hưởng thịnh vượng.
+                    </div>
+                    <div class="block-signs">
+                        <div class="block-signs-label">🔍 Dấu hiệu nhận biết:</div>
+                        <div class="block-signs-list">"Tôi chưa đủ giỏi", "Người khác xứng đáng hơn tôi", "Tôi cần cố gắng hơn nữa", Tự phá hoại khi sắp thành công</div>
+                    </div>
+                </div>
+                
+                <!-- BLOCK 2 -->
+                <div class="block-card block-2">
+                    <div class="block-header">
+                        <div class="block-number">2</div>
+                        <div>
+                            <div class="block-title">Khối Tội Lỗi &amp; Xấu Hổ</div>
+                            <div class="block-subtitle">Guilt &amp; Shame Block</div>
+                        </div>
+                    </div>
+                    <div class="block-desc">
+                        Cảm giác có lỗi khi có tiền (trong khi người khác không có), xấu hổ về việc muốn giàu, hoặc tin rằng tiền là "bẩn thỉu", "tội lỗi".
+                    </div>
+                    <div class="block-signs">
+                        <div class="block-signs-label">🔍 Dấu hiệu nhận biết:</div>
+                        <div class="block-signs-list">"Muốn giàu là tham lam", "Tôi có lỗi với gia đình nghèo", Cho đi ngay khi có tiền, Giấu giếm thành công</div>
+                    </div>
+                </div>
+                
+                <!-- BLOCK 3 -->
+                <div class="block-card block-3">
+                    <div class="block-header">
+                        <div class="block-number">3</div>
+                        <div>
+                            <div class="block-title">Khối Sợ Hãi</div>
+                            <div class="block-subtitle">Fear Block</div>
+                        </div>
+                    </div>
+                    <div class="block-desc">
+                        Sợ mất tiền, sợ thất bại, sợ thành công (và những thay đổi kéo theo), sợ bị đánh giá, sợ không đủ khả năng quản lý tiền.
+                    </div>
+                    <div class="block-signs">
+                        <div class="block-signs-label">🔍 Dấu hiệu nhận biết:</div>
+                        <div class="block-signs-list">"Nếu có tiền rồi mất thì sao?", "Người ta sẽ ganh ghét tôi", Trì hoãn quyết định tài chính, Tránh né cơ hội</div>
+                    </div>
+                </div>
+                
+                <!-- BLOCK 4 -->
+                <div class="block-card block-4">
+                    <div class="block-header">
+                        <div class="block-number">4</div>
+                        <div>
+                            <div class="block-title">Khối Oán Giận</div>
+                            <div class="block-subtitle">Resentment Block</div>
+                        </div>
+                    </div>
+                    <div class="block-desc">
+                        Oán giận người giàu, oán giận cha mẹ không cho bạn cơ hội tốt hơn, oán giận hệ thống "bất công". Năng lượng oán giận đẩy tiền ra xa.
+                    </div>
+                    <div class="block-signs">
+                        <div class="block-signs-label">🔍 Dấu hiệu nhận biết:</div>
+                        <div class="block-signs-list">"Người giàu đều xấu xa", "Xã hội không công bằng", Ghen tị với người thành công, Đổ lỗi cho hoàn cảnh</div>
+                    </div>
+                </div>
+                
+                <!-- BLOCK 5 -->
+                <div class="block-card block-5">
+                    <div class="block-header">
+                        <div class="block-number">5</div>
+                        <div>
+                            <div class="block-title">Khối Thiếu Tin Tưởng</div>
+                            <div class="block-subtitle">Distrust Block</div>
+                        </div>
+                    </div>
+                    <div class="block-desc">
+                        Không tin vào bản thân, không tin vào người khác, không tin vào vũ trụ/cuộc sống. Cảm giác phải "tự làm tất cả" và không ai giúp được.
+                    </div>
+                    <div class="block-signs">
+                        <div class="block-signs-label">🔍 Dấu hiệu nhận biết:</div>
+                        <div class="block-signs-list">"Không ai giúp tôi đâu", "Tôi phải tự lo", Khó chấp nhận sự giúp đỡ, Kiểm soát mọi thứ</div>
+                    </div>
+                </div>
+                
+                <!-- BLOCK 6 -->
+                <div class="block-card block-6">
+                    <div class="block-header">
+                        <div class="block-number">6</div>
+                        <div>
+                            <div class="block-title">Khối Giới Hạn</div>
+                            <div class="block-subtitle">Limitation Block</div>
+                        </div>
+                    </div>
+                    <div class="block-desc">
+                        Niềm tin rằng tiền là có giới hạn, thành công là có giới hạn, bạn chỉ có thể đạt được "đến mức này" thôi. Tư duy khan hiếm thay vì sung túc.
+                    </div>
+                    <div class="block-signs">
+                        <div class="block-signs-label">🔍 Dấu hiệu nhận biết:</div>
+                        <div class="block-signs-list">"Tiền không mọc trên cây", "Phải biết đủ", "Người như tôi chỉ được thế này", Tự đặt trần cho thu nhập</div>
+                    </div>
+                </div>
+                
+                <!-- BLOCK 7 -->
+                <div class="block-card block-7">
+                    <div class="block-header">
+                        <div class="block-number">7</div>
+                        <div>
+                            <div class="block-title">Khối Hy Sinh</div>
+                            <div class="block-subtitle">Sacrifice Block</div>
+                        </div>
+                    </div>
+                    <div class="block-desc">
+                        Niềm tin rằng phải hy sinh điều gì đó (sức khỏe, gia đình, hạnh phúc) để có tiền. Hoặc ngược lại - từ chối tiền để giữ những thứ khác.
+                    </div>
+                    <div class="block-signs">
+                        <div class="block-signs-label">🔍 Dấu hiệu nhận biết:</div>
+                        <div class="block-signs-list">"Muốn giàu phải bỏ gia đình", "Có tiền thì mất tự do", "Không thể có cả hai", Làm việc đến kiệt sức</div>
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+        
+        <!-- ============================================
+             SECTION 3: CƠ CHẾ HOẠT ĐỘNG
+             ============================================ -->
+        <section class="section">
+            <h2 class="section-title">
+                <span class="icon">⚙️</span>
+                Cơ Chế Hoạt Động Của Blocks
+            </h2>
+            
+            <p>Attraction Blocks hoạt động theo một vòng lặp tự củng cố. Hiểu cơ chế này giúp bạn phá vỡ vòng xoáy tiêu cực.</p>
+            
+            <!-- ============================================
+                 🖼️ HÌNH 7B: CƠ CHẾ HOẠT ĐỘNG BLOCKS
+                 - Bài: 1.2 | Section: Cơ Chế Hoạt Động
+                 - Nội dung: Vòng lặp 5 bước
+                   + 1. TRIGGER (Hoàn cảnh kích hoạt)
+                   + 2. BLOCK được kích hoạt
+                   + 3. CẢM XÚC tiêu cực
+                   + 4. HÀNH VI né tránh/phá hoại
+                   + 5. KẾT QUẢ xác nhận niềm tin → Quay lại bước 1
+                   + Arrows theo vòng tròn
+                   + Center: "VÒNG LẶP TỰ CỦNG CỐ"
+                 - Kích thước: 800x600px (tỷ lệ 4:3)
+                 - Style: Circular flow diagram, dark theme
+                 ============================================ -->
+            <div class="image-container">
+                
+            </div>
+            <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mjsk51b7-s8xmmc/1767180015994_zgsor9_Gemini_Generated_Image_ypk4a4ypk4a4ypk4.png" alt="gemini-generated-image-ypk4a4ypk4a4-owxj">
+            
+            <div class="mechanism-box">
+                <div class="mechanism-title">
+                    <span>🔄</span>
+                    Vòng Lặp Attraction Block
+                </div>
+                <div class="mechanism-flow">
+                    <div class="mechanism-step">
+                        <div class="mechanism-step-label">Bước 1</div>
+                        <div class="mechanism-step-text">TRIGGER xuất hiện<br><small>(cơ hội tài chính)</small></div>
+                    </div>
+                    <div class="mechanism-arrow">→</div>
+                    <div class="mechanism-step">
+                        <div class="mechanism-step-label">Bước 2</div>
+                        <div class="mechanism-step-text">BLOCK kích hoạt<br><small>(niềm tin giới hạn)</small></div>
+                    </div>
+                    <div class="mechanism-arrow">→</div>
+                    <div class="mechanism-step">
+                        <div class="mechanism-step-label">Bước 3</div>
+                        <div class="mechanism-step-text">CẢM XÚC tiêu cực<br><small>(sợ, lo, xấu hổ)</small></div>
+                    </div>
+                    <div class="mechanism-arrow">→</div>
+                    <div class="mechanism-step">
+                        <div class="mechanism-step-label">Bước 4</div>
+                        <div class="mechanism-step-text">HÀNH VI né tránh<br><small>(bỏ lỡ cơ hội)</small></div>
+                    </div>
+                    <div class="mechanism-arrow">→</div>
+                    <div class="mechanism-step">
+                        <div class="mechanism-step-label">Bước 5</div>
+                        <div class="mechanism-step-text">XÁC NHẬN niềm tin<br><small>("Thấy chưa, tôi đúng mà")</small></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="highlight-box">
+                <p><strong>⚡ Ví dụ thực tế - Khối Không Xứng Đáng:</strong></p>
+                <ul style="margin-top: var(--space-sm); padding-left: 1.5rem;">
+                    <li><strong>Trigger:</strong> Sếp gọi vào phòng đề xuất tăng lương</li>
+                    <li><strong>Block kích hoạt:</strong> "Tôi chưa đủ giỏi để được tăng"</li>
+                    <li><strong>Cảm xúc:</strong> Lo lắng, không xứng đáng, muốn từ chối</li>
+                    <li><strong>Hành vi:</strong> Nói "Để em suy nghĩ thêm" rồi không bao giờ đề cập lại</li>
+                    <li><strong>Kết quả:</strong> Không được tăng lương → "Thấy chưa, tôi đúng là không đủ giỏi"</li>
+                </ul>
+            </div>
+        </section>
+        
+        <!-- ============================================
+             SECTION 4: BÀI TEST XÁC ĐỊNH BLOCKS
+             ============================================ -->
+        <section class="section">
+            <h2 class="section-title">
+                <span class="icon">📋</span>
+                Bài Test Xác Định Blocks
+            </h2>
+            
+            <p>Làm bài test dưới đây để xác định những Attraction Blocks nào đang ảnh hưởng mạnh nhất đến bạn. Trả lời thành thật - không có đáp án đúng sai!</p>
+            
+            <!-- ============================================
+                 🖼️ HÌNH 7C: TEST INSTRUCTIONS
+                 - Bài: 1.2 | Section: Bài Test
+                 - Nội dung: Hướng dẫn làm test
+                   + Icon clipboard với checklist
+                   + "14 câu hỏi • 5 phút"
+                   + "Trả lời thành thật"
+                   + "Không có đáp án đúng sai"
+                   + Visual: relaxed person answering questions
+                 - Kích thước: 800x400px (tỷ lệ 2:1)
+                 - Style: Purple gradient, calming
+                 ============================================ -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mjsk51b7-s8xmmc/1767180043942_cngbo1_Gemini_Generated_Image_nn0k2ynn0k2ynn0k.png" alt="gemini-generated-image-nn0k2ynn0k2y-74ez">
+            </div>
+            
+            
+            <div class="test-container">
+                <div class="test-title">
+                    <span>🎯</span>
+                    Bài Test Xác Định Attraction Blocks
+                </div>
+                <p class="test-intro">
+                    Với mỗi câu hỏi, chọn mức độ phù hợp với bạn: <strong>Không bao giờ (0)</strong>, <strong>Thỉnh thoảng (1)</strong>, hoặc <strong>Thường xuyên (2)</strong>
+                </p>
+                
+                <!-- Questions -->
+                <div id="testQuestions">
+                    
+                    <!-- Block 1: Unworthiness -->
+                    <div class="test-question" data-block="1">
+                        <div class="question-header">
+                            <div class="question-number">1</div>
+                            <div class="question-text">Tôi cảm thấy người khác xứng đáng thành công hơn tôi.</div>
+                        </div>
+                        <div class="answer-options">
+                            <button class="answer-btn" data-value="0">Không bao giờ</button>
+                            <button class="answer-btn" data-value="1">Thỉnh thoảng</button>
+                            <button class="answer-btn" data-value="2">Thường xuyên</button>
+                        </div>
+                    </div>
+                    
+                    <div class="test-question" data-block="1">
+                        <div class="question-header">
+                            <div class="question-number">2</div>
+                            <div class="question-text">Khi có điều tốt đẹp xảy ra, tôi hay tự hỏi "Mình có xứng đáng không?"</div>
+                        </div>
+                        <div class="answer-options">
+                            <button class="answer-btn" data-value="0">Không bao giờ</button>
+                            <button class="answer-btn" data-value="1">Thỉnh thoảng</button>
+                            <button class="answer-btn" data-value="2">Thường xuyên</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Block 2: Guilt & Shame -->
+                    <div class="test-question" data-block="2">
+                        <div class="question-header">
+                            <div class="question-number">3</div>
+                            <div class="question-text">Tôi cảm thấy có lỗi khi tiêu tiền cho bản thân.</div>
+                        </div>
+                        <div class="answer-options">
+                            <button class="answer-btn" data-value="0">Không bao giờ</button>
+                            <button class="answer-btn" data-value="1">Thỉnh thoảng</button>
+                            <button class="answer-btn" data-value="2">Thường xuyên</button>
+                        </div>
+                    </div>
+                    
+                    <div class="test-question" data-block="2">
+                        <div class="question-header">
+                            <div class="question-number">4</div>
+                            <div class="question-text">Tôi giấu giếm hoặc không muốn nói về thu nhập/tài sản của mình.</div>
+                        </div>
+                        <div class="answer-options">
+                            <button class="answer-btn" data-value="0">Không bao giờ</button>
+                            <button class="answer-btn" data-value="1">Thỉnh thoảng</button>
+                            <button class="answer-btn" data-value="2">Thường xuyên</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Block 3: Fear -->
+                    <div class="test-question" data-block="3">
+                        <div class="question-header">
+                            <div class="question-number">5</div>
+                            <div class="question-text">Tôi trì hoãn các quyết định tài chính quan trọng vì sợ sai lầm.</div>
+                        </div>
+                        <div class="answer-options">
+                            <button class="answer-btn" data-value="0">Không bao giờ</button>
+                            <button class="answer-btn" data-value="1">Thỉnh thoảng</button>
+                            <button class="answer-btn" data-value="2">Thường xuyên</button>
+                        </div>
+                    </div>
+                    
+                    <div class="test-question" data-block="3">
+                        <div class="question-header">
+                            <div class="question-number">6</div>
+                            <div class="question-text">Tôi lo lắng về việc mất tiền hoặc mất tất cả những gì mình có.</div>
+                        </div>
+                        <div class="answer-options">
+                            <button class="answer-btn" data-value="0">Không bao giờ</button>
+                            <button class="answer-btn" data-value="1">Thỉnh thoảng</button>
+                            <button class="answer-btn" data-value="2">Thường xuyên</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Block 4: Resentment -->
+                    <div class="test-question" data-block="4">
+                        <div class="question-header">
+                            <div class="question-number">7</div>
+                            <div class="question-text">Tôi cảm thấy khó chịu hoặc ghen tị khi thấy người khác thành công.</div>
+                        </div>
+                        <div class="answer-options">
+                            <button class="answer-btn" data-value="0">Không bao giờ</button>
+                            <button class="answer-btn" data-value="1">Thỉnh thoảng</button>
+                            <button class="answer-btn" data-value="2">Thường xuyên</button>
+                        </div>
+                    </div>
+                    
+                    <div class="test-question" data-block="4">
+                        <div class="question-header">
+                            <div class="question-number">8</div>
+                            <div class="question-text">Tôi tin rằng người giàu thường kiếm tiền bằng cách không lương thiện.</div>
+                        </div>
+                        <div class="answer-options">
+                            <button class="answer-btn" data-value="0">Không bao giờ</button>
+                            <button class="answer-btn" data-value="1">Thỉnh thoảng</button>
+                            <button class="answer-btn" data-value="2">Thường xuyên</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Block 5: Distrust -->
+                    <div class="test-question" data-block="5">
+                        <div class="question-header">
+                            <div class="question-number">9</div>
+                            <div class="question-text">Tôi khó chấp nhận sự giúp đỡ từ người khác, kể cả khi cần.</div>
+                        </div>
+                        <div class="answer-options">
+                            <button class="answer-btn" data-value="0">Không bao giờ</button>
+                            <button class="answer-btn" data-value="1">Thỉnh thoảng</button>
+                            <button class="answer-btn" data-value="2">Thường xuyên</button>
+                        </div>
+                    </div>
+                    
+                    <div class="test-question" data-block="5">
+                        <div class="question-header">
+                            <div class="question-number">10</div>
+                            <div class="question-text">Tôi cảm thấy phải tự làm mọi thứ vì không tin ai khác làm được.</div>
+                        </div>
+                        <div class="answer-options">
+                            <button class="answer-btn" data-value="0">Không bao giờ</button>
+                            <button class="answer-btn" data-value="1">Thỉnh thoảng</button>
+                            <button class="answer-btn" data-value="2">Thường xuyên</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Block 6: Limitation -->
+                    <div class="test-question" data-block="6">
+                        <div class="question-header">
+                            <div class="question-number">11</div>
+                            <div class="question-text">Tôi tin rằng thu nhập của tôi có giới hạn nhất định không thể vượt qua.</div>
+                        </div>
+                        <div class="answer-options">
+                            <button class="answer-btn" data-value="0">Không bao giờ</button>
+                            <button class="answer-btn" data-value="1">Thỉnh thoảng</button>
+                            <button class="answer-btn" data-value="2">Thường xuyên</button>
+                        </div>
+                    </div>
+                    
+                    <div class="test-question" data-block="6">
+                        <div class="question-header">
+                            <div class="question-number">12</div>
+                            <div class="question-text">Khi nghĩ về mục tiêu tài chính lớn, tôi thường tự nói "Chắc không được đâu".</div>
+                        </div>
+                        <div class="answer-options">
+                            <button class="answer-btn" data-value="0">Không bao giờ</button>
+                            <button class="answer-btn" data-value="1">Thỉnh thoảng</button>
+                            <button class="answer-btn" data-value="2">Thường xuyên</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Block 7: Sacrifice -->
+                    <div class="test-question" data-block="7">
+                        <div class="question-header">
+                            <div class="question-number">13</div>
+                            <div class="question-text">Tôi tin rằng để có nhiều tiền phải hy sinh sức khỏe hoặc gia đình.</div>
+                        </div>
+                        <div class="answer-options">
+                            <button class="answer-btn" data-value="0">Không bao giờ</button>
+                            <button class="answer-btn" data-value="1">Thỉnh thoảng</button>
+                            <button class="answer-btn" data-value="2">Thường xuyên</button>
+                        </div>
+                    </div>
+                    
+                    <div class="test-question" data-block="7">
+                        <div class="question-header">
+                            <div class="question-number">14</div>
+                            <div class="question-text">Tôi thường đặt nhu cầu của người khác lên trước nhu cầu tài chính của mình.</div>
+                        </div>
+                        <div class="answer-options">
+                            <button class="answer-btn" data-value="0">Không bao giờ</button>
+                            <button class="answer-btn" data-value="1">Thỉnh thoảng</button>
+                            <button class="answer-btn" data-value="2">Thường xuyên</button>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <button class="test-submit-btn" id="submitTest" onclick="calculateResults()">
+                    🎯 Xem Kết Quả
+                </button>
+                
+                <!-- Results Section -->
+                <div class="test-results" id="testResults">
+                    <div class="results-title">📊 Kết Quả Của Bạn</div>
+                    
+                    <div class="result-bars">
+                        <div class="result-bar">
+                            <div class="result-label">1. Không Xứng Đáng</div>
+                            <div class="result-track">
+                                <div class="result-fill bar-1" id="bar1" style="width: 0%;">
+                                    <span class="result-score" id="score1">0/4</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="result-bar">
+                            <div class="result-label">2. Tội Lỗi &amp; Xấu Hổ</div>
+                            <div class="result-track">
+                                <div class="result-fill bar-2" id="bar2" style="width: 0%;">
+                                    <span class="result-score" id="score2">0/4</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="result-bar">
+                            <div class="result-label">3. Sợ Hãi</div>
+                            <div class="result-track">
+                                <div class="result-fill bar-3" id="bar3" style="width: 0%;">
+                                    <span class="result-score" id="score3">0/4</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="result-bar">
+                            <div class="result-label">4. Oán Giận</div>
+                            <div class="result-track">
+                                <div class="result-fill bar-4" id="bar4" style="width: 0%;">
+                                    <span class="result-score" id="score4">0/4</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="result-bar">
+                            <div class="result-label">5. Thiếu Tin Tưởng</div>
+                            <div class="result-track">
+                                <div class="result-fill bar-5" id="bar5" style="width: 0%;">
+                                    <span class="result-score" id="score5">0/4</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="result-bar">
+                            <div class="result-label">6. Giới Hạn</div>
+                            <div class="result-track">
+                                <div class="result-fill bar-6" id="bar6" style="width: 0%;">
+                                    <span class="result-score" id="score6">0/4</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="result-bar">
+                            <div class="result-label">7. Hy Sinh</div>
+                            <div class="result-track">
+                                <div class="result-fill bar-7" id="bar7" style="width: 0%;">
+                                    <span class="result-score" id="score7">0/4</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="main-block-result" id="mainBlockResult">
+                        <div class="main-block-label">Khối cản trở chính của bạn:</div>
+                        <div class="main-block-name" id="mainBlockName">Đang tính...</div>
+                        <div class="main-block-desc" id="mainBlockDesc">Mô tả sẽ hiện ở đây</div>
+                    </div>
+                    
+                    <button class="retake-btn" onclick="retakeTest()">
+                        🔄 Làm Lại Test
+                    </button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- ============================================
+             SECTION 5: TÓM TẮT & BƯỚC TIẾP THEO
+             ============================================ -->
+        <section class="section">
+            <h2 class="section-title">
+                <span class="icon">✅</span>
+                Tóm Tắt &amp; Bước Tiếp Theo
+            </h2>
+            
+            <!-- ============================================
+                 🖼️ HÌNH 7D: TÓM TẮT BÀI 1.2
+                 - Bài: 1.2 | Section: Tóm Tắt
+                 - Nội dung: Summary infographic
+                   + 7 Blocks với icons nhỏ
+                   + Key insight: "Blocks = cơ chế bảo vệ lỗi thời"
+                   + Next step: Bài 1.3 - Niềm Tin Giới Hạn
+                   + Checklist: Ghi lại top 2-3 blocks của bạn
+                 - Kích thước: 800x600px (tỷ lệ 4:3)
+                 - Style: Summary card với checkmarks
+                 ============================================ -->
+            <div class="image-container">
+                <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mjsk51b7-s8xmmc/1767180096424_gv1w8a_Gemini_Generated_Image_lvpcp3lvpcp3lvpc.png" alt="gemini-generated-image-lvpcp3lvpcp3-9abg">
+            </div>
+            
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-icon">🚫</div>
+                    <div class="info-title">Attraction Blocks</div>
+                    <div class="info-text">7 "bức tường năng lượng" ngăn tiền bạc đến với bạn: Không Xứng Đáng, Tội Lỗi, Sợ Hãi, Oán Giận, Thiếu Tin, Giới Hạn, Hy Sinh.</div>
+                </div>
+                
+                <div class="info-card">
+                    <div class="info-icon">🔄</div>
+                    <div class="info-title">Vòng Lặp</div>
+                    <div class="info-text">Blocks hoạt động theo vòng lặp tự củng cố: Trigger → Block → Cảm xúc → Hành vi → Kết quả xác nhận.</div>
+                </div>
+                
+                <div class="info-card">
+                    <div class="info-icon">💡</div>
+                    <div class="info-title">Nhận Thức Là Bước Đầu</div>
+                    <div class="info-text">Nhận diện được block nào đang ảnh hưởng là bước quan trọng nhất để bắt đầu chuyển hóa.</div>
+                </div>
+                
+                <div class="info-card">
+                    <div class="info-icon">➡️</div>
+                    <div class="info-title">Bước Tiếp Theo</div>
+                    <div class="info-text">Bài 1.3 sẽ đi sâu vào Niềm Tin Giới Hạn - "nguyên liệu" tạo nên các blocks.</div>
+                </div>
+            </div>
+            
+            <div class="tip-box">
+                <p><strong>📌 Nhiệm vụ hôm nay:</strong></p>
+                <ul>
+                    <li>✅ Hoàn thành bài test xác định Attraction Blocks</li>
+                    <li>✅ Ghi lại TOP 2-3 blocks mạnh nhất của bạn</li>
+                    <li>✅ Quan sát trong ngày: Khi nào blocks này xuất hiện?</li>
+                    <li>✅ Viết vào nhật ký: 1 tình huống cụ thể block đã ảnh hưởng đến bạn</li>
+                </ul>
+            </div>
+        </section>
+        
+        <!-- ============================================
+             FOOTER
+             ============================================ -->
+        <footer class="lesson-footer">
+            <p>© 2024 GEM Academy | <a href="https://gemral.com">gemral.com</a></p>
+        </footer>
+        
+    </div>
+    
+    <!-- ============================================
+         JAVASCRIPT
+         ============================================ -->
+    <script>
+        // ========== BLOCK DATA ==========
+        const blockData = {
+            1: {
+                name: "Khối Không Xứng Đáng",
+                desc: "Bạn có xu hướng cảm thấy không xứng đáng với thành công và thịnh vượng. Hãy tập trung vào việc công nhận giá trị bản thân."
+            },
+            2: {
+                name: "Khối Tội Lỗi & Xấu Hổ",
+                desc: "Bạn có xu hướng cảm thấy tội lỗi khi có tiền hoặc muốn giàu. Hãy làm hòa với mong muốn thịnh vượng của mình."
+            },
+            3: {
+                name: "Khối Sợ Hãi",
+                desc: "Sợ hãi đang cản trở bạn nắm bắt cơ hội. Hãy phân biệt giữa sợ hãi thực sự và sợ hãi do tiềm thức tạo ra."
+            },
+            4: {
+                name: "Khối Oán Giận",
+                desc: "Oán giận người giàu hoặc hoàn cảnh đang đẩy tiền ra xa. Hãy thực hành tha thứ và chuyển hóa năng lượng này."
+            },
+            5: {
+                name: "Khối Thiếu Tin Tưởng",
+                desc: "Bạn khó tin tưởng và đón nhận sự hỗ trợ. Hãy mở lòng và cho phép người khác và vũ trụ giúp đỡ bạn."
+            },
+            6: {
+                name: "Khối Giới Hạn",
+                desc: "Tư duy khan hiếm đang giới hạn tiềm năng của bạn. Hãy mở rộng niềm tin về những gì có thể xảy ra."
+            },
+            7: {
+                name: "Khối Hy Sinh",
+                desc: "Bạn tin phải hy sinh để có tiền. Hãy học cách cân bằng và tin rằng bạn xứng đáng có tất cả."
+            }
+        };
+        
+        // ========== ANSWER SELECTION ==========
+        document.querySelectorAll('.answer-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove selected from siblings
+                this.parentElement.querySelectorAll('.answer-btn').forEach(b => b.classList.remove('selected'));
+                // Add selected to this
+                this.classList.add('selected');
+            });
+        });
+        
+        // ========== CALCULATE RESULTS ==========
+        function calculateResults() {
+            const scores = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0};
+            let allAnswered = true;
+            
+            document.querySelectorAll('.test-question').forEach(q => {
+                const block = q.dataset.block;
+                const selected = q.querySelector('.answer-btn.selected');
+                if (selected) {
+                    scores[block] += parseInt(selected.dataset.value);
+                } else {
+                    allAnswered = false;
+                }
+            });
+            
+            if (!allAnswered) {
+                alert('Vui lòng trả lời tất cả các câu hỏi!');
+                return;
+            }
+            
+            // Update bars
+            for (let i = 1; i <= 7; i++) {
+                const percentage = (scores[i] / 4) * 100;
+                document.getElementById(`bar${i}`).style.width = percentage + '%';
+                document.getElementById(`score${i}`).textContent = scores[i] + '/4';
+            }
+            
+            // Find main block
+            let maxBlock = 1;
+            let maxScore = scores[1];
+            for (let i = 2; i <= 7; i++) {
+                if (scores[i] > maxScore) {
+                    maxScore = scores[i];
+                    maxBlock = i;
+                }
+            }
+            
+            document.getElementById('mainBlockName').textContent = blockData[maxBlock].name;
+            document.getElementById('mainBlockDesc').textContent = blockData[maxBlock].desc;
+            
+            // Show results
+            document.getElementById('testResults').classList.add('show');
+            document.getElementById('testResults').scrollIntoView({ behavior: 'smooth' });
+            
+            // Save to localStorage
+            localStorage.setItem('attractionBlocks_1_2', JSON.stringify(scores));
+            localStorage.setItem('attractionBlocks_1_2_main', maxBlock);
+        }
+        
+        // ========== RETAKE TEST ==========
+        function retakeTest() {
+            // Clear selections
+            document.querySelectorAll('.answer-btn').forEach(btn => btn.classList.remove('selected'));
+            
+            // Reset bars
+            for (let i = 1; i <= 7; i++) {
+                document.getElementById(`bar${i}`).style.width = '0%';
+                document.getElementById(`score${i}`).textContent = '0/4';
+            }
+            
+            // Hide results
+            document.getElementById('testResults').classList.remove('show');
+            
+            // Scroll to top of test
+            document.querySelector('.test-container').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // ========== LOAD SAVED RESULTS ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedScores = localStorage.getItem('attractionBlocks_1_2');
+            if (savedScores) {
+                const scores = JSON.parse(savedScores);
+                // Update bars
+                for (let i = 1; i <= 7; i++) {
+                    const percentage = (scores[i] / 4) * 100;
+                    document.getElementById(`bar${i}`).style.width = percentage + '%';
+                    document.getElementById(`score${i}`).textContent = scores[i] + '/4';
+                }
+                
+                const mainBlock = localStorage.getItem('attractionBlocks_1_2_main');
+                if (mainBlock) {
+                    document.getElementById('mainBlockName').textContent = blockData[mainBlock].name;
+                    document.getElementById('mainBlockDesc').textContent = blockData[mainBlock].desc;
+                    document.getElementById('testResults').classList.add('show');
+                }
+            }
+        });
+    </script>
+

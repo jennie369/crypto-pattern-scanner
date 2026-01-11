@@ -6,6 +6,76 @@ const corsHeaders = {
 };
 
 // ========================================
+// COMMISSION RATES v3.0
+// Reference: GEM_PARTNERSHIP_OFFICIAL_POLICY_V3.md
+// ========================================
+const COMMISSION_RATES_V3 = {
+  kol: { digital: 20, physical: 20 },  // KOL: 20% all products
+  ctv: {
+    bronze: { digital: 10, physical: 6 },   // 10% digital, 6% physical
+    silver: { digital: 15, physical: 8 },   // 15% digital, 8% physical
+    gold: { digital: 20, physical: 10 },    // 20% digital, 10% physical
+    platinum: { digital: 25, physical: 12 }, // 25% digital, 12% physical
+    diamond: { digital: 30, physical: 15 },  // 30% digital, 15% physical
+  },
+};
+
+// Sub-Affiliate Rates v3.0 (%)
+const SUB_AFFILIATE_RATES_V3 = {
+  kol: 3.5,      // KOL: 3.5%
+  bronze: 2,     // 2%
+  silver: 2.5,   // 2.5%
+  gold: 3,       // 3%
+  platinum: 3.5, // 3.5%
+  diamond: 4,    // 4%
+};
+
+// Vietnamese tier names for notifications
+const TIER_NAMES_VN = {
+  bronze: '🥉 Đồng',
+  silver: '🥈 Bạc',
+  gold: '🥇 Vàng',
+  platinum: '💎 Bạch Kim',
+  diamond: '👑 Kim Cương',
+};
+
+/**
+ * Get commission rate based on role, tier, and product type
+ * v3.0: Separate rates for digital and physical
+ */
+function getCommissionRateV3(role: string, tier: string, productType: string): number {
+  if (role === 'kol') {
+    return productType === 'digital'
+      ? COMMISSION_RATES_V3.kol.digital
+      : COMMISSION_RATES_V3.kol.physical;
+  }
+
+  if (role === 'ctv') {
+    const tierConfig = COMMISSION_RATES_V3.ctv[tier as keyof typeof COMMISSION_RATES_V3.ctv];
+    if (tierConfig) {
+      return productType === 'digital' ? tierConfig.digital : tierConfig.physical;
+    }
+    // Default to bronze
+    return productType === 'digital'
+      ? COMMISSION_RATES_V3.ctv.bronze.digital
+      : COMMISSION_RATES_V3.ctv.bronze.physical;
+  }
+
+  return 0;
+}
+
+/**
+ * Get sub-affiliate rate based on role and tier
+ * v3.0: New feature
+ */
+function getSubAffiliateRateV3(role: string, tier: string): number {
+  if (role === 'kol') {
+    return SUB_AFFILIATE_RATES_V3.kol;
+  }
+  return SUB_AFFILIATE_RATES_V3[tier as keyof typeof SUB_AFFILIATE_RATES_V3] || SUB_AFFILIATE_RATES_V3.bronze;
+}
+
+// ========================================
 // HELPER: Send push notification to partner
 // ========================================
 async function sendCommissionNotification(
@@ -248,6 +318,30 @@ function getPartnerIdFromOrder(orderData) {
   const partnerAttr = noteAttributes.find((attr)=>attr.name === 'partner_id' || attr.name === 'ref' || attr.name === 'affiliate_id');
   return partnerAttr?.value || null;
 }
+
+// ========================================
+// HELPER: Get user_id from order note_attributes
+// Mobile App injects user_id for direct user matching
+// ========================================
+function getUserIdFromOrder(orderData) {
+  const noteAttributes = orderData.note_attributes || [];
+  const userAttr = noteAttributes.find((attr)=>attr.name === 'user_id');
+  const userId = userAttr?.value || null;
+  if (userId) {
+    console.log(`📱 Found user_id from note_attributes: ${userId}`);
+  }
+  return userId;
+}
+
+// ========================================
+// HELPER: Get order source from note_attributes
+// ========================================
+function getOrderSource(orderData) {
+  const noteAttributes = orderData.note_attributes || [];
+  const sourceAttr = noteAttributes.find((attr)=>attr.name === 'source');
+  return sourceAttr?.value || 'unknown';
+}
+
 // ========================================
 // HELPER: Extract tier info from SKU (existing logic)
 // ========================================
@@ -328,6 +422,33 @@ function extractTierFromSku(lineItems) {
       productType = 'chatbot';
       tierPurchased = 'TIER2';
       amountPaid = price;
+      break;
+    } else if (sku.includes('gem-chatbot-vip') || sku.includes('chatbot-vip')) {
+      productType = 'chatbot';
+      tierPurchased = 'TIER3';
+      amountPaid = price;
+      break;
+    } else if (sku.includes('gem-course-starter') || sku.includes('course-starter') || sku.includes('tier-starter')) {
+      productType = 'course';
+      tierPurchased = 'STARTER';
+      amountPaid = price;
+      break;
+    }
+
+    // ========================================
+    // SPIRITUAL COURSES (Individual courses by Variant ID)
+    // ========================================
+    const spiritualCourseVariants: Record<string, { courseId: string; courseName: string }> = {
+      '46448176758961': { courseId: 'tan-so-goc', courseName: '7 Ngày Khai Mở Tần Số Gốc' },
+      '46448180166833': { courseId: 'tinh-yeu', courseName: 'Kích Hoạt Tần Số Tình Yêu' },
+      '46448192192689': { courseId: 'trieu-phu', courseName: 'Tái Tạo Tư Duy Triệu Phú' },
+    };
+
+    if (variantId && spiritualCourseVariants[variantId]) {
+      productType = 'individual_course';
+      tierPurchased = spiritualCourseVariants[variantId].courseId;
+      amountPaid = price;
+      console.log(`📚 Spiritual course detected: ${spiritualCourseVariants[variantId].courseName}`);
       break;
     }
   }
@@ -540,6 +661,11 @@ async function handleOrderPaid(supabase, orderData) {
   const orderIdShopify = orderData.id;
   const lineItems = orderData.line_items || [];
   const partnerId = getPartnerIdFromOrder(orderData);
+  const userIdFromOrder = getUserIdFromOrder(orderData); // NEW: Get user_id from mobile app
+  const orderSource = getOrderSource(orderData); // NEW: Track order source (mobile_app, web, etc.)
+
+  console.log(`📱 Order source: ${orderSource}, user_id from order: ${userIdFromOrder || 'none'}`);
+
 
   // ========================================
   // CRITICAL: Check if already processed to prevent duplicate grants
@@ -692,9 +818,33 @@ async function handleOrderPaid(supabase, orderData) {
   }
   console.log(`💎 Product: ${productType}, Tier: ${tierPurchased}, Amount: ${amountPaid}, Gems: ${gemAmount}`);
   // ========================================
-  // STEP 2: Find user by email
+  // STEP 2: Find user (PRIORITY: user_id from order > email lookup)
   // ========================================
-  const { data: userData, error: userError } = await supabase.from('users').select('id, course_tier, scanner_tier, chatbot_tier').eq('email', customerEmail).single();
+  let userData = null;
+  let userError = null;
+
+  // Priority 1: Use user_id from note_attributes (passed from Mobile App)
+  if (userIdFromOrder) {
+    console.log(`📱 Looking up user by ID: ${userIdFromOrder}`);
+    const { data, error } = await supabase.from('users').select('id, email, course_tier, scanner_tier, chatbot_tier').eq('id', userIdFromOrder).single();
+    if (!error && data) {
+      userData = data;
+      console.log(`✅ Found user by ID: ${data.id} (email: ${data.email})`);
+    } else {
+      console.log(`⚠️ user_id from order not found in database, falling back to email`);
+    }
+  }
+
+  // Priority 2: Fallback to email lookup
+  if (!userData && customerEmail) {
+    console.log(`📧 Looking up user by email: ${customerEmail}`);
+    const { data, error } = await supabase.from('users').select('id, email, course_tier, scanner_tier, chatbot_tier').eq('email', customerEmail).single();
+    userData = data;
+    userError = error;
+    if (data) {
+      console.log(`✅ Found user by email: ${data.id}`);
+    }
+  }
 
   // ========================================
   // STEP 2.1: Handle GEM PURCHASE (special case)
@@ -905,53 +1055,103 @@ async function handleOrderPaid(supabase, orderData) {
     if (affiliateId) {
       console.log(`🎉 AFFILIATE FOUND! ID: ${affiliateId}`);
       // Get affiliate profile if not already fetched
+      // v3.0: Include referred_by and monthly_sales fields
       let affiliateProfile = referralData?.affiliate_profile;
       if (!affiliateProfile) {
-        const { data: profile } = await supabase.from('affiliate_profiles').select('id, user_id, role, ctv_tier, total_sales').eq('user_id', affiliateId).single();
+        const { data: profile } = await supabase
+          .from('affiliate_profiles')
+          .select('id, user_id, role, ctv_tier, total_sales, monthly_sales, referred_by, sub_affiliate_earnings')
+          .eq('user_id', affiliateId)
+          .single();
         affiliateProfile = profile;
       }
       if (affiliateProfile) {
         const role = affiliateProfile.role;
-        const ctvTier = affiliateProfile.ctv_tier;
-        console.log(`   Role: ${role}, CTV Tier: ${ctvTier}`);
-        // Calculate commission rate
-        let commissionRate = 0;
-        if (role === 'affiliate') {
-          commissionRate = 3;
-        } else if (role === 'ctv') {
-          const ctvRates = {
-            'beginner': 10,
-            'growing': 15,
-            'master': 20,
-            'grand': 30
-          };
-          commissionRate = ctvRates[ctvTier] || 10;
-        }
+        const ctvTier = affiliateProfile.ctv_tier || 'bronze';
+        const productTypeCategory = determineProductType(lineItems);  // 'digital' or 'physical'
+        console.log(`   Role: ${role}, CTV Tier: ${ctvTier}, Product: ${productTypeCategory}`);
+
+        // ========================================
+        // v3.0: Calculate commission rate based on role, tier, and product type
+        // ========================================
+        const commissionRate = getCommissionRateV3(role, ctvTier, productTypeCategory);
+
         if (commissionRate > 0) {
           const commissionAmount = Math.floor(amountPaid * commissionRate / 100);
           console.log(`💰 Commission: ${amountPaid} × ${commissionRate}% = ${commissionAmount}`);
+
+          // ========================================
+          // v3.0: Process sub-affiliate commission
+          // ========================================
+          let subAffiliateId = null;
+          let subAffiliateCommission = 0;
+          let subAffiliateRate = 0;
+
+          if (affiliateProfile.referred_by) {
+            console.log(`   Checking sub-affiliate for referrer: ${affiliateProfile.referred_by}`);
+
+            // Get referrer (the one who referred this affiliate)
+            const { data: referrerProfile } = await supabase
+              .from('affiliate_profiles')
+              .select('user_id, role, ctv_tier, sub_affiliate_earnings, available_balance')
+              .eq('user_id', affiliateProfile.referred_by)
+              .single();
+
+            if (referrerProfile) {
+              subAffiliateId = referrerProfile.user_id;
+              subAffiliateRate = getSubAffiliateRateV3(referrerProfile.role, referrerProfile.ctv_tier || 'bronze');
+              subAffiliateCommission = Math.floor(amountPaid * subAffiliateRate / 100);
+
+              console.log(`   Sub-affiliate: ${subAffiliateId} gets ${subAffiliateRate}% = ${subAffiliateCommission}`);
+
+              // Update referrer's sub_affiliate_earnings
+              await supabase
+                .from('affiliate_profiles')
+                .update({
+                  sub_affiliate_earnings: (referrerProfile.sub_affiliate_earnings || 0) + subAffiliateCommission,
+                  available_balance: (referrerProfile.available_balance || 0) + subAffiliateCommission,
+                  updated_at: new Date().toISOString(),
+                })
+                .eq('user_id', subAffiliateId);
+
+              console.log(`✅ Sub-affiliate commission added: ${subAffiliateCommission} to ${subAffiliateId}`);
+            }
+          }
+
           // Try new commission_sales table first (from SQL migration)
           const { error: commissionSalesError } = await supabase.from('commission_sales').insert({
             partner_id: affiliateId,
             shopify_order_id: orderIdShopify.toString(),
             order_total: amountPaid,
-            product_type: determineProductType(lineItems),
+            product_type: productTypeCategory,  // v3.0: 'digital' or 'physical'
             product_category: productType,
             commission_rate: commissionRate / 100,
             commission_amount: commissionAmount,
             status: 'pending',
             buyer_email: customerEmail,
             buyer_user_id: userId,
+            // v3.0: Sub-affiliate tracking
+            sub_affiliate_id: subAffiliateId,
+            sub_affiliate_commission: subAffiliateCommission,
+            sub_affiliate_rate: subAffiliateRate / 100,
+            affiliate_role: role,
+            affiliate_tier: ctvTier,
             created_at: new Date().toISOString()
           });
           if (commissionSalesError) {
             console.log('⚠️ commission_sales insert failed, trying affiliate_commissions...');
-            // Fallback to existing affiliate_commissions table
+            // Fallback to existing affiliate_commissions table with v3.0 fields
             await supabase.from('affiliate_commissions').insert({
               affiliate_id: affiliateId,
               commission_rate: commissionRate / 100,
               commission_amount: commissionAmount,
               status: 'pending',
+              // v3.0 fields
+              affiliate_role: role,
+              affiliate_tier: ctvTier,
+              sub_affiliate_id: subAffiliateId,
+              sub_affiliate_commission: subAffiliateCommission,
+              sub_affiliate_rate: subAffiliateRate / 100,
               created_at: new Date().toISOString()
             });
           }
@@ -972,9 +1172,10 @@ async function handleOrderPaid(supabase, orderData) {
               first_purchase_date: new Date().toISOString()
             }).eq('id', referralData.id);
           }
-          // Update affiliate total_sales
+          // Update affiliate total_sales AND monthly_sales (v3.0)
           await supabase.from('affiliate_profiles').update({
             total_sales: (affiliateProfile.total_sales || 0) + amountPaid,
+            monthly_sales: (affiliateProfile.monthly_sales || 0) + amountPaid,  // v3.0: For downgrade check
             updated_at: new Date().toISOString()
           }).eq('user_id', affiliateId);
           // Try to record course enrollment for KPI (if function exists)

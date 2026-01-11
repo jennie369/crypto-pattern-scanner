@@ -1,0 +1,176 @@
+/**
+ * Reaction Constants
+ * Quick and full emoji reactions for messages
+ */
+
+// Quick reactions - 7 emojis displayed in inline picker
+export const QUICK_REACTIONS = [
+  '❤️',  // Love
+  '😂',  // Laugh
+  '😮',  // Wow
+  '😢',  // Sad
+  '😡',  // Angry
+  '👍',  // Like
+  '👎',  // Dislike
+];
+
+// Full emoji picker categories
+export const EMOJI_CATEGORIES = {
+  recent: {
+    key: 'recent',
+    title: 'Gần đây',
+    emojis: ['❤️', '😂', '👍', '🔥', '💯', '🙏'],
+  },
+  smileys: {
+    key: 'smileys',
+    title: 'Mặt cười',
+    emojis: ['😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🥰', '😍', '🤩'],
+  },
+  gestures: {
+    key: 'gestures',
+    title: 'Cử chỉ',
+    emojis: ['👍', '👎', '👏', '🙌', '🤝', '🙏', '💪', '✌️', '🤞', '🤟', '🤙', '👋'],
+  },
+  hearts: {
+    key: 'hearts',
+    title: 'Tim',
+    emojis: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '💔', '❤️‍🔥', '💕', '💖'],
+  },
+  objects: {
+    key: 'objects',
+    title: 'Đồ vật',
+    emojis: ['🔥', '⭐', '💯', '✨', '💎', '🎯', '🚀', '💰', '📈', '📉', '💹', '🎉'],
+  },
+};
+
+// All available reactions (flattened)
+export const ALL_REACTIONS = Object.values(EMOJI_CATEGORIES)
+  .flatMap(category => category.emojis)
+  .filter((emoji, index, self) => self.indexOf(emoji) === index); // Remove duplicates
+
+// =============================================
+// FORUM POST REACTIONS (Facebook-style)
+// =============================================
+
+/**
+ * Forum reaction types enum
+ */
+export const REACTION_TYPES = {
+  LIKE: 'like',
+  LOVE: 'love',
+  HAHA: 'haha',
+  WOW: 'wow',
+  SAD: 'sad',
+  ANGRY: 'angry',
+};
+
+/**
+ * Forum reaction configuration
+ * Each reaction has: type, label (Vietnamese), emoji, and color
+ */
+export const REACTION_CONFIG = {
+  like: {
+    type: 'like',
+    label: 'Thích',
+    emoji: '👍',
+    color: '#2196F3',
+  },
+  love: {
+    type: 'love',
+    label: 'Yêu thích',
+    emoji: '❤️',
+    color: '#E91E63',
+  },
+  haha: {
+    type: 'haha',
+    label: 'Haha',
+    emoji: '😂',
+    color: '#FFEB3B',
+  },
+  wow: {
+    type: 'wow',
+    label: 'Wow',
+    emoji: '😮',
+    color: '#FFEB3B',
+  },
+  sad: {
+    type: 'sad',
+    label: 'Buồn',
+    emoji: '😢',
+    color: '#FFEB3B',
+  },
+  angry: {
+    type: 'angry',
+    label: 'Phẫn nộ',
+    emoji: '😡',
+    color: '#FF9800',
+  },
+};
+
+/**
+ * Order of reactions in picker (left to right)
+ */
+export const REACTION_ORDER = ['like', 'love', 'haha', 'wow', 'sad', 'angry'];
+
+/**
+ * Animation timing constants
+ */
+export const REACTION_ANIMATIONS = {
+  LONG_PRESS_THRESHOLD: 300,    // ms to trigger long press
+  PICKER_APPEAR_DURATION: 200,  // ms for picker fade in
+  STAGGER_DELAY: 50,            // ms delay between each icon animation
+  HOVER_SCALE: 1.4,             // scale factor on hover
+  HOVER_DURATION: 150,          // ms for hover transition
+  SELECTION_DURATION: 200,      // ms for selection animation
+  LABEL_TRANSLATE_Y: -24,       // px to move label up
+};
+
+/**
+ * Dimension constants for reaction picker (Facebook-style)
+ * Optimized for 6 reactions with proper spacing
+ */
+export const REACTION_SIZES = {
+  PICKER_WIDTH: 292,           // Slightly narrower for tighter spacing
+  PICKER_HEIGHT: 50,           // Taller container for proper padding
+  PICKER_BORDER_RADIUS: 25,    // Half of height for pill shape
+  ICON_SIZE: 32,               // Smaller icons (was 40)
+  ICON_SPACING: 6,             // Spacing between icons
+  PADDING_HORIZONTAL: 12,      // More horizontal padding
+  EMOJI_FONT_SIZE: 26,         // Direct font size control (was size-8=32)
+};
+
+/**
+ * Default empty reaction counts object
+ */
+export const DEFAULT_REACTION_COUNTS = {
+  like: 0,
+  love: 0,
+  haha: 0,
+  wow: 0,
+  sad: 0,
+  angry: 0,
+  total: 0,
+};
+
+/**
+ * Tooltip messages for reactions feature
+ */
+export const REACTION_TOOLTIPS = {
+  PICKER: 'Giữ để chọn cảm xúc',
+  FIRST_TIME: 'Thử giữ nút để xem thêm cảm xúc!',
+  SUMMARY: 'Nhấn để xem ai đã thả cảm xúc',
+};
+
+export default {
+  QUICK_REACTIONS,
+  EMOJI_CATEGORIES,
+  ALL_REACTIONS,
+  // Forum reactions
+  REACTION_TYPES,
+  REACTION_CONFIG,
+  REACTION_ORDER,
+  REACTION_ANIMATIONS,
+  REACTION_SIZES,
+  DEFAULT_REACTION_COUNTS,
+  REACTION_TOOLTIPS,
+};

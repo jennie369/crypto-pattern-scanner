@@ -17,6 +17,7 @@ import {
   ActivityIndicator,
   Animated,
   Modal,
+  TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -39,22 +40,84 @@ import {
   HelpCircle,
   Heart,
   X,
+  PenLine,
+  Send,
 } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCart } from '../../contexts/CartContext';
 import { useTabBar } from '../../contexts/TabBarContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { shopifyService } from '../../services/shopifyService';
 import { reviewService } from '../../services/reviewService';
 import affiliateService from '../../services/affiliateService';
+import alertService from '../../services/alertService';
 import deepLinkHandler from '../../services/deepLinkHandler';
 import { ProductAffiliateLinkSheet } from '../../components/Affiliate';
 import OptimizedImage from '../../components/Common/OptimizedImage';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
 import { DARK_THEME } from '../../theme/darkTheme';
 import { TrendingUp, Eye, Layers, Grid3X3, Link2 } from 'lucide-react-native';
+import { CONTENT_BOTTOM_PADDING, ACTION_BUTTON_BOTTOM_PADDING } from '../../constants/layout';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-import { CONTENT_BOTTOM_PADDING, ACTION_BUTTON_BOTTOM_PADDING } from '../../constants/layout';
+
+/**
+ * Detect product type for commission calculation
+ * Digital products: courses, subscriptions, memberships, tiers, scanners
+ * Physical products: crystals, jewelry, etc.
+ */
+const detectProductType = (product) => {
+  if (!product) return 'crystal';
+
+  // Normalize text - remove diacritics for Vietnamese
+  const normalize = (str) => {
+    if (!str) return '';
+    return str.toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'd');
+  };
+
+  // Get all product text fields
+  const productType = normalize(product.product_type);
+  const tags = Array.isArray(product.tags)
+    ? normalize(product.tags.join(' '))
+    : normalize(product.tags);
+  const sku = normalize(product.sku || product.variants?.[0]?.sku);
+  const title = normalize(product.title || product.name);
+  const handle = normalize(product.handle);
+  const allText = `${productType} ${tags} ${sku} ${title} ${handle}`;
+
+  // Digital product indicators - based on actual Shopify products
+  const digitalIndicators = [
+    // Tags from Shopify
+    'course', 'digital', 'ebook', 'gem-academy', 'gem academy',
+    'khoa-hoc', 'khoa hoc', 'trading', 'trading-course',
+    'tier-starter', 'tier 1', 'tier 2', 'tier 3',
+    'gem pack', 'gems', 'in-app', 'virtual-currency', 'virtual currency',
+    'gem chatbot', 'scanner',
+    // Handle patterns
+    'gem-trading', 'gem-tier', 'gem-pack', 'gem-scanner', 'gem-chatbot',
+    'yinyang-chatbot', 'scanner-dashboard',
+    // Title keywords
+    'yinyang', 'chatbot', 'ai',
+    'vip', 'pro', 'premium', 'popular', 'starter',
+    // Vietnamese (normalized - no diacritics)
+    'khoa', 'goi', 'tan so', 'khai mo', 'tan so goc',
+    'tai tao', 'tu duy', 'trieu phu', 'tinh yeu', 'kich hoat'
+  ];
+
+  const isDigital = digitalIndicators.some(indicator => allText.includes(indicator));
+
+  console.log('[detectProductType]', {
+    title: title.substring(0, 50),
+    isDigital,
+    result: isDigital ? 'course (10%)' : 'crystal (6%)'
+  });
+
+  return isDigital ? 'course' : 'crystal';
+};
 
 const TAB_BAR_HEIGHT = 115; // Tab bar height for proper spacing above tab
 
@@ -105,6 +168,17 @@ const ProductDetailScreen = ({ navigation, route }) => {
   // Affiliate link state
   const [isAffiliate, setIsAffiliate] = useState(false);
   const [affiliateLinkSheetVisible, setAffiliateLinkSheetVisible] = useState(false);
+
+  // User review state
+  const { user } = useAuth();
+  const [canWriteReview, setCanWriteReview] = useState(false);
+  const [checkingPurchase, setCheckingPurchase] = useState(true);
+  const [reviewModalVisible, setReviewModalVisible] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewTitle, setReviewTitle] = useState('');
+  const [reviewBody, setReviewBody] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [allReviews, setAllReviews] = useState([]);
 
   // Set selected variant when product is available
   useEffect(() => {
@@ -307,25 +381,31 @@ const ProductDetailScreen = ({ navigation, route }) => {
   const collectImages = () => {
     const imageSet = new Set(); // Use Set to avoid duplicates
 
+    // Helper to extract image URL from various formats
+    const extractImageUrl = (img) => {
+      if (!img) return null;
+      if (typeof img === 'string') return img;
+      // Shopify GraphQL uses 'url', REST API uses 'src'
+      return img.url || img.src || null;
+    };
+
     // 1. Main product image
     if (product.image) {
-      const mainImg = typeof product.image === 'string' ? product.image : product.image?.src;
+      const mainImg = extractImageUrl(product.image);
       if (mainImg) imageSet.add(mainImg);
     }
 
-    // 2. Images array (can be objects with src or strings)
+    // 2. Images array (can be objects with src/url or strings)
     if (product.images && Array.isArray(product.images)) {
       product.images.forEach(img => {
-        const imgSrc = typeof img === 'string' ? img : img?.src;
+        const imgSrc = extractImageUrl(img);
         if (imgSrc) imageSet.add(imgSrc);
       });
     }
 
     // 3. Featured image
     if (product.featuredImage) {
-      const featuredSrc = typeof product.featuredImage === 'string'
-        ? product.featuredImage
-        : product.featuredImage?.src || product.featuredImage?.url;
+      const featuredSrc = extractImageUrl(product.featuredImage);
       if (featuredSrc) imageSet.add(featuredSrc);
     }
 
@@ -333,7 +413,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
     if (product.variants && Array.isArray(product.variants)) {
       product.variants.forEach(v => {
         if (v.image) {
-          const variantImg = typeof v.image === 'string' ? v.image : v.image?.src;
+          const variantImg = extractImageUrl(v.image);
           if (variantImg) imageSet.add(variantImg);
         }
       });
@@ -345,18 +425,37 @@ const ProductDetailScreen = ({ navigation, route }) => {
   const allImages = collectImages();
   const images = allImages.length > 0 ? allImages : [null];
 
-  // Check affiliate status on mount
+  // Show affiliate button for all logged-in users
+  // The sheet will handle showing "Register Partnership" if not an affiliate
   useEffect(() => {
-    const checkAffiliateStatus = async () => {
+    setIsAffiliate(!!user);
+  }, [user]);
+
+  // Check purchase status and load combined reviews
+  useEffect(() => {
+    const checkPurchaseAndLoadReviews = async () => {
+      if (!product?.handle) return;
+
+      setCheckingPurchase(true);
       try {
-        const profile = await affiliateService.getProfile();
-        setIsAffiliate(profile?.is_active || false);
-      } catch (err) {
-        setIsAffiliate(false);
+        // Check if user can write review (has purchased)
+        if (user?.id) {
+          const hasPurchased = await reviewService.checkUserPurchasedProduct(user.id, product.handle);
+          setCanWriteReview(hasPurchased);
+        }
+
+        // Load combined reviews (Shopify + In-app)
+        const combined = await reviewService.getCombinedReviews(product);
+        setAllReviews(combined);
+      } catch (error) {
+        console.error('[ProductDetail] Check purchase error:', error);
+      } finally {
+        setCheckingPurchase(false);
       }
     };
-    checkAffiliateStatus();
-  }, []);
+
+    checkPurchaseAndLoadReviews();
+  }, [product?.handle, user?.id]);
 
   // Load additional sections - DEFERRED to not block initial render
   useEffect(() => {
@@ -582,6 +681,51 @@ const ProductDetailScreen = ({ navigation, route }) => {
     }
   };
 
+  // Submit review handler
+  const handleSubmitReview = async () => {
+    if (!user?.id || !product?.handle) {
+      alertService.show('Lỗi', 'Vui lòng đăng nhập để đánh giá sản phẩm', 'error');
+      return;
+    }
+
+    if (reviewBody.trim().length < 10) {
+      alertService.show('Nội dung quá ngắn', 'Vui lòng viết ít nhất 10 ký tự', 'warning');
+      return;
+    }
+
+    setSubmittingReview(true);
+    try {
+      const result = await reviewService.submitReview({
+        userId: user.id,
+        productHandle: product.handle,
+        rating: reviewRating,
+        title: reviewTitle.trim() || null,
+        body: reviewBody.trim(),
+        images: [],
+      });
+
+      if (result.success) {
+        alertService.show('Gửi đánh giá thành công', 'Cảm ơn bạn đã chia sẻ trải nghiệm!', 'success');
+        setReviewModalVisible(false);
+        setReviewRating(5);
+        setReviewTitle('');
+        setReviewBody('');
+        setCanWriteReview(false); // Disable button after submission
+
+        // Reload reviews
+        const combined = await reviewService.getCombinedReviews(product);
+        setAllReviews(combined);
+      } else {
+        alertService.show('Không thể gửi đánh giá', result.error || 'Vui lòng thử lại sau', 'error');
+      }
+    } catch (error) {
+      console.error('[ProductDetail] Submit review error:', error);
+      alertService.show('Lỗi', 'Đã xảy ra lỗi khi gửi đánh giá', 'error');
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
   const renderStars = (rating) => {
     return Array(5).fill(0).map((_, i) => (
       <Star
@@ -606,7 +750,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
         onPress={() => navigation.push('ProductDetail', { product: item })}
       >
         <OptimizedImage
-          uri={item.image || item.images?.[0]?.src}
+          uri={item.image || item.images?.[0]?.url || item.images?.[0]?.src}
           style={styles.miniProductImage}
           resizeMode="cover"
         />
@@ -857,19 +1001,32 @@ const ProductDetailScreen = ({ navigation, route }) => {
                 <Text style={styles.sectionTitle}>Phản hồi từ khách hàng</Text>
               </View>
 
-              {reviewsData.length > 0 ? (
+              {/* Write Review Button - Only for verified purchasers */}
+              {canWriteReview && (
+                <TouchableOpacity
+                  style={styles.writeReviewBtn}
+                  onPress={() => setReviewModalVisible(true)}
+                  activeOpacity={0.8}
+                >
+                  <PenLine size={18} color={COLORS.gold} />
+                  <Text style={styles.writeReviewBtnText}>Viết đánh giá</Text>
+                  <Text style={styles.verifiedPurchaseBadge}>✓ Đã mua hàng</Text>
+                </TouchableOpacity>
+              )}
+
+              {allReviews.length > 0 ? (
                 <>
                   <View style={styles.reviewsSummary}>
                     <Text style={styles.reviewsRating}>{reviewStats.averageRating || 5}</Text>
                     <View style={styles.reviewsStars}>{renderStars(Math.round(reviewStats.averageRating || 5))}</View>
-                    <Text style={styles.reviewsCount}>({reviewStats.totalReviews || 0} đánh giá)</Text>
+                    <Text style={styles.reviewsCount}>({allReviews.length} đánh giá)</Text>
                   </View>
 
-                  {reviewsData.map((review, reviewIndex) => (
+                  {allReviews.map((review, reviewIndex) => (
                     <View key={review.id || `review-${reviewIndex}`} style={styles.reviewCard}>
                       <View style={styles.reviewHeader}>
                         <View style={styles.reviewUser}>
-                          <View style={styles.reviewAvatar}>
+                          <View style={[styles.reviewAvatar, review.source === 'gemral' && styles.reviewAvatarGemral]}>
                             <Text style={styles.reviewAvatarText}>{(review.author || 'K').charAt(0)}</Text>
                           </View>
                           <View>
@@ -910,7 +1067,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
                     Sản phẩm này chưa có đánh giá.
                   </Text>
                   <Text style={styles.noReviewsSubtext}>
-                    Hãy là người đầu tiên đánh giá!
+                    {canWriteReview ? 'Hãy là người đầu tiên đánh giá!' : 'Mua sản phẩm để có thể đánh giá.'}
                   </Text>
                 </View>
               )}
@@ -1068,7 +1225,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
                       onPress={() => navigation.push('ProductDetail', { product: item })}
                     >
                       <OptimizedImage
-                        uri={item.image || item.images?.[0]?.src}
+                        uri={item.image || item.images?.[0]?.url || item.images?.[0]?.src}
                         style={styles.exploreGridImage}
                         resizeMode="cover"
                       />
@@ -1140,7 +1297,7 @@ const ProductDetailScreen = ({ navigation, route }) => {
         visible={affiliateLinkSheetVisible}
         onClose={() => setAffiliateLinkSheetVisible(false)}
         product={product}
-        productType="crystal"
+        productType={detectProductType(product)}
       />
 
       {/* Review Image Viewer Modal - Swipe to view multiple images */}
@@ -1224,6 +1381,127 @@ const ProductDetailScreen = ({ navigation, route }) => {
             activeOpacity={1}
             onPress={() => setImageViewerVisible(false)}
           />
+        </View>
+      </Modal>
+
+      {/* Write Review Modal */}
+      <Modal
+        visible={reviewModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setReviewModalVisible(false)}
+      >
+        <View style={styles.reviewModalOverlay}>
+          <View style={styles.reviewModalContainer}>
+            {/* Header */}
+            <View style={styles.reviewModalHeader}>
+              <Text style={styles.reviewModalTitle}>Viết đánh giá</Text>
+              <TouchableOpacity
+                style={styles.reviewModalCloseBtn}
+                onPress={() => setReviewModalVisible(false)}
+              >
+                <X size={22} color={COLORS.textPrimary} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Product Info */}
+            <View style={styles.reviewProductInfo}>
+              <OptimizedImage
+                uri={images[0]}
+                style={styles.reviewProductImage}
+                resizeMode="cover"
+              />
+              <Text style={styles.reviewProductTitle} numberOfLines={2}>
+                {product?.title}
+              </Text>
+            </View>
+
+            <ScrollView style={styles.reviewFormScroll} showsVerticalScrollIndicator={false}>
+              {/* Rating Selector */}
+              <View style={styles.reviewRatingSection}>
+                <Text style={styles.reviewLabel}>Đánh giá của bạn</Text>
+                <View style={styles.reviewRatingStars}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <TouchableOpacity
+                      key={star}
+                      onPress={() => setReviewRating(star)}
+                      activeOpacity={0.7}
+                    >
+                      <Star
+                        size={36}
+                        color={star <= reviewRating ? COLORS.gold : 'rgba(255,255,255,0.2)'}
+                        fill={star <= reviewRating ? COLORS.gold : 'transparent'}
+                      />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                <Text style={styles.reviewRatingText}>
+                  {reviewRating === 5 ? 'Xuất sắc' :
+                   reviewRating === 4 ? 'Rất tốt' :
+                   reviewRating === 3 ? 'Tốt' :
+                   reviewRating === 2 ? 'Bình thường' : 'Không hài lòng'}
+                </Text>
+              </View>
+
+              {/* Title Input */}
+              <View style={styles.reviewInputSection}>
+                <Text style={styles.reviewLabel}>Tiêu đề (tùy chọn)</Text>
+                <TextInput
+                  style={styles.reviewInput}
+                  value={reviewTitle}
+                  onChangeText={setReviewTitle}
+                  placeholder="Tóm tắt trải nghiệm của bạn"
+                  placeholderTextColor={COLORS.textMuted}
+                  maxLength={100}
+                />
+              </View>
+
+              {/* Body Input */}
+              <View style={styles.reviewInputSection}>
+                <Text style={styles.reviewLabel}>Nội dung đánh giá *</Text>
+                <TextInput
+                  style={[styles.reviewInput, styles.reviewInputMultiline]}
+                  value={reviewBody}
+                  onChangeText={setReviewBody}
+                  placeholder="Chia sẻ chi tiết về sản phẩm: chất lượng, năng lượng, trải nghiệm..."
+                  placeholderTextColor={COLORS.textMuted}
+                  multiline
+                  numberOfLines={5}
+                  textAlignVertical="top"
+                  maxLength={1000}
+                />
+                <Text style={styles.reviewCharCount}>{reviewBody.length}/1000</Text>
+              </View>
+
+              {/* Verified Purchase Badge */}
+              <View style={styles.reviewVerifiedNotice}>
+                <Check size={16} color={COLORS.success} />
+                <Text style={styles.reviewVerifiedText}>
+                  Đánh giá của bạn sẽ được đánh dấu "Đã mua hàng"
+                </Text>
+              </View>
+            </ScrollView>
+
+            {/* Submit Button */}
+            <TouchableOpacity
+              style={[
+                styles.reviewSubmitBtn,
+                (submittingReview || reviewBody.trim().length < 10) && styles.reviewSubmitBtnDisabled,
+              ]}
+              onPress={handleSubmitReview}
+              disabled={submittingReview || reviewBody.trim().length < 10}
+              activeOpacity={0.8}
+            >
+              {submittingReview ? (
+                <ActivityIndicator size="small" color={COLORS.textPrimary} />
+              ) : (
+                <>
+                  <Send size={18} color={COLORS.textPrimary} />
+                  <Text style={styles.reviewSubmitText}>Gửi đánh giá</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
       </Modal>
     </LinearGradient>
@@ -1331,6 +1609,7 @@ const styles = StyleSheet.create({
   reviewHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: SPACING.sm },
   reviewUser: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   reviewAvatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(106, 91, 255, 0.2)', justifyContent: 'center', alignItems: 'center' },  // Purple bg
+  reviewAvatarGemral: { backgroundColor: 'rgba(255, 189, 89, 0.2)', borderWidth: 1.5, borderColor: 'rgba(255, 189, 89, 0.5)' },  // Gold bg for Gemral reviews
   reviewAvatarText: { fontSize: TYPOGRAPHY.fontSize.md, fontWeight: TYPOGRAPHY.fontWeight.bold, color: COLORS.purple },
   reviewName: { fontSize: TYPOGRAPHY.fontSize.sm, fontWeight: TYPOGRAPHY.fontWeight.semibold, color: COLORS.textPrimary },
   verifiedBadge: { fontSize: TYPOGRAPHY.fontSize.xs, color: COLORS.success },
@@ -1560,6 +1839,175 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     zIndex: -1,
+  },
+
+  // Write Review Button
+  writeReviewBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    borderRadius: 12,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    marginBottom: SPACING.lg,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 189, 89, 0.4)',
+  },
+  writeReviewBtnText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.gold,
+  },
+  verifiedPurchaseBadge: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.success,
+    backgroundColor: 'rgba(58, 247, 166, 0.15)',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 2,
+    borderRadius: 8,
+    marginLeft: SPACING.xs,
+  },
+
+  // Write Review Modal
+  reviewModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    justifyContent: 'flex-end',
+  },
+  reviewModalContainer: {
+    backgroundColor: '#0D0B14',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: '90%',
+    borderTopWidth: 1.5,
+    borderLeftWidth: 1.5,
+    borderRightWidth: 1.5,
+    borderColor: COLORS.inputBorder,
+  },
+  reviewModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  reviewModalTitle: {
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.gold,
+  },
+  reviewModalCloseBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  reviewProductInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+  },
+  reviewProductImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+  },
+  reviewProductTitle: {
+    flex: 1,
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textPrimary,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  reviewFormScroll: {
+    paddingHorizontal: SPACING.lg,
+    paddingTop: SPACING.md,
+    maxHeight: 400,
+  },
+  reviewRatingSection: {
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+  },
+  reviewLabel: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    marginBottom: SPACING.sm,
+  },
+  reviewRatingStars: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    marginBottom: SPACING.sm,
+  },
+  reviewRatingText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.gold,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+  },
+  reviewInputSection: {
+    marginBottom: SPACING.lg,
+  },
+  reviewInput: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.inputBorder,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.md,
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textPrimary,
+  },
+  reviewInputMultiline: {
+    minHeight: 120,
+    textAlignVertical: 'top',
+  },
+  reviewCharCount: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textMuted,
+    textAlign: 'right',
+    marginTop: SPACING.xs,
+  },
+  reviewVerifiedNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+    backgroundColor: 'rgba(58, 247, 166, 0.1)',
+    borderRadius: 8,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    marginBottom: SPACING.lg,
+  },
+  reviewVerifiedText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.success,
+  },
+  reviewSubmitBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    backgroundColor: COLORS.burgundy,
+    marginHorizontal: SPACING.lg,
+    marginVertical: SPACING.lg,
+    paddingVertical: SPACING.md,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.gold,
+  },
+  reviewSubmitBtnDisabled: {
+    opacity: 0.5,
+  },
+  reviewSubmitText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
   },
 });
 

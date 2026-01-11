@@ -300,7 +300,7 @@ const AddActionModal = ({
                     </View>
                     {isSelected && (
                       <View style={[styles.typeCheck, { backgroundColor: type.color }]}>
-                        <Check size={14} color={COLORS.bgDark} />
+                        <Check size={14} color={COLORS.bgDarkest} />
                       </View>
                     )}
                   </TouchableOpacity>
@@ -336,7 +336,7 @@ const AddActionModal = ({
               onPress={handleSave}
               disabled={!title.trim() || isLoading}
             >
-              <Plus size={18} color={COLORS.bgDark} />
+              <Plus size={18} color={COLORS.bgDarkest} />
               <Text style={styles.saveButtonText}>
                 {isLoading ? 'Đang lưu...' : 'Thêm Hành Động'}
               </Text>
@@ -542,7 +542,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   saveButtonText: {
-    color: COLORS.bgDark,
+    color: COLORS.bgDarkest,
     fontSize: TYPOGRAPHY.fontSize.base,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
   },

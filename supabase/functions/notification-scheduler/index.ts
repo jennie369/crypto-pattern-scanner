@@ -2,8 +2,8 @@
  * Gemral - Notification Scheduler Edge Function
  * Runs every 15 minutes via pg_cron to process scheduled push notifications
  *
- * Setup pg_cron:
- * SELECT cron.schedule('notification-scheduler', '*/15 * * * *',
+ * Setup pg_cron (run in SQL Editor):
+ * SELECT cron.schedule('notification-scheduler', '0,15,30,45 * * * *',
  *   $$SELECT net.http_post(
  *     url := 'https://YOUR_PROJECT.supabase.co/functions/v1/notification-scheduler',
  *     headers := '{"Authorization": "Bearer YOUR_SERVICE_ROLE_KEY"}'::jsonb

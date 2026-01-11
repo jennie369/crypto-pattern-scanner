@@ -1,0 +1,1667 @@
+
+
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bài 2.2: Cấu Trúc 3 Phases Của DPD | GEM Trading Academy</title>
+  
+  <!-- ============================================
+       🖼️ IMAGE CONFIGURATION - DỄ CHỈNH SỬA
+       ============================================
+       
+       TIER: 1 | CHAPTER: 2 | LESSON: 2.2
+       TÊN BÀI: Cấu Trúc 3 Phases Của DPD
+       SỐ HÌNH: 5 hình
+       
+       VERSION: 5.3 - Facebook-Style Full Width
+       ============================================ -->
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&amp;family=Noto+Sans+Display:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       🎨 GEM DESIGN SYSTEM V5.3 - FACEBOOK STYLE
+       Mobile: Full-width components (padding: 0)
+       Desktop: Standard padding + borders
+       ========================================== */
+    :root {
+      /* ========== COLORS ========== */
+      --color-navy: #112250;
+      --color-navy-light: #1a3a6e;
+      --color-gold: #FFBD59;
+      --color-cyan: #00F0FF;
+      --color-purple: #6A5BFF;
+      --color-burgundy: #9C0612;
+      --color-green: #10B981;
+      --color-red: #EF4444;
+      --color-orange: #F59E0B;
+      --color-white: #FFFFFF;
+      --color-text: #E8E8E8;
+      --color-text-muted: #A0A0A0;
+      --color-bg-dark: #0A0F1A;
+      --color-bg-card: rgba(255, 255, 255, 0.03);
+      
+      /* ========================================
+         V5.3: FACEBOOK-STYLE SPACING
+         Mobile: padding 0, full-width components
+         ======================================== */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 12px;
+      --space-lg: 16px;
+      --space-xl: 20px;
+      --space-2xl: 24px;
+      --space-3xl: 32px;
+      
+      /* V5.3: Container & Card - Mobile = 0 */
+      --container-padding: 0;
+      --card-padding: var(--space-lg);
+      --text-padding: var(--space-lg);
+      
+      /* V5.3: Border Radius - Mobile = 0 */
+      --radius-sm: 0;
+      --radius-md: 0;
+      --radius-lg: 0;
+      --radius-xl: 0;
+      
+      /* ========== SHADOWS ========== */
+      --shadow-card: none;
+      --shadow-glow-gold: 0 0 15px rgba(255, 189, 89, 0.3);
+      --shadow-glow-cyan: 0 0 15px rgba(0, 240, 255, 0.3);
+      
+      /* ========== GLASSMORPHISM ========== */
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-blur: blur(40px);
+      
+      /* V5.3: Grid gap - Mobile = 1px separator */
+      --grid-gap: 1px;
+      --grid-bg: var(--glass-border);
+    }
+    
+    /* ========== DESKTOP OVERRIDES ========== */
+    @media (min-width: 600px) {
+      :root {
+        --container-padding: 1.5rem;
+        --card-padding: 1.25rem;
+        --text-padding: 0;
+        
+        --radius-sm: 6px;
+        --radius-md: 8px;
+        --radius-lg: 12px;
+        --radius-xl: 16px;
+        
+        --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.3);
+        --grid-gap: var(--space-md);
+        --grid-bg: transparent;
+      }
+    }
+    
+    /* ==========================================
+       🌌 BACKGROUND LAYERS - 5 LAYERS
+       ========================================== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Noto Sans Display', sans-serif;
+      background: linear-gradient(135deg, #0A0F1A 0%, #112250 50%, #0A0F1A 100%);
+      color: var(--color-text);
+      min-height: 100vh;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+    
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      background: 
+        radial-gradient(ellipse at 20% 20%, rgba(255, 189, 89, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(0, 240, 255, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(106, 91, 255, 0.05) 0%, transparent 60%);
+    }
+    
+    /* ==========================================
+       📦 V5.3 CONTAINER - Mobile padding: 0
+       ========================================== */
+    .lesson-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: var(--container-padding);
+    }
+    
+    /* ==========================================
+       🎯 LESSON HEADER - V5.3
+       Mobile: border-bottom only, text padding
+       Desktop: full styling
+       ========================================== */
+    .lesson-header {
+      text-align: center;
+      padding: var(--space-2xl) var(--text-padding);
+      border-bottom: 1px solid var(--glass-border);
+      margin-bottom: var(--space-lg);
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-header {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-lg);
+        margin-bottom: var(--space-2xl);
+      }
+    }
+    
+    .lesson-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--color-gold), #E5A84B);
+      color: var(--color-navy);
+      padding: var(--space-xs) var(--space-md);
+      border-radius: 6px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--space-md);
+    }
+    
+    .lesson-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(1.4rem, 5vw, 2rem);
+      font-weight: 700;
+      color: var(--color-white);
+      text-transform: uppercase;
+      margin-bottom: var(--space-sm);
+      line-height: 1.2;
+    }
+    
+    .lesson-subtitle {
+      color: var(--color-text-muted);
+      font-size: 0.95rem;
+      margin-bottom: var(--space-lg);
+    }
+    
+    .lesson-meta {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-lg);
+      flex-wrap: wrap;
+      font-size: 0.8rem;
+    }
+    
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      color: var(--color-text-muted);
+    }
+    
+    .meta-item .icon {
+      font-size: 1rem;
+    }
+    
+    .meta-value {
+      color: var(--color-cyan);
+      font-weight: 600;
+    }
+    
+    /* ==========================================
+       📄 V5.3 CONTENT SECTIONS
+       Mobile: border-bottom, text padding only
+       ========================================== */
+    .content-section {
+      margin-bottom: 0;
+      padding-bottom: var(--space-lg);
+      border-bottom: 1px solid var(--glass-border);
+    }
+    
+    @media (min-width: 600px) {
+      .content-section {
+        margin-bottom: var(--space-2xl);
+        padding-bottom: 0;
+        border-bottom: none;
+      }
+    }
+    
+    .section-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      text-transform: uppercase;
+      margin-bottom: var(--space-lg);
+      padding: var(--space-lg) var(--text-padding) var(--space-sm);
+      border-bottom: 2px solid var(--color-gold);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      .section-title {
+        padding: 0 0 var(--space-sm) 0;
+      }
+    }
+    
+    .section-icon {
+      font-size: 1.3rem;
+    }
+    
+    /* V5.3: Text elements có padding riêng trên mobile */
+    p {
+      margin-bottom: var(--space-md);
+      color: var(--color-text);
+      padding: 0 var(--text-padding);
+    }
+    
+    @media (min-width: 600px) {
+      p {
+        padding: 0;
+      }
+    }
+    
+    strong {
+      color: var(--color-gold);
+    }
+    
+    /* ==========================================
+       🎴 V5.3 PHASE CARDS - Full Width Mobile
+       Mobile: border-left 4px, no radius
+       Desktop: full border + radius + shadow
+       ========================================== */
+    .phase-card {
+      background: var(--glass-bg);
+      border: none;
+      border-left: 4px solid var(--glass-border);
+      border-radius: 0;
+      padding: var(--card-padding);
+      margin-bottom: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .phase-card + .phase-card {
+      border-top: 1px solid var(--glass-border);
+    }
+    
+    @media (min-width: 600px) {
+      .phase-card {
+        backdrop-filter: var(--glass-blur);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-lg);
+        margin-bottom: var(--space-lg);
+        box-shadow: var(--shadow-card);
+        transition: all 0.3s ease;
+      }
+      
+      .phase-card + .phase-card {
+        border-top: 1px solid var(--glass-border);
+      }
+      
+      .phase-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(255, 255, 255, 0.15);
+      }
+    }
+    
+    .phase-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .phase-card::before {
+        height: 4px;
+      }
+    }
+    
+    .phase-card.phase-down {
+      border-left-color: var(--color-red);
+    }
+    
+    .phase-card.phase-pause {
+      border-left-color: var(--color-gold);
+    }
+    
+    .phase-card.phase-down::before {
+      background: linear-gradient(90deg, var(--color-red), var(--color-burgundy));
+    }
+    
+    .phase-card.phase-pause::before {
+      background: linear-gradient(90deg, var(--color-orange), var(--color-gold));
+    }
+    
+    .phase-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      margin-bottom: var(--space-md);
+    }
+    
+    .phase-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--color-white);
+      flex-shrink: 0;
+    }
+    
+    .phase-down .phase-number {
+      background: linear-gradient(135deg, var(--color-red), var(--color-burgundy));
+    }
+    
+    .phase-pause .phase-number {
+      background: linear-gradient(135deg, var(--color-orange), var(--color-gold));
+    }
+    
+    .phase-title-wrap {
+      flex: 1;
+    }
+    
+    .phase-name {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--color-white);
+      text-transform: uppercase;
+    }
+    
+    .phase-down .phase-name {
+      color: var(--color-red);
+    }
+    
+    .phase-pause .phase-name {
+      color: var(--color-gold);
+    }
+    
+    .phase-meaning {
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+    }
+    
+    .phase-content {
+      padding-left: calc(40px + var(--space-md));
+    }
+    
+    .phase-content p {
+      padding: 0;
+    }
+    
+    .phase-criteria {
+      list-style: none;
+      margin: var(--space-sm) 0;
+    }
+    
+    .phase-criteria li {
+      position: relative;
+      padding-left: var(--space-xl);
+      margin-bottom: var(--space-sm);
+      color: var(--color-text);
+      font-size: 0.9rem;
+    }
+    
+    .phase-criteria li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: var(--color-green);
+      font-weight: bold;
+    }
+    
+    .phase-highlight {
+      background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+      border: 1px solid var(--color-gold);
+      border-radius: 8px;
+      padding: var(--space-md);
+      margin-top: var(--space-md);
+      text-align: center;
+    }
+    
+    .phase-highlight-text {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      color: var(--color-gold);
+      font-size: 0.95rem;
+    }
+    
+    /* ==========================================
+       📊 V5.3 STATS GRID - Full Width Mobile
+       Mobile: gap 1px with bg separator
+       Desktop: gap 12px, borders
+       ========================================== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--grid-gap);
+      background: var(--grid-bg);
+      margin: 0;
+      padding: 0;
+    }
+    
+    @media (min-width: 500px) {
+      .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+    
+    @media (min-width: 600px) {
+      .stats-grid {
+        gap: var(--space-md);
+        background: transparent;
+        margin: var(--space-lg) 0;
+      }
+    }
+    
+    .stat-item {
+      background: var(--glass-bg);
+      border: none;
+      border-radius: 0;
+      padding: var(--card-padding);
+      text-align: center;
+    }
+    
+    @media (min-width: 600px) {
+      .stat-item {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+      }
+    }
+    
+    .stat-value {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--color-cyan);
+      margin-bottom: var(--space-xs);
+    }
+    
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+    }
+    
+    /* ==========================================
+       💡 V5.3 HIGHLIGHT BOX - Full Width Mobile
+       Mobile: border-left 4px only
+       Desktop: full styling
+       ========================================== */
+    .highlight-box {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(106, 91, 255, 0.05));
+      border: none;
+      border-left: 4px solid var(--color-cyan);
+      border-radius: 0;
+      padding: var(--card-padding);
+      margin: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .highlight-box {
+        border-radius: var(--radius-md);
+        margin: var(--space-lg) 0;
+      }
+    }
+    
+    .highlight-box p {
+      margin: 0;
+      color: var(--color-text);
+      padding: 0;
+    }
+    
+    .highlight-box.warning {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(156, 6, 18, 0.05));
+      border-left-color: var(--color-red);
+    }
+    
+    .highlight-box.tip {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+      border-left-color: var(--color-green);
+    }
+    
+    /* ==========================================
+       📈 V5.3 PATTERN VISUAL - Full Width Mobile
+       ========================================== */
+    .pattern-visual {
+      background: var(--glass-bg);
+      border: none;
+      border-left: 4px solid var(--color-purple);
+      border-radius: 0;
+      padding: var(--card-padding);
+      margin: 0;
+      overflow-x: auto;
+    }
+    
+    @media (min-width: 600px) {
+      .pattern-visual {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-lg);
+        margin: var(--space-lg) 0;
+      }
+    }
+    
+    .pattern-diagram {
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      line-height: 1.4;
+      color: var(--color-text);
+      white-space: pre;
+      text-align: center;
+    }
+    
+    @media (min-width: 600px) {
+      .pattern-diagram {
+        font-size: 0.85rem;
+      }
+    }
+    
+    .pattern-diagram .phase1 { color: var(--color-red); }
+    .pattern-diagram .phase2 { color: var(--color-gold); }
+    .pattern-diagram .phase3 { color: var(--color-red); }
+    .pattern-diagram .hfz { color: var(--color-cyan); font-weight: bold; }
+    
+    /* ==========================================
+       📸 V5.3 LESSON IMAGES - Full Width Mobile
+       Mobile: border-radius 0, edge-to-edge
+       Desktop: radius + shadow
+       ========================================== */
+    .lesson-image {
+      margin: 0;
+      border-radius: 0;
+      overflow: hidden;
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-image {
+        margin: var(--space-lg) 0;
+        border-radius: var(--radius-lg);
+      }
+    }
+    
+    .lesson-image img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      border-radius: 0;
+      box-shadow: none;
+      display: block;
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-image img {
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-card);
+      }
+    }
+    
+    .image-caption {
+      text-align: center;
+      color: var(--color-text-muted);
+      font-size: 0.85rem;
+      font-style: italic;
+      padding: var(--space-md) var(--text-padding);
+      margin: 0;
+      background: var(--glass-bg);
+      border-bottom: 1px solid var(--glass-border);
+    }
+    
+    @media (min-width: 600px) {
+      .image-caption {
+        padding: var(--space-md) 0;
+        margin-top: var(--space-md);
+        margin-bottom: var(--space-xl);
+        background: transparent;
+        border-bottom: none;
+      }
+    }
+    
+    /* ==========================================
+       📋 V5.3 COMPARISON TABLE - Full Width Mobile
+       ========================================== */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin: 0;
+      background: var(--glass-bg);
+    }
+    
+    @media (min-width: 600px) {
+      .table-container {
+        margin: var(--space-md) 0;
+        background: transparent;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--glass-border);
+      }
+    }
+    
+    .comparison-table {
+      width: 100%;
+      min-width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    
+    .comparison-table th,
+    .comparison-table td {
+      padding: var(--space-md);
+      text-align: left;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    
+    .comparison-table th {
+      background: rgba(255, 189, 89, 0.1);
+      color: var(--color-gold);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      position: sticky;
+      top: 0;
+    }
+    
+    .comparison-table td {
+      background: var(--glass-bg);
+      color: var(--color-text);
+    }
+    
+    @media (min-width: 600px) {
+      .comparison-table tr:hover td {
+        background: rgba(0, 240, 255, 0.05);
+      }
+    }
+    
+    /* ==========================================
+       ✅ V5.3 KEY POINTS LIST
+       ========================================== */
+    .key-points {
+      list-style: none;
+      margin: var(--space-md) 0;
+      padding: 0 var(--text-padding);
+    }
+    
+    @media (min-width: 600px) {
+      .key-points {
+        padding: 0;
+      }
+    }
+    
+    .key-points li {
+      position: relative;
+      padding-left: var(--space-xl);
+      margin-bottom: var(--space-sm);
+      color: var(--color-text);
+    }
+    
+    .key-points li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: var(--color-green);
+      font-weight: bold;
+    }
+    
+    /* ==========================================
+       📝 V5.3 QUIZ SECTION - Full Width Mobile
+       Mobile: border-left 4px, questions border-bottom
+       Desktop: full container styling
+       ========================================== */
+    .quiz-section {
+      background: linear-gradient(135deg, rgba(106, 91, 255, 0.1), rgba(0, 240, 255, 0.05));
+      border: none;
+      border-left: 4px solid var(--color-purple);
+      border-radius: 0;
+      padding: 0;
+      margin: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-section {
+        border: 2px solid var(--color-purple);
+        border-radius: var(--radius-lg);
+        padding: var(--space-lg);
+        margin: var(--space-2xl) 0;
+      }
+    }
+    
+    .quiz-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--card-padding);
+      border-bottom: 1px solid var(--glass-border);
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-header {
+        padding: 0;
+        border-bottom: none;
+        margin-bottom: var(--space-lg);
+      }
+    }
+    
+    .quiz-icon {
+      font-size: 2rem;
+    }
+    
+    .quiz-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--color-purple);
+      text-transform: uppercase;
+    }
+    
+    .quiz-question {
+      background: var(--glass-bg);
+      border: none;
+      border-bottom: 1px solid var(--glass-border);
+      border-radius: 0;
+      padding: var(--card-padding);
+      margin: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-question {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--space-lg);
+      }
+    }
+    
+    .question-number {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      color: var(--color-cyan);
+      font-size: 0.9rem;
+      margin-bottom: var(--space-sm);
+    }
+    
+    .question-text {
+      color: var(--color-text);
+      font-size: 1rem;
+      margin-bottom: var(--space-md);
+    }
+    
+    /* V5.3: Quiz Options - Full width on mobile */
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: var(--grid-gap);
+      background: var(--grid-bg);
+      margin: 0 calc(var(--card-padding) * -1);
+      padding: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-options {
+        gap: var(--space-sm);
+        background: transparent;
+        margin: 0;
+      }
+    }
+    
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.02);
+      border: none;
+      border-left: 4px solid transparent;
+      border-radius: 0;
+      padding: var(--space-md) var(--card-padding);
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-option {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-sm);
+        padding: var(--space-md);
+      }
+      
+      .quiz-option:hover:not(.disabled):not(.correct):not(.incorrect):not(.show-correct) {
+        background: rgba(0, 240, 255, 0.1);
+        border-color: var(--color-cyan);
+      }
+    }
+    
+    .option-letter {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      color: var(--color-cyan);
+      min-width: 24px;
+    }
+    
+    .quiz-option label {
+      color: var(--color-text);
+      cursor: pointer;
+      flex: 1;
+    }
+    
+    /* Quiz Option States - V5.3 */
+    .quiz-option.correct {
+      background: rgba(34, 197, 94, 0.2);
+      border-left-color: var(--color-green);
+      pointer-events: none;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-option.correct {
+        border-color: var(--color-green);
+      }
+    }
+    
+    .quiz-option.correct label {
+      color: var(--color-green);
+      font-weight: 600;
+    }
+    
+    .quiz-option.correct::after {
+      content: "✓";
+      color: var(--color-green);
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-left: auto;
+    }
+    
+    .quiz-option.incorrect {
+      background: rgba(239, 68, 68, 0.2);
+      border-left-color: var(--color-red);
+      pointer-events: none;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-option.incorrect {
+        border-color: var(--color-red);
+      }
+    }
+    
+    .quiz-option.incorrect label {
+      color: var(--color-red);
+      text-decoration: line-through;
+    }
+    
+    .quiz-option.incorrect::after {
+      content: "✗";
+      color: var(--color-red);
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-left: auto;
+    }
+    
+    .quiz-option.disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    
+    .quiz-option.show-correct {
+      background: rgba(34, 197, 94, 0.15);
+      border-left-color: var(--color-green);
+      pointer-events: none;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-option.show-correct {
+        border-color: var(--color-green);
+      }
+    }
+    
+    .quiz-option.show-correct label {
+      color: var(--color-green);
+    }
+    
+    /* Quiz Feedback */
+    .quiz-feedback {
+      margin-top: var(--space-md);
+      padding: var(--space-md);
+      border-radius: 8px;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .quiz-feedback.show {
+      display: block;
+    }
+    
+    .quiz-feedback.correct {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid var(--color-green);
+    }
+    
+    .quiz-feedback.incorrect {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid var(--color-red);
+    }
+    
+    .quiz-feedback-text {
+      color: var(--color-text);
+      font-size: 0.95rem;
+    }
+    
+    .quiz-question.answered {
+      border-left-width: 4px;
+    }
+    
+    .quiz-question.answered.correct-answered {
+      border-left-color: var(--color-green);
+    }
+    
+    .quiz-question.answered.incorrect-answered {
+      border-left-color: var(--color-red);
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-question.answered {
+        border-width: 2px;
+      }
+      
+      .quiz-question.answered.correct-answered {
+        border-color: var(--color-green);
+      }
+      
+      .quiz-question.answered.incorrect-answered {
+        border-color: var(--color-red);
+      }
+    }
+    
+    /* Retake Button */
+    .quiz-retake-container {
+      text-align: center;
+      padding: var(--card-padding);
+      border-top: 1px solid var(--glass-border);
+      display: none;
+    }
+    
+    .quiz-retake-container.show {
+      display: block;
+      animation: fadeIn 0.5s ease;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-retake-container {
+        padding: var(--space-lg) 0 0 0;
+        border-top: 1px solid var(--glass-border);
+        margin-top: var(--space-lg);
+      }
+    }
+    
+    .quiz-retake-btn {
+      background: linear-gradient(135deg, var(--color-purple), #5346E0);
+      color: var(--color-white);
+      border: none;
+      border-radius: 8px;
+      padding: var(--space-md) var(--space-xl);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+      text-transform: uppercase;
+    }
+    
+    @media (min-width: 600px) {
+      .quiz-retake-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(106, 91, 255, 0.4);
+      }
+    }
+    
+    .quiz-retake-btn:active {
+      transform: translateY(0);
+    }
+    
+    .quiz-retake-btn .btn-icon {
+      font-size: 1.1rem;
+    }
+    
+    /* ==========================================
+       📝 V5.3 SUMMARY BOX - Full Width Mobile
+       ========================================== */
+    .summary-box {
+      background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(0, 240, 255, 0.1));
+      border: none;
+      border-left: 4px solid var(--color-gold);
+      border-radius: 0;
+      padding: var(--card-padding);
+      margin: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .summary-box {
+        border: 2px solid var(--color-gold);
+        border-radius: var(--radius-lg);
+        padding: var(--space-lg);
+        margin: var(--space-2xl) 0;
+      }
+    }
+    
+    .summary-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--color-gold);
+      text-transform: uppercase;
+      margin-bottom: var(--space-md);
+      text-align: center;
+    }
+    
+    .summary-box .key-points {
+      padding: 0;
+    }
+    
+    /* ==========================================
+       🦶 V5.3 FOOTER - Full Width Mobile
+       ========================================== */
+    .lesson-footer {
+      text-align: center;
+      padding: var(--space-2xl) var(--text-padding);
+      border-top: 1px solid var(--glass-border);
+      margin-top: 0;
+    }
+    
+    @media (min-width: 600px) {
+      .lesson-footer {
+        padding: var(--space-2xl) 0;
+        margin-top: var(--space-2xl);
+      }
+    }
+    
+    .footer-brand {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      color: var(--color-gold);
+      font-size: 1.1rem;
+      margin-bottom: var(--space-sm);
+    }
+    
+    .footer-link {
+      color: var(--color-cyan);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+    
+    .footer-link:hover {
+      text-decoration: underline;
+    }
+    
+    /* ==========================================
+       🎬 ANIMATIONS
+       ========================================== */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+
+
+  <div class="lesson-container">
+    
+    <!-- ========== LESSON HEADER ========== -->
+    <header class="lesson-header"><span class="lesson-badge">ier 1 • Chapter 2</span>
+      <h1 class="lesson-title">Bài 2.2: Cấu Trúc 3 Phases Của DPD</h1>
+      <p class="lesson-subtitle">Phân tích chi tiết từng giai đoạn của pattern Giảm-Nghỉ-Giảm</p>
+      
+      <div class="lesson-meta">
+        <span class="meta-item">
+          <span class="icon">⏱️</span>
+          <span class="meta-value">10 phút</span>
+        </span>
+        <span class="meta-item">
+          <span class="icon">📊</span>
+          <span>3 Phases</span>
+        </span>
+        <span class="meta-item">
+          <span class="icon">📝</span>
+          <span class="meta-value">3 câu quiz</span>
+        </span>
+      </div>
+    </header>
+    
+    <!-- ========== SECTION 1: TỔNG QUAN 3 PHASES ========== -->
+    <section class="content-section">
+      <h2 class="section-title">
+        <span class="section-icon">🎯</span>
+        Tổng Quan 3 Phases
+      </h2>
+      
+      <p>Pattern <strong>DPD (Down-Pause-Down)</strong> gồm 3 giai đoạn rõ ràng. Mỗi giai đoạn có những đặc điểm riêng mà bạn cần nhận diện chính xác để trade thành công.</p>
+      
+      <!-- Pattern Visual - Full Width Mobile -->
+      <div class="pattern-visual">
+        <div class="pattern-diagram">
+<span class="phase1">    📉 PHASE 1: DOWN</span>
+<span class="phase1">    │</span>
+<span class="phase1">    │   Giá giảm mạnh</span>
+<span class="phase1">    │   ≥2%, 10+ nến</span>
+<span class="phase1">    │   Volume cao</span>
+<span class="phase1">    ▼</span>
+<span class="phase2">    ════════════════════</span>
+<span class="phase2">    ⏸️ PHASE 2: PAUSE</span>
+<span class="phase2">    Tích lũy 1-5 nến</span>
+<span class="phase2">    Range &lt;1.5%</span>
+<span class="hfz">    → TẠO HFZ TẠI ĐÂY ←</span>
+<span class="phase2">    ════════════════════</span>
+<span class="phase3">    │</span>
+<span class="phase3">    │   📉 PHASE 3: DOWN</span>
+<span class="phase3">    │   Tiếp tục giảm ≥2%</span>
+<span class="phase3">    │   Volume tăng</span>
+<span class="phase3">    ▼</span>
+        </div>
+      </div>
+    </section>
+    
+    <!-- ========== HÌNH 1: TỔNG QUAN 3 PHASES ========== -->
+    <div class="lesson-image"><img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mjlpa9yl-bpbn28/1767282164247_sryqro_Gemini_Generated_Image_29yduu29yduu29yd.png" alt="gemini-generated-image-29yduu29yduu-9kzw">
+      
+    </div>
+    
+    
+    <!-- ========== SECTION 2: PHASE 1 - DOWN ========== -->
+    <section class="content-section">
+      <h2 class="section-title">
+        <span class="section-icon">📉</span>
+        Phase 1: DOWN (Giảm)
+      </h2>
+      
+      <div class="phase-card phase-down">
+        <div class="phase-header">
+          <div class="phase-number">1</div>
+          <div class="phase-title-wrap">
+            <div class="phase-name">DOWN - Giảm Mạnh</div>
+            <div class="phase-meaning">Giai đoạn đầu tiên - Xung lực giảm ban đầu</div>
+          </div>
+        </div>
+        
+        <div class="phase-content">
+          <p>Đây là giai đoạn giá <strong>giảm mạnh và liên tục</strong>, thể hiện áp lực bán áp đảo. Smart Money đang bán ra với khối lượng lớn.</p>
+          
+          <ul class="phase-criteria">
+            <li><strong>Ít nhất 2 nến giảm liên tiếp</strong> (thường là 3-5 nến)</li>
+            <li><strong>Biên độ giảm ≥2%</strong> so với đỉnh gần nhất</li>
+            <li><strong>Số lượng nến: 10+ nến</strong> (đủ lâu để xác nhận trend)</li>
+            <li><strong>Volume cao</strong> - khối lượng giao dịch tăng đáng kể</li>
+            <li>Nến có thân dài, râu ngắn (thể hiện lực bán mạnh)</li>
+          </ul>
+        </div>
+      </div>
+      
+      <!-- Highlight Box - Full Width Mobile -->
+      <div class="highlight-box warning">
+        <p>⚠️ <strong>Lưu ý quan trọng:</strong> Nếu Phase 1 giảm yếu (&lt; 2%) hoặc ít nến (&lt; 10 nến), pattern có thể không đáng tin cậy. Hãy đợi setup tốt hơn!</p>
+      </div>
+    </section>
+    
+    <!-- ========== HÌNH 2: PHASE 1 CHI TIẾT ========== -->
+    <div class="lesson-image">
+      <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mjlpa9yl-bpbn28/1767281701909_xc3sm7_Gemini_Generated_Image_u28sl1u28sl1u28s.png" alt="gemini-generated-image-u28sl1u28sl1-dedt">
+    </div>
+    
+    
+    <!-- ========== SECTION 3: PHASE 2 - PAUSE ========== -->
+    <section class="content-section">
+      <h2 class="section-title">
+        <span class="section-icon">⏸️</span>
+        Phase 2: PAUSE (Nghỉ/Tích Lũy)
+      </h2>
+      
+      <div class="phase-card phase-pause">
+        <div class="phase-header">
+          <div class="phase-number">2</div>
+          <div class="phase-title-wrap">
+            <div class="phase-name">PAUSE - Tích Lũy</div>
+            <div class="phase-meaning">Giai đoạn quan trọng nhất - Nơi tạo HFZ</div>
+          </div>
+        </div>
+        
+        <div class="phase-content">
+          <p>Đây là giai đoạn giá <strong>đi ngang, tích lũy</strong> sau khi giảm mạnh. Smart Money đang tích lũy thêm vị thế SHORT tại đây.</p>
+          
+          <ul class="phase-criteria">
+            <li><strong>Số lượng nến: 1-5 nến</strong> (thường là 2-3 nến)</li>
+            <li><strong>Range &lt; 1.5%</strong> (biên độ dao động hẹp)</li>
+            <li><strong>Thân nến nhỏ</strong> - nến không có hướng rõ ràng</li>
+            <li><strong>Râu nến ngắn</strong> - ít biến động mạnh</li>
+            <li>Volume giảm so với Phase 1 (giai đoạn nghỉ ngơi)</li>
+          </ul>
+          
+          <div class="phase-highlight">
+            <span class="phase-highlight-text">⭐ HFZ (HIGH FREQUENCY ZONE) ĐƯỢC TẠO TẠI PHASE NÀY!</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Highlight Box Tip - Full Width Mobile -->
+      <div class="highlight-box tip">
+        <p>💡 <strong>Mẹo nhận diện:</strong> Phase 2 trông như giá "nghỉ ngơi" sau đợt giảm mạnh. Các nến thường có dạng Doji, Spinning Top hoặc Inside Bar.</p>
+      </div>
+      
+      <!-- Bảng so sánh - Full Width Mobile -->
+      <div class="table-container">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Tiêu chí</th>
+              <th>✅ Phase 2 Hợp Lệ</th>
+              <th>❌ Không Hợp Lệ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Số nến</td>
+              <td>1-5 nến</td>
+              <td>&gt; 5 nến</td>
+            </tr>
+            <tr>
+              <td>Range</td>
+              <td>&lt; 1.5%</td>
+              <td>&gt; 1.5%</td>
+            </tr>
+            <tr>
+              <td>Thân nến</td>
+              <td>Nhỏ, không rõ hướng</td>
+              <td>Lớn, có xu hướng</td>
+            </tr>
+            <tr>
+              <td>Volume</td>
+              <td>Thấp hơn Phase 1</td>
+              <td>Cao hơn Phase 1</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    
+    <!-- ========== HÌNH 3: PHASE 2 VÀ HFZ ========== -->
+    <div class="lesson-image">
+      
+    </div>
+    <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mjlpa9yl-bpbn28/1767281941447_1gfqs6_Gemini_Generated_Image_yw4aw0yw4aw0yw4a.png" alt="gemini-generated-image-yw4aw0yw4aw0-ves6">
+    
+    <!-- ========== SECTION 4: PHASE 3 - DOWN ========== -->
+    <section class="content-section">
+      <h2 class="section-title">
+        <span class="section-icon">📉</span>
+        Phase 3: DOWN (Giảm Tiếp)
+      </h2>
+      
+      <div class="phase-card phase-down">
+        <div class="phase-header">
+          <div class="phase-number">3</div>
+          <div class="phase-title-wrap">
+            <div class="phase-name">DOWN - Xác Nhận Pattern</div>
+            <div class="phase-meaning">Giai đoạn cuối - Xác nhận DPD hoàn chỉnh</div>
+          </div>
+        </div>
+        
+        <div class="phase-content">
+          <p>Đây là giai đoạn giá <strong>tiếp tục giảm</strong> sau khi tích lũy, xác nhận rằng trend giảm vẫn còn mạnh và pattern DPD đã hoàn chỉnh.</p>
+          
+          <ul class="phase-criteria">
+            <li><strong>Giá tiếp tục giảm ≥2%</strong> sau vùng Pause</li>
+            <li><strong>Volume tăng trở lại</strong> (xác nhận lực bán mạnh)</li>
+            <li><strong>Nến có thân dài</strong>, đóng cửa gần đáy</li>
+            <li>Breakout rõ ràng khỏi vùng Pause</li>
+            <li>Xác nhận pattern DPD đã hoàn chỉnh</li>
+          </ul>
+        </div>
+      </div>
+      
+      <!-- Highlight Box - Full Width Mobile -->
+      <div class="highlight-box">
+        <p>🎯 <strong>Quan trọng:</strong> Phase 3 là bằng chứng cho thấy Smart Money tiếp tục bán. Sau khi Phase 3 hoàn thành, chúng ta <strong>KHÔNG entry ngay</strong> mà phải <strong>ĐỢI giá quay lại test HFZ</strong> rồi mới vào lệnh SHORT.</p>
+      </div>
+    </section>
+    
+    <!-- ========== HÌNH 4: PHASE 3 VÀ RETEST ========== -->
+    <div class="lesson-image">
+      <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mjlpa9yl-bpbn28/1767281946997_1buaa2_Gemini_Generated_Image_xzmws8xzmws8xzmw.png" alt="gemini-generated-image-xzmws8xzmws8-qmvu">
+    </div>
+    
+    
+    <!-- ========== SECTION 5: THÔNG SỐ KỸ THUẬT ========== -->
+    <section class="content-section">
+      <h2 class="section-title">
+        <span class="section-icon">📊</span>
+        Thông Số Kỹ Thuật Từng Phase
+      </h2>
+      
+      <!-- Table - Full Width Mobile -->
+      <div class="table-container">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Phase</th>
+              <th>Số Nến</th>
+              <th>Biên Độ</th>
+              <th>Volume</th>
+              <th>Đặc Điểm</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong style="color: var(--color-red);">Phase 1</strong></td>
+              <td>10+ nến</td>
+              <td>≥ 2%</td>
+              <td>Cao</td>
+              <td>Thân dài</td>
+            </tr>
+            <tr>
+              <td><strong style="color: var(--color-gold);">Phase 2</strong></td>
+              <td>1-5 nến</td>
+              <td>&lt; 1.5%</td>
+              <td>Thấp</td>
+              <td>Doji</td>
+            </tr>
+            <tr>
+              <td><strong style="color: var(--color-red);">Phase 3</strong></td>
+              <td>3+ nến</td>
+              <td>≥ 2%</td>
+              <td>Tăng</td>
+              <td>Breakout</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Stats Grid - Full Width Mobile -->
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value">≥2%</div>
+          <div class="stat-label">Phase 1 Giảm</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">&lt;1.5%</div>
+          <div class="stat-label">Phase 2 Range</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">1-5</div>
+          <div class="stat-label">Nến Phase 2</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">≥2%</div>
+          <div class="stat-label">Phase 3 Giảm</div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- ========== HÌNH 5: INFOGRAPHIC ========== -->
+    <div class="lesson-image">
+      <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mjlpa9yl-bpbn28/1767281950829_td99uv_Gemini_Generated_Image_53x4xc53x4xc53x4.png" alt="gemini-generated-image-53x4xc53x4xc-y1ws">
+    </div>
+    
+    
+    <!-- ========== SECTION 6: TÓM TẮT ========== -->
+    <section class="content-section">
+      <div class="summary-box">
+        <h3 class="summary-title">📝 Tóm Tắt Bài Học</h3>
+        
+        <ul class="key-points">
+          <li><strong>Phase 1 (DOWN):</strong> Giảm mạnh ≥2%, 10+ nến, volume cao</li>
+          <li><strong>Phase 2 (PAUSE):</strong> Tích lũy 1-5 nến, range &lt; 1.5%, volume thấp → <strong>TẠO HFZ</strong></li>
+          <li><strong>Phase 3 (DOWN):</strong> Tiếp tục giảm ≥2%, volume tăng, xác nhận pattern</li>
+          <li><strong>HFZ được tạo từ Phase 2</strong> - đây là vùng entry quan trọng</li>
+          <li><strong>Không entry ngay</strong> sau Phase 3 - phải đợi giá quay lại test HFZ</li>
+          <li>Mỗi phase đều có tiêu chí cụ thể - cần đáp ứng đủ điều kiện</li>
+          <li>Pattern không hợp lệ nếu bất kỳ phase nào không đạt tiêu chí</li>
+        </ul>
+      </div>
+    </section>
+    
+    <!-- ========== QUIZ SECTION - V5.3 Full Width ========== -->
+    <section class="content-section">
+      <div class="quiz-section" id="quizSection">
+        <div class="quiz-header">
+          <span class="quiz-icon">📝</span>
+          <span class="quiz-title">Kiểm Tra Kiến Thức</span>
+        </div>
+        
+        <!-- Câu hỏi 1 -->
+        <div class="quiz-question" id="question1">
+          <div class="question-number">Câu 1/3</div>
+          <div class="question-text">Phase 2 (PAUSE) của DPD có đặc điểm gì quan trọng nhất?</div>
+          <div class="quiz-options">
+            <div class="quiz-option" onclick="checkAnswer(1, 'a', this)">
+              <span class="option-letter">A.</span>
+              <label>Giá giảm mạnh với volume cao</label>
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(1, 'b', this)">
+              <span class="option-letter">B.</span>
+              <label>Tích lũy 1-5 nến, range &lt; 1.5%, tạo HFZ</label>
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(1, 'c', this)">
+              <span class="option-letter">C.</span>
+              <label>Giá tăng đảo chiều với volume đột biến</label>
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(1, 'd', this)">
+              <span class="option-letter">D.</span>
+              <label>Breakout khỏi vùng kháng cự</label>
+            </div>
+          </div>
+          <div class="quiz-feedback" id="feedback1">
+            <span class="quiz-feedback-text"></span>
+          </div>
+        </div>
+        
+        <!-- Câu hỏi 2 -->
+        <div class="quiz-question" id="question2">
+          <div class="question-number">Câu 2/3</div>
+          <div class="question-text">Phase 1 (DOWN) cần đáp ứng những tiêu chí nào?</div>
+          <div class="quiz-options">
+            <div class="quiz-option" onclick="checkAnswer(2, 'a', this)">
+              <span class="option-letter">A.</span>
+              <label>Giảm &lt; 1%, 5 nến, volume thấp</label>
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(2, 'b', this)">
+              <span class="option-letter">B.</span>
+              <label>Đi ngang, 1-5 nến, range hẹp</label>
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(2, 'c', this)">
+              <span class="option-letter">C.</span>
+              <label>Giảm ≥2%, 10+ nến, volume cao</label>
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(2, 'd', this)">
+              <span class="option-letter">D.</span>
+              <label>Tăng nhẹ, 3-5 nến, volume trung bình</label>
+            </div>
+          </div>
+          <div class="quiz-feedback" id="feedback2">
+            <span class="quiz-feedback-text"></span>
+          </div>
+        </div>
+        
+        <!-- Câu hỏi 3 -->
+        <div class="quiz-question" id="question3">
+          <div class="question-number">Câu 3/3</div>
+          <div class="question-text">Sau khi Phase 3 hoàn thành, bạn nên làm gì tiếp theo?</div>
+          <div class="quiz-options">
+            <div class="quiz-option" onclick="checkAnswer(3, 'a', this)">
+              <span class="option-letter">A.</span>
+              <label>Entry SHORT ngay lập tức để không bỏ lỡ cơ hội</label>
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(3, 'b', this)">
+              <span class="option-letter">B.</span>
+              <label>Đợi giá quay lại test HFZ rồi mới entry SHORT</label>
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(3, 'c', this)">
+              <span class="option-letter">C.</span>
+              <label>Entry LONG vì giá sẽ đảo chiều tăng</label>
+            </div>
+            <div class="quiz-option" onclick="checkAnswer(3, 'd', this)">
+              <span class="option-letter">D.</span>
+              <label>Bỏ qua setup vì pattern đã kết thúc</label>
+            </div>
+          </div>
+          <div class="quiz-feedback" id="feedback3">
+            <span class="quiz-feedback-text"></span>
+          </div>
+        </div>
+        
+        <!-- Nút Làm Lại Quiz -->
+        <div class="quiz-retake-container" id="retakeContainer">
+          <button class="quiz-retake-btn" onclick="resetQuiz()">
+            <span class="btn-icon">🔄</span>
+            <span>Làm Lại Quiz</span>
+          </button>
+        </div>
+        
+      </div>
+    </section>
+    
+    <!-- ========== FOOTER ========== -->
+    <footer class="lesson-footer">
+      <div class="footer-brand">GEM Trading Academy</div>
+      <a href="https://gemral.com" class="footer-link" target="_blank">gemral.com</a>
+    </footer>
+    
+  </div>
+  
+  <!-- Quiz Script - V5.3 với Retake -->
+  <script>
+    // Đáp án đúng
+    const correctAnswers = {
+      1: 'b',
+      2: 'c',
+      3: 'b'
+    };
+    
+    // Tổng số câu hỏi
+    const totalQuestions = 3;
+    
+    // Giải thích cho từng câu
+    const explanations = {
+      1: {
+        correct: '🎉 Chính xác! Phase 2 (PAUSE) là giai đoạn tích lũy với 1-5 nến, range < 1.5%. Đây là nơi HFZ được tạo ra - vùng entry quan trọng nhất!',
+        incorrect: '❌ Chưa đúng! Phase 2 (PAUSE) có đặc điểm: tích lũy 1-5 nến, range < 1.5%, volume thấp. Đây là nơi TẠO HFZ - vùng entry quan trọng.'
+      },
+      2: {
+        correct: '🎉 Xuất sắc! Phase 1 cần: giảm ≥2%, 10+ nến, volume cao. Đây là xung lực giảm ban đầu, thể hiện áp lực bán mạnh từ Smart Money.',
+        incorrect: '❌ Chưa đúng! Phase 1 (DOWN) cần đáp ứng: Giảm ≥2%, 10+ nến, volume cao. Nếu không đủ tiêu chí này, pattern không hợp lệ.'
+      },
+      3: {
+        correct: '🎉 Tuyệt vời! Sau Phase 3, bạn phải ĐỢI giá quay lại test HFZ rồi mới entry SHORT. Đây là "Nguyên Tắc Vàng - Đợi Retest" của GEM Method!',
+        incorrect: '❌ Chưa đúng! Nguyên tắc quan trọng: KHÔNG entry ngay sau Phase 3. Phải ĐỢI giá quay lại test HFZ, có nến xác nhận, rồi mới entry SHORT.'
+      }
+    };
+    
+    // Theo dõi câu đã trả lời
+    const answeredQuestions = {};
+    
+    // Kiểm tra đã trả lời hết chưa
+    function checkAllAnswered() {
+      const answeredCount = Object.keys(answeredQuestions).length;
+      if (answeredCount >= totalQuestions) {
+        const retakeContainer = document.getElementById('retakeContainer');
+        retakeContainer.classList.add('show');
+      }
+    }
+    
+    // Reset Quiz
+    function resetQuiz() {
+      // Reset tracking
+      for (let key in answeredQuestions) {
+        delete answeredQuestions[key];
+      }
+      
+      // Ẩn nút Retake
+      const retakeContainer = document.getElementById('retakeContainer');
+      retakeContainer.classList.remove('show');
+      
+      // Reset tất cả câu hỏi
+      for (let i = 1; i <= totalQuestions; i++) {
+        const questionDiv = document.getElementById('question' + i);
+        const feedbackDiv = document.getElementById('feedback' + i);
+        const allOptions = questionDiv.querySelectorAll('.quiz-option');
+        
+        // Remove classes từ question
+        questionDiv.classList.remove('answered', 'correct-answered', 'incorrect-answered');
+        
+        // Reset feedback
+        feedbackDiv.classList.remove('correct', 'incorrect', 'show');
+        feedbackDiv.querySelector('.quiz-feedback-text').textContent = '';
+        
+        // Reset tất cả options
+        allOptions.forEach(option => {
+          option.classList.remove('correct', 'incorrect', 'disabled', 'show-correct');
+        });
+      }
+      
+      // Scroll lên đầu quiz
+      const quizSection = document.getElementById('quizSection');
+      const yOffset = -20;
+      const y = quizSection.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+    
+    function checkAnswer(questionNum, selectedAnswer, clickedElement) {
+      // Nếu đã trả lời rồi thì không làm gì
+      if (answeredQuestions[questionNum]) return;
+      
+      // Đánh dấu đã trả lời
+      answeredQuestions[questionNum] = true;
+      
+      const questionDiv = document.getElementById('question' + questionNum);
+      const feedbackDiv = document.getElementById('feedback' + questionNum);
+      const allOptions = questionDiv.querySelectorAll('.quiz-option');
+      const isCorrect = selectedAnswer === correctAnswers[questionNum];
+      
+      // Disable tất cả options
+      allOptions.forEach((option, index) => {
+        const optionLetter = ['a', 'b', 'c', 'd'][index];
+        
+        if (option === clickedElement) {
+          if (isCorrect) {
+            option.classList.add('correct');
+          } else {
+            option.classList.add('incorrect');
+          }
+        } else if (optionLetter === correctAnswers[questionNum] && !isCorrect) {
+          option.classList.add('show-correct');
+        } else {
+          option.classList.add('disabled');
+        }
+      });
+      
+      // Hiển thị feedback
+      const feedbackText = feedbackDiv.querySelector('.quiz-feedback-text');
+      
+      if (isCorrect) {
+        feedbackDiv.classList.add('correct', 'show');
+        feedbackText.textContent = explanations[questionNum].correct;
+        questionDiv.classList.add('answered', 'correct-answered');
+      } else {
+        feedbackDiv.classList.add('incorrect', 'show');
+        feedbackText.textContent = explanations[questionNum].incorrect;
+        questionDiv.classList.add('answered', 'incorrect-answered');
+      }
+      
+      // Kiểm tra đã trả lời hết chưa → hiện nút Retake
+      checkAllAnswered();
+    }
+  </script>
+

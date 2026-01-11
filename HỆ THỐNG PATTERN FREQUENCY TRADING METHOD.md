@@ -2,14 +2,14 @@
 
 ## **🎯 BẢNG CHUYỂN ĐỔI CUỐI CÙNG**
 
-| Sam Seiden (Cũ) | Frequency Method (Mới) | Tiếng Việt | Icon |
+|  | Frequency Method | Tiếng Việt | Icon |
 | ----- | ----- | ----- | ----- |
-| **DBD** (Drop-Base-Drop) | **DPD** (Down-Pause-Down) | Giảm-Nghỉ-Giảm | 🔴📉⏸️📉 |
-| **RBR** (Rally-Base-Rally) | **UPU** (Up-Pause-Up) | Tăng-Nghỉ-Tăng | 🟢📈⏸️📈 |
-| **RBD** (Rally-Base-Drop) | **UPD** (Up-Pause-Down) | Tăng-Nghỉ-Giảm | 🔄📈⏸️📉 |
-| **DBR** (Drop-Base-Rally) | **DPU** (Down-Pause-Up) | Giảm-Nghỉ-Tăng | 🔄📉⏸️📈 |
-| **Supply Zone** | **HFZ** (High Frequency Zone) | Vùng Tần Số Cao | 🔺🔴 |
-| **Demand Zone** | **LFZ** (Low Frequency Zone) | Vùng Tần Số Thấp | 🔻🟢 |
+**DPD** (Down-Pause-Down) | Giảm-Nghỉ-Giảm | 🔴📉⏸️📉 |
+**UPU** (Up-Pause-Up) | Tăng-Nghỉ-Tăng | 🟢📈⏸️📈 |
+ **UPD** (Up-Pause-Down) | Tăng-Nghỉ-Giảm | 🔄📈⏸️📉 |
+|**DPU** (Down-Pause-Up) | Giảm-Nghỉ-Tăng | 🔄📉⏸️📈 |
+**HFZ** (High Frequency Zone) | Vùng Tần Số Cao | 🔺🔴 |
+**LFZ** (Low Frequency Zone) | Vùng Tần Số Thấp | 🔻🟢 |
 
 ---
 

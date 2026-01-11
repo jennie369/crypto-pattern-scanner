@@ -824,7 +824,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: COLORS.bgDark || '#1a1a2e',
+    backgroundColor: COLORS.bgDarkest || '#1a1a2e',
     borderTopLeftRadius: SPACING.xl,
     borderTopRightRadius: SPACING.xl,
     maxHeight: '80%',

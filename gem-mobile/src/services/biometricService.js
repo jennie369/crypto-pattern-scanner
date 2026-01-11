@@ -220,6 +220,34 @@ const biometricService = {
   },
 
   /**
+   * Auto-enable biometric silently without prompting (for auto-setup on login)
+   * @param {string} email - User email
+   * @param {string} refreshToken - Supabase refresh token
+   * @param {string} typeName - Biometric type name
+   * @returns {Promise<{success: boolean, error?: string, typeName?: string}>}
+   */
+  async autoEnable(email, refreshToken, typeName = 'Sinh trắc học') {
+    try {
+      // Save credentials securely without authentication prompt
+      if (!SecureStore) {
+        return { success: false, error: 'SecureStore không khả dụng' };
+      }
+      await SecureStore.setItemAsync(STORAGE_KEYS.USER_EMAIL, email);
+      await SecureStore.setItemAsync(STORAGE_KEYS.USER_TOKEN, refreshToken);
+
+      // Save preferences
+      await AsyncStorage.setItem(STORAGE_KEYS.BIOMETRIC_ENABLED, 'true');
+      await AsyncStorage.setItem(STORAGE_KEYS.BIOMETRIC_TYPE, typeName);
+
+      console.log('[BiometricService] Auto-enabled for:', email);
+      return { success: true, typeName };
+    } catch (error) {
+      console.error('[BiometricService] autoEnable error:', error);
+      return { success: false, error: 'Không thể tự động bật sinh trắc học' };
+    }
+  },
+
+  /**
    * Disable biometric and clear stored credentials
    * @returns {Promise<{success: boolean, error?: string}>}
    */

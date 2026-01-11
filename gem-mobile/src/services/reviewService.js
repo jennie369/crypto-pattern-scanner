@@ -1,10 +1,12 @@
 /**
  * Gemral - Review Service
  * Handles fetching real Judge.me reviews with EXACT product matching
+ * + In-app reviews from verified purchasers (Supabase)
  * NO random reviews - only show reviews for the specific product
  */
 
 import reviewsData from '../data/reviews.json';
+import { supabase } from './supabase';
 
 class ReviewService {
   constructor() {
@@ -216,6 +218,244 @@ class ReviewService {
   hasReviews(product) {
     const reviews = this.getProductReviews(product);
     return reviews.length > 0;
+  }
+
+  // ==========================================
+  // IN-APP REVIEWS (Supabase - Verified Purchasers)
+  // ==========================================
+
+  /**
+   * Check if user has purchased a product
+   * @param {string} userId - User ID
+   * @param {string} productHandle - Product handle
+   * @returns {Promise<boolean>}
+   */
+  async checkUserPurchasedProduct(userId, productHandle) {
+    try {
+      if (!userId || !productHandle) return false;
+
+      // Get user profile with email and linked_emails
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('email, linked_emails')
+        .eq('id', userId)
+        .single();
+
+      if (profileError || !profile) {
+        console.log('[ReviewService] Profile not found for purchase check');
+        return false;
+      }
+
+      // Build list of all emails to search
+      const emails = [profile.email, ...(profile.linked_emails || [])].filter(Boolean);
+
+      if (emails.length === 0) return false;
+
+      // Query shopify_orders for any order containing this product
+      const { data: orders, error: ordersError } = await supabase
+        .from('shopify_orders')
+        .select('id, line_items')
+        .in('email', emails);
+
+      if (ordersError || !orders) {
+        console.log('[ReviewService] No orders found for user');
+        return false;
+      }
+
+      // Check if any order contains this product
+      const normalizedHandle = productHandle.toLowerCase();
+      const hasPurchased = orders.some(order => {
+        if (!order.line_items) return false;
+        const items = Array.isArray(order.line_items) ? order.line_items : [];
+        return items.some(item => {
+          // Match by handle or title containing the product name
+          const itemHandle = (item.product_handle || '').toLowerCase();
+          const itemTitle = (item.title || '').toLowerCase();
+          return itemHandle === normalizedHandle || itemHandle.includes(normalizedHandle);
+        });
+      });
+
+      console.log(`[ReviewService] User ${hasPurchased ? 'HAS' : 'has NOT'} purchased ${productHandle}`);
+      return hasPurchased;
+    } catch (error) {
+      console.error('[ReviewService] checkUserPurchasedProduct error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get in-app reviews from Supabase for a product
+   * @param {string} productHandle - Product handle
+   * @returns {Promise<Array>}
+   */
+  async getInAppReviews(productHandle) {
+    try {
+      if (!productHandle) return [];
+
+      // Fetch reviews without join (no FK relationship to profiles)
+      const { data: reviews, error } = await supabase
+        .from('product_reviews')
+        .select('id, user_id, product_handle, rating, title, body, images, verified_purchase, created_at')
+        .eq('product_handle', productHandle)
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('[ReviewService] getInAppReviews error:', error);
+        return [];
+      }
+
+      if (!reviews || reviews.length === 0) {
+        return [];
+      }
+
+      // Fetch author profiles separately
+      const userIds = [...new Set(reviews.map(r => r.user_id).filter(Boolean))];
+      let profilesMap = {};
+
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, full_name, avatar_url')
+          .in('id', userIds);
+
+        if (profiles) {
+          profilesMap = profiles.reduce((acc, p) => {
+            acc[p.id] = p;
+            return acc;
+          }, {});
+        }
+      }
+
+      // Transform to review format
+      return reviews.map(review => {
+        const author = profilesMap[review.user_id];
+        return {
+          id: `inapp_${review.id}`,
+          author: author?.full_name || 'Người dùng Gemral',
+          avatarUrl: author?.avatar_url,
+          rating: review.rating,
+          title: review.title,
+          body: review.body,
+          comment: review.body,
+          images: review.images || [],
+          date: this.formatDate(review.created_at),
+          verified: review.verified_purchase,
+          source: 'gemral',
+        };
+      });
+    } catch (error) {
+      console.error('[ReviewService] getInAppReviews error:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Submit a new product review (verified purchasers only)
+   * @param {Object} reviewData - { userId, productHandle, rating, title, body, images }
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async submitReview(reviewData) {
+    try {
+      const { userId, productHandle, rating, title, body, images } = reviewData;
+
+      if (!userId || !productHandle) {
+        return { success: false, error: 'Thiếu thông tin cần thiết' };
+      }
+
+      if (!rating || rating < 1 || rating > 5) {
+        return { success: false, error: 'Vui lòng chọn số sao đánh giá (1-5)' };
+      }
+
+      if (!body || body.trim().length < 10) {
+        return { success: false, error: 'Nội dung đánh giá phải có ít nhất 10 ký tự' };
+      }
+
+      // Verify purchase
+      const hasPurchased = await this.checkUserPurchasedProduct(userId, productHandle);
+      if (!hasPurchased) {
+        return { success: false, error: 'Chỉ khách hàng đã mua sản phẩm mới có thể đánh giá' };
+      }
+
+      // Check if user already reviewed this product
+      const { data: existingReview } = await supabase
+        .from('product_reviews')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('product_handle', productHandle)
+        .single();
+
+      if (existingReview) {
+        return { success: false, error: 'Bạn đã đánh giá sản phẩm này rồi' };
+      }
+
+      // Insert review
+      const { data, error } = await supabase
+        .from('product_reviews')
+        .insert({
+          user_id: userId,
+          product_handle: productHandle,
+          rating,
+          title: title?.trim() || null,
+          body: body.trim(),
+          images: images || [],
+          verified_purchase: true,
+          status: 'approved', // Auto-approve verified purchase reviews
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('[ReviewService] submitReview error:', error);
+        return { success: false, error: 'Không thể gửi đánh giá. Vui lòng thử lại.' };
+      }
+
+      console.log('[ReviewService] ✅ Review submitted:', data?.id);
+      return { success: true, review: data };
+    } catch (error) {
+      console.error('[ReviewService] submitReview error:', error);
+      return { success: false, error: 'Đã xảy ra lỗi khi gửi đánh giá' };
+    }
+  }
+
+  /**
+   * Get combined reviews (Shopify + In-app)
+   * @param {Object} product - Product object
+   * @returns {Promise<Array>}
+   */
+  async getCombinedReviews(product) {
+    try {
+      const productHandle = product?.handle;
+
+      // Get Shopify/Judge.me reviews
+      const shopifyReviews = this.getProductReviews(product);
+
+      // Get in-app reviews
+      const inAppReviews = productHandle ? await this.getInAppReviews(productHandle) : [];
+
+      // Combine and sort by date (newest first)
+      const combined = [...inAppReviews, ...shopifyReviews];
+      return combined;
+    } catch (error) {
+      console.error('[ReviewService] getCombinedReviews error:', error);
+      return this.getProductReviews(product);
+    }
+  }
+
+  /**
+   * Format date to Vietnamese format
+   */
+  formatDate(dateString) {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      });
+    } catch {
+      return '';
+    }
   }
 }
 

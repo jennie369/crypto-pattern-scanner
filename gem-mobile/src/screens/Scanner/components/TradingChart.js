@@ -24,21 +24,42 @@ import {
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY } from '../../../utils/tokens';
 import ChartToolbar from '../../../components/Trading/ChartToolbar';
+import { DrawingToolbar, OrderLinesToggle, OrderLinesSettings } from '../../../components/Trading';
+import DrawingListModal from '../../../components/Trading/DrawingListModal';
+import { useAuth } from '../../../contexts/AuthContext';
+import drawingService from '../../../services/drawingService';
+import { useOrderLines } from '../../../hooks/useOrderLines';
+import { chartPreferencesService } from '../../../services/chartPreferencesService';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-// Binance kline intervals mapping
+// Binance kline intervals mapping (must match Binance API intervals exactly)
 const TIMEFRAME_TO_BINANCE = {
+  // Seconds (spot only)
+  '1s': '1s',
+  // Minutes
   '1m': '1m',
+  '3m': '3m',
   '5m': '5m',
   '15m': '15m',
   '30m': '30m',
+  // Hours
   '1h': '1h',
+  '2h': '2h',
   '4h': '4h',
+  '6h': '6h',
+  '8h': '8h',
+  '12h': '12h',
+  // Days
   '1d': '1d',
   '1D': '1d',
+  '3d': '3d',
+  '3D': '3d',
+  // Weeks
   '1w': '1w',
   '1W': '1w',
+  // Months
+  '1M': '1M',
 };
 
 const TradingChart = ({
@@ -49,6 +70,11 @@ const TradingChart = ({
   onTimeframeChange,
   selectedPattern = null,
   patterns = [],
+  positionsRefreshTrigger = 0, // Increment when positions change to refresh order lines
+  // Zone Visualization Props (NEW)
+  zones = [],
+  zonePreferences = null,
+  onZonePress = null,
 }) => {
   const [showVolume, setShowVolume] = useState(true);
   const [darkTheme, setDarkTheme] = useState(true);
@@ -58,17 +84,83 @@ const TradingChart = ({
   const [isLoading, setIsLoading] = useState(true);
   const webViewRef = useRef(null);
 
+  // Drawing state
+  const [showDrawingToolbar, setShowDrawingToolbar] = useState(false);
+  const [drawingMode, setDrawingMode] = useState(null);
+  const [drawings, setDrawings] = useState([]);
+  const [magnetMode, setMagnetMode] = useState(true);
+  const [pendingPoints, setPendingPoints] = useState(0);
+  const [tempDrawingData, setTempDrawingData] = useState(null);
+  // New drawing states
+  const [selectedColor, setSelectedColor] = useState('#FFBD59');
+  const [selectedLineStyle, setSelectedLineStyle] = useState('solid');
+  const [showDrawingList, setShowDrawingList] = useState(false);
+  // Order lines state
+  const [showOrderLines, setShowOrderLines] = useState(true);
+  const [showOrderLinesSettings, setShowOrderLinesSettings] = useState(false);
+  // Chart ready state
+  const [chartReady, setChartReady] = useState(false);
+
+  // Auth context for user ID
+  const { user } = useAuth();
+
+  // Order lines hook
+  const {
+    orderLines,
+    preferences: orderLinesPreferences,
+    refresh: refreshOrderLines,
+    toggleVisibility: toggleOrderLineVisibility,
+    lineCount: orderLineCount,
+    positionCount,
+    pendingCount,
+  } = useOrderLines(symbol, showOrderLines, positionsRefreshTrigger);
+
   // WebView key for force remount
   const [webViewKey, setWebViewKey] = useState(0);
 
+  // Track if timeframe change is programmatic (to avoid race condition)
+  const isProgrammaticChange = useRef(false);
+
+  // Store the timeframe used for HTML generation (only changes on explicit reload)
+  const htmlTimeframeRef = useRef(timeframe);
+
+  // Reset chartReady when WebView reloads
+  useEffect(() => {
+    setChartReady(false);
+    // Update the HTML timeframe ref when WebView is about to reload
+    htmlTimeframeRef.current = activeTimeframe;
+    console.log('[TradingChart] WebView reload - htmlTimeframeRef set to:', activeTimeframe);
+  }, [webViewKey]);
+
   // Sync activeTimeframe when prop timeframe changes from parent
+  // BUT skip if change was initiated by handleTimeframeChange (to avoid race condition)
   useEffect(() => {
     if (timeframe !== activeTimeframe) {
+      // Skip if this is a programmatic change from handleTimeframeChange
+      if (isProgrammaticChange.current) {
+        console.log('[TradingChart] Skipping parent sync - programmatic change in progress');
+        isProgrammaticChange.current = false;
+        return;
+      }
+
       console.log('[TradingChart] Timeframe changed from parent:', timeframe);
+      const binanceInterval = TIMEFRAME_TO_BINANCE[timeframe] || timeframe;
       setActiveTimeframe(timeframe);
-      setWebViewKey(prev => prev + 1); // Force reload chart with new timeframe
+
+      // Use injection method if chart is ready, otherwise reload
+      if (chartReady && webViewRef.current) {
+        webViewRef.current.injectJavaScript(`
+          if (window.changeTimeframe) {
+            window.changeTimeframe('${binanceInterval}');
+          }
+          true;
+        `);
+      } else {
+        htmlTimeframeRef.current = timeframe; // Sync ref before reload
+        setWebViewKey(prev => prev + 1);
+      }
     }
-  }, [timeframe]);
+  }, [timeframe, chartReady]);
 
   // Pattern price data
   const displayPattern = selectedPattern || (patterns.length > 0 ? patterns[0] : null);
@@ -78,30 +170,434 @@ const TradingChart = ({
   const patternDirection = displayPattern?.direction || 'LONG';
   const hasPatternData = displayPattern && patternEntry > 0;
 
-  // PanResponder to prevent parent ScrollView from intercepting
+  // Load drawings when symbol/timeframe changes
+  useEffect(() => {
+    const loadDrawings = async () => {
+      if (!user?.id || !symbol) return;
+
+      const { data, error } = await drawingService.fetchDrawings(
+        user.id,
+        symbol,
+        activeTimeframe
+      );
+
+      if (!error && data) {
+        setDrawings(data);
+        // Send drawings to WebView if chart is ready
+        if (webViewRef.current && chartReady) {
+          webViewRef.current.injectJavaScript(`
+            if (window.loadDrawings) {
+              window.loadDrawings(${JSON.stringify(data)});
+            }
+            true;
+          `);
+        }
+      }
+    };
+
+    loadDrawings();
+  }, [user?.id, symbol, activeTimeframe]);
+
+  // Re-inject drawings and sync drawing settings when chart becomes ready (after any WebView reload)
+  useEffect(() => {
+    if (!chartReady || !webViewRef.current) return;
+
+    // Small delay to ensure WebView is fully ready
+    const timer = setTimeout(() => {
+      // Sync current drawing color and line style
+      webViewRef.current?.injectJavaScript(`
+        if (window.setDrawingColor) {
+          window.setDrawingColor('${selectedColor}');
+        }
+        if (window.setDrawingLineStyle) {
+          window.setDrawingLineStyle('${selectedLineStyle}');
+        }
+        true;
+      `);
+
+      // Re-inject drawings if there are any
+      if (drawings.length > 0) {
+        console.log('[TradingChart] Re-injecting drawings after chart ready:', drawings.length);
+        webViewRef.current?.injectJavaScript(`
+          if (window.loadDrawings) {
+            window.loadDrawings(${JSON.stringify(drawings)});
+          }
+          true;
+        `);
+      }
+    }, 150);
+
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chartReady]); // Only run when chartReady changes - selectedColor/selectedLineStyle/drawings are intentionally read at execution time
+
+  // Update drawings in WebView when drawings array changes (new drawing saved, drawing deleted, etc.)
+  useEffect(() => {
+    if (!chartReady || !webViewRef.current) return;
+
+    webViewRef.current.injectJavaScript(`
+      if (window.loadDrawings) {
+        window.loadDrawings(${JSON.stringify(drawings)});
+      }
+      true;
+    `);
+  }, [drawings, chartReady]);
+
+  // Send order lines to WebView when they change and chart is ready
+  useEffect(() => {
+    if (!webViewRef.current || !chartReady) return;
+
+    const injectOrderLines = () => {
+      if (showOrderLines && orderLines.length > 0) {
+        console.log('[TradingChart] Injecting order lines:', orderLines.length);
+        webViewRef.current?.injectJavaScript(`
+          if (window.updateOrderLines) {
+            window.updateOrderLines(${JSON.stringify(orderLines)});
+            console.log('Order lines updated:', ${orderLines.length});
+          }
+          true;
+        `);
+      } else {
+        // Clear order lines if disabled or empty
+        webViewRef.current?.injectJavaScript(`
+          if (window.clearOrderLines) {
+            window.clearOrderLines();
+          }
+          true;
+        `);
+      }
+    };
+
+    // Small delay to ensure any previous operations complete
+    const timer = setTimeout(injectOrderLines, 100);
+    return () => clearTimeout(timer);
+  }, [orderLines, showOrderLines, chartReady]);
+
+  // Send pattern lines to WebView with smart filtering against order lines
+  useEffect(() => {
+    if (!webViewRef.current || !chartReady) return;
+
+    const injectPatternLines = () => {
+      // Only inject pattern lines if enabled and has pattern data
+      if (showPriceLines && hasPatternData) {
+        const patternData = {
+          entry: patternEntry,
+          tp: patternTP,
+          sl: patternSL,
+          direction: patternDirection,
+        };
+
+        console.log('[TradingChart] Injecting pattern lines:', patternData);
+        webViewRef.current?.injectJavaScript(`
+          if (window.updatePatternLines) {
+            window.updatePatternLines(
+              ${JSON.stringify(patternData)},
+              ${JSON.stringify(showOrderLines ? orderLines : [])}
+            );
+          }
+          true;
+        `);
+      } else {
+        // Clear pattern lines if disabled
+        webViewRef.current?.injectJavaScript(`
+          if (window.clearPatternLines) {
+            window.clearPatternLines();
+          }
+          true;
+        `);
+      }
+    };
+
+    // Small delay to ensure order lines are processed first
+    const timer = setTimeout(injectPatternLines, 200);
+    return () => clearTimeout(timer);
+  }, [showPriceLines, hasPatternData, patternEntry, patternTP, patternSL, patternDirection, orderLines, showOrderLines, chartReady]);
+
+  // Send zones to WebView when they change and chart is ready
+  useEffect(() => {
+    if (!webViewRef.current || !chartReady) return;
+
+    const injectZones = () => {
+      if (zones.length > 0) {
+        console.log('[TradingChart] Injecting zones:', zones.length, 'First zone:', JSON.stringify(zones[0], null, 2));
+        webViewRef.current?.injectJavaScript(`
+          if (window.updateZones) {
+            console.log('[Chart] Received zones:', ${JSON.stringify(zones)}.length);
+            console.log('[Chart] First zone keys:', Object.keys(${JSON.stringify(zones)}[0] || {}).join(', '));
+            window.updateZones(${JSON.stringify(zones)}, ${JSON.stringify(zonePreferences)});
+            console.log('[Chart] Zones updated:', ${zones.length});
+          } else {
+            console.log('[Chart] ERROR: window.updateZones not defined');
+          }
+          true;
+        `);
+      } else {
+        // Clear zones if empty
+        webViewRef.current?.injectJavaScript(`
+          if (window.clearZones) {
+            window.clearZones();
+          }
+          true;
+        `);
+      }
+    };
+
+    // Delay to ensure chart is fully initialized
+    const timer = setTimeout(injectZones, 250);
+    return () => clearTimeout(timer);
+  }, [zones, zonePreferences, chartReady]);
+
+  // Handle drawing tool selection
+  const handleSelectDrawingTool = useCallback((toolId) => {
+    if (drawingMode === toolId) {
+      // Deselect if already selected
+      setDrawingMode(null);
+      setPendingPoints(0);
+      setTempDrawingData(null);
+    } else {
+      setDrawingMode(toolId);
+      setPendingPoints(0);
+      setTempDrawingData(null);
+    }
+
+    // Send to WebView
+    if (webViewRef.current) {
+      webViewRef.current.injectJavaScript(`
+        if (window.setDrawingMode) {
+          window.setDrawingMode('${toolId === drawingMode ? null : toolId}');
+        }
+        true;
+      `);
+    }
+  }, [drawingMode]);
+
+  // Handle delete all drawings
+  const handleDeleteAllDrawings = useCallback(async () => {
+    if (!user?.id || !symbol) return;
+
+    const { success } = await drawingService.deleteAllDrawings(user.id, symbol);
+
+    if (success) {
+      setDrawings([]);
+      // Clear drawings in WebView
+      if (webViewRef.current) {
+        webViewRef.current.injectJavaScript(`
+          if (window.clearAllDrawings) {
+            window.clearAllDrawings();
+          }
+          true;
+        `);
+      }
+    }
+  }, [user?.id, symbol]);
+
+  // Handle delete single drawing
+  const handleDeleteDrawing = useCallback(async (drawingId) => {
+    const { success } = await drawingService.deleteDrawing(drawingId);
+    if (success) {
+      setDrawings(prev => prev.filter(d => d.id !== drawingId));
+      // Remove from WebView
+      if (webViewRef.current) {
+        webViewRef.current.injectJavaScript(`
+          if (window.removeDrawing) {
+            window.removeDrawing('${drawingId}');
+          }
+          true;
+        `);
+      }
+    }
+  }, []);
+
+  // Handle update drawing (color change)
+  const handleUpdateDrawing = useCallback(async (drawingId, updates) => {
+    const { success } = await drawingService.updateDrawing(drawingId, updates);
+    if (success) {
+      setDrawings(prev => prev.map(d =>
+        d.id === drawingId ? { ...d, ...updates } : d
+      ));
+      // Update in WebView
+      if (webViewRef.current) {
+        webViewRef.current.injectJavaScript(`
+          if (window.updateDrawing) {
+            window.updateDrawing('${drawingId}', ${JSON.stringify(updates)});
+          }
+          true;
+        `);
+      }
+    }
+  }, []);
+
+  // Handle color change
+  const handleColorChange = useCallback((color) => {
+    setSelectedColor(color);
+    // Send to WebView
+    if (webViewRef.current) {
+      webViewRef.current.injectJavaScript(`
+        if (window.setDrawingColor) {
+          window.setDrawingColor('${color}');
+        }
+        true;
+      `);
+    }
+  }, []);
+
+  // Handle line style change
+  const handleLineStyleChange = useCallback((style) => {
+    setSelectedLineStyle(style);
+    // Send to WebView
+    if (webViewRef.current) {
+      webViewRef.current.injectJavaScript(`
+        if (window.setDrawingLineStyle) {
+          window.setDrawingLineStyle('${style}');
+        }
+        true;
+      `);
+    }
+  }, []);
+
+  // Handle WebView message (drawing clicks)
+  const handleWebViewMessage = useCallback(async (event) => {
+    try {
+      const data = JSON.parse(event.nativeEvent.data);
+
+      // Debug logs from WebView
+      if (data.type === 'debug_log') {
+        console.log('[WebView]', data.message, data.data);
+        return;
+      }
+
+      if (data.type === 'drawing_complete') {
+        // Save drawing to database
+        const newDrawing = {
+          user_id: user?.id,
+          symbol,
+          timeframe: activeTimeframe,
+          tool_type: data.toolType,
+          drawing_data: data.drawingData,
+          visible_timeframes: ['1m', '5m', '15m', '1h', '4h', '1d', '1w'],
+        };
+
+        const { data: savedDrawing, error } = await drawingService.saveDrawing(newDrawing);
+
+        if (!error && savedDrawing) {
+          setDrawings(prev => [...prev, savedDrawing]);
+          console.log('[TradingChart] Drawing saved:', savedDrawing.id);
+        }
+
+        // Reset drawing mode
+        setPendingPoints(0);
+        setTempDrawingData(null);
+      } else if (data.type === 'drawing_pending') {
+        setPendingPoints(data.points || 0);
+        setTempDrawingData(data.tempData || null);
+      } else if (data.type === 'drawing_deleted') {
+        // Remove from local state
+        setDrawings(prev => prev.filter(d => d.id !== data.drawingId));
+        // Delete from database
+        await drawingService.deleteDrawing(data.drawingId);
+      } else if (data.type === 'chart_ready') {
+        // Chart has loaded data and is ready for order lines
+        console.log('[TradingChart] Chart ready signal received:', data.symbol, data.candles);
+        setChartReady(true);
+      } else if (data.type === 'timeframe_changed') {
+        // Timeframe was changed via JavaScript (without WebView reload)
+        console.log('[TradingChart] Timeframe changed:', data.interval, 'candles:', data.candles);
+
+        // Refresh order lines
+        if (webViewRef.current && showOrderLines && orderLines.length > 0) {
+          setTimeout(() => {
+            webViewRef.current?.injectJavaScript(`
+              if (window.updateOrderLines) {
+                window.updateOrderLines(${JSON.stringify(orderLines)});
+              }
+              true;
+            `);
+          }, 100);
+        }
+
+        // Refresh drawings
+        if (webViewRef.current && drawings.length > 0) {
+          setTimeout(() => {
+            webViewRef.current?.injectJavaScript(`
+              if (window.loadDrawings) {
+                window.loadDrawings(${JSON.stringify(drawings)});
+              }
+              true;
+            `);
+          }, 150);
+        }
+
+        // Refresh zones
+        if (webViewRef.current && zones.length > 0) {
+          setTimeout(() => {
+            webViewRef.current?.injectJavaScript(`
+              if (window.updateZones) {
+                window.updateZones(${JSON.stringify(zones)}, ${JSON.stringify(zonePreferences)});
+              }
+              true;
+            `);
+          }, 200);
+        }
+      } else if (data.type === 'zone_press') {
+        // Handle zone press event
+        console.log('[TradingChart] Zone pressed:', data.zoneId);
+        onZonePress?.(data.zone);
+      }
+    } catch (e) {
+      console.log('[TradingChart] Message parse error:', e);
+    }
+  }, [user?.id, symbol, activeTimeframe, showOrderLines, orderLines, drawings, zones, zonePreferences, onZonePress]);
+
+  // Toggle drawing toolbar
+  const handleToggleDrawing = useCallback(() => {
+    setShowDrawingToolbar(prev => {
+      const newValue = !prev;
+      if (!newValue) {
+        // Reset drawing mode when closing toolbar
+        setDrawingMode(null);
+        setPendingPoints(0);
+        setTempDrawingData(null);
+        if (webViewRef.current) {
+          webViewRef.current.injectJavaScript(`
+            if (window.setDrawingMode) {
+              window.setDrawingMode(null);
+            }
+            true;
+          `);
+        }
+      }
+      return newValue;
+    });
+  }, []);
+
+  // PanResponder to prevent parent ScrollView from intercepting chart interactions
+  // Key: Don't capture (let WebView handle), but block native responder
   const panResponder = useMemo(() => PanResponder.create({
-    onStartShouldSetPanResponder: () => true,
-    onMoveShouldSetPanResponder: () => true,
-    onStartShouldSetPanResponderCapture: () => false,
-    onMoveShouldSetPanResponderCapture: () => false,
-    onPanResponderTerminationRequest: () => false,
-    onShouldBlockNativeResponder: () => false,
+    onStartShouldSetPanResponder: () => false,        // Don't become responder
+    onMoveShouldSetPanResponder: () => false,         // Don't become responder
+    onStartShouldSetPanResponderCapture: () => false, // Don't capture - let WebView handle
+    onMoveShouldSetPanResponderCapture: () => false,  // Don't capture - let WebView handle
+    onPanResponderTerminationRequest: () => false,    // Don't allow termination
+    onShouldBlockNativeResponder: () => true,         // Block parent native scroll
   }), []);
 
-  // Get Binance interval
-  const getBinanceInterval = useCallback(() => {
-    return TIMEFRAME_TO_BINANCE[activeTimeframe] || '4h';
-  }, [activeTimeframe]);
+  // Get Binance interval for HTML generation (uses ref to avoid triggering HTML regeneration)
+  const getBinanceIntervalForHtml = useCallback(() => {
+    return TIMEFRAME_TO_BINANCE[htmlTimeframeRef.current] || '4h';
+  }, []); // No dependencies - reads from ref
 
   // Generate chart HTML with lightweight-charts
+  // IMPORTANT: Uses htmlTimeframeRef instead of activeTimeframe to prevent reload on timeframe change
   const generateChartHTML = useCallback(() => {
     const binanceSymbol = symbol.toUpperCase();
-    const interval = getBinanceInterval();
+    const interval = getBinanceIntervalForHtml();
     const bgColor = darkTheme ? '#0D0D0D' : '#FFFFFF';
     const textColor = darkTheme ? '#D1D4DC' : '#131722';
     const gridColor = darkTheme ? 'rgba(42, 46, 57, 0.5)' : 'rgba(42, 46, 57, 0.1)';
 
-    // Price lines config
+    // Price lines config - Pattern lines (from scan) and Order lines (from positions) are SEPARATE
+    // Pattern lines show suggested Entry/SL/TP from scan results
+    // Order lines show actual Entry/SL/TP from open positions
     const entryPrice = showPriceLines && hasPatternData ? patternEntry : 0;
     const slPrice = showPriceLines && hasPatternData ? patternSL : 0;
     const tpPrice = showPriceLines && hasPatternData ? patternTP : 0;
@@ -112,7 +608,7 @@ const TradingChart = ({
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
@@ -133,7 +629,20 @@ const TradingChart = ({
       left: 50%;
       transform: translate(-50%, -50%);
       color: ${textColor};
-      font-size: 14px;
+      font-size: 13px;
+      text-align: center;
+    }
+    .loading-spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid rgba(106, 91, 255, 0.3);
+      border-top-color: #FFBD59;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
     .error-container {
       position: absolute;
@@ -162,7 +671,10 @@ const TradingChart = ({
 </head>
 <body>
   <div id="chart-container">
-    <div class="loading" id="loading">Loading chart...</div>
+    <div class="loading" id="loading">
+      <div class="loading-spinner"></div>
+      <div>Đang tải dữ liệu...</div>
+    </div>
   </div>
   <script>
     const SYMBOL = '${binanceSymbol}';
@@ -177,6 +689,15 @@ const TradingChart = ({
     let candleSeries = null;
     let volumeSeries = null;
     let ws = null;
+
+    // Helper function to calculate precision based on price (global scope)
+    function calculatePricePrecision(price) {
+      if (!price || price <= 0) return { precision: 2, minMove: 0.01 };
+      if (price >= 1000) return { precision: 2, minMove: 0.01 };
+      if (price >= 1) return { precision: 4, minMove: 0.0001 };
+      if (price >= 0.01) return { precision: 6, minMove: 0.000001 };
+      return { precision: 8, minMove: 0.00000001 };
+    }
 
     // Create chart
     function createChart() {
@@ -208,9 +729,33 @@ const TradingChart = ({
         },
         rightPriceScale: {
           borderColor: '${gridColor}',
+          autoScale: true,
           scaleMargins: {
-            top: 0.1,
-            bottom: SHOW_VOLUME ? 0.25 : 0.1,
+            top: 0.15,
+            bottom: SHOW_VOLUME ? 0.28 : 0.15,
+          },
+          alignLabels: true,
+          borderVisible: true,
+          entireTextOnly: false,
+        },
+        localization: {
+          priceFormatter: (price) => {
+            if (price >= 10000) {
+              return price.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            } else if (price >= 1000) {
+              return price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            } else if (price >= 100) {
+              return price.toFixed(2);
+            } else if (price >= 1) {
+              return price.toFixed(4);
+            } else if (price >= 0.01) {
+              return price.toFixed(6);
+            } else if (price >= 0.0001) {
+              return price.toFixed(8);
+            } else {
+              // For very small prices, use scientific notation or max decimals
+              return price.toPrecision(4);
+            }
           },
         },
         timeScale: {
@@ -231,7 +776,11 @@ const TradingChart = ({
         },
       });
 
-      // Candlestick series
+      // Get initial precision from entry price or a reasonable default
+      const initialPrice = ENTRY_PRICE > 0 ? ENTRY_PRICE : 1;
+      const { precision, minMove } = calculatePricePrecision(initialPrice);
+
+      // Candlestick series with dynamic price formatting
       candleSeries = chart.addCandlestickSeries({
         upColor: '#22C55E',
         downColor: '#EF4444',
@@ -239,6 +788,11 @@ const TradingChart = ({
         borderDownColor: '#EF4444',
         wickUpColor: '#22C55E',
         wickDownColor: '#EF4444',
+        priceFormat: {
+          type: 'price',
+          precision: precision,
+          minMove: minMove,
+        },
       });
 
       // Volume series (if enabled)
@@ -253,37 +807,9 @@ const TradingChart = ({
         });
       }
 
-      // Add price lines if pattern data exists
-      if (ENTRY_PRICE > 0) {
-        candleSeries.createPriceLine({
-          price: ENTRY_PRICE,
-          color: '#3B82F6',
-          lineWidth: 2,
-          lineStyle: LightweightCharts.LineStyle.Dashed,
-          axisLabelVisible: true,
-          title: 'ENTRY',
-        });
-      }
-      if (TP_PRICE > 0) {
-        candleSeries.createPriceLine({
-          price: TP_PRICE,
-          color: '#22C55E',
-          lineWidth: 2,
-          lineStyle: LightweightCharts.LineStyle.Dashed,
-          axisLabelVisible: true,
-          title: 'TP',
-        });
-      }
-      if (SL_PRICE > 0) {
-        candleSeries.createPriceLine({
-          price: SL_PRICE,
-          color: '#EF4444',
-          lineWidth: 2,
-          lineStyle: LightweightCharts.LineStyle.Dashed,
-          axisLabelVisible: true,
-          title: 'SL',
-        });
-      }
+      // Pattern lines will be added dynamically via updatePatternLines
+      // This allows us to hide them when order lines are present at similar prices
+      // Pattern lines use cyan color and dotted style to distinguish from order lines
 
       // Handle resize
       window.addEventListener('resize', () => {
@@ -299,29 +825,53 @@ const TradingChart = ({
       let data = null;
       let useFutures = true;
 
+      // Add cache-busting to ensure fresh data
+      const cacheBuster = Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+      console.log('Fetching klines for', SYMBOL, 'interval:', INTERVAL);
+
       try {
-        // Try Futures API first
-        const futuresUrl = 'https://fapi.binance.com/fapi/v1/klines?symbol=' + SYMBOL + '&interval=' + INTERVAL + '&limit=500';
-        const futuresResponse = await fetch(futuresUrl);
+        // Try Futures API first (use _cb for cache busting, not timestamp)
+        const futuresUrl = 'https://fapi.binance.com/fapi/v1/klines?symbol=' + SYMBOL + '&interval=' + INTERVAL + '&limit=500&_cb=' + cacheBuster;
+        console.log('Fetching Futures:', futuresUrl);
+        const futuresResponse = await fetch(futuresUrl, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
+          }
+        });
         const futuresData = await futuresResponse.json();
 
         if (Array.isArray(futuresData) && futuresData.length > 0) {
           data = futuresData;
+          console.log('Fetched', futuresData.length, 'candles from Futures API');
+          console.log('First candle time:', new Date(futuresData[0][0]).toISOString());
+          console.log('Last candle time:', new Date(futuresData[futuresData.length-1][0]).toISOString());
         } else {
+          console.log('Futures returned invalid data:', futuresData);
           throw new Error('No futures data');
         }
       } catch (futuresError) {
-        console.log('Futures API failed, trying Spot API...');
+        console.log('Futures API failed:', futuresError.message, '- trying Spot...');
         useFutures = false;
 
         try {
           // Fallback to Spot API
-          const spotUrl = 'https://api.binance.com/api/v3/klines?symbol=' + SYMBOL + '&interval=' + INTERVAL + '&limit=500';
-          const spotResponse = await fetch(spotUrl);
+          const spotUrl = 'https://api.binance.com/api/v3/klines?symbol=' + SYMBOL + '&interval=' + INTERVAL + '&limit=500&_cb=' + cacheBuster;
+          console.log('Fetching Spot:', spotUrl);
+          const spotResponse = await fetch(spotUrl, {
+            cache: 'no-store',
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache'
+            }
+          });
           const spotData = await spotResponse.json();
 
           if (Array.isArray(spotData) && spotData.length > 0) {
             data = spotData;
+            console.log('Fetched', spotData.length, 'candles from Spot API');
           } else {
             throw new Error('No spot data either');
           }
@@ -353,12 +903,58 @@ const TradingChart = ({
           color: parseFloat(k[4]) >= parseFloat(k[1]) ? 'rgba(34, 197, 94, 0.5)' : 'rgba(239, 68, 68, 0.5)',
         }));
 
+        // Update price format based on actual data
+        if (candles.length > 0) {
+          const lastPrice = candles[candles.length - 1].close;
+          const { precision: newPrecision, minMove: newMinMove } = calculatePricePrecision(lastPrice);
+          candleSeries.applyOptions({
+            priceFormat: {
+              type: 'price',
+              precision: newPrecision,
+              minMove: newMinMove,
+            },
+          });
+        }
+
         candleSeries.setData(candles);
+        storeCandleDataForMagnet(candles);  // Store for magnet mode
         if (SHOW_VOLUME && volumeSeries) {
           volumeSeries.setData(volumes);
         }
 
+        // Initialize current live price for PnL calculation
+        if (candles.length > 0) {
+          currentLivePrice = candles[candles.length - 1].close;
+        }
+
+        // Auto-fit chart to show all data with proper margins
+        chart.timeScale().fitContent();
+
+        // Small delay then scroll to show recent data with whitespace on right
+        setTimeout(() => {
+          if (candles.length > 100) {
+            const lastBarIndex = candles.length - 1;
+            const visibleBars = 100;
+            const defaultRightWhitespace = 25; // Default whitespace on right (like in Binance)
+
+            // Use setVisibleLogicalRange to include whitespace
+            chart.timeScale().setVisibleLogicalRange({
+              from: lastBarIndex - visibleBars + 1,
+              to: lastBarIndex + defaultRightWhitespace
+            });
+
+            console.log('Initial chart setup: rightWhitespace =', defaultRightWhitespace);
+          }
+        }, 100);
+
         document.getElementById('loading').style.display = 'none';
+
+        // Signal to React Native that chart is ready
+        window.ReactNativeWebView?.postMessage(JSON.stringify({
+          type: 'chart_ready',
+          symbol: SYMBOL,
+          candles: candles.length
+        }));
 
         // Connect WebSocket for live updates
         connectWebSocket(useFutures);
@@ -389,12 +985,13 @@ const TradingChart = ({
           const msg = JSON.parse(event.data);
           if (msg.k) {
             const k = msg.k;
+            const closePrice = parseFloat(k.c);
             const candle = {
               time: k.t / 1000,
               open: parseFloat(k.o),
               high: parseFloat(k.h),
               low: parseFloat(k.l),
-              close: parseFloat(k.c),
+              close: closePrice,
             };
             candleSeries.update(candle);
 
@@ -402,9 +999,405 @@ const TradingChart = ({
               volumeSeries.update({
                 time: k.t / 1000,
                 value: parseFloat(k.v),
-                color: parseFloat(k.c) >= parseFloat(k.o) ? 'rgba(34, 197, 94, 0.5)' : 'rgba(239, 68, 68, 0.5)',
+                color: closePrice >= parseFloat(k.o) ? 'rgba(34, 197, 94, 0.5)' : 'rgba(239, 68, 68, 0.5)',
               });
             }
+
+            // Real-time PnL update with live price
+            updatePnlOverlays(closePrice);
+          }
+        } catch (e) {
+          console.error('WS parse error:', e);
+        }
+      };
+
+      ws.onerror = (error) => {
+        console.error('WS error:', error);
+      };
+
+      ws.onopen = () => {
+        console.log('WebSocket connected:', wsUrl);
+      };
+
+      ws.onclose = () => {
+        console.log('WebSocket closed, reconnecting...');
+        // Reconnect after 3 seconds
+        setTimeout(() => connectWebSocket(currentUseFutures), 3000);
+      };
+    }
+
+    // Change timeframe without reloading (called from React Native)
+    let currentInterval = INTERVAL;
+    let savedPositionData = null; // Store position globally for restoration
+
+    // Helper to send debug logs to React Native
+    function debugLog(message, data) {
+      console.log(message, data);
+      window.ReactNativeWebView?.postMessage(JSON.stringify({
+        type: 'debug_log',
+        message: message,
+        data: data
+      }));
+    }
+
+    window.changeTimeframe = function(newInterval) {
+      if (newInterval === currentInterval) return;
+
+      debugLog('=== CHANGING TIMEFRAME ===', { from: currentInterval, to: newInterval });
+
+      // Save position data using multiple methods for reliability
+      savedPositionData = {
+        centerTime: 0,
+        visibleBars: 100,
+        isViewingLatest: true
+      };
+
+      // Method 1: Get visible time range
+      const visibleRange = chart.timeScale().getVisibleRange();
+      debugLog('visibleRange', visibleRange);
+
+      // Method 2: Get logical range (bar indices)
+      const logicalRange = chart.timeScale().getVisibleLogicalRange();
+      debugLog('logicalRange', logicalRange);
+
+      // Check if we have candle data
+      debugLog('lastCandleData.length', lastCandleData.length);
+
+      if (visibleRange && visibleRange.from && visibleRange.to) {
+        // Calculate center time
+        savedPositionData.centerTime = Math.floor((visibleRange.from + visibleRange.to) / 2);
+        debugLog('centerTime saved', { time: savedPositionData.centerTime, date: new Date(savedPositionData.centerTime * 1000).toISOString() });
+      }
+
+      if (logicalRange) {
+        savedPositionData.visibleBars = Math.round(logicalRange.to - logicalRange.from);
+
+        const totalBars = lastCandleData.length;
+        const lastBarIndex = totalBars - 1;
+
+        // IMPORTANT: Save the whitespace on the right (how many "bar widths" between last candle and right edge)
+        // This preserves the visual position of the latest candle
+        savedPositionData.rightWhitespace = Math.max(0, logicalRange.to - lastBarIndex);
+
+        // Also save the position of the last candle relative to the visible range
+        // (0 = last candle at left edge, 1 = last candle at right edge)
+        const lastCandlePosition = (lastBarIndex - logicalRange.from) / (logicalRange.to - logicalRange.from);
+        savedPositionData.lastCandlePosition = lastCandlePosition;
+
+        debugLog('position info', {
+          visibleBars: savedPositionData.visibleBars,
+          totalBars,
+          rightWhitespace: savedPositionData.rightWhitespace.toFixed(1),
+          lastCandlePosition: savedPositionData.lastCandlePosition.toFixed(2)
+        });
+      }
+
+      // If we have candle data, also save the center candle's time directly
+      if (lastCandleData.length > 0 && logicalRange) {
+        const centerBarIndex = Math.floor((logicalRange.from + logicalRange.to) / 2);
+        const clampedIndex = Math.max(0, Math.min(lastCandleData.length - 1, Math.round(centerBarIndex)));
+        savedPositionData.centerCandleTime = lastCandleData[clampedIndex].time;
+        debugLog('centerCandleTime saved', { index: clampedIndex, time: savedPositionData.centerCandleTime, date: new Date(savedPositionData.centerCandleTime * 1000).toISOString() });
+      }
+
+      debugLog('Final savedPositionData', savedPositionData);
+
+      // Close existing WebSocket
+      if (ws) {
+        ws.onclose = null;
+        ws.close();
+        ws = null;
+      }
+
+      // Update interval
+      currentInterval = newInterval;
+
+      // Show loading indicator
+      const loadingEl = document.getElementById('loading');
+      if (loadingEl) {
+        loadingEl.style.display = 'flex';
+        loadingEl.innerHTML = '<div class="loading-spinner"></div><div>Đang tải...</div>';
+      }
+
+      // Fetch new data
+      fetchNewTimeframeData(newInterval);
+    };
+
+    async function fetchNewTimeframeData(interval) {
+      let data = null;
+      let useFutures = currentUseFutures;
+
+      // Add timestamp to prevent caching
+      const cacheBuster = Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+      debugLog('=== FETCHING NEW DATA ===', { interval, savedPositionData });
+
+      try {
+        // Use _cb (cache buster) instead of timestamp to avoid Binance API confusion
+        const futuresUrl = 'https://fapi.binance.com/fapi/v1/klines?symbol=' + SYMBOL + '&interval=' + interval + '&limit=500&_cb=' + cacheBuster;
+        debugLog('Fetching Futures', { url: futuresUrl });
+        const futuresResponse = await fetch(futuresUrl, {
+          cache: 'no-store',
+          headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+        });
+        const futuresData = await futuresResponse.json();
+
+        if (Array.isArray(futuresData) && futuresData.length > 0) {
+          data = futuresData;
+          useFutures = true;
+          debugLog('Fetched candles from Futures', { count: futuresData.length });
+        } else {
+          debugLog('Futures returned invalid data', { response: futuresData });
+          throw new Error('No futures data');
+        }
+      } catch (futuresError) {
+        debugLog('Futures failed', { error: futuresError.message });
+        useFutures = false;
+
+        try {
+          // Fallback to Spot API
+          const spotUrl = 'https://api.binance.com/api/v3/klines?symbol=' + SYMBOL + '&interval=' + interval + '&limit=500&_cb=' + cacheBuster;
+          debugLog('Trying Spot fallback', { url: spotUrl });
+          const spotResponse = await fetch(spotUrl, {
+            cache: 'no-store',
+            headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+          });
+          const spotData = await spotResponse.json();
+
+          if (Array.isArray(spotData) && spotData.length > 0) {
+            data = spotData;
+            debugLog('Fetched candles from Spot (fallback)', { count: spotData.length });
+          } else {
+            debugLog('Spot returned no data', spotData);
+          }
+        } catch (spotError) {
+          debugLog('Both APIs failed', { error: spotError.message });
+          document.getElementById('loading').style.display = 'none';
+          return;
+        }
+      }
+
+      if (!data) {
+        debugLog('No data to display', null);
+        document.getElementById('loading').style.display = 'none';
+        return;
+      }
+
+      debugLog('Processing candles', { count: data.length });
+
+      // Process data
+      const candles = data.map(k => ({
+        time: k[0] / 1000,
+        open: parseFloat(k[1]),
+        high: parseFloat(k[2]),
+        low: parseFloat(k[3]),
+        close: parseFloat(k[4]),
+      }));
+
+      const volumes = data.map(k => ({
+        time: k[0] / 1000,
+        value: parseFloat(k[5]),
+        color: parseFloat(k[4]) >= parseFloat(k[1]) ? 'rgba(34, 197, 94, 0.5)' : 'rgba(239, 68, 68, 0.5)',
+      }));
+
+      // Update price format
+      if (candles.length > 0) {
+        const lastPrice = candles[candles.length - 1].close;
+        const { precision: newPrecision, minMove: newMinMove } = calculatePricePrecision(lastPrice);
+        candleSeries.applyOptions({
+          priceFormat: { type: 'price', precision: newPrecision, minMove: newMinMove },
+        });
+      }
+
+      // Update chart data
+      candleSeries.setData(candles);
+      storeCandleDataForMagnet(candles);
+
+      if (SHOW_VOLUME && volumeSeries) {
+        volumeSeries.setData(volumes);
+      }
+
+      if (candles.length > 0) {
+        currentLivePrice = candles[candles.length - 1].close;
+      }
+
+      // Disable auto-scroll to right when restoring position
+      chart.timeScale().applyOptions({
+        shiftVisibleRangeOnNewBar: false,
+      });
+
+      // Small delay to ensure chart has processed new data
+      await new Promise(resolve => setTimeout(resolve, 50));
+
+      // === RESTORE POSITION ===
+      try {
+      const totalBars = candles.length;
+      const oldestTime = candles[0].time;
+      const latestTime = candles[totalBars - 1].time;
+
+      debugLog('=== RESTORING POSITION ===', {
+        totalBars,
+        oldestTime: new Date(oldestTime * 1000).toISOString(),
+        latestTime: new Date(latestTime * 1000).toISOString()
+      });
+
+      // Get target time from saved data - prefer centerCandleTime if available
+      let targetTime = 0;
+      if (savedPositionData) {
+        targetTime = savedPositionData.centerCandleTime || savedPositionData.centerTime || 0;
+        debugLog('Restore target', {
+          targetTime: targetTime ? new Date(targetTime * 1000).toISOString() : 'none',
+          savedPositionData
+        });
+      } else {
+        debugLog('No savedPositionData!', null);
+      }
+
+      const visibleBars = Math.min(savedPositionData?.visibleBars || 100, totalBars);
+      const rightWhitespace = savedPositionData?.rightWhitespace || 0;
+      const lastCandlePosition = savedPositionData?.lastCandlePosition || 1;
+
+      debugLog('Restore params', { visibleBars, rightWhitespace: rightWhitespace.toFixed(1), lastCandlePosition: lastCandlePosition.toFixed(2) });
+
+      // NEW APPROACH: Preserve the visual position of the latest candle
+      // Instead of centering on a time, we position based on where the last candle was on screen
+      if (savedPositionData && rightWhitespace >= 0) {
+        // Calculate the logical range that preserves the last candle's position
+        const lastBarIndex = totalBars - 1;
+
+        // The end of the logical range should be: lastBarIndex + rightWhitespace
+        const logicalEnd = lastBarIndex + rightWhitespace;
+        const logicalStart = logicalEnd - visibleBars;
+
+        debugLog('DECISION: Preserving last candle position', {
+          lastBarIndex,
+          logicalStart: logicalStart.toFixed(1),
+          logicalEnd: logicalEnd.toFixed(1)
+        });
+
+        // Convert logical range to time range
+        // For the start, we need to find the candle at that logical index (or clamp to 0)
+        const startIndex = Math.max(0, Math.floor(logicalStart));
+        // For the end time, we use the last candle's time (the whitespace is handled by the chart)
+        const endIndex = Math.min(totalBars - 1, Math.ceil(logicalEnd));
+
+        // Set the visible logical range directly (this preserves whitespace)
+        chart.timeScale().setVisibleLogicalRange({
+          from: logicalStart,
+          to: logicalEnd
+        });
+
+        debugLog('Set logical range', {
+          from: logicalStart.toFixed(1),
+          to: logicalEnd.toFixed(1),
+          visibleBars,
+          rightWhitespace: rightWhitespace.toFixed(1)
+        });
+
+        // Verify the range was set correctly
+        setTimeout(() => {
+          const actualLogical = chart.timeScale().getVisibleLogicalRange();
+          const actualTime = chart.timeScale().getVisibleRange();
+          debugLog('Range after 100ms', {
+            logicalFrom: actualLogical?.from?.toFixed(1),
+            logicalTo: actualLogical?.to?.toFixed(1),
+            timeFrom: actualTime ? new Date(actualTime.from * 1000).toISOString() : 'null',
+            timeTo: actualTime ? new Date(actualTime.to * 1000).toISOString() : 'null'
+          });
+        }, 100);
+      }
+      // Target time is before our data range - show oldest data
+      else if (targetTime > 0 && targetTime < oldestTime) {
+        debugLog('DECISION: Target time older than data -> showing oldest', null);
+        chart.timeScale().setVisibleRange({
+          from: candles[0].time,
+          to: candles[Math.min(visibleBars - 1, totalBars - 1)].time,
+        });
+      }
+      // Fallback: show latest
+      else {
+        debugLog('DECISION: Fallback -> showing latest candles', { targetTime, oldestTime, latestTime });
+        if (totalBars > 100) {
+          chart.timeScale().setVisibleRange({
+            from: candles[totalBars - 100].time,
+            to: candles[totalBars - 1].time,
+          });
+        } else {
+          chart.timeScale().fitContent();
+        }
+      }
+
+        debugLog('Position restore complete', null);
+      } catch (restoreError) {
+        debugLog('ERROR restoring position', { error: restoreError.message, stack: restoreError.stack });
+        // Fallback: just fit content
+        chart.timeScale().fitContent();
+      }
+
+      debugLog('=== TIMEFRAME CHANGE COMPLETE ===', { interval });
+
+      // Hide loading
+      document.getElementById('loading').style.display = 'none';
+
+      // Clear saved position data
+      savedPositionData = null;
+
+      // Reconnect WebSocket
+      currentUseFutures = useFutures;
+      connectWebSocketForInterval(interval, useFutures);
+
+      // Update PnL
+      if (currentLivePrice > 0) {
+        updatePnlOverlays(currentLivePrice);
+      }
+
+      // Notify React Native
+      window.ReactNativeWebView?.postMessage(JSON.stringify({
+        type: 'timeframe_changed',
+        interval: interval,
+        candles: candles.length
+      }));
+    }
+
+    function connectWebSocketForInterval(interval, useFutures) {
+      if (ws) {
+        ws.onclose = null;
+        ws.close();
+      }
+
+      const wsBase = useFutures ? 'wss://fstream.binance.com/ws/' : 'wss://stream.binance.com:9443/ws/';
+      const wsUrl = wsBase + SYMBOL.toLowerCase() + '@kline_' + interval;
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        console.log('WebSocket reconnected for interval:', interval);
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.k) {
+            const k = msg.k;
+            const closePrice = parseFloat(k.c);
+            const candle = {
+              time: k.t / 1000,
+              open: parseFloat(k.o),
+              high: parseFloat(k.h),
+              low: parseFloat(k.l),
+              close: closePrice,
+            };
+            candleSeries.update(candle);
+
+            if (SHOW_VOLUME && volumeSeries) {
+              volumeSeries.update({
+                time: k.t / 1000,
+                value: parseFloat(k.v),
+                color: closePrice >= parseFloat(k.o) ? 'rgba(34, 197, 94, 0.5)' : 'rgba(239, 68, 68, 0.5)',
+              });
+            }
+
+            // Real-time PnL update
+            updatePnlOverlays(closePrice);
           }
         } catch (e) {
           console.error('WS parse error:', e);
@@ -416,57 +1409,1278 @@ const TradingChart = ({
       };
 
       ws.onclose = () => {
-        // Reconnect after 3 seconds
-        setTimeout(() => connectWebSocket(currentUseFutures), 3000);
+        console.log('WebSocket closed');
+        setTimeout(() => connectWebSocketForInterval(interval, useFutures), 3000);
       };
+    }
+
+    // ==========================================
+    // DRAWING TOOLS FUNCTIONALITY
+    // ==========================================
+
+    let currentDrawingMode = null;
+    let drawingPriceLines = [];  // Store drawing price lines
+    let pendingDrawing = null;   // Store pending multi-click drawing
+    let loadedDrawings = [];     // Store loaded drawings data
+    let magnetModeEnabled = true;
+    let lastCandleData = [];     // Store candle data for magnet mode
+    let currentDrawingColor = '${selectedColor}';  // Current drawing color
+    let currentLineStyle = '${selectedLineStyle}'; // Current line style (solid, dashed, dotted)
+
+    // Fibonacci levels
+    const FIBONACCI_LEVELS = [
+      { value: 0, label: '0%', color: '#787B86' },
+      { value: 0.236, label: '23.6%', color: '#F7525F' },
+      { value: 0.382, label: '38.2%', color: '#FF9800' },
+      { value: 0.5, label: '50%', color: '#4CAF50' },
+      { value: 0.618, label: '61.8%', color: '#2196F3' },
+      { value: 0.786, label: '78.6%', color: '#9C27B0' },
+      { value: 1, label: '100%', color: '#787B86' },
+    ];
+
+    // Set drawing mode from React Native
+    window.setDrawingMode = function(mode) {
+      currentDrawingMode = mode;
+      pendingDrawing = null;
+      // Notify React Native about mode change
+      window.ReactNativeWebView?.postMessage(JSON.stringify({
+        type: 'drawing_pending',
+        points: 0,
+        tempData: null
+      }));
+    };
+
+    // Load drawings from React Native
+    window.loadDrawings = function(drawings) {
+      loadedDrawings = drawings;
+      // Clear existing drawing lines
+      clearAllDrawingLines();
+      // Render each drawing
+      drawings.forEach(d => renderDrawing(d));
+    };
+
+    // Clear all drawing lines
+    window.clearAllDrawings = function() {
+      clearAllDrawingLines();
+      loadedDrawings = [];
+    };
+
+    // Set drawing color from React Native
+    window.setDrawingColor = function(color) {
+      currentDrawingColor = color;
+    };
+
+    // Set line style from React Native
+    window.setDrawingLineStyle = function(style) {
+      currentLineStyle = style;
+    };
+
+    // Remove single drawing by ID
+    window.removeDrawing = function(drawingId) {
+      // Remove from loadedDrawings
+      loadedDrawings = loadedDrawings.filter(d => d.id !== drawingId);
+      // Remove price lines with this drawing ID
+      const toRemove = drawingPriceLines.filter(line => line._drawingId === drawingId);
+      toRemove.forEach(line => {
+        try {
+          candleSeries.removePriceLine(line);
+        } catch (e) {}
+      });
+      drawingPriceLines = drawingPriceLines.filter(line => line._drawingId !== drawingId);
+    };
+
+    // Update drawing (e.g., color change)
+    window.updateDrawing = function(drawingId, updates) {
+      // Find drawing in loaded drawings
+      const drawingIndex = loadedDrawings.findIndex(d => d.id === drawingId);
+      if (drawingIndex === -1) return;
+
+      // Update local data
+      loadedDrawings[drawingIndex] = { ...loadedDrawings[drawingIndex], ...updates };
+
+      // Re-render the drawing
+      // First remove old lines
+      const toRemove = drawingPriceLines.filter(line => line._drawingId === drawingId);
+      toRemove.forEach(line => {
+        try {
+          candleSeries.removePriceLine(line);
+        } catch (e) {}
+      });
+      drawingPriceLines = drawingPriceLines.filter(line => line._drawingId !== drawingId);
+
+      // Re-render with new data
+      renderDrawing(loadedDrawings[drawingIndex]);
+    };
+
+    // Get line style value for lightweight-charts
+    function getLineStyleValue(style) {
+      switch (style) {
+        case 'dashed': return LightweightCharts.LineStyle.Dashed;
+        case 'dotted': return LightweightCharts.LineStyle.Dotted;
+        default: return LightweightCharts.LineStyle.Solid;
+      }
+    }
+
+    function clearAllDrawingLines() {
+      drawingPriceLines.forEach(line => {
+        try {
+          candleSeries.removePriceLine(line);
+        } catch (e) {}
+      });
+      drawingPriceLines = [];
+    }
+
+    // ==========================================
+    // ORDER LINES FUNCTIONALITY (Binance-style)
+    // With Real-time PnL Overlay
+    // ==========================================
+    let orderLinesPriceLines = [];  // Store order price lines
+    let positionsData = [];  // Store position data for real-time PnL calculation
+    let currentLivePrice = 0;  // Current live price from WebSocket
+    let pnlOverlayContainer = null;  // Container for PnL overlays
+
+    // Create PnL overlay container
+    function createPnlOverlayContainer() {
+      if (pnlOverlayContainer) return;
+      pnlOverlayContainer = document.createElement('div');
+      pnlOverlayContainer.id = 'pnl-overlay-container';
+      pnlOverlayContainer.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:100;';
+      document.getElementById('chart-container').appendChild(pnlOverlayContainer);
+    }
+
+    // Format price with Vietnamese format (dot for thousands, comma for decimals)
+    function formatPnlPrice(value) {
+      const absValue = Math.abs(value);
+      let formatted;
+      if (absValue >= 1000) {
+        // Vietnamese format: dot for thousands, comma for decimals
+        const fixed = absValue.toFixed(2);
+        const parts = fixed.split('.');
+        parts[0] = parts[0].replace(/\\B(?=(\\d{3})+(?!\\d))/g, '.');
+        formatted = parts.join(',');
+      } else if (absValue >= 1) {
+        formatted = absValue.toFixed(2).replace('.', ',');
+      } else {
+        formatted = absValue.toFixed(4).replace('.', ',');
+      }
+      return formatted;
+    }
+
+    // Calculate PnL for a position
+    function calculatePositionPnL(position, currentPrice) {
+      if (!position || !currentPrice || !position.entryPrice) return { pnl: 0, pnlPercent: 0 };
+
+      const entryPrice = parseFloat(position.entryPrice);
+      const quantity = parseFloat(position.quantity) || 0;
+      const leverage = parseFloat(position.leverage) || 1;
+      const isLong = position.direction === 'LONG';
+
+      // Calculate PnL
+      const priceDiff = isLong ? (currentPrice - entryPrice) : (entryPrice - currentPrice);
+      const pnl = priceDiff * quantity;
+
+      // Calculate PnL percent with leverage
+      const pnlPercent = ((priceDiff / entryPrice) * leverage * 100);
+
+      return { pnl, pnlPercent };
+    }
+
+    // Update PnL overlays with current price
+    function updatePnlOverlays(price) {
+      if (!pnlOverlayContainer || !chart || positionsData.length === 0) return;
+
+      currentLivePrice = price;
+
+      positionsData.forEach(position => {
+        const overlayId = 'pnl-' + position.id;
+        let overlay = document.getElementById(overlayId);
+
+        let pnlValue, priceCoord;
+
+        if (position.type === 'entry') {
+          // Real-time PnL for entry line
+          const { pnl } = calculatePositionPnL(position, price);
+          pnlValue = pnl;
+          priceCoord = position.entryPrice;
+        } else if (position.type === 'take_profit' || position.type === 'stop_loss') {
+          // Static expected PnL for TP/SL
+          pnlValue = position.expectedPnl;
+          priceCoord = position.price;
+        } else {
+          return;
+        }
+
+        const isProfit = pnlValue >= 0;
+
+        // Get Y coordinate
+        const y = candleSeries.priceToCoordinate(priceCoord);
+        if (y === null) return;
+
+        // Format PnL text - only Entry has PNL prefix
+        const pnlSign = isProfit ? '+' : '-';
+        const pnlPrefix = position.type === 'entry' ? 'PNL ' : '';
+        const pnlText = pnlPrefix + pnlSign + '$' + formatPnlPrice(Math.abs(pnlValue));
+
+        if (!overlay) {
+          // Create new overlay - NO background, just colored text
+          overlay = document.createElement('div');
+          overlay.id = overlayId;
+          overlay.style.cssText = 'position:absolute;left:8px;font-size:11px;font-weight:700;white-space:nowrap;text-shadow:0 0 3px rgba(0,0,0,0.8),0 0 6px rgba(0,0,0,0.5);transform:translateY(-100%);';
+          pnlOverlayContainer.appendChild(overlay);
+        }
+
+        // Update position (above the line) and content - only text color, no background
+        overlay.style.top = (y - 2) + 'px';
+        overlay.style.color = isProfit ? '#22C55E' : '#EF4444';
+        overlay.textContent = pnlText;
+      });
+    }
+
+    // Remove all PnL overlays
+    function clearPnlOverlays() {
+      if (pnlOverlayContainer) {
+        pnlOverlayContainer.innerHTML = '';
+      }
+    }
+
+    // Update order lines from React Native
+    window.updateOrderLines = function(lines) {
+      // Create overlay container if not exists
+      createPnlOverlayContainer();
+
+      // Clear existing order lines and overlays
+      orderLinesPriceLines.forEach(line => {
+        try {
+          candleSeries.removePriceLine(line);
+        } catch (e) {}
+      });
+      orderLinesPriceLines = [];
+      clearPnlOverlays();
+      positionsData = [];
+
+      // Sort lines by price to detect overlapping labels
+      const sortedLines = [...lines].sort((a, b) => a.price - b.price);
+
+      // Track which prices already have visible axis labels
+      const visibleLabelPrices = [];
+      const OVERLAP_THRESHOLD = 0.015; // 1.5% - labels closer than this will overlap
+
+      // Check if a price would overlap with existing visible labels
+      function wouldOverlap(price) {
+        return visibleLabelPrices.some(existingPrice => {
+          const diff = Math.abs((price - existingPrice) / existingPrice);
+          return diff < OVERLAP_THRESHOLD;
+        });
+      }
+
+      // Render each order line
+      sortedLines.forEach(lineData => {
+        try {
+          const lineStyle = lineData.lineStyle === 2
+            ? LightweightCharts.LineStyle.Dotted
+            : lineData.lineStyle === 1
+              ? LightweightCharts.LineStyle.Dashed
+              : LightweightCharts.LineStyle.Solid;
+
+          // Just show label, PnL will be in overlay for all line types
+          let title = lineData.label || '';
+
+          // Hide axis label if too close to another line's label to prevent overlap
+          // Entry lines get priority for axis labels
+          const isEntryLine = lineData.type === 'entry' || lineData.type === 'pending_entry';
+          const shouldShowAxisLabel = isEntryLine || !wouldOverlap(lineData.price);
+
+          if (shouldShowAxisLabel) {
+            visibleLabelPrices.push(lineData.price);
+          }
+
+          const priceLine = candleSeries.createPriceLine({
+            price: lineData.price,
+            color: lineData.color,
+            lineWidth: 2,
+            lineStyle: lineStyle,
+            axisLabelVisible: shouldShowAxisLabel,
+            title: title, // Always show title (on the line itself)
+          });
+          priceLine._orderLineId = lineData.id;
+          priceLine._orderLineType = lineData.type;
+          orderLinesPriceLines.push(priceLine);
+
+          // Store position data for PnL overlay
+          if (lineData.type === 'entry') {
+            positionsData.push({
+              id: lineData.id,
+              type: 'entry',
+              entryPrice: lineData.price,
+              quantity: lineData.quantity || 0,
+              direction: lineData.direction,
+              leverage: lineData.leverage || 1,
+              positionId: lineData.positionId,
+            });
+          } else if ((lineData.type === 'take_profit' || lineData.type === 'stop_loss') && lineData.expectedPnl !== undefined) {
+            // Store TP/SL data for static PnL overlay
+            positionsData.push({
+              id: lineData.id,
+              type: lineData.type,
+              price: lineData.price,
+              expectedPnl: lineData.expectedPnl,
+            });
+          }
+        } catch (e) {
+          console.error('Error creating order line:', e);
+        }
+      });
+
+      // Initial PnL update with current price
+      if (currentLivePrice > 0) {
+        updatePnlOverlays(currentLivePrice);
+      }
+    };
+
+    // Clear all order lines
+    window.clearOrderLines = function() {
+      orderLinesPriceLines.forEach(line => {
+        try {
+          candleSeries.removePriceLine(line);
+        } catch (e) {}
+      });
+      orderLinesPriceLines = [];
+      clearPnlOverlays();
+      positionsData = [];
+    };
+
+    // Subscribe to chart scale changes to update PnL overlay positions
+    function setupPnlOverlayPositionUpdates() {
+      if (!chart) return;
+
+      // Update overlay positions when price scale changes (zoom/scroll)
+      chart.subscribeCrosshairMove(() => {
+        if (currentLivePrice > 0 && positionsData.length > 0) {
+          // Debounce position updates
+          requestAnimationFrame(() => updatePnlOverlayPositions());
+        }
+      });
+
+      // Also update on visible range changes
+      chart.timeScale().subscribeVisibleLogicalRangeChange(() => {
+        if (currentLivePrice > 0 && positionsData.length > 0) {
+          requestAnimationFrame(() => updatePnlOverlayPositions());
+        }
+      });
+    }
+
+    // Update only positions (not PnL values) - for scroll/zoom
+    function updatePnlOverlayPositions() {
+      if (!pnlOverlayContainer || !chart || positionsData.length === 0) return;
+
+      positionsData.forEach(position => {
+        const overlayId = 'pnl-' + position.id;
+        const overlay = document.getElementById(overlayId);
+        if (!overlay) return;
+
+        // Get price coordinate based on type
+        let priceCoord;
+        if (position.type === 'entry') {
+          priceCoord = position.entryPrice;
+        } else if (position.type === 'take_profit' || position.type === 'stop_loss') {
+          priceCoord = position.price;
+        } else {
+          return;
+        }
+
+        const y = candleSeries.priceToCoordinate(priceCoord);
+        if (y === null) {
+          overlay.style.display = 'none';
+        } else {
+          overlay.style.display = 'block';
+          overlay.style.top = (y - 2) + 'px';
+        }
+      });
+    }
+
+    // ==========================================
+    // PATTERN LINES FUNCTIONALITY (Scan Results)
+    // Distinct from Order Lines with smart filtering
+    // ==========================================
+    let patternPriceLines = [];  // Store pattern price lines
+    let currentOrderLinesData = [];  // Store current order lines for comparison
+
+    // Check if a price is close to any order line (within threshold %)
+    function isPriceCloseToOrderLine(price, threshold = 0.5) {
+      if (!price || currentOrderLinesData.length === 0) return false;
+      return currentOrderLinesData.some(orderLine => {
+        const diff = Math.abs((orderLine.price - price) / price) * 100;
+        return diff <= threshold;
+      });
+    }
+
+    // Update pattern lines from React Native (with smart filtering)
+    window.updatePatternLines = function(patternData, orderLinesData) {
+      // Store order lines for comparison
+      currentOrderLinesData = orderLinesData || [];
+
+      // Clear existing pattern lines
+      patternPriceLines.forEach(line => {
+        try {
+          candleSeries.removePriceLine(line);
+        } catch (e) {}
+      });
+      patternPriceLines = [];
+
+      if (!patternData) return;
+
+      const { entry, tp, sl, direction } = patternData;
+
+      // Track visible label prices to prevent overlap
+      const visiblePatternPrices = [];
+      const PATTERN_OVERLAP_THRESHOLD = 0.015; // 1.5%
+
+      function wouldPatternLabelOverlap(price) {
+        // Check against order lines
+        if (isPriceCloseToOrderLine(price, 1.5)) return true;
+        // Check against other pattern lines
+        return visiblePatternPrices.some(existingPrice => {
+          const diff = Math.abs((price - existingPrice) / existingPrice);
+          return diff < PATTERN_OVERLAP_THRESHOLD;
+        });
+      }
+
+      // Pattern Entry line - Only show if no order line is close
+      if (entry > 0 && !isPriceCloseToOrderLine(entry, 0.8)) {
+        const showAxisLabel = !wouldPatternLabelOverlap(entry);
+        if (showAxisLabel) visiblePatternPrices.push(entry);
+
+        const entryLine = candleSeries.createPriceLine({
+          price: entry,
+          color: '#00F0FF', // Cyan - distinct from order line gold
+          lineWidth: 1,
+          lineStyle: LightweightCharts.LineStyle.Dotted,
+          axisLabelVisible: showAxisLabel,
+          title: 'P-Entry', // P prefix for Pattern (always show on line)
+        });
+        entryLine._patternLine = true;
+        patternPriceLines.push(entryLine);
+      }
+
+      // Pattern TP line - Only show if no order line is close
+      if (tp > 0 && !isPriceCloseToOrderLine(tp, 0.8)) {
+        const showAxisLabel = !wouldPatternLabelOverlap(tp);
+        if (showAxisLabel) visiblePatternPrices.push(tp);
+
+        const tpLine = candleSeries.createPriceLine({
+          price: tp,
+          color: '#22C55E80', // Semi-transparent green
+          lineWidth: 1,
+          lineStyle: LightweightCharts.LineStyle.Dotted,
+          axisLabelVisible: showAxisLabel,
+          title: 'P-TP',
+        });
+        tpLine._patternLine = true;
+        patternPriceLines.push(tpLine);
+      }
+
+      // Pattern SL line - Only show if no order line is close
+      if (sl > 0 && !isPriceCloseToOrderLine(sl, 0.8)) {
+        const showAxisLabel = !wouldPatternLabelOverlap(sl);
+        if (showAxisLabel) visiblePatternPrices.push(sl);
+
+        const slLine = candleSeries.createPriceLine({
+          price: sl,
+          color: '#EF444480', // Semi-transparent red
+          lineWidth: 1,
+          lineStyle: LightweightCharts.LineStyle.Dotted,
+          axisLabelVisible: showAxisLabel,
+          title: 'P-SL',
+        });
+        slLine._patternLine = true;
+        patternPriceLines.push(slLine);
+      }
+    };
+
+    // Clear all pattern lines
+    window.clearPatternLines = function() {
+      patternPriceLines.forEach(line => {
+        try {
+          candleSeries.removePriceLine(line);
+        } catch (e) {}
+      });
+      patternPriceLines = [];
+    };
+
+    // ==========================================
+    // ZONE VISUALIZATION - FILLED RECTANGLES
+    // Like Swift Algo: filled zones that move with chart
+    // ==========================================
+    let zoneElements = [];  // Store zone DOM elements
+    let zoneData = [];      // Store zone data for position updates
+    let zoneContainer = null;
+    let positionUpdateSetup = false;
+
+    // Create zone container
+    function createZoneContainer() {
+      if (zoneContainer) return;
+      zoneContainer = document.createElement('div');
+      zoneContainer.id = 'zone-container';
+      zoneContainer.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:5;overflow:hidden;';
+      const chartEl = document.getElementById('chart-container');
+      if (chartEl) chartEl.appendChild(zoneContainer);
+    }
+
+    // Render a single filled zone rectangle
+    function renderFilledZone(zone, index) {
+      console.log('[Zone.render] Starting zone', index, zone);
+
+      if (!chart || !candleSeries) {
+        console.log('[Zone.render] ERROR: chart or candleSeries not ready');
+        return null;
+      }
+      if (!zoneContainer) {
+        console.log('[Zone.render] Creating zone container...');
+        createZoneContainer();
+      }
+
+      const zoneType = zone.type || zone.zone_type || 'LFZ';
+      const isLong = zoneType === 'LFZ';
+      const high = parseFloat(zone.zone_high || zone.zoneHigh || zone.high);
+      const low = parseFloat(zone.zone_low || zone.zoneLow || zone.low);
+
+      // Get start_time and end_time for X positioning (timestamp in ms or seconds)
+      let startTime = zone.start_time || zone.startTime || zone.formation_time || zone.time;
+      let endTime = zone.end_time || zone.endTime || null;
+
+      // Convert ms to seconds if needed (Lightweight Charts uses seconds)
+      if (startTime && startTime > 9999999999) {
+        startTime = Math.floor(startTime / 1000);
+      }
+      if (endTime && endTime > 9999999999) {
+        endTime = Math.floor(endTime / 1000);
+      }
+
+      console.log('[Zone.render] Zone', index, ': type=' + zoneType + ' high=' + high + ' low=' + low + ' startTime=' + startTime + ' endTime=' + endTime);
+
+      if (!high || !low || isNaN(high) || isNaN(low)) {
+        console.log('[Zone.render] ERROR: Invalid zone prices');
+        return null;
+      }
+
+      // Colors like Swift Algo
+      const fillColor = isLong
+        ? 'rgba(14, 203, 129, 0.25)'   // Green/teal for Buy zones
+        : 'rgba(139, 69, 89, 0.35)';   // Dark red/maroon for Sell zones
+      const borderColor = isLong ? '#0ECB81' : '#8B4559';
+      const labelBg = isLong ? '#0ECB81' : '#F6465D';
+      const labelText = isLong ? 'Buy' : 'Sell';
+
+      // Create zone element - initially hidden until positioned
+      const el = document.createElement('div');
+      el.className = 'zone-rect';
+      el.style.cssText = 'position:absolute;display:none;' +
+        'background:' + fillColor + ';' +
+        'border-top:2px solid ' + borderColor + ';' +
+        'border-bottom:2px solid ' + borderColor + ';' +
+        'border-left:2px solid ' + borderColor + ';' +
+        'border-right:2px solid ' + borderColor + ';' +
+        'border-radius:4px;' +
+        'transition:opacity 0.2s;cursor:pointer;pointer-events:auto;';
+
+      // Add label (positioned inside the zone)
+      const label = document.createElement('div');
+      label.style.cssText = 'position:absolute;' + (isLong ? 'bottom' : 'top') + ':4px;left:8px;' +
+        'background:' + labelBg + ';color:#fff;font-size:10px;font-weight:bold;' +
+        'padding:2px 6px;border-radius:3px;white-space:nowrap;';
+      label.textContent = labelText + ' Zone';
+      el.appendChild(label);
+
+      // Create tooltip element (hidden by default)
+      const tooltip = document.createElement('div');
+      tooltip.className = 'zone-tooltip';
+      tooltip.style.cssText = 'display:none;position:absolute;top:-80px;left:50%;transform:translateX(-50%);' +
+        'background:rgba(20,20,30,0.95);border:1px solid ' + borderColor + ';border-radius:8px;' +
+        'padding:10px 14px;color:#fff;font-size:11px;z-index:100;min-width:140px;' +
+        'box-shadow:0 4px 12px rgba(0,0,0,0.4);';
+
+      const patternName = zone.pattern_type || zone.patternType || zone.name || 'Pattern';
+      const grade = zone.pattern_grade || zone.grade || 'N/A';
+      const confidence = zone.pattern_confidence || zone.confidence || zone.odds_score || 'N/A';
+      tooltip.innerHTML = '<div style="font-weight:bold;margin-bottom:6px;color:' + labelBg + ';">' + patternName + '</div>' +
+        '<div style="display:flex;justify-content:space-between;gap:12px;">' +
+        '<span style="color:#888;">Grade:</span><span style="font-weight:600;">' + grade + '</span></div>' +
+        '<div style="display:flex;justify-content:space-between;gap:12px;">' +
+        '<span style="color:#888;">Confidence:</span><span style="font-weight:600;">' + confidence + '%</span></div>' +
+        '<div style="display:flex;justify-content:space-between;gap:12px;">' +
+        '<span style="color:#888;">High:</span><span style="font-weight:600;">' + high.toFixed(2) + '</span></div>' +
+        '<div style="display:flex;justify-content:space-between;gap:12px;">' +
+        '<span style="color:#888;">Low:</span><span style="font-weight:600;">' + low.toFixed(2) + '</span></div>';
+      el.appendChild(tooltip);
+
+      // Show/hide tooltip on tap
+      el.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const isVisible = tooltip.style.display === 'block';
+        // Hide all other tooltips first
+        document.querySelectorAll('.zone-tooltip').forEach(t => t.style.display = 'none');
+        tooltip.style.display = isVisible ? 'none' : 'block';
+      });
+
+      zoneContainer.appendChild(el);
+      console.log('[Zone.render] Element added to container');
+
+      // Store for position updates - include BOTH startTime and endTime for X positioning & width
+      const zoneInfo = { el, high, low, zone, index, startTime, endTime, tooltip };
+      zoneElements.push(zoneInfo);
+      zoneData.push(zoneInfo);
+
+      // Initial position update
+      updateZonePosition(zoneInfo);
+
+      console.log('[Zone.render] ✅ Zone', index, 'created successfully! Container children:', zoneContainer.childNodes.length);
+      return el;
+    }
+
+    // Update single zone position based on price scale and time scale
+    function updateZonePosition(zoneInfo) {
+      if (!candleSeries || !chart) {
+        console.log('[Zone.position] No candleSeries or chart');
+        return;
+      }
+
+      // Y positioning (price)
+      const yTop = candleSeries.priceToCoordinate(zoneInfo.high);
+      const yBottom = candleSeries.priceToCoordinate(zoneInfo.low);
+
+      if (yTop === null || yBottom === null) {
+        zoneInfo.el.style.display = 'none';
+        return;
+      }
+
+      const top = Math.min(yTop, yBottom);
+      const height = Math.abs(yBottom - yTop);
+
+      // Only show if zone is visible (reasonable height)
+      if (height < 2 || height > 2000) {
+        zoneInfo.el.style.display = 'none';
+        return;
+      }
+
+      // X positioning (time) - use BOTH start_time AND end_time for accurate width
+      let left = 0;
+      let width = 100; // Default minimum width in pixels
+
+      const timeScale = chart.timeScale();
+      const chartWidth = zoneContainer ? zoneContainer.clientWidth : 400;
+      const priceScaleWidth = 48; // Right price scale width
+
+      if (zoneInfo.startTime && timeScale) {
+        // Convert start timestamp to X coordinate
+        const startX = timeScale.timeToCoordinate(zoneInfo.startTime);
+
+        if (startX !== null && !isNaN(startX)) {
+          // Position zone starting at pattern formation time
+          left = startX;
+
+          // ⚠️ CRITICAL: Calculate width from end_time if available
+          if (zoneInfo.endTime) {
+            const endX = timeScale.timeToCoordinate(zoneInfo.endTime);
+            if (endX !== null && !isNaN(endX)) {
+              // Width is the distance between start and end candles
+              width = Math.max(endX - startX, 50); // Min 50px
+            } else {
+              // end_time exists but coordinate failed - use fallback
+              const visibleRange = timeScale.getVisibleLogicalRange();
+              if (visibleRange) {
+                const barsVisible = visibleRange.to - visibleRange.from;
+                const pixelsPerBar = (chartWidth - priceScaleWidth) / barsVisible;
+                width = Math.max(pixelsPerBar * 10, 80); // ~10 candles fallback
+              }
+            }
+          } else {
+            // No end_time: use dynamic width based on visible candles (~10 candles)
+            const visibleRange = timeScale.getVisibleLogicalRange();
+            if (visibleRange) {
+              const barsVisible = visibleRange.to - visibleRange.from;
+              const pixelsPerBar = (chartWidth - priceScaleWidth) / barsVisible;
+              width = Math.max(pixelsPerBar * 10, 80);
+            }
+          }
+
+          // Clamp width - don't extend past price scale
+          const maxRight = chartWidth - priceScaleWidth;
+          if (left + width > maxRight) {
+            width = maxRight - left;
+          }
+
+          // If zone is completely off screen left, hide it
+          if (left + width < 0) {
+            zoneInfo.el.style.display = 'none';
+            return;
+          }
+
+          // If zone starts off screen left, clip it
+          if (left < 0) {
+            width = width + left; // Reduce width by negative left amount
+            left = 0;
+          }
+        } else {
+          // Fallback: position from right side (recent pattern)
+          left = Math.max(chartWidth - priceScaleWidth - width, 0);
+        }
+      } else {
+        // No start_time: default to right side of chart (near current candles)
+        left = Math.max(chartWidth - priceScaleWidth - width, 0);
+      }
+
+      // Minimum width check
+      if (width < 50) {
+        zoneInfo.el.style.display = 'none';
+        return;
+      }
+
+      // Apply position
+      zoneInfo.el.style.display = 'block';
+      zoneInfo.el.style.top = top + 'px';
+      zoneInfo.el.style.height = Math.max(height, 20) + 'px'; // Min height for visibility
+      zoneInfo.el.style.left = left + 'px';
+      zoneInfo.el.style.width = width + 'px';
+
+      // Update tooltip position if it's showing (keep it centered on zone)
+      if (zoneInfo.tooltip && zoneInfo.tooltip.style.display === 'block') {
+        // Tooltip is already positioned relative to zone element, no change needed
+      }
+    }
+
+    // Update ALL zone positions (called on chart movement)
+    function updateAllZonePositions() {
+      zoneData.forEach(updateZonePosition);
+    }
+
+    // Setup chart event listeners for position sync
+    function setupPositionSync() {
+      if (positionUpdateSetup || !chart) return;
+      positionUpdateSetup = true;
+
+      // Update on price scale changes (zoom, scroll)
+      chart.priceScale('right').subscribeVisiblePriceRangeChange(() => {
+        requestAnimationFrame(updateAllZonePositions);
+      });
+
+      // Update on time scale changes (horizontal scroll)
+      chart.timeScale().subscribeVisibleLogicalRangeChange(() => {
+        requestAnimationFrame(updateAllZonePositions);
+      });
+
+      // Update on crosshair move (continuous sync)
+      chart.subscribeCrosshairMove(() => {
+        requestAnimationFrame(updateAllZonePositions);
+      });
+
+      console.log('[Zone] Position sync listeners setup');
+    }
+
+    // Update zones from React Native
+    window.updateZones = function(zones, preferences) {
+      console.log('[Chart.updateZones] Called with', zones?.length || 0, 'zones');
+
+      // Create container if needed
+      createZoneContainer();
+
+      // Clear existing zones first
+      window.clearZones();
+
+      if (!zones || !Array.isArray(zones) || zones.length === 0) {
+        console.log('[Chart.updateZones] No zones to render');
+        return;
+      }
+
+      // Get current price for proximity sorting
+      const lastCandle = lastCandleData && lastCandleData.length > 0
+        ? lastCandleData[lastCandleData.length - 1]
+        : null;
+      const currentPrice = lastCandle ? lastCandle.close : 90000; // Default BTC price as fallback
+
+      // Sort zones by proximity to current price (closest first)
+      const sortedZones = [...zones].sort((a, b) => {
+        const midA = ((a.zone_high || a.high) + (a.zone_low || a.low)) / 2;
+        const midB = ((b.zone_high || b.high) + (b.zone_low || b.low)) / 2;
+        const distA = Math.abs(midA - currentPrice);
+        const distB = Math.abs(midB - currentPrice);
+        return distA - distB;
+      });
+
+      // Show up to 6 zones closest to current price
+      const MAX_ZONES = preferences?.maxZones || 6;
+      const zonesToRender = sortedZones.slice(0, MAX_ZONES);
+
+      console.log('[Chart.updateZones] Showing', zonesToRender.length, 'zones closest to price', currentPrice);
+
+      // Render filled zone rectangles
+      zonesToRender.forEach((zone, idx) => {
+        try {
+          renderFilledZone(zone, idx);
+        } catch (e) {
+          console.error('[Chart.updateZones] Error rendering zone ' + idx + ':', e.message);
+        }
+      });
+
+      // Setup position sync if not done
+      setupPositionSync();
+
+      console.log('[Chart.updateZones] Done! Zones will sync with chart movement.');
+    };
+
+    // Clear all zone rectangles
+    window.clearZones = function() {
+      // Remove all zone DOM elements
+      zoneElements.forEach(info => {
+        try {
+          if (info.el && info.el.parentNode) {
+            info.el.parentNode.removeChild(info.el);
+          }
+        } catch (e) {}
+      });
+      zoneElements = [];
+      zoneData = [];
+      console.log('[Chart.clearZones] Cleared all zone rectangles');
+    };
+
+    // Update a single zone - just re-render all zones
+    window.updateSingleZone = function(zoneId, updates) {
+      console.log('[Chart.updateSingleZone] Re-render requested for zone:', zoneId);
+      // For price lines, we just clear and re-add all zones
+      // The React Native side should call updateZones with the updated array
+    };
+
+    // Render a single drawing
+    function renderDrawing(drawing) {
+      const data = drawing.drawing_data;
+      const toolType = drawing.tool_type;
+
+      switch (toolType) {
+        case 'horizontal_line':
+          renderHorizontalLine(data, drawing.id);
+          break;
+        case 'trend_line':
+          // Trend lines not natively supported - using price lines as approximation
+          renderTrendLine(data, drawing.id);
+          break;
+        case 'rectangle':
+          renderRectangle(data, drawing.id);
+          break;
+        case 'fibonacci_retracement':
+          renderFibonacci(data, drawing.id);
+          break;
+        case 'long_position':
+          renderPosition(data, drawing.id, 'long');
+          break;
+        case 'short_position':
+          renderPosition(data, drawing.id, 'short');
+          break;
+      }
+    }
+
+    // Render horizontal line
+    function renderHorizontalLine(data, id) {
+      const lineStyle = data.lineStyle ? getLineStyleValue(data.lineStyle) : LightweightCharts.LineStyle.Solid;
+      const line = candleSeries.createPriceLine({
+        price: data.price,
+        color: data.color || '#FFBD59',
+        lineWidth: 2,
+        lineStyle: lineStyle,
+        axisLabelVisible: true,
+        title: '',
+      });
+      line._drawingId = id;
+      drawingPriceLines.push(line);
+    }
+
+    // Render trend line (shows start and end horizontal lines)
+    function renderTrendLine(data, id) {
+      const color = data.color || '#00F0FF';
+      const lineStyle = data.lineStyle ? getLineStyleValue(data.lineStyle) : LightweightCharts.LineStyle.Dashed;
+
+      // Start price line
+      const startLine = candleSeries.createPriceLine({
+        price: data.startPrice,
+        color: color,
+        lineWidth: 2,
+        lineStyle: lineStyle,
+        axisLabelVisible: true,
+        title: 'START',
+      });
+      startLine._drawingId = id;
+      drawingPriceLines.push(startLine);
+
+      // End price line
+      const endLine = candleSeries.createPriceLine({
+        price: data.endPrice,
+        color: color,
+        lineWidth: 2,
+        lineStyle: lineStyle,
+        axisLabelVisible: true,
+        title: 'END',
+      });
+      endLine._drawingId = id;
+      drawingPriceLines.push(endLine);
+    }
+
+    // Render rectangle (using top and bottom lines)
+    function renderRectangle(data, id) {
+      const color = data.color || '#6A5BFF';
+      const lineStyle = data.lineStyle ? getLineStyleValue(data.lineStyle) : LightweightCharts.LineStyle.Dotted;
+
+      const topLine = candleSeries.createPriceLine({
+        price: Math.max(data.startPrice, data.endPrice),
+        color: color,
+        lineWidth: 2,
+        lineStyle: lineStyle,
+        axisLabelVisible: true,
+        title: 'TOP',
+      });
+      topLine._drawingId = id;
+      drawingPriceLines.push(topLine);
+
+      const bottomLine = candleSeries.createPriceLine({
+        price: Math.min(data.startPrice, data.endPrice),
+        color: color,
+        lineWidth: 2,
+        lineStyle: lineStyle,
+        axisLabelVisible: true,
+        title: 'BTM',
+      });
+      bottomLine._drawingId = id;
+      drawingPriceLines.push(bottomLine);
+    }
+
+    // Render fibonacci retracement
+    function renderFibonacci(data, id) {
+      const startPrice = data.startPrice;
+      const endPrice = data.endPrice;
+      const range = endPrice - startPrice;
+
+      FIBONACCI_LEVELS.forEach(level => {
+        const price = startPrice + (range * level.value);
+        const line = candleSeries.createPriceLine({
+          price: price,
+          color: level.color,
+          lineWidth: 1,
+          lineStyle: LightweightCharts.LineStyle.Dashed,
+          axisLabelVisible: true,
+          title: level.label,
+        });
+        line._drawingId = id;
+        drawingPriceLines.push(line);
+      });
+    }
+
+    // Render long/short position
+    function renderPosition(data, id, type) {
+      const entryPrice = data.entryPrice;
+      const tpPercent = type === 'long' ? 0.04 : -0.04;  // +4% for long, -4% for short
+      const slPercent = type === 'long' ? -0.02 : 0.02;  // -2% for long, +2% for short
+      const tpPrice = entryPrice * (1 + tpPercent);
+      const slPrice = entryPrice * (1 + slPercent);
+
+      // Entry line
+      const entryLine = candleSeries.createPriceLine({
+        price: entryPrice,
+        color: '#3B82F6',
+        lineWidth: 2,
+        lineStyle: LightweightCharts.LineStyle.Solid,
+        axisLabelVisible: true,
+        title: type === 'long' ? 'LONG' : 'SHORT',
+      });
+      entryLine._drawingId = id;
+      drawingPriceLines.push(entryLine);
+
+      // TP line
+      const tpLine = candleSeries.createPriceLine({
+        price: tpPrice,
+        color: '#22C55E',
+        lineWidth: 1,
+        lineStyle: LightweightCharts.LineStyle.Dashed,
+        axisLabelVisible: true,
+        title: 'TP',
+      });
+      tpLine._drawingId = id;
+      drawingPriceLines.push(tpLine);
+
+      // SL line
+      const slLine = candleSeries.createPriceLine({
+        price: slPrice,
+        color: '#EF4444',
+        lineWidth: 1,
+        lineStyle: LightweightCharts.LineStyle.Dashed,
+        axisLabelVisible: true,
+        title: 'SL',
+      });
+      slLine._drawingId = id;
+      drawingPriceLines.push(slLine);
+    }
+
+    // Apply magnet mode - snap to nearest OHLC
+    function applyMagnetMode(price, time) {
+      if (!magnetModeEnabled || lastCandleData.length === 0) return price;
+
+      // Find candle closest to the clicked time
+      let closestCandle = null;
+      let minTimeDiff = Infinity;
+
+      for (const candle of lastCandleData) {
+        const timeDiff = Math.abs(candle.time - time);
+        if (timeDiff < minTimeDiff) {
+          minTimeDiff = timeDiff;
+          closestCandle = candle;
+        }
+      }
+
+      if (!closestCandle) return price;
+
+      // Find nearest OHLC value
+      const ohlc = [closestCandle.open, closestCandle.high, closestCandle.low, closestCandle.close];
+      let nearestPrice = price;
+      let minPriceDiff = Infinity;
+
+      for (const p of ohlc) {
+        const diff = Math.abs(p - price);
+        if (diff < minPriceDiff) {
+          minPriceDiff = diff;
+          nearestPrice = p;
+        }
+      }
+
+      // Only snap if within 2% of the price
+      const snapThreshold = price * 0.02;
+      return minPriceDiff < snapThreshold ? nearestPrice : price;
+    }
+
+    // Handle chart click for drawing
+    function setupDrawingClickHandler() {
+      chart.subscribeClick(param => {
+        if (!currentDrawingMode || !param.point || !param.time) return;
+
+        const price = candleSeries.coordinateToPrice(param.point.y);
+        const time = param.time;
+
+        // Apply magnet mode
+        const snappedPrice = applyMagnetMode(price, time);
+
+        // Handle based on tool type
+        switch (currentDrawingMode) {
+          case 'horizontal_line':
+            handleHorizontalLineClick(snappedPrice);
+            break;
+          case 'trend_line':
+            handleTwoClickTool(snappedPrice, time, 'trend_line');
+            break;
+          case 'rectangle':
+            handleTwoClickTool(snappedPrice, time, 'rectangle');
+            break;
+          case 'fibonacci_retracement':
+            handleTwoClickTool(snappedPrice, time, 'fibonacci_retracement');
+            break;
+          case 'long_position':
+            handlePositionClick(snappedPrice, 'long');
+            break;
+          case 'short_position':
+            handlePositionClick(snappedPrice, 'short');
+            break;
+        }
+      });
+    }
+
+    // Handle horizontal line (1 click)
+    function handleHorizontalLineClick(price) {
+      const drawingData = {
+        price: price,
+        color: currentDrawingColor,
+        lineStyle: currentLineStyle,
+      };
+
+      // Notify React Native
+      window.ReactNativeWebView?.postMessage(JSON.stringify({
+        type: 'drawing_complete',
+        toolType: 'horizontal_line',
+        drawingData: drawingData
+      }));
+
+      // Render immediately
+      renderHorizontalLine(drawingData, 'temp_' + Date.now());
+    }
+
+    // Handle 2-click tools (trend_line, rectangle, fibonacci)
+    function handleTwoClickTool(price, time, toolType) {
+      if (!pendingDrawing) {
+        // First click
+        pendingDrawing = {
+          toolType: toolType,
+          startPrice: price,
+          startTime: time
+        };
+
+        // Notify React Native about pending state
+        window.ReactNativeWebView?.postMessage(JSON.stringify({
+          type: 'drawing_pending',
+          points: 1,
+          tempData: pendingDrawing
+        }));
+      } else if (pendingDrawing.toolType === toolType) {
+        // Second click - complete the drawing
+        const drawingData = {
+          startPrice: pendingDrawing.startPrice,
+          startTime: pendingDrawing.startTime,
+          endPrice: price,
+          endTime: time,
+          color: currentDrawingColor,
+          lineStyle: currentLineStyle,
+        };
+
+        // Notify React Native
+        window.ReactNativeWebView?.postMessage(JSON.stringify({
+          type: 'drawing_complete',
+          toolType: toolType,
+          drawingData: drawingData
+        }));
+
+        // Render immediately
+        const tempId = 'temp_' + Date.now();
+        if (toolType === 'trend_line') {
+          renderTrendLine(drawingData, tempId);
+        } else if (toolType === 'rectangle') {
+          renderRectangle(drawingData, tempId);
+        } else if (toolType === 'fibonacci_retracement') {
+          renderFibonacci(drawingData, tempId);
+        }
+
+        // Reset pending
+        pendingDrawing = null;
+      }
+    }
+
+    // Handle position click (1 click)
+    function handlePositionClick(price, type) {
+      const drawingData = {
+        entryPrice: price,
+      };
+
+      // Notify React Native
+      window.ReactNativeWebView?.postMessage(JSON.stringify({
+        type: 'drawing_complete',
+        toolType: type + '_position',
+        drawingData: drawingData
+      }));
+
+      // Render immediately
+      renderPosition(drawingData, 'temp_' + Date.now(), type);
+    }
+
+    // Store candle data for magnet mode when fetched
+    function storeCandleDataForMagnet(candles) {
+      lastCandleData = candles;
     }
 
     // Initialize
     createChart();
     fetchKlines();
+    setupDrawingClickHandler();
+    setupPnlOverlayPositionUpdates();
   </script>
 </body>
 </html>`;
-  }, [symbol, activeTimeframe, showVolume, darkTheme, showPriceLines, hasPatternData, patternEntry, patternSL, patternTP, getBinanceInterval]);
+  }, [symbol, showVolume, darkTheme, showPriceLines, hasPatternData, patternEntry, patternSL, patternTP, getBinanceIntervalForHtml]);
+  // NOTE: activeTimeframe is NOT in dependencies - we use htmlTimeframeRef instead to prevent reload on timeframe change
+  // Note: selectedColor and selectedLineStyle are NOT included as dependencies
+  // because they are injected via setDrawingColor/setDrawingLineStyle JS functions
+  // Including them would cause unnecessary WebView reloads and lose drawings
 
-  // Toggle functions
+  // Toggle functions - update htmlTimeframeRef before reload to use current timeframe
   const toggleVolume = useCallback(() => {
     setShowVolume(prev => !prev);
+    htmlTimeframeRef.current = activeTimeframe; // Sync ref before reload
     setWebViewKey(prev => prev + 1);
-  }, []);
+  }, [activeTimeframe]);
 
   const toggleTheme = useCallback(() => {
     setDarkTheme(prev => !prev);
+    htmlTimeframeRef.current = activeTimeframe; // Sync ref before reload
     setWebViewKey(prev => prev + 1);
-  }, []);
+  }, [activeTimeframe]);
 
   const togglePriceLines = useCallback(() => {
     setShowPriceLines(prev => !prev);
+    htmlTimeframeRef.current = activeTimeframe; // Sync ref before reload
     setWebViewKey(prev => prev + 1);
-  }, []);
+  }, [activeTimeframe]);
 
   const handleTimeframeChange = useCallback((newTimeframe) => {
+    const binanceInterval = TIMEFRAME_TO_BINANCE[newTimeframe] || newTimeframe;
+
+    console.log('[TradingChart] handleTimeframeChange:', newTimeframe, '-> binance:', binanceInterval);
+
+    // Mark as programmatic change to prevent race condition with useEffect
+    isProgrammaticChange.current = true;
+
+    // Update state
     setActiveTimeframe(newTimeframe);
     onTimeframeChange?.(newTimeframe);
-    setWebViewKey(prev => prev + 1);
-  }, [onTimeframeChange]);
+
+    // If chart is ready, change timeframe without reloading WebView
+    // This preserves the scroll position
+    if (chartReady && webViewRef.current) {
+      console.log('[TradingChart] Using injection method for timeframe change');
+      webViewRef.current.injectJavaScript(`
+        if (window.changeTimeframe) {
+          window.changeTimeframe('${binanceInterval}');
+        }
+        true;
+      `);
+    } else {
+      // Fallback: reload WebView if chart not ready
+      console.log('[TradingChart] Chart not ready, reloading WebView');
+      htmlTimeframeRef.current = newTimeframe; // Use new timeframe for reload
+      setWebViewKey(prev => prev + 1);
+    }
+  }, [onTimeframeChange, chartReady]);
+
+  // Track previous values to prevent unnecessary reloads
+  const prevSymbolRef = useRef(symbol);
+  const prevPatternRef = useRef(null);
 
   // Reload when symbol changes
   useEffect(() => {
-    setWebViewKey(prev => prev + 1);
-  }, [symbol]);
-
-  // Reload when pattern changes
-  useEffect(() => {
-    if (showPriceLines) {
+    if (prevSymbolRef.current !== symbol) {
+      prevSymbolRef.current = symbol;
+      htmlTimeframeRef.current = activeTimeframe; // Sync ref before reload
       setWebViewKey(prev => prev + 1);
     }
-  }, [selectedPattern, showPriceLines]);
+  }, [symbol, activeTimeframe]);
+
+  // Reload when pattern PRICE VALUES change (not reference)
+  useEffect(() => {
+    if (!showPriceLines) return;
+
+    const currentPattern = selectedPattern || (patterns.length > 0 ? patterns[0] : null);
+    const prevPattern = prevPatternRef.current;
+
+    // Only reload if actual price values changed
+    const currentEntry = currentPattern?.entry || 0;
+    const currentSL = currentPattern?.stopLoss || 0;
+    const currentTP = currentPattern?.target || currentPattern?.takeProfit || 0;
+
+    const prevEntry = prevPattern?.entry || 0;
+    const prevSL = prevPattern?.stopLoss || 0;
+    const prevTP = prevPattern?.target || prevPattern?.takeProfit || 0;
+
+    if (currentEntry !== prevEntry || currentSL !== prevSL || currentTP !== prevTP) {
+      prevPatternRef.current = currentPattern;
+      htmlTimeframeRef.current = activeTimeframe; // Sync ref before reload
+      setWebViewKey(prev => prev + 1);
+    }
+  }, [selectedPattern, patterns, showPriceLines, activeTimeframe]);
 
   const refreshChart = useCallback(() => {
     setIsLoading(true);
+    htmlTimeframeRef.current = activeTimeframe; // Sync ref before reload
     setWebViewKey(prev => prev + 1);
-  }, []);
+  }, [activeTimeframe]);
 
   // Render chart
   const renderChart = (isFullScreen = false) => (
@@ -499,6 +2713,7 @@ const TradingChart = ({
         showsHorizontalScrollIndicator={false}
         showsVerticalScrollIndicator={false}
         androidLayerType="hardware"
+        onMessage={handleWebViewMessage}
       />
 
       {/* Loading overlay */}
@@ -528,19 +2743,64 @@ const TradingChart = ({
       <View style={styles.container}>
         {/* Chart Toolbar - ABOVE CHART */}
         <ChartToolbar
-          timeframes={['1m', '5m', '15m', '1h', '4h', '1D', '1W']}
           activeTimeframe={activeTimeframe}
           onTimeframeChange={handleTimeframeChange}
           showPriceLines={showPriceLines}
           onTogglePriceLines={togglePriceLines}
           showVolume={showVolume}
           onToggleVolume={toggleVolume}
+          onToggleDrawing={handleToggleDrawing}
           onToggleTheme={toggleTheme}
           onZoomIn={() => {}}
           onZoomOut={() => {}}
           onFullscreen={() => setFullScreen(true)}
+          activeIndicators={showDrawingToolbar ? ['drawing'] : []}
           compact={true}
         />
+
+        {/* Drawing Toolbar */}
+        <DrawingToolbar
+          visible={showDrawingToolbar}
+          activeTool={drawingMode}
+          magnetMode={magnetMode}
+          pendingPoints={pendingPoints}
+          onSelectTool={handleSelectDrawingTool}
+          onToggleMagnet={() => setMagnetMode(prev => !prev)}
+          onDeleteAll={handleDeleteAllDrawings}
+          onClose={handleToggleDrawing}
+          selectedColor={selectedColor}
+          onColorChange={handleColorChange}
+          selectedLineStyle={selectedLineStyle}
+          onLineStyleChange={handleLineStyleChange}
+          drawings={drawings}
+          onShowDrawingList={() => setShowDrawingList(true)}
+        />
+
+        {/* Order Lines Toggle Row */}
+        <View style={styles.orderLinesRow}>
+          <OrderLinesToggle
+            enabled={showOrderLines}
+            onToggle={() => {
+              setShowOrderLines(prev => {
+                const newValue = !prev;
+                // Clear order lines in WebView when disabled
+                if (!newValue && webViewRef.current) {
+                  webViewRef.current.injectJavaScript(`
+                    if (window.clearOrderLines) {
+                      window.clearOrderLines();
+                    }
+                    true;
+                  `);
+                }
+                return newValue;
+              });
+            }}
+            onSettingsPress={() => setShowOrderLinesSettings(true)}
+            lineCount={orderLineCount}
+            positionCount={positionCount}
+            pendingCount={pendingCount}
+          />
+        </View>
 
         {/* Chart WebView */}
         {renderChart(false)}
@@ -569,6 +2829,26 @@ const TradingChart = ({
           </TouchableOpacity>
         </View>
       </Modal>
+
+      {/* Drawing List Modal */}
+      <DrawingListModal
+        visible={showDrawingList}
+        onClose={() => setShowDrawingList(false)}
+        drawings={drawings}
+        onDeleteDrawing={handleDeleteDrawing}
+        onUpdateDrawing={handleUpdateDrawing}
+      />
+
+      {/* Order Lines Settings Modal */}
+      <OrderLinesSettings
+        visible={showOrderLinesSettings}
+        onClose={() => setShowOrderLinesSettings(false)}
+        preferences={orderLinesPreferences}
+        onPreferencesChange={(newPrefs) => {
+          // Refresh order lines when preferences change
+          refreshOrderLines();
+        }}
+      />
     </>
   );
 };
@@ -576,6 +2856,16 @@ const TradingChart = ({
 const styles = StyleSheet.create({
   container: {
     marginVertical: SPACING.xs,
+  },
+
+  orderLinesRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    backgroundColor: 'rgba(15, 16, 48, 0.95)',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(106, 91, 255, 0.2)',
   },
 
   chartWrapper: {

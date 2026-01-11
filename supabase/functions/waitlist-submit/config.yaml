@@ -1,0 +1,4 @@
+# Waitlist Submit Function Configuration
+# Disables JWT verification for public landing page form submissions
+
+verify_jwt: false

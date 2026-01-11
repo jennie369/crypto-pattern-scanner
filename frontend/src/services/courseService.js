@@ -116,7 +116,7 @@ class CourseService {
           modules:course_modules(
             *,
             lessons:course_lessons(
-              id, title, type, duration_minutes, order_index, is_preview, video_url
+              id, module_id, title, type, duration_minutes, order_index, is_preview, video_url
             )
           )
         `)
@@ -422,17 +422,27 @@ class CourseService {
    */
   async updateCourse(courseId, updates) {
     try {
+      console.log('[CourseService] Updating course:', courseId);
+      console.log('[CourseService] Update payload:', updates);
+
+      const updatePayload = {
+        ...updates,
+        updated_at: new Date().toISOString(),
+      };
+
       const { data, error } = await supabase
         .from('courses')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updatePayload)
         .eq('id', courseId)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('[CourseService] ❌ Update error:', error);
+        throw error;
+      }
+
+      console.log('[CourseService] ✅ Update successful, returned data:', data);
       return { success: true, data };
     } catch (error) {
       console.error('[CourseService] updateCourse error:', error);
@@ -620,6 +630,50 @@ class CourseService {
     } catch (error) {
       console.error('[CourseService] reorderModules error:', error);
       return { success: false, error: error.message };
+    }
+  }
+
+  // =====================
+  // UPLOAD METHODS
+  // =====================
+
+  /**
+   * Upload course thumbnail to Supabase Storage
+   * @param {File} file - Image file to upload
+   * @returns {Promise<string>} Public URL of uploaded image
+   */
+  async uploadThumbnail(file) {
+    try {
+      // Generate unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `course-thumbnail-${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
+      const filePath = `course-thumbnails/${fileName}`;
+
+      console.log('[CourseService] Uploading thumbnail:', filePath);
+
+      // Upload to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('course-assets')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false,
+        });
+
+      if (error) {
+        console.error('[CourseService] Upload error:', error);
+        throw error;
+      }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('course-assets')
+        .getPublicUrl(filePath);
+
+      console.log('[CourseService] ✅ Thumbnail uploaded:', urlData.publicUrl);
+      return urlData.publicUrl;
+    } catch (error) {
+      console.error('[CourseService] uploadThumbnail error:', error);
+      throw new Error('Không thể tải ảnh lên. Vui lòng thử lại.');
     }
   }
 

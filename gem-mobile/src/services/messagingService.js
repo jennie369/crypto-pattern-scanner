@@ -15,6 +15,8 @@
  */
 
 import { supabase } from './supabase';
+import * as FileSystem from 'expo-file-system/legacy';
+import { Platform } from 'react-native';
 
 class MessagingService {
   // Expose supabase instance for presence channels (same as web)
@@ -153,7 +155,7 @@ class MessagingService {
    * Send a message with optimistic update support
    * @param {string} conversationId - Conversation ID
    * @param {string} content - Message content
-   * @param {object} attachment - Attachment object {url, name, type, size}
+   * @param {object} attachment - Attachment object {url, name, type, size} or sticker/gif object
    * @returns {Promise<Object>} Created message
    */
   async sendMessage(conversationId, content, attachment = null) {
@@ -164,19 +166,58 @@ class MessagingService {
       // Create optimistic message ID (same pattern as web)
       const tempId = `temp-${Date.now()}`;
 
+      // Determine message type
+      let messageType = 'text';
+      if (attachment) {
+        if (attachment.type === 'sticker') {
+          messageType = 'sticker';
+        } else if (attachment.type === 'gif') {
+          messageType = 'gif';
+        } else if (attachment.type?.startsWith('image')) {
+          messageType = 'image';
+        } else if (attachment.type?.startsWith('video')) {
+          messageType = 'video';
+        } else if (attachment.type?.startsWith('audio') || attachment.messageType === 'audio') {
+          messageType = 'audio';
+        } else {
+          messageType = 'file';
+        }
+      }
+
       const messageData = {
         conversation_id: conversationId,
         sender_id: user.id,
         content,
-        message_type: attachment ? (attachment.type?.startsWith('image') ? 'image' : 'file') : 'text'
+        message_type: messageType
       };
 
-      // Add attachment fields if present
-      if (attachment) {
+      // Add sticker fields
+      if (attachment?.type === 'sticker') {
+        messageData.sticker_id = attachment.stickerId;
+        if (attachment.url) {
+          messageData.attachment_url = attachment.url;
+        }
+      }
+
+      // Add GIF fields
+      if (attachment?.type === 'gif') {
+        messageData.giphy_id = attachment.giphyId;
+        messageData.giphy_url = attachment.url;
+      }
+
+      // Add regular attachment fields if present
+      if (attachment && !['sticker', 'gif'].includes(attachment.type)) {
         messageData.attachment_url = attachment.url;
         messageData.attachment_name = attachment.name;
         messageData.attachment_type = attachment.type;
         messageData.attachment_size = attachment.size;
+        if (attachment.duration) {
+          messageData.attachment_duration = attachment.duration;
+        }
+        // Add caption for media messages (Phase 1C)
+        if (attachment.caption) {
+          messageData.caption = attachment.caption.substring(0, 1000); // Max 1000 chars
+        }
       }
 
       const { data, error } = await supabase
@@ -790,19 +831,88 @@ class MessagingService {
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       const filePath = `${conversationId}/${user.id}/${fileName}`;
 
-      // Convert URI to blob for upload
-      const response = await fetch(file.uri);
-      const blob = await response.blob();
+      console.log('[messagingService] Uploading attachment:', {
+        name: file.name,
+        type: file.type,
+        uri: file.uri?.substring(0, 50),
+        path: filePath,
+      });
+
+      // Read file - different methods for different platforms
+      let fileData;
+      let fileSize = file.size || 0;
+
+      try {
+        if (Platform.OS === 'web') {
+          // Web: Use fetch to get blob
+          const response = await fetch(file.uri);
+          fileData = await response.blob();
+          fileSize = fileData.size;
+        } else {
+          // Native (iOS/Android): Read as base64 first
+          const base64 = await FileSystem.readAsStringAsync(file.uri, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+
+          // Convert base64 to ArrayBuffer
+          const binaryStr = atob(base64);
+          const bytes = new Uint8Array(binaryStr.length);
+          for (let i = 0; i < binaryStr.length; i++) {
+            bytes[i] = binaryStr.charCodeAt(i);
+          }
+          fileData = bytes.buffer;
+          fileSize = bytes.length;
+        }
+      } catch (readError) {
+        console.warn('[messagingService] Base64 read failed, trying fetch:', readError.message);
+
+        // Fallback to fetch method (works on some devices)
+        try {
+          const response = await fetch(file.uri);
+          fileData = await response.blob();
+          fileSize = fileData.size;
+        } catch (fetchError) {
+          console.error('[messagingService] Fetch also failed:', fetchError);
+          throw new Error('Không thể đọc file. Vui lòng thử lại.');
+        }
+      }
 
       // Upload to message-attachments bucket (same as web)
       const { data, error } = await supabase.storage
         .from('message-attachments')
-        .upload(filePath, blob, {
-          contentType: file.type,
+        .upload(filePath, fileData, {
+          contentType: file.type || 'application/octet-stream',
           cacheControl: '3600'
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('[messagingService] Upload error:', error);
+
+        // Provide specific error messages
+        if (error.message?.includes('Bucket not found') ||
+            error.message?.includes('not found')) {
+          throw new Error(
+            'Storage bucket "message-attachments" chưa được tạo.\n\n' +
+            'Vui lòng tạo bucket trong Supabase Dashboard → Storage → New bucket\n' +
+            'Tên: message-attachments, Public: Yes'
+          );
+        }
+        if (error.message?.includes('row-level security') ||
+            error.message?.includes('policy') ||
+            error.message?.includes('403')) {
+          throw new Error(
+            'Không có quyền upload.\n\n' +
+            'Vui lòng thêm Storage Policies cho bucket "message-attachments".'
+          );
+        }
+        if (error.message?.includes('Payload too large') ||
+            error.message?.includes('413')) {
+          throw new Error('File quá lớn. Giới hạn 50MB.');
+        }
+        throw error;
+      }
+
+      console.log('[messagingService] Upload successful:', data);
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
@@ -813,7 +923,7 @@ class MessagingService {
         url: publicUrl,
         name: file.name || fileName,
         type: file.type,
-        size: file.size || blob.size
+        size: fileSize
       };
     } catch (error) {
       console.error('Error uploading attachment:', error);
@@ -896,11 +1006,18 @@ class MessagingService {
         .eq('is_deleted', false)
         .order('pinned_at', { ascending: false });
 
-      if (error) throw error;
+      // Handle case where column doesn't exist yet (migration not run)
+      if (error) {
+        if (error.code === '42703' || error.message?.includes('does not exist')) {
+          console.log('[messagingService] is_pinned column not found, feature not available yet');
+          return [];
+        }
+        throw error;
+      }
 
       return data || [];
     } catch (error) {
-      console.error('Error fetching pinned messages:', error);
+      console.warn('[messagingService] getPinnedMessages:', error?.message);
       return [];
     }
   }
@@ -922,12 +1039,19 @@ class MessagingService {
         .select()
         .single();
 
-      if (error) throw error;
+      // Handle missing column
+      if (error) {
+        if (error.code === '42703' || error.message?.includes('does not exist')) {
+          console.warn('[messagingService] pinMessage: column not found');
+          return null;
+        }
+        throw error;
+      }
 
       return data;
     } catch (error) {
-      console.error('Error pinning message:', error);
-      throw error;
+      console.warn('[messagingService] pinMessage:', error?.message);
+      return null;
     }
   }
 
@@ -948,12 +1072,245 @@ class MessagingService {
         .select()
         .single();
 
-      if (error) throw error;
+      // Handle missing column
+      if (error) {
+        if (error.code === '42703' || error.message?.includes('does not exist')) {
+          console.warn('[messagingService] unpinMessage: column not found');
+          return null;
+        }
+        throw error;
+      }
 
       return data;
     } catch (error) {
-      console.error('Error unpinning message:', error);
-      throw error;
+      console.warn('[messagingService] unpinMessage:', error?.message);
+      return null;
+    }
+  }
+
+  // =====================================================
+  // STARRED MESSAGES
+  // =====================================================
+
+  /**
+   * Star a message for current user
+   * @param {string} messageId - Message ID
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async starMessage(messageId) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Chưa đăng nhập');
+
+      // Check if starred_messages table exists by trying to insert
+      const { data, error } = await supabase
+        .from('starred_messages')
+        .upsert({
+          message_id: messageId,
+          user_id: user.id,
+          starred_at: new Date().toISOString(),
+        }, {
+          onConflict: 'message_id,user_id',
+        })
+        .select()
+        .single();
+
+      // Handle missing table
+      if (error) {
+        if (error.code === '42P01' || error.message?.includes('does not exist')) {
+          console.warn('[messagingService] starMessage: starred_messages table not found');
+          return { success: false, error: 'Feature not available yet' };
+        }
+        throw error;
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      console.warn('[messagingService] starMessage error:', error?.message);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Unstar a message for current user
+   * @param {string} messageId - Message ID
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async unstarMessage(messageId) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Chưa đăng nhập');
+
+      const { error } = await supabase
+        .from('starred_messages')
+        .delete()
+        .eq('message_id', messageId)
+        .eq('user_id', user.id);
+
+      // Handle missing table
+      if (error) {
+        if (error.code === '42P01' || error.message?.includes('does not exist')) {
+          console.warn('[messagingService] unstarMessage: starred_messages table not found');
+          return { success: false, error: 'Feature not available yet' };
+        }
+        throw error;
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.warn('[messagingService] unstarMessage error:', error?.message);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Toggle star status for a message
+   * @param {string} messageId - Message ID
+   * @returns {Promise<{success: boolean, isStarred: boolean, error?: string}>}
+   */
+  async toggleStarMessage(messageId) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Chưa đăng nhập');
+
+      // Check if already starred
+      const { data: existing, error: checkError } = await supabase
+        .from('starred_messages')
+        .select('id')
+        .eq('message_id', messageId)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      // Handle missing table
+      if (checkError) {
+        if (checkError.code === '42P01' || checkError.message?.includes('does not exist')) {
+          console.warn('[messagingService] toggleStarMessage: starred_messages table not found');
+          return { success: false, isStarred: false, error: 'Feature not available yet' };
+        }
+        throw checkError;
+      }
+
+      if (existing) {
+        // Unstar
+        const result = await this.unstarMessage(messageId);
+        return { ...result, isStarred: false };
+      } else {
+        // Star
+        const result = await this.starMessage(messageId);
+        return { ...result, isStarred: true };
+      }
+    } catch (error) {
+      console.warn('[messagingService] toggleStarMessage error:', error?.message);
+      return { success: false, isStarred: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get starred messages for a conversation or all conversations
+   * @param {string} conversationId - Optional conversation ID
+   * @returns {Promise<Array>} List of starred messages
+   */
+  async getStarredMessages(conversationId = null) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      // First get starred message IDs
+      const { data: starredData, error: starredError } = await supabase
+        .from('starred_messages')
+        .select('message_id, starred_at')
+        .eq('user_id', user.id)
+        .order('starred_at', { ascending: false });
+
+      // Handle missing table
+      if (starredError) {
+        if (starredError.code === '42P01' || starredError.message?.includes('does not exist')) {
+          console.warn('[messagingService] getStarredMessages: starred_messages table not found');
+          return [];
+        }
+        throw starredError;
+      }
+
+      if (!starredData || starredData.length === 0) {
+        return [];
+      }
+
+      const messageIds = starredData.map(s => s.message_id);
+
+      // Fetch full message details
+      let query = supabase
+        .from('messages')
+        .select(`
+          *,
+          sender:sender_id(
+            id,
+            display_name,
+            avatar_url
+          ),
+          conversations(
+            id,
+            name,
+            is_group
+          )
+        `)
+        .in('id', messageIds)
+        .eq('is_deleted', false);
+
+      if (conversationId) {
+        query = query.eq('conversation_id', conversationId);
+      }
+
+      const { data: messages, error: messagesError } = await query;
+
+      if (messagesError) throw messagesError;
+
+      // Add starred_at to each message
+      const messagesWithStarred = messages.map(msg => ({
+        ...msg,
+        starred_at: starredData.find(s => s.message_id === msg.id)?.starred_at,
+      }));
+
+      // Sort by starred_at desc
+      messagesWithStarred.sort((a, b) =>
+        new Date(b.starred_at) - new Date(a.starred_at)
+      );
+
+      return messagesWithStarred;
+    } catch (error) {
+      console.warn('[messagingService] getStarredMessages error:', error?.message);
+      return [];
+    }
+  }
+
+  /**
+   * Check if a message is starred by current user
+   * @param {string} messageId - Message ID
+   * @returns {Promise<boolean>}
+   */
+  async isMessageStarred(messageId) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return false;
+
+      const { data, error } = await supabase
+        .from('starred_messages')
+        .select('id')
+        .eq('message_id', messageId)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      // Handle missing table
+      if (error) {
+        if (error.code === '42P01' || error.message?.includes('does not exist')) {
+          return false;
+        }
+        throw error;
+      }
+
+      return !!data;
+    } catch (error) {
+      console.warn('[messagingService] isMessageStarred error:', error?.message);
+      return false;
     }
   }
 
@@ -1004,6 +1361,738 @@ class MessagingService {
       .subscribe();
 
     return channel;
+  }
+
+  // =====================================================
+  // MESSAGE RECALL
+  // =====================================================
+
+  /**
+   * Recall (thu hồi) a message
+   * @param {string} messageId - Message ID to recall
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async recallMessage(messageId) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Chưa đăng nhập');
+
+      // Fetch message
+      const { data: message, error: fetchError } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('id', messageId)
+        .single();
+
+      if (fetchError || !message) {
+        return { success: false, error: 'Tin nhắn không tồn tại' };
+      }
+
+      // Check ownership
+      if (message.sender_id !== user.id) {
+        return { success: false, error: 'Bạn chỉ có thể thu hồi tin nhắn của mình' };
+      }
+
+      // Check already recalled
+      if (message.is_recalled) {
+        return { success: false, error: 'Tin nhắn đã được thu hồi' };
+      }
+
+      // Check time limit
+      const createdAt = new Date(message.created_at);
+      const now = new Date();
+      const diffHours = (now - createdAt) / (1000 * 60 * 60);
+
+      const isMediaMessage = ['image', 'video', 'audio', 'file'].includes(message.message_type);
+      const timeLimit = isMediaMessage ? 1 : 24; // hours
+
+      if (diffHours > timeLimit) {
+        return { success: false, error: `Đã quá thời gian thu hồi (${timeLimit} giờ)` };
+      }
+
+      // Update message - try with all columns first, fallback if column doesn't exist
+      let updateError;
+
+      // First try with all recall columns
+      const { error: err1 } = await supabase
+        .from('messages')
+        .update({
+          is_recalled: true,
+          recalled_at: new Date().toISOString(),
+          content: null,
+          caption: null,
+        })
+        .eq('id', messageId);
+
+      updateError = err1;
+
+      // If column doesn't exist, try simpler update
+      if (updateError?.code === '42703' || updateError?.message?.includes('does not exist')) {
+        const { error: err2 } = await supabase
+          .from('messages')
+          .update({
+            content: '[Tin nhắn đã bị thu hồi]',
+            is_deleted: true,
+          })
+          .eq('id', messageId);
+        updateError = err2;
+      }
+
+      if (updateError) throw updateError;
+
+      // Delete reactions
+      await supabase
+        .from('message_reactions')
+        .delete()
+        .eq('message_id', messageId);
+
+      // Delete media from storage if applicable
+      if (isMediaMessage && message.attachment_url) {
+        try {
+          const path = this._extractPathFromUrl(message.attachment_url);
+          if (path) {
+            await supabase.storage
+              .from('message-attachments')
+              .remove([path]);
+          }
+        } catch (e) {
+          console.warn('[recallMessage] Failed to delete media:', e);
+        }
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('[messagingService] recallMessage error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Check if message can be recalled
+   * @param {object} message - Message object
+   * @param {string} currentUserId - Current user ID
+   * @returns {{ canRecall: boolean, reason?: string, remainingTime?: number }}
+   */
+  canRecallMessage(message, currentUserId) {
+    if (!message || !currentUserId) {
+      return { canRecall: false, reason: 'Invalid data' };
+    }
+
+    if (message.sender_id !== currentUserId) {
+      return { canRecall: false, reason: 'Không phải tin nhắn của bạn' };
+    }
+
+    if (message.is_recalled) {
+      return { canRecall: false, reason: 'Đã thu hồi' };
+    }
+
+    const createdAt = new Date(message.created_at);
+    const now = new Date();
+    const diffMs = now - createdAt;
+    const diffHours = diffMs / (1000 * 60 * 60);
+
+    const isMediaMessage = ['image', 'video', 'audio', 'file'].includes(message.message_type);
+    const timeLimitHours = isMediaMessage ? 1 : 24;
+    const timeLimitMs = timeLimitHours * 60 * 60 * 1000;
+
+    if (diffHours > timeLimitHours) {
+      return { canRecall: false, reason: 'Đã hết thời gian thu hồi' };
+    }
+
+    const remainingTime = timeLimitMs - diffMs;
+
+    return {
+      canRecall: true,
+      remainingTime, // in ms
+    };
+  }
+
+  /**
+   * Helper to extract path from storage URL
+   * @private
+   */
+  _extractPathFromUrl(url) {
+    if (!url) return null;
+    const match = url.match(/\/message-attachments\/(.+)$/);
+    return match ? match[1] : null;
+  }
+
+  // =====================================================
+  // PINNED CONVERSATIONS (per-user)
+  // =====================================================
+
+  /**
+   * Pin a conversation for current user
+   * @param {string} conversationId - Conversation ID
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async pinConversation(conversationId) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Chưa đăng nhập');
+
+      // Check current pinned count
+      const { data: pinnedData, error: countError } = await supabase
+        .from('conversation_settings')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('is_pinned', true);
+
+      if (countError) throw countError;
+
+      if (pinnedData?.length >= 5) {
+        return { success: false, error: 'Chỉ có thể ghim tối đa 5 cuộc trò chuyện' };
+      }
+
+      // Get max pin order
+      const { data: maxOrderData } = await supabase
+        .from('conversation_settings')
+        .select('pin_order')
+        .eq('user_id', user.id)
+        .eq('is_pinned', true)
+        .order('pin_order', { ascending: false })
+        .limit(1)
+        .single();
+
+      const nextOrder = (maxOrderData?.pin_order || 0) + 1;
+
+      // Upsert settings
+      const { error } = await supabase
+        .from('conversation_settings')
+        .upsert({
+          conversation_id: conversationId,
+          user_id: user.id,
+          is_pinned: true,
+          pin_order: nextOrder,
+        }, {
+          onConflict: 'conversation_id,user_id',
+        });
+
+      if (error) throw error;
+
+      return { success: true };
+    } catch (error) {
+      console.error('[messagingService] pinConversation error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Unpin a conversation
+   * @param {string} conversationId - Conversation ID
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async unpinConversation(conversationId) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Chưa đăng nhập');
+
+      const { error } = await supabase
+        .from('conversation_settings')
+        .update({
+          is_pinned: false,
+          pin_order: null,
+        })
+        .eq('conversation_id', conversationId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      return { success: true };
+    } catch (error) {
+      console.error('[messagingService] unpinConversation error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get pinned conversation IDs for current user
+   * @returns {Promise<{success: boolean, data?: string[], error?: string}>}
+   */
+  async getPinnedConversationIds() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Chưa đăng nhập');
+
+      const { data, error } = await supabase
+        .from('conversation_settings')
+        .select('conversation_id, pin_order')
+        .eq('user_id', user.id)
+        .eq('is_pinned', true)
+        .order('pin_order', { ascending: true });
+
+      if (error) throw error;
+
+      return {
+        success: true,
+        data: data?.map(d => d.conversation_id) || []
+      };
+    } catch (error) {
+      console.error('[messagingService] getPinnedConversationIds error:', error);
+      return { success: false, error: error.message, data: [] };
+    }
+  }
+
+  // =====================================================
+  // CHAT THEMES
+  // =====================================================
+
+  /**
+   * Get chat theme for a conversation
+   * @param {string} conversationId - Conversation ID
+   * @returns {Promise<{themeId: string, customBackground?: string}>}
+   */
+  async getChatTheme(conversationId) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { themeId: 'crystal' };
+
+      const { data, error } = await supabase
+        .from('conversation_settings')
+        .select('theme_id, custom_background_url')
+        .eq('conversation_id', conversationId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+
+      return {
+        themeId: data?.theme_id || 'crystal',
+        customBackground: data?.custom_background_url,
+      };
+    } catch (error) {
+      console.error('[messagingService] getChatTheme error:', error);
+      return { themeId: 'crystal' };
+    }
+  }
+
+  /**
+   * Set chat theme for a conversation
+   * @param {string} conversationId - Conversation ID
+   * @param {string} themeId - Theme ID
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async setChatTheme(conversationId, themeId) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Chưa đăng nhập');
+
+      const { error } = await supabase
+        .from('conversation_settings')
+        .upsert({
+          conversation_id: conversationId,
+          user_id: user.id,
+          theme_id: themeId,
+        }, {
+          onConflict: 'conversation_id,user_id',
+        });
+
+      if (error) throw error;
+
+      return { success: true };
+    } catch (error) {
+      console.error('[messagingService] setChatTheme error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Set custom background for a conversation
+   * @param {string} conversationId - Conversation ID
+   * @param {string} imageUrl - Background image URL
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async setCustomBackground(conversationId, imageUrl) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Chưa đăng nhập');
+
+      const { error } = await supabase
+        .from('conversation_settings')
+        .upsert({
+          conversation_id: conversationId,
+          user_id: user.id,
+          custom_background_url: imageUrl,
+        }, {
+          onConflict: 'conversation_id,user_id',
+        });
+
+      if (error) throw error;
+
+      return { success: true };
+    } catch (error) {
+      console.error('[messagingService] setCustomBackground error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // =====================================================
+  // ARCHIVE CONVERSATIONS
+  // =====================================================
+
+  /**
+   * Archive a conversation
+   * @param {string} conversationId - Conversation ID
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async archiveConversation(conversationId) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Chưa đăng nhập');
+
+      const { error } = await supabase
+        .from('conversation_settings')
+        .upsert({
+          conversation_id: conversationId,
+          user_id: user.id,
+          is_archived: true,
+          archived_at: new Date().toISOString(),
+        }, {
+          onConflict: 'conversation_id,user_id',
+        });
+
+      if (error) throw error;
+
+      return { success: true };
+    } catch (error) {
+      console.error('[messagingService] archiveConversation error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Unarchive a conversation
+   * @param {string} conversationId - Conversation ID
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async unarchiveConversation(conversationId) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Chưa đăng nhập');
+
+      const { error } = await supabase
+        .from('conversation_settings')
+        .update({
+          is_archived: false,
+          archived_at: null,
+        })
+        .eq('conversation_id', conversationId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      return { success: true };
+    } catch (error) {
+      console.error('[messagingService] unarchiveConversation error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get archived conversations
+   * @returns {Promise<Array>} List of archived conversations
+   */
+  async getArchivedConversations() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Chưa đăng nhập');
+
+      // Get archived conversation IDs
+      const { data: archivedSettings, error: settingsError } = await supabase
+        .from('conversation_settings')
+        .select('conversation_id, archived_at')
+        .eq('user_id', user.id)
+        .eq('is_archived', true)
+        .order('archived_at', { ascending: false });
+
+      if (settingsError) throw settingsError;
+
+      if (!archivedSettings || archivedSettings.length === 0) {
+        return [];
+      }
+
+      const archivedIds = archivedSettings.map(s => s.conversation_id);
+
+      // Fetch full conversation details
+      const { data, error } = await supabase
+        .from('conversations')
+        .select(`
+          *,
+          conversation_participants!inner(
+            unread_count,
+            last_read_at,
+            user_id,
+            users:user_id(
+              id,
+              display_name,
+              avatar_url,
+              online_status
+            )
+          ),
+          messages(
+            id,
+            content,
+            created_at,
+            sender_id,
+            is_deleted
+          )
+        `)
+        .in('id', archivedIds)
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Process conversations similar to getConversations
+      const conversationsWithLatest = data.map(conv => {
+        const sortedMessages = conv.messages
+          .filter(m => !m.is_deleted)
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+        const otherParticipant = conv.conversation_participants
+          .find(p => p.user_id !== user.id)?.users;
+
+        const archivedInfo = archivedSettings.find(s => s.conversation_id === conv.id);
+
+        return {
+          ...conv,
+          latest_message: sortedMessages[0] || null,
+          other_participant: otherParticipant,
+          my_unread_count: conv.conversation_participants
+            .find(p => p.user_id === user.id)?.unread_count || 0,
+          archived_at: archivedInfo?.archived_at,
+          messages: undefined
+        };
+      });
+
+      return conversationsWithLatest;
+    } catch (error) {
+      console.error('[messagingService] getArchivedConversations error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get archived conversation IDs for current user
+   * @returns {Promise<string[]>} List of archived conversation IDs
+   */
+  async getArchivedConversationIds() {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from('conversation_settings')
+        .select('conversation_id')
+        .eq('user_id', user.id)
+        .eq('is_archived', true);
+
+      if (error) throw error;
+
+      return data?.map(d => d.conversation_id) || [];
+    } catch (error) {
+      console.error('[messagingService] getArchivedConversationIds error:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Bulk unarchive conversations
+   * @param {string[]} conversationIds - Array of conversation IDs
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async bulkUnarchive(conversationIds) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Chưa đăng nhập');
+
+      const { error } = await supabase
+        .from('conversation_settings')
+        .update({
+          is_archived: false,
+          archived_at: null,
+        })
+        .eq('user_id', user.id)
+        .in('conversation_id', conversationIds);
+
+      if (error) throw error;
+
+      return { success: true };
+    } catch (error) {
+      console.error('[messagingService] bulkUnarchive error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // =====================================================
+  // MUTE CONVERSATIONS
+  // =====================================================
+
+  /**
+   * Mute a conversation until specified time
+   * @param {string} conversationId - Conversation ID
+   * @param {Date} muteUntil - Mute until this date
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async muteConversation(conversationId, muteUntil) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Chưa đăng nhập');
+
+      const { error } = await supabase
+        .from('conversation_settings')
+        .upsert({
+          conversation_id: conversationId,
+          user_id: user.id,
+          mute_until: muteUntil.toISOString(),
+        }, {
+          onConflict: 'conversation_id,user_id',
+        });
+
+      if (error) throw error;
+
+      return { success: true };
+    } catch (error) {
+      console.error('[messagingService] muteConversation error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Unmute a conversation
+   * @param {string} conversationId - Conversation ID
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async unmuteConversation(conversationId) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Chưa đăng nhập');
+
+      const { error } = await supabase
+        .from('conversation_settings')
+        .update({
+          mute_until: null,
+        })
+        .eq('conversation_id', conversationId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      return { success: true };
+    } catch (error) {
+      console.error('[messagingService] unmuteConversation error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get mute status for a conversation
+   * @param {string} conversationId - Conversation ID
+   * @returns {Promise<{isMuted: boolean, muteUntil?: string}>}
+   */
+  async getMuteStatus(conversationId) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { isMuted: false };
+
+      const { data, error } = await supabase
+        .from('conversation_settings')
+        .select('mute_until')
+        .eq('conversation_id', conversationId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+
+      const muteUntil = data?.mute_until;
+      const isMuted = muteUntil && new Date(muteUntil) > new Date();
+
+      return {
+        isMuted,
+        muteUntil: isMuted ? muteUntil : null,
+      };
+    } catch (error) {
+      console.error('[messagingService] getMuteStatus error:', error);
+      return { isMuted: false };
+    }
+  }
+
+  /**
+   * Update conversation notification sound
+   * @param {string} conversationId - Conversation ID
+   * @param {string} soundId - Sound ID
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async updateConversationSound(conversationId, soundId) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Chưa đăng nhập');
+
+      const { error } = await supabase
+        .from('conversation_settings')
+        .upsert({
+          conversation_id: conversationId,
+          user_id: user.id,
+          notification_sound: soundId,
+        }, {
+          onConflict: 'conversation_id,user_id',
+        });
+
+      if (error) throw error;
+
+      return { success: true };
+    } catch (error) {
+      console.error('[messagingService] updateConversationSound error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Delete a conversation (leave for current user)
+   * @param {string} conversationId - Conversation ID
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
+  async deleteConversation(conversationId) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Chưa đăng nhập');
+
+      // Remove user from participants
+      const { error } = await supabase
+        .from('conversation_participants')
+        .delete()
+        .eq('conversation_id', conversationId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      // Clean up settings
+      await supabase
+        .from('conversation_settings')
+        .delete()
+        .eq('conversation_id', conversationId)
+        .eq('user_id', user.id);
+
+      return { success: true };
+    } catch (error) {
+      console.error('[messagingService] deleteConversation error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Toggle mute for a conversation (legacy support)
+   * @param {string} conversationId - Conversation ID
+   * @param {boolean} mute - True to mute, false to unmute
+   * @returns {Promise<void>}
+   */
+  async toggleMute(conversationId, mute) {
+    if (mute) {
+      // Default mute: forever
+      const muteUntil = new Date('2099-12-31T23:59:59.999Z');
+      await this.muteConversation(conversationId, muteUntil);
+    } else {
+      await this.unmuteConversation(conversationId);
+    }
   }
 }
 

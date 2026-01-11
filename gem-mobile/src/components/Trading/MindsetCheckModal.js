@@ -39,6 +39,7 @@ import {
   TrendingUp,
   TrendingDown,
 } from 'lucide-react-native';
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
 import mindsetAdvisorService, { SCORE_COLORS } from '../../services/mindsetAdvisorService';
 import ScoreGauge from './ScoreGauge';
@@ -77,6 +78,7 @@ const MindsetCheckModal = ({
   onClose,
   onResult,
 }) => {
+  const navigation = useNavigation();
   const { user } = useAuth();
 
   // State
@@ -192,7 +194,51 @@ const MindsetCheckModal = ({
       });
     }
 
+    // Close modal first
     onClose();
+
+    // Navigate based on decision
+    if (decision === 'consult') {
+      // Navigate to GemMaster chat với context về mindset score
+      // Build comprehensive message with all context for GemMaster to understand
+      const scoreLevel = result?.recommendation === 'ready' ? 'tốt' :
+                         result?.recommendation === 'prepare' ? 'trung bình' :
+                         result?.recommendation === 'caution' ? 'cần thận trọng' : 'nên dừng lại';
+
+      const breakdown = result?.breakdown;
+      const breakdownInfo = breakdown ? `
+- Cảm xúc: ${breakdown.emotional?.score || 0}/100 (${breakdown.emotional?.weighted || 0} điểm)
+- Lịch sử trade: ${breakdown.history?.score || 0}/100 (${breakdown.history?.weighted || 0} điểm)
+- Kỷ luật: ${breakdown.discipline?.score || 0}/100 (${breakdown.discipline?.weighted || 0} điểm)` : '';
+
+      const patternInfo = pattern ? `
+
+Pattern đang xem xét: ${pattern.symbol} - ${pattern.type} (${pattern.timeframe || 'không rõ timeframe'})` : '';
+
+      const fullPrompt = `Tôi vừa kiểm tra tâm thế trading và cần lời khuyên:
+
+📊 Điểm tâm thế: ${Math.round(result?.totalScore || 0)}/100 (${scoreLevel})
+${breakdownInfo}${patternInfo}
+
+Bạn có lời khuyên gì cho tôi? Tôi có nên trade lúc này không?`;
+
+      setTimeout(() => {
+        navigation.navigate('GemMaster', {
+          screen: 'GemMasterChat',
+          params: {
+            // Use initialPrompt (not initialMessage) - this is what GemMasterScreen expects
+            initialPrompt: fullPrompt,
+          },
+        });
+      }, 300);
+    } else if (decision === 'breathe') {
+      // Navigate to Breathing exercise
+      setTimeout(() => {
+        navigation.navigate('Wellness', {
+          screen: 'BreathingExercise',
+        });
+      }, 300);
+    }
   };
 
   // Render Step 1: Emotional Assessment

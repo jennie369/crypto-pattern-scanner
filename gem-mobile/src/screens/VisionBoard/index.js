@@ -17,14 +17,19 @@ export { default as DailyRecapScreen } from './DailyRecapScreen';
 export { default as RitualPlaygroundScreen } from './RitualPlaygroundScreen';
 export { default as RitualHistoryScreen } from './RitualHistoryScreen';
 
-// New Ritual Screens (Vision Board 2.0)
+// New Ritual Screens (Vision Board 2.0 - Cosmic Glassmorphism)
 export {
   HeartExpansionRitual,
   GratitudeFlowRitual,
   CleansingBreathRitual,
   WaterManifestRitual,
   LetterToUniverseRitual,
+  BurnReleaseRitual,
+  StarWishRitual,
   RITUAL_SCREENS,
+  RITUAL_METADATA,
+  getAllRituals,
+  getRitualById,
 } from './rituals';
 
 // Widget components

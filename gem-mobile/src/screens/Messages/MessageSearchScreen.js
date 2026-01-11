@@ -32,6 +32,9 @@ import messagingService from '../../services/messagingService';
 // Auth
 import { useAuth } from '../../contexts/AuthContext';
 
+// Components
+import SearchFilters from '../../components/Messages/SearchFilters';
+
 // Tokens
 import {
   COLORS,
@@ -42,7 +45,7 @@ import {
 } from '../../utils/tokens';
 
 export default function MessageSearchScreen({ route, navigation }) {
-  const { conversationId, conversationName } = route.params || {};
+  const { conversationId, conversationName, participants = [], isGroupChat = false } = route.params || {};
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
 
@@ -51,6 +54,11 @@ export default function MessageSearchScreen({ route, navigation }) {
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [filters, setFilters] = useState({
+    messageType: 'all',
+    dateRange: 'all',
+    senderId: null,
+  });
 
   // Refs
   const searchTimeout = useRef(null);
@@ -58,6 +66,33 @@ export default function MessageSearchScreen({ route, navigation }) {
   // =====================================================
   // SEARCH
   // =====================================================
+
+  // Get date range for filter
+  const getDateRangeFilter = useCallback((range) => {
+    if (!range || range === 'all') return null;
+
+    const now = new Date();
+    let fromDate = null;
+
+    switch (range) {
+      case 'today':
+        fromDate = new Date(now.setHours(0, 0, 0, 0));
+        break;
+      case 'week':
+        fromDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case 'month':
+        fromDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      case 'year':
+        fromDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        return null;
+    }
+
+    return fromDate?.toISOString();
+  }, []);
 
   const handleSearch = useCallback(async (query) => {
     setSearchQuery(query);
@@ -77,7 +112,16 @@ export default function MessageSearchScreen({ route, navigation }) {
     searchTimeout.current = setTimeout(async () => {
       try {
         setSearching(true);
-        const searchResults = await messagingService.searchMessages(query, conversationId);
+
+        // Build search options with filters
+        const searchOptions = {
+          conversationId,
+          messageType: filters.messageType !== 'all' ? filters.messageType : null,
+          senderId: filters.senderId,
+          fromDate: getDateRangeFilter(filters.dateRange),
+        };
+
+        const searchResults = await messagingService.searchMessages(query, conversationId, searchOptions);
         setResults(searchResults);
         setHasSearched(true);
       } catch (error) {
@@ -86,7 +130,16 @@ export default function MessageSearchScreen({ route, navigation }) {
         setSearching(false);
       }
     }, 300);
-  }, [conversationId]);
+  }, [conversationId, filters, getDateRangeFilter]);
+
+  // Handle filters change
+  const handleFiltersChange = useCallback((newFilters) => {
+    setFilters(newFilters);
+    // Re-run search with new filters
+    if (searchQuery.length >= 2) {
+      handleSearch(searchQuery);
+    }
+  }, [searchQuery, handleSearch]);
 
   // Navigate to message in conversation
   const handleResultPress = useCallback((message) => {
@@ -284,6 +337,14 @@ export default function MessageSearchScreen({ route, navigation }) {
           </Text>
         </View>
       )}
+
+      {/* Advanced Search Filters */}
+      <SearchFilters
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+        participants={participants}
+        showSenderFilter={isGroupChat && participants.length > 0}
+      />
 
       {/* Results */}
       <FlatList

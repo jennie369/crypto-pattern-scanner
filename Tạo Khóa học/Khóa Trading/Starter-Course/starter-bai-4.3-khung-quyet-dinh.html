@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 4.3: Khung Quyết Định Của Bạn</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Noto+Sans+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-navy: #112250;
+            --color-navy-light: #1a3070;
+            --color-navy-dark: #0a1535;
+            --color-gold: #FFBD59;
+            --color-gold-light: #FFD993;
+            --color-gold-dark: #E5A030;
+            --color-cyan: #00F0FF;
+            --color-cyan-light: #80F7FF;
+            --color-purple: #6A5BFF;
+            --color-purple-light: #8B7FFF;
+            --color-green: #10B981;
+            --color-green-light: #34D399;
+
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.65);
+
+            --bg-glass: rgba(255, 255, 255, 0.08);
+            --bg-card-solid: #1a2d5a;
+            --border-glass: rgba(255, 255, 255, 0.15);
+            --border-gold: rgba(255, 189, 89, 0.4);
+
+            --shadow-gold: 0 4px 20px rgba(255, 189, 89, 0.25);
+            --shadow-cyan: 0 4px 20px rgba(0, 240, 255, 0.2);
+
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            --space-2xl: 3rem;
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-body);
+            background: linear-gradient(135deg, var(--color-navy-dark) 0%, var(--color-navy) 50%, var(--color-navy-light) 100%);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: var(--space-lg);
+            padding-top: var(--space-xl);
+            padding-bottom: var(--space-2xl);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-container {
+                padding: 0;
+                padding-top: var(--space-md);
+                padding-bottom: var(--space-xl);
+            }
+        }
+
+        /* ==================== HEADER ==================== */
+        .lesson-header {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+            padding: var(--space-xl);
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-xl);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-header {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+                padding: var(--space-lg) var(--space-md);
+            }
+        }
+
+        .badge-container {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+            margin-bottom: var(--space-md);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            color: var(--color-navy);
+            font-family: var(--font-heading);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 50px;
+            box-shadow: var(--shadow-gold);
+        }
+
+        .badge.chapter-badge {
+            background: linear-gradient(135deg, var(--color-purple) 0%, var(--color-purple-light) 100%);
+        }
+
+        .lesson-title {
+            font-family: var(--font-heading);
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: var(--space-md);
+            line-height: 1.2;
+        }
+
+        .lesson-title .highlight {
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .lesson-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ==================== SECTIONS ==================== */
+        .section { margin-bottom: var(--space-xl); }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+            padding: 0 var(--space-md);
+        }
+
+        @media (min-width: 601px) {
+            .section-header { padding: 0; }
+        }
+
+        .section-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-gold);
+        }
+
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: clamp(1.25rem, 4vw, 1.5rem);
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .text-content {
+            padding: 0 var(--space-md);
+        }
+
+        @media (min-width: 601px) {
+            .text-content { padding: 0; }
+        }
+
+        .text-content p {
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+
+        /* ==================== IMAGES ==================== */
+        .lesson-image {
+            width: 100%;
+            margin: var(--space-lg) 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 2px solid var(--border-glass);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-image {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+        }
+
+        .image-placeholder {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: linear-gradient(135deg, var(--bg-card-solid) 0%, var(--color-navy-dark) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            padding: var(--space-lg);
+            text-align: center;
+        }
+
+        .image-placeholder-icon { font-size: 3rem; opacity: 0.5; }
+
+        .image-caption {
+            text-align: center;
+            padding: var(--space-sm) var(--space-md);
+            background: var(--bg-glass);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-style: italic;
+        }
+
+        /* ==================== HIGHLIGHT BOXES ==================== */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border: 1px solid var(--border-gold);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+
+        @media (max-width: 600px) {
+            .highlight-box {
+                border-radius: 0;
+                border-left: 4px solid var(--color-gold);
+                border-right: none;
+            }
+        }
+
+        .highlight-box.cyan {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(0, 240, 255, 0.05) 100%);
+            border-color: rgba(0, 240, 255, 0.4);
+        }
+
+        @media (max-width: 600px) {
+            .highlight-box.cyan { border-left-color: var(--color-cyan); }
+        }
+
+        .highlight-box.green {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        @media (max-width: 600px) {
+            .highlight-box.green { border-left-color: var(--color-green); }
+        }
+
+        .highlight-box-title {
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--color-gold);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .highlight-box.cyan .highlight-box-title { color: var(--color-cyan); }
+        .highlight-box.green .highlight-box-title { color: var(--color-green); }
+
+        .highlight-box p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        /* ==================== QUESTION CARDS ==================== */
+        .questions-container {
+            display: grid;
+            gap: var(--space-lg);
+            margin: var(--space-xl) 0;
+        }
+
+        .question-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            position: relative;
+        }
+
+        @media (max-width: 600px) {
+            .question-card {
+                border-radius: 0;
+                border-left: 4px solid var(--color-gold);
+                border-right: none;
+            }
+        }
+
+        .question-number {
+            position: absolute;
+            top: -12px;
+            left: var(--space-lg);
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            color: var(--color-navy);
+            font-family: var(--font-heading);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 16px;
+            border-radius: 50px;
+        }
+
+        .question-text {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+            line-height: 1.4;
+        }
+
+        .question-options {
+            display: grid;
+            gap: var(--space-sm);
+        }
+
+        .question-option {
+            background: var(--bg-card-solid);
+            padding: var(--space-md);
+            border-radius: var(--radius-sm);
+            display: flex;
+            gap: var(--space-md);
+            align-items: center;
+        }
+
+        .option-icon { font-size: 1.25rem; }
+
+        .option-text {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .option-arrow {
+            margin-left: auto;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* ==================== REFERENCE TABLE ==================== */
+        .reference-box {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15) 0%, rgba(106, 91, 255, 0.05) 100%);
+            border: 2px solid var(--color-purple);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+
+        @media (max-width: 600px) {
+            .reference-box {
+                border-radius: 0;
+                border-left: 4px solid var(--color-purple);
+                border-right: none;
+            }
+        }
+
+        .reference-title {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-purple);
+            margin-bottom: var(--space-lg);
+            text-align: center;
+        }
+
+        .reference-grid {
+            display: grid;
+            gap: 1px;
+            background: var(--border-glass);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .reference-item {
+            background: var(--bg-card-solid);
+            padding: var(--space-lg);
+            display: flex;
+            gap: var(--space-md);
+        }
+
+        .reference-icon { font-size: 2rem; }
+
+        .reference-content h4 {
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: var(--space-xs);
+        }
+
+        .reference-item:nth-child(1) .reference-content h4 { color: var(--color-cyan); }
+        .reference-item:nth-child(2) .reference-content h4 { color: var(--color-gold); }
+        .reference-item:nth-child(3) .reference-content h4 { color: var(--color-purple); }
+
+        .reference-content p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* ==================== NO PRESSURE BOX ==================== */
+        .no-pressure-box {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border: 2px solid var(--color-green);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .no-pressure-box {
+                border-radius: 0;
+                border-left: 4px solid var(--color-green);
+                border-right: none;
+            }
+        }
+
+        .no-pressure-icon { font-size: 3rem; margin-bottom: var(--space-md); }
+
+        .no-pressure-title {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-green);
+            margin-bottom: var(--space-md);
+        }
+
+        .no-pressure-text {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            max-width: 500px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        /* ==================== SUMMARY & FOOTER ==================== */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.2) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border: 2px solid var(--color-gold);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+
+        @media (max-width: 600px) {
+            .summary-box {
+                border-radius: 0;
+                border-left: 4px solid var(--color-gold);
+                border-right: none;
+            }
+        }
+
+        .summary-title {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-gold);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .summary-list { list-style: none; }
+
+        .summary-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-sm);
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .summary-list li::before {
+            content: '✓';
+            color: var(--color-gold);
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-xl);
+            margin-top: var(--space-xl);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-footer {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+        }
+
+        .footer-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            color: var(--color-navy);
+            font-family: var(--font-heading);
+            font-size: 0.85rem;
+            font-weight: 700;
+            border-radius: 50px;
+            margin-bottom: var(--space-md);
+        }
+
+        .footer-text { color: var(--text-muted); font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="lesson-container">
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="badge-container">
+                <span class="badge">STARTER</span>
+                <span class="badge chapter-badge">MODULE A</span>
+            </div>
+            <h1 class="lesson-title">Khung Quyết Định <span class="highlight">Của Bạn</span></h1>
+            <p class="lesson-subtitle">4 câu hỏi đơn giản giúp bạn tìm ra con đường phù hợp nhất</p>
+        </header>
+
+        <!-- INTRO -->
+        <section class="section">
+            <div class="text-content">
+                <p>Bạn đã biết 3 con đường. Nhưng làm sao biết con đường nào phù hợp với mình? Đừng lo - chúng tôi có một khung quyết định đơn giản với 4 câu hỏi. Trả lời chúng và bạn sẽ có câu trả lời rõ ràng hơn.</p>
+
+                <p>Không cần quyết định ngay sau khi đọc. Hãy suy nghĩ, thảo luận với người thân nếu cần. Chúng tôi vẫn ở đây khi bạn sẵn sàng.</p>
+            </div>
+
+            <!-- Image 1 -->
+            <div class="lesson-image">
+                <div class="image-placeholder">
+                    <span class="image-placeholder-icon">🖼️</span>
+                    <span>Hình 1: 4 Questions Visual</span>
+                    <span style="font-size: 0.8rem; opacity: 0.7;">Canva: four-questions.png (1200x675)</span>
+                </div>
+                <div class="image-caption">4 câu hỏi giúp bạn tìm ra con đường phù hợp</div>
+            </div>
+        </section>
+
+        <!-- 4 QUESTIONS -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">❓</div>
+                <h2 class="section-title">4 Câu Hỏi Để Tự Vấn</h2>
+            </div>
+
+            <div class="questions-container">
+                <!-- Question 1 -->
+                <div class="question-card">
+                    <div class="question-number">Câu 1</div>
+                    <div class="question-text">"12 tháng nữa, tôi muốn ở đâu?"</div>
+                    <div class="question-options">
+                        <div class="question-option">
+                            <span class="option-icon">📍</span>
+                            <span class="option-text">Vẫn như hiện tại, chỉ thử xem trading thế nào</span>
+                            <span class="option-arrow">→ Path 1</span>
+                        </div>
+                        <div class="question-option">
+                            <span class="option-icon">💰</span>
+                            <span class="option-text">Có thu nhập ổn định từ trading</span>
+                            <span class="option-arrow">→ Path 2</span>
+                        </div>
+                        <div class="question-option">
+                            <span class="option-icon">🌟</span>
+                            <span class="option-text">Thu nhập từ cả trading và affiliate</span>
+                            <span class="option-arrow">→ Path 3</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question 2 -->
+                <div class="question-card">
+                    <div class="question-number">Câu 2</div>
+                    <div class="question-text">"Hoàn cảnh hiện tại của tôi là gì?"</div>
+                    <div class="question-options">
+                        <div class="question-option">
+                            <span class="option-icon">⏰</span>
+                            <span class="option-text">Có thời gian nhưng ngân sách hạn chế</span>
+                            <span class="option-arrow">→ Path 1</span>
+                        </div>
+                        <div class="question-option">
+                            <span class="option-icon">💵</span>
+                            <span class="option-text">Có ngân sách, muốn tiết kiệm thời gian</span>
+                            <span class="option-arrow">→ Path 2</span>
+                        </div>
+                        <div class="question-option">
+                            <span class="option-icon">👥</span>
+                            <span class="option-text">Có network/followers, thích chia sẻ</span>
+                            <span class="option-arrow">→ Path 3</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question 3 -->
+                <div class="question-card">
+                    <div class="question-number">Câu 3</div>
+                    <div class="question-text">"Điều gì khiến tôi hào hứng nhất?"</div>
+                    <div class="question-options">
+                        <div class="question-option">
+                            <span class="option-icon">📚</span>
+                            <span class="option-text">Tự khám phá, học dần dần theo pace riêng</span>
+                            <span class="option-arrow">→ Path 1</span>
+                        </div>
+                        <div class="question-option">
+                            <span class="option-icon">📈</span>
+                            <span class="option-text">Master trading nhanh nhất có thể</span>
+                            <span class="option-arrow">→ Path 2</span>
+                        </div>
+                        <div class="question-option">
+                            <span class="option-icon">🤝</span>
+                            <span class="option-text">Trading + Xây dựng business affiliate</span>
+                            <span class="option-arrow">→ Path 3</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question 4 -->
+                <div class="question-card">
+                    <div class="question-number">Câu 4</div>
+                    <div class="question-text">"Tôi sẵn sàng đầu tư gì ngay bây giờ?"</div>
+                    <div class="question-options">
+                        <div class="question-option">
+                            <span class="option-icon">🕐</span>
+                            <span class="option-text">Thời gian nhiều, tiền ít</span>
+                            <span class="option-arrow">→ Path 1</span>
+                        </div>
+                        <div class="question-option">
+                            <span class="option-icon">💎</span>
+                            <span class="option-text">Tiền có, muốn đầu tư vào bản thân</span>
+                            <span class="option-arrow">→ Path 2</span>
+                        </div>
+                        <div class="question-option">
+                            <span class="option-icon">🎯</span>
+                            <span class="option-text">Cả thời gian và tiền, muốn multiple streams</span>
+                            <span class="option-arrow">→ Path 3</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">💡 Cách Sử Dụng Khung Này</div>
+                <p>Nếu hầu hết câu trả lời của bạn trỏ về cùng một Path, đó có lẽ là con đường phù hợp nhất. Nếu câu trả lời phân tán, có thể bạn cần suy nghĩ thêm về ưu tiên của mình. Không có câu trả lời "đúng" - chỉ có câu trả lời phù hợp với bạn.</p>
+            </div>
+        </section>
+
+        <!-- REFERENCE TABLE -->
+        <div class="reference-box">
+            <div class="reference-title">📋 Khung Tham Chiếu Nhanh</div>
+            <div class="reference-grid">
+                <div class="reference-item">
+                    <div class="reference-icon">🌱</div>
+                    <div class="reference-content">
+                        <h4>Path 1: STARTER</h4>
+                        <p>Tự học, chậm mà chắc. Phù hợp: thời gian nhiều, ngân sách hạn chế, tự giác cao.</p>
+                    </div>
+                </div>
+                <div class="reference-item">
+                    <div class="reference-icon">🚀</div>
+                    <div class="reference-content">
+                        <h4>Path 2: UPGRADE</h4>
+                        <p>Nhanh hơn, có hệ thống đầy đủ. Phù hợp: muốn tiết kiệm thời gian, nghiêm túc trading.</p>
+                    </div>
+                </div>
+                <div class="reference-item">
+                    <div class="reference-icon">🌟</div>
+                    <div class="reference-content">
+                        <h4>Path 3: PARTNER</h4>
+                        <p>Trading + Affiliate. Phù hợp: có network, thích chia sẻ, muốn multiple income streams.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image 2 -->
+        <div class="lesson-image">
+            <div class="image-placeholder">
+                <span class="image-placeholder-icon">🖼️</span>
+                <span>Hình 2: Decision Matrix</span>
+                <span style="font-size: 0.8rem; opacity: 0.7;">Canva: decision-matrix.png (1200x675)</span>
+            </div>
+            <div class="image-caption">Ma trận quyết định dựa trên 4 câu hỏi</div>
+        </div>
+
+        <!-- NO PRESSURE -->
+        <div class="no-pressure-box">
+            <div class="no-pressure-icon">🌿</div>
+            <div class="no-pressure-title">Không Cần Quyết Định Ngay</div>
+            <div class="no-pressure-text">
+                Bạn có thể suy nghĩ thêm. Chapter tiếp theo sẽ chi tiết hóa từng option với đầy đủ thông tin. Chúng tôi vẫn ở đây khi bạn sẵn sàng. Không có deadline, không có pressure.
+            </div>
+        </div>
+
+        <!-- Image 3 -->
+        <div class="lesson-image">
+            <div class="image-placeholder">
+                <span class="image-placeholder-icon">🖼️</span>
+                <span>Hình 3: "Take Your Time" Encouragement</span>
+                <span style="font-size: 0.8rem; opacity: 0.7;">Canva: take-your-time.png (1200x675)</span>
+            </div>
+            <div class="image-caption">Hãy dành thời gian suy nghĩ - Quyết định đúng quan trọng hơn quyết định nhanh</div>
+        </div>
+
+        <!-- SUMMARY -->
+        <div class="summary-box">
+            <div class="summary-title">📝 Tóm Tắt Bài 4.3</div>
+            <ul class="summary-list">
+                <li>4 câu hỏi giúp xác định con đường: Mục tiêu, Hoàn cảnh, Hào hứng, Sẵn sàng đầu tư</li>
+                <li>Nếu câu trả lời trỏ về cùng một Path = đó có lẽ là con đường phù hợp</li>
+                <li>Path 1 cho người cần thời gian và tiết kiệm chi phí</li>
+                <li>Path 2 cho người nghiêm túc và muốn tiết kiệm thời gian</li>
+                <li>Path 3 cho người có network và muốn multiple income streams</li>
+            </ul>
+        </div>
+
+        <!-- TRANSITION -->
+        <div class="highlight-box cyan">
+            <div class="highlight-box-title">➡️ Chapter Tiếp Theo</div>
+            <p>Bạn đã hoàn thành Module A! Trong Chapter tiếp theo (Module B), chúng tôi sẽ đi vào chi tiết từng option: các gói TIER, chương trình Partnership, và những bước cụ thể để bắt đầu. Tất cả thông tin bạn cần để đưa ra quyết định cuối cùng.</p>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <span class="footer-badge">MODULE A</span>
+            <p class="footer-text">Bài 4.3: Khung Quyết Định Của Bạn | GEM Frequency Trading</p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,7 +1,7 @@
 /**
  * Gemral - Post Detail Screen
  * Shows full post with comments
- * Fixed: Comment input positioned above tab bar
+ * Phase 3: Comment Threading (30/12/2024)
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -23,10 +23,26 @@ import {
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowLeft, Heart, MessageCircle, Send, Reply, X, Edit3, ShoppingBag, Share2, Repeat2, Gift, Bookmark } from 'lucide-react-native';
-import ImageViewer from '../../components/ImageViewer';
+import { ArrowLeft, MessageCircle, Send, X, Edit3, ShoppingBag, Share2, Repeat2, Gift, Bookmark, Smile } from 'lucide-react-native';
+// Phase 2: New ImageGallery with gesture support
+import { ImageGallery } from '../../components/ImageViewer';
 import GiftCatalogSheet from '../../components/GiftCatalogSheet';
+
+// Phase 1: Forum Reaction System
+import ForumReactionButton from '../../components/Forum/ForumReactionButton';
+import ReactionSummary from '../../components/Forum/ReactionSummary';
+import ForumReactionTooltip from '../../components/Forum/ForumReactionTooltip';
+import { usePostReactions } from '../../hooks/usePostReactions';
+import AuthGate from '../../components/AuthGate';
 import ReceivedGiftsBar from '../../components/ReceivedGiftsBar';
+import { StickerEmojiSheet } from '../../components/Stickers';
+
+// Phase 3: Comment Threading
+import CommentThread from '../../components/Forum/CommentThread';
+import { useComments } from '../../hooks/useComments';
+
+// Phase 4: View Tracking
+import { useViewTracking } from '../../hooks/useViewTracking';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 import { forumService } from '../../services/forumService';
@@ -67,19 +83,41 @@ const PostDetailScreen = ({ route, navigation }) => {
   const TOTAL_TAB_BAR_HEIGHT = TAB_BAR_VISIBLE_HEIGHT + tabBarBottomPadding;
 
   const [post, setPost] = useState(null);
-  const [comments, setComments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [postLoading, setPostLoading] = useState(true);
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [replyingTo, setReplyingTo] = useState(null); // { id, authorName }
+
+  // Phase 3: Comment Threading Hook
+  const {
+    comments,
+    loading: commentsLoading,
+    replyTo: replyingTo,
+    getReplies,
+    isExpanded,
+    toggleThread,
+    loadReplies,
+    createComment,
+    deleteComment,
+    startReply,
+    cancelReply,
+    refresh: refreshComments,
+  } = useComments(postId);
+
+  // Phase 4: Track view when post is opened (1 second delay for meaningful view)
+  useViewTracking(postId, { enabled: !!postId, delay: 1000 });
+
+  // Phase 1: Reactions visibility state
+  const [reactionsVisible, setReactionsVisible] = useState(false);
 
   // Image viewer state
   const [imageViewerVisible, setImageViewerVisible] = useState(false);
 
   // Gift sheet state
   const [giftSheetVisible, setGiftSheetVisible] = useState(false);
+
+  // Emoji sheet state
+  const [emojiSheetVisible, setEmojiSheetVisible] = useState(false);
 
   // Keyboard handling refs
   const inputRef = useRef(null);
@@ -239,33 +277,37 @@ const PostDetailScreen = ({ route, navigation }) => {
     });
   };
 
+  // Load post data (comments loaded by useComments hook)
   const loadPost = async () => {
     try {
-      const [postData, commentsData] = await Promise.all([
-        forumService.getPostById(postId),
-        forumService.getCommentsWithReplies(postId),
-      ]);
+      const postData = await forumService.getPostById(postId);
       setPost(postData);
-      setComments(commentsData);
     } catch (error) {
       console.error('Error loading post:', error);
     } finally {
-      setLoading(false);
+      setPostLoading(false);
     }
   };
 
-  const handleLike = async () => {
-    if (liked) {
-      await forumService.unlikePost(postId);
-      setLiked(false);
-      setPost(prev => ({ ...prev, likes_count: (prev.likes_count || 1) - 1 }));
-    } else {
-      await forumService.likePost(postId);
-      setLiked(true);
-      setPost(prev => ({ ...prev, likes_count: (prev.likes_count || 0) + 1 }));
-    }
-  };
+  // Phase 1: Use reactions hook for like/reaction system
+  // Note: This hook needs post to be loaded, so we check post?.id
+  const {
+    userReaction,
+    reactionCounts,
+    totalCount,
+    topReactions,
+    hasReacted,
+    loading: isReacting,
+    addReaction,
+    removeReaction,
+    toggleReaction,
+  } = usePostReactions(
+    post?.id || postId,
+    post?.reaction_counts || null,
+    post?.user_reaction || null
+  );
 
+  // Phase 3: Handle comment submission with threading support
   const handleComment = async () => {
     if (!comment.trim() || submitting) return;
 
@@ -285,41 +327,17 @@ const PostDetailScreen = ({ route, navigation }) => {
 
     setSubmitting(true);
     try {
-      const parentId = replyingTo?.id || null;
-      const { data } = await forumService.createComment(postId, comment.trim(), parentId);
+      // Use useComments hook's createComment
+      const success = await createComment(comment.trim());
 
-      if (data) {
-        const newComment = {
-          ...data,
-          author: {
-            id: user?.id,
-            full_name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Bạn',
-            avatar_url: user?.user_metadata?.avatar_url,
-          },
-          replies: [],
-        };
-
-        if (parentId) {
-          // Add as reply to parent comment
-          setComments(prev => prev.map(c => {
-            if (c.id === parentId) {
-              return { ...c, replies: [...(c.replies || []), newComment] };
-            }
-            return c;
-          }));
-        } else {
-          // Add as root comment
-          setComments(prev => [...prev, newComment]);
-        }
-
+      if (success) {
         // Update post comments count
         setPost(prev => ({
           ...prev,
-          comments_count: (prev.comments_count || 0) + 1,
+          comments_count: (prev?.comments_count || 0) + 1,
         }));
 
         setComment('');
-        setReplyingTo(null);
         Keyboard.dismiss();
       }
     } catch (error) {
@@ -335,16 +353,51 @@ const PostDetailScreen = ({ route, navigation }) => {
     }
   };
 
-  // Handle reply button press
-  const handleReply = (commentItem) => {
-    const authorName = commentItem.author?.full_name || commentItem.author?.email?.split('@')[0] || 'người dùng';
-    setReplyingTo({ id: commentItem.id, authorName });
+  // Phase 3: Handle reply button press - uses hook's startReply
+  const handleReply = (commentData) => {
+    startReply(commentData);
     inputRef.current?.focus();
   };
 
-  // Cancel reply
-  const cancelReply = () => {
-    setReplyingTo(null);
+  // Phase 3: Handle cancel reply - uses hook's cancelReply
+  const handleCancelReply = () => {
+    cancelReply();
+  };
+
+  // Phase 3: Handle user press - navigate to profile
+  const handleUserPress = (userId) => {
+    if (userId) {
+      navigation.navigate('UserProfile', { userId });
+    }
+  };
+
+  // Phase 3: Handle mention press - navigate to username profile
+  const handleMentionPress = (username) => {
+    if (username) {
+      navigation.navigate('UserProfile', { username });
+    }
+  };
+
+  // Phase 3: Handle delete comment
+  const handleDeleteComment = async (commentId, parentId) => {
+    try {
+      const success = await deleteComment(commentId, parentId);
+      if (success) {
+        // Update post comments count
+        setPost(prev => ({
+          ...prev,
+          comments_count: Math.max((prev?.comments_count || 1) - 1, 0),
+        }));
+      }
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Không thể xóa bình luận',
+        buttons: [{ text: 'OK' }],
+      });
+    }
   };
 
   const formatTimestamp = (timestamp) => {
@@ -359,11 +412,21 @@ const PostDetailScreen = ({ route, navigation }) => {
     });
   };
 
-  // Get images array for viewer
+  // Get images array for viewer - Phase 2: returns objects with uri, width, height
   const getImages = () => {
-    if (post?.media_urls?.length > 0) return post.media_urls;
-    if (post?.image_url) return [post.image_url];
-    return [];
+    const urls = [];
+    if (post?.media_urls?.length > 0) {
+      urls.push(...post.media_urls);
+    } else if (post?.image_url) {
+      urls.push(post.image_url);
+    }
+
+    // Convert to objects with dimensions
+    return urls.map((uri) => ({
+      uri,
+      width: post?.image_width || 1080,
+      height: post?.image_height || 1080,
+    }));
   };
 
   // Get author info
@@ -403,7 +466,7 @@ const PostDetailScreen = ({ route, navigation }) => {
     setGiftSheetVisible(true);
   };
 
-  if (loading) {
+  if (postLoading) {
     return (
       <LinearGradient colors={GRADIENTS.background} style={styles.gradient}>
         <View style={styles.loadingContainer}>
@@ -570,26 +633,36 @@ const PostDetailScreen = ({ route, navigation }) => {
               </View>
             )}
 
+            {/* Phase 1: Reaction Summary - Shows top reactions (above action bar) */}
+            {totalCount > 0 && (
+              <View style={styles.reactionSummaryContainer}>
+                <ReactionSummary
+                  reactionCounts={reactionCounts}
+                  topReactions={topReactions}
+                  totalCount={totalCount}
+                  onPress={() => setReactionsVisible(true)}
+                  size="medium"
+                />
+              </View>
+            )}
+
             {/* Facebook-style Action Bar - Left + Right split */}
             <View style={styles.actionBar}>
-              {/* Left side - Like, Comment, Share */}
+              {/* Left side - Reaction, Comment, Share */}
               <View style={styles.actionBarLeft}>
-                <TouchableOpacity
-                  style={styles.actionBtn}
-                  onPress={handleLike}
-                  activeOpacity={0.7}
-                >
-                  <Heart
-                    size={22}
-                    color={liked ? '#FF6B6B' : COLORS.textMuted}
-                    fill={liked ? '#FF6B6B' : 'transparent'}
+                {/* Phase 1: Forum Reaction Button */}
+                <AuthGate action="thả cảm xúc bài viết này">
+                  <ForumReactionButton
+                    userReaction={userReaction}
+                    totalCount={0}
+                    onReactionSelect={addReaction}
+                    onToggle={toggleReaction}
+                    disabled={isReacting}
+                    showCount={false}
+                    showLabel={false}
+                    size="medium"
                   />
-                  {post.likes_count > 0 && (
-                    <Text style={[styles.actionCount, liked && styles.actionCountActive]}>
-                      {post.likes_count}
-                    </Text>
-                  )}
-                </TouchableOpacity>
+                </AuthGate>
 
                 <TouchableOpacity
                   style={styles.actionBtn}
@@ -639,86 +712,38 @@ const PostDetailScreen = ({ route, navigation }) => {
             )}
           </View>
 
-            {/* Comments Section */}
+            {/* Phase 3: Threaded Comments Section */}
             <View style={styles.commentsSection}>
               <Text style={styles.commentsTitle}>
-                Bình luận ({post.comments_count || comments.length || 0})
+                Bình luận ({post?.comments_count || comments?.length || 0})
               </Text>
 
-              {comments.map((c) => (
-                <View key={c.id}>
-                  {/* Parent Comment */}
-                  <View style={styles.commentCard}>
-                    <TouchableOpacity
-                      onPress={() => navigation.navigate('UserProfile', { userId: c.author?.id })}
-                      activeOpacity={0.7}
-                    >
-                      <Image
-                        source={{
-                          uri: c.author?.avatar_url
-                            || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.author?.full_name || 'A')}&background=6A5BFF&color=fff`
-                        }}
-                        style={styles.commentAvatar}
-                      />
-                    </TouchableOpacity>
-                    <View style={styles.commentContent}>
-                      <View style={styles.commentAuthorRow}>
-                        <UserLink
-                          user={c.author}
-                          textStyle={styles.commentAuthor}
-                        />
-                        <UserBadges user={c.author} size="tiny" maxBadges={2} />
-                      </View>
-                      <Text style={styles.commentText}>{c.content}</Text>
-                      <View style={styles.commentActions}>
-                        <Text style={styles.commentTime}>{formatTimestamp(c.created_at)}</Text>
-                        <TouchableOpacity
-                          style={styles.replyButton}
-                          onPress={() => handleReply(c)}
-                        >
-                          <Reply size={14} color={COLORS.textMuted} />
-                          <Text style={styles.replyButtonText}>Trả lời</Text>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  </View>
-
-                  {/* Replies */}
-                  {c.replies && c.replies.length > 0 && (
-                    <View style={styles.repliesContainer}>
-                      {c.replies.map((reply) => (
-                        <View key={reply.id} style={styles.replyCard}>
-                          <TouchableOpacity
-                            onPress={() => navigation.navigate('UserProfile', { userId: reply.author?.id })}
-                            activeOpacity={0.7}
-                          >
-                            <Image
-                              source={{
-                                uri: reply.author?.avatar_url
-                                  || `https://ui-avatars.com/api/?name=${encodeURIComponent(reply.author?.full_name || 'A')}&background=6A5BFF&color=fff`
-                              }}
-                              style={styles.replyAvatar}
-                            />
-                          </TouchableOpacity>
-                          <View style={styles.commentContent}>
-                            <View style={styles.commentAuthorRow}>
-                              <UserLink
-                                user={reply.author}
-                                textStyle={styles.commentAuthor}
-                              />
-                              <UserBadges user={reply.author} size="tiny" maxBadges={2} />
-                            </View>
-                            <Text style={styles.commentText}>{reply.content}</Text>
-                            <Text style={styles.commentTime}>{formatTimestamp(reply.created_at)}</Text>
-                          </View>
-                        </View>
-                      ))}
-                    </View>
-                  )}
+              {/* Loading state for comments */}
+              {commentsLoading && comments?.length === 0 && (
+                <View style={styles.commentsLoading}>
+                  <ActivityIndicator size="small" color={COLORS.gold} />
+                  <Text style={styles.commentsLoadingText}>Đang tải bình luận...</Text>
                 </View>
+              )}
+
+              {/* Threaded Comments */}
+              {comments?.map((rootComment) => (
+                <CommentThread
+                  key={rootComment?.id}
+                  comment={rootComment}
+                  replies={getReplies(rootComment?.id)}
+                  isExpanded={isExpanded(rootComment?.id)}
+                  onToggle={toggleThread}
+                  onLoadMore={loadReplies}
+                  onReply={handleReply}
+                  onDelete={handleDeleteComment}
+                  onUserPress={handleUserPress}
+                  onMentionPress={handleMentionPress}
+                />
               ))}
 
-              {comments.length === 0 && (
+              {/* Empty state */}
+              {!commentsLoading && comments?.length === 0 && (
                 <Text style={styles.noComments}>
                   Chưa có bình luận nào. Hãy là người đầu tiên!
                 </Text>
@@ -726,18 +751,13 @@ const PostDetailScreen = ({ route, navigation }) => {
             </View>
           </ScrollView>
 
-        {/* Image Viewer with text overlay */}
+        {/* Phase 2: Image Gallery with gestures - Full screen tap-to-view */}
         {post && (
-          <ImageViewer
+          <ImageGallery
             visible={imageViewerVisible}
             images={getImages()}
             initialIndex={0}
             onClose={() => setImageViewerVisible(false)}
-            showCounter={true}
-            showActions={false}
-            postContent={post.content}
-            authorName={getAuthorInfo().name}
-            showOverlay={true}
           />
         )}
 
@@ -754,29 +774,47 @@ const PostDetailScreen = ({ route, navigation }) => {
             loadPost();
           }}
         />
+
+        {/* Phase 1: Forum Reaction Tooltip - shows reactor list */}
+        <ForumReactionTooltip
+          visible={reactionsVisible}
+          onClose={() => setReactionsVisible(false)}
+          postId={post?.id || postId}
+          reactionCounts={reactionCounts}
+          onUserPress={(userId) => {
+            navigation.navigate('UserProfile', { userId });
+          }}
+        />
         </KeyboardAvoidingView>
         </SafeAreaView>
 
-        {/* Comment Input - Absolute positioned, moves with keyboard */}
+        {/* Phase 3: Comment Input - Absolute positioned, moves with keyboard */}
         <View style={[
           styles.inputContainerAbsolute,
           { bottom: keyboardVisible ? keyboardHeight : TOTAL_TAB_BAR_HEIGHT }
         ]}>
+          {/* Reply indicator bar */}
           {replyingTo && (
             <View style={styles.replyingToBar}>
               <Text style={styles.replyingToText}>
-                Đang trả lời <Text style={styles.replyingToName}>{replyingTo.authorName}</Text>
+                Đang trả lời <Text style={styles.replyingToName}>{replyingTo?.authorName || 'người dùng'}</Text>
               </Text>
-              <TouchableOpacity onPress={cancelReply} style={styles.cancelReplyBtn}>
+              <TouchableOpacity onPress={handleCancelReply} style={styles.cancelReplyBtn}>
                 <X size={18} color={COLORS.textMuted} />
               </TouchableOpacity>
             </View>
           )}
           <View style={styles.inputWrapper}>
+            <TouchableOpacity
+              style={styles.emojiButton}
+              onPress={() => setEmojiSheetVisible(true)}
+            >
+              <Smile size={22} color={COLORS.gold} />
+            </TouchableOpacity>
             <TextInput
               ref={inputRef}
               style={styles.input}
-              placeholder={replyingTo ? `Trả lời ${replyingTo.authorName}...` : 'Viết bình luận...'}
+              placeholder={replyingTo ? `Trả lời ${replyingTo?.authorName || 'người dùng'}...` : 'Viết bình luận...'}
               placeholderTextColor={COLORS.textMuted}
               value={comment}
               onChangeText={setComment}
@@ -796,6 +834,20 @@ const PostDetailScreen = ({ route, navigation }) => {
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* Emoji Sheet for Comments */}
+        <StickerEmojiSheet
+          visible={emojiSheetVisible}
+          onClose={() => setEmojiSheetVisible(false)}
+          onSelect={(item) => {
+            if (item.type === 'emoji' && item.emoji) {
+              setComment(prev => prev + item.emoji);
+            }
+            setEmojiSheetVisible(false);
+          }}
+          context="comment"
+          defaultTab="emoji"
+        />
         {AlertComponent}
     </LinearGradient>
   );
@@ -899,6 +951,12 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
     backgroundColor: COLORS.bgMid,
   },
+  // Phase 1: Reaction Summary Container
+  reactionSummaryContainer: {
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.xs,
+    marginBottom: SPACING.xs,
+  },
   // Facebook-style Action Bar - Left + Right split
   actionBar: {
     flexDirection: 'row',
@@ -935,6 +993,18 @@ const styles = StyleSheet.create({
   commentsSection: {
     paddingHorizontal: SPACING.lg,
     paddingBottom: 20,
+  },
+  // Phase 3: Comments loading state
+  commentsLoading: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SPACING.xl,
+    gap: SPACING.sm,
+  },
+  commentsLoadingText: {
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textMuted,
   },
   noComments: {
     fontFamily: 'System',
@@ -1072,6 +1142,13 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     maxHeight: 100,
     paddingVertical: SPACING.sm,
+  },
+  emojiButton: {
+    width: 36,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: SPACING.xs,
   },
   sendButton: {
     width: 40,

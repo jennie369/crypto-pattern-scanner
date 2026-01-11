@@ -5,7 +5,7 @@
  * ADMIN-ONLY TOPICS SUPPORT
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -39,6 +39,9 @@ import SoundPicker from '../../components/SoundPicker';
 import ProductPicker from '../../components/ProductPicker';
 import MentionInput from '../../components/MentionInput';
 // NOTE: AudiencePicker modal removed - using inline dropdown instead
+
+// Link Preview Component (Phase 4)
+import CreatePostLinkPreview from './components/CreatePostLinkPreview';
 
 // Main topic selections - CHỈ 3 TOPIC CHÍNH cho user thường
 const MAIN_TOPICS = [
@@ -195,6 +198,18 @@ const CreatePostScreen = ({ navigation }) => {
 
   // Mention trigger state - for external trigger from Tag People button
   const [triggerMention, setTriggerMention] = useState(false);
+
+  // ========== LINK PREVIEW STATE (Phase 4) ==========
+  const [linkPreviewData, setLinkPreviewData] = useState(null);
+
+  /**
+   * Handle link preview change
+   * Callback từ CreatePostLinkPreview component
+   */
+  const handlePreviewChange = useCallback((previewData) => {
+    setLinkPreviewData(previewData);
+    console.log('[CreatePost] Link preview updated:', previewData?.url || 'null');
+  }, []);
 
   // Calculate aspect ratio when images change
   useEffect(() => {
@@ -440,6 +455,21 @@ const CreatePostScreen = ({ navigation }) => {
       const combinedText = `${title} ${body || title}`;
       const hashtags = hashtagService.extractHashtags(combinedText);
 
+      // Prepare link preview data for database
+      const linkPreviewForDb = linkPreviewData ? {
+        url: linkPreviewData.url,
+        domain: linkPreviewData.domain,
+        title: linkPreviewData.title,
+        description: linkPreviewData.description,
+        image_url: linkPreviewData.image_url || linkPreviewData.image,
+        favicon_url: linkPreviewData.favicon_url || linkPreviewData.favicon,
+        site_name: linkPreviewData.site_name || linkPreviewData.siteName,
+        og_type: linkPreviewData.og_type || linkPreviewData.type,
+        is_video: linkPreviewData.is_video || linkPreviewData.isVideo || false,
+      } : null;
+
+      console.log('[CreatePost] Link preview for DB:', linkPreviewForDb ? linkPreviewForDb.url : 'null');
+
       const { data, error } = await forumService.createPost({
         title: title,
         content: body || title, // If only one line, use it as both title and content
@@ -450,6 +480,9 @@ const CreatePostScreen = ({ navigation }) => {
         feed_type: feedType,
         visibility: audience, // Save audience setting: 'public', 'followers', 'private'
         sound_id: selectedSound?.id || null, // Save attached sound
+        // ========== LINK PREVIEW (Phase 4) ==========
+        link_preview: linkPreviewForDb,
+        extracted_urls: linkPreviewForDb?.url ? [linkPreviewForDb.url] : [],
       });
 
       if (error) {
@@ -526,7 +559,8 @@ const CreatePostScreen = ({ navigation }) => {
 
         <KeyboardAvoidingView
           style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
         >
           <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
             {/* Topic Selector - CHỈ HIỂN THỊ CHO ADMIN */}
@@ -612,6 +646,15 @@ const CreatePostScreen = ({ navigation }) => {
               />
               <Text style={styles.hint}>💡 Dòng đầu tiên sẽ tự động trở thành tiêu đề. Dùng @ để tag, # cho hashtag</Text>
             </View>
+
+            {/* ═══════════════════════════════════════════ */}
+            {/* LINK PREVIEW SECTION (Phase 4) */}
+            {/* ═══════════════════════════════════════════ */}
+            <CreatePostLinkPreview
+              content={content}
+              onPreviewChange={handlePreviewChange}
+              disabled={submitting}
+            />
 
             {/* ═══════════════════════════════════════════ */}
             {/* ACTION TOOLBAR - Photo, Tag People (MOVED UP) */}

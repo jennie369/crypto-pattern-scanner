@@ -160,7 +160,7 @@ const CompactSidebar = () => {
       }
     },
     expanded: {
-      width: 90, // Icon + text below
+      width: 130, // Icon + text below (increased from 90 for better subtitle visibility)
       transition: {
         type: 'spring',
         damping: 25,

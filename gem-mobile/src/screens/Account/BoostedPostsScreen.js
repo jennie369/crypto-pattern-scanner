@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowLeft, Zap, TrendingUp, Eye, Clock, AlertCircle } from 'lucide-react-native';
+import { ArrowLeft, Zap, TrendingUp, Eye, Clock, AlertCircle, Plus } from 'lucide-react-native';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { boostService } from '../../services/boostService';
 import { useAuth } from '../../contexts/AuthContext';
@@ -222,6 +222,17 @@ export default function BoostedPostsScreen({ navigation }) {
             }
           />
         )}
+
+        {/* FAB for creating new boost */}
+        {campaigns.length > 0 && (
+          <TouchableOpacity
+            style={styles.fab}
+            onPress={() => navigation.navigate('SelectPostForBoost')}
+            activeOpacity={0.8}
+          >
+            <Plus size={24} color={COLORS.gold} strokeWidth={2.5} />
+          </TouchableOpacity>
+        )}
       </SafeAreaView>
     </LinearGradient>
   );
@@ -399,5 +410,23 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.fontSize.lg,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: '#112250',
+  },
+  fab: {
+    position: 'absolute',
+    right: SPACING.lg,
+    bottom: 140,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: GLASS.background,
+    borderWidth: 1.2,
+    borderColor: 'rgba(106, 91, 255, 0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
 });

@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 1.4: Trading Flag & Pennant</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        .section, .content-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .section p, .section-content p, p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+
+        .section ul, .section-content ul, ul {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        .section li, .section-content li, li { margin-bottom: var(--space-sm); color: var(--text-secondary); }
+        li strong { color: var(--gold); }
+
+        .image-placeholder, .image-container img {
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-placeholder, .image-container img { border-radius: 0; border: none; margin: var(--space-md) 0; }
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box h4 { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05));
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .warning-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--error);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .warning-box h4 { font-weight: 700; color: var(--error); margin-bottom: var(--space-sm); }
+        .warning-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .definition-box h4 { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); }
+
+        .success-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05));
+            border: 1px solid rgba(0, 200, 83, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .success-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .success-box h4 { font-weight: 700; color: var(--success); margin-bottom: var(--space-sm); }
+        .success-box p { color: var(--text-secondary); margin: 0; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .stats-grid {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .stat-card { border: none; border-radius: 0; padding: var(--space-md); }
+        }
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: block;
+            margin-bottom: var(--space-xs);
+            color: var(--cyan);
+        }
+        .stat-card .value.red { color: var(--error); }
+        .stat-card .value.gold { color: var(--gold); }
+        .stat-card .value.green { color: var(--success); }
+        .stat-card .label { font-size: 0.85rem; color: var(--text-muted); }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-box h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+        }
+        .summary-box ul { list-style: none; padding: 0; }
+        .summary-box li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-box li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-section {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-lg) 16px;
+                margin-top: 0;
+                border-top: 8px solid var(--bg-primary);
+            }
+        }
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-question {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin-bottom: 0;
+                border-bottom: 1px solid var(--glass-border);
+            }
+        }
+        .quiz-question h4, .question-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+            color: var(--success);
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+            color: var(--error);
+        }
+
+        .quiz-result {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+            color: var(--success);
+        }
+        .quiz-result.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+            color: var(--error);
+        }
+
+        .quiz-score {
+            text-align: center;
+            padding: var(--space-xl);
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), transparent);
+            border: 1px solid var(--purple);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-lg);
+            display: none;
+        }
+        .quiz-score.show { display: block; }
+        .quiz-score h3, .quiz-score-text { color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-score p { color: var(--text-secondary); }
+
+        .retake-btn {
+            margin-top: var(--space-md);
+            padding: var(--space-md) var(--space-xl);
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            color: var(--navy-dark);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .lesson-footer {
+                border: none;
+                border-radius: 0;
+                margin-top: 0;
+                padding: var(--space-lg) 16px;
+            }
+        }
+        .lesson-footer p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        .lesson-footer .highlight { color: var(--gold); font-weight: 600; }
+
+        strong { color: var(--gold); }
+
+        /* Additional classes for compatibility */
+        .path-card, .whale-card, .pattern-card, .example-card, .trade-result, .phase-card, .checklist {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .path-card h4, .whale-card h4, .pattern-card h4, .example-card h4 { color: var(--cyan); margin-bottom: var(--space-sm); }
+        .path-card.gold h4 { color: var(--gold); }
+        .path-card.green h4 { color: var(--success); }
+
+        .stat-row { display: flex; justify-content: space-around; flex-wrap: wrap; gap: var(--space-md); margin: var(--space-lg) 0; }
+        .stat-item { text-align: center; padding: var(--space-md); background: var(--bg-card); border-radius: var(--radius-md); flex: 1; min-width: 120px; }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--cyan); }
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: var(--space-xs); }
+
+        .whale-type-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md); margin: var(--space-lg) 0; }
+        .whale-type { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); border-top: 3px solid var(--cyan); }
+        .whale-type h4 { color: var(--text-primary); margin-bottom: var(--space-sm); }
+        .whale-type .size { color: var(--gold); font-weight: 600; }
+
+        .reason-list { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        .reason-item { display: flex; gap: var(--space-md); margin-bottom: var(--space-md); align-items: flex-start; }
+        .reason-number { background: linear-gradient(135deg, var(--cyan), var(--purple)); color: var(--navy-dark); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+        .reason-content h4 { color: var(--text-primary); margin-bottom: var(--space-xs); }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="container">
+        <div class="lesson-header">
+            <span class="lesson-badge">Tier 3 Elite</span>
+            <h1 class="lesson-title">Bài 1.4: Trading Flag & Pennant</h1>
+            <p class="lesson-subtitle">Chiến lược giao dịch chi tiết với Flag và Pennant</p>
+        </div>
+
+        <div class="content-section">
+            <span class="section-label">📋 Quy trình</span>
+            <h2 class="section-title">5-Step Trading Process</h2>
+
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h4>Xác Định Trend Chính</h4>
+                    <p>Kiểm tra trend trên timeframe cao hơn. Flag/Pennant hoạt động tốt nhất khi theo hướng trend chính của thị trường.</p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h4>Nhận Diện Pattern</h4>
+                    <p>Tìm Flagpole (đợt di chuyển mạnh) + Flag/Pennant (consolidation). Xác nhận volume giảm trong giai đoạn consolidation.</p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h4>Chờ Breakout</h4>
+                    <p>Không vào lệnh sớm! Chờ giá phá vỡ đường biên pattern với volume tăng. Có thể chờ retest để entry an toàn hơn.</p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h4>Đặt Stop Loss</h4>
+                    <p>SL đặt bên kia pattern: Bullish → dưới đáy Flag/Pennant. Bearish → trên đỉnh Flag/Pennant.</p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <h4>Set Take Profit</h4>
+                    <p>Target = Entry ± Chiều cao Flagpole. Có thể chia thành TP1, TP2 để quản lý lệnh tốt hơn.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <span class="section-label">✅ Checklist</span>
+            <h2 class="section-title">Pre-Trade Checklist</h2>
+
+            <ul class="checklist">
+                <li>Trend chính trên HTF cùng hướng với pattern?</li>
+                <li>Flagpole đủ mạnh và nhanh (volume cao)?</li>
+                <li>Consolidation ngắn (1-3 tuần)?</li>
+                <li>Volume giảm trong Flag/Pennant?</li>
+                <li>Flag không retrace quá 50% Flagpole?</li>
+                <li>Breakout có volume confirmation?</li>
+                <li>R:R tối thiểu 1:2?</li>
+            </ul>
+
+            <div class="image-placeholder">
+                <img src="https://via.placeholder.com/700x350/1a0a2e/8B5CF6?text=Trading+Checklist+-+Visualization" alt="Trading Checklist">
+                <p class="image-caption">Hình 1.4.1: Pre-trade checklist visualization</p>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <span class="section-label">🎯 Entry Strategies</span>
+            <h2 class="section-title">3 Chiến Lược Entry</h2>
+
+            <div class="grid-2">
+                <div class="grid-item purple">
+                    <h4 style="color: #8B5CF6; margin-bottom: 0.5rem;">1. Breakout Entry</h4>
+                    <p style="font-size: 0.9rem;">Vào lệnh ngay khi giá breakout. Ưu điểm: Không bỏ lỡ cơ hội. Nhược điểm: Risk cao hơn nếu false breakout.</p>
+                </div>
+                <div class="grid-item gold">
+                    <h4 style="color: #FFBD59; margin-bottom: 0.5rem;">2. Retest Entry</h4>
+                    <p style="font-size: 0.9rem;">Chờ giá retest đường biên sau breakout. Ưu điểm: Entry tốt hơn, SL chặt hơn. Nhược điểm: Có thể bỏ lỡ nếu không retest.</p>
+                </div>
+            </div>
+
+            <div class="highlight-box green">
+                <h4 style="color: #10B981; margin-bottom: 0.5rem;">3. Split Entry (Khuyên dùng)</h4>
+                <p>Chia position thành 2 phần: 50% vào khi breakout, 50% vào khi retest. Cân bằng giữa opportunity và risk management.</p>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://via.placeholder.com/700x400/1a0a2e/10B981?text=3+Entry+Strategies+-+Chart+Example" alt="Entry Strategies">
+                <p class="image-caption">Hình 1.4.2: 3 chiến lược entry trên chart thực tế</p>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <span class="section-label">⛔ Stop Loss</span>
+            <h2 class="section-title">Đặt Stop Loss Đúng Cách</h2>
+
+            <div class="grid-2">
+                <div class="grid-item green">
+                    <h4 style="color: #10B981; margin-bottom: 0.5rem;">Bullish Flag/Pennant</h4>
+                    <ul style="font-size: 0.9rem; margin-left: 1rem;">
+                        <li>SL dưới đáy của pattern</li>
+                        <li>Hoặc dưới đường trendline dưới</li>
+                        <li>Buffer: 1-2 ATR bên dưới</li>
+                    </ul>
+                </div>
+                <div class="grid-item red">
+                    <h4 style="color: #ef4444; margin-bottom: 0.5rem;">Bearish Flag/Pennant</h4>
+                    <ul style="font-size: 0.9rem; margin-left: 1rem;">
+                        <li>SL trên đỉnh của pattern</li>
+                        <li>Hoặc trên đường trendline trên</li>
+                        <li>Buffer: 1-2 ATR bên trên</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="highlight-box gold">
+                <p><strong>💡 Pro Tip:</strong> Sử dụng ATR (Average True Range) để thêm buffer vào SL. Điều này giúp tránh bị stop out do biến động nhỏ.</p>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <span class="section-label">💰 Take Profit</span>
+            <h2 class="section-title">Chiến Lược Take Profit</h2>
+
+            <div class="highlight-box">
+                <p><strong>📐 Công thức tính Target:</strong></p>
+                <p style="margin-top: 0.5rem; font-size: 1.1rem; color: #8B5CF6;"><strong>Target = Entry Point ± Flagpole Height</strong></p>
+            </div>
+
+            <div class="grid-2">
+                <div class="grid-item purple">
+                    <h4 style="color: #8B5CF6; margin-bottom: 0.5rem;">TP1 (50%)</h4>
+                    <p style="font-size: 0.9rem;">50% chiều cao Flagpole. Chốt 50% position, move SL to breakeven.</p>
+                </div>
+                <div class="grid-item gold">
+                    <h4 style="color: #FFBD59; margin-bottom: 0.5rem;">TP2 (100%)</h4>
+                    <p style="font-size: 0.9rem;">100% chiều cao Flagpole. Chốt 30-40% position còn lại.</p>
+                </div>
+            </div>
+
+            <div class="highlight-box green">
+                <p><strong>TP3 (Trail):</strong> Với 10-20% cuối, trailing stop theo swing high/low. Để profit run nếu trend mạnh.</p>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://via.placeholder.com/700x350/1a0a2e/FFBD59?text=Multi-TP+Strategy+-+Chart" alt="Multi-TP">
+                <p class="image-caption">Hình 1.4.3: Chiến lược Multi-TP trên Flag Pattern</p>
+            </div>
+        </div>
+
+        <div class="content-section">
+            <span class="section-label">⚠️ Lưu ý</span>
+            <h2 class="section-title">Những Lỗi Thường Gặp</h2>
+
+            <div class="highlight-box red">
+                <p><strong>❌ Tránh những lỗi sau:</strong></p>
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li>Vào lệnh quá sớm (trước breakout)</li>
+                    <li>Không chờ volume confirmation</li>
+                    <li>SL quá chặt → bị stop out sớm</li>
+                    <li>Không check trend HTF</li>
+                    <li>Giao dịch pattern yếu (retrace >50%)</li>
+                    <li>FOMO khi đã lỡ breakout</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="summary-box">
+            <h3>📋 Tóm Tắt Bài Học</h3>
+            <ul class="summary-list">
+                <li>5-Step Process: Trend → Pattern → Breakout → SL → TP</li>
+                <li>3 Entry Strategies: Breakout, Retest, Split Entry</li>
+                <li>SL đặt bên kia pattern với buffer (1-2 ATR)</li>
+                <li>Multi-TP: TP1 (50%), TP2 (100%), TP3 (Trail)</li>
+                <li>Luôn check pre-trade checklist trước khi vào lệnh</li>
+            </ul>
+        </div>
+
+        <div class="quiz-section">
+            <span class="section-label">📝 Kiểm Tra</span>
+            <h2 class="section-title">Quiz Nhanh</h2>
+
+            <div class="quiz-question" data-correct="2">
+                <p class="question-text">1. Split Entry strategy là gì?</p>
+                <div class="quiz-option" data-index="0">
+                    <span class="option-letter">A</span>
+                    <span>Vào 100% position khi breakout</span>
+                </div>
+                <div class="quiz-option" data-index="1">
+                    <span class="option-letter">B</span>
+                    <span>Chỉ vào lệnh khi retest</span>
+                </div>
+                <div class="quiz-option" data-index="2">
+                    <span class="option-letter">C</span>
+                    <span>Chia position: 50% breakout, 50% retest</span>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="1">
+                <p class="question-text">2. Target của Flag/Pennant được tính như thế nào?</p>
+                <div class="quiz-option" data-index="0">
+                    <span class="option-letter">A</span>
+                    <span>Entry + Chiều cao của Flag</span>
+                </div>
+                <div class="quiz-option" data-index="1">
+                    <span class="option-letter">B</span>
+                    <span>Entry + Chiều cao của Flagpole</span>
+                </div>
+                <div class="quiz-option" data-index="2">
+                    <span class="option-letter">C</span>
+                    <span>Entry + 2x chiều cao của Flag</span>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <p class="score-text">Kết quả: <span id="correct-count">0</span>/2</p>
+                <button class="retake-btn" onclick="location.reload()">Làm Lại</button>
+            </div>
+        </div>
+
+        <div class="lesson-footer">
+            <p>© 2024 GEM Trading Academy - Tier 3 Elite</p>
+        </div>
+    </div>
+
+    <script>
+        const totalQuestions = 2; let answeredCount = 0; let correctCount = 0;
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+                    question.classList.add('answered'); answeredCount++;
+                    const selectedIndex = parseInt(this.dataset.index);
+                    if (selectedIndex === correctIndex) { this.classList.add('correct'); result.textContent = '✓ Chính xác!'; result.className = 'quiz-result show correct'; correctCount++; }
+                    else { this.classList.add('incorrect'); options[correctIndex].classList.add('correct'); result.textContent = '✗ Chưa đúng.'; result.className = 'quiz-result show incorrect'; }
+                    if (answeredCount === totalQuestions) { document.getElementById('correct-count').textContent = correctCount; document.querySelector('.quiz-score').classList.add('show'); }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

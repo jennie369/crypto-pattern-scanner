@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 1.3: Niềm Tin Giới Hạn | GEM Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==================== VARIABLES ==================== */
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        /* ==================== BACKGROUND ==================== */
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--burgundy); bottom: -50px; right: 20%; }
+
+        /* ==================== CONTAINER ==================== */
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container {
+                padding: 0;
+            }
+        }
+
+        /* ==================== HEADER ==================== */
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--navy-dark);
+            margin-bottom: var(--space-md);
+        }
+        .lesson-chapter {
+            font-size: 0.9rem;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-lg);
+            flex-wrap: wrap;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        /* ==================== SECTION ==================== */
+        .section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section {
+                padding: 0;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .section-title {
+                padding: var(--space-lg) 16px var(--space-md) 16px;
+                margin-bottom: 0;
+            }
+        }
+
+        .section > p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .section > p {
+                padding: 0 16px;
+            }
+        }
+
+        .section > ul, .section > ol {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .section > ul, .section > ol {
+                padding-left: calc(16px + 1.5em);
+                padding-right: 16px;
+            }
+        }
+        .section li { margin-bottom: var(--space-sm); }
+
+        /* ==================== HIGHLIGHT BOXES ==================== */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box-title {
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .definition-box-title {
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(156, 6, 18, 0.05));
+            border: 1px solid rgba(156, 6, 18, 0.4);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .warning-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--burgundy);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .warning-box-title {
+            font-weight: 700;
+            color: var(--burgundy-light);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        /* ==================== IMAGE CONTAINER ==================== */
+        .image-container {
+            margin: var(--space-xl) 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-container {
+                margin: var(--space-md) 0;
+                border-radius: 0;
+                border: none;
+            }
+        }
+        .image-caption {
+            padding: var(--space-sm);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .image-caption {
+                padding: var(--space-sm) 16px;
+            }
+        }
+
+        /* ==================== FLOW STEPS ==================== */
+        .flow-steps {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .flow-steps {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .flow-step {
+            display: flex;
+            gap: var(--space-md);
+            align-items: flex-start;
+            padding: var(--space-md);
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .flow-step {
+                padding: var(--space-md) 16px;
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+            }
+        }
+        @media (min-width: 601px) {
+            .flow-step:hover {
+                border-color: var(--gold);
+                transform: translateX(8px);
+            }
+        }
+        .flow-step-number {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--navy-dark);
+        }
+        .flow-step-content { flex: 1; }
+        .flow-step-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+        }
+        .flow-step-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* ==================== REFRAME TABLE ==================== */
+        .reframe-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .reframe-table {
+                margin: var(--space-md) 0;
+            }
+        }
+        .reframe-table th, .reframe-table td {
+            padding: var(--space-md);
+            text-align: left;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .reframe-table th, .reframe-table td {
+                padding: var(--space-sm) 16px;
+            }
+        }
+        .reframe-table th {
+            background: var(--bg-card);
+            color: var(--gold);
+            font-weight: 700;
+        }
+        .reframe-table td {
+            color: var(--text-secondary);
+        }
+        .reframe-table tr:nth-child(even) td {
+            background: rgba(17, 34, 80, 0.3);
+        }
+        .old-belief {
+            color: var(--burgundy-light) !important;
+            text-decoration: line-through;
+            opacity: 0.8;
+        }
+        .new-belief {
+            color: var(--success) !important;
+            font-weight: 600;
+        }
+
+        /* ==================== LIMITING BELIEFS CARDS ==================== */
+        .beliefs-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .beliefs-grid {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .belief-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .belief-card {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--burgundy);
+                padding: var(--space-md) 16px;
+            }
+        }
+        .belief-number {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            background: var(--burgundy);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-right: var(--space-sm);
+        }
+        .belief-text {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        /* ==================== SUMMARY BOX ==================== */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02));
+            border: 2px solid var(--gold);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .summary-list { list-style: none; }
+        .summary-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-list li::before {
+            content: "✓";
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        /* ==================== FOOTER ==================== */
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .lesson-footer a {
+            color: var(--gold);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>💰</span>
+                <span>Module 1</span>
+            </div>
+            <div class="lesson-chapter">Module 1 - Thức Tỉnh: Nền Tảng</div>
+            <h1 class="lesson-title">Niềm Tin Giới Hạn</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 1.3</span></div>
+                <div class="meta-item"><span>⏱️</span><span>12 phút đọc</span></div>
+                <div class="meta-item"><span>🎯</span><span>Ngày 5-6</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🔓</span> Kẻ Thù Vô Hình</h2>
+            <p>Bạn có bao giờ tự hỏi: Tại sao có người làm việc 12 tiếng mỗi ngày mà vẫn túng thiếu, trong khi người khác làm ít hơn lại giàu có hơn gấp nhiều lần? Tại sao bạn đã đọc hàng chục cuốn sách về làm giàu, tham gia bao nhiêu khóa học, nhưng tình hình tài chính vẫn không thay đổi đáng kể?</p>
+
+            <p>Câu trả lời không nằm ở kỹ năng, không nằm ở cơ hội, cũng không nằm ở may mắn. Câu trả lời nằm ở một thứ vô hình nhưng cực kỳ mạnh mẽ: <strong>Niềm tin giới hạn</strong> - những "bức tường thủy tinh" mà bạn không nhìn thấy nhưng đang ngăn cản mọi nỗ lực của bạn.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🧠</span> Sự Thật Đáng Kinh Ngạc</div>
+                <p>Theo nghiên cứu của Tiến sĩ Bruce Lipton (tác giả "The Biology of Belief"), <strong>95% các quyết định</strong> của chúng ta được đưa ra bởi tiềm thức - nơi lưu trữ những niềm tin được cài đặt từ thời thơ ấu. Điều này có nghĩa là dù bạn có ý chí mạnh mẽ đến đâu, nếu tiềm thức tin rằng "tiền khó kiếm", bạn sẽ vô thức tìm cách chứng minh niềm tin đó là đúng.</p>
+            </div>
+
+            <p>Trong bài học hôm nay, bạn sẽ không chỉ nhận diện những niềm tin giới hạn đang cầm tù mình, mà còn học được kỹ thuật "Choose Again" - phương pháp đã giúp hàng nghìn người thoát khỏi vòng lặp nghèo khó và bước vào trạng thái thịnh vượng. Hãy chuẩn bị tinh thần, vì bạn sắp đối mặt với những sự thật có thể khiến bạn khó chịu - nhưng đó chính là bước đầu tiên để giải phóng.</p>
+        </section>
+
+        <!-- SECTION 1: GIỚI THIỆU -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Giới Thiệu</h2>
+            <p>Chào mừng bạn đến với Bài 1.3 - một trong những bài học quan trọng nhất của khóa học. Hôm nay, chúng ta sẽ đối mặt với "kẻ thù vô hình" đang giữ bạn trong vòng lặp thiếu thốn: <strong>Niềm Tin Giới Hạn</strong>.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📖</span> Niềm Tin Giới Hạn Là Gì?</div>
+                <p>Niềm tin giới hạn (Limiting Beliefs) là những suy nghĩ, quan điểm mà bạn tin là sự thật, nhưng thực tế chỉ là <strong>những câu chuyện bạn tự kể với bản thân</strong>. Chúng hoạt động như một "bộ lọc" vô hình, quyết định những gì bạn có thể thấy, làm và đạt được trong cuộc sống.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M1_B3_01%0ANiem+Tin+Gioi+Han" alt="Niềm Tin Giới Hạn">
+                <div class="image-caption">Niềm tin giới hạn hoạt động như bộ lọc vô hình trong tâm trí</div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: TOP 20 LIMITING BELIEFS -->
+        <section class="section">
+            <h2 class="section-title"><span>🔴</span> Top 20 Niềm Tin Giới Hạn Về Tiền Bạc</h2>
+            <p>Dưới đây là 20 niềm tin giới hạn phổ biến nhất mà hầu hết mọi người đều mang theo. Hãy đánh dấu những niềm tin mà bạn nhận ra trong chính mình:</p>
+
+            <div class="beliefs-grid">
+                <div class="belief-card">
+                    <span class="belief-number">1</span>
+                    <span class="belief-text">"Tiền khó kiếm"</span>
+                </div>
+                <div class="belief-card">
+                    <span class="belief-number">2</span>
+                    <span class="belief-text">"Tôi không đủ giỏi để giàu"</span>
+                </div>
+                <div class="belief-card">
+                    <span class="belief-number">3</span>
+                    <span class="belief-text">"Người giàu thường không hạnh phúc"</span>
+                </div>
+                <div class="belief-card">
+                    <span class="belief-number">4</span>
+                    <span class="belief-text">"Tiền là nguồn gốc của mọi tội lỗi"</span>
+                </div>
+                <div class="belief-card">
+                    <span class="belief-number">5</span>
+                    <span class="belief-text">"Gia đình tôi chưa bao giờ giàu"</span>
+                </div>
+                <div class="belief-card">
+                    <span class="belief-number">6</span>
+                    <span class="belief-text">"Tôi phải làm việc cực khổ mới có tiền"</span>
+                </div>
+                <div class="belief-card">
+                    <span class="belief-number">7</span>
+                    <span class="belief-text">"Muốn giàu thì phải gian lận"</span>
+                </div>
+                <div class="belief-card">
+                    <span class="belief-number">8</span>
+                    <span class="belief-text">"Tôi không xứng đáng được giàu có"</span>
+                </div>
+                <div class="belief-card">
+                    <span class="belief-number">9</span>
+                    <span class="belief-text">"Tiền sẽ thay đổi con người tôi"</span>
+                </div>
+                <div class="belief-card">
+                    <span class="belief-number">10</span>
+                    <span class="belief-text">"Có tiền sẽ mất bạn bè"</span>
+                </div>
+                <div class="belief-card">
+                    <span class="belief-number">11</span>
+                    <span class="belief-text">"Tôi không biết cách quản lý tiền"</span>
+                </div>
+                <div class="belief-card">
+                    <span class="belief-number">12</span>
+                    <span class="belief-text">"Tiền đến rồi sẽ đi"</span>
+                </div>
+                <div class="belief-card">
+                    <span class="belief-number">13</span>
+                    <span class="belief-text">"Tôi quá già/trẻ để bắt đầu"</span>
+                </div>
+                <div class="belief-card">
+                    <span class="belief-number">14</span>
+                    <span class="belief-text">"Thời buổi này khó kiếm tiền"</span>
+                </div>
+                <div class="belief-card">
+                    <span class="belief-number">15</span>
+                    <span class="belief-text">"Tôi không có vốn"</span>
+                </div>
+                <div class="belief-card">
+                    <span class="belief-number">16</span>
+                    <span class="belief-text">"Phải có bằng cấp cao mới giàu được"</span>
+                </div>
+                <div class="belief-card">
+                    <span class="belief-number">17</span>
+                    <span class="belief-text">"Tôi số không may mắn"</span>
+                </div>
+                <div class="belief-card">
+                    <span class="belief-number">18</span>
+                    <span class="belief-text">"Giàu thì phải hy sinh gia đình"</span>
+                </div>
+                <div class="belief-card">
+                    <span class="belief-number">19</span>
+                    <span class="belief-text">"Tôi không có thời gian"</span>
+                </div>
+                <div class="belief-card">
+                    <span class="belief-number">20</span>
+                    <span class="belief-text">"Đợi thời cơ tốt hơn mới bắt đầu"</span>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>⚠️</span> Cảnh Báo Quan Trọng</div>
+                <p>Nếu bạn nhận ra <strong>3 niềm tin trở lên</strong> trong danh sách này, đây là dấu hiệu rõ ràng rằng bạn đang mang theo "hành lý" năng lượng nặng nề từ quá khứ. Đừng lo - bạn có thể thay đổi!</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: KỸ THUẬT CHOOSE AGAIN -->
+        <section class="section">
+            <h2 class="section-title"><span>🔄</span> Kỹ Thuật "Choose Again"</h2>
+            <p>Đây là kỹ thuật mạnh mẽ nhất để chuyển hóa niềm tin giới hạn. Quy trình này dựa trên nguyên lý: <strong>Bạn không thể xóa một tư tưởng, nhưng bạn có thể CHỌN một tư tưởng khác.</strong></p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x600/0a1628/FFBD59?text=HINH+8%0AChoose+Again+Process" alt="Hình 8: Choose Again Process">
+                <div class="image-caption">Hình 8: Quy trình Choose Again - Notice, Forgive, Choose</div>
+            </div>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">NOTICE - Nhận Diện</div>
+                        <div class="flow-step-desc">Khi có suy nghĩ tiêu cực về tiền bạc xuất hiện, đừng chống lại. Chỉ cần nhận ra: "Ồ, đây là một niềm tin giới hạn." Quan sát nó như một người ngoài cuộc. Ví dụ: "Tôi nhận ra mình đang nghĩ 'tiền khó kiếm'."</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">FORGIVE - Tha Thứ</div>
+                        <div class="flow-step-desc">Tha thứ cho bản thân vì đã tin vào điều này. Nói: "Tôi tha thứ cho bản thân vì đã tin điều này. Đây không phải lỗi của tôi - tôi được dạy như vậy." Điều này giải phóng năng lượng bám chấp.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">CHOOSE - Chọn Lại</div>
+                        <div class="flow-step-desc">Thay thế bằng niềm tin mới: "Tôi CHỌN tin rằng [niềm tin thịnh vượng mới]." Ví dụ: "Tôi CHỌN tin rằng tiền đến với tôi một cách dễ dàng và dồi dào."</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Bí Quyết Thành Công</div>
+                <p>Lặp lại quy trình này <strong>mỗi khi</strong> niềm tin giới hạn xuất hiện. Không cần cố gắng ngăn chặn nó - chỉ cần lặp lại 3 bước. Sau 21-49 ngày, não bộ sẽ tự động chuyển sang niềm tin mới.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 4: BẢNG REFRAME -->
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> Bảng Reframe Niềm Tin</h2>
+            <p>Dưới đây là bảng chuyển đổi từ niềm tin giới hạn sang niềm tin thịnh vượng. Bạn có thể sử dụng bảng này như tài liệu tham khảo hàng ngày:</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x600/0a1628/00F0FF?text=M1_B3_02%0AReframe+Table" alt="Bảng Reframe">
+                <div class="image-caption">Bảng chuyển đổi niềm tin - Từ giới hạn sang thịnh vượng</div>
+            </div>
+
+            <table class="reframe-table">
+                <thead>
+                    <tr>
+                        <th>Niềm Tin Giới Hạn</th>
+                        <th>Niềm Tin Thịnh Vượng</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="old-belief">"Tiền khó kiếm"</td>
+                        <td class="new-belief">"Tiền đến với tôi dễ dàng và dồi dào"</td>
+                    </tr>
+                    <tr>
+                        <td class="old-belief">"Tôi không đủ giỏi"</td>
+                        <td class="new-belief">"Tôi có giá trị độc đáo mà thế giới cần"</td>
+                    </tr>
+                    <tr>
+                        <td class="old-belief">"Gia đình tôi chưa bao giờ giàu"</td>
+                        <td class="new-belief">"Tôi là người mở đường cho dòng họ"</td>
+                    </tr>
+                    <tr>
+                        <td class="old-belief">"Phải làm việc cực khổ mới có tiền"</td>
+                        <td class="new-belief">"Tôi được trả công xứng đáng cho giá trị tôi tạo ra"</td>
+                    </tr>
+                    <tr>
+                        <td class="old-belief">"Tôi không xứng đáng được giàu"</td>
+                        <td class="new-belief">"Tôi xứng đáng nhận mọi điều tốt đẹp"</td>
+                    </tr>
+                    <tr>
+                        <td class="old-belief">"Tiền đến rồi sẽ đi"</td>
+                        <td class="new-belief">"Tiền đến với tôi và ở lại với tôi"</td>
+                    </tr>
+                    <tr>
+                        <td class="old-belief">"Tôi số không may mắn"</td>
+                        <td class="new-belief">"Tôi tạo ra vận may của chính mình"</td>
+                    </tr>
+                    <tr>
+                        <td class="old-belief">"Thời buổi này khó kiếm tiền"</td>
+                        <td class="new-belief">"Đây là thời đại đầy cơ hội cho tôi"</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- SECTION 5: TÍCH HỢP RITUAL -->
+        <section class="section">
+            <h2 class="section-title"><span>🔥</span> Nghi Thức Burn & Release</h2>
+            <p>Để tăng hiệu quả chuyển hóa, bạn có thể kết hợp kỹ thuật Choose Again với Nghi Thức Burn & Release trong GEM App:</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/6A5BFF?text=M1_B3_03%0ABurn+Release+Ritual" alt="Nghi Thức Burn & Release">
+                <div class="image-caption">Nghi thức Burn & Release giúp giải phóng năng lượng niềm tin cũ</div>
+            </div>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Viết Ra Niềm Tin Giới Hạn</div>
+                        <div class="flow-step-desc">Mở GEM App → Vision Board → Burn & Release. Viết chi tiết niềm tin bạn muốn giải phóng.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Đọc To Và Cảm Nhận</div>
+                        <div class="flow-step-desc">Đọc to niềm tin đó một lần. Cho phép bản thân cảm nhận cảm xúc liên quan.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Nhấn "Release" Và Quan Sát</div>
+                        <div class="flow-step-desc">Nhấn nút Release, quan sát animation lửa đốt cháy. Hít thở sâu và nói: "Tôi buông bỏ. Tôi tự do."</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🌟</span> Thời Điểm Tốt Nhất</div>
+                <p>Thực hiện Burn & Release vào buổi tối trước khi ngủ hoặc vào ngày Trăng Non (New Moon) để tối đa hóa hiệu quả giải phóng.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 6: BÀI TẬP -->
+        <section class="section">
+            <h2 class="section-title"><span>✍️</span> Bài Tập Thực Hành</h2>
+
+            <p>Hoàn thành các bài tập sau trong 2 ngày tới:</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Xác Định 5 Niềm Tin Giới Hạn Của Bạn</div>
+                        <div class="flow-step-desc">Từ Top 20, chọn 5 niềm tin mà bạn cảm thấy "chạm" nhất. Viết ra giấy hoặc trong GEM App Journal.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Thực Hành Choose Again 3 Lần/Ngày</div>
+                        <div class="flow-step-desc">Mỗi khi niềm tin giới hạn xuất hiện, áp dụng quy trình Notice → Forgive → Choose.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Làm Nghi Thức Burn & Release</div>
+                        <div class="flow-step-desc">Thực hiện 1 lần Burn & Release trong GEM App cho niềm tin mạnh nhất.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x400/0a1628/00C853?text=M1_B3_04%0ATom+Tat+Bai+Tap" alt="Tóm tắt bài tập">
+                <div class="image-caption">Hoàn thành 3 bài tập trong 2 ngày để chuẩn bị cho Bài 1.4</div>
+            </div>
+        </section>
+
+        <!-- REAL STORIES SECTION -->
+        <section class="section">
+            <h2 class="section-title"><span>💫</span> Câu Chuyện Thực Tế</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>👤</span> Câu Chuyện Của Hằng - 33 tuổi, Nhân viên Ngân hàng</div>
+                <p>Hằng lớn lên trong gia đình có mẹ là giáo viên và bố là công nhân. Từ nhỏ, cô nghe đi nghe lại câu: "Nhà mình nghèo nên con phải chăm học, đi làm công ty nhà nước cho ổn định." Dù học giỏi và có nhiều cơ hội kinh doanh, Hằng luôn từ chối vì tin rằng "kinh doanh rủi ro, không phù hợp với người như mình."</p>
+                <p style="margin-top: var(--space-sm);">Khi tham gia khóa học và thực hành kỹ thuật Choose Again, Hằng nhận ra niềm tin giới hạn sâu nhất của mình: <strong>"Tôi sinh ra trong gia đình không có gen kinh doanh."</strong> Cô bắt đầu thực hành: Notice (nhận ra mỗi khi từ chối cơ hội) → Forgive (tha thứ cho bản thân và cha mẹ) → Choose ("Tôi có thể học bất kỳ kỹ năng nào tôi muốn").</p>
+                <p style="margin-top: var(--space-sm);">Sau 49 ngày, Hằng mạnh dạn mở một kênh YouTube về tài chính cá nhân - điều cô chưa bao giờ dám nghĩ tới. Chỉ sau 8 tháng, kênh đạt 50,000 subscribers và thu nhập từ YouTube đã <strong>vượt qua lương ngân hàng</strong>. "Điều kỳ diệu không phải là tôi học được kỹ năng mới, mà là tôi không còn tự giới hạn mình nữa," Hằng chia sẻ.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>👤</span> Câu Chuyện Của Anh Vinh - 45 tuổi, Chủ Xưởng Cơ Khí</div>
+                <p>Anh Vinh có xưởng cơ khí 15 năm nhưng luôn "dậm chân tại chỗ" với 5 nhân viên và doanh thu chỉ đủ trang trải. Mỗi khi có cơ hội mở rộng, anh đều tìm lý do để từ chối: "Thị trường không tốt", "Không có vốn", "Nhân viên khó quản lý"...</p>
+                <p style="margin-top: var(--space-sm);">Khi làm bài tập xác định 5 niềm tin giới hạn, anh Vinh sốc khi nhận ra tất cả đều bắt nguồn từ một niềm tin gốc: <strong>"Người lương thiện không thể giàu."</strong> Niềm tin này được "truyền thừa" từ bố - một người thợ cơ khí suốt đời nghèo nhưng tự hào về sự "trong sạch" của mình.</p>
+                <p style="margin-top: var(--space-sm);">Anh Vinh thực hành Burn & Release mỗi tối trong 21 ngày, viết ra và "đốt" niềm tin này. Đồng thời, anh áp dụng Choose Again với niềm tin mới: "Tôi có thể vừa giàu có vừa lương thiện, và sự giàu có giúp tôi làm được nhiều điều tốt hơn cho cộng đồng."</p>
+                <p style="margin-top: var(--space-sm);">Kết quả sau 1 năm: Xưởng mở rộng lên <strong>25 nhân viên</strong>, ký được hợp đồng với 2 tập đoàn lớn, và anh còn dành 10% lợi nhuận để hỗ trợ học nghề cho thanh niên khó khăn. "Hóa ra bố tôi sai - giàu có không làm tôi xấu đi, mà cho tôi sức mạnh để tốt hơn," anh Vinh tâm sự.</p>
+            </div>
+        </section>
+
+        <!-- KEY TAKEAWAYS SECTION -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Điểm Mấu Chốt</h2>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Niềm Tin Giới Hạn Không Phải Sự Thật</div>
+                        <div class="flow-step-desc">Chúng chỉ là những "câu chuyện" bạn vô tình học được từ môi trường xung quanh - gia đình, xã hội, trải nghiệm quá khứ. Bạn có quyền viết lại câu chuyện của mình bất cứ lúc nào.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Kỹ Thuật Choose Again Là Công Cụ Chuyển Hóa</div>
+                        <div class="flow-step-desc">Ba bước Notice → Forgive → Choose giúp bạn thay thế niềm tin cũ bằng niềm tin mới. Không cần cố xóa bỏ - chỉ cần lặp lại đủ nhiều để não bộ hình thành đường dẫn thần kinh mới.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Kiên Trì 21-49 Ngày Để Tạo Thay Đổi Vĩnh Viễn</div>
+                        <div class="flow-step-desc">Khoa học thần kinh chứng minh rằng cần ít nhất 21 ngày để hình thành thói quen mới và 49-66 ngày để biến nó thành tự động. Đừng bỏ cuộc giữa chừng.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TRANSITION SECTION -->
+        <section class="section">
+            <h2 class="section-title"><span>🚀</span> Chuẩn Bị Cho Bước Tiếp Theo</h2>
+
+            <p>Bạn đã học cách nhận diện và chuyển hóa niềm tin giới hạn - đây là bước quan trọng để dọn dẹp "phần mềm cũ" trong tâm trí. Nhưng dọn dẹp thôi chưa đủ, bạn cần <strong>cài đặt lại hệ thống</strong> với những chương trình mới.</p>
+
+            <p>Trong <strong>Bài 1.4: Nghi Thức Khai Mở</strong>, bạn sẽ học 7 bước thanh tẩy tâm thức và thực hành một bài meditation đặc biệt để "reset" lại toàn bộ hệ thống niềm tin của mình. Đây sẽ là bài cuối cùng của Module 1 - nền tảng quan trọng trước khi bạn bước vào Module 2 về Hóa Giải Nghiệp Tiền Bạc.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📝</span> Bài Tập Trước Khi Học Tiếp</div>
+                <p><strong>Hoàn thành 3 bài tập trong phần Bài Tập Thực Hành ở trên</strong>: Xác định 5 niềm tin giới hạn của bạn, thực hành Choose Again 3 lần/ngày, và làm 1 lần Burn & Release trong GEM App. Điều này giúp bạn tối đa hóa hiệu quả của Nghi Thức Khai Mở trong bài tiếp theo.</p>
+            </div>
+        </section>
+
+        <!-- SUMMARY SECTION -->
+        <section class="section">
+            <div class="summary-box">
+                <div class="summary-title"><span>📌</span> Tóm Tắt Bài Học</div>
+                <ul class="summary-list">
+                    <li>Niềm tin giới hạn là những "câu chuyện" bạn tự kể với bản thân, không phải sự thật</li>
+                    <li>Top 20 niềm tin giới hạn về tiền bạc - hầu hết mọi người có ít nhất 3-5 niềm tin này</li>
+                    <li>Kỹ thuật Choose Again: Notice (Nhận diện) → Forgive (Tha thứ) → Choose (Chọn lại)</li>
+                    <li>Bảng Reframe giúp bạn chuyển đổi từ niềm tin giới hạn sang niềm tin thịnh vượng</li>
+                    <li>Nghi thức Burn & Release trong GEM App giúp giải phóng năng lượng niềm tin cũ</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <p>© 2024 GEM Academy | <a href="https://gemral.com">gemral.com</a></p>
+            <p style="margin-top: var(--space-sm);">Tiếp theo: Bài 1.4 - Nghi Thức Khai Mở →</p>
+        </footer>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 4.1: Sức Mạnh Nghi Thức Buổi Sáng | GEM Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.5rem, 5vw, 2.25rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .definition-box p { color: var(--text-secondary); margin: 0; }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        @media (min-width: 601px) { .flow-step:hover { border-color: var(--gold); transform: translateX(8px); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .ritual-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .ritual-grid { grid-template-columns: 1fr; gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .ritual-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); }
+        @media (max-width: 600px) { .ritual-card { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; } }
+        .ritual-emoji { font-size: 2rem; margin-bottom: var(--space-sm); }
+        @media (max-width: 600px) { .ritual-emoji { font-size: 1.5rem; display: inline; margin-right: var(--space-sm); } }
+        .ritual-name { font-weight: 700; color: var(--gold); margin-bottom: var(--space-xs); }
+        @media (max-width: 600px) { .ritual-name { display: inline; } }
+        .ritual-time { font-size: 0.8rem; color: var(--cyan); margin-bottom: var(--space-sm); }
+        @media (max-width: 600px) { .ritual-time { display: block; margin-top: var(--space-xs); } }
+        .ritual-desc { font-size: 0.85rem; color: var(--text-muted); }
+
+        .app-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .app-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .app-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); }
+        .app-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .app-box p:last-child { margin-bottom: 0; }
+
+        .timeline-box { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .timeline-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .timeline-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-md); font-size: 1.1rem; }
+        .timeline-item { display: flex; gap: var(--space-md); margin-bottom: var(--space-md); align-items: flex-start; }
+        .timeline-item:last-child { margin-bottom: 0; }
+        .timeline-time { min-width: 60px; font-weight: 700; color: var(--cyan); font-size: 0.9rem; }
+        .timeline-content { flex: 1; color: var(--text-secondary); font-size: 0.9rem; }
+
+        .lesson-footer { text-align: center; padding: var(--space-xl); color: var(--text-muted); font-size: 0.85rem; }
+        .lesson-footer a { color: var(--gold); text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>🌅</span>
+                <span>Module 4</span>
+            </div>
+            <div class="lesson-chapter">Module 4 - Nghi Thức Triệu Phú</div>
+            <h1 class="lesson-title">Sức Mạnh Nghi Thức Buổi Sáng</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 4.1</span></div>
+                <div class="meta-item"><span>⏱️</span><span>20 phút đọc</span></div>
+                <div class="meta-item"><span>🎯</span><span>Thiết kế routine</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Bạn Có Biết?</h2>
+            <p>Cùng thức dậy lúc 6 giờ sáng, nhưng tại sao có người bước vào ngày mới tràn đầy năng lượng và tự tin, trong khi người khác lại cảm thấy mệt mỏi và lo lắng ngay từ những phút đầu tiên?</p>
+            <p>Sự khác biệt không nằm ở việc họ ngủ bao nhiêu tiếng đêm qua, mà nằm ở những gì họ làm trong 30 phút đầu tiên sau khi thức dậy.</p>
+            <p>Nghiên cứu từ Đại học Stanford cho thấy những người có nghi thức buổi sáng cố định có năng suất cao hơn 40% và thu nhập cao hơn 25% so với những người không có routine nào cả.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🌅</span> Sự Thật Đáng Ngạc Nhiên</div>
+                <p>Trong nghiên cứu về 177 triệu phú tự thân của tác giả Tom Corley, ông phát hiện rằng 89% trong số họ dậy trước 6 giờ sáng và đều có một bộ nghi thức cố định thực hiện mỗi ngày.</p>
+                <p style="margin-top: var(--space-sm);">Họ không chỉ dậy sớm - họ dậy sớm VỚI MỤC ĐÍCH. Và mục đích đó là "cài đặt" tần số thịnh vượng cho cả ngày phía trước.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 1: TẠI SAO BUỔI SÁNG QUAN TRỌNG -->
+        <section class="section">
+            <h2 class="section-title"><span>🌅</span> Tại Sao Buổi Sáng Quan Trọng?</h2>
+            <p>Bạn có biết rằng 80% người thành công nhất thế giới đều có nghi thức buổi sáng cố định? Không phải ngẫu nhiên. Buổi sáng là thời điểm vàng để "lập trình" ngày mới.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🧠</span> Khoa Học Về Sóng Não Buổi Sáng</div>
+                <p>Khi vừa thức dậy, não bạn ở trạng thái <strong>sóng Alpha/Theta</strong> - trạng thái "cửa sổ" giữa ý thức và tiềm thức. Đây là lúc tiềm thức dễ tiếp nhận "lập trình" nhất. Những gì bạn nghĩ, cảm nhận, làm trong 30-60 phút đầu ngày sẽ định hình TẦN SỐ cả ngày.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M4_B1_01%0AMorning+Brain+Waves" alt="Sóng não buổi sáng">
+                <div class="image-caption">Sóng Alpha/Theta buổi sáng - "Cửa sổ" vào tiềm thức</div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>⚠️</span> Thói Quen Phá Hoại Tần Số</div>
+                <p>Điều NHIỀU người làm ngay khi thức dậy: Kiểm tra điện thoại → đọc tin tức tiêu cực → xem email công việc → lo lắng. Kết quả? Họ vừa "lập trình" cả ngày với tần số thấp: lo âu, phản ứng, áp lực.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Nguyên tắc vàng:</strong> KHÔNG chạm điện thoại trong 30 phút đầu tiên.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: 7 NGHI THỨC CỦA JENNIE -->
+        <section class="section">
+            <h2 class="section-title"><span>✨</span> 7 Nghi Thức Buổi Sáng Của Jennie</h2>
+            <p>Đây là 7 nghi thức mà Jennie Uyen Chu thực hành mỗi sáng để duy trì tần số thịnh vượng. Bạn không cần làm tất cả - hãy chọn 3-5 nghi thức phù hợp với bạn.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x600/0a1628/FFBD59?text=HINH+19%0A7+Morning+Rituals" alt="Hình 19: 7 Nghi Thức Buổi Sáng">
+                <div class="image-caption">Hình 19: 7 Nghi Thức Buổi Sáng Của Người Thịnh Vượng</div>
+            </div>
+
+            <div class="ritual-grid">
+                <div class="ritual-card">
+                    <div class="ritual-emoji">🙏</div>
+                    <div class="ritual-name">1. Gratitude</div>
+                    <div class="ritual-time">2-3 phút</div>
+                    <div class="ritual-desc">Nằm yên, nghĩ 3 điều biết ơn. Cảm nhận thật sâu cảm giác biết ơn trong tim.</div>
+                </div>
+                <div class="ritual-card">
+                    <div class="ritual-emoji">🧘</div>
+                    <div class="ritual-name">2. Breath Work</div>
+                    <div class="ritual-time">3-5 phút</div>
+                    <div class="ritual-desc">10 hơi thở sâu 4-7-8 (hít 4 giây, giữ 7 giây, thở ra 8 giây). Kích hoạt hệ thần kinh đối giao cảm.</div>
+                </div>
+                <div class="ritual-card">
+                    <div class="ritual-emoji">💭</div>
+                    <div class="ritual-name">3. Affirmations</div>
+                    <div class="ritual-time">2-3 phút</div>
+                    <div class="ritual-desc">Đọc 5-10 affirmations thịnh vượng từ Bài 3.3. Nói to hoặc trong tâm, kèm cảm xúc.</div>
+                </div>
+                <div class="ritual-card">
+                    <div class="ritual-emoji">🎬</div>
+                    <div class="ritual-name">4. Visualization</div>
+                    <div class="ritual-time">5-10 phút</div>
+                    <div class="ritual-desc">Sử dụng script Quantum Creating từ Bài 3.4. Hình dung ngày hôm nay hoặc cuộc sống thịnh vượng.</div>
+                </div>
+                <div class="ritual-card">
+                    <div class="ritual-emoji">💧</div>
+                    <div class="ritual-name">5. Hydrate</div>
+                    <div class="ritual-time">1 phút</div>
+                    <div class="ritual-desc">Uống 1 ly nước ấm với chanh. Nói ý định thịnh vượng vào nước trước khi uống.</div>
+                </div>
+                <div class="ritual-card">
+                    <div class="ritual-emoji">🏃</div>
+                    <div class="ritual-name">6. Movement</div>
+                    <div class="ritual-time">5-15 phút</div>
+                    <div class="ritual-desc">Yoga nhẹ, đi bộ, nhảy, hoặc bất kỳ vận động nào. Di chuyển năng lượng trong cơ thể.</div>
+                </div>
+                <div class="ritual-card">
+                    <div class="ritual-emoji">📝</div>
+                    <div class="ritual-name">7. Intention</div>
+                    <div class="ritual-time">2-3 phút</div>
+                    <div class="ritual-desc">Viết 3 ý định cho ngày hôm nay. "Hôm nay tôi sẽ..." Tập trung vào CẢM XÚC muốn trải nghiệm.</div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Tip Từ Jennie</div>
+                <p>"Tôi không cần phải làm tất cả 7 nghi thức mỗi ngày. Ngày bận rộn, tôi chỉ làm 3: Gratitude + Breath + Intention (5 phút). Ngày rảnh, tôi làm full 7 (25-30 phút). Quan trọng là CONSISTENCY, không phải perfection."</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: MORNING ROUTINE 15 PHÚT -->
+        <section class="section">
+            <h2 class="section-title"><span>⏰</span> Morning Routine 15 Phút</h2>
+            <p>Đây là routine tối giản nhưng hiệu quả cao, phù hợp cho người bận rộn. Chỉ cần dậy sớm 15 phút so với bình thường.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x600/0a1628/FFBD59?text=HINH+20%0AMorning+15+Min+Routine" alt="Hình 20: Morning Routine 15 Phút">
+                <div class="image-caption">Hình 20: Morning Routine 15 Phút Cho Người Bận Rộn</div>
+            </div>
+
+            <div class="timeline-box">
+                <div class="timeline-title">⏰ Timeline 15 Phút Buổi Sáng</div>
+                <div class="timeline-item">
+                    <div class="timeline-time">0:00</div>
+                    <div class="timeline-content"><strong>Thức dậy:</strong> Nằm yên 1 phút. Nghĩ 3 điều biết ơn. Mỉm cười.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">1:00</div>
+                    <div class="timeline-content"><strong>Hít thở:</strong> 5 hơi thở sâu 4-4-8 (hít 4 giây, giữ 4 giây, thở 8 giây).</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">3:00</div>
+                    <div class="timeline-content"><strong>Affirmations:</strong> Đọc 5 affirmations thịnh vượng (nhìn gương nếu có thể).</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">5:00</div>
+                    <div class="timeline-content"><strong>Visualization:</strong> 5 phút hình dung ngày thành công hoặc mục tiêu thịnh vượng.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">10:00</div>
+                    <div class="timeline-content"><strong>Uống nước:</strong> 1 ly nước ấm, nói "Cảm ơn" vào nước trước khi uống.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">11:00</div>
+                    <div class="timeline-content"><strong>Movement:</strong> 3 phút stretch hoặc nhảy tại chỗ. Kích hoạt năng lượng.</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">14:00</div>
+                    <div class="timeline-content"><strong>Intention:</strong> Viết/nói 1 ý định cho ngày: "Hôm nay tôi chọn cảm nhận [X]."</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-time">15:00</div>
+                    <div class="timeline-content"><strong>Ready:</strong> Bắt đầu ngày với tần số cao! 🚀</div>
+                </div>
+            </div>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>📱</span> Tích Hợp GEM App</div>
+                <p><strong>Vision Board → Habits:</strong> Tạo habit "Morning Ritual" và check-in mỗi sáng để tracking streak.</p>
+                <p><strong>GEM Master → Affirmations:</strong> Mở để nhận affirmations ngẫu nhiên phù hợp với năng lượng ngày.</p>
+                <p><strong>Rituals → Gratitude Flow:</strong> Sử dụng ritual có sẵn thay vì tự làm nếu cần hướng dẫn.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 4: THIẾT KẾ ROUTINE CÁ NHÂN -->
+        <section class="section">
+            <h2 class="section-title"><span>📋</span> Thiết Kế Routine Của Bạn</h2>
+            <p>Bây giờ là lúc bạn thiết kế Morning Routine phù hợp với cuộc sống của mình. Trả lời các câu hỏi sau:</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M4_B1_03%0ADesign+Your+Routine" alt="Thiết kế routine của bạn">
+                <div class="image-caption">Mỗi người một routine - quan trọng là phù hợp với BẠN</div>
+            </div>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Bạn có bao nhiêu thời gian?</div>
+                        <div class="flow-step-desc">5 phút? 15 phút? 30 phút? Hãy thực tế. Bắt đầu nhỏ, tăng dần. 5 phút mỗi ngày tốt hơn 30 phút không đều đặn.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Bạn thích gì nhất?</div>
+                        <div class="flow-step-desc">Từ 7 nghi thức, chọn 2-3 cái bạn CẢM THẤY THÍCH. Nếu không thích, bạn sẽ không làm lâu dài.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Trigger là gì?</div>
+                        <div class="flow-step-desc">Gắn routine với một trigger sẵn có. Ví dụ: "Ngay sau khi tắt alarm" hoặc "Sau khi đi vệ sinh". Trigger + Routine = Habit.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Reward là gì?</div>
+                        <div class="flow-step-desc">Tự thưởng sau khi hoàn thành. Có thể đơn giản: ly cà phê ngon, 5 phút đọc sách thích, hoặc check-in GEM App.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📝</span> Template Morning Routine Của Tôi</div>
+                <p><strong>Thời gian:</strong> ___ phút (bắt đầu từ ___:___ sáng)</p>
+                <p style="margin-top: var(--space-sm);"><strong>Trigger:</strong> Ngay sau khi _________________</p>
+                <p style="margin-top: var(--space-sm);"><strong>Nghi thức 1:</strong> _________________ (___ phút)</p>
+                <p style="margin-top: var(--space-sm);"><strong>Nghi thức 2:</strong> _________________ (___ phút)</p>
+                <p style="margin-top: var(--space-sm);"><strong>Nghi thức 3:</strong> _________________ (___ phút)</p>
+                <p style="margin-top: var(--space-sm);"><strong>Reward:</strong> Sau khi xong, tôi sẽ _________________</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🎯</span> Quy Tắc 21-66-90</div>
+                <p><strong>21 ngày</strong> để tạo nhận thức về thói quen mới. <strong>66 ngày</strong> để biến nó thành tự động. <strong>90 ngày</strong> để nó trở thành một phần identity. Cam kết ít nhất 21 ngày liên tục trước khi đánh giá hiệu quả.</p>
+            </div>
+        </section>
+
+        <!-- REAL STORIES -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Câu Chuyện Thực Tế</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>👨‍💼</span> Câu Chuyện Của Bảo - Từ "Không Có Thời Gian" Đến 5AM Club</div>
+                <p><strong>Bảo, 32 tuổi, Quản lý dự án:</strong> "Tôi từng là người hay nói nhất câu 'Tôi không có thời gian'. Mỗi sáng tôi dậy trễ nhất có thể, chạy vội đến công ty, và luôn bắt đầu ngày trong trạng thái stress."</p>
+                <p style="margin-top: var(--space-sm);">"Khi bắt đầu khóa học này, tôi nghĩ nghi thức buổi sáng là chuyện xa xỉ dành cho người rảnh. Nhưng rồi tôi quyết định thử - chỉ 5 phút thôi. Dậy sớm 5 phút, làm 3 hơi thở sâu và nghĩ 3 điều biết ơn."</p>
+                <p style="margin-top: var(--space-sm);">"5 phút đó thay đổi mọi thứ. Tôi cảm thấy ngày bắt đầu khác hẳn. Dần dần, 5 phút thành 15 phút, rồi 30 phút. Giờ tôi là thành viên của 5AM Club - dậy 5 giờ sáng mỗi ngày. Năng suất tăng gấp đôi, stress giảm hẳn, và thu nhập tăng 40% chỉ sau 6 tháng."</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>👩‍👧</span> Câu Chuyện Của Lan - Mẹ Đơn Thân Với 10 Phút Vàng</div>
+                <p><strong>Lan, 35 tuổi, Mẹ đơn thân:</strong> "Là mẹ đơn thân với 2 con nhỏ, tôi tưởng mình không thể có thời gian cho bản thân vào buổi sáng. Con dậy là tôi phải lo cơm nước, đưa con đi học, rồi chạy đi làm."</p>
+                <p style="margin-top: var(--space-sm);">"Nhưng tôi nhận ra: nếu tôi không đổ đầy cho mình, tôi không thể cho con. Tôi bắt đầu dậy sớm hơn con 10 phút - chỉ 10 phút thôi. Trong 10 phút đó, tôi ngồi yên lặng, hít thở, và nói với mình: 'Hôm nay tôi sẽ là mẹ tốt nhất. Hôm nay sự dồi dào sẽ đến.'"</p>
+                <p style="margin-top: var(--space-sm);">"10 phút đó trở thành 'anchor' của tôi. Dù ngày có khó khăn thế nào, tôi đã có 10 phút vàng để nạp năng lượng. Kỳ lạ là sau đó, nhiều cơ hội bắt đầu đến - công việc mới, tăng lương, và cả những người giúp đỡ xuất hiện như thể được Vũ Trụ gửi đến."</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>💡</span> Bài Học Rút Ra</div>
+                <p><strong>Từ Bảo:</strong> Bắt đầu nhỏ - 5 phút cũng là bắt đầu. Đừng đợi đến khi "có thời gian" vì thời gian không tự đến, bạn phải TẠO RA nó.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Từ Lan:</strong> Dù bận đến đâu, bạn cũng có thể tìm được 10 phút. Và 10 phút với ý thức cao còn mạnh hơn 1 giờ làm việc vô thức.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 5: LỜI KHUYÊN THỰC HIỆN -->
+        <section class="section">
+            <h2 class="section-title"><span>🚀</span> Lời Khuyên Để Thành Công</h2>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">✓</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Chuẩn Bị Từ Tối Hôm Trước</div>
+                        <div class="flow-step-desc">Đặt sẵn quần áo, chuẩn bị nước, để crystal trên đầu giường. Giảm "friction" để việc thực hiện dễ hơn.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">✓</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Điện Thoại Ở Xa</div>
+                        <div class="flow-step-desc">Sạc điện thoại ở phòng khác hoặc để chế độ máy bay. Không check điện thoại trong routine.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">✓</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Đừng Hoàn Hảo</div>
+                        <div class="flow-step-desc">Ngày nào bạn skip một phần, không sao. Ngày nào bạn ngủ quên, không sao. Tiếp tục ngày hôm sau. Consistency > Perfection.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">✓</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Track Progress</div>
+                        <div class="flow-step-desc">Sử dụng GEM App → Vision Board → Habits để track. Nhìn thấy streak tăng lên sẽ tạo động lực.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>📱</span> Bài Tập Hôm Nay</div>
+                <p><strong>1.</strong> Thiết kế Morning Routine của bạn (sử dụng template ở trên)</p>
+                <p><strong>2.</strong> Tạo habit "Morning Ritual" trong GEM App → Vision Board → Habits</p>
+                <p><strong>3.</strong> Chuẩn bị cho sáng mai: đặt alarm sớm 15 phút, để điện thoại xa</p>
+                <p><strong>4.</strong> Cam kết: "Tôi sẽ thực hiện Morning Routine trong 21 ngày liên tục"</p>
+            </div>
+        </section>
+
+        <!-- KEY TAKEAWAYS -->
+        <section class="section">
+            <h2 class="section-title"><span>🔑</span> Key Takeaways</h2>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Buổi Sáng = Cửa Sổ Vào Tiềm Thức</div>
+                        <div class="flow-step-desc">Khi vừa thức dậy, não ở trạng thái sóng Alpha/Theta - đây là "cửa sổ" để lập trình tiềm thức. Những gì bạn làm trong 30-60 phút đầu ngày sẽ định hình tần số và chất lượng cả ngày.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Consistency > Perfection</div>
+                        <div class="flow-step-desc">5 phút mỗi ngày tốt hơn 30 phút không đều đặn. Bắt đầu nhỏ, duy trì đều đặn, rồi mới mở rộng dần. Đừng đợi đến khi "hoàn hảo" mới bắt đầu - hãy bắt đầu từ bất cứ đâu bạn có thể.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Trigger + Routine + Reward = Habit</div>
+                        <div class="flow-step-desc">Gắn routine với một trigger sẵn có (ví dụ: sau khi tắt alarm), có reward sau khi hoàn thành (ví dụ: ly cà phê ngon), và theo dõi streak trong GEM App. Đây là công thức khoa học để tạo thói quen bền vững.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TRANSITION -->
+        <section class="section">
+            <h2 class="section-title"><span>➡️</span> Bước Tiếp Theo</h2>
+            <p>Bạn đã có công thức để bắt đầu mỗi ngày với tần số cao. Nhưng làm thế nào để DUY TRÌ tần số đó suốt ngày, đặc biệt khi đối mặt với việc chi tiêu tiền bạc?</p>
+            <p>Trong <strong>Bài 4.2</strong>, chúng ta sẽ học về <strong>Nghi Thức Biết Ơn Tài Chính</strong> - cách biến mọi khoảnh khắc liên quan đến tiền bạc thành cơ hội để nâng cao tần số thịnh vượng.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📝</span> Bài Tập Chuẩn Bị</div>
+                <p>Tối nay, trước khi ngủ, hãy chuẩn bị cho Morning Routine đầu tiên của bạn:</p>
+                <p style="margin-top: var(--space-sm);">• Đặt alarm sớm hơn 10-15 phút so với bình thường</p>
+                <p style="margin-top: var(--space-sm);">• Để điện thoại xa giường (ở bàn hoặc phòng khác)</p>
+                <p style="margin-top: var(--space-sm);">• Viết ra 3 nghi thức bạn sẽ làm vào sáng mai</p>
+                <p style="margin-top: var(--space-sm);">• Đặt ý định: "Sáng mai, tôi sẽ bắt đầu ngày mới với năng lượng thịnh vượng"</p>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <p>© 2024 GEM Academy | Khóa học: Tái Tạo Tư Duy Triệu Phú</p>
+            <p>Module 4 - Bài 4.1: Sức Mạnh Nghi Thức Buổi Sáng | <a href="#">Quay về danh sách bài học</a></p>
+        </footer>
+
+    </div>
+</body>
+</html>

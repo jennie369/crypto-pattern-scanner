@@ -15,7 +15,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import { tokens } from '../../utils/tokens';
+import tokens from '../../utils/tokens';
 import { supabase } from '../../services/supabase';
 
 export default function HTMLLessonRenderer({
@@ -1044,6 +1044,6 @@ const styles = StyleSheet.create({
   },
 
   bottomSpacer: {
-    height: tokens.spacing['2xl'],
+    height: 40,
   },
 });

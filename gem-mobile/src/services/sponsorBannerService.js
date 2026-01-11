@@ -45,6 +45,7 @@ class SponsorBannerService {
           console.log(`[SponsorBanner] Banner ${i + 1}:`, {
             id: b.id,
             title: b.title,
+            layout_type: b.layout_type,  // <-- DEBUG: Check if layout_type exists
             target_screens: JSON.stringify(b.target_screens),  // Show actual array values
             target_tiers: JSON.stringify(b.target_tiers),      // Show actual array values
             start_date: b.start_date,
@@ -121,12 +122,18 @@ class SponsorBannerService {
       // Filter out dismissed banners if userId provided
       let filteredBanners = banners;
       if (userId && banners.length > 0) {
-        const { data: dismissed } = await supabase
+        console.log('[SponsorBanner] STEP 3 - Fetching dismissed banners for user:', userId);
+
+        const { data: dismissed, error: dismissError } = await supabase
           .from('dismissed_banners')
           .select('banner_id')
           .eq('user_id', userId);
 
-        console.log('[SponsorBanner] STEP 3 - Dismissed banners for user:', dismissed?.length || 0);
+        if (dismissError) {
+          console.error('[SponsorBanner] ❌ Error fetching dismissed banners:', dismissError);
+        }
+
+        console.log('[SponsorBanner] Dismissed banners count:', dismissed?.length || 0);
         if (dismissed?.length > 0) {
           console.log('[SponsorBanner] Dismissed banner IDs:', dismissed.map(d => d.banner_id));
         }
@@ -134,7 +141,7 @@ class SponsorBannerService {
         const dismissedIds = new Set(dismissed?.map(d => d.banner_id) || []);
         filteredBanners = banners.filter(b => !dismissedIds.has(b.id));
 
-        console.log('[SponsorBanner] STEP 4 - After filtering dismissed:', filteredBanners.length);
+        console.log('[SponsorBanner] STEP 4 - Before filter:', banners.length, '→ After filter:', filteredBanners.length);
       }
 
       // Filter out excluded banner IDs (for coordination between header/inline)
@@ -169,19 +176,34 @@ class SponsorBannerService {
    */
   async dismissBanner(userId, bannerId) {
     try {
-      const { error } = await supabase
+      console.log('[SponsorBanner] ========== DISMISS BANNER ==========');
+      console.log('[SponsorBanner] userId:', userId);
+      console.log('[SponsorBanner] bannerId:', bannerId);
+
+      const { data, error } = await supabase
         .from('dismissed_banners')
-        .upsert({
-          user_id: userId,
-          banner_id: bannerId,
-          dismissed_at: new Date().toISOString()
-        });
+        .upsert(
+          {
+            user_id: userId,
+            banner_id: bannerId,
+            dismissed_at: new Date().toISOString()
+          },
+          {
+            onConflict: 'user_id,banner_id',  // Handle unique constraint
+            ignoreDuplicates: false           // Update if exists
+          }
+        )
+        .select();
+
+      console.log('[SponsorBanner] Dismiss result - data:', data);
+      console.log('[SponsorBanner] Dismiss result - error:', error);
 
       if (error) {
         console.error('[SponsorBanner] Dismiss error:', error);
         return false;
       }
 
+      console.log('[SponsorBanner] ✅ Banner dismissed successfully');
       return true;
     } catch (error) {
       console.error('[SponsorBanner] dismissBanner error:', error);
@@ -273,51 +295,66 @@ class SponsorBannerService {
   async updateBanner(bannerId, updates) {
     try {
       const cleanedUpdates = this.cleanBannerData(updates);
-      console.log('[SponsorBanner] updateBanner - cleaned updates:', JSON.stringify(cleanedUpdates, null, 2));
+      console.log('[SponsorBanner] ========== UPDATE BANNER ==========');
+      console.log('[SponsorBanner] Banner ID:', bannerId);
+      console.log('[SponsorBanner] Updates to save:', JSON.stringify(cleanedUpdates, null, 2));
 
       // Check current user
       const { data: { user } } = await supabase.auth.getUser();
-      console.log('[SponsorBanner] Current user:', user?.id);
+      console.log('[SponsorBanner] Current user ID:', user?.id);
 
       // Check user's role in profiles
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('id, role, email')
+        .select('id, role, email, is_admin, scanner_tier, chatbot_tier')
         .eq('id', user?.id)
         .single();
-      console.log('[SponsorBanner] User profile:', profile);
+      console.log('[SponsorBanner] User profile:', JSON.stringify(profile, null, 2));
+      if (profileError) {
+        console.error('[SponsorBanner] Profile fetch error:', profileError);
+      }
 
-      // First, update the banner
-      const { error: updateError, count } = await supabase
+      // Try update with returning data
+      console.log('[SponsorBanner] Executing update...');
+      const { data: updateData, error: updateError } = await supabase
         .from('sponsor_banners')
         .update(cleanedUpdates)
-        .eq('id', bannerId);
+        .eq('id', bannerId)
+        .select();
 
-      console.log('[SponsorBanner] Update result - error:', updateError, 'count:', count);
+      console.log('[SponsorBanner] Update response - data:', JSON.stringify(updateData, null, 2));
+      console.log('[SponsorBanner] Update response - error:', updateError ? JSON.stringify(updateError, null, 2) : 'null');
 
       if (updateError) {
-        console.error('[SponsorBanner] Update error:', updateError);
+        console.error('[SponsorBanner] UPDATE FAILED:', updateError);
         throw updateError;
       }
 
-      // Then fetch the updated banner (separate query to avoid RLS issues with .select())
+      // If update returned data, use it
+      if (updateData && updateData.length > 0) {
+        console.log('[SponsorBanner] Update SUCCESS with data');
+        return { success: true, data: updateData[0] };
+      }
+
+      // Fallback: fetch the updated banner
+      console.log('[SponsorBanner] Fetching updated banner...');
       const { data: updatedBanner, error: fetchError } = await supabase
         .from('sponsor_banners')
         .select('*')
         .eq('id', bannerId)
         .single();
 
-      console.log('[SponsorBanner] updateBanner - fetched after update:', updatedBanner);
+      console.log('[SponsorBanner] Fetched banner:', JSON.stringify(updatedBanner, null, 2));
 
       if (fetchError) {
-        console.warn('[SponsorBanner] Fetch after update warning:', fetchError);
-        // Update succeeded but fetch failed - still return success
+        console.warn('[SponsorBanner] Fetch warning:', fetchError);
         return { success: true, data: { id: bannerId, ...cleanedUpdates } };
       }
 
+      console.log('[SponsorBanner] ========== UPDATE COMPLETE ==========');
       return { success: true, data: updatedBanner };
     } catch (error) {
-      console.error('[SponsorBanner] updateBanner error:', error);
+      console.error('[SponsorBanner] updateBanner EXCEPTION:', error);
       return { success: false, error: error.message };
     }
   }
@@ -382,6 +419,293 @@ class SponsorBannerService {
       };
     } catch (error) {
       console.error('[SponsorBanner] getBannerAnalytics error:', error);
+      return null;
+    }
+  }
+
+  // ============================================
+  // FACEBOOK-STYLE ENGAGEMENT FUNCTIONS
+  // ============================================
+
+  /**
+   * React to an ad (like, love, haha, wow, sad, angry)
+   * @param {string} adId - Ad/Banner ID
+   * @param {string} reactionType - Reaction type (like, love, haha, wow, sad, angry)
+   * @returns {object} { success, action, reaction }
+   */
+  async reactToAd(adId, reactionType) {
+    try {
+      const { data, error } = await supabase.rpc('react_to_ad', {
+        p_ad_id: adId,
+        p_reaction_type: reactionType,
+      });
+
+      if (error) throw error;
+      return data || { success: true, action: 'added', reaction: reactionType };
+    } catch (error) {
+      console.error('[SponsorBanner] reactToAd error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get user's current reaction to an ad
+   * @param {string} adId - Ad/Banner ID
+   * @returns {string|null} Reaction type or null
+   */
+  async getUserReaction(adId) {
+    try {
+      const { data, error } = await supabase.rpc('get_user_ad_reaction', {
+        p_ad_id: adId,
+      });
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('[SponsorBanner] getUserReaction error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get comments for an ad
+   * @param {string} adId - Ad/Banner ID
+   * @param {number} limit - Max comments to return (default 20)
+   * @param {number} offset - Offset for pagination (default 0)
+   * @returns {object} { comments, likedIds }
+   */
+  async getAdComments(adId, limit = 20, offset = 0) {
+    try {
+      // Get comments with user profile info
+      const { data: comments, error } = await supabase
+        .from('sponsor_ad_comments')
+        .select(`
+          id,
+          content,
+          parent_id,
+          likes_count,
+          replies_count,
+          created_at,
+          user_id,
+          profiles:user_id (
+            display_name,
+            avatar_url
+          )
+        `)
+        .eq('ad_id', adId)
+        .eq('is_hidden', false)
+        .is('parent_id', null) // Only top-level comments
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
+
+      if (error) throw error;
+
+      // Get current user's liked comment IDs
+      const { data: { user } } = await supabase.auth.getUser();
+      let likedIds = [];
+
+      if (user) {
+        const { data: likes } = await supabase
+          .from('sponsor_ad_comment_likes')
+          .select('comment_id')
+          .eq('user_id', user.id)
+          .in('comment_id', (comments || []).map(c => c.id));
+
+        likedIds = (likes || []).map(l => l.comment_id);
+      }
+
+      // Flatten profile data
+      const formattedComments = (comments || []).map(comment => ({
+        id: comment.id,
+        content: comment.content,
+        parent_id: comment.parent_id,
+        likes_count: comment.likes_count,
+        replies_count: comment.replies_count,
+        created_at: comment.created_at,
+        user_id: comment.user_id,
+        display_name: comment.profiles?.display_name || 'Người dùng ẩn danh',
+        avatar_url: comment.profiles?.avatar_url,
+      }));
+
+      return { comments: formattedComments, likedIds };
+    } catch (error) {
+      console.error('[SponsorBanner] getAdComments error:', error);
+      return { comments: [], likedIds: [] };
+    }
+  }
+
+  /**
+   * Add a comment to an ad
+   * @param {string} adId - Ad/Banner ID
+   * @param {string} content - Comment content
+   * @param {string|null} parentId - Parent comment ID for replies
+   * @returns {string|null} New comment ID or null
+   */
+  async addAdComment(adId, content, parentId = null) {
+    try {
+      const { data, error } = await supabase.rpc('add_ad_comment', {
+        p_ad_id: adId,
+        p_content: content,
+        p_parent_id: parentId,
+      });
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('[SponsorBanner] addAdComment error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Toggle like on a comment
+   * @param {string} commentId - Comment ID
+   * @returns {boolean} Whether the comment is now liked
+   */
+  async toggleAdCommentLike(commentId) {
+    try {
+      const { data, error } = await supabase.rpc('toggle_ad_comment_like', {
+        p_comment_id: commentId,
+      });
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('[SponsorBanner] toggleAdCommentLike error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Increment share count for an ad
+   * @param {string} adId - Ad/Banner ID
+   * @param {string} destination - Share destination (copy_link, external, etc.)
+   */
+  async incrementAdShare(adId, destination = 'copy_link') {
+    try {
+      const { error } = await supabase.rpc('increment_ad_share', {
+        p_ad_id: adId,
+        p_destination: destination,
+      });
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('[SponsorBanner] incrementAdShare error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Report an ad
+   * @param {string} adId - Ad/Banner ID
+   * @param {string} reason - Report reason
+   */
+  async reportAd(adId, reason) {
+    try {
+      const { error } = await supabase.rpc('report_ad', {
+        p_ad_id: adId,
+        p_reason: reason,
+      });
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('[SponsorBanner] reportAd error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Hide an ad from user's feed
+   * @param {string} adId - Ad/Banner ID
+   */
+  async hideAd(adId) {
+    try {
+      const { error } = await supabase.rpc('hide_ad', {
+        p_ad_id: adId,
+      });
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('[SponsorBanner] hideAd error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Log ad impression
+   * @param {string} adId - Ad/Banner ID
+   */
+  async logImpression(adId) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      const { error } = await supabase
+        .from('sponsor_ad_interactions')
+        .insert({
+          ad_id: adId,
+          user_id: user?.id,
+          interaction_type: 'impression',
+        });
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('[SponsorBanner] logImpression error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get ad engagement analytics (admin only)
+   * @param {string} adId - Ad/Banner ID
+   */
+  async getAdEngagementAnalytics(adId) {
+    try {
+      const { data, error } = await supabase
+        .from('sponsor_banners')
+        .select(`
+          id,
+          title,
+          view_count,
+          click_count,
+          reaction_like,
+          reaction_love,
+          reaction_haha,
+          reaction_wow,
+          reaction_sad,
+          reaction_angry,
+          comments_count,
+          shares_count,
+          hide_count,
+          report_count
+        `)
+        .eq('id', adId)
+        .single();
+
+      if (error) throw error;
+
+      // Calculate totals
+      const totalReactions = (data.reaction_like || 0) +
+        (data.reaction_love || 0) +
+        (data.reaction_haha || 0) +
+        (data.reaction_wow || 0) +
+        (data.reaction_sad || 0) +
+        (data.reaction_angry || 0);
+
+      const engagementRate = data.view_count > 0
+        ? (((totalReactions + data.comments_count + data.shares_count) / data.view_count) * 100).toFixed(2)
+        : 0;
+
+      return {
+        ...data,
+        totalReactions,
+        engagementRate: `${engagementRate}%`,
+      };
+    } catch (error) {
+      console.error('[SponsorBanner] getAdEngagementAnalytics error:', error);
       return null;
     }
   }

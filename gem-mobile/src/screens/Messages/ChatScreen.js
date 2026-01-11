@@ -37,6 +37,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import messagingService from '../../services/messagingService';
 import presenceService from '../../services/presenceService';
 
+// Hooks
+import { useMentions } from '../../hooks/useMentions';
+import useChatTheme from '../../hooks/useChatTheme';
+
 // Auth
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -44,11 +48,16 @@ import { useAuth } from '../../contexts/AuthContext';
 import MessageBubble from './components/MessageBubble';
 import ChatInput from './components/ChatInput';
 import TypingIndicator from './components/TypingIndicator';
-import MessageActionSheet from './components/MessageActionSheet';
 import PinnedMessagesBar from './components/PinnedMessagesBar';
 import EditMessageSheet from './components/EditMessageSheet';
 import ScheduleMessageSheet from './components/ScheduleMessageSheet';
 import TranslateMessageSheet from './components/TranslateMessageSheet';
+import RecallConfirmModal from '../../components/Messages/RecallConfirmModal';
+import OnlineStatusIndicator from '../../components/Messages/OnlineStatusIndicator';
+import { CallButton } from '../../components/Call';
+
+// Constants
+import { CALL_TYPE } from '../../constants/callConstants';
 
 // Tokens
 import {
@@ -78,8 +87,7 @@ export default function ChatScreen({ route, navigation }) {
   const [replyTo, setReplyTo] = useState(null);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [selectedMessage, setSelectedMessage] = useState(null);
-  const [showActionSheet, setShowActionSheet] = useState(false);
+  // Note: selectedMessage and showActionSheet removed - now handled by MessageContextMenu inside MessageBubble
   const [pinnedMessages, setPinnedMessages] = useState([]);
   const [currentPinIndex, setCurrentPinIndex] = useState(0);
   const [editingMessage, setEditingMessage] = useState(null);
@@ -89,6 +97,9 @@ export default function ChatScreen({ route, navigation }) {
   const [showTranslateSheet, setShowTranslateSheet] = useState(false);
   const [translatingMessage, setTranslatingMessage] = useState(null);
   const [pendingScheduleMessage, setPendingScheduleMessage] = useState(null);
+  const [highlightedMessageId, setHighlightedMessageId] = useState(null);
+  const [showRecallModal, setShowRecallModal] = useState(false);
+  const [recallingMessage, setRecallingMessage] = useState(null);
 
   // Refs
   const flatListRef = useRef(null);
@@ -109,6 +120,20 @@ export default function ChatScreen({ route, navigation }) {
     : otherParticipant?.display_name || 'Chat';
 
   const isOnline = presenceService.isOnline(otherParticipant?.online_status);
+
+  // Get all participants for @mentions
+  const participants = useMemo(() => {
+    if (!conversation?.conversation_participants) return [];
+    return conversation.conversation_participants
+      .map(p => p.users)
+      .filter(u => u && u.id);
+  }, [conversation?.conversation_participants]);
+
+  // Mentions hook
+  const { saveMentions, getMentionsForMessage } = useMentions(conversationId);
+
+  // Chat theme hook
+  const { theme: chatTheme } = useChatTheme(conversationId);
 
   // =====================================================
   // FETCH MESSAGES
@@ -254,8 +279,8 @@ export default function ChatScreen({ route, navigation }) {
   // SEND MESSAGE
   // =====================================================
 
-  const handleSend = useCallback(async (content, attachment = null) => {
-    if ((!content.trim() && !attachment) || sending) return;
+  const handleSend = useCallback(async (content, attachment = null, stickerData = null, mentionsData = []) => {
+    if ((!content.trim() && !attachment && !stickerData) || sending) return;
 
     try {
       setSending(true);
@@ -283,6 +308,8 @@ export default function ChatScreen({ route, navigation }) {
         },
         message_reactions: [],
         _isOptimistic: true,
+        // Include mentions for immediate display
+        mentions: mentionsData,
       };
 
       // Add optimistic message
@@ -303,9 +330,18 @@ export default function ChatScreen({ route, navigation }) {
         attachment
       );
 
+      // Save mentions to database if any
+      if (mentionsData && mentionsData.length > 0 && result?.id) {
+        try {
+          await saveMentions(result.id, mentionsData);
+        } catch (mentionError) {
+          console.error('Error saving mentions:', mentionError);
+        }
+      }
+
       // Replace optimistic message with real one
       setMessages(prev => prev.map(msg =>
-        msg.id === tempMessage.id ? { ...result, users: tempMessage.users } : msg
+        msg.id === tempMessage.id ? { ...result, users: tempMessage.users, mentions: mentionsData } : msg
       ));
     } catch (error) {
       console.error('Error sending message:', error);
@@ -314,7 +350,7 @@ export default function ChatScreen({ route, navigation }) {
     } finally {
       setSending(false);
     }
-  }, [conversationId, user?.id, profile, sending]);
+  }, [conversationId, user?.id, profile, sending, saveMentions]);
 
   // =====================================================
   // MESSAGE ACTIONS
@@ -365,16 +401,6 @@ export default function ChatScreen({ route, navigation }) {
     } catch (error) {
       console.error('Error deleting message:', error);
     }
-  }, []);
-
-  const handleLongPress = useCallback((message) => {
-    setSelectedMessage(message);
-    setShowActionSheet(true);
-  }, []);
-
-  const handleCloseActionSheet = useCallback(() => {
-    setShowActionSheet(false);
-    setSelectedMessage(null);
   }, []);
 
   const handleSearch = useCallback(() => {
@@ -471,6 +497,44 @@ export default function ChatScreen({ route, navigation }) {
     }
   }, [starredMessageIds]);
 
+  // Recall message
+  const handleOpenRecall = useCallback((message) => {
+    setRecallingMessage(message);
+    setShowRecallModal(true);
+  }, []);
+
+  const handleConfirmRecall = useCallback(async () => {
+    if (!recallingMessage) return;
+
+    try {
+      const result = await messagingService.recallMessage(recallingMessage.id);
+      if (result?.success) {
+        // Update message in local state
+        setMessages(prev => prev.map(msg =>
+          msg.id === recallingMessage.id
+            ? { ...msg, is_recalled: true, recalled_at: new Date().toISOString() }
+            : msg
+        ));
+      }
+    } catch (error) {
+      console.error('Error recalling message:', error);
+    } finally {
+      setShowRecallModal(false);
+      setRecallingMessage(null);
+    }
+  }, [recallingMessage]);
+
+  const handleCloseRecallModal = useCallback(() => {
+    setShowRecallModal(false);
+    setRecallingMessage(null);
+  }, []);
+
+  // Check if message can be recalled
+  const canRecallMessage = useCallback((message) => {
+    if (!message || message.is_recalled) return false;
+    return messagingService.canRecallMessage(message);
+  }, []);
+
   // Translate message
   const handleTranslate = useCallback((message) => {
     setTranslatingMessage(message);
@@ -511,6 +575,67 @@ export default function ChatScreen({ route, navigation }) {
   }, []);
 
   // =====================================================
+  // CALL HANDLERS
+  // =====================================================
+
+  const handleAudioCall = useCallback(() => {
+    if (!otherParticipant) return;
+
+    navigation.navigate('Call', {
+      screen: 'OutgoingCall',
+      params: {
+        call: {
+          call_type: CALL_TYPE.AUDIO,
+          conversation_id: conversationId,
+        },
+        callee: otherParticipant,
+      },
+    });
+  }, [navigation, conversationId, otherParticipant]);
+
+  const handleVideoCall = useCallback(() => {
+    if (!otherParticipant) return;
+
+    navigation.navigate('Call', {
+      screen: 'OutgoingCall',
+      params: {
+        call: {
+          call_type: CALL_TYPE.VIDEO,
+          conversation_id: conversationId,
+        },
+        callee: otherParticipant,
+      },
+    });
+  }, [navigation, conversationId, otherParticipant]);
+
+  // =====================================================
+  // SCROLL TO MESSAGE (for reply quotes)
+  // =====================================================
+
+  const scrollToMessage = useCallback((messageId) => {
+    if (!messageId || !flatListRef.current) return;
+
+    // Find the message index
+    const index = messages.findIndex(m => m.id === messageId);
+    if (index === -1) return;
+
+    // Scroll to the message
+    flatListRef.current.scrollToIndex({
+      index,
+      animated: true,
+      viewPosition: 0.5, // Center the message
+    });
+
+    // Highlight the message briefly
+    setHighlightedMessageId(messageId);
+
+    // Clear highlight after animation completes
+    setTimeout(() => {
+      setHighlightedMessageId(null);
+    }, 2500);
+  }, [messages]);
+
+  // =====================================================
   // RENDER
   // =====================================================
 
@@ -531,13 +656,25 @@ export default function ChatScreen({ route, navigation }) {
         isOwn={isOwn}
         showAvatar={showAvatar}
         onDoubleTap={() => handleReaction(item.id)}
-        onLongPress={() => handleLongPress(item)}
         onReply={() => handleReply(item)}
         onDelete={isOwn ? () => handleDelete(item.id) : null}
         onReaction={(emoji) => handleReaction(item.id, emoji)}
+        onCopy={() => {/* Handled in MessageContextMenu */}}
+        onForward={() => handleForward(item)}
+        onPin={() => handlePin(item)}
+        onStar={() => handleStar(item)}
+        onEdit={isOwn ? () => handleEdit(item) : null}
+        onTranslate={() => handleTranslate(item)}
+        onRecall={isOwn ? () => handleOpenRecall(item) : null}
+        onReport={!isOwn ? () => handleReport(item) : null}
+        isPinned={pinnedMessages.some(p => p.id === item.id)}
+        isStarred={starredMessageIds.includes(item.id)}
+        canRecall={isOwn && canRecallMessage(item)}
         currentUserId={user?.id}
         isGroupChat={isGroupChat}
         totalParticipants={totalParticipants}
+        onScrollToMessage={scrollToMessage}
+        isHighlighted={highlightedMessageId === item.id}
       />
     );
   };
@@ -561,17 +698,37 @@ export default function ChatScreen({ route, navigation }) {
           {displayName}
         </Text>
         {!conversation?.is_group && (
-          <View style={styles.headerStatus}>
-            {isOnline && <View style={styles.onlineDot} />}
-            <Text style={styles.headerStatusText}>
-              {isOnline ? 'Online' : presenceService.formatLastSeen(otherParticipant?.last_seen)}
-            </Text>
-          </View>
+          <OnlineStatusIndicator
+            isOnline={isOnline}
+            lastSeen={otherParticipant?.last_seen}
+            showText={true}
+            size="small"
+          />
         )}
       </TouchableOpacity>
 
       {/* Header Actions */}
       <View style={styles.headerActions}>
+        {/* Audio Call - only for 1-1 chats */}
+        {!conversation?.is_group && otherParticipant && (
+          <CallButton
+            type="audio"
+            size={20}
+            onPress={handleAudioCall}
+            style={styles.headerButton}
+          />
+        )}
+
+        {/* Video Call - only for 1-1 chats */}
+        {!conversation?.is_group && otherParticipant && (
+          <CallButton
+            type="video"
+            size={20}
+            onPress={handleVideoCall}
+            style={styles.headerButton}
+          />
+        )}
+
         {/* Search */}
         <TouchableOpacity
           style={styles.headerButton}
@@ -591,10 +748,13 @@ export default function ChatScreen({ route, navigation }) {
     </View>
   );
 
+  // Use chat theme gradient or default
+  const backgroundGradient = chatTheme?.gradient || GRADIENTS.background;
+
   return (
     <LinearGradient
-      colors={GRADIENTS.background}
-      locations={GRADIENTS.backgroundLocations}
+      colors={backgroundGradient}
+      locations={[0, 1]}
       style={styles.container}
     >
       {/* Header */}
@@ -614,19 +774,24 @@ export default function ChatScreen({ route, navigation }) {
       {/* Messages */}
       <KeyboardAvoidingView
         style={styles.content}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={0}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top + 60 : 0}
       >
         <FlatList
           ref={flatListRef}
           data={messages}
           renderItem={renderMessage}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.messagesList}
+          contentContainerStyle={[
+            styles.messagesList,
+            { paddingBottom: insets.bottom + 10 }
+          ]}
           inverted={false}
           showsVerticalScrollIndicator={false}
           onEndReached={loadMoreMessages}
           onEndReachedThreshold={0.3}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
           // Performance
           windowSize={10}
           removeClippedSubviews={true}
@@ -649,30 +814,21 @@ export default function ChatScreen({ route, navigation }) {
           conversationId={conversationId}
           onOpenSchedule={() => setShowScheduleSheet(true)}
           currentUserId={user?.id}
+          participants={participants}
         />
 
-        {/* Safe area bottom */}
-        <View style={{ height: insets.bottom }} />
+        {/* Safe area bottom padding */}
+        <View style={{ height: Math.max(insets.bottom, 8), backgroundColor: 'rgba(5, 4, 11, 0.9)' }} />
       </KeyboardAvoidingView>
 
-      {/* Message Action Sheet */}
-      <MessageActionSheet
-        visible={showActionSheet}
-        message={selectedMessage}
-        isOwn={selectedMessage?.sender_id === user?.id}
-        isPinned={pinnedMessages.some(p => p.id === selectedMessage?.id)}
-        isStarred={starredMessageIds.includes(selectedMessage?.id)}
-        onClose={handleCloseActionSheet}
-        onReply={() => handleReply(selectedMessage)}
-        onCopy={() => {}}
-        onForward={() => selectedMessage && handleForward(selectedMessage)}
-        onDelete={() => selectedMessage && handleDelete(selectedMessage.id)}
-        onReact={() => selectedMessage && handleReaction(selectedMessage.id)}
-        onReport={() => {}}
-        onPin={() => selectedMessage && handlePin(selectedMessage)}
-        onEdit={() => selectedMessage && handleEdit(selectedMessage)}
-        onStar={() => selectedMessage && handleStar(selectedMessage)}
-        onTranslate={() => selectedMessage && handleTranslate(selectedMessage)}
+      {/* Note: MessageActionSheet replaced by MessageContextMenu inside MessageBubble */}
+
+      {/* Recall Confirm Modal */}
+      <RecallConfirmModal
+        visible={showRecallModal}
+        message={recallingMessage}
+        onConfirm={handleConfirmRecall}
+        onCancel={handleCloseRecallModal}
       />
 
       {/* Edit Message Sheet */}

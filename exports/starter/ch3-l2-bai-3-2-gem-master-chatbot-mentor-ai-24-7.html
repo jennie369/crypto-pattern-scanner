@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 3.2: GEM Master Chatbot - Mentor AI 24/7</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Noto+Sans+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ==================== CSS VARIABLES ==================== */
+        :root {
+            /* Colors */
+            --color-navy: #112250;
+            --color-navy-light: #1a3070;
+            --color-navy-dark: #0a1535;
+            --color-gold: #FFBD59;
+            --color-gold-light: #FFD993;
+            --color-gold-dark: #E5A030;
+            --color-cyan: #00F0FF;
+            --color-cyan-light: #80F7FF;
+            --color-purple: #6A5BFF;
+            --color-purple-light: #8B7FFF;
+            --color-green: #10B981;
+            --color-green-light: #34D399;
+            --color-green-dark: #059669;
+            --color-red: #EF4444;
+            --color-red-light: #F87171;
+            --color-red-dark: #DC2626;
+
+            /* Text Colors */
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.65);
+
+            /* Backgrounds */
+            --bg-glass: rgba(255, 255, 255, 0.08);
+            --bg-glass-hover: rgba(255, 255, 255, 0.12);
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --bg-card-solid: #1a2d5a;
+
+            /* Borders */
+            --border-glass: rgba(255, 255, 255, 0.15);
+            --border-gold: rgba(255, 189, 89, 0.4);
+
+            /* Shadows */
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --shadow-gold: 0 4px 20px rgba(255, 189, 89, 0.25);
+            --shadow-cyan: 0 4px 20px rgba(0, 240, 255, 0.2);
+
+            /* Fonts */
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+
+            /* Spacing */
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            --space-2xl: 3rem;
+
+            /* Border Radius */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+        }
+
+        /* ==================== BASE STYLES ==================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: linear-gradient(135deg, var(--color-navy-dark) 0%, var(--color-navy) 50%, var(--color-navy-light) 100%);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+            font-size: 16px;
+            font-weight: 400;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ==================== LESSON CONTAINER ==================== */
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: var(--space-lg);
+            padding-top: var(--space-xl);
+            padding-bottom: var(--space-2xl);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-container {
+                padding: 0;
+                padding-top: var(--space-md);
+                padding-bottom: var(--space-xl);
+            }
+        }
+
+        /* ==================== HEADER ==================== */
+        .lesson-header {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+            padding: var(--space-xl);
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-xl);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-header {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+                padding: var(--space-lg) var(--space-md);
+            }
+        }
+
+        .badge-container {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+            margin-bottom: var(--space-md);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            color: var(--color-navy);
+            font-family: var(--font-heading);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 50px;
+            box-shadow: var(--shadow-gold);
+        }
+
+        .badge.chapter-badge {
+            background: linear-gradient(135deg, var(--color-cyan) 0%, #00c4cc 100%);
+            box-shadow: var(--shadow-cyan);
+        }
+
+        .lesson-title {
+            font-family: var(--font-heading);
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: var(--space-md);
+            line-height: 1.2;
+        }
+
+        .lesson-title .highlight {
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .lesson-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ==================== SECTIONS ==================== */
+        .section {
+            margin-bottom: var(--space-xl);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+            padding: 0 var(--space-md);
+        }
+
+        @media (min-width: 601px) {
+            .section-header {
+                padding: 0;
+            }
+        }
+
+        .section-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-gold);
+        }
+
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: clamp(1.25rem, 4vw, 1.5rem);
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* ==================== CONTENT BOXES ==================== */
+        .content-box {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+
+        @media (max-width: 600px) {
+            .content-box {
+                border-radius: 0;
+                border-left: 4px solid var(--color-gold);
+                border-right: none;
+                border-top: 1px solid var(--border-glass);
+                border-bottom: 1px solid var(--border-glass);
+            }
+        }
+
+        .content-box p {
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+
+        .content-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Text with padding on mobile */
+        .text-content {
+            padding: 0 var(--space-md);
+        }
+
+        @media (min-width: 601px) {
+            .text-content {
+                padding: 0;
+            }
+        }
+
+        .text-content p {
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+
+        /* ==================== HIGHLIGHT BOXES ==================== */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border: 1px solid var(--border-gold);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+
+        @media (max-width: 600px) {
+            .highlight-box {
+                border-radius: 0;
+                border-left: 4px solid var(--color-gold);
+                border-right: none;
+                margin-left: 0;
+                margin-right: 0;
+            }
+        }
+
+        .highlight-box.cyan {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(0, 240, 255, 0.05) 100%);
+            border-color: rgba(0, 240, 255, 0.4);
+        }
+
+        @media (max-width: 600px) {
+            .highlight-box.cyan {
+                border-left-color: var(--color-cyan);
+            }
+        }
+
+        .highlight-box.green {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        @media (max-width: 600px) {
+            .highlight-box.green {
+                border-left-color: var(--color-green);
+            }
+        }
+
+        .highlight-box.purple {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15) 0%, rgba(106, 91, 255, 0.05) 100%);
+            border-color: rgba(106, 91, 255, 0.4);
+        }
+
+        @media (max-width: 600px) {
+            .highlight-box.purple {
+                border-left-color: var(--color-purple);
+            }
+        }
+
+        .highlight-box.red {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%);
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+
+        @media (max-width: 600px) {
+            .highlight-box.red {
+                border-left-color: var(--color-red);
+            }
+        }
+
+        .highlight-box-title {
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--color-gold);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .highlight-box.cyan .highlight-box-title {
+            color: var(--color-cyan);
+        }
+
+        .highlight-box.green .highlight-box-title {
+            color: var(--color-green);
+        }
+
+        .highlight-box.purple .highlight-box-title {
+            color: var(--color-purple);
+        }
+
+        .highlight-box.red .highlight-box-title {
+            color: var(--color-red);
+        }
+
+        .highlight-box p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        /* ==================== IMAGES ==================== */
+        .lesson-image {
+            width: 100%;
+            margin: var(--space-lg) 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 2px solid var(--border-glass);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-image {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+                margin-left: 0;
+                margin-right: 0;
+            }
+        }
+
+        .lesson-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .image-placeholder {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: linear-gradient(135deg, var(--bg-card-solid) 0%, var(--color-navy-dark) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            padding: var(--space-lg);
+            text-align: center;
+        }
+
+        .image-placeholder-icon {
+            font-size: 3rem;
+            opacity: 0.5;
+        }
+
+        .image-caption {
+            text-align: center;
+            padding: var(--space-sm) var(--space-md);
+            background: var(--bg-glass);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-style: italic;
+        }
+
+        /* ==================== FEATURE CARDS ==================== */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+
+        @media (min-width: 601px) {
+            .feature-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .feature-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            display: flex;
+            gap: var(--space-md);
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 600px) {
+            .feature-card {
+                border-radius: 0;
+                border-left: 4px solid var(--color-cyan);
+                border-right: none;
+            }
+        }
+
+        .feature-card:hover {
+            border-color: var(--color-cyan);
+            transform: translateY(-2px);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--color-cyan) 0%, #00c4cc 100%);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .feature-content h4 {
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+        }
+
+        .feature-content p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* ==================== PROBLEM CARDS ==================== */
+        .problem-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+
+        .problem-card {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.02) 100%);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            display: flex;
+            gap: var(--space-md);
+        }
+
+        @media (max-width: 600px) {
+            .problem-card {
+                border-radius: 0;
+                border-left: 4px solid var(--color-red);
+                border-right: none;
+            }
+        }
+
+        .problem-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(239, 68, 68, 0.2);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+            color: var(--color-red-light);
+        }
+
+        .problem-content h4 {
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--color-red-light);
+            margin-bottom: var(--space-xs);
+        }
+
+        .problem-content p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* ==================== TIER CARDS ==================== */
+        .tier-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1px;
+            background: var(--border-glass);
+            margin: var(--space-lg) 0;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        @media (max-width: 600px) {
+            .tier-grid {
+                border-radius: 0;
+            }
+        }
+
+        @media (min-width: 601px) {
+            .tier-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .tier-card {
+            background: var(--bg-card-solid);
+            padding: var(--space-lg);
+            position: relative;
+        }
+
+        .tier-card.featured {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15) 0%, var(--bg-card-solid) 100%);
+        }
+
+        .tier-card.featured::before {
+            content: 'RECOMMENDED';
+            position: absolute;
+            top: var(--space-sm);
+            right: var(--space-sm);
+            background: var(--color-gold);
+            color: var(--color-navy);
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: var(--font-heading);
+        }
+
+        .tier-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+        }
+
+        .tier-icon {
+            font-size: 1.5rem;
+        }
+
+        .tier-name {
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .tier-limit {
+            font-size: 0.9rem;
+            color: var(--color-gold);
+            font-weight: 600;
+            margin-bottom: var(--space-md);
+        }
+
+        .tier-features {
+            list-style: none;
+        }
+
+        .tier-features li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: var(--space-sm);
+        }
+
+        .tier-features li::before {
+            content: '✓';
+            color: var(--color-green);
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .tier-card.locked .tier-features li::before {
+            content: '+';
+            color: var(--color-cyan);
+        }
+
+        /* ==================== CAPABILITY LIST ==================== */
+        .capability-list {
+            margin: var(--space-lg) 0;
+        }
+
+        .capability-item {
+            display: flex;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--bg-glass);
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--space-sm);
+            border: 1px solid var(--border-glass);
+        }
+
+        @media (max-width: 600px) {
+            .capability-item {
+                border-radius: 0;
+                border-left: 4px solid var(--color-green);
+                border-right: none;
+            }
+        }
+
+        .capability-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .capability-content h4 {
+            font-family: var(--font-heading);
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+        }
+
+        .capability-content p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        /* ==================== STARTER BOX ==================== */
+        .starter-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1) 0%, rgba(0, 240, 255, 0.02) 100%);
+            border: 2px solid var(--color-cyan);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .starter-box {
+                border-radius: 0;
+                border-left: 4px solid var(--color-cyan);
+                border-right: none;
+                border-top: 2px solid var(--color-cyan);
+                border-bottom: 2px solid var(--color-cyan);
+            }
+        }
+
+        .starter-box-title {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-cyan);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+        }
+
+        .starter-limit {
+            font-size: 2.5rem;
+            font-family: var(--font-heading);
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: var(--space-md);
+        }
+
+        .starter-features {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+            text-align: left;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .starter-feature {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .starter-feature .check {
+            color: var(--color-green);
+            font-weight: bold;
+        }
+
+        /* ==================== EXERCISE BOX ==================== */
+        .exercise-box {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border: 2px solid var(--color-green);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+
+        @media (max-width: 600px) {
+            .exercise-box {
+                border-radius: 0;
+                border-left: 4px solid var(--color-green);
+                border-right: none;
+            }
+        }
+
+        .exercise-title {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-green);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .exercise-description {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-lg);
+        }
+
+        .question-suggestions {
+            display: grid;
+            gap: var(--space-sm);
+        }
+
+        .question-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: var(--space-md);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            border: 1px solid var(--border-glass);
+            transition: all 0.3s ease;
+        }
+
+        .question-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(4px);
+        }
+
+        .question-icon {
+            font-size: 1.25rem;
+        }
+
+        /* ==================== SUMMARY BOX ==================== */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.2) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border: 2px solid var(--color-gold);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+
+        @media (max-width: 600px) {
+            .summary-box {
+                border-radius: 0;
+                border-left: 4px solid var(--color-gold);
+                border-right: none;
+            }
+        }
+
+        .summary-title {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-gold);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .summary-list {
+            list-style: none;
+        }
+
+        .summary-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-sm);
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .summary-list li::before {
+            content: '✓';
+            color: var(--color-gold);
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        /* ==================== QUIZ SECTION ==================== */
+        .quiz-section {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+
+        @media (max-width: 600px) {
+            .quiz-section {
+                border-radius: 0;
+                border-left: 4px solid var(--color-purple);
+                border-right: none;
+            }
+        }
+
+        .quiz-title {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-purple);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .quiz-question {
+            background: var(--bg-card-solid);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+
+        @media (max-width: 600px) {
+            .quiz-question {
+                border-radius: 0;
+            }
+        }
+
+        .question-number {
+            font-family: var(--font-heading);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--color-purple);
+            margin-bottom: var(--space-sm);
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+            line-height: 1.5;
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: var(--space-sm);
+        }
+
+        .quiz-option {
+            background: var(--bg-glass);
+            border: 2px solid var(--border-glass);
+            border-radius: var(--radius-sm);
+            padding: var(--space-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--color-purple);
+            background: rgba(106, 91, 255, 0.1);
+        }
+
+        .quiz-option.correct {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: var(--color-green);
+        }
+
+        .quiz-option.incorrect {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--color-red);
+        }
+
+        .quiz-option.disabled {
+            cursor: default;
+            opacity: 0.7;
+        }
+
+        .option-letter {
+            width: 32px;
+            height: 32px;
+            background: var(--bg-glass);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .quiz-option.correct .option-letter {
+            background: var(--color-green);
+            color: white;
+        }
+
+        .quiz-option.incorrect .option-letter {
+            background: var(--color-red);
+            color: white;
+        }
+
+        .option-text {
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .feedback {
+            display: none;
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: rgba(16, 185, 129, 0.15);
+            border-left: 4px solid var(--color-green);
+            color: var(--text-secondary);
+        }
+
+        .feedback.incorrect {
+            background: rgba(239, 68, 68, 0.15);
+            border-left: 4px solid var(--color-red);
+            color: var(--text-secondary);
+        }
+
+        .retake-btn {
+            display: none;
+            width: 100%;
+            padding: var(--space-md) var(--space-lg);
+            background: linear-gradient(135deg, var(--color-purple) 0%, var(--color-purple-light) 100%);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: var(--space-lg);
+        }
+
+        .retake-btn.show {
+            display: block;
+        }
+
+        .retake-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* ==================== FOOTER ==================== */
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-xl);
+            margin-top: var(--space-xl);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-footer {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+        }
+
+        .footer-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            color: var(--color-navy);
+            font-family: var(--font-heading);
+            font-size: 0.85rem;
+            font-weight: 700;
+            border-radius: 50px;
+            margin-bottom: var(--space-md);
+        }
+
+        .footer-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="lesson-container">
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="badge-container">
+                <span class="badge">STARTER</span>
+                <span class="badge chapter-badge">CHAPTER 3</span>
+            </div>
+            <h1 class="lesson-title">GEM Master Chatbot - <span class="highlight">Mentor AI 24/7</span></h1>
+            <p class="lesson-subtitle">Người đồng hành thông minh, luôn sẵn sàng hỗ trợ bạn trên hành trình trading mọi lúc, mọi nơi</p>
+        </header>
+
+        <!-- SECTION 1: CHATBOT LÀ GÌ VÀ TẠI SAO CẦN? -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">🤖</div>
+                <h2 class="section-title">Chatbot Là Gì Và Tại Sao Bạn Cần?</h2>
+            </div>
+
+            <div class="text-content">
+                <p>Bạn có bao giờ ngồi một mình lúc 2 giờ sáng, nhìn biểu đồ và tự hỏi: "Pattern này tên gì nhỉ?" hoặc "Mình nên entry ở đâu mới đúng?" Bạn Google, và kết quả là 10 trang web với 10 câu trả lời khác nhau. Bạn vào YouTube, video nào cũng nói khác nhau. Cuối cùng, bạn confused hơn trước khi tìm kiếm.</p>
+
+                <p>Đây là thực tế mà hầu hết trader mới đều gặp phải. Học trading không giống học những môn khác. Bạn không thể chờ đến sáng để hỏi ai đó, vì cơ hội trading có thể đã qua. Bạn cũng không thể tin tưởng hoàn toàn vào Google, vì thông tin tràn lan, mâu thuẫn, và nhiều khi outdated.</p>
+            </div>
+
+            <!-- Problem Cards -->
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="problem-icon">😵</div>
+                    <div class="problem-content">
+                        <h4>Information Overload</h4>
+                        <p>Google cho 1 triệu kết quả, nhưng không biết đâu là đúng, đâu là sai, đâu phù hợp với phương pháp của bạn</p>
+                    </div>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">🌙</div>
+                    <div class="problem-content">
+                        <h4>Không Có Ai Hỗ Trợ 24/7</h4>
+                        <p>Market hoạt động liên tục, nhưng bạn không thể gọi điện cho ai lúc 3 giờ sáng để hỏi về một pattern</p>
+                    </div>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-icon">🔀</div>
+                    <div class="problem-content">
+                        <h4>Thông Tin Mâu Thuẫn</h4>
+                        <p>Người này nói mua, người kia nói bán. Phương pháp này khác phương pháp kia. Ai đúng, ai sai?</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title">💡 Giải Pháp: GEM Master Chatbot</div>
+                <p>GEM Master là AI mentor được train đặc biệt để hiểu sâu về GEM Frequency Method. Không như Google hay ChatGPT thông thường, GEM Master cho bạn câu trả lời nhất quán, chính xác theo đúng phương pháp bạn đang học. Một mentor hiểu bạn, sẵn sàng 24/7, không bao giờ mệt mỏi hay thiếu kiên nhẫn.</p>
+            </div>
+
+            <!-- Image 1 -->
+            <div class="lesson-image">
+                <div class="image-placeholder">
+                    <span class="image-placeholder-icon">🖼️</span>
+                    <span>Hình 1: GEM Master Chatbot Interface</span>
+                    <span style="font-size: 0.8rem; opacity: 0.7;">Canva: chatbot-interface.png (1200x675)</span>
+                </div>
+                <div class="image-caption">Giao diện GEM Master Chatbot - Mentor AI thông minh của bạn</div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: GEM MASTER CÓ THỂ GIÚP GÌ? -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">✨</div>
+                <h2 class="section-title">GEM Master Có Thể Giúp Gì?</h2>
+            </div>
+
+            <div class="text-content">
+                <p>GEM Master không chỉ là một chatbot thông thường. Đây là AI được đào tạo chuyên sâu về trading, đặc biệt là phương pháp GEM Frequency. Từ những câu hỏi cơ bản nhất đến những tình huống phức tạp, GEM Master đều có thể hỗ trợ bạn một cách thông minh và chính xác.</p>
+            </div>
+
+            <!-- Capability List -->
+            <div class="capability-list">
+                <div class="capability-item">
+                    <span class="capability-icon">📚</span>
+                    <div class="capability-content">
+                        <h4>Giải Thích Khái Niệm Trading</h4>
+                        <p>Từ pattern cơ bản đến các thuật ngữ phức tạp, GEM Master giải thích dễ hiểu, kèm ví dụ cụ thể</p>
+                    </div>
+                </div>
+                <div class="capability-item">
+                    <span class="capability-icon">📊</span>
+                    <div class="capability-content">
+                        <h4>Phân Tích Chart</h4>
+                        <p>Gửi hình chart cho GEM Master, nhận phân tích chi tiết về pattern, trend, và các điểm quan trọng</p>
+                    </div>
+                </div>
+                <div class="capability-item">
+                    <span class="capability-icon">💎</span>
+                    <div class="capability-content">
+                        <h4>Hướng Dẫn GEM Frequency Method</h4>
+                        <p>Trả lời mọi thắc mắc về phương pháp GEM, từ 6 công thức đến cách áp dụng thực tế</p>
+                    </div>
+                </div>
+                <div class="capability-item">
+                    <span class="capability-icon">🧠</span>
+                    <div class="capability-content">
+                        <h4>Hỗ Trợ Tâm Lý Trading</h4>
+                        <p>Khi bạn FOMO, khi bạn sợ loss, khi bạn stress - GEM Master giúp bạn bình tĩnh và quyết định sáng suốt</p>
+                    </div>
+                </div>
+                <div class="capability-item">
+                    <span class="capability-icon">📖</span>
+                    <div class="capability-content">
+                        <h4>Gợi Ý Resources Học Thêm</h4>
+                        <p>Recommend bài học, video, tài liệu phù hợp với level và nhu cầu hiện tại của bạn</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image 2 -->
+            <div class="lesson-image">
+                <div class="image-placeholder">
+                    <span class="image-placeholder-icon">🖼️</span>
+                    <span>Hình 2: Sample Conversation với GEM Master</span>
+                    <span style="font-size: 0.8rem; opacity: 0.7;">Canva: sample-conversation.png (1200x800)</span>
+                </div>
+                <div class="image-caption">Ví dụ cuộc trò chuyện thực tế với GEM Master về pattern trading</div>
+            </div>
+
+            <div class="highlight-box green">
+                <div class="highlight-box-title">✨ Điểm Khác Biệt</div>
+                <p>Không như các AI chatbot thông thường, GEM Master được train với kiến thức chuyên sâu về GEM Frequency Method. Điều này có nghĩa là câu trả lời luôn nhất quán với phương pháp bạn đang học - không có chuyện mỗi lần hỏi là một câu trả lời khác nhau như khi bạn Google.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: GÓI STARTER CỦA BẠN -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">📦</div>
+                <h2 class="section-title">Gói STARTER Của Bạn</h2>
+            </div>
+
+            <div class="text-content">
+                <p>Với gói STARTER, bạn được trải nghiệm GEM Master với 10 câu hỏi mỗi ngày. Nghe có vẻ ít? Thực ra, 10 câu hỏi là đủ để bạn làm quen với chatbot, giải đáp những thắc mắc cơ bản, và bắt đầu hành trình học trading một cách có hướng dẫn.</p>
+
+                <p>Mỗi câu hỏi của bạn đều được trả lời một cách chi tiết, kèm ví dụ và giải thích. Không phải những câu trả lời ngắn gọn như một số chatbot khác. GEM Master thực sự giống như đang trò chuyện với một mentor giàu kinh nghiệm.</p>
+            </div>
+
+            <!-- Starter Box -->
+            <div class="starter-box">
+                <div class="starter-box-title">📦 GÓI STARTER - NHỮNG GÌ BẠN CÓ</div>
+                <div class="starter-limit">10 câu hỏi/ngày</div>
+                <div class="starter-features">
+                    <div class="starter-feature">
+                        <span class="check">✓</span>
+                        <span>Giải thích các khái niệm trading cơ bản</span>
+                    </div>
+                    <div class="starter-feature">
+                        <span class="check">✓</span>
+                        <span>Phân tích chart đơn giản</span>
+                    </div>
+                    <div class="starter-feature">
+                        <span class="check">✓</span>
+                        <span>Q&A về nội dung khóa học</span>
+                    </div>
+                    <div class="starter-feature">
+                        <span class="check">✓</span>
+                        <span>Hỗ trợ tâm lý trading cơ bản</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image 3 -->
+            <div class="lesson-image">
+                <div class="image-placeholder">
+                    <span class="image-placeholder-icon">🖼️</span>
+                    <span>Hình 3: What GEM Master Can Do</span>
+                    <span style="font-size: 0.8rem; opacity: 0.7;">Canva: chatbot-capabilities.png (1200x675)</span>
+                </div>
+                <div class="image-caption">Tổng quan các tính năng của GEM Master Chatbot</div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">💡 Mẹo Sử Dụng Hiệu Quả</div>
+                <p>Với 10 câu hỏi/ngày, hãy tập trung vào những thắc mắc quan trọng nhất. Thay vì hỏi những câu có thể tự tìm được (như "Bitcoin là gì?"), hãy hỏi những câu liên quan trực tiếp đến phương pháp GEM và chart analysis. Điều này giúp bạn tận dụng tối đa giá trị của mỗi câu hỏi.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 4: UPGRADE PATH (FOMO) -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">🚀</div>
+                <h2 class="section-title">Mở Khóa Thêm Sức Mạnh</h2>
+            </div>
+
+            <div class="text-content">
+                <p>10 câu hỏi là đủ để bắt đầu, nhưng khi bạn tiến sâu hơn vào trading, bạn sẽ cần nhiều hỗ trợ hơn. Những lúc market biến động mạnh, những lúc bạn phát hiện nhiều setup cùng lúc, những lúc cần phân tích chi tiết - đó là khi bạn thấy giới hạn 10 câu là không đủ.</p>
+
+                <p>GEM cung cấp các gói nâng cấp cho những trader muốn có sự hỗ trợ toàn diện hơn. Mỗi tier mở ra những khả năng mới, giúp bạn học nhanh hơn và trade hiệu quả hơn.</p>
+            </div>
+
+            <!-- Tier Grid -->
+            <div class="tier-grid">
+                <div class="tier-card">
+                    <div class="tier-header">
+                        <span class="tier-icon">🚀</span>
+                        <span class="tier-name">TIER 1</span>
+                    </div>
+                    <div class="tier-limit">50 câu hỏi/ngày</div>
+                    <ul class="tier-features">
+                        <li>Phân tích pattern chi tiết</li>
+                        <li>Trade planning assistance</li>
+                        <li>Entry/Exit point suggestions</li>
+                    </ul>
+                </div>
+
+                <div class="tier-card featured">
+                    <div class="tier-header">
+                        <span class="tier-icon">💎</span>
+                        <span class="tier-name">TIER 2</span>
+                    </div>
+                    <div class="tier-limit">200 câu hỏi/ngày</div>
+                    <ul class="tier-features">
+                        <li>Zone analysis (HFZ/LFZ)</li>
+                        <li>Multi-timeframe guidance</li>
+                        <li>Personalized strategies</li>
+                    </ul>
+                </div>
+
+                <div class="tier-card locked">
+                    <div class="tier-header">
+                        <span class="tier-icon">👑</span>
+                        <span class="tier-name">TIER 3</span>
+                    </div>
+                    <div class="tier-limit">UNLIMITED</div>
+                    <ul class="tier-features">
+                        <li>Priority response time</li>
+                        <li>Advanced analytics</li>
+                        <li>Real-time trade support</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Image 4 -->
+            <div class="lesson-image">
+                <div class="image-placeholder">
+                    <span class="image-placeholder-icon">🖼️</span>
+                    <span>Hình 4: Starter vs Higher Tiers Comparison</span>
+                    <span style="font-size: 0.8rem; opacity: 0.7;">Canva: tier-comparison-chatbot.png (1200x675)</span>
+                </div>
+                <div class="image-caption">So sánh khả năng chatbot giữa các gói - Bạn đang ở STARTER</div>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title">🎯 Khi Nào Nên Upgrade?</div>
+                <p>Bạn không cần upgrade ngay. Hãy sử dụng hết 10 câu/ngày trước. Khi bạn thấy mình thường xuyên hết quota trước khi kết thúc ngày, hoặc khi bạn muốn phân tích chi tiết hơn - đó là lúc nên cân nhắc upgrade. Nhiều trader thấy TIER 2 là sweet spot vì 200 câu/ngày cộng với zone analysis là đủ cho hầu hết nhu cầu.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 5: EXERCISE -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">🎯</div>
+                <h2 class="section-title">Thử Hỏi GEM Master Ngay!</h2>
+            </div>
+
+            <div class="text-content">
+                <p>Lý thuyết đã đủ - giờ là lúc trải nghiệm thực tế! Hãy mở GEM Master Chatbot và thử hỏi một trong những câu hỏi dưới đây. Bạn sẽ thấy ngay sự khác biệt khi có một mentor AI hiểu phương pháp của bạn.</p>
+            </div>
+
+            <!-- Exercise Box -->
+            <div class="exercise-box">
+                <div class="exercise-title">✏️ Bài Tập: Hỏi Thử Ngay!</div>
+                <p class="exercise-description">Chọn một trong những câu hỏi dưới đây và gửi cho GEM Master. Quan sát cách chatbot trả lời - chi tiết, có ví dụ, và nhất quán với phương pháp GEM.</p>
+
+                <div class="question-suggestions">
+                    <div class="question-item">
+                        <span class="question-icon">💬</span>
+                        <span>"DPD pattern là gì?"</span>
+                    </div>
+                    <div class="question-item">
+                        <span class="question-icon">💬</span>
+                        <span>"Tôi nên bắt đầu học trading từ đâu?"</span>
+                    </div>
+                    <div class="question-item">
+                        <span class="question-icon">💬</span>
+                        <span>"Giải thích khái niệm zone cho tôi"</span>
+                    </div>
+                    <div class="question-item">
+                        <span class="question-icon">💬</span>
+                        <span>"Làm sao để không FOMO khi trade?"</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image 5 -->
+            <div class="lesson-image">
+                <div class="image-placeholder">
+                    <span class="image-placeholder-icon">🖼️</span>
+                    <span>Hình 5: Quick Start Questions Guide</span>
+                    <span style="font-size: 0.8rem; opacity: 0.7;">Canva: quick-start-questions.png (1200x675)</span>
+                </div>
+                <div class="image-caption">Những câu hỏi hay để bắt đầu với GEM Master</div>
+            </div>
+
+            <div class="highlight-box green">
+                <div class="highlight-box-title">💡 Mẹo Để Có Câu Trả Lời Tốt Nhất</div>
+                <p>Hỏi càng cụ thể, câu trả lời càng hữu ích. Thay vì hỏi "Làm sao trade?", hãy hỏi "Với DPD pattern trên BTC 4H, tôi nên đặt entry ở đâu?" Bạn cũng có thể gửi hình chart kèm câu hỏi để được phân tích chi tiết hơn.</p>
+            </div>
+        </section>
+
+        <!-- SUMMARY -->
+        <div class="summary-box">
+            <div class="summary-title">📝 Tóm Tắt Bài 3.2</div>
+            <ul class="summary-list">
+                <li>GEM Master là AI mentor được train đặc biệt cho phương pháp GEM Frequency</li>
+                <li>Có thể giải thích concepts, phân tích chart, hỗ trợ tâm lý, và gợi ý resources</li>
+                <li>Gói STARTER cho phép 10 câu hỏi/ngày - đủ để bắt đầu học</li>
+                <li>Upgrade lên TIER cao hơn khi cần hỗ trợ chuyên sâu và nhiều câu hỏi hơn</li>
+                <li>Hỏi càng cụ thể, câu trả lời càng hữu ích</li>
+            </ul>
+        </div>
+
+        <!-- TRANSITION -->
+        <div class="highlight-box cyan">
+            <div class="highlight-box-title">➡️ Bài Tiếp Theo</div>
+            <p>Bạn đã có Scanner để tìm pattern, Chatbot để hỏi đáp. Nhưng trading là hành trình dài, và đi một mình sẽ rất khó khăn. Trong bài tiếp theo, chúng ta sẽ khám phá GEM Community - cộng đồng những trader cùng chí hướng, nơi bạn có thể học hỏi, chia sẻ, và cùng nhau phát triển.</p>
+        </div>
+
+        <!-- QUIZ SECTION -->
+        <section class="quiz-section" id="quizSection">
+            <h3 class="quiz-title">🧠 Kiểm Tra Kiến Thức</h3>
+
+            <!-- Question 1 -->
+            <div class="quiz-question" id="question1">
+                <div class="question-number">Câu hỏi 1/2</div>
+                <div class="question-text">Điểm khác biệt chính của GEM Master so với các AI chatbot thông thường là gì?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 1, false)">
+                        <span class="option-letter">A</span>
+                        <span class="option-text">Trả lời nhanh hơn</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 1, true)">
+                        <span class="option-letter">B</span>
+                        <span class="option-text">Được train đặc biệt cho phương pháp GEM Frequency</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 1, false)">
+                        <span class="option-letter">C</span>
+                        <span class="option-text">Có thể trade tự động</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 1, false)">
+                        <span class="option-letter">D</span>
+                        <span class="option-text">Hoàn toàn miễn phí không giới hạn</span>
+                    </div>
+                </div>
+                <div class="feedback correct" id="feedback1-correct">
+                    ✅ Chính xác! GEM Master được train đặc biệt để hiểu sâu về GEM Frequency Method, nên câu trả lời luôn nhất quán và chính xác theo phương pháp bạn đang học.
+                </div>
+                <div class="feedback incorrect" id="feedback1-incorrect">
+                    ❌ Không đúng. Điểm khác biệt chính là GEM Master được train đặc biệt cho phương pháp GEM Frequency, giúp câu trả lời nhất quán và phù hợp với phương pháp bạn đang học.
+                </div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="quiz-question" id="question2">
+                <div class="question-number">Câu hỏi 2/2</div>
+                <div class="question-text">Gói STARTER cho phép bạn sử dụng bao nhiêu câu hỏi mỗi ngày với GEM Master?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" onclick="checkAnswer(this, 2, false)">
+                        <span class="option-letter">A</span>
+                        <span class="option-text">5 câu hỏi/ngày</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 2, true)">
+                        <span class="option-letter">B</span>
+                        <span class="option-text">10 câu hỏi/ngày</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 2, false)">
+                        <span class="option-letter">C</span>
+                        <span class="option-text">50 câu hỏi/ngày</span>
+                    </div>
+                    <div class="quiz-option" onclick="checkAnswer(this, 2, false)">
+                        <span class="option-letter">D</span>
+                        <span class="option-text">Không giới hạn</span>
+                    </div>
+                </div>
+                <div class="feedback correct" id="feedback2-correct">
+                    ✅ Chính xác! Gói STARTER cho phép 10 câu hỏi/ngày - đủ để bạn làm quen và giải đáp những thắc mắc cơ bản. Khi cần nhiều hơn, bạn có thể upgrade lên các tier cao hơn.
+                </div>
+                <div class="feedback incorrect" id="feedback2-incorrect">
+                    ❌ Không đúng. Gói STARTER cho phép 10 câu hỏi/ngày. 50 câu là TIER 1, còn Unlimited là TIER 3.
+                </div>
+            </div>
+
+            <button class="retake-btn" id="retakeBtn" onclick="retakeQuiz()">🔄 Làm Lại Quiz</button>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <span class="footer-badge">STARTER COURSE</span>
+            <p class="footer-text">Bài 3.2: GEM Master Chatbot - Mentor AI 24/7 | GEM Frequency Trading</p>
+        </footer>
+    </div>
+
+    <script>
+        // Quiz state management
+        const answeredQuestions = {};
+        const totalQuestions = 2;
+
+        function checkAnswer(selectedOption, questionNumber, isCorrect) {
+            // Prevent re-answering
+            if (answeredQuestions[questionNumber]) {
+                return;
+            }
+
+            // Mark question as answered
+            answeredQuestions[questionNumber] = true;
+
+            // Get all options for this question
+            const questionDiv = document.getElementById(`question${questionNumber}`);
+            const options = questionDiv.querySelectorAll('.quiz-option');
+
+            // Disable all options
+            options.forEach(option => {
+                option.classList.add('disabled');
+            });
+
+            // Mark selected option
+            if (isCorrect) {
+                selectedOption.classList.add('correct');
+                document.getElementById(`feedback${questionNumber}-correct`).classList.add('show');
+            } else {
+                selectedOption.classList.add('incorrect');
+                document.getElementById(`feedback${questionNumber}-incorrect`).classList.add('show');
+
+                // Find and highlight correct answer
+                options.forEach(option => {
+                    const optionText = option.querySelector('.option-text').textContent;
+                    if (questionNumber === 1 && optionText.includes('train đặc biệt')) {
+                        option.classList.add('correct');
+                    }
+                    if (questionNumber === 2 && optionText.includes('10 câu hỏi')) {
+                        option.classList.add('correct');
+                    }
+                });
+            }
+
+            // Check if all questions answered
+            if (Object.keys(answeredQuestions).length === totalQuestions) {
+                document.getElementById('retakeBtn').classList.add('show');
+            }
+        }
+
+        function retakeQuiz() {
+            // Reset state
+            for (let key in answeredQuestions) {
+                delete answeredQuestions[key];
+            }
+
+            // Reset UI
+            for (let i = 1; i <= totalQuestions; i++) {
+                const questionDiv = document.getElementById(`question${i}`);
+                const options = questionDiv.querySelectorAll('.quiz-option');
+
+                options.forEach(option => {
+                    option.classList.remove('disabled', 'correct', 'incorrect');
+                });
+
+                document.getElementById(`feedback${i}-correct`).classList.remove('show');
+                document.getElementById(`feedback${i}-incorrect`).classList.remove('show');
+            }
+
+            // Hide retake button
+            document.getElementById('retakeBtn').classList.remove('show');
+
+            // Scroll to quiz section
+            document.getElementById('quizSection').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

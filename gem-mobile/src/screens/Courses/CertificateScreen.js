@@ -24,12 +24,13 @@ import {
 } from 'lucide-react-native';
 import ViewShot from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 
 import { useAuth } from '../../contexts/AuthContext';
 import { courseService } from '../../services/courseService';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS } from '../../utils/tokens';
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
+import { addXP, updateStreak, incrementCourseStats } from '../../services/learningGamificationService';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CERT_WIDTH = SCREEN_WIDTH - SPACING.xl * 2;
@@ -97,6 +98,15 @@ const CertificateScreen = ({ navigation, route }) => {
 
         if (result.success) {
           cert = result.certificate;
+
+          // Award XP for course completion (only when certificate is first generated)
+          try {
+            await addXP(100, 'course_complete', `Hoàn thành khóa học: ${cert.course_title || 'Course'}`);
+            await incrementCourseStats();
+            await updateStreak();
+          } catch (xpError) {
+            console.log('[CertificateScreen] XP award failed:', xpError);
+          }
         } else {
           alert({ type: 'error', title: 'Lỗi', message: result.error || 'Không thể tạo chứng chỉ' });
           navigation.goBack();

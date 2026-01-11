@@ -9,7 +9,7 @@
  * - Infinite scroll cho section "Khám phá thêm"
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, memo } from 'react';
 import {
   View,
   Text,
@@ -108,37 +108,36 @@ const ProductSection = ({
     return null;
   };
 
-  // Handle end reached for infinite scroll
-  const handleEndReached = () => {
-    if (hasInfiniteScroll && hasMore && !loadingMore && onLoadMore) {
-      onLoadMore();
+  // Grid với infinite scroll - Use simple View-based grid (NOT FlatList)
+  // Parent ScrollView handles scrolling and triggers onLoadMore
+  const renderInfiniteGrid = () => {
+    // Group products into rows of 2
+    const rows = [];
+    for (let i = 0; i < products.length; i += 2) {
+      rows.push(products.slice(i, i + 2));
     }
-  };
 
-  // Grid với infinite scroll (FlatList)
-  const renderInfiniteGrid = () => (
-    <FlatList
-      data={products}
-      keyExtractor={(item, index) => item?.id || `product-${index}`}
-      renderItem={({ item }) => (
-        <View style={styles.infiniteGridItem}>
-          <ProductCard
-            product={item}
-            onPress={() => onProductPress?.(item)}
-            style={styles.gridCard}
-          />
-        </View>
-      )}
-      numColumns={2}
-      columnWrapperStyle={styles.infiniteGridRow}
-      contentContainerStyle={styles.infiniteGridContent}
-      showsVerticalScrollIndicator={false}
-      onEndReached={handleEndReached}
-      onEndReachedThreshold={0.3}
-      ListFooterComponent={renderFooter}
-      scrollEnabled={false} // Parent ScrollView handles scrolling
-    />
-  );
+    return (
+      <View style={styles.infiniteGridContent}>
+        {rows.map((row, rowIndex) => (
+          <View key={`row-${rowIndex}`} style={styles.infiniteGridRow}>
+            {row.map((item, itemIndex) => (
+              <View key={item?.id || `product-${rowIndex}-${itemIndex}`} style={styles.infiniteGridItem}>
+                <ProductCard
+                  product={item}
+                  onPress={() => onProductPress?.(item)}
+                  style={styles.gridCard}
+                />
+              </View>
+            ))}
+            {/* Add empty placeholder if odd number of items in last row */}
+            {row.length === 1 && <View style={styles.infiniteGridItem} />}
+          </View>
+        ))}
+        {renderFooter()}
+      </View>
+    );
+  };
 
   // Grid tĩnh (không infinite scroll)
   const renderGridList = () => (
@@ -288,4 +287,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ProductSection;
+export default memo(ProductSection);

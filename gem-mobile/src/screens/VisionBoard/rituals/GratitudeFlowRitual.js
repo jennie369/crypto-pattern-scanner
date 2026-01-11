@@ -1,412 +1,461 @@
 /**
  * GratitudeFlowRitual - Dòng Chảy Biết Ơn
- * Vision Board 2.0 - Ritual với golden particles
- * Created: December 10, 2025
+ * Cosmic Glassmorphism Redesign
+ * Phases: Start → Input → Sending → Completed
  */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
-  Animated,
-  Dimensions,
   TextInput,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
-  Vibration,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Audio } from 'expo-av';
-import {
-  ArrowLeft,
-  Gift,
-  Volume2,
-  VolumeX,
-  Check,
-  Sparkles,
-  Plus,
-  X,
-  Send,
-} from 'lucide-react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSpring,
+  withDelay,
+  withSequence,
+  runOnJS,
+  Easing,
+} from 'react-native-reanimated';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Gift, Sparkles, Plus, X, Send, Check } from 'lucide-react-native';
+
 import { useAuth } from '../../../contexts/AuthContext';
 import { completeRitual } from '../../../services/ritualService';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+// Cosmic Components
+import {
+  CosmicBackground,
+  GlassCard,
+  GlassInputCard,
+  GlowingOrb,
+  GlowButton,
+  GlowIconButton,
+  ParticleField,
+  ProgressRing,
+  CompletionCelebration,
+  InstructionText,
+  TitleText,
+  SubtitleText,
+  RitualHeader,
+  COSMIC_COLORS,
+  COSMIC_SPACING,
+  COSMIC_RADIUS,
+  HAPTIC_PATTERNS,
+  COSMIC_TIMING,
+} from '../../../components/Rituals/cosmic';
 
-const GOLD_COLORS = {
-  primary: '#FFD700',
-  secondary: '#FFA500',
-  light: '#FFF3B0',
-  dark: '#B8860B',
+const THEME = COSMIC_COLORS.ritualThemes.gratitude;
+
+const CONFIG = {
+  maxGratitudes: 5,
+  minGratitudes: 3,
+  xpReward: 30,
+  sendAnimationDuration: 3000,
 };
 
-// Golden Particle
-const GoldenParticle = ({ delay, size = 8 }) => {
-  const opacity = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(50)).current;
-  const translateX = useRef(new Animated.Value(0)).current;
-  const scale = useRef(new Animated.Value(0)).current;
+// ============================================
+// GRATITUDE ITEM COMPONENT
+// ============================================
+
+const GratitudeItem = ({ text, index, onRemove, sending }) => {
+  const opacity = useSharedValue(0);
+  const translateX = useSharedValue(-30);
+  const translateY = useSharedValue(0);
+  const scale = useSharedValue(1);
 
   useEffect(() => {
-    let isMounted = true;
-
-    const animate = () => {
-      if (!isMounted) return;
-
-      const startX = (Math.random() - 0.5) * SCREEN_WIDTH * 0.8;
-      const endX = startX + (Math.random() - 0.5) * 100;
-
-      opacity.setValue(0);
-      translateY.setValue(50);
-      translateX.setValue(startX);
-      scale.setValue(0);
-
-      Animated.sequence([
-        Animated.delay(delay),
-        Animated.parallel([
-          Animated.timing(opacity, { toValue: 1, duration: 500, useNativeDriver: true }),
-          Animated.timing(scale, { toValue: 1, duration: 500, useNativeDriver: true }),
-        ]),
-        Animated.parallel([
-          Animated.timing(opacity, { toValue: 0, duration: 2000, useNativeDriver: true }),
-          Animated.timing(translateY, { toValue: -SCREEN_HEIGHT * 0.5, duration: 3000, useNativeDriver: true }),
-          Animated.timing(translateX, { toValue: endX, duration: 3000, useNativeDriver: true }),
-          Animated.timing(scale, { toValue: 0.5, duration: 3000, useNativeDriver: true }),
-        ]),
-      ]).start(() => {
-        if (isMounted) animate();
-      });
-    };
-
-    animate();
-
-    return () => {
-      isMounted = false;
-    };
+    opacity.value = withDelay(index * 100, withTiming(1, { duration: 300 }));
+    translateX.value = withDelay(index * 100, withSpring(0, COSMIC_TIMING.spring.gentle));
   }, []);
-
-  return (
-    <Animated.View
-      style={[
-        styles.particle,
-        {
-          width: size,
-          height: size,
-          opacity,
-          transform: [{ translateX }, { translateY }, { scale }],
-        },
-      ]}
-    />
-  );
-};
-
-// Gratitude Item Component
-const GratitudeItem = ({ text, index, onRemove }) => {
-  const slideAnim = useRef(new Animated.Value(-50)).current;
-  const opacityAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 300,
-        delay: index * 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacityAnim, {
-        toValue: 1,
-        duration: 300,
-        delay: index * 100,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, []);
+    if (sending) {
+      // Animate flying up like stars
+      const delay = index * 400;
+      opacity.value = withDelay(delay + 1500, withTiming(0, { duration: 500 }));
+      translateY.value = withDelay(delay, withTiming(-300, {
+        duration: 2000,
+        easing: COSMIC_TIMING.easing.smoothIn,
+      }));
+      scale.value = withDelay(delay, withSequence(
+        withTiming(1.1, { duration: 200 }),
+        withTiming(0.3, { duration: 1800 })
+      ));
+    }
+  }, [sending]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [
+      { translateX: translateX.value },
+      { translateY: translateY.value },
+      { scale: scale.value },
+    ],
+  }));
 
   return (
-    <Animated.View
-      style={[
-        styles.gratitudeItem,
-        {
-          transform: [{ translateX: slideAnim }],
-          opacity: opacityAnim,
-        },
-      ]}
-    >
-      <Sparkles size={16} color={GOLD_COLORS.primary} />
-      <Text style={styles.gratitudeText}>{text}</Text>
-      {onRemove && (
-        <TouchableOpacity onPress={onRemove} style={styles.removeButton}>
-          <X size={16} color="rgba(255,255,255,0.5)" />
-        </TouchableOpacity>
-      )}
+    <Animated.View style={animatedStyle}>
+      <GlassCard variant="glow" glowColor={THEME.glow} padding={COSMIC_SPACING.md}>
+        <View style={styles.gratitudeItemContent}>
+          <Sparkles size={18} color={THEME.primary} strokeWidth={2} />
+          <Text style={styles.gratitudeText}>{text}</Text>
+          {onRemove && !sending && (
+            <GlowIconButton
+              icon={<X />}
+              variant="ghost"
+              size="small"
+              onPress={onRemove}
+            />
+          )}
+        </View>
+      </GlassCard>
     </Animated.View>
   );
 };
 
+// ============================================
+// GOLDEN JAR COMPONENT
+// ============================================
+
+const GoldenJar = ({ fillLevel, shimmer }) => {
+  const shimmerValue = useSharedValue(0);
+
+  useEffect(() => {
+    if (shimmer) {
+      shimmerValue.value = withRepeat(
+        withSequence(
+          withTiming(1, { duration: 1000, easing: COSMIC_TIMING.easing.gentle }),
+          withTiming(0, { duration: 1000, easing: COSMIC_TIMING.easing.gentle })
+        ),
+        -1,
+        true
+      );
+    }
+  }, [shimmer]);
+
+  return (
+    <GlowingOrb
+      size={180}
+      color={THEME.primary}
+      secondaryColor={THEME.secondary}
+      gradient={THEME.gradient}
+      icon={<Gift />}
+      iconSize={70}
+      pulseSpeed={2500}
+      glowIntensity={0.6 + fillLevel * 0.4}
+      showRipples={false}
+    />
+  );
+};
+
+// ============================================
+// MAIN COMPONENT
+// ============================================
+
 const GratitudeFlowRitual = ({ navigation }) => {
   const { user } = useAuth();
+
+  // State
   const [phase, setPhase] = useState('start'); // start, input, sending, completed
   const [gratitudes, setGratitudes] = useState([]);
   const [currentInput, setCurrentInput] = useState('');
-  const [isMuted, setIsMuted] = useState(false);
-  const [sound, setSound] = useState(null);
+  const [isSoundOn, setIsSoundOn] = useState(true);
+  const [xpEarned, setXpEarned] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [inputFocused, setInputFocused] = useState(false);
 
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const sendProgress = useRef(new Animated.Value(0)).current;
+  // Animation values
+  const contentOpacity = useSharedValue(1);
+  const jarShimmer = useSharedValue(0);
 
-  // Load ambient sound
-  useEffect(() => {
-    const loadSound = async () => {
-      try {
-        const { sound: audioSound } = await Audio.Sound.createAsync(
-          require('../../../assets/sounds/chime.mp3'),
-          { isLooping: true, volume: 0.3 }
-        );
-        setSound(audioSound);
-      } catch (err) {
-        console.log('Sound not available');
-      }
-    };
+  // Content animation style
+  const contentAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: contentOpacity.value,
+  }));
 
-    loadSound();
-
-    return () => {
-      if (sound) sound.unloadAsync();
-    };
+  // Handlers
+  const handleStart = useCallback(() => {
+    HAPTIC_PATTERNS.tap();
+    contentOpacity.value = withTiming(0, { duration: 300 });
+    setTimeout(() => {
+      setPhase('input');
+      contentOpacity.value = withTiming(1, { duration: 400 });
+    }, 300);
   }, []);
 
-  // Fade in animation
-  useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 1000,
-      useNativeDriver: true,
-    }).start();
-  }, []);
+  const handleAddGratitude = useCallback(() => {
+    if (!currentInput.trim() || gratitudes.length >= CONFIG.maxGratitudes) return;
 
-  const startRitual = async () => {
-    setPhase('input');
-    Vibration.vibrate(100);
-
-    if (sound && !isMuted) {
-      await sound.playAsync();
-    }
-  };
-
-  const addGratitude = () => {
-    if (!currentInput.trim() || gratitudes.length >= 5) return;
-
-    setGratitudes([...gratitudes, currentInput.trim()]);
+    HAPTIC_PATTERNS.gratitude.add();
+    setGratitudes(prev => [...prev, currentInput.trim()]);
     setCurrentInput('');
-    Vibration.vibrate(50);
-  };
+  }, [currentInput, gratitudes.length]);
 
-  const removeGratitude = (index) => {
-    setGratitudes(gratitudes.filter((_, i) => i !== index));
-  };
+  const handleRemoveGratitude = useCallback((index) => {
+    HAPTIC_PATTERNS.tap();
+    setGratitudes(prev => prev.filter((_, i) => i !== index));
+  }, []);
 
-  const sendGratitude = async () => {
-    if (gratitudes.length === 0) return;
+  const handleSendGratitudes = useCallback(() => {
+    if (gratitudes.length < CONFIG.minGratitudes) return;
 
-    setPhase('sending');
+    HAPTIC_PATTERNS.gratitude.send();
+    contentOpacity.value = withTiming(0, { duration: 300 });
+    setTimeout(() => {
+      setPhase('sending');
+      contentOpacity.value = withTiming(1, { duration: 400 });
+    }, 300);
 
-    // Animate sending
-    Animated.timing(sendProgress, {
-      toValue: 1,
-      duration: 3000,
-      useNativeDriver: false,
-    }).start(async () => {
-      setPhase('completed');
-      Vibration.vibrate([0, 100, 50, 100, 50, 100]);
+    // Complete after animation
+    setTimeout(() => {
+      handleComplete();
+    }, CONFIG.sendAnimationDuration + 500);
+  }, [gratitudes]);
 
-      if (sound) {
-        await sound.stopAsync();
-      }
+  const handleComplete = async () => {
+    HAPTIC_PATTERNS.gratitude.complete();
+    setShowCelebration(true);
 
-      // Save completion
+    try {
       if (user?.id) {
-        try {
-          await completeRitual(user.id, 'gratitude-flow', JSON.stringify(gratitudes));
-        } catch (err) {
-          console.error('Failed to save ritual:', err);
-        }
-      }
-    });
-  };
-
-  const toggleMute = async () => {
-    setIsMuted(!isMuted);
-    if (sound) {
-      if (isMuted) {
-        await sound.playAsync();
+        const result = await completeRitual(user.id, 'gratitude-flow', {
+          gratitudeCount: gratitudes.length,
+          gratitudes,
+        });
+        setXpEarned(result?.xpEarned || CONFIG.xpReward);
+        setStreak(result?.newStreak || 1);
       } else {
-        await sound.pauseAsync();
+        setXpEarned(CONFIG.xpReward);
+        setStreak(1);
       }
+    } catch (err) {
+      console.error('[GratitudeFlowRitual] Complete error:', err);
+      setXpEarned(CONFIG.xpReward);
+      setStreak(1);
     }
   };
 
-  return (
-    <LinearGradient
-      colors={['#1A1500', '#2D2500', '#4A3D00']}
-      style={styles.container}
+  const handleBack = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
+
+  const handleContinue = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
+
+  // Calculate fill level
+  const fillLevel = gratitudes.length / CONFIG.maxGratitudes;
+  const canSend = gratitudes.length >= CONFIG.minGratitudes;
+
+  // Render Start Phase
+  const renderStart = () => (
+    <Animated.View style={[styles.phaseContainer, contentAnimatedStyle]}>
+      <GoldenJar fillLevel={0} shimmer={true} />
+
+      <View style={styles.textContainer}>
+        <TitleText text="Dòng Chảy Biết Ơn" color={THEME.primary} />
+        <SubtitleText text="Gửi lòng biết ơn của bạn đến vũ trụ" />
+      </View>
+
+      <InstructionText
+        text="Viết ít nhất 3 điều bạn biết ơn hôm nay"
+        variant="default"
+        color={COSMIC_COLORS.text.secondary}
+        style={styles.instruction}
+      />
+
+      <GlowButton
+        label="Bắt đầu"
+        variant="gratitude"
+        size="large"
+        fullWidth
+        onPress={handleStart}
+        style={styles.startButton}
+      />
+
+      <Text style={styles.durationText}>3-5 phút • Nuôi dưỡng tâm hồn</Text>
+    </Animated.View>
+  );
+
+  // Render Input Phase
+  const renderInput = () => (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.keyboardAvoid}
     >
-      <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <ArrowLeft size={24} color="#fff" />
-          </TouchableOpacity>
-          <Text style={styles.title}>Dòng Chảy Biết Ơn</Text>
-          <TouchableOpacity onPress={toggleMute} style={styles.muteButton}>
-            {isMuted ? (
-              <VolumeX size={24} color="#fff" />
-            ) : (
-              <Volume2 size={24} color="#fff" />
-            )}
-          </TouchableOpacity>
+      <Animated.View style={[styles.inputPhaseContainer, contentAnimatedStyle]}>
+        {/* Jar with progress */}
+        <View style={styles.jarContainer}>
+          <ProgressRing
+            progress={fillLevel}
+            size={200}
+            strokeWidth={6}
+            color={THEME.primary}
+            secondaryColor={THEME.secondary}
+            showPercentage={false}
+            showGlow={true}
+          >
+            <Gift size={60} color={THEME.primary} strokeWidth={1.5} />
+          </ProgressRing>
+          <Text style={styles.countText}>
+            {gratitudes.length}/{CONFIG.maxGratitudes}
+          </Text>
         </View>
 
-        {/* Particles Background */}
-        {(phase === 'input' || phase === 'sending') && (
-          <View style={styles.particlesContainer}>
-            {Array.from({ length: 15 }).map((_, i) => (
-              <GoldenParticle key={i} delay={i * 200} size={6 + Math.random() * 6} />
-            ))}
-          </View>
+        {/* Gratitude list */}
+        <ScrollView style={styles.gratitudeList} showsVerticalScrollIndicator={false}>
+          {gratitudes.map((text, index) => (
+            <GratitudeItem
+              key={index}
+              text={text}
+              index={index}
+              onRemove={() => handleRemoveGratitude(index)}
+              sending={false}
+            />
+          ))}
+        </ScrollView>
+
+        {/* Input area */}
+        {gratitudes.length < CONFIG.maxGratitudes && (
+          <GlassInputCard
+            focused={inputFocused}
+            glowColor={THEME.glow}
+            style={styles.inputCard}
+          >
+            <View style={styles.inputRow}>
+              <TextInput
+                style={styles.input}
+                placeholder="Tôi biết ơn..."
+                placeholderTextColor={COSMIC_COLORS.text.hint}
+                value={currentInput}
+                onChangeText={setCurrentInput}
+                onFocus={() => setInputFocused(true)}
+                onBlur={() => setInputFocused(false)}
+                onSubmitEditing={handleAddGratitude}
+                returnKeyType="done"
+              />
+              <GlowIconButton
+                icon={<Plus />}
+                variant="gratitude"
+                size="medium"
+                onPress={handleAddGratitude}
+                disabled={!currentInput.trim()}
+              />
+            </View>
+          </GlassInputCard>
         )}
 
-        {/* Main Content */}
-        <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
-          {phase === 'start' && (
-            <View style={styles.startScreen}>
-              <Gift size={80} color={GOLD_COLORS.primary} />
-              <Text style={styles.subtitle}>Thu hút thêm nhiều phước lành</Text>
-              <Text style={styles.description}>
-                Viết ra những điều bạn biết ơn và gửi lên vũ trụ để thu hút thêm nhiều phước lành.
-              </Text>
-              <TouchableOpacity style={styles.startButton} onPress={startRitual}>
-                <Text style={styles.startButtonText}>Bắt đầu</Text>
-              </TouchableOpacity>
-            </View>
-          )}
+        {/* Send button */}
+        <GlowButton
+          label={canSend ? 'Gửi lòng biết ơn' : `Thêm ${CONFIG.minGratitudes - gratitudes.length} điều nữa`}
+          icon={<Send />}
+          variant={canSend ? 'gratitude' : 'outline'}
+          size="large"
+          fullWidth
+          disabled={!canSend}
+          onPress={handleSendGratitudes}
+          style={styles.sendButton}
+        />
+      </Animated.View>
+    </KeyboardAvoidingView>
+  );
 
-          {phase === 'input' && (
-            <View style={styles.inputPhase}>
-              <Text style={styles.inputTitle}>
-                Viết ra những điều bạn biết ơn
-              </Text>
-              <Text style={styles.inputHint}>
-                ({gratitudes.length}/5 điều)
-              </Text>
+  // Render Sending Phase
+  const renderSending = () => (
+    <Animated.View style={[styles.phaseContainer, contentAnimatedStyle]}>
+      <View style={styles.sendingContainer}>
+        {/* Flying gratitudes */}
+        {gratitudes.map((text, index) => (
+          <GratitudeItem
+            key={index}
+            text={text}
+            index={index}
+            sending={true}
+          />
+        ))}
+      </View>
 
-              <ScrollView style={styles.gratitudeList} showsVerticalScrollIndicator={false}>
-                {gratitudes.map((text, index) => (
-                  <GratitudeItem
-                    key={index}
-                    text={text}
-                    index={index}
-                    onRemove={() => removeGratitude(index)}
-                  />
-                ))}
-              </ScrollView>
+      <InstructionText
+        text="Lòng biết ơn đang bay đến vũ trụ..."
+        variant="large"
+        color={THEME.primary}
+        glowColor={THEME.glow}
+        pulse={true}
+        style={styles.sendingText}
+      />
+    </Animated.View>
+  );
 
-              {gratitudes.length < 5 && (
-                <View style={styles.inputRow}>
-                  <TextInput
-                    style={styles.textInput}
-                    placeholder="Tôi biết ơn vì..."
-                    placeholderTextColor="rgba(255,255,255,0.4)"
-                    value={currentInput}
-                    onChangeText={setCurrentInput}
-                    onSubmitEditing={addGratitude}
-                    returnKeyType="done"
-                  />
-                  <TouchableOpacity
-                    style={[styles.addButton, !currentInput.trim() && styles.addButtonDisabled]}
-                    onPress={addGratitude}
-                    disabled={!currentInput.trim()}
-                  >
-                    <Plus size={24} color="#fff" />
-                  </TouchableOpacity>
-                </View>
-              )}
+  // Main render
+  return (
+    <GestureHandlerRootView style={styles.container}>
+      <CosmicBackground
+        variant="gratitude"
+        starDensity="medium"
+        showNebula={true}
+        showSpotlight={true}
+        spotlightIntensity={0.5}
+      >
+        {/* Golden particles */}
+        {/* OPTIMIZED: reduced particle counts */}
+        <ParticleField
+          variant="golden"
+          count={phase === 'sending' ? 25 : 12}
+          speed={phase === 'sending' ? 'fast' : 'slow'}
+          density="low"
+          direction="up"
+        />
 
-              {gratitudes.length > 0 && (
-                <TouchableOpacity style={styles.sendButton} onPress={sendGratitude}>
-                  <Text style={styles.sendButtonText}>Gửi vào vũ trụ</Text>
-                  <Send size={20} color="#1A1500" />
-                </TouchableOpacity>
-              )}
-            </View>
-          )}
+        <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+          {/* Header */}
+          <RitualHeader
+            title="Dòng Chảy Biết Ơn"
+            icon={<Gift />}
+            iconColor={THEME.primary}
+            onBack={handleBack}
+            showSound={true}
+            soundEnabled={isSoundOn}
+            onSoundToggle={() => setIsSoundOn(!isSoundOn)}
+          />
 
-          {phase === 'sending' && (
-            <View style={styles.sendingPhase}>
-              <View style={styles.sendingVisual}>
-                {gratitudes.map((text, index) => (
-                  <Animated.View
-                    key={index}
-                    style={[
-                      styles.flyingGratitude,
-                      {
-                        opacity: sendProgress.interpolate({
-                          inputRange: [0, 0.3 + index * 0.1, 0.5 + index * 0.1, 1],
-                          outputRange: [1, 1, 0, 0],
-                        }),
-                        transform: [
-                          {
-                            translateY: sendProgress.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [index * 60, -SCREEN_HEIGHT],
-                            }),
-                          },
-                          {
-                            scale: sendProgress.interpolate({
-                              inputRange: [0, 0.5, 1],
-                              outputRange: [1, 0.8, 0.3],
-                            }),
-                          },
-                        ],
-                      },
-                    ]}
-                  >
-                    <Sparkles size={16} color={GOLD_COLORS.primary} />
-                    <Text style={styles.flyingText}>{text}</Text>
-                  </Animated.View>
-                ))}
-              </View>
-              <Text style={styles.sendingText}>Đang gửi lòng biết ơn...</Text>
-            </View>
-          )}
+          {/* Content */}
+          <View style={styles.content}>
+            {phase === 'start' && renderStart()}
+            {phase === 'input' && renderInput()}
+            {phase === 'sending' && renderSending()}
+          </View>
+        </SafeAreaView>
 
-          {phase === 'completed' && (
-            <View style={styles.completionScreen}>
-              <View style={styles.completionIcon}>
-                <Check size={60} color="#4CAF50" />
-              </View>
-              <Text style={styles.completionTitle}>Tuyệt vời!</Text>
-              <Text style={styles.completionText}>
-                {gratitudes.length} lời biết ơn đã được gửi đến vũ trụ
-              </Text>
-              <View style={styles.xpBadge}>
-                <Sparkles size={20} color={GOLD_COLORS.primary} />
-                <Text style={styles.xpText}>+30 XP</Text>
-              </View>
-              <TouchableOpacity
-                style={styles.doneButton}
-                onPress={() => navigation.goBack()}
-              >
-                <Text style={styles.doneButtonText}>Hoàn tất</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-        </Animated.View>
-      </SafeAreaView>
-    </LinearGradient>
+        {/* Celebration overlay */}
+        <CompletionCelebration
+          ritualType="gratitude"
+          xpEarned={xpEarned}
+          streakCount={streak}
+          isNewRecord={streak > 0}
+          message={`Bạn đã gửi ${gratitudes.length} lời biết ơn đến vũ trụ.`}
+          visible={showCelebration}
+          onContinue={handleContinue}
+          showVisionBoardButton={true}
+          showReflectionButton={false}
+        />
+      </CosmicBackground>
+    </GestureHandlerRootView>
   );
 };
+
+// ============================================
+// STYLES
+// ============================================
 
 const styles = StyleSheet.create({
   container: {
@@ -415,229 +464,96 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  backButton: {
-    padding: 8,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#fff',
-  },
-  muteButton: {
-    padding: 8,
-  },
-  particlesContainer: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-  },
-  particle: {
-    position: 'absolute',
-    backgroundColor: GOLD_COLORS.primary,
-    borderRadius: 10,
-    shadowColor: GOLD_COLORS.primary,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 8,
-  },
   content: {
     flex: 1,
-    padding: 24,
-    paddingBottom: 40,
+    paddingHorizontal: COSMIC_SPACING.lg,
   },
-  startScreen: {
+  phaseContainer: {
     flex: 1,
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
+    paddingBottom: COSMIC_SPACING.xxl,
   },
-  subtitle: {
-    fontSize: 16,
-    color: 'rgba(255,255,255,0.7)',
-    marginTop: 16,
+  keyboardAvoid: {
+    flex: 1,
   },
-  description: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.6)',
+  inputPhaseContainer: {
+    flex: 1,
+    paddingTop: COSMIC_SPACING.lg,
+  },
+
+  // Start phase
+  textContainer: {
+    alignItems: 'center',
+    marginTop: COSMIC_SPACING.xl,
+    marginBottom: COSMIC_SPACING.md,
+  },
+  instruction: {
+    marginBottom: COSMIC_SPACING.xl,
     textAlign: 'center',
-    marginTop: 12,
-    paddingHorizontal: 32,
-    lineHeight: 22,
   },
   startButton: {
-    backgroundColor: GOLD_COLORS.primary,
-    paddingHorizontal: 48,
-    paddingVertical: 16,
-    borderRadius: 30,
-    marginTop: 32,
+    marginTop: COSMIC_SPACING.lg,
   },
-  startButtonText: {
+  durationText: {
+    fontSize: 14,
+    color: COSMIC_COLORS.text.muted,
+    marginTop: COSMIC_SPACING.md,
+  },
+
+  // Input phase
+  jarContainer: {
+    alignItems: 'center',
+    marginBottom: COSMIC_SPACING.lg,
+  },
+  countText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#1A1500',
-  },
-  inputPhase: {
-    flex: 1,
-  },
-  inputTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#fff',
-    textAlign: 'center',
-  },
-  inputHint: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.5)',
-    textAlign: 'center',
-    marginTop: 4,
-    marginBottom: 20,
+    color: THEME.primary,
+    marginTop: COSMIC_SPACING.sm,
   },
   gratitudeList: {
     flex: 1,
-    marginBottom: 16,
+    marginBottom: COSMIC_SPACING.md,
   },
-  gratitudeItem: {
+  gratitudeItemContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,215,0,0.1)',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255,215,0,0.2)',
+    gap: COSMIC_SPACING.sm,
   },
   gratitudeText: {
     flex: 1,
-    fontSize: 16,
-    color: '#fff',
-    marginLeft: 12,
+    fontSize: 15,
+    color: COSMIC_COLORS.text.primary,
+    lineHeight: 22,
   },
-  removeButton: {
-    padding: 4,
+  inputCard: {
+    marginBottom: COSMIC_SPACING.md,
   },
   inputRow: {
     flexDirection: 'row',
-    gap: 12,
-  },
-  textInput: {
-    flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    color: '#fff',
-  },
-  addButton: {
-    backgroundColor: GOLD_COLORS.primary,
-    width: 54,
-    height: 54,
-    borderRadius: 12,
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: COSMIC_SPACING.sm,
   },
-  addButtonDisabled: {
-    opacity: 0.5,
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: COSMIC_COLORS.text.primary,
+    paddingVertical: COSMIC_SPACING.xs,
   },
   sendButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: GOLD_COLORS.primary,
-    paddingVertical: 16,
-    borderRadius: 30,
-    marginTop: 20,
-    gap: 10,
+    marginBottom: COSMIC_SPACING.lg,
   },
-  sendButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1A1500',
-  },
-  sendingPhase: {
+
+  // Sending phase
+  sendingContainer: {
     flex: 1,
-    alignItems: 'center',
     justifyContent: 'center',
-  },
-  sendingVisual: {
-    alignItems: 'center',
     width: '100%',
   },
-  flyingGratitude: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,215,0,0.15)',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 20,
-    marginBottom: 12,
-  },
-  flyingText: {
-    fontSize: 14,
-    color: '#fff',
-    marginLeft: 8,
-  },
   sendingText: {
-    fontSize: 16,
-    color: 'rgba(255,255,255,0.7)',
-    marginTop: 32,
-  },
-  completionScreen: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  completionIcon: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: 'rgba(76,175,80,0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  completionTitle: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#fff',
-    marginTop: 24,
-  },
-  completionText: {
-    fontSize: 16,
-    color: 'rgba(255,255,255,0.7)',
-    marginTop: 12,
+    marginTop: COSMIC_SPACING.xl,
     textAlign: 'center',
-  },
-  xpBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,215,0,0.2)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginTop: 20,
-    gap: 8,
-  },
-  xpText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: GOLD_COLORS.primary,
-  },
-  doneButton: {
-    backgroundColor: '#4CAF50',
-    paddingHorizontal: 48,
-    paddingVertical: 14,
-    borderRadius: 25,
-    marginTop: 32,
-  },
-  doneButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
   },
 });
 

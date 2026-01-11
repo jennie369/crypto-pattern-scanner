@@ -22,7 +22,7 @@ const QUIZ_RESULTS_KEY = '@gem_quiz_results';
 const CERTIFICATES_KEY = '@gem_certificates';
 
 export const CourseProvider = ({ children }) => {
-  const { user, profile, tier: userTier, isAdmin } = useAuth();
+  const { user, profile, userTier, isAdmin } = useAuth();
 
   // State
   const [courses, setCourses] = useState([]);
@@ -53,6 +53,7 @@ export const CourseProvider = ({ children }) => {
   // Load data on mount or when admin status changes
   useEffect(() => {
     if (user?.id) {
+      console.log('[CourseContext] useEffect triggered - user:', user?.id, 'isAdmin:', isAdmin);
       loadAllData();
       setupRealtimeSubscriptions();
     } else {
@@ -64,6 +65,19 @@ export const CourseProvider = ({ children }) => {
       cleanupSubscriptions();
     };
   }, [user?.id, isAdmin]);
+
+  // Force reload when isAdmin changes to true (profile loaded after initial fetch)
+  useEffect(() => {
+    if (isAdmin && user?.id && courses.length > 0) {
+      console.log('[CourseContext] Admin status confirmed, checking if reload needed...');
+      // Check if we have unpublished courses - if not, we need to reload
+      const hasUnpublishedCourses = courses.some(c => c.is_published === false);
+      if (!hasUnpublishedCourses) {
+        console.log('[CourseContext] Reloading to include unpublished courses for admin');
+        loadAllData();
+      }
+    }
+  }, [isAdmin]);
 
   // ==================== REALTIME SUBSCRIPTIONS ====================
 
@@ -305,9 +319,14 @@ export const CourseProvider = ({ children }) => {
     try {
       // Load courses from service
       // Admin/Creator can see all courses (including unpublished)
+      console.log('[CourseContext] loadAllData - isAdmin:', isAdmin);
       const coursesData = await courseService.getCourses({
         includeUnpublished: isAdmin,
       });
+      console.log('[CourseContext] Loaded courses:', coursesData?.length || 0, 'courses');
+      if (coursesData?.length > 0) {
+        console.log('[CourseContext] Course titles:', coursesData.map(c => c.title));
+      }
       setCourses(coursesData);
 
       // Try to load enrollments from Supabase first, fallback to AsyncStorage
@@ -420,6 +439,42 @@ export const CourseProvider = ({ children }) => {
     await loadAllData();
     setRefreshing(false);
   }, [user?.id]);
+
+  // Check if user can access a course based on tier
+  // IMPORTANT: This must be defined BEFORE enrollInCourse which uses it
+  const canAccessCourse = useCallback((course) => {
+    // Admin can access everything
+    if (userTier === 'ADMIN' || isAdmin) {
+      console.log('[CourseContext] canAccessCourse: ADMIN bypass - full access');
+      return true;
+    }
+
+    // Use tier from AuthContext (already normalized with fallback to 'FREE')
+    // Handle null/undefined tier_required as FREE
+    const courseTier = course?.tier_required || 'FREE';
+
+    const tierOrder = ['FREE', 'TIER1', 'TIER2', 'TIER3'];
+
+    // If tier not in list, treat as FREE (most permissive)
+    let userTierIdx = tierOrder.indexOf(userTier || 'FREE');
+    if (userTierIdx === -1) userTierIdx = 0; // Treat unknown as FREE
+
+    let courseTierIdx = tierOrder.indexOf(courseTier);
+    if (courseTierIdx === -1) courseTierIdx = 0; // FREE/null courses accessible to all
+
+    const canAccess = courseTierIdx <= userTierIdx;
+
+    // Debug log
+    console.log('[CourseContext] canAccessCourse:', {
+      courseTitle: course?.title,
+      courseTier,
+      userTier,
+      isAdmin,
+      canAccess,
+    });
+
+    return canAccess;
+  }, [userTier, isAdmin]);
 
   // Enroll in a course - syncs to Supabase
   // NOTE: This function should ONLY be called for FREE courses or after successful Shopify payment
@@ -586,38 +641,131 @@ export const CourseProvider = ({ children }) => {
     }
   }, [completedLessons, courseProgress, courses, user?.id]);
 
-  // Check if user can access a course based on tier
-  const canAccessCourse = useCallback((course) => {
-    // Use tier from AuthContext (already normalized with fallback to 'FREE')
-    const courseTier = course?.tier_required || 'FREE';
+  // Unmark lesson as complete - syncs to Supabase for realtime
+  const uncompleteLesson = useCallback(async (courseId, lessonId) => {
+    try {
+      const currentCompleted = completedLessons[courseId] || [];
 
-    const tierOrder = ['FREE', 'TIER1', 'TIER2', 'TIER3', 'ADMIN'];
+      // Check if not completed
+      if (!currentCompleted.includes(lessonId)) {
+        return { success: true, alreadyUncompleted: true };
+      }
 
-    // If tier not in list, treat as FREE (most permissive)
-    let userTierIdx = tierOrder.indexOf(userTier || 'FREE');
-    if (userTierIdx === -1) userTierIdx = 0; // Treat unknown as FREE
+      // Remove from completed lessons locally
+      const newLessonsList = currentCompleted.filter(id => id !== lessonId);
+      const newCompleted = { ...completedLessons, [courseId]: newLessonsList };
+      setCompletedLessons(newCompleted);
 
-    let courseTierIdx = tierOrder.indexOf(courseTier);
-    if (courseTierIdx === -1) courseTierIdx = 0; // FREE courses accessible to all
+      // Calculate new progress
+      const course = courses.find(c => c.id === courseId);
+      const totalLessons = course?.modules?.reduce(
+        (sum, m) => sum + (m.lessons?.length || 0), 0
+      ) || 1;
+      const newPercent = Math.round((newLessonsList.length / totalLessons) * 100);
 
-    const canAccess = courseTierIdx <= userTierIdx;
+      const newProgress = { ...courseProgress, [courseId]: newPercent };
+      setCourseProgress(newProgress);
 
-    // Debug log
-    console.log('[CourseContext] canAccessCourse:', {
-      courseTier,
-      userTier,
-      courseTierIdx,
-      userTierIdx,
-      canAccess,
-    });
+      // Save to AsyncStorage
+      await Promise.all([
+        AsyncStorage.setItem(COMPLETED_LESSONS_KEY, JSON.stringify(newCompleted)),
+        AsyncStorage.setItem(PROGRESS_KEY, JSON.stringify(newProgress)),
+      ]);
 
-    return canAccess;
-  }, [userTier]);
+      // SYNC TO SUPABASE
+      if (user?.id) {
+        try {
+          // 1. Unmark lesson as complete in lesson_progress table
+          await progressService.unmarkLessonComplete(user.id, lessonId, courseId);
+          console.log('[CourseContext] Lesson uncomplete synced to Supabase');
 
-  // Check if course is locked
+          // 2. Update enrollment progress percentage
+          const { error: enrollError } = await supabase
+            .from('course_enrollments')
+            .update({
+              progress_percentage: newPercent,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('user_id', user.id)
+            .eq('course_id', courseId);
+
+          if (enrollError) {
+            console.warn('[CourseContext] Failed to update enrollment progress:', enrollError);
+          } else {
+            console.log('[CourseContext] Enrollment progress updated:', newPercent + '%');
+          }
+        } catch (dbErr) {
+          console.warn('[CourseContext] DB sync error:', dbErr);
+        }
+      }
+
+      return { success: true, progress: newPercent };
+    } catch (err) {
+      console.error('[CourseContext] Uncomplete lesson error:', err);
+      return { success: false, error: err.message };
+    }
+  }, [completedLessons, courseProgress, courses, user?.id]);
+
+  // Check if course is locked (considers both tier AND payment requirements)
   const isCourseLocked = useCallback((course) => {
-    return !canAccessCourse(course);
-  }, [canAccessCourse]);
+    // Admin can access everything
+    if (userTier === 'ADMIN' || isAdmin) {
+      return false;
+    }
+
+    // Check tier access first
+    const hasTierAccess = canAccessCourse(course);
+    if (!hasTierAccess) {
+      return true; // Locked due to tier
+    }
+
+    // For paid courses (shopify_product_id), check if enrolled
+    // If not enrolled in a paid course, it's locked
+    const isPaidCourse = course?.shopify_product_id || (course?.price && course?.price > 0);
+    if (isPaidCourse) {
+      const enrolled = enrolledCourseIds.includes(course?.id);
+      if (!enrolled) {
+        console.log('[CourseContext] isCourseLocked: Paid course, not enrolled', course?.title);
+        return true; // Locked due to payment required
+      }
+    }
+
+    return false;
+  }, [canAccessCourse, userTier, isAdmin, enrolledCourseIds]);
+
+  // Get the reason why a course is locked
+  const getCourseLockReason = useCallback((course) => {
+    // Admin can access everything
+    if (userTier === 'ADMIN' || isAdmin) {
+      return null;
+    }
+
+    // Check tier access first
+    const hasTierAccess = canAccessCourse(course);
+    if (!hasTierAccess) {
+      return {
+        type: 'tier',
+        requiredTier: course?.tier_required,
+        message: `Yêu cầu ${course?.tier_required || 'TIER1'}`,
+      };
+    }
+
+    // Check payment for paid courses
+    const isPaidCourse = course?.shopify_product_id || (course?.price && course?.price > 0);
+    if (isPaidCourse) {
+      const enrolled = enrolledCourseIds.includes(course?.id);
+      if (!enrolled) {
+        return {
+          type: 'payment',
+          shopifyProductId: course?.shopify_product_id,
+          price: course?.price,
+          message: 'Yêu cầu mua khóa học',
+        };
+      }
+    }
+
+    return null;
+  }, [canAccessCourse, userTier, isAdmin, enrolledCourseIds]);
 
   // Check if enrolled in a course
   const isEnrolled = useCallback((courseId) => {
@@ -642,8 +790,30 @@ export const CourseProvider = ({ children }) => {
 
   // Get course by ID
   const getCourseById = useCallback((courseId) => {
-    return courses.find(c => c.id === courseId);
+    const course = courses.find(c => c.id === courseId);
+    return course || null;
   }, [courses]);
+
+  // Fetch fresh course data with modules and lessons
+  // Use this when course exists but modules are missing/empty
+  const fetchCourseWithModules = useCallback(async (courseId) => {
+    try {
+      console.log('[CourseContext] Fetching fresh course data for:', courseId);
+      const freshCourse = await courseService.getCourseById(courseId);
+
+      if (freshCourse) {
+        // Update the courses array with fresh data
+        setCourses(prev =>
+          prev.map(c => c.id === courseId ? freshCourse : c)
+        );
+        return freshCourse;
+      }
+      return null;
+    } catch (err) {
+      console.error('[CourseContext] fetchCourseWithModules error:', err);
+      return null;
+    }
+  }, []);
 
   // Get next incomplete lesson for a course
   const getNextLesson = useCallback((courseId) => {
@@ -833,7 +1003,9 @@ export const CourseProvider = ({ children }) => {
     enrollInCourse,
     unenrollFromCourse,
     completeLesson,
+    uncompleteLesson,
     resetCourseProgress,
+    fetchCourseWithModules,
 
     // Quiz Actions
     saveQuizResult,
@@ -847,6 +1019,7 @@ export const CourseProvider = ({ children }) => {
     getCourseById,
     isEnrolled,
     isCourseLocked,
+    getCourseLockReason,
     canAccessCourse,
     getProgress,
     getCompletedLessons,

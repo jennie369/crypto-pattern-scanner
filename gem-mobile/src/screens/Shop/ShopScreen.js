@@ -1,6 +1,7 @@
 /**
  * Gemral - Shop Screen (Main)
  * Product catalog với sections theo Shopify tags - DARK THEME
+ * Enhanced with Hero Banner, Flash Sale, Categories, Wishlist, Recently Viewed
  * Sử dụng design tokens từ DESIGN_TOKENS.md v3.0
  */
 
@@ -19,12 +20,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Search, ShoppingCart, ShoppingBag } from 'lucide-react-native';
+import { Search, ShoppingCart, ShoppingBag, Heart } from 'lucide-react-native';
 import { ProductCard, CategoryFilter } from './components';
 import ProductSection from './components/ProductSection';
 import ShopCategoryTabs from './components/ShopCategoryTabs';
+import CourseSection from './components/CourseSection';
 import { useSponsorBanners } from '../../components/SponsorBannerSection';
-import SponsorBannerCard from '../../components/SponsorBannerCard';
+import SponsorBanner from '../../components/SponsorBanner';
 import { distributeBannersAmongSections } from '../../utils/bannerDistribution';
 import { shopifyService } from '../../services/shopifyService';
 import { useShopSections, useFilteredProducts } from '../../hooks/useShopProducts';
@@ -35,6 +37,17 @@ import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, GLASS } from '../../utils/token
 import { SHOP_SECTIONS, SHOP_CATEGORIES } from '../../utils/shopConfig';
 import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
 import useScrollToTop from '../../hooks/useScrollToTop';
+
+// Shop Enhancement Components
+import PromoBar from '../../components/shop/PromoBar';
+import HeroBannerCarousel from '../../components/shop/HeroBannerCarousel';
+import CategoryGrid from '../../components/shop/CategoryGrid';
+import FlashSaleSection from '../../components/shop/FlashSaleSection';
+import FeaturedProductSection from '../../components/shop/FeaturedProductSection';
+import RecentlyViewedSection from '../../components/shop/RecentlyViewedSection';
+import ShopOnboarding from '../../components/shop/ShopOnboarding';
+import { getWishlistCount } from '../../services/wishlistService';
+import shopOnboardingService from '../../services/shopOnboardingService';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const CARD_WIDTH = (SCREEN_WIDTH - SPACING.md * 3) / 2;
@@ -63,6 +76,11 @@ const ShopScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Shop Enhancement states
+  const [wishlistCount, setWishlistCount] = useState(0);
+  const [showPromoBar, setShowPromoBar] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
   // Sections data từ Shopify tags
   const [sectionsData, setSectionsData] = useState({});
   const [sectionsLoading, setSectionsLoading] = useState({});
@@ -87,15 +105,23 @@ const ShopScreen = ({ navigation }) => {
     setRefreshing(false);
   });
 
-  // Handle scroll for auto-hide header/tabs
+  // Handle scroll for auto-hide header/tabs AND infinite scroll
   const handleScroll = useCallback((event) => {
     const currentScrollY = event.nativeEvent.contentOffset.y;
     const diff = currentScrollY - lastScrollY.current;
+    const contentHeight = event.nativeEvent.contentSize.height;
+    const layoutHeight = event.nativeEvent.layoutMeasurement.height;
 
     // Also handle TabBar visibility
     handleTabBarScroll(event);
 
-    // Only animate if we've scrolled enough (threshold 10px)
+    // Check for infinite scroll - trigger when 300px from bottom
+    const distanceFromBottom = contentHeight - layoutHeight - currentScrollY;
+    if (distanceFromBottom < 300 && exploreHasMore && !exploreLoadingMore) {
+      loadExploreProducts(null, false);
+    }
+
+    // Only animate header if we've scrolled enough (threshold 10px)
     if (Math.abs(diff) < 10) return;
 
     const scrollingDown = diff > 0;
@@ -132,10 +158,34 @@ const ShopScreen = ({ navigation }) => {
     }
 
     lastScrollY.current = currentScrollY;
-  }, [handleTabBarScroll, headerTranslateY]);
+  }, [handleTabBarScroll, headerTranslateY, exploreHasMore, exploreLoadingMore]);
 
   useEffect(() => {
     loadInitialData();
+  }, []);
+
+  // Fetch wishlist count and refresh on focus
+  useEffect(() => {
+    const fetchWishlistCount = async () => {
+      const count = await getWishlistCount();
+      setWishlistCount(count);
+    };
+
+    fetchWishlistCount();
+
+    // Refresh on screen focus
+    const unsubscribe = navigation.addListener('focus', fetchWishlistCount);
+    return unsubscribe;
+  }, [navigation]);
+
+  // Check if shop onboarding should be shown (V2)
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      const shouldShow = await shopOnboardingService.shouldShowOnboarding();
+      setShowOnboarding(shouldShow);
+    };
+
+    checkOnboarding();
   }, []);
 
   const loadInitialData = async () => {
@@ -212,6 +262,11 @@ const ShopScreen = ({ navigation }) => {
     // Load từng section song song
     await Promise.all(
       SHOP_SECTIONS.map(async (section) => {
+        // Skip courses section - it handles its own data loading
+        if (section.type === 'courses') {
+          return;
+        }
+
         setSectionsLoading(prev => ({ ...prev, [section.id]: true }));
 
         try {
@@ -296,6 +351,19 @@ const ShopScreen = ({ navigation }) => {
   const renderSection = (sectionConfig) => {
     const data = sectionsData[sectionConfig.id];
     const isLoading = sectionsLoading[sectionConfig.id];
+
+    // Special handling for "courses" section
+    // CourseSection handles its own data loading and navigation
+    if (sectionConfig.type === 'courses') {
+      return (
+        <CourseSection
+          key={sectionConfig.id}
+          title={sectionConfig.title}
+          subtitle={sectionConfig.subtitle}
+          limit={sectionConfig.limit}
+        />
+      );
+    }
 
     // Special handling for "explore" section with infinite scroll
     if (sectionConfig.id === 'explore' && sectionConfig.hasInfiniteScroll) {
@@ -419,6 +487,20 @@ const ShopScreen = ({ navigation }) => {
               {/* Spacer for header */}
               <View style={{ height: TOTAL_HEADER_HEIGHT }} />
 
+              {/* Promo Bar */}
+              {showPromoBar && (
+                <PromoBar onDismiss={() => setShowPromoBar(false)} />
+              )}
+
+              {/* Hero Banner Carousel */}
+              <HeroBannerCarousel style={{ marginTop: SPACING.md }} />
+
+              {/* Category Grid */}
+              <CategoryGrid />
+
+              {/* Flash Sale Section */}
+              <FlashSaleSection />
+
               {/* Render sections với banners phân phối đều - đảm bảo TẤT CẢ banners được hiển thị */}
               {(() => {
                 // New algorithm: distribute ALL banners evenly among sections
@@ -431,7 +513,7 @@ const ShopScreen = ({ navigation }) => {
                 return distributedList.map((item) => {
                   if (item.type === 'banner') {
                     return (
-                      <SponsorBannerCard
+                      <SponsorBanner
                         key={item.key}
                         banner={item.data}
                         navigation={navigation}
@@ -445,6 +527,12 @@ const ShopScreen = ({ navigation }) => {
                   }
                 });
               })()}
+
+              {/* Featured Product Section - Below "Dành Cho Bạn" */}
+              <FeaturedProductSection />
+
+              {/* Recently Viewed Section */}
+              <RecentlyViewedSection />
 
               {/* Bottom padding for tab bar */}
               <View style={{ height: CONTENT_BOTTOM_PADDING }} />
@@ -471,6 +559,20 @@ const ShopScreen = ({ navigation }) => {
               >
                 <Search size={22} color={COLORS.textPrimary} />
               </TouchableOpacity>
+              {/* Wishlist Button */}
+              <TouchableOpacity
+                style={styles.iconBtn}
+                onPress={() => navigation.navigate('Wishlist')}
+              >
+                <Heart size={22} color={COLORS.textPrimary} />
+                {wishlistCount > 0 && (
+                  <View style={styles.wishlistBadge}>
+                    <Text style={styles.wishlistBadgeText}>
+                      {wishlistCount > 99 ? '99+' : wishlistCount}
+                    </Text>
+                  </View>
+                )}
+              </TouchableOpacity>
               <TouchableOpacity
                 style={styles.cartBtn}
                 onPress={() => navigation.navigate('Cart')}
@@ -495,6 +597,13 @@ const ShopScreen = ({ navigation }) => {
           />
         </Animated.View>
       </SafeAreaView>
+
+      {/* Shop Onboarding (V2) */}
+      <ShopOnboarding
+        visible={showOnboarding}
+        onComplete={() => setShowOnboarding(false)}
+        onSkip={() => setShowOnboarding(false)}
+      />
     </LinearGradient>
   );
 };
@@ -578,6 +687,23 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.fontSize.xs, // 10
     fontWeight: TYPOGRAPHY.fontWeight.bold, // 700
     color: COLORS.textPrimary, // #FFFFFF
+  },
+  wishlistBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: COLORS.burgundy,
+    borderRadius: 10,
+    minWidth: 18,
+    height: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  wishlistBadgeText: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.textPrimary,
   },
 
   // Grid

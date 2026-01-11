@@ -1,0 +1,415 @@
+-- ============================================================================
+-- GEMRAL AI LIVESTREAM - FOUNDATION TABLES
+-- Phase 1: Basic infrastructure for AI Livestream Commerce
+-- ============================================================================
+
+-- Enable UUID extension if not exists
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- ============================================================================
+-- 1. LIVESTREAM SESSIONS TABLE
+-- Stores information about each livestream session
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS livestream_sessions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+
+  -- Session info
+  title TEXT NOT NULL,
+  description TEXT,
+  thumbnail_url TEXT,
+
+  -- Status: scheduled, live, ended, cancelled
+  status TEXT DEFAULT 'scheduled'
+    CHECK (status IN ('scheduled', 'live', 'ended', 'cancelled')),
+
+  -- Timing
+  scheduled_start TIMESTAMPTZ,
+  actual_start TIMESTAMPTZ,
+  actual_end TIMESTAMPTZ,
+  duration_minutes INTEGER,
+
+  -- Platforms config
+  platforms JSONB DEFAULT '{"gemral": true, "tiktok": false, "facebook": false}',
+  stream_keys JSONB, -- Encrypted stream keys for each platform
+
+  -- AI Settings
+  persona TEXT DEFAULT 'SuPhu' CHECK (persona IN ('SuPhu', 'CoGiao', 'BanThan')),
+  voice_id TEXT DEFAULT 'banmai',
+  auto_reply BOOLEAN DEFAULT true,
+  proactive_engagement BOOLEAN DEFAULT true,
+
+  -- Real-time stats (updated during stream)
+  stats JSONB DEFAULT '{
+    "peak_viewers": 0,
+    "current_viewers": 0,
+    "total_comments": 0,
+    "total_gifts": 0,
+    "total_gift_value": 0,
+    "total_orders": 0,
+    "revenue": 0
+  }',
+
+  -- Metadata
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  created_by UUID REFERENCES auth.users(id)
+);
+
+-- Indexes for sessions
+CREATE INDEX IF NOT EXISTS idx_livestream_sessions_status ON livestream_sessions(status);
+CREATE INDEX IF NOT EXISTS idx_livestream_sessions_created_at ON livestream_sessions(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_livestream_sessions_created_by ON livestream_sessions(created_by);
+CREATE INDEX IF NOT EXISTS idx_livestream_sessions_scheduled ON livestream_sessions(scheduled_start)
+  WHERE status = 'scheduled';
+
+-- Trigger for updated_at
+CREATE OR REPLACE FUNCTION update_livestream_sessions_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_livestream_sessions_updated_at ON livestream_sessions;
+CREATE TRIGGER trigger_livestream_sessions_updated_at
+  BEFORE UPDATE ON livestream_sessions
+  FOR EACH ROW
+  EXECUTE FUNCTION update_livestream_sessions_updated_at();
+
+-- ============================================================================
+-- 2. LIVESTREAM COMMENTS TABLE
+-- Stores comments from all platforms (Gemral, TikTok, Facebook)
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS livestream_comments (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  session_id UUID REFERENCES livestream_sessions(id) ON DELETE CASCADE,
+
+  -- User info
+  user_id UUID REFERENCES auth.users(id), -- NULL for external platforms
+  platform TEXT NOT NULL CHECK (platform IN ('gemral', 'tiktok', 'facebook')),
+  platform_user_id TEXT, -- External platform user ID
+  platform_username TEXT NOT NULL,
+  platform_avatar TEXT,
+
+  -- Content
+  message TEXT NOT NULL,
+
+  -- AI Analysis (populated by AI service)
+  intent TEXT, -- BUY_INTENT, ASK_PRICE, GREETING, QUESTION, etc.
+  emotion TEXT, -- HAPPY, SAD, ANGRY, EXCITED, NEUTRAL, etc.
+  emotion_intensity FLOAT DEFAULT 0, -- 0.0 to 1.0
+  priority_score INTEGER DEFAULT 0, -- Higher = more priority
+
+  -- AI Response tracking
+  ai_responded BOOLEAN DEFAULT false,
+  ai_response_id UUID, -- Reference to ai_responses table
+  response_latency_ms INTEGER,
+
+  -- Gift info (if comment includes a gift)
+  has_gift BOOLEAN DEFAULT false,
+  gift_type TEXT,
+  gift_value INTEGER DEFAULT 0, -- In gems
+
+  -- Moderation flags
+  is_spam BOOLEAN DEFAULT false,
+  is_hidden BOOLEAN DEFAULT false,
+  is_pinned BOOLEAN DEFAULT false,
+  flagged_reason TEXT,
+
+  -- Metadata
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Indexes for comments
+CREATE INDEX IF NOT EXISTS idx_livestream_comments_session ON livestream_comments(session_id);
+CREATE INDEX IF NOT EXISTS idx_livestream_comments_created ON livestream_comments(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_livestream_comments_priority ON livestream_comments(priority_score DESC);
+CREATE INDEX IF NOT EXISTS idx_livestream_comments_platform ON livestream_comments(platform);
+CREATE INDEX IF NOT EXISTS idx_livestream_comments_user ON livestream_comments(user_id) WHERE user_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_livestream_comments_unresponded ON livestream_comments(session_id, created_at)
+  WHERE ai_responded = false AND is_spam = false AND is_hidden = false;
+
+-- ============================================================================
+-- 3. AI RESPONSES TABLE
+-- Stores AI-generated responses for tracking and analytics
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS ai_responses (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  session_id UUID REFERENCES livestream_sessions(id) ON DELETE CASCADE,
+  comment_id UUID REFERENCES livestream_comments(id) ON DELETE SET NULL,
+
+  -- Response details
+  response_text TEXT NOT NULL,
+  response_tier INTEGER CHECK (response_tier IN (1, 2, 3)), -- 1=Template, 2=Hybrid, 3=Full AI
+  persona TEXT,
+
+  -- Voice & Avatar settings used
+  voice_id TEXT,
+  voice_settings JSONB, -- {speed, pitch, emotion}
+  avatar_expression TEXT,
+
+  -- Generated media URLs
+  audio_url TEXT,
+  video_url TEXT,
+
+  -- Performance metrics
+  tts_latency_ms INTEGER,
+  avatar_latency_ms INTEGER,
+  total_latency_ms INTEGER,
+  tokens_used INTEGER,
+
+  -- Metadata
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Indexes for ai_responses
+CREATE INDEX IF NOT EXISTS idx_ai_responses_session ON ai_responses(session_id);
+CREATE INDEX IF NOT EXISTS idx_ai_responses_created ON ai_responses(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_ai_responses_tier ON ai_responses(response_tier);
+
+-- ============================================================================
+-- 4. EXTEND USER_PROFILES TABLE
+-- Add livestream-related columns
+-- ============================================================================
+
+-- Add new columns for livestream (safe - won't fail if columns exist)
+DO $$
+BEGIN
+  -- Platform connections (TikTok, Facebook accounts linked)
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'user_profiles' AND column_name = 'livestream_platforms') THEN
+    ALTER TABLE user_profiles ADD COLUMN livestream_platforms JSONB DEFAULT '{}';
+  END IF;
+
+  -- Emotional profile learned by AI
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'user_profiles' AND column_name = 'emotional_profile') THEN
+    ALTER TABLE user_profiles ADD COLUMN emotional_profile JSONB DEFAULT '{}';
+  END IF;
+
+  -- Livestream preferences
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'user_profiles' AND column_name = 'livestream_preferences') THEN
+    ALTER TABLE user_profiles ADD COLUMN livestream_preferences JSONB DEFAULT '{}';
+  END IF;
+
+  -- Last livestream interaction
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'user_profiles' AND column_name = 'last_livestream_seen') THEN
+    ALTER TABLE user_profiles ADD COLUMN last_livestream_seen TIMESTAMPTZ;
+  END IF;
+
+  -- Livestream stats
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'user_profiles' AND column_name = 'livestream_stats') THEN
+    ALTER TABLE user_profiles ADD COLUMN livestream_stats JSONB DEFAULT '{
+      "total_sessions_watched": 0,
+      "total_watch_time_minutes": 0,
+      "total_comments": 0,
+      "total_gifts_sent": 0,
+      "total_gifts_value": 0
+    }';
+  END IF;
+END $$;
+
+-- Index for platform connections
+CREATE INDEX IF NOT EXISTS idx_user_profiles_livestream_platforms
+  ON user_profiles USING GIN (livestream_platforms);
+
+-- ============================================================================
+-- 5. ROW LEVEL SECURITY (RLS) POLICIES
+-- ============================================================================
+
+-- Enable RLS on all tables
+ALTER TABLE livestream_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE livestream_comments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ai_responses ENABLE ROW LEVEL SECURITY;
+
+-- SESSIONS POLICIES
+-- Anyone can view live/ended sessions
+DROP POLICY IF EXISTS "Anyone can view public sessions" ON livestream_sessions;
+CREATE POLICY "Anyone can view public sessions" ON livestream_sessions
+  FOR SELECT USING (status IN ('live', 'ended'));
+
+-- Authenticated users can view scheduled sessions
+DROP POLICY IF EXISTS "Authenticated can view scheduled" ON livestream_sessions;
+CREATE POLICY "Authenticated can view scheduled" ON livestream_sessions
+  FOR SELECT USING (auth.uid() IS NOT NULL);
+
+-- Admins can manage all sessions
+DROP POLICY IF EXISTS "Admins can manage sessions" ON livestream_sessions;
+CREATE POLICY "Admins can manage sessions" ON livestream_sessions
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM user_profiles
+      WHERE id = auth.uid()
+      AND (tier = 'ADMIN' OR role = 'admin' OR is_admin = true)
+    )
+  );
+
+-- COMMENTS POLICIES
+-- Anyone can view non-hidden comments
+DROP POLICY IF EXISTS "Anyone can view comments" ON livestream_comments;
+CREATE POLICY "Anyone can view comments" ON livestream_comments
+  FOR SELECT USING (is_hidden = false AND is_spam = false);
+
+-- Authenticated users can create comments
+DROP POLICY IF EXISTS "Authenticated can create comments" ON livestream_comments;
+CREATE POLICY "Authenticated can create comments" ON livestream_comments
+  FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+
+-- Users can update own comments (for soft delete)
+DROP POLICY IF EXISTS "Users can update own comments" ON livestream_comments;
+CREATE POLICY "Users can update own comments" ON livestream_comments
+  FOR UPDATE USING (auth.uid() = user_id);
+
+-- Admins can manage all comments
+DROP POLICY IF EXISTS "Admins can manage comments" ON livestream_comments;
+CREATE POLICY "Admins can manage comments" ON livestream_comments
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM user_profiles
+      WHERE id = auth.uid()
+      AND (tier = 'ADMIN' OR role = 'admin' OR is_admin = true)
+    )
+  );
+
+-- AI RESPONSES POLICIES
+-- Only admins can view/manage ai_responses
+DROP POLICY IF EXISTS "Admins can manage ai_responses" ON ai_responses;
+CREATE POLICY "Admins can manage ai_responses" ON ai_responses
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM user_profiles
+      WHERE id = auth.uid()
+      AND (tier = 'ADMIN' OR role = 'admin' OR is_admin = true)
+    )
+  );
+
+-- System can insert ai_responses (via service role)
+DROP POLICY IF EXISTS "Service can insert ai_responses" ON ai_responses;
+CREATE POLICY "Service can insert ai_responses" ON ai_responses
+  FOR INSERT WITH CHECK (true);
+
+-- ============================================================================
+-- 6. REALTIME SUBSCRIPTIONS
+-- Enable realtime for comments (live chat)
+-- ============================================================================
+
+-- Enable realtime for livestream_comments
+ALTER PUBLICATION supabase_realtime ADD TABLE livestream_comments;
+
+-- Enable realtime for livestream_sessions (status updates)
+ALTER PUBLICATION supabase_realtime ADD TABLE livestream_sessions;
+
+-- ============================================================================
+-- 7. HELPER FUNCTIONS
+-- ============================================================================
+
+-- Function to get active session
+CREATE OR REPLACE FUNCTION get_active_livestream_session()
+RETURNS livestream_sessions AS $$
+  SELECT * FROM livestream_sessions
+  WHERE status = 'live'
+  ORDER BY actual_start DESC
+  LIMIT 1;
+$$ LANGUAGE sql STABLE;
+
+-- Function to update session stats
+CREATE OR REPLACE FUNCTION update_session_stats(
+  p_session_id UUID,
+  p_stat_key TEXT,
+  p_increment INTEGER DEFAULT 1
+)
+RETURNS VOID AS $$
+BEGIN
+  UPDATE livestream_sessions
+  SET stats = jsonb_set(
+    stats,
+    ARRAY[p_stat_key],
+    to_jsonb(COALESCE((stats->>p_stat_key)::INTEGER, 0) + p_increment)
+  )
+  WHERE id = p_session_id;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function to increment comment count when new comment is added
+CREATE OR REPLACE FUNCTION increment_session_comment_count()
+RETURNS TRIGGER AS $$
+BEGIN
+  UPDATE livestream_sessions
+  SET stats = jsonb_set(
+    stats,
+    '{total_comments}',
+    to_jsonb(COALESCE((stats->>'total_comments')::INTEGER, 0) + 1)
+  )
+  WHERE id = NEW.session_id;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_increment_comment_count ON livestream_comments;
+CREATE TRIGGER trigger_increment_comment_count
+  AFTER INSERT ON livestream_comments
+  FOR EACH ROW
+  EXECUTE FUNCTION increment_session_comment_count();
+
+-- Function to increment gift count and value
+CREATE OR REPLACE FUNCTION increment_session_gift_stats()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.has_gift = true THEN
+    UPDATE livestream_sessions
+    SET stats = jsonb_set(
+      jsonb_set(
+        stats,
+        '{total_gifts}',
+        to_jsonb(COALESCE((stats->>'total_gifts')::INTEGER, 0) + 1)
+      ),
+      '{total_gift_value}',
+      to_jsonb(COALESCE((stats->>'total_gift_value')::INTEGER, 0) + COALESCE(NEW.gift_value, 0))
+    )
+    WHERE id = NEW.session_id;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_increment_gift_stats ON livestream_comments;
+CREATE TRIGGER trigger_increment_gift_stats
+  AFTER INSERT ON livestream_comments
+  FOR EACH ROW
+  EXECUTE FUNCTION increment_session_gift_stats();
+
+-- ============================================================================
+-- 8. SEED DATA (Optional - for testing)
+-- ============================================================================
+
+-- Insert a test session (commented out for production)
+/*
+INSERT INTO livestream_sessions (
+  title,
+  description,
+  status,
+  persona,
+  voice_id,
+  created_by
+) VALUES (
+  'Test Livestream Session',
+  'This is a test session for development',
+  'scheduled',
+  'SuPhu',
+  'banmai',
+  (SELECT id FROM auth.users LIMIT 1)
+);
+*/
+
+-- ============================================================================
+-- DONE
+-- Run: npx supabase db push
+-- Or: npx supabase migration up
+-- ============================================================================

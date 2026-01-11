@@ -1,0 +1,320 @@
+/**
+ * MobilePreviewFrame Styles
+ * Phone mockup frame for previewing lesson content
+ */
+
+.mobile-preview-container {
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #0d1117 0%, #161b22 100%);
+  border-radius: 16px;
+  overflow: hidden;
+  height: 100%;
+  min-height: 400px;
+}
+
+.mobile-preview-container.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  border-radius: 0;
+}
+
+/* Toolbar */
+.mobile-preview-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.toolbar-left,
+.toolbar-center,
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.device-selector {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: #fff;
+  cursor: pointer;
+  outline: none;
+}
+
+.device-selector:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.device-selector option,
+.device-selector optgroup {
+  background: #1a1a2e;
+  color: #fff;
+}
+
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toolbar-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.toolbar-btn.active {
+  background: rgba(106, 91, 255, 0.3);
+  border-color: rgba(106, 91, 255, 0.5);
+  color: #a78bfa;
+}
+
+.toolbar-btn.close-btn:hover {
+  background: rgba(239, 68, 68, 0.3);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #f87171;
+}
+
+.zoom-level {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  min-width: 40px;
+  text-align: center;
+}
+
+.device-info {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.actual-size-badge {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* Phone Frame Wrapper */
+.phone-frame-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 8px;
+  overflow: auto;
+  transform-origin: top center;
+  min-height: 0; /* Enable scrolling in flexbox */
+}
+
+/* Center when fitting, scroll when 1:1 */
+.phone-frame-wrapper:has(.phone-frame) {
+  align-items: center;
+}
+
+@supports not selector(:has(.phone-frame)) {
+  .phone-frame-wrapper {
+    align-items: center;
+  }
+}
+
+/* Phone Frame */
+.phone-frame {
+  position: relative;
+  background: #000;
+  border: 3px solid #2a2a3a;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 25px 50px -12px rgba(0, 0, 0, 0.5),
+    inset 0 0 20px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+/* Status Bar */
+.phone-status-bar {
+  position: relative;
+  background: #0a0f1c;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 10;
+}
+
+.status-bar-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding-top: 8px;
+}
+
+.status-time {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.status-icons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+/* Notch (iPhone X+) */
+.phone-notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 150px;
+  height: 34px;
+  background: #000;
+  border-radius: 0 0 20px 20px;
+  z-index: 100;
+}
+
+/* Dynamic Island (iPhone 14 Pro) */
+.phone-dynamic-island {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 126px;
+  height: 37px;
+  background: #000;
+  border-radius: 24px;
+  z-index: 100;
+}
+
+/* Punch Hole (Android) */
+.phone-punch-hole {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 12px;
+  background: #000;
+  border-radius: 50%;
+  z-index: 100;
+}
+
+/* Content Area */
+.phone-content {
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: linear-gradient(180deg, #0a0f1c 0%, #111827 50%, #0a0f1c 100%);
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Disable ALL animations inside phone preview to make editing easier */
+.phone-content *,
+.phone-content *::before,
+.phone-content *::after {
+  animation: none !important;
+  animation-delay: 0s !important;
+  animation-duration: 0s !important;
+  animation-iteration-count: 1 !important;
+}
+
+.phone-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.phone-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.phone-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+/* Preview iFrame */
+.preview-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+}
+
+/* Home Indicator */
+.phone-home-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0f1c;
+}
+
+.home-bar {
+  width: 134px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+/* Preview Tips */
+.preview-tips {
+  padding: 8px 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.preview-tips span {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .mobile-preview-toolbar {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .toolbar-center {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .phone-frame-wrapper {
+    padding: 12px;
+  }
+}

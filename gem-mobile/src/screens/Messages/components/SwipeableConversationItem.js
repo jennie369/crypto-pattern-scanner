@@ -35,8 +35,8 @@ import {
 import { useCustomAlert } from '../../../components/CustomAlert';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const ACTION_WIDTH = 80;
-const ACTIONS_WIDTH = ACTION_WIDTH * 3; // 3 actions
+const ACTION_WIDTH = 70;
+const ACTIONS_WIDTH = ACTION_WIDTH * 4; // 4 actions (mute, pin, archive, delete)
 
 const SwipeableConversationItem = memo(({
   conversation,
@@ -45,6 +45,8 @@ const SwipeableConversationItem = memo(({
   onArchive,
   onDelete,
   onMute,
+  onPin,
+  isPinned,
   index,
 }) => {
   const { alert } = useCustomAlert();
@@ -138,6 +140,12 @@ const SwipeableConversationItem = memo(({
     onMute?.(conversation.id);
   }, [conversation.id, onMute, closeActions]);
 
+  const handlePin = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    closeActions();
+    onPin?.(conversation.id);
+  }, [conversation.id, onPin, closeActions]);
+
   const handleArchive = useCallback(() => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     closeActions();
@@ -190,11 +198,26 @@ const SwipeableConversationItem = memo(({
         >
           <Ionicons
             name={conversation.is_muted ? 'notifications' : 'notifications-off'}
-            size={22}
+            size={20}
             color={COLORS.textPrimary}
           />
           <Text style={styles.actionText}>
             {conversation.is_muted ? 'Unmute' : 'Mute'}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Pin */}
+        <TouchableOpacity
+          style={[styles.actionButton, styles.pinButton]}
+          onPress={handlePin}
+        >
+          <Ionicons
+            name={isPinned ? 'pin-outline' : 'pin'}
+            size={20}
+            color={COLORS.textPrimary}
+          />
+          <Text style={styles.actionText}>
+            {isPinned ? 'Unpin' : 'Pin'}
           </Text>
         </TouchableOpacity>
 
@@ -203,7 +226,7 @@ const SwipeableConversationItem = memo(({
           style={[styles.actionButton, styles.archiveButton]}
           onPress={handleArchive}
         >
-          <Ionicons name="archive" size={22} color={COLORS.textPrimary} />
+          <Ionicons name="archive" size={20} color={COLORS.textPrimary} />
           <Text style={styles.actionText}>Archive</Text>
         </TouchableOpacity>
 
@@ -212,7 +235,7 @@ const SwipeableConversationItem = memo(({
           style={[styles.actionButton, styles.deleteButton]}
           onPress={handleDelete}
         >
-          <Ionicons name="trash" size={22} color={COLORS.textPrimary} />
+          <Ionicons name="trash" size={20} color={COLORS.textPrimary} />
           <Text style={styles.actionText}>Delete</Text>
         </TouchableOpacity>
       </Animated.View>
@@ -230,6 +253,7 @@ const SwipeableConversationItem = memo(({
           currentUserId={currentUserId}
           onPress={handlePress}
           index={index}
+          isPinned={isPinned}
         />
       </Animated.View>
     </View>
@@ -274,8 +298,11 @@ const styles = StyleSheet.create({
   muteButton: {
     backgroundColor: COLORS.purple,
   },
+  pinButton: {
+    backgroundColor: '#F59E0B', // Amber for pin
+  },
   archiveButton: {
-    backgroundColor: COLORS.gold,
+    backgroundColor: COLORS.cyan,
   },
   deleteButton: {
     backgroundColor: COLORS.error,
@@ -283,6 +310,6 @@ const styles = StyleSheet.create({
 
   // Item container
   itemContainer: {
-    backgroundColor: COLORS.bgDarkest,
+    backgroundColor: 'transparent',
   },
 });

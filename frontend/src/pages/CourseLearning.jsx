@@ -7,10 +7,11 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
+  ArrowUp,
   GraduationCap,
   BookOpen,
   Video,
@@ -30,6 +31,9 @@ import {
   Clock,
   Award,
   ListOrdered,
+  ZoomIn,
+  ZoomOut,
+  Download,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { courseService } from '../services/courseService';
@@ -39,12 +43,18 @@ import { enrollmentService } from '../services/enrollmentService';
 import { hasAccess } from './Courses/utils/tierHelpers';
 import { ArticleRenderer, QuizQuestion, QuizTimer, QuizResult } from './Courses/components';
 import { TIER_STYLES } from '../shared/design-tokens';
+import { lessonNotesService } from '../services/lessonNotesService';
 import './CourseLearning.css';
 
 export default function CourseLearning() {
   const { courseId, lessonId } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const { user, isAdmin } = useAuth();
+
+  // Check if coming from editor (for back navigation)
+  const fromEditor = searchParams.get('from') === 'editor';
+  const editorLessonId = searchParams.get('lessonId');
 
   // State
   const [course, setCourse] = useState(null);
@@ -67,6 +77,126 @@ export default function CourseLearning() {
 
   // Check if accessing a preview lesson
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+
+  // Scroll to top state
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  // Notes state
+  const [lessonNotes, setLessonNotes] = useState('');
+  const [notesSaving, setNotesSaving] = useState(false);
+  const [notesLoading, setNotesLoading] = useState(false);
+  const notesSaveTimeoutRef = React.useRef(null);
+
+  // Image lightbox state
+  const [lightboxImage, setLightboxImage] = useState(null);
+  const [lightboxZoom, setLightboxZoom] = useState(1);
+
+  // Handle scroll to show/hide scroll-to-top button
+  useEffect(() => {
+    const mainContent = document.querySelector('.learning-main');
+    if (!mainContent) return;
+
+    const handleScroll = () => {
+      setShowScrollTop(mainContent.scrollTop > 300);
+    };
+
+    mainContent.addEventListener('scroll', handleScroll);
+    return () => mainContent.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    const mainContent = document.querySelector('.learning-main');
+    if (mainContent) {
+      mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  // Load notes from database when lesson changes
+  useEffect(() => {
+    const loadNotes = async () => {
+      if (!currentLesson?.id || !user) {
+        setLessonNotes('');
+        return;
+      }
+
+      setNotesLoading(true);
+      try {
+        const result = await lessonNotesService.getNote(currentLesson.id);
+        if (result.success) {
+          setLessonNotes(result.data || '');
+        }
+      } catch (error) {
+        console.error('Error loading notes:', error);
+      } finally {
+        setNotesLoading(false);
+      }
+    };
+
+    loadNotes();
+  }, [currentLesson?.id, user]);
+
+  // Add click-to-zoom handlers for images in article content
+  useEffect(() => {
+    const articleContent = document.querySelector('.article-html-content');
+    if (!articleContent) return;
+
+    const handleImageClick = (e) => {
+      const target = e.target;
+      if (target.tagName === 'IMG' && target.src) {
+        e.preventDefault();
+        e.stopPropagation();
+        setLightboxImage({
+          url: target.src,
+          alt: target.alt || 'Lesson image',
+        });
+        setLightboxZoom(1);
+      }
+    };
+
+    // Add cursor pointer to all images
+    const images = articleContent.querySelectorAll('img');
+    images.forEach((img) => {
+      img.style.cursor = 'zoom-in';
+    });
+
+    articleContent.addEventListener('click', handleImageClick);
+    return () => articleContent.removeEventListener('click', handleImageClick);
+  }, [currentLesson]);
+
+  // Save notes to database (debounced)
+  const handleNotesChange = (e) => {
+    const newNotes = e.target.value;
+    setLessonNotes(newNotes);
+
+    // Clear existing timeout
+    if (notesSaveTimeoutRef.current) {
+      clearTimeout(notesSaveTimeoutRef.current);
+    }
+
+    // Debounce save to database (1.5 seconds after last keystroke)
+    if (currentLesson?.id && user) {
+      setNotesSaving(true);
+      notesSaveTimeoutRef.current = setTimeout(async () => {
+        try {
+          await lessonNotesService.saveNote(currentLesson.id, newNotes);
+        } catch (error) {
+          console.error('Error saving notes:', error);
+        } finally {
+          setNotesSaving(false);
+        }
+      }, 1500);
+    }
+  };
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (notesSaveTimeoutRef.current) {
+        clearTimeout(notesSaveTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Fetch course data
   const fetchCourseData = useCallback(async () => {
@@ -110,8 +240,9 @@ export default function CourseLearning() {
         }
       }
 
-      // If not preview and not enrolled, redirect
-      if (!accessingPreview && !isEnrolled) {
+      // If not preview and not enrolled and not admin, redirect
+      const userIsAdmin = typeof isAdmin === 'function' ? isAdmin() : isAdmin;
+      if (!accessingPreview && !isEnrolled && !userIsAdmin) {
         navigate(`/courses/${courseId}`);
         return;
       }
@@ -224,6 +355,10 @@ export default function CourseLearning() {
 
   // Check if lesson is accessible
   const canAccessLesson = (lesson) => {
+    // Admin bypass - can access all lessons
+    const userIsAdmin = typeof isAdmin === 'function' ? isAdmin() : isAdmin;
+    if (userIsAdmin) return true;
+
     const tierNum = getTierNumber(course?.tier_required);
     return hasAccess(userTier, tierNum) || lesson.is_preview;
   };
@@ -236,8 +371,9 @@ export default function CourseLearning() {
 
   // Handle lesson selection
   const handleLessonSelect = async (lesson) => {
-    // In preview mode, only allow access to other preview lessons
-    if (isPreviewMode && !lesson.is_preview) {
+    // In preview mode, only allow access to other preview lessons (admin can access all)
+    const userIsAdmin = typeof isAdmin === 'function' ? isAdmin() : isAdmin;
+    if (isPreviewMode && !lesson.is_preview && !userIsAdmin) {
       // Show message or redirect to course detail
       alert('Đăng ký khóa học để xem toàn bộ nội dung');
       return;
@@ -336,9 +472,9 @@ export default function CourseLearning() {
     return mins > 0 ? `${hours}h ${mins}m` : `${hours} giờ`;
   };
 
-  // Tier style - TIER_STYLES uses string keys: FREE, TIER1, TIER2, TIER3
-  const tierKey = course?.tier_required || 'FREE';
-  const tierStyle = TIER_STYLES[tierKey] || TIER_STYLES['FREE'];
+  // Tier style - TIER_STYLES uses lowercase keys: free, tier1, tier2, tier3
+  const tierKey = (course?.tier_required || 'free').toLowerCase();
+  const tierStyle = TIER_STYLES[tierKey] || TIER_STYLES['free'];
 
   // Render lesson content based on type
   // DB uses 'type' and 'content', but some code uses 'lesson_type' and 'content_html'
@@ -381,6 +517,69 @@ export default function CourseLearning() {
         let displayContent = lessonContent;
         let inlineStyles = '';
 
+        // Helper function to scope ALL CSS selectors to .article-html-content
+        const scopeCSS = (cssText) => {
+          if (!cssText) return '';
+
+          // Remove comments first
+          let css = cssText.replace(/\/\*[\s\S]*?\*\//g, '');
+
+          // Split by rules (find each selector { ... } block)
+          const scopedRules = [];
+          const ruleRegex = /([^{}]+)\{([^{}]*)\}/g;
+          let match;
+
+          while ((match = ruleRegex.exec(css)) !== null) {
+            let selector = match[1].trim();
+            const properties = match[2];
+
+            // Skip @rules (media queries, keyframes, etc.) - they need special handling
+            if (selector.startsWith('@')) {
+              // For @media, @supports - we need to scope the inner rules
+              if (selector.startsWith('@media') || selector.startsWith('@supports')) {
+                scopedRules.push(`${selector} {`);
+                continue;
+              }
+              // For @keyframes, @font-face - keep as is
+              scopedRules.push(`${selector} { ${properties} }`);
+              continue;
+            }
+
+            // Handle closing braces for @rules
+            if (selector === '') continue;
+
+            // Scope each selector in a comma-separated list
+            const scopedSelectors = selector.split(',').map(sel => {
+              sel = sel.trim();
+              if (!sel) return '';
+
+              // Replace html, body, :root with .article-html-content
+              if (/^(html|body|:root)$/i.test(sel)) {
+                return '.article-html-content';
+              }
+
+              // Replace * (wildcard) with .article-html-content *
+              if (sel === '*') {
+                return '.article-html-content *';
+              }
+
+              // Skip if already scoped
+              if (sel.startsWith('.article-html-content')) {
+                return sel;
+              }
+
+              // Prefix all other selectors
+              return `.article-html-content ${sel}`;
+            }).filter(Boolean).join(', ');
+
+            if (scopedSelectors) {
+              scopedRules.push(`${scopedSelectors} { ${properties} }`);
+            }
+          }
+
+          return scopedRules.join('\n');
+        };
+
         if (lessonContent && lessonContent.includes('<!DOCTYPE html>')) {
           // Extract ALL style tags from the document (both head and body)
           const styleMatches = lessonContent.match(/<style[^>]*>([\s\S]*?)<\/style>/gi);
@@ -391,19 +590,19 @@ export default function CourseLearning() {
               return contentMatch ? contentMatch[1] : '';
             }).join('\n');
 
-            // Scope CSS rules to .article-html-content
-            // Replace body { with .article-html-content {
-            // Replace html { or html, body { similarly
-            inlineStyles = rawStyles
-              .replace(/\bbody\s*\{/gi, '.article-html-content {')
-              .replace(/\bhtml\s*\{/gi, '.article-html-content {')
-              .replace(/\bhtml\s*,\s*body\s*\{/gi, '.article-html-content {');
+            // Properly scope ALL CSS rules to .article-html-content
+            inlineStyles = scopeCSS(rawStyles);
           }
 
           // Extract body content using GREEDY quantifier
           const bodyMatch = lessonContent.match(/<body[^>]*>([\s\S]*)<\/body>/i);
           if (bodyMatch && bodyMatch[1]) {
-            displayContent = bodyMatch[1].trim();
+            // Remove any remaining <style> and <link stylesheet> tags from body content to prevent CSS leaking
+            displayContent = bodyMatch[1]
+              .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+              .replace(/<link[^>]*rel=["']stylesheet["'][^>]*>/gi, '')
+              .replace(/<link[^>]*href=["'][^"']*\.css["'][^>]*>/gi, '')
+              .trim();
           }
         }
 
@@ -643,175 +842,177 @@ export default function CourseLearning() {
         )}
       </AnimatePresence>
 
-      {/* Sidebar */}
-      <AnimatePresence>
-        {sidebarOpen && (
-          <motion.aside
-            className="learning-sidebar"
-            initial="closed"
-            animate="open"
-            exit="closed"
-            variants={sidebarVariants}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+      {/* Sidebar - CSS handles animation, no framer-motion to avoid conflicts */}
+      <aside
+        className={`learning-sidebar ${sidebarOpen ? 'open' : 'closed'}`}
+      >
+        {/* Sidebar Header */}
+        <div className="sidebar-header">
+          <motion.button
+            className="btn-back-course"
+            onClick={() => {
+              if (fromEditor) {
+                const targetLessonId = editorLessonId || currentLesson?.id;
+                if (targetLessonId) {
+                  navigate(`/courses/admin/edit/${courseId}/lessons/${targetLessonId}`);
+                } else {
+                  navigate(`/courses/admin/edit/${courseId}`);
+                }
+              } else {
+                navigate(`/courses/${courseId}`);
+              }
+            }}
+            whileHover={{ x: -2 }}
+            whileTap={{ scale: 0.98 }}
           >
-            {/* Sidebar Header */}
-            <div className="sidebar-header">
-              <motion.button
-                className="btn-back-course"
-                onClick={() => navigate(`/courses/${courseId}`)}
-                whileHover={{ x: -2 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <ArrowLeft size={18} />
-                <span>Quay lại</span>
-              </motion.button>
-              <button
-                className="btn-close-sidebar"
-                onClick={() => setSidebarOpen(false)}
-              >
-                <X size={20} />
-              </button>
-            </div>
+            <ArrowLeft size={18} />
+            <span>{fromEditor ? 'Về soạn thảo' : 'Quay lại'}</span>
+          </motion.button>
+          <button
+            className="btn-close-sidebar"
+            onClick={() => setSidebarOpen(false)}
+          >
+            <X size={20} />
+          </button>
+        </div>
 
-            {/* Preview Mode Banner */}
-            {isPreviewMode && (
-              <motion.div
-                className="preview-mode-banner"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                <Play size={16} />
-                <span>Chế độ xem trước</span>
-                <button onClick={() => navigate(`/courses/${courseId}`)}>
-                  Đăng ký ngay
-                </button>
-              </motion.div>
-            )}
-
-            {/* Course Info */}
-            <div className="sidebar-course-info">
-              <h2 className="sidebar-course-title">{course.title}</h2>
-              <div className="sidebar-instructor">
-                <GraduationCap size={16} />
-                <span>{course.instructor?.name || 'Gemral'}</span>
-              </div>
-
-              {/* Progress Card */}
-              <div className="sidebar-progress-card" style={{ borderColor: tierStyle.border }}>
-                <div className="progress-circle-small">
-                  <svg viewBox="0 0 100 100">
-                    <circle
-                      className="progress-bg"
-                      cx="50"
-                      cy="50"
-                      r="45"
-                      fill="none"
-                      strokeWidth="8"
-                    />
-                    <circle
-                      className="progress-fill"
-                      cx="50"
-                      cy="50"
-                      r="45"
-                      fill="none"
-                      strokeWidth="8"
-                      strokeDasharray={`${courseProgress * 2.83} 283`}
-                      strokeLinecap="round"
-                      style={{ stroke: tierStyle.color }}
-                    />
-                  </svg>
-                  <span className="progress-text-small">{courseProgress}%</span>
-                </div>
-                <div className="progress-info-small">
-                  <span className="progress-label">Tiến độ học tập</span>
-                  <span className="progress-detail">
-                    {completedLessons.length}/{course.totalLessons || 0} bài học
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Modules List */}
-            <div className="sidebar-modules">
-              {course.modules?.map((module, moduleIdx) => {
-                const isExpanded = expandedModules[module.id];
-                const moduleCompletedCount = module.lessons?.filter(l =>
-                  completedLessons.includes(l.id)
-                ).length || 0;
-
-                return (
-                  <div key={module.id} className="sidebar-module">
-                    {/* Module Header */}
-                    <button
-                      className={`module-header-btn ${isExpanded ? 'expanded' : ''}`}
-                      onClick={() => toggleModule(module.id)}
-                    >
-                      <div className="module-header-left">
-                        <span className="module-number">Chương {moduleIdx + 1}</span>
-                        <span className="module-title">{module.title}</span>
-                      </div>
-                      <div className="module-header-right">
-                        <span className="module-progress">
-                          {moduleCompletedCount}/{module.lessons?.length || 0}
-                        </span>
-                        <ChevronRight
-                          size={18}
-                          className={`module-chevron ${isExpanded ? 'rotated' : ''}`}
-                        />
-                      </div>
-                    </button>
-
-                    {/* Module Lessons */}
-                    <AnimatePresence>
-                      {isExpanded && (
-                        <motion.div
-                          className="module-lessons"
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          {module.lessons?.map((lesson, lessonIdx) => {
-                            const isActive = currentLesson?.id === lesson.id;
-                            const isCompleted = completedLessons.includes(lesson.id);
-                            const isLocked = !canAccessLesson(lesson);
-
-                            return (
-                              <motion.button
-                                key={lesson.id}
-                                className={`lesson-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''} ${isLocked ? 'locked' : ''}`}
-                                onClick={() => !isLocked && handleLessonSelect(lesson)}
-                                disabled={isLocked}
-                                whileHover={!isLocked ? { x: 4 } : {}}
-                                whileTap={!isLocked ? { scale: 0.98 } : {}}
-                              >
-                                <div className="lesson-icon">
-                                  {isLocked ? (
-                                    <Lock size={16} />
-                                  ) : (
-                                    getLessonIcon(lesson.lesson_type, isCompleted, isActive)
-                                  )}
-                                </div>
-                                <div className="lesson-details">
-                                  <span className="lesson-num">{moduleIdx + 1}.{lessonIdx + 1}</span>
-                                  <span className="lesson-title">{lesson.title}</span>
-                                </div>
-                                <span className="lesson-duration">
-                                  {formatDuration(lesson.duration_minutes)}
-                                </span>
-                              </motion.button>
-                            );
-                          })}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                );
-              })}
-            </div>
-          </motion.aside>
+        {/* Preview Mode Banner */}
+        {isPreviewMode && (
+          <motion.div
+            className="preview-mode-banner"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <Play size={16} />
+            <span>Chế độ xem trước</span>
+            <button onClick={() => navigate(`/courses/${courseId}`)}>
+              Đăng ký ngay
+            </button>
+          </motion.div>
         )}
-      </AnimatePresence>
+
+        {/* Course Info */}
+        <div className="sidebar-course-info">
+          <h2 className="sidebar-course-title">{course.title}</h2>
+          <div className="sidebar-instructor">
+            <GraduationCap size={16} />
+            <span>{course.instructor?.name || 'Gemral'}</span>
+          </div>
+
+          {/* Progress Card */}
+          <div className="sidebar-progress-card" style={{ borderColor: tierStyle.border }}>
+            <div className="progress-circle-small">
+              <svg viewBox="0 0 100 100">
+                <circle
+                  className="progress-bg"
+                  cx="50"
+                  cy="50"
+                  r="45"
+                  fill="none"
+                  strokeWidth="8"
+                />
+                <circle
+                  className="progress-fill"
+                  cx="50"
+                  cy="50"
+                  r="45"
+                  fill="none"
+                  strokeWidth="8"
+                  strokeDasharray={`${courseProgress * 2.83} 283`}
+                  strokeLinecap="round"
+                  style={{ stroke: tierStyle.color }}
+                />
+              </svg>
+              <span className="progress-text-small">{courseProgress}%</span>
+            </div>
+            <div className="progress-info-small">
+              <span className="progress-label">Tiến độ học tập</span>
+              <span className="progress-detail">
+                {completedLessons.length}/{course.totalLessons || 0} bài học
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Modules List */}
+        <div className="sidebar-modules">
+          {course.modules?.map((module, moduleIdx) => {
+            const isExpanded = expandedModules[module.id];
+            const moduleCompletedCount = module.lessons?.filter(l =>
+              completedLessons.includes(l.id)
+            ).length || 0;
+
+            return (
+              <div key={module.id} className="sidebar-module">
+                {/* Module Header */}
+                <button
+                  className={`module-header-btn ${isExpanded ? 'expanded' : ''}`}
+                  onClick={() => toggleModule(module.id)}
+                >
+                  <div className="module-header-left">
+                    <span className="module-number">Chương {moduleIdx + 1}</span>
+                    <span className="module-title">{module.title}</span>
+                  </div>
+                  <div className="module-header-right">
+                    <span className="module-progress">
+                      {moduleCompletedCount}/{module.lessons?.length || 0}
+                    </span>
+                    <ChevronRight
+                      size={18}
+                      className={`module-chevron ${isExpanded ? 'rotated' : ''}`}
+                    />
+                  </div>
+                </button>
+
+                {/* Module Lessons */}
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.div
+                      className="module-lessons"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      {module.lessons?.map((lesson, lessonIdx) => {
+                        const isActive = currentLesson?.id === lesson.id;
+                        const isCompleted = completedLessons.includes(lesson.id);
+                        const isLocked = !canAccessLesson(lesson);
+
+                        return (
+                          <motion.button
+                            key={lesson.id}
+                            className={`lesson-item ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''} ${isLocked ? 'locked' : ''}`}
+                            onClick={() => !isLocked && handleLessonSelect(lesson)}
+                            disabled={isLocked}
+                            whileHover={!isLocked ? { x: 4 } : {}}
+                            whileTap={!isLocked ? { scale: 0.98 } : {}}
+                          >
+                            <div className="lesson-icon">
+                              {isLocked ? (
+                                <Lock size={16} />
+                              ) : (
+                                getLessonIcon(lesson.lesson_type, isCompleted, isActive)
+                              )}
+                            </div>
+                            <div className="lesson-details">
+                              <span className="lesson-num">{moduleIdx + 1}.{lessonIdx + 1}</span>
+                              <span className="lesson-title">{lesson.title}</span>
+                            </div>
+                            <span className="lesson-duration">
+                              {formatDuration(lesson.duration_minutes)}
+                            </span>
+                          </motion.button>
+                        );
+                      })}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+        </div>
+      </aside>
 
       {/* Main Content */}
       <main className={`learning-main ${!sidebarOpen ? 'full-width' : ''}`}>
@@ -961,10 +1162,40 @@ export default function CourseLearning() {
 
                     {activeTab === 'notes' && (
                       <div className="notes-panel">
-                        <div className="empty-state">
-                          <StickyNote size={48} />
-                          <p>Tính năng ghi chú đang được phát triển</p>
-                        </div>
+                        {!user ? (
+                          <div className="empty-state">
+                            <Lock size={48} />
+                            <p>Đăng nhập để sử dụng tính năng ghi chú</p>
+                          </div>
+                        ) : notesLoading ? (
+                          <div className="empty-state">
+                            <Loader2 size={32} className="loading-spinner" />
+                            <p>Đang tải ghi chú...</p>
+                          </div>
+                        ) : (
+                          <div className="notes-content">
+                            <textarea
+                              className="notes-textarea"
+                              value={lessonNotes}
+                              onChange={handleNotesChange}
+                              placeholder="Ghi chú của bạn cho bài học này..."
+                              rows={8}
+                            />
+                            <p className="notes-hint">
+                              {notesSaving ? (
+                                <>
+                                  <Loader2 size={14} className="loading-spinner" />
+                                  Đang lưu...
+                                </>
+                              ) : (
+                                <>
+                                  <CheckCircle size={14} />
+                                  Ghi chú tự động đồng bộ lên cloud
+                                </>
+                              )}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -991,6 +1222,178 @@ export default function CourseLearning() {
           </motion.div>
         )}
       </main>
+
+      {/* Scroll to Top Button */}
+      <AnimatePresence>
+        {showScrollTop && (
+          <motion.button
+            className="scroll-to-top-btn"
+            onClick={scrollToTop}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <ArrowUp size={24} />
+          </motion.button>
+        )}
+      </AnimatePresence>
+
+      {/* Image Lightbox Modal */}
+      <AnimatePresence>
+        {lightboxImage && (
+          <motion.div
+            className="image-lightbox-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setLightboxImage(null)}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.95)',
+              zIndex: 10000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              padding: '20px',
+            }}
+          >
+            {/* Header with controls */}
+            <div
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                display: 'flex',
+                gap: '8px',
+                zIndex: 10001,
+              }}
+            >
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxZoom(prev => Math.max(prev - 0.25, 0.5));
+                }}
+                style={{
+                  padding: '10px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+                title="Thu nhỏ"
+              >
+                <ZoomOut size={20} />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxZoom(prev => Math.min(prev + 0.25, 3));
+                }}
+                style={{
+                  padding: '10px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+                title="Phóng to"
+              >
+                <ZoomIn size={20} />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const link = document.createElement('a');
+                  link.href = lightboxImage.url;
+                  link.download = lightboxImage.alt || 'image';
+                  link.click();
+                }}
+                style={{
+                  padding: '10px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+                title="Tải xuống"
+              >
+                <Download size={20} />
+              </button>
+              <button
+                onClick={() => setLightboxImage(null)}
+                style={{
+                  padding: '10px',
+                  backgroundColor: 'rgba(156, 6, 18, 0.5)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+                title="Đóng (Esc)"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Zoom indicator */}
+            {lightboxZoom !== 1 && (
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '20px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                  padding: '8px 16px',
+                  borderRadius: '20px',
+                  color: '#FFBD59',
+                  fontSize: '14px',
+                  fontFamily: 'monospace',
+                  zIndex: 10001,
+                }}
+              >
+                {Math.round(lightboxZoom * 100)}%
+              </div>
+            )}
+
+            {/* Image */}
+            <motion.img
+              src={lightboxImage.url}
+              alt={lightboxImage.alt}
+              onClick={(e) => e.stopPropagation()}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              style={{
+                maxWidth: '90vw',
+                maxHeight: '85vh',
+                objectFit: 'contain',
+                borderRadius: '8px',
+                transform: `scale(${lightboxZoom})`,
+                transition: 'transform 0.2s ease',
+                cursor: lightboxZoom > 1 ? 'grab' : 'default',
+              }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 5.2: Tạo Giá Trị - Tiền Là Năng Lượng Trao Đổi | GEM Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.5rem, 5vw, 2.25rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .definition-box p { color: var(--text-secondary); margin: 0; }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .ikigai-box { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .ikigai-box { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .ikigai-title { font-weight: 700; color: var(--purple); margin-bottom: var(--space-md); }
+        .ikigai-prompt { color: var(--text-secondary); margin-bottom: var(--space-sm); font-size: 0.95rem; }
+        .ikigai-textarea { width: 100%; min-height: 80px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-md); color: var(--text-primary); font-family: inherit; font-size: 0.95rem; resize: vertical; }
+        .ikigai-textarea:focus { outline: none; border-color: var(--gold); }
+        .ikigai-textarea::placeholder { color: var(--text-muted); }
+
+        .income-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .income-grid { grid-template-columns: 1fr; gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .income-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); }
+        @media (max-width: 600px) { .income-card { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; } }
+        .income-number { font-size: 1.5rem; font-weight: 800; color: var(--gold); margin-bottom: var(--space-xs); }
+        @media (max-width: 600px) { .income-number { display: inline; font-size: 1.2rem; margin-right: var(--space-sm); } }
+        .income-name { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        @media (max-width: 600px) { .income-name { display: inline; } }
+        .income-desc { font-size: 0.85rem; color: var(--text-muted); }
+        @media (max-width: 600px) { .income-desc { display: block; margin-top: var(--space-xs); } }
+
+        .app-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .app-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .app-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); }
+        .app-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .app-box p:last-child { margin-bottom: 0; }
+
+        .lesson-footer { text-align: center; padding: var(--space-xl); color: var(--text-muted); font-size: 0.85rem; }
+        .lesson-footer a { color: var(--gold); text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>💎</span>
+                <span>Module 5</span>
+            </div>
+            <div class="lesson-chapter">Module 5 - Hành Động Thuận Thiên</div>
+            <h1 class="lesson-title">Tạo Giá Trị - Tiền Là Năng Lượng Trao Đổi</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 5.2</span></div>
+                <div class="meta-item"><span>⏱️</span><span>25 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>Ikigai Exercise</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🌊</span> Tại Sao Có Người Kiếm Triệu Đô Từ Passion?</h2>
+            <p>Bạn có bao giờ tự hỏi: Tại sao có người làm điều họ YÊU THÍCH và vẫn kiếm được rất nhiều tiền, trong khi người khác làm công việc họ GHÉT và vẫn nghèo? Một YouTuber chơi game kiếm hàng tỷ đồng mỗi tháng. Một blogger chia sẻ công thức nấu ăn trở thành triệu phú. Một người dạy yoga online có thu nhập gấp 10 lần giám đốc ngân hàng. Điều gì đang xảy ra ở đây?</p>
+
+            <p>Câu trả lời nằm ở một hiểu biết sâu sắc về bản chất của tiền: TIỀN LÀ NĂNG LƯỢNG TRAO ĐỔI. Tiền không đến từ số giờ bạn làm việc - nó đến từ GIÁ TRỊ bạn tạo ra cho người khác. Và khi bạn làm điều bạn yêu thích, bạn tự nhiên tạo ra giá trị chất lượng cao hơn, đồng thời năng lượng của bạn cũng ở tần số cao hơn - thu hút thêm cơ hội và tiền bạc.</p>
+
+            <p>Bài học hôm nay sẽ giúp bạn khám phá IKIGAI - giao điểm giữa passion, talent, market need, và income. Bạn sẽ tìm ra điều gì CHỈ RIÊNG BẠN có thể mang đến cho thế giới, và làm thế nào để biến điều đó thành nguồn thu nhập bền vững. Đây là bài học có thể thay đổi hoàn toàn hướng đi sự nghiệp của bạn.</p>
+        </section>
+
+        <!-- SECTION 1: TIỀN = GIÁ TRỊ TRAO ĐỔI -->
+        <section class="section">
+            <h2 class="section-title"><span>💰</span> Tiền = Giá Trị Trao Đổi - Hiểu Đúng Bản Chất</h2>
+            <p>Có một sự thật cơ bản về tiền mà nhiều người bỏ qua suốt cả đời: <strong>Tiền không đến từ làm việc cực nhọc. Tiền đến từ GIÁ TRỊ bạn tạo ra cho người khác.</strong> Hiểu được điều này sẽ thay đổi hoàn toàn cách bạn nghĩ về sự nghiệp và thu nhập.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🔄</span> Nguyên Lý Trao Đổi Giá Trị</div>
+                <p>Tiền là hình thức năng lượng được sử dụng để TRAO ĐỔI giá trị. Bạn nhận tiền khi bạn giải quyết vấn đề cho ai đó, mang lại niềm vui cho ai đó, hoặc giúp ai đó đạt được điều họ muốn. Càng giải quyết vấn đề lớn, cho nhiều người, càng nhận nhiều tiền.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M5_B2_01%0AMoney+Value+Exchange" alt="Tiền là giá trị trao đổi">
+                <div class="image-caption">Tiền không đến từ thời gian bỏ ra, mà từ giá trị bạn tạo ra</div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Shift Tư Duy Quan Trọng</div>
+                <p><strong>Cũ:</strong> "Làm sao để kiếm được nhiều tiền hơn?"</p>
+                <p style="margin-top: var(--space-sm);"><strong>Mới:</strong> "Làm sao để tạo ra nhiều giá trị hơn cho nhiều người hơn?"</p>
+                <p style="margin-top: var(--space-sm);">Khi bạn tập trung vào câu hỏi mới, tiền trở thành KẾT QUẢ TỰ NHIÊN, không phải mục tiêu phải đuổi theo.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: IKIGAI EXERCISE -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Tìm Ikigai Của Bạn</h2>
+            <p><strong>Ikigai</strong> (生き甲斐) là khái niệm Nhật Bản, nghĩa là "lý do để thức dậy mỗi sáng". Ikigai nằm ở giao điểm của 4 vòng tròn - và đó cũng là nơi tiền chảy về một cách tự nhiên.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x800/0a1628/FFBD59?text=HINH+24%0AIkigai+Diagram" alt="Hình 24: Ikigai Diagram">
+                <div class="image-caption">Hình 24: Sơ Đồ Ikigai - Giao Điểm Của Đam Mê, Sứ Mệnh, Nghề Nghiệp và Kiếm Tiền</div>
+            </div>
+
+            <p>Hãy trả lời 4 câu hỏi sau để tìm Ikigai của bạn:</p>
+
+            <div class="ikigai-box">
+                <div class="ikigai-title">🔥 Vòng 1: LOVE - Bạn YÊU THÍCH điều gì?</div>
+                <div class="ikigai-prompt">Điều gì khiến bạn mất cảm giác thời gian? Điều gì bạn làm mà không cần được trả tiền?</div>
+                <textarea class="ikigai-textarea" placeholder="Ví dụ: Tôi yêu thích nấu ăn, viết lách, giúp đỡ người khác, học điều mới..."></textarea>
+            </div>
+
+            <div class="ikigai-box">
+                <div class="ikigai-title">💪 Vòng 2: GOOD AT - Bạn GIỎI điều gì?</div>
+                <div class="ikigai-prompt">Kỹ năng gì bạn có mà người khác hay nhờ vả? Điều gì bạn làm tốt hơn người bình thường?</div>
+                <textarea class="ikigai-textarea" placeholder="Ví dụ: Tôi giỏi giao tiếp, tổ chức, phân tích, sáng tạo, lắng nghe..."></textarea>
+            </div>
+
+            <div class="ikigai-box">
+                <div class="ikigai-title">🌍 Vòng 3: NEED - Thế giới CẦN điều gì?</div>
+                <div class="ikigai-prompt">Vấn đề gì bạn thấy xung quanh mà bạn muốn giải quyết? Ai đang cần giúp đỡ?</div>
+                <textarea class="ikigai-textarea" placeholder="Ví dụ: Mọi người cần học cách quản lý stress, cần ăn uống lành mạnh, cần được lắng nghe..."></textarea>
+            </div>
+
+            <div class="ikigai-box">
+                <div class="ikigai-title">💰 Vòng 4: PAID FOR - Người ta SẴN SÀNG TRẢ TIỀN cho điều gì?</div>
+                <div class="ikigai-prompt">Dịch vụ/sản phẩm nào có thị trường? Điều gì trong danh sách trên mà người ta đang chi tiền để có?</div>
+                <textarea class="ikigai-textarea" placeholder="Ví dụ: Coaching, khóa học online, sản phẩm healthy, tư vấn..."></textarea>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>⭐</span> Ikigai Của Bạn</div>
+                <p>Nhìn lại 4 câu trả lời. Có điều gì xuất hiện trong CẢ 4 vòng không? Đó là Ikigai tiềm năng của bạn. Nếu chưa rõ, không sao. Ikigai có thể mất thời gian để khám phá.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Ikigai tiềm năng của tôi:</strong> ________________________</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: 7 NGUỒN THU NHẬP -->
+        <section class="section">
+            <h2 class="section-title"><span>💵</span> 7 Nguồn Thu Nhập</h2>
+            <p>Người giàu trung bình có 7 nguồn thu nhập khác nhau. Đây không phải để bạn áp lực làm 7 việc cùng lúc, mà để mở rộng tầm nhìn về cách tiền có thể chảy đến bạn.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x600/0a1628/FFBD59?text=HINH+25%0A7+Income+Streams" alt="Hình 25: 7 Nguồn Thu Nhập">
+                <div class="image-caption">Hình 25: 7 Nguồn Thu Nhập - Đa Dạng Hóa Dòng Tiền</div>
+            </div>
+
+            <div class="income-grid">
+                <div class="income-card">
+                    <div class="income-number">1</div>
+                    <div class="income-name">Earned Income</div>
+                    <div class="income-desc">Thu nhập từ lương, công việc chính. Đổi thời gian lấy tiền.</div>
+                </div>
+                <div class="income-card">
+                    <div class="income-number">2</div>
+                    <div class="income-desc">Thu nhập từ kinh doanh mà bạn tích cực tham gia.</div>
+                    <div class="income-name">Business Income</div>
+                </div>
+                <div class="income-card">
+                    <div class="income-number">3</div>
+                    <div class="income-name">Interest Income</div>
+                    <div class="income-desc">Thu nhập từ lãi tiết kiệm, trái phiếu, cho vay.</div>
+                </div>
+                <div class="income-card">
+                    <div class="income-number">4</div>
+                    <div class="income-name">Dividend Income</div>
+                    <div class="income-desc">Thu nhập từ cổ tức khi đầu tư cổ phiếu.</div>
+                </div>
+                <div class="income-card">
+                    <div class="income-number">5</div>
+                    <div class="income-name">Rental Income</div>
+                    <div class="income-desc">Thu nhập từ cho thuê (nhà, xe, thiết bị).</div>
+                </div>
+                <div class="income-card">
+                    <div class="income-number">6</div>
+                    <div class="income-name">Capital Gains</div>
+                    <div class="income-desc">Lợi nhuận từ bán tài sản tăng giá (bất động sản, crypto).</div>
+                </div>
+                <div class="income-card">
+                    <div class="income-number">7</div>
+                    <div class="income-name">Royalty/Passive</div>
+                    <div class="income-desc">Thu nhập từ sản phẩm số, sách, bản quyền, affiliate.</div>
+                </div>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🎯</span> Bắt Đầu Từ Đâu?</div>
+                <p><strong>Nếu đang có 1 nguồn (lương):</strong> Mục tiêu tiếp theo là thêm 1 nguồn passive/side income. Có thể là affiliate, khóa học online nhỏ, hoặc đầu tư tiết kiệm.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Không cần 7 nguồn ngay:</strong> Bắt đầu với 2, rồi 3. Mỗi nguồn mới mất thời gian xây dựng. Kiên nhẫn và nhất quán.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 4: ENOUGH FOR ALL -->
+        <section class="section">
+            <h2 class="section-title"><span>🌊</span> Mindset "Enough For All"</h2>
+            <p>Một trong những niềm tin giới hạn phổ biến nhất là: "Nếu tôi kiếm được nhiều, nghĩa là ai đó sẽ có ít hơn." Đây là tư duy thiếu hụt, không phải sự thật.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M5_B2_02%0AAbundance+Mindset" alt="Enough For All Mindset">
+                <div class="image-caption">Vũ Trụ là vô hạn - đủ cho tất cả mọi người cùng thịnh vượng</div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🔄</span> Shift: Từ Cạnh Tranh Sang Tạo Giá Trị</div>
+                <p><strong>Tư duy thiếu hụt:</strong> "Có giới hạn. Nếu người khác thành công, cơ hội của tôi ít đi."</p>
+                <p style="margin-top: var(--space-sm);"><strong>Tư duy dồi dào:</strong> "Có vô hạn. Thành công của người khác chứng minh điều đó có thể. Có đủ cho tất cả."</p>
+                <p style="margin-top: var(--space-sm);">Khi bạn mang tư duy dồi dào, bạn sẵn sàng hợp tác thay vì cạnh tranh. Và hợp tác thường mang lại kết quả lớn hơn rất nhiều.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>✨</span> Affirmation: Enough For All</div>
+                <p>"Có đủ tiền, cơ hội, và thành công cho tất cả mọi người - bao gồm cả tôi."</p>
+                <p style="margin-top: var(--space-sm);">"Khi tôi thịnh vượng, tôi có thể giúp đỡ nhiều người hơn thịnh vượng."</p>
+                <p style="margin-top: var(--space-sm);">"Tiền tôi kiếm được không lấy từ ai. Nó đến từ giá trị tôi tạo ra."</p>
+            </div>
+        </section>
+
+        <!-- SECTION 5: THỰC HÀNH -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Thực Hành Tạo Giá Trị</h2>
+
+            <div class="ikigai-box">
+                <div class="ikigai-title">📝 Bài Tập 1: Giá Trị Tôi Đang Tạo Ra</div>
+                <div class="ikigai-prompt">Trong công việc/hoạt động hiện tại, bạn đang giải quyết vấn đề gì cho ai? Mang lại giá trị gì?</div>
+                <textarea class="ikigai-textarea" placeholder="Ví dụ: Tôi giúp khách hàng tiết kiệm thời gian bằng cách... Tôi mang lại niềm vui cho... bằng cách..."></textarea>
+            </div>
+
+            <div class="ikigai-box">
+                <div class="ikigai-title">📝 Bài Tập 2: Giá Trị Tôi Có Thể Tạo Thêm</div>
+                <div class="ikigai-prompt">Dựa trên Ikigai của bạn, có cách nào bạn có thể tạo thêm giá trị cho nhiều người hơn?</div>
+                <textarea class="ikigai-textarea" placeholder="Ví dụ: Tôi có thể viết blog chia sẻ kiến thức... Tôi có thể tạo khóa học online về... Tôi có thể giới thiệu affiliate sản phẩm mà tôi tin tưởng..."></textarea>
+            </div>
+
+            <div class="ikigai-box">
+                <div class="ikigai-title">📝 Bài Tập 3: Nguồn Thu Nhập Mới</div>
+                <div class="ikigai-prompt">Từ 7 nguồn thu nhập, bạn đang có nguồn nào? Nguồn nào bạn muốn thêm trong 12 tháng tới?</div>
+                <textarea class="ikigai-textarea" placeholder="Hiện có: Earned Income (lương)\nMuốn thêm: Royalty/Passive từ affiliate GEM..."></textarea>
+            </div>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>📱</span> Tích Hợp GEM App</div>
+                <p><strong>GEM Master → Career:</strong> Hỏi "Tôi nên tập trung tạo giá trị gì dựa trên [kỹ năng/sở thích của bạn]?" để nhận gợi ý cá nhân hóa.</p>
+                <p><strong>Vision Board → Goals:</strong> Thêm mục tiêu "Tạo nguồn thu nhập thứ 2" với các milestones cụ thể.</p>
+                <p><strong>Partnership:</strong> Khám phá chương trình CTV/Affiliate của GEM - một cách để tạo passive income từ giá trị bạn chia sẻ.</p>
+            </div>
+        </section>
+
+        <!-- REAL STORIES SECTION -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Câu Chuyện Thực Tế: Tìm Và Sống Với Ikigai</h2>
+            <p>Hãy cùng xem hai câu chuyện thực tế về những người đã tìm ra Ikigai và biến nó thành nguồn thu nhập.</p>
+
+            <div class="ikigai-box">
+                <div class="ikigai-title">📌 Câu Chuyện 1: Anh Phong - Từ Kế Toán Đến Food Blogger</div>
+                <div class="ikigai-prompt">
+                    <p><strong>Background:</strong> Phong, 34 tuổi, làm kế toán 10 năm với mức lương ổn định 25 triệu/tháng. Công việc không tệ, nhưng mỗi sáng thức dậy anh cảm thấy thiếu năng lượng và đếm ngày đến cuối tuần.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Khám phá Ikigai:</strong> Khi làm bài tập 4 vòng tròn, Phong nhận ra: (1) YÊU THÍCH: nấu ăn và chụp ảnh đồ ăn, (2) GIỎI: trình bày món ăn đẹp mắt, (3) THẾ GIỚI CẦN: content về ẩm thực Việt cho khách du lịch, (4) TRẢ TIỀN: sponsored posts, affiliate, cookbook.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Hành động:</strong> Phong bắt đầu Instagram về ẩm thực Việt Nam bằng tiếng Anh, đăng 1 post/ngày sau giờ làm. Sau 1 năm, anh có 80K followers quốc tế.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Kết quả sau 2 năm:</strong> Thu nhập từ Instagram và YouTube đạt 40 triệu/tháng - gấp 1.6 lần lương kế toán. Phong nghỉ việc công ty và làm full-time food blogger. "Lần đầu tiên trong đời, tôi thức dậy HẠNH PHÚC mỗi sáng. Và kỳ lạ là, tiền cũng đến nhiều hơn."</p>
+                </div>
+            </div>
+
+            <div class="ikigai-box">
+                <div class="ikigai-title">📌 Câu Chuyện 2: Chị Liên - Từ Bà Mẹ Bỉm Sữa Đến Business Owner</div>
+                <div class="ikigai-prompt">
+                    <p><strong>Background:</strong> Liên, 38 tuổi, nghỉ việc ở nhà chăm con 3 năm. Cảm giác mất identity và phụ thuộc tài chính vào chồng khiến cô stress.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Khám phá Ikigai:</strong> (1) YÊU THÍCH: may vá, DIY đồ cho con, (2) GIỎI: thiết kế quần áo trẻ em handmade, (3) THẾ GIỚI CẦN: quần áo trẻ em chất lượng không hóa chất, (4) TRẢ TIỀN: các mẹ bỉm sữa khác sẵn sàng trả giá cao cho đồ handmade an toàn.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Hành động:</strong> Bắt đầu bán trên Facebook cá nhân, sau đó mở shop Shopee. May trong thời gian con ngủ trưa và tối.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Kết quả sau 18 tháng:</strong> Doanh thu 50-70 triệu/tháng, thuê 2 người may phụ. Liên có thu nhập riêng, có thời gian cho con, và quan trọng nhất - có lại IDENTITY của mình. "Tôi không còn là 'vợ anh A' hay 'mẹ bé B' nữa. Tôi là Liên - người sáng lập thương hiệu LittleLove Kids."</p>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💎</span> Bài Học Từ Hai Câu Chuyện</div>
+                <p>Cả Phong và Liên đều không bắt đầu với ý định kiếm tiền. Họ bắt đầu với câu hỏi: "Điều gì tôi YÊU THÍCH làm mà người khác CẦN?" Tiền đến như KẾT QUẢ TỰ NHIÊN của việc tạo ra giá trị từ passion. Và điều quan trọng: họ bắt đầu NHỎ, bên cạnh công việc/cuộc sống hiện tại, không phải "nhảy việc" liều lĩnh.</p>
+            </div>
+        </section>
+
+        <!-- KEY TAKEAWAYS SECTION -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> 3 Điểm Cốt Lõi Cần Nhớ</h2>
+
+            <div class="income-grid">
+                <div class="income-card">
+                    <div class="income-number">1</div>
+                    <div class="income-name">Tiền Là Năng Lượng Trao Đổi</div>
+                    <div class="income-desc">Tiền không đến từ thời gian làm việc - nó đến từ GIÁ TRỊ bạn tạo ra. Thay vì hỏi "Làm sao kiếm nhiều tiền hơn?", hãy hỏi "Làm sao tạo nhiều giá trị hơn cho nhiều người hơn?" Khi bạn tập trung vào giá trị, tiền trở thành kết quả tự nhiên.</div>
+                </div>
+                <div class="income-card">
+                    <div class="income-number">2</div>
+                    <div class="income-name">Ikigai = Giao Điểm Vàng</div>
+                    <div class="income-desc">Ikigai nằm ở giao điểm của 4 vòng: YÊU THÍCH + GIỎI + THẾ GIỚI CẦN + ĐƯỢC TRẢ TIỀN. Khi bạn tìm được Ikigai, công việc không còn là "làm việc" nữa - nó trở thành biểu hiện của con người bạn. Và đó là nơi thịnh vượng tự nhiên đến.</div>
+                </div>
+                <div class="income-card">
+                    <div class="income-number">3</div>
+                    <div class="income-name">7 Nguồn Thu Nhập</div>
+                    <div class="income-desc">Người giàu trung bình có 7 nguồn thu nhập. Bạn không cần 7 nguồn ngay - bắt đầu với việc thêm 1 nguồn passive/side income bên cạnh lương. Có thể là affiliate, khóa học online nhỏ, hoặc đầu tư. Mỗi nguồn mới tạo thêm sự an toàn tài chính.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TRANSITION SECTION -->
+        <section class="section">
+            <h2 class="section-title"><span>🔮</span> Bước Tiếp Theo: Quản Lý Tiền Khi Nó Đến</h2>
+            <p>Bạn đã hiểu cách tạo ra giá trị và thu hút tiền. Nhưng có một vấn đề: nếu bạn không có HỆ THỐNG quản lý tiền, ngay cả khi tiền chảy về nhiều hơn, nó cũng sẽ chảy đi nhanh hơn. Nhiều người kiếm được nhiều tiền hơn nhưng vẫn không tích lũy được - đây gọi là "lifestyle inflation".</p>
+
+            <p>Trong Bài 5.3 tiếp theo, chúng ta sẽ học về HỆ THỐNG 6 LỌ của T. Harv Eker - phương pháp phân bổ tiền đã giúp hàng triệu người trên thế giới xây dựng sự thịnh vượng bền vững. Bạn sẽ có công cụ cụ thể để quản lý mọi đồng tiền kiếm được một cách tự động và hiệu quả.</p>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>✍️</span> Bài Tập Trước Khi Sang Bài Tiếp</div>
+                <p><strong>Hoàn thành 4 câu hỏi Ikigai:</strong></p>
+                <p>1. Tôi YÊU THÍCH làm gì? (Điều gì khiến tôi mất cảm giác thời gian?)</p>
+                <p>2. Tôi GIỎI điều gì? (Kỹ năng gì người khác hay nhờ vả?)</p>
+                <p>3. Thế giới CẦN điều gì? (Vấn đề gì tôi thấy cần được giải quyết?)</p>
+                <p>4. Người ta TRẢ TIỀN cho điều gì? (Dịch vụ/sản phẩm nào có thị trường?)</p>
+                <p style="margin-top: var(--space-md);">Viết thật chi tiết - đây là nền tảng để tìm ra hướng đi tài chính phù hợp với bạn.</p>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <p>© 2024 GEM Academy | Khóa học: Tái Tạo Tư Duy Triệu Phú</p>
+            <p>Module 5 - Bài 5.2: Tạo Giá Trị | <a href="#">Quay về danh sách bài học</a></p>
+        </footer>
+
+    </div>
+</body>
+</html>

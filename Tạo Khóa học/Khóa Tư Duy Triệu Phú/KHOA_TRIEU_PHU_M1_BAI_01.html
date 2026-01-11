@@ -1,0 +1,1390 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 1.1: Câu Chuyện Tiền Bạc Của Bạn | GEM Academy</title>
+    
+    <!-- ============================================
+         🖼️ IMAGE CONFIGURATION
+         TIER: Triệu Phú | MODULE: 1 | LESSON: 1.1
+         Hình 6: Money Story Iceberg (800x600px)
+         ============================================ -->
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Noto+Sans+Display:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ==========================================
+           🎨 GEM DESIGN SYSTEM - V5.3 DESIGN TOKENS
+           Facebook-Style Full-Width Layout
+           ========================================== */
+        :root {
+            /* ========== COLORS ========== */
+            --color-navy: #112250;
+            --color-navy-dark: #0A0F1A;
+            --color-navy-light: #1a3a6e;
+            --color-gold: #FFBD59;
+            --color-gold-dark: #E5A84D;
+            --color-burgundy: #9C0612;
+            --color-cyan: #00F0FF;
+            --color-purple: #6A5BFF;
+            --color-green: #10B981;
+            --color-red: #EF4444;
+            --color-white: #FFFFFF;
+            --color-text: #E8E8E8;
+            --color-text-secondary: rgba(255, 255, 255, 0.7);
+            --color-text-muted: rgba(255, 255, 255, 0.5);
+            
+            /* ========== BACKGROUNDS ========== */
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --bg-card-hover: rgba(255, 255, 255, 0.06);
+            --bg-glass: rgba(255, 255, 255, 0.08);
+            --color-bg-dark: #0A0F1A;
+            
+            /* ========== BORDERS ========== */
+            --border-subtle: rgba(255, 255, 255, 0.1);
+            --border-gold: rgba(255, 189, 89, 0.3);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            
+            /* ========== V5.3 TEXT-ONLY PADDING ========== */
+            --text-padding: 16px;
+            
+            /* ========== TYPOGRAPHY ========== */
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', 'Montserrat', sans-serif;
+            
+            --text-xs: 0.75rem;
+            --text-sm: 0.875rem;
+            --text-base: 1rem;
+            --text-lg: 1.125rem;
+            --text-xl: 1.25rem;
+            --text-2xl: 1.5rem;
+            --text-3xl: 1.875rem;
+            
+            /* ========== SPACING ========== */
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            --space-2xl: 3rem;
+            
+            /* ========== BORDERS & RADIUS ========== */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-full: 9999px;
+            
+            /* ========== SHADOWS ========== */
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --shadow-glow-gold: 0 0 20px rgba(255, 189, 89, 0.3);
+            --shadow-glow-cyan: 0 0 20px rgba(0, 240, 255, 0.3);
+            
+            /* ========== CARD PADDING ========== */
+            --card-padding: 1.25rem;
+        }
+        
+        /* ==========================================
+           🔄 CSS RESET & BASE
+           ========================================== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        html {
+            font-size: 16px;
+            -webkit-text-size-adjust: 100%;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            font-size: var(--text-base);
+            line-height: 1.7;
+            color: var(--color-text);
+            background: linear-gradient(
+                180deg,
+                var(--color-bg-dark) 0%,
+                var(--color-navy) 30%,
+                var(--color-navy) 70%,
+                var(--color-bg-dark) 100%
+            );
+            min-height: 100vh;
+        }
+        
+        /* Background Bokeh Effects */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse 600px 600px at 20% 20%, 
+                    rgba(255, 189, 89, 0.08), transparent 70%),
+                radial-gradient(ellipse 500px 500px at 80% 80%, 
+                    rgba(0, 240, 255, 0.06), transparent 70%),
+                radial-gradient(ellipse 400px 400px at 50% 50%, 
+                    rgba(106, 91, 255, 0.04), transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        /* ==========================================
+           📦 CONTAINER - V5.3
+           ========================================== */
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0;
+        }
+        
+        @media (min-width: 600px) {
+            .container {
+                padding: var(--space-lg);
+            }
+        }
+        
+        /* ==========================================
+           🏷️ LESSON HEADER
+           ========================================== */
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl) var(--text-padding);
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(0, 240, 255, 0.05));
+            border-bottom: 1px solid var(--glass-border);
+        }
+        
+        @media (min-width: 600px) {
+            .lesson-header {
+                padding: var(--space-2xl);
+                border-radius: var(--radius-lg);
+                margin-bottom: var(--space-lg);
+                border: 1px solid var(--glass-border);
+            }
+        }
+        
+        .lesson-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));
+            color: var(--color-navy);
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: var(--text-sm);
+            padding: var(--space-xs) var(--space-md);
+            border-radius: var(--radius-full);
+            margin-bottom: var(--space-md);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .lesson-title {
+            font-family: var(--font-heading);
+            font-size: var(--text-2xl);
+            font-weight: 800;
+            color: var(--color-gold);
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 10px rgba(255, 189, 89, 0.3);
+        }
+        
+        @media (min-width: 600px) {
+            .lesson-title {
+                font-size: var(--text-3xl);
+            }
+        }
+        
+        .lesson-subtitle {
+            color: var(--color-text-secondary);
+            font-size: var(--text-base);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-lg);
+            margin-top: var(--space-md);
+            flex-wrap: wrap;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+            font-size: var(--text-sm);
+            color: var(--color-text-muted);
+        }
+        
+        /* ==========================================
+           📑 SECTION
+           ========================================== */
+        .section {
+            padding: var(--space-lg) 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        
+        @media (min-width: 600px) {
+            .section {
+                padding: var(--space-xl) 0;
+            }
+        }
+        
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: var(--text-lg);
+            font-weight: 700;
+            color: var(--color-gold);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: 0 var(--text-padding);
+        }
+        
+        @media (min-width: 600px) {
+            .section-title {
+                font-size: var(--text-xl);
+                padding: 0;
+            }
+        }
+        
+        .section-title .icon {
+            font-size: 1.25em;
+        }
+        
+        /* ==========================================
+           📝 TEXT ELEMENTS - V5.3 PADDING
+           ========================================== */
+        .section p {
+            padding: 0 var(--text-padding);
+            margin-bottom: var(--space-md);
+        }
+        
+        @media (min-width: 600px) {
+            .section p {
+                padding: 0;
+            }
+        }
+        
+        .section ul, .section ol {
+            padding-left: calc(var(--text-padding) + 1.5rem);
+            padding-right: var(--text-padding);
+            margin-bottom: var(--space-md);
+        }
+        
+        @media (min-width: 600px) {
+            .section ul, .section ol {
+                padding-left: 1.5rem;
+                padding-right: 0;
+            }
+        }
+        
+        .section li {
+            margin-bottom: var(--space-sm);
+            color: var(--color-text-secondary);
+        }
+        
+        .section li strong {
+            color: var(--color-gold);
+        }
+        
+        /* ==========================================
+           📦 HIGHLIGHT BOX - V5.3
+           ========================================== */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(106, 91, 255, 0.05));
+            border: none;
+            border-left: 4px solid var(--color-cyan);
+            border-radius: 0;
+            padding: var(--card-padding);
+            padding-left: calc(var(--text-padding) - 4px);
+            padding-right: var(--text-padding);
+            margin: var(--space-lg) 0;
+        }
+        
+        @media (min-width: 600px) {
+            .highlight-box {
+                border: 1px solid rgba(0, 240, 255, 0.3);
+                border-radius: var(--radius-md);
+                padding: var(--card-padding);
+            }
+        }
+        
+        .highlight-box p {
+            padding: 0 !important;
+            margin: 0;
+            color: var(--color-text);
+        }
+        
+        .highlight-box strong {
+            color: var(--color-cyan);
+        }
+        
+        /* ==========================================
+           📖 DEFINITION BOX - V5.3
+           ========================================== */
+        .definition-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(0, 240, 255, 0.05));
+            border: none;
+            border-left: 4px solid var(--color-gold);
+            border-radius: 0;
+            padding: var(--card-padding);
+            padding-left: calc(var(--text-padding) - 4px);
+            padding-right: var(--text-padding);
+            margin: var(--space-lg) 0;
+            text-align: center;
+        }
+        
+        @media (min-width: 600px) {
+            .definition-box {
+                border: 2px solid var(--color-gold);
+                border-radius: var(--radius-lg);
+                padding: var(--card-padding);
+            }
+        }
+        
+        .definition-box .term {
+            font-family: var(--font-heading);
+            font-size: var(--text-xl);
+            font-weight: 800;
+            color: var(--color-gold);
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .definition-box .meaning {
+            font-size: var(--text-lg);
+            color: var(--color-cyan);
+            font-weight: 600;
+        }
+        
+        .definition-box .description {
+            margin-top: var(--space-sm);
+            color: var(--color-text-secondary);
+            font-size: var(--text-sm);
+        }
+        
+        /* ==========================================
+           🖼️ IMAGE - V5.3
+           ========================================== */
+        .image-container {
+            width: 100%;
+            margin: var(--space-lg) 0;
+            border-radius: 0;
+            overflow: hidden;
+        }
+        
+        @media (min-width: 600px) {
+            .image-container {
+                border-radius: var(--radius-md);
+                box-shadow: var(--shadow-md);
+            }
+        }
+        
+        .image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .image-caption {
+            text-align: center;
+            font-size: var(--text-sm);
+            color: var(--color-text-muted);
+            padding: var(--space-sm) var(--text-padding);
+            font-style: italic;
+        }
+        
+        @media (min-width: 600px) {
+            .image-caption {
+                padding: var(--space-sm) 0;
+            }
+        }
+        
+        /* ==========================================
+           📊 INFO GRID - V5.3
+           ========================================== */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1px;
+            margin: var(--space-md) 0;
+            background: var(--glass-border);
+        }
+        
+        @media (min-width: 600px) {
+            .info-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: var(--space-md);
+                background: transparent;
+            }
+        }
+        
+        .info-card {
+            background: var(--bg-glass);
+            border: none;
+            border-radius: 0;
+            padding: var(--card-padding);
+            padding-left: var(--text-padding);
+            padding-right: var(--text-padding);
+        }
+        
+        @media (min-width: 600px) {
+            .info-card {
+                border: 1px solid var(--glass-border);
+                border-radius: var(--radius-md);
+                padding: var(--card-padding);
+            }
+        }
+        
+        .info-card .info-icon {
+            font-size: 1.5rem;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .info-card .info-title {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            color: var(--color-gold);
+            font-size: var(--text-sm);
+            margin-bottom: var(--space-xs);
+        }
+        
+        .info-card .info-text {
+            color: var(--color-text-secondary);
+            font-size: var(--text-sm);
+            line-height: 1.6;
+        }
+        
+        /* ==========================================
+           📝 EXERCISE BOX - V5.3
+           ========================================== */
+        .exercise-box {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(0, 240, 255, 0.05));
+            border: none;
+            border-left: 4px solid var(--color-purple);
+            border-radius: 0;
+            padding: var(--card-padding);
+            padding-left: calc(var(--text-padding) - 4px);
+            padding-right: var(--text-padding);
+            margin: var(--space-lg) 0;
+        }
+        
+        @media (min-width: 600px) {
+            .exercise-box {
+                border: 2px solid var(--color-purple);
+                border-radius: var(--radius-lg);
+                padding: var(--space-xl);
+            }
+        }
+        
+        .exercise-title {
+            font-family: var(--font-heading);
+            font-size: var(--text-lg);
+            font-weight: 700;
+            color: var(--color-purple);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .exercise-instructions {
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-md);
+            font-size: var(--text-sm);
+        }
+        
+        .exercise-instructions li {
+            margin-bottom: var(--space-xs);
+        }
+        
+        .textarea-container {
+            margin-top: var(--space-md);
+        }
+        
+        .textarea-label {
+            display: block;
+            font-family: var(--font-heading);
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: var(--space-sm);
+            font-size: var(--text-sm);
+        }
+        
+        .writing-textarea {
+            width: 100%;
+            min-height: 200px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            padding: var(--space-md);
+            color: var(--color-text);
+            font-family: var(--font-body);
+            font-size: var(--text-base);
+            line-height: 1.7;
+            resize: vertical;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .writing-textarea:focus {
+            outline: none;
+            border-color: var(--color-purple);
+            box-shadow: 0 0 15px rgba(106, 91, 255, 0.3);
+        }
+        
+        .writing-textarea::placeholder {
+            color: var(--color-text-muted);
+        }
+        
+        .save-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            background: linear-gradient(135deg, var(--color-purple), #5a4bef);
+            color: var(--color-white);
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: var(--space-sm) var(--space-lg);
+            font-family: var(--font-heading);
+            font-weight: 600;
+            font-size: var(--text-sm);
+            cursor: pointer;
+            margin-top: var(--space-md);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(106, 91, 255, 0.4);
+        }
+        
+        .save-status {
+            font-size: var(--text-xs);
+            color: var(--color-green);
+            margin-top: var(--space-sm);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .save-status.show {
+            opacity: 1;
+        }
+        
+        /* ==========================================
+           🔮 APP INTEGRATION BOX - V5.3
+           ========================================== */
+        .app-integration-box {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.2), rgba(0, 240, 255, 0.1));
+            border: none;
+            border-left: 4px solid var(--color-purple);
+            border-radius: 0;
+            padding: var(--card-padding);
+            padding-left: calc(var(--text-padding) - 4px);
+            padding-right: var(--text-padding);
+            margin: var(--space-lg) 0;
+        }
+        
+        @media (min-width: 600px) {
+            .app-integration-box {
+                border: 2px solid var(--color-purple);
+                border-radius: var(--radius-lg);
+                padding: var(--space-xl);
+            }
+        }
+        
+        .app-integration-title {
+            font-family: var(--font-heading);
+            font-size: var(--text-lg);
+            font-weight: 700;
+            color: var(--color-purple);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        .app-steps {
+            counter-reset: app-step;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .app-steps li {
+            counter-increment: app-step;
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-md);
+            padding: var(--space-sm) 0;
+            color: var(--color-text-secondary);
+            font-size: var(--text-sm);
+        }
+        
+        .app-steps li::before {
+            content: counter(app-step);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--color-purple), var(--color-cyan));
+            border-radius: 50%;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: var(--text-xs);
+            color: var(--color-white);
+        }
+        
+        .tarot-prompt {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: var(--radius-sm);
+            padding: var(--space-md);
+            margin-top: var(--space-md);
+            border: 1px dashed var(--color-cyan);
+        }
+        
+        .tarot-prompt-label {
+            font-size: var(--text-xs);
+            color: var(--color-cyan);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: var(--space-xs);
+        }
+        
+        .tarot-prompt-text {
+            color: var(--color-gold);
+            font-style: italic;
+            font-size: var(--text-base);
+        }
+        
+        /* ==========================================
+           📋 SOURCE CARDS - V5.3
+           ========================================== */
+        .source-cards {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1px;
+            margin: var(--space-md) 0;
+            background: var(--glass-border);
+        }
+        
+        @media (min-width: 600px) {
+            .source-cards {
+                grid-template-columns: repeat(3, 1fr);
+                gap: var(--space-md);
+                background: transparent;
+            }
+        }
+        
+        .source-card {
+            background: var(--bg-glass);
+            border: none;
+            border-radius: 0;
+            padding: var(--card-padding);
+            text-align: center;
+        }
+        
+        @media (min-width: 600px) {
+            .source-card {
+                border: 1px solid var(--glass-border);
+                border-radius: var(--radius-md);
+                transition: transform 0.3s, box-shadow 0.3s;
+            }
+            
+            .source-card:hover {
+                transform: translateY(-3px);
+                box-shadow: var(--shadow-glow-gold);
+            }
+        }
+        
+        .source-card .source-icon {
+            font-size: 2rem;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .source-card .source-title {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            color: var(--color-gold);
+            font-size: var(--text-sm);
+            margin-bottom: var(--space-sm);
+        }
+        
+        .source-card .source-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            text-align: left;
+        }
+        
+        .source-card .source-list li {
+            font-size: var(--text-xs);
+            color: var(--color-text-secondary);
+            padding: var(--space-xs) 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        
+        .source-card .source-list li:last-child {
+            border-bottom: none;
+        }
+        
+        /* ==========================================
+           💡 TIP BOX - V5.3
+           ========================================== */
+        .tip-box {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(0, 240, 255, 0.05));
+            border: none;
+            border-left: 4px solid var(--color-green);
+            border-radius: 0;
+            padding: var(--card-padding);
+            padding-left: calc(var(--text-padding) - 4px);
+            padding-right: var(--text-padding);
+            margin: var(--space-lg) 0;
+        }
+        
+        @media (min-width: 600px) {
+            .tip-box {
+                border: 1px solid rgba(16, 185, 129, 0.3);
+                border-radius: var(--radius-md);
+                padding: var(--card-padding);
+            }
+        }
+        
+        .tip-box p {
+            padding: 0 !important;
+            margin: 0;
+            color: var(--color-text);
+            font-size: var(--text-sm);
+        }
+        
+        .tip-box strong {
+            color: var(--color-green);
+        }
+        
+        /* ==========================================
+           📊 ICEBERG LAYERS - V5.3
+           ========================================== */
+        .iceberg-container {
+            margin: var(--space-lg) 0;
+        }
+        
+        .iceberg-layer {
+            background: var(--bg-glass);
+            border: none;
+            border-left: 4px solid;
+            border-radius: 0;
+            padding: var(--card-padding);
+            padding-left: calc(var(--text-padding) - 4px);
+            padding-right: var(--text-padding);
+            margin-bottom: 1px;
+        }
+        
+        @media (min-width: 600px) {
+            .iceberg-layer {
+                border: 1px solid var(--glass-border);
+                border-radius: var(--radius-md);
+                margin-bottom: var(--space-md);
+            }
+        }
+        
+        .iceberg-layer.visible {
+            border-left-color: var(--color-cyan);
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), transparent);
+        }
+        
+        .iceberg-layer.hidden {
+            border-left-color: var(--color-purple);
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.1), transparent);
+        }
+        
+        .iceberg-layer.deep {
+            border-left-color: var(--color-burgundy);
+            background: linear-gradient(135deg, rgba(156, 6, 18, 0.15), transparent);
+        }
+        
+        .iceberg-layer .layer-label {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: var(--text-xs);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: var(--space-xs);
+        }
+        
+        .iceberg-layer.visible .layer-label {
+            color: var(--color-cyan);
+        }
+        
+        .iceberg-layer.hidden .layer-label {
+            color: var(--color-purple);
+        }
+        
+        .iceberg-layer.deep .layer-label {
+            color: #ff6b6b;
+        }
+        
+        .iceberg-layer .layer-title {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            color: var(--color-gold);
+            font-size: var(--text-base);
+            margin-bottom: var(--space-xs);
+        }
+        
+        .iceberg-layer .layer-desc {
+            color: var(--color-text-secondary);
+            font-size: var(--text-sm);
+        }
+        
+        .iceberg-layer .layer-examples {
+            margin-top: var(--space-sm);
+            font-size: var(--text-xs);
+            color: var(--color-text-muted);
+            font-style: italic;
+        }
+        
+        /* ==========================================
+           🎯 FOOTER
+           ========================================== */
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl) var(--text-padding);
+            color: var(--color-text-muted);
+            font-size: var(--text-sm);
+            border-top: 1px solid var(--glass-border);
+            margin-top: var(--space-lg);
+        }
+        
+        .lesson-footer a {
+            color: var(--color-gold);
+            text-decoration: none;
+        }
+        
+        .lesson-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <!-- ============================================
+             LESSON HEADER
+             ============================================ -->
+        <header class="lesson-header">
+            <span class="lesson-badge">Module 1 • Bài 1.1</span>
+            <h1 class="lesson-title">Câu Chuyện Tiền Bạc Của Bạn</h1>
+            <p class="lesson-subtitle">Khám phá "Money Story" - Kịch bản vô thức đang điều khiển mối quan hệ của bạn với tiền</p>
+            <div class="lesson-meta">
+                <span class="meta-item">⏱️ 25 phút</span>
+                <span class="meta-item">📝 Có bài tập</span>
+                <span class="meta-item">🔮 GEM Master Tarot</span>
+            </div>
+        </header>
+        
+        <!-- ============================================
+             SECTION 1: MONEY STORY LÀ GÌ
+             ============================================ -->
+        <section class="section">
+            <h2 class="section-title">
+                <span class="icon">📖</span>
+                Money Story Là Gì?
+            </h2>
+            
+            <p>Mỗi chúng ta đều mang trong mình một <strong>"Money Story"</strong> - câu chuyện về tiền bạc được viết từ thuở nhỏ, ẩn sâu trong tiềm thức và âm thầm điều khiển mọi quyết định tài chính của chúng ta.</p>
+            
+            <div class="definition-box">
+                <div class="term">MONEY STORY</div>
+                <div class="meaning">= Kịch Bản Tiền Bạc Tiềm Thức</div>
+                <div class="description">Tập hợp niềm tin, cảm xúc, ký ức và patterns vô thức về tiền bạc được hình thành từ nhỏ và ảnh hưởng đến toàn bộ hành vi tài chính của bạn</div>
+            </div>
+            
+            <p>Money Story không phải là những gì bạn <em>nghĩ</em> về tiền - mà là những gì bạn <em>cảm nhận</em> và <em>phản ứng tự động</em> với tiền. Đó là lý do tại sao nhiều người biết rõ cần tiết kiệm nhưng vẫn tiêu xài hoang phí, hoặc biết mình xứng đáng được tăng lương nhưng vẫn không dám đề xuất.</p>
+            
+            <!-- ============================================
+                 🖼️ HÌNH 6A: MONEY STORY CONCEPT
+                 - Bài: 1.1 | Section: Money Story Là Gì
+                 - Nội dung: Infographic giải thích Money Story
+                   + Hình ảnh não bộ với 2 phần: Ý thức (nhỏ) và Tiềm thức (lớn)
+                   + Mũi tên từ tiềm thức → hành vi tài chính
+                   + Text: "90% quyết định tài chính đến từ tiềm thức"
+                   + Visual: người đang suy nghĩ với thought bubble về tiền
+                 - Kích thước: 800x500px (tỷ lệ 16:10)
+                 - Style: Navy background, Gold highlights, Glassmorphism
+                 ============================================ -->
+            <div class="image-container">
+                <img 
+                    src="https://via.placeholder.com/800x500/112250/FFBD59?text=HINH+6A%3A+MONEY+STORY+CONCEPT" 
+                    alt="Money Story Concept - 90% quyết định tài chính đến từ tiềm thức"
+                    loading="lazy"
+                />
+            </div>
+            <p class="image-caption">Hình 6A: Money Story - Kịch bản tiền bạc tiềm thức điều khiển hành vi của bạn</p>
+            
+            <div class="highlight-box">
+                <p><strong>💡 Nhận thức quan trọng:</strong> Money Story của bạn được viết trước khi bạn có khả năng suy nghĩ logic. Nó nằm trong tiềm thức và hoạt động như "phần mềm nền" - chạy ngầm mà bạn không hay biết.</p>
+            </div>
+        </section>
+        
+        <!-- ============================================
+             SECTION 2: MÔ HÌNH ICEBERG
+             ============================================ -->
+        <section class="section">
+            <h2 class="section-title">
+                <span class="icon">🧊</span>
+                Mô Hình Tảng Băng Money Story
+            </h2>
+            
+            <p>Giống như tảng băng trôi, Money Story của bạn có phần nổi (những gì bạn nhận thức được) và phần chìm (những gì ẩn trong tiềm thức). Phần chìm chiếm đến <strong style="color: var(--color-cyan);">90%</strong> và mới là yếu tố quyết định thực sự.</p>
+            
+            <!-- ============================================
+                 🖼️ HÌNH 6: MONEY STORY ICEBERG
+                 - Tier: Triệu Phú | Module: 1 | Lesson: 1.1
+                 - Nội dung: Tảng băng với 3 tầng:
+                   + Phần nổi (10%): Hành vi tài chính hiện tại
+                   + Phần giữa: Niềm tin có ý thức
+                   + Phần sâu (90%): Ký ức, cảm xúc, patterns vô thức
+                 - Kích thước gợi ý: 800x600px (tỷ lệ 4:3)
+                 - Style: Iceberg với gradient từ cyan → purple → burgundy
+                 - Thay URL trong src="" để đổi hình
+                 ============================================ -->
+            <div class="image-container">
+                <img 
+                    src="https://via.placeholder.com/800x600/112250/FFBD59?text=HINH+6%3A+MONEY+STORY+ICEBERG" 
+                    alt="Mô hình tảng băng Money Story - Phần nổi 10% là hành vi, phần chìm 90% là tiềm thức"
+                    loading="lazy"
+                />
+            </div>
+            <p class="image-caption">Hình 6: Mô hình Tảng Băng Money Story - 90% nằm trong tiềm thức</p>
+            
+            <div class="iceberg-container">
+                <div class="iceberg-layer visible">
+                    <div class="layer-label">🔵 Phần Nổi (10%) - Nhìn Thấy Được</div>
+                    <div class="layer-title">Hành Vi Tài Chính Hiện Tại</div>
+                    <div class="layer-desc">Những gì người khác (và bạn) có thể quan sát được: thu nhập, chi tiêu, tiết kiệm, đầu tư, nợ...</div>
+                    <div class="layer-examples">VD: "Tôi tiêu hết tiền mỗi tháng", "Tôi không dám đầu tư", "Tôi hay mua sắm khi stress"</div>
+                </div>
+                
+                <div class="iceberg-layer hidden">
+                    <div class="layer-label">🟣 Phần Giữa (30%) - Có Thể Nhận Thức</div>
+                    <div class="layer-title">Niềm Tin & Suy Nghĩ Có Ý Thức</div>
+                    <div class="layer-desc">Những gì bạn biết mình tin về tiền, nhưng không biết từ đâu ra</div>
+                    <div class="layer-examples">VD: "Tiền không mua được hạnh phúc", "Người giàu thường xấu", "Tôi không giỏi về tiền"</div>
+                </div>
+                
+                <div class="iceberg-layer deep">
+                    <div class="layer-label">🔴 Phần Sâu (60%) - Vô Thức Hoàn Toàn</div>
+                    <div class="layer-title">Ký Ức, Cảm Xúc & Patterns Nguyên Thủy</div>
+                    <div class="layer-desc">Những trải nghiệm thời thơ ấu, cảm xúc đi kèm, và patterns phản ứng tự động</div>
+                    <div class="layer-examples">VD: Ký ức bố mẹ cãi nhau vì tiền, cảm giác xấu hổ khi nghèo, nỗi sợ bị bỏ rơi nếu không có tiền</div>
+                </div>
+            </div>
+            
+            <div class="tip-box">
+                <p><strong>🌟 Tin vui:</strong> Khi bạn đưa phần "chìm" lên bề mặt ý thức, nó sẽ mất đi sức mạnh kiểm soát bạn. Đó chính là mục đích của bài tập "Viết Dòng Ý Thức" hôm nay!</p>
+            </div>
+        </section>
+        
+        <!-- ============================================
+             SECTION 3: NGUỒN GỐC MONEY STORY
+             ============================================ -->
+        <section class="section">
+            <h2 class="section-title">
+                <span class="icon">🌱</span>
+                Nguồn Gốc Money Story Của Bạn
+            </h2>
+            
+            <p>Money Story của bạn được "viết" từ 3 nguồn chính. Hiểu rõ nguồn gốc giúp bạn dễ dàng nhận diện và chuyển hóa chúng hơn.</p>
+            
+            <!-- ============================================
+                 🖼️ HÌNH 6C: 3 NGUỒN GỐC MONEY STORY
+                 - Bài: 1.1 | Section: Nguồn Gốc Money Story
+                 - Nội dung: Infographic 3 nguồn gốc
+                   + Icon Gia Đình (house/family): bố mẹ, ông bà, mức sống
+                   + Icon Xã Hội (globe/people): văn hóa, truyền thông, bạn bè
+                   + Icon Trải Nghiệm (heart/lightning): ký ức, sự kiện, cảm xúc
+                   + Mũi tên từ 3 nguồn → Money Story ở giữa
+                   + Timeline: "Đặc biệt trước 7 tuổi - Sóng Theta"
+                 - Kích thước: 800x600px (tỷ lệ 4:3)
+                 - Style: 3 cards/circles với gradient khác nhau
+                 ============================================ -->
+            <div class="image-container">
+                <img 
+                    src="https://via.placeholder.com/800x600/112250/FFBD59?text=HINH+6C%3A+3+NGUON+GOC+MONEY+STORY" 
+                    alt="3 Nguồn Gốc Money Story - Gia Đình, Xã Hội, Trải Nghiệm"
+                    loading="lazy"
+                />
+            </div>
+            <p class="image-caption">Hình 6C: 3 Nguồn Gốc hình thành Money Story của bạn</p>
+            
+            <div class="source-cards">
+                <div class="source-card">
+                    <div class="source-icon">👨‍👩‍👧</div>
+                    <div class="source-title">Gia Đình</div>
+                    <ul class="source-list">
+                        <li>Cách bố mẹ nói về tiền</li>
+                        <li>Mức sống thời thơ ấu</li>
+                        <li>Xung đột về tiền trong nhà</li>
+                        <li>Quan điểm của ông bà</li>
+                        <li>Patterns tiền bạc gia đình</li>
+                    </ul>
+                </div>
+                
+                <div class="source-card">
+                    <div class="source-icon">🌍</div>
+                    <div class="source-title">Xã Hội</div>
+                    <ul class="source-list">
+                        <li>Văn hóa "tiền là vạn năng"</li>
+                        <li>So sánh với bạn bè</li>
+                        <li>Truyền thông, mạng xã hội</li>
+                        <li>Định kiến giàu/nghèo</li>
+                        <li>Áp lực "thành công"</li>
+                    </ul>
+                </div>
+                
+                <div class="source-card">
+                    <div class="source-icon">💔</div>
+                    <div class="source-title">Trải Nghiệm</div>
+                    <ul class="source-list">
+                        <li>Lần đầu kiếm tiền</li>
+                        <li>Thất bại tài chính</li>
+                        <li>Bị lừa đảo, mất tiền</li>
+                        <li>Thành công bất ngờ</li>
+                        <li>Khủng hoảng gia đình</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="highlight-box">
+                <p><strong>⚡ Quan trọng:</strong> Những trải nghiệm mang cảm xúc mạnh (đau đớn, xấu hổ, sợ hãi, vui sướng) sẽ "khắc sâu" vào tiềm thức nhất. Đặc biệt là những sự kiện xảy ra trước 7 tuổi - khi não bộ ở trạng thái sóng Theta (trạng thái "download" thông tin).</p>
+            </div>
+        </section>
+        
+        <!-- ============================================
+             SECTION 4: KỸ THUẬT VIẾT DÒNG Ý THỨC
+             ============================================ -->
+        <section class="section">
+            <h2 class="section-title">
+                <span class="icon">✍️</span>
+                Kỹ Thuật Viết Dòng Ý Thức
+            </h2>
+            
+            <p>"Viết Dòng Ý Thức" (Stream of Consciousness Writing) là kỹ thuật mạnh mẽ để đưa tiềm thức lên bề mặt. Bạn sẽ viết liên tục trong 20 phút, không dừng, không sửa, không phán xét.</p>
+            
+            <!-- ============================================
+                 🖼️ HÌNH 6D: 4 NGUYÊN TẮC VIẾT DÒNG Ý THỨC
+                 - Bài: 1.1 | Section: Kỹ Thuật Viết Dòng Ý Thức
+                 - Nội dung: Infographic 4 nguyên tắc
+                   + 1. KHÔNG DỪNG - Icon bút viết liên tục
+                   + 2. KHÔNG SỬA - Icon crossed-out eraser
+                   + 3. KHÔNG PHÁN XÉT - Icon heart/accept
+                   + 4. RIÊNG TƯ - Icon lock/private
+                   + Visual: người đang viết với flow energy
+                   + Timer: 20 PHÚT
+                 - Kích thước: 800x600px (tỷ lệ 4:3)
+                 - Style: 4 quadrants hoặc vertical list với icons
+                 ============================================ -->
+            <div class="image-container">
+                <img 
+                    src="https://via.placeholder.com/800x600/112250/FFBD59?text=HINH+6D%3A+4+NGUYEN+TAC+VIET+DONG+Y+THUC" 
+                    alt="4 Nguyên Tắc Viết Dòng Ý Thức - Không Dừng, Không Sửa, Không Phán Xét, Riêng Tư"
+                    loading="lazy"
+                />
+            </div>
+            <p class="image-caption">Hình 6D: 4 Nguyên Tắc Viết Dòng Ý Thức - Kỹ thuật đưa tiềm thức lên bề mặt</p>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-icon">📝</div>
+                    <div class="info-title">Nguyên Tắc 1: Không Dừng</div>
+                    <div class="info-text">Viết liên tục, kể cả khi không biết viết gì. Nếu bí, hãy viết "Tôi không biết viết gì..." cho đến khi ý tưởng mới xuất hiện.</div>
+                </div>
+                
+                <div class="info-card">
+                    <div class="info-icon">🚫</div>
+                    <div class="info-title">Nguyên Tắc 2: Không Sửa</div>
+                    <div class="info-text">Đừng xóa, đừng sửa lỗi chính tả, đừng đọc lại khi đang viết. Mọi sự "sửa" đều kích hoạt phần ý thức và ngăn tiềm thức trồi lên.</div>
+                </div>
+                
+                <div class="info-card">
+                    <div class="info-icon">💭</div>
+                    <div class="info-title">Nguyên Tắc 3: Không Phán Xét</div>
+                    <div class="info-text">Mọi thứ viết ra đều OK. Không có đúng sai, hay dở, logic hay phi logic. Bạn đang "download" từ tiềm thức, không phải viết văn.</div>
+                </div>
+                
+                <div class="info-card">
+                    <div class="info-icon">🔒</div>
+                    <div class="info-title">Nguyên Tắc 4: Riêng Tư</div>
+                    <div class="info-text">Những gì bạn viết chỉ dành cho bạn. Không ai đọc, không ai phán xét. Sự riêng tư tuyệt đối giúp tiềm thức "mở cửa".</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- ============================================
+             SECTION 5: BÀI TẬP THỰC HÀNH
+             ============================================ -->
+        <section class="section">
+            <h2 class="section-title">
+                <span class="icon">🎯</span>
+                Bài Tập: Viết Money Story Của Bạn
+            </h2>
+            
+            <!-- ============================================
+                 🖼️ HÌNH 6E: HƯỚNG DẪN BÀI TẬP VIẾT
+                 - Bài: 1.1 | Section: Bài Tập Thực Hành
+                 - Nội dung: Visual guide cho bài tập
+                   + Icon timer: 20 PHÚT
+                   + Câu bắt đầu: "Khi tôi nghĩ về tiền, tôi cảm thấy..."
+                   + Visual: notebook/journal với bút
+                   + Gợi ý: các câu hỏi trigger (bubble notes)
+                   + Atmosphere: peaceful, meditative
+                 - Kích thước: 800x500px (tỷ lệ 16:10)
+                 - Style: Warm, inviting, purple gradient
+                 ============================================ -->
+            <div class="image-container">
+                <img 
+                    src="https://via.placeholder.com/800x500/112250/6A5BFF?text=HINH+6E%3A+HUONG+DAN+BAI+TAP+VIET" 
+                    alt="Hướng Dẫn Bài Tập Viết Dòng Ý Thức - 20 phút viết Money Story"
+                    loading="lazy"
+                />
+            </div>
+            <p class="image-caption">Hình 6E: Hướng dẫn Bài Tập Viết Dòng Ý Thức 20 phút</p>
+            
+            <div class="exercise-box">
+                <div class="exercise-title">
+                    <span>✍️</span>
+                    Viết Dòng Ý Thức - 20 Phút
+                </div>
+                
+                <p class="exercise-instructions" style="padding: 0; margin-bottom: var(--space-md);">
+                    <strong>Hướng dẫn:</strong>
+                </p>
+                <ul class="exercise-instructions">
+                    <li>Hẹn đồng hồ 20 phút</li>
+                    <li>Bắt đầu với câu: <em>"Khi tôi nghĩ về tiền, tôi cảm thấy..."</em></li>
+                    <li>Viết liên tục, không dừng, không sửa</li>
+                    <li>Để mọi suy nghĩ, cảm xúc, ký ức trào ra</li>
+                    <li>Khi hết 20 phút, dừng lại và thở sâu</li>
+                </ul>
+                
+                <div class="textarea-container">
+                    <label class="textarea-label">💭 Bắt đầu viết tại đây:</label>
+                    <textarea 
+                        class="writing-textarea" 
+                        id="moneyStoryText"
+                        placeholder="Khi tôi nghĩ về tiền, tôi cảm thấy..."
+                    ></textarea>
+                    <button class="save-btn" onclick="saveMoneyStory()">
+                        💾 Lưu Money Story
+                    </button>
+                    <p class="save-status" id="saveStatus">✅ Đã lưu thành công!</p>
+                </div>
+                
+                <div class="tip-box" style="margin-top: var(--space-lg);">
+                    <p><strong>🌟 Gợi ý các hướng suy nghĩ:</strong></p>
+                    <ul style="margin-top: var(--space-sm); padding-left: 1.5rem;">
+                        <li>Ký ức đầu tiên về tiền là gì?</li>
+                        <li>Bố mẹ bạn nói gì về tiền?</li>
+                        <li>Lần đầu tiên bạn kiếm tiền cảm giác thế nào?</li>
+                        <li>Bạn từng xấu hổ về tiền chưa?</li>
+                        <li>Tiền khiến bạn sợ điều gì?</li>
+                        <li>Nếu có nhiều tiền, cuộc sống sẽ thế nào?</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        
+        <!-- ============================================
+             SECTION 6: TÍCH HỢP GEM MASTER TAROT
+             ============================================ -->
+        <section class="section">
+            <h2 class="section-title">
+                <span class="icon">🔮</span>
+                Tích Hợp App GEM
+            </h2>
+            
+            <p>Sau khi hoàn thành bài tập viết, hãy sử dụng GEM Master Tarot để nhận thêm insight từ vũ trụ về Money Story của bạn.</p>
+            
+            <!-- ============================================
+                 🖼️ HÌNH 6F: GEM MASTER TAROT SCREENSHOT
+                 - Bài: 1.1 | Section: Tích Hợp App GEM
+                 - Nội dung: Screenshot/Mockup app GEM
+                   + Màn hình GEM Master tab
+                   + Tarot cards spread (3 lá bài)
+                   + Input field với câu hỏi mẫu
+                   + Mystical atmosphere với stars/moon
+                   + Brand: GEM logo, gemral.com
+                 - Kích thước: 400x700px (tỷ lệ mobile 9:16)
+                 - Style: App screenshot mockup, dark theme
+                 ============================================ -->
+            <div class="image-container" style="max-width: 400px; margin: var(--space-lg) auto;">
+                <img 
+                    src="https://via.placeholder.com/400x700/112250/6A5BFF?text=HINH+6F%3A+GEM+MASTER+TAROT+APP" 
+                    alt="GEM Master Tarot - Bốc bài về Money Story trong app GEM"
+                    loading="lazy"
+                />
+            </div>
+            <p class="image-caption">Hình 6F: GEM Master Tarot - Công cụ bốc bài về tiền bạc trong app GEM</p>
+            
+            <div class="app-integration-box">
+                <div class="app-integration-title">
+                    <span>📱</span>
+                    GEM Master Tarot - Bốc Bài Về Tiền Bạc
+                </div>
+                
+                <ul class="app-steps">
+                    <li>Mở app GEM và vào tab <strong>GEM Master</strong></li>
+                    <li>Chọn tính năng <strong>Tarot</strong></li>
+                    <li>Nhập câu hỏi bên dưới (hoặc tự đặt câu hỏi riêng)</li>
+                    <li>Bốc 1-3 lá bài và đọc diễn giải</li>
+                    <li>Ghi lại insight vào nhật ký của bạn</li>
+                </ul>
+                
+                <div class="tarot-prompt">
+                    <div class="tarot-prompt-label">💬 Câu hỏi gợi ý:</div>
+                    <div class="tarot-prompt-text">"Money Story nào đang ảnh hưởng đến tôi nhiều nhất? Tôi cần làm gì để chuyển hóa nó?"</div>
+                </div>
+            </div>
+            
+            <div class="highlight-box">
+                <p><strong>🌙 Lưu ý:</strong> Tarot không "tiên tri" tương lai mà phản chiếu năng lượng tiềm thức hiện tại của bạn. Những lá bài xuất hiện là thông điệp từ chính tiềm thức của bạn, giúp bạn nhìn thấy những gì mà phần ý thức chưa thể thấy.</p>
+            </div>
+        </section>
+        
+        <!-- ============================================
+             SECTION 7: TÓM TẮT & BƯỚC TIẾP THEO
+             ============================================ -->
+        <section class="section">
+            <h2 class="section-title">
+                <span class="icon">✅</span>
+                Tóm Tắt Bài Học
+            </h2>
+            
+            <!-- ============================================
+                 🖼️ HÌNH 6G: TÓM TẮT BÀI 1.1
+                 - Bài: 1.1 | Section: Tóm Tắt
+                 - Nội dung: Infographic tóm tắt 4 điểm chính
+                   + 1. Money Story = Kịch bản tiềm thức
+                   + 2. Mô hình Tảng Băng (10% nổi, 90% chìm)
+                   + 3. 3 Nguồn Gốc: Gia Đình, Xã Hội, Trải Nghiệm
+                   + 4. Kỹ thuật Viết Dòng Ý Thức
+                   + Checklist: 3 nhiệm vụ hôm nay
+                 - Kích thước: 800x600px (tỷ lệ 4:3)
+                 - Style: Summary card với checkmarks
+                 ============================================ -->
+            <div class="image-container">
+                <img 
+                    src="https://via.placeholder.com/800x600/112250/10B981?text=HINH+6G%3A+TOM+TAT+BAI+1.1" 
+                    alt="Tóm Tắt Bài 1.1 - 4 điểm chính về Money Story"
+                    loading="lazy"
+                />
+            </div>
+            <p class="image-caption">Hình 6G: Tóm tắt Bài 1.1 - Câu Chuyện Tiền Bạc Của Bạn</p>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-icon">📖</div>
+                    <div class="info-title">Money Story</div>
+                    <div class="info-text">Kịch bản tiền bạc tiềm thức được hình thành từ nhỏ, ảnh hưởng đến 90% quyết định tài chính của bạn.</div>
+                </div>
+                
+                <div class="info-card">
+                    <div class="info-icon">🧊</div>
+                    <div class="info-title">Mô Hình Tảng Băng</div>
+                    <div class="info-text">Phần nổi (hành vi) chỉ chiếm 10%. Phần chìm (niềm tin, ký ức, cảm xúc vô thức) mới là "gốc rễ" thực sự.</div>
+                </div>
+                
+                <div class="info-card">
+                    <div class="info-icon">🌱</div>
+                    <div class="info-title">3 Nguồn Gốc</div>
+                    <div class="info-text">Money Story được "viết" từ Gia Đình, Xã Hội, và Trải Nghiệm Cá Nhân - đặc biệt trước 7 tuổi.</div>
+                </div>
+                
+                <div class="info-card">
+                    <div class="info-icon">✍️</div>
+                    <div class="info-title">Viết Dòng Ý Thức</div>
+                    <div class="info-text">Kỹ thuật mạnh mẽ để đưa tiềm thức lên bề mặt: Không dừng, Không sửa, Không phán xét, Riêng tư.</div>
+                </div>
+            </div>
+            
+            <div class="tip-box">
+                <p><strong>📌 Nhiệm vụ hôm nay:</strong></p>
+                <ul style="margin-top: var(--space-sm); padding-left: 1.5rem;">
+                    <li>✅ Hoàn thành bài tập Viết Dòng Ý Thức (20 phút)</li>
+                    <li>✅ Bốc Tarot trong app GEM với câu hỏi về Money Story</li>
+                    <li>✅ Ghi lại 3 insight quan trọng nhất vào nhật ký</li>
+                </ul>
+            </div>
+        </section>
+        
+        <!-- ============================================
+             FOOTER
+             ============================================ -->
+        <footer class="lesson-footer">
+            <p>© 2024 GEM Academy | <a href="https://gemral.com">gemral.com</a></p>
+        </footer>
+        
+    </div>
+    
+    <!-- ============================================
+         JAVASCRIPT
+         ============================================ -->
+    <script>
+        // ========== MONEY STORY SAVE FUNCTIONALITY ==========
+        
+        // Load saved data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedStory = localStorage.getItem('moneyStory_1_1');
+            if (savedStory) {
+                document.getElementById('moneyStoryText').value = savedStory;
+            }
+        });
+        
+        // Save Money Story to localStorage
+        function saveMoneyStory() {
+            const text = document.getElementById('moneyStoryText').value;
+            const timestamp = new Date().toISOString();
+            
+            // Save to localStorage
+            localStorage.setItem('moneyStory_1_1', text);
+            localStorage.setItem('moneyStory_1_1_timestamp', timestamp);
+            
+            // Show save status
+            const statusEl = document.getElementById('saveStatus');
+            statusEl.classList.add('show');
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                statusEl.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Auto-save every 30 seconds while typing
+        let autoSaveTimeout;
+        document.getElementById('moneyStoryText').addEventListener('input', function() {
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                const text = this.value;
+                if (text.trim()) {
+                    localStorage.setItem('moneyStory_1_1', text);
+                    localStorage.setItem('moneyStory_1_1_timestamp', new Date().toISOString());
+                }
+            }, 30000); // Auto-save after 30 seconds of no typing
+        });
+    </script>
+</body>
+</html>

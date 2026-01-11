@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 1.4: Nghi Thức Khai Mở | GEM Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==================== VARIABLES ==================== */
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        /* ==================== BACKGROUND ==================== */
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: 20%; }
+
+        /* ==================== CONTAINER ==================== */
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container {
+                padding: 0;
+            }
+        }
+
+        /* ==================== HEADER ==================== */
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--navy-dark);
+            margin-bottom: var(--space-md);
+        }
+        .lesson-chapter {
+            font-size: 0.9rem;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-lg);
+            flex-wrap: wrap;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        /* ==================== SECTION ==================== */
+        .section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section {
+                padding: 0;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .section-title {
+                padding: var(--space-lg) 16px var(--space-md) 16px;
+                margin-bottom: 0;
+            }
+        }
+
+        .section > p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .section > p {
+                padding: 0 16px;
+            }
+        }
+
+        /* ==================== HIGHLIGHT BOXES ==================== */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box-title {
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .definition-box-title {
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        /* ==================== IMAGE CONTAINER ==================== */
+        .image-container {
+            margin: var(--space-xl) 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-container {
+                margin: var(--space-md) 0;
+                border-radius: 0;
+                border: none;
+            }
+        }
+        .image-caption {
+            padding: var(--space-sm);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .image-caption {
+                padding: var(--space-sm) 16px;
+            }
+        }
+
+        /* ==================== FLOW STEPS ==================== */
+        .flow-steps {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .flow-steps {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .flow-step {
+            display: flex;
+            gap: var(--space-md);
+            align-items: flex-start;
+            padding: var(--space-md);
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .flow-step {
+                padding: var(--space-md) 16px;
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+            }
+        }
+        @media (min-width: 601px) {
+            .flow-step:hover {
+                border-color: var(--gold);
+                transform: translateX(8px);
+            }
+        }
+        .flow-step-number {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--navy-dark);
+        }
+        .flow-step-content { flex: 1; }
+        .flow-step-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+        }
+        .flow-step-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* ==================== MEDITATION SCRIPT ==================== */
+        .meditation-box {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05));
+            border: 1px solid rgba(106, 91, 255, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .meditation-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .meditation-box-title {
+            font-weight: 700;
+            color: var(--purple);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .meditation-script {
+            color: var(--text-secondary);
+            font-style: italic;
+            line-height: 1.8;
+        }
+        .meditation-script p {
+            margin-bottom: var(--space-md);
+        }
+        .pause-indicator {
+            color: var(--purple);
+            font-weight: 600;
+            font-style: normal;
+        }
+
+        /* ==================== SUMMARY BOX ==================== */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02));
+            border: 2px solid var(--gold);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .summary-list { list-style: none; }
+        .summary-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-list li::before {
+            content: "✓";
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        /* ==================== QUIZ SECTION ==================== */
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-section {
+                border: none;
+                border-radius: 0;
+                padding: 0;
+                margin-top: 0;
+                border-top: 8px solid var(--bg-primary);
+            }
+        }
+        .quiz-header {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-header {
+                padding: var(--space-lg) 16px var(--space-md);
+                margin-bottom: 0;
+            }
+        }
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+        }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-question {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin-bottom: 0;
+                border-bottom: 1px solid var(--glass-border);
+            }
+        }
+        .question-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50%;
+            font-weight: 700;
+            color: var(--navy-dark);
+            margin-bottom: var(--space-md);
+        }
+        .question-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+            line-height: 1.6;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .quiz-options {
+                gap: 1px;
+                background: var(--glass-border);
+                margin-left: calc(-16px - 4px);
+                margin-right: -16px;
+            }
+        }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .quiz-option {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid transparent;
+                padding: var(--space-md) 16px;
+            }
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+        @media (max-width: 600px) {
+            .quiz-option:hover:not(.disabled) {
+                border-left-color: var(--gold);
+            }
+        }
+        .quiz-option.selected {
+            border-color: var(--gold);
+            background: rgba(255, 189, 89, 0.1);
+        }
+        @media (max-width: 600px) {
+            .quiz-option.selected {
+                border-left-color: var(--gold);
+            }
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+        }
+        @media (max-width: 600px) {
+            .quiz-option.correct {
+                border-left-color: var(--success) !important;
+            }
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+        }
+        @media (max-width: 600px) {
+            .quiz-option.incorrect {
+                border-left-color: var(--error) !important;
+            }
+        }
+        .quiz-option.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .option-marker {
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .quiz-option.selected .option-marker {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: var(--navy-dark);
+        }
+        .quiz-option.correct .option-marker {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+        .quiz-option.incorrect .option-marker {
+            background: var(--error);
+            border-color: var(--error);
+            color: white;
+        }
+        .option-text { flex: 1; color: var(--text-secondary); }
+
+        .question-feedback {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--space-sm);
+            display: none;
+        }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+        }
+        .question-feedback.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+        }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .quiz-result {
+            text-align: center;
+            padding: var(--space-xl);
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .result-score {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--gold), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--space-md);
+        }
+        .result-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
+        }
+        .result-message { color: var(--text-muted); }
+
+        .quiz-buttons {
+            display: flex;
+            justify-content: center;
+            padding: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-buttons { padding: var(--space-lg) 16px; }
+        }
+        .quiz-btn {
+            padding: var(--space-md) var(--space-xl);
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            border: 2px solid var(--glass-border);
+        }
+        .quiz-btn:hover { border-color: var(--gold); }
+
+        /* ==================== FOOTER ==================== */
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .lesson-footer a {
+            color: var(--gold);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>💰</span>
+                <span>Module 1</span>
+            </div>
+            <div class="lesson-chapter">Module 1 - Thức Tỉnh: Nền Tảng</div>
+            <h1 class="lesson-title">Nghi Thức Khai Mở</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 1.4</span></div>
+                <div class="meta-item"><span>⏱️</span><span>15 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🔮</span> Khoảnh Khắc "Reset"</h2>
+            <p>Bạn có biết rằng các nhà du hành vũ trụ thường trải qua một trải nghiệm gọi là "Overview Effect" khi nhìn Trái Đất từ không gian không? Khoảnh khắc đó thay đổi hoàn toàn cách họ nhìn nhận cuộc sống - mọi lo âu, tranh chấp, giới hạn đều trở nên nhỏ bé và vô nghĩa.</p>
+
+            <p>Hôm nay, bạn sẽ trải qua một "Overview Effect" của riêng mình - không cần bay lên vũ trụ, mà bằng cách <strong>reset lại toàn bộ hệ thống niềm tin</strong> qua Nghi Thức Khai Mở. Đây là nghi thức thanh tẩy mạnh mẽ nhất trong toàn bộ khóa học, được thiết kế để bạn bước vào hành trình 49 ngày với tâm thức hoàn toàn mới.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🧪</span> Nghiên Cứu Khoa Học</div>
+                <p>Một nghiên cứu năm 2019 tại Đại học Johns Hopkins cho thấy những người thực hành nghi thức thanh tẩy có ý nghĩa (meaningful ritual) trước khi bắt đầu một mục tiêu mới có <strong>tỷ lệ thành công cao hơn 67%</strong> so với nhóm không thực hành. Lý do? Nghi thức tạo ra một "đường phân cách tâm lý" giữa bản thân cũ và bản thân mới, giúp não bộ dễ dàng chấp nhận những thay đổi.</p>
+            </div>
+
+            <p>Trong 3 bài học trước, bạn đã hiểu về Tư Duy Thịnh Vượng, biết điểm xuất phát của mình qua Thang Đo Tỉnh Thức, và học cách nhận diện những niềm tin giới hạn. Bây giờ là lúc để <strong>đóng lại chương cũ và mở ra chương mới</strong>. Hãy chuẩn bị tâm thế sẵn sàng - vì sau nghi thức này, bạn sẽ không còn là người như trước nữa.</p>
+        </section>
+
+        <!-- SECTION 1: GIỚI THIỆU -->
+        <section class="section">
+            <h2 class="section-title"><span>🌟</span> Chào Mừng Đến Bài Cuối Module 1</h2>
+            <p>Xin chúc mừng! Bạn đã hoàn thành phần lý thuyết của Module 1. Bây giờ là lúc để <strong>hành động</strong>. Trong bài học này, bạn sẽ thực hiện Nghi Thức Khai Mở - một nghi thức thanh tẩy mạnh mẽ để chuẩn bị tâm thức cho hành trình 49 ngày phía trước.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🔮</span> Nghi Thức Khai Mở Là Gì?</div>
+                <p>Đây là nghi thức thanh tẩy năng lượng, giải phóng những "rác" tâm lý từ quá khứ và mở cửa cho tần số thịnh vượng mới. Được thiết kế dựa trên các nguyên lý từ <strong>Học Thuyết Chuyển Hóa Nội Tâm</strong> và truyền thống tâm linh Đông Tây.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M1_B4_01%0ANghi+Thuc+Khai+Mo" alt="Nghi Thức Khai Mở">
+                <div class="image-caption">Nghi thức thanh tẩy chuẩn bị cho hành trình 49 ngày</div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: 7 BƯỚC THANH TẨY -->
+        <section class="section">
+            <h2 class="section-title"><span>🌀</span> 7 Bước Thanh Tẩy Tâm Thức</h2>
+            <p>Thực hiện 7 bước này theo thứ tự, tốt nhất là vào buổi sáng sớm hoặc buổi tối yên tĩnh. Chuẩn bị một không gian yên tĩnh, sạch sẽ.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x800/0a1628/FFBD59?text=HINH+9%0A7+Buoc+Thanh+Tay" alt="Hình 9: 7 Bước Thanh Tẩy">
+                <div class="image-caption">Hình 9: 7 Bước Thanh Tẩy Tâm Thức</div>
+            </div>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Chuẩn Bị Không Gian</div>
+                        <div class="flow-step-desc">Chọn một góc yên tĩnh. Tắt điện thoại. Nếu có thể, thắp nến hoặc đèn nhẹ. Ngồi thoải mái trên ghế hoặc sàn. Đặt tay lên đùi, lòng bàn tay hướng lên.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Hít Thở Thanh Lọc</div>
+                        <div class="flow-step-desc">Hít sâu qua mũi 4 giây → Giữ 7 giây → Thở ra qua miệng 8 giây. Lặp lại 3 lần. Mỗi lần thở ra, hình dung năng lượng đen tối rời khỏi cơ thể.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tuyên Bố Ý Định</div>
+                        <div class="flow-step-desc">Nói to hoặc trong tâm: "Tôi mở lòng đón nhận sự thịnh vượng. Tôi sẵn sàng thay đổi. Tôi xứng đáng được giàu có và hạnh phúc."</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Giải Phóng Quá Khứ</div>
+                        <div class="flow-step-desc">Hình dung những niềm tin giới hạn từ Bài 1.3 như những sợi dây buộc quanh người. Nói: "Tôi buông bỏ [niềm tin]." Hình dung sợi dây tan biến thành ánh sáng.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tha Thứ Toàn Diện</div>
+                        <div class="flow-step-desc">Nói: "Tôi tha thứ cho bản thân vì mọi lỗi lầm về tiền bạc. Tôi tha thứ cho cha mẹ, gia đình vì những gì họ đã dạy tôi về tiền. Tôi tự do."</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">6</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Đón Nhận Năng Lượng Mới</div>
+                        <div class="flow-step-desc">Hình dung ánh sáng vàng kim từ trên cao đổ xuống đỉnh đầu, tràn qua toàn thân. Nói: "Tôi đón nhận năng lượng thịnh vượng. Tôi là nam châm thu hút tiền bạc."</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">7</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Niêm Phong & Cảm Ơn</div>
+                        <div class="flow-step-desc">Đặt tay lên tim, nói: "Xin cảm ơn. Nghi thức này đã hoàn thành. Tôi bước vào hành trình mới với tâm thanh tịnh." Hít thở sâu 3 lần rồi mở mắt.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>⏰</span> Thời Gian Thực Hiện</div>
+                <p>Toàn bộ nghi thức mất khoảng <strong>15-20 phút</strong>. Thực hiện vào sáng sớm hoặc tối muộn khi không bị quấy rầy.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: SCRIPT MEDITATION -->
+        <section class="section">
+            <h2 class="section-title"><span>🧘</span> Script Meditation 15 Phút</h2>
+            <p>Dưới đây là script meditation chi tiết. Bạn có thể tự đọc hoặc sử dụng audio trong GEM App.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/6A5BFF?text=M1_B4_02%0AMeditation+Script" alt="Meditation Script">
+                <div class="image-caption">Thực hành thiền định với script hướng dẫn</div>
+            </div>
+
+            <div class="meditation-box">
+                <div class="meditation-box-title"><span>🎧</span> Script Meditation Khai Mở</div>
+                <div class="meditation-script">
+                    <p>Hãy ngồi thoải mái. Nhắm mắt lại. Bắt đầu với 3 hơi thở sâu...</p>
+                    <p><span class="pause-indicator">[Hít vào... Giữ... Thở ra...]</span></p>
+                    <p>Cảm nhận cơ thể bạn thư giãn. Từ đỉnh đầu... xuống trán... mắt... má... hàm... cổ... vai...</p>
+                    <p><span class="pause-indicator">[Dừng 10 giây]</span></p>
+                    <p>Bây giờ, hình dung bạn đang đứng trước một cánh cửa lớn. Cánh cửa này dẫn đến cuộc sống thịnh vượng của bạn...</p>
+                    <p>Phía trước cửa, bạn thấy những chiếc túi nặng. Đây là những niềm tin giới hạn bạn đã mang theo...</p>
+                    <p>Đặt tay lên từng chiếc túi. Nói: "Tôi buông bỏ niềm tin này. Tôi không cần nó nữa."</p>
+                    <p><span class="pause-indicator">[Dừng 30 giây - Hình dung đặt xuống từng chiếc túi]</span></p>
+                    <p>Tay bạn nhẹ đi. Vai bạn thẳng lên. Bạn cảm thấy tự do...</p>
+                    <p>Cánh cửa từ từ mở ra. Ánh sáng vàng kim tràn ra từ bên trong...</p>
+                    <p>Bước qua cửa. Bạn bước vào không gian của sự dồi dào. Xung quanh bạn là năng lượng thịnh vượng...</p>
+                    <p><span class="pause-indicator">[Dừng 20 giây]</span></p>
+                    <p>Hít thở sâu. Hấp thụ năng lượng này vào từng tế bào...</p>
+                    <p>Nói trong tâm: "Tôi là dòng chảy tần số. Tôi thu hút những gì tôi rung động. Tôi xứng đáng được giàu có."</p>
+                    <p><span class="pause-indicator">[Dừng 15 giây]</span></p>
+                    <p>Cảm nhận sự biết ơn dâng trào trong tim. Cảm ơn vũ trụ. Cảm ơn bản thân. Cảm ơn hành trình phía trước...</p>
+                    <p>Từ từ đưa ý thức trở lại căn phòng. Cảm nhận cơ thể. Nghe âm thanh xung quanh...</p>
+                    <p>Khi sẵn sàng, mở mắt từ từ. Mỉm cười. Bạn đã hoàn thành Nghi Thức Khai Mở.</p>
+                    <p><span class="pause-indicator">[Kết thúc]</span></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: TÍCH HỢP APP -->
+        <section class="section">
+            <h2 class="section-title"><span>📱</span> Thực Hành Trong GEM App</h2>
+            <p>Bạn có thể thực hiện nghi thức này trực tiếp trong GEM App với các tính năng hỗ trợ:</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Vision Board → Burn & Release</div>
+                        <div class="flow-step-desc">Viết ra 5 niềm tin giới hạn từ Bài 1.3 và thực hiện nghi thức đốt cháy để giải phóng.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Rituals → Cleansing Breath</div>
+                        <div class="flow-step-desc">Sử dụng bài tập hít thở có hướng dẫn để thanh lọc năng lượng. Timer tự động cho 4-7-8 breathing.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">GEM Master → Meditation Audio</div>
+                        <div class="flow-step-desc">Tìm audio "Khai Mở Thịnh Vượng" trong thư viện meditation để thực hành theo hướng dẫn.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/00F0FF?text=M1_B4_03%0AGEM+App+Features" alt="GEM App Features">
+                <div class="image-caption">Các tính năng trong GEM App hỗ trợ nghi thức khai mở</div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: TỔNG KẾT MODULE 1 -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Tổng Kết Module 1</h2>
+            <p>Xin chúc mừng! Bạn đã hoàn thành Module 1 - Thức Tỉnh. Hãy nhìn lại những gì bạn đã học:</p>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>📌</span> Những Điều Bạn Đã Đạt Được</div>
+                <ul class="summary-list">
+                    <li><strong>Bài 1.1:</strong> Hiểu về Tư Duy Thịnh Vượng và tại sao tiền bạc là năng lượng</li>
+                    <li><strong>Bài 1.2:</strong> Làm bài test Thang Đo Tỉnh Thức để biết điểm xuất phát của bạn</li>
+                    <li><strong>Bài 1.3:</strong> Nhận diện 20 Niềm Tin Giới Hạn và học kỹ thuật Choose Again</li>
+                    <li><strong>Bài 1.4:</strong> Thực hiện 7 Bước Thanh Tẩy Tâm Thức và Nghi Thức Khai Mở</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🚀</span> Chuẩn Bị Cho Module 2</div>
+                <p>Module 2 sẽ đi sâu vào chủ đề <strong>Hóa Giải Nghiệp Tiền Bạc</strong>. Bạn sẽ học cách nhận diện và chuyển hóa nghiệp tài chính của gia đình qua nhiều thế hệ. Đây là chìa khóa để phá vỡ vòng lặp nghèo khó mà nhiều người mang theo từ dòng họ.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x400/0a1628/00C853?text=M1_B4_04%0AComplete+Module+1" alt="Complete Module 1">
+                <div class="image-caption">Bạn đã hoàn thành Module 1 - Sẵn sàng cho Module 2!</div>
+            </div>
+        </section>
+
+        <!-- REAL STORIES SECTION -->
+        <section class="section">
+            <h2 class="section-title"><span>💫</span> Câu Chuyện Thực Tế</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>👤</span> Câu Chuyện Của Thảo - 29 tuổi, Chuyên viên Truyền thông</div>
+                <p>Thảo là một trong những người hoài nghi nhất khi bắt đầu khóa học. "Nghi thức thanh tẩy nghe có vẻ mê tín," cô thừa nhận. Nhưng vì đã đầu tư tiền vào khóa học, Thảo quyết định thử làm theo hướng dẫn dù trong lòng vẫn nghi ngờ.</p>
+                <p style="margin-top: var(--space-sm);">Cô chọn thực hiện Nghi Thức Khai Mở vào đêm Trăng Non, một mình trong phòng riêng. "Khi tôi nói to 'Tôi tha thứ cho cha mẹ vì những gì họ đã dạy tôi về tiền', tôi bật khóc không kiểm soát," Thảo kể lại. "Tôi không ngờ mình còn mang theo nhiều tổn thương như vậy từ những lần bố mẹ cãi nhau vì tiền khi tôi còn nhỏ."</p>
+                <p style="margin-top: var(--space-sm);">Khoảnh khắc đó, Thảo nhận ra cô đã vô thức né tránh kiếm nhiều tiền vì sợ tiền sẽ phá hủy các mối quan hệ - giống như cách nó đã làm với gia đình cô. Sau nghi thức, cô cảm thấy <strong>"nhẹ nhõm như trút được tảng đá"</strong>. Trong 6 tháng tiếp theo, Thảo tự tin đàm phán tăng lương 40% và bắt đầu làm thêm freelance - điều cô chưa bao giờ dám làm trước đó.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>👤</span> Câu Chuyện Của Anh Phúc - 52 tuổi, Doanh nhân</div>
+                <p>Anh Phúc đã có 20 năm kinh doanh với nhiều thăng trầm. "Tôi từng nghĩ mình đã biết hết về tiền bạc," anh chia sẻ. "Nhưng khi làm bài test Thang Đo Tỉnh Thức ở Bài 1.2, tôi sốc khi thấy mình chỉ ở Tầng 2 - Quan Sát. Hóa ra tôi kiếm tiền giỏi nhưng vẫn mang tư duy khan hiếm."</p>
+                <p style="margin-top: var(--space-sm);">Anh Phúc thực hiện Nghi Thức Khai Mở một cách nghiêm túc, mỗi bước đều làm chậm rãi và có ý thức. "Bước 5 - Tha Thứ Toàn Diện - là bước khó nhất với tôi. Tôi phải đối mặt với những quyết định kinh doanh sai lầm trong quá khứ mà tôi vẫn tự trách mình."</p>
+                <p style="margin-top: var(--space-sm);">Sau nghi thức, anh Phúc bắt đầu viết nhật ký mỗi sáng và thực hành Choose Again mỗi khi có suy nghĩ tiêu cực. Sau 49 ngày hoàn thành khóa học, công ty của anh ký được hợp đồng <strong>lớn nhất trong 10 năm</strong> - một thương vụ mà trước đó anh không dám theo đuổi vì sợ thất bại. "Không phải nghi thức tạo ra hợp đồng," anh nói, "mà nghi thức đã gỡ bỏ nỗi sợ khiến tôi không dám hành động."</p>
+            </div>
+        </section>
+
+        <!-- KEY TAKEAWAYS SECTION -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Điểm Mấu Chốt Của Module 1</h2>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tiền Bạc Là Năng Lượng, Không Phải Vật Chất</div>
+                        <div class="flow-step-desc">Bạn không "đuổi theo" tiền - bạn thu hút tiền bằng cách nâng cao tần số của mình. Đây là nguyên lý nền tảng của toàn bộ khóa học và sẽ được áp dụng trong mọi module tiếp theo.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Niềm Tin Giới Hạn Có Thể Được Chọn Lại</div>
+                        <div class="flow-step-desc">Kỹ thuật Choose Again (Notice → Forgive → Choose) cho phép bạn thay thế bất kỳ niềm tin nào đang cản trở sự thịnh vượng của bạn. Lặp lại 21-49 ngày để tạo thay đổi vĩnh viễn.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Nghi Thức Tạo Ra "Đường Phân Cách" Tâm Lý</div>
+                        <div class="flow-step-desc">Nghi Thức Khai Mở với 7 bước thanh tẩy giúp não bộ nhận ra sự chuyển đổi từ "bản thân cũ" sang "bản thân mới". Đây là bước chuẩn bị quan trọng trước khi bước vào hành trình 49 ngày.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🚀</span> Sẵn Sàng Cho Module 2</div>
+                <p>Trong Module 2: Hóa Giải Nghiệp Tiền Bạc, bạn sẽ đi sâu vào cội nguồn của những pattern tài chính được truyền qua nhiều thế hệ. Bạn sẽ học cách lập Bản Đồ Nghiệp Tiền của gia đình, thực hành Nghi Thức Cắt Dây Nghiệp, và chuyển hóa "nghiệp" thành "phước". Đây là module quan trọng nhất để phá vỡ vòng lặp nghèo khó của dòng họ.</p>
+            </div>
+        </section>
+
+        <!-- QUIZ SECTION -->
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">Kiểm Tra Kiến Thức Module 1</h2>
+                <p class="quiz-subtitle">3 câu hỏi - Chọn đáp án đúng nhất</p>
+            </div>
+
+            <div class="quiz-question" data-question="1" data-correct="C">
+                <div class="question-number">1</div>
+                <div class="question-text">Trong kỹ thuật "Choose Again", bước thứ 2 là gì?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Notice - Nhận diện niềm tin giới hạn</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Choose - Chọn niềm tin mới</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Forgive - Tha thứ cho bản thân</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Release - Giải phóng năng lượng</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="2" data-correct="B">
+                <div class="question-number">2</div>
+                <div class="question-text">Nghi Thức Khai Mở gồm bao nhiêu bước chính?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">5 bước</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">7 bước</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">9 bước</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">12 bước</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="3" data-correct="D">
+                <div class="question-number">3</div>
+                <div class="question-text">Theo Học Thuyết Chuyển Hóa Nội Tâm, câu nào đúng về niềm tin giới hạn?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Niềm tin giới hạn là sự thật không thể thay đổi</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Chỉ có những người yếu đuối mới có niềm tin giới hạn</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Cần phải xóa bỏ hoàn toàn niềm tin giới hạn</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Bạn có thể CHỌN một niềm tin khác thay vì niềm tin giới hạn</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-result">
+                <div class="result-score">0/3</div>
+                <div class="result-text">Hoàn thành!</div>
+                <div class="result-message"></div>
+            </div>
+
+            <div class="quiz-buttons">
+                <button class="quiz-btn" id="retakeQuiz" style="display: none;">Làm Lại</button>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <p>© 2024 GEM Academy | <a href="https://gemral.com">gemral.com</a></p>
+            <p style="margin-top: var(--space-sm);">Tiếp theo: Module 2 - Hóa Giải Nghiệp Tiền Bạc →</p>
+        </footer>
+
+    </div>
+
+    <script>
+        // ==================== QUIZ INSTANT FEEDBACK ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            const questions = document.querySelectorAll('.quiz-question');
+            const retakeBtn = document.getElementById('retakeQuiz');
+            const resultDiv = document.querySelector('.quiz-result');
+
+            let answeredCount = 0;
+            let correctCount = 0;
+            const totalQuestions = questions.length;
+
+            const explanations = {
+                1: {
+                    correct: 'Đúng! Quy trình Choose Again là: Notice (Nhận diện) → Forgive (Tha thứ) → Choose (Chọn lại). Bước tha thứ giúp giải phóng năng lượng bám chấp.',
+                    incorrect: 'Sai! Quy trình đúng là: Notice → Forgive → Choose. Bước 2 là Forgive (Tha thứ cho bản thân vì đã tin vào niềm tin giới hạn).'
+                },
+                2: {
+                    correct: 'Chính xác! Nghi Thức Khai Mở gồm 7 bước: Chuẩn bị không gian, Hít thở thanh lọc, Tuyên bố ý định, Giải phóng quá khứ, Tha thứ toàn diện, Đón nhận năng lượng mới, Niêm phong & cảm ơn.',
+                    incorrect: 'Sai! Nghi Thức Khai Mở gồm 7 bước chính. Hãy xem lại phần 7 Bước Thanh Tẩy Tâm Thức.'
+                },
+                3: {
+                    correct: 'Hoàn toàn đúng! Theo Học Thuyết, bạn không thể xóa một tư tưởng, nhưng bạn có thể CHỌN một tư tưởng khác để thay thế.',
+                    incorrect: 'Sai! Nguyên lý quan trọng: Bạn không thể xóa niềm tin, nhưng bạn có thể CHỌN một niềm tin khác. Đây là bản chất của kỹ thuật Choose Again.'
+                }
+            };
+
+            questions.forEach(question => {
+                const options = question.querySelectorAll('.quiz-option');
+                const correctAnswer = question.dataset.correct;
+                const questionNum = question.dataset.question;
+                const feedbackDiv = question.querySelector('.question-feedback');
+                const feedbackTitle = feedbackDiv.querySelector('.feedback-title');
+                const feedbackText = feedbackDiv.querySelector('.feedback-text');
+
+                options.forEach(option => {
+                    option.addEventListener('click', function() {
+                        if (question.classList.contains('answered')) return;
+
+                        question.classList.add('answered');
+                        answeredCount++;
+
+                        const selectedOption = this.dataset.option;
+                        const isCorrect = selectedOption === correctAnswer;
+
+                        options.forEach(opt => opt.classList.add('disabled'));
+                        this.classList.add('selected');
+
+                        if (isCorrect) {
+                            this.classList.add('correct');
+                            correctCount++;
+                            feedbackDiv.classList.add('correct');
+                            feedbackTitle.textContent = '✓ Chính xác!';
+                            feedbackText.textContent = explanations[questionNum].correct;
+                        } else {
+                            this.classList.add('incorrect');
+                            feedbackDiv.classList.add('incorrect');
+                            feedbackTitle.textContent = '✗ Sai rồi!';
+                            feedbackText.textContent = explanations[questionNum].incorrect;
+                            options.forEach(opt => {
+                                if (opt.dataset.option === correctAnswer) {
+                                    opt.classList.add('correct');
+                                }
+                            });
+                        }
+
+                        feedbackDiv.classList.add('show');
+
+                        if (answeredCount === totalQuestions) {
+                            const scoreDiv = resultDiv.querySelector('.result-score');
+                            const messageDiv = resultDiv.querySelector('.result-message');
+                            scoreDiv.textContent = `${correctCount}/${totalQuestions}`;
+
+                            if (correctCount === totalQuestions) {
+                                messageDiv.textContent = '🎉 Xuất sắc! Bạn đã nắm vững kiến thức Module 1!';
+                            } else if (correctCount >= 2) {
+                                messageDiv.textContent = '👍 Tốt lắm! Bạn đã sẵn sàng cho Module 2.';
+                            } else {
+                                messageDiv.textContent = '📚 Xem lại bài học để chuẩn bị tốt hơn nhé!';
+                            }
+
+                            resultDiv.classList.add('show');
+                            retakeBtn.style.display = 'inline-block';
+                        }
+                    });
+                });
+            });
+
+            retakeBtn.addEventListener('click', function() {
+                answeredCount = 0;
+                correctCount = 0;
+
+                questions.forEach(question => {
+                    question.classList.remove('answered');
+                    const options = question.querySelectorAll('.quiz-option');
+                    const feedbackDiv = question.querySelector('.question-feedback');
+
+                    options.forEach(opt => {
+                        opt.classList.remove('selected', 'correct', 'incorrect', 'disabled');
+                    });
+                    feedbackDiv.classList.remove('show', 'correct', 'incorrect');
+                });
+
+                resultDiv.classList.remove('show');
+                retakeBtn.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

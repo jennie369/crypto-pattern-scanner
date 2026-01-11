@@ -1,0 +1,443 @@
+
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Section 7 - Pricing 4 Tiers | GEM Trading Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&amp;family=Noto+Sans+Display:wght@300;400;600;700&amp;display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+/* ==================== ISOLATED SECTION 8 - NO CONFLICTS ==================== */
+/* All classes prefixed with .s8- to avoid conflicts */
+.s8-wrapper{
+--burgundy:#9C0612;
+--gold:#FFBD59;
+--gold-light:#DEBC81;
+--font-heading:'Montserrat',sans-serif;
+--font-body:'Noto Sans Display',sans-serif;
+}
+.s8-wrapper *{box-sizing:border-box;}
+.s8-section{
+position:relative;
+min-height:100vh;
+padding:100px 20px;
+background:linear-gradient(180deg,
+    #050718 0%,      /* MATCH Section 6 ending - near black */
+    #0A0A1A 10%,     /* Dark navy-black */
+    #12081A 20%,     /* Dark purple hint */
+    #1A0815 25%,     /* Purple to burgundy */
+    #250810 35%,     /* Dark burgundy */
+    #35080D 45%,     /* Deeper burgundy */
+    #45080C 55%,     /* Mid burgundy */
+    #55090C 65%,     /* Burgundy */
+    #600A10 75%,     /* Richer burgundy */
+    #6B0F1A 100%     /* MATCH Section 8 starting */
+);
+overflow:hidden;
+font-family:var(--font-body);
+color:#fff;
+}
+.s8-section::after{
+content:'';
+position:absolute;
+bottom:20%;
+left:50%;
+transform:translateX(-50%);
+width:800px;
+height:800px;
+background:radial-gradient(circle,rgba(255,189,89,0.2) 0%,transparent 70%);
+filter:blur(150px);
+pointer-events:none;
+}
+.s8-container{
+position:relative;
+z-index:1;
+max-width:1400px;
+margin:0 auto;
+}
+.s8-header{
+text-align:center;
+margin-bottom:60px;
+}
+.s8-badge{
+display:inline-block;
+background:linear-gradient(135deg,rgba(255,189,89,0.3),rgba(156,6,18,0.2));
+border:2px solid var(--gold);
+color:var(--gold);
+padding:12px 30px;
+border-radius:50px;
+font-size:0.85rem;
+font-weight:700;
+letter-spacing:2px;
+text-transform:uppercase;
+margin-bottom:25px;
+}
+.s8-title{
+font-family:var(--font-heading);
+font-size:clamp(2.5rem,5vw,4rem);
+font-weight:900;
+color:#fff;
+line-height:1.2;
+margin-bottom:20px;
+}
+.s8-subtitle{
+font-size:clamp(1rem,2vw,1.3rem);
+color:var(--gold-light);
+line-height:1.7;
+max-width:800px;
+margin:0 auto;
+}
+.s8-usp{
+background:linear-gradient(135deg,rgba(0,0,0,0.8),rgba(156,6,18,0.5));
+border:3px solid var(--gold);
+border-radius:25px;
+padding:40px 35px;
+margin-bottom:60px;
+}
+.s8-usp-title{
+font-family:var(--font-heading);
+font-size:2rem;
+font-weight:800;
+color:var(--gold);
+text-align:center;
+margin-bottom:15px;
+}
+.s8-usp-text{
+text-align:center;
+font-size:1.1rem;
+color:#fff;
+line-height:1.8;
+margin-bottom:30px;
+}
+.s8-formulas{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:20px;
+margin-top:30px;
+}
+@media (min-width:1024px){
+.s8-formulas{
+grid-template-columns:repeat(3,1fr);
+}
+}
+@media (max-width:767px){
+.s8-formulas{
+grid-template-columns:1fr;
+}
+}
+.s8-formula-card{
+background:rgba(0,0,0,0.6);
+border:2px solid rgba(255,189,89,0.3);
+border-radius:15px;
+padding:20px;
+transition:all 0.3s ease;
+min-height:140px;
+display:flex;
+flex-direction:column;
+justify-content:center;
+}
+.s8-formula-card:hover{
+transform:translateY(-5px);
+border-color:var(--gold);
+box-shadow:0 8px 20px rgba(255,189,89,0.3);
+}
+.s8-formula-name{
+font-family:var(--font-heading);
+font-size:1.3rem;
+font-weight:800;
+color:var(--gold);
+margin-bottom:8px;
+}
+.s8-formula-desc{
+font-size:0.9rem;
+color:var(--gold-light);
+}
+.s8-pricing-grid{
+display:grid;
+grid-template-columns:1fr;
+gap:40px;
+margin-bottom:60px;
+}
+@media (min-width:768px){
+.s8-pricing-grid{
+grid-template-columns:repeat(2,1fr);
+}
+}
+@media (min-width:1200px){
+.s8-pricing-grid{
+grid-template-columns:repeat(4,1fr);
+}
+}
+/* Starter tier special styling */
+.s8-tier-card.starter{
+border:2px solid rgba(0,240,255,0.5);
+background:rgba(0,0,0,0.7);
+}
+.s8-tier-card.starter .s8-tier-price{
+font-size:2.2rem;
+color:#00F0FF;
+}
+.s8-tier-card{
+position:relative;
+background:rgba(0,0,0,0.8);
+border:3px solid rgba(255,189,89,0.3);
+border-radius:30px;
+padding:40px 30px;
+transition:all 0.4s ease;
+}
+.s8-tier-card:hover{
+transform:translateY(-10px);
+border-color:var(--gold);
+box-shadow:0 20px 50px rgba(255,189,89,0.4);
+}
+.s8-tier-card.featured{
+border:4px solid var(--gold);
+transform:scale(1.05);
+}
+.s8-tier-card.featured:hover{
+transform:translateY(-10px) scale(1.05);
+}
+.s8-popular{
+position:absolute;
+top:20px;
+right:20px;
+background:linear-gradient(135deg,var(--gold),#FFD700);
+color:#000;
+font-family:var(--font-heading);
+font-weight:800;
+font-size:0.7rem;
+padding:8px 18px;
+border-radius:50px;
+text-transform:uppercase;
+}
+.s8-tier-badge{
+display:inline-block;
+background:rgba(156,6,18,0.5);
+color:var(--gold-light);
+font-size:0.75rem;
+font-weight:700;
+padding:8px 20px;
+border-radius:20px;
+margin-bottom:15px;
+text-transform:uppercase;
+}
+.s8-tier-name{
+font-family:var(--font-heading);
+font-size:1.8rem;
+font-weight:900;
+color:#fff;
+margin-bottom:15px;
+}
+.s8-tier-price{
+font-family:var(--font-heading);
+font-size:3rem;
+font-weight:900;
+color:var(--gold);
+margin-bottom:10px;
+line-height:1;
+}
+.s8-tier-value{
+font-size:0.95rem;
+color:rgba(255,255,255,0.6);
+text-decoration:line-through;
+margin-bottom:20px;
+}
+.s8-tier-desc{
+font-size:1rem;
+color:var(--gold-light);
+line-height:1.6;
+margin-bottom:25px;
+}
+.s8-tier-features{
+list-style:none;
+padding:0;
+margin-bottom:30px;
+}
+.s8-tier-features li{
+padding:10px 0;
+font-size:0.95rem;
+color:#fff;
+border-bottom:1px solid rgba(255,255,255,0.1);
+}
+.s8-tier-features li:last-child{
+border-bottom:none;
+}
+.s8-tier-features strong{
+color:var(--gold);
+}
+.s8-tier-cta{
+display:block;
+width:100%;
+font-family:var(--font-heading);
+font-size:1.1rem;
+font-weight:700;
+color:#000;
+background:linear-gradient(135deg,var(--gold),#FFD700);
+border:none;
+padding:18px;
+border-radius:50px;
+cursor:pointer;
+transition:all 0.3s ease;
+text-decoration:none;
+text-align:center;
+}
+.s8-tier-cta:hover{
+transform:translateY(-3px);
+box-shadow:0 10px 30px rgba(255,189,89,0.5);
+}
+@media (max-width:767px){
+.s8-section{
+padding:60px 15px;
+}
+.s8-tier-card{
+padding:30px 25px;
+}
+}
+</style>
+
+
+<div class="s8-wrapper">
+<section class="s8-section" id="pricing">
+<div class="s8-container selected-for-delete">
+<div class="s8-header">
+<div class="s8-badge">
+<i data-lucide="gem" style="width:16px;height:16px;display:inline-block;vertical-align:middle;margin-right:5px;"></i>
+BẢNG GIÁ - 4 CẤP
+</div>
+<h2 class="s8-title">Đầu Tư Vào Tương Lai Trading Của Bạn</h2>
+<p class="s8-subtitle">
+4 cấp độ - từ Starter đến Empire. Chọn lộ trình phù hợp với mục tiêu và ngân sách của bạn.
+</p>
+</div>
+
+<img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk857d2c-qftm5a/1768048181929_6r86z5_gemral-landing-044.webp" alt="gemral-landing-044-xtlh" style="width: 100%; max-width: 800px; height: auto; display: block; margin: 0px auto; padding: 0px; border-radius: 12px; box-shadow: rgba(0, 0, 0, 0.3) 0px 4px 20px, rgba(0, 0, 0, 0.2) 0px 8px 32px;"><div class="s8-usp" style="max-height: 2000px;">
+<h3 class="s8-usp-title">
+<i data-lucide="flame" style="width:28px;height:28px;display:inline-block;vertical-align:middle;margin-right:10px;"></i>
+6 Công Thức Tần Số Độc Quyền
+</h3>
+<p class="s8-usp-text">
+Hệ thống hoàn toàn MỚI. Nghiên cứu 10+ năm. CHỈ HỌC ĐƯỢC TẠI GEM.<br>
+<strong>KHÔNG PHẢI</strong> Cung Cầu, Tiền Thông Minh, ICT, hay Wyckoff truyền thống.
+</p>
+<div class="s8-formulas">
+<div class="s8-formula-card">
+<div class="s8-formula-name">DPD</div>
+<div class="s8-formula-desc">Giảm-Dừng-Giảm</div>
+</div>
+<div class="s8-formula-card">
+<div class="s8-formula-name">UPU</div>
+<div class="s8-formula-desc">Tăng-Dừng-Tăng</div>
+</div>
+<div class="s8-formula-card">
+<div class="s8-formula-name">UPD</div>
+<div class="s8-formula-desc">Tăng-Dừng-Giảm</div>
+</div>
+<div class="s8-formula-card">
+<div class="s8-formula-name">DPU</div>
+<div class="s8-formula-desc">Giảm-Dừng-Tăng</div>
+</div>
+<div class="s8-formula-card">
+<div class="s8-formula-name">HFZ</div>
+<div class="s8-formula-desc">Vùng Tần Số Cao</div>
+</div>
+<div class="s8-formula-card">
+<div class="s8-formula-name">LFZ</div>
+<div class="s8-formula-desc">Vùng Tần Số Thấp</div>
+</div>
+</div>
+</div><img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk857d2c-qftm5a/1768060936554_rq3yxd_sec07-01.jpg.webp" alt="sec07-01-jpg-f8he" style="width: 100%; max-width: 800px; height: auto; display: block; margin: 0px auto; padding: 0px; border-radius: 12px; box-shadow: rgba(0, 0, 0, 0.3) 0px 4px 20px, rgba(0, 0, 0, 0.2) 0px 8px 32px; cursor: grab;">
+
+<div class="s8-pricing-grid">
+<!-- TIER STARTER - 299K -->
+<div class="s8-tier-card starter">
+<div class="s8-tier-badge">STARTER</div>
+<h3 class="s8-tier-name">Starter</h3>
+<div class="s8-tier-price">299K</div>
+<div class="s8-tier-value">&nbsp;</div>
+<p class="s8-tier-desc">Dành cho người mới bắt đầu muốn trải nghiệm phương pháp GEM Frequency</p>
+<ul class="s8-tier-features">
+<li>✅ Basic Course Trading - Nền tảng cơ bản</li>
+<li>✅ Forum Access - Truy cập cộng đồng GEM</li>
+<li>✅ Pattern Scanner - 5 lần quét/ngày</li>
+<li>✅ GEM Master Chatbot - 10 câu hỏi/ngày</li>
+<li><strong>❌ 0 công thức Tần Số</strong></li>
+</ul>
+<a href="/cart/add?id=46448154050737" class="s8-tier-cta">Bắt Đầu Trải Nghiệm</a>
+</div>
+
+<!-- TIER 1 - 11M -->
+<div class="s8-tier-card">
+<div class="s8-tier-badge">CẤP 1</div>
+<h3 class="s8-tier-name">Nền Tảng</h3>
+<div class="s8-tier-price">11M</div>
+<div class="s8-tier-value">Giá trị: 36.4M</div>
+<p class="s8-tier-desc">Nền tảng trader chuyên nghiệp - Win rate 50-55%</p>
+<ul class="s8-tier-features">
+<li>✅ 5 modules / 17 chapters</li>
+<li>✅ 7 mẫu hình nến cơ bản (70% cơ hội)</li>
+<li>✅ Scanner 12 tháng (quét 7 mẫu hình)</li>
+<li>✅ AI Sư Phụ 12 tháng</li>
+<li>✅ Telegram Bot + Cộng đồng 12 tháng</li>
+<li><strong>❌ 0 công thức Tần Số</strong></li>
+</ul>
+<a href="/cart/add?id=46351707898033" class="s8-tier-cta">Chọn Nền Tảng</a>
+</div>
+
+<!-- TIER 2 - 21M (Best Value) -->
+<div class="s8-tier-card featured">
+<div class="s8-popular">🔥 78% CHỌN</div>
+<div class="s8-tier-badge">CẤP 2</div>
+<h3 class="s8-tier-name">Tần Số Trader
+<i data-lucide="star" style="width:24px;height:24px;display:inline-block;vertical-align:middle;margin-left:5px;color:var(--gold);"></i>
+</h3>
+<div class="s8-tier-price">21M</div>
+<div class="s8-tier-value">Giá trị: 73.1M</div>
+<p class="s8-tier-desc">Phương pháp độc quyền - Win rate 70-75%</p>
+<ul class="s8-tier-features">
+<li>✅ 10 modules / 30 chapters</li>
+<li>✅ 15 mẫu hình nến (95% cơ hội)</li>
+<li><strong>
+<i data-lucide="flame" style="width:18px;height:18px;display:inline-block;vertical-align:middle;margin-right:5px;"></i>
+6 CÔNG THỨC TẦN SỐ ĐỘC QUYỀN</strong></li>
+<li>✅ Scanner PREMIUM 12 tháng</li>
+<li>✅ AI Sư Phụ PREMIUM 12 tháng</li>
+<li>✅ 8 công cụ + Cộng đồng VIP</li>
+</ul>
+<a href="/cart/add?id=46351719235761" class="s8-tier-cta">Chọn Phương Pháp Độc Quyền
+<i data-lucide="star" style="width:18px;height:18px;display:inline-block;vertical-align:middle;margin-left:5px;"></i>
+</a>
+</div>
+
+<!-- TIER 3 - 68M -->
+<div class="s8-tier-card">
+<div class="s8-tier-badge">CẤP 3</div>
+<h3 class="s8-tier-name">Đế Chế
+<i data-lucide="gem" style="width:24px;height:24px;display:inline-block;vertical-align:middle;margin-left:5px;color:var(--gold);"></i>
+</h3>
+<div class="s8-tier-price">68M</div>
+<div class="s8-tier-value">Giá trị: 322.3M</div>
+<p class="s8-tier-desc">Hệ thống đầy đủ - Win rate 80-90%</p>
+<ul class="s8-tier-features">
+<li>✅ 14 modules / 38 chapters</li>
+<li>✅ 15 mẫu hình thành thạo</li>
+<li><strong>
+<i data-lucide="flame" style="width:18px;height:18px;display:inline-block;vertical-align:middle;margin-right:5px;"></i>
+11 CÔNG THỨC TẦN SỐ ĐẦY ĐỦ</strong></li>
+<li>✅ Scanner ELITE + AI Prediction 24 tháng</li>
+<li>✅ AI Sư Phụ ELITE 24 tháng</li>
+<li>✅ 11 công cụ + Signals 5-8/ngày</li>
+<li>✅ Whale Tracker + Mastermind Elite trọn đời</li>
+</ul>
+<a href="/cart/add?id=46351723331761" class="s8-tier-cta">Đầu Tư Vào Đế Chế
+<i data-lucide="gem" style="width:18px;height:18px;display:inline-block;vertical-align:middle;margin-left:5px;"></i>
+</a>
+</div>
+</div>
+
+</div>
+</section>
+</div>
+<script style="max-height: 2000px;">
+lucide.createIcons();
+</script>
+

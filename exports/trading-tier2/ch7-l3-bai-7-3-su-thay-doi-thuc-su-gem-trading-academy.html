@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 7.3: Sự Thay Đổi Thực Sự - GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        .section, .content-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .section p, .section-content p, p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+
+        .section ul, .section-content ul, ul {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        .section li, .section-content li, li { margin-bottom: var(--space-sm); color: var(--text-secondary); }
+        li strong { color: var(--gold); }
+
+        .image-placeholder, .image-container img {
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-placeholder, .image-container img { border-radius: 0; border: none; margin: var(--space-md) 0; }
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box h4 { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05));
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .warning-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--error);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .warning-box h4 { font-weight: 700; color: var(--error); margin-bottom: var(--space-sm); }
+        .warning-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .definition-box h4 { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); }
+
+        .success-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05));
+            border: 1px solid rgba(0, 200, 83, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .success-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .success-box h4 { font-weight: 700; color: var(--success); margin-bottom: var(--space-sm); }
+        .success-box p { color: var(--text-secondary); margin: 0; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .stats-grid {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .stat-card { border: none; border-radius: 0; padding: var(--space-md); }
+        }
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: block;
+            margin-bottom: var(--space-xs);
+            color: var(--cyan);
+        }
+        .stat-card .value.red { color: var(--error); }
+        .stat-card .value.gold { color: var(--gold); }
+        .stat-card .value.green { color: var(--success); }
+        .stat-card .label { font-size: 0.85rem; color: var(--text-muted); }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-box h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+        }
+        .summary-box ul { list-style: none; padding: 0; }
+        .summary-box li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-box li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-section {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-lg) 16px;
+                margin-top: 0;
+                border-top: 8px solid var(--bg-primary);
+            }
+        }
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-question {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin-bottom: 0;
+                border-bottom: 1px solid var(--glass-border);
+            }
+        }
+        .quiz-question h4, .question-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+            color: var(--success);
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+            color: var(--error);
+        }
+
+        .quiz-result {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+            color: var(--success);
+        }
+        .quiz-result.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+            color: var(--error);
+        }
+
+        .quiz-score {
+            text-align: center;
+            padding: var(--space-xl);
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), transparent);
+            border: 1px solid var(--purple);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-lg);
+            display: none;
+        }
+        .quiz-score.show { display: block; }
+        .quiz-score h3, .quiz-score-text { color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-score p { color: var(--text-secondary); }
+
+        .retake-btn {
+            margin-top: var(--space-md);
+            padding: var(--space-md) var(--space-xl);
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            color: var(--navy-dark);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .lesson-footer {
+                border: none;
+                border-radius: 0;
+                margin-top: 0;
+                padding: var(--space-lg) 16px;
+            }
+        }
+        .lesson-footer p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        .lesson-footer .highlight { color: var(--gold); font-weight: 600; }
+
+        strong { color: var(--gold); }
+
+        /* Additional classes for compatibility */
+        .path-card, .whale-card, .pattern-card, .example-card, .trade-result, .phase-card, .checklist {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .path-card h4, .whale-card h4, .pattern-card h4, .example-card h4 { color: var(--cyan); margin-bottom: var(--space-sm); }
+        .path-card.gold h4 { color: var(--gold); }
+        .path-card.green h4 { color: var(--success); }
+
+        .stat-row { display: flex; justify-content: space-around; flex-wrap: wrap; gap: var(--space-md); margin: var(--space-lg) 0; }
+        .stat-item { text-align: center; padding: var(--space-md); background: var(--bg-card); border-radius: var(--radius-md); flex: 1; min-width: 120px; }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--cyan); }
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: var(--space-xs); }
+
+        .whale-type-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md); margin: var(--space-lg) 0; }
+        .whale-type { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); border-top: 3px solid var(--cyan); }
+        .whale-type h4 { color: var(--text-primary); margin-bottom: var(--space-sm); }
+        .whale-type .size { color: var(--gold); font-weight: 600; }
+
+        .reason-list { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        .reason-item { display: flex; gap: var(--space-md); margin-bottom: var(--space-md); align-items: flex-start; }
+        .reason-number { background: linear-gradient(135deg, var(--cyan), var(--purple)); color: var(--navy-dark); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+        .reason-content h4 { color: var(--text-primary); margin-bottom: var(--space-xs); }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="container">
+        <header class="lesson-header">
+            <span class="lesson-badge">🦋 Module A - Chương 7</span>
+            <h1 class="lesson-title">Bài 7.3: Sự Thay Đổi Thực Sự</h1>
+            <p class="lesson-subtitle">Từ biết đến làm - Hành động tạo nên khác biệt</p>
+        </header>
+
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon purple">🔑</div>
+                <div class="card-meta">
+                    <h3>Bí Mật Của Sự Thay Đổi</h3>
+                    <span>Knowledge vs Action</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>90% traders biết nên làm gì nhưng không làm. Sự khác biệt giữa thành công và thất bại không nằm ở kiến thức, mà ở <strong>hành động nhất quán</strong>.</p>
+
+                <div class="quote-box">
+                    <div class="quote-text">"Biết mà không làm, coi như không biết."</div>
+                    <div class="quote-author">— Vương Dương Minh</div>
+                </div>
+
+                <p>Sự thay đổi thực sự xảy ra khi:</p>
+                <ul class="styled-list green">
+                    <li><strong>Kiến thức → Hành động:</strong> Áp dụng những gì đã học vào thực tế</li>
+                    <li><strong>Hành động → Thói quen:</strong> Lặp đi lặp lại cho đến khi tự động</li>
+                    <li><strong>Thói quen → Bản sắc:</strong> Trở thành một phần của con người bạn</li>
+                </ul>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x350/112250/8B5CF6?text=Knowledge+to+Identity" alt="Change Process">
+                    <p class="image-caption">Hình 7.3.1: Hành trình từ Kiến thức đến Bản sắc</p>
+                </div>
+            </div>
+        </article>
+
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon green">🎯</div>
+                <div class="card-meta">
+                    <h3>3 Lĩnh Vực Cần Thay Đổi</h3>
+                    <span>Mindset - Behavior - Habits</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="change-grid">
+                    <div class="change-card">
+                        <div class="change-icon">🧠</div>
+                        <div class="change-title">MINDSET</div>
+                        <div class="change-desc">Tư duy xác suất<br>Chấp nhận loss<br>Patience</div>
+                    </div>
+                    <div class="change-card">
+                        <div class="change-icon">⚡</div>
+                        <div class="change-title">BEHAVIOR</div>
+                        <div class="change-desc">Tuân thủ plan<br>Không FOMO<br>Cut loss nhanh</div>
+                    </div>
+                    <div class="change-card">
+                        <div class="change-icon">🔄</div>
+                        <div class="change-title">HABITS</div>
+                        <div class="change-desc">Daily routine<br>Journaling<br>Review trades</div>
+                    </div>
+                </div>
+
+                <p><strong>Mindset thay đổi trước:</strong></p>
+                <ul class="styled-list">
+                    <li><strong>"Thua là thất bại"</strong> → "Thua là chi phí kinh doanh, một phần của process"</li>
+                    <li><strong>"Cần thắng trade này"</strong> → "Đây chỉ là 1 trong 100 trades"</li>
+                    <li><strong>"Market sai"</strong> → "Tôi cần điều chỉnh analysis"</li>
+                    <li><strong>"Sao tôi không giàu nhanh"</strong> → "Process over profit, consistency over speed"</li>
+                </ul>
+            </div>
+        </article>
+
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon gold">📋</div>
+                <div class="card-meta">
+                    <h3>Daily Habits Của Pro Trader</h3>
+                    <span>Routine tạo nên nhất quán</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="habit-box">
+                    <div class="habit-title">☀️ Morning Routine</div>
+                    <ul class="habit-list">
+                        <li class="habit-item">
+                            <div class="habit-checkbox">☐</div>
+                            <div class="habit-text">Check economic calendar cho ngày hôm nay</div>
+                        </li>
+                        <li class="habit-item">
+                            <div class="habit-checkbox">☐</div>
+                            <div class="habit-text">Review overnight price action trên HTF</div>
+                        </li>
+                        <li class="habit-item">
+                            <div class="habit-checkbox">☐</div>
+                            <div class="habit-text">Mark key zones và potential setups</div>
+                        </li>
+                        <li class="habit-item">
+                            <div class="habit-checkbox">☐</div>
+                            <div class="habit-text">Set alerts cho entry zones</div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="habit-box">
+                    <div class="habit-title">🌙 Evening Routine</div>
+                    <ul class="habit-list">
+                        <li class="habit-item">
+                            <div class="habit-checkbox">☐</div>
+                            <div class="habit-text">Review all trades taken today</div>
+                        </li>
+                        <li class="habit-item">
+                            <div class="habit-checkbox">☐</div>
+                            <div class="habit-text">Update trading journal với screenshots</div>
+                        </li>
+                        <li class="habit-item">
+                            <div class="habit-checkbox">☐</div>
+                            <div class="habit-text">Note lessons learned & mistakes</div>
+                        </li>
+                        <li class="habit-item">
+                            <div class="habit-checkbox">☐</div>
+                            <div class="habit-text">Prepare watchlist for tomorrow</div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x300/112250/FFBD59?text=Pro+Trader+Daily+Routine" alt="Daily Routine">
+                    <p class="image-caption">Hình 7.3.2: Daily routine của professional trader</p>
+                </div>
+            </div>
+        </article>
+
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon cyan">📝</div>
+                <div class="card-meta">
+                    <h3>Trading Journal - Công Cụ #1</h3>
+                    <span>Không journal = không cải thiện</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Trading journal là công cụ quan trọng nhất để cải thiện. Mỗi trade cần ghi lại:</p>
+
+                <ul class="styled-list gold">
+                    <li><strong>Setup:</strong> Pattern gì? Zone score bao nhiêu? MTF alignment?</li>
+                    <li><strong>Entry:</strong> Lý do vào lệnh? Có confirmation không?</li>
+                    <li><strong>Management:</strong> SL/TP ở đâu? Có di chuyển không?</li>
+                    <li><strong>Result:</strong> Win/Loss? R:R actual?</li>
+                    <li><strong>Psychology:</strong> Cảm xúc trước/trong/sau trade?</li>
+                    <li><strong>Lesson:</strong> Rút ra được gì? Cần cải thiện gì?</li>
+                </ul>
+
+                <div class="quote-box">
+                    <div class="quote-text">"Journal không phải để ghi kết quả, mà để ghi process. Kết quả sẽ đến khi process đúng."</div>
+                    <div class="quote-author">— GEM Method</div>
+                </div>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x350/112250/00F0FF?text=Trading+Journal+Template" alt="Journal Template">
+                    <p class="image-caption">Hình 7.3.3: Template trading journal cơ bản</p>
+                </div>
+            </div>
+        </article>
+
+        <article class="content-card">
+            <div class="card-header">
+                <div class="card-icon purple">🚀</div>
+                <div class="card-meta">
+                    <h3>Cam Kết Thay Đổi</h3>
+                    <span>30-Day Challenge</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p>Để biến kiến thức thành thói quen, cam kết làm những điều sau trong <strong>30 ngày liên tiếp</strong>:</p>
+
+                <ul class="styled-list green">
+                    <li><strong>Morning:</strong> 15 phút review charts trước khi trade</li>
+                    <li><strong>Trading:</strong> Chỉ trade khi có setup từ GEM Method</li>
+                    <li><strong>Journal:</strong> Ghi chép mỗi trade, dù win hay loss</li>
+                    <li><strong>Review:</strong> 15 phút cuối ngày review những gì đã làm</li>
+                    <li><strong>No Revenge:</strong> Thua 2 trades liên tiếp = nghỉ ngày đó</li>
+                </ul>
+
+                <p><strong>Sau 30 ngày:</strong> Những hành động này sẽ trở thành thói quen tự động. Bạn không cần nỗ lực để làm chúng nữa.</p>
+
+                <div class="image-container">
+                    <img src="https://via.placeholder.com/680x300/112250/8B5CF6?text=30+Day+Trading+Challenge" alt="30 Day Challenge">
+                    <p class="image-caption">Hình 7.3.4: 30-Day Challenge để xây dựng thói quen</p>
+                </div>
+            </div>
+        </article>
+
+        <div class="summary-box">
+            <h3>📝 Tóm Tắt Bài Học</h3>
+            <ul class="summary-list">
+                <li>Sự thay đổi thực sự: Kiến thức → Hành động → Thói quen → Bản sắc</li>
+                <li>3 lĩnh vực cần thay đổi: Mindset, Behavior, Habits</li>
+                <li>Daily routine: Morning prep + Evening review</li>
+                <li>Trading journal là công cụ quan trọng nhất để cải thiện</li>
+                <li>30-Day Challenge để biến hành động thành thói quen</li>
+            </ul>
+        </div>
+
+        <section class="quiz-section">
+            <h3>🎯 Kiểm Tra Kiến Thức</h3>
+
+            <div class="quiz-question" data-correct="1">
+                <p><strong>Câu 1:</strong> Thứ tự đúng của quá trình thay đổi là gì?</p>
+                <button class="quiz-option" data-index="0">Thói quen → Hành động → Kiến thức → Bản sắc</button>
+                <button class="quiz-option" data-index="1">Kiến thức → Hành động → Thói quen → Bản sắc</button>
+                <button class="quiz-option" data-index="2">Bản sắc → Thói quen → Hành động → Kiến thức</button>
+                <button class="quiz-option" data-index="3">Hành động → Kiến thức → Bản sắc → Thói quen</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="0">
+                <p><strong>Câu 2:</strong> Trading journal nên ghi lại những gì?</p>
+                <button class="quiz-option" data-index="0">Setup, Entry, Management, Result, Psychology, Lesson</button>
+                <button class="quiz-option" data-index="1">Chỉ win trades</button>
+                <button class="quiz-option" data-index="2">Chỉ số tiền lãi/lỗ</button>
+                <button class="quiz-option" data-index="3">Chỉ screenshot chart</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="2">
+                <p><strong>Câu 3:</strong> Để xây dựng thói quen mới, cần làm nhất quán trong bao lâu?</p>
+                <button class="quiz-option" data-index="0">7 ngày</button>
+                <button class="quiz-option" data-index="1">14 ngày</button>
+                <button class="quiz-option" data-index="2">30 ngày</button>
+                <button class="quiz-option" data-index="3">1 năm</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <div class="score-text"><span id="correct-count">0</span>/3</div>
+                <div class="score-label">Câu trả lời đúng</div>
+                <button class="retake-btn" onclick="location.reload()">Làm lại Quiz</button>
+            </div>
+        </section>
+
+        <footer class="lesson-footer">
+            <div class="footer-logo">GEM Trading Academy</div>
+            <p class="footer-text">Module A - Hành Trình Chuyển Hóa • Bài 7.3</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+                    question.classList.add('answered');
+                    answeredCount++;
+                    const selectedIndex = parseInt(this.dataset.index);
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác!';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Xem đáp án đúng ở trên.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

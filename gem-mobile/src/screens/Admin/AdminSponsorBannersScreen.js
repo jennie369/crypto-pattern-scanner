@@ -22,6 +22,9 @@ import {
   Dimensions,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
+import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
+import * as FileSystem from 'expo-file-system/legacy';
 import CustomAlert from '../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -42,16 +45,30 @@ import {
   ChevronDown,
   Check,
   Search,
+  Upload,
+  Camera,
 } from 'lucide-react-native';
+import { supabase } from '../../services/supabase';
+import { STORAGE_BUCKET, MAX_IMAGES_PER_POST } from '../../constants/imageConstants';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+// Aspect ratio options for image upload
+const ASPECT_RATIO_OPTIONS = [
+  { value: '16:9', ratio: [16, 9], label: '16:9 (Ngang)' },
+  { value: '1:1', ratio: [1, 1], label: '1:1 (Vuông)' },
+  { value: '9:16', ratio: [9, 16], label: '9:16 (Dọc)' },
+  { value: '4:3', ratio: [4, 3], label: '4:3' },
+  { value: 'free', ratio: null, label: 'Tự do' },
+];
 
 import { COLORS, GRADIENTS, SPACING, GLASS } from '../../utils/tokens';
 import { useAuth } from '../../contexts/AuthContext';
 import { sponsorBannerService } from '../../services/sponsorBannerService';
+import { BANNER_LAYOUT_OPTIONS } from '../../components/SponsorBanner';
 
 const TIER_OPTIONS = ['FREE', 'TIER1', 'TIER2', 'TIER3', 'ADMIN'];
-const SCREEN_OPTIONS = ['home', 'scanner', 'shop', 'account', 'visionboard', 'wallet', 'portfolio'];
+const SCREEN_OPTIONS = ['home', 'forum', 'scanner', 'shop', 'courses', 'account', 'visionboard', 'wallet', 'portfolio'];
 
 // Danh sách các DeepLink có sẵn trong app
 const DEEPLINK_OPTIONS = [
@@ -115,6 +132,8 @@ export default function AdminSponsorBannersScreen({ navigation }) {
   const [modalTab, setModalTab] = useState('basic'); // 'basic' | 'html' | 'preview'
   const [deeplinkPickerVisible, setDeeplinkPickerVisible] = useState(false);
   const [deeplinkSearch, setDeeplinkSearch] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [selectedAspectRatio, setSelectedAspectRatio] = useState('16:9'); // Default aspect ratio
 
   // Custom Alert state
   const [alertConfig, setAlertConfig] = useState({
@@ -138,8 +157,12 @@ export default function AdminSponsorBannersScreen({ navigation }) {
     title: '',
     subtitle: '',
     description: '',
-    image_url: '',
+    image_url: '', // Single image for Compact/Featured
+    images: [], // Multiple images for Post Style
     html_content: '',
+    layout_type: 'compact', // 'compact' | 'post' | 'featured'
+    sponsor_name: '', // For post-style layout
+    sponsor_avatar: '', // For post-style layout
     action_type: 'screen',
     action_value: '',
     action_label: 'Tìm hiểu thêm',
@@ -233,7 +256,11 @@ export default function AdminSponsorBannersScreen({ navigation }) {
       subtitle: '',
       description: '',
       image_url: '',
+      images: [], // Reset images array
       html_content: '',
+      layout_type: 'compact',
+      sponsor_name: '',
+      sponsor_avatar: '',
       action_type: 'screen',
       action_value: '',
       action_label: 'Tìm hiểu thêm',
@@ -250,6 +277,7 @@ export default function AdminSponsorBannersScreen({ navigation }) {
     });
     setEditingBanner(null);
     setModalTab('basic');
+    setSelectedAspectRatio('16:9'); // Reset aspect ratio
   };
 
   const openCreateModal = () => {
@@ -262,12 +290,26 @@ export default function AdminSponsorBannersScreen({ navigation }) {
     console.log('[AdminBanners] action_value from DB:', banner.action_value);
     console.log('[AdminBanners] action_type from DB:', banner.action_type);
     setEditingBanner(banner);
+
+    // Parse images from banner - could be stored as JSON string or array
+    let images = [];
+    if (banner.images) {
+      images = Array.isArray(banner.images) ? banner.images : JSON.parse(banner.images || '[]');
+    } else if (banner.image_url && banner.layout_type === 'post') {
+      // Fallback: if only image_url exists for post style, use it as single image
+      images = [banner.image_url];
+    }
+
     setForm({
       title: banner.title || '',
       subtitle: banner.subtitle || '',
       description: banner.description || '',
       image_url: banner.image_url || '',
+      images: images,
       html_content: banner.html_content || '',
+      layout_type: banner.layout_type || 'compact',
+      sponsor_name: banner.sponsor_name || '',
+      sponsor_avatar: banner.sponsor_avatar || '',
       action_type: banner.action_type || 'screen',
       action_value: banner.action_value || '',
       action_label: banner.action_label || 'Tìm hiểu thêm',
@@ -377,6 +419,221 @@ export default function AdminSponsorBannersScreen({ navigation }) {
         : [...prev.target_screens, screen];
       return { ...prev, target_screens: screens };
     });
+  };
+
+  // Get aspect ratio for current layout and selection
+  const getAspectRatioForUpload = () => {
+    // For Compact and Featured, use fixed 16:9
+    if (form.layout_type === 'compact' || form.layout_type === 'featured') {
+      return [16, 9];
+    }
+    // For Post Style, use selected aspect ratio
+    const selected = ASPECT_RATIO_OPTIONS.find(opt => opt.value === selectedAspectRatio);
+    return selected?.ratio || null; // null = free aspect ratio
+  };
+
+  // Check if current layout supports multiple images
+  const supportsMultipleImages = () => form.layout_type === 'post';
+
+  // Pick and upload image from device
+  const pickAndUploadImage = async (source = 'library') => {
+    try {
+      // Check max images limit for Post Style
+      if (supportsMultipleImages() && form.images.length >= MAX_IMAGES_PER_POST) {
+        showAlert('Lỗi', `Tối đa ${MAX_IMAGES_PER_POST} hình ảnh`, [{ text: 'OK' }], 'error');
+        return;
+      }
+
+      const aspectRatio = getAspectRatioForUpload();
+      const allowsEditing = aspectRatio !== null; // Free ratio = no forced crop
+
+      let result;
+
+      if (source === 'camera') {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+          showAlert('Lỗi', 'Cần quyền truy cập camera', [{ text: 'OK' }], 'error');
+          return;
+        }
+        result = await ImagePicker.launchCameraAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing,
+          aspect: aspectRatio,
+          quality: 0.8,
+        });
+      } else {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+          showAlert('Lỗi', 'Cần quyền truy cập thư viện ảnh', [{ text: 'OK' }], 'error');
+          return;
+        }
+        result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing,
+          aspect: aspectRatio,
+          quality: 0.8,
+          allowsMultipleSelection: supportsMultipleImages(), // Allow multiple for Post Style
+          selectionLimit: supportsMultipleImages() ? MAX_IMAGES_PER_POST - form.images.length : 1,
+        });
+      }
+
+      if (result.canceled || !result.assets?.length) return;
+
+      setUploadingImage(true);
+
+      const uploadedUrls = [];
+
+      for (const asset of result.assets) {
+        const imageUri = asset.uri;
+
+        // Resize image to max 1080px width
+        const resized = await ImageManipulator.manipulateAsync(
+          imageUri,
+          [{ resize: { width: 1080 } }],
+          { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
+        );
+
+        // Read as base64
+        const base64 = await FileSystem.readAsStringAsync(resized.uri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+
+        // Convert to ArrayBuffer
+        const binaryString = atob(base64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+
+        // Upload to Supabase storage with correct bucket
+        const timestamp = Date.now();
+        const randomId = Math.random().toString(36).substring(7);
+        const path = `banners/sponsor_${timestamp}_${randomId}.jpg`;
+
+        const { data, error } = await supabase.storage
+          .from(STORAGE_BUCKET)
+          .upload(path, bytes.buffer, {
+            contentType: 'image/jpeg',
+            upsert: false,
+          });
+
+        if (error) throw error;
+
+        // Get public URL
+        const { data: urlData } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(data.path);
+        uploadedUrls.push(urlData.publicUrl);
+      }
+
+      // Update form based on layout type
+      if (supportsMultipleImages()) {
+        // Post Style - add to images array
+        setForm(prev => ({
+          ...prev,
+          images: [...prev.images, ...uploadedUrls],
+          image_url: prev.images.length === 0 ? uploadedUrls[0] : prev.image_url // Keep first as main
+        }));
+      } else {
+        // Compact/Featured - single image
+        setForm(prev => ({ ...prev, image_url: uploadedUrls[0] }));
+      }
+
+      showAlert('Thành công', `Đã tải lên ${uploadedUrls.length} hình ảnh!`, [{ text: 'OK' }], 'success');
+
+    } catch (error) {
+      console.error('[AdminBanners] Image upload error:', error);
+      showAlert('Lỗi', 'Không thể tải lên hình ảnh: ' + error.message, [{ text: 'OK' }], 'error');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  // Remove image from array (for Post Style)
+  const removeImage = (index) => {
+    setForm(prev => {
+      const newImages = prev.images.filter((_, i) => i !== index);
+      return {
+        ...prev,
+        images: newImages,
+        image_url: newImages[0] || '', // Update main image_url
+      };
+    });
+  };
+
+  // State for avatar upload
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  // Pick and upload sponsor avatar (square 1:1 image)
+  const pickAndUploadAvatar = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        showAlert('Lỗi', 'Cần quyền truy cập thư viện ảnh', [{ text: 'OK' }], 'error');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1], // Square aspect ratio for avatar
+        quality: 0.8,
+      });
+
+      if (result.canceled || !result.assets?.length) return;
+
+      setUploadingAvatar(true);
+
+      const imageUri = result.assets[0].uri;
+
+      // Resize avatar to 200px (small file size for avatars)
+      const resized = await ImageManipulator.manipulateAsync(
+        imageUri,
+        [{ resize: { width: 200 } }],
+        { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
+      );
+
+      // Read as base64
+      const base64 = await FileSystem.readAsStringAsync(resized.uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      // Convert to ArrayBuffer
+      const binaryString = atob(base64);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+
+      // Upload to Supabase storage
+      const timestamp = Date.now();
+      const randomId = Math.random().toString(36).substring(7);
+      const path = `banners/avatar_${timestamp}_${randomId}.jpg`;
+
+      const { data, error } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .upload(path, bytes.buffer, {
+          contentType: 'image/jpeg',
+          upsert: false,
+        });
+
+      if (error) throw error;
+
+      // Get public URL
+      const { data: urlData } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(data.path);
+
+      setForm(prev => ({ ...prev, sponsor_avatar: urlData.publicUrl }));
+      showAlert('Thành công', 'Đã tải lên avatar nhà tài trợ!', [{ text: 'OK' }], 'success');
+
+    } catch (error) {
+      console.error('[AdminBanners] Avatar upload error:', error);
+      showAlert('Lỗi', 'Không thể tải lên avatar: ' + error.message, [{ text: 'OK' }], 'error');
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  // Remove sponsor avatar
+  const removeAvatar = () => {
+    setForm(prev => ({ ...prev, sponsor_avatar: '' }));
   };
 
   const formatNumber = (num) => {
@@ -500,9 +757,36 @@ export default function AdminSponsorBannersScreen({ navigation }) {
 
                     {/* Target Info */}
                     <View style={styles.targetInfo}>
-                      <Text style={styles.targetLabel}>
-                        Màn hình: {banner.target_screens?.join(', ') || 'portfolio'}
-                      </Text>
+                      <View style={styles.targetInfoRow}>
+                        <Text style={styles.targetLabel}>
+                          Màn hình: {banner.target_screens?.join(', ') || 'portfolio'}
+                        </Text>
+                        {/* Layout Type Badge */}
+                        <View style={[
+                          styles.layoutBadge,
+                          {
+                            backgroundColor: banner.layout_type === 'featured'
+                              ? `${COLORS.gold}20`
+                              : banner.layout_type === 'post'
+                              ? `${COLORS.purple}20`
+                              : `${COLORS.textMuted}20`
+                          }
+                        ]}>
+                          <Text style={[
+                            styles.layoutBadgeText,
+                            {
+                              color: banner.layout_type === 'featured'
+                                ? COLORS.gold
+                                : banner.layout_type === 'post'
+                                ? COLORS.purple
+                                : COLORS.textMuted
+                            }
+                          ]}>
+                            {banner.layout_type === 'featured' ? 'Featured' :
+                             banner.layout_type === 'post' ? 'Post' : 'Compact'}
+                          </Text>
+                        </View>
+                      </View>
                     </View>
 
                     {/* Actions */}
@@ -637,17 +921,231 @@ export default function AdminSponsorBannersScreen({ navigation }) {
                       />
                     </View>
 
-                    {/* Image URL */}
+                    {/* Image Section */}
                     <View style={styles.inputGroup}>
-                      <Text style={styles.inputLabel}>URL hình ảnh</Text>
-                      <TextInput
-                        style={styles.input}
-                        value={form.image_url}
-                        onChangeText={(text) => setForm(prev => ({ ...prev, image_url: text }))}
-                        placeholder="https://..."
-                        placeholderTextColor={COLORS.textMuted}
-                      />
+                      <Text style={styles.inputLabel}>Hình ảnh</Text>
+                      <Text style={styles.inputHint}>
+                        {form.layout_type === 'post'
+                          ? `Tải nhiều ảnh (tối đa ${MAX_IMAGES_PER_POST}), chọn tỷ lệ phù hợp`
+                          : 'Tải ảnh lên từ thiết bị hoặc dán URL (tỷ lệ 16:9)'}
+                      </Text>
+
+                      {/* Aspect Ratio Selector - Only for Post Style */}
+                      {form.layout_type === 'post' && (
+                        <View style={styles.aspectRatioSection}>
+                          <Text style={styles.aspectRatioLabel}>Tỷ lệ ảnh:</Text>
+                          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                            <View style={styles.aspectRatioRow}>
+                              {ASPECT_RATIO_OPTIONS.map((option) => (
+                                <TouchableOpacity
+                                  key={option.value}
+                                  style={[
+                                    styles.aspectRatioButton,
+                                    selectedAspectRatio === option.value && styles.aspectRatioButtonActive,
+                                  ]}
+                                  onPress={() => setSelectedAspectRatio(option.value)}
+                                >
+                                  <Text
+                                    style={[
+                                      styles.aspectRatioButtonText,
+                                      selectedAspectRatio === option.value && styles.aspectRatioButtonTextActive,
+                                    ]}
+                                  >
+                                    {option.label}
+                                  </Text>
+                                </TouchableOpacity>
+                              ))}
+                            </View>
+                          </ScrollView>
+                        </View>
+                      )}
+
+                      {/* Image Upload Buttons */}
+                      <View style={styles.imageUploadRow}>
+                        <TouchableOpacity
+                          style={styles.uploadButton}
+                          onPress={() => pickAndUploadImage('library')}
+                          disabled={uploadingImage}
+                        >
+                          {uploadingImage ? (
+                            <ActivityIndicator size="small" color={COLORS.gold} />
+                          ) : (
+                            <>
+                              <Upload size={18} color={COLORS.gold} />
+                              <Text style={styles.uploadButtonText}>
+                                {form.layout_type === 'post' ? 'Chọn ảnh' : 'Chọn ảnh'}
+                              </Text>
+                            </>
+                          )}
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.uploadButton}
+                          onPress={() => pickAndUploadImage('camera')}
+                          disabled={uploadingImage}
+                        >
+                          <Camera size={18} color={COLORS.gold} />
+                          <Text style={styles.uploadButtonText}>Chụp ảnh</Text>
+                        </TouchableOpacity>
+                      </View>
+
+                      {/* Image Grid Preview - For Post Style (multiple images) */}
+                      {form.layout_type === 'post' && form.images.length > 0 && (
+                        <View style={styles.imageGridContainer}>
+                          <Text style={styles.imageCountLabel}>
+                            {form.images.length} / {MAX_IMAGES_PER_POST} ảnh
+                          </Text>
+                          <View style={styles.imageGrid}>
+                            {form.images.map((url, index) => (
+                              <View key={index} style={styles.imageGridItem}>
+                                <Image
+                                  source={{ uri: url }}
+                                  style={styles.imageGridImage}
+                                  resizeMode="cover"
+                                />
+                                <TouchableOpacity
+                                  style={styles.removeImageButton}
+                                  onPress={() => removeImage(index)}
+                                >
+                                  <X size={14} color={COLORS.textPrimary} />
+                                </TouchableOpacity>
+                                {index === 0 && (
+                                  <View style={styles.mainImageBadge}>
+                                    <Text style={styles.mainImageBadgeText}>Chính</Text>
+                                  </View>
+                                )}
+                              </View>
+                            ))}
+                          </View>
+                        </View>
+                      )}
+
+                      {/* Single Image Preview - For Compact/Featured */}
+                      {form.layout_type !== 'post' && form.image_url ? (
+                        <View style={styles.imagePreviewContainer}>
+                          <Image
+                            source={{ uri: form.image_url }}
+                            style={styles.imagePreview}
+                            resizeMode="cover"
+                          />
+                          <TouchableOpacity
+                            style={styles.removeImageButton}
+                            onPress={() => setForm(prev => ({ ...prev, image_url: '' }))}
+                          >
+                            <X size={16} color={COLORS.textPrimary} />
+                          </TouchableOpacity>
+                        </View>
+                      ) : null}
+
+                      {/* URL Input - For Compact/Featured only */}
+                      {form.layout_type !== 'post' && (
+                        <>
+                          <Text style={[styles.inputLabel, { marginTop: SPACING.sm }]}>Hoặc dán URL</Text>
+                          <TextInput
+                            style={styles.input}
+                            value={form.image_url}
+                            onChangeText={(text) => setForm(prev => ({ ...prev, image_url: text }))}
+                            placeholder="https://..."
+                            placeholderTextColor={COLORS.textMuted}
+                          />
+                        </>
+                      )}
                     </View>
+
+                    {/* Layout Type */}
+                    <View style={styles.inputGroup}>
+                      <Text style={styles.inputLabel}>Kiểu hiển thị</Text>
+                      <Text style={styles.inputHint}>
+                        Chọn layout banner sẽ hiển thị cho người dùng
+                      </Text>
+                      <View style={styles.layoutTypeRow}>
+                        {BANNER_LAYOUT_OPTIONS.map((option) => (
+                          <TouchableOpacity
+                            key={option.value}
+                            style={[
+                              styles.layoutTypeButton,
+                              form.layout_type === option.value && styles.layoutTypeActive
+                            ]}
+                            onPress={() => setForm(prev => ({ ...prev, layout_type: option.value }))}
+                          >
+                            <Text style={[
+                              styles.layoutTypeLabel,
+                              form.layout_type === option.value && styles.layoutTypeLabelActive
+                            ]}>
+                              {option.label}
+                            </Text>
+                            <Text style={styles.layoutTypeDesc} numberOfLines={1}>
+                              {option.description}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    </View>
+
+                    {/* Sponsor Info - Only for Post-style layout */}
+                    {form.layout_type === 'post' && (
+                      <>
+                        <View style={styles.inputGroup}>
+                          <Text style={styles.inputLabel}>Tên nhà tài trợ</Text>
+                          <Text style={styles.inputHint}>
+                            Hiển thị như tên tác giả trong bài post
+                          </Text>
+                          <TextInput
+                            style={styles.input}
+                            value={form.sponsor_name}
+                            onChangeText={(text) => setForm(prev => ({ ...prev, sponsor_name: text }))}
+                            placeholder="VD: GEM Official"
+                            placeholderTextColor={COLORS.textMuted}
+                          />
+                        </View>
+
+                        <View style={styles.inputGroup}>
+                          <Text style={styles.inputLabel}>Avatar nhà tài trợ</Text>
+                          <Text style={styles.inputHint}>
+                            Hình vuông (1:1), để trống sẽ dùng image_url
+                          </Text>
+
+                          {/* Avatar Preview or Upload Button */}
+                          {form.sponsor_avatar ? (
+                            <View style={styles.avatarPreviewContainer}>
+                              <Image
+                                source={{ uri: form.sponsor_avatar }}
+                                style={styles.avatarPreview}
+                              />
+                              <TouchableOpacity
+                                style={styles.avatarRemoveButton}
+                                onPress={removeAvatar}
+                              >
+                                <X size={16} color={COLORS.white} />
+                              </TouchableOpacity>
+                              <TouchableOpacity
+                                style={styles.avatarChangeButton}
+                                onPress={pickAndUploadAvatar}
+                                disabled={uploadingAvatar}
+                              >
+                                <Text style={styles.avatarChangeText}>
+                                  {uploadingAvatar ? 'Đang tải...' : 'Đổi ảnh'}
+                                </Text>
+                              </TouchableOpacity>
+                            </View>
+                          ) : (
+                            <TouchableOpacity
+                              style={styles.avatarUploadButton}
+                              onPress={pickAndUploadAvatar}
+                              disabled={uploadingAvatar}
+                            >
+                              {uploadingAvatar ? (
+                                <ActivityIndicator size="small" color={COLORS.gold} />
+                              ) : (
+                                <>
+                                  <Upload size={24} color={COLORS.gold} />
+                                  <Text style={styles.avatarUploadText}>Tải lên avatar</Text>
+                                </>
+                              )}
+                            </TouchableOpacity>
+                          )}
+                        </View>
+                      </>
+                    )}
 
                     {/* Action Type */}
                     <View style={styles.inputGroup}>
@@ -1108,7 +1606,12 @@ const styles = StyleSheet.create({
   bannerStatText: { fontSize: 12, color: COLORS.textMuted },
   bannerCTR: { fontSize: 12, color: COLORS.purple, fontWeight: '600' },
   targetInfo: { marginBottom: 8 },
-  targetLabel: { fontSize: 11, color: COLORS.textSubtle },
+  targetInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  targetLabel: { fontSize: 11, color: COLORS.textSubtle, flex: 1 },
   bannerActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 12 },
   actionButton: { padding: 8 },
 
@@ -1295,6 +1798,130 @@ const styles = StyleSheet.create({
   },
   inputMultiline: { minHeight: 80, textAlignVertical: 'top' },
 
+  // Image Upload Styles
+  imageUploadRow: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    marginBottom: SPACING.sm,
+  },
+  uploadButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: 'rgba(255, 189, 89, 0.1)',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.3)',
+    borderStyle: 'dashed',
+  },
+  uploadButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.gold,
+  },
+  imagePreviewContainer: {
+    position: 'relative',
+    marginBottom: SPACING.sm,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  imagePreview: {
+    width: '100%',
+    height: 160,
+    borderRadius: 12,
+    backgroundColor: COLORS.bgMid,
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(220, 38, 38, 0.9)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // Aspect Ratio Selector Styles
+  aspectRatioSection: {
+    marginBottom: SPACING.sm,
+  },
+  aspectRatioLabel: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+    marginBottom: 6,
+  },
+  aspectRatioRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  aspectRatioButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  aspectRatioButtonActive: {
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    borderColor: COLORS.gold,
+  },
+  aspectRatioButtonText: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+  },
+  aspectRatioButtonTextActive: {
+    color: COLORS.gold,
+    fontWeight: '600',
+  },
+
+  // Image Grid Styles (for Post Style multiple images)
+  imageGridContainer: {
+    marginTop: SPACING.sm,
+  },
+  imageCountLabel: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+    marginBottom: 8,
+  },
+  imageGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  imageGridItem: {
+    position: 'relative',
+    width: '31%',
+    aspectRatio: 1,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
+  imageGridImage: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: COLORS.bgMid,
+  },
+  mainImageBadge: {
+    position: 'absolute',
+    bottom: 4,
+    left: 4,
+    backgroundColor: 'rgba(255, 189, 89, 0.9)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  mainImageBadgeText: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: COLORS.bgDarkest,
+  },
+
   actionTypeRow: { flexDirection: 'row', gap: 8 },
   actionTypeButton: {
     flex: 1,
@@ -1311,6 +1938,46 @@ const styles = StyleSheet.create({
   },
   actionTypeText: { fontSize: 13, color: COLORS.textMuted },
   actionTypeTextActive: { color: COLORS.gold, fontWeight: '600' },
+
+  // Layout Type Selection
+  layoutTypeRow: { gap: 8 },
+  layoutTypeButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    marginBottom: 8,
+  },
+  layoutTypeActive: {
+    backgroundColor: 'rgba(106, 91, 255, 0.2)',
+    borderColor: COLORS.purple,
+  },
+  layoutTypeLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.textMuted,
+    marginBottom: 2,
+  },
+  layoutTypeLabelActive: {
+    color: COLORS.gold,
+  },
+  layoutTypeDesc: {
+    fontSize: 11,
+    color: COLORS.textSubtle,
+  },
+  layoutBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
+  layoutBadgeText: {
+    fontSize: 9,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+  },
 
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: {
@@ -1498,5 +2165,59 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: COLORS.textPrimary,
+  },
+
+  // Avatar Upload Styles
+  avatarPreviewContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  avatarPreview: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: COLORS.bgMid,
+  },
+  avatarRemoveButton: {
+    position: 'absolute',
+    top: -4,
+    left: 52,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#FF4757',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: COLORS.bgDarkest,
+  },
+  avatarChangeButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 8,
+  },
+  avatarChangeText: {
+    fontSize: 13,
+    color: COLORS.gold,
+    fontWeight: '500',
+  },
+  avatarUploadButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.sm,
+    paddingVertical: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: 'rgba(255, 189, 89, 0.3)',
+  },
+  avatarUploadText: {
+    fontSize: 14,
+    color: COLORS.gold,
+    fontWeight: '500',
   },
 });

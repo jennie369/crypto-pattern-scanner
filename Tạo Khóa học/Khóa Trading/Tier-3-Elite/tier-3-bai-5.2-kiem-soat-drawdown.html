@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 5.2: Kiểm Soát Drawdown | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container, .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container, .container { padding: 0; }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge, .tier-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-header h1, .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-header p, .lesson-subtitle { color: var(--text-muted); }
+
+        .section, .content-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section, .content-section {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .section p, .section-content p, p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+
+        .section ul, .section-content ul, ul {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        .section li, .section-content li, li { margin-bottom: var(--space-sm); color: var(--text-secondary); }
+        li strong { color: var(--gold); }
+
+        .image-placeholder, .image-container img {
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin: var(--space-lg) 0;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-placeholder, .image-container img { border-radius: 0; border: none; margin: var(--space-md) 0; }
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box h4 { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05));
+            border: 1px solid rgba(255, 82, 82, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .warning-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--error);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .warning-box h4 { font-weight: 700; color: var(--error); margin-bottom: var(--space-sm); }
+        .warning-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .definition-box h4 { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); }
+
+        .success-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05));
+            border: 1px solid rgba(0, 200, 83, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .success-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .success-box h4 { font-weight: 700; color: var(--success); margin-bottom: var(--space-sm); }
+        .success-box p { color: var(--text-secondary); margin: 0; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .stats-grid {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .stat-card { border: none; border-radius: 0; padding: var(--space-md); }
+        }
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: block;
+            margin-bottom: var(--space-xs);
+            color: var(--cyan);
+        }
+        .stat-card .value.red { color: var(--error); }
+        .stat-card .value.gold { color: var(--gold); }
+        .stat-card .value.green { color: var(--success); }
+        .stat-card .label { font-size: 0.85rem; color: var(--text-muted); }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-box h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+        }
+        .summary-box ul { list-style: none; padding: 0; }
+        .summary-box li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-box li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-section {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-lg) 16px;
+                margin-top: 0;
+                border-top: 8px solid var(--bg-primary);
+            }
+        }
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-question {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin-bottom: 0;
+                border-bottom: 1px solid var(--glass-border);
+            }
+        }
+        .quiz-question h4, .question-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+        }
+
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+            color: var(--success);
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+            color: var(--error);
+        }
+
+        .quiz-result {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .quiz-result.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+            color: var(--success);
+        }
+        .quiz-result.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+            color: var(--error);
+        }
+
+        .quiz-score {
+            text-align: center;
+            padding: var(--space-xl);
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), transparent);
+            border: 1px solid var(--purple);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-lg);
+            display: none;
+        }
+        .quiz-score.show { display: block; }
+        .quiz-score h3, .quiz-score-text { color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-score p { color: var(--text-secondary); }
+
+        .retake-btn {
+            margin-top: var(--space-md);
+            padding: var(--space-md) var(--space-xl);
+            background: linear-gradient(135deg, var(--purple), var(--cyan));
+            color: var(--navy-dark);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .lesson-footer {
+                border: none;
+                border-radius: 0;
+                margin-top: 0;
+                padding: var(--space-lg) 16px;
+            }
+        }
+        .lesson-footer p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        .lesson-footer .highlight { color: var(--gold); font-weight: 600; }
+
+        strong { color: var(--gold); }
+
+        /* Additional classes for compatibility */
+        .path-card, .whale-card, .pattern-card, .example-card, .trade-result, .phase-card, .checklist {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        .path-card h4, .whale-card h4, .pattern-card h4, .example-card h4 { color: var(--cyan); margin-bottom: var(--space-sm); }
+        .path-card.gold h4 { color: var(--gold); }
+        .path-card.green h4 { color: var(--success); }
+
+        .stat-row { display: flex; justify-content: space-around; flex-wrap: wrap; gap: var(--space-md); margin: var(--space-lg) 0; }
+        .stat-item { text-align: center; padding: var(--space-md); background: var(--bg-card); border-radius: var(--radius-md); flex: 1; min-width: 120px; }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--cyan); }
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: var(--space-xs); }
+
+        .whale-type-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-md); margin: var(--space-lg) 0; }
+        .whale-type { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); border-top: 3px solid var(--cyan); }
+        .whale-type h4 { color: var(--text-primary); margin-bottom: var(--space-sm); }
+        .whale-type .size { color: var(--gold); font-weight: 600; }
+
+        .reason-list { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        .reason-item { display: flex; gap: var(--space-md); margin-bottom: var(--space-md); align-items: flex-start; }
+        .reason-number { background: linear-gradient(135deg, var(--cyan), var(--purple)); color: var(--navy-dark); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+        .reason-content h4 { color: var(--text-primary); margin-bottom: var(--space-xs); }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="container">
+        <header class="lesson-header">
+            <span class="tier-badge">TIER 3 - Elite</span>
+            <h1 class="lesson-title">Kiểm Soát Drawdown</h1>
+            <p class="lesson-subtitle">Bảo Vệ Vốn Khỏi Thua Lỗ Quá Mức</p>
+        </header>
+
+        <section class="content-section">
+            <div class="section-icon">📉</div>
+            <h2 class="section-title">Drawdown Là Gì?</h2>
+            <p><strong style="color: #EF4444;">Drawdown</strong> là phần trăm giảm từ đỉnh cao nhất của tài khoản xuống đáy thấp nhất. Đây là chỉ số quan trọng nhất để đánh giá rủi ro thực sự.</p>
+
+            <div class="highlight-box">
+                <p><strong>📊 Công Thức:</strong></p>
+                <p style="margin-bottom: 0; font-family: monospace; color: #10B981;">Drawdown = (Peak Value - Current Value) / Peak Value × 100%</p>
+            </div>
+
+            <p><strong>Ví dụ:</strong> Tài khoản từ $100,000 giảm xuống $85,000 = Drawdown 15%</p>
+
+            <div class="drawdown-meter">
+                <div class="drawdown-label">
+                    <span>Drawdown Level</span>
+                    <span>Risk Status</span>
+                </div>
+                <div class="drawdown-bar">
+                    <div class="drawdown-fill safe">0-5% SAFE</div>
+                </div>
+                <div class="drawdown-bar">
+                    <div class="drawdown-fill warning">5-10% WARNING</div>
+                </div>
+                <div class="drawdown-bar">
+                    <div class="drawdown-fill danger">10%+ DANGER</div>
+                </div>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://placehold.co/700x400/112250/EF4444?text=Drawdown+Visualization+Chart" alt="Drawdown Chart">
+                <p class="image-caption">Visualization của drawdown trên equity curve</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-icon">⚠️</div>
+            <h2 class="section-title">Toán Học Của Recovery</h2>
+            <p>Điều nguy hiểm về drawdown: <strong style="color: #EF4444;">Recovery khó hơn loss rất nhiều</strong>. Hãy xem bảng sau:</p>
+
+            <table class="recovery-table">
+                <thead>
+                    <tr>
+                        <th>Drawdown</th>
+                        <th>% Cần Để Recovery</th>
+                        <th>Độ Khó</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="loss">-10%</td>
+                        <td class="gain">+11.1%</td>
+                        <td>Dễ</td>
+                    </tr>
+                    <tr>
+                        <td class="loss">-20%</td>
+                        <td class="gain">+25%</td>
+                        <td>Trung bình</td>
+                    </tr>
+                    <tr>
+                        <td class="loss">-30%</td>
+                        <td class="gain">+43%</td>
+                        <td>Khó</td>
+                    </tr>
+                    <tr>
+                        <td class="loss">-50%</td>
+                        <td class="gain">+100%</td>
+                        <td>Rất khó</td>
+                    </tr>
+                    <tr>
+                        <td class="loss">-75%</td>
+                        <td class="gain">+300%</td>
+                        <td>Gần như impossible</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="highlight-box red">
+                <p style="margin-bottom: 0;"><strong>🚨 Insight Quan Trọng:</strong> Mất 50% cần lãi 100% để về hòa. Đây là lý do drawdown control quan trọng hơn chasing profits!</p>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://placehold.co/700x400/112250/FFBD59?text=Recovery+Math+Visualization" alt="Recovery Math">
+                <p class="image-caption">Mối quan hệ giữa drawdown và recovery requirement</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-icon">📏</div>
+            <h2 class="section-title">Quy Tắc Drawdown Tối Đa</h2>
+            <p>GEM Academy đặt ra các ngưỡng drawdown rõ ràng với actions tương ứng:</p>
+
+            <div class="rule-card">
+                <h4 class="safe">🟢 0-5% Drawdown: Normal Zone</h4>
+                <ul style="margin-bottom: 0;">
+                    <li>Trading bình thường, full position size</li>
+                    <li>Có thể có tối đa 5 vị thế mở</li>
+                    <li>Tập trung vào tìm high-quality setups</li>
+                </ul>
+            </div>
+
+            <div class="rule-card warning">
+                <h4 class="warning">🟡 5-10% Drawdown: Caution Zone</h4>
+                <ul style="margin-bottom: 0;">
+                    <li>Giảm position size xuống 50%</li>
+                    <li>Tối đa 3 vị thế mở</li>
+                    <li>Chỉ trade A+ setups (confluence 4-5/5)</li>
+                    <li>Review trading journal để tìm nguyên nhân</li>
+                </ul>
+            </div>
+
+            <div class="rule-card danger">
+                <h4 class="danger">🔴 10%+ Drawdown: Danger Zone</h4>
+                <ul style="margin-bottom: 0;">
+                    <li><strong>NGỪNG TRADING ngay lập tức</strong></li>
+                    <li>Đóng tất cả vị thế rủi ro</li>
+                    <li>Nghỉ ngơi ít nhất 48-72 giờ</li>
+                    <li>Review toàn bộ strategy trước khi quay lại</li>
+                </ul>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://placehold.co/700x400/112250/10B981?text=Drawdown+Zones+Rules" alt="Drawdown Zones">
+                <p class="image-caption">Ba zones drawdown và actions tương ứng</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-icon">🔌</div>
+            <h2 class="section-title">Circuit Breakers</h2>
+            <p>"Circuit breaker" là cơ chế tự động dừng trading khi đạt ngưỡng thua lỗ nhất định:</p>
+
+            <div class="circuit-breaker">
+                <h4>⚡ Daily Circuit Breaker</h4>
+                <p style="margin-bottom: 0;"><strong>Trigger:</strong> Thua 3 lệnh liên tiếp HOẶC mất 2% tài khoản trong ngày<br>
+                <strong>Action:</strong> Ngừng trading trong ngày, review journal</p>
+            </div>
+
+            <div class="circuit-breaker">
+                <h4>⚡ Weekly Circuit Breaker</h4>
+                <p style="margin-bottom: 0;"><strong>Trigger:</strong> Drawdown 5% trong tuần<br>
+                <strong>Action:</strong> Giảm size 50%, chỉ trade A+ setups</p>
+            </div>
+
+            <div class="circuit-breaker">
+                <h4>⚡ Monthly Circuit Breaker</h4>
+                <p style="margin-bottom: 0;"><strong>Trigger:</strong> Drawdown 10% trong tháng<br>
+                <strong>Action:</strong> NGỪNG trading hoàn toàn, seek mentorship</p>
+            </div>
+
+            <div class="highlight-box gold">
+                <p style="margin-bottom: 0;"><strong>💡 Tại Sao Circuit Breakers Quan Trọng?</strong> Chúng ngăn chặn "revenge trading" và "tilt" - hai kẻ thù lớn nhất khi đang thua.</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-icon">📈</div>
+            <h2 class="section-title">Chiến Lược Phục Hồi</h2>
+            <p>Khi đã vào vùng drawdown, đây là cách phục hồi an toàn:</p>
+
+            <ol>
+                <li><strong>Acknowledge và accept:</strong> Không denial, chấp nhận thực tế</li>
+                <li><strong>Stop the bleeding:</strong> Đóng vị thế thua, không average down</li>
+                <li><strong>Rest và review:</strong> Nghỉ ngơi, đọc lại journal để hiểu tại sao</li>
+                <li><strong>Reduce size:</strong> Khi quay lại, trade với size nhỏ hơn</li>
+                <li><strong>Build confidence:</strong> Tập trung win rate trước, size sau</li>
+            </ol>
+
+            <div class="highlight-box">
+                <p style="margin-bottom: 0;"><strong>🎯 Recovery Mantra:</strong> "Slow and steady wins the race." Đừng cố gấp đôi size để "gỡ" nhanh - đây là cách nhanh nhất để thua thêm.</p>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://placehold.co/700x400/112250/8B5CF6?text=Recovery+Strategy+Flowchart" alt="Recovery Strategy">
+                <p class="image-caption">Flowchart chiến lược phục hồi sau drawdown</p>
+            </div>
+        </section>
+
+        <section class="summary-box">
+            <h3>📝 Tóm Tắt Bài Học</h3>
+            <ul>
+                <li><strong>Drawdown</strong> = % giảm từ đỉnh xuống đáy</li>
+                <li><strong>Recovery math:</strong> Mất 50% cần lãi 100% để về hòa</li>
+                <li><strong>Max drawdown:</strong> 10% là ngưỡng NGỪNG TRADING</li>
+                <li><strong>Circuit breakers:</strong> 3 losing trades hoặc 2% daily = stop</li>
+                <li><strong>Recovery:</strong> Slow, reduce size, rebuild confidence</li>
+            </ul>
+        </section>
+
+        <section class="quiz-section">
+            <h2 class="quiz-title">📝 Kiểm Tra Kiến Thức</h2>
+
+            <div class="quiz-question" data-correct="2">
+                <p class="question-text">1. Nếu tài khoản mất 50%, cần bao nhiêu % lợi nhuận để về hòa?</p>
+                <button class="quiz-option" data-index="0">50%</button>
+                <button class="quiz-option" data-index="1">75%</button>
+                <button class="quiz-option" data-index="2">100%</button>
+                <button class="quiz-option" data-index="3">150%</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="1">
+                <p class="question-text">2. Khi drawdown đạt 5-10%, trader nên làm gì?</p>
+                <button class="quiz-option" data-index="0">Tăng size để gỡ nhanh</button>
+                <button class="quiz-option" data-index="1">Giảm size 50%, chỉ trade A+ setups</button>
+                <button class="quiz-option" data-index="2">Trading bình thường</button>
+                <button class="quiz-option" data-index="3">Đóng tất cả vị thế và nghỉ 1 tháng</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="0">
+                <p class="question-text">3. Daily Circuit Breaker trigger khi nào?</p>
+                <button class="quiz-option" data-index="0">3 lệnh thua liên tiếp hoặc mất 2% trong ngày</button>
+                <button class="quiz-option" data-index="1">5 lệnh thua trong tuần</button>
+                <button class="quiz-option" data-index="2">Drawdown 10%</button>
+                <button class="quiz-option" data-index="3">Khi market crash</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <p class="quiz-score-text">Bạn trả lời đúng <span id="correct-count">0</span>/3 câu hỏi!</p>
+                <button class="retake-btn" onclick="location.reload()">Làm Lại Quiz</button>
+            </div>
+        </section>
+
+        <footer class="lesson-footer">
+            <p>GEM Trading Academy - Tier 3 Elite</p>
+            <p>© 2024 GEM Trading. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+        document.querySelectorAll('.quiz-question').forEach(q => {
+            const ci = parseInt(q.dataset.correct);
+            const opts = q.querySelectorAll('.quiz-option');
+            const res = q.querySelector('.quiz-result');
+            opts.forEach(o => {
+                o.addEventListener('click', function() {
+                    if (q.classList.contains('answered')) return;
+                    q.classList.add('answered');
+                    answeredCount++;
+                    const si = parseInt(this.dataset.index);
+                    if (si === ci) {
+                        this.classList.add('correct');
+                        res.textContent = '✓ Chính xác!';
+                        res.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        opts[ci].classList.add('correct');
+                        res.textContent = '✗ Chưa đúng. Hãy xem lại nội dung bài học.';
+                        res.className = 'quiz-result show incorrect';
+                    }
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

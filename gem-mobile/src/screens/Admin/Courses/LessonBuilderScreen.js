@@ -37,6 +37,7 @@ import {
   ClipboardPaste,
   Check,
   AlertTriangle,
+  Image as ImageIcon,
 } from 'lucide-react-native';
 import * as Clipboard from 'expo-clipboard';
 
@@ -45,6 +46,8 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../../utils/tokens';
 import * as attachmentService from '../../../services/attachmentService';
 import { saveHTMLContent } from '../../../services/courseBuilderService';
+import courseImageService from '../../../services/courseImageService';
+import { ImageUploader, LessonImageList, MediaLibraryModal } from '../../../components/Admin';
 
 const LessonBuilderScreen = ({ navigation, route }) => {
   const { lessonId, courseId, moduleId, lessonType: initialType } = route.params || {};
@@ -71,9 +74,20 @@ const LessonBuilderScreen = ({ navigation, route }) => {
   const [saving, setSaving] = useState(false);
   const [savingHtml, setSavingHtml] = useState(false);
 
+  // Tab state
+  const [activeTab, setActiveTab] = useState('content'); // 'content' | 'images'
+
+  // Images state
+  const [lessonImages, setLessonImages] = useState([]);
+  const [imagesLoading, setImagesLoading] = useState(false);
+  const [mediaLibraryVisible, setMediaLibraryVisible] = useState(false);
+
   // Load lesson data
   useEffect(() => {
     loadLessonData();
+    if (lessonId) {
+      loadLessonImages();
+    }
   }, [lessonId]);
 
   const loadLessonData = async () => {
@@ -114,6 +128,143 @@ const LessonBuilderScreen = ({ navigation, route }) => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Load lesson images
+  const loadLessonImages = async () => {
+    if (!lessonId) return;
+
+    try {
+      setImagesLoading(true);
+      const images = await courseImageService.getByLesson(lessonId);
+      setLessonImages(images || []);
+    } catch (error) {
+      console.error('[LessonBuilderScreen] loadLessonImages error:', error);
+    } finally {
+      setImagesLoading(false);
+    }
+  };
+
+  // ========== IMAGE HANDLING ==========
+
+  // Handle upload complete
+  const handleUploadComplete = async (uploadData) => {
+    try {
+      // Create record in database
+      const imageRecord = await courseImageService.create({
+        lesson_id: lessonId,
+        image_url: uploadData.url,
+        storage_path: uploadData.path,
+        title: uploadData.fileName,
+        alt_text: uploadData.fileName,
+        width: uploadData.width,
+        height: uploadData.height,
+        file_size: uploadData.fileSize,
+        mime_type: uploadData.mimeType,
+        sort_order: lessonImages.length,
+      });
+
+      setLessonImages(prev => [...prev, imageRecord]);
+
+      alert({
+        type: 'success',
+        title: 'Thành công',
+        message: 'Đã tải lên hình ảnh',
+        buttons: [{ text: 'OK' }],
+      });
+    } catch (error) {
+      console.error('[LessonBuilderScreen] handleUploadComplete error:', error);
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: error.message || 'Không thể lưu thông tin hình ảnh',
+        buttons: [{ text: 'OK' }],
+      });
+    }
+  };
+
+  // Handle delete image
+  const handleDeleteImage = async (imageId) => {
+    try {
+      await courseImageService.deleteImage(imageId);
+      setLessonImages(prev => prev.filter(img => img.id !== imageId));
+    } catch (error) {
+      console.error('[LessonBuilderScreen] handleDeleteImage error:', error);
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Không thể xóa hình ảnh',
+        buttons: [{ text: 'OK' }],
+      });
+    }
+  };
+
+  // Handle update image
+  const handleUpdateImage = async (imageId, updates) => {
+    try {
+      const updated = await courseImageService.update(imageId, updates);
+      setLessonImages(prev =>
+        prev.map(img => (img.id === imageId ? { ...img, ...updated } : img))
+      );
+    } catch (error) {
+      console.error('[LessonBuilderScreen] handleUpdateImage error:', error);
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Không thể cập nhật hình ảnh',
+        buttons: [{ text: 'OK' }],
+      });
+    }
+  };
+
+  // Handle reorder images
+  const handleReorderImages = async (reorderedImages) => {
+    try {
+      setLessonImages(reorderedImages);
+      await courseImageService.updateOrder(
+        reorderedImages.map((img, idx) => ({ id: img.id, sort_order: idx }))
+      );
+    } catch (error) {
+      console.error('[LessonBuilderScreen] handleReorderImages error:', error);
+      // Reload to restore correct order on error
+      loadLessonImages();
+    }
+  };
+
+  // Handle select from media library
+  const handleSelectFromLibrary = async (image) => {
+    try {
+      // Check if already exists
+      if (lessonImages.some(img => img.image_url === image.image_url)) {
+        alert({
+          type: 'warning',
+          title: 'Đã tồn tại',
+          message: 'Hình ảnh này đã có trong bài học',
+          buttons: [{ text: 'OK' }],
+        });
+        return;
+      }
+
+      // Create new record linking to existing image
+      const imageRecord = await courseImageService.create({
+        lesson_id: lessonId,
+        image_url: image.image_url,
+        storage_path: image.storage_path,
+        title: image.title || image.position_id,
+        position_id: image.position_id,
+        alt_text: image.alt_text || image.title,
+        width: image.width,
+        height: image.height,
+        file_size: image.file_size,
+        mime_type: image.mime_type,
+        sort_order: lessonImages.length,
+      });
+
+      setLessonImages(prev => [...prev, imageRecord]);
+    } catch (error) {
+      console.error('[LessonBuilderScreen] handleSelectFromLibrary error:', error);
+      throw error;
     }
   };
 
@@ -731,6 +882,37 @@ const LessonBuilderScreen = ({ navigation, route }) => {
     }
   };
 
+  // Render Images Tab content
+  const renderImagesTab = () => (
+    <View style={styles.imagesTabContent}>
+      {/* Image Uploader */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Tải lên hình ảnh</Text>
+        <ImageUploader
+          lessonId={lessonId}
+          folderPath="lessons"
+          onUploadComplete={handleUploadComplete}
+          onOpenMediaLibrary={() => setMediaLibraryVisible(true)}
+          onError={(error) => console.error('[LessonBuilderScreen] Upload error:', error)}
+        />
+      </View>
+
+      {/* Lesson Images List */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>
+          Hình ảnh trong bài ({lessonImages.length})
+        </Text>
+        <LessonImageList
+          images={lessonImages}
+          loading={imagesLoading}
+          onUpdate={handleUpdateImage}
+          onDelete={handleDeleteImage}
+          onReorder={handleReorderImages}
+        />
+      </View>
+    </View>
+  );
+
   if (loading) {
     return (
       <View style={styles.container}>
@@ -772,6 +954,48 @@ const LessonBuilderScreen = ({ navigation, route }) => {
             </TouchableOpacity>
           </View>
 
+          {/* Tab Bar */}
+          <View style={styles.tabBar}>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === 'content' && styles.tabActive]}
+              onPress={() => setActiveTab('content')}
+            >
+              <FileText
+                size={18}
+                color={activeTab === 'content' ? COLORS.gold : COLORS.textMuted}
+              />
+              <Text
+                style={[
+                  styles.tabText,
+                  activeTab === 'content' && styles.tabTextActive,
+                ]}
+              >
+                Nội dung
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.tab, activeTab === 'images' && styles.tabActive]}
+              onPress={() => setActiveTab('images')}
+            >
+              <ImageIcon
+                size={18}
+                color={activeTab === 'images' ? COLORS.gold : COLORS.textMuted}
+              />
+              <Text
+                style={[
+                  styles.tabText,
+                  activeTab === 'images' && styles.tabTextActive,
+                ]}
+              >
+                Hình ảnh
+                {lessonImages.length > 0 && (
+                  <Text style={styles.tabBadge}> ({lessonImages.length})</Text>
+                )}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
           <KeyboardAvoidingView
             style={{ flex: 1 }}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -781,6 +1005,8 @@ const LessonBuilderScreen = ({ navigation, route }) => {
               contentContainerStyle={styles.contentContainer}
               showsVerticalScrollIndicator={false}
             >
+              {activeTab === 'content' ? (
+                <>
               {/* Basic Info */}
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Thông tin cơ bản</Text>
@@ -898,10 +1124,22 @@ const LessonBuilderScreen = ({ navigation, route }) => {
 
               {/* Bottom Spacer */}
               <View style={{ height: 100 }} />
+                </>
+              ) : (
+                renderImagesTab()
+              )}
             </ScrollView>
           </KeyboardAvoidingView>
         </SafeAreaView>
       </LinearGradient>
+
+      {/* Media Library Modal */}
+      <MediaLibraryModal
+        visible={mediaLibraryVisible}
+        onClose={() => setMediaLibraryVisible(false)}
+        onSelectImage={handleSelectFromLibrary}
+        currentLessonImages={lessonImages}
+      />
 
       {AlertComponent}
     </View>
@@ -1356,6 +1594,44 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.fontSize.xs,
     color: COLORS.textMuted,
     marginTop: 2,
+  },
+
+  // Tab Bar
+  tabBar: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: GLASS.border,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+  },
+  tab: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.xs,
+    paddingVertical: SPACING.md,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  tabActive: {
+    borderBottomColor: COLORS.gold,
+  },
+  tabText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  tabTextActive: {
+    color: COLORS.gold,
+  },
+  tabBadge: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.gold,
+  },
+
+  // Images Tab
+  imagesTabContent: {
+    paddingBottom: 100,
   },
 });
 

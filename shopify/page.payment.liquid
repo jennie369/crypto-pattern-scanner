@@ -1,0 +1,514 @@
+{% comment %}
+  GEM Payment Page Template
+  URL: /pages/thanh-toan?order=ORDER_NUMBER
+  Hiển thị QR code + thông tin chuyển khoản + auto-check status
+{% endcomment %}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thanh toán đơn hàng - {{ shop.name }}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 100%);
+      min-height: 100vh;
+      color: #fff;
+    }
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .logo {
+      text-align: center;
+      padding: 20px 0;
+    }
+    .logo img {
+      height: 50px;
+    }
+    .payment-box {
+      background: rgba(255,255,255,0.05);
+      border-radius: 20px;
+      padding: 24px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .header h1 {
+      color: #FFBD59;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .header p {
+      color: #888;
+      font-size: 14px;
+    }
+    .order-number {
+      background: rgba(255,189,89,0.1);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .order-number span {
+      color: #888;
+      font-size: 13px;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .order-number strong {
+      color: #FFBD59;
+      font-size: 24px;
+      font-weight: 700;
+    }
+    .qr-container {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .qr-container img {
+      max-width: 220px;
+      height: auto;
+    }
+    .qr-tip {
+      color: #666;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+    .countdown-box {
+      background: rgba(255,189,89,0.1);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .countdown-label {
+      color: #888;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+    .countdown-timer {
+      color: #FFBD59;
+      font-size: 32px;
+      font-weight: 700;
+      font-family: 'Courier New', monospace;
+    }
+    .countdown-timer.urgent {
+      color: #ff4444;
+    }
+    .countdown-note {
+      color: #666;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+    .divider {
+      height: 1px;
+      background: rgba(255,255,255,0.1);
+      margin: 20px 0;
+    }
+    .bank-info {
+      background: rgba(255,255,255,0.03);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .info-row:last-child {
+      border-bottom: none;
+    }
+    .info-label {
+      color: #888;
+      font-size: 13px;
+    }
+    .info-value {
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .info-value.highlight {
+      color: #FFBD59;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .copy-btn {
+      background: transparent;
+      border: 1px solid #FFBD59;
+      color: #FFBD59;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 11px;
+      transition: all 0.2s;
+    }
+    .copy-btn:hover {
+      background: #FFBD59;
+      color: #1a1a2e;
+    }
+    .copy-btn.copied {
+      background: #4CAF50;
+      border-color: #4CAF50;
+      color: #fff;
+    }
+    .warning-box {
+      background: rgba(255,189,89,0.1);
+      border-left: 3px solid #FFBD59;
+      padding: 12px 16px;
+      margin-top: 20px;
+      font-size: 13px;
+      color: #ccc;
+      border-radius: 0 8px 8px 0;
+    }
+    .warning-box strong {
+      color: #FFBD59;
+    }
+    .status-box {
+      text-align: center;
+      padding: 20px;
+      margin-top: 20px;
+    }
+    .status-pending {
+      color: #FFBD59;
+      font-size: 14px;
+    }
+    .status-pending .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #FFBD59;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .status-paid {
+      background: rgba(0,240,255,0.1);
+      border-radius: 16px;
+      padding: 30px;
+    }
+    .status-paid .icon {
+      font-size: 60px;
+      margin-bottom: 12px;
+    }
+    .status-paid h2 {
+      color: #00F0FF;
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+    .status-paid p {
+      color: #888;
+      font-size: 14px;
+    }
+    .error-box {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .error-box .icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+    .error-box h2 {
+      color: #ff6b6b;
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+    .error-box p {
+      color: #888;
+      font-size: 14px;
+    }
+    .loading {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .loading .spinner-large {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255,189,89,0.2);
+      border-top-color: #FFBD59;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 24px;
+      color: #FFBD59;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Logo -->
+    <div class="logo">
+      {% if shop.logo %}
+        <img src="{{ shop.logo | image_url: width: 200 }}" alt="{{ shop.name }}">
+      {% else %}
+        <h2 style="color: #FFBD59;">{{ shop.name }}</h2>
+      {% endif %}
+    </div>
+
+    <!-- Main Content - populated by JavaScript -->
+    <div class="payment-box" id="payment-content">
+      <div class="loading">
+        <div class="spinner-large"></div>
+        <p style="color: #888;">Đang tải thông tin đơn hàng...</p>
+      </div>
+    </div>
+
+    <a href="/" class="back-link">← Quay về trang chủ</a>
+  </div>
+
+  <script>
+    (function() {
+      var SUPABASE_URL = 'https://pgfkbcnzqozzkohwbgbk.supabase.co';
+      var container = document.getElementById('payment-content');
+
+      // Get order number from URL
+      var urlParams = new URLSearchParams(window.location.search);
+      var orderNumber = urlParams.get('order') || urlParams.get('don-hang');
+
+      if (!orderNumber) {
+        showError('Không tìm thấy mã đơn hàng', 'Vui lòng kiểm tra lại link hoặc liên hệ hỗ trợ.');
+        return;
+      }
+
+      // Fetch payment info
+      fetchPaymentInfo();
+
+      function fetchPaymentInfo() {
+        fetch(SUPABASE_URL + '/functions/v1/payment-status?order=' + orderNumber)
+          .then(function(res) { return res.json(); })
+          .then(function(response) {
+            if (response.success && response.data) {
+              renderPaymentInfo(response.data);
+            } else {
+              showError('Không tìm thấy đơn hàng', 'Đơn hàng #' + orderNumber + ' không tồn tại hoặc đã được xử lý.');
+            }
+          })
+          .catch(function(err) {
+            console.error('Error:', err);
+            showError('Lỗi kết nối', 'Không thể tải thông tin đơn hàng. Vui lòng thử lại.');
+          });
+      }
+
+      function renderPaymentInfo(data) {
+        if (data.is_paid) {
+          showPaid();
+          return;
+        }
+
+        var amount = data.total_amount || 0;
+        var qrUrl = 'https://img.vietqr.io/image/VCB-1074286868-compact2.png?amount=' + amount + '&addInfo=DH' + orderNumber + '&accountName=CT%20TNHH%20GEM%20CAPITAL%20HOLDING';
+        var expiresAt = data.expires_at ? new Date(data.expires_at) : new Date(Date.now() + 24*60*60*1000);
+
+        container.innerHTML = [
+          '<div class="header">',
+          '  <h1>💳 Thanh toán chuyển khoản</h1>',
+          '  <p>Quét mã QR hoặc chuyển khoản thủ công</p>',
+          '</div>',
+          '',
+          '<div class="order-number">',
+          '  <span>Mã đơn hàng</span>',
+          '  <strong>#' + orderNumber + '</strong>',
+          '</div>',
+          '',
+          '<div class="qr-container">',
+          '  <img src="' + qrUrl + '" alt="QR Thanh toán">',
+          '  <p class="qr-tip">Mở app ngân hàng → Quét mã → Xác nhận</p>',
+          '</div>',
+          '',
+          '<div class="countdown-box">',
+          '  <div class="countdown-label">Thời gian thanh toán còn lại</div>',
+          '  <div class="countdown-timer" id="countdown">--:--:--</div>',
+          '  <p class="countdown-note">Đơn hàng sẽ tự động hủy khi hết thời gian</p>',
+          '</div>',
+          '',
+          '<div class="divider"></div>',
+          '',
+          '<div class="bank-info">',
+          '  <div class="info-row">',
+          '    <span class="info-label">Ngân hàng</span>',
+          '    <span class="info-value">Vietcombank</span>',
+          '  </div>',
+          '  <div class="info-row">',
+          '    <span class="info-label">Số tài khoản</span>',
+          '    <span class="info-value">',
+          '      1074286868',
+          '      <button class="copy-btn" onclick="copyText(\'1074286868\', this)">Copy</button>',
+          '    </span>',
+          '  </div>',
+          '  <div class="info-row">',
+          '    <span class="info-label">Chủ tài khoản</span>',
+          '    <span class="info-value">CT TNHH GEM CAPITAL HOLDING</span>',
+          '  </div>',
+          '  <div class="info-row">',
+          '    <span class="info-label">Số tiền</span>',
+          '    <span class="info-value highlight">',
+          '      ' + formatMoney(amount) + 'đ',
+          '      <button class="copy-btn" onclick="copyText(\'' + amount + '\', this)">Copy</button>',
+          '    </span>',
+          '  </div>',
+          '  <div class="info-row">',
+          '    <span class="info-label">Nội dung CK</span>',
+          '    <span class="info-value highlight">',
+          '      DH' + orderNumber,
+          '      <button class="copy-btn" onclick="copyText(\'DH' + orderNumber + '\', this)">Copy</button>',
+          '    </span>',
+          '  </div>',
+          '</div>',
+          '',
+          '<div class="warning-box">',
+          '  <strong>⚠️ Quan trọng:</strong> Vui lòng nhập chính xác nội dung chuyển khoản ',
+          '  <strong>DH' + orderNumber + '</strong> để hệ thống tự động xác nhận thanh toán.',
+          '</div>',
+          '',
+          '<div class="status-box" id="status">',
+          '  <span class="status-pending">',
+          '    <span class="spinner"></span>',
+          '    Đang chờ thanh toán...',
+          '  </span>',
+          '</div>'
+        ].join('\n');
+
+        // Start countdown
+        startCountdown(expiresAt);
+
+        // Start polling
+        setInterval(checkStatus, 10000);
+        setTimeout(checkStatus, 3000);
+      }
+
+      function startCountdown(expiresAt) {
+        function update() {
+          var now = new Date();
+          var diff = expiresAt - now;
+          var el = document.getElementById('countdown');
+
+          if (!el) return;
+
+          if (diff <= 0) {
+            el.textContent = 'Hết hạn';
+            el.classList.add('urgent');
+            return;
+          }
+
+          var hours = Math.floor(diff / (1000 * 60 * 60));
+          var mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          var secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+          el.textContent = pad(hours) + ':' + pad(mins) + ':' + pad(secs);
+
+          if (hours < 1) {
+            el.classList.add('urgent');
+          }
+        }
+
+        update();
+        setInterval(update, 1000);
+      }
+
+      function checkStatus() {
+        fetch(SUPABASE_URL + '/functions/v1/payment-status?order=' + orderNumber)
+          .then(function(res) { return res.json(); })
+          .then(function(response) {
+            if (response.success && response.data) {
+              if (response.data.is_paid) {
+                showPaid();
+              } else if (response.data.is_verifying) {
+                var statusEl = document.getElementById('status');
+                if (statusEl) {
+                  statusEl.innerHTML = '<span class="status-pending"><span class="spinner"></span>Đang xác minh thanh toán...</span>';
+                }
+              }
+            }
+          })
+          .catch(function(err) {
+            console.log('Status check error:', err);
+          });
+      }
+
+      function showPaid() {
+        container.innerHTML = [
+          '<div class="status-paid">',
+          '  <div class="icon">✅</div>',
+          '  <h2>Thanh toán thành công!</h2>',
+          '  <p>Đơn hàng #' + orderNumber + ' đã được xác nhận.</p>',
+          '  <p style="margin-top: 12px;">Cảm ơn bạn đã mua hàng!</p>',
+          '</div>'
+        ].join('\n');
+      }
+
+      function showError(title, message) {
+        container.innerHTML = [
+          '<div class="error-box">',
+          '  <div class="icon">❌</div>',
+          '  <h2>' + title + '</h2>',
+          '  <p>' + message + '</p>',
+          '</div>'
+        ].join('\n');
+      }
+
+      function formatMoney(amount) {
+        return Number(amount).toLocaleString('vi-VN');
+      }
+
+      function pad(n) {
+        return n < 10 ? '0' + n : n;
+      }
+
+      // Global copy function
+      window.copyText = function(text, btn) {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(text).then(function() {
+            btn.textContent = 'Đã copy!';
+            btn.classList.add('copied');
+            setTimeout(function() {
+              btn.textContent = 'Copy';
+              btn.classList.remove('copied');
+            }, 2000);
+          });
+        } else {
+          var input = document.createElement('input');
+          input.value = text;
+          document.body.appendChild(input);
+          input.select();
+          document.execCommand('copy');
+          document.body.removeChild(input);
+          btn.textContent = 'Đã copy!';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            btn.textContent = 'Copy';
+            btn.classList.remove('copied');
+          }, 2000);
+        }
+      };
+    })();
+  </script>
+</body>
+</html>

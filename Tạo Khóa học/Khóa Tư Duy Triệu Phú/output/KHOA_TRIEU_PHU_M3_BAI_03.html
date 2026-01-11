@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 3.3: Affirmations Thịnh Vượng | GEM Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #112250; --navy-dark: #0a1628; --gold: #FFBD59; --gold-dark: #E5A73D;
+            --cyan: #00F0FF; --purple: #6A5BFF; --burgundy: #9C0612; --burgundy-light: #C41E2A;
+            --success: #00C853; --error: #FF5252; --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6); --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85); --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4); --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 32px;
+            --radius-md: 12px; --radius-lg: 16px;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        img { max-width: 100%; height: auto; display: block; }
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: 20%; }
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.5rem, 5vw, 2.25rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; border-bottom: 8px solid var(--bg-primary); } }
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); }
+        .definition-box p { color: var(--text-secondary); margin: 0; }
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+        .affirmation-list { display: flex; flex-direction: column; gap: 1px; background: var(--glass-border); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .affirmation-list { margin: var(--space-md) 0; } }
+        .affirmation-item { padding: var(--space-md); background: var(--bg-card); color: var(--text-secondary); font-size: 0.95rem; display: flex; gap: var(--space-sm); }
+        @media (max-width: 600px) { .affirmation-item { padding: var(--space-md) 16px; } }
+        .affirmation-item span:first-child { color: var(--gold); font-weight: 700; min-width: 25px; }
+        .level-tag { display: inline-block; padding: var(--space-xs) var(--space-sm); border-radius: 4px; font-size: 0.75rem; font-weight: 700; margin-bottom: var(--space-md); }
+        .level-tag.beginner { background: rgba(0, 200, 83, 0.2); color: var(--success); }
+        .level-tag.intermediate { background: rgba(255, 189, 89, 0.2); color: var(--gold); }
+        .level-tag.advanced { background: rgba(106, 91, 255, 0.2); color: var(--purple); }
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+        .lesson-footer { text-align: center; padding: var(--space-xl); color: var(--text-muted); font-size: 0.85rem; }
+        .lesson-footer a { color: var(--gold); text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="lesson-badge"><span>✨</span><span>Module 3</span></div>
+            <div class="lesson-chapter">Module 3 - Cài Đặt Tần Số Thịnh Vượng</div>
+            <h1 class="lesson-title">Affirmations Thịnh Vượng</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 3.3</span></div>
+                <div class="meta-item"><span>⏱️</span><span>15 phút</span></div>
+                <div class="meta-item"><span>🎯</span><span>50 Affirmations</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Bạn Nói Gì Với Bản Thân 60,000 Lần Mỗi Ngày?</h2>
+            <p>Mỗi ngày, bạn có khoảng 60,000 đến 80,000 suy nghĩ. Và đây là phần đáng lo ngại: phần lớn những suy nghĩ này là TỰ ĐỘNG và LẶP LẠI từ ngày hôm trước.</p>
+            <p>Nếu suy nghĩ tự động của bạn về tiền bạc là "Tôi không bao giờ đủ tiền", "Kiếm tiền khó quá", "Tôi không có số giàu"... thì bạn đang phát đi tần số thiếu thốn hàng chục nghìn lần mỗi ngày mà không biết.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Tin Vui Là Đây</div>
+                <p>Bạn CÓ THỂ can thiệp vào dòng suy nghĩ tự động này. Thay vì để não chạy "chương trình cũ", bạn có thể chủ động CÀI ĐẶT những câu nói mới - đó chính là Affirmations (Khẳng Định Tích Cực).</p>
+                <p style="margin-top: var(--space-sm);">Sau 21-66 ngày lặp lại có ý thức, những affirmations này sẽ trở thành suy nghĩ TỰ ĐỘNG mới. Bạn không cần cố gắng nữa - chúng sẽ tự chạy và thay đổi tần số của bạn 24/7.</p>
+            </div>
+
+            <p>Trong bài này, bạn sẽ có 50 affirmations thịnh vượng được thiết kế khoa học, phân theo 3 cấp độ từ dễ đến khó. Hãy chọn những câu phù hợp và bắt đầu hành trình 21 ngày của bạn.</p>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Affirmation Là Gì?</h2>
+            <p>Affirmation (Khẳng Định) là những câu nói tích cực bạn lặp lại để "lập trình lại" tiềm thức. Khi nói và cảm nhận đủ nhiều lần, não bộ bắt đầu tin và tìm cách biến nó thành hiện thực.</p>
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🧠</span> Khoa Học Đằng Sau Affirmations</div>
+                <p>Não bộ không phân biệt được giữa trải nghiệm thực và trải nghiệm tưởng tượng mãnh liệt. Khi bạn nói affirmation với CẢM XÚC, các neural pathways mới được hình thành - thay thế dần pattern cũ.</p>
+            </div>
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M3_B3_01%0AAffirmation+Power" alt="Affirmation Power">
+                <div class="image-caption">Affirmation + Cảm Xúc = Lập trình lại tiềm thức</div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>📝</span> Cách Viết Affirmation Hiệu Quả</h2>
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Sử Dụng Thì Hiện Tại</div>
+                        <div class="flow-step-desc">Nói "Tôi đang giàu có" thay vì "Tôi sẽ giàu". Não cần tin rằng điều này đang xảy ra BÂY GIỜ.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Dùng Câu Khẳng Định</div>
+                        <div class="flow-step-desc">Nói "Tôi thu hút tiền" thay vì "Tôi không còn nghèo". Não không xử lý được từ "không" - nó chỉ nghe "nghèo".</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Thêm Cảm Xúc</div>
+                        <div class="flow-step-desc">Khi nói, CẢM NHẬN như thể điều đó đã thành hiện thực. Cảm xúc là nhiên liệu cho manifestation.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Chọn Câu "Tin Được"</div>
+                        <div class="flow-step-desc">Nếu não phản đối quá mạnh, chọn câu nhẹ hơn. "Tôi đang mở ra cho tiền bạc" dễ tin hơn "Tôi là triệu phú".</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>💰</span> 50 Affirmations Thịnh Vượng</h2>
+            <p>Dưới đây là 50 affirmations được phân theo 3 cấp độ. Bắt đầu từ cấp phù hợp với bạn:</p>
+
+            <div class="highlight-box">
+                <span class="level-tag beginner">CẤP 1: MỞ ĐẦU</span>
+                <div class="highlight-box-title">Dành cho người mới bắt đầu hoặc còn nhiều kháng cự</div>
+            </div>
+            <div class="affirmation-list">
+                <div class="affirmation-item"><span>1.</span> Tôi đang mở lòng đón nhận sự thịnh vượng.</div>
+                <div class="affirmation-item"><span>2.</span> Tôi xứng đáng có cuộc sống tốt đẹp.</div>
+                <div class="affirmation-item"><span>3.</span> Tôi đang học cách yêu thương bản thân nhiều hơn.</div>
+                <div class="affirmation-item"><span>4.</span> Mỗi ngày, tôi đang cải thiện mối quan hệ với tiền.</div>
+                <div class="affirmation-item"><span>5.</span> Tôi cho phép bản thân nhận được nhiều hơn.</div>
+                <div class="affirmation-item"><span>6.</span> Tôi đang thay đổi niềm tin cũ về tiền bạc.</div>
+                <div class="affirmation-item"><span>7.</span> Tôi tin rằng có đủ cho tất cả mọi người.</div>
+                <div class="affirmation-item"><span>8.</span> Tôi đang học cách quản lý tiền tốt hơn.</div>
+                <div class="affirmation-item"><span>9.</span> Tôi biết ơn những gì tôi đang có.</div>
+                <div class="affirmation-item"><span>10.</span> Tôi đang trở nên tự tin hơn về tài chính.</div>
+            </div>
+
+            <div class="highlight-box">
+                <span class="level-tag intermediate">CẤP 2: TRUNG CẤP</span>
+                <div class="highlight-box-title">Dành cho người đã bắt đầu tin và muốn tiến xa hơn</div>
+            </div>
+            <div class="affirmation-list">
+                <div class="affirmation-item"><span>11.</span> Tiền chảy đến tôi dễ dàng và vui vẻ.</div>
+                <div class="affirmation-item"><span>12.</span> Tôi là nam châm thu hút tiền bạc.</div>
+                <div class="affirmation-item"><span>13.</span> Tôi tạo ra giá trị và nhận lại sự thịnh vượng.</div>
+                <div class="affirmation-item"><span>14.</span> Tiền là công cụ tốt trong tay tôi.</div>
+                <div class="affirmation-item"><span>15.</span> Tôi kiếm tiền bằng việc giúp đỡ người khác.</div>
+                <div class="affirmation-item"><span>16.</span> Tài khoản của tôi đang tăng trưởng mỗi ngày.</div>
+                <div class="affirmation-item"><span>17.</span> Tôi thu hút cơ hội kiếm tiền từ mọi hướng.</div>
+                <div class="affirmation-item"><span>18.</span> Tiền đến với tôi từ những nguồn bất ngờ.</div>
+                <div class="affirmation-item"><span>19.</span> Tôi luôn có đủ tiền cho mọi nhu cầu.</div>
+                <div class="affirmation-item"><span>20.</span> Tôi quản lý tiền một cách thông minh.</div>
+                <div class="affirmation-item"><span>21.</span> Tôi chi tiêu có ý thức và tiết kiệm đều đặn.</div>
+                <div class="affirmation-item"><span>22.</span> Tiền là nguồn năng lượng tích cực trong đời tôi.</div>
+                <div class="affirmation-item"><span>23.</span> Tôi cảm thấy an toàn và được hỗ trợ về tài chính.</div>
+                <div class="affirmation-item"><span>24.</span> Tôi đưa ra quyết định tài chính sáng suốt.</div>
+                <div class="affirmation-item"><span>25.</span> Sự giàu có là trạng thái tự nhiên của tôi.</div>
+                <div class="affirmation-item"><span>26.</span> Tôi cho phép bản thân muốn nhiều hơn.</div>
+                <div class="affirmation-item"><span>27.</span> Tôi giữ tiền và để nó sinh sôi.</div>
+                <div class="affirmation-item"><span>28.</span> Mỗi đồng tôi chi tiêu quay lại gấp nhiều lần.</div>
+                <div class="affirmation-item"><span>29.</span> Tôi là người tạo ra tài sản.</div>
+                <div class="affirmation-item"><span>30.</span> Tiền bạc hỗ trợ tôi sống cuộc đời mơ ước.</div>
+            </div>
+
+            <div class="highlight-box">
+                <span class="level-tag advanced">CẤP 3: NÂNG CAO</span>
+                <div class="highlight-box-title">Dành cho người đã có nền tảng vững và sẵn sàng bứt phá</div>
+            </div>
+            <div class="affirmation-list">
+                <div class="affirmation-item"><span>31.</span> Tôi là nguồn thịnh vượng vô tận.</div>
+                <div class="affirmation-item"><span>32.</span> Tiền yêu tôi và tôi yêu tiền.</div>
+                <div class="affirmation-item"><span>33.</span> Tôi tạo ra thu nhập thụ động dễ dàng.</div>
+                <div class="affirmation-item"><span>34.</span> Sự giàu có chảy qua tôi đến với thế giới.</div>
+                <div class="affirmation-item"><span>35.</span> Tôi kiếm tiền ngay cả khi đang ngủ.</div>
+                <div class="affirmation-item"><span>36.</span> Tôi là đồng sáng tạo với Vũ trụ trong việc tạo ra thịnh vượng.</div>
+                <div class="affirmation-item"><span>37.</span> Tài sản ròng của tôi tăng theo cấp số nhân.</div>
+                <div class="affirmation-item"><span>38.</span> Tôi làm giàu cho bản thân và làm giàu cho người khác.</div>
+                <div class="affirmation-item"><span>39.</span> Tôi có khả năng kiếm được bất kỳ số tiền nào tôi muốn.</div>
+                <div class="affirmation-item"><span>40.</span> Tự do tài chính là hiện thực của tôi.</div>
+                <div class="affirmation-item"><span>41.</span> Tôi được sinh ra để thịnh vượng.</div>
+                <div class="affirmation-item"><span>42.</span> Vũ trụ luôn cung cấp đầy đủ cho tôi.</div>
+                <div class="affirmation-item"><span>43.</span> Tôi sống trong sự dồi dào vô hạn.</div>
+                <div class="affirmation-item"><span>44.</span> Mọi thứ tôi chạm vào đều biến thành vàng.</div>
+                <div class="affirmation-item"><span>45.</span> Tôi là một kênh thịnh vượng cho mọi người xung quanh.</div>
+                <div class="affirmation-item"><span>46.</span> Tôi giàu có về mọi mặt: tiền, sức khỏe, tình yêu.</div>
+                <div class="affirmation-item"><span>47.</span> Sự giàu có của tôi tác động tích cực đến thế giới.</div>
+                <div class="affirmation-item"><span>48.</span> Tôi để lại di sản thịnh vượng cho các thế hệ sau.</div>
+                <div class="affirmation-item"><span>49.</span> Tôi là ví dụ sống về sự thịnh vượng có ý thức.</div>
+                <div class="affirmation-item"><span>50.</span> Tôi đã tự do tài chính. Tôi đã thịnh vượng. Tôi đã đủ đầy.</div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>📅</span> Lịch 21 Ngày</h2>
+            <p>Để affirmations có hiệu quả, cần lặp lại ít nhất 21 ngày liên tục. Đây là cách thực hành:</p>
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">🌅</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Buổi Sáng (5 phút)</div>
+                        <div class="flow-step-desc">Ngay khi thức dậy, đọc 5-10 affirmations bạn chọn. Nói to hoặc thầm trong đầu. CẢM NHẬN mỗi câu.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">🌙</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Buổi Tối (5 phút)</div>
+                        <div class="flow-step-desc">Trước khi ngủ, lặp lại các affirmations. Đây là lúc tiềm thức dễ tiếp nhận nhất.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📱</span> GEM App → Affirmations</div>
+                <p>Sử dụng tính năng <strong>GEM Master → Affirmations</strong> để nhận affirmation hàng ngày và tracking 21 ngày của bạn.</p>
+            </div>
+        </section>
+
+        <!-- REAL STORIES -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Câu Chuyện Từ Học Viên Thực Hành Affirmations</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>👤</span> Câu Chuyện Của Mai (28 tuổi, Graphic Designer Freelance)</div>
+                <p><strong>Điểm khởi đầu:</strong> Mai làm freelance 3 năm nhưng thu nhập bấp bênh. Tháng được 20 triệu, tháng chỉ 5 triệu. Cô thường xuyên lo lắng và suy nghĩ "Tháng sau không biết có job không, mình không ổn định được đâu."</p>
+                <p style="margin-top: var(--space-sm);"><strong>Affirmations Mai chọn:</strong> Cô bắt đầu với Cấp 1 vì còn nhiều kháng cự. 3 câu chính: "Mỗi ngày, tôi đang cải thiện mối quan hệ với tiền" (số 4), "Tôi tin rằng có đủ cho tất cả mọi người" (số 7), và "Tôi đang trở nên tự tin hơn về tài chính" (số 10). Cô đọc mỗi sáng khi thức dậy và mỗi tối trước ngủ.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Kết quả sau 21 ngày:</strong> Mai nhận được 3 client mới đến từ referral - điều chưa bao giờ xảy ra trước đây. Sau 2 tháng, cô nâng lên Cấp 2 với câu "Tiền chảy đến tôi dễ dàng và vui vẻ". Thu nhập bình quân hiện tại: 25 triệu/tháng ổn định, đỉnh cao 40 triệu/tháng.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>👤</span> Câu Chuyện Của Anh Khôi (42 tuổi, Quản lý cấp trung)</div>
+                <p><strong>Điểm khởi đầu:</strong> Anh Khôi có lương ổn định 35 triệu/tháng nhưng không bao giờ tiết kiệm được. Tiền vào là tiền ra. Anh luôn nghĩ "Tiền không ở được với mình, cứ đến là đi".</p>
+                <p style="margin-top: var(--space-sm);"><strong>Cách tiếp cận:</strong> Anh nhận ra vấn đề không phải thu nhập mà là NIỀM TIN về tiền. Anh chọn affirmation số 27 "Tôi giữ tiền và để nó sinh sôi" và số 21 "Tôi chi tiêu có ý thức và tiết kiệm đều đặn". Mỗi lần muốn mua gì, anh dừng lại và đọc affirmation.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Kết quả sau 3 tháng:</strong> Lần đầu tiên trong đời, anh Khôi có quỹ tiết kiệm 50 triệu. Không phải vì lương tăng, mà vì anh BẮT ĐẦU GIỮ ĐƯỢC TIỀN. Điều thú vị là anh không cảm thấy "ép buộc" - việc tiết kiệm trở nên tự nhiên như một thói quen mới.</p>
+            </div>
+
+            <p>Điểm chung của cả hai câu chuyện: Họ không chỉ đọc affirmations như một bài tập - họ CẢM NHẬN mỗi câu là thật và kiên trì ít nhất 21 ngày liên tục. Đây là yếu tố quyết định thành công.</p>
+        </section>
+
+        <!-- KEY TAKEAWAYS -->
+        <section class="section">
+            <h2 class="section-title"><span>🔑</span> 3 Điều Quan Trọng Nhất</h2>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Chọn Câu "Tin Được" - Không Quá Xa Thực Tại</div>
+                        <div class="flow-step-desc">Nếu bạn đang nợ 100 triệu mà nói "Tôi là triệu phú", não sẽ phản đối và tạo kháng cự. Bắt đầu từ Cấp 1 như "Tôi đang mở lòng đón nhận sự thịnh vượng". Khi cảm thấy thoải mái, mới nâng cấp lên. Affirmation hiệu quả nhất là câu bạn có thể TIN được ít nhất 60%.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Cảm Xúc Quan Trọng Hơn Lặp Lại</div>
+                        <div class="flow-step-desc">Nói 100 lần mà không có cảm xúc không bằng nói 10 lần với cảm xúc mãnh liệt. Khi đọc affirmation, hãy nhắm mắt, hít thở sâu, và CẢM NHẬN như thể điều đó đã là thật. Nếu bạn nói "Tiền chảy đến tôi dễ dàng" mà cảm thấy NHẸU NHÀNG, VUI VẺ - đó là dấu hiệu đúng.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">21 Ngày Liên Tục - Không Ngắt Quãng</div>
+                        <div class="flow-step-desc">Não cần thời gian để tạo neural pathway mới. Nghiên cứu cho thấy cần ít nhất 21 ngày liên tục để bắt đầu hình thành thói quen, và 66 ngày để nó trở thành tự động. Nếu ngắt quãng, bạn phải bắt đầu lại từ đầu. Đặt reminder trong GEM App để nhắc nhở mỗi sáng và tối.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TRANSITION -->
+        <section class="section">
+            <h2 class="section-title"><span>🌉</span> Chuẩn Bị Cho Bài Cuối Module 3</h2>
+            <p>Bạn đã có 3 công cụ mạnh mẽ: Thang Cảm Xúc (bản đồ), New Money Story (bản thiết kế), và Affirmations (câu khẳng định hàng ngày).</p>
+            <p>Bài 3.4 sẽ cho bạn công cụ cuối cùng và MẠNH MẼ NHẤT: <strong>Visualization (Hình Dung)</strong>. Đây là kỹ thuật được các vận động viên Olympic, doanh nhân thành đạt, và những người manifestation thành công sử dụng để tạo ra thực tại mong muốn.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📝</span> Bài Tập Chuẩn Bị</div>
+                <p><strong>Chọn 5 affirmations yêu thích:</strong> Từ danh sách 50 câu trên, chọn 5 câu bạn cảm thấy "có thể tin được" nhất. Viết chúng ra giấy hoặc note trong điện thoại.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Thực hành ngay hôm nay:</strong> Đọc 5 câu này sáng khi thức dậy và tối trước ngủ. Mỗi câu đọc 3 lần, CẢM NHẬN như thể nó đã là thật.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Lưu ý:</strong> Bài 3.4 có Quiz cuối Module. Hãy đọc kỹ nội dung về Visualization vì câu hỏi sẽ kiểm tra cả 4 bài của Module 3.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Tổng Kết Bài 3.3</h2>
+            <div class="summary-box">
+                <div class="summary-title"><span>📌</span> Những Điều Bạn Đã Học</div>
+                <ul class="summary-list">
+                    <li>Hiểu cách affirmations hoạt động và lập trình tiềm thức</li>
+                    <li>Học 4 quy tắc viết affirmation hiệu quả</li>
+                    <li>Có 50 affirmations thịnh vượng theo 3 cấp độ</li>
+                    <li>Biết cách thực hành lịch 21 ngày</li>
+                </ul>
+            </div>
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>➡️</span> Tiếp Theo: Bài 3.4</div>
+                <p>Trong bài cuối Module 3, bạn sẽ học <strong>Visualization (Hình Dung)</strong> - kỹ thuật mạnh mẽ nhất trong manifestation. Bài này có Quiz!</p>
+            </div>
+        </section>
+
+        <footer class="lesson-footer">
+            <p>© 2024 GEM Academy | <a href="https://gemral.com">gemral.com</a></p>
+            <p style="margin-top: var(--space-sm);">Tiếp theo: Bài 3.4 - Visualization (Quiz) →</p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 6.4: Review 49 Ngày | GEM Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.5rem, 5vw, 2.25rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .definition-box p { color: var(--text-secondary); margin: 0; }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .compare-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: var(--space-md); margin: var(--space-lg) 0; align-items: stretch; }
+        @media (max-width: 600px) { .compare-grid { grid-template-columns: 1fr; gap: var(--space-md); margin: var(--space-md) 16px; } }
+        .compare-box { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); text-align: center; }
+        @media (max-width: 600px) { .compare-box { border-radius: 0; } }
+        .compare-box.before { border: 2px solid var(--error); }
+        .compare-box.after { border: 2px solid var(--success); }
+        @media (max-width: 600px) { .compare-box.before, .compare-box.after { border: none; } .compare-box.before { border-left: 4px solid var(--error); } .compare-box.after { border-left: 4px solid var(--success); } }
+        .compare-emoji { font-size: 3rem; margin-bottom: var(--space-sm); }
+        .compare-title { font-weight: 700; font-size: 1.1rem; margin-bottom: var(--space-md); }
+        .compare-box.before .compare-title { color: var(--error); }
+        .compare-box.after .compare-title { color: var(--success); }
+        .compare-score { font-size: 2.5rem; font-weight: 800; margin-bottom: var(--space-sm); }
+        .compare-box.before .compare-score { color: var(--error); }
+        .compare-box.after .compare-score { color: var(--success); }
+        .compare-label { font-size: 0.85rem; color: var(--text-muted); }
+        .compare-arrow { font-size: 2rem; color: var(--gold); display: flex; align-items: center; justify-content: center; }
+        @media (max-width: 600px) { .compare-arrow { transform: rotate(90deg); margin: var(--space-sm) 0; } }
+
+        .journey-timeline { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .journey-timeline { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .journey-item { display: flex; gap: var(--space-md); padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); }
+        @media (max-width: 600px) { .journey-item { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        .journey-week { min-width: 80px; text-align: center; }
+        .journey-week-num { font-size: 1.5rem; font-weight: 800; color: var(--gold); }
+        .journey-week-label { font-size: 0.75rem; color: var(--text-muted); }
+        .journey-content { flex: 1; }
+        .journey-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .journey-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .wins-box { background: var(--bg-card); border: 2px solid var(--success); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .wins-box { border: none; border-radius: 0; border-left: 4px solid var(--success); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .wins-title { font-size: 1.2rem; font-weight: 700; color: var(--success); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .wins-input-group { margin-bottom: var(--space-md); }
+        .wins-label { display: block; color: var(--text-secondary); margin-bottom: var(--space-sm); font-size: 0.9rem; }
+        .wins-textarea { width: 100%; min-height: 80px; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-md); color: var(--text-primary); font-family: inherit; font-size: 0.95rem; resize: vertical; }
+        .wins-textarea:focus { outline: none; border-color: var(--success); }
+
+        .lessons-box { background: var(--bg-card); border: 2px solid var(--cyan); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .lessons-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .lessons-title { font-size: 1.2rem; font-weight: 700; color: var(--cyan); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .summary-grid { grid-template-columns: 1fr; gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .summary-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); text-align: center; }
+        @media (max-width: 600px) { .summary-card { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; text-align: left; display: flex; align-items: center; gap: var(--space-md); } }
+        .summary-emoji { font-size: 2.5rem; margin-bottom: var(--space-sm); }
+        @media (max-width: 600px) { .summary-emoji { font-size: 1.8rem; margin-bottom: 0; } }
+        .summary-value { font-size: 1.5rem; font-weight: 800; color: var(--gold); margin-bottom: var(--space-xs); }
+        @media (max-width: 600px) { .summary-value { font-size: 1.2rem; margin-bottom: 0; } }
+        .summary-label { font-size: 0.85rem; color: var(--text-muted); }
+
+        .app-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .app-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .app-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); }
+        .app-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .app-box p:last-child { margin-bottom: 0; }
+
+        /* QUIZ STYLES */
+        .quiz-section { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05)); border: 2px solid var(--purple); border-radius: var(--radius-lg); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-section { padding: var(--space-lg) 0; margin-bottom: 0; border: none; border-radius: 0; border-bottom: 8px solid var(--bg-primary); } }
+        .quiz-header { text-align: center; margin-bottom: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-header { padding: 0 16px; } }
+        .quiz-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: var(--purple); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: white; margin-bottom: var(--space-md); }
+        .quiz-title { font-size: 1.5rem; font-weight: 700; color: var(--purple); }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; margin-top: var(--space-sm); }
+
+        .quiz-question { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .quiz-question { border-radius: 0; padding: var(--space-lg) 16px; margin-bottom: 1px; } }
+        .question-header { display: flex; align-items: center; gap: var(--space-sm); margin-bottom: var(--space-md); }
+        .question-number { width: 32px; height: 32px; background: var(--purple); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; }
+        .question-text { font-weight: 600; color: var(--text-primary); flex: 1; }
+
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        .quiz-option { display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; transition: all 0.3s ease; }
+        @media (max-width: 600px) { .quiz-option { border-radius: 0; border: none; border-left: 4px solid var(--glass-border); } }
+        .quiz-option:hover:not(.disabled) { border-color: var(--purple); background: rgba(106, 91, 255, 0.1); }
+        @media (max-width: 600px) { .quiz-option:hover:not(.disabled) { border-left-color: var(--purple); } }
+        .quiz-option.selected { border-color: var(--purple); background: rgba(106, 91, 255, 0.2); }
+        @media (max-width: 600px) { .quiz-option.selected { border-left-color: var(--purple); } }
+        .quiz-option.correct { border-color: var(--success); background: rgba(0, 200, 83, 0.2); }
+        @media (max-width: 600px) { .quiz-option.correct { border-left-color: var(--success); } }
+        .quiz-option.incorrect { border-color: var(--error); background: rgba(255, 82, 82, 0.2); }
+        @media (max-width: 600px) { .quiz-option.incorrect { border-left-color: var(--error); } }
+        .quiz-option.disabled { cursor: not-allowed; opacity: 0.7; }
+        .option-letter { width: 28px; height: 28px; min-width: 28px; border-radius: 50%; background: var(--glass-border); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+        .quiz-option.correct .option-letter { background: var(--success); }
+        .quiz-option.incorrect .option-letter { background: var(--error); }
+        .option-text { flex: 1; color: var(--text-secondary); }
+        .option-icon { font-size: 1.2rem; display: none; }
+        .quiz-option.correct .option-icon, .quiz-option.incorrect .option-icon { display: block; }
+
+        .question-feedback { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--radius-md); display: none; }
+        @media (max-width: 600px) { .question-feedback { border-radius: 0; margin: var(--space-md) 0 0 0; } }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); }
+        .question-feedback.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .quiz-result { text-align: center; padding: var(--space-xl); background: var(--bg-card); border-radius: var(--radius-md); margin-top: var(--space-lg); display: none; }
+        @media (max-width: 600px) { .quiz-result { border-radius: 0; margin: var(--space-md) 0 0 0; padding: var(--space-xl) 16px; } }
+        .quiz-result.show { display: block; }
+        .result-score { font-size: 3rem; font-weight: 800; margin-bottom: var(--space-md); }
+        .result-score.perfect { color: var(--success); }
+        .result-score.good { color: var(--gold); }
+        .result-score.retry { color: var(--error); }
+        .result-message { font-size: 1.1rem; color: var(--text-secondary); margin-bottom: var(--space-lg); }
+        .result-detail { font-size: 0.9rem; color: var(--text-muted); }
+
+        .lesson-footer { text-align: center; padding: var(--space-xl); color: var(--text-muted); font-size: 0.85rem; }
+        .lesson-footer a { color: var(--gold); text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>🎉</span>
+                <span>Module 6 - Final</span>
+            </div>
+            <div class="lesson-chapter">Module 6 - Nhân Rộng Thịnh Vượng</div>
+            <h1 class="lesson-title">Review 49 Ngày - Celebrate Your Transformation</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 6.4</span></div>
+                <div class="meta-item"><span>⏱️</span><span>30 phút</span></div>
+                <div class="meta-item"><span>📝</span><span>Quiz Module 6</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🌊</span> Bạn Có Nhận Ra Mình Đã Thay Đổi Bao Nhiêu?</h2>
+            <p>Hãy dừng lại một chút và nghĩ về con người bạn 49 ngày trước - người đã bấm vào khóa học này với hy vọng và có thể cả chút hoài nghi. Người đó có những niềm tin gì về tiền bạc? Cảm thấy như thế nào khi thức dậy mỗi sáng? Phản ứng ra sao khi gặp khó khăn tài chính? Có tin rằng mình xứng đáng được thịnh vượng không?</p>
+
+            <p>Bây giờ, hãy nhìn vào gương - không phải gương vật lý, mà là gương nội tâm. Bạn có còn là người đó không? Hay bạn đã trở thành một phiên bản khác - một phiên bản có tần số cao hơn, có công cụ để quản lý cảm xúc, có nghi thức để bắt đầu mỗi ngày với năng lượng tích cực, và quan trọng nhất - có niềm tin mới về khả năng thu hút thịnh vượng của mình?</p>
+
+            <p>Bài học hôm nay không dạy bạn điều gì mới - thay vào đó, chúng ta sẽ DỪNG LẠI để celebrate hành trình 49 ngày vừa qua, ghi nhận những chiến thắng, rút ra bài học, và chuẩn bị cho giai đoạn tiếp theo. Đây là một trong những bài học QUAN TRỌNG NHẤT của khóa học, vì nếu bạn không nhận ra mình đã thay đổi, bạn sẽ dễ dàng quay về lối mòn cũ mà không hề hay biết.</p>
+        </section>
+
+        <!-- SECTION 1: NHÌN LẠI HÀNH TRÌNH -->
+        <section class="section">
+            <h2 class="section-title"><span>🌟</span> 49 Ngày Đã Qua - Bạn Đã Hoàn Thành Một Chu Kỳ Chuyển Hóa</h2>
+            <p>Xin chúc mừng! Bạn đã hoàn thành hành trình 49 ngày "Tái Tạo Tư Duy Triệu Phú". Đây không chỉ là một khóa học bạn đã "xem xong" - đây là một CHU KỲ CHUYỂN HÓA hoàn chỉnh mà bạn đã ĐI QUA với ý thức và thực hành. Bây giờ là lúc để DỪNG LẠI, NHÌN LẠI, và CELEBRATE những gì bạn đã đạt được.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M6_B4_01%0A49+Days+Journey+Complete" alt="49 Ngày Hành Trình">
+                <div class="image-caption">49 Ngày - Một chu kỳ chuyển hóa hoàn chỉnh</div>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🔢</span> Tại Sao 49 Ngày?</div>
+                <p>49 = 7 × 7. Trong nhiều truyền thống tâm linh, 7 là con số hoàn hảo, và 49 đại diện cho một chu kỳ chuyển hóa hoàn chỉnh.</p>
+                <p style="margin-top: var(--space-sm);">• <strong>Tuần 1-2:</strong> Nhận thức và thanh tẩy</p>
+                <p style="margin-top: var(--space-xs);">• <strong>Tuần 3-4:</strong> Cài đặt và lập trình lại</p>
+                <p style="margin-top: var(--space-xs);">• <strong>Tuần 5-6:</strong> Thực hành và củng cố</p>
+                <p style="margin-top: var(--space-xs);">• <strong>Tuần 7:</strong> Integration và nhân rộng</p>
+            </div>
+
+            <div class="journey-timeline">
+                <div class="journey-item">
+                    <div class="journey-week">
+                        <div class="journey-week-num">1-2</div>
+                        <div class="journey-week-label">TUẦN</div>
+                    </div>
+                    <div class="journey-content">
+                        <div class="journey-title">Module 0-1: Thức Tỉnh</div>
+                        <div class="journey-desc">Nhận ra money story, limiting beliefs, 7 attraction blocks. Bắt đầu thanh tẩy tâm thức.</div>
+                    </div>
+                </div>
+                <div class="journey-item">
+                    <div class="journey-week">
+                        <div class="journey-week-num">2-3</div>
+                        <div class="journey-week-label">TUẦN</div>
+                    </div>
+                    <div class="journey-content">
+                        <div class="journey-title">Module 2: Hóa Giải Nghiệp</div>
+                        <div class="journey-desc">Hiểu nghiệp tiền bạc, vẽ bản đồ gia đình, nghi thức tha thứ và cắt dây nghiệp.</div>
+                    </div>
+                </div>
+                <div class="journey-item">
+                    <div class="journey-week">
+                        <div class="journey-week-num">3-4</div>
+                        <div class="journey-week-label">TUẦN</div>
+                    </div>
+                    <div class="journey-content">
+                        <div class="journey-title">Module 3: Cài Đặt Tần Số</div>
+                        <div class="journey-desc">Thang cảm xúc, viết lại money story, affirmations, visualization - nâng tần số thịnh vượng.</div>
+                    </div>
+                </div>
+                <div class="journey-item">
+                    <div class="journey-week">
+                        <div class="journey-week-num">4-5</div>
+                        <div class="journey-week-label">TUẦN</div>
+                    </div>
+                    <div class="journey-content">
+                        <div class="journey-title">Module 4: Nghi Thức Triệu Phú</div>
+                        <div class="journey-desc">Morning routine, gratitude, PAUSE rule, night routine - xây dựng habits tự động.</div>
+                    </div>
+                </div>
+                <div class="journey-item">
+                    <div class="journey-week">
+                        <div class="journey-week-num">5-6</div>
+                        <div class="journey-week-label">TUẦN</div>
+                    </div>
+                    <div class="journey-content">
+                        <div class="journey-title">Module 5: Hành Động Thuận Thiên</div>
+                        <div class="journey-desc">Aligned action, Ikigai, 6 Jars system, đầu tư bản thân - action từ tần số cao.</div>
+                    </div>
+                </div>
+                <div class="journey-item">
+                    <div class="journey-week">
+                        <div class="journey-week-num">6-7</div>
+                        <div class="journey-week-label">TUẦN</div>
+                    </div>
+                    <div class="journey-content">
+                        <div class="journey-title">Module 6: Nhân Rộng Thịnh Vượng</div>
+                        <div class="journey-desc">Duy trì tần số, xử lý setbacks, cộng đồng - sustainability và growth.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: SO SÁNH TRƯỚC SAU -->
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> TRƯỚC vs SAU: Bạn Đã Thay Đổi</h2>
+            <p>Hãy làm lại bài test tần số (Bài 0.2) để so sánh với điểm ban đầu. Hoặc đơn giản tự đánh giá:</p>
+
+            <div class="compare-grid">
+                <div class="compare-box before">
+                    <div class="compare-emoji">😔</div>
+                    <div class="compare-title">NGÀY 1</div>
+                    <div class="compare-score">?/10</div>
+                    <div class="compare-label">Tần số ban đầu</div>
+                </div>
+                <div class="compare-arrow">→</div>
+                <div class="compare-box after">
+                    <div class="compare-emoji">🌟</div>
+                    <div class="compare-title">NGÀY 49</div>
+                    <div class="compare-score">?/10</div>
+                    <div class="compare-label">Tần số hiện tại</div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📝</span> Self-Assessment</div>
+                <p>Trả lời các câu hỏi sau (1-10):</p>
+                <p style="margin-top: var(--space-sm);">• Niềm tin về khả năng kiếm tiền: TRƯỚC ___ → SAU ___</p>
+                <p style="margin-top: var(--space-xs);">• Mức độ biết ơn hàng ngày: TRƯỚC ___ → SAU ___</p>
+                <p style="margin-top: var(--space-xs);">• Khả năng quản lý cảm xúc: TRƯỚC ___ → SAU ___</p>
+                <p style="margin-top: var(--space-xs);">• Consistency với morning routine: TRƯỚC ___ → SAU ___</p>
+                <p style="margin-top: var(--space-xs);">• Cảm giác "xứng đáng" với thịnh vượng: TRƯỚC ___ → SAU ___</p>
+            </div>
+
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <div class="summary-emoji">📚</div>
+                    <div class="summary-info">
+                        <div class="summary-value">24</div>
+                        <div class="summary-label">Bài học đã hoàn thành</div>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-emoji">🧘</div>
+                    <div class="summary-info">
+                        <div class="summary-value">49</div>
+                        <div class="summary-label">Ngày thực hành</div>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-emoji">✨</div>
+                    <div class="summary-info">
+                        <div class="summary-value">∞</div>
+                        <div class="summary-label">Tiềm năng mở ra</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: WINS INVENTORY -->
+        <section class="section">
+            <h2 class="section-title"><span>🏆</span> Wins Inventory - Những Chiến Thắng</h2>
+            <p>Đây là lúc để CELEBRATE! Viết ra TẤT CẢ những wins trong 49 ngày qua - lớn hay nhỏ đều quan trọng.</p>
+
+            <div class="wins-box">
+                <div class="wins-title"><span>🌟</span> Ghi Lại Những Chiến Thắng</div>
+
+                <div class="wins-input-group">
+                    <label class="wins-label">💰 Wins về tiền bạc/tài chính (thu nhập tăng, tiết kiệm, cơ hội mới...)</label>
+                    <textarea class="wins-textarea" placeholder="Viết ra những wins về tài chính của bạn..."></textarea>
+                </div>
+
+                <div class="wins-input-group">
+                    <label class="wins-label">🧠 Wins về mindset (niềm tin mới, pattern cũ bị phá vỡ...)</label>
+                    <textarea class="wins-textarea" placeholder="Những thay đổi về tư duy và niềm tin..."></textarea>
+                </div>
+
+                <div class="wins-input-group">
+                    <label class="wins-label">💪 Wins về habits (morning routine, rituals đã thành tự động...)</label>
+                    <textarea class="wins-textarea" placeholder="Những thói quen mới bạn đã xây dựng..."></textarea>
+                </div>
+
+                <div class="wins-input-group">
+                    <label class="wins-label">❤️ Wins về cảm xúc/relationships (bình an hơn, mối quan hệ tốt hơn...)</label>
+                    <textarea class="wins-textarea" placeholder="Những thay đổi về cảm xúc và các mối quan hệ..."></textarea>
+                </div>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>💡</span> Tại Sao Celebrate Quan Trọng?</div>
+                <p>Khi bạn acknowledge và celebrate wins, bạn đang:</p>
+                <p style="margin-top: var(--space-sm);">• <strong>Củng cố neural pathways</strong> của thành công</p>
+                <p style="margin-top: var(--space-xs);">• <strong>Nâng tần số</strong> qua gratitude</p>
+                <p style="margin-top: var(--space-xs);">• <strong>Build momentum</strong> cho giai đoạn tiếp theo</p>
+                <p style="margin-top: var(--space-xs);">• <strong>Proof</strong> rằng transformation đang xảy ra</p>
+            </div>
+        </section>
+
+        <!-- SECTION 4: LESSONS LEARNED -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Lessons Learned - Bài Học Rút Ra</h2>
+            <p>Ngoài wins, hãy ghi lại những BÀI HỌC quan trọng nhất từ hành trình này:</p>
+
+            <div class="lessons-box">
+                <div class="lessons-title"><span>💎</span> Những Bài Học Quý Giá</div>
+
+                <div class="wins-input-group">
+                    <label class="wins-label">🔑 Bài học quan trọng NHẤT về tiền bạc/thịnh vượng:</label>
+                    <textarea class="wins-textarea" placeholder="Điều quan trọng nhất bạn đã học được..."></textarea>
+                </div>
+
+                <div class="wins-input-group">
+                    <label class="wins-label">⚡ Điều bạn ước mình biết sớm hơn:</label>
+                    <textarea class="wins-textarea" placeholder="Nếu có thể quay lại ngày 1, bạn sẽ nói gì với chính mình..."></textarea>
+                </div>
+
+                <div class="wins-input-group">
+                    <label class="wins-label">🚀 Điều bạn sẽ tiếp tục làm sau khóa học:</label>
+                    <textarea class="wins-textarea" placeholder="Practices, rituals, mindsets bạn sẽ duy trì..."></textarea>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📸</span> Lưu Giữ Khoảnh Khắc Này</div>
+                <p>Đây là thời điểm đặc biệt trong hành trình của bạn. Hãy:</p>
+                <p style="margin-top: var(--space-sm);">• <strong>Screenshot</strong> những gì bạn vừa viết</p>
+                <p style="margin-top: var(--space-xs);">• <strong>Share</strong> trong GEM Community để celebrate</p>
+                <p style="margin-top: var(--space-xs);">• <strong>Journal</strong> thêm trong sổ cá nhân</p>
+                <p style="margin-top: var(--space-xs);">• <strong>Revisit</strong> khi cần motivation</p>
+            </div>
+        </section>
+
+        <!-- SECTION: REAL TRANSFORMATION STORIES -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Câu Chuyện Chuyển Hóa Thực Tế</h2>
+            <p>Trước khi bạn viết ra câu chuyện của chính mình, hãy đọc qua ba câu chuyện chuyển hóa thực tế từ những học viên đã hoàn thành khóa học này. Mỗi câu chuyện đều bắt đầu từ một điểm khác nhau, nhưng tất cả đều có điểm chung: họ đã CAM KẾT với hành trình 49 ngày và để cho quá trình chuyển hóa xảy ra.</p>
+
+            <div class="wins-box">
+                <div class="wins-title"><span>📌</span> Câu Chuyện 1: Anh Hùng - Từ Nợ Nần Đến Tự Do Tài Chính</div>
+                <div class="partner-content">
+                    <p><strong>Ngày 1:</strong> Hùng, 38 tuổi, đang gánh 800 triệu nợ từ việc kinh doanh thất bại. Mỗi sáng thức dậy với cảm giác nặng nề, lo lắng, và tự trách bản thân. Tần số ban đầu: 2/10.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Quá trình 49 ngày:</strong> Module 2 giúp Hùng nhận ra anh đang mang "nghiệp nợ" từ cha - người cũng từng phá sản và mất hết. Nghi thức tha thứ cho cha và cho chính mình là bước ngoặt lớn nhất. Module 4-5 giúp anh xây dựng lại morning routine và tìm lại passion trong việc dạy học (anh là giáo viên trước khi kinh doanh).</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Ngày 49:</strong> Hùng quay lại nghề giáo với mindset mới - không chỉ dạy kiến thức mà còn truyền cảm hứng. Thu nhập ổn định hơn, và quan trọng hơn, anh tìm lại được niềm vui sống. Tần số hiện tại: 7/10. "Tôi vẫn còn nợ, nhưng tôi không còn BỊ nợ chi phối tâm trí nữa. Tôi biết mình sẽ trả hết, từng bước một."</p>
+                </div>
+            </div>
+
+            <div class="wins-box">
+                <div class="wins-title"><span>📌</span> Câu Chuyện 2: Chị Loan - Từ Nghèo Khó Đến Abundant Mindset</div>
+                <div class="partner-content">
+                    <p><strong>Ngày 1:</strong> Loan, 45 tuổi, lớn lên trong gia đình nghèo và suốt đời tin rằng "người như mình không thể giàu được". Dù có công việc ổn định, chị luôn cảm thấy thiếu thốn và sợ chi tiêu. Tần số ban đầu: 4/10.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Quá trình 49 ngày:</strong> Bản đồ nghiệp gia đình (Module 2) cho thấy 3 thế hệ đều có pattern "tiết kiệm đến mức khổ sở". Affirmations về xứng đáng (Module 3) ban đầu rất khó - chị khóc khi tự nói "Tôi xứng đáng được thịnh vượng". 6 Jars system (Module 5) là công cụ thay đổi thực tế nhất - lần đầu tiên chị CHO PHÉP mình chi 10% cho "chơi".</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Ngày 49:</strong> Loan đặt mua một chiếc áo dài đẹp - điều chị chưa bao giờ dám làm trong đời. Chị bắt đầu donate nhỏ cho từ thiện mỗi tháng - một dấu hiệu của abundant mindset. Tần số hiện tại: 8/10. "Lần đầu trong đời tôi tin rằng mình xứng đáng có cuộc sống tốt đẹp. Và kỳ lạ thay, khi tôi tin như vậy, tiền bắt đầu đến dễ dàng hơn."</p>
+                </div>
+            </div>
+
+            <div class="wins-box">
+                <div class="wins-title"><span>📌</span> Câu Chuyện 3: Em Minh - Từ Lo Âu Đến Inner Peace</div>
+                <div class="partner-content">
+                    <p><strong>Ngày 1:</strong> Minh, 26 tuổi, mới ra trường và lo lắng cực độ về tương lai. Mỗi đêm mất ngủ vì so sánh bản thân với bạn bè thành công hơn. Tần số ban đầu: 3/10.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Quá trình 49 ngày:</strong> Module 1 giúp Minh nhận ra "comparison trap" là limiting belief lớn nhất. Morning routine (Module 4) - đặc biệt là 15 phút gratitude và visualization mỗi sáng - tạo ra sự thay đổi lớn nhất. S.B.O.C. (Module 6) giúp em xử lý những lúc lo âu dâng cao.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Ngày 49:</strong> Minh không còn mất ngủ vì lo lắng. Em bắt đầu side project nhỏ bán hàng handmade - không phải vì cần tiền gấp, mà vì MUỐN tạo ra giá trị. Tần số hiện tại: 7/10. "Tôi nhận ra mình không cần phải 'giỏi' như ai cả. Tôi chỉ cần làm tốt nhất phiên bản của mình và tin rằng vũ trụ sẽ sắp xếp. Và bằng cách nào đó, điều đó đang xảy ra."</p>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💎</span> Bây Giờ Đến Lượt Bạn</div>
+                <p>Mỗi câu chuyện trên đều độc đáo, nhưng tất cả đều có điểm chung: người học đã THỰC HÀNH chứ không chỉ đọc. Bây giờ đến lượt bạn viết câu chuyện của chính mình. Hãy quay lại phần "Ghi Lại Những Chiến Thắng" và "Những Bài Học Quý Giá" ở trên - viết thật chi tiết, thật trung thực. Đây sẽ là tài liệu quý giá nhất bạn có từ khóa học này.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 5: WHAT'S NEXT -->
+        <section class="section">
+            <h2 class="section-title"><span>🚀</span> What's Next?</h2>
+            <p>Khóa học kết thúc, nhưng hành trình thịnh vượng mới BẮT ĐẦU. Module 7 sẽ giới thiệu cho bạn những con đường tiếp theo.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/6A5BFF?text=M6_B4_02%0AWhat%27s+Next" alt="What's Next">
+                <div class="image-caption">Hành trình không dừng lại - Có nhiều con đường chờ đón bạn</div>
+            </div>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>📱</span> Tiếp Tục Với App GEM</div>
+                <p>Dù khóa học kết thúc, app GEM vẫn đồng hành:</p>
+                <p>• <strong>Vision Board:</strong> Tiếp tục track habits và daily score</p>
+                <p>• <strong>GEM Master:</strong> AI support bất cứ lúc nào</p>
+                <p>• <strong>Rituals:</strong> Tiếp tục các nghi thức đã học</p>
+                <p>• <strong>Community:</strong> Kết nối, chia sẻ, support nhau</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🎯</span> Module 7: Sứ Mệnh Phụng Sự</div>
+                <p>Module cuối cùng sẽ giới thiệu cho bạn 3 con đường tiếp theo:</p>
+                <p style="margin-top: var(--space-sm);">1. <strong>Tự tiếp tục</strong> - Thực hành những gì đã học</p>
+                <p style="margin-top: var(--space-xs);">2. <strong>Nâng cấp công cụ</strong> - Products, khóa học tiếp theo</p>
+                <p style="margin-top: var(--space-xs);">3. <strong>Partnership</strong> - Trở thành đối tác lan tỏa thịnh vượng</p>
+            </div>
+        </section>
+
+        <!-- QUIZ MODULE 6 -->
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <div class="quiz-badge">
+                    <span>📝</span>
+                    <span>Quiz Module 6</span>
+                </div>
+                <h2 class="quiz-title">Kiểm Tra Kiến Thức</h2>
+                <p class="quiz-subtitle">3 câu hỏi • Chọn đáp án và xem kết quả ngay</p>
+            </div>
+
+            <!-- Question 1 -->
+            <div class="quiz-question" data-question="1" data-correct="B">
+                <div class="question-header">
+                    <div class="question-number">1</div>
+                    <div class="question-text">Trong quy trình S.B.O.C. để xử lý khi tần số rớt, "O" đại diện cho điều gì?</div>
+                </div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <div class="option-letter">A</div>
+                        <div class="option-text">Organize - Tổ chức suy nghĩ</div>
+                        <div class="option-icon"></div>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <div class="option-letter">B</div>
+                        <div class="option-text">Observe - Quan sát không phán xét</div>
+                        <div class="option-icon"></div>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <div class="option-letter">C</div>
+                        <div class="option-text">Open - Mở lòng đón nhận</div>
+                        <div class="option-icon"></div>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <div class="option-letter">D</div>
+                        <div class="option-text">Overcome - Vượt qua khó khăn</div>
+                        <div class="option-icon"></div>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text">S.B.O.C. = Stop - Breathe - Observe - Choose. "O" là Observe - quan sát cảm xúc, suy nghĩ, trigger KHÔNG phán xét, chỉ nhận biết.</div>
+                </div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="quiz-question" data-question="2" data-correct="C">
+                <div class="question-header">
+                    <div class="question-number">2</div>
+                    <div class="question-text">Câu nói "Bạn là trung bình của 5 người bạn dành nhiều thời gian nhất" nhấn mạnh tầm quan trọng của điều gì?</div>
+                </div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <div class="option-letter">A</div>
+                        <div class="option-text">Số lượng bạn bè</div>
+                        <div class="option-icon"></div>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <div class="option-letter">B</div>
+                        <div class="option-text">Thời gian online</div>
+                        <div class="option-icon"></div>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <div class="option-letter">C</div>
+                        <div class="option-text">Môi trường và cộng đồng xung quanh</div>
+                        <div class="option-icon"></div>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <div class="option-letter">D</div>
+                        <div class="option-text">Kỹ năng giao tiếp</div>
+                        <div class="option-icon"></div>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text">Câu nói này nhấn mạnh tầm quan trọng của MÔI TRƯỜNG - những người xung quanh ảnh hưởng đến tần số năng lượng của bạn thông qua hiện tượng entrainment.</div>
+                </div>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="quiz-question" data-question="3" data-correct="A">
+                <div class="question-header">
+                    <div class="question-number">3</div>
+                    <div class="question-text">Theo nghiên cứu, việc có Accountability Partner với check-in thường xuyên tăng cơ hội đạt mục tiêu lên bao nhiêu %?</div>
+                </div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <div class="option-letter">A</div>
+                        <div class="option-text">95%</div>
+                        <div class="option-icon"></div>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <div class="option-letter">B</div>
+                        <div class="option-text">65%</div>
+                        <div class="option-icon"></div>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <div class="option-letter">C</div>
+                        <div class="option-text">50%</div>
+                        <div class="option-icon"></div>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <div class="option-letter">D</div>
+                        <div class="option-text">75%</div>
+                        <div class="option-icon"></div>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text">Theo ASTD: Có mục tiêu = 10%, Cam kết với người khác = 65%, Có accountability check-in = 95%. Đây là sức mạnh của cộng đồng và accountability.</div>
+                </div>
+            </div>
+
+            <!-- Quiz Result -->
+            <div class="quiz-result" id="quizResult">
+                <div class="result-score" id="resultScore">0/3</div>
+                <div class="result-message" id="resultMessage"></div>
+                <div class="result-detail" id="resultDetail"></div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <p>Module 6 Hoàn Tất! 🎉</p>
+            <p style="margin-top: var(--space-sm);">Tiếp theo: <a href="KHOA_TRIEU_PHU_M7_BAI_01.html">Module 7: Sứ Mệnh Phụng Sự →</a></p>
+            <p style="margin-top: var(--space-lg);">© 2024 GEM Academy by Jennie Uyen Chu</p>
+        </footer>
+
+    </div>
+
+    <script>
+        // Quiz Logic - Instant Feedback
+        let answeredQuestions = new Set();
+        let correctAnswers = 0;
+        const totalQuestions = 3;
+
+        document.querySelectorAll('.quiz-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const questionEl = this.closest('.quiz-question');
+                const questionNum = questionEl.dataset.question;
+                const correctAnswer = questionEl.dataset.correct;
+                const selectedAnswer = this.dataset.option;
+
+                // Check if already answered
+                if (answeredQuestions.has(questionNum)) return;
+
+                // Mark as answered
+                answeredQuestions.add(questionNum);
+
+                // Disable all options in this question
+                questionEl.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.add('disabled');
+                });
+
+                // Mark selected option
+                this.classList.add('selected');
+
+                // Check if correct
+                const isCorrect = selectedAnswer === correctAnswer;
+                const feedbackEl = questionEl.querySelector('.question-feedback');
+                const feedbackTitle = feedbackEl.querySelector('.feedback-title');
+
+                if (isCorrect) {
+                    this.classList.add('correct');
+                    this.querySelector('.option-icon').textContent = '✓';
+                    feedbackEl.classList.add('correct');
+                    feedbackTitle.textContent = '✓ Chính xác!';
+                    correctAnswers++;
+                } else {
+                    this.classList.add('incorrect');
+                    this.querySelector('.option-icon').textContent = '✗';
+                    feedbackEl.classList.add('incorrect');
+                    feedbackTitle.textContent = '✗ Chưa đúng';
+
+                    // Highlight correct answer
+                    questionEl.querySelectorAll('.quiz-option').forEach(opt => {
+                        if (opt.dataset.option === correctAnswer) {
+                            opt.classList.add('correct');
+                            opt.querySelector('.option-icon').textContent = '✓';
+                        }
+                    });
+                }
+
+                // Show feedback
+                feedbackEl.classList.add('show');
+
+                // Check if all questions answered
+                if (answeredQuestions.size === totalQuestions) {
+                    showResult();
+                }
+            });
+        });
+
+        function showResult() {
+            const resultEl = document.getElementById('quizResult');
+            const scoreEl = document.getElementById('resultScore');
+            const messageEl = document.getElementById('resultMessage');
+            const detailEl = document.getElementById('resultDetail');
+
+            scoreEl.textContent = `${correctAnswers}/${totalQuestions}`;
+
+            if (correctAnswers === totalQuestions) {
+                scoreEl.classList.add('perfect');
+                messageEl.textContent = '🎉 Hoàn hảo! Bạn đã sẵn sàng cho Module 7!';
+                detailEl.textContent = 'Xin chúc mừng đã hoàn thành 49 ngày hành trình!';
+            } else if (correctAnswers >= 2) {
+                scoreEl.classList.add('good');
+                messageEl.textContent = '👍 Tốt lắm! Gần như hoàn hảo!';
+                detailEl.textContent = 'Xem lại các câu trả lời sai để củng cố kiến thức nhé!';
+            } else {
+                scoreEl.classList.add('retry');
+                messageEl.textContent = '📚 Cần ôn lại Module 6';
+                detailEl.textContent = 'Đọc lại các bài học trong Module 6 và thử lại nhé!';
+            }
+
+            resultEl.classList.add('show');
+            resultEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    </script>
+</body>
+</html>

@@ -37,6 +37,19 @@ export const TIER_ACCESS = {
       scansPerDay: 10,
       alertsPerCoin: 0,
     },
+    // Zone Visualization Configuration - FREE tier per user's table
+    zoneVisualization: {
+      enabled: false,            // ❌ Zone Rectangles NOT available
+      maxZonesDisplayed: 1,      // Max 1 zone
+      zoneRectangles: false,     // ❌ No rectangles
+      zoneLabels: false,         // ❌ No labels
+      zoneLifecycle: false,      // ❌ No lifecycle
+      historicalZones: false,    // ❌ No historical
+      mtfTimeframes: 0,          // ❌ No MTF
+      zoneAlerts: 0,             // ❌ No alerts
+      customColors: false,       // ❌ No colors
+      zoneExport: false,         // ❌ No export
+    },
   },
 
   TIER1: {
@@ -62,11 +75,24 @@ export const TIER_ACCESS = {
       scansPerDay: 50,
       alertsPerCoin: 3,
     },
+    // Zone Visualization Configuration - TIER1 per user's table
+    zoneVisualization: {
+      enabled: true,              // ✅ Zone Rectangles
+      maxZonesDisplayed: 3,       // Up to 3 zones
+      zoneRectangles: true,       // Filled rectangles
+      zoneLabels: true,           // Buy/Sell labels
+      zoneLifecycle: false,       // No lifecycle tracking
+      historicalZones: false,     // No historical zones
+      mtfTimeframes: 0,           // No MTF analysis
+      zoneAlerts: 3,              // 3 alerts per coin
+      customColors: false,        // No color customization
+      zoneExport: false,          // No zone export
+    },
   },
 
   TIER2: {
     name: 'Tier 2 - Pro',
-    price: 33000000, // 33M VND
+    price: 21000000, // 21M VND
     coins: {
       max: 200,
       list: 'TOP_200',
@@ -86,6 +112,19 @@ export const TIER_ACCESS = {
     limits: {
       scansPerDay: -1, // Unlimited
       alertsPerCoin: 10,
+    },
+    // Zone Visualization Configuration
+    zoneVisualization: {
+      enabled: true,              // Zone visualization enabled
+      maxZonesDisplayed: 10,      // Up to 10 zones
+      zoneRectangles: true,       // Filled rectangles
+      zoneLabels: true,           // Buy/Sell labels
+      zoneLifecycle: true,        // Lifecycle tracking (Fresh/Tested/Broken)
+      historicalZones: true,      // Show historical zones
+      mtfTimeframes: 3,           // HTF, ITF, LTF analysis
+      zoneAlerts: 10,             // 10 alerts per coin
+      customColors: true,         // Color customization allowed
+      zoneExport: false,          // No zone export
     },
   },
 
@@ -112,6 +151,19 @@ export const TIER_ACCESS = {
       scansPerDay: -1,
       alertsPerCoin: -1,
     },
+    // Zone Visualization Configuration
+    zoneVisualization: {
+      enabled: true,              // Zone visualization enabled
+      maxZonesDisplayed: 20,      // Up to 20 zones
+      zoneRectangles: true,       // Filled rectangles
+      zoneLabels: true,           // Buy/Sell labels
+      zoneLifecycle: true,        // Lifecycle tracking
+      historicalZones: true,      // Show historical zones
+      mtfTimeframes: 5,           // All timeframes
+      zoneAlerts: -1,             // Unlimited alerts
+      customColors: true,         // Color customization allowed
+      zoneExport: true,           // Zone export enabled
+    },
   },
 
   ADMIN: {
@@ -130,6 +182,19 @@ export const TIER_ACCESS = {
     limits: {
       scansPerDay: -1,
       alertsPerCoin: -1,
+    },
+    // Zone Visualization Configuration - Full Access
+    zoneVisualization: {
+      enabled: true,              // Zone visualization enabled
+      maxZonesDisplayed: 50,      // Up to 50 zones
+      zoneRectangles: true,       // Filled rectangles
+      zoneLabels: true,           // Buy/Sell labels
+      zoneLifecycle: true,        // Lifecycle tracking
+      historicalZones: true,      // Show historical zones
+      mtfTimeframes: 12,          // All 12 timeframes
+      zoneAlerts: -1,             // Unlimited alerts
+      customColors: true,         // Color customization allowed
+      zoneExport: true,           // Zone export enabled
     },
   },
 };

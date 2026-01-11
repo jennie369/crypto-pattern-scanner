@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import affiliateService from '../services/affiliate';
+import { affiliateLinks } from '../utils/linkUtils';
 import './AffiliateDashboard.css';
 
 const AffiliateDashboard = () => {
@@ -75,7 +76,7 @@ const AffiliateDashboard = () => {
 
   const copyReferralLink = () => {
     if (referralCode) {
-      const link = `${window.location.origin}?ref=${referralCode.code}`;
+      const link = affiliateLinks.referral(referralCode.code);
       navigator.clipboard.writeText(link);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -216,7 +217,7 @@ const AffiliateDashboard = () => {
               <div className="link-box">
                 <input
                   type="text"
-                  value={referralCode ? `${window.location.origin}?ref=${referralCode.code}` : ''}
+                  value={referralCode ? affiliateLinks.referral(referralCode.code) : ''}
                   readOnly
                 />
                 <button onClick={copyReferralLink} className="btn-copy">

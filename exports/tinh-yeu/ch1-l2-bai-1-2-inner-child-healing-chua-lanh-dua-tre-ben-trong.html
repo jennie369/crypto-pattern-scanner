@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 1.2: Inner Child Healing - Chữa Lành Đứa Trẻ Bên Trong | Khóa Tần Số Tình Yêu</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root{--navy:#112250;--navy-dark:#0a1628;--gold:#FFBD59;--gold-dark:#E5A73D;--cyan:#00F0FF;--purple:#6A5BFF;--burgundy:#9C0612;--burgundy-light:#C41E2A;--success:#00C853;--error:#FF5252;--bg-primary:#0a1628;--bg-card:rgba(17,34,80,0.6);--text-primary:#FFFFFF;--text-secondary:rgba(255,255,255,0.85);--text-muted:rgba(255,255,255,0.6);--glass-bg:rgba(17,34,80,0.4);--glass-border:rgba(255,189,89,0.2);--space-xs:4px;--space-sm:8px;--space-md:16px;--space-lg:24px;--space-xl:32px;--radius-md:12px;--radius-lg:16px}*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}body{font-family:'Montserrat',sans-serif;background:var(--bg-primary);color:var(--text-primary);line-height:1.6}img{max-width:100%;height:auto;display:block}.background-container{position:fixed;inset:0;z-index:-1}.bg-layer-base{position:absolute;inset:0;background:linear-gradient(180deg,var(--navy-dark) 0%,var(--navy) 50%,var(--navy-dark) 100%)}.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.3}.orb-1{width:400px;height:400px;background:var(--gold);top:-100px;right:-100px}.orb-2{width:300px;height:300px;background:var(--cyan);bottom:20%;left:-100px}.orb-3{width:250px;height:250px;background:var(--burgundy);bottom:-50px;right:20%}.lesson-container{max-width:800px;margin:0 auto;padding:1.5rem}@media(max-width:600px){.lesson-container{padding:0}}.lesson-header{text-align:center;padding:var(--space-xl);margin-bottom:var(--space-xl);background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);box-shadow:0 4px 24px rgba(0,0,0,0.2)}@media(max-width:600px){.lesson-header{padding:var(--space-lg) 16px;margin-bottom:0;border:none;border-radius:0;box-shadow:none;border-bottom:8px solid var(--bg-primary)}}.lesson-badge{display:inline-flex;align-items:center;gap:var(--space-sm);padding:var(--space-sm) var(--space-md);background:linear-gradient(135deg,var(--burgundy),var(--burgundy-light));border-radius:50px;font-size:0.75rem;font-weight:700;text-transform:uppercase;margin-bottom:var(--space-md)}.lesson-chapter{font-size:0.9rem;color:var(--gold);font-weight:600;margin-bottom:var(--space-sm);text-transform:uppercase;letter-spacing:2px}.lesson-title{font-size:clamp(1.75rem,5vw,2.5rem);font-weight:800;margin-bottom:var(--space-md);background:linear-gradient(135deg,var(--text-primary),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.lesson-meta{display:flex;justify-content:center;gap:var(--space-lg);flex-wrap:wrap;color:var(--text-muted);font-size:0.85rem}.meta-item{display:flex;align-items:center;gap:var(--space-xs)}.section{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);box-shadow:0 4px 24px rgba(0,0,0,0.2);padding:var(--space-xl);margin-bottom:var(--space-lg)}@media(max-width:600px){.section{padding:0;margin-bottom:0;border:none;border-radius:0;box-shadow:none;border-bottom:8px solid var(--bg-primary)}}.section-title{font-size:1.5rem;font-weight:700;color:var(--gold);margin-bottom:var(--space-lg);display:flex;align-items:center;gap:var(--space-sm)}@media(max-width:600px){.section-title{padding:var(--space-lg) 16px var(--space-md) 16px;margin-bottom:0}}.section>p{color:var(--text-secondary);margin-bottom:var(--space-md)}@media(max-width:600px){.section>p{padding:0 16px}}.section>ul,.section>ol{color:var(--text-secondary);padding-left:1.5em;margin-bottom:var(--space-md)}@media(max-width:600px){.section>ul,.section>ol{padding-left:calc(16px + 1.5em);padding-right:16px}}.section li{margin-bottom:var(--space-sm)}.highlight-box{background:linear-gradient(135deg,rgba(255,189,89,0.15),rgba(255,189,89,0.05));border:1px solid rgba(255,189,89,0.3);border-radius:var(--radius-md);padding:var(--space-lg);margin:var(--space-lg) 0}@media(max-width:600px){.highlight-box{border:none;border-radius:0;border-left:4px solid var(--gold);padding:var(--space-md) 16px;margin:var(--space-md) 0}}.highlight-box-title{font-weight:700;color:var(--gold);margin-bottom:var(--space-sm);display:flex;align-items:center;gap:var(--space-sm)}.highlight-box p{color:var(--text-secondary);margin:0;margin-bottom:var(--space-sm)}.definition-box{background:linear-gradient(135deg,rgba(0,240,255,0.1),rgba(0,240,255,0.02));border:1px solid rgba(0,240,255,0.2);border-radius:var(--radius-md);padding:var(--space-lg);margin:var(--space-lg) 0}@media(max-width:600px){.definition-box{border:none;border-radius:0;border-left:4px solid var(--cyan);padding:var(--space-md) 16px;margin:var(--space-md) 0}}.definition-box-title{font-weight:700;color:var(--cyan);margin-bottom:var(--space-sm);display:flex;align-items:center;gap:var(--space-sm)}.definition-box p{color:var(--text-secondary);margin-bottom:var(--space-sm)}.warning-box{background:linear-gradient(135deg,rgba(156,6,18,0.2),rgba(156,6,18,0.05));border:1px solid rgba(156,6,18,0.4);border-radius:var(--radius-md);padding:var(--space-lg);margin:var(--space-lg) 0}@media(max-width:600px){.warning-box{border:none;border-radius:0;border-left:4px solid var(--burgundy);padding:var(--space-md) 16px;margin:var(--space-md) 0}}.warning-box-title{font-weight:700;color:var(--burgundy-light);margin-bottom:var(--space-sm);display:flex;align-items:center;gap:var(--space-sm)}.warning-box p{color:var(--text-secondary);margin-bottom:var(--space-sm)}.success-box{background:linear-gradient(135deg,rgba(0,200,83,0.15),rgba(0,200,83,0.05));border:1px solid rgba(0,200,83,0.3);border-radius:var(--radius-md);padding:var(--space-lg);margin:var(--space-lg) 0}@media(max-width:600px){.success-box{border:none;border-radius:0;border-left:4px solid var(--success);padding:var(--space-md) 16px;margin:var(--space-md) 0}}.success-box-title{font-weight:700;color:var(--success);margin-bottom:var(--space-sm);display:flex;align-items:center;gap:var(--space-sm)}.success-box p{color:var(--text-secondary);margin-bottom:var(--space-sm)}.quote-box{background:linear-gradient(135deg,rgba(106,91,255,0.15),rgba(106,91,255,0.05));border:1px solid rgba(106,91,255,0.3);border-radius:var(--radius-md);padding:var(--space-lg);margin:var(--space-lg) 0;font-style:italic}@media(max-width:600px){.quote-box{border:none;border-radius:0;border-left:4px solid var(--purple);padding:var(--space-md) 16px;margin:var(--space-md) 0}}.quote-box p{color:var(--text-secondary);margin-bottom:var(--space-sm)}.quote-author{color:var(--purple);font-weight:600;font-style:normal}.image-container{margin:var(--space-xl) 0;border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--glass-border)}@media(max-width:600px){.image-container{margin:var(--space-md) 0;border-radius:0;border:none}}.image-caption{padding:var(--space-sm);font-size:0.85rem;color:var(--text-muted);font-style:italic;text-align:center}@media(max-width:600px){.image-caption{padding:var(--space-sm) 16px}}.flow-steps{display:flex;flex-direction:column;gap:var(--space-md);margin:var(--space-lg) 0}@media(max-width:600px){.flow-steps{gap:1px;background:var(--glass-border);margin:var(--space-md) 0}}.flow-step{display:flex;gap:var(--space-md);align-items:flex-start;padding:var(--space-md);background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius-md);transition:all 0.3s ease}@media(max-width:600px){.flow-step{padding:var(--space-md) 16px;border:none;border-radius:0;border-left:4px solid var(--gold)}}@media(min-width:601px){.flow-step:hover{border-color:var(--gold);transform:translateX(8px)}}.flow-step-number{width:40px;height:40px;min-width:40px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;color:var(--navy-dark)}.flow-step-content{flex:1}.flow-step-title{font-weight:700;color:var(--text-primary);margin-bottom:var(--space-xs)}.flow-step-desc{font-size:0.9rem;color:var(--text-muted)}.patterns-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--space-md);margin:var(--space-lg) 0}@media(max-width:600px){.patterns-grid{gap:1px;background:var(--glass-border);margin:var(--space-md) 0}}.pattern-card{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius-md);padding:var(--space-lg);text-align:center;transition:all 0.3s ease}@media(max-width:600px){.pattern-card{border:none;border-radius:0;padding:var(--space-md)}}@media(min-width:601px){.pattern-card:hover{border-color:var(--burgundy);transform:translateY(-4px)}}.pattern-icon{font-size:2.5rem;margin-bottom:var(--space-sm)}.pattern-name{font-weight:700;color:var(--text-primary);margin-bottom:var(--space-xs)}.pattern-desc{font-size:0.85rem;color:var(--text-muted)}.summary-box{background:linear-gradient(135deg,rgba(255,189,89,0.1),rgba(255,189,89,0.02));border:2px solid var(--gold);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0}@media(max-width:600px){.summary-box{border:none;border-radius:0;border-left:4px solid var(--gold);padding:var(--space-lg) 16px;margin:var(--space-md) 0}}.summary-title{font-size:1.25rem;font-weight:700;color:var(--gold);margin-bottom:var(--space-lg);display:flex;align-items:center;gap:var(--space-sm)}.summary-list{list-style:none}.summary-list li{display:flex;align-items:flex-start;gap:var(--space-sm);margin-bottom:var(--space-md);color:var(--text-secondary)}.summary-list li::before{content:"✓";color:var(--gold);font-weight:700}
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge"><span>💔</span><span>Module 1</span></div>
+            <div class="lesson-chapter">Chapter 1 - Chữa Lành Vết Thương Quá Khứ</div>
+            <h1 class="lesson-title">Inner Child Healing - Chữa Lành Đứa Trẻ Bên Trong</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 1.2</span></div>
+                <div class="meta-item"><span>⏱️</span><span>10 phút đọc</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>👶</span> Đứa Trẻ Đang Khóc Trong Bạn</h2>
+
+            <p>Đã bao giờ bạn phản ứng quá mức trong một tình huống, rồi sau đó tự hỏi: "Tại sao mình lại hành xử như vậy?" Người yêu về muộn 30 phút và bạn bùng nổ như thể họ đã bỏ rơi bạn mãi mãi. Một lời phê bình nhỏ khiến bạn sụp đổ như thể cả thế giới đang chống lại bạn. Đây không phải là phản ứng của người trưởng thành đang đứng trước mặt bạn - đây là tiếng khóc của một đứa trẻ bị tổn thương từ nhiều năm trước, vẫn đang sống bên trong bạn.</p>
+
+            <p>Đứa trẻ bên trong (Inner Child) là khái niệm quan trọng bậc nhất trong hành trình chữa lành tình yêu, bởi vì hầu hết những patterns đau thương trong quan hệ trưởng thành đều bắt nguồn từ những vết thương thời thơ ấu chưa được lành. Khi bạn chữa lành Inner Child, bạn không chỉ thay đổi cách yêu mà còn thay đổi cách bạn nhìn nhận chính mình và thế giới xung quanh.</p>
+
+            <div class="quote-box">
+                <p>"Until you make the unconscious conscious, it will direct your life and you will call it fate."</p>
+                <p class="quote-author">— Carl Jung (Cho đến khi bạn đưa vô thức lên ý thức, nó sẽ điều khiển cuộc đời bạn và bạn gọi đó là số phận)</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m1-inner-child-concept.png" alt="Inner Child Concept">
+            </div>
+            <div class="image-caption">Hình 1: Inner Child - Đứa trẻ bên trong mỗi người trưởng thành vẫn mang theo những vết thương cần được chữa lành</div>
+        </section>
+
+        <!-- CONCEPT INTRODUCTION -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Inner Child Là Gì?</h2>
+
+            <p>Inner Child (Đứa Trẻ Bên Trong) là phần tâm lý trong tiềm thức lưu giữ tất cả những trải nghiệm, cảm xúc, nhu cầu và vết thương từ thời thơ ấu. Đây không phải là một khái niệm trừu tượng mà là một phần rất thực trong psyche của bạn, tiếp tục ảnh hưởng đến cách bạn suy nghĩ, cảm nhận và hành xử hàng ngày, đặc biệt trong các mối quan hệ thân mật.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📖</span> Định Nghĩa Chuyên Sâu</div>
+                <p><strong>Inner Child</strong> là tập hợp những ký ức, cảm xúc và patterns hành vi được hình thành từ những năm đầu đời (0-7 tuổi), thời điểm não bộ hoạt động chủ yếu ở sóng Theta - trạng thái tiếp thu mọi thông tin mà không có khả năng phản biện. Mọi điều xảy ra trong giai đoạn này đều được "ghi khắc" vào tiềm thức như những sự thật tuyệt đối.</p>
+                <p>Ví dụ: Nếu bố mẹ bạn thường xuyên cãi nhau, Inner Child có thể đã "học" rằng "tình yêu = đau khổ và xung đột". Dù bạn trưởng thành và biết điều đó không đúng, phần tiềm thức vẫn tiếp tục vận hành theo chương trình cũ.</p>
+            </div>
+
+            <p>Điều quan trọng cần hiểu là Inner Child không phải là "kẻ thù" hay "phần yếu đuối" của bạn cần phải loại bỏ. Đây là phần của bạn cần được yêu thương, thấu hiểu và chữa lành. Khi bạn chữa lành Inner Child, bạn đang tích hợp lại phần bị "chia cắt" của bản thân, trở nên toàn vẹn và có khả năng yêu thương sâu sắc hơn.</p>
+        </section>
+
+        <!-- DEEP EXPLANATION - 5 VẾT THƯƠNG -->
+        <section class="section">
+            <h2 class="section-title"><span>💔</span> 5 Vết Thương Cốt Lõi</h2>
+
+            <p>Theo Lise Bourbeau, tác giả cuốn sách nổi tiếng "Heal Your Wounds and Find Your True Self", có 5 vết thương cốt lõi hình thành từ thời thơ ấu. Mỗi vết thương tạo ra một "mặt nạ" - cách bạn tự bảo vệ mình khỏi nỗi đau, nhưng đồng thời cũng ngăn cản bạn có những mối quan hệ lành mạnh.</p>
+
+            <div class="image-container">
+                <img src="images/m1-5-vet-thuong-cot-loi.png" alt="5 Vết Thương Cốt Lõi">
+            </div>
+            <div class="image-caption">Hình 2: 5 Vết Thương Cốt Lõi theo Lise Bourbeau và cách chúng ảnh hưởng đến tình yêu trưởng thành</div>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Vết Thương Bị Bỏ Rơi (Abandonment)</div>
+                        <div class="flow-step-desc"><strong>Hình thành:</strong> Khi cha/mẹ vắng mặt (về thể chất hoặc cảm xúc) - đi công tác nhiều, ly hôn, hoặc có mặt nhưng không "hiện diện" thực sự. <strong>Biểu hiện ở người lớn:</strong> Sợ cô đơn, cần người khác liên tục ở bên, ghen tuông, bám víu, lo lắng khi không liên lạc được với người yêu. <strong>Mặt nạ:</strong> Người phụ thuộc (Dependent).</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Vết Thương Bị Từ Chối (Rejection)</div>
+                        <div class="flow-step-desc"><strong>Hình thành:</strong> Khi cảm giác không được chấp nhận, không đủ tốt - bị so sánh với anh chị em, không được thừa nhận, bị bỏ qua. <strong>Biểu hiện ở người lớn:</strong> Tự cô lập, không dám thể hiện con người thật, sợ bị từ chối nên từ chối trước, tin rằng mình không xứng đáng được yêu. <strong>Mặt nạ:</strong> Người trốn chạy (Fugitive).</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Vết Thương Bị Sỉ Nhục (Humiliation)</div>
+                        <div class="flow-step-desc"><strong>Hình thành:</strong> Khi bị chê bai, làm nhục trước mặt người khác, bị kiểm soát về cơ thể (ăn uống, vệ sinh). <strong>Biểu hiện ở người lớn:</strong> Mặc cảm, xấu hổ về cơ thể hoặc tình dục, cố gắng làm hài lòng mọi người, hy sinh bản thân để được chấp nhận. <strong>Mặt nạ:</strong> Người khổ dâm (Masochist).</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Vết Thương Bị Phản Bội (Betrayal)</div>
+                        <div class="flow-step-desc"><strong>Hình thành:</strong> Khi lời hứa không được giữ, bị lừa dối bởi người bạn tin tưởng, cha/mẹ không giữ cam kết. <strong>Biểu hiện ở người lớn:</strong> Khó tin tưởng, cần kiểm soát mọi thứ và mọi người, sợ mất quyền lực, ghen tuông cực độ. <strong>Mặt nạ:</strong> Người kiểm soát (Controller).</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Vết Thương Bất Công (Injustice)</div>
+                        <div class="flow-step-desc"><strong>Hình thành:</strong> Khi không được đối xử công bằng, cảm xúc bị phủ nhận ("Con không được khóc!"), yêu cầu phải hoàn hảo. <strong>Biểu hiện ở người lớn:</strong> Cầu toàn, cứng nhắc, khó tha thứ, đè nén cảm xúc, không cho phép mình mắc sai lầm. <strong>Mặt nạ:</strong> Người cứng nhắc (Rigid).</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>❓</span> Vết Thương Chính Của Bạn Là Gì?</div>
+                <p>Hãy đọc lại 5 vết thương và tự hỏi: Vết thương nào khiến bạn cảm thấy quen thuộc nhất? Điều gì "trigger" bạn mạnh nhất trong các mối quan hệ? Hầu hết mọi người có 1-2 vết thương chính. Ghi chép câu trả lời của bạn vào sổ tay - đây là thông tin quan trọng cho các bài tập chữa lành tiếp theo.</p>
+            </div>
+        </section>
+
+        <!-- REAL-WORLD EXAMPLES -->
+        <section class="section">
+            <h2 class="section-title"><span>💫</span> Câu Chuyện Thực Tế</h2>
+
+            <p>Để hiểu rõ hơn cách Inner Child ảnh hưởng đến tình yêu trưởng thành, hãy cùng xem ba câu chuyện từ những học viên đã trải qua hành trình chữa lành.</p>
+
+            <div class="success-box">
+                <div class="success-box-title"><span>🌟</span> Câu Chuyện 1: Thanh - Vết Thương Bỏ Rơi</div>
+                <p>Thanh, 34 tuổi, không thể hiểu tại sao cô luôn cảm thấy lo lắng cực độ mỗi khi người yêu đi công tác. Dù anh gọi điện mỗi ngày, cô vẫn không thể ngủ được, liên tục tưởng tượng anh đang gặp người khác. Qua Inner Child work, Thanh nhớ lại rằng bố cô đã bỏ đi khi cô 4 tuổi mà không nói một lời. Đứa trẻ 4 tuổi trong cô vẫn sợ rằng mọi người đàn ông đều sẽ biến mất đột ngột. Khi Thanh bắt đầu chữa lành vết thương này, nói với Inner Child rằng "Bây giờ con đã trưởng thành, con có thể tự lo cho mình", nỗi lo của cô giảm đi đáng kể.</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>⚠️</span> Câu Chuyện 2: Quốc - Vết Thương Sỉ Nhục</div>
+                <p>Quốc, 29 tuổi, luôn hy sinh mọi thứ cho người yêu nhưng không bao giờ đòi hỏi gì. Anh nghĩ mình đang yêu vô điều kiện, nhưng thực ra anh không tin mình xứng đáng được yêu như chính mình. Khi còn nhỏ, mẹ Quốc hay chê anh mập trước mặt họ hàng. Đứa trẻ trong anh đã học rằng: "Mình không đủ tốt để được yêu, phải cố gắng gấp đôi người khác". Sau khi nhận ra điều này, Quốc bắt đầu luyện tập nhận yêu thương thay vì chỉ cho đi, và lần đầu tiên trong đời, anh cảm thấy xứng đáng trong một mối quan hệ.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>💡</span> Câu Chuyện 3: Mai Anh - Vết Thương Bất Công</div>
+                <p>Mai Anh, 31 tuổi, không thể tha thứ cho bất kỳ sai lầm nào của người yêu. Một lời nói vô ý có thể khiến cô giận dỗi nhiều ngày. Cô đặt tiêu chuẩn cực cao cho bản thân và người khác. Nguồn gốc: Mẹ Mai Anh là người hoàn hảo chủ nghĩa, không bao giờ cho phép cô mắc sai lầm. "Con gái phải hoàn hảo!" là câu cô nghe mỗi ngày. Đứa trẻ trong cô tin rằng sai lầm = thất bại = không được yêu. Khi Mai Anh học cách nói với Inner Child rằng "Không sao đâu, mắc sai lầm là bình thường", cô bắt đầu mềm mại hơn với chính mình và với người yêu.</p>
+            </div>
+        </section>
+
+        <!-- RE-PARENTING -->
+        <section class="section">
+            <h2 class="section-title"><span>🤱</span> Re-Parenting: Tự Làm Cha Mẹ Cho Chính Mình</h2>
+
+            <p>Re-parenting là quá trình bạn trở thành cha/mẹ yêu thương cho chính đứa trẻ bên trong mình. Bạn không thể quay lại quá khứ để thay đổi những gì đã xảy ra, nhưng bạn hoàn toàn có thể cho đứa trẻ bên trong những gì nó chưa từng nhận được. Đây là quá trình mạnh mẽ nhất để chữa lành Inner Child.</p>
+
+            <div class="image-container">
+                <img src="images/m1-meditation-visualization.png" alt="Re-parenting Visualization">
+            </div>
+            <div class="image-caption">Hình 3: Re-parenting - Bạn trở thành cha/mẹ yêu thương cho đứa trẻ bên trong</div>
+
+            <div class="patterns-grid">
+                <div class="pattern-card">
+                    <div class="pattern-icon">🛡️</div>
+                    <div class="pattern-name">An Toàn</div>
+                    <div class="pattern-desc">"Con được bảo vệ. Con an toàn. Không ai có thể làm hại con nữa."</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">💝</div>
+                    <div class="pattern-name">Yêu Thương</div>
+                    <div class="pattern-desc">"Con được yêu thương vô điều kiện, không cần làm gì để xứng đáng."</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">✨</div>
+                    <div class="pattern-name">Xứng Đáng</div>
+                    <div class="pattern-desc">"Con xứng đáng được hạnh phúc, được yêu, được có những điều tốt đẹp nhất."</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">👁️</div>
+                    <div class="pattern-name">Được Thấy</div>
+                    <div class="pattern-desc">"Con quan trọng. Mình nhìn thấy con. Mình nghe thấy con."</div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💬</span> Những Lời Inner Child Cần Nghe Mỗi Ngày</div>
+                <p>"Mình rất tự hào về con, không phải vì con làm gì mà vì con là con."</p>
+                <p>"Con không cần phải hoàn hảo để được yêu. Con chỉ cần là con."</p>
+                <p>"Cảm xúc của con hoàn toàn hợp lý. Con được phép cảm thấy như vậy."</p>
+                <p>"Con đã làm tốt nhất có thể với những gì con biết lúc đó."</p>
+                <p>"Mình sẽ không bao giờ bỏ rơi con. Mình sẽ luôn ở đây."</p>
+            </div>
+        </section>
+
+        <!-- PRACTICAL APPLICATION -->
+        <section class="section">
+            <h2 class="section-title"><span>✍️</span> Bài Tập Thực Hành: Viết Thư Cho Inner Child</h2>
+
+            <p>Viết thư cho Inner Child là một trong những bài tập powerful nhất để kết nối và chữa lành. Đây không phải là bài tập trí tuệ mà là bài tập cảm xúc - hãy để trái tim dẫn dắt, không cần lo về ngữ pháp hay văn phong.</p>
+
+            <div class="image-container">
+                <img src="images/m1-letter-to-inner-child.png" alt="Letter to Inner Child Template">
+            </div>
+            <div class="image-caption">Hình 4: Template Thư Gửi Inner Child - Hướng dẫn viết từng phần</div>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Mở Đầu - Gọi Tên</div>
+                        <div class="flow-step-desc">"Gửi [tên nhỏ của bạn] thân yêu," - Sử dụng tên bạn được gọi khi còn nhỏ để kết nối sâu hơn với phần đó của mình.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Thừa Nhận - Nhìn Thấy Nỗi Đau</div>
+                        <div class="flow-step-desc">"Mình biết con đã trải qua..." - Viết cụ thể những điều đau đớn đứa trẻ đã phải chịu đựng. Không né tránh, không giảm nhẹ.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Thấu Hiểu - Validate Cảm Xúc</div>
+                        <div class="flow-step-desc">"Mình hiểu con đã cảm thấy..." - Đặt tên cho những cảm xúc: sợ hãi, cô đơn, tức giận, xấu hổ. Cho đứa trẻ biết cảm xúc của nó là hợp lý.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Xin Lỗi - Nếu Bạn Đã Bỏ Quên</div>
+                        <div class="flow-step-desc">"Mình xin lỗi vì đã không..." - Xin lỗi vì những năm tháng bạn đã bỏ quên, phớt lờ, hoặc trách móc Inner Child của mình.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Cam Kết - Lời Hứa Mới</div>
+                        <div class="flow-step-desc">"Từ nay, mình hứa sẽ..." - Cam kết cụ thể bạn sẽ làm gì khác: lắng nghe, bảo vệ, yêu thương vô điều kiện.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">6</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Yêu Thương - Kết Thư</div>
+                        <div class="flow-step-desc">"Con được yêu. Con xứng đáng. Con an toàn." - Kết thúc bằng những lời khẳng định yêu thương mà đứa trẻ cần nghe.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📱</span> Tích Hợp App GEM</div>
+                <p>Sau khi viết xong thư, hãy vào app GEM → Ritual <strong>"Letter to Universe"</strong> để gửi lá thư này đến vũ trụ. Đây là cách symbolic để release năng lượng cũ và đánh dấu sự khởi đầu mới trong mối quan hệ với chính mình.</p>
+            </div>
+        </section>
+
+        <!-- COMMON QUESTIONS -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🤔</span> "Tôi đã trưởng thành rồi, tại sao còn cần quan tâm đến đứa trẻ bên trong?"</div>
+                <p>Dù bạn đã lớn về mặt thể chất, phần tiềm thức - nơi lưu giữ 95% quyết định hàng ngày của bạn - vẫn vận hành theo những chương trình được cài đặt từ thời thơ ấu. Chừng nào bạn chưa "update" những chương trình này, chúng sẽ tiếp tục điều khiển cuộc sống tình cảm của bạn. Inner Child work là cách để update những chương trình lỗi thời.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🤔</span> "Làm sao tôi biết mình đang kết nối với Inner Child thực sự?"</div>
+                <p>Bạn sẽ biết khi cảm thấy một sự xúc động sâu sắc - có thể là muốn khóc, cảm giác nhẹ nhõm, hoặc một nỗi buồn nhẹ nhàng. Đây là dấu hiệu bạn đang chạm vào phần thật của mình, không phải đang "diễn" hay suy nghĩ về nó một cách lý trí. Nếu bạn không cảm thấy gì, hãy kiên nhẫn - kết nối cần thời gian, đặc biệt nếu bạn đã né tránh phần này của mình nhiều năm.</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>⚠️</span> Lưu Ý Quan Trọng</div>
+                <p>Nếu trong quá trình làm bài tập, bạn cảm thấy bị overwhelm hoặc có những ký ức rất đau đớn trỗi dậy, đây là dấu hiệu bình thường. Hãy dừng lại, hít thở sâu, và nhớ rằng bạn đang an toàn trong hiện tại. Nếu cảm xúc quá mạnh, hãy cân nhắc làm việc với một nhà trị liệu chuyên nghiệp. Chữa lành không cần phải cô đơn.</p>
+            </div>
+        </section>
+
+        <!-- KEY TAKEAWAYS -->
+        <section class="section">
+            <h2 class="section-title"><span>📝</span> Tổng Kết Bài Học</h2>
+
+            <div class="image-container">
+                <img src="images/m1-lise-bourbeau-quote.png" alt="Lise Bourbeau Quote">
+            </div>
+            <div class="image-caption">Hình 5: "Heal your wounds and find your true self" - Chữa lành vết thương để tìm thấy con người thật</div>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>🎯</span> Những Điểm Chính Cần Nhớ</div>
+                <ul class="summary-list">
+                    <li>Inner Child là phần tiềm thức mang theo những vết thương và chương trình từ thời thơ ấu, tiếp tục ảnh hưởng đến tình yêu trưởng thành</li>
+                    <li>5 Vết Thương Cốt Lõi theo Lise Bourbeau: Bỏ Rơi, Từ Chối, Sỉ Nhục, Phản Bội, Bất Công - mỗi vết thương tạo ra một "mặt nạ" bảo vệ</li>
+                    <li>Re-parenting là quá trình bạn trở thành cha/mẹ yêu thương cho chính đứa trẻ bên trong, cho nó những gì chưa từng nhận được</li>
+                    <li>Viết thư cho Inner Child là bài tập powerful để kết nối, thừa nhận và chữa lành những vết thương sâu</li>
+                    <li>Chữa lành Inner Child không phải sự kiện một lần mà là hành trình liên tục của việc yêu thương và chăm sóc chính mình</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- TRANSITION -->
+        <section class="section">
+            <h2 class="section-title"><span>🚀</span> Bước Tiếp Theo</h2>
+
+            <p>Bạn đã bắt đầu hành trình kết nối với Inner Child - phần quan trọng nhất của việc chữa lành tình yêu. Trong bài tiếp theo, chúng ta sẽ học về <strong>Nghệ Thuật Tha Thứ</strong> - giải phóng bản thân khỏi những oán giận đang giữ bạn ở tần số thấp và ngăn cản tình yêu đích thực đến với bạn.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💕</span> Lời Nhắn Từ Jennie</div>
+                <p>Đứa trẻ bên trong bạn đã chờ đợi rất lâu để được nhìn thấy, được lắng nghe, được yêu thương. Hôm nay, bạn đã bắt đầu hành trình đó. Hãy nhớ rằng: Bạn không chữa lành Inner Child để trở thành người hoàn hảo, mà để trở nên toàn vẹn. Và một người toàn vẹn mới có thể yêu thương trọn vẹn.</p>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>

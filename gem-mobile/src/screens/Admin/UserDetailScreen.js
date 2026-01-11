@@ -477,7 +477,7 @@ const UserDetailScreen = () => {
               disabled={actionLoading}
             >
               {actionLoading ? (
-                <ActivityIndicator size="small" color={COLORS.bgDark} />
+                <ActivityIndicator size="small" color={COLORS.bgDarkest} />
               ) : (
                 <Text style={styles.modalSubmitText}>Cập nhật</Text>
               )}
@@ -532,7 +532,7 @@ const UserDetailScreen = () => {
               disabled={actionLoading}
             >
               {actionLoading ? (
-                <ActivityIndicator size="small" color={COLORS.bgDark} />
+                <ActivityIndicator size="small" color={COLORS.bgDarkest} />
               ) : (
                 <Text style={styles.modalSubmitText}>Thêm Gems</Text>
               )}
@@ -582,7 +582,7 @@ const UserDetailScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.bgDark,
+    backgroundColor: COLORS.bgDarkest,
   },
   header: {
     flexDirection: 'row',
@@ -879,7 +879,7 @@ const styles = StyleSheet.create({
   modalSubmitText: {
     fontSize: TYPOGRAPHY.fontSize.md,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.bgDark,
+    color: COLORS.bgDarkest,
   },
 });
 

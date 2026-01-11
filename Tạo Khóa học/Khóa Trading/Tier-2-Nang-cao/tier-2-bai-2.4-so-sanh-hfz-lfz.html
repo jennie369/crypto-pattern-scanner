@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 2.4: So Sánh HFZ và LFZ | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-navy: #112250;
+            --accent-gold: #FFBD59;
+            --accent-cyan: #00F0FF;
+            --accent-purple: #6A5BFF;
+            --success-green: #10B981;
+            --error-red: #EF4444;
+            --text-primary: #FFFFFF;
+            --text-secondary: #A0AEC0;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --bg-card-hover: rgba(255, 255, 255, 0.08);
+            --border-subtle: rgba(255, 255, 255, 0.1);
+            --gradient-gold: linear-gradient(135deg, #FFBD59 0%, #FFCF87 100%);
+            --gradient-green: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--primary-navy);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--primary-navy);
+        }
+
+        /* HEADER */
+        .lesson-header {
+            padding: 2rem 1.5rem;
+            background: linear-gradient(180deg, rgba(106, 91, 255, 0.15) 0%, transparent 100%);
+            border-bottom: 1px solid var(--border-subtle);
+            text-align: center;
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #6A5BFF 0%, #8B7FFF 100%);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #fff;
+            margin-bottom: 1rem;
+        }
+
+        .lesson-chapter {
+            font-size: 0.875rem;
+            color: var(--accent-purple);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .lesson-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        /* CONTENT SECTION */
+        .content-section {
+            padding: 0;
+        }
+
+        .content-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1rem;
+            margin: 1rem;
+            padding: 1.5rem;
+            border-left: 4px solid var(--accent-purple);
+        }
+
+        .content-card h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--accent-purple);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .content-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.25rem 0 0.75rem 0;
+            color: var(--text-primary);
+        }
+
+        .content-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-size: 0.9375rem;
+        }
+
+        .content-card ul, .content-card ol {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        .content-card li {
+            margin-bottom: 0.5rem;
+            font-size: 0.9375rem;
+        }
+
+        /* IMAGE PLACEHOLDER */
+        .image-placeholder {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.2) 0%, rgba(106, 91, 255, 0.1) 100%);
+            border: 2px dashed var(--accent-purple);
+            border-radius: 0.75rem;
+            padding: 3rem 1.5rem;
+            text-align: center;
+            margin: 1.25rem 0;
+        }
+
+        .image-placeholder .icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .image-placeholder .label {
+            font-size: 0.875rem;
+            color: var(--accent-purple);
+            font-weight: 600;
+        }
+
+        .image-placeholder .dimensions {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* COMPARISON TABLE */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.875rem;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 0.875rem;
+            border: 1px solid var(--border-subtle);
+            text-align: left;
+        }
+
+        .comparison-table th {
+            background: rgba(106, 91, 255, 0.2);
+            font-weight: 600;
+        }
+
+        .comparison-table th:first-child {
+            color: var(--text-primary);
+        }
+
+        .comparison-table th.lfz {
+            color: var(--success-green);
+            text-align: center;
+        }
+
+        .comparison-table th.hfz {
+            color: var(--error-red);
+            text-align: center;
+        }
+
+        .comparison-table td {
+            color: var(--text-secondary);
+        }
+
+        .comparison-table td:nth-child(2) {
+            background: rgba(16, 185, 129, 0.05);
+            text-align: center;
+        }
+
+        .comparison-table td:nth-child(3) {
+            background: rgba(239, 68, 68, 0.05);
+            text-align: center;
+        }
+
+        /* VS CARDS */
+        .vs-container {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 1rem;
+            align-items: center;
+            margin: 1.5rem 0;
+        }
+
+        .zone-card {
+            background: var(--bg-card);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .zone-card.lfz {
+            border: 2px solid var(--success-green);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .zone-card.hfz {
+            border: 2px solid var(--error-red);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .zone-emoji {
+            font-size: 3rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .zone-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .zone-card.lfz .zone-name {
+            color: var(--success-green);
+        }
+
+        .zone-card.hfz .zone-name {
+            color: var(--error-red);
+        }
+
+        .zone-desc {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .vs-divider {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-purple);
+        }
+
+        /* DECISION BOX */
+        .decision-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .decision-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.75rem;
+            padding: 1rem;
+        }
+
+        .decision-card h4 {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .decision-card.lfz h4 {
+            color: var(--success-green);
+        }
+
+        .decision-card.hfz h4 {
+            color: var(--error-red);
+        }
+
+        .decision-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .decision-card li {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            padding: 0.25rem 0;
+            padding-left: 1.25rem;
+            position: relative;
+        }
+
+        .decision-card.lfz li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--success-green);
+        }
+
+        .decision-card.hfz li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--error-red);
+        }
+
+        /* INFO BOX */
+        .info-box {
+            background: rgba(106, 91, 255, 0.1);
+            border: 1px solid rgba(106, 91, 255, 0.3);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .info-box-title {
+            font-weight: 600;
+            color: var(--accent-purple);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-box p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+        /* SIMILARITY LIST */
+        .similarity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .similarity-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(106, 91, 255, 0.1);
+            border-radius: 0.5rem;
+            border-left: 3px solid var(--accent-purple);
+        }
+
+        .similarity-icon {
+            font-size: 1.25rem;
+        }
+
+        .similarity-text {
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+        }
+
+        /* SUMMARY BOX */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.2) 0%, rgba(106, 91, 255, 0.05) 100%);
+            border: 1px solid rgba(106, 91, 255, 0.3);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 1.5rem 1rem;
+        }
+
+        .summary-box h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--accent-purple);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .summary-box ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .summary-box li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.625rem;
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+        }
+
+        .summary-box li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--accent-purple);
+            font-weight: bold;
+        }
+
+        /* QUIZ SECTION */
+        .quiz-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 1rem;
+            margin: 1.5rem 1rem;
+            padding: 1.5rem;
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .quiz-header h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            margin-bottom: 0.25rem;
+        }
+
+        .quiz-header p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .quiz-question {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .question-text {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .quiz-option {
+            padding: 0.875rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+        }
+
+        .quiz-option:hover:not(.correct):not(.incorrect) {
+            background: var(--bg-card-hover);
+            border-color: var(--accent-gold);
+        }
+
+        .quiz-option.correct {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: var(--success-green);
+            color: var(--success-green);
+        }
+
+        .quiz-option.incorrect {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: var(--error-red);
+            color: var(--error-red);
+        }
+
+        .quiz-result {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: none;
+        }
+
+        .quiz-result.show {
+            display: block;
+        }
+
+        .quiz-result.correct {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-green);
+        }
+
+        .quiz-result.incorrect {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-red);
+        }
+
+        .quiz-score {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.2) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border-radius: 0.75rem;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .quiz-score.show {
+            display: block;
+        }
+
+        .score-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+        }
+
+        .retake-btn {
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--gradient-gold);
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #000;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .retake-btn:hover {
+            transform: scale(1.02);
+        }
+
+        /* FOOTER */
+        .lesson-footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-logo .gem {
+            color: var(--accent-gold);
+        }
+
+        .footer-text {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+        }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 600px) {
+            .content-card {
+                margin: 0.75rem 0;
+                border-radius: 0;
+                border-left: 4px solid var(--accent-purple);
+                border-right: none;
+                border-top: none;
+                border-bottom: 1px solid var(--border-subtle);
+            }
+
+            .summary-box,
+            .quiz-section {
+                margin: 1rem 0;
+                border-radius: 0;
+            }
+
+            .lesson-header {
+                padding: 1.5rem 1rem;
+            }
+
+            .lesson-title {
+                font-size: 1.5rem;
+            }
+
+            .vs-container {
+                grid-template-columns: 1fr;
+            }
+
+            .vs-divider {
+                transform: rotate(90deg);
+            }
+
+            .decision-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison-table {
+                font-size: 0.75rem;
+            }
+
+            .comparison-table th,
+            .comparison-table td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="lesson-container">
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="header-badge">
+                <span>📈</span>
+                <span>Tier 2 - Nâng Cao</span>
+            </div>
+            <div class="lesson-chapter">Chapter 2 - LFZ Mastery</div>
+            <h1 class="lesson-title">So Sánh HFZ và LFZ</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 2.4</span></div>
+                <div class="meta-item"><span>⏱️</span><span>12 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- CONTENT -->
+        <main class="content-section">
+            <!-- Section 1: Overview -->
+            <div class="content-card">
+                <h2>⚖️ HFZ vs LFZ - Hai Mặt Của Đồng Xu</h2>
+
+                <p>HFZ và LFZ là hai khái niệm cốt lõi trong GEM Frequency Method. Hiểu rõ sự giống và khác nhau giúp bạn áp dụng đúng zone trong mọi tình huống thị trường.</p>
+
+                <div class="vs-container">
+                    <div class="zone-card lfz">
+                        <div class="zone-emoji">🟢</div>
+                        <div class="zone-name">LFZ</div>
+                        <div class="zone-desc">Low Frequency Zone<br>Vùng MUA</div>
+                    </div>
+                    <div class="vs-divider">VS</div>
+                    <div class="zone-card hfz">
+                        <div class="zone-emoji">🔴</div>
+                        <div class="zone-name">HFZ</div>
+                        <div class="zone-desc">High Frequency Zone<br>Vùng BÁN</div>
+                    </div>
+                </div>
+
+                <div class="image-placeholder">
+                    <div class="icon">⚖️</div>
+                    <div class="label">Hình 2.4.1: HFZ vs LFZ Trên Cùng Biểu Đồ</div>
+                    <div class="dimensions">1200 x 600px</div>
+                </div>
+            </div>
+
+            <!-- Section 2: Bảng so sánh chi tiết -->
+            <div class="content-card">
+                <h2>📊 Bảng So Sánh Chi Tiết</h2>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Tiêu Chí</th>
+                            <th class="lfz">🟢 LFZ</th>
+                            <th class="hfz">🔴 HFZ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Tên Đầy Đủ</strong></td>
+                            <td>Low Frequency Zone</td>
+                            <td>High Frequency Zone</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Loại Lệnh</strong></td>
+                            <td>Lệnh MUA chờ khớp</td>
+                            <td>Lệnh BÁN chờ khớp</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Vị Trí</strong></td>
+                            <td>DƯỚI giá hiện tại</td>
+                            <td>TRÊN giá hiện tại</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tín Hiệu</strong></td>
+                            <td>LONG (Buy)</td>
+                            <td>SHORT (Sell)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Patterns Tạo Ra</strong></td>
+                            <td>UPU, DPU</td>
+                            <td>DPD, UPD</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Entry Line</strong></td>
+                            <td>ĐỈNH của Pause</td>
+                            <td>ĐÁY của Pause</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Stop Line</strong></td>
+                            <td>ĐÁY của Pause</td>
+                            <td>ĐỈNH của Pause</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Confirmation</strong></td>
+                            <td>Bullish candles</td>
+                            <td>Bearish candles</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="image-placeholder">
+                    <div class="icon">📊</div>
+                    <div class="label">Hình 2.4.2: Entry và Stop Lines - LFZ vs HFZ</div>
+                    <div class="dimensions">1200 x 600px</div>
+                </div>
+            </div>
+
+            <!-- Section 3: Điểm giống nhau -->
+            <div class="content-card">
+                <h2>🤝 Điểm Giống Nhau</h2>
+
+                <p>Mặc dù đối lập về hướng trade, HFZ và LFZ chia sẻ nhiều đặc điểm quan trọng:</p>
+
+                <div class="similarity-list">
+                    <div class="similarity-item">
+                        <div class="similarity-icon">📐</div>
+                        <div class="similarity-text">Đều được vẽ từ vùng Pause của 3-phase pattern</div>
+                    </div>
+                    <div class="similarity-item">
+                        <div class="similarity-icon">⏳</div>
+                        <div class="similarity-text">Đều có Zone Lifecycle: FRESH → TESTED → BROKEN</div>
+                    </div>
+                    <div class="similarity-item">
+                        <div class="similarity-icon">✅</div>
+                        <div class="similarity-text">Đều cần xác nhận (confirmation candle) trước khi entry</div>
+                    </div>
+                    <div class="similarity-item">
+                        <div class="similarity-icon">📏</div>
+                        <div class="similarity-text">Đều có quy tắc độ dày zone: 0.5% - 2% là lý tưởng</div>
+                    </div>
+                    <div class="similarity-item">
+                        <div class="similarity-icon">🎯</div>
+                        <div class="similarity-text">Đều cho R:R tốt: trung bình 1:2 đến 1:3</div>
+                    </div>
+                    <div class="similarity-item">
+                        <div class="similarity-icon">🏦</div>
+                        <div class="similarity-text">Đều đại diện cho vùng Smart Money đặt lệnh</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4: Khi nào trade -->
+            <div class="content-card">
+                <h2>🎯 Khi Nào Trade HFZ, Khi Nào Trade LFZ?</h2>
+
+                <div class="decision-grid">
+                    <div class="decision-card lfz">
+                        <h4>🟢 Trade LFZ Khi:</h4>
+                        <ul>
+                            <li>Thị trường đang uptrend hoặc sideways</li>
+                            <li>Muốn mua vào với giá tốt</li>
+                            <li>Thấy UPU hoặc DPU pattern</li>
+                            <li>LFZ có confluence với support level</li>
+                            <li>Bullish divergence xuất hiện</li>
+                        </ul>
+                    </div>
+                    <div class="decision-card hfz">
+                        <h4>🔴 Trade HFZ Khi:</h4>
+                        <ul>
+                            <li>Thị trường đang downtrend hoặc sideways</li>
+                            <li>Muốn bán ra với giá cao</li>
+                            <li>Thấy DPD hoặc UPD pattern</li>
+                            <li>HFZ có confluence với resistance level</li>
+                            <li>Bearish divergence xuất hiện</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-box-title">💡 Pro Tip: Trade Theo Trend</div>
+                    <p>Trong uptrend, ưu tiên trade LFZ (buy the dip). Trong downtrend, ưu tiên trade HFZ (sell the rally). Counter-trend trades có win rate thấp hơn.</p>
+                </div>
+
+                <div class="image-placeholder">
+                    <div class="icon">📈</div>
+                    <div class="label">Hình 2.4.3: Trade LFZ Trong Uptrend, HFZ Trong Downtrend</div>
+                    <div class="dimensions">1200 x 600px</div>
+                </div>
+            </div>
+
+            <!-- Section 5: Confluence -->
+            <div class="content-card">
+                <h2>🔥 HFZ + LFZ Confluence</h2>
+
+                <p>Khi HFZ của timeframe cao (HTF) trùng với LFZ của timeframe thấp (LTF), đó là tín hiệu <strong>đặc biệt quan trọng</strong>!</p>
+
+                <h3>Ví Dụ Confluence:</h3>
+                <ul>
+                    <li><strong>Daily LFZ</strong> trùng với <strong>4H LFZ</strong> = Strong Buy Zone</li>
+                    <li><strong>Weekly HFZ</strong> trùng với <strong>Daily HFZ</strong> = Strong Sell Zone</li>
+                    <li><strong>LFZ</strong> trùng với <strong>Previous Support</strong> = Extra confirmation</li>
+                </ul>
+
+                <div class="info-box">
+                    <div class="info-box-title">🎯 Confluence Score</div>
+                    <p>Mỗi yếu tố confluence thêm 1 điểm. Zone có ≥3 điểm confluence được coi là "High Quality Zone" với win rate 75%+.</p>
+                </div>
+
+                <div class="image-placeholder">
+                    <div class="icon">🔥</div>
+                    <div class="label">Hình 2.4.4: Multi-Timeframe Confluence - LFZ + Support</div>
+                    <div class="dimensions">1200 x 700px</div>
+                </div>
+            </div>
+        </main>
+
+        <!-- SUMMARY -->
+        <div class="summary-box">
+            <h3>📋 Tóm Tắt Bài Học</h3>
+            <ul>
+                <li>LFZ = Vùng mua (dưới giá), HFZ = Vùng bán (trên giá)</li>
+                <li>LFZ từ UPU/DPU, HFZ từ DPD/UPD</li>
+                <li>Cả hai đều cần confirmation và có zone lifecycle</li>
+                <li>Trade LFZ trong uptrend, trade HFZ trong downtrend</li>
+                <li>Confluence (nhiều yếu tố trùng nhau) tăng win rate đáng kể</li>
+            </ul>
+        </div>
+
+        <!-- QUIZ -->
+        <div class="quiz-section">
+            <div class="quiz-header">
+                <h3>🎯 Kiểm Tra Kiến Thức</h3>
+                <p>Trả lời các câu hỏi để củng cố bài học</p>
+            </div>
+
+            <div class="quiz-question" data-correct="2">
+                <div class="question-text">Câu 1: Patterns nào tạo ra HFZ?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-index="0">UPU và DPU</div>
+                    <div class="quiz-option" data-index="1">UPU và UPD</div>
+                    <div class="quiz-option" data-index="2">DPD và UPD</div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="0">
+                <div class="question-text">Câu 2: Trong thị trường uptrend, nên ưu tiên trade zone nào?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-index="0">LFZ (Buy the dip)</div>
+                    <div class="quiz-option" data-index="1">HFZ (Sell the rally)</div>
+                    <div class="quiz-option" data-index="2">Không trade zone nào</div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="1">
+                <div class="question-text">Câu 3: Entry Line của LFZ nằm ở đâu so với Entry Line của HFZ?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-index="0">Giống nhau - đều ở giữa Pause zone</div>
+                    <div class="quiz-option" data-index="1">Ngược nhau - LFZ ở ĐỈNH Pause, HFZ ở ĐÁY Pause</div>
+                    <div class="quiz-option" data-index="2">Ngược nhau - LFZ ở ĐÁY Pause, HFZ ở ĐỈNH Pause</div>
+                </div>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <div class="score-text">🎉 Bạn trả lời đúng <span id="correct-count">0</span>/3 câu!</div>
+                <button class="retake-btn" onclick="resetQuiz()">Làm Lại Quiz</button>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <div class="footer-logo">
+                <span class="gem">GEM</span> Trading Academy
+            </div>
+            <div class="footer-text">© 2024 GEM Trading Academy. All rights reserved.</div>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-question').forEach(question => {
+            const correctIndex = parseInt(question.dataset.correct);
+            const options = question.querySelectorAll('.quiz-option');
+            const result = question.querySelector('.quiz-result');
+
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (question.classList.contains('answered')) return;
+
+                    question.classList.add('answered');
+                    answeredCount++;
+
+                    const selectedIndex = parseInt(this.dataset.index);
+
+                    if (selectedIndex === correctIndex) {
+                        this.classList.add('correct');
+                        result.textContent = '✓ Chính xác!';
+                        result.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        options[correctIndex].classList.add('correct');
+                        result.textContent = '✗ Chưa đúng. Xem đáp án đúng ở trên.';
+                        result.className = 'quiz-result show incorrect';
+                    }
+
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+
+        function resetQuiz() {
+            answeredCount = 0;
+            correctCount = 0;
+
+            document.querySelectorAll('.quiz-question').forEach(question => {
+                question.classList.remove('answered');
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('correct', 'incorrect');
+                });
+                question.querySelector('.quiz-result').className = 'quiz-result';
+            });
+
+            document.querySelector('.quiz-score').classList.remove('show');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 6.1: Duy Trì Tần Số Cao | GEM Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.5rem, 5vw, 2.25rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .definition-box p { color: var(--text-secondary); margin: 0; }
+
+        .warning-box { background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05)); border: 1px solid rgba(255, 82, 82, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .warning-box { border: none; border-radius: 0; border-left: 4px solid var(--error); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .warning-box-title { font-weight: 700; color: var(--error); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .warning-box p { color: var(--text-secondary); margin: 0; }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .enemy-grid { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .enemy-grid { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .enemy-card { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-lg); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); }
+        @media (max-width: 600px) { .enemy-card { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--error); } }
+        .enemy-icon { font-size: 2rem; min-width: 50px; text-align: center; }
+        .enemy-content { flex: 1; }
+        .enemy-name { font-weight: 700; color: var(--error); margin-bottom: var(--space-xs); }
+        .enemy-desc { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .enemy-solution { font-size: 0.85rem; color: var(--success); display: flex; align-items: flex-start; gap: var(--space-xs); }
+
+        .protection-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .protection-grid { grid-template-columns: 1fr; gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .protection-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); }
+        @media (max-width: 600px) { .protection-card { border: none; border-radius: 0; border-left: 4px solid var(--success); padding: var(--space-md) 16px; } }
+        .protection-emoji { font-size: 2rem; margin-bottom: var(--space-sm); }
+        @media (max-width: 600px) { .protection-emoji { font-size: 1.5rem; display: inline-block; margin-right: var(--space-sm); margin-bottom: 0; } }
+        .protection-name { font-weight: 700; color: var(--success); margin-bottom: var(--space-sm); }
+        @media (max-width: 600px) { .protection-name { display: inline-block; } }
+        .protection-desc { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .checkin-box { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .checkin-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .checkin-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-md); font-size: 1.1rem; }
+        .checkin-questions { display: flex; flex-direction: column; gap: var(--space-sm); }
+        .checkin-question { display: flex; align-items: flex-start; gap: var(--space-sm); padding: var(--space-sm); background: var(--glass-bg); border-radius: var(--radius-md); }
+        @media (max-width: 600px) { .checkin-question { border-radius: 0; } }
+        .checkin-number { width: 24px; height: 24px; min-width: 24px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; color: var(--navy-dark); }
+        .checkin-text { color: var(--text-secondary); font-size: 0.9rem; }
+
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .app-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .app-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .app-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); }
+        .app-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .app-box p:last-child { margin-bottom: 0; }
+
+        .lesson-footer { text-align: center; padding: var(--space-xl); color: var(--text-muted); font-size: 0.85rem; }
+        .lesson-footer a { color: var(--gold); text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>🔥</span>
+                <span>Module 6</span>
+            </div>
+            <div class="lesson-chapter">Module 6 - Nhân Rộng Thịnh Vượng</div>
+            <h1 class="lesson-title">Duy Trì Tần Số Cao - Bảo Vệ Năng Lượng</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 6.1</span></div>
+                <div class="meta-item"><span>⏱️</span><span>25 phút đọc</span></div>
+                <div class="meta-item"><span>🛡️</span><span>Energy Protection</span></div>
+            </div>
+        </header>
+
+        <!-- SECTION 1: OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🌟</span> Tại Sao Nhiều Người Nâng Tần Số Lên Rồi... Lại Rớt Xuống?</h2>
+
+            <p>Bạn đã bao giờ trải nghiệm điều này chưa? Sau một khóa học tuyệt vời, một buổi thiền sâu, hay một retreat năng lượng - bạn cảm thấy mình như một con người mới, tràn đầy năng lượng và lạc quan. Nhưng chỉ sau vài ngày hoặc vài tuần trở về cuộc sống thường nhật, mọi thứ dường như quay lại vạch xuất phát. Bạn tự hỏi: "Tại sao mình không giữ được cảm giác tuyệt vời đó?"</p>
+
+            <p>Đây là một trong những thách thức lớn nhất trên hành trình phát triển tâm thức mà ít người nói đến. Thực tế là: <strong>NÂNG tần số lên đã khó, nhưng DUY TRÌ tần số cao còn khó hơn gấp nhiều lần.</strong> Và đây chính xác là lý do Module 6 tồn tại - không phải để dạy bạn cách nâng tần số (bạn đã biết rồi từ 5 module trước), mà để dạy bạn cách BẢO VỆ và DUY TRÌ nó trong dài hạn.</p>
+
+            <p>Trong bài học này, bạn sẽ hiểu được tại sao tần số của bạn dao động, những "kẻ thù" nào đang tấn công năng lượng của bạn mỗi ngày, và quan trọng nhất - những chiến lược cụ thể để bảo vệ tần số cao như bảo vệ một ngọn lửa quý giá giữa cơn gió mạnh.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M6_B1_01%0AProtect+Your+Energy%0AFlame+In+The+Wind" alt="Bảo vệ năng lượng">
+                <div class="image-caption">Tần số cao cần được bảo vệ như ngọn lửa quý giá trong gió - không có sự bảo vệ, nó sẽ tắt</div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: CONCEPT INTRODUCTION -->
+        <section class="section">
+            <h2 class="section-title"><span>🔥</span> Hiểu Về Bản Chất Của Tần Số Năng Lượng</h2>
+
+            <p>Trước khi đi vào các chiến lược cụ thể, hãy cùng hiểu sâu hơn về bản chất của tần số năng lượng. Điều này sẽ giúp bạn không chỉ biết PHẢI LÀM GÌ, mà còn hiểu TẠI SAO nó hoạt động.</p>
+
+            <p>Một quan niệm sai lầm phổ biến là nghĩ rằng một khi bạn đã "giác ngộ" hay nâng tần số lên mức cao, bạn sẽ ở đó mãi mãi. Thực tế hoàn toàn ngược lại. Tần số năng lượng của bạn giống như nhiệt độ cơ thể - nó dao động liên tục dựa trên nhiều yếu tố, và cần được duy trì chủ động.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📊</span> Tần Số Dao Động Dựa Trên 5 Yếu Tố Chính</div>
+                <p>Hiểu được 5 yếu tố này giúp bạn biết cần bảo vệ ở đâu:</p>
+                <p style="margin-top: var(--space-sm);"><strong>1. Suy nghĩ bạn đang có:</strong> Mỗi suy nghĩ mang một tần số riêng - lo lắng, sợ hãi ở tần số thấp; biết ơn, yêu thương ở tần số cao.</p>
+                <p style="margin-top: var(--space-sm);"><strong>2. Người bạn đang ở cùng:</strong> Năng lượng lan truyền - bạn sẽ bị "kéo" theo tần số của những người xung quanh.</p>
+                <p style="margin-top: var(--space-sm);"><strong>3. Thông tin bạn đang tiêu thụ:</strong> Tin tức tiêu cực, drama mạng xã hội = tần số giảm ngay lập tức.</p>
+                <p style="margin-top: var(--space-sm);"><strong>4. Môi trường xung quanh:</strong> Không gian bừa bộn, ồn ào = năng lượng thấp; không gian sạch sẽ, thiên nhiên = năng lượng cao.</p>
+                <p style="margin-top: var(--space-sm);"><strong>5. Cơ thể vật lý:</strong> Thức ăn, giấc ngủ, vận động ảnh hưởng trực tiếp đến tần số tinh thần.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Nguyên Lý Entropy - Tại Sao Tần Số Tự Nhiên Sẽ Giảm</div>
+                <p>Trong vật lý, có một nguyên lý gọi là entropy - xu hướng tự nhiên của mọi hệ thống là trở về trạng thái hỗn độn, mất trật tự. Tần số năng lượng của bạn cũng tuân theo quy luật này - nếu KHÔNG có nỗ lực duy trì chủ động, nó sẽ tự động giảm xuống theo thời gian.</p>
+                <p style="margin-top: var(--space-sm);">Đây chính là lý do bạn cần NGHI THỨC hàng ngày - không phải vì nó "đẹp" hay "thần bí", mà vì đó là cách khoa học để liên tục nạp năng lượng và chống lại xu hướng entropy tự nhiên. Giống như bạn cần ăn mỗi ngày để duy trì cơ thể, bạn cần thực hành mỗi ngày để duy trì tần số.</p>
+            </div>
+
+            <p>Hãy nghĩ về tần số cao như một ngọn lửa quý giá. Nếu bạn để nó một mình trong gió mà không có sự bảo vệ, nó sẽ tắt - không phải vì ngọn lửa yếu, mà vì gió quá mạnh. Nhiệm vụ của bạn không chỉ là nhóm lửa (nâng tần số) mà còn là xây một "ngôi nhà" để bảo vệ nó (chiến lược duy trì).</p>
+        </section>
+
+        <!-- SECTION 2: 5 KẺ THÙ CỦA TẦN SỐ CAO -->
+        <section class="section">
+            <h2 class="section-title"><span>⚔️</span> 5 Kẻ Thù Của Tần Số Cao</h2>
+            <p>Để bảo vệ tần số, trước tiên bạn cần biết những gì đang tấn công nó. Đây là 5 "kẻ thù" phổ biến nhất:</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x600/0a1628/FF5252?text=M6_B1_02%0A5+Enemies+of+High+Frequency" alt="5 Kẻ Thù Của Tần Số Cao">
+                <div class="image-caption">5 Kẻ Thù khiến tần số của bạn rớt xuống</div>
+            </div>
+
+            <div class="enemy-grid">
+                <div class="enemy-card">
+                    <div class="enemy-icon">📱</div>
+                    <div class="enemy-content">
+                        <div class="enemy-name">1. NEGATIVE MEDIA</div>
+                        <div class="enemy-desc">Tin tức tiêu cực, drama trên mạng xã hội, content độc hại. Mỗi lần scroll feed đầy negativity = tần số giảm.</div>
+                        <div class="enemy-solution">✅ Giải pháp: Curated feed, unfollow nguồn tiêu cực, giới hạn thời gian social media</div>
+                    </div>
+                </div>
+                <div class="enemy-card">
+                    <div class="enemy-icon">👥</div>
+                    <div class="enemy-content">
+                        <div class="enemy-name">2. ENERGY VAMPIRES</div>
+                        <div class="enemy-desc">Những người liên tục phàn nàn, đổ lỗi, toxic positivity, hoặc cố kéo bạn xuống level của họ.</div>
+                        <div class="enemy-solution">✅ Giải pháp: Thiết lập boundaries, giảm thời gian tiếp xúc, không engage với drama</div>
+                    </div>
+                </div>
+                <div class="enemy-card">
+                    <div class="enemy-icon">😰</div>
+                    <div class="enemy-content">
+                        <div class="enemy-name">3. CHRONIC STRESS</div>
+                        <div class="enemy-desc">Stress kéo dài không được giải quyết - từ công việc, tài chính, mối quan hệ - tích tụ và hạ tần số từ từ.</div>
+                        <div class="enemy-solution">✅ Giải pháp: Daily rituals, thiền định, xử lý gốc rễ vấn đề thay vì trốn tránh</div>
+                    </div>
+                </div>
+                <div class="enemy-card">
+                    <div class="enemy-icon">🍔</div>
+                    <div class="enemy-content">
+                        <div class="enemy-name">4. POOR PHYSICAL HABITS</div>
+                        <div class="enemy-desc">Thiếu ngủ, ăn uống kém chất lượng, không vận động - cơ thể và tâm trí liên kết chặt chẽ.</div>
+                        <div class="enemy-solution">✅ Giải pháp: 7-8 tiếng ngủ, thực phẩm sạch, 30 phút vận động/ngày</div>
+                    </div>
+                </div>
+                <div class="enemy-card">
+                    <div class="enemy-icon">🔄</div>
+                    <div class="enemy-content">
+                        <div class="enemy-name">5. UNCONSCIOUS PATTERNS</div>
+                        <div class="enemy-desc">Những patterns cũ chưa được chuyển hóa hoàn toàn - quay lại tự động khi không chú ý.</div>
+                        <div class="enemy-solution">✅ Giải pháp: Awareness, daily check-in, tiếp tục thực hành các kỹ thuật từ Module 1-5</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>⚠️</span> Cảnh Báo: Rò Rỉ Năng Lượng</div>
+                <p>Nhiều người nâng tần số lên rồi để nó "rò rỉ" qua 5 kẻ thù này mà không nhận ra. Họ thắc mắc: "Sao tôi đã làm đủ mọi thứ mà vẫn không thấy kết quả?"</p>
+                <p style="margin-top: var(--space-sm);">Câu trả lời: Năng lượng họ tạo ra bị MẤT nhanh hơn tốc độ họ tạo.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: BẢO VỆ NĂNG LƯỢNG -->
+        <section class="section">
+            <h2 class="section-title"><span>🛡️</span> 6 Cách Bảo Vệ Năng Lượng</h2>
+            <p>Bây giờ bạn biết "kẻ thù" rồi, đây là 6 chiến lược bảo vệ năng lượng hiệu quả nhất:</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x600/0a1628/00C853?text=M6_B1_03%0A6+Energy+Protection+Strategies" alt="6 Chiến Lược Bảo Vệ Năng Lượng">
+                <div class="image-caption">6 Chiến Lược Bảo Vệ và Duy Trì Tần Số Cao</div>
+            </div>
+
+            <div class="protection-grid">
+                <div class="protection-card">
+                    <div class="protection-emoji">⏰</div>
+                    <div class="protection-name">1. Morning Routine Không Thương Lượng</div>
+                    <div class="protection-desc">15-30 phút mỗi sáng cho rituals: thiền, affirmations, visualization. Đây là "áo giáp" năng lượng cho cả ngày.</div>
+                </div>
+                <div class="protection-card">
+                    <div class="protection-emoji">🚫</div>
+                    <div class="protection-name">2. Digital Boundaries</div>
+                    <div class="protection-desc">Không xem điện thoại 1 giờ đầu và 1 giờ cuối ngày. Curated social feed. App limits.</div>
+                </div>
+                <div class="protection-card">
+                    <div class="protection-emoji">👥</div>
+                    <div class="protection-name">3. Selective Association</div>
+                    <div class="protection-desc">Chọn lọc người ở cùng. Dành nhiều thời gian với người nâng bạn lên. Giới hạn với energy vampires.</div>
+                </div>
+                <div class="protection-card">
+                    <div class="protection-emoji">🏠</div>
+                    <div class="protection-name">4. Sacred Space</div>
+                    <div class="protection-desc">Tạo không gian năng lượng cao tại nhà: gọn gàng, sạch sẽ, crystals, cây xanh, ánh sáng tự nhiên.</div>
+                </div>
+                <div class="protection-card">
+                    <div class="protection-emoji">🍃</div>
+                    <div class="protection-name">5. Regular Cleansing</div>
+                    <div class="protection-desc">Cleansing năng lượng hàng tuần: đốt sage, tắm muối biển, đi ra thiên nhiên, grounding.</div>
+                </div>
+                <div class="protection-card">
+                    <div class="protection-emoji">📊</div>
+                    <div class="protection-name">6. Daily Score Tracking</div>
+                    <div class="protection-desc">Track điểm năng lượng mỗi ngày (1-10). Nhận diện patterns: ngày nào cao, ngày nào thấp, tại sao?</div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🔑</span> Key Insight</div>
+                <p><strong>"Phòng bệnh hơn chữa bệnh."</strong> Bảo vệ năng lượng DỄ HƠN nhiều so với phải nâng tần số lên từ vùng thấp. Đó là lý do cần có chiến lược bảo vệ TRƯỚC khi tần số bị tấn công.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 4: DAILY CHECK-IN -->
+        <section class="section">
+            <h2 class="section-title"><span>📋</span> Daily Frequency Check-In</h2>
+            <p>Một trong những công cụ mạnh nhất để duy trì tần số cao là DAILY CHECK-IN - đánh giá năng lượng của bạn mỗi ngày. Đây là quy trình đơn giản nhưng cực kỳ hiệu quả:</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Morning Check (5 phút sau khi thức dậy)</div>
+                        <div class="flow-step-desc">Hỏi: "Hôm nay tần số của mình ở đâu? (1-10)" - Chưa cần làm gì, chỉ nhận biết.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Set Intention (trong morning routine)</div>
+                        <div class="flow-step-desc">"Hôm nay, mình chọn duy trì tần số ở mức __. Mình sẽ bảo vệ năng lượng bằng cách __."</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Midday Pulse (giữa ngày, 2 phút)</div>
+                        <div class="flow-step-desc">"Bây giờ tần số mình ở đâu? Có gì đang kéo xuống? Cần adjust gì không?"</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Evening Review (trước khi ngủ, 5 phút)</div>
+                        <div class="flow-step-desc">"Hôm nay tần số trung bình là bao nhiêu? Điều gì nâng lên? Điều gì kéo xuống? Ngày mai cần làm gì khác?"</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="checkin-box">
+                <div class="checkin-title">📝 10 Câu Hỏi Check-In Hàng Ngày</div>
+                <div class="checkin-questions">
+                    <div class="checkin-question">
+                        <div class="checkin-number">1</div>
+                        <div class="checkin-text">Tần số năng lượng của tôi hôm nay (1-10)?</div>
+                    </div>
+                    <div class="checkin-question">
+                        <div class="checkin-number">2</div>
+                        <div class="checkin-text">Tôi có làm morning routine không?</div>
+                    </div>
+                    <div class="checkin-question">
+                        <div class="checkin-number">3</div>
+                        <div class="checkin-text">Cảm xúc chủ đạo trong ngày là gì?</div>
+                    </div>
+                    <div class="checkin-question">
+                        <div class="checkin-number">4</div>
+                        <div class="checkin-text">Điều gì khiến tần số tôi TĂNG hôm nay?</div>
+                    </div>
+                    <div class="checkin-question">
+                        <div class="checkin-number">5</div>
+                        <div class="checkin-text">Điều gì khiến tần số tôi GIẢM hôm nay?</div>
+                    </div>
+                    <div class="checkin-question">
+                        <div class="checkin-number">6</div>
+                        <div class="checkin-text">Tôi có tiếp xúc với energy vampire không?</div>
+                    </div>
+                    <div class="checkin-question">
+                        <div class="checkin-number">7</div>
+                        <div class="checkin-text">Tôi tiêu thụ media gì hôm nay? Positive hay Negative?</div>
+                    </div>
+                    <div class="checkin-question">
+                        <div class="checkin-number">8</div>
+                        <div class="checkin-text">Thức ăn/giấc ngủ/vận động hôm nay thế nào?</div>
+                    </div>
+                    <div class="checkin-question">
+                        <div class="checkin-number">9</div>
+                        <div class="checkin-text">Tôi có aligned action nào hôm nay không?</div>
+                    </div>
+                    <div class="checkin-question">
+                        <div class="checkin-number">10</div>
+                        <div class="checkin-text">Ngày mai tôi sẽ làm gì khác để duy trì/nâng tần số?</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>📱</span> App GEM: Vision Board → Daily Score</div>
+                <p>App GEM có tính năng <strong>Daily Score</strong> giúp bạn track điểm năng lượng hàng ngày một cách tự động:</p>
+                <p>• <strong>Chấm điểm nhanh:</strong> 1-10 chỉ trong vài giây</p>
+                <p>• <strong>Xem biểu đồ:</strong> Trend tần số theo tuần/tháng</p>
+                <p>• <strong>Nhận patterns:</strong> AI phân tích ngày nào cao/thấp</p>
+                <p>• <strong>Reminders:</strong> Nhắc check-in 3 lần/ngày</p>
+            </div>
+        </section>
+
+        <!-- SECTION 5: WEEKLY PRACTICES -->
+        <section class="section">
+            <h2 class="section-title"><span>📅</span> Weekly Practices Để Duy Trì Tần Số</h2>
+            <p>Ngoài daily practices, bạn cần có WEEKLY practices - những hoạt động làm mỗi tuần để "reset" và "recharge" năng lượng:</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M6_B1_04%0AWeekly+Energy+Practices" alt="Weekly Energy Practices">
+                <div class="image-caption">Lịch tuần để duy trì tần số cao</div>
+            </div>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">🌿 Nature Time (1-2 giờ/tuần)</div>
+                        <div class="flow-step-desc">Đi ra thiên nhiên: công viên, núi, biển, rừng. Grounding - đi chân trần trên cỏ/đất. Thiên nhiên tự động nâng tần số.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">🧹 Space Cleansing (30 phút/tuần)</div>
+                        <div class="flow-step-desc">Dọn dẹp không gian sống. Đốt sage hoặc trầm hương. Mở cửa sổ cho không khí lưu thông. Sắp xếp crystals.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">📚 Wisdom Input (1-2 giờ/tuần)</div>
+                        <div class="flow-step-desc">Đọc sách phát triển bản thân, nghe podcast positive, xem content nâng cao tần số. Nạp "thức ăn tinh thần".</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">👥 High-Vibe Connection (1 lần/tuần)</div>
+                        <div class="flow-step-desc">Gặp gỡ người có tần số cao. Cộng đồng GEM, mastermind group, hoặc bạn bè cùng hướng đi. Năng lượng lan truyền.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">📊 Weekly Review (30 phút/tuần)</div>
+                        <div class="flow-step-desc">Xem lại daily scores cả tuần. Patterns gì? Tuần sau cần adjust gì? Mục tiêu tần số tuần sau?</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📆</span> Suggested Weekly Schedule</div>
+                <p><strong>Thứ 2:</strong> Deep meditation (20 phút thay vì 10)</p>
+                <p style="margin-top: var(--space-xs);"><strong>Thứ 4:</strong> Nature time hoặc High-vibe connection</p>
+                <p style="margin-top: var(--space-xs);"><strong>Thứ 7:</strong> Space cleansing + Wisdom input</p>
+                <p style="margin-top: var(--space-xs);"><strong>Chủ Nhật:</strong> Weekly review + Set intentions cho tuần mới</p>
+            </div>
+        </section>
+
+        <!-- SECTION 6: REAL-WORLD EXAMPLES -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Câu Chuyện Thực Tế Về Bảo Vệ Tần Số</h2>
+
+            <p>Hãy xem những câu chuyện thực tế để hiểu rõ hơn tầm quan trọng của việc bảo vệ tần số và hậu quả khi không làm điều đó.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>✨</span> Câu Chuyện 1: Hoa - Từ Tràn Đầy Năng Lượng Đến Kiệt Sức</div>
+                <p>Hoa, 29 tuổi, tham gia một retreat thiền định 5 ngày và trở về với cảm giác "như được tái sinh". Cô đầy năng lượng, lạc quan, và bắt đầu thấy những thay đổi tích cực trong cuộc sống.</p>
+                <p style="margin-top: var(--space-sm);">Tuy nhiên, cô không thiết lập bất kỳ chiến lược bảo vệ nào. Cô tiếp tục scroll Facebook hàng giờ mỗi ngày, dành thời gian với nhóm bạn hay phàn nàn, và bỏ qua morning routine vì "quá bận".</p>
+                <p style="margin-top: var(--space-sm);"><strong>Kết quả:</strong> Chỉ sau 2 tuần, Hoa cảm thấy như chưa từng đi retreat. Tần số rớt về như cũ, thậm chí còn thấp hơn vì cô thất vọng về bản thân. Cô nghĩ "thiền định không hiệu quả với mình" - nhưng thực ra vấn đề là cô đã để năng lượng "rò rỉ" qua 5 kẻ thù mà không nhận ra.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🌟</span> Câu Chuyện 2: Nam - Chiến Lược Bảo Vệ Thành Công</div>
+                <p>Nam, 35 tuổi, cũng tham gia một khóa học phát triển bản thân tương tự. Nhưng khác với Hoa, anh đã lên kế hoạch bảo vệ năng lượng TRƯỚC khi kết thúc khóa học.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Chiến lược của Nam:</strong></p>
+                <p style="margin-top: var(--space-sm);">• <strong>Digital boundaries:</strong> Giới hạn social media 30 phút/ngày, unfollow các nguồn tiêu cực</p>
+                <p style="margin-top: var(--space-sm);">• <strong>Morning routine:</strong> 15 phút thiền và affirmations không thương lượng</p>
+                <p style="margin-top: var(--space-sm);">• <strong>Selective association:</strong> Tham gia cộng đồng GEM, gặp gỡ người cùng tần số mỗi tuần</p>
+                <p style="margin-top: var(--space-sm);">• <strong>Daily check-in:</strong> Chấm điểm năng lượng 1-10 mỗi tối, điều chỉnh khi thấy xu hướng giảm</p>
+                <p style="margin-top: var(--space-sm);"><strong>Kết quả sau 3 tháng:</strong> Tần số của Nam không chỉ duy trì mà còn tiếp tục tăng. Anh thu hút được cơ hội kinh doanh mới, mối quan hệ cải thiện, và quan trọng nhất - anh cảm thấy bình an và tự tin hơn bao giờ hết.</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>💡</span> Bài Học Rút Ra</div>
+                <p>Sự khác biệt giữa Hoa và Nam không phải ở khóa học họ tham gia - mà ở việc họ có hay không có chiến lược bảo vệ tần số sau khi nâng lên. Kiến thức quan trọng, nhưng ÁP DỤNG và BẢO VỆ còn quan trọng hơn nhiều. Bạn không cần là người đặc biệt để duy trì tần số cao - bạn chỉ cần có HỆ THỐNG.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 7: ACTION & KEY TAKEAWAYS -->
+        <section class="section">
+            <h2 class="section-title"><span>✨</span> Hành Động & Điểm Chính Cần Nhớ</h2>
+
+            <p>Bây giờ hãy đưa tất cả những gì bạn đã học vào thực hành ngay hôm nay. Đừng chờ đợi "thời điểm hoàn hảo" - thời điểm hoàn hảo là NGAY BÂY GIỜ.</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">✓</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">1. Xác Định 1-2 "Kẻ Thù" Lớn Nhất Của Bạn</div>
+                        <div class="flow-step-desc">Trong 5 kẻ thù đã nêu, cái nào đang ảnh hưởng bạn nhiều nhất hiện tại? Viết ra và quyết định sẽ xử lý nó trong tuần này.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">✓</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">2. Chọn 1 Protection Strategy Để Thực Hiện</div>
+                        <div class="flow-step-desc">Chọn 1 trong 6 chiến lược bảo vệ và CAM KẾT thực hiện 7 ngày liên tục. Bắt đầu nhỏ nhưng consistent.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">✓</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">3. Bắt Đầu Daily Check-In Từ Tối Nay</div>
+                        <div class="flow-step-desc">Chấm điểm tần số 1-10 mỗi ngày. Dùng app GEM Vision Board → Daily Score hoặc ghi vào sổ tay.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🔑</span> ĐIỂM CHÍNH #1: Tần Số Cao Cần Được Bảo Vệ Chủ Động</div>
+                <p>Nâng tần số lên mới chỉ là một nửa công việc - nửa còn lại là bảo vệ và duy trì nó. Giống như ngọn lửa trong gió, nếu không có sự bảo vệ, năng lượng cao sẽ tự nhiên "rò rỉ" qua 5 kẻ thù: negative media, energy vampires, chronic stress, poor physical habits, và unconscious patterns.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🔑</span> ĐIỂM CHÍNH #2: Có 6 Chiến Lược Bảo Vệ Hiệu Quả</div>
+                <p>Morning routine không thương lượng, digital boundaries, selective association, sacred space, regular cleansing, và daily score tracking. Bạn không cần áp dụng tất cả ngay - bắt đầu với 1-2 chiến lược và xây dựng dần.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🔑</span> ĐIỂM CHÍNH #3: Daily Check-In Là Công Cụ Mạnh Nhất</div>
+                <p>Khi bạn theo dõi tần số mỗi ngày (1-10), bạn sẽ nhận ra patterns: ngày nào cao, ngày nào thấp, tại sao. Awareness là bước đầu tiên của thay đổi. "What gets measured gets managed."</p>
+            </div>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>📱</span> Thực Hành Với App GEM</div>
+                <p><strong>Vision Board → Daily Score:</strong> Chấm điểm năng lượng hàng ngày, xem biểu đồ trend theo tuần/tháng.</p>
+                <p><strong>Vision Board → Habits:</strong> Track các protective habits như morning routine, digital boundaries, meditation.</p>
+                <p><strong>Rituals → Cleansing Breath:</strong> Ritual 5 phút để reset năng lượng ngay khi cảm thấy bị tấn công bởi negativity.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 8: TRANSITION -->
+        <section class="section">
+            <h2 class="section-title"><span>🚀</span> Chuẩn Bị Cho Bài Tiếp Theo</h2>
+
+            <p>Bạn đã học cách bảo vệ tần số cao - nhưng thực tế là dù bảo vệ tốt đến đâu, sẽ có lúc tần số của bạn bị rớt. Đây là điều BÌNH THƯỜNG và sẽ xảy ra với tất cả mọi người, kể cả những bậc thầy tâm linh.</p>
+
+            <p>Trong bài tiếp theo - <strong>Bài 6.2: Xử Lý Khi Tần Số Rớt</strong> - bạn sẽ học được kỹ thuật STOP-BREATHE-OBSERVE-CHOOSE để nhanh chóng phục hồi khi tần số bị giảm, cùng với các Quick Uplift Techniques giúp bạn quay trở lại trạng thái cao trong vài phút thay vì vài ngày.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>✨</span> Hẹn Gặp Bạn Ở Bài 6.2!</div>
+                <p>Hãy hoàn thành 3 action steps trên trước khi chuyển sang bài tiếp theo. Đặc biệt, bắt đầu Daily Check-In từ tối nay - đây sẽ là công cụ quan trọng nhất giúp bạn theo dõi và duy trì tần số trong suốt phần còn lại của khóa học và cả cuộc đời.</p>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <p>Bài 6.1 Hoàn Tất! 🛡️</p>
+            <p style="margin-top: var(--space-sm);">Tiếp theo: <a href="KHOA_TRIEU_PHU_M6_BAI_02.html">Bài 6.2: Xử Lý Khi Tần Số Rớt →</a></p>
+            <p style="margin-top: var(--space-lg);">© 2024 GEM Academy by Jennie Uyen Chu</p>
+        </footer>
+
+    </div>
+</body>
+</html>

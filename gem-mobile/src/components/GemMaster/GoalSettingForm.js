@@ -33,6 +33,7 @@ import {
   Check,
   Plus,
   CheckCircle,
+  Zap,
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { supabase } from '../../services/supabase';
@@ -43,6 +44,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 // Life areas for goal categorization
 const LIFE_AREAS = [
   { id: 'finance', label: 'Tài chính', icon: DollarSign, color: '#10B981' },
+  { id: 'crypto', label: 'Crypto', icon: Zap, color: '#F7931A' },
   { id: 'career', label: 'Sự nghiệp', icon: Briefcase, color: '#6366F1' },
   { id: 'health', label: 'Sức khỏe', icon: Heart, color: '#EF4444' },
   { id: 'relationships', label: 'Mối quan hệ', icon: Users, color: '#EC4899' },
@@ -68,6 +70,66 @@ const MOTIVATION_LEVELS = [
   { id: 'need_help', label: 'Cần hỗ trợ', emoji: '30%' },
 ];
 
+// Goal suggestions by life area - quick select options
+const GOAL_SUGGESTIONS = {
+  finance: [
+    'Tiết kiệm 100 triệu trong 6 tháng',
+    'Xây dựng quỹ khẩn cấp 6 tháng chi tiêu',
+    'Tăng thu nhập thụ động lên 10tr/tháng',
+    'Đầu tư crypto có lợi nhuận ổn định',
+    'Thanh toán hết nợ trong năm nay',
+    'Mua nhà/đất đầu tiên',
+  ],
+  crypto: [
+    'Đạt lợi nhuận 50% từ trading crypto',
+    'Xây dựng portfolio crypto cân bằng',
+    'Học phân tích kỹ thuật thành thạo',
+    'Quản lý rủi ro, không mất quá 2%/lệnh',
+    'Tìm 3 altcoin tiềm năng mùa bull run',
+    'Tham gia staking và yield farming',
+  ],
+  career: [
+    'Thăng tiến lên vị trí quản lý',
+    'Tăng lương 30% trong năm nay',
+    'Học thêm kỹ năng mới (AI, Data)',
+    'Chuyển đổi ngành nghề thành công',
+    'Xây dựng thương hiệu cá nhân',
+    'Khởi nghiệp kinh doanh riêng',
+  ],
+  health: [
+    'Giảm 10kg và duy trì cân nặng',
+    'Tập gym đều đặn 4 buổi/tuần',
+    'Ngủ đủ 7-8 tiếng mỗi đêm',
+    'Ăn uống lành mạnh, ít đường',
+    'Chạy bộ 5km không nghỉ',
+    'Thiền định 15 phút mỗi ngày',
+  ],
+  relationships: [
+    'Cải thiện mối quan hệ với gia đình',
+    'Tìm được người bạn đời phù hợp',
+    'Dành thời gian chất lượng với con',
+    'Mở rộng mạng lưới quan hệ',
+    'Hàn gắn mối quan hệ đã xa cách',
+    'Học cách giao tiếp hiệu quả hơn',
+  ],
+  personal: [
+    'Học ngoại ngữ mới (Anh/Trung)',
+    'Đọc 24 cuốn sách trong năm',
+    'Phát triển tư duy tích cực',
+    'Vượt qua nỗi sợ và lo âu',
+    'Xây dựng thói quen tốt mỗi ngày',
+    'Du lịch trải nghiệm 3 nơi mới',
+  ],
+  spiritual: [
+    'Thiền định sâu 30 phút mỗi ngày',
+    'Kết nối với bản ngã cao hơn',
+    'Sống mindful và hiện tại',
+    'Phát triển trực giác và năng lượng',
+    'Thực hành biết ơn mỗi ngày',
+    'Cân bằng chakra và năng lượng',
+  ],
+};
+
 // Pre-defined affirmation templates by category
 const AFFIRMATION_TEMPLATES = {
   finance: [
@@ -75,6 +137,13 @@ const AFFIRMATION_TEMPLATES = {
     'Tôi xứng đáng được giàu có và sung túc',
     'Tiền bạc đến với tôi dễ dàng và liên tục',
     'Tôi quản lý tài chính một cách thông minh',
+  ],
+  crypto: [
+    'Tôi giao dịch với sự bình tĩnh và kỷ luật',
+    'Mỗi quyết định trading của tôi đều sáng suốt',
+    'Tôi kiên nhẫn chờ đợi cơ hội hoàn hảo',
+    'Tôi quản lý rủi ro một cách khôn ngoan',
+    'Thị trường crypto mang lại cơ hội tuyệt vời cho tôi',
   ],
   career: [
     'Tôi là chuyên gia trong lĩnh vực của mình',
@@ -343,6 +412,11 @@ ${affirmations.map(aff => `• "${aff}"`).join('\n')}
         'Đặt mục tiêu tiết kiệm cụ thể mỗi tháng (ví dụ: 20% thu nhập)',
         'Tìm hiểu và đầu tư vào các kênh phù hợp với khẩu vị rủi ro',
       ],
+      crypto: [
+        'Học trading/phân tích kỹ thuật 1h/ngày',
+        'Ghi chép trading journal sau mỗi lệnh',
+        'Quản lý rủi ro: không vào quá 2% vốn/lệnh',
+      ],
       career: [
         'Xác định 3 kỹ năng quan trọng cần phát triển và lập kế hoạch học tập',
         'Mở rộng network qua các sự kiện ngành và LinkedIn',
@@ -374,6 +448,8 @@ ${affirmations.map(aff => `• "${aff}"`).join('\n')}
   };
 
   // Add widgets to Vision Board
+  // FIXED: Link affirmation/action_plan widgets to the goal using linked_goal_id
+  // This enables cascade deletion when the goal is deleted
   const handleAddToVisionBoard = useCallback(async () => {
     try {
       setIsSubmitting(true);
@@ -381,9 +457,25 @@ ${affirmations.map(aff => `• "${aff}"`).join('\n')}
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Save all widgets
-      for (const widget of analysisResult?.widgets || []) {
-        await gemMasterService.saveWidgetToVisionBoard(widget, user.id);
+      const widgets = analysisResult?.widgets || [];
+      let goalWidgetId = null;
+
+      // First, save the goal widget to get its ID
+      const goalWidget = widgets.find(w => w.type === 'goal');
+      if (goalWidget) {
+        const result = await gemMasterService.saveWidgetToVisionBoard(goalWidget, user.id);
+        if (result.success && result.widget?.id) {
+          goalWidgetId = result.widget.id;
+          console.log('[GoalSettingForm] Goal widget saved with ID:', goalWidgetId);
+        }
+      }
+
+      // Then save affirmation and action_plan widgets linked to the goal
+      for (const widget of widgets) {
+        if (widget.type === 'goal') continue; // Already saved
+
+        // Pass goalWidgetId as linkedGoalId for cascade deletion support
+        await gemMasterService.saveWidgetToVisionBoard(widget, user.id, goalWidgetId);
       }
 
       // Show success modal
@@ -403,11 +495,14 @@ ${affirmations.map(aff => `• "${aff}"`).join('\n')}
     }
   }, [analysisResult, onResult]);
 
-  // Navigate to Vision Board
+  // Navigate to Vision Board - scroll to Goals section
   const goToVisionBoard = useCallback(() => {
     setShowSuccessModal(false);
     handleClose();
-    navigation.navigate('Account', { screen: 'VisionBoard' });
+    navigation.navigate('Account', {
+      screen: 'VisionBoard',
+      params: { scrollToSection: 'goals' }
+    });
   }, [navigation, handleClose]);
 
   // Get area label for display
@@ -481,6 +576,7 @@ ${affirmations.map(aff => `• "${aff}"`).join('\n')}
   // Render Step 2: Goal Description
   const renderStep2 = () => {
     const areaInfo = LIFE_AREAS.find(a => a.id === selectedArea);
+    const suggestions = GOAL_SUGGESTIONS[selectedArea] || [];
     return (
       <View style={styles.stepContent}>
         <Text style={styles.stepTitle}>Mô tả mục tiêu của bạn</Text>
@@ -490,16 +586,42 @@ ${affirmations.map(aff => `• "${aff}"`).join('\n')}
 
         <TextInput
           style={styles.goalInput}
-          placeholder="Ví dụ: Tôi muốn tiết kiệm 100 triệu trong 6 tháng..."
+          placeholder="Nhập mục tiêu hoặc chọn gợi ý bên dưới..."
           placeholderTextColor={COLORS.textMuted}
           value={goalText}
           onChangeText={setGoalText}
           multiline
-          numberOfLines={4}
+          numberOfLines={3}
           textAlignVertical="top"
         />
 
         <Text style={styles.charCount}>{goalText.length} ký tự (tối thiểu 5)</Text>
+
+        {/* Quick suggestion chips */}
+        {suggestions.length > 0 && (
+          <View style={styles.suggestionsSection}>
+            <Text style={styles.suggestionsLabel}>Gợi ý nhanh:</Text>
+            <View style={styles.suggestionsList}>
+              {suggestions.map((suggestion, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.suggestionChip,
+                    goalText === suggestion && styles.suggestionChipSelected,
+                  ]}
+                  onPress={() => setGoalText(suggestion)}
+                >
+                  <Text style={[
+                    styles.suggestionChipText,
+                    goalText === suggestion && styles.suggestionChipTextSelected,
+                  ]}>
+                    {suggestion}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        )}
       </View>
     );
   };
@@ -753,9 +875,11 @@ ${affirmations.map(aff => `• "${aff}"`).join('\n')}
           animationType="fade"
           onRequestClose={() => setShowSuccessModal(false)}
         >
-          <Pressable style={styles.successOverlay} onPress={() => setShowSuccessModal(false)}>
+          <View style={styles.successOverlay}>
             <View style={styles.successModal}>
-              <CheckCircle size={56} color={COLORS.success || '#10B981'} />
+              <View style={styles.successIconContainer}>
+                <CheckCircle size={48} color={COLORS.success || '#10B981'} />
+              </View>
               <Text style={styles.successTitle}>Đã thêm thành công!</Text>
               <Text style={styles.successMessage}>
                 Mục tiêu đã được thêm vào Vision Board của bạn.
@@ -771,11 +895,11 @@ ${affirmations.map(aff => `• "${aff}"`).join('\n')}
                   <Text style={styles.successButtonSecondaryText}>Đóng</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.successButtonPrimary} onPress={goToVisionBoard}>
-                  <Text style={styles.successButtonPrimaryText}>XEM VISION BOARD</Text>
+                  <Text style={styles.successButtonPrimaryText}>Xem Vision Board</Text>
                 </TouchableOpacity>
               </View>
             </View>
-          </Pressable>
+          </View>
         </Modal>
       </View>
     </Modal>
@@ -909,6 +1033,40 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     marginTop: SPACING.sm,
     textAlign: 'right',
+  },
+  // Goal Suggestions
+  suggestionsSection: {
+    marginTop: SPACING.lg,
+  },
+  suggestionsLabel: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    marginBottom: SPACING.sm,
+  },
+  suggestionsList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+  },
+  suggestionChip: {
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  suggestionChipSelected: {
+    backgroundColor: 'rgba(255, 189, 89, 0.2)',
+    borderColor: COLORS.gold,
+  },
+  suggestionChipText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textSecondary,
+  },
+  suggestionChipTextSelected: {
+    color: COLORS.gold,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
   },
   // Options
   sectionLabel: {
@@ -1188,68 +1346,71 @@ const styles = StyleSheet.create({
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: '#0A0F1C',
   },
-  // Success Modal - Glassmorphism frosted glass style
+  // Success Modal - Dark theme with gold accents
   successOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   successModal: {
-    width: SCREEN_WIDTH - 80,
-    maxWidth: 280,
-    backgroundColor: 'rgba(15, 25, 45, 0.85)',
-    borderRadius: 16,
-    padding: 20,
-    paddingTop: 24,
+    width: '85%',
+    maxWidth: 340,
+    backgroundColor: COLORS.glassBg || '#1a1a2e',
+    borderRadius: SPACING.lg,
+    padding: SPACING.xl,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(100, 150, 200, 0.25)',
+    borderColor: 'rgba(255, 189, 89, 0.3)',
+  },
+  successIconContainer: {
+    marginBottom: SPACING.md,
   },
   successTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginTop: 12,
-    marginBottom: 6,
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.gold,
+    textAlign: 'center',
+    marginBottom: SPACING.sm,
   },
   successMessage: {
-    fontSize: 13,
-    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textSecondary,
     textAlign: 'center',
-    lineHeight: 18,
-    marginBottom: 18,
+    lineHeight: 22,
+    marginBottom: SPACING.xl,
   },
   successButtons: {
     flexDirection: 'row',
-    gap: 12,
+    justifyContent: 'center',
+    gap: SPACING.md,
     width: '100%',
   },
   successButtonSecondary: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: SPACING.md,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
     alignItems: 'center',
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   successButtonSecondaryText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textMuted,
   },
   successButtonPrimary: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: SPACING.md,
+    backgroundColor: COLORS.gold,
     alignItems: 'center',
-    borderRadius: 22,
-    backgroundColor: 'rgba(245, 245, 245, 0.95)',
   },
   successButtonPrimaryText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1a1a2e',
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: '#0A0F1C',
   },
 });
 

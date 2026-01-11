@@ -6,7 +6,6 @@
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
 -- =====================================================
 -- TABLE 1: Blocked Users
 -- =====================================================
@@ -23,29 +22,23 @@ CREATE TABLE IF NOT EXISTS public.blocked_users (
   -- Prevent self-blocking
   CONSTRAINT no_self_block CHECK (blocker_id != blocked_id)
 );
-
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_blocked_users_blocker ON public.blocked_users(blocker_id);
 CREATE INDEX IF NOT EXISTS idx_blocked_users_blocked ON public.blocked_users(blocked_id);
-
 -- RLS Policies
 ALTER TABLE public.blocked_users ENABLE ROW LEVEL SECURITY;
-
 DROP POLICY IF EXISTS "Users can view their blocks" ON public.blocked_users;
 CREATE POLICY "Users can view their blocks"
   ON public.blocked_users FOR SELECT
   USING (auth.uid() = blocker_id);
-
 DROP POLICY IF EXISTS "Users can create blocks" ON public.blocked_users;
 CREATE POLICY "Users can create blocks"
   ON public.blocked_users FOR INSERT
   WITH CHECK (auth.uid() = blocker_id);
-
 DROP POLICY IF EXISTS "Users can delete their blocks" ON public.blocked_users;
 CREATE POLICY "Users can delete their blocks"
   ON public.blocked_users FOR DELETE
   USING (auth.uid() = blocker_id);
-
 -- =====================================================
 -- TABLE 2: User Reports
 -- =====================================================
@@ -74,25 +67,20 @@ CREATE TABLE IF NOT EXISTS public.user_reports (
   -- Prevent self-reporting
   CONSTRAINT no_self_report CHECK (reporter_id != reported_user_id)
 );
-
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_user_reports_reporter ON public.user_reports(reporter_id);
 CREATE INDEX IF NOT EXISTS idx_user_reports_reported ON public.user_reports(reported_user_id);
 CREATE INDEX IF NOT EXISTS idx_user_reports_status ON public.user_reports(status);
-
 -- RLS Policies
 ALTER TABLE public.user_reports ENABLE ROW LEVEL SECURITY;
-
 DROP POLICY IF EXISTS "Users can view their reports" ON public.user_reports;
 CREATE POLICY "Users can view their reports"
   ON public.user_reports FOR SELECT
   USING (auth.uid() = reporter_id);
-
 DROP POLICY IF EXISTS "Users can create reports" ON public.user_reports;
 CREATE POLICY "Users can create reports"
   ON public.user_reports FOR INSERT
   WITH CHECK (auth.uid() = reporter_id);
-
 -- =====================================================
 -- FUNCTION: Check if user is blocked
 -- =====================================================
@@ -109,7 +97,6 @@ BEGIN
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
 -- =====================================================
 -- FUNCTION: Get blocked users for a user
 -- =====================================================
@@ -135,16 +122,13 @@ BEGIN
   ORDER BY b.created_at DESC;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
-
 -- =====================================================
 -- GRANT PERMISSIONS
 -- =====================================================
 GRANT ALL ON public.blocked_users TO authenticated;
 GRANT ALL ON public.user_reports TO authenticated;
-
 -- Force schema reload
 NOTIFY pgrst, 'reload schema';
-
 -- =====================================================
 -- VERIFY TABLES CREATED
 -- =====================================================
@@ -167,7 +151,6 @@ BEGIN
     RAISE WARNING '⚠️  Only % tables created. Expected 2.', table_count;
   END IF;
 END $$;
-
 -- Comments
 COMMENT ON TABLE public.blocked_users IS 'Users who have blocked each other';
 COMMENT ON TABLE public.user_reports IS 'User reports for inappropriate behavior';

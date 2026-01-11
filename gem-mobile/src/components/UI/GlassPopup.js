@@ -198,9 +198,9 @@ const styles = StyleSheet.create({
   glassCard: {
     borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: 'rgba(15, 25, 45, 0.85)',
+    backgroundColor: 'rgba(26, 26, 46, 0.95)',
     borderWidth: 1,
-    borderColor: 'rgba(100, 150, 200, 0.25)',
+    borderColor: 'rgba(255, 189, 89, 0.3)',
   },
   borderGlow: {
     position: 'absolute',
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 1,
-    backgroundColor: 'rgba(120, 170, 220, 0.4)',
+    backgroundColor: 'rgba(255, 189, 89, 0.4)',
   },
   content: {
     padding: 20,
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#FFBD59',
     textAlign: 'center',
     marginBottom: 6,
   },
@@ -277,8 +277,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
   },
   buttonPrimary: {
-    backgroundColor: 'rgba(245, 245, 245, 0.95)',
-    borderColor: 'rgba(255, 255, 255, 0.5)',
+    backgroundColor: '#FFBD59',
+    borderColor: 'rgba(255, 189, 89, 0.5)',
   },
   buttonDestructive: {
     backgroundColor: 'rgba(248, 113, 113, 0.15)',

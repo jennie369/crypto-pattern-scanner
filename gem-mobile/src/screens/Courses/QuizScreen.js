@@ -25,18 +25,39 @@ import {
 
 import { useCourse } from '../../contexts/CourseContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTabBar } from '../../contexts/TabBarContext';
 import { quizService } from '../../services/quizService';
 import QuizQuestion from './components/QuizQuestion';
 import QuizTimer from './components/QuizTimer';
 import QuizResult from './components/QuizResult';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, GLASS } from '../../utils/tokens';
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
+import { addXP, updateStreak, incrementQuizStats } from '../../services/learningGamificationService';
 
 const QuizScreen = ({ navigation, route }) => {
   const { courseId, lessonId, lesson, courseTitle } = route.params;
   const { user } = useAuth();
   const { completeLesson, getProgress } = useCourse();
   const { alert, AlertComponent } = useCustomAlert();
+
+  // Use TabBarContext to hide tab bar on this screen
+  let hideTabBar, showTabBar;
+  try {
+    const tabBarContext = useTabBar();
+    hideTabBar = tabBarContext.hideTabBar;
+    showTabBar = tabBarContext.showTabBar;
+  } catch (e) {
+    hideTabBar = () => {};
+    showTabBar = () => {};
+  }
+
+  // Hide tab bar when entering quiz, show when leaving
+  useEffect(() => {
+    hideTabBar(false);
+    return () => {
+      showTabBar(true);
+    };
+  }, []);
 
   // State
   const [loading, setLoading] = useState(true);
@@ -200,9 +221,31 @@ const QuizScreen = ({ navigation, route }) => {
       });
       setSubmitted(true);
 
-      // If passed, mark lesson as complete
+      // If passed, mark lesson as complete and award XP
       if (submitResult.passed) {
         await completeLesson(courseId, lessonId);
+
+        // Award XP for quiz completion
+        try {
+          const isPerfect = submitResult.scorePercent >= 100;
+          const isHighScore = submitResult.scorePercent >= 80;
+
+          // Base XP for passing
+          const baseXP = 20;
+          const bonusXP = isPerfect ? 30 : (isHighScore ? 15 : 0);
+          const totalXP = baseXP + bonusXP;
+
+          const actionType = isPerfect ? 'quiz_perfect' : 'quiz_pass';
+          const description = isPerfect
+            ? `Điểm tuyệt đối: ${lesson?.title || 'Quiz'}`
+            : `Hoàn thành quiz: ${lesson?.title || 'Quiz'}`;
+
+          await addXP(totalXP, actionType, description);
+          await incrementQuizStats(isPerfect);
+          await updateStreak();
+        } catch (xpError) {
+          console.log('[QuizScreen] XP award failed:', xpError);
+        }
       }
 
       // Update retake info

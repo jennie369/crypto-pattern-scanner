@@ -14,6 +14,7 @@ import {
   Dimensions,
   Animated,
   Platform,
+  InteractionManager,
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { CheckCircle, XCircle, AlertCircle, Info } from 'lucide-react-native';
@@ -24,12 +25,12 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const BLUE_GLOW = '#4A90D9';
 const BLUE_BORDER = 'rgba(74, 144, 217, 0.6)';
 
-// Alert types with icons
+// Alert types with icons - Green for success
 const ALERT_TYPES = {
   success: {
     icon: CheckCircle,
-    iconColor: '#4ADE80',
-    iconBg: 'rgba(74, 222, 128, 0.15)',
+    iconColor: '#10B981', // Green
+    iconBg: 'rgba(16, 185, 129, 0.15)',
   },
   error: {
     icon: XCircle,
@@ -85,8 +86,20 @@ const DarkAlert = memo(({
   }, [visible]);
 
   const handleButtonPress = (button) => {
-    button.onPress?.();
+    // CRITICAL: Close alert FIRST, then call button callback
+    // On iOS, calling button.onPress first can close the parent modal
+    // while this alert is still mounted, causing a race condition crash
     onClose?.();
+    // Delay button callback to ensure alert is fully closed
+    if (button.onPress) {
+      if (Platform.OS === 'ios') {
+        InteractionManager.runAfterInteractions(() => {
+          setTimeout(() => button.onPress(), 100);
+        });
+      } else {
+        setTimeout(() => button.onPress(), 50);
+      }
+    }
   };
 
   return (
@@ -193,17 +206,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   container: {
-    width: SCREEN_WIDTH - 80,
-    maxWidth: 280,
+    width: SCREEN_WIDTH - 64,
+    maxWidth: 320,
   },
   glassCard: {
     borderRadius: 16,
     overflow: 'hidden',
     // Dark matte frosted glass background
-    backgroundColor: 'rgba(15, 25, 45, 0.85)',
-    // Subtle border
+    backgroundColor: 'rgba(26, 26, 46, 0.95)',
+    // Gold border
     borderWidth: 1,
-    borderColor: 'rgba(100, 150, 200, 0.25)',
+    borderColor: 'rgba(255, 189, 89, 0.3)',
   },
   borderGlow: {
     position: 'absolute',
@@ -211,20 +224,21 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 1,
-    backgroundColor: 'rgba(120, 170, 220, 0.4)',
+    backgroundColor: 'rgba(255, 189, 89, 0.4)',
   },
   content: {
-    padding: 20,
-    paddingTop: 24,
+    padding: 16,
+    paddingTop: 20,
+    paddingBottom: 18,
     alignItems: 'center',
   },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
     borderWidth: 1.5,
     // Shadow glow effect
     shadowOffset: { width: 0, height: 0 },
@@ -235,7 +249,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 17,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: '#FFBD59',
     textAlign: 'center',
     marginBottom: 6,
   },
@@ -244,12 +258,12 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.7)',
     textAlign: 'center',
     lineHeight: 18,
-    marginBottom: 18,
+    marginBottom: 14,
     paddingHorizontal: 4,
   },
   buttonContainer: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 10,
     width: '100%',
     marginTop: 4,
   },
@@ -258,18 +272,20 @@ const styles = StyleSheet.create({
   },
   buttonContainerVertical: {
     flexDirection: 'column',
-    gap: 10,
+    gap: 8,
   },
   button: {
     flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 22,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.15)',
+    minHeight: 40,
+    maxHeight: 44,
   },
   buttonFullWidth: {
     flex: 0,
@@ -277,12 +293,12 @@ const styles = StyleSheet.create({
   },
   buttonSingle: {
     flex: 0,
-    minWidth: 120,
-    paddingHorizontal: 28,
+    minWidth: 100,
+    paddingHorizontal: 24,
   },
   buttonPrimary: {
-    backgroundColor: 'rgba(245, 245, 245, 0.95)',
-    borderColor: 'rgba(255, 255, 255, 0.5)',
+    backgroundColor: '#FFBD59',
+    borderColor: 'rgba(255, 189, 89, 0.5)',
   },
   buttonDestructive: {
     backgroundColor: 'rgba(248, 113, 113, 0.15)',
@@ -293,9 +309,10 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   buttonText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: '#FFFFFF',
+    textAlign: 'center',
   },
   buttonTextPrimary: {
     color: '#1a1a2e',

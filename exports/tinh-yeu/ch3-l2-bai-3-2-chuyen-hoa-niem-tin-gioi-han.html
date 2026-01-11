@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 3.2: Chuyển Hóa Niềm Tin Giới Hạn | Khóa Tần Số Tình Yêu</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--burgundy); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .highlight-box.purple { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05)); border-color: rgba(106, 91, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.purple { border-left-color: var(--purple); } }
+        .highlight-box.purple .highlight-box-title { color: var(--purple); }
+
+        .highlight-box.cyan { background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 240, 255, 0.05)); border-color: rgba(0, 240, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.cyan { border-left-color: var(--cyan); } }
+        .highlight-box.cyan .highlight-box-title { color: var(--cyan); }
+
+        .highlight-box.red { background: linear-gradient(135deg, rgba(156, 6, 18, 0.15), rgba(156, 6, 18, 0.05)); border-color: rgba(156, 6, 18, 0.3); }
+        @media (max-width: 600px) { .highlight-box.red { border-left-color: var(--burgundy); } }
+        .highlight-box.red .highlight-box-title { color: var(--burgundy-light); }
+
+        .highlight-box.green { background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05)); border-color: rgba(0, 200, 83, 0.3); }
+        @media (max-width: 600px) { .highlight-box.green { border-left-color: var(--success); } }
+        .highlight-box.green .highlight-box-title { color: var(--success); }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .example-box { background: linear-gradient(135deg, rgba(106, 91, 255, 0.1), rgba(106, 91, 255, 0.02)); border: 1px solid rgba(106, 91, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .example-box { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .example-box-title { font-weight: 700; color: var(--purple); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .belief-transform { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-md) 0; }
+        @media (max-width: 600px) { .belief-transform { border: none; border-radius: 0; padding: var(--space-md) 16px; margin: 0; border-bottom: 1px solid var(--glass-border); } }
+        .belief-old { color: var(--error); font-style: italic; margin-bottom: var(--space-sm); display: flex; align-items: flex-start; gap: var(--space-sm); }
+        .belief-old::before { content: "✗"; font-weight: 700; }
+        .belief-arrow { text-align: center; color: var(--gold); font-size: 1.5rem; margin: var(--space-sm) 0; }
+        .belief-new { color: var(--success); font-weight: 600; display: flex; align-items: flex-start; gap: var(--space-sm); }
+        .belief-new::before { content: "✓"; font-weight: 700; }
+
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        @media (min-width: 601px) { .flow-step:hover { border-color: var(--gold); transform: translateX(8px); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .faq-item { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-md) 0; }
+        @media (max-width: 600px) { .faq-item { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; } }
+        .faq-question { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); }
+        .faq-answer { font-size: 0.95rem; color: var(--text-secondary); }
+
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>💕</span>
+                <span>Module 3</span>
+            </div>
+            <div class="lesson-chapter">Chapter 3 - Nâng Tần Số Tình Yêu</div>
+            <h1 class="lesson-title">Chuyển Hóa Niềm Tin Giới Hạn</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 3.2</span></div>
+                <div class="meta-item"><span>⏱️</span><span>30 phút đọc</span></div>
+            </div>
+        </header>
+
+        <!-- SECTION 1: Opening Hook -->
+        <section class="section">
+            <h2 class="section-title"><span>🔓</span> Bạn Đang Tự Giam Mình Trong Nhà Tù Nào?</h2>
+
+            <p>Hãy tưởng tượng bạn đang sống trong một căn phòng với những bức tường vô hình. Bạn không thể thấy chúng, nhưng mỗi khi bạn cố gắng tiến về phía tình yêu, bạn đâm vào tường và bị đẩy lùi. Những bức tường đó có tên gọi: NIỀM TIN GIỚI HẠN.</p>
+
+            <p>"Tình yêu luôn làm tôi đau." "Tôi không đủ tốt để được yêu." "Người tốt đều đã có người yêu rồi." Những câu này nghe quen không? Đây là những niềm tin mà nhiều người mang theo suốt đời mà không hề nhận ra - và chúng đang định hình toàn bộ trải nghiệm tình yêu của họ. Tin tốt là: những bức tường này không phải bằng đá - chúng được xây bằng suy nghĩ. Và suy nghĩ có thể thay đổi.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Sự Thật Quan Trọng</div>
+                <p>Bạn không nhìn thế giới như nó LÀ - bạn nhìn thế giới như BẠN là. Niềm tin của bạn hoạt động như một bộ lọc, chỉ cho phép bạn thấy những gì khớp với những gì bạn đã tin sẵn. Thay đổi bộ lọc, thế giới sẽ thay đổi.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m3-belief-cycle.png" alt="Vòng lặp niềm tin">
+            </div>
+            <div class="image-caption">Hình 1: Vòng lặp khép kín của niềm tin - suy nghĩ - kết quả</div>
+        </section>
+
+        <!-- SECTION 2: What is Limiting Belief -->
+        <section class="section">
+            <h2 class="section-title"><span>🔒</span> Niềm Tin Giới Hạn Là Gì?</h2>
+
+            <p>Niềm tin giới hạn (limiting beliefs) là những suy nghĩ, quan điểm bạn tin là sự thật TUYỆT ĐỐI nhưng thực ra chỉ là những câu chuyện bạn đã kể cho chính mình lặp đi lặp lại cho đến khi chúng trở nên "thật" trong tâm trí bạn. Trong tình yêu, những niềm tin này thường được hình thành từ thời thơ ấu hoặc từ những trải nghiệm đau buồn trong quá khứ.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🧠</span> Cơ Chế Niềm Tin</div>
+                <p><strong>Niềm tin → Suy nghĩ → Cảm xúc → Hành động → Kết quả → Củng cố niềm tin ban đầu</strong><br><br>Đây là vòng lặp khép kín cực kỳ mạnh mẽ. Nếu bạn tin "Mình không xứng đáng được yêu", bạn sẽ suy nghĩ theo hướng đó, cảm thấy không tự tin, hành xử theo cách khiến người khác xa lánh (bám víu hoặc đẩy ra), và kết quả đó củng cố niềm tin ban đầu: "Thấy chưa, mình nói đúng mà!"</p>
+            </div>
+
+            <p>Điều nguy hiểm nhất của niềm tin giới hạn là chúng hoạt động ở cấp độ VÔ THỨC. Bạn không nhận ra mình đang tin vào chúng - bạn chỉ thấy chúng như "sự thật hiển nhiên về cuộc sống". Chính vì thế, bước đầu tiên là NHẬN DIỆN những niềm tin này.</p>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>💜</span> Nguồn Gốc Của Niềm Tin</div>
+                <p>Phần lớn niềm tin về tình yêu được hình thành trước năm 7 tuổi - thông qua việc quan sát mối quan hệ của bố mẹ, cách bạn được đối xử, và những trải nghiệm đầu đời. Sau đó, chúng được củng cố hoặc thay đổi bởi các mối quan hệ trong tuổi trưởng thành. Nhưng nhớ rằng: những gì được học có thể được UN-LEARN.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: 10 Common Beliefs -->
+        <section class="section">
+            <h2 class="section-title"><span>⚠️</span> 10 Niềm Tin Giới Hạn Phổ Biến Nhất</h2>
+
+            <p>Dưới đây là 10 niềm tin giới hạn phổ biến nhất về tình yêu mà Jennie gặp trong hơn 10 năm coaching. Hãy đọc và đánh dấu những niềm tin bạn nhận ra trong bản thân - sự thành thật ở bước này sẽ quyết định mức độ chuyển hóa của bạn.</p>
+
+            <div class="highlight-box red">
+                <div class="highlight-box-title"><span>1️⃣</span> "Tình yêu luôn làm tôi đau"</div>
+                <p>Bạn đã bị tổn thương và giờ tin rằng đau khổ là một phần KHÔNG THỂ TRÁNH KHỎI của tình yêu. Niềm tin này khiến bạn hoặc tránh xa tình yêu hoàn toàn, hoặc vô thức chọn những người sẽ tiếp tục làm bạn đau.</p>
+            </div>
+
+            <div class="highlight-box red">
+                <div class="highlight-box-title"><span>2️⃣</span> "Tôi không đủ tốt/đẹp/giỏi"</div>
+                <p>Bạn tin rằng có điều gì đó "sai" với bản thân khiến bạn không thể thu hút người phù hợp. Niềm tin này thường dẫn đến việc chấp nhận ít hơn những gì bạn xứng đáng, hoặc tự sabotage khi có người tốt đến gần.</p>
+            </div>
+
+            <div class="highlight-box red">
+                <div class="highlight-box-title"><span>3️⃣</span> "Người tốt đều đã có người yêu rồi"</div>
+                <p>Niềm tin khan hiếm - tin rằng "thị trường" đã hết người tốt và chỉ còn "hàng tồn". Niềm tin này khiến bạn chấp nhận người không phù hợp vì sợ không còn ai khác.</p>
+            </div>
+
+            <div class="highlight-box red">
+                <div class="highlight-box-title"><span>4️⃣</span> "Nếu tôi mở lòng, tôi sẽ bị lợi dụng"</div>
+                <p>Sự vulnerable (dễ tổn thương) bị đánh đồng với sự yếu đuối và nguy hiểm. Bạn xây tường để "bảo vệ" mình nhưng thực ra đang ngăn cản tình yêu thực sự đến với bạn.</p>
+            </div>
+
+            <div class="highlight-box red">
+                <div class="highlight-box-title"><span>5️⃣</span> "Tình yêu đích thực chỉ có trong phim"</div>
+                <p>Bạn đã từ bỏ hy vọng về tình yêu sâu sắc, lành mạnh trong đời thực. Niềm tin này trở thành "lời tiên tri tự ứng nghiệm" - bạn không tin nên bạn không tìm kiếm, không tìm kiếm nên không tìm thấy.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m3-limiting-beliefs.png" alt="10 niềm tin giới hạn">
+            </div>
+            <div class="image-caption">Hình 2: 10 niềm tin giới hạn phổ biến về tình yêu</div>
+
+            <div class="highlight-box red">
+                <div class="highlight-box-title"><span>6️⃣</span> "Tôi quá độc lập để cần ai"</div>
+                <p>Che giấu nỗi sợ bị bỏ rơi bằng vẻ ngoài tự lập. "Tôi không cần ai" thực ra thường là "Tôi sợ cần ai vì sợ họ sẽ làm tôi thất vọng." Độc lập là tốt, nhưng kết nối với người khác cũng là nhu cầu con người.</p>
+            </div>
+
+            <div class="highlight-box red">
+                <div class="highlight-box-title"><span>7️⃣</span> "Ở tuổi này thì còn ai yêu mình"</div>
+                <p>Niềm tin về "hạn sử dụng" cho tình yêu. Đây là một trong những niềm tin phi lý nhất - hàng ngày có người 50, 60, 70 tuổi tìm thấy tình yêu mới. Tuổi tác không quyết định - tần số và sự sẵn sàng mới quyết định.</p>
+            </div>
+
+            <div class="highlight-box red">
+                <div class="highlight-box-title"><span>8️⃣</span> "Đàn ông/Phụ nữ đều như vậy cả"</div>
+                <p>Tổng quát hóa một giới tính dựa trên trải nghiệm với một số cá nhân. "Tất cả đàn ông đều lừa dối" hay "Tất cả phụ nữ đều chỉ cần tiền" - đây là cách não bộ cố bảo vệ bạn nhưng lại đóng cửa với những người thực sự tốt.</p>
+            </div>
+
+            <div class="highlight-box red">
+                <div class="highlight-box-title"><span>9️⃣</span> "Tình yêu cần phải đấu tranh mới bền"</div>
+                <p>Đánh đồng drama với đam mê. "Nếu không khổ sở thì không phải tình yêu thật." Niềm tin này khiến bạn bỏ qua những mối quan hệ bình yên vì "chán" và tìm đến những mối quan hệ toxic vì "có cảm xúc".</p>
+            </div>
+
+            <div class="highlight-box red">
+                <div class="highlight-box-title"><span>🔟</span> "Tôi sẽ thay đổi được họ"</div>
+                <p>Tin rằng tình yêu của bạn có thể biến đổi ai đó từ người không phù hợp thành người hoàn hảo. Niềm tin này khiến bạn bỏ qua red flags và ở lại những mối quan hệ nên kết thúc từ lâu.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 4: Real Examples -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Câu Chuyện Chuyển Hóa Thực Tế</h2>
+
+            <p>Để bạn thấy sức mạnh của việc thay đổi niềm tin, hãy cùng nghe câu chuyện của những người đã chuyển hóa thành công.</p>
+
+            <div class="example-box">
+                <div class="example-box-title"><span>👩</span> Câu Chuyện Của Lan (33 tuổi) - Từ "Tôi Không Xứng Đáng" Đến Hạnh Phúc</div>
+                <p>Lan lớn lên với mẹ đơn thân luôn nói: "Con gái phải biết thân phận. Đừng mơ cao." Cô mang niềm tin "Mình không đủ tốt" vào mọi mối quan hệ. Mỗi khi có người đàn ông tốt quan tâm, Lan nghĩ: "Chắc anh ấy chưa biết mình thực sự như thế nào." Cô hoặc tự sabotage, hoặc chọn những người đối xử tệ với cô vì "điều đó mới khớp với những gì mình xứng đáng."</p>
+                <p style="margin-top: var(--space-sm);">Sau khi làm The Work với niềm tin này, Lan nhận ra: lời mẹ nói xuất phát từ nỗi sợ của mẹ, không phải sự thật về giá trị của Lan. Turnaround của cô: "Tôi HOÀN TOÀN xứng đáng được yêu, và những trải nghiệm trong quá khứ chỉ là bài học, không phải bản án."</p>
+                <p style="margin-top: var(--space-sm);">6 tháng sau khi thay đổi niềm tin, Lan bắt đầu mối quan hệ với một người đàn ông đối xử với cô như công chúa. "Trước đây, tôi sẽ nghĩ anh ấy đang đóng kịch. Bây giờ tôi biết: đây là cách tôi xứng đáng được đối xử."</p>
+            </div>
+
+            <div class="example-box">
+                <div class="example-box-title"><span>👨</span> Câu Chuyện Của Khoa (40 tuổi) - Từ "Quá Già Để Yêu" Đến Hôn Nhân</div>
+                <p>Sau ly hôn năm 38 tuổi, Khoa tin rằng "thời của mình đã qua". Anh nhìn vào gương thấy những nếp nhăn và nghĩ: "Ai mà thèm một ông già như mình?" Niềm tin này khiến anh ngừng cố gắng - anh không đi ra ngoài, không tham gia hoạt động nào, và từ chối mọi lời giới thiệu của bạn bè.</p>
+                <p style="margin-top: var(--space-sm);">Khi làm The Work với câu hỏi "Bạn có chắc chắn tuyệt đối rằng 40 tuổi là quá già để yêu?", Khoa nhận ra câu trả lời là KHÔNG. Anh tìm thấy vô số ví dụ về người tìm được tình yêu ở tuổi 50, 60, thậm chí 70. Turnaround: "40 tuổi là tuổi tôi biết rõ mình muốn gì - đây là LỢI THẾ, không phải bất lợi."</p>
+                <p style="margin-top: var(--space-sm);">Khoa kết hôn lần thứ hai vào năm 42 tuổi với một phụ nữ 38 tuổi. "Cô ấy nói rằng cô ấy thích sự trưởng thành và ổn định của tôi. Hóa ra điều tôi nghĩ là nhược điểm lại là điểm thu hút."</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m3-the-work-process.png" alt="The Work - 4 câu hỏi">
+            </div>
+            <div class="image-caption">Hình 3: Quy trình The Work của Byron Katie - 4 câu hỏi thay đổi cuộc đời</div>
+        </section>
+
+        <!-- SECTION 5: The Work Process -->
+        <section class="section">
+            <h2 class="section-title"><span>🔧</span> Kỹ Thuật "THE WORK" - Byron Katie</h2>
+
+            <p>Byron Katie là một người phụ nữ Mỹ đã trải qua 10 năm trầm cảm nặng trước khi có sự thức tỉnh sâu sắc. Cô phát triển phương pháp "The Work" - một quy trình đơn giản nhưng cực kỳ hiệu quả để thẩm vấn và chuyển hóa những niềm tin gây đau khổ. Phương pháp này gồm 4 câu hỏi:</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Điều đó có thật không?</div>
+                        <div class="flow-step-desc">Hỏi bản thân: "Niềm tin này có phải là SỰ THẬT tuyệt đối không?" Ví dụ: "Tình yêu luôn làm tôi đau" - có LUÔN LUÔN không? 100% các trường hợp? Mọi lúc, mọi nơi, với mọi người?</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Bạn có thể chắc chắn tuyệt đối điều đó là thật không?</div>
+                        <div class="flow-step-desc">Đào sâu hơn. Bạn có bằng chứng 100% không thể bác bỏ không? Hay đây chỉ là MỘT CÁCH DIỄN GIẢI của bạn về những gì đã xảy ra? Có cách diễn giải nào khác không?</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Bạn phản ứng thế nào khi tin vào điều đó?</div>
+                        <div class="flow-step-desc">Khi bạn TIN niềm tin này, bạn cảm thấy gì? Hành xử thế nào? Đối xử với người khác ra sao? Bỏ lỡ những cơ hội gì? Niềm tin này PHỤC VỤ bạn hay PHẢN BỘI bạn?</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Bạn sẽ là ai nếu không có niềm tin đó?</div>
+                        <div class="flow-step-desc">Tưởng tượng bạn thức dậy sáng mai và niềm tin này BIẾN MẤT hoàn toàn. Bạn sẽ cảm thấy thế nào? Hành động khác đi như thế nào? Mối quan hệ của bạn sẽ ra sao? Bạn sẽ mở lòng với ai?</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>💡</span> Bí Quyết Thực Hành</div>
+                <p>The Work không phải là bài tập trí tuệ - nó đòi hỏi sự THÀNH THẬT sâu sắc với bản thân. Đừng trả lời cho có, hãy thực sự ngồi với mỗi câu hỏi. Viết ra giấy. Đọc to câu trả lời. Cảm nhận trong cơ thể. Sự chuyển hóa xảy ra khi bạn THẤY sự thật, không chỉ khi bạn HIỂU nó về mặt lý trí.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 6: Turnaround -->
+        <section class="section">
+            <h2 class="section-title"><span>🔄</span> Turnaround - Đảo Ngược Niềm Tin</h2>
+
+            <p>Sau 4 câu hỏi, Byron Katie đề xuất "Turnaround" - đảo ngược niềm tin để tìm ra những sự thật mới mà bạn chưa từng xem xét. Turnaround không phải là "positive thinking" ép buộc - đó là quá trình tìm ra sự thật CÓ THỂ đúng tương đương hoặc hơn niềm tin cũ. Dưới đây là ví dụ:</p>
+
+            <div class="belief-transform">
+                <div class="belief-old">"Anh ấy đã làm tôi đau"</div>
+                <div class="belief-arrow">⬇️ Turnaround ⬇️</div>
+                <div class="belief-new">"Tôi đã làm tôi đau" (bằng cách níu kéo, không đặt ranh giới, bỏ qua red flags, kỳ vọng phi thực tế)</div>
+            </div>
+
+            <div class="belief-transform">
+                <div class="belief-old">"Tôi không xứng đáng được yêu"</div>
+                <div class="belief-arrow">⬇️ Turnaround ⬇️</div>
+                <div class="belief-new">"Tôi HOÀN TOÀN xứng đáng được yêu" (và niềm tin cũ đã là thứ duy nhất ngăn tôi nhận ra điều đó)</div>
+            </div>
+
+            <div class="belief-transform">
+                <div class="belief-old">"Tình yêu luôn kết thúc tồi tệ"</div>
+                <div class="belief-arrow">⬇️ Turnaround ⬇️</div>
+                <div class="belief-new">"Một số mối quan hệ kết thúc để nhường chỗ cho điều tốt đẹp hơn - kết thúc không có nghĩa là thất bại"</div>
+            </div>
+
+            <div class="belief-transform">
+                <div class="belief-old">"Người tốt đều đã có người yêu rồi"</div>
+                <div class="belief-arrow">⬇️ Turnaround ⬇️</div>
+                <div class="belief-new">"Có vô số người tốt single đang tìm kiếm người như tôi - tôi chỉ cần mở mắt để thấy họ"</div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m3-turnaround-examples.png" alt="Ví dụ Turnaround">
+            </div>
+            <div class="image-caption">Hình 4: Ví dụ chuyển hóa niềm tin với kỹ thuật Turnaround</div>
+
+            <div class="highlight-box green">
+                <div class="highlight-box-title"><span>✅</span> Quy Tắc Quan Trọng</div>
+                <p>Sau khi tìm Turnaround, bạn PHẢI tìm ít nhất 3 BẰNG CHỨNG cụ thể cho turnaround đó. Ví dụ: nếu turnaround là "Tôi xứng đáng được yêu", hãy tìm 3 lần trong đời bạn được yêu thương chân thành - từ gia đình, bạn bè, hoặc bất kỳ ai. Bằng chứng là thứ biến turnaround từ "positive thinking" thành NHẬN THỨC MỚI thực sự.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 7: FAQ -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">Q: Tôi đã tin vào niềm tin này hàng chục năm. Liệu có thể thay đổi được không?</div>
+                <div class="faq-answer">A: Hoàn toàn có thể! Não bộ có tính "neuroplasticity" - khả năng thay đổi và tạo kết nối mới suốt đời. Những niềm tin đã ăn sâu nhiều năm có thể mất nhiều thời gian hơn để thay đổi, nhưng với sự kiên trì và thực hành đều đặn, bạn SẼ thấy sự chuyển biến. Mỗi lần bạn làm The Work là một lần bạn đang "tái lập trình" não bộ.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Q: Làm sao biết mình đã thực sự thay đổi niềm tin hay chỉ là tự lừa dối?</div>
+                <div class="faq-answer">A: Dấu hiệu thực sự của việc thay đổi niềm tin là sự thay đổi trong HÀNH VI và CẢM XÚC tự động. Nếu trước đây bạn co người lại khi ai đó đến gần, giờ bạn cảm thấy thoải mái hơn - đó là dấu hiệu tốt. Nếu trước đây nghĩ về tình yêu khiến bạn lo lắng, giờ bạn cảm thấy bình an - đó là chuyển hóa thực sự.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Q: Tôi không tin vào "positive thinking". The Work có phải là một dạng đó không?</div>
+                <div class="faq-answer">A: Không! The Work hoàn toàn khác với positive thinking. Positive thinking ép bạn nghĩ tích cực mà không giải quyết gốc rễ. The Work là quá trình THẨM VẤN để tìm ra sự thật - đôi khi sự thật là niềm tin cũ ĐÚNG, đôi khi nó SAI. Byron Katie không bảo bạn nghĩ tích cực - cô ấy bảo bạn TÌM SỰ THẬT.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Q: Có cần làm The Work với một người hỗ trợ không hay tự làm được?</div>
+                <div class="faq-answer">A: Bạn hoàn toàn có thể tự làm The Work - đó là sức mạnh của phương pháp này. Tuy nhiên, với những niềm tin sâu và đau đớn, việc có một người đồng hành (coach, therapist, hoặc bạn bè tin tưởng) có thể giúp bạn đào sâu hơn và tránh tự lừa dối bản thân.</div>
+            </div>
+        </section>
+
+        <!-- SECTION 8: Practice & Summary -->
+        <section class="section">
+            <h2 class="section-title"><span>✍️</span> Bài Tập Thực Hành</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📝</span> Bài Tập: The Work Cho Niềm Tin #1 Của Bạn</div>
+                <p>Chọn niềm tin giới hạn MẠNH NHẤT của bạn về tình yêu từ danh sách 10 niềm tin, hoặc niềm tin khác mà bạn nhận ra. Viết ra giấy và trả lời 4 câu hỏi của The Work một cách thành thật và sâu sắc. Sau đó, tìm ít nhất 3 Turnarounds và 3 bằng chứng cho mỗi turnaround.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m3-worksheet-template.png" alt="Worksheet chuyển hóa niềm tin">
+            </div>
+            <div class="image-caption">Hình 5: Worksheet thực hành The Work - in ra và điền vào</div>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>💎</span> Những Điều Cần Ghi Nhớ</div>
+                <ul class="summary-list">
+                    <li>Niềm tin không phải sự thật tuyệt đối - chúng là những câu chuyện bạn đã kể cho mình đến khi chúng trở nên "thật"</li>
+                    <li>Vòng lặp Niềm tin → Suy nghĩ → Cảm xúc → Hành động → Kết quả tạo ra "lời tiên tri tự ứng nghiệm"</li>
+                    <li>The Work giúp bạn thẩm vấn niềm tin thay vì tin mù quáng - 4 câu hỏi đơn giản nhưng mạnh mẽ</li>
+                    <li>Turnaround mở ra những khả năng mới, nhưng cần có BẰNG CHỨNG để có sức mạnh thực sự</li>
+                    <li>Thay đổi niềm tin = thay đổi cuộc đời - đây có thể là công việc quan trọng nhất bạn từng làm</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>🚀</span> Bài Tiếp Theo</div>
+                <p>Trong Bài 3.3 - Khẳng Định Tự Yêu (Affirmations), bạn sẽ học cách sử dụng sức mạnh của ngôn từ để củng cố những niềm tin mới và tiếp tục nâng tần số tình yêu. Affirmations kết hợp với The Work tạo thành bộ đôi mạnh mẽ cho sự chuyển hóa.</p>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>

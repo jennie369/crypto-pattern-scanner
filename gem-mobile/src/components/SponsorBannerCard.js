@@ -12,7 +12,7 @@ import {
   Image,
   Linking,
 } from 'react-native';
-import { X, Sparkles, ChevronRight } from 'lucide-react-native';
+import { X, ChevronRight } from 'lucide-react-native';
 import { COLORS, SPACING } from '../utils/tokens';
 import { sponsorBannerService } from '../services/sponsorBannerService';
 import deepLinkHandler from '../services/deepLinkHandler';
@@ -177,42 +177,26 @@ export default function SponsorBannerCard({
   return (
     <View style={styles.container}>
       <TouchableOpacity
-        style={[styles.banner, { backgroundColor: banner.background_color || '#1a0b2e' }]}
+        style={styles.banner}
         onPress={handleBannerClick}
-        activeOpacity={0.9}
+        activeOpacity={0.7}
       >
-        {banner.is_dismissible && (
-          <TouchableOpacity
-            style={styles.dismissButton}
-            onPress={handleDismiss}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            <X size={16} color={COLORS.textMuted} />
-          </TouchableOpacity>
-        )}
+        {/* Sponsored Badge - subtle top left */}
+        <View style={styles.header}>
+          <Text style={styles.sponsoredLabel}>Tài trợ</Text>
+          {banner.is_dismissible && (
+            <TouchableOpacity
+              style={styles.dismissButton}
+              onPress={handleDismiss}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <X size={14} color={COLORS.textMuted} />
+            </TouchableOpacity>
+          )}
+        </View>
+
         <View style={styles.content}>
-          <View style={styles.textContent}>
-            <View style={styles.titleRow}>
-              <Sparkles size={18} color={banner.accent_color || COLORS.gold} />
-              <Text style={[styles.title, { color: banner.text_color || '#FFFFFF' }]}>
-                {banner.title}
-              </Text>
-            </View>
-            {banner.subtitle && (
-              <Text
-                style={[styles.subtitle, { color: banner.text_color || '#FFFFFF' }]}
-                numberOfLines={2}
-              >
-                {banner.subtitle}
-              </Text>
-            )}
-            {banner.action_label && (
-              <View style={[styles.button, { backgroundColor: banner.accent_color || COLORS.gold }]}>
-                <Text style={styles.buttonText}>{banner.action_label}</Text>
-                <ChevronRight size={14} color="#000" />
-              </View>
-            )}
-          </View>
+          {/* Image on left (if available) */}
           {banner.image_url && (
             <Image
               source={{ uri: banner.image_url }}
@@ -220,6 +204,24 @@ export default function SponsorBannerCard({
               resizeMode="cover"
             />
           )}
+
+          {/* Text content */}
+          <View style={styles.textContent}>
+            <Text style={styles.title} numberOfLines={2}>
+              {banner.title}
+            </Text>
+            {banner.subtitle && (
+              <Text style={styles.subtitle} numberOfLines={2}>
+                {banner.subtitle}
+              </Text>
+            )}
+            {banner.action_label && (
+              <View style={styles.ctaRow}>
+                <Text style={styles.ctaText}>{banner.action_label}</Text>
+                <ChevronRight size={14} color={COLORS.textMuted} />
+              </View>
+            )}
+          </View>
         </View>
       </TouchableOpacity>
     </View>
@@ -228,63 +230,63 @@ export default function SponsorBannerCard({
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: SPACING.lg,
-    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
   },
   banner: {
-    borderRadius: 16,
-    overflow: 'hidden',
-    padding: SPACING.lg,
-    position: 'relative',
+    backgroundColor: COLORS.glassBg,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    padding: SPACING.md,
   },
-  dismissButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    padding: 4,
-    zIndex: 10,
-  },
-  content: {
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginBottom: SPACING.sm,
+  },
+  sponsoredLabel: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+    fontWeight: '500',
+  },
+  dismissButton: {
+    padding: 2,
+  },
+  content: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  image: {
+    width: 56,
+    height: 56,
+    borderRadius: 8,
+    marginRight: SPACING.md,
   },
   textContent: {
     flex: 1,
-    paddingRight: SPACING.md,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 6,
   },
   title: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+    lineHeight: 20,
+    marginBottom: 4,
   },
   subtitle: {
     fontSize: 13,
-    opacity: 0.9,
-    marginBottom: SPACING.sm,
+    color: COLORS.textSecondary,
+    lineHeight: 18,
   },
-  button: {
+  ctaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    alignSelf: 'flex-start',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    gap: 4,
+    marginTop: SPACING.sm,
   },
-  buttonText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#000',
-  },
-  image: {
-    width: 80,
-    height: 80,
-    borderRadius: 12,
+  ctaText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: COLORS.textMuted,
   },
 });

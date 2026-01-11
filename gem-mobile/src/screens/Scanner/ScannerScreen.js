@@ -14,6 +14,14 @@ import {
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  runOnJS,
+} from 'react-native-reanimated';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import alertService from '../../services/alertService';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -26,22 +34,26 @@ import {
   RefreshCw,
   Briefcase,
   Layers,
+  GripVertical,
 } from 'lucide-react-native';
+// Note: Using simple state swap for sections instead of DraggableFlatList
+// to avoid scroll conflicts with parent ScrollView
 
 import CoinSelector from './components/CoinSelector';
 import TradingChart from './components/TradingChart';
 import ScanResultsSection from './components/ScanResultsSection';
-import MultiTFResultsSection from './components/MultiTFResultsSection';
-import PaperTradeModal from './components/PaperTradeModal';
+// V2 Paper Trade Modal with enhanced Binance-style UI
+import { PaperTradeModalV2, OpenPositionsSection, MTFAlignmentPanel } from '../../components/Trading';
+import { MultiZoneOverlay } from '../../components/Scanner';
 import { useSponsorBanners } from '../../components/SponsorBannerSection';
-import SponsorBannerCard from '../../components/SponsorBannerCard';
+import SponsorBanner from '../../components/SponsorBanner';
 import { useTooltip } from '../../components/Common/TooltipProvider';
 import { patternDetection } from '../../services/patternDetection';
+import zoneManager from '../../services/zoneManager';
+import { mtfAlignmentService } from '../../services/mtfAlignmentService';
 import {
-  scanMultipleTimeframes,
   checkMultiTFAccess,
   getAvailableTimeframesForTier,
-  MULTI_TF_TIMEFRAMES,
 } from '../../services/multiTimeframeScanner';
 import { binanceService } from '../../services/binanceService';
 import { favoritesService } from '../../services/favoritesService';
@@ -49,6 +61,7 @@ import paperTradeService from '../../services/paperTradeService';
 import { tierAccessService } from '../../services/tierAccessService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useScanner } from '../../contexts/ScannerContext';
+import { useUpgrade } from '../../hooks/useUpgrade';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { formatPrice } from '../../utils/formatters';
 
@@ -61,6 +74,9 @@ const ScannerScreen = ({ navigation }) => {
 
   // Tooltip hook for feature discovery
   const { showTooltipForScreen, initialized: tooltipInitialized } = useTooltip();
+
+  // Upgrade hook for quota exceeded
+  const { onQuotaReached, TIER_TYPES } = useUpgrade();
 
   // Get persisted scanner state from context
   const {
@@ -107,8 +123,148 @@ const ScannerScreen = ({ navigation }) => {
   const [selectedPattern, setSelectedPattern] = useState(null);
   const [openPositionsCount, setOpenPositionsCount] = useState(0);
 
-  // Multi-Timeframe Scan State - scanning status only (results in context)
-  const [multiTFScanning, setMultiTFScanning] = useState(false);
+  // Positions refresh trigger
+  const [positionsRefreshTrigger, setPositionsRefreshTrigger] = useState(0);
+
+  // Zone Visualization State
+  const [zones, setZones] = useState([]);
+  const [zonePreferences, setZonePreferences] = useState(null);
+  const [mtfAlignment, setMtfAlignment] = useState(null);
+  const [showZones, setShowZones] = useState(true);
+
+  // Section order for drag & drop (scanResults first by default)
+  const [sectionOrder, setSectionOrder] = useState(['scanResults', 'openPositions']);
+
+  // SIMPLIFIED drag & drop - only translateY, no fade/scale
+  const translateY1 = useSharedValue(0);
+  const translateY2 = useSharedValue(0);
+  const isDragging = useSharedValue(false);
+  const activeDragSection = useSharedValue(0); // 0 = none, 1 = first, 2 = second
+  const SWAP_THRESHOLD = 60;
+  const SECTION_HEIGHT = 200; // Approximate section height for swap animation
+
+  // Spring config for smooth animations
+  const springConfig = {
+    damping: 25,
+    stiffness: 300,
+    mass: 0.8,
+  };
+
+  // Swap sections
+  const swapSections = useCallback(() => {
+    setSectionOrder(prev =>
+      prev[0] === 'scanResults'
+        ? ['openPositions', 'scanResults']
+        : ['scanResults', 'openPositions']
+    );
+  }, []);
+
+  // Pan gesture for first section
+  const panGesture1 = Gesture.Pan()
+    .activateAfterLongPress(250)
+    .onStart(() => {
+      'worklet';
+      isDragging.value = true;
+      activeDragSection.value = 1;
+    })
+    .onUpdate((event) => {
+      'worklet';
+      // Dragged section follows finger
+      translateY1.value = event.translationY;
+      // Other section moves opposite (proportional)
+      const progress = Math.min(Math.abs(event.translationY) / SWAP_THRESHOLD, 1);
+      translateY2.value = event.translationY > 0 ? -progress * SECTION_HEIGHT * 0.5 : progress * SECTION_HEIGHT * 0.5;
+    })
+    .onEnd((event) => {
+      'worklet';
+      const shouldSwap = Math.abs(event.translationY) > SWAP_THRESHOLD;
+
+      if (shouldSwap) {
+        // Animate to swapped positions
+        const direction = event.translationY > 0 ? 1 : -1;
+        translateY1.value = withSpring(direction * SECTION_HEIGHT, springConfig, () => {
+          // Reset positions after swap
+          translateY1.value = 0;
+          translateY2.value = 0;
+          runOnJS(swapSections)();
+        });
+        translateY2.value = withSpring(-direction * SECTION_HEIGHT, springConfig);
+      } else {
+        // Spring back
+        translateY1.value = withSpring(0, springConfig);
+        translateY2.value = withSpring(0, springConfig);
+      }
+
+      isDragging.value = false;
+      activeDragSection.value = 0;
+    });
+
+  // Pan gesture for second section
+  const panGesture2 = Gesture.Pan()
+    .activateAfterLongPress(250)
+    .onStart(() => {
+      'worklet';
+      isDragging.value = true;
+      activeDragSection.value = 2;
+    })
+    .onUpdate((event) => {
+      'worklet';
+      // Dragged section follows finger
+      translateY2.value = event.translationY;
+      // Other section moves opposite (proportional)
+      const progress = Math.min(Math.abs(event.translationY) / SWAP_THRESHOLD, 1);
+      translateY1.value = event.translationY > 0 ? progress * SECTION_HEIGHT * 0.5 : -progress * SECTION_HEIGHT * 0.5;
+    })
+    .onEnd((event) => {
+      'worklet';
+      const shouldSwap = Math.abs(event.translationY) > SWAP_THRESHOLD;
+
+      if (shouldSwap) {
+        // Animate to swapped positions
+        const direction = event.translationY > 0 ? 1 : -1;
+        translateY2.value = withSpring(direction * SECTION_HEIGHT, springConfig, () => {
+          // Reset positions after swap
+          translateY1.value = 0;
+          translateY2.value = 0;
+          runOnJS(swapSections)();
+        });
+        translateY1.value = withSpring(-direction * SECTION_HEIGHT, springConfig);
+      } else {
+        // Spring back
+        translateY1.value = withSpring(0, springConfig);
+        translateY2.value = withSpring(0, springConfig);
+      }
+
+      isDragging.value = false;
+      activeDragSection.value = 0;
+    });
+
+  // Animated styles - simplified with subtle scale when dragging
+  const animatedStyle1 = useAnimatedStyle(() => {
+    const isActive = activeDragSection.value === 1;
+    return {
+      transform: [
+        { translateY: translateY1.value },
+        { scale: isActive ? 1.01 : 1 },
+      ],
+      zIndex: isActive ? 100 : 1,
+      opacity: activeDragSection.value === 2 ? 0.85 : 1,
+    };
+  });
+
+  const animatedStyle2 = useAnimatedStyle(() => {
+    const isActive = activeDragSection.value === 2;
+    return {
+      transform: [
+        { translateY: translateY2.value },
+        { scale: isActive ? 1.01 : 1 },
+      ],
+      zIndex: isActive ? 100 : 1,
+      opacity: activeDragSection.value === 1 ? 0.85 : 1,
+    };
+  });
+
+  // NOTE: Multi-TF is now integrated into main scan via timeframesToScan
 
   // Selected timeframes from CoinSelector (TIER2/3)
   const [selectedScanTimeframes, setSelectedScanTimeframes] = useState([selectedTimeframe]);
@@ -125,6 +281,8 @@ const ScannerScreen = ({ navigation }) => {
 
   // WebSocket ref
   const wsRef = useRef(null);
+  // Track current expected symbol to prevent stale data from updating UI
+  const currentSymbolRef = useRef(null);
 
   // Currently displayed coin (first selected)
   const displayCoin = selectedCoins[0] || 'BTCUSDT';
@@ -140,7 +298,13 @@ const ScannerScreen = ({ navigation }) => {
     };
   }, [displayCoin]);
 
-  const subscribeToPrice = (symbol) => {
+  const subscribeToPrice = async (symbol) => {
+    const targetSymbol = symbol.toUpperCase();
+
+    // CRITICAL: Set expected symbol FIRST before any async operations
+    currentSymbolRef.current = targetSymbol;
+    console.log('[Scanner] Subscribing to:', targetSymbol);
+
     // Close existing WebSocket
     if (wsRef.current) {
       wsRef.current.close();
@@ -151,22 +315,54 @@ const ScannerScreen = ({ navigation }) => {
     setCurrentPrice(null);
     setPriceChange(null);
 
+    // FIRST: Fetch initial price via REST API immediately (don't wait for WebSocket)
+    try {
+      const response = await fetch(`https://fapi.binance.com/fapi/v1/ticker/24hr?symbol=${targetSymbol}`);
+      const data = await response.json();
+
+      // CRITICAL: Check if we're still expecting this symbol (prevents stale REST response)
+      if (currentSymbolRef.current !== targetSymbol) {
+        console.log('[Scanner] Ignoring stale REST response for:', targetSymbol, 'current:', currentSymbolRef.current);
+        return; // Don't continue if user switched to another coin
+      }
+
+      if (data && data.lastPrice) {
+        console.log('[Scanner] REST price for', targetSymbol, ':', data.lastPrice);
+        setCurrentPrice(parseFloat(data.lastPrice));
+        setPriceChange(parseFloat(data.priceChangePercent || 0));
+      }
+    } catch (restError) {
+      console.warn('[Scanner] REST price fetch failed:', restError.message);
+    }
+
+    // Check again before creating WebSocket (user might have switched during REST call)
+    if (currentSymbolRef.current !== targetSymbol) {
+      console.log('[Scanner] Skipping WebSocket for stale symbol:', targetSymbol);
+      return;
+    }
+
+    // THEN: Connect WebSocket for real-time updates (using FUTURES WebSocket)
+    // Use fstream.binance.com for Futures perpetual contracts
     const ws = new WebSocket(
-      `wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@ticker`
+      `wss://fstream.binance.com/ws/${symbol.toLowerCase()}@ticker`
     );
 
-    // Track the symbol this WebSocket is for (prevents race condition)
-    const targetSymbol = symbol.toUpperCase();
+    ws.onopen = () => {
+      console.log('[Scanner] WebSocket connected for:', targetSymbol);
+    };
 
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
         // Verify the message is for the correct symbol (race condition fix)
         const messageSymbol = data.s?.toUpperCase();
-        if (messageSymbol && messageSymbol !== targetSymbol) {
-          console.log('[Scanner] Ignoring stale price from:', messageSymbol, 'expected:', targetSymbol);
+
+        // Double check: both message symbol AND current expected symbol
+        if (messageSymbol !== targetSymbol || currentSymbolRef.current !== targetSymbol) {
+          console.log('[Scanner] Ignoring stale WS price from:', messageSymbol, 'expected:', currentSymbolRef.current);
           return;
         }
+
         setCurrentPrice(parseFloat(data.c));
         setPriceChange(parseFloat(data.P));
       } catch (e) {
@@ -175,13 +371,20 @@ const ScannerScreen = ({ navigation }) => {
     };
 
     ws.onerror = (error) => {
-      // WebSocket errors are common due to network issues - just log quietly
-      console.log('[Scanner] WebSocket connection issue - will retry on next interaction');
+      // WebSocket errors are common due to network issues - try REST fallback
+      console.log('[Scanner] WebSocket error for:', targetSymbol, '- using REST fallback');
     };
 
     ws.onclose = () => {
-      // Silently handle close
       console.log('[Scanner] WebSocket closed for:', targetSymbol);
+      // Auto-reconnect after 5 seconds if still on same symbol
+      setTimeout(() => {
+        // Use ref instead of displayCoin to avoid stale closure
+        if (currentSymbolRef.current === targetSymbol && !wsRef.current) {
+          console.log('[Scanner] Reconnecting WebSocket for:', targetSymbol);
+          subscribeToPrice(targetSymbol);
+        }
+      }, 5000);
     };
 
     wsRef.current = ws;
@@ -189,6 +392,11 @@ const ScannerScreen = ({ navigation }) => {
 
   // Handle Scan Now button - accepts optional coins array and timeframes from CoinSelector
   const handleScan = async (coinsToScan = null, timeframesToUse = null) => {
+    console.log('[Scanner] handleScan called');
+    console.log('[Scanner] coinsToScan param:', coinsToScan);
+    console.log('[Scanner] selectedCoins context:', selectedCoins);
+    console.log('[Scanner] timeframesToUse param:', timeframesToUse);
+
     // =====================================================
     // CHECK SCAN QUOTA FIRST (Database-backed)
     // =====================================================
@@ -201,6 +409,9 @@ const ScannerScreen = ({ navigation }) => {
           const resetTime = quotaCheck.resetAt
             ? new Date(quotaCheck.resetAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
             : '00:00';
+
+          // Show upgrade popup with tracking
+          onQuotaReached(TIER_TYPES.SCANNER, 'scanner_scan_button');
 
           alertService.warning(
             'Hết lượt scan',
@@ -216,6 +427,7 @@ const ScannerScreen = ({ navigation }) => {
 
     // Use provided coins or fall back to selectedCoins
     let coins = coinsToScan || selectedCoins;
+    console.log('[Scanner] Coins to scan (after fallback):', coins);
 
     // Ensure coins is an array
     if (!Array.isArray(coins)) {
@@ -341,6 +553,43 @@ const ScannerScreen = ({ navigation }) => {
       console.log('[Scanner] Results per coin:', resultsPerCoin.length);
 
       // =====================================================
+      // CREATE ZONES FROM PATTERNS (Zone Visualization)
+      // =====================================================
+      if (allPatterns.length > 0 && tierAccessService.isZoneVisualizationEnabled()) {
+        try {
+          console.log('[Scanner] Creating zones from patterns...');
+          const createdZones = await zoneManager.createZonesFromPatterns(
+            allPatterns,
+            displayCoin,
+            selectedTimeframe,
+            user?.id
+          );
+          setZones(createdZones);
+          console.log('[Scanner] Zones created:', createdZones.length);
+
+          // Calculate MTF alignment if enabled
+          if (tierAccessService.canUseMTFAlignment()) {
+            try {
+              const alignment = await mtfAlignmentService.calculateMTFAlignment(
+                displayCoin,
+                user?.id,
+                userTier
+              );
+              setMtfAlignment(alignment);
+              console.log('[Scanner] MTF alignment calculated:', alignment?.recommendation);
+            } catch (mtfError) {
+              console.log('[Scanner] MTF alignment error:', mtfError.message);
+            }
+          }
+        } catch (zoneError) {
+          console.log('[Scanner] Zone creation error:', zoneError.message);
+        }
+      } else {
+        setZones([]);
+        setMtfAlignment(null);
+      }
+
+      // =====================================================
       // INCREMENT SCAN QUOTA (Database-backed)
       // =====================================================
       if (user?.id) {
@@ -360,35 +609,9 @@ const ScannerScreen = ({ navigation }) => {
         }
       }
 
-      // =====================================================
-      // TIER2/3 AUTO Multi-TF Scan - runs automatically!
-      // =====================================================
-      if (multiTFAccess.hasAccess && coins.length === 1) {
-        // Only run Multi-TF for single coin scan (performance)
-        const symbol = coins[0];
-        console.log('[Scanner] Auto-running Multi-TF scan for TIER2/3 user...');
-
-        try {
-          setMultiTFScanning(true);
-
-          const timeframesToScan = availableTimeframes
-            .slice(0, multiTFAccess.maxTimeframes)
-            .map(tf => tf.value);
-
-          const multiResults = await scanMultipleTimeframes(symbol, timeframesToScan, userTier);
-          setMultiTFResults(multiResults);
-
-          console.log('[Scanner] Multi-TF Scan complete:', multiResults?.confluence?.length || 0, 'confluence patterns');
-        } catch (mtfError) {
-          console.error('[Scanner] Multi-TF Scan error:', mtfError);
-          // Don't show alert - just log, main scan already succeeded
-        } finally {
-          setMultiTFScanning(false);
-        }
-      } else if (coins.length > 1) {
-        // Clear multi-TF results for multi-coin scans
-        setMultiTFResults(null);
-      }
+      // NOTE: Multi-TF functionality is now integrated into the main scan
+      // The main scan already handles multiple timeframes via timeframesToScan
+      // Results are shown in ScanResultsSection grouped by coin with timeframe labels
 
     } catch (error) {
       console.error('[Scanner] Scan error:', error);
@@ -416,23 +639,32 @@ const ScannerScreen = ({ navigation }) => {
   };
 
   const handlePaperTradeSuccess = async () => {
+    // Close modal and clear pattern first
     setPaperTradeModalVisible(false);
     setSelectedPattern(null);
-    // Refresh open positions count - filter by current user
-    await paperTradeService.init();
-    const userId = user?.id || null;
-    setOpenPositionsCount(paperTradeService.getOpenPositions(userId).length);
+
+    // Refresh open positions count and trigger OpenPositionsSection reload
+    // Wrap in try-catch to prevent unhandled errors from crashing the app
+    try {
+      const userId = user?.id || null;
+      await paperTradeService.init(userId);
+      setOpenPositionsCount(paperTradeService.getOpenPositions(userId).length);
+      // IMPORTANT: Trigger refresh for OpenPositionsSection to show new position immediately
+      setPositionsRefreshTrigger(prev => prev + 1);
+    } catch (error) {
+      console.warn('[ScannerScreen] handlePaperTradeSuccess error:', error?.message);
+    }
   };
 
   const handleViewOpenPositions = () => {
     navigation.navigate('OpenPositions');
   };
 
-  // Load open positions count on mount - filter by current user
+  // Load open positions count on mount with CLOUD SYNC
   useEffect(() => {
     const loadPositionsCount = async () => {
-      await paperTradeService.init();
       const userId = user?.id || null;
+      await paperTradeService.init(userId);
       setOpenPositionsCount(paperTradeService.getOpenPositions(userId).length);
     };
     loadPositionsCount();
@@ -466,9 +698,11 @@ const ScannerScreen = ({ navigation }) => {
   }, [tooltipInitialized, user?.id, userTier, showTooltipForScreen]);
 
   // Handle selecting coin from scan results
+  // NOTE: Only update state - useEffect will handle subscribeToPrice automatically
+  // This prevents race condition that causes price flickering
   const handleSelectFromResults = (symbol) => {
     setSelectedCoins([symbol]);
-    subscribeToPrice(symbol);
+    // Don't call subscribeToPrice here - useEffect handles it when displayCoin changes
   };
 
   // formatPrice is now imported from utils/formatters
@@ -494,9 +728,12 @@ const ScannerScreen = ({ navigation }) => {
               onRefresh={onRefresh}
               tintColor={COLORS.gold}
               colors={[COLORS.gold]}
+              progressViewOffset={100}
             />
           }
           showsVerticalScrollIndicator={false}
+          nestedScrollEnabled={true}
+          scrollEventThrottle={16}
         >
           {/* 1. Top Row: Coin Selector + Positions Button */}
           <View style={styles.topRow}>
@@ -520,7 +757,7 @@ const ScannerScreen = ({ navigation }) => {
               onPress={handleViewOpenPositions}
               activeOpacity={0.8}
             >
-              <Briefcase size={18} color="#FFFFFF" />
+              <Briefcase size={18} color={COLORS.purple} />
               <Text style={styles.positionsButtonText}>
                 {openPositionsCount > 0 ? `(${openPositionsCount})` : ''}
               </Text>
@@ -609,7 +846,7 @@ const ScannerScreen = ({ navigation }) => {
                     <TrendingDown size={12} color="#FFFFFF" />
                   )}
                   <Text style={styles.priceChangeTextCompact}>
-                    {priceChange >= 0 ? '+' : ''}{priceChange.toFixed(2)}%
+                    {priceChange >= 0 ? '+' : ''}{priceChange.toFixed(2).replace('.', ',')}%
                   </Text>
                 </View>
               )}
@@ -629,40 +866,123 @@ const ScannerScreen = ({ navigation }) => {
             onSymbolPress={() => {/* Could open coin selector */}}
             selectedPattern={selectedPattern}
             patterns={scanResults.find(r => r.symbol === displayCoin)?.patterns || []}
+            positionsRefreshTrigger={positionsRefreshTrigger}
+            zones={showZones ? zones : []}
+            zonePreferences={zonePreferences}
+            onZonePress={(zone) => {
+              console.log('[Scanner] Zone pressed:', zone.id);
+              navigation.navigate('PatternDetail', { pattern: zone });
+            }}
           />
 
-          {/* Scan Results Section - Merged with Detected Patterns */}
-          {/* Uses CoinAccordion - only 1 coin open at a time */}
-          <View style={styles.scanResultsWrapper}>
-            <ScanResultsSection
-              results={scanResults}
-              isScanning={scanning}
-              onSelectCoin={handleSelectFromResults}
-              onSelectPattern={(pattern) => {
-                setSelectedCoins([pattern.symbol]);
-                subscribeToPrice(pattern.symbol);
-                // Auto-switch timeframe to match pattern's timeframe
-                if (pattern.timeframe) {
-                  setSelectedTimeframe(pattern.timeframe);
-                }
-                setSelectedPattern(pattern); // Show price lines on chart
-              }}
-              onPaperTrade={handlePaperTrade}
-              selectedCoin={displayCoin}
-              selectedPatternId={selectedPattern?.id}
-              userTier={userTier}
-            />
-          </View>
-
-          {/* Multi-Timeframe Results Section - Auto for TIER2/3 (single coin only) */}
-          {multiTFAccess.hasAccess && selectedCoins.length === 1 && (
-            <MultiTFResultsSection
-              results={multiTFResults}
-              isScanning={multiTFScanning}
-              userTier={userTier}
-              onUpgradePress={() => navigation.navigate('Shop')}
-            />
+          {/* MTF Alignment Panel (TIER2+) */}
+          {mtfAlignment && tierAccessService.canUseMTFAlignment() && (
+            <View style={styles.mtfPanel}>
+              <MTFAlignmentPanel
+                symbol={displayCoin}
+                alignment={mtfAlignment}
+                compact
+                onExpand={() => {
+                  navigation.navigate('MTFDashboard', {
+                    symbol: displayCoin,
+                    alignment: mtfAlignment,
+                  });
+                }}
+              />
+            </View>
           )}
+
+          {/* First Section (based on order) */}
+          <Animated.View style={[styles.sectionWrapper, animatedStyle1]}>
+            {sectionOrder[0] === 'scanResults' ? (
+              <ScanResultsSection
+                results={scanResults}
+                isScanning={scanning}
+                onSelectCoin={handleSelectFromResults}
+                onSelectPattern={(pattern) => {
+                  setSelectedCoins([pattern.symbol]);
+                  // Don't call subscribeToPrice - useEffect handles it
+                  if (pattern.timeframe) {
+                    setSelectedTimeframe(pattern.timeframe);
+                  }
+                  setSelectedPattern(pattern);
+                }}
+                onPaperTrade={handlePaperTrade}
+                selectedCoin={displayCoin}
+                selectedPatternId={selectedPattern?.id}
+                userTier={userTier}
+              />
+            ) : (
+              <OpenPositionsSection
+                userId={user?.id}
+                navigation={navigation}
+                refreshTrigger={positionsRefreshTrigger}
+                onViewAllPress={handleViewOpenPositions}
+                onViewChart={(symbol) => {
+                  setSelectedCoins([symbol]);
+                  // Don't call subscribeToPrice - useEffect handles it
+                }}
+                onPositionClose={() => {
+                  setPositionsRefreshTrigger(prev => prev + 1);
+                  setOpenPositionsCount(paperTradeService.getOpenPositions(user?.id).length);
+                }}
+              />
+            )}
+
+            {/* Drag Handle */}
+            <GestureDetector gesture={panGesture1}>
+              <Animated.View style={styles.sectionDragHandle}>
+                <GripVertical size={16} color={COLORS.textMuted} />
+              </Animated.View>
+            </GestureDetector>
+          </Animated.View>
+
+          {/* Second Section (based on order) */}
+          <Animated.View style={[styles.sectionWrapper, animatedStyle2]}>
+            {sectionOrder[1] === 'scanResults' ? (
+              <ScanResultsSection
+                results={scanResults}
+                isScanning={scanning}
+                onSelectCoin={handleSelectFromResults}
+                onSelectPattern={(pattern) => {
+                  setSelectedCoins([pattern.symbol]);
+                  // Don't call subscribeToPrice - useEffect handles it
+                  if (pattern.timeframe) {
+                    setSelectedTimeframe(pattern.timeframe);
+                  }
+                  setSelectedPattern(pattern);
+                }}
+                onPaperTrade={handlePaperTrade}
+                selectedCoin={displayCoin}
+                selectedPatternId={selectedPattern?.id}
+                userTier={userTier}
+              />
+            ) : (
+              <OpenPositionsSection
+                userId={user?.id}
+                navigation={navigation}
+                refreshTrigger={positionsRefreshTrigger}
+                onViewAllPress={handleViewOpenPositions}
+                onViewChart={(symbol) => {
+                  setSelectedCoins([symbol]);
+                  // Don't call subscribeToPrice - useEffect handles it
+                }}
+                onPositionClose={() => {
+                  setPositionsRefreshTrigger(prev => prev + 1);
+                  setOpenPositionsCount(paperTradeService.getOpenPositions(user?.id).length);
+                }}
+              />
+            )}
+
+            {/* Drag Handle */}
+            <GestureDetector gesture={panGesture2}>
+              <Animated.View style={styles.sectionDragHandle}>
+                <GripVertical size={16} color={COLORS.textMuted} />
+              </Animated.View>
+            </GestureDetector>
+          </Animated.View>
+
+          {/* NOTE: Multi-TF functionality is now integrated into main scan results above */}
 
           {/* Empty State - Only show when not scanning and no results */}
           {!scanning && scanResults.length === 0 && (
@@ -674,9 +994,9 @@ const ScannerScreen = ({ navigation }) => {
               </Text>
               <TouchableOpacity
                 style={styles.retryButton}
-                onPress={handleScan}
+                onPress={() => handleScan()}
               >
-                <RefreshCw size={18} color={COLORS.gold} />
+                <RefreshCw size={18} color={COLORS.purple} />
                 <Text style={styles.retryText}>Scan Now</Text>
               </TouchableOpacity>
             </View>
@@ -684,7 +1004,7 @@ const ScannerScreen = ({ navigation }) => {
 
           {/* Sponsor Banners - distributed */}
           {sponsorBanners.map((banner) => (
-            <SponsorBannerCard
+            <SponsorBanner
               key={banner.id}
               banner={banner}
               navigation={navigation}
@@ -697,15 +1017,15 @@ const ScannerScreen = ({ navigation }) => {
           <View style={{ height: 120 }} />
         </ScrollView>
 
-        {/* Paper Trade Modal */}
-        <PaperTradeModal
+        {/* Paper Trade Modal V2 - Enhanced Binance-style UI */}
+        <PaperTradeModalV2
           visible={paperTradeModalVisible}
           pattern={selectedPattern}
-          onClose={() => {
-            setPaperTradeModalVisible(false);
-            setSelectedPattern(null);
-          }}
-          onSuccess={handlePaperTradeSuccess}
+          symbol={selectedPattern?.symbol || selectedCoins?.[0] || 'BTCUSDT'}
+          baseAsset={selectedPattern?.baseAsset || selectedPattern?.symbol?.replace(/USDT$/, '') || 'BTC'}
+          currentPrice={currentPrice || 0}
+          mode={selectedPattern ? 'pattern' : 'custom'}
+          onClose={handlePaperTradeSuccess}
         />
       </SafeAreaView>
     </LinearGradient>
@@ -740,16 +1060,18 @@ const styles = StyleSheet.create({
   positionsButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.purple,
+    backgroundColor: 'rgba(106, 91, 255, 0.2)',
     paddingVertical: 12,
     paddingHorizontal: 14,
     borderRadius: 12,
     gap: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.4)',
   },
   positionsButtonText: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#FFFFFF',
+    color: COLORS.textPrimary,
   },
 
   // 2. Scan Row - Status + Button
@@ -759,7 +1081,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    backgroundColor: 'rgba(106, 91, 255, 0.08)',
   },
   statusLeft: {
     flexDirection: 'row',
@@ -774,7 +1096,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
-    backgroundColor: 'rgba(58, 247, 166, 0.15)',
+    backgroundColor: 'rgba(106, 91, 255, 0.2)',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 10,
@@ -783,19 +1105,19 @@ const styles = StyleSheet.create({
   liveText: {
     fontSize: 11,
     fontWeight: '700',
-    color: COLORS.success,
+    color: COLORS.purple,
   },
   scanButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#9C0612',
+    backgroundColor: COLORS.burgundy,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 10,
     gap: 6,
-    borderWidth: 1.5,
-    borderColor: COLORS.gold,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 189, 89, 0.5)',
   },
   scanButtonDisabled: {
     opacity: 0.7,
@@ -811,7 +1133,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
-    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    backgroundColor: 'rgba(106, 91, 255, 0.15)',
     paddingHorizontal: 6,
     paddingVertical: 3,
     borderRadius: 8,
@@ -820,27 +1142,27 @@ const styles = StyleSheet.create({
   multiTFBadgeText: {
     fontSize: 9,
     fontWeight: '700',
-    color: COLORS.gold,
+    color: COLORS.purple,
   },
 
-  // Quota Badge Styles
+  // Quota Badge Styles - Unified purple theme
   quotaBadge: {
-    backgroundColor: 'rgba(0, 255, 136, 0.15)',
+    backgroundColor: 'rgba(106, 91, 255, 0.15)',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
     marginLeft: 4,
     borderWidth: 1,
-    borderColor: 'rgba(0, 255, 136, 0.3)',
+    borderColor: 'rgba(106, 91, 255, 0.3)',
   },
   quotaBadgeText: {
     fontSize: 10,
     fontWeight: '700',
-    color: COLORS.success,
+    color: COLORS.purple,
   },
   quotaBadgeLow: {
-    backgroundColor: 'rgba(255, 185, 0, 0.15)',
-    borderColor: 'rgba(255, 185, 0, 0.3)',
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    borderColor: 'rgba(255, 189, 89, 0.3)',
   },
   quotaBadgeEmpty: {
     backgroundColor: 'rgba(255, 107, 107, 0.15)',
@@ -850,25 +1172,25 @@ const styles = StyleSheet.create({
     color: COLORS.error,
   },
   quotaBadgeUnlimited: {
-    backgroundColor: 'rgba(106, 91, 255, 0.15)',
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 8,
     marginLeft: 4,
     borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.3)',
+    borderColor: 'rgba(255, 189, 89, 0.3)',
   },
   quotaBadgeTextUnlimited: {
     fontSize: 12,
     fontWeight: '700',
-    color: COLORS.purple,
+    color: COLORS.gold,
   },
 
   // 3. Price Section - COMPACT (single row)
   priceSection: {
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.xs,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: 'rgba(106, 91, 255, 0.05)',
   },
   priceRowCompact: {
     flexDirection: 'row',
@@ -884,14 +1206,14 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: 'rgba(106, 91, 255, 0.3)',
+    backgroundColor: 'rgba(106, 91, 255, 0.25)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   coinIconTextSmall: {
     fontSize: 12,
     fontWeight: '700',
-    color: COLORS.purple,
+    color: COLORS.textPrimary,
   },
   coinNameCompact: {
     fontSize: 14,
@@ -901,7 +1223,7 @@ const styles = StyleSheet.create({
   priceValueCompact: {
     fontSize: 18,
     fontWeight: '700',
-    color: COLORS.cyan,
+    color: COLORS.gold,
   },
   priceChangeBadgeCompact: {
     flexDirection: 'row',
@@ -928,11 +1250,36 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
   },
 
-  // Scan Results - MINIMAL spacing
-  scanResultsWrapper: {
+  // MTF Alignment Panel
+  mtfPanel: {
+    marginHorizontal: SPACING.md,
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.xs,
+  },
+
+  // Section wrapper with drag handle
+  sectionWrapper: {
+    position: 'relative',
     marginHorizontal: SPACING.sm,
-    marginBottom: SPACING.sm,
-    marginTop: 0,
+    marginBottom: SPACING.xs,
+    shadowColor: COLORS.gold,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 8,
+    backgroundColor: 'transparent',
+  },
+
+  // Drag handle for section reordering - inside rounded corners
+  sectionDragHandle: {
+    position: 'absolute',
+    left: 4,
+    top: 20,
+    width: 20,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(106, 91, 255, 0.3)',
+    borderRadius: 6,
+    zIndex: 10,
   },
 
   // Empty State
@@ -940,10 +1287,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 40,
     marginHorizontal: SPACING.lg,
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    borderRadius: 18,
-    borderWidth: 1.2,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
+    backgroundColor: 'rgba(15, 16, 48, 0.6)',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.25)',
   },
   emptyTitle: {
     fontSize: 18,
@@ -964,14 +1311,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 12,
+    backgroundColor: 'rgba(106, 91, 255, 0.1)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 189, 89, 0.3)',
+    borderColor: 'rgba(106, 91, 255, 0.3)',
     gap: 8,
   },
   retryText: {
     fontSize: 14,
     fontWeight: '600',
-    color: COLORS.gold,
+    color: COLORS.purple,
   },
 });
 

@@ -25,13 +25,14 @@ import PostCard from './components/PostCard';
 import AdCard from '../../components/Forum/AdCard';
 import HeaderMessagesIcon from '../../components/HeaderMessagesIcon';
 import CategoryTabs from './components/CategoryTabs';
+// FeedTabs removed - using CategoryTabs only
 import FABButton from './components/FABButton';
 import SideMenu from './components/SideMenu';
 import CreateFeedModal from './components/CreateFeedModal';
 import EditFeedsModal from './components/EditFeedsModal';
 import AuthGate from '../../components/AuthGate';
 import { useSponsorBanners } from '../../components/SponsorBannerSection';
-import SponsorBannerCard from '../../components/SponsorBannerCard';
+import SponsorBanner from '../../components/SponsorBanner';
 import { injectBannersIntoFeed } from '../../utils/bannerDistribution';
 import { forumService } from '../../services/forumService';
 import { forumRecommendationService } from '../../services/forumRecommendationService';
@@ -55,6 +56,7 @@ const ForumScreen = ({ navigation }) => {
   const [sessionId, setSessionId] = useState(null); // Feed session ID
   const [selectedFeed, setSelectedFeed] = useState('explore'); // Main tab: explore, following, news, notifications, popular, academy
   const [selectedTopic, setSelectedTopic] = useState(null); // Topic filter: giao-dich, tinh-than, can-bang
+  // feedType removed - explore always uses 'hot' algorithm
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
@@ -82,9 +84,9 @@ const ForumScreen = ({ navigation }) => {
   const isHeaderVisible = useRef(true);
   const isAnimating = useRef(false);
   const animationCooldown = useRef(false); // Prevent rapid re-triggering
-  const SCROLL_THRESHOLD = 150; // Only trigger after scrolling this much from top
-  const VELOCITY_THRESHOLD = 0.8; // Minimum velocity to trigger hide (pixels/ms)
-  const COOLDOWN_MS = 300; // Cooldown between animations
+  const SCROLL_THRESHOLD = 100; // Only trigger after scrolling this much from top (reduced for responsiveness)
+  const VELOCITY_THRESHOLD = 0.5; // Minimum velocity to trigger hide (pixels/ms) - reduced for smoother feel
+  const COOLDOWN_MS = 150; // Cooldown between animations - reduced for responsiveness
 
   // Measure header height on layout
   const onHeaderLayout = useCallback((event) => {
@@ -327,11 +329,13 @@ const ForumScreen = ({ navigation }) => {
 
       // Get posts from API with feed type and topic filter
       // NEW: forumService.getPosts now returns { posts, sessionId, hasMore, totalPosts }
+      // Explore uses 'hot' algorithm, other feeds use their own sorting defined in forumService
       const result = await forumService.getPosts({
         feed: selectedFeed,
         topic: selectedTopic,
         page: currentPage,
         limit: 50,
+        sortBy: selectedFeed === 'explore' ? 'hot' : 'latest',
       });
 
       // Handle new return format - posts is now an array of { type: 'post'/'ad', data: {...} }
@@ -612,12 +616,11 @@ const ForumScreen = ({ navigation }) => {
       isAnimating.current = true;
       animationCooldown.current = true;
 
-      Animated.spring(headerTranslateY, {
+      // Use timing for smoother, more predictable animation
+      Animated.timing(headerTranslateY, {
         toValue: toHidden ? -HEADER_MAX_HEIGHT : 0,
+        duration: 200,
         useNativeDriver: true,
-        tension: 100,
-        friction: 12,
-        velocity: scrollVelocity.current * (toHidden ? -1 : 1),
       }).start(() => {
         isAnimating.current = false;
         // Add cooldown to prevent jitter
@@ -668,11 +671,10 @@ const ForumScreen = ({ navigation }) => {
     if (!isHeaderVisible.current) {
       isHeaderVisible.current = true;
 
-      Animated.spring(headerTranslateY, {
+      Animated.timing(headerTranslateY, {
         toValue: 0,
+        duration: 200,
         useNativeDriver: true,
-        tension: 100,
-        friction: 12,
       }).start();
     }
   }, [headerTranslateY]);
@@ -705,11 +707,10 @@ const ForumScreen = ({ navigation }) => {
     // Show header when changing feed
     if (!isHeaderVisible.current) {
       isHeaderVisible.current = true;
-      Animated.spring(headerTranslateY, {
+      Animated.timing(headerTranslateY, {
         toValue: 0,
+        duration: 200,
         useNativeDriver: true,
-        tension: 100,
-        friction: 12,
       }).start();
     }
   }, [selectedFeed, headerTranslateY]);
@@ -723,11 +724,10 @@ const ForumScreen = ({ navigation }) => {
     flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
     if (!isHeaderVisible.current) {
       isHeaderVisible.current = true;
-      Animated.spring(headerTranslateY, {
+      Animated.timing(headerTranslateY, {
         toValue: 0,
+        duration: 200,
         useNativeDriver: true,
-        tension: 100,
-        friction: 12,
       }).start();
     }
 
@@ -816,7 +816,7 @@ const ForumScreen = ({ navigation }) => {
     if (ad.link.startsWith('/upgrade')) {
       navigation.navigate('Shop', { screen: 'Pricing' });
     } else if (ad.link.startsWith('/academy')) {
-      navigation.navigate('Courses');
+      navigation.navigate('Shop', { screen: 'CourseList' });
     }
   };
 
@@ -848,7 +848,7 @@ const ForumScreen = ({ navigation }) => {
     // Sponsor banner - injected between posts
     if (item.type === 'sponsor_banner') {
       return (
-        <SponsorBannerCard
+        <SponsorBanner
           banner={item.data}
           navigation={navigation}
           userId={bannerUserId}
@@ -916,11 +916,10 @@ const ForumScreen = ({ navigation }) => {
     // Show header when changing tab
     if (!isHeaderVisible.current) {
       isHeaderVisible.current = true;
-      Animated.spring(headerTranslateY, {
+      Animated.timing(headerTranslateY, {
         toValue: 0,
+        duration: 200,
         useNativeDriver: true,
-        tension: 100,
-        friction: 12,
       }).start();
     }
   }, [selectedFeed, headerTranslateY]);

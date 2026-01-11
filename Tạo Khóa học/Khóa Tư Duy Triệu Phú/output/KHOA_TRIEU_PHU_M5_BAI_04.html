@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 5.4: Đầu Tư Vào Bản Thân | GEM Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.5rem, 5vw, 2.25rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .definition-box p { color: var(--text-secondary); margin: 0; }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .invest-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .invest-grid { grid-template-columns: 1fr; gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .invest-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); text-align: center; }
+        @media (max-width: 600px) { .invest-card { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; text-align: left; } }
+        .invest-emoji { font-size: 2.5rem; margin-bottom: var(--space-sm); }
+        @media (max-width: 600px) { .invest-emoji { font-size: 1.5rem; display: inline-block; margin-right: var(--space-sm); margin-bottom: 0; } }
+        .invest-name { font-size: 1.1rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        @media (max-width: 600px) { .invest-name { display: inline-block; } }
+        .invest-desc { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .invest-items { font-size: 0.85rem; color: var(--text-muted); text-align: left; }
+        .invest-items li { margin-bottom: var(--space-xs); }
+
+        .comparison-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .comparison-grid { grid-template-columns: 1fr; gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .comparison-card { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); }
+        @media (max-width: 600px) { .comparison-card { border-radius: 0; padding: var(--space-md) 16px; } }
+        .comparison-card.bad { border: 1px solid var(--error); }
+        .comparison-card.good { border: 1px solid var(--success); }
+        @media (max-width: 600px) { .comparison-card.bad, .comparison-card.good { border: none; } .comparison-card.bad { border-left: 4px solid var(--error); } .comparison-card.good { border-left: 4px solid var(--success); } }
+        .comparison-title { font-weight: 700; margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .comparison-card.bad .comparison-title { color: var(--error); }
+        .comparison-card.good .comparison-title { color: var(--success); }
+        .comparison-list { font-size: 0.9rem; color: var(--text-secondary); }
+        .comparison-list li { margin-bottom: var(--space-xs); }
+
+        .roi-box { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .roi-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .roi-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-md); }
+        .roi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md); text-align: center; }
+        @media (max-width: 600px) { .roi-grid { grid-template-columns: 1fr; gap: var(--space-sm); text-align: left; } }
+        .roi-item { padding: var(--space-md); background: var(--glass-bg); border-radius: var(--radius-md); }
+        @media (max-width: 600px) { .roi-item { display: flex; justify-content: space-between; align-items: center; border-radius: 0; } }
+        .roi-item-title { font-size: 0.85rem; color: var(--text-muted); margin-bottom: var(--space-xs); }
+        @media (max-width: 600px) { .roi-item-title { margin-bottom: 0; } }
+        .roi-item-value { font-size: 1.5rem; font-weight: 800; }
+        @media (max-width: 600px) { .roi-item-value { font-size: 1.2rem; } }
+        .roi-item.stock .roi-item-value { color: var(--cyan); }
+        .roi-item.realestate .roi-item-value { color: var(--gold); }
+        .roi-item.education .roi-item-value { color: var(--success); }
+
+        .academy-card { background: linear-gradient(135deg, rgba(106, 91, 255, 0.2), rgba(106, 91, 255, 0.05)); border: 2px solid var(--purple); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .academy-card { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .academy-header { display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-lg); }
+        .academy-logo { font-size: 3rem; }
+        .academy-title { font-size: 1.5rem; font-weight: 800; color: var(--purple); }
+        .academy-subtitle { font-size: 0.9rem; color: var(--text-muted); }
+        .academy-courses { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-md); }
+        @media (max-width: 600px) { .academy-courses { grid-template-columns: 1fr; gap: var(--space-sm); } }
+        .course-item { background: var(--glass-bg); border-radius: var(--radius-md); padding: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .course-item { border-radius: 0; border-left: 2px solid var(--purple); } }
+        .course-emoji { font-size: 1.5rem; }
+        .course-info { flex: 1; }
+        .course-name { font-weight: 600; color: var(--text-primary); font-size: 0.9rem; }
+        .course-desc { font-size: 0.8rem; color: var(--text-muted); }
+
+        .checklist { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .checklist { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .checklist-item { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); }
+        @media (max-width: 600px) { .checklist-item { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--success); } }
+        .checklist-check { font-size: 1.2rem; color: var(--success); }
+        .checklist-content { flex: 1; }
+        .checklist-title { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .checklist-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.2), rgba(255, 189, 89, 0.05)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.3rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-md); }
+        @media (max-width: 600px) { .summary-grid { grid-template-columns: 1fr; gap: var(--space-sm); } }
+        .summary-item { background: var(--glass-bg); border-radius: var(--radius-md); padding: var(--space-md); }
+        @media (max-width: 600px) { .summary-item { border-radius: 0; border-left: 2px solid var(--gold); } }
+        .summary-lesson { font-size: 0.8rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-xs); }
+        .summary-point { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .app-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .app-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .app-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); }
+        .app-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .app-box p:last-child { margin-bottom: 0; }
+
+        /* QUIZ STYLES */
+        .quiz-section { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05)); border: 2px solid var(--purple); border-radius: var(--radius-lg); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-section { padding: var(--space-lg) 0; margin-bottom: 0; border: none; border-radius: 0; border-bottom: 8px solid var(--bg-primary); } }
+        .quiz-header { text-align: center; margin-bottom: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-header { padding: 0 16px; } }
+        .quiz-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: var(--purple); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: white; margin-bottom: var(--space-md); }
+        .quiz-title { font-size: 1.5rem; font-weight: 700; color: var(--purple); }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; margin-top: var(--space-sm); }
+
+        .quiz-question { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .quiz-question { border-radius: 0; padding: var(--space-lg) 16px; margin-bottom: 1px; } }
+        .question-header { display: flex; align-items: center; gap: var(--space-sm); margin-bottom: var(--space-md); }
+        .question-number { width: 32px; height: 32px; background: var(--purple); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; }
+        .question-text { font-weight: 600; color: var(--text-primary); flex: 1; }
+
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        .quiz-option { display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; transition: all 0.3s ease; }
+        @media (max-width: 600px) { .quiz-option { border-radius: 0; border: none; border-left: 4px solid var(--glass-border); } }
+        .quiz-option:hover:not(.disabled) { border-color: var(--purple); background: rgba(106, 91, 255, 0.1); }
+        @media (max-width: 600px) { .quiz-option:hover:not(.disabled) { border-left-color: var(--purple); } }
+        .quiz-option.selected { border-color: var(--purple); background: rgba(106, 91, 255, 0.2); }
+        @media (max-width: 600px) { .quiz-option.selected { border-left-color: var(--purple); } }
+        .quiz-option.correct { border-color: var(--success); background: rgba(0, 200, 83, 0.2); }
+        @media (max-width: 600px) { .quiz-option.correct { border-left-color: var(--success); } }
+        .quiz-option.incorrect { border-color: var(--error); background: rgba(255, 82, 82, 0.2); }
+        @media (max-width: 600px) { .quiz-option.incorrect { border-left-color: var(--error); } }
+        .quiz-option.disabled { cursor: not-allowed; opacity: 0.7; }
+        .option-letter { width: 28px; height: 28px; min-width: 28px; border-radius: 50%; background: var(--glass-border); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+        .quiz-option.correct .option-letter { background: var(--success); }
+        .quiz-option.incorrect .option-letter { background: var(--error); }
+        .option-text { flex: 1; color: var(--text-secondary); }
+        .option-icon { font-size: 1.2rem; display: none; }
+        .quiz-option.correct .option-icon, .quiz-option.incorrect .option-icon { display: block; }
+
+        .question-feedback { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--radius-md); display: none; }
+        @media (max-width: 600px) { .question-feedback { border-radius: 0; margin: var(--space-md) 0 0 0; } }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); }
+        .question-feedback.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .quiz-result { text-align: center; padding: var(--space-xl); background: var(--bg-card); border-radius: var(--radius-md); margin-top: var(--space-lg); display: none; }
+        @media (max-width: 600px) { .quiz-result { border-radius: 0; margin: var(--space-md) 0 0 0; padding: var(--space-xl) 16px; } }
+        .quiz-result.show { display: block; }
+        .result-score { font-size: 3rem; font-weight: 800; margin-bottom: var(--space-md); }
+        .result-score.perfect { color: var(--success); }
+        .result-score.good { color: var(--gold); }
+        .result-score.retry { color: var(--error); }
+        .result-message { font-size: 1.1rem; color: var(--text-secondary); margin-bottom: var(--space-lg); }
+        .result-detail { font-size: 0.9rem; color: var(--text-muted); }
+
+        .lesson-footer { text-align: center; padding: var(--space-xl); color: var(--text-muted); font-size: 0.85rem; }
+        .lesson-footer a { color: var(--gold); text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>🎓</span>
+                <span>Module 5 - Final</span>
+            </div>
+            <div class="lesson-chapter">Module 5 - Hành Động Thuận Thiên</div>
+            <h1 class="lesson-title">Đầu Tư Vào Bản Thân - Khoản Đầu Tư Sinh Lời Nhất</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 5.4</span></div>
+                <div class="meta-item"><span>⏱️</span><span>12 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>Quiz Module 5</span></div>
+            </div>
+        </header>
+
+        <!-- SECTION 1: OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🌟</span> Khoản Đầu Tư Sinh Lời Nhất Mà Bạn Đang Bỏ Lỡ</h2>
+
+            <p>Bạn có biết rằng có một loại đầu tư mà không một cuộc khủng hoảng kinh tế nào có thể lấy đi, không ai có thể đánh cắp, và tỷ suất sinh lời có thể lên tới hàng nghìn phần trăm? Đây không phải là bitcoin, cũng không phải là bất động sản hay chứng khoán - mà chính là <strong>đầu tư vào bản thân bạn</strong>.</p>
+
+            <p>Warren Buffett - nhà đầu tư huyền thoại được mệnh danh là "Nhà tiên tri xứ Omaha" với tài sản hơn 100 tỷ đô la - đã từng được hỏi: "Khoản đầu tư tốt nhất mà ông từng thực hiện là gì?" Câu trả lời của ông không phải là cổ phiếu Coca-Cola hay Apple mà ông đã nắm giữ. Thay vào đó, ông nói: <strong>"Đầu tư vào bản thân. Bất cứ thứ gì giúp bạn cải thiện khả năng của mình đều là khoản đầu tư tốt nhất. Không ai có thể lấy đi những gì bạn đã học được - không thuế, không lạm phát, không trộm cắp."</strong></p>
+
+            <p>Trong bài học cuối cùng của Module 5 này, chúng ta sẽ khám phá sâu về nghệ thuật đầu tư vào bản thân - không chỉ là học thêm một kỹ năng mới, mà là xây dựng cả một hệ thống phát triển toàn diện giúp bạn nâng cao giá trị của mình theo cấp số nhân. Đến cuối bài, bạn sẽ có một bản kế hoạch rõ ràng để biến mình thành phiên bản tốt nhất - phiên bản mà thịnh vượng tự động chảy đến.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M5_B4_01%0AInvest+In+Yourself%0AThe+Best+Investment" alt="Đầu tư vào bản thân">
+                <div class="image-caption">Đầu tư vào bản thân - Khoản đầu tư không bao giờ mất giá trị</div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: CONCEPT INTRODUCTION -->
+        <section class="section">
+            <h2 class="section-title"><span>💎</span> Đầu Tư Vào Bản Thân Thực Sự Là Gì?</h2>
+
+            <p>Hãy bắt đầu với những điều cơ bản nhất. Đầu tư vào bản thân không đơn giản là đi học thêm một khóa học hay mua vài cuốn sách rồi để trên kệ đầy bụi. Thực chất, đó là quá trình có chủ đích mà bạn dành thời gian, tiền bạc và năng lượng để nâng cấp chính mình - trong kiến thức, kỹ năng, sức khỏe, mối quan hệ và tâm thức - với mục tiêu tạo ra nhiều giá trị hơn cho bản thân và thế giới xung quanh.</p>
+
+            <p>Bạn có thể đang nghĩ: "Tôi không có nhiều tiền để đầu tư vào giáo dục hay phát triển bản thân." Đây là quan niệm sai lầm mà đa số mọi người mắc phải. Sự thật là: những người giàu có nhất thế giới không đợi có tiền mới đầu tư vào bản thân - họ đầu tư vào bản thân TRƯỚC, và đó là lý do họ trở nên giàu có. Tiền không tạo ra người thành công, mà người đã đầu tư vào bản thân mới tạo ra tiền.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📊</span> Tại Sao Đây Là Điều Quan Trọng Nhất Với Bạn?</div>
+                <p>Đây là lý do tại sao việc đầu tư vào bản thân có thể thay đổi hoàn toàn cuộc đời tài chính của bạn:</p>
+                <p style="margin-top: var(--space-sm);"><strong>Thứ nhất:</strong> Mọi khoản thu nhập đều đi qua BẠN - nếu bạn không phát triển, thu nhập của bạn cũng không thể phát triển.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Thứ hai:</strong> Kiến thức và kỹ năng là tài sản duy nhất không thể bị tịch thu, phá sản hay mất giá theo thời gian.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Thứ ba:</strong> Trong thế giới thay đổi nhanh chóng, những người liên tục học hỏi sẽ làm chủ tương lai, còn những người ngừng học sẽ sớm bị đào thải.</p>
+            </div>
+
+            <p>Hãy nghĩ về nó theo cách này: Bạn chính là "công ty" quan trọng nhất mà bạn sẽ ever quản lý. Nếu một CEO không đầu tư vào nâng cấp máy móc, đào tạo nhân viên, phát triển sản phẩm mới - công ty đó sẽ sớm phá sản. Bạn cũng vậy. Nếu bạn không liên tục đầu tư vào "nâng cấp" chính mình, bạn đang tự đặt mình vào con đường đi xuống.</p>
+        </section>
+
+        <!-- SECTION 3: DEEP EXPLANATION - THE WHAT, WHY, HOW -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Hiểu Sâu Về Đầu Tư Bản Thân</h2>
+
+            <p><strong>PHẦN 1: CÁI GÌ - Bốn Lĩnh Vực Đầu Tư Quan Trọng Nhất</strong></p>
+
+            <p>Giống như một doanh nghiệp cần đầu tư vào nhiều mảng để phát triển bền vững, BẠN cũng cần đầu tư toàn diện vào bốn lĩnh vực cốt lõi. Mỗi lĩnh vực đều có vai trò riêng, và khi kết hợp lại, chúng tạo nên một cá nhân hoàn chỉnh với giá trị vượt trội.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x600/0a1628/FFBD59?text=M5_B4_02%0A4+Investment+Areas%0AKnowledge+Health+Network+Mind" alt="4 Lĩnh Vực Đầu Tư Bản Thân">
+                <div class="image-caption">4 Lĩnh Vực Đầu Tư Bản Thân - Mỗi lĩnh vực đều không thể thiếu</div>
+            </div>
+
+            <div class="invest-grid">
+                <div class="invest-card">
+                    <div class="invest-emoji">📚</div>
+                    <div class="invest-name">1. KIẾN THỨC & KỸ NĂNG</div>
+                    <div class="invest-desc">Nâng cấp "phần mềm" của bạn để tạo ra nhiều giá trị hơn</div>
+                    <ul class="invest-items">
+                        <li>Khóa học chuyên môn và kỹ năng mới</li>
+                        <li>Sách, audiobook, ebook chất lượng</li>
+                        <li>Mentorship và coaching 1-1</li>
+                        <li>Chứng chỉ nghề nghiệp được công nhận</li>
+                        <li>Kỹ năng mềm như giao tiếp, thuyết trình, lãnh đạo</li>
+                    </ul>
+                </div>
+                <div class="invest-card">
+                    <div class="invest-emoji">💪</div>
+                    <div class="invest-name">2. SỨC KHỎE THỂ CHẤT</div>
+                    <div class="invest-desc">Nền tảng của mọi thành công - không có sức khỏe, mọi thứ đều vô nghĩa</div>
+                    <ul class="invest-items">
+                        <li>Gym, yoga, fitness hoặc môn thể thao yêu thích</li>
+                        <li>Thực phẩm dinh dưỡng chất lượng cao</li>
+                        <li>Khám sức khỏe định kỳ và phòng bệnh</li>
+                        <li>Giấc ngủ chất lượng với nệm, gối tốt</li>
+                        <li>Quản lý stress qua meditation, spa, nghỉ ngơi</li>
+                    </ul>
+                </div>
+                <div class="invest-card">
+                    <div class="invest-emoji">🤝</div>
+                    <div class="invest-name">3. NETWORK & MỐI QUAN HỆ</div>
+                    <div class="invest-desc">"Bạn là trung bình cộng của 5 người bạn dành thời gian nhiều nhất"</div>
+                    <ul class="invest-items">
+                        <li>Tham gia cộng đồng có cùng mục tiêu</li>
+                        <li>Networking events và hội thảo chuyên ngành</li>
+                        <li>Masterminds và group coaching</li>
+                        <li>Nuôi dưỡng các mối quan hệ chất lượng</li>
+                        <li>Tìm mentor và role models để học hỏi</li>
+                    </ul>
+                </div>
+                <div class="invest-card">
+                    <div class="invest-emoji">🧘</div>
+                    <div class="invest-name">4. TÂM TRÍ & TÂM LINH</div>
+                    <div class="invest-desc">Nâng cao tần số năng lượng - nền tảng của Học Thuyết Chuyển Hóa</div>
+                    <ul class="invest-items">
+                        <li>Khóa học phát triển tâm thức như khóa này</li>
+                        <li>Thiền định thường xuyên qua app hoặc retreat</li>
+                        <li>Therapy hoặc counseling khi cần chữa lành</li>
+                        <li>Công cụ hỗ trợ năng lượng như crystal, tarot</li>
+                        <li>Tạo không gian sống tích cực, nhiều năng lượng</li>
+                    </ul>
+                </div>
+            </div>
+
+            <p><strong>PHẦN 2: TẠI SAO - Sức Mạnh Của Hiệu Ứng Compound</strong></p>
+
+            <p>Tại sao đầu tư vào bản thân lại hiệu quả đến vậy? Câu trả lời nằm ở một nguyên lý mà Albert Einstein từng gọi là "kỳ quan thứ tám của thế giới" - hiệu ứng lãi kép (compound effect). Khi bạn đầu tư tiền vào ngân hàng, tiền sinh ra tiền. Khi bạn đầu tư vào bản thân, kiến thức sinh ra kiến thức, kỹ năng mở ra cơ hội mới, và giá trị bạn tạo ra ngày càng lớn theo cấp số nhân.</p>
+
+            <div class="roi-box">
+                <div class="roi-title">📊 So Sánh ROI (Tỷ Suất Sinh Lời) Trung Bình Các Loại Đầu Tư</div>
+                <div class="roi-grid">
+                    <div class="roi-item stock">
+                        <div class="roi-item-title">Chứng khoán</div>
+                        <div class="roi-item-value">7-10%/năm</div>
+                    </div>
+                    <div class="roi-item realestate">
+                        <div class="roi-item-title">Bất động sản</div>
+                        <div class="roi-item-value">5-15%/năm</div>
+                    </div>
+                    <div class="roi-item education">
+                        <div class="roi-item-title">Giáo dục/Kỹ năng</div>
+                        <div class="roi-item-value">100-1000%+</div>
+                    </div>
+                </div>
+            </div>
+
+            <p>Nghiên cứu của Georgetown University cho thấy những người có bằng đại học kiếm được trung bình 84% nhiều hơn so với những người chỉ tốt nghiệp trung học trong suốt cuộc đời làm việc. Nhưng điều quan trọng hơn cả bằng cấp chính thức là việc học tập liên tục - những người dành thời gian học hỏi mỗi ngày có thu nhập cao hơn 30% so với những người đã ngừng học sau khi ra trường.</p>
+
+            <p><strong>PHẦN 3: NHƯ THẾ NÀO - Quy Tắc 10% Education Budget</strong></p>
+
+            <p>Trong Hệ Thống 6 Lọ mà bạn đã học ở bài trước, quỹ EDU (Education) chiếm 10% thu nhập. Đây không phải là chi phí - đây là KHOẢN ĐẦU TƯ có tỷ suất sinh lời cao nhất mà bạn có thể thực hiện. Hãy đi qua từng bước để áp dụng quy tắc này một cách hiệu quả nhất.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M5_B4_03%0A10%25+Education+Budget%0ARule+For+Growth" alt="10% Education Budget">
+                <div class="image-caption">Quy tắc 10% Education Budget - Đầu tư vào sự phát triển của bản thân</div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Công Thức Thu Nhập - Hiểu Để Áp Dụng</div>
+                <p><strong>Thu nhập = Giá trị bạn tạo ra × Số người bạn phục vụ</strong></p>
+                <p style="margin-top: var(--space-sm);">Để tăng thu nhập, bạn chỉ có hai con đường: TĂNG GIÁ TRỊ mà bạn mang lại (thông qua kỹ năng, kiến thức tốt hơn) hoặc TĂNG QUY MÔ (phục vụ nhiều người hơn, ví dụ qua kinh doanh online). Đầu tư vào bản thân giúp bạn làm được CẢ HAI - bạn trở nên có giá trị hơn VÀ có khả năng tiếp cận nhiều người hơn.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Ví dụ:</strong> Một designer biết thêm marketing sẽ hiểu khách hàng muốn gì (tăng giá trị), đồng thời có thể tự quảng bá dịch vụ hiệu quả hơn (tăng quy mô tiếp cận).</p>
+            </div>
+
+            <div class="comparison-grid">
+                <div class="comparison-card bad">
+                    <div class="comparison-title"><span>❌</span> KHÔNG Dùng Quỹ EDU Cho</div>
+                    <ul class="comparison-list">
+                        <li>Entertainment như Netflix, games, xem phim rạp</li>
+                        <li>Quần áo thời trang, phụ kiện xa xỉ</li>
+                        <li>Du lịch nghỉ dưỡng thuần túy không có mục đích học</li>
+                        <li>Ăn uống nhà hàng, quán bar, cà phê đắt tiền</li>
+                        <li>Gadgets và công nghệ không phục vụ việc học</li>
+                    </ul>
+                </div>
+                <div class="comparison-card good">
+                    <div class="comparison-title"><span>✅</span> ĐÚNG Cách Sử Dụng Quỹ EDU</div>
+                    <ul class="comparison-list">
+                        <li>Khóa học online hoặc offline nâng cao kỹ năng</li>
+                        <li>Sách, audiobook, ebook về chuyên môn và phát triển</li>
+                        <li>Mentorship và coaching 1-1 với người giỏi hơn</li>
+                        <li>Conferences, workshops và sự kiện networking</li>
+                        <li>Công cụ học tập như laptop, phần mềm, app premium</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: REAL-WORLD EXAMPLES -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Câu Chuyện Thực Tế - Sức Mạnh Của Việc Đầu Tư Vào Bản Thân</h2>
+
+            <p>Để bạn hiểu rõ hơn về sức mạnh thực sự của việc đầu tư vào bản thân, hãy cùng xem xét một số câu chuyện thực tế từ những người đã áp dụng thành công nguyên tắc này.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>✨</span> Câu Chuyện 1: Minh - Từ Nhân Viên Văn Phòng Thành Chuyên Gia</div>
+                <p>Minh, 28 tuổi, làm nhân viên văn phòng với mức lương 12 triệu/tháng. Anh cảm thấy mình đang "đi vào ngõ cụt" khi công việc không có gì phát triển, lương chỉ tăng theo lạm phát.</p>
+                <p style="margin-top: var(--space-sm);">Sau khi học về Hệ Thống 6 Lọ, Minh quyết định dành 10% lương (1.2 triệu/tháng) cho quỹ EDU. Trong 18 tháng, anh đã:</p>
+                <p style="margin-top: var(--space-sm);">• <strong>Tháng 1-6:</strong> Học khóa Data Analytics online (tổng 5 triệu), vừa học vừa làm project nhỏ</p>
+                <p style="margin-top: var(--space-sm);">• <strong>Tháng 7-12:</strong> Lấy chứng chỉ Google Analytics và Tableau, đọc 15 cuốn sách về data và business</p>
+                <p style="margin-top: var(--space-sm);">• <strong>Tháng 13-18:</strong> Tham gia cộng đồng Data Science, networking với các senior trong ngành</p>
+                <p style="margin-top: var(--space-sm);"><strong>Kết quả sau 18 tháng:</strong> Minh nhảy việc sang vị trí Data Analyst với mức lương 28 triệu/tháng - tăng 133% so với trước. Tổng chi phí đầu tư khoảng 20 triệu, nhưng thu nhập tăng thêm 16 triệu/tháng = 192 triệu/năm. ROI đạt gần 1000%!</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>💡</span> Câu Chuyện 2: Lan - Sai Lầm Cần Tránh</div>
+                <p>Lan, 32 tuổi, cũng muốn phát triển bản thân nhưng mắc một sai lầm phổ biến. Cô mua rất nhiều khóa học online - khoảng 50 triệu trong một năm - nhưng chỉ hoàn thành được 2-3 khóa. Số còn lại nằm trong tài khoản, chưa bao giờ được mở.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Sai lầm của Lan:</strong> Cô đầu tư tiền nhưng không đầu tư THỜI GIAN và CAM KẾT. Việc mua khóa học tạo cảm giác "đang phát triển" nhưng thực tế không có gì thay đổi.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Bài học:</strong> Đầu tư vào bản thân không chỉ là bỏ tiền ra - mà phải kèm theo cam kết thực hành. Tốt hơn là hoàn thành xuất sắc 1 khóa học hơn mua 10 khóa rồi bỏ dở.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Cách khắc phục:</strong> Áp dụng quy tắc "Finish Before Buy" - hoàn thành khóa học hiện tại trước khi mua khóa mới. Đặt lịch học cố định mỗi ngày, dù chỉ 30 phút.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🌟</span> Câu Chuyện 3: Hùng - Đầu Tư Vào Sức Khỏe Và Tâm Thức</div>
+                <p>Hùng, 40 tuổi, là chủ doanh nghiệp nhỏ với doanh thu tốt nhưng luôn cảm thấy kiệt sức và hay cáu gắt. Anh dành 100% thời gian cho công việc, bỏ bê sức khỏe và tâm trí.</p>
+                <p style="margin-top: var(--space-sm);">Sau khi đọc cuốn "Atomic Habits" và tham gia khóa thiền định, Hùng bắt đầu thay đổi. Anh đầu tư vào:</p>
+                <p style="margin-top: var(--space-sm);">• <strong>Sức khỏe:</strong> Gym 3 buổi/tuần (2 triệu/tháng), ăn uống lành mạnh hơn</p>
+                <p style="margin-top: var(--space-sm);">• <strong>Tâm thức:</strong> Thiền 15 phút mỗi sáng, tham gia retreat 3 ngày (15 triệu)</p>
+                <p style="margin-top: var(--space-sm);"><strong>Kết quả sau 6 tháng:</strong> Năng lượng tăng vọt, sáng suốt hơn trong quyết định kinh doanh, mối quan hệ với nhân viên và gia đình cải thiện rõ rệt. Doanh thu công ty tăng 40% nhờ anh có thể tập trung chiến lược thay vì chạy theo từng việc nhỏ.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 5: COMMON QUESTIONS -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp Về Đầu Tư Bản Thân</h2>
+
+            <p>Bạn có thể đang có một số thắc mắc về việc đầu tư vào bản thân. Hãy cùng giải đáp những câu hỏi phổ biến nhất mà nhiều người thường đặt ra.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>💬</span> "Tôi không có tiền để đầu tư vào giáo dục, phải làm sao?"</div>
+                <p>Đây là một trong những lầm tưởng lớn nhất. Thực tế, có rất nhiều cách đầu tư vào bản thân mà không tốn tiền hoặc tốn rất ít:</p>
+                <p style="margin-top: var(--space-sm);">• <strong>Miễn phí:</strong> YouTube có hàng triệu video chất lượng, podcast miễn phí, sách ở thư viện, blog và bài viết online</p>
+                <p style="margin-top: var(--space-sm);">• <strong>Chi phí thấp:</strong> Khóa học trên Udemy khi sale chỉ 200-300k, ebook rẻ hơn sách giấy, many apps có free tier</p>
+                <p style="margin-top: var(--space-sm);">• <strong>Quan trọng nhất:</strong> Đầu tư THỜI GIAN - thay 1 giờ lướt Facebook bằng 1 giờ đọc sách hoặc học online, hoàn toàn miễn phí</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💬</span> "Tôi đã lớn tuổi, học thêm có còn ý nghĩa gì không?"</div>
+                <p>Câu trả lời là CÓ, và thực ra bạn có lợi thế hơn người trẻ. Nghiên cứu cho thấy người lớn tuổi có kinh nghiệm thực tế để áp dụng ngay những gì học được - không phải chờ đợi như sinh viên mới ra trường.</p>
+                <p style="margin-top: var(--space-sm);">Warren Buffett bắt đầu đầu tư nghiêm túc ở tuổi 30. Ray Kroc mua McDonald's khi đã 52 tuổi. Colonel Sanders franchise KFC ở tuổi 62. Tuổi tác không phải rào cản - sự ngừng học mới là rào cản thực sự.</p>
+                <p style="margin-top: var(--space-sm);">Thời điểm tốt nhất để trồng cây là 20 năm trước. Thời điểm tốt thứ hai là NGAY BÂY GIỜ.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>💬</span> "Khác gì so với việc đi học đại học thông thường?"</div>
+                <p>Đầu tư vào bản thân theo cách chúng ta đang nói có 3 điểm khác biệt quan trọng:</p>
+                <p style="margin-top: var(--space-sm);">• <strong>Tập trung vào kỹ năng thực tế:</strong> Không phải lý thuyết hàn lâm, mà là những gì có thể áp dụng ngay để tạo ra giá trị</p>
+                <p style="margin-top: var(--space-sm);">• <strong>Linh hoạt và cá nhân hóa:</strong> Bạn chọn học những gì PHÙ HỢP với mình, không phải theo chương trình cố định</p>
+                <p style="margin-top: var(--space-sm);">• <strong>Bao gồm cả 4 lĩnh vực:</strong> Không chỉ kiến thức, mà còn sức khỏe, mối quan hệ và tâm thức - tạo nên con người TOÀN DIỆN</p>
+            </div>
+        </section>
+
+        <!-- SECTION 6: PRACTICAL APPLICATION -->
+        <section class="section">
+            <h2 class="section-title"><span>📋</span> Áp Dụng Thực Tế - Bắt Đầu Ngay Hôm Nay</h2>
+
+            <p>Bây giờ hãy đưa tất cả những gì bạn đã học vào thực hành. Đừng chờ đến khi "có thời gian" hay "có tiền" - hãy bắt đầu với những gì bạn có NGAY BÂY GIỜ. Dưới đây là những bước hành động cụ thể mà bạn có thể thực hiện trong tuần này.</p>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>🎯</span> HÀNH ĐỘNG NGAY BÂY GIỜ (5-10 phút)</div>
+                <p>Mở sổ tay hoặc app ghi chú và trả lời 3 câu hỏi sau:</p>
+                <p style="margin-top: var(--space-sm);">1. Kỹ năng nào nếu tôi cải thiện sẽ tạo tác động lớn nhất cho thu nhập/sự nghiệp trong 12 tháng tới?</p>
+                <p style="margin-top: var(--space-sm);">2. Tôi có thể dành bao nhiêu thời gian mỗi ngày cho việc học (dù chỉ 15-30 phút)?</p>
+                <p style="margin-top: var(--space-sm);">3. 10% thu nhập của tôi là bao nhiêu và tôi sẽ bắt đầu trích quỹ EDU từ tháng nào?</p>
+            </div>
+
+            <div class="checklist">
+                <div class="checklist-item">
+                    <div class="checklist-check">✅</div>
+                    <div class="checklist-content">
+                        <div class="checklist-title">1. Thiết Lập Quỹ EDU 10% Ngay Tuần Này</div>
+                        <div class="checklist-desc">Mở một tài khoản tiết kiệm riêng hoặc tạo một lọ/phong bì riêng. Ngay khi nhận lương, tách 10% vào đây TRƯỚC khi chi tiêu bất cứ thứ gì khác. Dù thu nhập 5 triệu thì 500k/tháng cũng là khởi đầu tốt.</div>
+                    </div>
+                </div>
+                <div class="checklist-item">
+                    <div class="checklist-check">✅</div>
+                    <div class="checklist-content">
+                        <div class="checklist-title">2. Cam Kết Đọc/Học 30 Phút Mỗi Ngày</div>
+                        <div class="checklist-desc">Chọn một thời điểm cố định trong ngày - buổi sáng sớm hoặc trước khi ngủ là tốt nhất. Thay thế 30 phút scrolling social media bằng đọc sách hoặc học online. Đặt alarm reminder trên điện thoại.</div>
+                    </div>
+                </div>
+                <div class="checklist-item">
+                    <div class="checklist-check">✅</div>
+                    <div class="checklist-content">
+                        <div class="checklist-title">3. Chọn 1 Kỹ Năng Ưu Tiên Cao Nhất</div>
+                        <div class="checklist-desc">Không học tất cả cùng lúc. Chọn MỘT kỹ năng quan trọng nhất và tập trung vào đó trong 3-6 tháng. Tìm một khóa học tốt (có thể miễn phí trên YouTube hoặc Coursera) và cam kết hoàn thành.</div>
+                    </div>
+                </div>
+                <div class="checklist-item">
+                    <div class="checklist-check">✅</div>
+                    <div class="checklist-content">
+                        <div class="checklist-title">4. Tham Gia Ít Nhất 1 Cộng Đồng Phát Triển</div>
+                        <div class="checklist-desc">Cộng đồng GEM trong app, nhóm Facebook về chủ đề bạn đang học, hoặc tìm một mastermind group. Môi trường sẽ kéo bạn lên. "Bạn là trung bình cộng của 5 người bạn dành thời gian nhiều nhất."</div>
+                    </div>
+                </div>
+                <div class="checklist-item">
+                    <div class="checklist-check">✅</div>
+                    <div class="checklist-content">
+                        <div class="checklist-title">5. Lập Kế Hoạch Học Tập 12 Tháng</div>
+                        <div class="checklist-desc">Viết ra cụ thể: Năm nay tôi sẽ đọc bao nhiêu cuốn sách? Tham gia khóa học nào? Phát triển kỹ năng gì? Có kế hoạch cụ thể = Có kết quả cụ thể. Không có kế hoạch = Không có gì thay đổi.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M5_B4_04%0A12+Month+Learning+Plan%0ATemplate" alt="Template Kế Hoạch Học Tập 12 Tháng">
+                <div class="image-caption">Template Kế Hoạch Học Tập 12 Tháng - Tải xuống trong app GEM</div>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📱</span> Thực Hành Ngay Với App GEM</div>
+                <p><strong>GEM Master → Career:</strong> Mở app GEM, vào mục GEM Master và chọn Career. Hỏi AI về hướng đi sự nghiệp phù hợp với bạn, kỹ năng nào cần phát triển ưu tiên, và cơ hội thu nhập nào phù hợp với năng lực hiện tại.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Vision Board → Goals:</strong> Vào Vision Board, cập nhật mục tiêu tài chính cho 12 tháng tới. Thêm learning goals cụ thể - ví dụ: "Hoàn thành khóa Data Analytics", "Đọc 20 cuốn sách", "Lấy chứng chỉ Google Ads".</p>
+                <p style="margin-top: var(--space-sm);"><strong>⏰ Thời điểm tốt nhất:</strong> Làm ngay sau khi đọc xong bài này, khi động lực còn cao. Đừng để "later" - later thường có nghĩa là never.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 7: KEY TAKEAWAYS & MODULE SUMMARY -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Điểm Chính Cần Nhớ & Tổng Kết Module 5</h2>
+
+            <p>Trước khi chuyển sang Module tiếp theo, hãy đảm bảo bạn đã nắm vững những điểm cốt lõi của bài học này và toàn bộ Module 5 về Hành Động Thuận Thiên.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>✨</span> ĐIỂM CHÍNH #1: Đầu Tư Vào Bản Thân Là Khoản Đầu Tư Có ROI Cao Nhất</div>
+                <p>Trong khi chứng khoán cho 7-10%/năm, bất động sản 5-15%/năm, việc đầu tư vào kiến thức và kỹ năng có thể mang lại 100-1000%+ ROI. Và quan trọng hơn, không ai có thể lấy đi những gì bạn đã học được - không thuế, không lạm phát, không phá sản.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>✨</span> ĐIỂM CHÍNH #2: Đầu Tư Toàn Diện Vào 4 Lĩnh Vực</div>
+                <p>Không chỉ kiến thức và kỹ năng, mà còn sức khỏe, mối quan hệ và tâm thức. Một người giỏi chuyên môn nhưng sức khỏe kém sẽ không thể tận dụng hết tiềm năng. Cân bằng 4 lĩnh vực tạo nên một con người hoàn chỉnh với giá trị vượt trội.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>✨</span> ĐIỂM CHÍNH #3: Quy Tắc 10% Education Budget</div>
+                <p>Dành 10% thu nhập cho giáo dục và phát triển bản thân, tách riêng ngay khi nhận lương. Đây không phải chi phí mà là ĐẦU TƯ. Ngay cả khi thu nhập còn thấp, 10% vẫn tạo ra thói quen và nền tảng cho sự phát triển dài hạn.</p>
+            </div>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>📚</span> Tổng Kết Toàn Bộ Module 5: Hành Động Thuận Thiên</div>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-lesson">Bài 5.1</div>
+                        <div class="summary-point"><strong>Aligned Action:</strong> Hành động từ cảm hứng nội tại, không phải từ sợ hãi hay áp lực. Co-Creation với Vũ Trụ. Following the Nudges - lắng nghe những gợi ý từ bên trong.</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-lesson">Bài 5.2</div>
+                        <div class="summary-point"><strong>Tạo Giá Trị:</strong> Ikigai - giao điểm của yêu thích, giỏi, cần thiết, được trả tiền. 7 nguồn thu nhập của người giàu. Thu nhập = Giá trị × Quy mô.</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-lesson">Bài 5.3</div>
+                        <div class="summary-point"><strong>Quản Lý Tài Chính:</strong> Hệ thống 6 Lọ (55-10-10-10-10-5). Emergency Fund 3-6 tháng chi phí. Debt Management - trả nợ lãi cao trước.</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-lesson">Bài 5.4</div>
+                        <div class="summary-point"><strong>Đầu Tư Bản Thân:</strong> 4 lĩnh vực (Kiến thức, Sức khỏe, Mối quan hệ, Tâm thức). 10% Education Budget. Hiệu ứng compound của học tập.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>🔑</span> MỘT CÂU TÓM TẮT CỦA MODULE 5</div>
+                <p style="font-size: 1.1rem; font-weight: 600;">"Hành động từ TRẠNG THÁI ĐÚNG quan trọng hơn hành động NHIỀU - nâng tần số trước, rồi hành động theo cảm hứng, tạo giá trị, quản lý tiền thông minh, và liên tục đầu tư vào phiên bản tốt nhất của chính mình."</p>
+            </div>
+        </section>
+
+        <!-- SECTION 8: TRANSITION -->
+        <section class="section">
+            <h2 class="section-title"><span>🚀</span> Chuẩn Bị Cho Module Tiếp Theo</h2>
+
+            <p>Chúc mừng bạn đã hoàn thành Module 5 - Hành Động Thuận Thiên! Bạn đã học được cách hành động đúng cách trong sự thuận thiên, aligned với Vũ Trụ và tần số năng lượng cao của chính mình.</p>
+
+            <p>Trong Module 6 tiếp theo - <strong>Nhân Rộng Thịnh Vượng</strong> - chúng ta sẽ khám phá cách DUY TRÌ tần số cao trong dài hạn, cách xử lý khi tần số bị rớt (vì điều này chắc chắn sẽ xảy ra!), và cách xây dựng cộng đồng hỗ trợ lẫn nhau trên hành trình thịnh vượng. Đây là bước quan trọng để đảm bảo những gì bạn đã xây dựng không chỉ là nhất thời mà là BỀN VỮNG.</p>
+
+            <p>Trước khi chuyển sang Module 6, hãy hoàn thành bài Quiz bên dưới để củng cố kiến thức, và đừng quên thực hiện các action steps đã nêu - đặc biệt là thiết lập quỹ EDU 10% và lập kế hoạch học tập 12 tháng.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>✨</span> Hẹn Gặp Bạn Ở Module 6!</div>
+                <p>Bạn đã đi được hơn nửa chặng đường của Khóa Tái Tạo Tư Duy Triệu Phú. Module 6 và 7 sẽ giúp bạn consolidate mọi thứ đã học và chuẩn bị cho cuộc sống thịnh vượng bền vững phía trước. Tiếp tục giữ đà và năng lượng nhé!</p>
+            </div>
+        </section>
+
+        <!-- QUIZ MODULE 5 -->
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <div class="quiz-badge">
+                    <span>📝</span>
+                    <span>Quiz Module 5</span>
+                </div>
+                <h2 class="quiz-title">Kiểm Tra Kiến Thức</h2>
+                <p class="quiz-subtitle">3 câu hỏi • Chọn đáp án và xem kết quả ngay</p>
+            </div>
+
+            <!-- Question 1 -->
+            <div class="quiz-question" data-question="1" data-correct="B">
+                <div class="question-header">
+                    <div class="question-number">1</div>
+                    <div class="question-text">Trong Hệ Thống 6 Lọ, quỹ EDU (Education) chiếm bao nhiêu % thu nhập?</div>
+                </div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <div class="option-letter">A</div>
+                        <div class="option-text">5%</div>
+                        <div class="option-icon"></div>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <div class="option-letter">B</div>
+                        <div class="option-text">10%</div>
+                        <div class="option-icon"></div>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <div class="option-letter">C</div>
+                        <div class="option-text">15%</div>
+                        <div class="option-icon"></div>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <div class="option-letter">D</div>
+                        <div class="option-text">20%</div>
+                        <div class="option-icon"></div>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text">Theo Hệ Thống 6 Lọ của T. Harv Eker, quỹ EDU chiếm 10% thu nhập - dùng để đầu tư vào sách, khóa học, mentoring và phát triển bản thân.</div>
+                </div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="quiz-question" data-question="2" data-correct="C">
+                <div class="question-header">
+                    <div class="question-number">2</div>
+                    <div class="question-text">Theo bài học, "Inspired Action" khác gì với "Forced Action"?</div>
+                </div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <div class="option-letter">A</div>
+                        <div class="option-text">Inspired Action nhanh hơn, Forced Action chậm hơn</div>
+                        <div class="option-icon"></div>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <div class="option-letter">B</div>
+                        <div class="option-text">Inspired Action không cần nỗ lực, Forced Action cần nỗ lực</div>
+                        <div class="option-icon"></div>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <div class="option-letter">C</div>
+                        <div class="option-text">Inspired Action đến từ cảm hứng nội tại, Forced Action đến từ sợ hãi/áp lực</div>
+                        <div class="option-icon"></div>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <div class="option-letter">D</div>
+                        <div class="option-text">Chúng giống nhau, chỉ khác tên gọi</div>
+                        <div class="option-icon"></div>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text">Inspired Action xuất phát từ cảm hứng, excitement, aligned với tần số cao. Forced Action xuất phát từ sợ hãi, lo lắng, "phải làm" - tạo ra kháng cự và kết quả không bền vững.</div>
+                </div>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="quiz-question" data-question="3" data-correct="D">
+                <div class="question-header">
+                    <div class="question-number">3</div>
+                    <div class="question-text">4 Lĩnh vực đầu tư vào bản thân là gì?</div>
+                </div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <div class="option-letter">A</div>
+                        <div class="option-text">Tiền, Vàng, Bất động sản, Chứng khoán</div>
+                        <div class="option-icon"></div>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <div class="option-letter">B</div>
+                        <div class="option-text">Kiến thức, Tiền bạc, Thời gian, Công nghệ</div>
+                        <div class="option-icon"></div>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <div class="option-letter">C</div>
+                        <div class="option-text">Sức khỏe, Gia đình, Sự nghiệp, Tài chính</div>
+                        <div class="option-icon"></div>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <div class="option-letter">D</div>
+                        <div class="option-text">Kiến thức & Kỹ năng, Sức khỏe, Network & Quan hệ, Tâm trí & Tâm linh</div>
+                        <div class="option-icon"></div>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text">4 lĩnh vực đầu tư bản thân: (1) Kiến thức & Kỹ năng - nâng cấp "phần mềm", (2) Sức khỏe - nền tảng, (3) Network & Quan hệ - môi trường, (4) Tâm trí & Tâm linh - tần số năng lượng.</div>
+                </div>
+            </div>
+
+            <!-- Quiz Result -->
+            <div class="quiz-result" id="quizResult">
+                <div class="result-score" id="resultScore">0/3</div>
+                <div class="result-message" id="resultMessage"></div>
+                <div class="result-detail" id="resultDetail"></div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <p>Module 5 Hoàn Tất! 🎉</p>
+            <p style="margin-top: var(--space-sm);">Tiếp theo: <a href="KHOA_TRIEU_PHU_M6_BAI_01.html">Module 6: Nhân Rộng Thịnh Vượng →</a></p>
+            <p style="margin-top: var(--space-lg);">© 2024 GEM Academy by Jennie Uyen Chu</p>
+        </footer>
+
+    </div>
+
+    <script>
+        // Quiz Logic - Instant Feedback
+        let answeredQuestions = new Set();
+        let correctAnswers = 0;
+        const totalQuestions = 3;
+
+        document.querySelectorAll('.quiz-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const questionEl = this.closest('.quiz-question');
+                const questionNum = questionEl.dataset.question;
+                const correctAnswer = questionEl.dataset.correct;
+                const selectedAnswer = this.dataset.option;
+
+                // Check if already answered
+                if (answeredQuestions.has(questionNum)) return;
+
+                // Mark as answered
+                answeredQuestions.add(questionNum);
+
+                // Disable all options in this question
+                questionEl.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.add('disabled');
+                });
+
+                // Mark selected option
+                this.classList.add('selected');
+
+                // Check if correct
+                const isCorrect = selectedAnswer === correctAnswer;
+                const feedbackEl = questionEl.querySelector('.question-feedback');
+                const feedbackTitle = feedbackEl.querySelector('.feedback-title');
+
+                if (isCorrect) {
+                    this.classList.add('correct');
+                    this.querySelector('.option-icon').textContent = '✓';
+                    feedbackEl.classList.add('correct');
+                    feedbackTitle.textContent = '✓ Chính xác!';
+                    correctAnswers++;
+                } else {
+                    this.classList.add('incorrect');
+                    this.querySelector('.option-icon').textContent = '✗';
+                    feedbackEl.classList.add('incorrect');
+                    feedbackTitle.textContent = '✗ Chưa đúng';
+
+                    // Highlight correct answer
+                    questionEl.querySelectorAll('.quiz-option').forEach(opt => {
+                        if (opt.dataset.option === correctAnswer) {
+                            opt.classList.add('correct');
+                            opt.querySelector('.option-icon').textContent = '✓';
+                        }
+                    });
+                }
+
+                // Show feedback
+                feedbackEl.classList.add('show');
+
+                // Check if all questions answered
+                if (answeredQuestions.size === totalQuestions) {
+                    showResult();
+                }
+            });
+        });
+
+        function showResult() {
+            const resultEl = document.getElementById('quizResult');
+            const scoreEl = document.getElementById('resultScore');
+            const messageEl = document.getElementById('resultMessage');
+            const detailEl = document.getElementById('resultDetail');
+
+            scoreEl.textContent = `${correctAnswers}/${totalQuestions}`;
+
+            if (correctAnswers === totalQuestions) {
+                scoreEl.classList.add('perfect');
+                messageEl.textContent = '🌟 Xuất sắc! Bạn đã nắm vững kiến thức Module 5!';
+                detailEl.textContent = 'Bạn đã sẵn sàng cho Module 6: Nhân Rộng Thịnh Vượng';
+            } else if (correctAnswers >= 2) {
+                scoreEl.classList.add('good');
+                messageEl.textContent = '👍 Tốt lắm! Bạn đã hiểu phần lớn nội dung.';
+                detailEl.textContent = 'Xem lại các câu trả lời sai để củng cố kiến thức nhé!';
+            } else {
+                scoreEl.classList.add('retry');
+                messageEl.textContent = '📚 Cần ôn lại bài học';
+                detailEl.textContent = 'Đọc lại Module 5 và thử làm quiz lần nữa nhé!';
+            }
+
+            resultEl.classList.add('show');
+            resultEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    </script>
+</body>
+</html>

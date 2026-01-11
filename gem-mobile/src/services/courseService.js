@@ -415,8 +415,55 @@ class CourseService {
           if (error) throw error;
 
           if (data && data.length > 0) {
+            // Fetch modules and lessons for each course
+            const coursesWithModules = await Promise.all(
+              data.map(async (courseData) => {
+                try {
+                  // Fetch modules for this course
+                  const { data: modulesData, error: modulesError } = await supabase
+                    .from('course_modules')
+                    .select('*')
+                    .eq('course_id', courseData.id)
+                    .order('order_index', { ascending: true });
+
+                  if (modulesError) {
+                    console.warn('[Course] Modules fetch error for course', courseData.id, modulesError);
+                    return { ...courseData, modules: [] };
+                  }
+
+                  // Fetch lessons for each module
+                  const modulesWithLessons = await Promise.all(
+                    (modulesData || []).map(async (module) => {
+                      try {
+                        const { data: lessonsData, error: lessonsError } = await supabase
+                          .from('course_lessons')
+                          .select('*')
+                          .eq('module_id', module.id)
+                          .order('order_index', { ascending: true });
+
+                        if (lessonsError) {
+                          console.warn('[Course] Lessons fetch error for module', module.id, lessonsError);
+                          return { ...module, lessons: [] };
+                        }
+
+                        return { ...module, lessons: lessonsData || [] };
+                      } catch (err) {
+                        console.warn('[Course] Error loading lessons for module:', module.id, err);
+                        return { ...module, lessons: [] };
+                      }
+                    })
+                  );
+
+                  return { ...courseData, modules: modulesWithLessons };
+                } catch (err) {
+                  console.warn('[Course] Error loading modules for course:', courseData.id, err);
+                  return { ...courseData, modules: [] };
+                }
+              })
+            );
+
             // Transform Supabase data to match expected format
-            courses = data.map(c => ({
+            courses = coursesWithModules.map(c => ({
               ...c,
               instructor: {
                 name: c.instructor_name || 'Gemral',
@@ -425,7 +472,14 @@ class CourseService {
               },
               thumbnail_url: c.thumbnail_url || 'https://placehold.co/400x200/1a0b2e/FFBD59?text=Course',
             }));
-            console.log('[Course] Loaded', courses.length, 'courses from Supabase:', courses.map(c => c.title));
+
+            // Log course data with module/lesson counts
+            console.log('[Course] Loaded', courses.length, 'courses from Supabase:');
+            courses.forEach(c => {
+              const lessonCount = c.modules?.reduce((sum, m) => sum + (m.lessons?.length || 0), 0) || 0;
+              console.log(`  - ${c.title}: ${c.modules?.length || 0} modules, ${lessonCount} lessons`);
+            });
+
             this._coursesCache = courses;
             this._lastFetchTime = Date.now();
           } else {

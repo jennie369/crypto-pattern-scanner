@@ -5,12 +5,12 @@
  * WITH LIKE ANIMATION
  */
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet, Share, Animated, Pressable, Modal, Dimensions, ScrollView, TextInput, ActivityIndicator } from 'react-native';
 import CustomAlert, { useCustomAlert } from '../../../components/CustomAlert';
 import { Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, Edit2, Flag, EyeOff, UserX, Trash2, X, Repeat2, Gift, Send, Layers } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
-import { BlurView } from 'expo-blur';
+// import { BlurView } from 'expo-blur'; // Removed - not used and may cause web issues
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../../utils/tokens';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -23,7 +23,14 @@ import PostImageCarousel from '../../../components/PostImageCarousel';
 import ReportModal from '../../../components/ReportModal';
 import { ProgressiveImage } from '../../../components/Image';
 import { getImageDisplayHeight } from '../../../utils/imageUtils';
-import ImageViewer from '../../../components/ImageViewer';
+// Phase 2: New ImageGallery with gesture support
+// Import conditionally to avoid web issues
+let ImageGallery = null;
+try {
+  ImageGallery = require('../../../components/ImageViewer').ImageGallery;
+} catch (e) {
+  console.warn('[PostCard] ImageGallery not available:', e.message);
+}
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -31,14 +38,30 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 import ShareSheet from '../../../components/ShareSheet';
 import RepostSheet from '../../../components/RepostSheet';
 import GiftCatalogSheet from '../../../components/GiftCatalogSheet';
-import ReactionsListSheet from '../../../components/ReactionsListSheet';
 import ReceivedGiftsBar from '../../../components/ReceivedGiftsBar';
 import QuotedPost from '../../../components/QuotedPost';
+
+// NEW: Forum Reaction System (Phase 1)
+import ForumReactionButton from '../../../components/Forum/ForumReactionButton';
+import ReactionSummary from '../../../components/Forum/ReactionSummary';
+import ForumReactionTooltip from '../../../components/Forum/ForumReactionTooltip';
+import { usePostReactions } from '../../../hooks/usePostReactions';
+
+// Phase 4: View Count & Trending
+import { ViewCount, TrendingBadge } from '../../../components/Forum';
 
 // Feature components for monetization, sounds, shopping
 import SoundCard from '../../../components/SoundCard';
 import ShoppingTagOverlay from '../../../components/ShoppingTagOverlay';
 import BoostedBadge from '../../../components/BoostedBadge';
+
+// Link Preview Components (Phase 3 + Multi-Link Support)
+import LinkPreviewCard from './LinkPreviewCard';
+import LinkPreviewSkeleton from './LinkPreviewSkeleton';
+import MultiLinkPreviewSection from './MultiLinkPreviewSection';
+import { useLinkPreview } from '../../../hooks/useLinkPreview';
+import { detectPrimaryUrl, detectUrls } from '../../../utils/urlDetector';
+import { PREVIEW_STATUS } from '../../../constants/linkPreview';
 
 // Double tap detection constants
 const DOUBLE_TAP_DELAY = 300; // ms
@@ -51,10 +74,28 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
   const { alert, AlertComponent } = useCustomAlert();
 
   // Local state for optimistic updates
-  const [isLiked, setIsLiked] = useState(post.user_liked || false);
-  const [likesCount, setLikesCount] = useState(post.likes_count || 0);
   const [isSaved, setIsSaved] = useState(post.user_saved || false);
-  const [isLiking, setIsLiking] = useState(false);
+
+  // NEW: Use reaction hook for reaction system (Phase 1)
+  const {
+    userReaction,
+    reactionCounts,
+    totalCount,
+    topReactions,
+    hasReacted,
+    loading: isReacting,
+    addReaction,
+    removeReaction,
+    toggleReaction,
+  } = usePostReactions(
+    post.id,
+    post.reaction_counts || null,
+    post.user_reaction || null
+  );
+
+  // Legacy state for backwards compatibility (will be removed after migration)
+  const isLiked = hasReacted;
+  const likesCount = totalCount;
 
   // State for expandable content
   const [isExpanded, setIsExpanded] = useState(false);
@@ -84,6 +125,82 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
   const [commentsCount, setCommentsCount] = useState(post.comments_count || 0);
   const commentInputRef = useRef(null);
 
+  // ========== LINK PREVIEW ==========
+
+  /**
+   * Extract link preview data từ post
+   */
+  const getLinkPreviewData = useCallback(() => {
+    // Ưu tiên dùng data đã lưu trong post
+    if (post?.link_preview) {
+      return {
+        url: post.link_preview.url,
+        domain: post.link_preview.domain,
+        title: post.link_preview.title,
+        description: post.link_preview.description,
+        image: post.link_preview.image_url,
+        favicon: post.link_preview.favicon_url,
+        siteName: post.link_preview.site_name,
+        type: post.link_preview.og_type || 'website',
+        isVideo: post.link_preview.is_video || false,
+        status: PREVIEW_STATUS?.SUCCESS || 'success',
+      };
+    }
+
+    // Fallback: detect URL từ content
+    const detectedUrl = detectPrimaryUrl(post?.content || '');
+    return detectedUrl ? { url: detectedUrl } : null;
+  }, [post?.link_preview, post?.content]);
+
+  const previewData = getLinkPreviewData();
+  const previewUrl = previewData?.url || null;
+
+  // Check for multiple URLs in content
+  const allUrls = useMemo(() => {
+    return detectUrls(post?.content || '');
+  }, [post?.content]);
+  const hasMultipleLinks = allUrls.length > 1;
+
+  // Fetch preview nếu chỉ có URL (chưa có full data) - only for single URL case
+  const shouldFetch = previewUrl && !post?.link_preview && !hasMultipleLinks;
+  const {
+    preview: fetchedPreview,
+    loading: previewLoading,
+    error: previewError,
+    refetch: refetchPreview,
+  } = useLinkPreview(shouldFetch ? previewUrl : null, {
+    enabled: shouldFetch,
+    autoFetch: true,
+  });
+
+  // Merge data: prefer stored data, fallback to fetched
+  const finalPreview = post?.link_preview ? previewData : fetchedPreview;
+  const showPreview = previewUrl && (finalPreview || previewLoading);
+
+  // DEBUG: Log link preview detection
+  useEffect(() => {
+    if (post?.content) {
+      const urls = detectUrls(post.content);
+      if (urls.length > 0) {
+        console.log('[PostCard] URLs detected:', {
+          postId: post.id,
+          urlCount: urls.length,
+          urls,
+          hasMultipleLinks,
+          showPreview,
+          hasExistingPreview: !!post?.link_preview,
+        });
+      }
+    }
+  }, [post?.id, post?.content, hasMultipleLinks, showPreview, post?.link_preview]);
+
+  /**
+   * Handle link preview press
+   */
+  const handlePreviewPress = useCallback((url) => {
+    console.log('[PostCard] Link preview pressed:', url);
+  }, []);
+
   // Animation refs
   const likeScale = useRef(new Animated.Value(1)).current;
   const heartBounce = useRef(new Animated.Value(0)).current;
@@ -97,15 +214,9 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
   const viewStartTime = useRef(null);
   const hasTrackedView = useRef(false);
 
-  // Check if user already liked (from post data)
-  useEffect(() => {
-    if (user && post.likes) {
-      const userLiked = post.likes.some(like => like.user_id === user.id);
-      setIsLiked(userLiked);
-    } else if (post.user_liked !== undefined) {
-      setIsLiked(post.user_liked);
-    }
-  }, [user, post.likes, post.user_liked]);
+  // NOTE: User reaction is now managed by usePostReactions hook
+  // The hook fetches and manages the user's reaction state automatically
+  // Legacy user_liked/likes are still supported for backwards compatibility
 
   // Track dwell time when component mounts/unmounts
   useEffect(() => {
@@ -130,17 +241,12 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
     };
   }, [post.id, user?.id, sessionId]);
 
-  // Handle like action WITH ANIMATION
+  // Handle like action WITH ANIMATION - now uses reaction system
   const handleLike = useCallback(async () => {
-    if (isLiking) return;
+    if (isReacting) return;
 
-    setIsLiking(true);
-
-    // Optimistic update
-    const wasLiked = isLiked;
+    const wasLiked = hasReacted;
     const newIsLiked = !wasLiked;
-    setIsLiked(newIsLiked);
-    setLikesCount(prev => newIsLiked ? prev + 1 : Math.max(0, prev - 1));
 
     // Play animation when LIKING (not unliking)
     if (newIsLiked) {
@@ -175,34 +281,22 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
       ]).start();
     }
 
-    try {
-      if (wasLiked) {
-        await forumService.unlikePost(post.id);
-      } else {
-        await forumService.likePost(post.id);
-      }
+    // Use new reaction system - toggleReaction handles optimistic updates
+    await toggleReaction('like');
 
-      // Notify parent if needed
-      if (onLikeChange) {
-        onLikeChange(post.id, newIsLiked);
-      }
-      if (onUpdate) {
-        onUpdate(post.id, {
-          likes_count: newIsLiked ? likesCount + 1 : Math.max(0, likesCount - 1),
-          user_liked: newIsLiked,
-        });
-      }
-
-      console.log('[PostCard] ✅ Like toggled:', newIsLiked ? 'liked' : 'unliked');
-    } catch (error) {
-      // Revert on error
-      console.error('[PostCard] Like error:', error);
-      setIsLiked(wasLiked);
-      setLikesCount(prev => wasLiked ? prev + 1 : prev - 1);
-    } finally {
-      setIsLiking(false);
+    // Notify parent if needed
+    if (onLikeChange) {
+      onLikeChange(post.id, newIsLiked);
     }
-  }, [isLiked, isLiking, likesCount, post.id, onLikeChange, onUpdate]);
+    if (onUpdate) {
+      onUpdate(post.id, {
+        reaction_counts: reactionCounts,
+        user_reaction: newIsLiked ? 'like' : null,
+      });
+    }
+
+    console.log('[PostCard] ✅ Reaction toggled:', newIsLiked ? 'liked' : 'unliked');
+  }, [hasReacted, isReacting, post.id, toggleReaction, reactionCounts, onLikeChange, onUpdate, likeScale]);
 
   // Show big heart animation (Instagram style)
   const showBigHeart = useCallback(() => {
@@ -375,19 +469,25 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
     setImageViewerVisible(true);
   }, []);
 
-  // Get all images for the viewer
+  // Get all images for the viewer - Phase 2: returns objects with uri, width, height
   const getAllImages = useCallback(() => {
+    const urls = [];
     if (post.media_urls?.length > 0) {
-      return post.media_urls;
+      urls.push(...post.media_urls);
+    } else if (post.image_url) {
+      urls.push(post.image_url);
+    } else if (post.media_url) {
+      urls.push(post.media_url);
     }
-    if (post.image_url) {
-      return [post.image_url];
-    }
-    if (post.media_url) {
-      return [post.media_url];
-    }
-    return [];
-  }, [post.media_urls, post.image_url, post.media_url]);
+
+    // Convert to objects with dimensions
+    return urls.map((uri, index) => ({
+      uri,
+      // Use post dimensions if available, fallback to reasonable defaults
+      width: post.image_width || 1080,
+      height: post.image_height || 1080,
+    }));
+  }, [post.media_urls, post.image_url, post.media_url, post.image_width, post.image_height]);
 
   // Get image count for badge display
   const getImageCount = useCallback(() => {
@@ -768,6 +868,11 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
       {/* Boosted Badge - Shows if post is boosted */}
       {post.is_boosted && <BoostedBadge />}
 
+      {/* Phase 4: Trending Badge - Shows if post is trending */}
+      {post.trending_rank > 0 && post.trending_rank <= 10 && (
+        <TrendingBadge rank={post.trending_rank} size="sm" />
+      )}
+
       {/* Author Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleAuthorPress} activeOpacity={0.7}>
@@ -783,6 +888,13 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
           </View>
           <View style={styles.timestampRow}>
             <Text style={styles.timestamp}>{formatTimestamp(post.created_at)}</Text>
+            {/* Phase 4: View Count */}
+            {(post.views_count > 0 || post.view_count > 0) && (
+              <>
+                <Text style={styles.timestampDot}>•</Text>
+                <ViewCount count={post.views_count || post.view_count} size="sm" />
+              </>
+            )}
             {/* Edited Badge */}
             {post.edited_at && (
               <View style={styles.editedBadge}>
@@ -815,6 +927,59 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
       <TouchableOpacity activeOpacity={0.8} onPress={() => onPress?.(post)}>
         {renderContentWithHashtags(post.content)}
       </TouchableOpacity>
+
+      {/* ========== LINK PREVIEW SECTION ========== */}
+      {hasMultipleLinks ? (
+        // Multiple Link Previews (2+ URLs in post)
+        <View style={styles.linkPreviewContainer}>
+          <MultiLinkPreviewSection
+            content={post?.content || ''}
+            existingPreview={post?.link_preview}
+            maxPreviews={3}
+            showHeader={false}
+          />
+        </View>
+      ) : showPreview && (
+        // Single Link Preview (original behavior)
+        <View style={styles.linkPreviewContainer}>
+          {previewLoading && !finalPreview ? (
+            // Loading skeleton
+            <LinkPreviewSkeleton />
+          ) : finalPreview ? (
+            // Link preview card
+            <LinkPreviewCard
+              preview={finalPreview}
+              onPress={handlePreviewPress}
+              onRetry={shouldFetch ? refetchPreview : undefined}
+            />
+          ) : previewError ? (
+            // Error state - show compact version
+            <LinkPreviewCard
+              preview={{
+                url: previewUrl,
+                domain: (() => {
+                  try {
+                    return new URL(previewUrl).hostname;
+                  } catch {
+                    return previewUrl;
+                  }
+                })(),
+                title: (() => {
+                  try {
+                    return new URL(previewUrl).hostname;
+                  } catch {
+                    return previewUrl;
+                  }
+                })(),
+                status: PREVIEW_STATUS?.ERROR || 'error',
+                error: previewError,
+              }}
+              onRetry={refetchPreview}
+              compact
+            />
+          ) : null}
+        </View>
+      )}
 
       {/* Post Image/Media - Support both single and multiple images with progressive loading */}
       {/* Images are full-bleed (edge-to-edge), using SCREEN_WIDTH for container */}
@@ -976,40 +1141,36 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
         <QuotedPost post={post.original_post} />
       )}
 
+      {/* Reaction Summary - Shows top reactions (above action bar) */}
+      {totalCount > 0 && (
+        <View style={styles.reactionSummaryContainer}>
+          <ReactionSummary
+            reactionCounts={reactionCounts}
+            topReactions={topReactions}
+            totalCount={totalCount}
+            onPress={() => setReactionsVisible(true)}
+            size="medium"
+          />
+        </View>
+      )}
+
       {/* Facebook-style Action Bar - Left icons + Right icons */}
       <View style={styles.actionBar}>
-        {/* Left side - Like, Comment, Share */}
+        {/* Left side - Reaction, Comment, Share */}
         <View style={styles.actionBarLeft}>
-          {/* Like Button */}
-          <AuthGate action="thích bài viết này">
-            <TouchableOpacity
-              style={styles.actionBtn}
-              onPress={handleLike}
-              activeOpacity={0.7}
-              disabled={isLiking}
-            >
-              <Animated.View style={{ transform: [{ scale: likeScale }] }}>
-                <Heart
-                  size={22}
-                  color={isLiked ? '#FF6B6B' : COLORS.textMuted}
-                  fill={isLiked ? '#FF6B6B' : 'transparent'}
-                  strokeWidth={2}
-                />
-              </Animated.View>
-            </TouchableOpacity>
+          {/* NEW: Forum Reaction Button (Phase 1) */}
+          <AuthGate action="thả cảm xúc bài viết này">
+            <ForumReactionButton
+              userReaction={userReaction}
+              totalCount={0}
+              onReactionSelect={addReaction}
+              onToggle={toggleReaction}
+              disabled={isReacting}
+              showCount={false}
+              showLabel={false}
+              size="medium"
+            />
           </AuthGate>
-          {/* Likes Count - Tap to see who liked */}
-          {likesCount > 0 && (
-            <TouchableOpacity
-              onPress={() => setReactionsVisible(true)}
-              activeOpacity={0.7}
-              hitSlop={{ top: 10, bottom: 10, left: 5, right: 10 }}
-            >
-              <Text style={[styles.actionCount, styles.likesCountTappable, isLiked && styles.actionCountActive]}>
-                {likesCount}
-              </Text>
-            </TouchableOpacity>
-          )}
 
           {/* Comment Button */}
           <AuthGate action="bình luận bài viết này">
@@ -1304,27 +1465,26 @@ const PostCard = ({ post, onPress, onLikeChange, onUpdate, sessionId }) => {
         }}
       />
 
-      <ReactionsListSheet
+      {/* NEW: Forum Reaction Tooltip (Phase 1) - replaces ReactionsListSheet */}
+      <ForumReactionTooltip
         visible={reactionsVisible}
         onClose={() => setReactionsVisible(false)}
         postId={post.id}
-        onUserPress={(user) => {
-          navigation.navigate('UserProfile', { userId: user?.id });
+        reactionCounts={reactionCounts}
+        onUserPress={(userId) => {
+          navigation.navigate('UserProfile', { userId });
         }}
       />
 
-      {/* Image Viewer - Full screen tap-to-view with Facebook-style overlay */}
-      <ImageViewer
-        visible={imageViewerVisible}
-        images={getAllImages()}
-        initialIndex={imageViewerIndex}
-        onClose={() => setImageViewerVisible(false)}
-        showCounter={true}
-        showActions={false}
-        postContent={post.content}
-        authorName={authorName}
-        showOverlay={true}
-      />
+      {/* Phase 2: Image Gallery with gestures - Full screen tap-to-view */}
+      {ImageGallery && (
+        <ImageGallery
+          visible={imageViewerVisible}
+          images={getAllImages()}
+          initialIndex={imageViewerIndex}
+          onClose={() => setImageViewerVisible(false)}
+        />
+      )}
 
       {AlertComponent}
     </Pressable>
@@ -1397,6 +1557,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: SPACING.sm,
   },
+  timestampDot: {
+    color: COLORS.textMuted,
+    fontSize: 10,
+    marginHorizontal: 2,
+  },
   editedBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1460,6 +1625,20 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.sm, // Larger tap target
     paddingHorizontal: SPACING.lg, // Needs padding (card no longer has it)
   },
+  // ===== LINK PREVIEW =====
+  linkPreviewContainer: {
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.sm,
+    paddingHorizontal: SPACING.lg,
+  },
+
+  // ===== REACTION SUMMARY =====
+  reactionSummaryContainer: {
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.xs,
+    marginBottom: SPACING.xs,
+  },
+
   mediaContainer: {
     position: 'relative',
     marginBottom: SPACING.md,

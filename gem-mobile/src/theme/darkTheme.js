@@ -8,7 +8,10 @@
  * - Glass background: rgba(15, 16, 48, 0.55) - EXACT!
  */
 
-import { COLORS, SPACING, GLASS } from '../utils/tokens';
+import { COLORS, SPACING, GLASS, TYPOGRAPHY, GRADIENTS } from '../utils/tokens';
+
+// Re-export design tokens for convenience
+export { COLORS, SPACING, GLASS, TYPOGRAPHY, GRADIENTS };
 
 export const DARK_THEME = {
   // === BASE BACKGROUND (EXACT from tokens.js) ===

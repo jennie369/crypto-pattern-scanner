@@ -404,10 +404,9 @@ const ProductRecommendations = ({ context, showAll = false }) => {
       priceRange: product.priceRange,
     };
 
-    navigation.navigate('Shop', {
-      screen: 'ProductDetail',
-      params: { product: normalizedProduct },
-    });
+    // Navigate directly to ProductDetail screen within current stack
+    // This keeps the back button working correctly
+    navigation.navigate('ProductDetail', { product: normalizedProduct });
   }, [navigation]);
 
   // Handle scanner press
@@ -422,8 +421,7 @@ const ProductRecommendations = ({ context, showAll = false }) => {
     }
   }, [navigation, scannerProduct, handleProductPress]);
 
-  // Handle affiliate registration - navigate to PartnershipRegistration screen
-  // Use CommonActions.navigate for cross-tab navigation
+  // Handle affiliate registration - navigate to Account tab > PartnershipRegistration
   const handleAffiliateRegister = useCallback(() => {
     navigation.dispatch(
       CommonActions.navigate({
@@ -437,6 +435,7 @@ const ProductRecommendations = ({ context, showAll = false }) => {
   }, [navigation]);
 
   // Handle affiliate detail - navigate to AffiliateDetail screen (for approved partners)
+  // This one still uses cross-tab because AffiliateDetail has more complex state
   const handleAffiliateDetail = useCallback(() => {
     navigation.dispatch(
       CommonActions.navigate({
@@ -519,15 +518,16 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
   },
   card: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(15, 22, 41, 0.85)',
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
   },
   affiliateCard: {
-    borderColor: '#2ECC7140',
-    backgroundColor: 'rgba(46, 204, 113, 0.05)',
+    borderColor: 'rgba(46, 204, 113, 0.3)',
+    backgroundColor: 'rgba(15, 22, 41, 0.85)',
   },
   cardHeader: {
     flexDirection: 'row',
@@ -632,10 +632,12 @@ const styles = StyleSheet.create({
   },
   statItem: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(20, 28, 50, 0.9)',
     borderRadius: 10,
     padding: 12,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.15)',
   },
   statValue: {
     fontSize: TYPOGRAPHY.fontSize.lg,

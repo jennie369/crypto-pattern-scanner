@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 7.2: Cơ Hội & Lựa Chọn | GEM Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.5rem, 5vw, 2.25rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .product-grid { grid-template-columns: 1fr; gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .product-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); position: relative; }
+        @media (max-width: 600px) { .product-card { border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        .product-badge { position: absolute; top: var(--space-sm); right: var(--space-sm); padding: var(--space-xs) var(--space-sm); background: var(--gold); border-radius: 50px; font-size: 0.7rem; font-weight: 700; color: var(--navy-dark); }
+        .product-emoji { font-size: 2.5rem; margin-bottom: var(--space-sm); }
+        .product-name { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); font-size: 1.1rem; }
+        .product-desc { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: var(--space-md); }
+        .product-price { font-size: 1.3rem; font-weight: 800; color: var(--cyan); }
+        .product-price-old { font-size: 0.9rem; color: var(--text-muted); text-decoration: line-through; margin-left: var(--space-sm); }
+
+        .tier-grid { display: flex; flex-direction: column; gap: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .tier-grid { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .tier-card { background: var(--bg-card); border-radius: var(--radius-lg); padding: var(--space-xl); position: relative; overflow: hidden; }
+        @media (max-width: 600px) { .tier-card { border-radius: 0; padding: var(--space-lg) 16px; } }
+        .tier-card.ctv { border: 2px solid var(--success); }
+        .tier-card.kol { border: 2px solid var(--gold); }
+        .tier-card.instructor { border: 2px solid var(--purple); }
+        @media (max-width: 600px) {
+            .tier-card.ctv, .tier-card.kol, .tier-card.instructor { border: none; }
+            .tier-card.ctv { border-left: 4px solid var(--success); }
+            .tier-card.kol { border-left: 4px solid var(--gold); }
+            .tier-card.instructor { border-left: 4px solid var(--purple); }
+        }
+        .tier-badge { display: inline-flex; align-items: center; gap: var(--space-xs); padding: var(--space-xs) var(--space-sm); border-radius: 50px; font-size: 0.75rem; font-weight: 700; margin-bottom: var(--space-md); }
+        .tier-card.ctv .tier-badge { background: var(--success); color: white; }
+        .tier-card.kol .tier-badge { background: var(--gold); color: var(--navy-dark); }
+        .tier-card.instructor .tier-badge { background: var(--purple); color: white; }
+        .tier-header { display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-md); }
+        .tier-emoji { font-size: 2.5rem; }
+        .tier-title { font-size: 1.3rem; font-weight: 700; }
+        .tier-card.ctv .tier-title { color: var(--success); }
+        .tier-card.kol .tier-title { color: var(--gold); }
+        .tier-card.instructor .tier-title { color: var(--purple); }
+        .tier-desc { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        .tier-benefits { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-sm); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .tier-benefits { grid-template-columns: 1fr; } }
+        .tier-benefit { display: flex; align-items: center; gap: var(--space-sm); font-size: 0.9rem; color: var(--text-muted); }
+        .tier-benefit-icon { color: var(--success); }
+        .tier-requirement { background: var(--glass-bg); border-radius: var(--radius-md); padding: var(--space-md); }
+        @media (max-width: 600px) { .tier-requirement { border-radius: 0; } }
+        .tier-requirement-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: var(--space-xs); }
+        .tier-requirement-value { font-weight: 700; color: var(--cyan); }
+
+        .ctv-levels { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-sm); margin: var(--space-md) 0; }
+        @media (max-width: 600px) { .ctv-levels { grid-template-columns: repeat(3, 1fr); } }
+        .ctv-level { text-align: center; padding: var(--space-sm); background: var(--glass-bg); border-radius: var(--radius-md); }
+        @media (max-width: 600px) { .ctv-level { border-radius: 0; } }
+        .ctv-level-icon { font-size: 1.5rem; margin-bottom: var(--space-xs); }
+        .ctv-level-name { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); }
+        .ctv-level-rate { font-size: 0.9rem; font-weight: 700; color: var(--gold); }
+
+        .bonus-box { background: linear-gradient(135deg, rgba(106, 91, 255, 0.2), rgba(106, 91, 255, 0.05)); border: 2px solid var(--purple); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .bonus-box { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .bonus-title { font-size: 1.3rem; font-weight: 700; color: var(--purple); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .bonus-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-md); }
+        @media (max-width: 600px) { .bonus-grid { grid-template-columns: 1fr; gap: var(--space-sm); } }
+        .bonus-item { background: var(--glass-bg); border-radius: var(--radius-md); padding: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .bonus-item { border-radius: 0; border-left: 2px solid var(--purple); } }
+        .bonus-item-emoji { font-size: 1.5rem; }
+        .bonus-item-text { font-size: 0.9rem; color: var(--text-secondary); }
+        .bonus-item-text strong { color: var(--gold); }
+
+        .cta-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .cta-grid { grid-template-columns: 1fr; gap: var(--space-md); margin: var(--space-md) 16px; } }
+        .cta-card { background: var(--bg-card); border-radius: var(--radius-lg); padding: var(--space-xl); text-align: center; border: 2px solid var(--glass-border); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .cta-card { border-radius: var(--radius-md); } }
+        .cta-card:hover { transform: translateY(-4px); box-shadow: 0 8px 32px rgba(255, 189, 89, 0.2); }
+        .cta-card.featured { border-color: var(--gold); }
+        .cta-emoji { font-size: 3rem; margin-bottom: var(--space-md); }
+        .cta-title { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-sm); }
+        .cta-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: var(--space-lg); }
+        .cta-button { display: block; width: 100%; padding: var(--space-md); background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border: none; border-radius: var(--radius-md); color: var(--navy-dark); font-weight: 700; font-family: inherit; font-size: 0.9rem; cursor: pointer; text-decoration: none; text-align: center; transition: all 0.3s ease; }
+        .cta-button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255, 189, 89, 0.3); }
+        .cta-button.secondary { background: var(--glass-bg); border: 1px solid var(--gold); color: var(--gold); }
+
+        .closing-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.2), rgba(255, 189, 89, 0.05)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-lg) 0; text-align: center; }
+        @media (max-width: 600px) { .closing-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-xl) 16px; margin: var(--space-md) 0; text-align: left; } }
+        .closing-emoji { font-size: 3rem; margin-bottom: var(--space-md); }
+        .closing-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-md); }
+        .closing-text { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        .closing-signature { font-style: italic; color: var(--text-muted); }
+
+        .lesson-footer { text-align: center; padding: var(--space-xl); color: var(--text-muted); font-size: 0.85rem; }
+        .lesson-footer a { color: var(--gold); text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>🎯</span>
+                <span>Module 7 - Final</span>
+            </div>
+            <div class="lesson-chapter">Module 7 - Sứ Mệnh Phụng Sự</div>
+            <h1 class="lesson-title">Cơ Hội & Lựa Chọn - Bước Tiếp Theo</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 7.2</span></div>
+                <div class="meta-item"><span>⏱️</span><span>40 phút đọc</span></div>
+                <div class="meta-item"><span>🚀</span><span>Next Steps</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🌊</span> Đây Là Bài Học Quan Trọng Nhất</h2>
+            <p>Nếu bạn chỉ có 10 phút trong toàn bộ khóa học này, hãy dành 10 phút đó cho bài học này. Tại sao? Bởi vì đây là bài quyết định bạn thuộc nhóm nào sau 1 năm nữa: nhóm 45% thực sự thay đổi cuộc sống, hay nhóm 55% quay lại đúng điểm xuất phát.</p>
+
+            <p>Trong bài trước, bạn đã hiểu về 3 con đường: Tự Tiếp Tục, Nâng Cấp Công Cụ, và Trở Thành Đối Tác. Bây giờ chúng ta sẽ đi vào CHI TIẾT CỤ THỂ: những products và khóa học nào có sẵn, chương trình Partnership hoạt động như thế nào, và quan trọng nhất - các bước HÀNH ĐỘNG để bạn bắt đầu ngay hôm nay.</p>
+
+            <p>Tôi sẽ thẳng thắn với bạn: Bài này có phần "bán hàng" - vì GEM Academy là một doanh nghiệp và chúng tôi cần revenue để tiếp tục phục vụ cộng đồng. Nhưng tôi cam kết với bạn rằng mọi thông tin đều chính xác, không có áp lực hay manipulation, và sự lựa chọn hoàn toàn thuộc về bạn. Mục tiêu của tôi là cho bạn ĐẦY ĐỦ THÔNG TIN để tự quyết định - đó mới là cách tiếp cận tần số cao mà chúng ta đã học trong khóa này.</p>
+        </section>
+
+        <!-- SECTION 1: CON ĐƯỜNG 2 - PRODUCTS -->
+        <section class="section">
+            <h2 class="section-title"><span>🚀</span> Con Đường 2: Nâng Cấp Công Cụ - Chi Tiết</h2>
+            <p>Nếu bạn muốn tăng tốc và duy trì kết quả lâu dài, đây là những công cụ hỗ trợ mạnh mẽ nhất mà GEM Academy cung cấp. Mỗi sản phẩm đều được thiết kế để complement những gì bạn đã học trong khóa này:</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M7_B2_01%0APremium+Products" alt="Premium Products">
+                <div class="image-caption">Công cụ nâng cấp cho hành trình thịnh vượng</div>
+            </div>
+
+            <div class="product-grid">
+                <div class="product-card">
+                    <div class="product-badge">Best Seller</div>
+                    <div class="product-emoji">💎</div>
+                    <div class="product-name">Prosperity Crystal Set</div>
+                    <div class="product-desc">Bộ 6 tinh thể cho thịnh vượng: Citrine, Pyrite, Green Aventurine, Tiger Eye, Clear Quartz, Amethyst. Đã cleanse và charge sẵn.</div>
+                    <div class="product-price">₫990,000 <span class="product-price-old">₫1,490,000</span></div>
+                </div>
+                <div class="product-card">
+                    <div class="product-emoji">🎓</div>
+                    <div class="product-name">Crystal Healing Master</div>
+                    <div class="product-desc">Khóa học làm việc với năng lượng tinh thể. Hiểu sâu về từng loại đá và cách sử dụng trong manifestation.</div>
+                    <div class="product-price">₫799,000</div>
+                </div>
+                <div class="product-card">
+                    <div class="product-emoji">🃏</div>
+                    <div class="product-name">Tarot Mastery Course</div>
+                    <div class="product-desc">Học đọc Tarot từ cơ bản đến nâng cao. Kết hợp với GEM Master AI để thực hành hàng ngày.</div>
+                    <div class="product-price">₫699,000</div>
+                </div>
+                <div class="product-card">
+                    <div class="product-badge">⭐ Recommended</div>
+                    <div class="product-emoji">📦</div>
+                    <div class="product-name">Prosperity Bundle</div>
+                    <div class="product-desc">Trọn bộ: Crystal Set + Tarot Deck + 2 Khóa học + 1 năm Premium App. Tiết kiệm 40%!</div>
+                    <div class="product-price">₫2,490,000 <span class="product-price-old">₫4,180,000</span></div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🛒</span> Mua Sắm Trên App GEM</div>
+                <p>Tất cả products đều có sẵn trong app GEM → Tab "Shop". Thanh toán an toàn, giao hàng toàn quốc, đổi trả trong 30 ngày.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: CON ĐƯỜNG 3 - PARTNERSHIP -->
+        <section class="section">
+            <h2 class="section-title"><span>🌟</span> Con Đường 3: Partnership Program</h2>
+            <p>GEM Partnership Program cho phép bạn vừa tiếp tục hành trình chuyển hóa, vừa tạo thu nhập từ việc giúp đỡ người khác.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x600/0a1628/6A5BFF?text=HINH+29%0APartnership+Tiers" alt="Hình 29: Partnership Tiers">
+                <div class="image-caption">Hình 29: 3 Cấp Độ Partnership - Từ CTV đến Instructor</div>
+            </div>
+
+            <div class="tier-grid">
+                <!-- TIER 1: CTV -->
+                <div class="tier-card ctv">
+                    <div class="tier-badge">🌱 Entry Level</div>
+                    <div class="tier-header">
+                        <div class="tier-emoji">👥</div>
+                        <div class="tier-title">TIER 1: CTV (Cộng Tác Viên)</div>
+                    </div>
+                    <div class="tier-desc">
+                        <p>Dành cho TẤT CẢ mọi người muốn bắt đầu. Không cần followers, không cần kinh nghiệm. Đăng ký miễn phí và được duyệt tự động sau 3 ngày.</p>
+                    </div>
+                    <div class="ctv-levels">
+                        <div class="ctv-level">
+                            <div class="ctv-level-icon">🥉</div>
+                            <div class="ctv-level-name">Bronze</div>
+                            <div class="ctv-level-rate">10%</div>
+                        </div>
+                        <div class="ctv-level">
+                            <div class="ctv-level-icon">🥈</div>
+                            <div class="ctv-level-name">Silver</div>
+                            <div class="ctv-level-rate">15%</div>
+                        </div>
+                        <div class="ctv-level">
+                            <div class="ctv-level-icon">🥇</div>
+                            <div class="ctv-level-name">Gold</div>
+                            <div class="ctv-level-rate">20%</div>
+                        </div>
+                        <div class="ctv-level">
+                            <div class="ctv-level-icon">💎</div>
+                            <div class="ctv-level-name">Platinum</div>
+                            <div class="ctv-level-rate">25%</div>
+                        </div>
+                        <div class="ctv-level">
+                            <div class="ctv-level-icon">👑</div>
+                            <div class="ctv-level-name">Diamond</div>
+                            <div class="ctv-level-rate">30%</div>
+                        </div>
+                    </div>
+                    <div class="tier-benefits">
+                        <div class="tier-benefit"><span class="tier-benefit-icon">✓</span> Link affiliate cá nhân</div>
+                        <div class="tier-benefit"><span class="tier-benefit-icon">✓</span> Dashboard tracking</div>
+                        <div class="tier-benefit"><span class="tier-benefit-icon">✓</span> Marketing materials</div>
+                        <div class="tier-benefit"><span class="tier-benefit-icon">✓</span> Thanh toán hàng tháng</div>
+                    </div>
+                    <div class="tier-requirement">
+                        <div class="tier-requirement-label">Điều kiện đăng ký</div>
+                        <div class="tier-requirement-value">KHÔNG CÓ - Ai cũng được đăng ký</div>
+                    </div>
+                </div>
+
+                <!-- TIER 2: KOL -->
+                <div class="tier-card kol">
+                    <div class="tier-badge">⭐ Premium</div>
+                    <div class="tier-header">
+                        <div class="tier-emoji">📢</div>
+                        <div class="tier-title">TIER 2: KOL Affiliate</div>
+                    </div>
+                    <div class="tier-desc">
+                        <p>Dành cho những ai có ảnh hưởng trên mạng xã hội. Commission cao hơn, thanh toán nhanh hơn, support ưu tiên.</p>
+                    </div>
+                    <div class="tier-benefits">
+                        <div class="tier-benefit"><span class="tier-benefit-icon">✓</span> 20% Digital Products</div>
+                        <div class="tier-benefit"><span class="tier-benefit-icon">✓</span> 20% Physical Products</div>
+                        <div class="tier-benefit"><span class="tier-benefit-icon">✓</span> 3.5% Sub-Affiliate</div>
+                        <div class="tier-benefit"><span class="tier-benefit-icon">✓</span> Thanh toán 2 tuần/lần</div>
+                        <div class="tier-benefit"><span class="tier-benefit-icon">✓</span> Content exclusive</div>
+                        <div class="tier-benefit"><span class="tier-benefit-icon">✓</span> Priority support</div>
+                    </div>
+                    <div class="tier-requirement">
+                        <div class="tier-requirement-label">Điều kiện BẮT BUỘC</div>
+                        <div class="tier-requirement-value">20,000+ followers trên bất kỳ platform nào</div>
+                    </div>
+                </div>
+
+                <!-- TIER 3: Instructor -->
+                <div class="tier-card instructor">
+                    <div class="tier-badge">🎓 Exclusive</div>
+                    <div class="tier-header">
+                        <div class="tier-emoji">🎓</div>
+                        <div class="tier-title">TIER 3: Instructor (Giảng Viên)</div>
+                    </div>
+                    <div class="tier-desc">
+                        <p>Dành cho những người có chuyên môn đặc biệt muốn tạo khóa học riêng trên nền tảng GEM Academy. Cơ hội tạo nguồn thu nhập thụ động lâu dài.</p>
+                    </div>
+                    <div class="tier-benefits">
+                        <div class="tier-benefit"><span class="tier-benefit-icon">✓</span> 40-60% Revenue Share</div>
+                        <div class="tier-benefit"><span class="tier-benefit-icon">✓</span> Bán khóa học của bạn</div>
+                        <div class="tier-benefit"><span class="tier-benefit-icon">✓</span> Commission từ referrals</div>
+                        <div class="tier-benefit"><span class="tier-benefit-icon">✓</span> Royalties từ nội dung</div>
+                        <div class="tier-benefit"><span class="tier-benefit-icon">✓</span> Co-branding với GEM</div>
+                        <div class="tier-benefit"><span class="tier-benefit-icon">✓</span> Production support</div>
+                    </div>
+                    <div class="tier-requirement">
+                        <div class="tier-requirement-label">Điều kiện</div>
+                        <div class="tier-requirement-value">Được GEM mời hoặc có chuyên môn đặc biệt (apply qua form)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION: PARTNERSHIP SUCCESS STORIES -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Câu Chuyện Thành Công Từ Partners</h2>
+            <p>Hãy cùng xem ba câu chuyện thực tế từ những Partners đã bắt đầu từ con số 0 và xây dựng được nguồn thu nhập mới từ GEM Partnership Program:</p>
+
+            <div class="tier-card ctv">
+                <div class="tier-badge">🌱 CTV Story</div>
+                <div class="tier-header">
+                    <div class="tier-emoji">👤</div>
+                    <div class="tier-title">Chị Ngọc - Từ 0 Đến 8 Triệu/Tháng</div>
+                </div>
+                <div class="tier-desc">
+                    <p><strong>Background:</strong> Ngọc, 31 tuổi, nhân viên văn phòng tại TP.HCM với lương cứng 15 triệu/tháng. Không có followers, không có kinh nghiệm marketing. Chỉ có sự nhiệt huyết muốn chia sẻ những gì đã học được.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Hành trình:</strong> Bắt đầu đăng ký CTV sau khóa học, share link affiliate trong Facebook cá nhân và nhóm bạn bè. Tháng đầu chỉ kiếm được 500K. Nhưng cô không bỏ cuộc - bắt đầu viết posts chia sẻ kinh nghiệm thực tế của mình và tạo content có giá trị.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Kết quả sau 8 tháng:</strong> Upgrade lên Silver tier với thu nhập trung bình 8 triệu/tháng passive income. Xây được team 12 sub-affiliates. "Điều tuyệt vời nhất là tôi kiếm tiền từ việc giúp đỡ người khác. Mỗi khi ai đó mua qua link của tôi, tôi biết cuộc sống họ sẽ thay đổi."</p>
+                </div>
+            </div>
+
+            <div class="tier-card kol">
+                <div class="tier-badge">⭐ KOL Story</div>
+                <div class="tier-header">
+                    <div class="tier-emoji">📢</div>
+                    <div class="tier-title">Anh Minh - 30 Triệu/Tháng Từ Podcast</div>
+                </div>
+                <div class="tier-desc">
+                    <p><strong>Background:</strong> Minh, 35 tuổi, có kênh podcast về lifestyle với 45K followers. Anh đã từng thử nhiều affiliate programs nhưng không thành công vì sản phẩm không phù hợp với audience của mình.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Hành trình:</strong> Sau khi hoàn thành khóa học, Minh nhận ra GEM hoàn toàn aligned với message của podcast mình. Anh đăng ký KOL tier và bắt đầu tích hợp GEM vào content một cách tự nhiên - không phải quảng cáo cứng, mà là chia sẻ thực sự những gì anh đang dùng.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Kết quả sau 6 tháng:</strong> Thu nhập từ GEM affiliate đạt 25-35 triệu/tháng. Quan trọng hơn, engagement của podcast tăng vì listeners appreciate nội dung có chiều sâu về mindset và manifestation. "GEM đã cho tôi thêm một nguồn thu nhập, nhưng cũng cho tôi thêm nội dung chất lượng để chia sẻ. Win-win thực sự."</p>
+                </div>
+            </div>
+
+            <div class="tier-card instructor">
+                <div class="tier-badge">🎓 Instructor Story</div>
+                <div class="tier-header">
+                    <div class="tier-emoji">🎓</div>
+                    <div class="tier-title">Chị Hà - Từ Therapist Đến Course Creator</div>
+                </div>
+                <div class="tier-desc">
+                    <p><strong>Background:</strong> Hà, 42 tuổi, là nhà tâm lý trị liệu với 15 năm kinh nghiệm. Cô có chuyên môn sâu về trauma healing nhưng luôn bị giới hạn bởi số lượng clients có thể gặp trực tiếp.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Hành trình:</strong> Sau khi hoàn thành khóa học và thấy được tiềm năng của GEM platform, Hà liên hệ với team để đề xuất tạo khóa học "Healing Your Inner Child". GEM cung cấp production support, platform, và marketing - Hà chỉ cần tập trung vào nội dung chuyên môn.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Kết quả sau 1 năm:</strong> Khóa học của Hà có hơn 2,000 học viên với revenue share mang về 60-80 triệu/tháng. Cô tiếp cận được gấp 10 lần số người so với làm 1-1. "Đây là giấc mơ của mọi therapist - lan tỏa impact mà không bị giới hạn bởi thời gian và địa lý. GEM đã biến giấc mơ đó thành hiện thực."</p>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💎</span> Điểm Chung Của Cả Ba Câu Chuyện</div>
+                <p>Ngọc không có followers nhưng có sự kiên trì. Minh có platform nhưng cần đúng sản phẩm để promote. Hà có chuyên môn nhưng cần platform để scale. GEM Partnership đã cho mỗi người chính xác những gì họ cần. Bạn thuộc nhóm nào? Và GEM có thể giúp bạn điều gì?</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: TẠI SAO BÂY GIỜ -->
+        <section class="section">
+            <h2 class="section-title"><span>⏰</span> Tại Sao Bây Giờ?</h2>
+            <p>Thời điểm này có những lợi thế đặc biệt cho những ai hành động nhanh:</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x600/0a1628/FFBD59?text=HINH+30%0ABonus+Package" alt="Hình 30: Bonus Package">
+                <div class="image-caption">Hình 30: Đặc Quyền Cho Học Viên Đăng Ký Trong 7 Ngày</div>
+            </div>
+
+            <div class="bonus-box">
+                <div class="bonus-title"><span>🎁</span> Bonus Đặc Biệt - Chỉ Trong 7 Ngày</div>
+                <div class="bonus-grid">
+                    <div class="bonus-item">
+                        <div class="bonus-item-emoji">📚</div>
+                        <div class="bonus-item-text"><strong>Ebook "Affirmations 365"</strong> - Khẳng định cho mỗi ngày trong năm (trị giá ₫199K)</div>
+                    </div>
+                    <div class="bonus-item">
+                        <div class="bonus-item-emoji">🎧</div>
+                        <div class="bonus-item-text"><strong>Meditation Audio Pack</strong> - 10 bài thiền guided (trị giá ₫299K)</div>
+                    </div>
+                    <div class="bonus-item">
+                        <div class="bonus-item-emoji">📞</div>
+                        <div class="bonus-item-text"><strong>1-on-1 Call 30 phút</strong> - Với mentor GEM (trị giá ₫500K)</div>
+                    </div>
+                    <div class="bonus-item">
+                        <div class="bonus-item-emoji">💎</div>
+                        <div class="bonus-item-text"><strong>1 Tháng Premium App</strong> - Trải nghiệm đầy đủ tính năng (trị giá ₫99K)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📈</span> Thời Điểm Thị Trường</div>
+                <p>Thị trường wellness và personal development tại Việt Nam đang tăng trưởng 25%/năm. Những người bắt đầu SỚM sẽ có lợi thế first-mover.</p>
+                <p style="margin-top: var(--space-sm);">• GEM đang mở rộng → Nhiều cơ hội cho Partners</p>
+                <p style="margin-top: var(--space-xs);">• Nhu cầu về spiritual wellness tăng cao</p>
+                <p style="margin-top: var(--space-xs);">• Ít cạnh tranh trong niche này</p>
+            </div>
+        </section>
+
+        <!-- SECTION 4: NEXT STEPS - 3 CTAs -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Next Steps - Chọn Con Đường Của Bạn</h2>
+            <p>Bạn đã có tất cả thông tin. Bây giờ là lúc CHỌN và HÀNH ĐỘNG. Đây là 3 lựa chọn cho bạn:</p>
+
+            <div class="cta-grid">
+                <div class="cta-card">
+                    <div class="cta-emoji">🛍️</div>
+                    <div class="cta-title">Mua Products</div>
+                    <div class="cta-desc">Nâng cấp công cụ với Crystals, Khóa học, và Premium Bundle</div>
+                    <a href="#" class="cta-button secondary">Xem Shop →</a>
+                </div>
+                <div class="cta-card featured">
+                    <div class="cta-emoji">⭐</div>
+                    <div class="cta-title">Đăng Ký Partnership</div>
+                    <div class="cta-desc">Bắt đầu tạo thu nhập từ việc giúp người khác chuyển hóa</div>
+                    <a href="#" class="cta-button">Đăng Ký Ngay →</a>
+                </div>
+                <div class="cta-card">
+                    <div class="cta-emoji">👥</div>
+                    <div class="cta-title">Tham Gia Community</div>
+                    <div class="cta-desc">Kết nối với cộng đồng GEM, tiếp tục thực hành cùng nhau</div>
+                    <a href="#" class="cta-button secondary">Mở App →</a>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>❓</span> Chưa Chắc Chắn?</div>
+                <p>Không sao cả! Bạn có thể:</p>
+                <p style="margin-top: var(--space-sm);">• Chat với GEM Master trong app để được tư vấn</p>
+                <p style="margin-top: var(--space-xs);">• Đặt câu hỏi trong Forum community</p>
+                <p style="margin-top: var(--space-xs);">• Email support@gemacademy.vn để được hỗ trợ 1-1</p>
+            </div>
+        </section>
+
+        <!-- SECTION 5: LỜI KẾT -->
+        <section class="section">
+            <h2 class="section-title"><span>🙏</span> Lời Kết - Từ Jennie</h2>
+
+            <div class="closing-box">
+                <div class="closing-emoji">💎</div>
+                <div class="closing-title">Cảm Ơn Bạn Đã Đi Cùng Hành Trình Này</div>
+                <div class="closing-text">
+                    <p>49 ngày qua, bạn đã dành thời gian, năng lượng, và niềm tin để chuyển hóa bản thân. Điều đó không dễ dàng - và tôi thực sự trân trọng sự cam kết của bạn.</p>
+                    <p style="margin-top: var(--space-md);">Dù bạn chọn con đường nào tiếp theo, hãy nhớ: <strong>Bạn đã không còn như trước.</strong> Hạt giống thịnh vượng đã được gieo trong tâm trí bạn. Hãy tiếp tục tưới nước cho nó mỗi ngày.</p>
+                    <p style="margin-top: var(--space-md);">Tôi tin vào hành trình của bạn. Tôi tin vào tiềm năng vô hạn bên trong bạn. Và tôi luôn ở đây để hỗ trợ bạn trên đường đi.</p>
+                </div>
+                <div class="closing-signature">
+                    <p style="margin-top: var(--space-lg);">Với tình yêu và ánh sáng,</p>
+                    <p style="margin-top: var(--space-sm); font-size: 1.2rem; font-weight: 700; color: var(--gold);">Jennie Uyen Chu</p>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">Founder, GEM Academy</p>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📧</span> Liên Hệ & Hỗ Trợ</div>
+                <p><strong>Email:</strong> support@gemacademy.vn</p>
+                <p style="margin-top: var(--space-xs);"><strong>Hotline:</strong> 1900-xxxx (8:00 - 21:00)</p>
+                <p style="margin-top: var(--space-xs);"><strong>App GEM:</strong> Chat với GEM Master 24/7</p>
+                <p style="margin-top: var(--space-xs);"><strong>Community:</strong> Forum trong app GEM</p>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <p>🎉 KHÓA HỌC HOÀN TẤT! 🎉</p>
+            <p style="margin-top: var(--space-md); font-size: 1.1rem; font-weight: 700; color: var(--gold);">Tái Tạo Tư Duy Triệu Phú - 49 Ngày Chuyển Hóa</p>
+            <p style="margin-top: var(--space-lg);">© 2024 GEM Academy by Jennie Uyen Chu</p>
+            <p style="margin-top: var(--space-sm);">Xây dựng với 💛 tại Việt Nam</p>
+        </footer>
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 4.2: Bạn Đang Ở Ngã Ba Đường</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Noto+Sans+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-navy: #112250;
+            --color-navy-light: #1a3070;
+            --color-navy-dark: #0a1535;
+            --color-gold: #FFBD59;
+            --color-gold-light: #FFD993;
+            --color-gold-dark: #E5A030;
+            --color-cyan: #00F0FF;
+            --color-cyan-light: #80F7FF;
+            --color-purple: #6A5BFF;
+            --color-purple-light: #8B7FFF;
+            --color-green: #10B981;
+            --color-green-light: #34D399;
+            --color-green-dark: #059669;
+            --color-red: #EF4444;
+            --color-red-light: #F87171;
+
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.65);
+
+            --bg-glass: rgba(255, 255, 255, 0.08);
+            --bg-glass-hover: rgba(255, 255, 255, 0.12);
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --bg-card-solid: #1a2d5a;
+
+            --border-glass: rgba(255, 255, 255, 0.15);
+            --border-gold: rgba(255, 189, 89, 0.4);
+
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --shadow-gold: 0 4px 20px rgba(255, 189, 89, 0.25);
+            --shadow-cyan: 0 4px 20px rgba(0, 240, 255, 0.2);
+
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            --space-2xl: 3rem;
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-body);
+            background: linear-gradient(135deg, var(--color-navy-dark) 0%, var(--color-navy) 50%, var(--color-navy-light) 100%);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: var(--space-lg);
+            padding-top: var(--space-xl);
+            padding-bottom: var(--space-2xl);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-container {
+                padding: 0;
+                padding-top: var(--space-md);
+                padding-bottom: var(--space-xl);
+            }
+        }
+
+        /* ==================== HEADER ==================== */
+        .lesson-header {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+            padding: var(--space-xl);
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-xl);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-header {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+                padding: var(--space-lg) var(--space-md);
+            }
+        }
+
+        .badge-container {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+            margin-bottom: var(--space-md);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            color: var(--color-navy);
+            font-family: var(--font-heading);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 50px;
+            box-shadow: var(--shadow-gold);
+        }
+
+        .badge.chapter-badge {
+            background: linear-gradient(135deg, var(--color-purple) 0%, var(--color-purple-light) 100%);
+        }
+
+        .lesson-title {
+            font-family: var(--font-heading);
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: var(--space-md);
+            line-height: 1.2;
+        }
+
+        .lesson-title .highlight {
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .lesson-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ==================== SECTIONS ==================== */
+        .section {
+            margin-bottom: var(--space-xl);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+            padding: 0 var(--space-md);
+        }
+
+        @media (min-width: 601px) {
+            .section-header { padding: 0; }
+        }
+
+        .section-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-gold);
+        }
+
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: clamp(1.25rem, 4vw, 1.5rem);
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .text-content {
+            padding: 0 var(--space-md);
+        }
+
+        @media (min-width: 601px) {
+            .text-content { padding: 0; }
+        }
+
+        .text-content p {
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+
+        /* ==================== IMAGES ==================== */
+        .lesson-image {
+            width: 100%;
+            margin: var(--space-lg) 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 2px solid var(--border-glass);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-image {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+        }
+
+        .image-placeholder {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: linear-gradient(135deg, var(--bg-card-solid) 0%, var(--color-navy-dark) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            padding: var(--space-lg);
+            text-align: center;
+        }
+
+        .image-placeholder-icon { font-size: 3rem; opacity: 0.5; }
+
+        .image-caption {
+            text-align: center;
+            padding: var(--space-sm) var(--space-md);
+            background: var(--bg-glass);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-style: italic;
+        }
+
+        /* ==================== HIGHLIGHT BOXES ==================== */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border: 1px solid var(--border-gold);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+
+        @media (max-width: 600px) {
+            .highlight-box {
+                border-radius: 0;
+                border-left: 4px solid var(--color-gold);
+                border-right: none;
+            }
+        }
+
+        .highlight-box.cyan {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(0, 240, 255, 0.05) 100%);
+            border-color: rgba(0, 240, 255, 0.4);
+        }
+
+        @media (max-width: 600px) {
+            .highlight-box.cyan { border-left-color: var(--color-cyan); }
+        }
+
+        .highlight-box.green {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        @media (max-width: 600px) {
+            .highlight-box.green { border-left-color: var(--color-green); }
+        }
+
+        .highlight-box-title {
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--color-gold);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .highlight-box.cyan .highlight-box-title { color: var(--color-cyan); }
+        .highlight-box.green .highlight-box-title { color: var(--color-green); }
+
+        .highlight-box p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        /* ==================== PATH CARDS ==================== */
+        .path-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+            position: relative;
+        }
+
+        @media (max-width: 600px) {
+            .path-card {
+                border-radius: 0;
+                border-right: none;
+            }
+        }
+
+        .path-card.path-1 { border-left: 4px solid var(--color-cyan); }
+        .path-card.path-2 {
+            border: 2px solid var(--color-gold);
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.1) 0%, var(--bg-glass) 100%);
+        }
+        .path-card.path-3 { border-left: 4px solid var(--color-purple); }
+
+        .path-card.path-2::before {
+            content: 'PHỔ BIẾN NHẤT';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--color-gold);
+            color: var(--color-navy);
+            font-family: var(--font-heading);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 4px 16px;
+            border-radius: 50px;
+        }
+
+        .path-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+        }
+
+        .path-icon {
+            font-size: 2.5rem;
+        }
+
+        .path-title-group {
+            flex: 1;
+        }
+
+        .path-label {
+            font-family: var(--font-heading);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: var(--space-xs);
+        }
+
+        .path-card.path-1 .path-label { color: var(--color-cyan); }
+        .path-card.path-2 .path-label { color: var(--color-gold); }
+        .path-card.path-3 .path-label { color: var(--color-purple); }
+
+        .path-title {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .path-description {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.8;
+            margin-bottom: var(--space-lg);
+        }
+
+        .path-details {
+            display: grid;
+            gap: var(--space-lg);
+        }
+
+        @media (min-width: 601px) {
+            .path-details {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .path-section h4 {
+            font-family: var(--font-heading);
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .path-card.path-1 .path-section h4 { color: var(--color-cyan); }
+        .path-card.path-2 .path-section h4 { color: var(--color-gold); }
+        .path-card.path-3 .path-section h4 { color: var(--color-purple); }
+
+        .path-section ul {
+            list-style: none;
+        }
+
+        .path-section ul li {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: var(--space-xs);
+            padding-left: var(--space-lg);
+            position: relative;
+        }
+
+        .path-section ul li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--text-muted);
+        }
+
+        .path-section.pros ul li::before { content: '✓'; color: var(--color-green); }
+        .path-section.cons ul li::before { content: '!'; color: var(--color-gold); }
+
+        /* ==================== TIER OPTIONS ==================== */
+        .tier-options {
+            background: var(--bg-card-solid);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-top: var(--space-lg);
+        }
+
+        .tier-options-title {
+            font-family: var(--font-heading);
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--color-gold);
+            margin-bottom: var(--space-md);
+        }
+
+        .tier-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-sm) 0;
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        .tier-option:last-child { border-bottom: none; }
+
+        .tier-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .tier-price {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            color: var(--color-gold);
+        }
+
+        .tier-feature {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* ==================== COMMISSION TABLE ==================== */
+        .commission-table {
+            background: var(--bg-card-solid);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-top: var(--space-lg);
+        }
+
+        .commission-title {
+            font-family: var(--font-heading);
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--color-purple);
+            margin-bottom: var(--space-md);
+        }
+
+        .commission-row {
+            display: flex;
+            justify-content: space-between;
+            padding: var(--space-sm) 0;
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        .commission-row:last-child { border-bottom: none; }
+
+        .commission-level {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .commission-rate {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            color: var(--color-purple);
+        }
+
+        /* ==================== NO WRONG CHOICE BOX ==================== */
+        .no-wrong-box {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+            border: 2px solid var(--color-green);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .no-wrong-box {
+                border-radius: 0;
+                border-left: 4px solid var(--color-green);
+                border-right: none;
+            }
+        }
+
+        .no-wrong-icon { font-size: 3rem; margin-bottom: var(--space-md); }
+
+        .no-wrong-title {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--color-green);
+            margin-bottom: var(--space-md);
+        }
+
+        .no-wrong-points {
+            display: grid;
+            gap: var(--space-sm);
+            max-width: 500px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .no-wrong-point {
+            background: var(--bg-glass);
+            padding: var(--space-md);
+            border-radius: var(--radius-sm);
+            display: flex;
+            gap: var(--space-md);
+            align-items: center;
+        }
+
+        .no-wrong-check {
+            font-size: 1.25rem;
+            color: var(--color-green);
+        }
+
+        .no-wrong-text {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        /* ==================== SUMMARY & FOOTER ==================== */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.2) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border: 2px solid var(--color-gold);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+
+        @media (max-width: 600px) {
+            .summary-box {
+                border-radius: 0;
+                border-left: 4px solid var(--color-gold);
+                border-right: none;
+            }
+        }
+
+        .summary-title {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--color-gold);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .summary-list { list-style: none; }
+
+        .summary-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-sm);
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .summary-list li::before {
+            content: '✓';
+            color: var(--color-gold);
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-xl);
+            margin-top: var(--space-xl);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-footer {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+        }
+
+        .footer-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            color: var(--color-navy);
+            font-family: var(--font-heading);
+            font-size: 0.85rem;
+            font-weight: 700;
+            border-radius: 50px;
+            margin-bottom: var(--space-md);
+        }
+
+        .footer-text { color: var(--text-muted); font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="lesson-container">
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="badge-container">
+                <span class="badge">STARTER</span>
+                <span class="badge chapter-badge">MODULE A</span>
+            </div>
+            <h1 class="lesson-title">Bạn Đang Ở <span class="highlight">Ngã Ba Đường</span></h1>
+            <p class="lesson-subtitle">Ba con đường phía trước - mỗi con đường phù hợp với hoàn cảnh khác nhau</p>
+        </header>
+
+        <!-- INTRO -->
+        <section class="section">
+            <div class="text-content">
+                <p>Bạn đã hoàn thành phần trải nghiệm của khóa học STARTER. Bây giờ là lúc quyết định bước tiếp theo. Phía trước bạn có 3 con đường - không có con đường nào sai, chỉ có con đường phù hợp với hoàn cảnh và mục tiêu của bạn.</p>
+
+                <p>Chúng tôi sẽ trình bày thành thật về mỗi con đường: ưu điểm, hạn chế, và phù hợp với ai. Bạn sẽ tự quyết định - không pressure, không manipulation.</p>
+            </div>
+
+            <!-- Image 1 -->
+            <div class="lesson-image">
+                <div class="image-placeholder">
+                    <span class="image-placeholder-icon">🖼️</span>
+                    <span>Hình 1: 3 Paths Visual Overview</span>
+                    <span style="font-size: 0.8rem; opacity: 0.7;">Canva: three-paths-overview.png (1200x675)</span>
+                </div>
+                <div class="image-caption">Ba con đường phía trước - Bạn chọn đường nào?</div>
+            </div>
+        </section>
+
+        <!-- PATH 1: STARTER -->
+        <div class="path-card path-1">
+            <div class="path-header">
+                <div class="path-icon">🌱</div>
+                <div class="path-title-group">
+                    <div class="path-label">CON ĐƯỜNG 1</div>
+                    <div class="path-title">Tiếp Tục Với STARTER</div>
+                </div>
+            </div>
+
+            <div class="path-description">
+                Tiếp tục hành trình với gói STARTER hiện tại. Tự học, tự rèn luyện với những công cụ cơ bản. Con đường chậm hơn nhưng phù hợp nếu bạn có thời gian và muốn tiết kiệm chi phí ban đầu.
+            </div>
+
+            <div class="path-details">
+                <div class="path-section">
+                    <h4>📦 Bạn Sẽ Có:</h4>
+                    <ul>
+                        <li>Scanner: 5 lần quét/ngày</li>
+                        <li>Chatbot: 10 câu hỏi/ngày</li>
+                        <li>Forum: Truy cập đầy đủ</li>
+                        <li>Basic Course: Nền tảng trading</li>
+                    </ul>
+                </div>
+
+                <div class="path-section">
+                    <h4>📊 Kết Quả Kỳ Vọng (12 tháng):</h4>
+                    <ul>
+                        <li>Win rate: 45-55% (cơ bản)</li>
+                        <li>Timeline: Chậm nhưng steady</li>
+                        <li>Thu nhập: Tùy thuộc cá nhân</li>
+                    </ul>
+                </div>
+
+                <div class="path-section pros">
+                    <h4>✅ Phù Hợp Nếu:</h4>
+                    <ul>
+                        <li>Ngân sách hiện tại hạn chế</li>
+                        <li>Có nhiều thời gian tự học</li>
+                        <li>Tự giác và kiên trì cao</li>
+                    </ul>
+                </div>
+
+                <div class="path-section cons">
+                    <h4>⚠️ Trade-off:</h4>
+                    <ul>
+                        <li>Thiếu 6 công thức độc quyền</li>
+                        <li>Limit công cụ (5 scan, 10 chat/ngày)</li>
+                        <li>Có thể mất nhiều thời gian hơn</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image 2 -->
+        <div class="lesson-image">
+            <div class="image-placeholder">
+                <span class="image-placeholder-icon">🖼️</span>
+                <span>Hình 2: Path 1 - Starter Details</span>
+                <span style="font-size: 0.8rem; opacity: 0.7;">Canva: path-1-starter.png (1200x675)</span>
+            </div>
+            <div class="image-caption">Con đường 1: Tiếp tục với STARTER - Chậm mà chắc</div>
+        </div>
+
+        <!-- PATH 2: UPGRADE (FEATURED) -->
+        <div class="path-card path-2">
+            <div class="path-header">
+                <div class="path-icon">🚀</div>
+                <div class="path-title-group">
+                    <div class="path-label">CON ĐƯỜNG 2</div>
+                    <div class="path-title">Upgrade Lên TIER Cao Hơn</div>
+                </div>
+            </div>
+
+            <div class="path-description">
+                Đầu tư vào khóa học nâng cao và unlock toàn bộ hệ thống GEM Frequency. Tiết kiệm thời gian, có hỗ trợ chuyên sâu, và access đầy đủ các công thức độc quyền. Con đường được chọn bởi hầu hết những người nghiêm túc với trading.
+            </div>
+
+            <div class="path-details">
+                <div class="path-section">
+                    <h4>🔓 Bạn Sẽ Unlock:</h4>
+                    <ul>
+                        <li>6 công thức Frequency độc quyền</li>
+                        <li>Scanner và Chatbot không giới hạn</li>
+                        <li>Khóa học nâng cao đầy đủ</li>
+                        <li>Hỗ trợ 1-1 từ mentor</li>
+                    </ul>
+                </div>
+
+                <div class="path-section">
+                    <h4>📊 Kết Quả Kỳ Vọng (12 tháng):</h4>
+                    <ul>
+                        <li>Win rate: 65-70%</li>
+                        <li>Timeline: 3-6 tháng bắt đầu profitable</li>
+                        <li>Thu nhập: Phụ thuộc vốn và kỷ luật</li>
+                    </ul>
+                </div>
+
+                <div class="path-section pros">
+                    <h4>✅ Phù Hợp Nếu:</h4>
+                    <ul>
+                        <li>Muốn tiết kiệm thời gian</li>
+                        <li>Có ngân sách đầu tư vào bản thân</li>
+                        <li>Nghiêm túc về mục tiêu trading</li>
+                    </ul>
+                </div>
+
+                <div class="path-section cons">
+                    <h4>⚠️ Trade-off:</h4>
+                    <ul>
+                        <li>Cần đầu tư tài chính ban đầu</li>
+                        <li>Vẫn cần thời gian học và thực hành</li>
+                        <li>Không phải "get rich quick"</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="tier-options">
+                <div class="tier-options-title">💰 CÁC GÓI TIER:</div>
+                <div class="tier-option">
+                    <div>
+                        <div class="tier-name">TIER 1</div>
+                        <div class="tier-feature">4 patterns + 50 scan/ngày</div>
+                    </div>
+                    <div class="tier-price">11M VND</div>
+                </div>
+                <div class="tier-option">
+                    <div>
+                        <div class="tier-name">TIER 2</div>
+                        <div class="tier-feature">Full 6 công thức + Zone Detection</div>
+                    </div>
+                    <div class="tier-price">21M VND</div>
+                </div>
+                <div class="tier-option">
+                    <div>
+                        <div class="tier-name">TIER 3</div>
+                        <div class="tier-feature">Everything + AI Signals + Whale Tracking</div>
+                    </div>
+                    <div class="tier-price">68M VND</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image 3 -->
+        <div class="lesson-image">
+            <div class="image-placeholder">
+                <span class="image-placeholder-icon">🖼️</span>
+                <span>Hình 3: Path 2 - Upgrade Details (Highlighted)</span>
+                <span style="font-size: 0.8rem; opacity: 0.7;">Canva: path-2-upgrade.png (1200x675)</span>
+            </div>
+            <div class="image-caption">Con đường 2: Upgrade TIER - Được chọn bởi đa số traders nghiêm túc</div>
+        </div>
+
+        <!-- PATH 3: PARTNERSHIP -->
+        <div class="path-card path-3">
+            <div class="path-header">
+                <div class="path-icon">🌟</div>
+                <div class="path-title-group">
+                    <div class="path-label">CON ĐƯỜNG 3</div>
+                    <div class="path-title">Trở Thành Partner</div>
+                </div>
+            </div>
+
+            <div class="path-description">
+                Kết hợp học trading với kiếm thêm thu nhập từ affiliate. Giới thiệu GEM cho network của bạn và nhận commission. Xây dựng multiple income streams - từ trading VÀ từ affiliate.
+            </div>
+
+            <div class="path-details">
+                <div class="path-section">
+                    <h4>🎁 Bạn Sẽ Có:</h4>
+                    <ul>
+                        <li>Tất cả benefits của tier bạn chọn</li>
+                        <li>Commission từ giới thiệu</li>
+                        <li>Marketing materials support</li>
+                        <li>Training affiliate riêng</li>
+                    </ul>
+                </div>
+
+                <div class="path-section">
+                    <h4>📊 Kết Quả Kỳ Vọng (12 tháng):</h4>
+                    <ul>
+                        <li>Trading: Tùy theo tier chọn</li>
+                        <li>Thu nhập affiliate: Tùy network</li>
+                        <li>Passive income tiềm năng</li>
+                    </ul>
+                </div>
+
+                <div class="path-section pros">
+                    <h4>✅ Phù Hợp Nếu:</h4>
+                    <ul>
+                        <li>Có network hoặc followers</li>
+                        <li>Thích chia sẻ và teaching</li>
+                        <li>Muốn multiple income streams</li>
+                    </ul>
+                </div>
+
+                <div class="path-section cons">
+                    <h4>⚠️ Trade-off:</h4>
+                    <ul>
+                        <li>Cần thời gian cho cả trading và affiliate</li>
+                        <li>Cần xây dựng trust với network</li>
+                        <li>Commission phụ thuộc hiệu quả</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="commission-table">
+                <div class="commission-title">💎 COMMISSION TIERS:</div>
+                <div class="commission-row">
+                    <div class="commission-level">CTV Bronze</div>
+                    <div class="commission-rate">10% digital / 6% physical</div>
+                </div>
+                <div class="commission-row">
+                    <div class="commission-level">CTV Silver</div>
+                    <div class="commission-rate">15% digital / 8% physical</div>
+                </div>
+                <div class="commission-row">
+                    <div class="commission-level">KOL (20k+ followers)</div>
+                    <div class="commission-rate">20% cả hai</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image 4 -->
+        <div class="lesson-image">
+            <div class="image-placeholder">
+                <span class="image-placeholder-icon">🖼️</span>
+                <span>Hình 4: Path 3 - Partnership Details</span>
+                <span style="font-size: 0.8rem; opacity: 0.7;">Canva: path-3-partnership.png (1200x675)</span>
+            </div>
+            <div class="image-caption">Con đường 3: Partnership - Trading + Thu nhập affiliate</div>
+        </div>
+
+        <!-- NO WRONG CHOICE -->
+        <div class="no-wrong-box">
+            <div class="no-wrong-icon">✨</div>
+            <div class="no-wrong-title">Không Có Lựa Chọn Sai</div>
+            <div class="no-wrong-points">
+                <div class="no-wrong-point">
+                    <span class="no-wrong-check">✓</span>
+                    <span class="no-wrong-text">Mỗi con đường phù hợp với hoàn cảnh khác nhau</span>
+                </div>
+                <div class="no-wrong-point">
+                    <span class="no-wrong-check">✓</span>
+                    <span class="no-wrong-text">Lựa chọn SAI duy nhất là không lựa chọn gì cả</span>
+                </div>
+                <div class="no-wrong-point">
+                    <span class="no-wrong-check">✓</span>
+                    <span class="no-wrong-text">Bạn luôn có thể điều chỉnh sau nếu hoàn cảnh thay đổi</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image 5 -->
+        <div class="lesson-image">
+            <div class="image-placeholder">
+                <span class="image-placeholder-icon">🖼️</span>
+                <span>Hình 5: No Wrong Choice Encouragement</span>
+                <span style="font-size: 0.8rem; opacity: 0.7;">Canva: no-wrong-choice.png (1200x675)</span>
+            </div>
+            <div class="image-caption">Không có lựa chọn sai - Chỉ có lựa chọn phù hợp với bạn</div>
+        </div>
+
+        <!-- SUMMARY -->
+        <div class="summary-box">
+            <div class="summary-title">📝 Tóm Tắt Bài 4.2</div>
+            <ul class="summary-list">
+                <li><strong>Path 1 (Starter):</strong> Chậm mà chắc, phù hợp ngân sách hạn chế, cần kiên trì cao</li>
+                <li><strong>Path 2 (Upgrade):</strong> Nhanh hơn, có hệ thống đầy đủ, cần đầu tư tài chính</li>
+                <li><strong>Path 3 (Partner):</strong> Trading + Affiliate, cần network và thời gian cho cả hai</li>
+                <li>Không có lựa chọn sai - chỉ có lựa chọn phù hợp với hoàn cảnh của bạn</li>
+                <li>Bạn có thể điều chỉnh con đường bất cứ lúc nào</li>
+            </ul>
+        </div>
+
+        <!-- TRANSITION -->
+        <div class="highlight-box cyan">
+            <div class="highlight-box-title">➡️ Bài Tiếp Theo</div>
+            <p>Trong bài tiếp theo, chúng tôi sẽ cung cấp một khung quyết định đơn giản với 4 câu hỏi giúp bạn xác định con đường phù hợp nhất. Không cần quyết định ngay - hãy đọc tiếp để có thêm góc nhìn.</p>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <span class="footer-badge">MODULE A</span>
+            <p class="footer-text">Bài 4.2: Bạn Đang Ở Ngã Ba Đường | GEM Frequency Trading</p>
+        </footer>
+    </div>
+</body>
+</html>

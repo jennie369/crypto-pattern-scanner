@@ -22,6 +22,7 @@ import AccountScreen from '../screens/tabs/AccountScreen';
 import AffiliateDetailScreen from '../screens/Account/AffiliateDetailScreen';
 import PortfolioScreen from '../screens/Account/PortfolioScreen';
 import TierUpgradeScreen from '../screens/Account/TierUpgradeScreen';
+import { UpgradeScreen, TierDetailScreen } from '../screens/Upgrade';
 import PaperTradeHistoryScreen from '../screens/Account/PaperTradeHistoryScreen';
 import ProfileSettingsScreen from '../screens/Account/ProfileSettingsScreen';
 import NotificationSettingsScreen from '../screens/Account/NotificationSettingsScreen';
@@ -80,6 +81,7 @@ import {
   AdminReportsScreen,
   AdminNotificationsScreen,
   AdminSponsorBannersScreen,
+  AdminShopBannersScreen,
   // Auto-Post & Content Calendar
   ContentCalendarScreen,
   ContentEditorScreen,
@@ -97,6 +99,13 @@ import {
   // Subscription Expiration Management
   AdminExpiringUsersScreen,
   AdminExpirationLogsScreen,
+  // Sticker Management
+  AdminStickerPacksScreen,
+  AdminStickerUploadScreen,
+  // Course Highlights Management
+  AdminCourseHighlightsScreen,
+  // Upgrade Management
+  AdminUpgradeScreen,
 } from '../screens/Admin';
 
 // User Management Screens (Phase B.1)
@@ -120,12 +129,14 @@ import {
   DailyRecapScreen,
   RitualPlaygroundScreen,
   RitualHistoryScreen,
-  // New Ritual Screens (Vision Board 2.0)
+  // New Ritual Screens (Vision Board 2.0 - Cosmic Glassmorphism)
   HeartExpansionRitual,
   GratitudeFlowRitual,
   CleansingBreathRitual,
   WaterManifestRitual,
   LetterToUniverseRitual,
+  BurnReleaseRitual,
+  StarWishRitual,
 } from '../screens/VisionBoard';
 
 // Gem Economy Screens
@@ -142,6 +153,8 @@ import {
   GrantAccessScreen,
   CourseStudentsScreen,
   CoursePreviewScreen,
+  StudentProgressScreen,
+  CourseAnalyticsScreen,
 } from '../screens/Admin/Courses';
 
 // Profile Screens - Follow System (Issue 29-31)
@@ -165,6 +178,27 @@ import {
   ConnectBinanceScreen,
   ShadowReportScreen,
 } from '../screens/ShadowMode';
+
+// Livestream Screens (AI Avatar Livestream)
+import { LivestreamViewerScreen, LivestreamListScreen } from '../screens/Livestream';
+
+// Livestream Admin Screens
+import { AdminLivestreamScreen, AnalyticsDashboardScreen } from '../screens/Admin';
+
+// Partnership Admin Screens (Phase 4-5)
+import { AdminPartnershipDashboard, AdminApplicationDetail } from '../screens/Admin';
+
+// Waitlist Leads Admin Screen
+import { WaitlistLeadsScreen } from '../screens/Admin';
+
+// Settings Screens (Language, Currency, Theme)
+import {
+  SettingsScreen,
+  LanguageSettingsScreen,
+  ThemeSettingsScreen,
+  CurrencySettingsScreen,
+  AboutScreen,
+} from '../screens/Settings';
 
 const Stack = createNativeStackNavigator();
 
@@ -191,11 +225,39 @@ export default function AccountStack() {
       {/* Tier Upgrade */}
       <Stack.Screen name="TierUpgrade" component={TierUpgradeScreen} />
 
+      {/* Upgrade Screen - New Unified Upgrade Flow */}
+      <Stack.Screen
+        name="UpgradeScreen"
+        component={UpgradeScreen}
+        options={{
+          headerShown: false,
+          animation: 'slide_from_bottom',
+          presentation: 'modal',
+        }}
+      />
+
+      {/* Tier Detail Screen */}
+      <Stack.Screen
+        name="TierDetail"
+        component={TierDetailScreen}
+        options={{
+          headerShown: false,
+          animation: 'slide_from_right',
+        }}
+      />
+
       {/* Profile Settings */}
       <Stack.Screen name="ProfileSettings" component={ProfileSettingsScreen} />
 
       {/* Notification Settings */}
       <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
+
+      {/* Settings (Language, Currency, Theme) */}
+      <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen name="LanguageSettings" component={LanguageSettingsScreen} />
+      <Stack.Screen name="ThemeSettings" component={ThemeSettingsScreen} />
+      <Stack.Screen name="CurrencySettings" component={CurrencySettingsScreen} />
+      <Stack.Screen name="AboutSettings" component={AboutScreen} />
 
       {/* Help & Support */}
       <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
@@ -268,6 +330,22 @@ export default function AccountStack() {
       <Stack.Screen
         name="LetterToUniverseRitual"
         component={LetterToUniverseRitual}
+        options={{
+          animation: 'slide_from_bottom',
+          presentation: 'modal',
+        }}
+      />
+      <Stack.Screen
+        name="BurnReleaseRitual"
+        component={BurnReleaseRitual}
+        options={{
+          animation: 'slide_from_bottom',
+          presentation: 'modal',
+        }}
+      />
+      <Stack.Screen
+        name="StarWishRitual"
+        component={StarWishRitual}
         options={{
           animation: 'slide_from_bottom',
           presentation: 'modal',
@@ -352,6 +430,30 @@ export default function AccountStack() {
       <Stack.Screen name="ShadowReport" component={ShadowReportScreen} />
 
       {/* ═══════════════════════════════════════════ */}
+      {/* AI LIVESTREAM SCREENS */}
+      {/* ═══════════════════════════════════════════ */}
+      <Stack.Screen name="LivestreamList" component={LivestreamListScreen} />
+      <Stack.Screen
+        name="LivestreamViewer"
+        component={LivestreamViewerScreen}
+        options={{
+          headerShown: false,
+          animation: 'slide_from_bottom',
+          presentation: 'fullScreenModal',
+        }}
+      />
+      <Stack.Screen
+        name="AdminLivestream"
+        component={AdminLivestreamScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="LivestreamAnalytics"
+        component={AnalyticsDashboardScreen}
+        options={{ headerShown: false }}
+      />
+
+      {/* ═══════════════════════════════════════════ */}
       {/* SOUND & MONETIZATION SCREENS */}
       {/* ═══════════════════════════════════════════ */}
       <Stack.Screen name="SoundDetail" component={SoundDetailScreen} />
@@ -407,6 +509,20 @@ export default function AccountStack() {
       <Stack.Screen
         name="AdminSponsorBanners"
         component={AdminSponsorBannersScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="AdminShopBanners"
+        component={AdminShopBannersScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="AdminCourseHighlights"
+        component={AdminCourseHighlightsScreen}
         options={{
           headerShown: false,
         }}
@@ -563,6 +679,16 @@ export default function AccountStack() {
         component={CoursePreviewScreen}
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="StudentProgress"
+        component={StudentProgressScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="CourseAnalytics"
+        component={CourseAnalyticsScreen}
+        options={{ headerShown: false }}
+      />
 
       {/* ═══════════════════════════════════════════ */}
       {/* ADMIN SUBSCRIPTION EXPIRATION MANAGEMENT */}
@@ -575,6 +701,52 @@ export default function AccountStack() {
       <Stack.Screen
         name="AdminExpirationLogs"
         component={AdminExpirationLogsScreen}
+        options={{ headerShown: false }}
+      />
+
+      {/* ═══════════════════════════════════════════ */}
+      {/* ADMIN STICKER MANAGEMENT */}
+      {/* ═══════════════════════════════════════════ */}
+      <Stack.Screen
+        name="AdminStickerPacks"
+        component={AdminStickerPacksScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="AdminStickerUpload"
+        component={AdminStickerUploadScreen}
+        options={{ headerShown: false }}
+      />
+
+      {/* ═══════════════════════════════════════════ */}
+      {/* ADMIN UPGRADE MANAGEMENT */}
+      {/* ═══════════════════════════════════════════ */}
+      <Stack.Screen
+        name="AdminUpgrade"
+        component={AdminUpgradeScreen}
+        options={{ headerShown: false }}
+      />
+
+      {/* ═══════════════════════════════════════════ */}
+      {/* ADMIN PARTNERSHIP SYSTEM v3.0 (Phase 4-5) */}
+      {/* ═══════════════════════════════════════════ */}
+      <Stack.Screen
+        name="AdminPartnershipDashboard"
+        component={AdminPartnershipDashboard}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="AdminApplicationDetail"
+        component={AdminApplicationDetail}
+        options={{ headerShown: false }}
+      />
+
+      {/* ═══════════════════════════════════════════ */}
+      {/* ADMIN WAITLIST LEADS MANAGEMENT */}
+      {/* ═══════════════════════════════════════════ */}
+      <Stack.Screen
+        name="WaitlistLeads"
+        component={WaitlistLeadsScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

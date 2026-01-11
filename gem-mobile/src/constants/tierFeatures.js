@@ -8,6 +8,16 @@
  * - Trend Analysis
  * - Retest Validation
  * - Quality Filtering
+ *
+ * ZONE VISUALIZATION FEATURES:
+ * - Zone Rectangles (filled zones on chart)
+ * - Zone Labels (Buy/Sell badges)
+ * - Zone Lifecycle (Fresh/Tested/Broken tracking)
+ * - Historical Zones (show past zones)
+ * - MTF Alignment (multi-timeframe zone confluence)
+ * - Zone Alerts (price test notifications)
+ * - Zone Customization (color customization)
+ * - Zone Export (export zones to file)
  */
 
 export const TIER_FEATURES = {
@@ -21,8 +31,19 @@ export const TIER_FEATURES = {
     rsiDivergence: false,
     dynamicRR: false,
     multiTimeframe: false,
+    // Zone Visualization Features
+    zoneRectangles: false,
+    zoneLabels: false,
+    zoneLifecycle: false,
+    historicalZones: false,
+    mtfAlignment: false,
+    zoneAlerts: false,
+    zoneCustomization: false,
+    zoneExport: false,
+    multipleZones: false,
     minPatternScore: 40, // Show more patterns (lower quality ok)
     maxPatterns: 3,      // Limit patterns shown
+    maxZonesDisplayed: 1,
     scanLabel: 'Basic Scan'
   },
 
@@ -36,8 +57,19 @@ export const TIER_FEATURES = {
     rsiDivergence: false,
     dynamicRR: false,
     multiTimeframe: false,
+    // Zone Visualization Features
+    zoneRectangles: true,     // ENABLED
+    zoneLabels: true,         // ENABLED
+    zoneLifecycle: false,
+    historicalZones: false,
+    mtfAlignment: false,
+    zoneAlerts: true,         // ENABLED (limited)
+    zoneCustomization: false,
+    zoneExport: false,
+    multipleZones: true,      // ENABLED (up to 3)
     minPatternScore: 40,
     maxPatterns: 7,
+    maxZonesDisplayed: 3,
     scanLabel: 'Basic Scan'
   },
 
@@ -51,8 +83,19 @@ export const TIER_FEATURES = {
     rsiDivergence: true,       // ENABLED
     dynamicRR: true,           // ENABLED
     multiTimeframe: true,      // ENABLED (3 TFs)
+    // Zone Visualization Features
+    zoneRectangles: true,      // ENABLED
+    zoneLabels: true,          // ENABLED
+    zoneLifecycle: true,       // ENABLED
+    historicalZones: true,     // ENABLED
+    mtfAlignment: true,        // ENABLED (3 TFs)
+    zoneAlerts: true,          // ENABLED (10 per coin)
+    zoneCustomization: true,   // ENABLED
+    zoneExport: false,
+    multipleZones: true,       // ENABLED (up to 10)
     minPatternScore: 50,       // Higher quality threshold
     maxPatterns: 15,
+    maxZonesDisplayed: 10,
     scanLabel: 'Enhanced Scan'
   },
 
@@ -66,8 +109,19 @@ export const TIER_FEATURES = {
     rsiDivergence: true,       // ENABLED
     dynamicRR: true,           // ENABLED
     multiTimeframe: true,      // ENABLED (5 TFs)
+    // Zone Visualization Features
+    zoneRectangles: true,      // ENABLED
+    zoneLabels: true,          // ENABLED
+    zoneLifecycle: true,       // ENABLED
+    historicalZones: true,     // ENABLED
+    mtfAlignment: true,        // ENABLED (5 TFs)
+    zoneAlerts: true,          // ENABLED (unlimited)
+    zoneCustomization: true,   // ENABLED
+    zoneExport: true,          // ENABLED
+    multipleZones: true,       // ENABLED (up to 20)
     minPatternScore: 45,       // Show slightly more for analysis
     maxPatterns: 50,
+    maxZonesDisplayed: 20,
     scanLabel: 'Elite Scan'
   },
 
@@ -82,8 +136,19 @@ export const TIER_FEATURES = {
     rsiDivergence: true,
     dynamicRR: true,
     multiTimeframe: true,
+    // Zone Visualization Features
+    zoneRectangles: true,
+    zoneLabels: true,
+    zoneLifecycle: true,
+    historicalZones: true,
+    mtfAlignment: true,
+    zoneAlerts: true,
+    zoneCustomization: true,
+    zoneExport: true,
+    multipleZones: true,
     minPatternScore: 35,       // See all patterns for debugging
     maxPatterns: 100,
+    maxZonesDisplayed: 50,
     scanLabel: 'Admin Scan'
   }
 };
@@ -233,6 +298,100 @@ export const FEATURE_COMPARISON = {
     requiredTier: 'TIER2',
     phase: 'PHASE_3',
     icon: '🔄'
+  },
+
+  // ====================================
+  // ZONE VISUALIZATION FEATURES
+  // ====================================
+  zoneRectangles: {
+    name: 'Zone Rectangles',
+    nameVi: 'Vùng Zone',
+    description: 'Display filled zone rectangles on chart instead of simple lines',
+    descriptionVi: 'Hiển thị vùng zone đầy màu thay vì đường đơn giản',
+    impact: '+5-10% visual clarity',
+    requiredTier: 'TIER1',
+    phase: 'ZONE_VISUALIZATION',
+    icon: '🟩'
+  },
+  zoneLabels: {
+    name: 'Zone Labels',
+    nameVi: 'Nhãn Zone',
+    description: 'Show Buy/Sell labels with strength percentage on zones',
+    descriptionVi: 'Hiển thị nhãn Buy/Sell với % độ mạnh trên zone',
+    impact: '+3-5% decision clarity',
+    requiredTier: 'TIER1',
+    phase: 'ZONE_VISUALIZATION',
+    icon: '🏷️'
+  },
+  zoneLifecycle: {
+    name: 'Zone Lifecycle Tracking',
+    nameVi: 'Vòng đời Zone',
+    description: 'Track zone status: Fresh → Tested → Broken',
+    descriptionVi: 'Theo dõi trạng thái zone: Fresh → Tested → Broken',
+    impact: '+8-12% zone strength accuracy',
+    requiredTier: 'TIER2',
+    phase: 'ZONE_VISUALIZATION',
+    icon: '🔄'
+  },
+  historicalZones: {
+    name: 'Historical Zones',
+    nameVi: 'Zone lịch sử',
+    description: 'View past zones and their test history',
+    descriptionVi: 'Xem zone quá khứ và lịch sử test',
+    impact: '+5-8% pattern recognition',
+    requiredTier: 'TIER2',
+    phase: 'ZONE_VISUALIZATION',
+    icon: '📜'
+  },
+  mtfAlignment: {
+    name: 'MTF Zone Alignment',
+    nameVi: 'Đồng thuận MTF',
+    description: 'Multi-timeframe zone confluence analysis (HTF/ITF/LTF)',
+    descriptionVi: 'Phân tích đồng thuận zone đa khung thời gian',
+    impact: '+15-25% high probability setups',
+    requiredTier: 'TIER2',
+    phase: 'ZONE_VISUALIZATION',
+    icon: '🎯'
+  },
+  zoneAlerts: {
+    name: 'Zone Alerts',
+    nameVi: 'Cảnh báo Zone',
+    description: 'Get notified when price tests or breaks a zone',
+    descriptionVi: 'Nhận thông báo khi giá test hoặc phá zone',
+    impact: 'Real-time trading signals',
+    requiredTier: 'TIER1',
+    phase: 'ZONE_VISUALIZATION',
+    icon: '🔔'
+  },
+  zoneCustomization: {
+    name: 'Zone Customization',
+    nameVi: 'Tùy chỉnh Zone',
+    description: 'Customize zone colors and display preferences',
+    descriptionVi: 'Tùy chỉnh màu sắc và cách hiển thị zone',
+    impact: 'Personalized experience',
+    requiredTier: 'TIER2',
+    phase: 'ZONE_VISUALIZATION',
+    icon: '🎨'
+  },
+  zoneExport: {
+    name: 'Zone Export',
+    nameVi: 'Xuất Zone',
+    description: 'Export zones to CSV/JSON for external analysis',
+    descriptionVi: 'Xuất zone ra CSV/JSON để phân tích bên ngoài',
+    impact: 'Advanced data analysis',
+    requiredTier: 'TIER3',
+    phase: 'ZONE_VISUALIZATION',
+    icon: '📤'
+  },
+  multipleZones: {
+    name: 'Multiple Zones Display',
+    nameVi: 'Hiển thị nhiều Zone',
+    description: 'Display multiple zones per timeframe (up to tier limit)',
+    descriptionVi: 'Hiển thị nhiều zone trên cùng khung (theo tier)',
+    impact: '+10-15% opportunity detection',
+    requiredTier: 'TIER1',
+    phase: 'ZONE_VISUALIZATION',
+    icon: '📊'
   }
 };
 

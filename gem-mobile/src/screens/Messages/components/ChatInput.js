@@ -11,9 +11,10 @@
  * - Send button animation
  * - Message scheduling
  * - Glass-morphism styling
+ * - @Mentions with autocomplete
  */
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -35,9 +36,12 @@ import * as Haptics from '../../../utils/haptics';
 // Components
 import VoiceRecorder from './VoiceRecorder';
 import MessageReplyPreview from './MessageReplyPreview';
+import { StickerEmojiSheet } from '../../../components/Stickers';
+import MentionSuggestionList from '../../../components/Messages/MentionSuggestionList';
 
 // Services
 import messagingService from '../../../services/messagingService';
+import stickerService from '../../../services/stickerService';
 
 // Tokens
 import {
@@ -58,6 +62,7 @@ export default function ChatInput({
   conversationId,
   onOpenSchedule,
   currentUserId,
+  participants = [], // For @mentions
 }) {
   // State
   const [text, setText] = useState('');
@@ -65,6 +70,16 @@ export default function ChatInput({
   const [uploading, setUploading] = useState(false);
   const [inputHeight, setInputHeight] = useState(44);
   const [isRecording, setIsRecording] = useState(false);
+  const [stickerSheetVisible, setStickerSheetVisible] = useState(false);
+
+  // Mentions state
+  const [mentions, setMentions] = useState([]); // Collected mentions with positions
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [mentionSearch, setMentionSearch] = useState('');
+  const [cursorPosition, setCursorPosition] = useState(0);
+
+  // Refs
+  const inputRef = useRef(null);
 
   // Animation refs
   const sendButtonScale = useRef(new Animated.Value(1)).current;
@@ -75,6 +90,58 @@ export default function ChatInput({
   // Show mic button when no text (TikTok-style)
   const showMicButton = !text.trim() && !attachment;
 
+  // Filter participants for mention suggestions (exclude current user)
+  const filteredSuggestions = useMemo(() => {
+    if (!showSuggestions || !mentionSearch) return [];
+
+    const searchLower = mentionSearch.toLowerCase();
+    return participants
+      .filter(p => p.id !== currentUserId)
+      .filter(p =>
+        p.display_name?.toLowerCase().includes(searchLower) ||
+        p.username?.toLowerCase().includes(searchLower)
+      )
+      .slice(0, 5);
+  }, [participants, mentionSearch, showSuggestions, currentUserId]);
+
+  // =====================================================
+  // MENTIONS DETECTION
+  // =====================================================
+
+  const detectMentionTrigger = useCallback((value, selectionStart) => {
+    // Find the @ symbol before cursor
+    const textBeforeCursor = value.substring(0, selectionStart);
+    const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+
+    if (lastAtIndex === -1) {
+      setShowSuggestions(false);
+      setMentionSearch('');
+      return;
+    }
+
+    // Check if @ is at start or after a space
+    const charBeforeAt = textBeforeCursor[lastAtIndex - 1];
+    if (lastAtIndex > 0 && charBeforeAt !== ' ' && charBeforeAt !== '\n') {
+      setShowSuggestions(false);
+      setMentionSearch('');
+      return;
+    }
+
+    // Get text after @ until cursor
+    const textAfterAt = textBeforeCursor.substring(lastAtIndex + 1);
+
+    // Check if there's a space in the search (completed mention)
+    if (textAfterAt.includes(' ')) {
+      setShowSuggestions(false);
+      setMentionSearch('');
+      return;
+    }
+
+    // Show suggestions with search text
+    setMentionSearch(textAfterAt);
+    setShowSuggestions(true);
+  }, []);
+
   // =====================================================
   // TEXT INPUT
   // =====================================================
@@ -82,11 +149,71 @@ export default function ChatInput({
   const handleTextChange = useCallback((value) => {
     setText(value);
     onTyping?.();
-  }, [onTyping]);
+
+    // Detect mention trigger
+    detectMentionTrigger(value, cursorPosition);
+  }, [onTyping, detectMentionTrigger, cursorPosition]);
+
+  const handleSelectionChange = useCallback((event) => {
+    const { selection } = event.nativeEvent;
+    setCursorPosition(selection.start);
+
+    // Re-check mention trigger on cursor move
+    detectMentionTrigger(text, selection.start);
+  }, [text, detectMentionTrigger]);
 
   const handleContentSizeChange = useCallback((event) => {
     const height = Math.min(event.nativeEvent.contentSize.height, MAX_INPUT_HEIGHT);
     setInputHeight(Math.max(44, height));
+  }, []);
+
+  // =====================================================
+  // MENTION SELECTION
+  // =====================================================
+
+  const handleSelectMention = useCallback((user) => {
+    // Find where the @ started
+    const textBeforeCursor = text.substring(0, cursorPosition);
+    const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+
+    if (lastAtIndex === -1) return;
+
+    // Build new text with mention
+    const beforeAt = text.substring(0, lastAtIndex);
+    const afterCursor = text.substring(cursorPosition);
+    const mentionText = `@${user.display_name} `;
+    const newText = beforeAt + mentionText + afterCursor;
+
+    // Calculate new cursor position
+    const newCursorPosition = lastAtIndex + mentionText.length;
+
+    // Add to mentions array
+    const newMention = {
+      userId: user.id,
+      displayName: user.display_name,
+      startIndex: lastAtIndex,
+      endIndex: lastAtIndex + mentionText.trim().length,
+    };
+
+    setMentions(prev => [...prev, newMention]);
+    setText(newText);
+    setShowSuggestions(false);
+    setMentionSearch('');
+
+    // Set cursor position after mention
+    setTimeout(() => {
+      inputRef.current?.setNativeProps({
+        selection: { start: newCursorPosition, end: newCursorPosition },
+      });
+      setCursorPosition(newCursorPosition);
+    }, 50);
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }, [text, cursorPosition]);
+
+  const handleDismissSuggestions = useCallback(() => {
+    setShowSuggestions(false);
+    setMentionSearch('');
   }, []);
 
   // =====================================================
@@ -111,13 +238,19 @@ export default function ChatInput({
       }),
     ]).start();
 
-    // Send message
-    await onSend(text, attachment);
+    // Capture current mentions before clearing
+    const currentMentions = [...mentions];
+
+    // Send message with mentions
+    await onSend(text, attachment, null, currentMentions);
 
     // Clear input
     setText('');
     setAttachment(null);
-  }, [canSend, text, attachment, onSend, sendButtonScale]);
+    setMentions([]);
+    setShowSuggestions(false);
+    setMentionSearch('');
+  }, [canSend, text, attachment, mentions, onSend, sendButtonScale]);
 
   // =====================================================
   // MEDIA PICKER
@@ -286,6 +419,48 @@ export default function ChatInput({
   }, []);
 
   // =====================================================
+  // STICKER / EMOJI / GIF
+  // =====================================================
+
+  const handleStickerSelect = useCallback(async (item) => {
+    setStickerSheetVisible(false);
+
+    // Handle emoji - insert as text
+    if (item.type === 'emoji') {
+      setText(prev => prev + item.emoji);
+      return;
+    }
+
+    // Handle sticker or GIF - send as message
+    try {
+      // Track usage for recent items
+      await stickerService.trackUsage({
+        stickerId: item.stickerId,
+        giphyId: item.giphyId,
+        giphyUrl: item.url,
+        type: item.type,
+      });
+
+      // Send sticker/GIF message
+      await onSend('', null, {
+        type: item.type,
+        stickerId: item.stickerId,
+        giphyId: item.giphyId,
+        url: item.url,
+        format: item.format,
+      });
+    } catch (error) {
+      console.error('Error sending sticker/GIF:', error);
+      alertService.error('Loi', 'Khong the gui sticker');
+    }
+  }, [onSend]);
+
+  const handleOpenStickerSheet = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setStickerSheetVisible(true);
+  }, []);
+
+  // =====================================================
   // RENDER
   // =====================================================
 
@@ -352,19 +527,41 @@ export default function ChatInput({
           </TouchableOpacity>
         )}
 
-        {/* Text Input */}
-        <View style={[styles.inputContainer, { height: inputHeight }]}>
-          <TextInput
-            style={styles.input}
-            placeholder="Message..."
-            placeholderTextColor={COLORS.textMuted}
-            value={text}
-            onChangeText={handleTextChange}
-            onContentSizeChange={handleContentSizeChange}
-            multiline
-            maxLength={2000}
-            editable={!disabled}
-          />
+        {/* Sticker/Emoji Button */}
+        <TouchableOpacity
+          style={styles.stickerButton}
+          onPress={handleOpenStickerSheet}
+          disabled={uploading}
+        >
+          <Ionicons name="happy-outline" size={24} color={COLORS.gold} />
+        </TouchableOpacity>
+
+        {/* Text Input with Mention Suggestions */}
+        <View style={[styles.inputWrapper, { height: inputHeight }]}>
+          {/* Mention Suggestions */}
+          {showSuggestions && filteredSuggestions.length > 0 && (
+            <MentionSuggestionList
+              suggestions={filteredSuggestions}
+              onSelect={handleSelectMention}
+              onDismiss={handleDismissSuggestions}
+            />
+          )}
+
+          <View style={styles.inputContainer}>
+            <TextInput
+              ref={inputRef}
+              style={styles.input}
+              placeholder="Message..."
+              placeholderTextColor={COLORS.textMuted}
+              value={text}
+              onChangeText={handleTextChange}
+              onContentSizeChange={handleContentSizeChange}
+              onSelectionChange={handleSelectionChange}
+              multiline
+              maxLength={2000}
+              editable={!disabled}
+            />
+          </View>
         </View>
 
         {/* Send Button or Mic Button */}
@@ -407,6 +604,14 @@ export default function ChatInput({
           <Text style={styles.recordingHint}>Release to send, slide left to cancel</Text>
         </View>
       )}
+
+      {/* Sticker/Emoji/GIF Sheet */}
+      <StickerEmojiSheet
+        visible={stickerSheetVisible}
+        onClose={() => setStickerSheetVisible(false)}
+        onSelect={handleStickerSelect}
+        context="chat"
+      />
     </View>
   );
 }
@@ -478,7 +683,19 @@ const styles = StyleSheet.create({
     marginRight: SPACING.xs,
   },
 
+  // Sticker Button
+  stickerButton: {
+    width: 36,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
   // Input
+  inputWrapper: {
+    flex: 1,
+    position: 'relative',
+  },
   inputContainer: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.3)',

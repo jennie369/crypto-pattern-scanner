@@ -27,12 +27,30 @@ import {
   TouchableOpacity,
   Dimensions,
   Animated,
+  LayoutAnimation,
+  UIManager,
 } from 'react-native';
+
+// Enable LayoutAnimation on Android
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 import alertService from '../../services/alertService';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Sparkles, Settings, Plus, Clock, ChevronDown } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS, GRADIENTS } from '../../utils/tokens';
 import { LinearGradient } from 'expo-linear-gradient';
+
+// Layout constants - QUAN TRỌNG: Xem file này để hiểu cách keyboard positioning hoạt động
+import {
+  KEYBOARD_CLOSED_BOTTOM,
+  KEYBOARD_OPEN_OFFSET,
+  CHAT_CONTENT_BOTTOM_PADDING,
+  CHAT_CONTENT_KEYBOARD_PADDING,
+  SCROLL_BUTTON_BOTTOM_CLOSED,
+  SCROLL_BUTTON_KEYBOARD_OFFSET,
+  INPUT_AREA_BACKGROUND,
+} from '../../constants/gemMasterLayout';
 import { useTabBar } from '../../contexts/TabBarContext';
 import { useCart } from '../../contexts/CartContext';
 import { useFocusEffect } from '@react-navigation/native';
@@ -68,6 +86,13 @@ import InlineChatForm from '../../components/GemMaster/InlineChatForm';
 // NEW: Quick Buy & Upsell Modals for crystal purchase flow
 import QuickBuyModal from '../../components/GemMaster/QuickBuyModal';
 import UpsellModal from '../../components/GemMaster/UpsellModal';
+// NEW: Binance-style FAQ Panel
+import FAQPanel from '../../components/GemMaster/FAQPanel';
+
+// NEW: Upgrade Banner for quota exhausted
+import { UpgradeBanner } from '../../components/upgrade';
+import { useSponsorBanners } from '../../components/SponsorBannerSection';
+import SponsorBanner from '../../components/SponsorBanner';
 
 // Services
 import TierService from '../../services/tierService';
@@ -83,6 +108,9 @@ import { supabase } from '../../services/supabase';
 import { detectWidgetTrigger } from '../../services/widgetDetectionService';
 import { shouldShowCrystalRecommendations, extractShopifyTags } from '../../services/crystalTagMappingService';
 import shopifyService from '../../services/shopifyService';
+// NEW: WebSocket/Hybrid Chat Services (PHASE 1C)
+import { useWebSocketChat } from '../../hooks/useWebSocketChat';
+import ConnectionStatus from './components/ConnectionStatus';
 
 // Karma type icons mapping (lucide-react-native icon names)
 const KARMA_ICONS = {
@@ -95,17 +123,32 @@ const KARMA_ICONS = {
   general: 'Sparkles',
 };
 
-// Welcome message
+// Welcome message - AI Sư Phụ persona
 const WELCOME_MESSAGE = {
   id: 'welcome',
   type: 'assistant',
-  text: 'Xin chào! Tôi là Gemral - trợ lý AI của bạn. Tôi có thể giúp bạn:\n\n• Trả lời câu hỏi về crypto & trading\n• Xem quẻ Kinh Dịch (I Ching)\n• Đọc bài Tarot\n• Tư vấn phong thủy & tâm linh\n\nBạn muốn khám phá điều gì hôm nay?',
+  text: 'Ta là GEM Master.\n\nTa có thể hướng dẫn bạn:\n\n- Phân tích thị trường crypto & trading\n- Xem quẻ Kinh Dịch\n- Đọc bài Tarot\n- Tư vấn năng lượng & tần số\n\nBạn cần điều gì?',
   timestamp: new Date().toISOString(),
 };
 
 const GemMasterScreen = ({ navigation, route }) => {
   // Tooltip hook for feature discovery
   const { showTooltipForScreen, initialized: tooltipInitialized } = useTooltip();
+
+  // Sponsor banners - use hook to fetch banners for gemmaster screen
+  const { banners: sponsorBanners, dismissBanner, userId: bannerUserId } = useSponsorBanners('gemmaster', null);
+
+  // WebSocket Chat hook (PHASE 1C)
+  const {
+    isOnline: wsIsOnline,
+    isConnected: wsIsConnected,
+    isTyping: wsIsTyping,
+    queueSize: wsQueueSize,
+    queueSyncStatus: wsQueueSyncStatus,
+    connect: wsConnect,
+    getConnectionStatusText,
+    getConnectionStatusColor,
+  } = useWebSocketChat({ autoConnect: true });
 
   // Chat state
   const [messages, setMessages] = useState([WELCOME_MESSAGE]);
@@ -121,7 +164,7 @@ const GemMasterScreen = ({ navigation, route }) => {
     showTabBar,
     // Don't use handleChatScroll - it causes tab bar to flicker
     // handleChatScroll,
-    bottomPadding,
+    tabBarHeight, // Use tabBarHeight constant (100) instead of animated bottomPadding
     isVisible: isTabBarVisible,
     disableAutoHide,
   } = useTabBar();
@@ -183,8 +226,11 @@ const GemMasterScreen = ({ navigation, route }) => {
     context: '',
   });
 
-  // Keyboard state for bottom padding
+  // Keyboard state for bottom padding - use Animated for smooth transitions
+  // QUAN TRỌNG: Xem constants/gemMasterLayout.js để hiểu các giá trị này
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const keyboardHeightAnim = useRef(new Animated.Value(KEYBOARD_CLOSED_BOTTOM)).current;
 
   // Scroll state for scroll-to-bottom button
   const [showScrollButton, setShowScrollButton] = useState(false);
@@ -211,6 +257,12 @@ const GemMasterScreen = ({ navigation, route }) => {
   const [upsellModal, setUpsellModal] = useState({
     visible: false,
     upsellData: null,
+  });
+
+  // NEW: Binance-style FAQ Panel state
+  const [faqPanelState, setFaqPanelState] = useState({
+    visible: false,
+    topicId: null,
   });
 
   // Fetch user and tier on mount
@@ -273,22 +325,52 @@ const GemMasterScreen = ({ navigation, route }) => {
     };
   }, []);
 
-  // Hide tab bar when keyboard shows (QuickActionBar stays visible)
+  // Hide tab bar when keyboard shows - INSTANT position change
   useEffect(() => {
-    const keyboardDidShow = Keyboard.addListener('keyboardDidShow', () => {
+    // Use 'Will' events on iOS for faster response, 'Did' events on Android
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+
+    // Track keyboard height for animation
+    let currentKeyboardHeight = 0;
+
+    const keyboardShowListener = Keyboard.addListener(showEvent, (e) => {
+      const height = e.endCoordinates.height;
+      currentKeyboardHeight = height;
+      console.log('[GemMaster] Keyboard SHOW - height:', height);
       setKeyboardVisible(true);
+      setKeyboardHeight(height);
       hideTabBar();
+      // Sử dụng constant từ gemMasterLayout.js
+      keyboardHeightAnim.setValue(height + KEYBOARD_OPEN_OFFSET);
     });
-    const keyboardDidHide = Keyboard.addListener('keyboardDidHide', () => {
+
+    // On Android, also listen to keyboardDidShow for more accurate height
+    const keyboardDidShowListener = Platform.OS === 'android'
+      ? Keyboard.addListener('keyboardDidShow', (e) => {
+          const height = e.endCoordinates.height;
+          if (height !== currentKeyboardHeight) {
+            currentKeyboardHeight = height;
+            keyboardHeightAnim.setValue(height + KEYBOARD_OPEN_OFFSET);
+          }
+        })
+      : null;
+
+    const keyboardHideListener = Keyboard.addListener(hideEvent, () => {
+      console.log('[GemMaster] Keyboard HIDE');
       setKeyboardVisible(false);
+      setKeyboardHeight(0);
       showTabBar();
+      // Sử dụng constant từ gemMasterLayout.js
+      keyboardHeightAnim.setValue(KEYBOARD_CLOSED_BOTTOM);
     });
 
     return () => {
-      keyboardDidShow.remove();
-      keyboardDidHide.remove();
+      keyboardShowListener.remove();
+      keyboardHideListener.remove();
+      keyboardDidShowListener?.remove();
     };
-  }, [hideTabBar, showTabBar]);
+  }, [hideTabBar, showTabBar, keyboardHeightAnim]);
 
   // Show tooltips for first-time users
   useEffect(() => {
@@ -467,10 +549,12 @@ const GemMasterScreen = ({ navigation, route }) => {
       });
 
       // Get product recommendations from response or fetch separately
+      // SKIP for questionnaire mode to avoid delay
       let products = response.products || response.recommendedProducts || [];
+      const isQuestionnaireResponse = response.mode === 'questionnaire' || response.isQuestionMessage;
 
-      // If no products from response, try RecommendationEngine
-      if (products.length === 0) {
+      // If no products from response, try RecommendationEngine (but NOT for questionnaire)
+      if (products.length === 0 && !isQuestionnaireResponse) {
         try {
           const recommendations = await RecommendationEngine.getRecommendations(
             user?.id,
@@ -670,12 +754,20 @@ const GemMasterScreen = ({ navigation, route }) => {
       };
 
       setMessages((prev) => [...prev, userMessage]);
-      // No scroll needed - inverted FlatList auto-shows new content at bottom
 
-      // Decrement quota
+      // Show typing indicator IMMEDIATELY for fast visual feedback
+      setIsTyping(true);
+
+      // Auto-scroll to bottom to show typing indicator (inverted list: offset 0 = bottom)
+      setTimeout(() => {
+        flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+      }, 50);
+
+      // Decrement quota (fire-and-forget - don't block response)
       if (user) {
-        await QuotaService.decrementQuota(user.id);
-        await refreshQuota();
+        QuotaService.decrementQuota(user.id)
+          .then(() => refreshQuota())
+          .catch(err => console.warn('[GemMaster] Quota decrement error:', err));
       }
 
       // Get AI response with conversation history
@@ -758,6 +850,11 @@ const GemMasterScreen = ({ navigation, route }) => {
 
       setMessages((prev) => [...prev, response]);
 
+      // Auto-scroll to show AI response (especially important for questionnaire flow)
+      setTimeout(() => {
+        flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+      }, 100);
+
       // ===== WIDGET SUGGESTION SYSTEM (UNIFIED) =====
       // Only show ONE widget suggestion per conversation turn
       // Prioritize WidgetSuggestionCard (legacy) as it integrates with VisionBoard
@@ -802,35 +899,67 @@ const GemMasterScreen = ({ navigation, route }) => {
       }
 
       // Method 2: Show widget suggestion from karma analysis result
-      // If karma analysis contains healing/affirmation, suggest adding to VisionBoard
+      // If karma analysis contains healing/affirmation, suggest adding to VisionBoard as GOAL type
       if (!widgetSuggestionShown && isKarmaAnalysisResult && user && shouldShowWidgetSuggestion()) {
         try {
           console.log('[GemMaster] Karma analysis detected, showing widget suggestion');
 
-          // Extract affirmations from the response
+          // Extract affirmations from the response (various formats)
           const affirmationMatch = response.text?.match(/Affirmation:\s*"([^"]+)"/g);
-          const affirmations = affirmationMatch
+          let affirmations = affirmationMatch
             ? affirmationMatch.map(a => a.replace(/Affirmation:\s*"/, '').replace(/"$/, ''))
             : [];
 
-          // Extract healing exercises
+          // Also try to extract affirmations from bullet points
+          if (affirmations.length === 0) {
+            const bulletMatch = response.text?.match(/[•✨]\s*([^\n]+)/g);
+            if (bulletMatch) {
+              const bulletAffirmations = bulletMatch
+                .map(b => b.replace(/[•✨]\s*/, '').trim())
+                .filter(b => b.toLowerCase().includes('tôi') || b.toLowerCase().includes('xứng đáng'));
+              if (bulletAffirmations.length > 0) {
+                affirmations = bulletAffirmations;
+              }
+            }
+          }
+
+          // Extract healing exercises as action steps
           const healingSteps = response.scenario?.healing || [];
 
-          // Create widget suggestion
+          // Also try to extract numbered steps from response
+          let actionSteps = healingSteps;
+          if (actionSteps.length === 0) {
+            const numberedMatch = response.text?.match(/\d+\.\s*([^\n]+)/g);
+            if (numberedMatch) {
+              actionSteps = numberedMatch.map(s => s.replace(/^\d+\.\s*/, '').trim()).slice(0, 5);
+            }
+          }
+
+          // Create widget suggestion as GOAL type (includes affirmations + action plan)
           const karmaType = response.scenario?.type || response.topics?.[0] || 'general';
+          const goalTitle = response.scenario?.title || 'Chữa Lành Năng Lượng';
           const widgetData = {
-            type: 'affirmation',
-            title: `Chữa Lành ${response.scenario?.title || 'Năng Lượng'}`,
+            type: 'goal', // Changed from 'affirmation' to 'goal'
+            title: goalTitle,
+            goalTitle: goalTitle,
             icon: KARMA_ICONS[karmaType] || 'Sparkles',
             affirmations: affirmations.length > 0 ? affirmations : healingSteps.slice(0, 3),
-            explanation: `Widget nhắc bạn thực hành chữa lành mỗi ngày.`,
+            steps: actionSteps.length > 0 ? actionSteps : healingSteps, // Include as action plan
+            explanation: `Mục tiêu chữa lành ${goalTitle.toLowerCase()} với affirmations và kế hoạch hành động.`,
             lifeArea: karmaType,
+            crystals: response.scenario?.crystal ? [response.scenario.crystal] : [],
           };
+
+          console.log('[GemMaster] Creating goal widget with:', {
+            type: widgetData.type,
+            affirmationsCount: widgetData.affirmations?.length,
+            stepsCount: widgetData.steps?.length,
+          });
 
           setTimeout(() => {
             setWidgetForm({
               visible: true,
-              widgetType: 'affirmation',
+              widgetType: 'goal', // Changed from 'affirmation' to 'goal'
               extractedData: widgetData,
               title: widgetData.title,
             });
@@ -979,6 +1108,202 @@ const GemMasterScreen = ({ navigation, route }) => {
     });
   }, [navigation, handleSendResultToChat]);
 
+  // NEW: Handle topic selection from QuickActionBar → show FAQ panel
+  const handleTopicSelect = useCallback((topicId) => {
+    console.log('[GemMaster] Topic selected:', topicId);
+    // Dismiss keyboard first so FAQ panel shows properly
+    Keyboard.dismiss();
+    setFaqPanelState({
+      visible: true,
+      topicId,
+    });
+  }, []);
+
+  // NEW: Handle FAQ question selection → process different action types
+  const handleFAQQuestionSelect = useCallback(async (question) => {
+    console.log('[GemMaster] FAQ question selected:', question.id, question.action);
+
+    // Close the FAQ panel
+    setFaqPanelState({ visible: false, topicId: null });
+
+    // Process based on action type
+    switch (question.action) {
+      case 'message':
+        // Simple message → send to AI
+        if (question.prompt) {
+          handleSend(question.prompt);
+        }
+        break;
+
+      case 'message_crystal':
+        // Message + crystal products → send to AI (products auto-attached)
+        if (question.prompt) {
+          handleSend(question.prompt);
+        }
+        break;
+
+      case 'questionnaire':
+        // Karma questionnaire → send trigger message to AI
+        const karmaPrompt = question.karmaType === 'money'
+          ? 'Phân tích nghiệp tiền bạc của tôi'
+          : question.karmaType === 'love'
+            ? 'Phân tích nghiệp tình yêu của tôi'
+            : 'Phân tích nghiệp của tôi';
+        handleSend(karmaPrompt);
+        break;
+
+      case 'inline_form':
+        // Show inline form → goalSettingForm or InlineChatForm
+        // NEW: Add user question and AI brief message first before showing form
+        {
+          // Add user message to show what they selected
+          const userMsg = {
+            id: `user_${Date.now()}`,
+            type: 'user',
+            text: question.text,
+            timestamp: new Date().toISOString(),
+          };
+          setMessages(prev => [...prev, userMsg]);
+
+          // Determine brief message and form config based on form type
+          let briefText = '';
+          let formConfig = {
+            visible: true,
+            formType: 'goal',
+            preSelectedArea: null,
+            userInput: question.text,
+          };
+
+          if (question.formType === 'frequency_analysis') {
+            briefText = '✨ Tôi sẽ giúp bạn phân tích tần số năng lượng của bạn. Để phân tích chính xác, tôi cần hỏi bạn một số câu hỏi ngắn về trạng thái hiện tại của bạn.';
+            formConfig = {
+              visible: true,
+              formType: 'frequency',
+              preSelectedArea: 'spiritual',
+              userInput: 'Phân tích tần số năng lượng của tôi',
+            };
+          } else if (question.formType === 'goal_setting') {
+            briefText = '🎯 Tuyệt vời! Tôi sẽ giúp bạn đặt mục tiêu hiệu quả. Để tạo mục tiêu phù hợp nhất, hãy trả lời một vài câu hỏi ngắn sau đây.';
+            formConfig = {
+              visible: true,
+              formType: 'goal',
+              preSelectedArea: null,
+              userInput: question.text,
+            };
+          } else if (question.formType === 'manifest_wealth') {
+            briefText = '💰 Tôi sẽ hướng dẫn bạn manifest tiền bạc và thịnh vượng. Để tạo mục tiêu manifest phù hợp với bạn, hãy trả lời một vài câu hỏi ngắn sau đây.';
+            formConfig = {
+              visible: true,
+              formType: 'goal',
+              preSelectedArea: 'finance',
+              userInput: 'Manifest tiền bạc',
+            };
+          } else if (question.formType === 'manifest_love') {
+            briefText = '💕 Tôi sẽ hướng dẫn bạn manifest tình yêu và mối quan hệ tốt đẹp. Để tạo mục tiêu manifest phù hợp với bạn, hãy trả lời một vài câu hỏi ngắn sau đây.';
+            formConfig = {
+              visible: true,
+              formType: 'goal',
+              preSelectedArea: 'relationships',
+              userInput: 'Manifest tình yêu',
+            };
+          } else if (question.formType === 'crystal_match') {
+            briefText = '💎 Tôi sẽ giúp bạn tìm loại đá thạch anh phù hợp nhất. Để đưa ra gợi ý chính xác, hãy trả lời một vài câu hỏi ngắn về nhu cầu của bạn.';
+            formConfig = {
+              visible: true,
+              formType: 'crystal',
+              preSelectedArea: null,
+              userInput: 'Đá nào phù hợp với tôi?',
+            };
+          }
+
+          // Add AI brief message
+          const briefMsg = {
+            id: `brief_${Date.now()}`,
+            type: 'assistant',
+            text: briefText,
+            timestamp: new Date().toISOString(),
+            source: 'faq_brief',
+          };
+          setMessages(prev => [...prev, briefMsg]);
+
+          // Auto-scroll to show messages
+          setTimeout(() => {
+            flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
+          }, 100);
+
+          // Show inline form after a small delay for better UX
+          setTimeout(() => {
+            setInlineFormState(formConfig);
+          }, 500);
+        }
+        break;
+
+      case 'courses_overview':
+        // AI response + course products → send message that triggers course recommendation
+        if (question.prompt) {
+          handleSend(question.prompt);
+        }
+        break;
+
+      case 'course_detail':
+        // AI response + specific course → send message with course tags
+        if (question.prompt) {
+          handleSend(question.prompt);
+        }
+        break;
+
+      case 'affiliate_info':
+        // AI response + affiliate CTA → send message then show affiliate promo
+        if (question.prompt) {
+          handleSend(question.prompt);
+        }
+        // Show affiliate promo after a delay
+        setTimeout(() => {
+          setCurrentAffiliatePromo({
+            type: 'affiliate_invitation',
+            title: 'Trở thành Partner của Gemral',
+            description: 'Kiếm thu nhập thụ động với hoa hồng 20-30% khi giới thiệu khóa học & sản phẩm.',
+          });
+        }, 2000);
+        break;
+
+      case 'navigate_ritual':
+        // Brief message then navigate to ritual screen
+        if (question.briefMessage) {
+          // Add brief AI message first
+          const briefMsg = {
+            id: `brief_${Date.now()}`,
+            type: 'assistant',
+            text: question.briefMessage,
+            timestamp: new Date().toISOString(),
+            source: 'faq',
+          };
+          setMessages(prev => [...prev, briefMsg]);
+        }
+        // Navigate to ritual screen
+        setTimeout(() => {
+          navigation.navigate('VisionBoard', {
+            screen: 'LetterToUniverseRitual',
+          });
+        }, 1000);
+        break;
+
+      case 'navigate_partnership':
+        // Navigate directly to partnership registration
+        navigation.navigate('AccountTab', {
+          screen: 'PartnershipRegistration',
+        });
+        break;
+
+      default:
+        // Unknown action → just send as message
+        if (question.prompt || question.text) {
+          handleSend(question.prompt || question.text);
+        }
+        break;
+    }
+  }, [handleSend, navigation, setInlineFormState, setMessages, setCurrentAffiliatePromo]);
+
   // Navigate to I Ching
   const handleIChing = useCallback(() => {
     navigation.navigate('IChing', {
@@ -1118,6 +1443,18 @@ const GemMasterScreen = ({ navigation, route }) => {
         <View style={styles.statusRow}>
           <TierBadge tier={userTier} size="sm" />
           <QuotaIndicator quota={quota} size="sm" showResetTime />
+          {/* WebSocket Connection Status - Only show in DEV mode (backend not deployed yet) */}
+          {__DEV__ && (
+            <ConnectionStatus
+              isOnline={wsIsOnline}
+              isConnected={wsIsConnected}
+              statusText={getConnectionStatusText()}
+              statusColor={getConnectionStatusColor()}
+              queueSize={wsQueueSize}
+              isSyncing={wsQueueSyncStatus?.status === 'started'}
+              onReconnect={wsConnect}
+            />
+          )}
         </View>
 
         {/* Logo and Title */}
@@ -1138,9 +1475,24 @@ const GemMasterScreen = ({ navigation, route }) => {
             <ClearChatButton onClear={handleClearChat} variant="text" />
           </View>
         )}
+
+        {/* Sponsor Banners - shown at bottom of chat when scrolling up */}
+        {sponsorBanners.length > 0 && (
+          <View style={{ marginTop: SPACING.md }}>
+            {sponsorBanners.map((banner) => (
+              <SponsorBanner
+                key={banner.id}
+                banner={banner}
+                navigation={navigation}
+                userId={bannerUserId}
+                onDismiss={dismissBanner}
+              />
+            ))}
+          </View>
+        )}
       </View>
     ),
-    [userTier, quota, messages.length, handleClearChat]
+    [userTier, quota, messages.length, handleClearChat, wsIsOnline, wsIsConnected, wsQueueSize, wsQueueSyncStatus, wsConnect, getConnectionStatusText, getConnectionStatusColor, sponsorBanners, bannerUserId, dismissBanner, navigation]
   );
 
   // Handle scroll event for showing scroll-to-bottom button ONLY
@@ -1148,9 +1500,9 @@ const GemMasterScreen = ({ navigation, route }) => {
   const handleScroll = useCallback((event) => {
     const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
     // With inverted list, contentOffset.y > 0 means user scrolled UP to see older messages
-    // Show button when user has scrolled up more than 200px from the newest messages
-    const hasEnoughContent = contentSize.height > layoutMeasurement.height + 100;
-    const isScrolledUp = contentOffset.y > 200;
+    // Show button when user has scrolled up more than 100px from the newest messages
+    const hasEnoughContent = contentSize.height > layoutMeasurement.height;
+    const isScrolledUp = contentOffset.y > 100;
     setShowScrollButton(hasEnoughContent && isScrolledUp);
   }, []);
 
@@ -1262,7 +1614,8 @@ const GemMasterScreen = ({ navigation, route }) => {
   const ListFooterComponent = useCallback(
     () => (
       <View style={styles.footerContainer}>
-        {isTyping && <TypingIndicator />}
+        {/* Typing Indicator - shows when local or WebSocket typing */}
+        {(isTyping || wsIsTyping) && <TypingIndicator />}
 
         {/* InlineChatForm - in chat form for goal setting */}
         {inlineFormState.visible && (
@@ -1330,7 +1683,7 @@ const GemMasterScreen = ({ navigation, route }) => {
         <View style={{ height: 20 }} />
       </View>
     ),
-    [isTyping, inlineFormState, widgetForm, suggestedWidgets, user, handleWidgetsCreated, handleShowInlineForm]
+    [isTyping, wsIsTyping, inlineFormState, widgetForm, suggestedWidgets, user, handleWidgetsCreated, handleShowInlineForm]
   );
 
   return (
@@ -1339,7 +1692,7 @@ const GemMasterScreen = ({ navigation, route }) => {
       locations={GRADIENTS.backgroundLocations}
       style={styles.gradientContainer}
     >
-      <SafeAreaView style={[styles.container, !keyboardVisible && { paddingBottom: 130 }]} edges={['top']}>
+      <SafeAreaView style={styles.container} edges={['top']}>
         {/* Fixed Top Header - Always visible */}
         <View style={styles.fixedHeader}>
           {/* History Button */}
@@ -1369,11 +1722,8 @@ const GemMasterScreen = ({ navigation, route }) => {
           </TouchableOpacity>
         </View>
 
-        <KeyboardAvoidingView
-          style={styles.keyboardView}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-        >
+        {/* Chat Messages Container */}
+        <View style={styles.chatContainer}>
           {/* Chat Messages - INVERTED for instant bottom display like Messenger */}
           <FlatList
             ref={flatListRef}
@@ -1383,7 +1733,15 @@ const GemMasterScreen = ({ navigation, route }) => {
             inverted={true}
             ListHeaderComponent={ListFooterComponent}
             ListFooterComponent={ListHeaderComponent}
-            contentContainerStyle={styles.messagesContent}
+            contentContainerStyle={[
+              styles.messagesContent,
+              {
+                // Khi keyboard mở, cần thêm padding để scroll được đến cuối tin nhắn
+                paddingTop: keyboardVisible
+                  ? keyboardHeight + CHAT_CONTENT_KEYBOARD_PADDING
+                  : CHAT_CONTENT_BOTTOM_PADDING
+              }
+            ]}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
             onScroll={handleScroll}
@@ -1395,7 +1753,7 @@ const GemMasterScreen = ({ navigation, route }) => {
 
           {/* Scroll to Bottom Button - positioned above input area (smaller) */}
           {showScrollButton && (
-            <View style={styles.scrollToBottomButton}>
+            <View style={[styles.scrollToBottomButton, { bottom: keyboardVisible ? keyboardHeight + SCROLL_BUTTON_KEYBOARD_OFFSET : SCROLL_BUTTON_BOTTOM_CLOSED }]}>
               <TouchableOpacity
                 style={styles.scrollToBottomButtonInner}
                 onPress={handleScrollToBottom}
@@ -1405,48 +1763,7 @@ const GemMasterScreen = ({ navigation, route }) => {
               </TouchableOpacity>
             </View>
           )}
-
-          {/* Bottom Input Area - QuickActionBar + ChatInput stacked */}
-          <View style={styles.bottomInputArea}>
-            {/* Quick Action Bar (Always visible above input) */}
-            <QuickActionBar
-              onAction={handleQuickAction}
-              onNavigate={handleQuickNavigate}
-              disabled={!canQuery()}
-            />
-
-            {/* Chat Input with Voice (Day 11-12) */}
-            <ChatInput
-              onSend={handleSend}
-              disabled={isTyping || !canQuery()}
-              placeholder={
-                !canQuery()
-                  ? 'Hết lượt hỏi hôm nay...'
-                  : 'Nhập tin nhắn...'
-              }
-              // Voice props
-              voiceEnabled={true}
-              voiceQuota={voiceQuota}
-              onVoiceRecordingStart={handleVoiceRecordingStart}
-              onVoiceRecordingStop={handleVoiceRecordingStop}
-              onVoiceQuotaPress={handleVoiceQuotaPress}
-              onVoiceError={handleVoiceError}
-            />
-
-            {/* Quota Status Compact (Bottom) */}
-            {!canQuery() && (
-              <TouchableOpacity
-                style={styles.quotaExhaustedBanner}
-                onPress={() => setShowUpgradeModal(true)}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.quotaExhaustedText}>
-                  Hết lượt hỏi hôm nay • Nhấn để nâng cấp
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        </KeyboardAvoidingView>
+        </View>
 
         {/* Upgrade Modal - with Shopify checkout flow */}
         <ChatbotPricingModal
@@ -1530,7 +1847,64 @@ const GemMasterScreen = ({ navigation, route }) => {
           onContinueShopping={handleContinueShopping}
         />
 
+        {/* NEW: Binance-style FAQ Panel - slides up from bottom */}
+        <FAQPanel
+          visible={faqPanelState.visible}
+          topicId={faqPanelState.topicId}
+          onClose={() => setFaqPanelState({ visible: false, topicId: null })}
+          onSelectQuestion={handleFAQQuestionSelect}
+        />
+
       </SafeAreaView>
+
+      {/* Bottom Input Area - OUTSIDE SafeAreaView for proper absolute positioning */}
+      <Animated.View style={[
+        styles.bottomInputAreaAbsolute,
+        { bottom: keyboardHeightAnim }
+      ]}>
+        {/* Quick Action Bar - Always visible (sticky above input) */}
+        <QuickActionBar
+          onAction={handleQuickAction}
+          onNavigate={handleQuickNavigate}
+          onTopicSelect={handleTopicSelect}
+          disabled={!canQuery()}
+        />
+
+        {/* Chat Input with Voice (Day 11-12) + Offline Indicator (PHASE 1C) */}
+        <ChatInput
+          onSend={handleSend}
+          disabled={isTyping || !canQuery()}
+          placeholder={
+            !canQuery()
+              ? 'Hết lượt hỏi hôm nay...'
+              : 'Nhập tin nhắn...'
+          }
+          // Voice props
+          voiceEnabled={true}
+          voiceQuota={voiceQuota}
+          onVoiceRecordingStart={handleVoiceRecordingStart}
+          onVoiceRecordingStop={handleVoiceRecordingStop}
+          onVoiceQuotaPress={handleVoiceQuotaPress}
+          onVoiceError={handleVoiceError}
+          // Offline props (PHASE 1C)
+          isOffline={!wsIsOnline}
+          queueSize={wsQueueSize}
+        />
+
+        {/* Quota Status Compact (Bottom) - Using new UpgradeBanner */}
+        {!canQuery() && (
+          <UpgradeBanner
+            triggerType="quota_reached"
+            tierType="chatbot"
+            variant="compact"
+            title="Hết lượt hỏi hôm nay"
+            subtitle="Nâng cấp để chat không giới hạn"
+            ctaText="Nâng cấp"
+            source="gem_master_chat"
+            onUpgrade={() => setShowUpgradeModal(true)}
+          />
+        )}
+      </Animated.View>
     </LinearGradient>
   );
 };
@@ -1543,6 +1917,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   keyboardView: {
+    flex: 1,
+  },
+  chatContainer: {
     flex: 1,
   },
   // Fixed header at top - always visible
@@ -1620,8 +1997,16 @@ const styles = StyleSheet.create({
   },
   bottomInputArea: {
     // Stacks QuickActionBar + ChatInput vertically
-    backgroundColor: 'transparent',
-    // paddingBottom is now animated via bottomPadding from TabBarContext
+    backgroundColor: COLORS.bgDeep || '#0A0F1C',
+    // paddingBottom is applied dynamically based on keyboard state
+  },
+  bottomInputAreaAbsolute: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    backgroundColor: INPUT_AREA_BACKGROUND, // Xem constants/gemMasterLayout.js
+    paddingTop: SPACING.xs,
+    paddingBottom: SPACING.sm,
   },
   quotaExhaustedBanner: {
     marginHorizontal: SPACING.md,
@@ -1643,7 +2028,7 @@ const styles = StyleSheet.create({
   scrollToBottomButton: {
     position: 'absolute',
     right: SPACING.md,
-    bottom: 200, // Positioned above the input area + quick action bar + tab bar
+    // bottom is set dynamically based on keyboard state
     zIndex: 10,
   },
   // Scroll to bottom button inner (touchable) - smaller size

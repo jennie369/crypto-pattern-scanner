@@ -26,6 +26,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { courseService } from '../../services/courseService';
 import { shopifyService } from '../../services/shopify';
+import { CourseNavigator } from './components';
 import './CourseBuilder.css';
 
 export default function CourseBuilder() {
@@ -73,6 +74,8 @@ export default function CourseBuilder() {
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
   const [thumbnailFile, setThumbnailFile] = useState(null);
   const [errors, setErrors] = useState({});
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [courseNavOpen, setCourseNavOpen] = useState(true); // Course Navigator panel
 
   // Shopify products state
   const [shopifyProducts, setShopifyProducts] = useState([]);
@@ -169,6 +172,19 @@ export default function CourseBuilder() {
 
         console.log('[CourseBuilder] Course loaded:', course.title);
 
+        // Determine is_free_preview based on tier_required ONLY
+        // If tier_required is 'FREE' -> course is free
+        // If shopify_product_id exists -> course requires purchase (not free)
+        // If neither -> default to unchecked (user must explicitly choose)
+        const isFree = course.tier_required === 'FREE';
+
+        console.log('[CourseBuilder] Loaded course data:', {
+          tier_required: course.tier_required,
+          shopify_product_id: course.shopify_product_id,
+          price: course.price,
+          is_free_preview: isFree,
+        });
+
         setFormData({
           title: course.title || '',
           description: course.description || '',
@@ -176,7 +192,7 @@ export default function CourseBuilder() {
           price: course.price?.toString() || '',
           membership_duration_days: course.membership_duration_days?.toString() || '',
           shopify_product_id: course.shopify_product_id || '',
-          is_free_preview: course.tier_required === 'FREE' || !course.shopify_product_id,
+          is_free_preview: isFree,
           is_published: course.is_published || false,
         });
 
@@ -202,9 +218,8 @@ export default function CourseBuilder() {
     }
   };
 
-  // Handle thumbnail upload
-  const handleThumbnailChange = (e) => {
-    const file = e.target.files?.[0];
+  // Handle thumbnail upload (from file input or drag & drop)
+  const processImageFile = (file) => {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
@@ -220,6 +235,40 @@ export default function CourseBuilder() {
     setThumbnailFile(file);
     setThumbnailPreview(URL.createObjectURL(file));
     setErrors(prev => ({ ...prev, thumbnail: null }));
+  };
+
+  const handleThumbnailChange = (e) => {
+    const file = e.target.files?.[0];
+    processImageFile(file);
+  };
+
+  // Drag & Drop handlers
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    const files = e.dataTransfer?.files;
+    if (files && files.length > 0) {
+      processImageFile(files[0]);
+    }
   };
 
   const removeThumbnail = () => {
@@ -252,6 +301,15 @@ export default function CourseBuilder() {
     setError(null);
 
     try {
+      // Determine tier_required based on user choices:
+      // - If Shopify product selected -> tier_required = null (purchase required)
+      // - If is_free_preview checked (and no Shopify product) -> tier_required = 'FREE'
+      // - Otherwise -> tier_required = null (undefined access, will need product or free)
+      let tierRequired = null;
+      if (formData.is_free_preview && !formData.shopify_product_id) {
+        tierRequired = 'FREE';
+      }
+
       const courseData = {
         title: formData.title,
         description: formData.description,
@@ -259,9 +317,14 @@ export default function CourseBuilder() {
         price: formData.price ? parseFloat(formData.price) : null,
         membership_duration_days: formData.membership_duration_days ? parseInt(formData.membership_duration_days) : null,
         shopify_product_id: formData.shopify_product_id || null,
-        tier_required: (!formData.shopify_product_id && formData.is_free_preview) ? 'FREE' : null,
+        tier_required: tierRequired,
         is_published: formData.is_published,
       };
+
+      console.log('[CourseBuilder] Saving course with data:', {
+        ...courseData,
+        is_free_preview: formData.is_free_preview,
+      });
 
       let savedCourseId = courseId;
 
@@ -271,17 +334,21 @@ export default function CourseBuilder() {
       }
 
       if (isEditing) {
+        console.log('[CourseBuilder] Updating course:', courseId);
         const updateResult = await courseService.updateCourse(courseId, courseData);
         if (!updateResult.success) {
           throw new Error(updateResult.error || 'Không thể cập nhật khóa học');
         }
+        console.log('[CourseBuilder] ✅ Course updated successfully:', updateResult.data);
         setSuccessMessage('Đã lưu thay đổi');
       } else {
+        console.log('[CourseBuilder] Creating new course');
         const result = await courseService.createCourse(courseData, user.id);
         if (!result.success) {
           throw new Error(result.error || 'Không thể tạo khóa học');
         }
         savedCourseId = result.data?.id;
+        console.log('[CourseBuilder] ✅ Course created successfully:', result.data);
         setSuccessMessage('Đã tạo khóa học');
       }
 
@@ -391,11 +458,21 @@ export default function CourseBuilder() {
         </div>
       )}
 
-      {/* Form */}
-      <div className="builder-form">
-        <div className="form-grid">
-          {/* Left Column - Main Info */}
-          <div className="form-column">
+      {/* Main Layout with Navigator */}
+      <div className="builder-layout-wrapper">
+        {/* Course Navigator - Quick switch between courses */}
+        <CourseNavigator
+          currentCourseId={courseId}
+          isOpen={courseNavOpen}
+          onToggle={() => setCourseNavOpen(!courseNavOpen)}
+          position="left"
+        />
+
+        {/* Form */}
+        <div className="builder-form">
+          <div className="form-grid">
+            {/* Left Column - Main Info */}
+            <div className="form-column">
             {/* Section: Thông tin cơ bản */}
             <div className="form-section">
               <h3 className="section-title">Thông tin cơ bản</h3>
@@ -551,7 +628,13 @@ export default function CourseBuilder() {
                     </button>
                   </div>
                 ) : (
-                  <label className="thumbnail-dropzone">
+                  <label
+                    className={`thumbnail-dropzone ${isDragOver ? 'drag-over' : ''}`}
+                    onDragEnter={handleDragEnter}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                  >
                     <input
                       type="file"
                       accept="image/*"
@@ -559,7 +642,9 @@ export default function CourseBuilder() {
                       hidden
                     />
                     <Image size={48} />
-                    <span className="dropzone-text">Nhấn để tải ảnh lên</span>
+                    <span className="dropzone-text">
+                      {isDragOver ? 'Thả ảnh vào đây' : 'Nhấn hoặc kéo thả ảnh'}
+                    </span>
                     <span className="dropzone-hint">PNG, JPG tối đa 5MB</span>
                   </label>
                 )}
@@ -625,6 +710,7 @@ export default function CourseBuilder() {
               </ul>
             </div>
           </div>
+        </div>
         </div>
       </div>
 

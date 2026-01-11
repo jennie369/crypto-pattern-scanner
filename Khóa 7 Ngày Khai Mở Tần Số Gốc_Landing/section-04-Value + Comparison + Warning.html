@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Value + Comparison + Warning - Dark</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Noto+Sans+Display:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root{--primary-burgundy:#9C0612;--primary-dark:#640A0C;--secondary-red:#761E0B;--gold-accent:#FFBD59;--gold-light:#DEBC81;--bg-navy:#112250;--text-light:#FFF;--text-gold:#DEBC81;--font-heading:'Montserrat',sans-serif;--font-body:'Noto Sans Display',sans-serif}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:var(--font-body);line-height:1.6;color:var(--text-light);overflow-x:hidden;background:#000}
+        .container{max-width:1200px;margin:0 auto;padding:0 20px}
+        h1,h2,h3,h4{font-family:var(--font-heading);font-weight:700;line-height:1.2}
+        
+        /* ========== SECTION 1: VALUE STACK ========== */
+        .gem-value-stack-section{padding:80px 20px;background:linear-gradient(180deg,#5C0A14 0%,var(--primary-dark) 20%,#4D0509 40%,#3E060C 60%,#2F0508 80%,#200404 100%);position:relative;overflow:hidden}
+        .gem-value-stack-section::before{content:'';position:absolute;width:100%;height:100%;top:0;left:0;background:radial-gradient(circle at 30% 30%,rgba(255,189,89,.08) 0%,transparent 40%),radial-gradient(circle at 70% 70%,rgba(156,6,18,.1) 0%,transparent 50%);pointer-events:none}
+        .gem-value-stack-section h2{text-align:center;color:var(--gold-accent);font-size:42px;margin-bottom:50px;position:relative;z-index:2}
+        .value-box{max-width:800px;margin:0 auto;background:rgba(0,0,0,.7);backdrop-filter:blur(20px);border-radius:30px;padding:50px;box-shadow:0 15px 50px rgba(0,0,0,.5);border:3px solid var(--gold-accent);position:relative;z-index:2}
+        .value-item{display:flex;align-items:center;padding:25px 0;border-bottom:2px dashed rgba(255,189,89,.2)}
+        .value-item:last-of-type{border-bottom:none}
+        .value-icon{font-size:40px;margin-right:25px;flex-shrink:0}
+        .value-details{flex:1}
+        .value-details h3{color:var(--gold-accent);font-size:20px;margin-bottom:5px;font-weight:700}
+        .value-details p{color:var(--text-gold);font-size:15px}
+        .value-price{font-size:22px;font-weight:700;color:var(--text-gold);text-decoration:line-through;flex-shrink:0}
+        .total-divider{border-top:3px solid var(--gold-accent);margin:30px 0;padding-top:30px}
+        .total-value{text-align:center;margin-bottom:40px}
+        .total-value .label{font-size:18px;color:var(--text-gold);margin-bottom:10px}
+        .total-value .amount{font-size:32px;font-weight:800;color:var(--text-gold);text-decoration:line-through}
+        .special-offer{background:linear-gradient(135deg,var(--primary-burgundy) 0%,var(--secondary-red) 100%);color:var(--text-light);padding:40px;border-radius:20px;text-align:center;margin-top:30px;border:2px solid var(--gold-accent)}
+        .special-offer .label{font-size:20px;color:var(--gold-light);margin-bottom:15px}
+        .special-offer .price{font-size:48px;font-weight:800;color:var(--gold-accent);margin-bottom:15px}
+        .savings-badge{display:inline-block;background:var(--gold-accent);color:var(--bg-navy);padding:12px 30px;border-radius:50px;font-weight:700;font-size:20px;margin-top:15px}
+        .cta-center{text-align:center;margin-top:40px}
+        .cta-button{display:inline-block;background:var(--gold-accent);color:var(--bg-navy);padding:18px 50px;font-size:20px;font-weight:700;text-decoration:none;border-radius:50px;transition:all .3s;border:3px solid var(--gold-accent)}
+        .cta-button:hover{background:var(--primary-burgundy);color:var(--gold-accent);transform:translateY(-3px);box-shadow:0 15px 40px rgba(255,189,89,.6)}
+        
+        /* ========== SECTION 2: COMPARISON ========== */
+        .gem-comparison-section{padding:80px 20px;background:linear-gradient(180deg,#200404 0%,#2F0508 20%,#3E060C 40%,#4D0509 60%,var(--primary-dark) 80%,#5C0A14 100%);position:relative;overflow:hidden}
+        .gem-comparison-section::before{content:'';position:absolute;width:100%;height:100%;top:0;left:0;background:radial-gradient(circle at 80% 30%,rgba(255,189,89,.06) 0%,transparent 35%),radial-gradient(circle at 20% 70%,rgba(156,6,18,.08) 0%,transparent 40%);pointer-events:none}
+        .comp-title{text-align:center;color:var(--gold-accent);font-size:42px;margin-bottom:60px;position:relative;z-index:2}
+        .comp-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:40px;max-width:1100px;margin:0 auto;align-items:center;position:relative;z-index:2}
+        .comp-box{padding:40px 30px;border-radius:20px;border:3px solid;min-height:500px;transition:all .3s;backdrop-filter:blur(15px)}
+        .comp-box:hover{transform:translateY(-5px);box-shadow:0 15px 40px rgba(255,189,89,.3)}
+        .comp-box.before{background:rgba(118,30,11,.3);border-color:var(--secondary-red)}
+        .comp-box.after{background:rgba(40,167,69,.2);border-color:#28a745}
+        .comp-box h3{font-size:28px;margin-bottom:25px;text-align:center;font-weight:700}
+        .comp-box.before h3{color:#ff6b6b}
+        .comp-box.after h3{color:#51cf66}
+        .comp-list{list-style:none}
+        .comp-list li{padding:12px 0 12px 35px;position:relative;font-size:16px;line-height:1.7;color:var(--text-light);margin-bottom:15px}
+        .comp-box.before .comp-list li::before{content:"❌";position:absolute;left:0;top:12px;font-size:22px}
+        .comp-box.after .comp-list li::before{content:"✅";position:absolute;left:0;top:12px;font-size:22px}
+        .comp-arrow{font-size:48px;color:var(--gold-accent);animation:bounce-arrow 2s infinite}
+        @keyframes bounce-arrow{0%,100%{transform:translateX(0)}50%{transform:translateX(10px)}}
+        .comp-insight{text-align:center;margin-top:60px;padding:40px;background:rgba(0,0,0,.6);backdrop-filter:blur(15px);border-radius:20px;max-width:900px;margin-left:auto;margin-right:auto;border:2px solid rgba(255,189,89,.3)}
+        .comp-insight h3{color:var(--gold-accent);font-size:28px;margin-bottom:15px}
+        .comp-insight p{font-size:20px;color:var(--text-gold)}
+        .comp-insight strong{color:var(--gold-accent)}
+        
+        /* ========== SECTION 3: WARNING ========== */
+        .warning-section{background:linear-gradient(180deg,#5C0A14 0%,var(--primary-dark) 50%,#4D0509 100%);padding:80px 20px;border-top:5px solid var(--gold-accent);border-bottom:5px solid var(--gold-accent);position:relative;overflow:hidden}
+        .warning-section::before{content:'';position:absolute;width:100%;height:100%;top:0;left:0;background:radial-gradient(circle at 50% 50%,rgba(255,189,89,.1) 0%,transparent 50%);pointer-events:none}
+        .warning-icon{text-align:center;margin-bottom:50px;position:relative;z-index:2}
+        .warning-icon div:first-child{font-size:60px;margin-bottom:20px}
+        .warning-icon h2{font-size:42px;color:var(--gold-accent);margin:0}
+        .warning-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:40px;max-width:900px;margin:0 auto 50px;position:relative;z-index:2}
+        .warning-box{background:rgba(0,0,0,.7);backdrop-filter:blur(20px);padding:35px;border-radius:15px;border:3px solid;box-shadow:0 10px 30px rgba(0,0,0,.5);transition:all .3s}
+        .warning-box:hover{transform:translateY(-5px)}
+        .warning-box.not-for{border-color:#dc3545}
+        .warning-box.only-for{border-color:var(--gold-accent);background:rgba(255,189,89,.15)}
+        .warning-box h3{font-size:24px;color:var(--gold-accent);margin-bottom:25px;text-align:center}
+        .warning-box ul{list-style:none;padding:0}
+        .warning-box li{margin:15px 0;font-size:16px;padding-left:35px;position:relative;line-height:1.6}
+        .warning-box.not-for li{color:var(--text-gold)}
+        .warning-box.only-for li{color:var(--text-light);font-weight:600}
+        .warning-box li span{position:absolute;left:0;font-size:20px}
+        .warning-final{text-align:center;max-width:800px;margin:0 auto;position:relative;z-index:2}
+        .warning-final p{font-size:20px;font-weight:700;color:var(--gold-accent);line-height:1.6}
+        
+        @media (max-width:768px){
+            .gem-value-stack-section,.gem-comparison-section,.warning-section{padding:60px 15px}
+            .gem-value-stack-section h2,.comp-title,.warning-icon h2{font-size:32px}
+            .value-box{padding:30px 20px}
+            .value-item{flex-direction:column;align-items:flex-start}
+            .value-icon{margin-bottom:15px}
+            .comp-grid{grid-template-columns:1fr;gap:25px}
+            .comp-arrow{font-size:36px;transform:rotate(90deg);animation:bounce-arrow-down 2s infinite;text-align:center;display:block;padding:10px 0}
+            @keyframes bounce-arrow-down{0%,100%{transform:rotate(90deg) translateX(0)}50%{transform:rotate(90deg) translateX(10px)}}
+            .comp-box{padding:30px 25px;min-height:auto}
+            .comp-box h3{font-size:24px;margin-bottom:20px}
+            .comp-list li{font-size:15px;padding:10px 0 10px 32px;margin-bottom:12px}
+            .comp-insight{padding:30px 20px}
+            .comp-insight h3{font-size:22px}
+            .comp-insight p{font-size:18px}
+            .warning-grid{grid-template-columns:1fr}
+            .warning-box h3{font-size:20px}
+            .special-offer .price{font-size:40px}
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========== SECTION 1: VALUE STACK ========== -->
+<section class="gem-value-stack-section">
+    <div class="container">
+        <h2>💎 Tổng Giá Trị Bạn Nhận Được</h2>
+
+        <div class="value-box">
+            <div class="value-item">
+                <span class="value-icon">🎓</span>
+                <div class="value-details">
+                    <h3>Chương Trình 7 Ngày Chuyển Hóa</h3>
+                    <p>7 buổi học sâu + bài tập thực hành hàng ngày</p>
+                </div>
+                <span class="value-price">4.900.000đ</span>
+            </div>
+
+            <div class="value-item">
+                <span class="value-icon">📚</span>
+                <div class="value-details">
+                    <h3>Workbook 70 Trang</h3>
+                    <p>Hệ thống bài tập, template, checklist hoàn chỉnh</p>
+                </div>
+                <span class="value-price">700.000đ</span>
+            </div>
+
+            <div class="value-item">
+                <span class="value-icon">👥</span>
+                <div class="value-details">
+                    <h3>Private Community Trọn Đời</h3>
+                    <p>Cộng đồng tần số cao + support liên tục</p>
+                </div>
+                <span class="value-price">1.800.000đ</span>
+            </div>
+
+            <div class="value-item">
+                <span class="value-icon">🗺️</span>
+                <div class="value-details">
+                    <h3>Bonus: Lộ Trình 49 Ngày Chi Tiết</h3>
+                    <p>Blueprint để tiếp tục chuyển hóa sâu hơn</p>
+                </div>
+                <span class="value-price">400.000đ</span>
+            </div>
+
+            <div class="total-divider"></div>
+
+            <div class="total-value">
+                <p class="label">TỔNG GIÁ TRỊ:</p>
+                <p class="amount">7.400.000đ</p>
+            </div>
+
+            <div class="special-offer">
+                <p class="label">👉 GIÁ ĐẶC BIỆT CHO 15 NGƯỜI ĐẦU TIÊN:</p>
+                <p class="price">1.990.000đ</p>
+                <div class="savings-badge">TIẾT KIỆM 5.410.000đ (73%)</div>
+                <p style="margin-top:20px;font-size:16px;color:var(--gold-light)">
+                    ⚡ Giá tăng lên 2.990.000đ sau khi hết slot
+                </p>
+            </div>
+
+            <div class="cta-center">
+                <a href="/collections/all" class="cta-button">NHẬN ƯU ĐÃI NGAY</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== SECTION 2: COMPARISON ========== -->
+<section class="gem-comparison-section">
+    <div class="container">
+        <h2 class="comp-title">⚖️ So Sánh: Cách Cũ vs 7 Ngày Khai Mở</h2>
+
+        <div class="comp-grid">
+            <div class="comp-box before">
+                <h3>❌ Cách Cũ<br>(Khóa học thông thường)</h3>
+                <ul class="comp-list">
+                    <li><strong>Năng Lượng Hàng Ngày:</strong> Mệt mỏi, uể oải</li>
+                    <li><strong>Tâm Trạng:</strong> Lo âu, stress</li>
+                    <li><strong>Mối Quan Hệ:</strong> Xung đột, căng thẳng</li>
+                    <li><strong>Tài Chính:</strong> Thiếu thốn, khó khăn</li>
+                    <li><strong>Phương Hướng:</strong> Lạc lối, bối rối</li>
+                    <li><strong>Tương Lai:</strong> Tiếp tục như cũ</li>
+                </ul>
+            </div>
+
+            <div class="comp-arrow">→</div>
+
+            <div class="comp-box after">
+                <h3>✅ 7 Ngày Khai Mở Tần Số</h3>
+                <ul class="comp-list">
+                    <li><strong>Năng Lượng Hàng Ngày:</strong> Tràn đầy sinh lực</li>
+                    <li><strong>Tâm Trạng:</strong> Bình an, vui vẻ</li>
+                    <li><strong>Mối Quan Hệ:</strong> Hài hòa, kết nối</li>
+                    <li><strong>Tài Chính:</strong> Dồi dào, may mắn</li>
+                    <li><strong>Phương Hướng:</strong> Rõ ràng, tự tin</li>
+                    <li><strong>Tương Lai:</strong> Chuyển đổi hoàn toàn</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="comp-insight">
+            <h3>Đã thử nhiều cách nhưng chưa thành công?</h3>
+            <p>
+                Đó không phải lỗi của bạn. Bạn chỉ chưa được tiếp cận <strong>ĐÚNG PHƯƠNG PHÁP</strong> mà thôi.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- ========== SECTION 3: WARNING ========== -->
+<section class="warning-section">
+    <div class="container">
+        
+        <div class="warning-icon">
+            <div>⚠️</div>
+            <h2>CHÚ Ý</h2>
+        </div>
+        
+        <div class="warning-grid">
+            
+            <div class="warning-box not-for">
+                <h3>Khóa này KHÔNG dành cho:</h3>
+                <ul>
+                    <li>
+                        <span>❌</span>
+                        Người chỉ muốn đọc thêm lý thuyết
+                    </li>
+                    <li>
+                        <span>❌</span>
+                        Người tìm "phép màu" thay đổi qua đêm
+                    </li>
+                    <li>
+                        <span>❌</span>
+                        Người không sẵn sàng đối diện với chính mình
+                    </li>
+                    <li>
+                        <span>❌</span>
+                        Người không cam kết hoàn thành 7 ngày
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="warning-box only-for">
+                <h3>Khóa này CHỈ dành cho:</h3>
+                <ul>
+                    <li>
+                        <span>✅</span>
+                        Người thực sự muốn thay đổi, không chỉ nói suông
+                    </li>
+                    <li>
+                        <span>✅</span>
+                        Người sẵn sàng học và áp dụng
+                    </li>
+                    <li>
+                        <span>✅</span>
+                        Người tin vào quy trình, không cần instant results
+                    </li>
+                    <li>
+                        <span>✅</span>
+                        Người ready to go deep
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="warning-final">
+            <p>Nếu bạn không thuộc nhóm thứ 2, xin đừng đăng ký.</p>
+        </div>
+    </div>
+</section>
+
+</body>
+</html>

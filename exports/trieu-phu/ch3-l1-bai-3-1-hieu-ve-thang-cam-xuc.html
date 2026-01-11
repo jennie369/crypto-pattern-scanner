@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 3.1: Hiểu Về Thang Cảm Xúc | GEM Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==================== VARIABLES ==================== */
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        /* ==================== BACKGROUND ==================== */
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: 20%; }
+
+        /* ==================== CONTAINER ==================== */
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container {
+                padding: 0;
+            }
+        }
+
+        /* ==================== HEADER ==================== */
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--navy-dark);
+            margin-bottom: var(--space-md);
+        }
+        .lesson-chapter {
+            font-size: 0.9rem;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-lg);
+            flex-wrap: wrap;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        /* ==================== SECTION ==================== */
+        .section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section {
+                padding: 0;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .section-title {
+                padding: var(--space-lg) 16px var(--space-md) 16px;
+                margin-bottom: 0;
+            }
+        }
+
+        .section > p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .section > p {
+                padding: 0 16px;
+            }
+        }
+
+        /* ==================== HIGHLIGHT BOXES ==================== */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box-title {
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .definition-box-title {
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .definition-box p { color: var(--text-secondary); margin: 0; }
+
+        /* ==================== IMAGE CONTAINER ==================== */
+        .image-container {
+            margin: var(--space-xl) 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-container {
+                margin: var(--space-md) 0;
+                border-radius: 0;
+                border: none;
+            }
+        }
+        .image-caption {
+            padding: var(--space-sm);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .image-caption {
+                padding: var(--space-sm) 16px;
+            }
+        }
+
+        /* ==================== EMOTION SCALE ==================== */
+        .emotion-scale {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .emotion-scale {
+                margin: var(--space-md) 0;
+            }
+        }
+        .emotion-item {
+            display: flex;
+            align-items: center;
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+        }
+        @media (max-width: 600px) {
+            .emotion-item {
+                border-radius: 0;
+                padding: var(--space-sm) 16px;
+            }
+        }
+        .emotion-number {
+            width: 30px;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+        .emotion-name {
+            flex: 1;
+            font-weight: 600;
+        }
+        .emotion-hz {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Color coding for emotion levels */
+        .emotion-item.level-high { background: rgba(0, 200, 83, 0.15); }
+        .emotion-item.level-high .emotion-name { color: var(--success); }
+
+        .emotion-item.level-mid-high { background: rgba(0, 240, 255, 0.1); }
+        .emotion-item.level-mid-high .emotion-name { color: var(--cyan); }
+
+        .emotion-item.level-mid { background: rgba(255, 189, 89, 0.1); }
+        .emotion-item.level-mid .emotion-name { color: var(--gold); }
+
+        .emotion-item.level-mid-low { background: rgba(106, 91, 255, 0.1); }
+        .emotion-item.level-mid-low .emotion-name { color: var(--purple); }
+
+        .emotion-item.level-low { background: rgba(156, 6, 18, 0.15); }
+        .emotion-item.level-low .emotion-name { color: var(--burgundy-light); }
+
+        /* ==================== MAPPING TABLE ==================== */
+        .mapping-table {
+            width: 100%;
+            margin: var(--space-lg) 0;
+            border-collapse: collapse;
+            overflow: hidden;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .mapping-table {
+                border-radius: 0;
+                border: none;
+                margin: var(--space-md) 0;
+            }
+        }
+        .mapping-table th {
+            background: var(--bg-card);
+            padding: var(--space-md);
+            text-align: left;
+            font-weight: 700;
+            color: var(--gold);
+            font-size: 0.9rem;
+        }
+        .mapping-table td {
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border-top: 1px solid var(--glass-border);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            vertical-align: top;
+        }
+        .mapping-table .tier-name {
+            font-weight: 700;
+        }
+
+        /* ==================== FLOW STEPS ==================== */
+        .flow-steps {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .flow-steps {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .flow-step {
+            display: flex;
+            gap: var(--space-md);
+            align-items: flex-start;
+            padding: var(--space-md);
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .flow-step {
+                padding: var(--space-md) 16px;
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+            }
+        }
+        @media (min-width: 601px) {
+            .flow-step:hover {
+                border-color: var(--gold);
+                transform: translateX(8px);
+            }
+        }
+        .flow-step-number {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--navy-dark);
+        }
+        .flow-step-content { flex: 1; }
+        .flow-step-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+        }
+        .flow-step-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* ==================== SUMMARY BOX ==================== */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02));
+            border: 2px solid var(--gold);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .summary-list { list-style: none; }
+        .summary-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-list li::before {
+            content: "✓";
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        /* ==================== FOOTER ==================== */
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .lesson-footer a {
+            color: var(--gold);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>✨</span>
+                <span>Module 3</span>
+            </div>
+            <div class="lesson-chapter">Module 3 - Cài Đặt Tần Số Thịnh Vượng</div>
+            <h1 class="lesson-title">Hiểu Về Thang Cảm Xúc</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 3.1</span></div>
+                <div class="meta-item"><span>⏱️</span><span>15 phút đọc</span></div>
+                <div class="meta-item"><span>📊</span><span>22 cấp cảm xúc</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Một Khám Phá Quan Trọng</h2>
+            <p>Hãy thử một thí nghiệm ngay bây giờ: Nghĩ về số dư trong tài khoản ngân hàng của bạn. Bạn cảm thấy gì? Lo lắng? Thoải mái? Sợ hãi? Hay biết ơn?</p>
+            <p>Cảm xúc vừa xuất hiện trong bạn CHÍNH LÀ tần số rung động hiện tại của bạn về tiền bạc. Và theo Quy Luật Thu Hút, tần số bạn phát ra là tần số bạn sẽ nhận lại.</p>
+            <p>Điều này giải thích tại sao một số người dường như "may mắn" với tiền - họ đang rung động ở tần số cao về tài chính. Trong khi những người khác, dù làm việc chăm chỉ, vẫn cứ xoay vòng trong vòng tròn thiếu thốn - vì họ mắc kẹt ở tần số thấp.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Tin Vui</div>
+                <p>Tần số không phải định mệnh. Bạn có thể học cách nhận diện tần số hiện tại của mình, và quan trọng hơn - bạn có thể học cách NÂNG tần số đó lên.</p>
+                <p style="margin-top: var(--space-sm);">Module 3 này sẽ trang bị cho bạn "bản đồ" và "la bàn" để điều hướng thế giới tần số cảm xúc - từ đó thu hút sự thịnh vượng tài chính vào cuộc sống.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 1: GIỚI THIỆU -->
+        <section class="section">
+            <h2 class="section-title"><span>🌟</span> Chào Mừng Đến Module 3</h2>
+            <p>Bạn đã hoàn thành hai module đầu tiên: thanh tẩy niềm tin giới hạn và hóa giải nghiệp tiền bạc. Bây giờ là lúc để <strong>CÀI ĐẶT</strong> tần số mới - tần số của sự thịnh vượng.</p>
+            <p>Trước khi cài đặt, bạn cần hiểu về <strong>Thang Cảm Xúc</strong> (Emotional Guidance Scale) - công cụ giúp bạn biết mình đang ở tần số nào và cách nâng lên.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📖</span> Thang Cảm Xúc Là Gì?</div>
+                <p>Thang Cảm Xúc là hệ thống 22 cấp cảm xúc từ thấp nhất (Fear/Grief) đến cao nhất (Joy/Freedom). Mỗi cảm xúc tương ứng với một tần số rung động. Cảm xúc càng cao = Tần số càng cao = Thu hút những điều tốt đẹp hơn.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M3_B1_01%0AEmotional+Scale+Intro" alt="Giới Thiệu Thang Cảm Xúc">
+                <div class="image-caption">Cảm xúc là "la bàn" chỉ cho bạn biết tần số hiện tại của mình</div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: 22 CẤP CẢM XÚC -->
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> 22 Cấp Độ Cảm Xúc</h2>
+            <p>Dưới đây là thang 22 cấp cảm xúc, từ cao nhất (1) đến thấp nhất (22). Xác định xem bạn thường ở đâu khi nghĩ về TIỀN BẠC:</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x1000/0a1628/FFBD59?text=HINH+14%0AEmotional+Scale%0A22+Levels" alt="Hình 14: Emotional Scale">
+                <div class="image-caption">Hình 14: Thang Cảm Xúc 22 Cấp - Bạn đang ở đâu khi nghĩ về tiền?</div>
+            </div>
+
+            <div class="emotion-scale">
+                <div class="emotion-item level-high">
+                    <span class="emotion-number">1.</span>
+                    <span class="emotion-name">Joy / Freedom / Love / Appreciation</span>
+                    <span class="emotion-hz">540+ Hz</span>
+                </div>
+                <div class="emotion-item level-high">
+                    <span class="emotion-number">2.</span>
+                    <span class="emotion-name">Passion</span>
+                    <span class="emotion-hz">500 Hz</span>
+                </div>
+                <div class="emotion-item level-high">
+                    <span class="emotion-number">3.</span>
+                    <span class="emotion-name">Enthusiasm / Eagerness / Happiness</span>
+                    <span class="emotion-hz">450 Hz</span>
+                </div>
+                <div class="emotion-item level-mid-high">
+                    <span class="emotion-number">4.</span>
+                    <span class="emotion-name">Positive Expectation / Belief</span>
+                    <span class="emotion-hz">400 Hz</span>
+                </div>
+                <div class="emotion-item level-mid-high">
+                    <span class="emotion-number">5.</span>
+                    <span class="emotion-name">Optimism</span>
+                    <span class="emotion-hz">350 Hz</span>
+                </div>
+                <div class="emotion-item level-mid-high">
+                    <span class="emotion-number">6.</span>
+                    <span class="emotion-name">Hopefulness</span>
+                    <span class="emotion-hz">310 Hz</span>
+                </div>
+                <div class="emotion-item level-mid">
+                    <span class="emotion-number">7.</span>
+                    <span class="emotion-name">Contentment</span>
+                    <span class="emotion-hz">250 Hz</span>
+                </div>
+                <div class="emotion-item level-mid">
+                    <span class="emotion-number">8.</span>
+                    <span class="emotion-name">Boredom</span>
+                    <span class="emotion-hz">200 Hz</span>
+                </div>
+                <div class="emotion-item level-mid">
+                    <span class="emotion-number">9.</span>
+                    <span class="emotion-name">Pessimism</span>
+                    <span class="emotion-hz">175 Hz</span>
+                </div>
+                <div class="emotion-item level-mid-low">
+                    <span class="emotion-number">10.</span>
+                    <span class="emotion-name">Frustration / Irritation / Impatience</span>
+                    <span class="emotion-hz">150 Hz</span>
+                </div>
+                <div class="emotion-item level-mid-low">
+                    <span class="emotion-number">11.</span>
+                    <span class="emotion-name">Overwhelm</span>
+                    <span class="emotion-hz">125 Hz</span>
+                </div>
+                <div class="emotion-item level-mid-low">
+                    <span class="emotion-number">12.</span>
+                    <span class="emotion-name">Disappointment</span>
+                    <span class="emotion-hz">100 Hz</span>
+                </div>
+                <div class="emotion-item level-mid-low">
+                    <span class="emotion-number">13.</span>
+                    <span class="emotion-name">Doubt</span>
+                    <span class="emotion-hz">90 Hz</span>
+                </div>
+                <div class="emotion-item level-mid-low">
+                    <span class="emotion-number">14.</span>
+                    <span class="emotion-name">Worry</span>
+                    <span class="emotion-hz">80 Hz</span>
+                </div>
+                <div class="emotion-item level-low">
+                    <span class="emotion-number">15.</span>
+                    <span class="emotion-name">Blame</span>
+                    <span class="emotion-hz">75 Hz</span>
+                </div>
+                <div class="emotion-item level-low">
+                    <span class="emotion-number">16.</span>
+                    <span class="emotion-name">Discouragement</span>
+                    <span class="emotion-hz">70 Hz</span>
+                </div>
+                <div class="emotion-item level-low">
+                    <span class="emotion-number">17.</span>
+                    <span class="emotion-name">Anger</span>
+                    <span class="emotion-hz">150 Hz*</span>
+                </div>
+                <div class="emotion-item level-low">
+                    <span class="emotion-number">18.</span>
+                    <span class="emotion-name">Revenge</span>
+                    <span class="emotion-hz">60 Hz</span>
+                </div>
+                <div class="emotion-item level-low">
+                    <span class="emotion-number">19.</span>
+                    <span class="emotion-name">Hatred / Rage</span>
+                    <span class="emotion-hz">50 Hz</span>
+                </div>
+                <div class="emotion-item level-low">
+                    <span class="emotion-number">20.</span>
+                    <span class="emotion-name">Jealousy</span>
+                    <span class="emotion-hz">40 Hz</span>
+                </div>
+                <div class="emotion-item level-low">
+                    <span class="emotion-number">21.</span>
+                    <span class="emotion-name">Insecurity / Guilt / Unworthiness</span>
+                    <span class="emotion-hz">30 Hz</span>
+                </div>
+                <div class="emotion-item level-low">
+                    <span class="emotion-number">22.</span>
+                    <span class="emotion-name">Fear / Grief / Depression / Despair / Powerlessness</span>
+                    <span class="emotion-hz">20 Hz</span>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Lưu Ý Về Anger (Tức Giận)</div>
+                <p>Anger có tần số 150 Hz nhưng đứng ở vị trí 17 vì nó là cảm xúc "cầu nối". Khi bạn đang ở Fear/Depression, đi lên Anger thực sự là TIẾN BỘ. Từ Anger, bạn có thể tiếp tục đi lên. Đừng sợ tức giận - sử dụng nó như bàn đạp.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: MAPPING VỚI 7 TẦNG -->
+        <section class="section">
+            <h2 class="section-title"><span>🔗</span> Mapping Với 7 Tầng Tâm Thức</h2>
+            <p>22 cấp cảm xúc tương ứng với <strong>7 Tầng Tâm Thức</strong> trong Học Thuyết Chuyển Hóa Nội Tâm:</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x600/0a1628/00F0FF?text=HINH+15%0AMapping+7+Tang" alt="Hình 15: Mapping 7 Tầng">
+                <div class="image-caption">Hình 15: Mapping 22 Cấp Cảm Xúc với 7 Tầng Tâm Thức</div>
+            </div>
+
+            <table class="mapping-table">
+                <thead>
+                    <tr>
+                        <th>Tầng</th>
+                        <th>Tên Tầng</th>
+                        <th>Tần Số</th>
+                        <th>Cảm Xúc (Cấp)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="tier-name" style="color: var(--gold);">7</td>
+                        <td>Nhất Nguyên</td>
+                        <td>5000+ Hz</td>
+                        <td>Vượt trên cảm xúc</td>
+                    </tr>
+                    <tr>
+                        <td class="tier-name" style="color: var(--gold);">6</td>
+                        <td>Từ Bi</td>
+                        <td>1000-5000 Hz</td>
+                        <td>1-2 (Joy, Passion)</td>
+                    </tr>
+                    <tr>
+                        <td class="tier-name" style="color: var(--success);">5</td>
+                        <td>Đồng Điệu</td>
+                        <td>700-1000 Hz</td>
+                        <td>3 (Enthusiasm)</td>
+                    </tr>
+                    <tr>
+                        <td class="tier-name" style="color: var(--cyan);">4</td>
+                        <td>Sáng Tạo</td>
+                        <td>500-700 Hz</td>
+                        <td>4-6 (Expectation, Optimism, Hope)</td>
+                    </tr>
+                    <tr>
+                        <td class="tier-name" style="color: var(--cyan);">3</td>
+                        <td>Chuyển Hóa</td>
+                        <td>300-500 Hz</td>
+                        <td>7-9 (Contentment, Boredom, Pessimism)</td>
+                    </tr>
+                    <tr>
+                        <td class="tier-name" style="color: var(--purple);">2</td>
+                        <td>Quan Sát</td>
+                        <td>150-300 Hz</td>
+                        <td>10-14 (Frustration → Worry)</td>
+                    </tr>
+                    <tr>
+                        <td class="tier-name" style="color: var(--burgundy-light);">1</td>
+                        <td>Phàm</td>
+                        <td>50-150 Hz</td>
+                        <td>15-22 (Blame → Despair)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🎯</span> Mục Tiêu Của Bạn</div>
+                <p><strong>Ngắn hạn:</strong> Nâng từ Tầng 1-2 lên Tầng 3-4 (từ Fear/Worry lên Contentment/Optimism)</p>
+                <p style="margin-top: var(--space-xs);"><strong>Dài hạn (sau 49 ngày):</strong> Ổn định ở Tầng 4 (Sáng Tạo) - tần số của manifestation và thu hút thịnh vượng</p>
+            </div>
+        </section>
+
+        <!-- SECTION 4: KỸ THUẬT MOVING UP -->
+        <section class="section">
+            <h2 class="section-title"><span>⬆️</span> Kỹ Thuật "Moving Up the Scale"</h2>
+            <p>Bạn KHÔNG THỂ nhảy từ Fear (22) lên Joy (1) trong một bước. Điều đó không tự nhiên và không bền vững. Bí quyết là đi lên <strong>TỪNG BƯỚC MỘT</strong>.</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Xác Định Vị Trí Hiện Tại</div>
+                        <div class="flow-step-desc">Nghĩ về tiền bạc. Cảm giác nào xuất hiện? Tìm nó trên thang 22 cấp. Ví dụ: "Khi nghĩ về tiền, tôi cảm thấy lo lắng (Worry - cấp 14)."</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tìm Cảm Xúc Kế Tiếp</div>
+                        <div class="flow-step-desc">Nhìn lên 1-2 bậc. Từ Worry (14), bạn có thể đi lên Doubt (13) hoặc Disappointment (12). Đây là mục tiêu ngắn hạn của bạn.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Sử Dụng "Reaching Thoughts"</div>
+                        <div class="flow-step-desc">Tìm suy nghĩ "có thể chấp nhận được" giúp bạn cảm thấy NHẸ HƠN một chút. Không cần tích cực hoàn toàn - chỉ cần BỚT TIÊU CỰC HƠN một chút.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Lặp Lại Cho Đến Khi Ổn Định</div>
+                        <div class="flow-step-desc">Khi bạn đã ổn định ở cấp mới (thường mất 1-3 ngày), lại nhìn lên và tiếp tục đi. Đây là marathon, không phải sprint.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📝</span> Ví Dụ "Reaching Thoughts"</div>
+                <p><strong>Từ Fear → Anger:</strong> "Tôi chán lắm rồi! Tôi không muốn sống như này nữa!" (Anger tốt hơn Fear vì nó có năng lượng hành động)</p>
+                <p style="margin-top: var(--space-xs);"><strong>Từ Worry → Doubt:</strong> "Có thể tình hình không tệ như tôi nghĩ... Tôi không chắc, nhưng có thể có cách."</p>
+                <p style="margin-top: var(--space-xs);"><strong>Từ Doubt → Contentment:</strong> "Ít nhất tôi có đủ ăn hôm nay. Nhiều người còn khó khăn hơn tôi."</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/00C853?text=M3_B1_02%0AMoving+Up+Technique" alt="Kỹ Thuật Moving Up">
+                <div class="image-caption">Đi lên từng bước - không cố nhảy cóc</div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: THỰC HÀNH -->
+        <section class="section">
+            <h2 class="section-title"><span>✍️</span> Bài Tập Thực Hành</h2>
+            <p>Thực hiện bài tập này NGAY BÂY GIỜ để áp dụng những gì bạn vừa học:</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Check-In Cảm Xúc Tiền Bạc</div>
+                        <div class="flow-step-desc">Nhắm mắt. Nghĩ về tình hình tài chính hiện tại của bạn. Cảm xúc nào xuất hiện? Ghi lại: "Khi nghĩ về tiền, tôi cảm thấy ____________ (cấp ___)"</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Xác Định Mục Tiêu Ngắn Hạn</div>
+                        <div class="flow-step-desc">Nhìn lên 2 bậc trên thang. Viết: "Mục tiêu cảm xúc tuần này của tôi là đạt đến ____________ (cấp ___)"</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tạo 3 "Reaching Thoughts"</div>
+                        <div class="flow-step-desc">Viết 3 suy nghĩ giúp bạn cảm thấy NHẸ HƠN một chút về tiền bạc. Không cần tích cực hoàn toàn - chỉ cần bớt nặng nề.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📱</span> Tích Hợp GEM App</div>
+                <p>Sử dụng tính năng <strong>Vision Board → Daily Score</strong> để tracking cảm xúc hàng ngày. Ghi lại cấp cảm xúc về tiền bạc mỗi sáng và mỗi tối để theo dõi tiến trình.</p>
+            </div>
+        </section>
+
+        <!-- REAL STORIES -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Câu Chuyện Thật Từ Học Viên</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>👤</span> Câu Chuyện Của Phương (29 tuổi, Nhân viên Marketing)</div>
+                <p><strong>Trước khi học:</strong> Phương luôn cảm thấy hoảng loạn mỗi khi nhìn vào app ngân hàng. Cô thường xuyên ở trạng thái Worry (cấp 14) hoặc thậm chí Fear (cấp 22) về tiền bạc. Mỗi khi có hóa đơn đến, tim cô đập nhanh, tay run và cô tránh không muốn mở ra xem.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Quá trình chuyển hóa:</strong> Phương bắt đầu theo dõi cảm xúc tiền bạc mỗi ngày. Cô nhận ra mình thường ở Fear vào đầu tháng (khi trả bill) và Worry vào cuối tháng (khi tiền gần hết). Thay vì cố gắng "tích cực giả tạo", cô cho phép mình đi lên từng bước: từ Fear → Anger ("Tôi chán lắm rồi! Đây không phải cuộc sống tôi muốn!") → Frustration → Doubt → Pessimism.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Kết quả sau 3 tuần:</strong> Phương đã ổn định ở Contentment (cấp 7). Điều kỳ diệu là khi cô không còn sợ hãi, cô bắt đầu nhìn ra cơ hội - một dự án freelance mà trước đây cô quá hoảng loạn để nhận. Thu nhập tháng đó tăng 40% so với bình thường.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>👤</span> Câu Chuyện Của Anh Đức (45 tuổi, Chủ doanh nghiệp nhỏ)</div>
+                <p><strong>Trước khi học:</strong> Anh Đức đã kinh doanh 10 năm nhưng luôn ở trạng thái căng thẳng về tiền. Dù doanh thu ổn, anh vẫn thường xuyên cảm thấy Overwhelm (cấp 11) và Frustration (cấp 10). Anh làm việc 14 tiếng/ngày nhưng vẫn thấy không đủ.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Nhận ra vấn đề:</strong> Khi học về Thang Cảm Xúc, anh Đức bàng hoàng nhận ra: "Tôi đã ở tầng Quan Sát (tầng 2) suốt 10 năm qua! Tôi cứ tưởng mình thành công vì có tiền, nhưng thực ra tần số tôi rất thấp." Anh hiểu rằng tiền đến nhưng đi cũng nhanh vì tần số không tương xứng.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Sau 49 ngày thực hành:</strong> Anh Đức đã ổn định ở Optimism (cấp 5) - tầng Sáng Tạo. Điều thú vị là anh giảm giờ làm từ 14 tiếng xuống 8 tiếng, nhưng doanh thu lại tăng 25% vì anh ra quyết định sáng suốt hơn và thu hút được khách hàng tốt hơn.</p>
+            </div>
+
+            <p>Cả hai câu chuyện trên đều có điểm chung: họ không cố gắng "tích cực giả tạo" hay nhảy cóc trên thang cảm xúc. Họ kiên nhẫn đi lên từng bước, và kết quả tài chính thay đổi như một hệ quả tự nhiên của việc nâng tần số.</p>
+        </section>
+
+        <!-- KEY TAKEAWAYS -->
+        <section class="section">
+            <h2 class="section-title"><span>🔑</span> 3 Điều Quan Trọng Nhất Từ Bài Này</h2>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Cảm Xúc Là La Bàn Tần Số</div>
+                        <div class="flow-step-desc">Cảm xúc bạn trải nghiệm khi nghĩ về tiền bạc chính là "la bàn" cho biết tần số rung động hiện tại của bạn. Không có cảm xúc nào "xấu" - tất cả đều là thông tin hữu ích giúp bạn biết mình đang ở đâu trên bản đồ tần số. Khi bạn biết vị trí, bạn mới có thể điều hướng.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Đi Lên Từng Bước, Không Nhảy Cóc</div>
+                        <div class="flow-step-desc">Bạn không thể (và không nên) cố nhảy từ Fear lên Joy trong một bước. Điều đó không tự nhiên và không bền vững. Bí quyết là đi lên từng cấp một: Fear → Anger → Frustration → Doubt → Contentment → Optimism. Mỗi bước tiến nhỏ đều là chiến thắng.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tần Số Quyết Định Kết Quả</div>
+                        <div class="flow-step-desc">Khi bạn ổn định ở tần số cao hơn (từ tầng Sáng Tạo trở lên), tiền bạc bắt đầu chảy đến một cách tự nhiên. Không phải vì bạn làm việc nhiều hơn, mà vì bạn thu hút cơ hội tốt hơn, ra quyết định sáng suốt hơn, và tạo giá trị lớn hơn từ cùng một lượng công sức.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TRANSITION -->
+        <section class="section">
+            <h2 class="section-title"><span>🌉</span> Chuẩn Bị Cho Bài Tiếp Theo</h2>
+            <p>Bạn đã có "bản đồ" (Thang Cảm Xúc 22 cấp) và "la bàn" (cảm xúc của bạn). Bây giờ bạn đã biết mình đang ở đâu trên bản đồ tần số.</p>
+            <p>Nhưng biết vị trí chỉ là bước đầu. Bước tiếp theo quan trọng hơn: <strong>Viết lại câu chuyện</strong> về tiền bạc mà bạn đang kể với chính mình mỗi ngày.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📝</span> Bài Tập Trước Khi Qua Bài 3.2</div>
+                <p>Trong 24 giờ tới, hãy lắng nghe "câu chuyện tiền bạc" mà bạn đang kể cho bản thân. Khi bạn nghĩ về tiền, bạn nói gì trong đầu? Ghi lại ít nhất 3 câu nói thường xuyên của bạn về tiền bạc.</p>
+                <p style="margin-top: var(--space-sm);">Ví dụ: "Tiền luôn không đủ", "Kiếm tiền khó quá", "Người giàu thường không tốt", "Tôi không giỏi quản lý tiền"...</p>
+                <p style="margin-top: var(--space-sm);">Những câu này chính là "câu chuyện cũ" mà bạn sẽ học cách viết lại trong Bài 3.2.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 6: TỔNG KẾT -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Tổng Kết Bài 3.1</h2>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>📌</span> Những Điều Bạn Đã Học</div>
+                <ul class="summary-list">
+                    <li>Hiểu về Thang Cảm Xúc 22 cấp (Emotional Guidance Scale)</li>
+                    <li>Mapping 22 cấp cảm xúc với 7 Tầng Tâm Thức</li>
+                    <li>Học kỹ thuật "Moving Up the Scale" - đi lên từng bước</li>
+                    <li>Sử dụng "Reaching Thoughts" để nâng tần số</li>
+                    <li>Xác định vị trí hiện tại và mục tiêu ngắn hạn của bạn</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>➡️</span> Tiếp Theo: Bài 3.2</div>
+                <p>Trong bài tiếp theo, bạn sẽ học cách <strong>Viết Lại Câu Chuyện Tiền Bạc</strong> (New Money Story). Đây là công cụ mạnh mẽ để thay đổi câu chuyện bạn kể với bản thân về tiền - từ đó thay đổi tần số và thực tại.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x400/0a1628/00C853?text=M3_B1_03%0AKnow+Your+Frequency" alt="Know Your Frequency">
+                <div class="image-caption">Biết tần số hiện tại = Biết cách đi lên = Thay đổi thực tại</div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <p>© 2024 GEM Academy | <a href="https://gemral.com">gemral.com</a></p>
+            <p style="margin-top: var(--space-sm);">Tiếp theo: Bài 3.2 - Viết Lại Câu Chuyện Tiền Bạc →</p>
+        </footer>
+
+    </div>
+</body>
+</html>

@@ -18,6 +18,7 @@ import {
   hasFeature,
   getUpgradeBenefits,
 } from '../config/tierAccess';
+import { TIER_FEATURES } from '../constants/tierFeatures';
 import QuotaService from './quotaService';
 
 class TierAccessService {
@@ -336,6 +337,16 @@ class TierAccessService {
       advancedStats: `Advanced Statistics chỉ có ở ${upgradeInfo.nextTierName} trở lên.`,
       aiSignals: `AI Signals là tính năng của ${upgradeInfo.nextTierName} trở lên.`,
       scan: `Bạn đã hết lượt scan hôm nay. Nâng cấp để có unlimited scans!`,
+      // Zone visualization messages
+      zoneRectangles: `Zone rectangles chỉ có ở ${upgradeInfo.nextTierName} trở lên.`,
+      zoneLabels: `Zone labels chỉ có ở ${upgradeInfo.nextTierName} trở lên.`,
+      zoneLifecycle: `Zone lifecycle tracking yêu cầu ${upgradeInfo.nextTierName} trở lên.`,
+      historicalZones: `Historical zones yêu cầu ${upgradeInfo.nextTierName} trở lên.`,
+      mtfAlignment: `MTF Zone Alignment yêu cầu ${upgradeInfo.nextTierName} trở lên.`,
+      zoneAlerts: `Zone alerts yêu cầu ${upgradeInfo.nextTierName} trở lên.`,
+      zoneCustomization: `Zone customization yêu cầu ${upgradeInfo.nextTierName} trở lên.`,
+      zoneExport: `Zone export yêu cầu ${upgradeInfo.nextTierName} trở lên.`,
+      multipleZones: `Hiển thị nhiều zones yêu cầu ${upgradeInfo.nextTierName} trở lên.`,
     };
 
     return {
@@ -343,6 +354,276 @@ class TierAccessService {
       nextTier: upgradeInfo.nextTierName,
       benefits: upgradeInfo.benefits,
     };
+  }
+
+  // ============================================================
+  // ZONE VISUALIZATION ACCESS METHODS
+  // ============================================================
+
+  /**
+   * Get zone visualization configuration for current tier
+   * @returns {Object} Zone visualization config
+   */
+  getZoneVisualizationConfig() {
+    return this.tierConfig.zoneVisualization || {
+      enabled: false,
+      maxZonesDisplayed: 1,
+      zoneRectangles: false,
+      zoneLabels: false,
+      zoneLifecycle: false,
+      historicalZones: false,
+      mtfTimeframes: 0,
+      zoneAlerts: 0,
+      customColors: false,
+      zoneExport: false,
+    };
+  }
+
+  /**
+   * Check if user can use zone rectangles (filled zones)
+   * @returns {boolean}
+   */
+  canUseZoneRectangles() {
+    const config = this.getZoneVisualizationConfig();
+    return config.zoneRectangles === true;
+  }
+
+  /**
+   * Check if user can use zone labels (Buy/Sell badges)
+   * @returns {boolean}
+   */
+  canUseZoneLabels() {
+    const config = this.getZoneVisualizationConfig();
+    return config.zoneLabels === true;
+  }
+
+  /**
+   * Check if user can use zone lifecycle tracking
+   * @returns {boolean}
+   */
+  canUseZoneLifecycle() {
+    const config = this.getZoneVisualizationConfig();
+    return config.zoneLifecycle === true;
+  }
+
+  /**
+   * Check if user can view historical zones
+   * @returns {boolean}
+   */
+  canViewHistoricalZones() {
+    const config = this.getZoneVisualizationConfig();
+    return config.historicalZones === true;
+  }
+
+  /**
+   * Get maximum zones that can be displayed
+   * @returns {number} Max zones (-1 = unlimited)
+   */
+  getMaxZonesDisplayed() {
+    const config = this.getZoneVisualizationConfig();
+    return config.maxZonesDisplayed || 1;
+  }
+
+  /**
+   * Get number of MTF timeframes allowed
+   * @returns {number} Number of timeframes (0 = none)
+   */
+  getMTFTimeframesAllowed() {
+    const config = this.getZoneVisualizationConfig();
+    return config.mtfTimeframes || 0;
+  }
+
+  /**
+   * Check if user can use MTF alignment feature
+   * @returns {boolean}
+   */
+  canUseMTFAlignment() {
+    return this.getMTFTimeframesAllowed() > 0;
+  }
+
+  /**
+   * Get maximum zone alerts allowed
+   * @returns {number} Max alerts (-1 = unlimited, 0 = none)
+   */
+  getMaxZoneAlerts() {
+    const config = this.getZoneVisualizationConfig();
+    return config.zoneAlerts !== undefined ? config.zoneAlerts : 0;
+  }
+
+  /**
+   * Check if user can create zone alerts
+   * @returns {boolean}
+   */
+  canUseZoneAlerts() {
+    return this.getMaxZoneAlerts() !== 0;
+  }
+
+  /**
+   * Check if user can customize zone colors
+   * @returns {boolean}
+   */
+  canCustomizeZones() {
+    const config = this.getZoneVisualizationConfig();
+    return config.customColors === true;
+  }
+
+  /**
+   * Check if user can export zones
+   * @returns {boolean}
+   */
+  canExportZones() {
+    const config = this.getZoneVisualizationConfig();
+    return config.zoneExport === true;
+  }
+
+  /**
+   * Check if user can scan multiple patterns (display multiple zones)
+   * @returns {boolean}
+   */
+  canScanMultiplePatterns() {
+    const config = this.getZoneVisualizationConfig();
+    return config.enabled === true && config.maxZonesDisplayed > 1;
+  }
+
+  /**
+   * Check if zone visualization is enabled for tier
+   * @returns {boolean}
+   */
+  isZoneVisualizationEnabled() {
+    const config = this.getZoneVisualizationConfig();
+    return config.enabled === true;
+  }
+
+  /**
+   * Get zone feature access summary
+   * @returns {Object} Object with all zone feature access flags
+   */
+  getZoneFeatureAccess() {
+    const config = this.getZoneVisualizationConfig();
+    return {
+      enabled: config.enabled || false,
+      zoneRectangles: config.zoneRectangles || false,
+      zoneLabels: config.zoneLabels || false,
+      zoneLifecycle: config.zoneLifecycle || false,
+      historicalZones: config.historicalZones || false,
+      mtfAlignment: config.mtfTimeframes > 0,
+      zoneAlerts: config.zoneAlerts !== 0,
+      zoneCustomization: config.customColors || false,
+      zoneExport: config.zoneExport || false,
+      multipleZones: config.maxZonesDisplayed > 1,
+      maxZonesDisplayed: config.maxZonesDisplayed || 1,
+      mtfTimeframes: config.mtfTimeframes || 0,
+      maxZoneAlerts: config.zoneAlerts || 0,
+    };
+  }
+
+  /**
+   * Check zone feature access by feature name
+   * @param {string} featureName - Zone feature to check
+   * @returns {boolean}
+   */
+  hasZoneFeature(featureName) {
+    const tierFeatures = TIER_FEATURES[this.userTier] || TIER_FEATURES.FREE;
+    return tierFeatures[featureName] === true;
+  }
+
+  /**
+   * Get zones display limit based on tier
+   * @param {Array} zones - Array of zones to filter
+   * @returns {Array} Filtered zones based on tier limit
+   */
+  filterZonesByTier(zones) {
+    if (!zones || !Array.isArray(zones)) return [];
+
+    const maxZones = this.getMaxZonesDisplayed();
+    if (maxZones === -1) return zones; // Unlimited
+
+    return zones.slice(0, maxZones);
+  }
+
+  /**
+   * Get zone upgrade benefits
+   * @returns {Object|null} Zone-specific upgrade info
+   */
+  getZoneUpgradeBenefits() {
+    const upgradeInfo = this.getUpgradeInfo();
+    if (!upgradeInfo) return null;
+
+    const currentConfig = this.getZoneVisualizationConfig();
+    const nextTier = TIER_ACCESS[upgradeInfo.nextTier];
+    const nextConfig = nextTier?.zoneVisualization || {};
+
+    const zoneUpgrades = [];
+
+    // Check for zone rectangle upgrade
+    if (!currentConfig.zoneRectangles && nextConfig.zoneRectangles) {
+      zoneUpgrades.push({
+        icon: 'Square',
+        text: 'Zone Rectangles - Hiển thị vùng zone đầy màu',
+      });
+    }
+
+    // Check for zone labels upgrade
+    if (!currentConfig.zoneLabels && nextConfig.zoneLabels) {
+      zoneUpgrades.push({
+        icon: 'Tag',
+        text: 'Zone Labels - Nhãn Buy/Sell với % độ mạnh',
+      });
+    }
+
+    // Check for zone lifecycle upgrade
+    if (!currentConfig.zoneLifecycle && nextConfig.zoneLifecycle) {
+      zoneUpgrades.push({
+        icon: 'RefreshCw',
+        text: 'Zone Lifecycle - Theo dõi Fresh/Tested/Broken',
+      });
+    }
+
+    // Check for historical zones upgrade
+    if (!currentConfig.historicalZones && nextConfig.historicalZones) {
+      zoneUpgrades.push({
+        icon: 'History',
+        text: 'Historical Zones - Xem zone quá khứ',
+      });
+    }
+
+    // Check for MTF upgrade
+    if (nextConfig.mtfTimeframes > currentConfig.mtfTimeframes) {
+      zoneUpgrades.push({
+        icon: 'Layers',
+        text: `MTF Alignment - ${nextConfig.mtfTimeframes} timeframes`,
+      });
+    }
+
+    // Check for zone alerts upgrade
+    if (nextConfig.zoneAlerts > currentConfig.zoneAlerts) {
+      const alertText = nextConfig.zoneAlerts === -1 ? 'Unlimited' : nextConfig.zoneAlerts;
+      zoneUpgrades.push({
+        icon: 'Bell',
+        text: `Zone Alerts - ${alertText} cảnh báo/coin`,
+      });
+    }
+
+    // Check for zone export upgrade
+    if (!currentConfig.zoneExport && nextConfig.zoneExport) {
+      zoneUpgrades.push({
+        icon: 'Download',
+        text: 'Zone Export - Xuất ra CSV/JSON',
+      });
+    }
+
+    // Check for more zones upgrade
+    if (nextConfig.maxZonesDisplayed > currentConfig.maxZonesDisplayed) {
+      zoneUpgrades.push({
+        icon: 'Grid',
+        text: `Hiển thị ${nextConfig.maxZonesDisplayed} zones (hiện ${currentConfig.maxZonesDisplayed})`,
+      });
+    }
+
+    return zoneUpgrades.length > 0 ? {
+      ...upgradeInfo,
+      zoneUpgrades,
+    } : null;
   }
 }
 

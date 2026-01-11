@@ -75,6 +75,9 @@ export const HEXAGRAMS = {
 // Card back design
 export const CARD_BACK = require('./card_back.jpg');
 
+// Screen background - mystical I Ching wheel
+export const ICHING_BACKGROUND = require('./iching_background.jpg.jpeg');
+
 /**
  * Get hexagram image by number (1-64)
  */
@@ -94,6 +97,7 @@ export const getCardBack = () => CARD_BACK;
 export default {
   HEXAGRAMS,
   CARD_BACK,
+  ICHING_BACKGROUND,
   getHexagramImage,
   getCardBack,
 };

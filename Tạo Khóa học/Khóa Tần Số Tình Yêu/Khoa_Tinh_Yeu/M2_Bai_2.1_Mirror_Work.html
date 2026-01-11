@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 2.1: Mirror Work - Kỹ Thuật Gương | Khóa Tần Số Tình Yêu</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--burgundy); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .section > ul, .section > ol { color: var(--text-secondary); padding-left: 1.5em; margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > ul, .section > ol { padding-left: calc(16px + 1.5em); padding-right: 16px; } }
+        .section li { margin-bottom: var(--space-sm); }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .highlight-box.purple { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05)); border-color: rgba(106, 91, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.purple { border-left-color: var(--purple); } }
+        .highlight-box.purple .highlight-box-title { color: var(--purple); }
+
+        .highlight-box.cyan { background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 240, 255, 0.05)); border-color: rgba(0, 240, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.cyan { border-left-color: var(--cyan); } }
+        .highlight-box.cyan .highlight-box-title { color: var(--cyan); }
+
+        .highlight-box.green { background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05)); border-color: rgba(0, 200, 83, 0.3); }
+        @media (max-width: 600px) { .highlight-box.green { border-left-color: var(--success); } }
+        .highlight-box.green .highlight-box-title { color: var(--success); }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .quote-box { background: linear-gradient(135deg, rgba(106, 91, 255, 0.1), rgba(106, 91, 255, 0.02)); border: 1px solid rgba(106, 91, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; font-style: italic; }
+        @media (max-width: 600px) { .quote-box { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .quote-box .quote-author { color: var(--purple); font-weight: 600; margin-top: var(--space-sm); font-style: normal; }
+
+        .example-box { background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02)); border: 1px solid rgba(0, 200, 83, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .example-box { border: none; border-radius: 0; border-left: 4px solid var(--success); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .example-box-title { font-weight: 700; color: var(--success); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        @media (min-width: 601px) { .flow-step:hover { border-color: var(--gold); transform: translateX(8px); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .affirmation-list { list-style: none; margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .affirmation-list { margin: var(--space-md) 0; padding: 0 16px !important; } }
+        .affirmation-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); padding: var(--space-md); background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border-radius: var(--radius-md); border-left: 4px solid var(--gold); color: var(--text-secondary); font-style: italic; }
+
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+
+        .faq-item { margin-bottom: var(--space-lg); }
+        .faq-question { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); }
+        .faq-answer { color: var(--text-secondary); }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>💕</span>
+                <span>Module 2</span>
+            </div>
+            <div class="lesson-chapter">Chapter 2 - Yêu Thương Bản Thân</div>
+            <h1 class="lesson-title">Mirror Work - Kỹ Thuật Gương</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 2.1</span></div>
+                <div class="meta-item"><span>⏱️</span><span>25 phút đọc</span></div>
+            </div>
+        </header>
+
+        <!-- SECTION 1: Opening Hook -->
+        <section class="section">
+            <h2 class="section-title"><span>🪞</span> Chiếc Gương Thần Kỳ</h2>
+
+            <p>Bạn nhìn vào gương bao nhiêu lần mỗi ngày để kiểm tra tóc, trang điểm, hay quần áo? Nhưng đã bao giờ bạn thực sự nhìn sâu vào đôi mắt mình và nói một lời yêu thương chưa? Đối với hầu hết chúng ta, câu trả lời là chưa bao giờ. Chúng ta sẵn sàng nói "anh yêu em" hay "con yêu mẹ" hàng trăm lần, nhưng lại không thể nói ba chữ đơn giản ấy với chính mình.</p>
+
+            <p>Louise Hay, người phụ nữ đã chữa lành hàng triệu người trên thế giới, đã khám phá ra rằng đây chính là gốc rễ của mọi vấn đề. Cô tin rằng mọi đau khổ trong cuộc sống đều bắt nguồn từ một điều duy nhất: chúng ta không yêu thương bản thân đủ nhiều. Và công cụ mạnh mẽ nhất để thay đổi điều này chính là Mirror Work - kỹ thuật làm việc với gương.</p>
+
+            <div class="quote-box">
+                <p>"Hãy nhìn vào mắt mình trong gương và nói 'Tao yêu mày'. Đây là điều khó khăn nhất mà bạn có thể làm - và cũng là điều chữa lành nhất. Nếu bạn chỉ có thể làm một điều cho bản thân mỗi ngày, hãy làm điều này."</p>
+                <div class="quote-author">— Louise Hay</div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m2-louise-hay-mirror.png" alt="Louise Hay và Mirror Work">
+            </div>
+            <div class="image-caption">Hình 1: Louise Hay - Người tiên phong của Mirror Work</div>
+        </section>
+
+        <!-- SECTION 2: Concept Introduction -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Mirror Work Là Gì?</h2>
+
+            <p>Mirror Work không chỉ đơn giản là đứng trước gương và lặp lại những câu affirmation. Đây là một thực hành thiêng liêng, một cuộc đối thoại sâu sắc giữa bạn và phần bản thân mà bạn đã bỏ quên từ lâu. Khi bạn nhìn vào mắt mình trong gương, bạn đang nhìn thẳng vào linh hồn mình - không có nơi nào để trốn, không có mặt nạ nào để đeo.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🪞</span> Định Nghĩa Mirror Work</div>
+                <p>Mirror Work là thực hành nhìn vào mắt mình trong gương và nói những lời yêu thương, chấp nhận, và khẳng định tích cực. Đây là hành động thiêng liêng của việc thừa nhận giá trị bản thân và xây dựng mối quan hệ yêu thương với chính mình. Louise Hay gọi đây là "công cụ mạnh mẽ nhất để thay đổi cuộc sống từ bên trong".</p>
+            </div>
+
+            <p>Tại sao phải dùng gương mà không chỉ đơn giản là tự nói với mình? Bởi vì gương tạo ra một trải nghiệm hoàn toàn khác biệt. Khi bạn nhìn vào mắt mình, bạn không thể nói dối. Bạn không thể che giấu cảm xúc thật. Mọi sự kháng cự, mọi niềm tin tiêu cực đều hiện lên rõ ràng trên khuôn mặt bạn. Và đó chính là điểm bắt đầu của sự chữa lành.</p>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>💜</span> Nguyên Lý Phản Chiếu</div>
+                <p>Theo Học Thuyết Chuyển Hóa Nội Tâm, gương là công cụ hoàn hảo để kích hoạt Nguyên Lý Phản Chiếu. Những gì bạn thấy trong gương không chỉ là hình ảnh vật lý, mà còn phản chiếu toàn bộ mối quan hệ bạn đang có với chính mình. Khi bạn học cách yêu thương hình ảnh trong gương, bạn đang học cách yêu thương bản thân ở mức độ sâu nhất.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: Deep Explanation -->
+        <section class="section">
+            <h2 class="section-title"><span>🧠</span> Tại Sao Mirror Work Hiệu Quả?</h2>
+
+            <p>Để hiểu sâu về sức mạnh của Mirror Work, chúng ta cần nhìn từ cả góc độ khoa học lẫn năng lượng. Kỹ thuật này không phải là mê tín hay chỉ là "động viên tinh thần" - nó thực sự tạo ra những thay đổi trong cấu trúc não bộ và trường năng lượng của bạn.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🧬</span> Góc Nhìn Khoa Học Thần Kinh</div>
+                <p>Khi bạn nhìn vào mắt mình trong gương, não bộ kích hoạt vùng fusiform face area - vùng chuyên xử lý khuôn mặt. Đồng thời, việc duy trì eye contact kích hoạt hệ thống oxytocin - hormone tạo cảm giác gắn kết và tin tưởng. Bạn đang tạo ra một "mối quan hệ gắn kết" với chính mình, giống như cách em bé gắn kết với mẹ thông qua ánh mắt.</p>
+            </div>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Phá Vỡ Rào Cản Tự Phê Bình</div>
+                        <div class="flow-step-desc">Khi nhìn thẳng vào mắt mình, bạn buộc phải đối mặt với những niềm tin tiêu cực đang chạy ngầm trong tiềm thức. Những tiếng nói phê bình bắt đầu lộ diện rõ ràng, và đó là bước đầu tiên để thay đổi chúng.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Kích Hoạt Vùng Tự Nhận Thức</div>
+                        <div class="flow-step-desc">Não bộ có một vùng gọi là medial prefrontal cortex, chuyên xử lý nhận thức về bản thân. Eye contact với gương kích hoạt mạnh mẽ vùng này, giúp bạn có cái nhìn khách quan và yêu thương hơn về chính mình.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tái Lập Trình Tiềm Thức</div>
+                        <div class="flow-step-desc">Lặp đi lặp lại những lời khẳng định tích cực trong trạng thái tập trung cao độ tạo ra những đường neural mới. Sau 21-30 ngày thực hành đều đặn, những pattern suy nghĩ mới này trở thành tự động.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Chữa Lành Đứa Trẻ Bên Trong</div>
+                        <div class="flow-step-desc">Khi bạn nói "Tao yêu mày", bạn đang nói với đứa trẻ bên trong - phần bản thân chưa từng được nghe những lời này từ người lớn. Đây là hành động re-parenting mạnh mẽ nhất bạn có thể làm cho chính mình.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m2-mirror-brain-science.png" alt="Khoa học đằng sau Mirror Work">
+            </div>
+            <div class="image-caption">Hình 2: Não bộ phản ứng với Mirror Work như thế nào</div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>⚡</span> Góc Nhìn Năng Lượng</div>
+                <p>Từ góc nhìn tần số, mỗi lời bạn nói đều mang một rung động. Khi bạn nói "Tao yêu mày" với sự chân thành, bạn đang phát ra tần số 500+ Hz - tần số của tình yêu. Và điều kỳ diệu là: bạn vừa là người phát, vừa là người nhận. Bạn đang tắm mình trong chính tần số yêu thương mà bạn tạo ra, nâng cao toàn bộ trường năng lượng của bản thân.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 4: Real-World Examples -->
+        <section class="section">
+            <h2 class="section-title"><span>💫</span> Những Câu Chuyện Chuyển Hóa</h2>
+
+            <p>Để hiểu sức mạnh thực sự của Mirror Work, hãy cùng nghe những câu chuyện từ những người đã thực hành và trải nghiệm sự chuyển đổi sâu sắc.</p>
+
+            <div class="example-box">
+                <div class="example-box-title"><span>👩</span> Câu Chuyện Của Hạnh</div>
+                <p>Hạnh, 35 tuổi, là một doanh nhân thành công bên ngoài nhưng bên trong luôn cảm thấy mình không đủ tốt. Cô lớn lên với bố mẹ hay so sánh cô với con nhà người ta, và tiếng nói phê bình đó đã theo cô đến tận bây giờ. Khi bắt đầu Mirror Work, ngày đầu tiên cô không thể nói nổi chữ "yêu" - cổ họng cô nghẹn lại, nước mắt trào ra. Cô chỉ đứng đó, nhìn vào mắt mình và khóc.</p>
+                <p style="margin-top: var(--space-sm);">"Tôi nhận ra mình chưa bao giờ thực sự nhìn vào mắt mình", Hạnh chia sẻ. "Tôi luôn nhìn lướt qua - kiểm tra tóc, kiểm tra da, nhưng không bao giờ thực sự NHÌN. Và khi tôi nhìn, tôi thấy bao nhiêu đau khổ, bao nhiêu cô đơn trong đôi mắt ấy." Sau 3 tuần thực hành mỗi ngày, Hạnh có thể nói "Tao yêu mày" mà không khóc - thay vào đó là một nụ cười dịu dàng.</p>
+            </div>
+
+            <div class="example-box">
+                <div class="example-box-title"><span>👨</span> Câu Chuyện Của Khôi</div>
+                <p>Khôi, 42 tuổi, ban đầu nghĩ Mirror Work là "thứ dành cho phụ nữ". Anh đồng ý thử chỉ vì vợ anh năn nỉ. Ngày đầu tiên, anh cảm thấy ngớ ngẩn và muốn bỏ cuộc. Nhưng điều gì đó khiến anh tiếp tục - có lẽ là ánh mắt buồn của chính mình trong gương.</p>
+                <p style="margin-top: var(--space-sm);">"Đến tuần thứ hai, tôi bắt đầu nói chuyện với thằng bé Khôi 8 tuổi trong gương", anh kể. "Thằng bé bị bố đánh mỗi khi điểm kém, bị mắng là 'đồ vô dụng'. Tôi nói với nó: 'Mày không vô dụng. Mày rất giỏi. Và tao xin lỗi vì đã để mày cô đơn suốt bao nhiêu năm.' Đó là lần đầu tiên tôi khóc từ khi còn là đứa trẻ." Sau 2 tháng, Khôi nhận ra mình đã thay đổi cách đối xử với con trai - không còn la mắng, không còn so sánh.</p>
+            </div>
+
+            <div class="example-box">
+                <div class="example-box-title"><span>👩‍🦱</span> Câu Chuyện Của Liên</div>
+                <p>Liên, 28 tuổi, mang theo nỗi đau bị bạn trai cũ phản bội. Cô tin rằng mình "không đủ đẹp, không đủ tốt" nên mới bị bỏ rơi. Mỗi lần nhìn vào gương, cô chỉ thấy những khuyết điểm. Mirror Work với cô ban đầu là tra tấn.</p>
+                <p style="margin-top: var(--space-sm);">Nhưng cô kiên trì. Mỗi ngày, dù chỉ 2 phút. "Tao không ghét mày" - đó là câu đầu tiên cô có thể nói thành thật. Rồi "Mày cũng ổn". Rồi "Mày xứng đáng được yêu thương". Sau 3 tháng, câu "Tao yêu mày" cuối cùng cũng tuôn ra một cách tự nhiên. "Khi tôi thực sự yêu bản thân," Liên chia sẻ, "tôi không còn cần ai khác để validate giá trị của mình nữa. Và đó là khi tôi sẵn sàng cho một tình yêu mới - một tình yêu lành mạnh."</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m2-mirror-stories.png" alt="Những câu chuyện Mirror Work">
+            </div>
+            <div class="image-caption">Hình 3: Hành trình chuyển hóa qua Mirror Work</div>
+        </section>
+
+        <!-- SECTION 5: Common Questions -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Những Thắc Mắc Thường Gặp</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">Tại sao tôi muốn quay mặt đi khi nhìn vào mắt mình?</div>
+                <div class="faq-answer">Đây là phản ứng hoàn toàn bình thường. Khi chúng ta không có mối quan hệ tốt với bản thân, việc nhìn thẳng vào mắt mình tạo ra cảm giác không thoải mái - giống như bạn đang đối mặt với một người mà bạn đã né tránh từ lâu. Hãy bắt đầu từ từ, chỉ vài giây, rồi tăng dần lên.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Tôi không thể nói "Tao yêu mày" vì cảm thấy đó là nói dối. Làm sao bây giờ?</div>
+                <div class="faq-answer">Không sao cả! Hãy bắt đầu với những câu bạn có thể nói thành thật: "Tao sẵn sàng học cách yêu mày", "Tao đang cố gắng chấp nhận mày", hoặc đơn giản là "Tao ở đây với mày". Sự chân thành quan trọng hơn những từ ngữ hoàn hảo.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Mỗi lần thực hành tôi đều khóc. Đây có phải là dấu hiệu tốt?</div>
+                <div class="faq-answer">Tuyệt đối là dấu hiệu tốt! Nước mắt là cách cơ thể giải phóng những cảm xúc bị kìm nén. Mỗi lần bạn khóc trong Mirror Work, bạn đang chữa lành một lớp đau khổ cũ. Hãy để nước mắt chảy tự do mà không cố kiềm chế.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Tôi cảm thấy ngớ ngẩn khi nói chuyện với gương. Làm sao để vượt qua?</div>
+                <div class="faq-answer">Cảm giác ngớ ngẩn ban đầu là bình thường - bạn đang làm điều mà xã hội chưa bao giờ dạy bạn. Hãy nhớ rằng đây là thời gian riêng tư của bạn, không ai đang đánh giá. Và sau vài ngày thực hành, cảm giác này sẽ biến mất, thay thế bằng cảm giác được kết nối sâu sắc với chính mình.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Thời điểm nào trong ngày là tốt nhất để thực hành Mirror Work?</div>
+                <div class="faq-answer">Sáng sớm sau khi thức dậy và tối trước khi đi ngủ là hai thời điểm lý tưởng nhất. Buổi sáng giúp bạn bắt đầu ngày mới với năng lượng yêu thương. Buổi tối giúp tiềm thức của bạn "ủ" những niềm tin tích cực trong khi ngủ. Nếu chỉ chọn một, hãy chọn buổi tối.</div>
+            </div>
+        </section>
+
+        <!-- SECTION 6: Practical Application -->
+        <section class="section">
+            <h2 class="section-title"><span>📝</span> Hướng Dẫn Thực Hành Chi Tiết</h2>
+
+            <p>Bây giờ bạn đã hiểu Mirror Work là gì và tại sao nó hiệu quả, hãy cùng đi vào quy trình thực hành cụ thể từng bước. Đây là phương pháp được Louise Hay khuyên dùng, đã được điều chỉnh cho phù hợp với người Việt.</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Chuẩn Bị Không Gian Thiêng Liêng</div>
+                        <div class="flow-step-desc">Chọn một chiếc gương đủ lớn để nhìn rõ khuôn mặt. Tốt nhất là gương trong phòng riêng nơi bạn không bị quấy rầy. Đảm bảo ánh sáng đủ để nhìn rõ mắt mình. Bạn có thể thắp một cây nến nhỏ hoặc bật nhạc nhẹ để tạo không khí trang nghiêm.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Hít Thở Và Định Tâm</div>
+                        <div class="flow-step-desc">Đứng hoặc ngồi thoải mái trước gương. Hít thở sâu 3 lần - hít vào 4 giây, giữ 4 giây, thở ra 6 giây. Cảm nhận cơ thể thư giãn. Đặt một tay lên tim nếu muốn tạo thêm sự kết nối.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Nhìn Sâu Vào Mắt</div>
+                        <div class="flow-step-desc">Nhìn thẳng vào mắt mình - không phải nhìn tổng thể khuôn mặt, mà nhìn sâu vào đồng tử. Hãy nhìn như thể bạn đang nhìn một người thân yêu nhất. Duy trì eye contact trong suốt quá trình thực hành.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Gọi Tên Và Bắt Đầu Đối Thoại</div>
+                        <div class="flow-step-desc">Gọi tên mình một cách trìu mến: "[Tên ơi], tao ở đây với mày." Sau đó nói từ từ: "Tao yêu mày. Tao thực sự, thực sự yêu mày." Để cho cảm xúc dâng lên - nếu nước mắt chảy, hãy để nó chảy.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Thêm Các Khẳng Định Khác</div>
+                        <div class="flow-step-desc">Tiếp tục với các affirmations khác theo nhu cầu của bạn hôm nay. Có thể là: "Mày xứng đáng được yêu thương", "Tao tự hào về mày", "Mày đủ tốt rồi", hoặc bất cứ điều gì bạn cần nghe.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">6</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Kết Thúc Với Lời Cam Kết</div>
+                        <div class="flow-step-desc">Trước khi rời đi, nói: "Tao sẽ luôn ở đây cho mày. Tao không bao giờ bỏ rơi mày." Đặt tay lên tim, cảm nhận lời hứa này thấm vào tim. Hít thở sâu một lần cuối và nở một nụ cười với hình ảnh trong gương.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m2-mirror-practice-steps.png" alt="Các bước thực hành Mirror Work">
+            </div>
+            <div class="image-caption">Hình 4: 6 bước thực hành Mirror Work mỗi ngày</div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📆</span> Lịch Trình 21 Ngày</div>
+                <p><strong>Tuần 1 (Làm quen):</strong> Mỗi sáng và tối 2-3 phút. Chỉ cần nhìn vào mắt và nói "Tao yêu mày" 10 lần. Cho phép mọi cảm xúc xuất hiện mà không phán xét.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Tuần 2 (Mở rộng):</strong> Tăng lên 5 phút. Thêm 3-5 affirmations khác. Bắt đầu nói về những điều cụ thể: "Tao yêu nụ cười của mày", "Tao trân trọng sự kiên cường của mày".</p>
+                <p style="margin-top: var(--space-sm);"><strong>Tuần 3 (Đi sâu):</strong> 10 phút mỗi ngày. Bắt đầu đối thoại với Inner Child trong gương. Hỏi: "Mày cần gì hôm nay?" và lắng nghe câu trả lời từ trực giác.</p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>💡</span> 12 Affirmations Cho Mirror Work</div>
+                <p>1. "Tao yêu mày vô điều kiện." • 2. "Mày xứng đáng được yêu thương và tôn trọng." • 3. "Mày đủ tốt rồi, đúng như mày hiện tại." • 4. "Tao tha thứ cho mày về tất cả những sai lầm." • 5. "Mày đẹp từ bên trong lẫn bên ngoài." • 6. "Tao tự hào về mày và những gì mày đã vượt qua." • 7. "Mày xứng đáng với tình yêu đích thực." • 8. "Tao tin tưởng mày và trực giác của mày." • 9. "Mày mạnh mẽ hơn mày nghĩ." • 10. "Tao sẽ luôn ở đây cho mày." • 11. "Mọi trải nghiệm đều giúp mày trưởng thành." • 12. "Mày xứng đáng với mọi điều tốt đẹp."</p>
+            </div>
+        </section>
+
+        <!-- SECTION 7: Key Takeaways -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Những Điểm Cốt Lõi</h2>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>💎</span> Ghi Nhớ Từ Bài Học Này</div>
+                <ul class="summary-list">
+                    <li>Mirror Work là thực hành nhìn vào mắt mình trong gương và nói những lời yêu thương, được Louise Hay phát triển như công cụ mạnh mẽ nhất để xây dựng self-love</li>
+                    <li>Khoa học đã chứng minh Mirror Work kích hoạt oxytocin, tái lập trình tiềm thức, và chữa lành Inner Child thông qua việc tạo mối quan hệ gắn kết với chính mình</li>
+                    <li>Cảm giác khó chịu, muốn quay mặt đi, hoặc khóc khi thực hành đều là phản ứng bình thường và là dấu hiệu của sự chữa lành</li>
+                    <li>Nếu không thể nói "Tao yêu mày", hãy bắt đầu với "Tao sẵn sàng học cách yêu mày" - sự chân thành quan trọng hơn từ ngữ hoàn hảo</li>
+                    <li>Thực hành mỗi ngày ít nhất 2 lần (sáng và tối), bắt đầu từ 2 phút và tăng dần lên 10 phút sau 21 ngày</li>
+                    <li>Mirror Work hiệu quả vì nó áp dụng Nguyên Lý Phản Chiếu - khi bạn yêu thương hình ảnh trong gương, bạn đang yêu thương bản thân ở mức độ sâu nhất</li>
+                </ul>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m2-21-day-practice.png" alt="Lịch trình 21 ngày Mirror Work">
+            </div>
+            <div class="image-caption">Hình 5: Cam kết 21 ngày - Hành trình yêu thương bản thân</div>
+        </section>
+
+        <!-- SECTION 8: Transition -->
+        <section class="section">
+            <h2 class="section-title"><span>🌟</span> Bước Tiếp Theo</h2>
+
+            <p>Mirror Work là nền tảng đầu tiên để xây dựng tình yêu bản thân. Nhưng yêu thương bản thân không chỉ dừng lại ở những lời nói - nó cần được thể hiện qua hành động hàng ngày. Trong bài học tiếp theo, chúng ta sẽ khám phá 7 Hành Vi Tinh Tấn - những hành động cụ thể giúp bạn chăm sóc bản thân trên mọi phương diện: thể chất, tinh thần, cảm xúc và tâm linh.</p>
+
+            <div class="highlight-box green">
+                <div class="highlight-box-title"><span>✨</span> Bài Tập Thực Hành Hôm Nay</div>
+                <p>Ngay sau khi đọc xong bài này, hãy đến trước gương và thực hành Mirror Work lần đầu tiên. Chỉ cần 2 phút. Nhìn vào mắt mình, hít thở sâu, và nói: "[Tên ơi], tao ở đây với mày. Tao đang học cách yêu mày." Ghi lại cảm xúc của bạn vào journal. Đây là bước đầu tiên trên hành trình yêu thương bản thân vô điều kiện.</p>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>

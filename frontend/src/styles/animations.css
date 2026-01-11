@@ -909,3 +909,27 @@
 .animation-running {
   animation-play-state: running;
 }
+
+/* ============================================
+   DISABLE ANIMATIONS IN EDITOR/PREVIEW CONTEXTS
+   For easier content editing without distracting animations
+   ============================================ */
+
+/* Disable ALL animations inside HTML preview/editor areas */
+.html-preview *,
+.html-preview *::before,
+.html-preview *::after,
+.wysiwyg-editor *,
+.wysiwyg-editor *::before,
+.wysiwyg-editor *::after,
+.phone-content *,
+.phone-content *::before,
+.phone-content *::after,
+[contenteditable="true"] *,
+[contenteditable="true"] *::before,
+[contenteditable="true"] *::after {
+  animation: none !important;
+  animation-delay: 0s !important;
+  animation-duration: 0s !important;
+  animation-iteration-count: 1 !important;
+}

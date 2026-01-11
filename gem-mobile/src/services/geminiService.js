@@ -1,56 +1,62 @@
 /**
  * Gemral - Gemini API Service
  *
- * Integration với Gemini 2.5 Flash API
- * - Rate limiting protection
- * - Error handling
- * - Conversation history management
+ * Integration via Supabase Edge Function (gemini-proxy)
+ * - Tier-based rate limiting
+ * - JWT authentication
+ * - Usage logging
  *
- * Performance: 2-5 seconds response time
- * Cost: Token-based (~$0.001 per query)
+ * Model: gemini-2.5-flash (with thinking tokens)
  */
 
-import { GEMINI_CONFIG, SYSTEM_PROMPT } from '../config/gemini.config';
+import { supabase, getSession, SUPABASE_URL } from './supabase';
+import { SYSTEM_PROMPT } from '../config/gemini.config';
+
+// Edge Function endpoint
+const GEMINI_PROXY_URL = `${SUPABASE_URL}/functions/v1/gemini-proxy`;
 
 class GeminiService {
   constructor() {
-    this.endpoint = GEMINI_CONFIG.endpoint;
-    this.apiKey = GEMINI_CONFIG.apiKey;
     this.maxRetries = 3;
     this.retryDelay = 1000; // 1 second
+    this.rateLimitInfo = null; // Store rate limit info from last request
   }
 
   /**
-   * Generate response from Gemini API
+   * Generate response from Gemini API via Edge Function
    * @param {string} message - User message
    * @param {Array} history - Conversation history
+   * @param {string} feature - Feature name ('gem_master', 'chat', etc.)
    * @returns {Promise<Object>} - { text, source: 'gemini', confidence: 1.0 }
    */
-  async generateResponse(message, history = []) {
+  async generateResponse(message, history = [], feature = 'gem_master') {
     const startTime = Date.now();
 
     try {
       // Build conversation context
-      const contents = this.buildContents(message, history);
+      const messages = this.buildMessages(message, history);
 
-      // Make API request
-      const response = await this.makeRequest(contents);
-
-      // Extract text from response
-      const text = this.extractText(response);
+      // Make API request via Edge Function
+      const response = await this.callEdgeFunction({
+        feature,
+        messages,
+        systemPrompt: SYSTEM_PROMPT,
+        metadata: { requestType: 'chat' },
+      });
 
       const duration = Date.now() - startTime;
-      console.log(`✅ [Gemini] Response generated in ${duration}ms`);
+      console.log(`[Gemini] Response generated in ${duration}ms`);
 
       return {
-        text,
+        text: response.text,
         source: 'gemini',
         confidence: 1.0,
         duration,
-        tokensUsed: response.usageMetadata?.totalTokenCount || 0,
+        tokensUsed: response.usage?.totalTokens || 0,
+        rateLimit: this.rateLimitInfo,
       };
     } catch (error) {
-      console.error('❌ [Gemini] Error:', error.message);
+      console.error('[Gemini] Error:', error.message);
 
       // Return fallback response
       return this.getFallbackResponse(error);
@@ -58,169 +64,108 @@ class GeminiService {
   }
 
   /**
-   * Build contents array for Gemini API
+   * Build messages array for Gemini API
    * @param {string} message - Current user message
    * @param {Array} history - Previous messages
    * @returns {Array}
    */
-  buildContents(message, history = []) {
-    const contents = [];
+  buildMessages(message, history = []) {
+    const messages = [];
 
-    // Add system prompt as first user message (Gemini workaround)
-    contents.push({
+    // Add system instruction acknowledgment (Gemini workaround)
+    messages.push({
       role: 'user',
-      parts: [{ text: `[SYSTEM INSTRUCTION]\n${SYSTEM_PROMPT}\n[END SYSTEM INSTRUCTION]\n\nHãy nhớ instruction trên và trả lời câu hỏi sau.` }],
+      parts: [{ text: '[SYSTEM INSTRUCTION RECEIVED]\nHãy nhớ instruction và trả lời câu hỏi sau.' }],
     });
 
-    contents.push({
+    messages.push({
       role: 'model',
-      parts: [{ text: 'Tôi đã hiểu. Tôi là Gemral AI, trợ lý trading và manifestation của Gemral. Tôi sẽ tuân theo tất cả hướng dẫn và bảo vệ 6 công thức Frequency độc quyền. Hãy hỏi tôi bất cứ điều gì!' }],
+      parts: [{ text: 'Ta đã hiểu. Ta là GEM Master. Ta sẽ tuân theo hướng dẫn. Bạn cần điều gì?' }],
     });
 
     // Add conversation history (last 10 messages)
     const recentHistory = history.slice(-10);
     for (const msg of recentHistory) {
-      contents.push({
+      messages.push({
         role: msg.role === 'user' ? 'user' : 'model',
         parts: [{ text: msg.content }],
       });
     }
 
     // Add current message
-    contents.push({
+    messages.push({
       role: 'user',
       parts: [{ text: message }],
     });
 
-    return contents;
+    return messages;
   }
 
   /**
-   * Make request to Gemini API with retry logic
-   * @param {Array} contents - Conversation contents
+   * Call Gemini API via Edge Function with auth
+   * @param {Object} params - Request parameters
    * @returns {Promise<Object>}
    */
-  async makeRequest(contents, attempt = 1) {
-    const url = `${this.endpoint}?key=${this.apiKey}`;
-
-    const body = {
-      contents,
-      generationConfig: {
-        temperature: GEMINI_CONFIG.temperature,
-        maxOutputTokens: GEMINI_CONFIG.maxTokens,
-        topP: GEMINI_CONFIG.topP,
-        topK: GEMINI_CONFIG.topK,
-      },
-      safetySettings: [
-        {
-          category: 'HARM_CATEGORY_HARASSMENT',
-          threshold: 'BLOCK_MEDIUM_AND_ABOVE',
-        },
-        {
-          category: 'HARM_CATEGORY_HATE_SPEECH',
-          threshold: 'BLOCK_MEDIUM_AND_ABOVE',
-        },
-        {
-          category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-          threshold: 'BLOCK_MEDIUM_AND_ABOVE',
-        },
-        {
-          category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-          threshold: 'BLOCK_MEDIUM_AND_ABOVE',
-        },
-      ],
-    };
-
+  async callEdgeFunction(params, attempt = 1) {
     try {
-      console.log('[Gemini] Making request to:', url.split('?')[0]);
-      console.log('[Gemini] Request body contents length:', contents.length);
+      // Get current session for JWT token
+      const { session, error: sessionError } = await getSession();
 
-      const response = await fetch(url, {
+      if (sessionError || !session?.access_token) {
+        throw new Error('Not authenticated. Please sign in to use AI features.');
+      }
+
+      console.log('[Gemini] Calling Edge Function:', params.feature);
+
+      const response = await fetch(GEMINI_PROXY_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+          'x-request-feature': params.feature,
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify(params),
       });
 
-      console.log('[Gemini] Response status:', response.status);
+      // Store rate limit info from headers
+      this.rateLimitInfo = {
+        limit: parseInt(response.headers.get('X-RateLimit-Limit') || '0', 10),
+        remaining: parseInt(response.headers.get('X-RateLimit-Remaining') || '0', 10),
+        resetAt: response.headers.get('X-RateLimit-Reset') || null,
+      };
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('[Gemini] Error response:', errorText);
-        let errorData = {};
-        try {
-          errorData = JSON.parse(errorText);
-        } catch (e) {
-          // ignore parse error
-        }
-        throw new Error(
-          errorData.error?.message || `HTTP ${response.status}: ${response.statusText}`
-        );
+      const data = await response.json();
+
+      // Handle rate limit exceeded
+      if (response.status === 429) {
+        console.warn('[Gemini] Rate limit exceeded');
+        throw new Error('RATE_LIMIT_EXCEEDED');
       }
 
-      const jsonResponse = await response.json();
-      console.log('[Gemini] Full response:', JSON.stringify(jsonResponse, null, 2).slice(0, 1000));
-      return jsonResponse;
+      // Handle auth errors
+      if (response.status === 401) {
+        throw new Error('AUTH_EXPIRED');
+      }
+
+      // Handle other errors
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || `HTTP ${response.status}`);
+      }
+
+      return {
+        text: data.data?.text || '',
+        usage: data.data?.usage || {},
+        rateLimit: data.rateLimit,
+      };
     } catch (error) {
-      // Retry logic
+      // Retry logic for transient errors
       if (attempt < this.maxRetries && this.shouldRetry(error)) {
-        console.log(`⚠️ [Gemini] Retry attempt ${attempt + 1}/${this.maxRetries}`);
+        console.log(`[Gemini] Retry attempt ${attempt + 1}/${this.maxRetries}`);
         await this.delay(this.retryDelay * attempt);
-        return this.makeRequest(contents, attempt + 1);
+        return this.callEdgeFunction(params, attempt + 1);
       }
 
       throw error;
-    }
-  }
-
-  /**
-   * Extract text from Gemini response
-   * @param {Object} response - API response
-   * @returns {string}
-   */
-  extractText(response) {
-    try {
-      console.log('[Gemini] Raw response:', JSON.stringify(response, null, 2).slice(0, 500));
-
-      // Check if response was blocked by safety filters
-      if (response.promptFeedback?.blockReason) {
-        console.warn('[Gemini] Response blocked:', response.promptFeedback.blockReason);
-        return '⚠️ Câu hỏi của bạn không thể xử lý được. Vui lòng thử hỏi cách khác nhé!';
-      }
-
-      const candidates = response.candidates;
-      if (!candidates || candidates.length === 0) {
-        // Check if there's a finish reason
-        console.warn('[Gemini] No candidates, checking promptFeedback');
-        return '🤔 Gemral đang suy nghĩ... Vui lòng thử lại!';
-      }
-
-      const candidate = candidates[0];
-
-      // Check finish reason
-      if (candidate.finishReason === 'SAFETY') {
-        return '⚠️ Câu trả lời bị giới hạn bởi bộ lọc an toàn. Vui lòng hỏi cách khác!';
-      }
-
-      const content = candidate.content;
-      if (!content || !content.parts || content.parts.length === 0) {
-        console.warn('[Gemini] No content parts, finishReason:', candidate.finishReason);
-        return '🤔 Gemral đang xử lý... Vui lòng thử lại!';
-      }
-
-      // Collect text from all parts
-      let text = '';
-      for (const part of content.parts) {
-        if (part.text) {
-          text += part.text;
-        }
-      }
-
-      return text || '🤔 Không có phản hồi. Vui lòng thử lại!';
-    } catch (error) {
-      console.error('❌ [Gemini] Extract text error:', error);
-      return '😔 Có lỗi xảy ra khi xử lý câu trả lời. Vui lòng thử lại!';
     }
   }
 
@@ -235,14 +180,20 @@ class GeminiService {
       'ETIMEDOUT',
       'ENOTFOUND',
       'network',
-      '429', // Rate limit
-      '500', // Server error
-      '502', // Bad gateway
-      '503', // Service unavailable
-      '504', // Gateway timeout
+      'fetch',
+      '500',
+      '502',
+      '503',
+      '504',
     ];
 
     const errorString = error.message.toLowerCase();
+
+    // Don't retry rate limit or auth errors
+    if (errorString.includes('rate_limit') || errorString.includes('auth')) {
+      return false;
+    }
+
     return retryableErrors.some((e) => errorString.includes(e.toLowerCase()));
   }
 
@@ -261,27 +212,55 @@ class GeminiService {
    * @returns {Object}
    */
   getFallbackResponse(error) {
-    const isRateLimit = error.message.includes('429');
-    const isNetworkError =
-      error.message.includes('network') ||
-      error.message.includes('ECONNRESET') ||
-      error.message.includes('fetch');
+    const errorMsg = error.message || '';
 
     let text;
-    if (isRateLimit) {
-      text = '⚠️ Hệ thống đang bận. Vui lòng thử lại sau vài giây.\n\nTrong lúc chờ, bạn có thể:\n• Xem TIER bundles trong Shop\n• Khám phá Crystals\n• Đọc FAQ trong Settings\n\nCảm ơn bạn đã kiên nhẫn! 😊';
-    } else if (isNetworkError) {
-      text = '📶 Không thể kết nối. Vui lòng kiểm tra kết nối mạng và thử lại.\n\nMẹo: Bật WiFi hoặc 4G để có trải nghiệm tốt nhất.';
+
+    if (errorMsg.includes('RATE_LIMIT_EXCEEDED')) {
+      const resetTime = this.rateLimitInfo?.resetAt
+        ? new Date(this.rateLimitInfo.resetAt).toLocaleTimeString('vi-VN')
+        : 'vài giây nữa';
+
+      text = `Bạn đã đạt giới hạn request trong phút này.
+
+**Reset lúc:** ${resetTime}
+
+**Mẹo:**
+- Upgrade TIER để có nhiều request hơn
+- TIER 1: 30 req/min
+- TIER 2: 60 req/min
+- TIER 3: 120 req/min
+
+Vui lòng thử lại sau.`;
+    } else if (errorMsg.includes('AUTH_EXPIRED') || errorMsg.includes('Not authenticated')) {
+      text = `Phiên đăng nhập đã hết hạn.
+
+Vui lòng đăng xuất và đăng nhập lại để tiếp tục sử dụng.`;
+    } else if (errorMsg.includes('network') || errorMsg.includes('fetch') || errorMsg.includes('ECONNRESET')) {
+      text = `Không thể kết nối server.
+
+Vui lòng kiểm tra kết nối mạng và thử lại.`;
     } else {
-      text = '😔 Xin lỗi, tôi gặp sự cố kỹ thuật.\n\nBạn có thể:\n• Thử lại sau vài giây\n• Gọi Hotline: 0909 123 456\n• Email: support@gemmaster.com\n\nCảm ơn bạn đã thông cảm! 🙏';
+      text = `Xin lỗi, có sự cố kỹ thuật.
+
+Vui lòng thử lại sau vài giây hoặc liên hệ support nếu lỗi tiếp tục.`;
     }
 
     return {
       text,
       source: 'fallback',
       confidence: 0,
-      error: error.message,
+      error: errorMsg,
+      rateLimit: this.rateLimitInfo,
     };
+  }
+
+  /**
+   * Get current rate limit info
+   * @returns {Object|null}
+   */
+  getRateLimitInfo() {
+    return this.rateLimitInfo;
   }
 
   /**
@@ -290,12 +269,75 @@ class GeminiService {
    */
   async testConnection() {
     try {
-      const response = await this.generateResponse('test');
+      const response = await this.generateResponse('test', [], 'chat');
       return response.source === 'gemini';
     } catch (error) {
-      console.error('❌ [Gemini] Connection test failed:', error);
+      console.error('[Gemini] Connection test failed:', error);
       return false;
     }
+  }
+
+  // ===========================================
+  // FEATURE-SPECIFIC METHODS
+  // ===========================================
+
+  /**
+   * Call GEM Master for trading advice
+   * @param {string} message - User question
+   * @param {Array} history - Conversation history
+   * @returns {Promise<Object>}
+   */
+  async callGemMaster(message, history = []) {
+    return this.generateResponse(message, history, 'gem_master');
+  }
+
+  /**
+   * Call for Tarot reading
+   * @param {string} question - User's question
+   * @param {Object} cards - Selected tarot cards
+   * @returns {Promise<Object>}
+   */
+  async callTarotReading(question, cards) {
+    const prompt = `[TAROT READING REQUEST]
+Câu hỏi: ${question}
+Lá bài: ${JSON.stringify(cards)}
+
+Hãy giải nghĩa lá bài này cho câu hỏi trên.`;
+
+    return this.generateResponse(prompt, [], 'tarot');
+  }
+
+  /**
+   * Call for I-Ching reading
+   * @param {string} question - User's question
+   * @param {Object} hexagram - Hexagram data
+   * @returns {Promise<Object>}
+   */
+  async callIChingReading(question, hexagram) {
+    const prompt = `[I-CHING READING REQUEST]
+Câu hỏi: ${question}
+Quẻ: ${hexagram.name} (${hexagram.image})
+Số: ${hexagram.number}
+
+Hãy giải nghĩa quẻ Kinh Dịch này cho câu hỏi trên.`;
+
+    return this.generateResponse(prompt, [], 'i_ching');
+  }
+
+  /**
+   * Call for Tử Vi reading
+   * @param {Object} birthInfo - Birth date/time info
+   * @param {string} question - User's question
+   * @returns {Promise<Object>}
+   */
+  async callTuViReading(birthInfo, question) {
+    const prompt = `[TỬ VI READING REQUEST]
+Thông tin ngày sinh: ${JSON.stringify(birthInfo)}
+Câu hỏi: ${question}
+
+Hãy phân tích Tử Vi dựa trên thông tin trên.`;
+
+    return this.generateResponse(prompt, [], 'tu_vi');
   }
 }
 

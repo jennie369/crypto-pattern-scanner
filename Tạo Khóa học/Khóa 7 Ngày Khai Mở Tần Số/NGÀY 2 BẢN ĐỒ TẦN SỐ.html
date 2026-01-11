@@ -1,0 +1,2310 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>NGÀY 2: BẢN ĐỒ TẦN SỐ | 7 Ngày Khai Mở Tần Số Gốc</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Noto+Sans+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+/* ==========================================
+   🎨 GEM DESIGN SYSTEM - V5.3 DESIGN TOKENS
+   Facebook-Style Full-Width Layout
+   ========================================== */
+:root {
+  /* ========== COLORS ========== */
+  --color-navy: #112250;
+  --color-navy-dark: #0A0F1A;
+  --color-navy-light: #1a3a6e;
+  --color-gold: #FFBD59;
+  --color-gold-dark: #E5A84D;
+  --color-burgundy: #9C0612;
+  --color-cyan: #00F0FF;
+  --color-purple: #6A5BFF;
+  --color-green: #10B981;
+  --color-red: #EF4444;
+  --color-orange: #FF9800;
+  --color-white: #FFFFFF;
+  --color-text: #E8E8E8;
+  --color-text-secondary: rgba(255, 255, 255, 0.7);
+  --color-text-muted: rgba(255, 255, 255, 0.5);
+  
+  /* ========== BACKGROUNDS ========== */
+  --bg-card: rgba(255, 255, 255, 0.03);
+  --bg-card-hover: rgba(255, 255, 255, 0.06);
+  --bg-glass: rgba(255, 255, 255, 0.08);
+  --color-bg-dark: #0A0F1A;
+  
+  /* ========== BORDERS ========== */
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --border-gold: rgba(255, 189, 89, 0.3);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  
+  /* ==========================================
+     🚨 V5.3 CRITICAL: TEXT-ONLY PADDING
+     ========================================== */
+  --text-padding: 16px;
+  
+  /* ========== SPACING ========== */
+  --space-xs: 0.125rem;
+  --space-sm: 0.25rem;
+  --space-md: 0.5rem;
+  --space-lg: 0.75rem;
+  --space-xl: 1rem;
+  --space-2xl: 1.25rem;
+  --space-3xl: 1.5rem;
+  
+  /* ==========================================
+     🚨 V5.3 CRITICAL: CONTAINER PADDING = 0
+     ========================================== */
+  --container-padding: 0;
+  --card-padding: 0.75rem;
+  --table-padding: 0.375rem;
+  
+  /* ========== BORDER RADIUS ========== */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  
+  /* ========== SHADOWS ========== */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.3);
+  --shadow-glow-gold: 0 0 15px rgba(255, 189, 89, 0.3);
+  --shadow-glow-cyan: 0 0 15px rgba(0, 240, 255, 0.3);
+  
+  /* ========== GLASSMORPHISM ========== */
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-blur: blur(40px);
+  
+  /* ========== TYPOGRAPHY ========== */
+  --font-heading: 'Montserrat', sans-serif;
+  --font-body: 'Noto Sans Display', sans-serif;
+  --text-xs: 0.7rem;
+  --text-sm: 0.8rem;
+  --text-base: 0.9rem;
+  --text-lg: 1rem;
+  --text-xl: 1.1rem;
+  --text-2xl: 1.3rem;
+}
+
+/* ==========================================
+   💻 DESKTOP BREAKPOINT (600px+)
+   ========================================== */
+@media (min-width: 600px) {
+  :root {
+    --text-padding: 24px;
+    --container-padding: 1.5rem;
+    --card-padding: 1rem;
+    --table-padding: 0.75rem;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    
+    --space-sm: 0.5rem;
+    --space-md: 0.75rem;
+    --space-lg: 1rem;
+    --space-xl: 1.5rem;
+    --space-2xl: 2rem;
+    --space-3xl: 3rem;
+    
+    --text-xs: 0.75rem;
+    --text-sm: 0.85rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+  }
+}
+
+/* ========== RESET & BASE ========== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  background: linear-gradient(
+    180deg,
+    var(--color-bg-dark) 0%,
+    var(--color-navy) 30%,
+    var(--color-navy) 70%,
+    var(--color-bg-dark) 100%
+  );
+  color: var(--color-text);
+  line-height: 1.6;
+  min-height: 100vh;
+  font-size: var(--text-base);
+}
+
+/* Bokeh Background */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(ellipse 600px 600px at 20% 20%, rgba(255, 189, 89, 0.08), transparent 70%),
+    radial-gradient(ellipse 500px 500px at 80% 80%, rgba(0, 240, 255, 0.06), transparent 70%),
+    radial-gradient(ellipse 400px 400px at 50% 50%, rgba(106, 91, 255, 0.04), transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* V5.3: Container không có padding trên mobile */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+@media (min-width: 600px) {
+  .container {
+    padding: var(--container-padding);
+  }
+}
+
+/* ==========================================
+   LESSON HEADER - Full-Width Mobile
+   ========================================== */
+.lesson-header {
+  text-align: center;
+  margin-bottom: 1px;
+  padding: var(--card-padding);
+  padding-left: var(--text-padding);
+  padding-right: var(--text-padding);
+  background: var(--bg-card);
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
+  backdrop-filter: var(--glass-blur);
+  position: relative;
+  overflow: hidden;
+}
+
+.lesson-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-gold), var(--color-cyan), var(--color-gold));
+}
+
+@media (min-width: 600px) {
+  .lesson-header {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-subtle);
+    margin-bottom: var(--space-xl);
+    padding: var(--card-padding);
+  }
+}
+
+.lesson-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));
+  color: var(--color-navy);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: 20px;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--space-sm);
+}
+
+.lesson-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-cyan) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: var(--space-sm);
+  line-height: 1.3;
+}
+
+.lesson-subtitle {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+/* ==========================================
+   SECTION - Full-Width Mobile
+   ========================================== */
+.section {
+  background: var(--glass-bg);
+  border: none;
+  border-bottom: 1px solid var(--glass-border);
+  border-radius: 0;
+  padding: var(--card-padding) 0;
+  margin-bottom: 1px;
+  backdrop-filter: var(--glass-blur);
+}
+
+@media (min-width: 600px) {
+  .section {
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: var(--card-padding);
+    margin-bottom: var(--space-xl);
+  }
+}
+
+.section > p,
+.section > h2,
+.section > h3,
+.section > ul,
+.section > ol {
+  padding-left: var(--text-padding);
+  padding-right: var(--text-padding);
+}
+
+@media (min-width: 600px) {
+  .section > p,
+  .section > h2,
+  .section > h3,
+  .section > ul,
+  .section > ol {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.section-title .icon {
+  font-size: 1.2em;
+}
+
+/* ==========================================
+   HIGHLIGHT BOX - Border-Left Mobile
+   ========================================== */
+.highlight-box {
+  padding: var(--card-padding);
+  padding-left: calc(var(--text-padding) - 4px);
+  padding-right: var(--text-padding);
+  border-radius: 0;
+  margin: var(--space-md) 0;
+  border: none;
+  border-left: 4px solid var(--color-gold);
+  background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(0, 240, 255, 0.05));
+}
+
+@media (min-width: 600px) {
+  .highlight-box {
+    border: 1px solid rgba(255, 189, 89, 0.3);
+    border-left: 4px solid var(--color-gold);
+    border-radius: var(--radius-md);
+    padding: var(--card-padding);
+  }
+}
+
+.highlight-box.cyan {
+  border-left-color: var(--color-cyan);
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(106, 91, 255, 0.05));
+}
+
+.highlight-box.purple {
+  border-left-color: var(--color-purple);
+  background: linear-gradient(135deg, rgba(106, 91, 255, 0.1), rgba(0, 240, 255, 0.05));
+}
+
+.highlight-box.green {
+  border-left-color: var(--color-green);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(0, 240, 255, 0.05));
+}
+
+.highlight-box.red {
+  border-left-color: var(--color-red);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(255, 189, 89, 0.05));
+}
+
+.highlight-box.orange {
+  border-left-color: var(--color-orange);
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.1), rgba(255, 189, 89, 0.05));
+}
+
+.highlight-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: var(--space-sm);
+}
+
+.highlight-box p {
+  margin-bottom: var(--space-sm);
+  color: var(--color-text);
+}
+
+.highlight-box p:last-child {
+  margin-bottom: 0;
+}
+
+/* ==========================================
+   DEFINITION BOX - Border-Left Mobile
+   ========================================== */
+.definition-box {
+  background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(0, 240, 255, 0.05));
+  border: none;
+  border-left: 4px solid var(--color-gold);
+  border-radius: 0;
+  padding: var(--card-padding);
+  padding-left: calc(var(--text-padding) - 4px);
+  padding-right: var(--text-padding);
+  margin: var(--space-lg) 0;
+  text-align: center;
+}
+
+@media (min-width: 600px) {
+  .definition-box {
+    border: 2px solid var(--color-gold);
+    border-radius: var(--radius-lg);
+    padding: var(--card-padding);
+  }
+}
+
+.definition-box .term {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  color: var(--color-gold);
+  margin-bottom: var(--space-sm);
+}
+
+.definition-box .meaning {
+  font-size: var(--text-lg);
+  color: var(--color-cyan);
+  font-weight: 600;
+}
+
+.definition-box .description {
+  margin-top: var(--space-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+/* ==========================================
+   STATS GRID - Gap 1px Mobile
+   ========================================== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  margin: var(--space-md) 0;
+  background: var(--glass-border);
+}
+
+@media (min-width: 600px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+    background: transparent;
+  }
+}
+
+.stat-card {
+  background: var(--glass-bg);
+  border: none;
+  border-radius: 0;
+  padding: var(--space-md);
+  text-align: center;
+}
+
+@media (min-width: 600px) {
+  .stat-card {
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: var(--card-padding);
+  }
+  
+  .stat-card:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--color-gold);
+    transform: translateY(-2px);
+  }
+}
+
+.stat-value {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  color: var(--color-gold);
+}
+
+.stat-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-xs);
+}
+
+/* ==========================================
+   INFO GRID - Gap 1px Mobile
+   ========================================== */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1px;
+  margin: var(--space-md) 0;
+  background: var(--glass-border);
+}
+
+@media (min-width: 600px) {
+  .info-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-md);
+    background: transparent;
+  }
+}
+
+.info-card {
+  background: var(--glass-bg);
+  border: none;
+  border-radius: 0;
+  padding: var(--card-padding);
+  padding-left: var(--text-padding);
+  padding-right: var(--text-padding);
+}
+
+@media (min-width: 600px) {
+  .info-card {
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: var(--card-padding);
+  }
+  
+  .info-card:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--color-cyan);
+  }
+}
+
+.info-card .card-icon {
+  font-size: 1.5rem;
+  margin-bottom: var(--space-sm);
+}
+
+.info-card .card-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: var(--space-xs);
+}
+
+.info-card .card-text {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+/* ==========================================
+   ARCHETYPE GRID - 4 Cards
+   ========================================== */
+.archetype-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  margin: var(--space-md) 0;
+  background: var(--glass-border);
+}
+
+@media (min-width: 600px) {
+  .archetype-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+    background: transparent;
+  }
+}
+
+.archetype-card {
+  background: var(--glass-bg);
+  border: none;
+  border-radius: 0;
+  padding: var(--card-padding);
+  text-align: center;
+}
+
+@media (min-width: 600px) {
+  .archetype-card {
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: var(--card-padding);
+  }
+  
+  .archetype-card:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--color-gold);
+    transform: translateY(-3px);
+  }
+}
+
+.archetype-icon {
+  font-size: 2rem;
+  margin-bottom: var(--space-sm);
+}
+
+.archetype-name {
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: var(--space-xs);
+}
+
+.archetype-freq {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));
+  color: var(--color-navy);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  margin-bottom: var(--space-sm);
+}
+
+.archetype-quote {
+  font-size: var(--text-xs);
+  color: var(--color-cyan);
+  font-style: italic;
+  margin-bottom: var(--space-xs);
+}
+
+.archetype-trait {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-xs);
+}
+
+.archetype-lesson {
+  font-size: var(--text-xs);
+  color: var(--color-purple);
+  font-weight: 600;
+}
+
+/* ==========================================
+   FREQUENCY LEVEL CARD
+   ========================================== */
+.freq-level {
+  background: var(--glass-bg);
+  border: none;
+  border-left: 4px solid var(--color-gold);
+  border-radius: 0;
+  padding: var(--card-padding);
+  padding-left: calc(var(--text-padding) - 4px);
+  padding-right: var(--text-padding);
+  margin-bottom: 1px;
+}
+
+@media (min-width: 600px) {
+  .freq-level {
+    border: 1px solid var(--glass-border);
+    border-left: 4px solid var(--color-gold);
+    border-radius: var(--radius-md);
+    padding: var(--card-padding);
+    margin-bottom: var(--space-md);
+  }
+  
+  .freq-level:hover {
+    background: var(--bg-card-hover);
+    transform: translateX(5px);
+  }
+}
+
+.freq-level.negative {
+  border-left-color: var(--color-red);
+}
+
+.freq-level.neutral {
+  border-left-color: var(--color-orange);
+}
+
+.freq-level.positive {
+  border-left-color: var(--color-green);
+}
+
+.freq-level .freq-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: var(--space-xs);
+}
+
+.freq-level .freq-feeling {
+  font-size: var(--text-sm);
+  color: var(--color-cyan);
+  margin-bottom: var(--space-xs);
+}
+
+.freq-level .freq-behavior {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-xs);
+}
+
+.freq-level .freq-example {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* ==========================================
+   FREQUENCY GROUP HEADER
+   ========================================== */
+.freq-group-header {
+  text-align: center;
+  padding: var(--space-md) var(--text-padding);
+  margin: var(--space-lg) 0 var(--space-md) 0;
+}
+
+.freq-group-header .group-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  margin-bottom: var(--space-xs);
+}
+
+.freq-group-header .group-range {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.freq-group-header.negative .group-title {
+  color: var(--color-red);
+}
+
+.freq-group-header.neutral .group-title {
+  color: var(--color-orange);
+}
+
+.freq-group-header.positive .group-title {
+  color: var(--color-green);
+}
+
+/* ==========================================
+   IMAGE CONTAINER - Full-Width Mobile
+   ========================================== */
+.image-container {
+  margin: var(--space-md) 0;
+  text-align: center;
+}
+
+.image-container img {
+  width: 100%;
+  border-radius: 0;
+  box-shadow: var(--shadow-md);
+  display: block;
+}
+
+@media (min-width: 600px) {
+  .image-container img {
+    border-radius: var(--radius-md);
+    border: 2px solid var(--glass-border);
+  }
+}
+
+.image-caption {
+  margin-top: var(--space-sm);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-style: italic;
+  padding: 0 var(--text-padding);
+}
+
+@media (min-width: 600px) {
+  .image-caption {
+    font-size: var(--text-sm);
+    padding: 0;
+  }
+}
+
+/* ==========================================
+   IMAGE PLACEHOLDER
+   ========================================== */
+.image-placeholder {
+  margin: var(--space-md) 0;
+  min-height: 250px;
+  background: linear-gradient(135deg, rgba(17, 34, 80, 0.8), rgba(10, 15, 26, 0.9));
+  border: 2px dashed var(--color-gold);
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+  text-align: center;
+}
+
+@media (min-width: 600px) {
+  .image-placeholder {
+    min-height: 300px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+.image-placeholder .placeholder-icon {
+  font-size: 3rem;
+  margin-bottom: var(--space-md);
+}
+
+.image-placeholder .placeholder-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: var(--space-sm);
+}
+
+.image-placeholder .placeholder-desc {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  max-width: 300px;
+  line-height: 1.4;
+}
+
+.image-placeholder .placeholder-id {
+  font-size: var(--text-xs);
+  color: var(--color-cyan);
+  font-family: monospace;
+  margin-top: var(--space-sm);
+  background: rgba(0, 240, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+/* ==========================================
+   TOOL CARD
+   ========================================== */
+.tool-card {
+  background: var(--glass-bg);
+  border: none;
+  border-left: 4px solid var(--color-purple);
+  border-radius: 0;
+  padding: var(--card-padding);
+  padding-left: calc(var(--text-padding) - 4px);
+  padding-right: var(--text-padding);
+  margin: var(--space-md) 0;
+}
+
+@media (min-width: 600px) {
+  .tool-card {
+    border: 2px solid var(--color-purple);
+    border-radius: var(--radius-lg);
+    padding: var(--card-padding);
+  }
+}
+
+.tool-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.tool-header .tool-icon {
+  font-size: 1.5rem;
+}
+
+.tool-header .tool-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-purple);
+}
+
+.tool-name {
+  font-size: var(--text-base);
+  color: var(--color-gold);
+  font-style: italic;
+  margin-bottom: var(--space-sm);
+}
+
+.tool-effect {
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  margin-bottom: var(--space-sm);
+}
+
+.tool-usage {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+/* ==========================================
+   EXERCISE CARD
+   ========================================== */
+.exercise-card {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.05), rgba(106, 91, 255, 0.05));
+  border: none;
+  border-left: 4px solid var(--color-cyan);
+  border-radius: 0;
+  padding: var(--card-padding);
+  padding-left: calc(var(--text-padding) - 4px);
+  padding-right: var(--text-padding);
+  margin: var(--space-lg) 0;
+}
+
+@media (min-width: 600px) {
+  .exercise-card {
+    border: 2px solid var(--color-cyan);
+    border-radius: var(--radius-lg);
+    padding: var(--card-padding);
+  }
+}
+
+.exercise-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.exercise-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-cyan);
+}
+
+.exercise-time {
+  background: var(--color-cyan);
+  color: var(--color-navy);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+.exercise-step {
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.exercise-step:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.step-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: var(--space-sm);
+}
+
+.step-content {
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+.step-content p {
+  margin-bottom: var(--space-sm);
+}
+
+.step-content ul,
+.step-content ol {
+  margin-left: var(--space-xl);
+  margin-bottom: var(--space-sm);
+}
+
+.step-content li {
+  margin-bottom: var(--space-xs);
+}
+
+/* ==========================================
+   CHECKLIST
+   ========================================== */
+.checklist {
+  list-style: none;
+  margin: var(--space-md) 0;
+}
+
+.checklist li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.checklist li:last-child {
+  border-bottom: none;
+}
+
+.checklist .checkbox {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--color-gold);
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ==========================================
+   SUMMARY BOX
+   ========================================== */
+.summary-box {
+  background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(0, 240, 255, 0.1));
+  border: none;
+  border-left: 4px solid var(--color-gold);
+  border-radius: 0;
+  padding: var(--card-padding) 0;
+  margin: var(--space-lg) 0;
+}
+
+@media (min-width: 600px) {
+  .summary-box {
+    border: 2px solid var(--color-gold);
+    border-radius: var(--radius-lg);
+    padding: var(--card-padding);
+  }
+}
+
+.summary-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: var(--space-md);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 0 var(--text-padding);
+}
+
+@media (min-width: 600px) {
+  .summary-title {
+    padding: 0;
+  }
+}
+
+.key-points {
+  list-style: none;
+}
+
+.key-point {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--text-padding);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+@media (min-width: 600px) {
+  .key-point {
+    padding: var(--space-sm) 0;
+  }
+}
+
+.key-point:last-child {
+  border-bottom: none;
+}
+
+.key-point .bullet {
+  color: var(--color-cyan);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ==========================================
+   QUIZ SECTION - V5.3 Facebook-Style
+   ========================================== */
+.quiz-section {
+  background: linear-gradient(135deg, rgba(156, 6, 18, 0.1), rgba(17, 34, 80, 0.3));
+  border: none;
+  border-left: 4px solid var(--color-burgundy);
+  border-radius: 0;
+  padding: var(--card-padding) 0;
+  margin: var(--space-lg) 0;
+}
+
+@media (min-width: 600px) {
+  .quiz-section {
+    border: 2px solid var(--color-burgundy);
+    border-radius: var(--radius-lg);
+    padding: var(--card-padding);
+  }
+}
+
+.quiz-header {
+  text-align: center;
+  padding: 0 var(--text-padding);
+  margin-bottom: var(--space-lg);
+}
+
+@media (min-width: 600px) {
+  .quiz-header {
+    padding: 0;
+  }
+}
+
+.quiz-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: var(--space-sm);
+}
+
+.quiz-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.quiz-score {
+  background: var(--glass-bg);
+  border: none;
+  border-bottom: 1px solid var(--glass-border);
+  border-radius: 0;
+  padding: var(--space-md) var(--text-padding);
+  text-align: center;
+  margin-bottom: var(--space-md);
+}
+
+@media (min-width: 600px) {
+  .quiz-score {
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+  }
+}
+
+.quiz-score .score-label {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.quiz-score .score-value {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  color: var(--color-gold);
+}
+
+/* Quiz Question */
+.quiz-question {
+  background: var(--glass-bg);
+  border: none;
+  border-bottom: 1px solid var(--glass-border);
+  border-radius: 0;
+  padding: var(--card-padding) var(--text-padding);
+  margin-bottom: 1px;
+}
+
+@media (min-width: 600px) {
+  .quiz-question {
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: var(--card-padding);
+    margin-bottom: var(--space-md);
+  }
+}
+
+.question-number {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: var(--space-xs);
+}
+
+.question-text {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-md);
+}
+
+/* Quiz Options */
+.quiz-options {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 0 calc(var(--text-padding) * -1);
+  background: var(--glass-border);
+}
+
+@media (min-width: 600px) {
+  .quiz-options {
+    gap: var(--space-sm);
+    margin: 0;
+    background: transparent;
+  }
+}
+
+.quiz-option {
+  background: var(--bg-card);
+  border: none;
+  border-radius: 0;
+  padding: var(--space-md) var(--text-padding);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+@media (min-width: 600px) {
+  .quiz-option {
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+  }
+  
+  .quiz-option:hover:not(.answered) {
+    background: var(--bg-card-hover);
+    border-color: var(--color-gold);
+    transform: translateX(5px);
+  }
+}
+
+.quiz-option.answered {
+  cursor: not-allowed;
+}
+
+.quiz-option.correct {
+  background: rgba(16, 185, 129, 0.2);
+  border-left: 4px solid var(--color-green);
+}
+
+@media (min-width: 600px) {
+  .quiz-option.correct {
+    border: 2px solid var(--color-green);
+    border-left: 4px solid var(--color-green);
+  }
+}
+
+.quiz-option.correct::after {
+  content: '✓';
+  position: absolute;
+  right: var(--text-padding);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: var(--text-lg);
+  color: var(--color-green);
+  font-weight: bold;
+}
+
+.quiz-option.wrong {
+  background: rgba(239, 68, 68, 0.2);
+  border-left: 4px solid var(--color-red);
+}
+
+@media (min-width: 600px) {
+  .quiz-option.wrong {
+    border: 2px solid var(--color-red);
+    border-left: 4px solid var(--color-red);
+  }
+}
+
+.quiz-option.wrong::after {
+  content: '✗';
+  position: absolute;
+  right: var(--text-padding);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: var(--text-lg);
+  color: var(--color-red);
+  font-weight: bold;
+}
+
+/* Quiz Answer Explanation */
+.quiz-answer {
+  background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(0, 240, 255, 0.05));
+  border: none;
+  border-left: 4px solid var(--color-gold);
+  border-radius: 0;
+  padding: var(--space-md) var(--text-padding);
+  margin-top: var(--space-md);
+  display: none;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+
+@media (min-width: 600px) {
+  .quiz-answer {
+    border: 1px solid var(--color-gold);
+    border-left: 4px solid var(--color-gold);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+  }
+}
+
+.quiz-answer.show {
+  display: block;
+}
+
+.quiz-answer strong {
+  color: var(--color-gold);
+}
+
+/* Quiz Result */
+.quiz-result {
+  background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));
+  border: none;
+  border-radius: 0;
+  padding: var(--card-padding) var(--text-padding);
+  margin-top: var(--space-lg);
+  text-align: center;
+  display: none;
+}
+
+@media (min-width: 600px) {
+  .quiz-result {
+    border: 3px solid var(--color-burgundy);
+    border-radius: var(--radius-lg);
+    padding: var(--card-padding);
+  }
+}
+
+.quiz-result.show {
+  display: block;
+}
+
+.quiz-result .result-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  color: var(--color-navy);
+  margin-bottom: var(--space-sm);
+}
+
+.quiz-result .result-score {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--color-burgundy);
+  margin: var(--space-md) 0;
+}
+
+.quiz-result .result-message {
+  font-size: var(--text-base);
+  color: var(--color-navy);
+  font-weight: 600;
+  margin-bottom: var(--space-md);
+}
+
+.pass-message {
+  background: rgba(16, 185, 129, 0.2);
+  border: 2px solid var(--color-green);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+.pass-message strong {
+  color: var(--color-green);
+}
+
+.fail-message {
+  background: rgba(239, 68, 68, 0.2);
+  border: 2px solid var(--color-red);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-top: var(--space-md);
+  display: none;
+}
+
+.fail-message strong {
+  color: var(--color-red);
+}
+
+.retry-button {
+  display: inline-block;
+  background: var(--color-burgundy);
+  color: white;
+  padding: var(--space-md) var(--space-xl);
+  border-radius: 50px;
+  font-weight: 700;
+  text-decoration: none;
+  margin-top: var(--space-md);
+  cursor: pointer;
+  border: none;
+  font-size: var(--text-sm);
+  transition: all 0.3s ease;
+}
+
+@media (min-width: 600px) {
+  .retry-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+/* ==========================================
+   NEXT DAY PREVIEW
+   ========================================== */
+.next-preview {
+  background: linear-gradient(135deg, rgba(106, 91, 255, 0.1), rgba(0, 240, 255, 0.05));
+  border: none;
+  border-left: 4px solid var(--color-purple);
+  border-radius: 0;
+  padding: var(--card-padding);
+  padding-left: calc(var(--text-padding) - 4px);
+  padding-right: var(--text-padding);
+  margin: var(--space-lg) 0;
+  text-align: center;
+}
+
+@media (min-width: 600px) {
+  .next-preview {
+    border: 2px solid var(--color-purple);
+    border-radius: var(--radius-lg);
+    padding: var(--card-padding);
+  }
+}
+
+.next-preview .preview-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: var(--space-sm);
+}
+
+.next-preview .preview-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  color: var(--color-purple);
+  margin-bottom: var(--space-sm);
+}
+
+.next-preview .preview-desc {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+/* ==========================================
+   FOOTER
+   ========================================== */
+.lesson-footer {
+  background: var(--bg-card);
+  border-top: 1px solid var(--glass-border);
+  padding: var(--space-xl) var(--text-padding);
+  text-align: center;
+  margin-top: var(--space-lg);
+}
+
+@media (min-width: 600px) {
+  .lesson-footer {
+    background: transparent;
+    border-top: none;
+    padding: var(--space-xl) 0;
+  }
+}
+
+.footer-brand {
+  font-family: var(--font-heading);
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: var(--space-xs);
+}
+
+.footer-url {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <!-- ============================================
+         LESSON HEADER
+         ============================================ -->
+    <header class="lesson-header">
+      <div class="lesson-badge">Ngày 2 / 7</div>
+      <h1 class="lesson-title">BẢN ĐỒ TẦN SỐ</h1>
+      <p class="lesson-subtitle">Bạn Đang Rung Động Ở Đâu?</p>
+    </header>
+    
+    <!-- ============================================
+         🖼️ HÌNH 01: HERO - BẢN ĐỒ TẦN SỐ
+         - Nội dung: Hình minh họa bản đồ ý thức, thang đo năng lượng từ thấp đến cao
+         - Kích thước: 1200x600px
+         ============================================ -->
+    <div class="image-placeholder">
+      <div class="placeholder-icon">🗺️</div>
+      <div class="placeholder-title">Hero: Bản Đồ Tần Số Ý Thức</div>
+      <div class="placeholder-desc">Hình minh họa thang đo ý thức Hawkins từ 1-1000, với các tầng năng lượng từ thấp (đỏ) đến cao (xanh lá/vàng), có người đứng trên thang</div>
+      <div class="placeholder-id">IMG-01-HERO-FREQUENCY-MAP</div>
+    </div>
+    <p class="image-caption">Bản đồ tần số ý thức - Bạn đang đứng ở đâu?</p>
+    
+    <!-- ============================================
+         SECTION 1: LỜI CHÀO
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title"><span class="icon">☀️</span> Chào Buổi Sáng!</h2>
+      
+      <p><strong>Hôm nay chúng ta sẽ trả lời câu hỏi quan trọng:</strong></p>
+      <p>Bạn đang rung động ở tần số nào?</p>
+      
+      <div class="highlight-box">
+        <p><strong>Tiến sĩ David Hawkins</strong>, sau 30 năm nghiên cứu hàng triệu người, đã tạo ra một bản đồ ý thức - thang đo từ 1 đến 1000, đo lường mức độ tiến hóa của ý thức con người.</p>
+      </div>
+      
+      <!-- ============================================
+           🖼️ HÌNH 02: CHÂN DUNG DR. DAVID HAWKINS
+           - Nội dung: Ảnh hoặc illustration của Dr. David Hawkins
+           - Kích thước: 400x400px
+           ============================================ -->
+      <div class="image-placeholder">
+        <div class="placeholder-icon">👨‍🔬</div>
+        <div class="placeholder-title">Tiến Sĩ David Hawkins</div>
+        <div class="placeholder-desc">Chân dung Dr. David Hawkins - người sáng tạo thang đo ý thức, phong cách học thuật, tông màu ấm</div>
+        <div class="placeholder-id">IMG-02-DR-HAWKINS-PORTRAIT</div>
+      </div>
+      <p class="image-caption">Dr. David Hawkins - Tác giả "Power vs Force"</p>
+    </section>
+    
+    <!-- ============================================
+         SECTION 2: BÀI 2.1 - HIỂU VỀ TẦN SỐ
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title"><span class="icon">📊</span> Bài 2.1: Hiểu Về Tần Số</h2>
+      
+      <p>Hãy tưởng tượng bạn là một chiếc radio. Nếu bạn đang chỉnh ở tần số FM 90.5, bạn chỉ có thể bắt được sóng từ các đài phát ở 90.5. Bạn không thể nghe được các đài ở 102.7 hay 88.1.</p>
+      
+      <!-- ============================================
+           🖼️ HÌNH 03: RADIO VÀ TẦN SỐ
+           - Nội dung: Hình radio đang chỉnh sóng, có các tần số khác nhau
+           - Kích thước: 800x500px
+           ============================================ -->
+      <div class="image-placeholder">
+        <div class="placeholder-icon">📻</div>
+        <div class="placeholder-title">Ẩn Dụ Chiếc Radio</div>
+        <div class="placeholder-desc">Hình chiếc radio vintage với núm chỉnh tần số, sóng FM hiển thị các con số khác nhau, ánh sáng vàng từ radio</div>
+        <div class="placeholder-id">IMG-03-RADIO-FREQUENCY-METAPHOR</div>
+      </div>
+      <p class="image-caption">Bạn là chiếc radio - tần số bạn quyết định sóng bạn nhận</p>
+      
+      <div class="definition-box">
+        <div class="term">Quy Luật Thu Hút</div>
+        <div class="meaning">Tần số của bạn quyết định những gì bạn thu hút về mình</div>
+        <div class="description">Giống như radio, bạn chỉ có thể "bắt sóng" những gì cùng tần số với bạn</div>
+      </div>
+      
+      <div class="highlight-box">
+        <div class="highlight-title">💡 Nguyên Lý Căn Bản</div>
+        <p>Nếu tần số của bạn là <strong>"sợ hãi" (100 Hz)</strong>, bạn sẽ liên tục thu hút về những tình huống đáng sợ, những người khiến bạn lo lắng.</p>
+        <p>Nếu tần số của bạn là <strong>"biết ơn" (540 Hz)</strong>, bạn sẽ thu hút về những cơ hội tốt, những người tử tế, những điều may mắn.</p>
+      </div>
+      
+      <!-- ============================================
+           🖼️ HÌNH 04: SO SÁNH TẦN SỐ THU HÚT
+           - Nội dung: Split screen - trái: người tần số thấp thu hút xui, phải: người tần số cao thu hút may mắn
+           - Kích thước: 1000x600px
+           ============================================ -->
+      <div class="image-placeholder">
+        <div class="placeholder-icon">⚖️</div>
+        <div class="placeholder-title">So Sánh Tần Số Thu Hút</div>
+        <div class="placeholder-desc">Chia đôi: Bên trái - người tối, lo lắng, xung quanh có mây đen, tiền bay đi. Bên phải - người sáng, vui vẻ, xung quanh có ánh sáng vàng, tiền và cơ hội bay đến</div>
+        <div class="placeholder-id">IMG-04-FREQUENCY-ATTRACTION-COMPARISON</div>
+      </div>
+      <p class="image-caption">Tần số thấp thu hút xui xẻo - Tần số cao thu hút may mắn</p>
+    </section>
+    
+    <!-- ============================================
+         SECTION 3: BẢN ĐỒ 7 TẦNG Ý THỨC
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title"><span class="icon">🎚️</span> Bản Đồ 7 Tầng Ý Thức</h2>
+      
+      <!-- ============================================
+           🖼️ HÌNH 05: INFOGRAPHIC 7 TẦNG Ý THỨC
+           - Nội dung: Infographic dọc hiển thị 7 tầng từ thấp đến cao
+           - Kích thước: 800x1200px (dọc)
+           ============================================ -->
+      <div class="image-placeholder">
+        <div class="placeholder-icon">📈</div>
+        <div class="placeholder-title">Infographic: 7 Tầng Ý Thức</div>
+        <div class="placeholder-desc">Infographic dọc với 7 tầng: Tầng 1 (đỏ) dưới 200Hz - Tiêu hao, Ranh giới 200Hz (cam), Tầng 2-3 (vàng) 200-399Hz - Trung lập, Tầng 4-5 (xanh lá) 400-599Hz - Sáng tạo, Tầng 6-7 (xanh cyan/tím) 600+ - Giác ngộ</div>
+        <div class="placeholder-id">IMG-05-SEVEN-CONSCIOUSNESS-LEVELS</div>
+      </div>
+      <p class="image-caption">Thang đo 7 tầng ý thức của Dr. David Hawkins</p>
+      
+      <!-- TẦNG 1: NĂNG LƯỢNG TIÊU HAO -->
+      <div class="freq-group-header negative">
+        <div class="group-title">TẦNG 1: NĂNG LƯỢNG TIÊU HAO</div>
+        <div class="group-range">Dưới 200 Hz - Bạn đang mất năng lượng</div>
+      </div>
+      
+      <div class="freq-level negative">
+        <div class="freq-title">20 Hz - Xấu Hổ, Tội Lỗi</div>
+        <div class="freq-feeling"><strong>Cảm giác:</strong> "Tôi là người xấu"</div>
+        <div class="freq-behavior"><strong>Hành vi:</strong> Tự ghét bản thân, trốn tránh mọi người</div>
+        <div class="freq-example">Ví dụ: Người bị xâm hại, người nghiện nặng</div>
+      </div>
+      
+      <div class="freq-level negative">
+        <div class="freq-title">50 Hz - Tuyệt Vọng</div>
+        <div class="freq-feeling"><strong>Cảm giác:</strong> "Không còn hi vọng"</div>
+        <div class="freq-behavior"><strong>Hành vi:</strong> Từ bỏ cuộc sống, trầm cảm nặng</div>
+        <div class="freq-example">Ví dụ: Người vô gia cư, nghĩ đến tự tử</div>
+      </div>
+      
+      <div class="freq-level negative">
+        <div class="freq-title">100 Hz - Sợ Hãi</div>
+        <div class="freq-feeling"><strong>Cảm giác:</strong> "Thế giới rất nguy hiểm"</div>
+        <div class="freq-behavior"><strong>Hành vi:</strong> Lo lắng mãn tính, không dám hành động</div>
+        <div class="freq-example">Ví dụ: Sợ nghèo, sợ bệnh, sợ người khác</div>
+      </div>
+      
+      <div class="freq-level negative">
+        <div class="freq-title">150 Hz - Giận Dữ</div>
+        <div class="freq-feeling"><strong>Cảm giác:</strong> "Đời bất công với tôi"</div>
+        <div class="freq-behavior"><strong>Hành vi:</strong> Đổ lỗi, oán hận, trả thù</div>
+        <div class="freq-example">Ví dụ: Người hay cáu giận, mắng chửi</div>
+      </div>
+      
+      <div class="freq-level negative">
+        <div class="freq-title">175 Hz - Kiêu Ngạo</div>
+        <div class="freq-feeling"><strong>Cảm giác:</strong> "Tôi đúng, người khác sai"</div>
+        <div class="freq-behavior"><strong>Hành vi:</strong> Coi thường, phán xét, ngạo mạn</div>
+        <div class="freq-example">Ví dụ: Người thành công nhưng cô độc</div>
+      </div>
+      
+      <!-- ============================================
+           🖼️ HÌNH 06: MINH HỌA TẦNG 1 - NĂNG LƯỢNG TIÊU HAO
+           - Nội dung: Người mệt mỏi, năng lượng rò rỉ ra ngoài
+           - Kích thước: 800x500px
+           ============================================ -->
+      <div class="image-placeholder">
+        <div class="placeholder-icon">😔</div>
+        <div class="placeholder-title">Tầng 1: Năng Lượng Tiêu Hao</div>
+        <div class="placeholder-desc">Hình người ngồi gục, xung quanh có năng lượng (dạng khói/sóng) đang thoát ra ngoài cơ thể, màu đỏ/cam tối, biểu tượng pin cạn</div>
+        <div class="placeholder-id">IMG-06-ENERGY-DRAIN-ILLUSTRATION</div>
+      </div>
+      <p class="image-caption">Dưới 200 Hz: Năng lượng liên tục bị tiêu hao</p>
+      
+      <!-- RANH GIỚI 200 HZ -->
+      <div class="definition-box">
+        <div class="term">⚡ 200 Hz - RANH GIỚI QUAN TRỌNG</div>
+        <div class="meaning">Điểm Chuyển Giao Dũng Cảm</div>
+        <div class="description">
+          <strong>Dưới 200 Hz:</strong> Bạn TIÊU HAO năng lượng<br>
+          <strong>Trên 200 Hz:</strong> Bạn SÁNG TẠO năng lượng
+        </div>
+      </div>
+      
+      <!-- ============================================
+           🖼️ HÌNH 07: RANH GIỚI 200 HZ
+           - Nội dung: Đường phân cách giữa vùng tối (dưới) và vùng sáng (trên)
+           - Kích thước: 800x400px
+           ============================================ -->
+      <div class="image-placeholder">
+        <div class="placeholder-icon">⚡</div>
+        <div class="placeholder-title">Ranh Giới 200 Hz - Điểm Chuyển Giao</div>
+        <div class="placeholder-desc">Hình đường ngang chia đôi: phía dưới tối (đỏ/cam), phía trên sáng (xanh lá/vàng), có mũi tên chỉ "Tiêu hao" xuống dưới và "Sáng tạo" lên trên, số 200 Hz ở giữa</div>
+        <div class="placeholder-id">IMG-07-200HZ-BOUNDARY-LINE</div>
+      </div>
+      <p class="image-caption">200 Hz - Ranh giới giữa tiêu hao và sáng tạo năng lượng</p>
+      
+      <!-- TẦNG 2-3: NĂNG LƯỢNG TRUNG LẬP -->
+      <div class="freq-group-header neutral">
+        <div class="group-title">TẦNG 2-3: NĂNG LƯỢNG TRUNG LẬP</div>
+        <div class="group-range">200 - 399 Hz - Bạn đang cân bằng</div>
+      </div>
+      
+      <div class="freq-level neutral">
+        <div class="freq-title">200 Hz - Dũng Cảm</div>
+        <div class="freq-feeling"><strong>Cảm giác:</strong> "Tôi có thể đối mặt"</div>
+        <div class="freq-behavior"><strong>Hành vi:</strong> Dám hành động, chấp nhận thử thách</div>
+      </div>
+      
+      <div class="freq-level neutral">
+        <div class="freq-title">250 Hz - Trung Lập</div>
+        <div class="freq-feeling"><strong>Cảm giác:</strong> "Mọi thứ đều ổn"</div>
+        <div class="freq-behavior"><strong>Hành vi:</strong> Không còn phản ứng quá mức</div>
+      </div>
+      
+      <div class="freq-level neutral">
+        <div class="freq-title">310 Hz - Sẵn Sàng</div>
+        <div class="freq-feeling"><strong>Cảm giác:</strong> "Tôi có thể làm được"</div>
+        <div class="freq-behavior"><strong>Hành vi:</strong> Chủ động, tìm kiếm cơ hội</div>
+      </div>
+      
+      <div class="freq-level neutral">
+        <div class="freq-title">350 Hz - Chấp Nhận</div>
+        <div class="freq-feeling"><strong>Cảm giác:</strong> "Mọi thứ đều có lý do"</div>
+        <div class="freq-behavior"><strong>Hành vi:</strong> Không còn chống đối hiện thực</div>
+      </div>
+      
+      <!-- TẦNG 4-5: NĂNG LƯỢNG SÁNG TẠO -->
+      <div class="freq-group-header positive">
+        <div class="group-title">TẦNG 4-5: NĂNG LƯỢNG SÁNG TẠO</div>
+        <div class="group-range">400 - 599 Hz - Bạn đang tỏa sáng</div>
+      </div>
+      
+      <div class="freq-level positive">
+        <div class="freq-title">400 Hz - Lý Trí</div>
+        <div class="freq-feeling"><strong>Cảm giác:</strong> "Tôi hiểu cách vận hành"</div>
+        <div class="freq-behavior"><strong>Hành vi:</strong> Logic, phân tích, giải quyết vấn đề</div>
+        <div class="freq-example">Ví dụ: Người thành công trong kinh doanh</div>
+      </div>
+      
+      <div class="freq-level positive">
+        <div class="freq-title">500 Hz - Tình Yêu Vô Điều Kiện</div>
+        <div class="freq-feeling"><strong>Cảm giác:</strong> "Tất cả đều kết nối"</div>
+        <div class="freq-behavior"><strong>Hành vi:</strong> Cho đi không mong nhận lại</div>
+        <div class="freq-example">Ví dụ: Mẹ Teresa, người từ thiện chân chính</div>
+      </div>
+      
+      <div class="freq-level positive">
+        <div class="freq-title">540 Hz - Niềm Vui, Biết Ơn</div>
+        <div class="freq-feeling"><strong>Cảm giác:</strong> "Cuộc sống thật tuyệt vời"</div>
+        <div class="freq-behavior"><strong>Hành vi:</strong> Tràn đầy năng lượng tích cực</div>
+        <div class="freq-example">Ví dụ: Người lan tỏa niềm vui đến mọi người</div>
+      </div>
+      
+      <!-- ============================================
+           🖼️ HÌNH 08: MINH HỌA TẦNG 4-5 - NĂNG LƯỢNG SÁNG TẠO
+           - Nội dung: Người tỏa sáng, năng lượng tích cực
+           - Kích thước: 800x500px
+           ============================================ -->
+      <div class="image-placeholder">
+        <div class="placeholder-icon">✨</div>
+        <div class="placeholder-title">Tầng 4-5: Năng Lượng Sáng Tạo</div>
+        <div class="placeholder-desc">Hình người đứng thẳng, tay mở rộng, ánh sáng vàng/xanh lá tỏa ra từ trái tim, xung quanh có các biểu tượng: tiền, trái tim, ngôi sao bay đến</div>
+        <div class="placeholder-id">IMG-08-CREATIVE-ENERGY-ILLUSTRATION</div>
+      </div>
+      <p class="image-caption">Trên 400 Hz: Năng lượng sáng tạo và thu hút</p>
+    </section>
+    
+    <!-- ============================================
+         SECTION 4: BÀI 2.2 - 4 NGUYÊN MẪU TẦN SỐ
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title"><span class="icon">🎭</span> Bài 2.2: 4 Nguyên Mẫu Tần Số</h2>
+      
+      <p>Ngoài việc biết mình ở tần số nào, bạn cũng cần hiểu <strong>"Nguyên Mẫu"</strong> - khuôn mẫu hành vi chủ đạo của bạn.</p>
+      
+      <!-- ============================================
+           🖼️ HÌNH 09: 4 NGUYÊN MẪU - TỔNG QUAN
+           - Nội dung: Infographic 4 nguyên mẫu trong 1 hình
+           - Kích thước: 1000x800px
+           ============================================ -->
+      <div class="image-placeholder">
+        <div class="placeholder-icon">🎭</div>
+        <div class="placeholder-title">Infographic: 4 Nguyên Mẫu Tần Số</div>
+        <div class="placeholder-desc">4 phần bằng nhau: 1) Nạn nhân (😢, 50-150Hz, đỏ), 2) Chiến binh (⚔️, 150-250Hz, cam), 3) Người Xây Dựng (🏗️, 250-450Hz, vàng), 4) Người Táo Khang (✨, 450+Hz, xanh lá)</div>
+        <div class="placeholder-id">IMG-09-FOUR-ARCHETYPES-OVERVIEW</div>
+      </div>
+      <p class="image-caption">4 Nguyên Mẫu: Nạn nhân → Chiến binh → Xây dựng → Táo Khang</p>
+      
+      <div class="archetype-grid">
+        <div class="archetype-card">
+          <div class="archetype-icon">😢</div>
+          <div class="archetype-name">NẠN NHÂN</div>
+          <div class="archetype-freq">50-150 Hz</div>
+          <div class="archetype-quote">"Sao lại là tôi?"</div>
+          <div class="archetype-trait">Luôn đổ lỗi, cảm giác bất lực</div>
+          <div class="archetype-lesson">Bài học: Trách nhiệm</div>
+        </div>
+        
+        <div class="archetype-card">
+          <div class="archetype-icon">⚔️</div>
+          <div class="archetype-name">CHIẾN BINH</div>
+          <div class="archetype-freq">150-250 Hz</div>
+          <div class="archetype-quote">"Tôi sẽ chiến đấu!"</div>
+          <div class="archetype-trait">Luôn phòng thủ, coi mọi thứ là mối đe dọa</div>
+          <div class="archetype-lesson">Bài học: Buông bỏ</div>
+        </div>
+        
+        <div class="archetype-card">
+          <div class="archetype-icon">🏗️</div>
+          <div class="archetype-name">NGƯỜI XÂY DỰNG</div>
+          <div class="archetype-freq">250-450 Hz</div>
+          <div class="archetype-quote">"Tôi sẽ tạo ra nó!"</div>
+          <div class="archetype-trait">Chủ động, lý trí, có kế hoạch</div>
+          <div class="archetype-lesson">Bài học: Chấp nhận</div>
+        </div>
+        
+        <div class="archetype-card">
+          <div class="archetype-icon">✨</div>
+          <div class="archetype-name">NGƯỜI TÁO KHANG</div>
+          <div class="archetype-freq">450+ Hz</div>
+          <div class="archetype-quote">"Mọi thứ đều hoàn hảo"</div>
+          <div class="archetype-trait">Chuyển hóa khó khăn thành cơ hội</div>
+          <div class="archetype-lesson">Đã thành thạo tất cả</div>
+        </div>
+      </div>
+      
+      <!-- ============================================
+           🖼️ HÌNH 10: HÀNH TRÌNH TIẾN HÓA NGUYÊN MẪU
+           - Nội dung: Mũi tên từ Nạn nhân → Chiến binh → Xây dựng → Táo Khang
+           - Kích thước: 1000x400px
+           ============================================ -->
+      <div class="image-placeholder">
+        <div class="placeholder-icon">🔄</div>
+        <div class="placeholder-title">Hành Trình Tiến Hóa Nguyên Mẫu</div>
+        <div class="placeholder-desc">Timeline ngang với 4 điểm: Nạn nhân → Chiến binh → Xây dựng → Táo Khang, mỗi điểm có icon và màu sắc tương ứng, mũi tên lên trên biểu thị tiến hóa</div>
+        <div class="placeholder-id">IMG-10-ARCHETYPE-EVOLUTION-PATH</div>
+      </div>
+      <p class="image-caption">Hành trình tiến hóa: Từ Nạn nhân đến Táo Khang</p>
+    </section>
+    
+    <!-- ============================================
+         SECTION 5: BÀI 2.3 - BÀI TẬP THỰC HÀNH
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title"><span class="icon">📝</span> Bài 2.3: Nhận Diện Tần Số Hiện Tại</h2>
+      
+      <!-- CÔNG CỤ HỖ TRỢ -->
+      <div class="tool-card">
+        <div class="tool-header">
+          <span class="tool-icon">💎</span>
+          <span class="tool-title">Công Cụ Hôm Nay</span>
+        </div>
+        <div class="tool-name">Viên đá Ngày 2: Amethyst (Thạch anh tím)</div>
+        <div class="tool-effect"><strong>Tác dụng:</strong> Thanh tẩy năng lượng thấp, bảo vệ khỏi năng lượng tiêu cực</div>
+        <div class="tool-usage"><strong>Cách dùng:</strong> Đặt dưới gối khi ngủ để thanh tẩy năng lượng âm trong giấc mơ</div>
+        
+        <!-- ============================================
+             🖼️ HÌNH 11: AMETHYST - THẠCH ANH TÍM
+             - Nội dung: Viên đá Amethyst tím đẹp
+             - Kích thước: 600x600px
+             ============================================ -->
+        <div class="image-placeholder" style="margin-top: var(--space-md);">
+          <div class="placeholder-icon">💜</div>
+          <div class="placeholder-title">Amethyst - Thạch Anh Tím</div>
+          <div class="placeholder-desc">Viên đá Amethyst màu tím đậm, có ánh sáng chiếu qua, nền tối để nổi bật màu tím, có thể kèm tay cầm đá</div>
+          <div class="placeholder-id">IMG-11-AMETHYST-CRYSTAL</div>
+        </div>
+        <p class="image-caption">Amethyst - Viên đá thanh tẩy năng lượng</p>
+      </div>
+      
+      <!-- BÀI TẬP -->
+      <div class="exercise-card">
+        <div class="exercise-header">
+          <span class="exercise-title">🧘 Bài Tập: Đánh Giá Tần Số</span>
+          <span class="exercise-time">⏱️ 20 phút</span>
+        </div>
+        
+        <!-- ============================================
+             🖼️ HÌNH 12: HƯỚNG DẪN BÀI TẬP ĐÁNH GIÁ
+             - Nội dung: Infographic các bước làm bài tập
+             - Kích thước: 800x600px
+             ============================================ -->
+        <div class="image-placeholder">
+          <div class="placeholder-icon">📋</div>
+          <div class="placeholder-title">Hướng Dẫn Bài Tập Đánh Giá Tần Số</div>
+          <div class="placeholder-desc">Infographic 3 bước: 1) Trả lời 4 câu hỏi (10 phút), 2) Tính điểm (5 phút), 3) Nhận diện pattern (5 phút). Có icon cho mỗi bước</div>
+          <div class="placeholder-id">IMG-12-EXERCISE-GUIDE-STEPS</div>
+        </div>
+        
+        <div class="exercise-step">
+          <div class="step-title">Bước 1: Đánh Giá Tần Số (10 phút)</div>
+          <div class="step-content">
+            <p>Trả lời thật lòng các câu hỏi sau, viết vào sổ:</p>
+            
+            <p><strong>1. Về cảm xúc thường xuyên:</strong></p>
+            <p>Trong 1 tuần vừa rồi, cảm xúc nào xuất hiện nhiều nhất?</p>
+            <ul class="checklist">
+              <li><span class="checkbox"></span> Sợ hãi / Lo lắng</li>
+              <li><span class="checkbox"></span> Giận dữ / Bực bội</li>
+              <li><span class="checkbox"></span> Buồn chán / Trung lập</li>
+              <li><span class="checkbox"></span> Thoải mái / Vui vẻ</li>
+              <li><span class="checkbox"></span> Biết ơn / Hạnh phúc</li>
+            </ul>
+            
+            <p><strong>2. Về cách nhìn đời:</strong></p>
+            <p>Khi có chuyện xảy ra, phản ứng đầu tiên của bạn là?</p>
+            <ul class="checklist">
+              <li><span class="checkbox"></span> "Sao lại là tôi?" (Nạn nhân)</li>
+              <li><span class="checkbox"></span> "Ai đã gây ra chuyện này?" (Đổ lỗi)</li>
+              <li><span class="checkbox"></span> "Okay, giải quyết thôi" (Trung lập)</li>
+              <li><span class="checkbox"></span> "Đây là bài học gì?" (Học hỏi)</li>
+              <li><span class="checkbox"></span> "Tốt thôi, mọi thứ hoàn hảo" (Chấp nhận)</li>
+            </ul>
+            
+            <p><strong>3. Về năng lượng:</strong></p>
+            <p>Cuối ngày, bạn thường cảm thấy:</p>
+            <ul class="checklist">
+              <li><span class="checkbox"></span> Kiệt sức, muốn trốn</li>
+              <li><span class="checkbox"></span> Mệt mỏi, cáu kỉnh</li>
+              <li><span class="checkbox"></span> Bình thường</li>
+              <li><span class="checkbox"></span> Vẫn còn năng lượng tốt</li>
+              <li><span class="checkbox"></span> Sảng khoái, muốn làm thêm</li>
+            </ul>
+            
+            <p><strong>4. Về mối quan hệ:</strong></p>
+            <p>Người xung quanh thường:</p>
+            <ul class="checklist">
+              <li><span class="checkbox"></span> Khiến bạn lo lắng / tức giận</li>
+              <li><span class="checkbox"></span> Drama liên tục</li>
+              <li><span class="checkbox"></span> Không ảnh hưởng nhiều</li>
+              <li><span class="checkbox"></span> Hỗ trợ, động viên</li>
+              <li><span class="checkbox"></span> Nâng bạn lên, cùng tiến bộ</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="exercise-step">
+          <div class="step-title">Bước 2: Tính Điểm (5 phút)</div>
+          <div class="step-content">
+            <p>Mỗi câu trả lời: Câu 1 = 1 điểm, Câu 2 = 2 điểm... Câu 5 = 5 điểm</p>
+            <p><strong>Tổng điểm của bạn: ___ / 20</strong></p>
+            
+            <div class="highlight-box green">
+              <div class="highlight-title">📊 Kết Quả:</div>
+              <p><strong>4-8 điểm:</strong> Tầng 1 (dưới 200 Hz) - Năng lượng tiêu hao</p>
+              <p><strong>9-12 điểm:</strong> Tầng 2-3 (200-399 Hz) - Trung lập</p>
+              <p><strong>13-16 điểm:</strong> Tầng 4-5 (400-599 Hz) - Sáng tạo</p>
+              <p><strong>17-20 điểm:</strong> Tầng 6+ (600+ Hz) - Gần giác ngộ</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="exercise-step">
+          <div class="step-title">Bước 3: Nhận Diện Pattern (5 phút)</div>
+          <div class="step-content">
+            <p>Viết vào sổ:</p>
+            <p><em>"Tần số hiện tại của tôi: ___ Hz (Tầng ___)"</em></p>
+            <p><em>"3 tình huống khiến tần số tôi giảm: 1.___ 2.___ 3.___"</em></p>
+            <p><em>"3 việc khiến tần số tôi tăng: 1.___ 2.___ 3.___"</em></p>
+            <p><em>"Tôi là Nguyên Mẫu: ___"</em></p>
+            <p><em>"Tôi muốn tiến hóa thành: ___"</em></p>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- ============================================
+         SECTION 6: BÀI 2.4 - NHIỆM VỤ TRONG NGÀY
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title"><span class="icon">📋</span> Bài 2.4: Nhiệm Vụ Trong Ngày</h2>
+      
+      <p><strong>Thực Hành "Nhật Ký Tần Số"</strong></p>
+      <p>Từ hôm nay, cuối mỗi ngày trước khi ngủ, dành 5 phút điền template sau:</p>
+      
+      <!-- ============================================
+           🖼️ HÌNH 13: TEMPLATE NHẬT KÝ TẦN SỐ
+           - Nội dung: Form nhật ký tần số đẹp mắt
+           - Kích thước: 800x1000px (dọc)
+           ============================================ -->
+      <div class="image-placeholder">
+        <div class="placeholder-icon">📓</div>
+        <div class="placeholder-title">Template: Nhật Ký Tần Số</div>
+        <div class="placeholder-desc">Form điền với các trường: Ngày, Tần số trung bình (1-10), Lúc thấp nhất + lý do, Lúc cao nhất + lý do, Bài học hôm nay. Thiết kế đẹp với màu gradient tím-xanh</div>
+        <div class="placeholder-id">IMG-13-FREQUENCY-JOURNAL-TEMPLATE</div>
+      </div>
+      <p class="image-caption">Template Nhật Ký Tần Số - Điền mỗi tối trước khi ngủ</p>
+      
+      <div class="highlight-box purple">
+        <div class="highlight-title">📓 Nhật Ký Tần Số</div>
+        <p><strong>Ngày: ___ / ___ / ___</strong></p>
+        <p><strong>Tần số trung bình hôm nay: ___ / 10</strong></p>
+        <p style="font-size: var(--text-xs); color: var(--color-text-muted);">(1 = cực kỳ thấp, 10 = cực kỳ cao)</p>
+        <br>
+        <p><strong>Lúc tần số THẤP nhất:</strong> ___</p>
+        <p><strong>Lý do:</strong> ___</p>
+        <br>
+        <p><strong>Lúc tần số CAO nhất:</strong> ___</p>
+        <p><strong>Lý do:</strong> ___</p>
+        <br>
+        <p><strong>Bài học hôm nay:</strong> ___</p>
+      </div>
+      
+      <!-- ============================================
+           🖼️ HÌNH 14: CÁCH DÙNG AMETHYST KHI NGỦ
+           - Nội dung: Amethyst đặt dưới gối hoặc bên giường
+           - Kích thước: 800x500px
+           ============================================ -->
+      <div class="image-placeholder">
+        <div class="placeholder-icon">🛏️</div>
+        <div class="placeholder-title">Cách Dùng Amethyst Khi Ngủ</div>
+        <div class="placeholder-desc">Hình giường ngủ với viên Amethyst đặt dưới gối hoặc trên tủ đầu giường, có ánh sáng tím nhẹ tỏa ra, không khí yên bình</div>
+        <div class="placeholder-id">IMG-14-AMETHYST-SLEEP-USAGE</div>
+      </div>
+      <p class="image-caption">Đặt Amethyst dưới gối để thanh tẩy năng lượng khi ngủ</p>
+      
+      <div class="highlight-box">
+        <p>💜 <strong>Hãy dùng viên đá Amethyst</strong> đặt dưới gối hoặc để bên giường để thanh tẩy năng lượng âm trong khi ngủ.</p>
+      </div>
+    </section>
+    
+    <!-- ============================================
+         SECTION 7: SHOP YINYANGMASTERS
+         ============================================ -->
+    <section class="section">
+      <div class="tool-card" style="border-left-color: var(--color-gold);">
+        <div class="tool-header">
+          <span class="tool-icon">🛒</span>
+          <span class="tool-title" style="color: var(--color-gold);">Mua Amethyst Chính Hãng</span>
+        </div>
+        
+        <!-- ============================================
+             🖼️ HÌNH 15: BANNER YINYANGMASTERS SHOP
+             - Nội dung: Banner shop với Amethyst và mã giảm giá
+             - Kích thước: 1000x400px
+             ============================================ -->
+        <div class="image-placeholder">
+          <div class="placeholder-icon">💎</div>
+          <div class="placeholder-title">YinYangMasters Shop Banner</div>
+          <div class="placeholder-desc">Banner quảng cáo YinYangMasters.com với sản phẩm Amethyst, mã giảm giá GEM7DAYS - Giảm 15%, thiết kế sang trọng tông tím-vàng</div>
+          <div class="placeholder-id">IMG-15-YINYANGMASTERS-SHOP-BANNER</div>
+        </div>
+        
+        <p style="text-align: center; margin-top: var(--space-md);">
+          <strong>YinYangMasters.com</strong><br>
+          Mã giảm giá: <strong style="color: var(--color-gold);">GEM7DAYS</strong> - Giảm 15%
+        </p>
+      </div>
+    </section>
+    
+    <!-- ============================================
+         SUMMARY BOX
+         ============================================ -->
+    <div class="summary-box">
+      <div class="summary-title">📝 Tóm Tắt Ngày 2</div>
+      <div class="key-points">
+        <div class="key-point">
+          <span class="bullet">✓</span>
+          <span><strong>Tần số quyết định thu hút:</strong> Giống như radio, bạn chỉ bắt được sóng cùng tần số</span>
+        </div>
+        <div class="key-point">
+          <span class="bullet">✓</span>
+          <span><strong>200 Hz là ranh giới:</strong> Dưới 200 = tiêu hao, Trên 200 = sáng tạo năng lượng</span>
+        </div>
+        <div class="key-point">
+          <span class="bullet">✓</span>
+          <span><strong>4 Nguyên Mẫu:</strong> Nạn nhân → Chiến binh → Xây dựng → Táo Khang</span>
+        </div>
+        <div class="key-point">
+          <span class="bullet">✓</span>
+          <span><strong>Nhật ký tần số:</strong> Ghi chép hàng ngày để nhận diện pattern</span>
+        </div>
+        <div class="key-point">
+          <span class="bullet">✓</span>
+          <span><strong>Amethyst:</strong> Thanh tẩy năng lượng tiêu cực khi ngủ</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ============================================
+         QUIZ SECTION
+         ============================================ -->
+    <div class="quiz-section" id="quiz-section">
+      <div class="quiz-header">
+        <h2 class="quiz-title">📝 Quiz Ngày 2</h2>
+        <p class="quiz-desc">Kiểm tra sự hiểu biết của bạn về Bản Đồ Tần Số</p>
+        <p class="quiz-desc"><strong>Bạn cần trả lời đúng ít nhất 4/5 câu để hoàn thành</strong></p>
+      </div>
+      
+      <div class="quiz-score">
+        <span class="score-label">📊 Điểm của bạn: </span>
+        <span class="score-value" id="current-score">0/5</span>
+      </div>
+      
+      <!-- Câu 1 -->
+      <div class="quiz-question" data-question="1">
+        <div class="question-number">Câu 1:</div>
+        <div class="question-text">Tần số 200 Hz là điểm chuyển giao vì:</div>
+        <ul class="quiz-options">
+          <li class="quiz-option" data-correct="false">a) Cao nhất có thể</li>
+          <li class="quiz-option" data-correct="true">b) Dưới 200 tiêu hao năng lượng, trên 200 sáng tạo năng lượng</li>
+          <li class="quiz-option" data-correct="false">c) Dễ đạt nhất</li>
+          <li class="quiz-option" data-correct="false">d) Không quan trọng</li>
+        </ul>
+        <div class="quiz-answer">
+          <strong>Đáp án đúng: b)</strong> 200 Hz là ranh giới quan trọng nhất. Dưới mức này bạn đang tiêu hao năng lượng (sợ hãi, giận dữ...), trên mức này bạn bắt đầu sáng tạo năng lượng (dũng cảm, chấp nhận...).
+        </div>
+      </div>
+      
+      <!-- Câu 2 -->
+      <div class="quiz-question" data-question="2">
+        <div class="question-number">Câu 2:</div>
+        <div class="question-text">Nguyên Mẫu "Nạn Nhân" có đặc điểm:</div>
+        <ul class="quiz-options">
+          <li class="quiz-option" data-correct="true">a) Luôn đổ lỗi cho người khác</li>
+          <li class="quiz-option" data-correct="false">b) Chủ động giải quyết vấn đề</li>
+          <li class="quiz-option" data-correct="false">c) Biết ơn mọi thứ</li>
+          <li class="quiz-option" data-correct="false">d) Không có cảm xúc</li>
+        </ul>
+        <div class="quiz-answer">
+          <strong>Đáp án đúng: a)</strong> Người có nguyên mẫu "Nạn Nhân" thường đổ lỗi cho hoàn cảnh và người khác, cảm giác bất lực, luôn hỏi "Sao lại là tôi?". Bài học họ cần học là Trách Nhiệm.
+        </div>
+      </div>
+      
+      <!-- Câu 3 -->
+      <div class="quiz-question" data-question="3">
+        <div class="question-number">Câu 3:</div>
+        <div class="question-text">Khi bạn ở tần số "Sợ hãi" (100 Hz), bạn sẽ:</div>
+        <ul class="quiz-options">
+          <li class="quiz-option" data-correct="false">a) Thu hút niềm vui</li>
+          <li class="quiz-option" data-correct="true">b) Thu hút những tình huống đáng sợ</li>
+          <li class="quiz-option" data-correct="false">c) Trung lập</li>
+          <li class="quiz-option" data-correct="false">d) Không thu hút gì</li>
+        </ul>
+        <div class="quiz-answer">
+          <strong>Đáp án đúng: b)</strong> Theo quy luật "Tần số thu hút tần số", khi bạn rung động ở tần số sợ hãi, bạn sẽ liên tục thu hút về những tình huống, người và sự việc khiến bạn cảm thấy sợ hãi.
+        </div>
+      </div>
+      
+      <!-- Câu 4 -->
+      <div class="quiz-question" data-question="4">
+        <div class="question-number">Câu 4:</div>
+        <div class="question-text">"Người Xây Dựng" cần học bài học:</div>
+        <ul class="quiz-options">
+          <li class="quiz-option" data-correct="false">a) Trách nhiệm</li>
+          <li class="quiz-option" data-correct="false">b) Buông bỏ</li>
+          <li class="quiz-option" data-correct="true">c) Chấp nhận</li>
+          <li class="quiz-option" data-correct="false">d) Không cần học gì</li>
+        </ul>
+        <div class="quiz-answer">
+          <strong>Đáp án đúng: c)</strong> Người Xây Dựng giỏi hành động và giải quyết vấn đề, nhưng bài học họ cần học là Chấp Nhận - hiểu rằng không phải mọi thứ đều cần "sửa" hay kiểm soát.
+        </div>
+      </div>
+      
+      <!-- Câu 5 -->
+      <div class="quiz-question" data-question="5">
+        <div class="question-number">Câu 5:</div>
+        <div class="question-text">Mục đích của Nhật Ký Tần Số là:</div>
+        <ul class="quiz-options">
+          <li class="quiz-option" data-correct="false">a) Viết cho vui</li>
+          <li class="quiz-option" data-correct="true">b) Quan sát pattern tần số của mình</li>
+          <li class="quiz-option" data-correct="false">c) Khoe với người khác</li>
+          <li class="quiz-option" data-correct="false">d) Không có mục đích</li>
+        </ul>
+        <div class="quiz-answer">
+          <strong>Đáp án đúng: b)</strong> Nhật Ký Tần Số giúp bạn quan sát pattern: Lúc nào tần số cao? Lúc nào thấp? Điều gì kích hoạt? Từ đó bạn có ý thức điều chỉnh.
+        </div>
+      </div>
+      
+      <!-- Quiz Result -->
+      <div class="quiz-result" id="quiz-result">
+        <div class="result-title" id="result-title">🎉 Xuất Sắc!</div>
+        <div class="result-score" id="final-score">5/5</div>
+        <p class="result-message" id="result-message">Hoàn hảo!</p>
+        
+        <div class="pass-message" id="pass-msg">
+          <strong>✅ HOÀN THÀNH NGÀY 2!</strong>
+          <p style="margin-top: var(--space-sm);">Bạn đã hiểu rõ về Bản Đồ Tần Số. Sẵn sàng cho Ngày 3!</p>
+        </div>
+        
+        <div class="fail-message" id="fail-msg">
+          <strong>📚 HÃY THỬ LẠI</strong>
+          <p style="margin-top: var(--space-sm);">Bạn cần 4/5 điểm để tiếp tục. Đọc lại bài học và thử lại nhé!</p>
+          <button class="retry-button" onclick="retryQuiz()">🔄 Làm Lại Quiz</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ============================================
+         NEXT DAY PREVIEW
+         ============================================ -->
+    <div class="next-preview">
+      <div class="preview-label">Tiếp theo</div>
+      <div class="preview-title">NGÀY 3: 5 NGUYÊN LÝ VẬN HÀNH</div>
+      <div class="preview-desc">Hôm nay bạn đã có bản đồ. Mai, chúng ta sẽ học 5 Nguyên Lý Vận Hành - những quy luật chi phối cách năng lượng hoạt động trong vũ trụ.</div>
+      
+      <!-- ============================================
+           🖼️ HÌNH 16: PREVIEW NGÀY 3 - 5 NGUYÊN LÝ
+           - Nội dung: Teaser cho ngày 3 với 5 biểu tượng nguyên lý
+           - Kích thước: 800x400px
+           ============================================ -->
+      <div class="image-placeholder" style="margin-top: var(--space-md);">
+        <div class="placeholder-icon">⚙️</div>
+        <div class="placeholder-title">Preview: 5 Nguyên Lý Vận Hành</div>
+        <div class="placeholder-desc">5 biểu tượng/icon đại diện cho 5 nguyên lý: Rung động, Tương ứng, Nhân quả, Phân cực, Nhịp điệu. Thiết kế teaser hấp dẫn với dấu hỏi</div>
+        <div class="placeholder-id">IMG-16-DAY3-PREVIEW-FIVE-PRINCIPLES</div>
+      </div>
+    </div>
+    
+    <!-- ============================================
+         FOOTER
+         ============================================ -->
+    <footer class="lesson-footer">
+      <div class="footer-brand">GEM Trading Academy</div>
+      <div class="footer-url">gemral.com</div>
+    </footer>
+    
+  </div>
+  
+  <!-- ============================================
+       QUIZ JAVASCRIPT
+       ============================================ -->
+  <script>
+    (function() {
+      'use strict';
+      
+      var totalQuestions = 5;
+      var correctAnswers = 0;
+      var answeredQuestions = new Set();
+      
+      document.addEventListener('DOMContentLoaded', function() {
+        var questions = document.querySelectorAll('.quiz-question');
+        
+        questions.forEach(function(questionEl) {
+          var questionNum = questionEl.getAttribute('data-question');
+          var options = questionEl.querySelectorAll('.quiz-option');
+          var answerDiv = questionEl.querySelector('.quiz-answer');
+          
+          options.forEach(function(optionEl) {
+            optionEl.addEventListener('click', function(e) {
+              e.preventDefault();
+              handleAnswer(optionEl, questionEl, questionNum, options, answerDiv);
+            });
+          });
+        });
+      });
+      
+      function handleAnswer(optionEl, questionEl, questionNum, allOptions, answerDiv) {
+        if (answeredQuestions.has(questionNum)) {
+          return;
+        }
+        
+        answeredQuestions.add(questionNum);
+        
+        allOptions.forEach(function(opt) {
+          opt.classList.add('answered');
+        });
+        
+        var isCorrect = optionEl.getAttribute('data-correct') === 'true';
+        
+        if (isCorrect) {
+          optionEl.classList.add('correct');
+          correctAnswers++;
+        } else {
+          optionEl.classList.add('wrong');
+          
+          allOptions.forEach(function(opt) {
+            if (opt.getAttribute('data-correct') === 'true') {
+              opt.classList.add('correct');
+            }
+          });
+        }
+        
+        var scoreEl = document.getElementById('current-score');
+        if (scoreEl) {
+          scoreEl.textContent = correctAnswers + '/' + totalQuestions;
+        }
+        
+        if (answerDiv) {
+          answerDiv.classList.add('show');
+        }
+        
+        if (answeredQuestions.size === totalQuestions) {
+          setTimeout(showResult, 1000);
+        }
+      }
+      
+      function showResult() {
+        var resultDiv = document.getElementById('quiz-result');
+        var resultTitle = document.getElementById('result-title');
+        var finalScore = document.getElementById('final-score');
+        var resultMessage = document.getElementById('result-message');
+        var passMsg = document.getElementById('pass-msg');
+        var failMsg = document.getElementById('fail-msg');
+        
+        if (!resultDiv) return;
+        
+        resultDiv.classList.add('show');
+        
+        if (finalScore) {
+          finalScore.textContent = correctAnswers + '/' + totalQuestions;
+        }
+        
+        if (correctAnswers >= 4) {
+          if (resultTitle) {
+            resultTitle.textContent = '🎉 Xuất Sắc!';
+            resultTitle.style.color = '#10B981';
+          }
+          
+          if (resultMessage) {
+            if (correctAnswers === 5) {
+              resultMessage.textContent = 'Hoàn hảo! Bạn đã trả lời đúng tất cả!';
+            } else {
+              resultMessage.textContent = 'Tuyệt vời! Bạn đạt ' + correctAnswers + '/5 điểm!';
+            }
+          }
+          
+          if (passMsg) passMsg.style.display = 'block';
+          if (failMsg) failMsg.style.display = 'none';
+          
+        } else {
+          if (resultTitle) {
+            resultTitle.textContent = '💪 Cố Gắng Lên!';
+            resultTitle.style.color = '#EF4444';
+          }
+          
+          if (resultMessage) {
+            resultMessage.textContent = 'Bạn đạt ' + correctAnswers + '/5 điểm. Cần 4/5 để tiếp tục.';
+          }
+          
+          if (passMsg) passMsg.style.display = 'none';
+          if (failMsg) failMsg.style.display = 'block';
+        }
+        
+        resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      
+      window.retryQuiz = function() {
+        correctAnswers = 0;
+        answeredQuestions.clear();
+        
+        var scoreEl = document.getElementById('current-score');
+        if (scoreEl) scoreEl.textContent = '0/5';
+        
+        var resultDiv = document.getElementById('quiz-result');
+        if (resultDiv) resultDiv.classList.remove('show');
+        
+        var questions = document.querySelectorAll('.quiz-question');
+        questions.forEach(function(questionEl) {
+          var options = questionEl.querySelectorAll('.quiz-option');
+          options.forEach(function(opt) {
+            opt.classList.remove('correct', 'wrong', 'answered');
+          });
+          
+          var answerDiv = questionEl.querySelector('.quiz-answer');
+          if (answerDiv) answerDiv.classList.remove('show');
+        });
+        
+        var quizSection = document.getElementById('quiz-section');
+        if (quizSection) {
+          quizSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      };
+      
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1759 @@
+================================================================================
+         PROMPTS TẠO HÌNH ẢNH CANVA - GEM TRADING ACADEMY
+                    (Tất cả 3 Tier - ~390 hình)
+================================================================================
+
+================================================================================
+                         TIER 1 - CƠ BẢN (45 bài)
+================================================================================
+
+═══════════════════════════════════════════════════════════════════════════════
+CHƯƠNG 3: UPU PATTERN MASTERY
+═══════════════════════════════════════════════════════════════════════════════
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 3.2: CẤU TRÚC 3 PHASES CỦA UPU
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: UPU 3 PHASES DIAGRAM
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Warning/Deep  | Burgundy      | #9C0612
+Success       | Green         | #10B981
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge góc trái: "BÀI 3.2"
+- Màu nền: Vàng gold (#FFBD59)
+- Màu text: Navy (#112250)
+- Border radius: 8px
+
+Tiêu đề chính: "UPU 3 PHASES DIAGRAM"
+- Màu: Vàng gold (#FFBD59)
+- Font: Montserrat Bold, size lớn
+
+Subtitle: "Sơ đồ 3 giai đoạn của pattern UPU"
+- Màu: Trắng (#FFFFFF)
+
+═══════════════════════════════════════════════════════════════
+DIAGRAM CHÍNH (chiếm 70% diện tích):
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                     UPU PATTERN STRUCTURE                    │
+│                                                              │
+│                                              📈              │
+│                                           /    \             │
+│                    PHASE 3              /       \            │
+│                    (UP tiếp)          /          ● ENTRY     │
+│                         ↗          /                         │
+│                      /           /                           │
+│         PHASE 2   /           /                              │
+│        (Pullback)●──────────●                                │
+│                  ↘        ↗                                  │
+│                    ↘    /                                    │
+│      PHASE 1        ↘/                                       │
+│      (Uptrend)      /                                        │
+│                   /                                          │
+│                 /    ● LFZ ZONE                              │
+│               /      (Vùng mua)                              │
+│             ●────────────────────────────────────────        │
+│           START                                              │
+└─────────────────────────────────────────────────────────────┘
+
+3 PHASES với annotations:
+┌────────────────────┐  ┌────────────────────┐  ┌────────────────────┐
+│ PHASE 1: UPTREND   │  │ PHASE 2: PULLBACK  │  │ PHASE 3: UP TIẾP   │
+│ ════════════════   │  │ ═════════════════  │  │ ═════════════════  │
+│ 📈 Giá tăng mạnh   │  │ 📉 Giá hồi về      │  │ 📈 Giá bật lên     │
+│ • Xu hướng rõ ràng │  │ • Tạo LFZ zone     │  │ • Tiếp tục trend   │
+│ • Volume tăng      │  │ • Volume giảm      │  │ • Target profit    │
+│                    │  │                    │  │                    │
+│ Viền: Xanh lá      │  │ Viền: Vàng         │  │ Viền: Cyan         │
+│ (#10B981)          │  │ (#FFBD59)          │  │ (#00F0FF)          │
+└────────────────────┘  └────────────────────┘  └────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+FOOTER:
+═══════════════════════════════════════════════════════════════
+"GEM TRADING" - màu trắng, căn giữa
+
+
+📐 HÌNH 2: UPU REAL CHART EXAMPLE
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+⚠️ ENFORCE: Vẽ BIỂU ĐỒ NẾN CANDLESTICK thực tế
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Nến xanh      | Green solid   | #00C853
+Nến đỏ        | Red solid     | #EF4444
+LFZ Zone      | Green trans   | #10B981 (30% opacity)
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+⚠️ QUY TẮC VẼ NẾN CANDLESTICK - BẮT BUỘC:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  • NẾN XANH (Bullish): FILL MÀU XANH ĐẶC (#00C853), opacity 100%           │
+│  • NẾN ĐỎ (Bearish): FILL MÀU ĐỎ ĐẶC (#EF4444), opacity 100%               │
+│  • CẢ HAI đều là hình chữ nhật SOLID FILLED, không outline rỗng            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "EXAMPLE"
+- Màu nền: Cyan (#00F0FF)
+- Màu text: Navy (#112250)
+
+Tiêu đề chính: "UPU REAL CHART - SOL/USDT H4"
+- Màu: Vàng gold (#FFBD59)
+
+═══════════════════════════════════════════════════════════════
+BIỂU ĐỒ NẾN (chiếm 65% diện tích):
+═══════════════════════════════════════════════════════════════
+
+TRỤC GIÁ (bên trái):
+$185
+$180
+$175
+$170
+$165
+$160
+$155
+$150
+
+PHASE 1 - UPTREND:
+$150 → $175 (nến xanh liên tục)
+Bracket: "PHASE 1: +16.7%"
+Mũi tên xanh lớn chỉ LÊN
+
+PHASE 2 - PULLBACK:
+$175 → $162 (nến đỏ)
+LFZ ZONE được highlight màu xanh lá 30% opacity
+Range: $160 - $165
+Label: "→ LFZ TẠO TẠI ĐÂY"
+
+PHASE 3 - UP TIẾP:
+$162 → $185+ (nến xanh)
+Bracket: "PHASE 3: +14.2%"
+Mũi tên xanh lớn chỉ LÊN
+
+═══════════════════════════════════════════════════════════════
+INFO BOX (góc phải):
+═══════════════════════════════════════════════════════════════
+📊 UPU PATTERN INFO:
+════════════════════
+Viền: Cyan (#00F0FF), 2px
+
+- Coin: SOL/USDT
+- Timeframe: H4
+- Pattern: UPU
+- Loại: Continuation Bullish
+- Zone: LFZ (Vùng Mua)
+- Win Rate: 72%
+
+═══════════════════════════════════════════════════════════════
+FOOTER:
+═══════════════════════════════════════════════════════════════
+"GEM TRADING" - màu trắng, căn giữa
+
+
+📐 HÌNH 3: UPU VS OTHER PATTERNS
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Warning/Deep  | Burgundy      | #9C0612
+Success       | Green         | #10B981
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "SO SÁNH"
+- Màu nền: Purple (#6A5BFF)
+
+Tiêu đề chính: "SO SÁNH 4 PATTERNS CƠ BẢN"
+- Màu: Vàng gold (#FFBD59)
+
+═══════════════════════════════════════════════════════════════
+BẢNG SO SÁNH 2x2:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────┐  ┌─────────────────────────────┐
+│         UPU 📈📉📈           │  │         UPD 📈📉📉           │
+│  ═════════════════════       │  │  ═════════════════════       │
+│                              │  │                              │
+│  Up → Pause → Up             │  │  Up → Pause → Down           │
+│                              │  │                              │
+│  Loại: Continuation BULLISH  │  │  Loại: Reversal BEARISH      │
+│  Zone: LFZ (Vùng Mua)        │  │  Zone: HFZ (Vùng Bán)        │
+│  Action: LONG                │  │  Action: SHORT               │
+│                              │  │                              │
+│  Viền: Xanh lá (#10B981)     │  │  Viền: Đỏ (#EF4444)          │
+└─────────────────────────────┘  └─────────────────────────────┘
+
+┌─────────────────────────────┐  ┌─────────────────────────────┐
+│         DPU 📉📈📈           │  │         DPD 📉📈📉           │
+│  ═════════════════════       │  │  ═════════════════════       │
+│                              │  │                              │
+│  Down → Pause → Up           │  │  Down → Pause → Down         │
+│                              │  │                              │
+│  Loại: Reversal BULLISH      │  │  Loại: Continuation BEARISH  │
+│  Zone: LFZ (Vùng Mua)        │  │  Zone: HFZ (Vùng Bán)        │
+│  Action: LONG                │  │  Action: SHORT               │
+│                              │  │                              │
+│  Viền: Xanh lá (#10B981)     │  │  Viền: Đỏ (#EF4444)          │
+└─────────────────────────────┘  └─────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+HIGHLIGHT BOX:
+═══════════════════════════════════════════════════════════════
+💡 GHI NHỚ: Chữ cuối = Hướng đi tiếp theo
+   U = Up (Bullish) → LONG
+   D = Down (Bearish) → SHORT
+
+═══════════════════════════════════════════════════════════════
+FOOTER:
+═══════════════════════════════════════════════════════════════
+"GEM TRADING" - màu trắng, căn giữa
+
+
+📐 HÌNH 4: UPU PSYCHOLOGY DIAGRAM
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Warning/Deep  | Burgundy      | #9C0612
+Success       | Green         | #10B981
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "TÂM LÝ"
+- Màu nền: Purple (#6A5BFF)
+
+Tiêu đề chính: "TÂM LÝ TRADERS TRONG UPU"
+- Màu: Vàng gold (#FFBD59)
+
+═══════════════════════════════════════════════════════════════
+DIAGRAM TÂM LÝ (kết hợp với price action):
+═══════════════════════════════════════════════════════════════
+PHASE 1 - UPTREND:
+┌──────────────────────────────────────┐
+│  😊 EUPHORIA                          │
+│  "Giá lên hoài!"                     │
+│  FOMO - Fear Of Missing Out          │
+│  Retail traders nhảy vào muộn        │
+│                                       │
+│  Smart Money: Đang HOLD vị thế       │
+└──────────────────────────────────────┘
+   ↓
+
+PHASE 2 - PULLBACK:
+┌──────────────────────────────────────┐
+│  😰 FEAR                              │
+│  "Nó sẽ dump tiếp!"                  │
+│  Retail bán tháo (panic sell)        │
+│  Weak hands rời đi                    │
+│                                       │
+│  Smart Money: Đang TÍCH LŨY          │
+│  ← LFZ ZONE ĐƯỢC TẠO Ở ĐÂY           │
+└──────────────────────────────────────┘
+   ↓
+
+PHASE 3 - UP TIẾP:
+┌──────────────────────────────────────┐
+│  🤔 REGRET                            │
+│  "Giá lại lên rồi!"                  │
+│  Retail đã bán giá thấp              │
+│  Smart money đã entry tại LFZ        │
+│                                       │
+│  Smart Money: PROFIT 💰              │
+└──────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+INSIGHT BOX:
+═══════════════════════════════════════════════════════════════
+🧠 INSIGHT:
+Hãy trading như SMART MONEY, không như retail!
+Entry tại LFZ khi retail đang sợ hãi.
+
+═══════════════════════════════════════════════════════════════
+FOOTER:
+═══════════════════════════════════════════════════════════════
+"GEM TRADING" - màu trắng, căn giữa
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 3.3: CÁCH VẼ LFZ TỪ UPU
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: LFZ DRAWING STEPS
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Warning/Deep  | Burgundy      | #9C0612
+Success       | Green         | #10B981
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "HƯỚNG DẪN"
+- Màu nền: Cyan (#00F0FF)
+
+Tiêu đề chính: "4 BƯỚC VẼ LFZ TỪ UPU"
+- Màu: Vàng gold (#FFBD59)
+
+═══════════════════════════════════════════════════════════════
+4 BƯỚC (Grid 2x2):
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────┐  ┌─────────────────────────────┐
+│  ① XÁC ĐỊNH PATTERN         │  │  ② TÌM PAUSE ZONE           │
+│  ─────────────────────       │  │  ─────────────────────       │
+│                              │  │                              │
+│  🔍 Tìm UPU pattern          │  │  📍 Xác định vùng Pause      │
+│  - Nhận diện 3 phases        │  │  - Nến sideway               │
+│  - Xác nhận trend UP         │  │  - Volume giảm               │
+│  - Đánh dấu điểm chuyển      │  │  - Range hẹp                 │
+│                              │  │                              │
+│  [Mini chart minh họa]       │  │  [Mini chart minh họa]       │
+│                              │  │                              │
+│  Viền: Cyan (#00F0FF)        │  │  Viền: Purple (#6A5BFF)      │
+└─────────────────────────────┘  └─────────────────────────────┘
+
+┌─────────────────────────────┐  ┌─────────────────────────────┐
+│  ③ VẼ ZONE BOUNDARIES       │  │  ④ XÁC ĐỊNH ENTRY & SL      │
+│  ─────────────────────       │  │  ─────────────────────       │
+│                              │  │                              │
+│  📏 Vẽ 2 đường ngang         │  │  🎯 Thiết lập trade          │
+│  - Entry Line: Đỉnh zone     │  │  - Entry: Tại Entry Line     │
+│  - Stop Line: Đáy zone       │  │  - SL: Dưới Stop Line        │
+│  - Kéo dài sang phải         │  │  - TP: 2-3 lần SL            │
+│                              │  │                              │
+│  [Mini chart minh họa]       │  │  [Mini chart minh họa]       │
+│                              │  │                              │
+│  Viền: Vàng (#FFBD59)        │  │  Viền: Xanh lá (#10B981)     │
+└─────────────────────────────┘  └─────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+FOOTER:
+═══════════════════════════════════════════════════════════════
+"GEM TRADING" - màu trắng, căn giữa
+
+
+📐 HÌNH 2: ENTRY AND STOP LEVELS
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+⚠️ ENFORCE: Vẽ BIỂU ĐỒ NẾN CANDLESTICK thực tế
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Entry Line    | Cyan          | #00F0FF
+Stop Line     | Red           | #EF4444
+LFZ Zone      | Green trans   | #10B981 (30%)
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "ENTRY/SL"
+Tiêu đề chính: "VỊ TRÍ ENTRY VÀ STOP LOSS"
+
+═══════════════════════════════════════════════════════════════
+CHART VỚI ANNOTATIONS:
+═══════════════════════════════════════════════════════════════
+TRỤC GIÁ:
+$180 ─── TP2 (Target 2) ─── Màu xanh lá
+$175 ─── TP1 (Target 1) ─── Màu xanh lá
+$170 ═══════════════════════════════════ ENTRY LINE (Cyan)
+      ┌─────────────────────────────────┐
+      │  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░│
+      │  ░░░   LFZ ZONE               ░░░│
+      │  ░░░   (Vùng mua)             ░░░│
+      │  ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░│
+      └─────────────────────────────────┘
+$165 ═══════════════════════════════════ STOP LINE (Red)
+$160 ─── SL (Stop Loss) ─── Màu đỏ
+
+INFO BOXES:
+┌────────────────────┐  ┌────────────────────┐
+│ 🎯 ENTRY LINE      │  │ 🛑 STOP LINE       │
+│ ═══════════════    │  │ ═══════════════    │
+│ Vị trí: Đỉnh zone  │  │ Vị trí: Đáy zone   │
+│ Đặt lệnh: Limit    │  │ SL: Dưới 1-2%      │
+│ Màu: Cyan          │  │ Màu: Đỏ            │
+└────────────────────┘  └────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+FOOTER:
+═══════════════════════════════════════════════════════════════
+"GEM TRADING" - màu trắng, căn giữa
+
+
+📐 HÌNH 3: ZONE THICKNESS EXAMPLES
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Warning/Deep  | Burgundy      | #9C0612
+Success       | Green         | #10B981
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "SO SÁNH"
+Tiêu đề chính: "ĐỘ DÀY ZONE - CÁCH ĐÁNH GIÁ"
+
+═══════════════════════════════════════════════════════════════
+3 VÍ DỤ ZONE:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│  ZONE MỎNG (< 1%)        ✅ TỐT                             │
+│  ══════════════════════════════════════════════════════════ │
+│  ████████████████████████████████████████████████████████   │
+│  ══════════════════════════════════════════════════════════ │
+│  • SL nhỏ → R:R cao                                         │
+│  • Entry chính xác                                          │
+│  • Khuyến nghị: 10/10                                       │
+│  Viền: Xanh lá (#10B981)                                    │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│  ZONE TRUNG BÌNH (1-2%)   ⚠️ OK                             │
+│  ══════════════════════════════════════════════════════════ │
+│  ████████████████████████████████████████████████████████   │
+│  ████████████████████████████████████████████████████████   │
+│  ████████████████████████████████████████████████████████   │
+│  ══════════════════════════════════════════════════════════ │
+│  • SL trung bình                                            │
+│  • Có thể trade nếu factors khác tốt                        │
+│  • Khuyến nghị: 7/10                                        │
+│  Viền: Vàng (#FFBD59)                                       │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│  ZONE DÀY (> 2%)         ❌ TRÁNH                           │
+│  ══════════════════════════════════════════════════════════ │
+│  ████████████████████████████████████████████████████████   │
+│  ████████████████████████████████████████████████████████   │
+│  ████████████████████████████████████████████████████████   │
+│  ████████████████████████████████████████████████████████   │
+│  ████████████████████████████████████████████████████████   │
+│  ██████████████████████████████████████████████████████████ │
+│  ══════════════════════════════════════════════════════════ │
+│  • SL lớn → R:R thấp                                        │
+│  • Khó xác định entry                                       │
+│  • Khuyến nghị: 3/10                                        │
+│  Viền: Đỏ (#EF4444)                                         │
+└─────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+FOOTER:
+═══════════════════════════════════════════════════════════════
+"GEM TRADING" - màu trắng, căn giữa
+
+
+📐 HÌNH 4: TRADINGVIEW LFZ DRAWING
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Warning/Deep  | Burgundy      | #9C0612
+Success       | Green         | #10B981
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "CÔNG CỤ"
+Tiêu đề chính: "HƯỚNG DẪN VẼ LFZ TRÊN TRADINGVIEW"
+
+═══════════════════════════════════════════════════════════════
+BƯỚC 1-4:
+═══════════════════════════════════════════════════════════════
+┌────────────────────────────────────────────────────────────┐
+│  BƯỚC 1: Chọn công cụ Rectangle                           │
+│  ══════════════════════════════════════════════════════════│
+│  📌 Vào Drawing Tools → Chọn Rectangle                    │
+│  [Screenshot minh họa toolbar TradingView]                 │
+└────────────────────────────────────────────────────────────┘
+↓
+┌────────────────────────────────────────────────────────────┐
+│  BƯỚC 2: Vẽ vùng Pause                                    │
+│  ══════════════════════════════════════════════════════════│
+│  📌 Click & drag từ điểm cao → điểm thấp của Pause zone   │
+│  [Screenshot minh họa vẽ rectangle]                        │
+└────────────────────────────────────────────────────────────┘
+↓
+┌────────────────────────────────────────────────────────────┐
+│  BƯỚC 3: Thiết lập màu sắc                                │
+│  ══════════════════════════════════════════════════════════│
+│  📌 Click vào zone → Settings                             │
+│  • Background: #10B981 (Green) opacity 30%                │
+│  • Border: #10B981 solid                                  │
+│  [Screenshot settings panel]                               │
+└────────────────────────────────────────────────────────────┘
+↓
+┌────────────────────────────────────────────────────────────┐
+│  BƯỚC 4: Kéo dài zone sang phải                           │
+│  ══════════════════════════════════════════════════════════│
+│  📌 Extend right: Enable                                  │
+│  Zone sẽ tự động kéo dài khi price action tiến về phía    │
+│  [Screenshot zone extended]                                │
+└────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+FOOTER:
+═══════════════════════════════════════════════════════════════
+"GEM TRADING" - màu trắng, căn giữa
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 3.4: CHIẾN LƯỢC ENTRY CHO UPU
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: UPU ENTRY FLOW 5 BƯỚC
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Warning/Deep  | Burgundy      | #9C0612
+Success       | Green         | #10B981
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "QUY TRÌNH"
+Tiêu đề chính: "5 BƯỚC ENTRY UPU"
+
+═══════════════════════════════════════════════════════════════
+FLOWCHART 5 BƯỚC:
+═══════════════════════════════════════════════════════════════
+         ┌───────────────────────────────┐
+    ①    │  SCAN TÌM UPU PATTERN         │
+         │  🔍 Scanner / Manual scan     │
+         └───────────────┬───────────────┘
+                         ↓
+         ┌───────────────────────────────┐
+    ②    │  VẼ LFZ ZONE                  │
+         │  📏 Xác định Entry & Stop Line │
+         └───────────────┬───────────────┘
+                         ↓
+         ┌───────────────────────────────┐
+    ③    │  CHỜ GIÁ CHẠM LFZ             │
+         │  ⏳ Set alert hoặc theo dõi    │
+         └───────────────┬───────────────┘
+                         ↓
+         ┌───────────────────────────────┐
+    ④    │  TÌM NẾN XÁC NHẬN             │
+         │  📊 Bullish candle at zone    │
+         └───────────────┬───────────────┘
+                         ↓
+         ┌───────────────────────────────┐
+    ⑤    │  VÀO LỆNH + ĐẶT SL/TP         │
+         │  ✅ Execute trade              │
+         └───────────────────────────────┘
+
+Mỗi box có màu viền khác nhau theo thứ tự:
+① Cyan, ② Purple, ③ Vàng, ④ Xanh lá, ⑤ Vàng Gold
+
+═══════════════════════════════════════════════════════════════
+FOOTER:
+═══════════════════════════════════════════════════════════════
+"GEM TRADING" - màu trắng, căn giữa
+
+
+📐 HÌNH 2: BULLISH CANDLESTICK PATTERNS
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Nến xanh      | Green solid   | #00C853
+Nến đỏ        | Red solid     | #EF4444
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "NẾN XÁC NHẬN"
+Tiêu đề chính: "CÁC MẪU NẾN BULLISH PHỔ BIẾN"
+
+═══════════════════════════════════════════════════════════════
+6 MẪU NẾN (Grid 2x3):
+═══════════════════════════════════════════════════════════════
+┌───────────────────┐  ┌───────────────────┐  ┌───────────────────┐
+│ BULLISH ENGULFING │  │ HAMMER            │  │ MORNING STAR      │
+│ ═════════════════ │  │ ═════════════════ │  │ ═════════════════ │
+│                   │  │        │          │  │    █    █  ███    │
+│    █ ████         │  │        │          │  │    █    █████     │
+│    █████          │  │      █████        │  │  █████  █         │
+│    ████           │  │        │          │  │         │         │
+│    █              │  │                   │  │                   │
+│                   │  │                   │  │                   │
+│ Độ mạnh: ⭐⭐⭐⭐⭐ │  │ Độ mạnh: ⭐⭐⭐⭐   │  │ Độ mạnh: ⭐⭐⭐⭐⭐ │
+└───────────────────┘  └───────────────────┘  └───────────────────┘
+
+┌───────────────────┐  ┌───────────────────┐  ┌───────────────────┐
+│ PIERCING LINE     │  │ DRAGONFLY DOJI    │  │ THREE WHITE       │
+│ ═════════════════ │  │ ═════════════════ │  │ SOLDIERS          │
+│    █████          │  │        │          │  │ ═════════════════ │
+│    █████████      │  │        │          │  │      ████         │
+│      █████████    │  │      ─────        │  │    ████           │
+│                   │  │        │          │  │  ████             │
+│                   │  │                   │  │                   │
+│ Độ mạnh: ⭐⭐⭐⭐   │  │ Độ mạnh: ⭐⭐⭐     │  │ Độ mạnh: ⭐⭐⭐⭐⭐ │
+└───────────────────┘  └───────────────────┘  └───────────────────┘
+
+═══════════════════════════════════════════════════════════════
+FOOTER:
+═══════════════════════════════════════════════════════════════
+"GEM TRADING" - màu trắng, căn giữa
+
+
+📐 HÌNH 3: SOL ENTRY EXAMPLE CHART
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+⚠️ ENFORCE: Vẽ BIỂU ĐỒ NẾN CANDLESTICK thực tế
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Nến xanh      | Green solid   | #00C853
+Nến đỏ        | Red solid     | #EF4444
+LFZ Zone      | Green trans   | #10B981 (30%)
+Entry Line    | Cyan          | #00F0FF
+Stop Line     | Red           | #EF4444
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "VÍ DỤ THỰC TẾ"
+Tiêu đề chính: "SOL/USDT H4 - UPU ENTRY"
+
+═══════════════════════════════════════════════════════════════
+BIỂU ĐỒ NẾN VỚI ANNOTATIONS:
+═══════════════════════════════════════════════════════════════
+Hiển thị chart SOL/USDT H4 với:
+
+1. PHASE 1 - UPTREND:
+   - Nến xanh liên tục từ $140 → $165
+   - Bracket label: "PHASE 1: +17.9%"
+
+2. PHASE 2 - PULLBACK:
+   - Nến đỏ pull back về $152
+   - LFZ Zone được highlight ($150 - $155)
+   - Label: "LFZ ZONE"
+
+3. ENTRY POINT:
+   - Nến Bullish Engulfing tại LFZ
+   - Arrow: "→ BULLISH ENGULFING = ENTRY"
+   - Entry Line tại $155
+
+4. PHASE 3 - UP TIẾP:
+   - Nến xanh từ $155 → $180
+   - TP1 = $170, TP2 = $180
+   - Bracket label: "PROFIT: +16.1%"
+
+═══════════════════════════════════════════════════════════════
+INFO BOX:
+═══════════════════════════════════════════════════════════════
+📊 TRADE SUMMARY:
+═══════════════════
+- Entry: $155.00
+- SL: $148.00 (-4.5%)
+- TP1: $170.00 (+9.7%)
+- TP2: $180.00 (+16.1%)
+- R:R = 1:2.5
+- Result: ✅ WIN
+
+═══════════════════════════════════════════════════════════════
+FOOTER:
+═══════════════════════════════════════════════════════════════
+"GEM TRADING" - màu trắng, căn giữa
+
+
+📐 HÌNH 4: COMMON ENTRY MISTAKES
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Warning/Deep  | Burgundy      | #9C0612
+Success       | Green         | #10B981
+Error/Wrong   | Red           | #EF4444
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "CẢNH BÁO"
+- Màu nền: Đỏ (#EF4444)
+Tiêu đề chính: "5 SAI LẦM PHỔ BIẾN KHI ENTRY UPU"
+
+═══════════════════════════════════════════════════════════════
+5 SAI LẦM:
+═══════════════════════════════════════════════════════════════
+┌────────────────────────────────────────────────────────────┐
+│ ❌ SAI LẦM 1: ENTRY KHÔNG CÓ NẾN XÁC NHẬN                  │
+│ ════════════════════════════════════════════════════════════│
+│ Vấn đề: Giá chạm zone nhưng chưa có reversal signal        │
+│ Hậu quả: Giá tiếp tục đi ngược hướng → SL hit              │
+│ ✅ Sửa: CHỜ nến xác nhận (Engulfing, Hammer...)            │
+│ Viền: Đỏ (#EF4444)                                         │
+└────────────────────────────────────────────────────────────┘
+
+┌────────────────────────────────────────────────────────────┐
+│ ❌ SAI LẦM 2: ENTRY ZONE ĐÃ BỊ TEST                        │
+│ ════════════════════════════════════════════════════════════│
+│ Vấn đề: Zone đã bị giá chạm nhiều lần (tested zone)        │
+│ Hậu quả: Zone yếu, dễ bị phá                               │
+│ ✅ Sửa: Chỉ trade FRESH zones (chưa bị test)               │
+│ Viền: Đỏ (#EF4444)                                         │
+└────────────────────────────────────────────────────────────┘
+
+┌────────────────────────────────────────────────────────────┐
+│ ❌ SAI LẦM 3: SL QUÁ SÁT                                    │
+│ ════════════════════════════════════════════════════════════│
+│ Vấn đề: Đặt SL ngay dưới Entry Line                        │
+│ Hậu quả: Bị stop hunt, SL hit rồi giá đi đúng hướng        │
+│ ✅ Sửa: SL dưới Stop Line + buffer 1-2%                    │
+│ Viền: Đỏ (#EF4444)                                         │
+└────────────────────────────────────────────────────────────┘
+
+┌────────────────────────────────────────────────────────────┐
+│ ❌ SAI LẦM 4: ENTRY SAI TREND                               │
+│ ════════════════════════════════════════════════════════════│
+│ Vấn đề: Trade UPU trong downtrend tổng thể                 │
+│ Hậu quả: Đi ngược big picture → thất bại                   │
+│ ✅ Sửa: Xác nhận HTF trend trước khi trade                 │
+│ Viền: Đỏ (#EF4444)                                         │
+└────────────────────────────────────────────────────────────┘
+
+┌────────────────────────────────────────────────────────────┐
+│ ❌ SAI LẦM 5: POSITION SIZE QUÁ LỚN                         │
+│ ════════════════════════════════════════════════════════════│
+│ Vấn đề: All-in hoặc size > 5% portfolio                    │
+│ Hậu quả: Một trade loss = blow account                     │
+│ ✅ Sửa: Max 1-2% risk per trade                            │
+│ Viền: Đỏ (#EF4444)                                         │
+└────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+FOOTER:
+═══════════════════════════════════════════════════════════════
+"GEM TRADING" - màu trắng, căn giữa
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 3.5: CHECKLIST XÁC NHẬN UPU
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: UPU CHECKLIST 8 POINTS
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Warning/Deep  | Burgundy      | #9C0612
+Success       | Green         | #10B981
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "CHECKLIST"
+- Màu nền: Xanh lá (#10B981)
+Tiêu đề chính: "CHECKLIST 8 ĐIỂM XÁC NHẬN UPU"
+Subtitle: "In ra và dán cạnh màn hình!"
+
+═══════════════════════════════════════════════════════════════
+CHECKLIST 8 ĐIỂM:
+═══════════════════════════════════════════════════════════════
+┌────────────────────────────────────────────────────────────┐
+│  ☐ 1. PHASE 1: Uptrend rõ ràng (> 5%)                     │
+│  ────────────────────────────────────────────────────────  │
+│  ☐ 2. PHASE 2: Pullback về vùng Pause (< 50% Phase 1)     │
+│  ────────────────────────────────────────────────────────  │
+│  ☐ 3. LFZ ZONE: Được xác định rõ ràng                      │
+│  ────────────────────────────────────────────────────────  │
+│  ☐ 4. ZONE FRESH: Zone chưa bị test (lần đầu chạm)         │
+│  ────────────────────────────────────────────────────────  │
+│  ☐ 5. NẾN XÁC NHẬN: Bullish candle tại zone               │
+│  ────────────────────────────────────────────────────────  │
+│  ☐ 6. HTF TREND: Đồng thuận với trend lớn                  │
+│  ────────────────────────────────────────────────────────  │
+│  ☐ 7. R:R RATIO: Tối thiểu 1:2                            │
+│  ────────────────────────────────────────────────────────  │
+│  ☐ 8. POSITION SIZE: ≤ 2% portfolio                        │
+└────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+SCORING BOX:
+═══════════════════════════════════════════════════════════════
+📊 ĐÁNH GIÁ:
+- 8/8 điểm: ✅ ENTRY NGAY
+- 6-7/8 điểm: ⚠️ CÂN NHẮC
+- < 6/8 điểm: ❌ BỎ QUA
+
+═══════════════════════════════════════════════════════════════
+FOOTER:
+═══════════════════════════════════════════════════════════════
+"GEM TRADING" - màu trắng, căn giữa
+
+
+📐 HÌNH 2: COMMON UPU MISTAKES
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Error/Wrong   | Red           | #EF4444
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "CẢNH BÁO"
+- Màu nền: Đỏ (#EF4444)
+Tiêu đề chính: "5 LỖI PHỔ BIẾN KHI TRADE UPU"
+Subtitle: "Hãy tránh xa những lỗi này!"
+
+═══════════════════════════════════════════════════════════════
+5 LỖI (Danh sách vertical):
+═══════════════════════════════════════════════════════════════
+┌────────────────────────────────────────────────────────────┐
+│ ❌ LỖI 1: VẼ LFZ SAI                                        │
+│ ═══════════════════════════════════════════════════════════ │
+│ Vẽ zone quá rộng hoặc sai vị trí                           │
+│ → Kết quả: Entry sai, SL không hợp lý                      │
+│ Viền: Đỏ (#EF4444)                                         │
+└────────────────────────────────────────────────────────────┘
+
+┌────────────────────────────────────────────────────────────┐
+│ ❌ LỖI 2: BỎ QUA HTF TREND                                  │
+│ ═══════════════════════════════════════════════════════════ │
+│ Trade UPU trong overall downtrend                          │
+│ → Kết quả: Đi ngược big picture, loss                      │
+│ Viền: Đỏ (#EF4444)                                         │
+└────────────────────────────────────────────────────────────┘
+
+┌────────────────────────────────────────────────────────────┐
+│ ❌ LỖI 3: TRADE TESTED ZONE                                 │
+│ ═══════════════════════════════════════════════════════════ │
+│ Entry tại zone đã bị giá chạm nhiều lần                    │
+│ → Kết quả: Zone yếu, dễ bị phá                             │
+│ Viền: Đỏ (#EF4444)                                         │
+└────────────────────────────────────────────────────────────┘
+
+┌────────────────────────────────────────────────────────────┐
+│ ❌ LỖI 4: KHÔNG CÓ NẾN XÁC NHẬN                             │
+│ ═══════════════════════════════════════════════════════════ │
+│ Entry ngay khi giá chạm zone                               │
+│ → Kết quả: Giá tiếp tục pullback, SL hit                   │
+│ Viền: Đỏ (#EF4444)                                         │
+└────────────────────────────────────────────────────────────┘
+
+┌────────────────────────────────────────────────────────────┐
+│ ❌ LỖI 5: R:R QUÁ THẤP                                      │
+│ ═══════════════════════════════════════════════════════════ │
+│ Trade với R:R < 1:1                                        │
+│ → Kết quả: Về lâu dài thua nhiều hơn thắng                 │
+│ Viền: Đỏ (#EF4444)                                         │
+└────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+FOOTER:
+═══════════════════════════════════════════════════════════════
+"GEM TRADING" - màu trắng, căn giữa
+
+
+📐 HÌNH 3: GOOD VS BAD UPU SETUP
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+⚠️ ENFORCE: Vẽ BIỂU ĐỒ NẾN CANDLESTICK thực tế
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Good/Success  | Green         | #10B981
+Bad/Error     | Red           | #EF4444
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "SO SÁNH"
+Tiêu đề chính: "SETUP TỐT VS SETUP XẤU"
+
+═══════════════════════════════════════════════════════════════
+2 CHARTS SONG SONG:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────┐  ┌─────────────────────────────┐
+│ ✅ SETUP TỐT                 │  │ ❌ SETUP XẤU                 │
+│ ════════════════════════════ │  │ ════════════════════════════ │
+│                              │  │                              │
+│  [Chart UPU hoàn hảo]        │  │  [Chart UPU có vấn đề]       │
+│                              │  │                              │
+│  ✓ Phase 1: +12% rõ ràng     │  │  ✗ Phase 1: +3% yếu         │
+│  ✓ Pullback: 30% Phase 1    │  │  ✗ Pullback: 80% Phase 1    │
+│  ✓ Zone: Mỏng < 1%          │  │  ✗ Zone: Dày > 3%           │
+│  ✓ Zone: Fresh (chưa test)  │  │  ✗ Zone: Đã test 2 lần      │
+│  ✓ Nến: Bullish Engulfing   │  │  ✗ Nến: Không có xác nhận   │
+│  ✓ HTF: Đồng thuận UP       │  │  ✗ HTF: Đang downtrend      │
+│  ✓ R:R = 1:3                │  │  ✗ R:R = 1:0.8              │
+│                              │  │                              │
+│  Viền: Xanh lá (#10B981)     │  │  Viền: Đỏ (#EF4444)         │
+└─────────────────────────────┘  └─────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════
+KLUẬN:
+═══════════════════════════════════════════════════════════════
+💡 KẾT LUẬN:
+Không phải UPU nào cũng đáng trade!
+Chỉ trade setup đạt ≥ 6/8 điểm checklist.
+
+═══════════════════════════════════════════════════════════════
+FOOTER:
+═══════════════════════════════════════════════════════════════
+"GEM TRADING" - màu trắng, căn giữa
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 3.6: VÍ DỤ THỰC TẾ UPU
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: SOL UPU EXAMPLE H4 CHART
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+⚠️ ENFORCE: Vẽ BIỂU ĐỒ NẾN CANDLESTICK thực tế
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Nến xanh      | Green solid   | #00C853
+Nến đỏ        | Red solid     | #EF4444
+LFZ Zone      | Green trans   | #10B981 (30%)
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "CASE 1"
+- Màu nền: Cam (#F59E0B)
+Tiêu đề chính: "SOL/USDT H4 - UPU ANALYSIS"
+
+═══════════════════════════════════════════════════════════════
+BIỂU ĐỒ NẾN CHI TIẾT:
+═══════════════════════════════════════════════════════════════
+[Chart SOL/USDT H4 với annotations đầy đủ]
+
+TRỤC GIÁ:
+$200
+$190
+$180
+$170
+$160
+$150
+$140
+
+3 PHASES được đánh dấu rõ ràng:
+- PHASE 1: $140 → $175 (+25%)
+  Bracket + mũi tên xanh
+
+- PHASE 2: $175 → $158 (-9.7%)
+  LFZ Zone: $155 - $162
+  Label: "LFZ ZONE - VÙNG MUA"
+
+- PHASE 3: $158 → $195 (+23.4%)
+  Bracket + mũi tên xanh
+  Entry point được đánh dấu
+  TP1, TP2 được vẽ
+
+═══════════════════════════════════════════════════════════════
+INFO BOX:
+═══════════════════════════════════════════════════════════════
+📊 TRADE RESULT:
+═══════════════════
+- Coin: SOL/USDT
+- Timeframe: H4
+- Entry: $160.50
+- SL: $152.00
+- TP1: $175.00 ✅ HIT
+- TP2: $190.00 ✅ HIT
+- Total P&L: +18.4%
+- R:R Achieved: 1:3.5
+
+═══════════════════════════════════════════════════════════════
+FOOTER:
+═══════════════════════════════════════════════════════════════
+"GEM TRADING" - màu trắng, căn giữa
+
+
+📐 HÌNH 2: BNB UPU EXAMPLE 1D CHART
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+⚠️ ENFORCE: Vẽ BIỂU ĐỒ NẾN CANDLESTICK thực tế
+📋 DESIGN SYSTEM GENERAL:
+[Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "CASE 2"
+- Màu nền: Xanh dương (#3B82F6)
+Tiêu đề chính: "BNB/USDT DAILY - UPU SWING TRADE"
+
+═══════════════════════════════════════════════════════════════
+BIỂU ĐỒ NẾN:
+═══════════════════════════════════════════════════════════════
+[Chart BNB/USDT Daily với annotations]
+
+TRỤC GIÁ:
+$750
+$700
+$650
+$600
+$550
+$500
+$450
+
+3 PHASES:
+- PHASE 1: $450 → $650 (+44.4%)
+- PHASE 2: $650 → $550 (-15.4%)
+  LFZ Zone: $530 - $560
+- PHASE 3: $550 → $720 (+30.9%)
+
+═══════════════════════════════════════════════════════════════
+INFO BOX:
+═══════════════════════════════════════════════════════════════
+📊 SWING TRADE RESULT:
+══════════════════════
+- Coin: BNB/USDT
+- Timeframe: Daily
+- Hold time: 3 weeks
+- Entry: $555.00
+- SL: $520.00
+- TP: $700.00 ✅ HIT
+- Total P&L: +26.1%
+
+═══════════════════════════════════════════════════════════════
+FOOTER:
+═══════════════════════════════════════════════════════════════
+"GEM TRADING" - màu trắng, căn giữa
+
+
+📐 HÌNH 3: BNB ENTRY CONFIRMATION
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+⚠️ ENFORCE: Vẽ BIỂU ĐỒ NẾN CANDLESTICK thực tế
+📋 DESIGN SYSTEM GENERAL:
+[Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "NẾN XÁC NHẬN"
+Tiêu đề chính: "BULLISH ENGULFING TẠI LFZ"
+
+═══════════════════════════════════════════════════════════════
+ZOOM VÀO VÙNG LFZ:
+═══════════════════════════════════════════════════════════════
+[Zoom chart tại vùng LFZ với nến xác nhận]
+
+Highlight:
+- LFZ Zone được highlight màu xanh
+- Nến trước: Nến đỏ nhỏ
+- Nến xác nhận: Bullish Engulfing lớn bao trùm
+  Arrow: "→ BULLISH ENGULFING"
+  Label: "NẾN XÁC NHẬN = ENTRY SIGNAL"
+
+═══════════════════════════════════════════════════════════════
+CANDLESTICK DETAIL BOX:
+═══════════════════════════════════════════════════════════════
+🕯️ BULLISH ENGULFING:
+════════════════════════
+- Open: $548.00
+- High: $572.00
+- Low: $545.00
+- Close: $568.00
+- Body: +3.6%
+- Bao trùm hoàn toàn nến trước
+
+✅ XÁC NHẬN: ENTRY SIGNAL HỢP LỆ
+
+═══════════════════════════════════════════════════════════════
+FOOTER:
+═══════════════════════════════════════════════════════════════
+"GEM TRADING" - màu trắng, căn giữa
+
+
+═══════════════════════════════════════════════════════════════════════════════
+CHƯƠNG 4: UPD PATTERN
+═══════════════════════════════════════════════════════════════════════════════
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 4.1: UPD LÀ GÌ?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: UPD PATTERN DEFINITION
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Warning/Deep  | Burgundy      | #9C0612
+Success       | Green         | #10B981
+Bearish/Down  | Red           | #EF4444
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+NỘI DUNG HÌNH:
+HEADER: Badge "BÀI 4.1" màu đỏ, Tiêu đề "UPD PATTERN LÀ GÌ?"
+
+DIAGRAM: UPD Pattern Structure với 3 phases:
+- PHASE 1 (UP): Giá tăng mạnh từ START
+- PHASE 2 (PAUSE): Vùng sideway tạo HFZ ZONE (Vùng bán)
+- PHASE 3 (DOWN): Giá giảm xuống SHORT ENTRY
+
+INFO BOX:
+📊 UPD = Up → Pause → Down
+• Loại: REVERSAL BEARISH
+• Zone: HFZ (High Frequency Zone - Vùng BÁN)
+• Action: SHORT (Bán)
+• Win Rate: 68-72%
+
+FOOTER: "GEM TRADING" - màu trắng, căn giữa
+
+
+📐 HÌNH 2: UPD MARKET CONTEXT
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+HEADER: Badge "BỐI CẢNH", Tiêu đề "KHI NÀO SỬ DỤNG UPD?"
+
+3 ĐIỀU KIỆN (Cards vertical):
+① THỊ TRƯỜNG TRONG UPTREND MỞ RỘNG
+   📈 Giá đã tăng mạnh và dài, Uptrend > 20%, FOMO
+   Viền: Cyan
+
+② XUẤT HIỆN VÙNG PAUSE (TÍCH LŨY)
+   ⏸️ Giá đi sideway, Volume giảm, Smart money PHÂN PHỐI
+   Viền: Vàng
+
+③ GIÁ BẮT ĐẦU GIẢM TỪ VÙNG PAUSE
+   📉 Break support, Volume tăng, HFZ = Cơ hội SHORT
+   Viền: Đỏ
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: UPD PSYCHOLOGY
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+HEADER: Badge "TÂM LÝ", Tiêu đề "TÂM LÝ ĐÁM ĐÔNG TRONG UPD"
+
+DIAGRAM TÂM LÝ (3 giai đoạn):
+PHASE 1 - UPTREND: 😊 EUPHORIA/GREED
+  "Giá sẽ lên mãi!" | Retail: FOMO | Smart Money: PHÂN PHỐI
+
+PHASE 2 - PAUSE: 🤔 CONFUSION
+  "Sao giá không lên?" | Retail: Hold | Smart Money: BÁN NỐT → Tạo HFZ
+
+PHASE 3 - DOWN: 😱 PANIC
+  "Xong rồi! Bán tháo!" | Retail: Panic sell | Smart Money: PROFIT 💰
+
+INSIGHT BOX: 🧠 Khi retail euphoria và mua đuổi, đó là lúc tìm SHORT tại HFZ!
+
+FOOTER: "GEM TRADING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 4.2 - 4.6: UPD PATTERN (TÓM TẮT)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BÀI 4.2: UPD CẤU TRÚC 3 PHASES
+📐 HÌNH 1: UPD 3 Phases Breakdown - Biểu đồ nến chi tiết 3 phases
+📐 HÌNH 2: UPD Zone Identification - 4 bước xác định HFZ
+📐 HÌNH 3: UPD Entry Timing - 3 thời điểm entry tối ưu
+
+BÀI 4.3: TẠI SAO UPD MẠNH?
+📐 HÌNH 1: UPD Supply Zone - Giải thích HFZ = Supply Zone
+📐 HÌNH 2: UPD Institutional Flow - Dòng tiền tổ chức (Accumulation → Distribution → Markdown)
+📐 HÌNH 3: UPD Win Rate Stats - Thống kê 68% win rate, R:R 1:2.5
+
+BÀI 4.4: CHIẾN LƯỢC ENTRY UPD
+📐 HÌNH 1: UPD Entry Strategy - Chiến lược vào lệnh Short
+📐 HÌNH 2: UPD Stop Loss Placement - SL trên HFZ + buffer
+📐 HÌNH 3: UPD Take Profit Levels - TP1, TP2, TP3
+📐 HÌNH 4: UPD Entry Confirmation - Nến xác nhận (Bearish Engulfing, Shooting Star)
+
+BÀI 4.5: UPD PHÂN BIỆT VỚI DPD
+📐 HÌNH 1: UPD vs DPD Comparison - Bảng so sánh chi tiết
+📐 HÌNH 2: Pattern Recognition Guide - Hướng dẫn nhận diện nhanh
+📐 HÌNH 3: Common Confusion Points - Điểm dễ nhầm lẫn
+
+BÀI 4.6: VÍ DỤ THỰC TẾ UPD
+📐 HÌNH 1: BTC UPD Example - Chart BTC/USDT với UPD annotations
+📐 HÌNH 2: ETH UPD Trade Setup - Setup SHORT trên ETH
+📐 HÌNH 3: UPD Trade Result - Kết quả trade thực tế
+
+
+═══════════════════════════════════════════════════════════════════════════════
+CHƯƠNG 5: DPU PATTERN (TÓM TẮT)
+═══════════════════════════════════════════════════════════════════════════════
+
+BÀI 5.1: DPU LÀ GÌ?
+📐 HÌNH 1: DPU Pattern Definition - Down → Pause → Up, Reversal Bullish
+📐 HÌNH 2: DPU Market Context - Điều kiện thị trường cho DPU
+📐 HÌNH 3: DPU vs Other Patterns - So sánh với UPU, UPD, DPD
+
+BÀI 5.2: DPU CẤU TRÚC 3 PHASES
+📐 HÌNH 1: DPU 3 Phases Diagram - Chart với 3 phases
+📐 HÌNH 2: DPU Demand Zone - LFZ trong DPU
+📐 HÌNH 3: DPU Volume Analysis - Phân tích volume
+
+BÀI 5.3-5.6: (Format tương tự các bài trước)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+CHƯƠNG 6: CLASSIC PATTERNS (TÓM TẮT)
+═══════════════════════════════════════════════════════════════════════════════
+
+BÀI 6.1: TỔNG QUAN CLASSIC PATTERNS
+📐 HÌNH 1: Classic Patterns Overview - Grid 6 patterns
+📐 HÌNH 2: Patterns Classification - Continuation vs Reversal
+📐 HÌNH 3: Patterns Win Rates - So sánh win rate
+
+BÀI 6.2: FLAG & PENNANT
+📐 HÌNH 1: Flag Pattern Structure - Bull Flag & Bear Flag
+📐 HÌNH 2: Pennant Pattern Structure - Bullish & Bearish Pennant
+📐 HÌNH 3: Flag vs Pennant Comparison
+📐 HÌNH 4: Flag Pennant Entry - Điểm entry
+
+BÀI 6.3: TRIANGLE PATTERNS
+📐 HÌNH 1: Ascending Triangle - Cấu trúc chi tiết
+📐 HÌNH 2: Descending Triangle - Cấu trúc chi tiết
+📐 HÌNH 3: Symmetrical Triangle - Cấu trúc chi tiết
+📐 HÌNH 4: Triangle Breakout - Xác nhận breakout
+
+BÀI 6.4: HEAD & SHOULDERS
+📐 HÌNH 1: Head Shoulders Structure - H&S pattern
+📐 HÌNH 2: Inverse Head Shoulders - Inverse H&S
+📐 HÌNH 3: Neckline Importance - Tầm quan trọng Neckline
+📐 HÌNH 4: H&S Entry Strategy
+
+BÀI 6.5: DOUBLE TOP/BOTTOM
+📐 HÌNH 1: Double Top Structure
+📐 HÌNH 2: Double Bottom Structure
+📐 HÌNH 3: Double Top Bottom Entry
+📐 HÌNH 4: Double Pattern Targets
+
+BÀI 6.6: TỔNG KẾT CLASSIC PATTERNS
+📐 HÌNH 1: Pattern Summary Table
+📐 HÌNH 2: Pattern Selection Guide
+📐 HÌNH 3: Pattern Combinations
+
+
+═══════════════════════════════════════════════════════════════════════════════
+CHƯƠNG 7-10: TIER 1 (TÓM TẮT FORMAT)
+═══════════════════════════════════════════════════════════════════════════════
+
+CHƯƠNG 7: PAPER TRADING (5 bài, ~15 hình)
+CHƯƠNG 8: GEM MASTER AI (5 bài, ~15 hình)
+CHƯƠNG 9: MODULE A - TRANSFORMATION (4 bài, ~12 hình)
+CHƯƠNG 10: MODULE B - OPPORTUNITIES (7 bài, ~21 hình)
+
+[Mỗi bài có 3-4 hình với format prompt tương tự]
+
+
+================================================================================
+                         TIER 2 - NÂNG CAO (43 bài)
+================================================================================
+
+═══════════════════════════════════════════════════════════════════════════════
+CHƯƠNG 1: HFZ (HIGH FREQUENCY ZONE)
+═══════════════════════════════════════════════════════════════════════════════
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 1.1: HFZ LÀ GÌ?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: HFZ DEFINITION
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+HFZ Zone      | Red trans     | #EF4444 (30% opacity)
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+NỘI DUNG HÌNH:
+HEADER: Badge "TIER 2", Tiêu đề "HFZ - HIGH FREQUENCY ZONE"
+
+DEFINITION BOX:
+┌────────────────────────────────────────────────────────────┐
+│ 📊 HFZ = HIGH FREQUENCY ZONE                               │
+│ ════════════════════════════════════════════════════════════│
+│ • Định nghĩa: Vùng có tần suất giao dịch CAO               │
+│ • Hình thành: Từ patterns UPD, DPD                         │
+│ • Loại: SUPPLY ZONE (Vùng bán)                             │
+│ • Action: SHORT khi giá chạm HFZ                           │
+│ • Màu sắc: ĐỎ (#EF4444) với 30% opacity                    │
+└────────────────────────────────────────────────────────────┘
+
+DIAGRAM:
+Biểu đồ nến với HFZ zone được highlight màu đỏ
+- Entry Line: Đáy zone (nơi vào SHORT)
+- Stop Line: Đỉnh zone (SL phía trên)
+- Arrows: Giá đi xuống từ HFZ
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: HFZ VS LFZ
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+HEADER: Badge "SO SÁNH", Tiêu đề "HFZ VS LFZ - KHÁC BIỆT QUAN TRỌNG"
+
+BẢNG SO SÁNH:
+┌─────────────────────────────┬─────────────────────────────┐
+│          HFZ                │          LFZ                │
+│ ══════════════════════════  │ ══════════════════════════  │
+│ High Frequency Zone         │ Low Frequency Zone          │
+│ SUPPLY ZONE (Vùng bán)      │ DEMAND ZONE (Vùng mua)      │
+│ Màu: ĐỎ (#EF4444)           │ Màu: XANH LÁ (#10B981)      │
+│ Action: SHORT               │ Action: LONG                │
+│ Từ patterns: UPD, DPD       │ Từ patterns: UPU, DPU       │
+│ Giá giảm từ đây             │ Giá tăng từ đây             │
+└─────────────────────────────┴─────────────────────────────┘
+
+VISUAL: 2 mini charts song song
+- Bên trái: Chart với HFZ (đỏ) - giá đi xuống
+- Bên phải: Chart với LFZ (xanh) - giá đi lên
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: HFZ IDENTIFICATION
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+HEADER: Badge "NHẬN DIỆN", Tiêu đề "CÁCH NHẬN DIỆN HFZ"
+
+4 DẤU HIỆU:
+① Hình thành sau UPTREND mạnh (> 15%)
+② Giá sideway với range hẹp (< 3%)
+③ Volume giảm dần trong vùng Pause
+④ Nến nhỏ, body ngắn, nhiều doji
+
+CHECKLIST BOX:
+☐ Có uptrend trước đó?
+☐ Vùng sideway rõ ràng?
+☐ Volume giảm?
+☐ Break support xác nhận?
+
+FOOTER: "GEM TRADING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 1.2-1.6: HFZ (TÓM TẮT FORMAT)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BÀI 1.2: CÁCH VẼ HFZ (4 hình)
+BÀI 1.3: ZONE LIFECYCLE (3 hình)
+BÀI 1.4: CHIẾN LƯỢC ENTRY HFZ (4 hình)
+BÀI 1.5: HFZ ĐA KHUNG THỜI GIAN (3 hình)
+BÀI 1.6: VÍ DỤ THỰC TẾ HFZ (3 hình)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+CHƯƠNG 2-8: TIER 2 (TÓM TẮT FORMAT)
+═══════════════════════════════════════════════════════════════════════════════
+
+CHƯƠNG 2: LFZ NÂNG CAO (6 bài, ~18 hình)
+CHƯƠNG 3: TRIANGLE PATTERNS NÂNG CAO (5 bài, ~15 hình)
+CHƯƠNG 4: MULTI-TIMEFRAME ANALYSIS (5 bài, ~15 hình)
+CHƯƠNG 5: ZONE GRADING (5 bài, ~15 hình)
+CHƯƠNG 6: RISK MANAGEMENT NÂNG CAO (5 bài, ~15 hình)
+CHƯƠNG 7: MODULE A - TIER 2 (4 bài, ~12 hình)
+CHƯƠNG 8: MODULE B - TIER 2 (7 bài, ~21 hình)
+
+
+================================================================================
+                          TIER 3 - ELITE (37 bài)
+================================================================================
+
+═══════════════════════════════════════════════════════════════════════════════
+CHƯƠNG 1: FLAG & PENNANT MASTERY
+═══════════════════════════════════════════════════════════════════════════════
+
+BÀI 1.1: FLAG LÀ GÌ?
+📐 HÌNH 1: Flag Pattern Anatomy - Giải phẫu chi tiết Flag
+📐 HÌNH 2: Flag Formation Process - Quá trình hình thành
+📐 HÌNH 3: Flag Psychology - Tâm lý đằng sau pattern
+
+BÀI 1.2-1.5: (Format tương tự)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+CHƯƠNG 2-7: TIER 3 (TÓM TẮT FORMAT)
+═══════════════════════════════════════════════════════════════════════════════
+
+CHƯƠNG 2: CANDLESTICK MASTERY (6 bài, ~18 hình)
+CHƯƠNG 3: AI SIGNALS (5 bài, ~15 hình)
+CHƯƠNG 4: WHALE TRACKING (5 bài, ~15 hình)
+CHƯƠNG 5: PORTFOLIO & PSYCHOLOGY (5 bài, ~15 hình)
+CHƯƠNG 6: MODULE A - TIER 3 (4 bài, ~12 hình)
+CHƯƠNG 7: MODULE B - TIER 3 (7 bài, ~21 hình)
+
+
+================================================================================
+                          TEMPLATE CHUẨN CHO MỖI LOẠI HÌNH
+================================================================================
+
+═══════════════════════════════════════════════════════════════════════════════
+TEMPLATE 1: PATTERN DIAGRAM
+═══════════════════════════════════════════════════════════════════════════════
+
+📐 TEMPLATE: PATTERN DIAGRAM
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+LFZ Zone      | Green trans   | #10B981 (30%)
+HFZ Zone      | Red trans     | #EF4444 (30%)
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+NỘI DUNG:
+1. Header với Badge + Tiêu đề + Subtitle
+2. Diagram pattern với annotations
+3. Info box giải thích
+4. Footer "GEM TRADING"
+
+
+═══════════════════════════════════════════════════════════════════════════════
+TEMPLATE 2: CANDLESTICK CHART
+═══════════════════════════════════════════════════════════════════════════════
+
+📐 TEMPLATE: CANDLESTICK CHART
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+⚠️ ENFORCE: Vẽ BIỂU ĐỒ NẾN CANDLESTICK thực tế
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Nến xanh      | Green solid   | #00C853 (FILLED)
+Nến đỏ        | Red solid     | #EF4444 (FILLED)
+Zone          | Color trans   | 30% opacity
+Entry Line    | Cyan          | #00F0FF
+Stop Line     | Red           | #EF4444
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+⚠️ QUY TẮC NẾN - BẮT BUỘC:
+• NẾN XANH: FILL MÀU XANH ĐẶC (#00C853), 100% opacity
+• NẾN ĐỎ: FILL MÀU ĐỎ ĐẶC (#EF4444), 100% opacity
+• CẢ HAI là hình chữ nhật SOLID FILLED, không outline rỗng
+
+NỘI DUNG:
+1. Header với Badge + Coin/Timeframe
+2. Biểu đồ nến với trục giá
+3. Annotations (brackets, arrows, labels)
+4. Zone highlights với opacity 30%
+5. Info box với trade details
+6. Footer "GEM TRADING"
+
+
+═══════════════════════════════════════════════════════════════════════════════
+TEMPLATE 3: COMPARISON TABLE
+═══════════════════════════════════════════════════════════════════════════════
+
+📐 TEMPLATE: COMPARISON TABLE
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+[Same design system]
+
+NỘI DUNG:
+1. Header với Badge "SO SÁNH"
+2. Bảng 2 cột hoặc Grid 2x2
+3. Mỗi ô có viền màu khác nhau
+4. Dùng icons để phân biệt (✓ ✗ ⚠️)
+5. Footer "GEM TRADING"
+
+
+═══════════════════════════════════════════════════════════════════════════════
+TEMPLATE 4: CHECKLIST
+═══════════════════════════════════════════════════════════════════════════════
+
+📐 TEMPLATE: CHECKLIST
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+[Same design system]
+
+NỘI DUNG:
+1. Header với Badge "CHECKLIST" màu xanh lá
+2. Danh sách với checkbox ☐
+3. Scoring box (X/X điểm)
+4. Khuyến nghị hành động
+5. Footer "GEM TRADING"
+
+
+═══════════════════════════════════════════════════════════════════════════════
+TEMPLATE 5: FLOWCHART / PROCESS
+═══════════════════════════════════════════════════════════════════════════════
+
+📐 TEMPLATE: FLOWCHART
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+[Same design system]
+
+NỘI DUNG:
+1. Header với Badge "QUY TRÌNH"
+2. Các bước với số thứ tự ①②③④⑤
+3. Mũi tên nối các bước
+4. Mỗi box có viền màu khác nhau
+5. Footer "GEM TRADING"
+
+
+═══════════════════════════════════════════════════════════════════════════════
+TEMPLATE 6: SUCCESS STORY / TESTIMONIAL
+═══════════════════════════════════════════════════════════════════════════════
+
+📐 TEMPLATE: SUCCESS STORY
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+[Same design system]
+
+NỘI DUNG:
+1. Header với tên người
+2. Avatar placeholder (circle)
+3. Quote box với câu chuyện
+4. Stats: Kết quả trading / Thu nhập
+5. Footer "GEM TRADING"
+
+
+================================================================================
+                              TỔNG KẾT
+================================================================================
+
+TỔNG SỐ HÌNH ẢNH: ~390 hình
+
+TIER 1 (45 bài): ~150 hình
+- Chương 3-6: Patterns (~60 hình)
+- Chương 7-8: Paper Trading & AI (~30 hình)
+- Chương 9-10: Module A & B (~60 hình)
+
+TIER 2 (43 bài): ~130 hình
+- Chương 1-6: Advanced Zones & Analysis (~90 hình)
+- Chương 7-8: Module A & B (~40 hình)
+
+TIER 3 (37 bài): ~110 hình
+- Chương 1-5: Elite Content (~75 hình)
+- Chương 6-7: Module A & B (~35 hình)
+
+COLOR PALETTE CHÍNH:
+┌─────────────────────────────────────────────────────────────┐
+│ Navy Background  | #112250                                  │
+│ Gold Title       | #FFBD59                                  │
+│ Cyan Data        | #00F0FF                                  │
+│ Purple Accent    | #6A5BFF                                  │
+│ Green Success    | #10B981                                  │
+│ Red Error/Bear   | #EF4444                                  │
+│ White Text       | #FFFFFF                                  │
+│ Green Candle     | #00C853                                  │
+└─────────────────────────────────────────────────────────────┘
+
+FONT: Montserrat (Bold/Regular)
+SIZE RATIO: 9:16 (dọc) hoặc 1:1 (vuông)
+FOOTER: "GEM TRADING" căn giữa
+
+================================================================================
+                              END OF FILE
+================================================================================
+

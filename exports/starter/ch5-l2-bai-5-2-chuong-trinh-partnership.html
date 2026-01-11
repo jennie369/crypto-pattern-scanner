@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 5.2: Chương Trình Partnership</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Noto+Sans+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-navy: #112250;
+            --color-navy-light: #1a3070;
+            --color-navy-dark: #0a1535;
+            --color-gold: #FFBD59;
+            --color-gold-light: #FFD993;
+            --color-gold-dark: #E5A030;
+            --color-cyan: #00F0FF;
+            --color-purple: #6A5BFF;
+            --color-purple-light: #8B7FFF;
+            --color-green: #10B981;
+            --color-green-light: #34D399;
+
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.65);
+
+            --bg-glass: rgba(255, 255, 255, 0.08);
+            --bg-card-solid: #1a2d5a;
+            --border-glass: rgba(255, 255, 255, 0.15);
+            --border-gold: rgba(255, 189, 89, 0.4);
+
+            --shadow-gold: 0 4px 20px rgba(255, 189, 89, 0.25);
+
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            --space-2xl: 3rem;
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-body);
+            background: linear-gradient(135deg, var(--color-navy-dark) 0%, var(--color-navy) 50%, var(--color-navy-light) 100%);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+            font-size: 16px;
+        }
+
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: var(--space-lg);
+            padding-top: var(--space-xl);
+            padding-bottom: var(--space-2xl);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-container {
+                padding: 0;
+                padding-top: var(--space-md);
+                padding-bottom: var(--space-xl);
+            }
+        }
+
+        .lesson-header {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+            padding: var(--space-xl);
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-xl);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-header {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+                padding: var(--space-lg) var(--space-md);
+            }
+        }
+
+        .badge-container { display: flex; justify-content: center; gap: var(--space-sm); flex-wrap: wrap; margin-bottom: var(--space-md); }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            color: var(--color-navy);
+            font-family: var(--font-heading);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-radius: 50px;
+        }
+
+        .badge.chapter-badge { background: linear-gradient(135deg, var(--color-green) 0%, var(--color-green-light) 100%); }
+
+        .lesson-title {
+            font-family: var(--font-heading);
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+        }
+
+        .lesson-title .highlight {
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .lesson-subtitle { font-size: 1.1rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto; }
+
+        .section { margin-bottom: var(--space-xl); }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+            padding: 0 var(--space-md);
+        }
+
+        @media (min-width: 601px) { .section-header { padding: 0; } }
+
+        .section-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .section-title { font-family: var(--font-heading); font-size: clamp(1.25rem, 4vw, 1.5rem); font-weight: 700; }
+
+        .text-content { padding: 0 var(--space-md); }
+        @media (min-width: 601px) { .text-content { padding: 0; } }
+        .text-content p { margin-bottom: var(--space-md); color: var(--text-secondary); line-height: 1.8; }
+
+        .lesson-image {
+            width: 100%;
+            margin: var(--space-lg) 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 2px solid var(--border-glass);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-image { border-radius: 0; border-left: none; border-right: none; }
+        }
+
+        .image-placeholder {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: linear-gradient(135deg, var(--bg-card-solid) 0%, var(--color-navy-dark) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            padding: var(--space-lg);
+            text-align: center;
+        }
+
+        .image-placeholder-icon { font-size: 3rem; opacity: 0.5; }
+        .image-caption { text-align: center; padding: var(--space-sm); background: var(--bg-glass); color: var(--text-muted); font-size: 0.85rem; font-style: italic; }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border: 1px solid var(--border-gold);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+
+        @media (max-width: 600px) {
+            .highlight-box { border-radius: 0; border-left: 4px solid var(--color-gold); border-right: none; }
+        }
+
+        .highlight-box.cyan { background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(0, 240, 255, 0.05) 100%); border-color: rgba(0, 240, 255, 0.4); }
+        @media (max-width: 600px) { .highlight-box.cyan { border-left-color: var(--color-cyan); } }
+
+        .highlight-box.green { background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%); border-color: rgba(16, 185, 129, 0.4); }
+        @media (max-width: 600px) { .highlight-box.green { border-left-color: var(--color-green); } }
+
+        .highlight-box-title { font-family: var(--font-heading); font-size: 1rem; font-weight: 700; color: var(--color-gold); margin-bottom: var(--space-sm); }
+        .highlight-box.cyan .highlight-box-title { color: var(--color-cyan); }
+        .highlight-box.green .highlight-box-title { color: var(--color-green); }
+        .highlight-box p { color: var(--text-secondary); font-size: 0.95rem; margin: 0; }
+
+        /* PARTNER TIER CARDS */
+        .partner-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+            position: relative;
+        }
+
+        @media (max-width: 600px) { .partner-card { border-radius: 0; border-right: none; } }
+
+        .partner-card.ctv { border-left: 4px solid var(--color-gold); }
+        .partner-card.kol { border-left: 4px solid var(--color-purple); }
+        .partner-card.instructor { border-left: 4px solid var(--color-cyan); }
+
+        .partner-card.ctv.featured {
+            border: 2px solid var(--color-gold);
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.1) 0%, var(--bg-glass) 100%);
+        }
+
+        .partner-card.ctv.featured::before {
+            content: '🌟 ĐỀ XUẤT';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--color-gold);
+            color: var(--color-navy);
+            font-family: var(--font-heading);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 4px 16px;
+            border-radius: 50px;
+        }
+
+        .partner-header { display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-lg); flex-wrap: wrap; }
+        .partner-icon { font-size: 2.5rem; }
+        .partner-title-group { flex: 1; }
+        .partner-label { font-family: var(--font-heading); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: var(--space-xs); }
+        .partner-card.ctv .partner-label { color: var(--color-gold); }
+        .partner-card.kol .partner-label { color: var(--color-purple); }
+        .partner-card.instructor .partner-label { color: var(--color-cyan); }
+        .partner-title { font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; }
+        .partner-tagline { font-size: 0.9rem; color: var(--text-muted); margin-top: var(--space-xs); }
+
+        .partner-content { display: grid; gap: var(--space-lg); }
+        @media (min-width: 601px) { .partner-content { grid-template-columns: 1fr 1fr; } }
+
+        .partner-section h4 { font-family: var(--font-heading); font-size: 0.9rem; font-weight: 700; margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .partner-card.ctv .partner-section h4 { color: var(--color-gold); }
+        .partner-card.kol .partner-section h4 { color: var(--color-purple); }
+        .partner-card.instructor .partner-section h4 { color: var(--color-cyan); }
+
+        .partner-section ul { list-style: none; }
+        .partner-section ul li { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: var(--space-xs); padding-left: var(--space-lg); position: relative; }
+        .partner-section ul li::before { content: '✓'; position: absolute; left: 0; color: var(--color-green); font-weight: bold; }
+
+        /* CTV LEVELS TABLE */
+        .ctv-levels {
+            margin-top: var(--space-lg);
+        }
+
+        .ctv-level {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--bg-card-solid);
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--space-sm);
+            align-items: center;
+        }
+
+        @media (max-width: 600px) { .ctv-level { grid-template-columns: 1fr; } }
+
+        .ctv-level-badge {
+            font-size: 1.5rem;
+            background: var(--bg-glass);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-sm);
+            text-align: center;
+        }
+
+        .ctv-level-info { display: flex; flex-wrap: wrap; gap: var(--space-sm); align-items: center; }
+        .ctv-level-name { font-family: var(--font-heading); font-weight: 700; color: var(--text-primary); min-width: 100px; }
+        .ctv-level-stats { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
+        .ctv-stat { font-size: 0.8rem; color: var(--text-muted); background: var(--bg-glass); padding: 2px 8px; border-radius: 50px; }
+        .ctv-stat.highlight { color: var(--color-gold); background: rgba(255, 189, 89, 0.2); }
+
+        /* INCOME EXAMPLES */
+        .income-grid {
+            display: grid;
+            gap: var(--space-md);
+        }
+
+        @media (min-width: 601px) { .income-grid { grid-template-columns: repeat(3, 1fr); } }
+
+        .income-card {
+            background: var(--bg-card-solid);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+
+        @media (max-width: 600px) { .income-card { border-radius: 0; } }
+
+        .income-persona { font-size: 2rem; margin-bottom: var(--space-sm); }
+        .income-title { font-family: var(--font-heading); font-size: 0.9rem; font-weight: 700; color: var(--color-gold); margin-bottom: var(--space-sm); }
+        .income-amount { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 800; color: var(--color-green); margin-bottom: var(--space-sm); }
+        .income-calc { font-size: 0.8rem; color: var(--text-muted); }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.2) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border: 2px solid var(--color-gold);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) { .summary-box { border-radius: 0; border-left: 4px solid var(--color-gold); border-right: none; } }
+        .summary-title { font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: var(--color-gold); margin-bottom: var(--space-md); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-sm); color: var(--text-secondary); font-size: 0.95rem; }
+        .summary-list li::before { content: '✓'; color: var(--color-gold); font-weight: bold; }
+
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) { .lesson-footer { border-radius: 0; border-left: none; border-right: none; } }
+        .footer-badge { display: inline-block; padding: 8px 20px; background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%); color: var(--color-navy); font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700; border-radius: 50px; margin-bottom: var(--space-md); }
+        .footer-text { color: var(--text-muted); font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="badge-container">
+                <span class="badge">STARTER</span>
+                <span class="badge chapter-badge">MODULE B</span>
+            </div>
+            <h1 class="lesson-title">Chương Trình <span class="highlight">Partnership</span></h1>
+            <p class="lesson-subtitle">Vừa học trading, vừa tạo thêm thu nhập - Tại sao không?</p>
+        </header>
+
+        <!-- SECTION 1: TẠI SAO PARTNERSHIP? -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">🤝</div>
+                <h2 class="section-title">Tại Sao Nên Tham Gia Partnership?</h2>
+            </div>
+
+            <div class="text-content">
+                <p>Trong bài trước, bạn đã tìm hiểu về các gói TIER và con đường upgrade. Nhưng có một con đường khác mà nhiều traders thông minh chọn: <strong>Partnership Program</strong> - chương trình cho phép bạn vừa học trading, vừa tạo thêm thu nhập từ việc giới thiệu GEM cho những người khác.</p>
+
+                <p>Partnership không chỉ là về tiền. Đó còn là về việc xây dựng network, giúp đỡ người khác, và tạo ra những giá trị lâu dài. Nhiều partners của chúng tôi chia sẻ rằng họ cảm thấy có ý nghĩa khi giúp bạn bè thoát khỏi những sai lầm trading mà họ từng mắc phải.</p>
+            </div>
+
+            <div class="lesson-image">
+                <div class="image-placeholder">
+                    <span class="image-placeholder-icon">🖼️</span>
+                    <span>Hình 1: Partnership Overview Visual</span>
+                    <span style="font-size: 0.8rem; opacity: 0.7;">Canva: partnership-overview.png (1200x675)</span>
+                </div>
+                <div class="image-caption">Tổng quan về Chương Trình Partnership</div>
+            </div>
+
+            <div class="highlight-box green">
+                <div class="highlight-box-title">💡 4 Lý Do Tham Gia Partnership</div>
+                <p><strong>Trading + Affiliate income:</strong> Thêm nguồn thu ngoài trading | <strong>Karma tốt:</strong> Giúp người khác tránh sai lầm | <strong>Build community:</strong> Xây dựng team của riêng bạn | <strong>Passive income:</strong> Thu nhập từ sub-affiliate dài hạn</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: CTV - CỘNG TÁC VIÊN -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">🌟</div>
+                <h2 class="section-title">TIER 1: CTV - Cộng Tác Viên</h2>
+            </div>
+
+            <div class="partner-card ctv featured">
+                <div class="partner-header">
+                    <div class="partner-icon">🤝</div>
+                    <div class="partner-title-group">
+                        <div class="partner-label">Cộng Tác Viên</div>
+                        <div class="partner-title">Ai Cũng Có Thể Đăng Ký!</div>
+                        <div class="partner-tagline">Không yêu cầu followers - Duyệt tự động sau 3 ngày</div>
+                    </div>
+                </div>
+
+                <div class="text-content" style="padding: 0;">
+                    <p style="margin-bottom: var(--space-lg);">Chương trình CTV được thiết kế để mọi người đều có thể tham gia, dù bạn là trader mới hay đã có kinh nghiệm. Bạn không cần followers, không cần làm influencer, chỉ cần giới thiệu GEM cho những người bạn biết cần nó.</p>
+                </div>
+
+                <div class="ctv-levels">
+                    <div class="ctv-level">
+                        <div class="ctv-level-badge">🥉</div>
+                        <div class="ctv-level-info">
+                            <span class="ctv-level-name">BRONZE</span>
+                            <div class="ctv-level-stats">
+                                <span class="ctv-stat">Bắt đầu</span>
+                                <span class="ctv-stat highlight">Digital: 10%</span>
+                                <span class="ctv-stat">Physical: 6%</span>
+                                <span class="ctv-stat">Sub: 2%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ctv-level">
+                        <div class="ctv-level-badge">🥈</div>
+                        <div class="ctv-level-info">
+                            <span class="ctv-level-name">SILVER</span>
+                            <div class="ctv-level-stats">
+                                <span class="ctv-stat">50M tích lũy</span>
+                                <span class="ctv-stat highlight">Digital: 15%</span>
+                                <span class="ctv-stat">Physical: 8%</span>
+                                <span class="ctv-stat">Sub: 2.5%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ctv-level">
+                        <div class="ctv-level-badge">🥇</div>
+                        <div class="ctv-level-info">
+                            <span class="ctv-level-name">GOLD</span>
+                            <div class="ctv-level-stats">
+                                <span class="ctv-stat">150M tích lũy</span>
+                                <span class="ctv-stat highlight">Digital: 20%</span>
+                                <span class="ctv-stat">Physical: 10%</span>
+                                <span class="ctv-stat">Sub: 3%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ctv-level">
+                        <div class="ctv-level-badge">💎</div>
+                        <div class="ctv-level-info">
+                            <span class="ctv-level-name">PLATINUM</span>
+                            <div class="ctv-level-stats">
+                                <span class="ctv-stat">400M tích lũy</span>
+                                <span class="ctv-stat highlight">Digital: 25%</span>
+                                <span class="ctv-stat">Physical: 12%</span>
+                                <span class="ctv-stat">Sub: 3.5%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ctv-level">
+                        <div class="ctv-level-badge">👑</div>
+                        <div class="ctv-level-info">
+                            <span class="ctv-level-name">DIAMOND</span>
+                            <div class="ctv-level-stats">
+                                <span class="ctv-stat">800M tích lũy</span>
+                                <span class="ctv-stat highlight">Digital: 30%</span>
+                                <span class="ctv-stat">Physical: 15%</span>
+                                <span class="ctv-stat">Sub: 4%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lesson-image">
+                <div class="image-placeholder">
+                    <span class="image-placeholder-icon">🖼️</span>
+                    <span>Hình 2: 5 Cấp Bậc CTV Visual</span>
+                    <span style="font-size: 0.8rem; opacity: 0.7;">Canva: ctv-5-levels.png (1200x675)</span>
+                </div>
+                <div class="image-caption">5 cấp bậc CTV - Thăng cấp theo doanh số tích lũy</div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">💰 Ví Dụ Thu Nhập CTV</div>
+                <p><strong>Bronze:</strong> Bán 1 khóa Starter 299K → Nhận 30K | Bán 1 khóa TIER 1 (11M) → Nhận 1.1M<br><strong>Silver:</strong> Bán 1 khóa TIER 1 (11M) → Nhận 1.65M | <strong>Gold:</strong> Bán 1 khóa TIER 2 (21M) → Nhận 4.2M</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: KOL AFFILIATE -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">⭐</div>
+                <h2 class="section-title">TIER 2: KOL Affiliate</h2>
+            </div>
+
+            <div class="partner-card kol">
+                <div class="partner-header">
+                    <div class="partner-icon">📱</div>
+                    <div class="partner-title-group">
+                        <div class="partner-label">KOL Affiliate</div>
+                        <div class="partner-title">Dành Cho Influencers</div>
+                        <div class="partner-tagline">Yêu cầu: 20,000+ followers - Admin duyệt thủ công</div>
+                    </div>
+                </div>
+
+                <div class="partner-content">
+                    <div class="partner-section">
+                        <h4>📦 Quyền Lợi:</h4>
+                        <ul>
+                            <li>Commission Digital: 20%</li>
+                            <li>Commission Physical: 20%</li>
+                            <li>Sub-affiliate: 3.5%</li>
+                            <li>Thanh toán: 2 lần/tháng</li>
+                        </ul>
+                    </div>
+
+                    <div class="partner-section">
+                        <h4>🎯 Hỗ Trợ Đặc Biệt:</h4>
+                        <ul>
+                            <li>Marketing materials sẵn có</li>
+                            <li>Dedicated account manager</li>
+                            <li>Priority support 24/7</li>
+                            <li>Custom landing page riêng</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lesson-image">
+                <div class="image-placeholder">
+                    <span class="image-placeholder-icon">🖼️</span>
+                    <span>Hình 3: KOL Tier Card</span>
+                    <span style="font-size: 0.8rem; opacity: 0.7;">Canva: kol-tier-card.png (1200x675)</span>
+                </div>
+                <div class="image-caption">KOL Affiliate - Cho những người có ảnh hưởng trên mạng xã hội</div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: INSTRUCTOR -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">🎓</div>
+                <h2 class="section-title">TIER 3: Instructor</h2>
+            </div>
+
+            <div class="partner-card instructor">
+                <div class="partner-header">
+                    <div class="partner-icon">📚</div>
+                    <div class="partner-title-group">
+                        <div class="partner-label">Instructor</div>
+                        <div class="partner-title">Tạo Khóa Học Riêng Trên GEM</div>
+                        <div class="partner-tagline">Revenue share 40-60% - Platform + Marketing có sẵn</div>
+                    </div>
+                </div>
+
+                <div class="partner-content">
+                    <div class="partner-section">
+                        <h4>📦 Quyền Lợi:</h4>
+                        <ul>
+                            <li>Revenue share: 40-60%</li>
+                            <li>Platform hosting miễn phí</li>
+                            <li>GEM marketing cho khóa học</li>
+                            <li>Student management tools</li>
+                        </ul>
+                    </div>
+
+                    <div class="partner-section">
+                        <h4>🎯 Ai Phù Hợp:</h4>
+                        <ul>
+                            <li>Traders có kinh nghiệm 2+ năm</li>
+                            <li>Có kiến thức chuyên môn sâu</li>
+                            <li>Muốn chia sẻ, teaching</li>
+                            <li>Xây dựng passive income</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lesson-image">
+                <div class="image-placeholder">
+                    <span class="image-placeholder-icon">🖼️</span>
+                    <span>Hình 4: Instructor Tier Card</span>
+                    <span style="font-size: 0.8rem; opacity: 0.7;">Canva: instructor-tier-card.png (1200x675)</span>
+                </div>
+                <div class="image-caption">Instructor - Biến kiến thức thành thu nhập dài hạn</div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: INCOME EXAMPLES -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">📊</div>
+                <h2 class="section-title">Ví Dụ Thu Nhập Thực Tế</h2>
+            </div>
+
+            <div class="text-content">
+                <p>Dưới đây là những con số thực tế từ các partners của GEM. Đây không phải là lời hứa hay guarantee, mà là những ví dụ để bạn hình dung tiềm năng. Kết quả thực tế phụ thuộc vào effort và network của mỗi người.</p>
+            </div>
+
+            <div class="income-grid">
+                <div class="income-card">
+                    <div class="income-persona">👤</div>
+                    <div class="income-title">CTV Bronze Part-time</div>
+                    <div class="income-amount">~1M/tháng</div>
+                    <div class="income-calc">5 referrals × 200K average</div>
+                </div>
+
+                <div class="income-card">
+                    <div class="income-persona">💼</div>
+                    <div class="income-title">CTV Silver Chuyên Tâm</div>
+                    <div class="income-amount">~16M/tháng</div>
+                    <div class="income-calc">10 referrals × 1.65M average</div>
+                </div>
+
+                <div class="income-card">
+                    <div class="income-persona">📱</div>
+                    <div class="income-title">KOL 50K Followers</div>
+                    <div class="income-amount">~44M/tháng</div>
+                    <div class="income-calc">20 referrals × 2.2M average</div>
+                </div>
+            </div>
+
+            <div class="lesson-image">
+                <div class="image-placeholder">
+                    <span class="image-placeholder-icon">🖼️</span>
+                    <span>Hình 5: Income Calculator Visual</span>
+                    <span style="font-size: 0.8rem; opacity: 0.7;">Canva: income-calculator.png (1200x675)</span>
+                </div>
+                <div class="image-caption">Công cụ tính thu nhập dự kiến dựa trên số referrals</div>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title">⚠️ Lưu Ý Quan Trọng</div>
+                <p>Đây là những ví dụ minh họa, không phải guarantee. Thu nhập thực tế phụ thuộc vào effort, network, và kỹ năng marketing của bạn. Chúng tôi KHÔNG hứa hẹn thu nhập cụ thể, chỉ cung cấp công cụ và hỗ trợ để bạn đạt được mục tiêu của mình.</p>
+            </div>
+        </section>
+
+        <div class="lesson-image">
+            <div class="image-placeholder">
+                <span class="image-placeholder-icon">🖼️</span>
+                <span>Hình 6: Success Stories Partners</span>
+                <span style="font-size: 0.8rem; opacity: 0.7;">Canva: partner-success-stories.png (1200x675)</span>
+            </div>
+            <div class="image-caption">Chia sẻ từ các partners thành công</div>
+        </div>
+
+        <div class="summary-box">
+            <div class="summary-title">📝 Tóm Tắt Bài 5.2</div>
+            <ul class="summary-list">
+                <li><strong>CTV:</strong> Ai cũng có thể đăng ký, 5 cấp bậc (Bronze → Diamond), commission 10-30%</li>
+                <li><strong>KOL Affiliate:</strong> Dành cho influencers 20K+ followers, commission 20%</li>
+                <li><strong>Instructor:</strong> Tạo khóa học riêng, revenue share 40-60%</li>
+                <li>Partnership là cách vừa học vừa tạo thêm thu nhập và giúp đỡ cộng đồng</li>
+                <li>Không có minimum, không có pressure - làm theo khả năng của bạn</li>
+            </ul>
+        </div>
+
+        <div class="highlight-box cyan">
+            <div class="highlight-box-title">➡️ Bài Tiếp Theo</div>
+            <p>Trong bài tiếp theo, chúng ta sẽ tìm hiểu tại sao việc bắt đầu sớm có thể mang lại lợi thế cho bạn - với những lý do logic, không phải pressure tactics.</p>
+        </div>
+
+        <footer class="lesson-footer">
+            <span class="footer-badge">MODULE B</span>
+            <p class="footer-text">Bài 5.2: Chương Trình Partnership | GEM Frequency Trading</p>
+        </footer>
+    </div>
+</body>
+</html>

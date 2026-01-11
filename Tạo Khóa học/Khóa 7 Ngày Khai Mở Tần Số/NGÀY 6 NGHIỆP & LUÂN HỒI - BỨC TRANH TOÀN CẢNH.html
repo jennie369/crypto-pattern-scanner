@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NGÀY 6: NGHIỆP & LUÂN HỒI - BỨC TRANH TOÀN CẢNH | 7 Ngày Khai Mở Tần Số Gốc</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Noto+Sans+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ===== V5.4 DESIGN TOKENS - DARK THEME ===== */
+        :root {
+            /* === CTA BUTTONS === */
+            --cta-next-day: '#ngay-7';
+            --cta-prev-day: '#ngay-5';
+
+            /* === V5.4 COLORS (Primary) === */
+            --color-navy: #112250;
+            --color-navy-dark: #0A0F1A;
+            --color-gold: #FFBD59;
+            --color-cyan: #00F0FF;
+            --color-purple: #6A5BFF;
+            --color-green: #10B981;
+            --color-red: #EF4444;
+            --color-bg-dark: #0A0F1A;
+            --color-text: #F1F5F9;
+            --color-text-muted: #94A3B8;
+
+            /* === V5.4 Derived Colors === */
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --bg-card-solid: #112250;
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --border-gold: rgba(255, 189, 89, 0.3);
+            --border-cyan: rgba(0, 240, 255, 0.3);
+
+            /* === V5.4 SPACING === */
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            --space-2xl: 3rem;
+            --text-padding: 16px;
+            --container-padding: 0;
+            --card-padding: 1.5rem;
+
+            /* === V5.4 RADIUS === */
+            --radius-none: 0;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --radius-full: 9999px;
+
+            /* === LEGACY COMPATIBILITY === */
+            --primary-burgundy: #9C0612;
+            --primary-dark: #640A0C;
+            --secondary-red: #761E0B;
+            --gold-accent: #FFBD59;
+            --gold-light: #DEBC81;
+            --bg-navy: #112250;
+            --bg-light: var(--color-bg-dark);
+            --text-dark: var(--color-text);
+            --text-light: #FFFFFF;
+
+            /* === FONT === */
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+
+            /* === HÌNH ẢNH === */
+            --hero-image: url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=1200&q=80');
+            --stone-labradorite: url('https://images.unsplash.com/photo-1602524206684-cf17f0f50c3a?w=400&q=80');
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            line-height: 1.7;
+            color: var(--color-text);
+            background: var(--color-bg-dark);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* V5.4 Bokeh Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 20% 40%, rgba(106, 91, 255, 0.15), transparent 50%),
+                radial-gradient(ellipse 60% 40% at 80% 60%, rgba(0, 240, 255, 0.1), transparent 50%),
+                radial-gradient(ellipse 50% 30% at 50% 80%, rgba(255, 189, 89, 0.08), transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 1rem;
+            color: var(--color-text);
+        }
+
+        p {
+            margin-bottom: 1.2rem;
+            color: var(--color-text);
+        }
+
+        /* V5.4 Container - Edge-to-Edge Mobile */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--container-padding);
+        }
+
+        @media (min-width: 600px) {
+            .container {
+                padding: var(--space-lg);
+            }
+        }
+
+        .content-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* V5.4 Text Padding for Mobile */
+        .content-section > p,
+        .content-section > h2,
+        .content-section > h3,
+        .content-section > ul,
+        .content-section > ol {
+            padding-left: var(--text-padding);
+            padding-right: var(--text-padding);
+        }
+
+        @media (min-width: 600px) {
+            .content-section > p,
+            .content-section > h2,
+            .content-section > h3,
+            .content-section > ul,
+            .content-section > ol {
+                padding-left: 0;
+                padding-right: 0;
+            }
+        }
+        
+        /* ===== NAVIGATION ===== */
+        .course-nav {
+            background: linear-gradient(135deg, var(--bg-navy) 0%, var(--primary-dark) 100%);
+            padding: 1.5rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .course-title {
+            color: var(--gold-accent);
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        
+        .day-indicator {
+            color: var(--text-light);
+            font-size: 1rem;
+            padding: 0.5rem 1.5rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50px;
+            border: 2px solid var(--gold-accent);
+        }
+        
+        .day-progress {
+            color: var(--gold-light);
+            font-size: 0.9rem;
+        }
+        
+        /* ===== HERO SECTION ===== */
+        .hero-section {
+            background: linear-gradient(135deg, 
+                rgba(17, 34, 80, 0.95) 0%, 
+                rgba(100, 10, 12, 0.9) 100%),
+                var(--hero-image);
+            background-size: cover;
+            background-position: center;
+            padding: 6rem 2rem 4rem;
+            text-align: center;
+            color: var(--text-light);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,189,89,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .day-number {
+            font-size: 1.2rem;
+            color: var(--gold-accent);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            letter-spacing: 2px;
+        }
+        
+        .hero-title {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+        }
+        
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: var(--gold-light);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        /* ===== V5.4 CONTENT SECTIONS ===== */
+        .content-section {
+            padding: var(--space-xl) 0;
+        }
+
+        @media (min-width: 600px) {
+            .content-section {
+                padding: var(--space-2xl) var(--space-lg);
+            }
+        }
+
+        .content-section:nth-child(even) {
+            background: rgba(17, 34, 80, 0.3);
+        }
+
+        .section-title {
+            font-size: 2rem;
+            color: var(--color-gold);
+            text-align: center;
+            margin-bottom: var(--space-xl);
+            position: relative;
+            padding-bottom: 1rem;
+            padding-left: var(--text-padding);
+            padding-right: var(--text-padding);
+        }
+
+        @media (min-width: 600px) {
+            .section-title {
+                font-size: 2.2rem;
+                padding-left: 0;
+                padding-right: 0;
+            }
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--color-gold), var(--color-cyan));
+            border-radius: 2px;
+        }
+
+        .subsection-title {
+            font-size: 1.6rem;
+            color: var(--color-gold);
+            margin: 2rem 0 1.5rem;
+            padding-left: 1rem;
+            border-left: 5px solid var(--gold-accent);
+        }
+        
+        /* ===== KARMA TYPES GRID ===== */
+        .karma-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .karma-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border-top: 4px solid var(--gold-accent);
+        }
+        
+        .karma-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .karma-number {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-burgundy), var(--secondary-red));
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 50px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .karma-card h3 {
+            color: var(--primary-burgundy);
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+        
+        .karma-definition {
+            background: #FFF8E0;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            border-left: 3px solid var(--gold-accent);
+        }
+        
+        .karma-examples {
+            margin: 1rem 0;
+        }
+        
+        .karma-examples ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .karma-examples li {
+            padding: 0.5rem 0 0.5rem 1.5rem;
+            position: relative;
+        }
+        
+        .karma-examples li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--primary-burgundy);
+            font-weight: 700;
+        }
+        
+        .karma-solution {
+            background: #E8F5E9;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            border-left: 3px solid #4CAF50;
+        }
+        
+        .karma-solution strong {
+            color: #2E7D32;
+        }
+        
+        /* ===== HIGHLIGHT BOXES ===== */
+        .highlight-box {
+            background: linear-gradient(135deg, #FFF8E0 0%, #FFE8E8 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            border: 3px solid var(--gold-accent);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .highlight-box h3 {
+            color: var(--primary-burgundy);
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+        }
+        
+        .highlight-box.warning {
+            background: linear-gradient(135deg, #FFE5E5 0%, #FFF0F0 100%);
+            border-color: var(--secondary-red);
+        }
+        
+        .highlight-box.success {
+            background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%);
+            border-color: #4CAF50;
+        }
+        
+        /* ===== REINCARNATION TIMELINE ===== */
+        .reincarnation-timeline {
+            position: relative;
+            padding: 2rem 0;
+            margin: 3rem 0;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding: 2rem 0 2rem 4rem;
+            border-left: 4px solid var(--gold-accent);
+            margin-left: 2rem;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -15px;
+            top: 2rem;
+            width: 26px;
+            height: 26px;
+            background: var(--primary-burgundy);
+            border: 4px solid white;
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px var(--gold-accent);
+        }
+        
+        .timeline-level {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-burgundy), var(--secondary-red));
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .timeline-content {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .timeline-content h4 {
+            color: var(--primary-burgundy);
+            margin-bottom: 0.5rem;
+        }
+        
+        .timeline-content ul {
+            list-style: none;
+            padding: 0;
+            margin: 1rem 0;
+        }
+        
+        .timeline-content ul li {
+            padding: 0.3rem 0 0.3rem 1.5rem;
+            position: relative;
+        }
+        
+        .timeline-content ul li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #4CAF50;
+            font-weight: 700;
+        }
+        
+        /* ===== SOUL TYPES ===== */
+        .soul-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .soul-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+        
+        .soul-card:hover {
+            border-color: var(--gold-accent);
+            transform: scale(1.05);
+        }
+        
+        .soul-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .soul-card h4 {
+            color: var(--primary-burgundy);
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+        
+        /* ===== EXERCISE SECTION ===== */
+        .exercise-section {
+            background: linear-gradient(135deg, #112250 0%, #640A0C 100%);
+            color: white;
+            padding: 4rem 2rem;
+            margin: 4rem 0;
+            border-radius: 20px;
+        }
+        
+        .exercise-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .exercise-header h2 {
+            color: var(--gold-accent);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .exercise-info {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+        
+        .info-item {
+            text-align: center;
+        }
+        
+        .info-label {
+            color: var(--gold-light);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .info-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .exercise-steps {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+        }
+        
+        .exercise-step {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(255,255,255,0.05);
+            border-left: 4px solid var(--gold-accent);
+            border-radius: 10px;
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: var(--gold-accent);
+            color: var(--primary-dark);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: 700;
+            margin-right: 1rem;
+        }
+        
+        .step-title {
+            display: inline;
+            color: var(--gold-accent);
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+        
+        .journaling-prompts {
+            background: rgba(255,189,89,0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+        
+        .journaling-prompts h4 {
+            color: var(--gold-accent);
+            margin-bottom: 1rem;
+        }
+        
+        .prompt-item {
+            background: rgba(255,255,255,0.1);
+            padding: 1rem;
+            margin: 0.8rem 0;
+            border-radius: 8px;
+            font-style: italic;
+        }
+        
+        /* ===== QUIZ SECTION ===== */
+        .quiz-section {
+            background: white;
+            padding: 4rem 2rem;
+            margin: 4rem 0;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .quiz-header h2 {
+            color: var(--primary-burgundy);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .quiz-intro {
+            background: #FFF8E0;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 2rem 0;
+            text-align: center;
+            border: 2px dashed var(--gold-accent);
+        }
+        
+        .question-card {
+            background: #F8F9FA;
+            padding: 2rem;
+            margin: 2rem 0;
+            border-radius: 15px;
+            border-left: 5px solid var(--primary-burgundy);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .question-number {
+            display: inline-block;
+            background: var(--primary-burgundy);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: white;
+            border: 2px solid #E0E0E0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .option:hover {
+            border-color: var(--gold-accent);
+            background: #FFFBF0;
+        }
+        
+        .option input[type="radio"] {
+            margin-right: 1rem;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .option label {
+            cursor: pointer;
+            flex: 1;
+            font-size: 1.05rem;
+        }
+        
+        .option.correct {
+            border-color: #4CAF50;
+            background: #E8F5E9;
+        }
+        
+        .option.incorrect {
+            border-color: #F44336;
+            background: #FFEBEE;
+        }
+        
+        .submit-quiz-btn {
+            display: block;
+            width: 100%;
+            max-width: 400px;
+            margin: 3rem auto;
+            padding: 1.2rem 3rem;
+            background: linear-gradient(135deg, var(--primary-burgundy), var(--secondary-red));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(156, 6, 18, 0.3);
+        }
+        
+        .submit-quiz-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(156, 6, 18, 0.4);
+        }
+        
+        .submit-quiz-btn:disabled {
+            background: #CCCCCC;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .quiz-result {
+            display: none;
+            background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            margin: 2rem 0;
+            border: 3px solid #4CAF50;
+        }
+        
+        .quiz-result.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .result-score {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--primary-burgundy);
+            margin: 1rem 0;
+        }
+        
+        .result-message {
+            font-size: 1.3rem;
+            color: var(--text-dark);
+            margin: 1rem 0;
+        }
+        
+        .result-feedback {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            text-align: left;
+        }
+        
+        /* ===== NAVIGATION BUTTONS ===== */
+        .lesson-navigation {
+            display: flex;
+            justify-content: space-between;
+            gap: 2rem;
+            margin: 4rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .nav-btn {
+            flex: 1;
+            min-width: 200px;
+            padding: 1.5rem 2rem;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .nav-btn.prev {
+            background: white;
+            color: var(--primary-burgundy);
+            border: 3px solid var(--primary-burgundy);
+        }
+        
+        .nav-btn.prev:hover {
+            background: var(--primary-burgundy);
+            color: white;
+        }
+        
+        .nav-btn.next {
+            background: linear-gradient(135deg, var(--primary-burgundy), var(--secondary-red));
+            color: white;
+            box-shadow: 0 5px 20px rgba(156, 6, 18, 0.3);
+        }
+        
+        .nav-btn.next:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(156, 6, 18, 0.4);
+        }
+        
+        /* ===== FOOTER ===== */
+        .course-footer {
+            background: var(--bg-navy);
+            color: white;
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+        
+        .footer-message {
+            font-size: 1.2rem;
+            color: var(--gold-light);
+            margin-bottom: 1rem;
+        }
+        
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .section-title {
+                font-size: 1.8rem;
+            }
+            
+            .subsection-title {
+                font-size: 1.4rem;
+            }
+            
+            .karma-grid,
+            .soul-types {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .lesson-navigation {
+                flex-direction: column;
+            }
+            
+            .timeline-item {
+                padding-left: 2rem;
+                margin-left: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== NAVIGATION ===== -->
+    <nav class="course-nav">
+        <div class="container">
+            <div class="nav-content">
+                <div class="course-title">7 NGÀY KHAI MỞ TẦN SỐ GỐC</div>
+                <div class="day-indicator">NGÀY 6/7</div>
+                <div class="day-progress">🔥 Gần đến đích rồi!</div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== HERO SECTION ===== -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <div class="day-number">✨ NGÀY 6 ✨</div>
+            <h1 class="hero-title">NGHIỆP & LUÂN HỒI<br>BỨC TRANH TOÀN CẢNH</h1>
+            <p class="hero-subtitle">
+                Hiểu rõ về Nghiệp và Luân Hồi - Tại sao bạn ở đây? Bài học nào đang chờ bạn?<br>
+                Khám phá Hợp Đồng Linh Hồn và Con Đường Tiến Hóa Của Bạn
+            </p>
+        </div>
+    </section>
+
+    <!-- ===== BÀI 6.1: HIỂU ĐÚNG VỀ NGHIỆP ===== -->
+    <section class="content-section">
+        <div class="content-container">
+            <h2 class="section-title">🌟 Bài 6.1: Hiểu Đúng Về Nghiệp</h2>
+            
+            <p style="font-size: 1.2rem; text-align: center; color: var(--primary-burgundy); font-weight: 600;">
+                Chào buổi sáng! Hôm nay chúng ta đi sâu vào một chủ đề được hiểu lầm nhiều nhất: <strong>NGHIỆP</strong>.
+            </p>
+
+            <div class="highlight-box warning">
+                <h3>❌ Nghiệp KHÔNG Phải Là...</h3>
+                <ul style="font-size: 1.1rem; line-height: 2;">
+                    <li>❌ Trừng phạt từ thần linh</li>
+                    <li>❌ Số phận định sẵn không thể thay đổi</li>
+                    <li>❌ "Ác giả ác báo"</li>
+                    <li>❌ Mê tín dị đoan</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box success">
+                <h3>✅ Nghiệp Thực Sự Là Gì?</h3>
+                <ul style="font-size: 1.1rem; line-height: 2;">
+                    <li>✅ <strong>Quy luật Nhân Quả:</strong> Mỗi hành động tạo ra kết quả tương ứng</li>
+                    <li>✅ <strong>Tần số năng lượng:</strong> Tích lũy từ suy nghĩ, lời nói, hành động</li>
+                    <li>✅ <strong>Bài học cần học:</strong> Cơ hội để tiến hóa ý thức</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <h3>💡 Công Thức Đơn Giản</h3>
+                <p style="font-size: 1.5rem; text-align: center; font-weight: 700; color: var(--primary-burgundy); padding: 1rem; background: white; border-radius: 10px;">
+                    NGHIỆP = Năng Lượng Chưa Giải Quyết Từ Quá Khứ
+                </p>
+            </div>
+
+            <h3 class="subsection-title">📚 Ví Dụ Dễ Hiểu</h3>
+            <p>Nghĩ về nghiệp như <strong>HỌC TOÁN:</strong></p>
+            <ul style="font-size: 1.1rem; line-height: 2; margin-left: 2rem;">
+                <li>Bạn lớp 3, chưa biết nhân chia</li>
+                <li>Giáo viên ra bài: 3 x 4 = ?</li>
+                <li>Bạn trả lời sai → Phải học lại</li>
+                <li>Học lại không phải TRỪ PHẠT, mà là CƠ HỘI học đúng</li>
+                <li>Khi học xong, lên lớp 4 → Bài mới</li>
+            </ul>
+            <p style="font-size: 1.2rem; font-weight: 600; color: var(--primary-burgundy); margin-top: 2rem;">
+                Cuộc đời cũng vậy. Mỗi kiếp là một lớp học.
+            </p>
+        </div>
+    </section>
+
+    <!-- ===== BÀI 6.2: 4 LOẠI NGHIỆP ===== -->
+    <section class="content-section">
+        <div class="content-container">
+            <h2 class="section-title">🔮 Bài 6.2: 4 Loại Nghiệp</h2>
+            
+            <div class="karma-grid">
+                <!-- NGHIỆP 1: CÁ NHÂN -->
+                <div class="karma-card">
+                    <div class="karma-number">1</div>
+                    <h3>🎯 NGHIỆP CÁ NHÂN<br>(Personal Karma)</h3>
+                    
+                    <div class="karma-definition">
+                        <strong>Định nghĩa:</strong> Do hành động của RIÊNG BẠN tạo ra (kiếp này hoặc kiếp trước)
+                    </div>
+                    
+                    <div class="karma-examples">
+                        <strong>Ví dụ:</strong>
+                        <ul>
+                            <li>Kiếp trước bạn phản bội người yêu → Kiếp này bị phản bội (học lòng trung thành)</li>
+                            <li>Kiếp trước bạn giàu nhưng keo kiệt → Kiếp này nghèo (học lòng rộng rãi)</li>
+                            <li>Kiếp này bạn nói dối nhiều → Không ai tin bạn (học sự chân thật)</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="margin: 1rem 0;">
+                        <strong>Cách nhận diện:</strong>
+                        <ul style="margin-left: 1rem;">
+                            <li>Vấn đề chỉ bạn gặp, người khác không</li>
+                            <li>Pattern riêng của bạn</li>
+                            <li>Cảm giác "đây là bài học CỦA TÔI"</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="karma-solution">
+                        <strong>Cách giải quyết:</strong><br>
+                        → Học bài học đó<br>
+                        → Hành động NGƯỢC lại<br>
+                        → Chuyển hóa tần số
+                    </div>
+                </div>
+
+                <!-- NGHIỆP 2: GIA ĐÌNH -->
+                <div class="karma-card">
+                    <div class="karma-number">2</div>
+                    <h3>👨‍👩‍👧‍👦 NGHIỆP GIA ĐÌNH<br>(Family Karma)</h3>
+                    
+                    <div class="karma-definition">
+                        <strong>Định nghĩa:</strong> Thừa hưởng từ dòng họ (cha mẹ, ông bà, tổ tiên)
+                    </div>
+                    
+                    <div class="karma-examples">
+                        <strong>Ví dụ:</strong>
+                        <ul>
+                            <li>Ông bà ngoại giàu nhưng mất tất cả vì đánh bạc → Ba mẹ bạn sợ tiền, giữ chặt</li>
+                            <li>Ông nội ngoại tình → Bố bạn cũng ngoại tình → Bạn sợ cam kết</li>
+                            <li>Dòng họ có người tự tử → Trầm cảm di truyền</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="margin: 1rem 0;">
+                        <strong>Cách nhận diện:</strong>
+                        <ul style="margin-left: 1rem;">
+                            <li>Nhiều người trong gia đình có CÙNG vấn đề</li>
+                            <li>Câu nói "Nhà mình đời đời vậy"</li>
+                            <li>Bạn làm theo pattern gia đình mà không biết tại sao</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="karma-solution">
+                        <strong>Cách giải quyết:</strong><br>
+                        → Nhận ra: "Đây không phải của TÔI, đây là của DÒNG HỌ"<br>
+                        → Quyết định: "Tôi sẽ PHÁ vỡ chu kỳ này"<br>
+                        → Hành động khác: Làm điều chưa ai trong gia đình làm<br>
+                        → Chữa lành cho cả dòng họ
+                    </div>
+                </div>
+
+                <!-- NGHIỆP 3: TẬP THỂ -->
+                <div class="karma-card">
+                    <div class="karma-number">3</div>
+                    <h3>🌍 NGHIỆP TẬP THỂ<br>(Collective Karma)</h3>
+                    
+                    <div class="karma-definition">
+                        <strong>Định nghĩa:</strong> Của cả quốc gia, dân tộc, nhân loại
+                    </div>
+                    
+                    <div class="karma-examples">
+                        <strong>Ví dụ:</strong>
+                        <ul>
+                            <li>Sinh ra ở quốc gia từng bị chiến tranh → Học về hòa bình</li>
+                            <li>Sinh ra trong thời đại biến đổi khí hậu → Học sống hài hòa với thiên nhiên</li>
+                            <li>Sinh ra khi công nghệ bùng nổ → Học cân bằng giữa kỹ thuật số và tâm linh</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="margin: 1rem 0;">
+                        <strong>Cách nhận diện:</strong>
+                        <ul style="margin-left: 1rem;">
+                            <li>CẢ thế hệ/quốc gia gặp cùng vấn đề</li>
+                            <li>Không ai thoát khỏi (VD: đại dịch, khủng hoảng kinh tế)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="karma-solution">
+                        <strong>Cách giải quyết:</strong><br>
+                        → Nâng cao ý thức CÁ NHÂN<br>
+                        → Khi nhiều người thức tỉnh → Tập thể thay đổi<br>
+                        → Trở thành ánh sáng trong bóng tối
+                    </div>
+                </div>
+
+                <!-- NGHIỆP 4: NGHỀ NGHIỆP -->
+                <div class="karma-card">
+                    <div class="karma-number">4</div>
+                    <h3>📜 HỢP ĐỒNG LINH HỒN<br>(Karmic Contracts)</h3>
+                    
+                    <div class="karma-definition">
+                        <strong>Định nghĩa:</strong> "Hợp đồng linh hồn" - Bạn đồng ý học bài học nào đó trước khi sinh
+                    </div>
+                    
+                    <div class="karma-examples">
+                        <strong>Ví dụ:</strong>
+                        <ul>
+                            <li>Người chọn sinh ra khuyết tật để học về lòng kiên trì</li>
+                            <li>Người chọn mất người thân sớm để học về sự vô thường</li>
+                            <li>Người chọn nghèo để học về nội tại giá trị</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="margin: 1rem 0;">
+                        <strong>Cách nhận diện:</strong>
+                        <ul style="margin-left: 1rem;">
+                            <li>Cảm giác "Tôi PHẢI ở đây để làm điều này"</li>
+                            <li>Vấn đề lớn, suốt đời, không thể tránh</li>
+                            <li>Có ý nghĩa sâu xa hơn khổ đau bề mặt</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="karma-solution">
+                        <strong>Cách giải quyết:</strong><br>
+                        → Chấp nhận: "Tôi đã chọn điều này"<br>
+                        → Tìm bài học: "Tôi cần học gì?"<br>
+                        → Hoàn thành: Học xong, nghiệp hoàn thành
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== BÀI 6.3: LUÂN HỒI ===== -->
+    <section class="content-section">
+        <div class="content-container">
+            <h2 class="section-title">♾️ Bài 6.3: Luân Hồi - Vòng Tròn Tiến Hóa</h2>
+            
+            <h3 class="subsection-title">Luân Hồi Là Gì?</h3>
+            <div class="highlight-box">
+                <p style="font-size: 1.2rem;">
+                    <strong>Định nghĩa:</strong> Linh hồn đi qua nhiều kiếp sống để tiến hóa ý thức
+                </p>
+                <p style="font-size: 1.1rem; margin-top: 1rem;">
+                    <strong>Ví dụ đơn giản:</strong> Nghĩ về trò chơi video với nhiều cấp độ<br>
+                    • Mỗi kiếp = 1 cấp độ<br>
+                    • Mục tiêu: Học bài học, tăng level<br>
+                    • Level đủ cao → "Thắng game" (giác ngộ)
+                </p>
+            </div>
+
+            <h3 class="subsection-title">Tại Sao Phải Luân Hồi?</h3>
+            <p style="font-size: 1.2rem; font-weight: 600; color: var(--primary-burgundy);">
+                Không phải PHẢI. Mà là CHỌN.
+            </p>
+            
+            <div class="highlight-box success">
+                <h4>Linh hồn chọn tái sinh để:</h4>
+                <ol style="font-size: 1.1rem; line-height: 2; margin-left: 2rem;">
+                    <li>Học những bài học chưa học xong</li>
+                    <li>Chuyển hóa nghiệp chưa giải quyết</li>
+                    <li>Phát triển những phẩm chất còn thiếu</li>
+                    <li>Trải nghiệm các khía cạnh của sự sống</li>
+                </ol>
+            </div>
+
+            <div style="background: #FFF8E0; padding: 2rem; border-radius: 15px; margin: 2rem 0;">
+                <h4 style="color: var(--primary-burgundy); margin-bottom: 1rem;">🎭 Ví Dụ Các Kiếp:</h4>
+                <ul style="font-size: 1.1rem; line-height: 2;">
+                    <li>Một kiếp là <strong>vua</strong> → Học về quyền lực</li>
+                    <li>Kiếp sau là <strong>nô lệ</strong> → Học về khiêm nhường</li>
+                    <li>Kiếp sau là <strong>người mẹ</strong> → Học về tình yêu vô điều kiện</li>
+                    <li>Kiếp sau là <strong>nghệ sĩ</strong> → Học về sáng tạo</li>
+                </ul>
+            </div>
+
+            <h3 class="subsection-title">📊 Chu Kỳ Luân Hồi - 7 Tầng Tiến Hóa</h3>
+            
+            <div class="reincarnation-timeline">
+                <div class="timeline-item">
+                    <div class="timeline-level">TẦng 1-2: SỐNG VÔ THỨC</div>
+                    <div class="timeline-content">
+                        <h4>Nhiều kiếp đầu tiên</h4>
+                        <ul>
+                            <li>Sống theo bản năng</li>
+                            <li>Phản ứng tự động</li>
+                            <li>Tạo ra nhiều nghiệp</li>
+                            <li>Chưa nhận ra mình đang luân hồi</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-level">TẦng 3-4: THỨC TỈNH</div>
+                    <div class="timeline-content">
+                        <h4>Vài kiếp quan trọng</h4>
+                        <ul>
+                            <li>Bắt đầu tự hỏi "Tại sao?"</li>
+                            <li>Học về nhân quả</li>
+                            <li>Cố gắng sống có ý thức hơn</li>
+                            <li>Giải quyết một số nghiệp</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-level">TẦng 5-6: TIẾN HÓA NHANH</div>
+                    <div class="timeline-content">
+                        <h4>Ít kiếp, chuyển hóa mạnh</h4>
+                        <ul>
+                            <li>Sống hoàn toàn có ý thức</li>
+                            <li>Chủ động chuyển hóa nghiệp</li>
+                            <li>Phục vụ người khác</li>
+                            <li>Chuẩn bị tốt nghiệp</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-level">TẦng 7: GIÁC NGỘ</div>
+                    <div class="timeline-content">
+                        <h4>Kiếp cuối cùng</h4>
+                        <ul>
+                            <li>Học xong mọi bài học</li>
+                            <li>Không còn nghiệp</li>
+                            <li>Có thể chọn: Về nguồn HOẶC quay lại phục vụ (Bodhisattva)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== BÀI 6.4: SOUL CONTRACT ===== -->
+    <section class="content-section">
+        <div class="content-container">
+            <h2 class="section-title">📜 Bài 6.4: Soul Contract - Hợp Đồng Linh Hồn</h2>
+            
+            <div class="highlight-box">
+                <h3>🌟 Bạn Đã Ký Hợp Đồng Trước Khi Sinh</h3>
+                <p style="font-size: 1.1rem; line-height: 1.8;">
+                    Trước khi tái sinh, linh hồn bạn đã lên KẾ HOẠCH cho kiếp này:
+                </p>
+            </div>
+
+            <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); margin: 2rem 0;">
+                <h4 style="color: var(--primary-burgundy); margin-bottom: 1.5rem; font-size: 1.4rem;">✨ Bạn đã chọn:</h4>
+                <ul style="font-size: 1.1rem; line-height: 2.2; list-style: none;">
+                    <li>✓ Gia đình sinh ra</li>
+                    <li>✓ Quốc gia, thời đại</li>
+                    <li>✓ Cơ thể (giới tính, ngoại hình, sức khỏe)</li>
+                    <li>✓ Những người quan trọng sẽ gặp (Soul Mates)</li>
+                    <li>✓ Những thử thách chính (để học bài học)</li>
+                    <li>✓ Những tài năng mang theo</li>
+                </ul>
+            </div>
+
+            <h3 class="subsection-title">🤔 Tại Sao Lại Chọn Khó Khăn?</h3>
+            <p style="font-size: 1.1rem; font-style: italic;">
+                Câu hỏi thường gặp: <strong>"Nếu tôi chọn, tại sao chọn khổ?"</strong>
+            </p>
+
+            <div class="highlight-box success">
+                <h4 style="color: #2E7D32;">💎 Trả Lời:</h4>
+                <p style="font-size: 1.2rem; line-height: 1.8;">
+                    Linh hồn không sợ khổ đau. Linh hồn chỉ muốn TIẾN HÓA.
+                </p>
+                <p style="font-size: 1.15rem; font-weight: 600; margin-top: 1rem;">
+                    Khó khăn = Bài học sâu nhất = Tiến hóa nhanh nhất
+                </p>
+            </div>
+
+            <div style="background: #E8F5E9; padding: 2rem; border-radius: 15px; margin: 2rem 0; border-left: 5px solid #4CAF50;">
+                <h4 style="color: #2E7D32; margin-bottom: 1rem;">📖 Ví Dụ:</h4>
+                <ul style="font-size: 1.1rem; line-height: 2;">
+                    <li>Muốn học về <strong>DŨNG CẢM</strong> → Chọn kiếp với sợ hãi lớn để vượt qua</li>
+                    <li>Muốn học về <strong>TỰ DO</strong> → Chọn kiếp bị giam hãm để tìm tự do bên trong</li>
+                    <li>Muốn học về <strong>TÌNH YÊU</strong> → Chọn kiếp với nhiều đau khổ để học yêu thương bản thân</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <p style="font-size: 1.3rem; font-weight: 700; text-align: center; color: var(--primary-burgundy);">
+                    💪 Nhớ: Bạn (linh hồn) MẠNH hơn bạn nghĩ.<br>
+                    Bạn không bao giờ chọn cái bạn không thể xử lý được.
+                </p>
+            </div>
+
+            <h3 class="subsection-title">👥 Các Loại Linh Hồn Gặp Trong Đời</h3>
+            
+            <div class="soul-types">
+                <div class="soul-card">
+                    <div class="soul-icon">💫</div>
+                    <h4>Soul Mates<br>(Bạn Đồng Hành)</h4>
+                    <p>
+                        • Đã gặp nhiều kiếp<br>
+                        • Đến để hỗ trợ nhau học bài học<br>
+                        • Không nhất thiết là người yêu<br>
+                        • Cảm giác quen thuộc khi gặp
+                    </p>
+                </div>
+
+                <div class="soul-card">
+                    <div class="soul-icon">🔥</div>
+                    <h4>Twin Flame<br>(Song Sinh Linh Hồn)</h4>
+                    <p>
+                        • Một linh hồn tách làm đôi<br>
+                        • Gương phản chiếu hoàn hảo<br>
+                        • Gặp để chữa lành sâu nhất<br>
+                        • Rất hiếm, chỉ gặp khi sẵn sàng
+                    </p>
+                </div>
+
+                <div class="soul-card">
+                    <div class="soul-icon">⚖️</div>
+                    <h4>Karmic Relationships<br>(Mối Quan Hệ Nghiệp)</h4>
+                    <p>
+                        • Đến để giải quyết nghiệp từ kiếp trước<br>
+                        • Thường đau khổ, kịch tính<br>
+                        • Mục đích: Học bài học, thanh toán nghiệp<br>
+                        • Khi học xong, tự nhiên kết thúc
+                    </p>
+                </div>
+
+                <div class="soul-card">
+                    <div class="soul-icon">⚡</div>
+                    <h4>Catalyst Souls<br>(Linh Hồn Xúc Tác)</h4>
+                    <p>
+                        • Xuất hiện ngắn nhưng thay đổi cuộc đời bạn<br>
+                        • Đến để "kích hoạt" bạn tiến hóa<br>
+                        • Có thể là người lạ nói một câu, thầy cô, người yêu ngắn ngủi
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== BÀI 6.5: LÀM SAO THOÁT LUÂN HỒI ===== -->
+    <section class="content-section">
+        <div class="content-container">
+            <h2 class="section-title">🎓 Bài 6.5: Làm Sao Thoát Luân Hồi?</h2>
+            
+            <div class="highlight-box">
+                <h3>💡 Không Phải "Thoát" Mà Là "Hoàn Thành"</h3>
+                <p style="font-size: 1.2rem;">
+                    Luân hồi không phải nhà tù. Đó là trường học.<br>
+                    Bạn không cần "trốn", bạn cần <strong>"TỐT NGHIỆP"</strong>.
+                </p>
+            </div>
+
+            <h3 class="subsection-title">✅ Điều Kiện Để Hoàn Thành</h3>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin: 2rem 0;">
+                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-top: 4px solid var(--gold-accent);">
+                    <h4 style="color: var(--primary-burgundy); margin-bottom: 1rem;">1️⃣ Học Xong Mọi Bài Học</h4>
+                    <ul style="line-height: 2;">
+                        <li>Không còn pattern lặp lại</li>
+                        <li>Không còn phản ứng tự động</li>
+                        <li>Sống hoàn toàn có ý thức</li>
+                    </ul>
+                </div>
+
+                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-top: 4px solid var(--gold-accent);">
+                    <h4 style="color: var(--primary-burgundy); margin-bottom: 1rem;">2️⃣ Hóa Giải Hết Nghiệp</h4>
+                    <ul style="line-height: 2;">
+                        <li>Không còn nợ năng lượng với ai</li>
+                        <li>Đã tha thứ tất cả</li>
+                        <li>Đã hòa giải với quá khứ</li>
+                    </ul>
+                </div>
+
+                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-top: 4px solid var(--gold-accent);">
+                    <h4 style="color: var(--primary-burgundy); margin-bottom: 1rem;">3️⃣ Đạt Tần Số Đủ Cao</h4>
+                    <ul style="line-height: 2;">
+                        <li>Tầng 6-7 (600+ Hz)</li>
+                        <li>Sống trong tình yêu vô điều kiện</li>
+                        <li>Không còn bị kéo xuống bởi cảm xúc âm</li>
+                    </ul>
+                </div>
+
+                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-top: 4px solid var(--gold-accent);">
+                    <h4 style="color: var(--primary-burgundy); margin-bottom: 1rem;">4️⃣ Không Còn Attachment</h4>
+                    <ul style="line-height: 2;">
+                        <li>Với vật chất</li>
+                        <li>Với cái tôi</li>
+                        <li>Với kết quả</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3 class="subsection-title">🌈 Sau Khi Hoàn Thành</h3>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin: 2rem 0;">
+                <div class="highlight-box success">
+                    <h4 style="color: #2E7D32;">🏠 Lựa chọn 1: VỀ NGUỒN (Nirvana)</h4>
+                    <ul style="line-height: 2;">
+                        <li>Hòa nhập với ý thức vũ trụ</li>
+                        <li>Kết thúc chu kỳ cá nhân</li>
+                        <li>Bình an tuyệt đối</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box success">
+                    <h4 style="color: #2E7D32;">💖 Lựa chọn 2: QUAY LẠI PHỤC VỤ (Bodhisattva)</h4>
+                    <ul style="line-height: 2;">
+                        <li>Tự nguyện tái sinh</li>
+                        <li>Giúp người khác tỉnh thức</li>
+                        <li>Trở thành thầy, người dẫn đường</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== BÀI TẬP THỰC HÀNH ===== -->
+    <div class="exercise-section">
+        <div class="content-container">
+            <div class="exercise-header">
+                <h2>🔮 Bài 6.6: Bài Tập Thực Hành<br>Khám Phá Nghiệp Của Bạn</h2>
+                
+                <div class="exercise-info">
+                    <div class="info-item">
+                        <div class="info-label">⏰ THỜI GIAN</div>
+                        <div class="info-value">30 phút</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">🔮 VIÊN ĐÁ</div>
+                        <div class="info-value">Labradorite</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">📝 CÔNG CỤ</div>
+                        <div class="info-value">Sổ tay & Bút</div>
+                    </div>
+                </div>
+
+                <p style="font-size: 1.1rem; color: var(--gold-light); margin-top: 1rem;">
+                    💎 Viên đá Ngày 6: <strong>Labradorite</strong> (Đá xám xanh lung linh)<br>
+                    Công dụng: Mở cửa thông tin kiếp trước, tăng trực giác
+                </p>
+            </div>
+
+            <div class="exercise-steps">
+                <div class="exercise-step">
+                    <span class="step-number">1</span>
+                    <span class="step-title">Nhận Diện Nghiệp Cá Nhân (10 phút)</span>
+                    
+                    <div class="journaling-prompts">
+                        <h4>📝 Viết ra:</h4>
+                        
+                        <div class="prompt-item">
+                            "Những pattern lặp lại trong đời tôi:"<br>
+                            1. ___<br>
+                            2. ___<br>
+                            3. ___
+                        </div>
+                        
+                        <div class="prompt-item">
+                            "Pattern nào khổ nhất? ___"
+                        </div>
+                        
+                        <div class="prompt-item">
+                            "Nếu đây là bài học, bài học là gì? ___"
+                        </div>
+                        
+                        <div class="prompt-item">
+                            "Có thể kiếp trước tôi đã làm gì để tạo ra bài học này? ___"<br>
+                            <em>(Đừng nghĩ logic, để trực giác trả lời)</em>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exercise-step">
+                    <span class="step-number">2</span>
+                    <span class="step-title">Nhận Diện Nghiệp Gia Đình (10 phút)</span>
+                    
+                    <div class="journaling-prompts">
+                        <h4>📝 Viết ra:</h4>
+                        
+                        <div class="prompt-item">
+                            "Vấn đề nào nhiều người trong gia đình gặp?"<br>
+                            • Về tiền bạc: ___<br>
+                            • Về tình cảm: ___<br>
+                            • Về sức khỏe: ___<br>
+                            • Khác: ___
+                        </div>
+                        
+                        <div class="prompt-item">
+                            "Tôi có lặp lại pattern này không? ___"
+                        </div>
+                        
+                        <div class="prompt-item">
+                            "Tôi có thể PHÁ VỠ chu kỳ này bằng cách: ___"
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exercise-step">
+                    <span class="step-number">3</span>
+                    <span class="step-title">Khám Phá Soul Contract (10 phút)</span>
+                    
+                    <div class="journaling-prompts">
+                        <h4>🔮 Nhắm mắt, cầm viên đá Labradorite. Hỏi linh hồn:</h4>
+                        
+                        <div class="prompt-item">
+                            "Tôi đến đây để học gì?"<br>
+                            <em>(Để trực giác trả lời, không suy nghĩ)</em>
+                        </div>
+                        
+                        <div class="prompt-item">
+                            "Tôi đến đây để phục vụ ai/cái gì?"
+                        </div>
+                        
+                        <div class="prompt-item">
+                            "Thử thách lớn nhất tôi chọn là gì?"
+                        </div>
+                        
+                        <div class="prompt-item">
+                            "Tài năng/quà tặng tôi mang theo là gì?"
+                        </div>
+                        
+                        <p style="margin-top: 1rem; color: var(--gold-accent); font-weight: 600;">
+                            ⚠️ Viết ngay những gì hiện lên. Đừng phán xét.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== QUIZ SECTION ===== -->
+    <section class="quiz-section">
+        <div class="content-container">
+            <div class="quiz-header">
+                <h2>📝 Quiz Ngày 6: Kiểm Tra Hiểu Biết</h2>
+                <div class="quiz-intro">
+                    <p style="font-size: 1.1rem; font-weight: 600;">
+                        🎯 Làm quiz để kiểm tra sự hiểu biết của bạn về Nghiệp & Luân Hồi<br>
+                        Điểm tối đa: 100 điểm (5 câu x 20 điểm)
+                    </p>
+                </div>
+            </div>
+
+            <form id="quizForm">
+                <!-- Câu 1 -->
+                <div class="question-card">
+                    <div class="question-number">Câu 1</div>
+                    <div class="question-text">Có bao nhiêu loại Nghiệp?</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" id="q1a" name="q1" value="a">
+                            <label for="q1a">A. 1 loại</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q1b" name="q1" value="b">
+                            <label for="q1b">B. 2 loại</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q1c" name="q1" value="c">
+                            <label for="q1c">C. 3 loại</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q1d" name="q1" value="d">
+                            <label for="q1d">D. 4 loại</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Câu 2 -->
+                <div class="question-card">
+                    <div class="question-number">Câu 2</div>
+                    <div class="question-text">Nghiệp Gia Đình là:</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" id="q2a" name="q2" value="a">
+                            <label for="q2a">A. Do gia đình tạo ra cho bạn</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q2b" name="q2" value="b">
+                            <label for="q2b">B. Thừa hưởng từ dòng họ</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q2c" name="q2" value="c">
+                            <label for="q2c">C. Không tồn tại</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q2d" name="q2" value="d">
+                            <label for="q2d">D. Không thể thay đổi</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Câu 3 -->
+                <div class="question-card">
+                    <div class="question-number">Câu 3</div>
+                    <div class="question-text">Nghiệp thực chất là:</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" id="q3a" name="q3" value="a">
+                            <label for="q3a">A. Trừng phạt</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q3b" name="q3" value="b">
+                            <label for="q3b">B. Quy luật nhân quả, năng lượng chưa giải quyết</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q3c" name="q3" value="c">
+                            <label for="q3c">C. Mê tín</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q3d" name="q3" value="d">
+                            <label for="q3d">D. Số phận</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Câu 4 -->
+                <div class="question-card">
+                    <div class="question-number">Câu 4</div>
+                    <div class="question-text">Luân Hồi là:</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" id="q4a" name="q4" value="a">
+                            <label for="q4a">A. Hình phạt</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q4b" name="q4" value="b">
+                            <label for="q4b">B. Vòng tròn tiến hóa để học bài học</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q4c" name="q4" value="c">
+                            <label for="q4c">C. Không tồn tại</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q4d" name="q4" value="d">
+                            <label for="q4d">D. Chỉ cho người xấu</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Câu 5 -->
+                <div class="question-card">
+                    <div class="question-number">Câu 5</div>
+                    <div class="question-text">Soul Contract là:</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" id="q5a" name="q5" value="a">
+                            <label for="q5a">A. Hợp đồng pháp lý</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q5b" name="q5" value="b">
+                            <label for="q5b">B. Kế hoạch linh hồn chọn trước khi sinh</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q5c" name="q5" value="c">
+                            <label for="q5c">C. Không có thật</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q5d" name="q5" value="d">
+                            <label for="q5d">D. Chỉ là ý niệm</label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" class="submit-quiz-btn" onclick="submitQuiz()">
+                    🎯 NỘP BÀI & XEM ĐIỂM
+                </button>
+            </form>
+
+            <div id="quizResult" class="quiz-result">
+                <h3 style="color: var(--primary-burgundy); font-size: 2rem; margin-bottom: 1rem;">
+                    🎉 KẾT QUẢ QUIZ
+                </h3>
+                <div class="result-score" id="scoreDisplay">0/100</div>
+                <div class="result-message" id="resultMessage"></div>
+                <div class="result-feedback" id="resultFeedback"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== NAVIGATION ===== -->
+    <section class="content-section">
+        <div class="content-container">
+            <div class="lesson-navigation">
+                <a href="#ngay-5" class="nav-btn prev">
+                    ← NGÀY 5: 5 QUY TRÌNH
+                </a>
+                <a href="#ngay-7" class="nav-btn next">
+                    NGÀY 7: TỔNG KẾT →
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="course-footer">
+        <div class="content-container">
+            <p class="footer-message">
+                ✨ Hôm nay, bạn đã nhìn thấy BỨC TRANH LỚN ✨
+            </p>
+            <p style="font-size: 1.1rem; line-height: 1.8; max-width: 700px; margin: 1.5rem auto;">
+                Bạn không phải nạn nhân của hoàn cảnh. Bạn là linh hồn dũng cảm đã CHỌN đến đây để học, để lớn, để tiến hóa.
+            </p>
+            <p style="font-size: 1rem; color: var(--gold-light); margin-top: 2rem;">
+                Mọi đau khổ đều có ý nghĩa. Mọi thử thách đều là bài học. Mọi người gặp đều có mục đích.
+            </p>
+            <p style="font-size: 1.2rem; font-weight: 700; color: var(--gold-accent); margin-top: 2rem;">
+                💎 Mai là Ngày 7 - ngày cuối cùng. Chúng ta sẽ tổng kết hành trình!
+            </p>
+            <p style="margin-top: 1.5rem;">
+                Nghỉ ngơi. Bạn đã đi được 6/7 chặng đường. Hãy tự hào! 🌟
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Quiz Logic với chấm điểm tự động
+        const correctAnswers = {
+            q1: 'd',  // 4 loại
+            q2: 'b',  // Thừa hưởng từ dòng họ
+            q3: 'b',  // Quy luật nhân quả
+            q4: 'b',  // Vòng tròn tiến hóa
+            q5: 'b'   // Kế hoạch linh hồn
+        };
+
+        const feedbackMessages = {
+            100: {
+                title: "🏆 XUẤT SẮC!",
+                message: "Bạn đã hiểu sâu sắc về Nghiệp và Luân Hồi! Kiến thức của bạn rất vững vàng.",
+                color: "#4CAF50"
+            },
+            80: {
+                title: "🌟 RẤT TỐT!",
+                message: "Bạn đã nắm vững phần lớn kiến thức. Hãy xem lại những câu sai để hiểu rõ hơn.",
+                color: "#8BC34A"
+            },
+            60: {
+                title: "👍 TỐT!",
+                message: "Bạn đã hiểu được những khái niệm cơ bản. Hãy đọc lại bài học để củng cố thêm.",
+                color: "#FFC107"
+            },
+            0: {
+                title: "💪 CỐ GẮNG LÊN!",
+                message: "Hãy đọc lại bài học cẩn thận và thử lại nhé. Mỗi lần học là một bước tiến!",
+                color: "#FF9800"
+            }
+        };
+
+        function submitQuiz() {
+            const form = document.getElementById('quizForm');
+            let score = 0;
+            let totalQuestions = 5;
+            let answeredAll = true;
+            let detailedFeedback = [];
+
+            // Reset all options styling
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('correct', 'incorrect');
+            });
+
+            // Check each question
+            for (let i = 1; i <= totalQuestions; i++) {
+                const questionName = 'q' + i;
+                const selectedOption = form.querySelector(`input[name="${questionName}"]:checked`);
+                
+                if (!selectedOption) {
+                    answeredAll = false;
+                    continue;
+                }
+
+                const userAnswer = selectedOption.value;
+                const correctAnswer = correctAnswers[questionName];
+                const questionCard = selectedOption.closest('.question-card');
+                const allOptions = questionCard.querySelectorAll('.option');
+
+                // Highlight correct and incorrect answers
+                allOptions.forEach(opt => {
+                    const radio = opt.querySelector('input[type="radio"]');
+                    if (radio.value === correctAnswer) {
+                        opt.classList.add('correct');
+                    }
+                    if (radio.checked && radio.value !== correctAnswer) {
+                        opt.classList.add('incorrect');
+                    }
+                });
+
+                if (userAnswer === correctAnswer) {
+                    score += 20;
+                    detailedFeedback.push(`<p style="color: #4CAF50;">✓ Câu ${i}: <strong>Đúng</strong></p>`);
+                } else {
+                    detailedFeedback.push(`<p style="color: #F44336;">✗ Câu ${i}: <strong>Sai</strong> - Đáp án đúng đã được đánh dấu màu xanh</p>`);
+                }
+            }
+
+            if (!answeredAll) {
+                alert('⚠️ Vui lòng trả lời tất cả các câu hỏi!');
+                return;
+            }
+
+            // Display results
+            const resultDiv = document.getElementById('quizResult');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const resultMessage = document.getElementById('resultMessage');
+            const resultFeedback = document.getElementById('resultFeedback');
+
+            scoreDisplay.textContent = score + '/100 điểm';
+            
+            // Get appropriate feedback
+            let feedback;
+            if (score === 100) feedback = feedbackMessages[100];
+            else if (score >= 80) feedback = feedbackMessages[80];
+            else if (score >= 60) feedback = feedbackMessages[60];
+            else feedback = feedbackMessages[0];
+
+            resultMessage.innerHTML = `<strong style="font-size: 1.5rem; color: ${feedback.color}">${feedback.title}</strong><br>${feedback.message}`;
+            resultFeedback.innerHTML = `<h4 style="color: var(--primary-burgundy); margin-bottom: 1rem;">📊 Chi Tiết:</h4>${detailedFeedback.join('')}`;
+
+            resultDiv.classList.add('show');
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Disable submit button
+            const submitBtn = document.querySelector('.submit-quiz-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '✅ ĐÃ NỘP BÀI';
+        }
+
+        // Scroll to top when page loads
+        window.addEventListener('load', function() {
+            window.scrollTo(0, 0);
+        });
+    </script>
+</body>
+</html>

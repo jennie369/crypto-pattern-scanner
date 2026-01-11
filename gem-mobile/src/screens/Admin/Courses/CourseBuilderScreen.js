@@ -149,8 +149,9 @@ const CourseBuilderScreen = ({ navigation, route }) => {
       setTitle(course.title || '');
       setDescription(course.description || '');
       setThumbnailUrl(course.thumbnail_url || '');
-      // tier_required deprecated - use Shopify product for access control
-      setIsFreePreview(course.tier_required === 'FREE' || !course.shopify_product_id);
+      // FIX: Only check tier_required, NOT shopify_product_id
+      // The old logic was incorrectly auto-checking "free course" when no Shopify product was selected
+      setIsFreePreview(course.tier_required === 'FREE');
       setPrice(course.price?.toString() || '');
       setMembershipDuration(course.membership_duration_days?.toString() || '');
       setShopifyProductId(course.shopify_product_id || '');

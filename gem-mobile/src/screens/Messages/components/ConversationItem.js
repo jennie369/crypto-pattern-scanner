@@ -24,6 +24,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 // Components
 import OnlineIndicator from './OnlineIndicator';
+import PinnedConversationBadge from '../../../components/Messages/PinnedConversationBadge';
 
 // Services
 import presenceService from '../../../services/presenceService';
@@ -37,7 +38,7 @@ import {
   TOUCH,
 } from '../../../utils/tokens';
 
-const ConversationItem = memo(({ conversation, currentUserId, onPress, index }) => {
+const ConversationItem = memo(({ conversation, currentUserId, onPress, index, isPinned }) => {
   // Get other participant info
   const otherParticipant = conversation.other_participant ||
     conversation.conversation_participants?.find(p => p.user_id !== currentUserId)?.users;
@@ -121,10 +122,13 @@ const ConversationItem = memo(({ conversation, currentUserId, onPress, index }) 
       ]}
     >
       <TouchableOpacity
-        style={styles.touchable}
+        style={[styles.touchable, isPinned && styles.touchablePinned]}
         onPress={onPress}
         activeOpacity={0.7}
       >
+        {/* Pinned Badge */}
+        {isPinned && <PinnedConversationBadge />}
+
         {/* Avatar Section */}
         <View style={styles.avatarContainer}>
           {avatarUrl ? (
@@ -193,17 +197,21 @@ export default ConversationItem;
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: SPACING.lg,
-    marginVertical: SPACING.xs,
+    // Facebook-style borderless - no margin horizontal
   },
   touchable: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(15, 16, 48, 0.4)',
-    borderRadius: 16,
-    padding: SPACING.md,
-    borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.15)',
+    backgroundColor: 'transparent',
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    // Borderless - only bottom separator
+    borderBottomWidth: 0.5,
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+    position: 'relative',
+  },
+  touchablePinned: {
+    backgroundColor: 'rgba(255, 189, 89, 0.05)',
   },
 
   // Avatar

@@ -662,7 +662,7 @@ const ReadingForm = ({ type, data, onChange }) => {
         <View style={styles.readingPreviewText}>
           <Text style={styles.readingPreviewTitle}>
             {isIChing
-              ? `Quẻ ${data.hexagramNumber}: ${data.vietnameseName}`
+              ? `Quẻ ${data.hexagramNumber}: ${data.hexagramName} (${data.chineseName || ''})`
               : data.cards?.map(c => c.vietnamese || c.name).join(' • ')
             }
           </Text>

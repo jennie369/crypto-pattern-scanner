@@ -3,7 +3,7 @@
  * Shopify WebView Checkout - Dark Theme
  */
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -17,6 +17,7 @@ import { WebView } from 'react-native-webview';
 import { ArrowLeft, X, RefreshCw } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useCart } from '../../contexts/CartContext';
+import { useTabBar } from '../../contexts/TabBarContext';
 import { COLORS, SPACING, TYPOGRAPHY, GRADIENTS, GLASS } from '../../utils/tokens';
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 
@@ -28,6 +29,25 @@ const CheckoutScreen = ({ navigation, route }) => {
   const [loading, setLoading] = useState(true);
   const [canGoBack, setCanGoBack] = useState(false);
   const [orderCompleted, setOrderCompleted] = useState(false);
+
+  // Use TabBarContext to hide tab bar on this screen
+  let hideTabBar, showTabBar;
+  try {
+    const tabBarContext = useTabBar();
+    hideTabBar = tabBarContext.hideTabBar;
+    showTabBar = tabBarContext.showTabBar;
+  } catch (e) {
+    hideTabBar = () => {};
+    showTabBar = () => {};
+  }
+
+  // Hide tab bar when entering checkout, show when leaving
+  useEffect(() => {
+    hideTabBar(false);
+    return () => {
+      showTabBar(true);
+    };
+  }, []);
 
   // Extract order ID from Shopify thank you URL
   const extractOrderInfo = (url) => {

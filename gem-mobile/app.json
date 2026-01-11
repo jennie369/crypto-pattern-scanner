@@ -14,11 +14,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.gemral.mobile",
-      "buildNumber": "2",
-      "associatedDomains": [
-        "applinks:link.gemral.app",
-        "applinks:yinyangmasters.com"
-      ],
+      "buildNumber": "3",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "LSApplicationQueriesSchemes": [
@@ -37,7 +33,9 @@
           "fbshareextension"
         ],
         "NSPhotoLibraryUsageDescription": "Cho phép truy cập thư viện ảnh để chia sẻ hình ảnh",
-        "NSCameraUsageDescription": "Cho phép sử dụng camera để chụp ảnh chia sẻ"
+        "NSCameraUsageDescription": "Cho phép sử dụng camera để chụp ảnh chia sẻ",
+        "NSMicrophoneUsageDescription": "Cho phép sử dụng microphone để nhập liệu bằng giọng nói",
+        "NSSpeechRecognitionUsageDescription": "Cho phép nhận dạng giọng nói để chuyển đổi thành văn bản"
       }
     },
     "android": {
@@ -52,6 +50,36 @@
           "action": "VIEW",
           "autoVerify": true,
           "data": [
+            {
+              "scheme": "https",
+              "host": "gemral.com",
+              "pathPrefix": "/courses"
+            },
+            {
+              "scheme": "https",
+              "host": "gemral.com",
+              "pathPrefix": "/shop"
+            },
+            {
+              "scheme": "https",
+              "host": "gemral.com",
+              "pathPrefix": "/forum"
+            },
+            {
+              "scheme": "https",
+              "host": "www.gemral.com",
+              "pathPrefix": "/courses"
+            },
+            {
+              "scheme": "https",
+              "host": "www.gemral.com",
+              "pathPrefix": "/shop"
+            },
+            {
+              "scheme": "https",
+              "host": "www.gemral.com",
+              "pathPrefix": "/forum"
+            },
             {
               "scheme": "https",
               "host": "link.gemral.app",
@@ -76,19 +104,26 @@
     "plugins": [
       "expo-secure-store",
       "expo-web-browser",
+      "./plugins/withAndroidGradleFix",
       [
         "expo-build-properties",
         {
           "android": {
             "compileSdkVersion": 35,
-            "targetSdkVersion": 34,
+            "targetSdkVersion": 35,
             "buildToolsVersion": "35.0.0"
           }
         }
       ]
     ],
     "androidNavigationBar": {
-      "visible": "sticky-immersive"
+      "visible": "sticky-immersive",
+      "backgroundColor": "#05040B"
+    },
+    "androidStatusBar": {
+      "barStyle": "light-content",
+      "backgroundColor": "#00000000",
+      "translucent": true
     },
     "extra": {
       "eas": {

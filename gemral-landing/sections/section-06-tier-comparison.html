@@ -1,0 +1,843 @@
+<!-- ============================================
+     SECTION 6 PART 1: KHÓA HỌC TRADING & TƯ DUY
+     GEMRAL - HIGH SPECIFICITY CSS (chống override)
+     ============================================ -->
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEMRAL - Khóa Học Trading & Tư Duy</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Noto+Sans+Display:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ===== RESET & HIGH SPECIFICITY ===== */
+        .gpr-section,
+        .gpr-section *,
+        .gpr-section *::before,
+        .gpr-section *::after {
+            margin: 0 !important;
+            padding: 0 !important;
+            box-sizing: border-box !important;
+        }
+        
+        .gpr-section {
+            --navy: #112250;
+            --navy-dark: #0a1632;
+            --burgundy: #9C0612;
+            --burgundy-dark: #6B0F1A;
+            --gold: #FFBD59;
+            --gold-dark: #C88F2F;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --pink: #FF6B9D;
+            --green: #10B981;
+            --white: #ffffff;
+            --white-80: rgba(255, 255, 255, 0.8);
+            --white-60: rgba(255, 255, 255, 0.6);
+            --white-40: rgba(255, 255, 255, 0.4);
+            --white-20: rgba(255, 255, 255, 0.2);
+            --white-10: rgba(255, 255, 255, 0.1);
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+            
+            font-family: var(--font-body) !important;
+            background: linear-gradient(180deg, var(--navy) 0%, var(--burgundy-dark) 40%, #0D1B3F 70%, var(--navy-dark) 100%) !important;
+            color: var(--white) !important;
+            line-height: 1.6 !important;
+            padding: 100px 0 !important;
+            position: relative !important;
+            overflow: hidden !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            display: block !important;
+        }
+        
+        .gpr-section::before {
+            content: '' !important;
+            position: absolute !important;
+            top: -150px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            width: 1000px !important;
+            height: 400px !important;
+            background: radial-gradient(ellipse, rgba(255, 189, 89, 0.12) 0%, transparent 70%) !important;
+            pointer-events: none !important;
+        }
+        
+        .gpr-section .gpr-container {
+            max-width: 1280px !important;
+            width: 100% !important;
+            margin: 0 auto !important;
+            padding: 0 30px !important;
+            position: relative !important;
+            z-index: 1 !important;
+            display: block !important;
+        }
+        
+        /* Header */
+        .gpr-section .gpr-header {
+            text-align: center !important;
+            margin-bottom: 60px !important;
+            display: block !important;
+        }
+        
+        .gpr-section .gpr-badge {
+            display: inline-block !important;
+            padding: 10px 24px !important;
+            border-radius: 30px !important;
+            font-family: var(--font-heading) !important;
+            font-size: 13px !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 1px !important;
+            margin-bottom: 25px !important;
+            background: linear-gradient(135deg, var(--burgundy), var(--burgundy-dark)) !important;
+            color: var(--white) !important;
+            box-shadow: 0 4px 20px rgba(156, 6, 18, 0.4) !important;
+        }
+        
+        .gpr-section .gpr-title {
+            font-family: var(--font-heading) !important;
+            font-size: 42px !important;
+            font-weight: 800 !important;
+            line-height: 1.2 !important;
+            margin-bottom: 20px !important;
+            color: var(--white) !important;
+        }
+        
+        .gpr-section .gpr-subtitle {
+            font-size: 18px !important;
+            color: var(--white-80) !important;
+            max-width: 700px !important;
+            margin: 0 auto !important;
+            line-height: 1.7 !important;
+        }
+        
+        .gpr-section .text-gold { color: var(--gold) !important; }
+        .gpr-section .text-cyan { color: var(--cyan) !important; }
+        .gpr-section .text-pink { color: var(--pink) !important; }
+        .gpr-section .text-green { color: var(--green) !important; }
+        .gpr-section .text-purple { color: var(--purple) !important; }
+        
+        /* Category */
+        .gpr-section .gpr-category {
+            margin-bottom: 80px !important;
+            display: block !important;
+        }
+        
+        .gpr-section .gpr-cat-header {
+            display: flex !important;
+            align-items: center !important;
+            gap: 15px !important;
+            margin-bottom: 30px !important;
+            padding-bottom: 15px !important;
+            border-bottom: 2px solid var(--white-10) !important;
+            flex-wrap: wrap !important;
+        }
+        
+        .gpr-section .gpr-cat-icon {
+            width: 50px !important;
+            height: 50px !important;
+            min-width: 50px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background: rgba(255, 189, 89, 0.1) !important;
+            border-radius: 12px !important;
+            border: 2px solid rgba(255, 189, 89, 0.3) !important;
+        }
+        
+        .gpr-section .gpr-cat-icon svg {
+            width: 28px !important;
+            height: 28px !important;
+            stroke: var(--gold) !important;
+            fill: none !important;
+        }
+        
+        .gpr-section .gpr-cat-title {
+            font-family: var(--font-heading) !important;
+            font-size: 26px !important;
+            font-weight: 800 !important;
+            color: var(--white) !important;
+        }
+        
+        .gpr-section .gpr-cat-desc {
+            font-size: 14px !important;
+            color: var(--white-60) !important;
+            margin-left: auto !important;
+        }
+        
+        /* ===== GRID - CRITICAL FIX ===== */
+        .gpr-section .gpr-grid-4 {
+            display: grid !important;
+            grid-template-columns: repeat(4, 1fr) !important;
+            gap: 20px !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            margin-top: 15px !important; /* Space for badges */
+            padding: 0 !important;
+        }
+
+        .gpr-section .gpr-grid-3 {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 25px !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            margin-top: 15px !important; /* Space for badges */
+            padding: 0 !important;
+        }
+        
+        /* ===== CARD - CRITICAL FIX ===== */
+        .gpr-section .gpr-card {
+            background: rgba(0, 0, 0, 0.5) !important;
+            backdrop-filter: blur(20px) !important;
+            -webkit-backdrop-filter: blur(20px) !important;
+            border: 2px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 20px !important;
+            padding: 28px 18px !important;
+            padding-top: 36px !important; /* Extra space for badge */
+            position: relative !important;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            min-width: 0 !important;
+            max-width: 100% !important;
+            overflow: visible !important; /* Allow badge to show */
+            width: 100% !important;
+        }
+        
+        .gpr-section .gpr-card:hover {
+            transform: translateY(-8px) !important;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4) !important;
+        }
+        
+        .gpr-section .gpr-card.free { border-color: rgba(255, 255, 255, 0.2) !important; }
+        .gpr-section .gpr-card.pro { border-color: rgba(0, 240, 255, 0.3) !important; }
+        .gpr-section .gpr-card.pro:hover {
+            border-color: var(--cyan) !important;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 0 0 30px rgba(0, 240, 255, 0.15) !important;
+        }
+        .gpr-section .gpr-card.premium { border-color: var(--gold) !important; }
+        .gpr-section .gpr-card.premium:hover {
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 0 0 40px rgba(255, 189, 89, 0.2) !important;
+        }
+        .gpr-section .gpr-card.vip {
+            border-color: rgba(106, 91, 255, 0.4) !important;
+            background: linear-gradient(180deg, rgba(106, 91, 255, 0.1) 0%, rgba(0, 0, 0, 0.5) 100%) !important;
+        }
+        .gpr-section .gpr-card.vip:hover {
+            border-color: var(--purple) !important;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 0 0 30px rgba(106, 91, 255, 0.2) !important;
+        }
+        .gpr-section .gpr-card.mindset {
+            background: linear-gradient(180deg, rgba(156, 6, 18, 0.15) 0%, rgba(0, 0, 0, 0.5) 100%) !important;
+        }
+        
+        /* Card Badge */
+        .gpr-section .gpr-card-badge {
+            position: absolute !important;
+            top: -12px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            padding: 6px 14px !important;
+            border-radius: 20px !important;
+            font-family: var(--font-heading) !important;
+            font-size: 10px !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            white-space: nowrap !important;
+            z-index: 2 !important;
+        }
+        
+        .gpr-section .gpr-card-badge.popular {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark)) !important;
+            color: var(--navy-dark) !important;
+            box-shadow: 0 4px 15px rgba(255, 189, 89, 0.5) !important;
+        }
+        
+        .gpr-section .gpr-card-badge.best {
+            background: linear-gradient(135deg, var(--purple), #4338CA) !important;
+            color: var(--white) !important;
+            box-shadow: 0 4px 15px rgba(106, 91, 255, 0.5) !important;
+        }
+        
+        .gpr-section .gpr-card-badge.free-badge {
+            background: var(--green) !important;
+            color: var(--white) !important;
+        }
+        
+        /* Card Header */
+        .gpr-section .gpr-card-head {
+            text-align: center !important;
+            margin-bottom: 18px !important;
+            padding-bottom: 18px !important;
+            border-bottom: 1px solid var(--white-10) !important;
+            display: block !important;
+        }
+        
+        .gpr-section .gpr-tier {
+            font-family: var(--font-heading) !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 1px !important;
+            color: var(--white-60) !important;
+            margin-bottom: 8px !important;
+            display: block !important;
+        }
+        
+        .gpr-section .gpr-name {
+            font-family: var(--font-heading) !important;
+            font-size: 14px !important; /* Smaller to fit on one line */
+            font-weight: 800 !important;
+            color: var(--white) !important;
+            margin-bottom: 12px !important;
+            line-height: 1.3 !important;
+            display: block !important;
+            white-space: nowrap !important; /* Keep on one line */
+        }
+        
+        /* ===== PRICE - CRITICAL FIX ===== */
+        .gpr-section .gpr-price {
+            display: flex !important;
+            align-items: baseline !important;
+            justify-content: center !important;
+            gap: 3px !important;
+            flex-wrap: nowrap !important;
+        }
+
+        .gpr-section .gpr-amount {
+            font-family: var(--font-heading) !important;
+            font-size: 18px !important; /* Smaller to fit */
+            font-weight: 800 !important;
+            white-space: nowrap !important;
+            display: inline !important;
+        }
+        
+        .gpr-section .gpr-period {
+            font-size: 12px !important;
+            color: var(--white-60) !important;
+            white-space: nowrap !important;
+        }
+        
+        .gpr-section .gpr-free {
+            font-family: var(--font-heading) !important;
+            font-size: 22px !important;
+            font-weight: 800 !important;
+            color: var(--green) !important;
+        }
+        
+        /* Features */
+        .gpr-section .gpr-features {
+            flex: 1 !important;
+            margin-bottom: 18px !important;
+            display: block !important;
+        }
+        
+        .gpr-section .gpr-feat {
+            display: flex !important;
+            align-items: flex-start !important;
+            gap: 8px !important;
+            padding: 7px 0 !important;
+            font-size: 12px !important;
+            color: var(--white-80) !important;
+        }
+        
+        .gpr-section .gpr-feat svg {
+            width: 14px !important;
+            height: 14px !important;
+            min-width: 14px !important;
+            flex-shrink: 0 !important;
+            margin-top: 2px !important;
+            fill: none !important;
+        }
+        
+        .gpr-section .gpr-feat svg.check { stroke: var(--green) !important; }
+        .gpr-section .gpr-feat svg.cross { stroke: var(--white-40) !important; }
+        
+        .gpr-section .gpr-highlight {
+            color: var(--gold) !important;
+            font-weight: 600 !important;
+        }
+        
+        .gpr-section .gpr-bonus {
+            display: inline-block !important;
+            background: rgba(16, 185, 129, 0.2) !important;
+            color: var(--green) !important;
+            padding: 2px 6px !important;
+            border-radius: 10px !important;
+            font-size: 9px !important;
+            font-weight: 700 !important;
+            margin-left: 4px !important;
+        }
+        
+        .gpr-section .gpr-muted {
+            color: var(--white-40) !important;
+        }
+        
+        /* Actions */
+        .gpr-section .gpr-actions {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 8px !important;
+        }
+        
+        .gpr-section .gpr-btn {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 6px !important;
+            padding: 11px 14px !important;
+            border-radius: 10px !important;
+            font-family: var(--font-heading) !important;
+            font-size: 12px !important;
+            font-weight: 700 !important;
+            text-decoration: none !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            border: none !important;
+            white-space: nowrap !important;
+        }
+        
+        .gpr-section .gpr-btn svg {
+            width: 14px !important;
+            height: 14px !important;
+            flex-shrink: 0 !important;
+        }
+        
+        .gpr-section .gpr-btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark)) !important;
+            color: var(--navy-dark) !important;
+        }
+        
+        .gpr-section .gpr-btn-primary:hover {
+            transform: scale(1.02) !important;
+            box-shadow: 0 5px 20px rgba(255, 189, 89, 0.4) !important;
+        }
+        
+        .gpr-section .gpr-btn-secondary {
+            background: transparent !important;
+            border: 1px solid var(--white-20) !important;
+            color: var(--white) !important;
+        }
+        
+        .gpr-section .gpr-btn-secondary:hover {
+            border-color: var(--gold) !important;
+            color: var(--gold) !important;
+        }
+        
+        /* Divider & Footer */
+        .gpr-section .gpr-divider {
+            height: 1px !important;
+            background: linear-gradient(90deg, transparent, var(--white-20), transparent) !important;
+            margin: 60px 0 !important;
+            border: none !important;
+        }
+        
+        .gpr-section .gpr-footer {
+            text-align: center !important;
+            margin-top: 60px !important;
+            font-size: 13px !important;
+            color: var(--white-60) !important;
+            letter-spacing: 2px !important;
+            text-transform: uppercase !important;
+        }
+        
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1400px) {
+            .gpr-section .gpr-card {
+                padding: 24px 12px !important;
+                padding-top: 36px !important;
+            }
+            .gpr-section .gpr-amount {
+                font-size: 16px !important;
+            }
+            .gpr-section .gpr-name {
+                font-size: 12px !important;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .gpr-section .gpr-grid-4 {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+            .gpr-section .gpr-amount {
+                font-size: 22px !important;
+            }
+            .gpr-section .gpr-name {
+                font-size: 15px !important;
+            }
+        }
+        
+        @media (max-width: 900px) {
+            .gpr-section .gpr-grid-3 {
+                grid-template-columns: 1fr !important;
+                max-width: 420px !important;
+                margin: 0 auto !important;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .gpr-section {
+                padding: 80px 0 !important;
+            }
+            .gpr-section .gpr-title {
+                font-size: 32px !important;
+            }
+            .gpr-section .gpr-container {
+                padding: 0 20px !important;
+            }
+            .gpr-section .gpr-grid-4 {
+                grid-template-columns: 1fr !important;
+                max-width: 420px !important;
+                margin: 0 auto !important;
+            }
+            .gpr-section .gpr-cat-header {
+                flex-direction: column !important;
+                text-align: center !important;
+                gap: 10px !important;
+            }
+            .gpr-section .gpr-cat-desc {
+                margin-left: 0 !important;
+            }
+            .gpr-section .gpr-amount {
+                font-size: 26px !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .gpr-section .gpr-title {
+                font-size: 26px !important;
+            }
+            .gpr-section .gpr-cat-title {
+                font-size: 22px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="gpr-section">
+        <div class="gpr-container">
+            <div class="gpr-header">
+                <span class="gpr-badge">💎 Bảng Giá Sản Phẩm</span>
+                <h2 class="gpr-title">
+                    CHỌN GÓI PHÙ HỢP<br>
+                    <span class="text-gold">VỚI HÀNH TRÌNH CỦA BẠN</span>
+                </h2>
+                <p class="gpr-subtitle">
+                    Từ người mới bắt đầu đến trader chuyên nghiệp, từ tìm kiếm sự thịnh vượng tài chính 
+                    đến chuyển hóa tư duy — GEMRAL có giải pháp phù hợp cho mọi giai đoạn.
+                </p>
+            </div>
+            
+            <!-- KHÓA HỌC TRADING -->
+            <div class="gpr-category">
+                <div class="gpr-cat-header">
+                    <div class="gpr-cat-icon">
+                        <svg viewBox="0 0 24 24" stroke-width="2">
+                            <path d="M3 3v18h18"/>
+                            <path d="m19 9-5 5-4-4-3 3"/>
+                        </svg>
+                    </div>
+                    <h3 class="gpr-cat-title">Khóa Học Frequency Trading</h3>
+                    <span class="gpr-cat-desc">Phương pháp giao dịch tần số độc quyền của Gem Trading</span>
+                </div>
+                
+                <div class="gpr-grid-4">
+                    <!-- STARTER -->
+                    <div class="gpr-card free">
+                        <span class="gpr-card-badge free-badge">Người Mới</span>
+                        <div class="gpr-card-head">
+                            <span class="gpr-tier">Starter</span>
+                            <h4 class="gpr-name">Khóa Học Cơ Bản</h4>
+                            <div class="gpr-price">
+                                <span class="gpr-amount text-cyan">299.000</span>
+                                <span class="gpr-period">đ</span>
+                            </div>
+                        </div>
+                        <div class="gpr-features">
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Dành cho người mới bắt đầu muốn học trading</span>
+                            </div>
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Kiến thức nền tảng về thị trường crypto</span>
+                            </div>
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Giới thiệu 6 công thức tần số cơ bản</span>
+                            </div>
+                            <div class="gpr-feat">
+                                <svg class="cross" viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                <span class="gpr-muted">Không bao gồm Scanner & Chatbot</span>
+                            </div>
+                        </div>
+                        <div class="gpr-actions">
+                            <button onclick="gemralAddToCart('course-starter')" class="gpr-btn gpr-btn-primary">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                                Thêm Vào Giỏ
+                            </button>
+                            <a href="https://yinyangmasters.com/products/gem-trading-course-tier-starter" target="_blank" class="gpr-btn gpr-btn-secondary">Tìm Hiểu Thêm →</a>
+                        </div>
+                    </div>
+
+                    <!-- TIER 1 -->
+                    <div class="gpr-card pro">
+                        <div class="gpr-card-head">
+                            <span class="gpr-tier">Tier 1</span>
+                            <h4 class="gpr-name">Frequency Pro</h4>
+                            <div class="gpr-price">
+                                <span class="gpr-amount text-cyan">11.000.000</span>
+                                <span class="gpr-period">đ</span>
+                            </div>
+                        </div>
+                        <div class="gpr-features">
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Toàn bộ nội dung khóa Trading Frequency</span>
+                            </div>
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span class="gpr-highlight">Scanner PRO (997K/tháng × 12) <span class="gpr-bonus">MIỄN PHÍ</span></span>
+                            </div>
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span class="gpr-highlight">Chatbot PRO (39K/tháng × 12) <span class="gpr-bonus">MIỄN PHÍ</span></span>
+                            </div>
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Hỗ trợ qua nhóm Telegram</span>
+                            </div>
+                        </div>
+                        <div class="gpr-actions">
+                            <button onclick="gemralAddToCart('course-tier1')" class="gpr-btn gpr-btn-primary">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                                Thêm Vào Giỏ
+                            </button>
+                            <a href="https://yinyangmasters.com/products/gem-tier1" target="_blank" class="gpr-btn gpr-btn-secondary">Tìm Hiểu Thêm →</a>
+                        </div>
+                    </div>
+
+                    <!-- TIER 2 -->
+                    <div class="gpr-card premium">
+                        <span class="gpr-card-badge popular">Phổ Biến Nhất</span>
+                        <div class="gpr-card-head">
+                            <span class="gpr-tier">Tier 2</span>
+                            <h4 class="gpr-name">Frequency Premium</h4>
+                            <div class="gpr-price">
+                                <span class="gpr-amount text-gold">21.000.000</span>
+                                <span class="gpr-period">đ</span>
+                            </div>
+                        </div>
+                        <div class="gpr-features">
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Toàn bộ Tier 1 + Chiến lược nâng cao</span>
+                            </div>
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span class="gpr-highlight">Scanner PREMIUM (1.997K × 12) <span class="gpr-bonus">MIỄN PHÍ</span></span>
+                            </div>
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span class="gpr-highlight">Chatbot PREMIUM (99K × 12) <span class="gpr-bonus">MIỄN PHÍ</span></span>
+                            </div>
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Hướng dẫn 1-1 hàng tháng</span>
+                            </div>
+                        </div>
+                        <div class="gpr-actions">
+                            <button onclick="gemralAddToCart('course-tier2')" class="gpr-btn gpr-btn-primary">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                                Thêm Vào Giỏ
+                            </button>
+                            <a href="https://yinyangmasters.com/products/gem-tier2" target="_blank" class="gpr-btn gpr-btn-secondary">Tìm Hiểu Thêm →</a>
+                        </div>
+                    </div>
+
+                    <!-- TIER 3 -->
+                    <div class="gpr-card vip">
+                        <span class="gpr-card-badge best">VIP Cao Cấp</span>
+                        <div class="gpr-card-head">
+                            <span class="gpr-tier">Tier 3</span>
+                            <h4 class="gpr-name">Frequency VIP</h4>
+                            <div class="gpr-price">
+                                <span class="gpr-amount text-purple">68.000.000</span>
+                                <span class="gpr-period">đ</span>
+                            </div>
+                        </div>
+                        <div class="gpr-features">
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Toàn bộ Tier 2 + Lớp học VIP riêng tư</span>
+                            </div>
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span class="gpr-highlight">Scanner VIP (5.997K × 24) <span class="gpr-bonus">MIỄN PHÍ</span></span>
+                            </div>
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span class="gpr-highlight">Chatbot PREMIUM (24 tháng) <span class="gpr-bonus">MIỄN PHÍ</span></span>
+                            </div>
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Nhóm VIP riêng + Hỗ trợ 24/7</span>
+                            </div>
+                        </div>
+                        <div class="gpr-actions">
+                            <button onclick="gemralAddToCart('course-tier3')" class="gpr-btn gpr-btn-primary">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                                Thêm Vào Giỏ
+                            </button>
+                            <a href="https://yinyangmasters.com/products/gem-tier3" target="_blank" class="gpr-btn gpr-btn-secondary">Tìm Hiểu Thêm →</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="gpr-divider"></div>
+            
+            <!-- KHÓA HỌC TƯ DUY -->
+            <div class="gpr-category">
+                <div class="gpr-cat-header">
+                    <div class="gpr-cat-icon">
+                        <svg viewBox="0 0 24 24" stroke-width="2">
+                            <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-1.54"/>
+                            <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-1.54"/>
+                        </svg>
+                    </div>
+                    <h3 class="gpr-cat-title">Khóa Học Chuyển Hóa Tư Duy</h3>
+                    <span class="gpr-cat-desc">Học Thuyết Chuyển Hóa Nội Tâm — Jennie Uyen Chu</span>
+                </div>
+                
+                <div class="gpr-grid-3">
+                    <!-- 7 Ngày -->
+                    <div class="gpr-card mindset">
+                        <span class="gpr-card-badge popular">Bán Chạy Nhất</span>
+                        <div class="gpr-card-head">
+                            <span class="gpr-tier">7 Ngày Chuyển Hóa</span>
+                            <h4 class="gpr-name">Khai Mở Tần Số Gốc</h4>
+                            <div class="gpr-price">
+                                <span class="gpr-amount text-gold">1.990.000</span>
+                                <span class="gpr-period">đ</span>
+                            </div>
+                        </div>
+                        <div class="gpr-features">
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Hành trình 7 ngày chuyển hóa tần số từ gốc rễ</span>
+                            </div>
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Hiểu rõ 5 Niềm Tin Nền Tảng</span>
+                            </div>
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>7 Nghi Thức duy trì tần số cao</span>
+                            </div>
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Bài tập thực hành và nhật ký hướng dẫn</span>
+                            </div>
+                        </div>
+                        <div class="gpr-actions">
+                            <button onclick="gemralAddToCart('mindset-7days')" class="gpr-btn gpr-btn-primary">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                                Thêm Vào Giỏ
+                            </button>
+                            <a href="https://yinyangmasters.com/products/khoa-hoc-7-ngay-khai-mo-tan-so-goc" target="_blank" class="gpr-btn gpr-btn-secondary">Tìm Hiểu Thêm →</a>
+                        </div>
+                    </div>
+
+                    <!-- Tình Yêu -->
+                    <div class="gpr-card mindset">
+                        <div class="gpr-card-head">
+                            <span class="gpr-tier">Tình Yêu & Quan Hệ</span>
+                            <h4 class="gpr-name">Kích Hoạt Tần Số Tình Yêu</h4>
+                            <div class="gpr-price">
+                                <span class="gpr-amount text-pink">399.000</span>
+                                <span class="gpr-period">đ</span>
+                            </div>
+                        </div>
+                        <div class="gpr-features">
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Hiểu tần số tình yêu trong các mối quan hệ</span>
+                            </div>
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Phá vỡ Hình Tư Tưởng "không xứng đáng"</span>
+                            </div>
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Kỹ thuật thu hút quan hệ lành mạnh</span>
+                            </div>
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Bài tập yêu thương bản thân</span>
+                            </div>
+                        </div>
+                        <div class="gpr-actions">
+                            <button onclick="gemralAddToCart('mindset-love')" class="gpr-btn gpr-btn-primary">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                                Thêm Vào Giỏ
+                            </button>
+                            <a href="https://yinyangmasters.com/products/khoa-hoc-kich-hoat-tan-so-tinh-yeu" target="_blank" class="gpr-btn gpr-btn-secondary">Tìm Hiểu Thêm →</a>
+                        </div>
+                    </div>
+
+                    <!-- Triệu Phú -->
+                    <div class="gpr-card mindset">
+                        <div class="gpr-card-head">
+                            <span class="gpr-tier">Tài Chính & Thịnh Vượng</span>
+                            <h4 class="gpr-name">Tái Tạo Tư Duy Triệu Phú</h4>
+                            <div class="gpr-price">
+                                <span class="gpr-amount text-gold">499.000</span>
+                                <span class="gpr-period">đ</span>
+                            </div>
+                        </div>
+                        <div class="gpr-features">
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Phá vỡ Hình Tư Tưởng thiếu thốn</span>
+                            </div>
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Cài đặt tư duy thịnh vượng</span>
+                            </div>
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Kỹ thuật gieo hạt tài chính</span>
+                            </div>
+                            <div class="gpr-feat">
+                                <svg class="check" viewBox="0 0 24 24" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span>Bài tập xả bỏ và nhận vào</span>
+                            </div>
+                        </div>
+                        <div class="gpr-actions">
+                            <button onclick="gemralAddToCart('mindset-wealth')" class="gpr-btn gpr-btn-primary">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                                Thêm Vào Giỏ
+                            </button>
+                            <a href="https://yinyangmasters.com/products/khoa-hoc-tai-tao-tu-duy-trieu-phu" target="_blank" class="gpr-btn gpr-btn-secondary">Tìm Hiểu Thêm →</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="gpr-footer">gemral.com</div>
+        </div>
+    </section>
+</body>
+</html>

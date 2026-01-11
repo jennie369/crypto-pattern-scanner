@@ -36,6 +36,13 @@ import {
   X,
   Clock,
   Flame,
+  Zap,
+  TrendingUp,
+  Gift,
+  Mail,
+  Wind,
+  Droplets,
+  Star,
 } from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { supabase } from '../../services/supabase';
@@ -47,12 +54,66 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 // Life areas for goal categorization - Tiếng Việt có dấu
 const LIFE_AREAS = [
   { id: 'finance', label: 'Tài chính', icon: DollarSign, color: '#10B981', gradient: ['#10B981', '#059669'] },
+  { id: 'crypto', label: 'Crypto', icon: Zap, color: '#F7931A', gradient: ['#F7931A', '#FFD700'] },
   { id: 'career', label: 'Sự nghiệp', icon: Briefcase, color: '#6366F1', gradient: ['#6366F1', '#4F46E5'] },
   { id: 'health', label: 'Sức khỏe', icon: Heart, color: '#EF4444', gradient: ['#EF4444', '#DC2626'] },
   { id: 'relationships', label: 'Mối quan hệ', icon: Users, color: '#EC4899', gradient: ['#EC4899', '#DB2777'] },
   { id: 'personal', label: 'Phát triển', icon: Brain, color: '#8B5CF6', gradient: ['#8B5CF6', '#7C3AED'] },
   { id: 'spiritual', label: 'Tâm linh', icon: Sparkles, color: '#F59E0B', gradient: ['#F59E0B', '#D97706'] },
 ];
+
+// Goal suggestions by life area - quick select options
+const GOAL_SUGGESTIONS = {
+  finance: [
+    'Tiết kiệm 100 triệu trong 6 tháng',
+    'Xây dựng quỹ khẩn cấp 6 tháng chi tiêu',
+    'Tăng thu nhập thụ động lên 10tr/tháng',
+    'Thanh toán hết nợ trong năm nay',
+    'Đầu tư sinh lời ổn định 15%/năm',
+  ],
+  crypto: [
+    'Đạt lợi nhuận 50% từ trading crypto',
+    'Xây dựng portfolio crypto cân bằng',
+    'Học phân tích kỹ thuật thành thạo',
+    'Quản lý rủi ro, không mất quá 2%/lệnh',
+    'Tìm 3 altcoin tiềm năng mùa bull run',
+  ],
+  career: [
+    'Thăng tiến lên vị trí quản lý',
+    'Tăng lương 30% trong năm nay',
+    'Học thêm kỹ năng mới (AI, Data)',
+    'Chuyển đổi ngành nghề thành công',
+    'Xây dựng thương hiệu cá nhân',
+  ],
+  health: [
+    'Giảm 10kg và duy trì cân nặng',
+    'Tập gym đều đặn 4 buổi/tuần',
+    'Ngủ đủ 7-8 tiếng mỗi đêm',
+    'Ăn uống lành mạnh, ít đường',
+    'Thiền định 15 phút mỗi ngày',
+  ],
+  relationships: [
+    'Cải thiện mối quan hệ với gia đình',
+    'Tìm được người bạn đời phù hợp',
+    'Dành thời gian chất lượng với con',
+    'Mở rộng mạng lưới quan hệ',
+    'Học cách giao tiếp hiệu quả hơn',
+  ],
+  personal: [
+    'Học ngoại ngữ mới (Anh/Trung)',
+    'Đọc 24 cuốn sách trong năm',
+    'Phát triển tư duy tích cực',
+    'Vượt qua nỗi sợ và lo âu',
+    'Xây dựng thói quen tốt mỗi ngày',
+  ],
+  spiritual: [
+    'Thiền định sâu 30 phút mỗi ngày',
+    'Kết nối với bản ngã cao hơn',
+    'Sống mindful và hiện tại',
+    'Phát triển trực giác và năng lượng',
+    'Thực hành biết ơn mỗi ngày',
+  ],
+};
 
 // Timeframes - Tiếng Việt có dấu
 const TIMEFRAMES = [
@@ -101,6 +162,13 @@ const AFFIRMATION_TEMPLATES = {
     'Tôi thu hút tiền bạc và sự thịnh vượng mỗi ngày',
     'Tôi xứng đáng được giàu có và sung túc',
     'Tiền bạc đến với tôi dễ dàng và liên tục',
+  ],
+  crypto: [
+    'Tôi giao dịch với sự bình tĩnh và kỷ luật',
+    'Mỗi quyết định trading của tôi đều sáng suốt',
+    'Tôi kiên nhẫn chờ đợi cơ hội hoàn hảo',
+    'Tôi quản lý rủi ro một cách khôn ngoan',
+    'Thị trường crypto mang lại cơ hội tuyệt vời cho tôi',
   ],
   career: [
     'Tôi là chuyên gia trong lĩnh vực của mình',
@@ -296,6 +364,18 @@ const ACTION_PLAN_TEMPLATES = {
     'Đặt mục tiêu tài chính cụ thể theo tháng',
     'Tham gia cộng đồng đầu tư để học hỏi',
   ],
+  crypto: [
+    'Học trading/phân tích kỹ thuật 1h/ngày',
+    'Review và cập nhật kế hoạch trading mỗi tuần',
+    'Ghi chép trading journal sau mỗi lệnh',
+    'Quản lý rủi ro: không vào quá 2% vốn/lệnh',
+    'Nghiên cứu fundamental coin mỗi tuần',
+    'Theo dõi on-chain data và whale movements',
+    'Backtest chiến lược trading mỗi tháng',
+    'Đa dạng hóa portfolio 5-7 coin chất lượng',
+    'Thực hành 1 điều nhỏ ra ngoài vùng an toàn mỗi ngày',
+    'Tập trung vào quá trình thay vì kết quả',
+  ],
   career: [
     'Học 1 kỹ năng mới mỗi tháng',
     'Networking với 2 người mới mỗi tuần',
@@ -358,6 +438,47 @@ const ACTION_PLAN_TEMPLATES = {
   ],
 };
 
+// Ritual suggestions by life area - mapped to existing rituals from ritualService
+// IDs match RITUAL_TYPES in ritualService.js
+const RITUAL_SUGGESTIONS = {
+  finance: [
+    { id: 'gratitude-flow', title: 'Dòng Chảy Biết Ơn', subtitle: 'Thu hút thịnh vượng', icon: Gift, color: '#FFD700' },
+    { id: 'letter-to-universe', title: 'Thư Gửi Vũ Trụ', subtitle: 'Gửi ý định tài chính', icon: Mail, color: '#9D4EDD' },
+    { id: 'water-manifest', title: 'Nghi Thức Nước', subtitle: 'Manifest tài chính', icon: Droplets, color: '#4ECDC4' },
+  ],
+  crypto: [
+    { id: 'cleansing-breath', title: 'Thở Thanh Lọc', subtitle: 'Giữ bình tĩnh khi trading', icon: Wind, color: '#667EEA' },
+    { id: 'burn-release', title: 'Đốt & Giải Phóng', subtitle: 'Buông bỏ FOMO/FUD', icon: Flame, color: '#FF6B6B' },
+    { id: 'letter-to-universe', title: 'Thư Gửi Vũ Trụ', subtitle: 'Gửi mục tiêu trading', icon: Mail, color: '#9D4EDD' },
+  ],
+  career: [
+    { id: 'letter-to-universe', title: 'Thư Gửi Vũ Trụ', subtitle: 'Gửi ước nguyện sự nghiệp', icon: Mail, color: '#9D4EDD' },
+    { id: 'cleansing-breath', title: 'Thở Thanh Lọc', subtitle: 'Giải tỏa áp lực công việc', icon: Wind, color: '#667EEA' },
+    { id: 'star-wish', title: 'Nghi Thức Ước Sao', subtitle: 'Ước nguyện thành công', icon: Star, color: '#4ECDC4' },
+  ],
+  health: [
+    { id: 'cleansing-breath', title: 'Thở Thanh Lọc', subtitle: 'Thải độc cơ thể', icon: Wind, color: '#667EEA' },
+    { id: 'water-manifest', title: 'Nghi Thức Nước', subtitle: 'Nạp năng lượng khỏe mạnh', icon: Droplets, color: '#4ECDC4' },
+    { id: 'heart-expansion', title: 'Mở Rộng Trái Tim', subtitle: 'Yêu thương bản thân', icon: Heart, color: '#F093FB' },
+  ],
+  relationships: [
+    { id: 'heart-expansion', title: 'Mở Rộng Trái Tim', subtitle: 'Tăng tần số yêu thương', icon: Heart, color: '#F093FB' },
+    { id: 'gratitude-flow', title: 'Dòng Chảy Biết Ơn', subtitle: 'Biết ơn người thân', icon: Gift, color: '#FFD700' },
+    { id: 'burn-release', title: 'Đốt & Giải Phóng', subtitle: 'Buông bỏ tổn thương', icon: Flame, color: '#FF6B6B' },
+  ],
+  personal: [
+    { id: 'letter-to-universe', title: 'Thư Gửi Vũ Trụ', subtitle: 'Gửi ước mơ phát triển', icon: Mail, color: '#9D4EDD' },
+    { id: 'burn-release', title: 'Đốt & Giải Phóng', subtitle: 'Buông bỏ giới hạn', icon: Flame, color: '#FF6B6B' },
+    { id: 'star-wish', title: 'Nghi Thức Ước Sao', subtitle: 'Ước nguyện tương lai', icon: Star, color: '#4ECDC4' },
+  ],
+  spiritual: [
+    { id: 'heart-expansion', title: 'Mở Rộng Trái Tim', subtitle: 'Kết nối yêu thương', icon: Heart, color: '#F093FB' },
+    { id: 'gratitude-flow', title: 'Dòng Chảy Biết Ơn', subtitle: 'Thực hành biết ơn', icon: Gift, color: '#FFD700' },
+    { id: 'letter-to-universe', title: 'Thư Gửi Vũ Trụ', subtitle: 'Gửi điều ước thiêng liêng', icon: Mail, color: '#9D4EDD' },
+    { id: 'water-manifest', title: 'Nghi Thức Nước', subtitle: 'Nạp ý định vào nước', icon: Droplets, color: '#4ECDC4' },
+  ],
+};
+
 /**
  * InlineChatForm - Multi-step inline form in chat
  * Renders as a chat bubble with step-by-step form
@@ -397,6 +518,9 @@ const InlineChatForm = ({
   // NEW: Generated personalized content
   const [personalizedAffirmations, setPersonalizedAffirmations] = useState([]);
   const [personalizedActions, setPersonalizedActions] = useState([]);
+
+  // NEW: Ritual selection state
+  const [selectedRituals, setSelectedRituals] = useState([]);
 
   // Animate in
   useEffect(() => {
@@ -447,6 +571,7 @@ const InlineChatForm = ({
     setSelectedChallenges([]);
     setPersonalizedAffirmations([]);
     setPersonalizedActions([]);
+    setSelectedRituals([]);
   }, [preSelectedArea, userInput]);
 
   // Handle close
@@ -490,6 +615,16 @@ const InlineChatForm = ({
         return prev.filter(s => s !== step);
       }
       return [...prev, step];
+    });
+  }, []);
+
+  // Toggle ritual selection (multi-select)
+  const toggleRitual = useCallback((ritualId) => {
+    setSelectedRituals(prev => {
+      if (prev.includes(ritualId)) {
+        return prev.filter(r => r !== ritualId);
+      }
+      return [...prev, ritualId];
     });
   }, []);
 
@@ -595,10 +730,10 @@ const InlineChatForm = ({
     setSelectedActionSteps(autoSelected.length > 0 ? autoSelected : uniqueActions.slice(0, 3).map(a => a.title));
   }, [selectedChallenges, selectedArea]);
 
-  // Next step - now 7 steps total (with deeper questioning)
-  // Step 1: Area, Step 2: Goal, Step 3: Why+Emotions, Step 4: Timeframe+Challenges, Step 5: Affirmations, Step 6: Actions
+  // Next step - now 7 steps total (with deeper questioning + rituals)
+  // Step 1: Area, Step 2: Goal, Step 3: Why+Emotions, Step 4: Timeframe+Challenges, Step 5: Affirmations, Step 6: Actions, Step 7: Rituals
   const nextStep = useCallback(() => {
-    const maxSteps = 6;
+    const maxSteps = 7;
     if (step < maxSteps) {
       // When moving to step 5 (affirmations), generate personalized content
       if (step === 4) {
@@ -620,8 +755,9 @@ const InlineChatForm = ({
     }
   }, [step, preSelectedArea]);
 
-  // Check if step is complete - now 6 steps
+  // Check if step is complete - now 7 steps
   // Step 3: Why reason is OPTIONAL now - only emotions required
+  // Step 7: Rituals are OPTIONAL - can skip
   const isStepComplete = useCallback(() => {
     switch (step) {
       case 1: return selectedArea !== null;
@@ -630,6 +766,7 @@ const InlineChatForm = ({
       case 4: return selectedTimeframe !== null && selectedChallenges.length > 0; // Timeframe + Challenges
       case 5: return selectedAffirmations.length > 0;
       case 6: return selectedActionSteps.length > 0;
+      case 7: return true; // Rituals are optional - always allow submission
       default: return false;
     }
   }, [step, selectedArea, goalText, selectedEmotions, selectedTimeframe, selectedChallenges, selectedAffirmations, selectedActionSteps]);
@@ -658,8 +795,41 @@ const InlineChatForm = ({
       // Generate a unique goal ID for linking
       const goalId = `goal_${Date.now()}`;
 
+      // Get ritual details for selected rituals
+      // Auto-select first ritual if none selected (so goals always have at least 1 ritual)
+      const ritualSuggestions = RITUAL_SUGGESTIONS[selectedArea] || RITUAL_SUGGESTIONS.spiritual;
+      const ritualsToUse = selectedRituals.length > 0
+        ? selectedRituals
+        : ritualSuggestions.length > 0 ? [ritualSuggestions[0].id] : [];
+
+      const selectedRitualDetails = ritualsToUse.map(ritualId => {
+        const ritual = ritualSuggestions.find(r => r.id === ritualId);
+        return ritual ? { id: ritual.id, title: ritual.title, subtitle: ritual.subtitle, color: ritual.color } : null;
+      }).filter(Boolean);
+
+      // Debug: Log what rituals are being saved
+      // CRITICAL: Check if any rituals were lost during lookup
+      const ritualLookupResults = ritualsToUse.map(ritualId => {
+        const ritual = ritualSuggestions.find(r => r.id === ritualId);
+        return { id: ritualId, found: !!ritual, title: ritual?.title || 'NOT FOUND' };
+      });
+
+      console.log('[InlineChatForm] Saving goal with rituals:', {
+        selectedArea,
+        selectedRituals,
+        ritualsToUse,
+        autoSelected: selectedRituals.length === 0,
+        ritualSuggestionsCount: ritualSuggestions.length,
+        ritualSuggestionsIds: ritualSuggestions.map(r => r.id),
+        ritualLookupResults,
+        selectedRitualDetails,
+        selectedRitualDetailsCount: selectedRitualDetails.length,
+        // This should match ritualsToUse.length if all rituals were found
+        allRitualsFound: ritualsToUse.length === selectedRitualDetails.length,
+      });
+
       // Build 3 widgets - all linked to the same goal
-      // Enhanced with deeper questioning data
+      // Enhanced with deeper questioning data + rituals
       const goalWidget = {
         user_id: user.id,
         type: 'goal',
@@ -678,6 +848,8 @@ const InlineChatForm = ({
             emotionLabels: emotionLabels,
             challenges: selectedChallenges,
             challengeLabels: challengeLabels,
+            // NEW: Selected rituals
+            rituals: selectedRitualDetails,
           }],
           lifeArea: selectedArea,
           // Store deeper context for future reference
@@ -686,6 +858,8 @@ const InlineChatForm = ({
             emotions: selectedEmotions,
             challenges: selectedChallenges,
           },
+          // Store rituals at content level too for easy access
+          rituals: selectedRitualDetails,
         },
         is_active: true,
       };
@@ -698,6 +872,17 @@ const InlineChatForm = ({
         .single();
 
       if (goalError) throw goalError;
+
+      // DEBUG: Verify that ALL rituals were saved correctly
+      console.log('[InlineChatForm] Goal widget created - VERIFY RITUALS:', {
+        goalId: createdGoal.id,
+        contentRitualsCount: createdGoal.content?.rituals?.length || 0,
+        contentRituals: createdGoal.content?.rituals?.map(r => r.id),
+        goals0RitualsCount: createdGoal.content?.goals?.[0]?.rituals?.length || 0,
+        goals0Rituals: createdGoal.content?.goals?.[0]?.rituals?.map(r => r.id),
+        originalSelectedRituals: selectedRituals,
+        originalSelectedRitualDetails: selectedRitualDetails.map(r => r.id),
+      });
 
       const linkedGoalId = createdGoal.id;
 
@@ -781,54 +966,39 @@ const InlineChatForm = ({
 
       setShowSuccess(true);
 
-      // Callback with all 3 widgets
-      const widgets = [goalWidget, affirmationWidget, actionPlanWidget];
-      setTimeout(() => {
-        onResult?.({
-          success: true,
-          widgets,
-          formData: {
-            lifeArea: selectedArea,
-            goal: goalText,
-            timeframe: timeframeLabel,
-            // Enhanced with deeper questioning data
-            whyReason: whyReason,
-            emotions: emotionLabels,
-            challenges: challengeLabels,
-            affirmations: selectedAffirmations,
-            actionSteps: selectedActionSteps,
-          },
-        });
-      }, 1500);
+      // Store widgets for later callback when user dismisses
+      // DO NOT auto-dismiss - wait for user to tap button
 
     } catch (error) {
       console.error('[InlineChatForm] Error:', error);
     } finally {
       setIsSubmitting(false);
     }
-  }, [selectedArea, goalText, selectedTimeframe, selectedAffirmations, selectedActionSteps, whyReason, selectedEmotions, selectedChallenges, getAreaInfo, onResult]);
+  }, [selectedArea, goalText, selectedTimeframe, selectedAffirmations, selectedActionSteps, selectedRituals, whyReason, selectedEmotions, selectedChallenges, getAreaInfo, onResult]);
 
-  // Navigate to Vision Board
+  // Navigate to Vision Board - scroll to Goals section
   const goToVisionBoard = useCallback(() => {
     handleClose();
-    navigation.navigate('Account', { screen: 'VisionBoard' });
+    navigation.navigate('Account', {
+      screen: 'VisionBoard',
+      params: { scrollToSection: 'goals' }
+    });
   }, [navigation, handleClose]);
 
   if (!visible) return null;
 
   const areaInfo = getAreaInfo();
-  const totalSteps = preSelectedArea ? 5 : 6; // Now 6 steps: area, goal, why+emotions, time+challenges, affirmation, action
+  const totalSteps = preSelectedArea ? 6 : 7; // Now 7 steps: area, goal, why+emotions, time+challenges, affirmation, action, ritual
   const adjustedStep = preSelectedArea ? step - 1 : step;
 
-  // Success view
+  // Success view - Dark theme with gold accents
   if (showSuccess) {
     return (
       <Animated.View style={[styles.container, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
-        <LinearGradient
-          colors={['rgba(16, 185, 129, 0.15)', 'rgba(16, 185, 129, 0.05)']}
-          style={styles.successCard}
-        >
-          <CheckCircle size={48} color="#10B981" />
+        <View style={styles.successCard}>
+          <View style={styles.successIconContainer}>
+            <CheckCircle size={48} color={COLORS.success || '#10B981'} />
+          </View>
           <Text style={styles.successTitle}>Đã thêm thành công!</Text>
           <Text style={styles.successMessage}>
             Mục tiêu đã được thêm vào Vision Board của bạn.
@@ -841,7 +1011,7 @@ const InlineChatForm = ({
               <Text style={styles.successBtnPrimaryText}>Xem Vision Board</Text>
             </TouchableOpacity>
           </View>
-        </LinearGradient>
+        </View>
       </Animated.View>
     );
   }
@@ -925,7 +1095,7 @@ const InlineChatForm = ({
               </Text>
               <TextInput
                 style={styles.goalInput}
-                placeholder="Ví dụ: Tôi muốn tiết kiệm 100 triệu trong 6 tháng..."
+                placeholder="Nhập mục tiêu hoặc chọn gợi ý bên dưới..."
                 placeholderTextColor={COLORS.textMuted}
                 value={goalText}
                 onChangeText={setGoalText}
@@ -934,6 +1104,32 @@ const InlineChatForm = ({
                 textAlignVertical="top"
               />
               <Text style={styles.charCount}>{goalText.length} ký tự (tối thiểu 5)</Text>
+
+              {/* Goal suggestions */}
+              {GOAL_SUGGESTIONS[selectedArea] && (
+                <View style={styles.suggestionsSection}>
+                  <Text style={styles.suggestionsLabel}>Gợi ý nhanh:</Text>
+                  <View style={styles.suggestionsList}>
+                    {GOAL_SUGGESTIONS[selectedArea].map((suggestion, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={[
+                          styles.suggestionChip,
+                          goalText === suggestion && styles.suggestionChipSelected,
+                        ]}
+                        onPress={() => setGoalText(suggestion)}
+                      >
+                        <Text style={[
+                          styles.suggestionChipText,
+                          goalText === suggestion && styles.suggestionChipTextSelected,
+                        ]}>
+                          {suggestion}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              )}
             </>
           )}
 
@@ -1135,6 +1331,75 @@ const InlineChatForm = ({
               </Text>
             </>
           )}
+
+          {/* Step 7: RITUAL SELECTION - Based on life area */}
+          {step === 7 && (
+            <>
+              <Text style={styles.stepQuestion}>Nghi thức tâm linh hỗ trợ</Text>
+              <Text style={styles.stepHint}>
+                Chọn nghi thức để tăng cường năng lượng cho mục tiêu (không bắt buộc)
+              </Text>
+
+              <View style={styles.ritualGrid}>
+                {(RITUAL_SUGGESTIONS[selectedArea] || RITUAL_SUGGESTIONS.spiritual).map((ritual) => {
+                  const IconComponent = ritual.icon;
+                  const isSelected = selectedRituals.includes(ritual.id);
+                  return (
+                    <TouchableOpacity
+                      key={ritual.id}
+                      style={[
+                        styles.ritualCard,
+                        isSelected && styles.ritualCardSelected,
+                        { borderColor: isSelected ? ritual.color : 'rgba(255,255,255,0.1)' },
+                      ]}
+                      onPress={() => toggleRitual(ritual.id)}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[styles.ritualIconWrapper, { backgroundColor: `${ritual.color}20` }]}>
+                        <IconComponent size={24} color={ritual.color} />
+                      </View>
+                      <Text style={[styles.ritualTitle, isSelected && { color: ritual.color }]}>
+                        {ritual.title}
+                      </Text>
+                      <Text style={styles.ritualSubtitle}>{ritual.subtitle}</Text>
+                      {isSelected && (
+                        <View style={[styles.ritualCheck, { backgroundColor: ritual.color }]}>
+                          <Check size={12} color="#0A0F1C" />
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+
+              <Text style={styles.selectedCount}>
+                {selectedRituals.length > 0
+                  ? `Đã chọn: ${selectedRituals.length} nghi thức`
+                  : 'Bỏ qua nếu không muốn chọn'}
+              </Text>
+
+              {/* Navigate to ritual button */}
+              {selectedRituals.length > 0 && (
+                <TouchableOpacity
+                  style={styles.viewRitualBtn}
+                  onPress={() => {
+                    // Navigate to first selected ritual - RitualPlayground is in AccountStack
+                    const ritualSuggestions = RITUAL_SUGGESTIONS[selectedArea] || RITUAL_SUGGESTIONS.spiritual;
+                    const firstRitualId = selectedRituals[0];
+                    const firstRitual = ritualSuggestions.find(r => r.id === firstRitualId);
+                    handleClose();
+                    navigation.navigate('Account', {
+                      screen: 'RitualPlayground',
+                      params: { ritual: firstRitual || { id: firstRitualId } },
+                    });
+                  }}
+                >
+                  <Sparkles size={16} color={COLORS.gold} />
+                  <Text style={styles.viewRitualBtnText}>Thực hiện nghi thức ngay</Text>
+                </TouchableOpacity>
+              )}
+            </>
+          )}
         </ScrollView>
 
         {/* Actions */}
@@ -1145,7 +1410,7 @@ const InlineChatForm = ({
             </TouchableOpacity>
           )}
 
-          {step < 6 ? (
+          {step < 7 ? (
             <TouchableOpacity
               style={[styles.nextBtn, !isStepComplete() && styles.nextBtnDisabled]}
               onPress={nextStep}
@@ -1245,7 +1510,7 @@ const styles = StyleSheet.create({
     paddingBottom: SPACING.xl, // More padding at bottom for overscroll buffer
   },
   scrollableList: {
-    maxHeight: 280, // Increased from 180
+    maxHeight: 360, // Expanded from 280 for better scroll experience
   },
   stepQuestion: {
     fontSize: TYPOGRAPHY.fontSize.md,
@@ -1301,6 +1566,40 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     marginTop: SPACING.xs,
     textAlign: 'right',
+  },
+  // Goal Suggestions
+  suggestionsSection: {
+    marginTop: SPACING.md,
+  },
+  suggestionsLabel: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    marginBottom: SPACING.sm,
+  },
+  suggestionsList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.xs,
+  },
+  suggestionChip: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  suggestionChipSelected: {
+    backgroundColor: 'rgba(255, 189, 89, 0.25)',
+    borderColor: COLORS.gold,
+  },
+  suggestionChipText: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+  },
+  suggestionChipTextSelected: {
+    color: COLORS.gold,
+    fontWeight: '600',
   },
   // Timeframe
   timeframeScroll: {
@@ -1522,57 +1821,63 @@ const styles = StyleSheet.create({
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: '#0A0F1C',
   },
-  // Success - Glassmorphism frosted glass style
+  // Success - Dark theme with gold accents
   successCard: {
-    borderRadius: 16,
-    padding: 20,
-    paddingTop: 24,
+    borderRadius: SPACING.lg,
+    padding: SPACING.xl,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(100, 150, 200, 0.25)',
-    backgroundColor: 'rgba(15, 25, 45, 0.85)',
+    borderColor: 'rgba(255, 189, 89, 0.3)',
+    backgroundColor: COLORS.glassBg || '#1a1a2e',
+  },
+  successIconContainer: {
+    marginBottom: SPACING.md,
   },
   successTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginTop: 12,
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: COLORS.gold,
+    textAlign: 'center',
+    marginBottom: SPACING.sm,
   },
   successMessage: {
-    fontSize: 13,
-    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: TYPOGRAPHY.fontSize.md,
+    color: COLORS.textSecondary,
     textAlign: 'center',
-    marginTop: 6,
-    marginBottom: 18,
-    lineHeight: 18,
+    lineHeight: 22,
+    marginBottom: SPACING.xl,
   },
   successButtons: {
     flexDirection: 'row',
-    gap: 12,
+    justifyContent: 'center',
+    gap: SPACING.md,
+    width: '100%',
   },
   successBtn: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    flex: 1,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: SPACING.md,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'center',
   },
   successBtnText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textMuted,
   },
   successBtnPrimary: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 22,
-    backgroundColor: 'rgba(245, 245, 245, 0.95)',
+    flex: 1,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.lg,
+    borderRadius: SPACING.md,
+    backgroundColor: COLORS.gold,
+    alignItems: 'center',
   },
   successBtnPrimaryText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1a1a2e',
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+    color: '#0A0F1C',
   },
   // Frequency Legend styles
   frequencyLegend: {
@@ -1624,6 +1929,74 @@ const styles = StyleSheet.create({
   frequencyCount: {
     fontSize: TYPOGRAPHY.fontSize.xs,
     color: COLORS.textMuted,
+  },
+  // Ritual Grid styles
+  ritualGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SPACING.sm,
+    marginBottom: SPACING.md,
+  },
+  ritualCard: {
+    width: '48%',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: SPACING.md,
+    padding: SPACING.md,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  ritualCardSelected: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  ritualIconWrapper: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SPACING.xs,
+  },
+  ritualTitle: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.textPrimary,
+    textAlign: 'center',
+    marginBottom: 2,
+  },
+  ritualSubtitle: {
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+  },
+  ritualCheck: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  viewRitualBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: SPACING.xs,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    borderRadius: SPACING.md,
+    borderWidth: 1,
+    borderColor: COLORS.gold,
+    marginTop: SPACING.sm,
+  },
+  viewRitualBtnText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.gold,
   },
 });
 

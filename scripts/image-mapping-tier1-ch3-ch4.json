@@ -1,0 +1,321 @@
+{
+  "instructions": "HƯỚNG DẪN: Điền URL hình ảnh vào từng vị trí bên dưới. Mỗi bài có 5 vị trí hình ảnh (image_1 đến image_5). Sau khi điền xong, lưu file và chạy script updateImagesFromMapping.js",
+
+  "chapter_3_UPU_Pattern": {
+    "lesson_3.1": {
+      "title": "Bài 3.1: UPU là gì?",
+      "file": "tier-1-bai-3.1-upu-la-gi.html",
+      "images": {
+        "image_1": {
+          "description": "Hình minh họa UPU Pattern tổng quan",
+          "url": ""
+        },
+        "image_2": {
+          "description": "Hình minh họa cấu trúc 3 phases",
+          "url": ""
+        },
+        "image_3": {
+          "description": "Hình ví dụ thực tế",
+          "url": ""
+        },
+        "image_4": {
+          "description": "Hình so sánh/diagram",
+          "url": ""
+        },
+        "image_5": {
+          "description": "Hình tổng kết/checklist",
+          "url": ""
+        }
+      }
+    },
+    "lesson_3.2": {
+      "title": "Bài 3.2: Cấu trúc 3 Phases của UPU",
+      "file": "tier-1-bai-3.2-cau-truc-3-phases-cua-upu.html",
+      "images": {
+        "image_1": {
+          "description": "Hình Phase 1 - Up",
+          "url": ""
+        },
+        "image_2": {
+          "description": "Hình Phase 2 - Pullback",
+          "url": ""
+        },
+        "image_3": {
+          "description": "Hình Phase 3 - Up continuation",
+          "url": ""
+        },
+        "image_4": {
+          "description": "Hình tổng hợp 3 phases",
+          "url": ""
+        },
+        "image_5": {
+          "description": "Hình ví dụ thực tế",
+          "url": ""
+        }
+      }
+    },
+    "lesson_3.3": {
+      "title": "Bài 3.3: Cách vẽ LFZ từ UPU",
+      "file": "tier-1-bai-3.3-cach-ve-lfz-tu-upu.html",
+      "images": {
+        "image_1": {
+          "description": "Hình xác định điểm bắt đầu zone",
+          "url": ""
+        },
+        "image_2": {
+          "description": "Hình vẽ zone step-by-step",
+          "url": ""
+        },
+        "image_3": {
+          "description": "Hình zone hoàn chỉnh",
+          "url": ""
+        },
+        "image_4": {
+          "description": "Hình sai lầm thường gặp",
+          "url": ""
+        },
+        "image_5": {
+          "description": "Hình ví dụ thực tế",
+          "url": ""
+        }
+      }
+    },
+    "lesson_3.4": {
+      "title": "Bài 3.4: Chiến lược Entry cho UPU",
+      "file": "tier-1-bai-3.4-chien-luoc-entry-cho-upu.html",
+      "images": {
+        "image_1": {
+          "description": "Hình điểm entry lý tưởng",
+          "url": ""
+        },
+        "image_2": {
+          "description": "Hình đặt Stop Loss",
+          "url": ""
+        },
+        "image_3": {
+          "description": "Hình Take Profit targets",
+          "url": ""
+        },
+        "image_4": {
+          "description": "Hình Risk/Reward ratio",
+          "url": ""
+        },
+        "image_5": {
+          "description": "Hình ví dụ trade hoàn chỉnh",
+          "url": ""
+        }
+      }
+    },
+    "lesson_3.5": {
+      "title": "Bài 3.5: Checklist xác nhận UPU",
+      "file": "tier-1-bai-3.5-checklist-xac-nhan-upu.html",
+      "images": {
+        "image_1": {
+          "description": "Hình checklist 8 điểm",
+          "url": ""
+        },
+        "image_2": {
+          "description": "Hình ví dụ đạt checklist",
+          "url": ""
+        },
+        "image_3": {
+          "description": "Hình ví dụ không đạt",
+          "url": ""
+        },
+        "image_4": {
+          "description": "Hình scoring system",
+          "url": ""
+        },
+        "image_5": {
+          "description": "Hình decision flowchart",
+          "url": ""
+        }
+      }
+    },
+    "lesson_3.6": {
+      "title": "Bài 3.6: Ví dụ thực tế UPU",
+      "file": "tier-1-bai-3.6-vi-du-thuc-te-upu.html",
+      "images": {
+        "image_1": {
+          "description": "Hình ví dụ 1 - BTC",
+          "url": ""
+        },
+        "image_2": {
+          "description": "Hình ví dụ 2 - ETH",
+          "url": ""
+        },
+        "image_3": {
+          "description": "Hình ví dụ 3 - Altcoin",
+          "url": ""
+        },
+        "image_4": {
+          "description": "Hình phân tích chi tiết",
+          "url": ""
+        },
+        "image_5": {
+          "description": "Hình kết quả trade",
+          "url": ""
+        }
+      }
+    }
+  },
+
+  "chapter_4_UPD_Pattern": {
+    "lesson_4.1": {
+      "title": "Bài 4.1: UPD là gì?",
+      "file": "tier-1-bai-4.1-upd-la-gi.html",
+      "images": {
+        "image_1": {
+          "description": "Hình minh họa UPD Pattern tổng quan",
+          "url": ""
+        },
+        "image_2": {
+          "description": "Hình cấu trúc cơ bản",
+          "url": ""
+        },
+        "image_3": {
+          "description": "Hình so sánh với UPU",
+          "url": ""
+        },
+        "image_4": {
+          "description": "Hình tại sao UPD mạnh",
+          "url": ""
+        },
+        "image_5": {
+          "description": "Hình ví dụ thực tế",
+          "url": ""
+        }
+      }
+    },
+    "lesson_4.2": {
+      "title": "Bài 4.2: Cấu trúc 3 Phases của UPD",
+      "file": "tier-1-bai-4.2-cau-truc-3-phases-cua-upd.html",
+      "images": {
+        "image_1": {
+          "description": "Hình Phase 1 - Up",
+          "url": ""
+        },
+        "image_2": {
+          "description": "Hình Phase 2 - Pullback",
+          "url": ""
+        },
+        "image_3": {
+          "description": "Hình Phase 3 - Down reversal",
+          "url": ""
+        },
+        "image_4": {
+          "description": "Hình tổng hợp 3 phases",
+          "url": ""
+        },
+        "image_5": {
+          "description": "Hình ví dụ thực tế",
+          "url": ""
+        }
+      }
+    },
+    "lesson_4.3": {
+      "title": "Bài 4.3: Tại sao UPD là Pattern mạnh",
+      "file": "tier-1-bai-4.3-tai-sao-upd-la-pattern-manh.html",
+      "images": {
+        "image_1": {
+          "description": "Hình supply/demand imbalance",
+          "url": ""
+        },
+        "image_2": {
+          "description": "Hình institutional footprint",
+          "url": ""
+        },
+        "image_3": {
+          "description": "Hình win rate statistics",
+          "url": ""
+        },
+        "image_4": {
+          "description": "Hình so sánh với patterns khác",
+          "url": ""
+        },
+        "image_5": {
+          "description": "Hình case study",
+          "url": ""
+        }
+      }
+    },
+    "lesson_4.4": {
+      "title": "Bài 4.4: Chiến lược Entry cho UPD",
+      "file": "tier-1-bai-4.4-chien-luoc-entry-cho-upd.html",
+      "images": {
+        "image_1": {
+          "description": "Hình điểm entry SHORT",
+          "url": ""
+        },
+        "image_2": {
+          "description": "Hình đặt Stop Loss",
+          "url": ""
+        },
+        "image_3": {
+          "description": "Hình Take Profit targets",
+          "url": ""
+        },
+        "image_4": {
+          "description": "Hình Risk/Reward ratio",
+          "url": ""
+        },
+        "image_5": {
+          "description": "Hình ví dụ trade hoàn chỉnh",
+          "url": ""
+        }
+      }
+    },
+    "lesson_4.5": {
+      "title": "Bài 4.5: Phân biệt UPD và DPD",
+      "file": "tier-1-bai-4.5-phan-biet-upd-va-dpd.html",
+      "images": {
+        "image_1": {
+          "description": "Hình UPD diagram",
+          "url": ""
+        },
+        "image_2": {
+          "description": "Hình DPD diagram",
+          "url": ""
+        },
+        "image_3": {
+          "description": "Hình so sánh side-by-side",
+          "url": ""
+        },
+        "image_4": {
+          "description": "Hình cách phân biệt nhanh",
+          "url": ""
+        },
+        "image_5": {
+          "description": "Hình decision tree",
+          "url": ""
+        }
+      }
+    },
+    "lesson_4.6": {
+      "title": "Bài 4.6: Ví dụ thực tế UPD",
+      "file": "tier-1-bai-4.6-vi-du-thuc-te-upd.html",
+      "images": {
+        "image_1": {
+          "description": "Hình ví dụ 1 - BTC",
+          "url": ""
+        },
+        "image_2": {
+          "description": "Hình ví dụ 2 - ETH",
+          "url": ""
+        },
+        "image_3": {
+          "description": "Hình ví dụ 3 - Altcoin",
+          "url": ""
+        },
+        "image_4": {
+          "description": "Hình phân tích chi tiết",
+          "url": ""
+        },
+        "image_5": {
+          "description": "Hình kết quả trade",
+          "url": ""
+        }
+      }
+    }
+  }
+}

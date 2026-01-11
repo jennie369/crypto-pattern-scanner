@@ -23,6 +23,22 @@
 
 import { binanceService } from './binanceService';
 
+// Phase 1A: Pattern Config and Zone Calculator
+import {
+  getPatternConfig,
+  getZoneTypeConfig,
+  sortPatternsByStrength,
+  PATTERN_CONFIG,
+} from '../constants/patternConfig';
+import {
+  calculateZoneBoundaries,
+  calculateRiskReward,
+  calculateDistanceToZone,
+  validateZoneWidth,
+  calculateATR,
+  extractPauseCandles,
+} from './zoneCalculator';
+
 // Enhancement utilities (TIER2/3 features)
 import { analyzeVolumeProfile, confirmVolumeDirection } from '../utils/volumeAnalysis';
 import { analyzeTrend, calculateTrendBonus, getTrendAlignment } from '../utils/trendAnalysis';
@@ -295,6 +311,124 @@ class PatternDetectionService {
   setUserTier(tier) {
     this.userTier = tier || 'FREE';
     console.log(`[PatternDetection] User tier set to: ${this.userTier}`);
+  }
+
+  /**
+   * Phase 1A: Enrich pattern with zone boundaries and pattern strength
+   * @param {Object} pattern - Base pattern from detection
+   * @param {Array} candles - OHLCV candle data
+   * @param {Object} options - Additional options
+   * @returns {Object} Pattern enriched with zone data
+   */
+  enrichWithZoneData(pattern, candles, options = {}) {
+    try {
+      const patternType = pattern.patternType;
+      const patternConfig = getPatternConfig(patternType);
+      const zoneTypeConfig = getZoneTypeConfig(patternConfig.type);
+
+      // Get pause candles for zone calculation
+      // For swing-based patterns, use the area around the peak/trough
+      const pauseStartIndex = pattern.points?.high2?.index ||
+                              pattern.points?.low2?.index ||
+                              pattern.points?.peak?.index ||
+                              pattern.points?.trough?.index ||
+                              candles.length - 10;
+      const pauseEndIndex = Math.min(pauseStartIndex + 6, candles.length - 1);
+      const pauseCandles = candles.slice(
+        Math.max(0, pauseStartIndex - 3),
+        pauseEndIndex + 1
+      );
+
+      // Calculate zone boundaries
+      const zone = calculateZoneBoundaries(
+        pauseCandles,
+        patternConfig.type, // 'HFZ' or 'LFZ'
+        pattern.currentPrice
+      );
+
+      if (!zone) {
+        // Return pattern with just patternConfig enrichment if zone calc fails
+        return {
+          ...pattern,
+          patternConfig: {
+            name: patternConfig.name,
+            fullName: patternConfig.fullName,
+            context: patternConfig.context,
+            strength: patternConfig.strength,
+            stars: patternConfig.stars,
+            starsDisplay: patternConfig.starsDisplay,
+            winRate: patternConfig.winRate,
+            tradingBias: patternConfig.tradingBias,
+          },
+          zoneType: patternConfig.type,
+          zoneTypeConfig: {
+            name: zoneTypeConfig.name,
+            fullName: zoneTypeConfig.fullName,
+            vietnameseName: zoneTypeConfig.vietnameseName,
+            color: zoneTypeConfig.color,
+          },
+        };
+      }
+
+      // Calculate ATR for zone validation
+      const atr = calculateATR(candles, 14);
+      const zoneValidation = atr > 0 ? validateZoneWidth(zone, atr) : { isValid: true };
+
+      // Calculate distance to zone
+      const distanceToZone = calculateDistanceToZone(pattern.currentPrice, zone);
+
+      // Calculate R:R using zone boundaries
+      const targetPrice = pattern.target;
+      const riskRewardCalc = calculateRiskReward(zone, targetPrice);
+
+      return {
+        ...pattern,
+        // Pattern strength info
+        patternConfig: {
+          name: patternConfig.name,
+          fullName: patternConfig.fullName,
+          context: patternConfig.context,
+          strength: patternConfig.strength,
+          stars: patternConfig.stars,
+          starsDisplay: patternConfig.starsDisplay,
+          winRate: patternConfig.winRate,
+          tradingBias: patternConfig.tradingBias,
+        },
+        // Zone type info
+        zoneType: patternConfig.type,
+        zoneTypeConfig: {
+          name: zoneTypeConfig.name,
+          fullName: zoneTypeConfig.fullName,
+          vietnameseName: zoneTypeConfig.vietnameseName,
+          color: zoneTypeConfig.color,
+          colorMuted: zoneTypeConfig.colorMuted,
+        },
+        // Zone boundaries (Phase 1A key addition)
+        zone: {
+          entryPrice: zone.entryPrice,
+          stopPrice: zone.stopPrice,
+          stopLossPrice: zone.stopLossPrice,
+          zoneWidth: zone.zoneWidth,
+          zoneWidthPercent: zone.zoneWidthPercent,
+          pauseHigh: zone.pauseHigh,
+          pauseLow: zone.pauseLow,
+        },
+        // Zone validation
+        zoneValidation,
+        // Distance info
+        distanceToZone,
+        // Updated R:R from zone calc
+        riskRewardFromZone: riskRewardCalc,
+        // For UI display - use zone entry instead of old entry
+        zoneEntry: zone.entryPrice,
+        zoneStop: zone.stopPrice,
+        // Flags
+        hasZoneData: true,
+      };
+    } catch (error) {
+      console.warn('[PatternDetection] Zone enrichment error:', error.message);
+      return pattern;
+    }
   }
 
   /**
@@ -1940,14 +2074,32 @@ class PatternDetectionService {
 
       console.log(`[PatternDetection] Found ${patterns.length} patterns for ${symbol} (tier: ${tier})`);
 
+      // Phase 1A: Enrich all patterns with zone data and pattern strength
+      const zoneEnrichedPatterns = patterns.map(pattern =>
+        this.enrichWithZoneData(pattern, candles)
+      );
+
+      console.log(`[PatternDetection] Zone enriched ${zoneEnrichedPatterns.filter(p => p.hasZoneData).length}/${patterns.length} patterns`);
+
       // Apply TIER2/3 enhancements if user has access
-      const enhancedPatterns = patterns.map(pattern =>
+      const enhancedPatterns = zoneEnrichedPatterns.map(pattern =>
         this.applyEnhancements(pattern, candles, timeframe)
       );
 
       console.log(`[PatternDetection] Enhanced ${enhancedPatterns.filter(p => p.hasEnhancements).length}/${patterns.length} patterns`);
 
-      return enhancedPatterns.sort((a, b) => b.confidence - a.confidence);
+      // Phase 1A: Sort by pattern strength first, then confidence
+      // Reversal patterns (5 stars) > Continuation patterns (3 stars)
+      return enhancedPatterns.sort((a, b) => {
+        // Primary sort: pattern strength (descending)
+        const strengthA = a.patternConfig?.strength || 1;
+        const strengthB = b.patternConfig?.strength || 1;
+        if (strengthB !== strengthA) {
+          return strengthB - strengthA;
+        }
+        // Secondary sort: confidence (descending)
+        return b.confidence - a.confidence;
+      });
     } catch (error) {
       console.error('[PatternDetection] Error:', error);
       return [];

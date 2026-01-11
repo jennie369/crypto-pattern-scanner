@@ -1,0 +1,286 @@
+/**
+ * Call Signaling Service
+ * Handles WebRTC signaling via Supabase Realtime broadcast channels
+ */
+
+import { supabase } from './supabase';
+import {
+  SIGNAL_TYPE,
+  getSignalingChannelName,
+} from '../constants/callConstants';
+
+class CallSignalingService {
+  constructor() {
+    this.channel = null;
+    this.callId = null;
+    this.userId = null;
+
+    // Callbacks
+    this.onOffer = null;
+    this.onAnswer = null;
+    this.onIceCandidate = null;
+    this.onEnd = null;
+    this.onMuteChange = null;
+    this.onVideoChange = null;
+    this.onBusy = null;
+    this.onReconnect = null;
+  }
+
+  // ========== CHANNEL MANAGEMENT ==========
+
+  /**
+   * Subscribe to signaling channel for a call
+   * @param {string} callId - Call ID
+   * @param {string} userId - Current user ID
+   * @returns {Promise<void>}
+   */
+  async subscribe(callId, userId) {
+    try {
+      this.callId = callId;
+      this.userId = userId;
+
+      const channelName = getSignalingChannelName(callId);
+      console.log('[Signaling] Subscribing to channel:', channelName);
+
+      // Unsubscribe from existing channel if any
+      await this.unsubscribe();
+
+      this.channel = supabase
+        .channel(channelName, {
+          config: {
+            broadcast: {
+              self: false, // Don't receive own messages
+            },
+          },
+        })
+        .on('broadcast', { event: 'signal' }, ({ payload }) => {
+          this._handleSignal(payload);
+        })
+        .subscribe((status) => {
+          console.log('[Signaling] Channel status:', status);
+        });
+
+      console.log('[Signaling] Subscribed to channel:', channelName);
+    } catch (error) {
+      console.error('[Signaling] Subscribe error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Unsubscribe from signaling channel
+   * @returns {Promise<void>}
+   */
+  async unsubscribe() {
+    try {
+      if (this.channel) {
+        console.log('[Signaling] Unsubscribing from channel');
+        await supabase.removeChannel(this.channel);
+        this.channel = null;
+      }
+      this.callId = null;
+    } catch (error) {
+      console.error('[Signaling] Unsubscribe error:', error);
+    }
+  }
+
+  // ========== SEND SIGNALS ==========
+
+  /**
+   * Send a signal through the channel
+   * @param {Object} signal - Signal data
+   * @private
+   */
+  async _sendSignal(signal) {
+    if (!this.channel) {
+      console.error('[Signaling] No channel to send signal');
+      return;
+    }
+
+    try {
+      await this.channel.send({
+        type: 'broadcast',
+        event: 'signal',
+        payload: {
+          ...signal,
+          senderId: this.userId,
+          timestamp: Date.now(),
+        },
+      });
+      console.log('[Signaling] Sent signal:', signal.type);
+    } catch (error) {
+      console.error('[Signaling] Send signal error:', error);
+    }
+  }
+
+  /**
+   * Send WebRTC offer
+   * @param {Object} offer - SDP offer
+   * @param {string} calleeId - Target user ID
+   */
+  async sendOffer(offer, calleeId) {
+    await this._sendSignal({
+      type: SIGNAL_TYPE.OFFER,
+      offer,
+      calleeId,
+    });
+  }
+
+  /**
+   * Send WebRTC answer
+   * @param {Object} answer - SDP answer
+   */
+  async sendAnswer(answer) {
+    await this._sendSignal({
+      type: SIGNAL_TYPE.ANSWER,
+      answer,
+    });
+  }
+
+  /**
+   * Send ICE candidate
+   * @param {Object} candidate - ICE candidate
+   */
+  async sendIceCandidate(candidate) {
+    await this._sendSignal({
+      type: SIGNAL_TYPE.ICE_CANDIDATE,
+      candidate,
+    });
+  }
+
+  /**
+   * Send end call signal
+   * @param {string} reason - End reason
+   */
+  async sendEnd(reason = 'normal') {
+    await this._sendSignal({
+      type: SIGNAL_TYPE.END,
+      reason,
+    });
+  }
+
+  /**
+   * Send mute status change
+   * @param {boolean} isMuted - Mute state
+   */
+  async sendMuteChange(isMuted) {
+    await this._sendSignal({
+      type: isMuted ? SIGNAL_TYPE.MUTE : SIGNAL_TYPE.UNMUTE,
+      isMuted,
+    });
+  }
+
+  /**
+   * Send video status change
+   * @param {boolean} isVideoOn - Video state
+   */
+  async sendVideoChange(isVideoOn) {
+    await this._sendSignal({
+      type: isVideoOn ? SIGNAL_TYPE.VIDEO_ON : SIGNAL_TYPE.VIDEO_OFF,
+      isVideoOn,
+    });
+  }
+
+  /**
+   * Send busy signal (already in another call)
+   */
+  async sendBusy() {
+    await this._sendSignal({
+      type: SIGNAL_TYPE.BUSY,
+    });
+  }
+
+  /**
+   * Send reconnect signal
+   */
+  async sendReconnect() {
+    await this._sendSignal({
+      type: SIGNAL_TYPE.RECONNECT,
+    });
+  }
+
+  // ========== HANDLE SIGNALS ==========
+
+  /**
+   * Handle incoming signals
+   * @param {Object} payload - Signal payload
+   * @private
+   */
+  _handleSignal(payload) {
+    // Ignore signals from self
+    if (payload.senderId === this.userId) {
+      return;
+    }
+
+    console.log('[Signaling] Received signal:', payload.type);
+
+    switch (payload.type) {
+      case SIGNAL_TYPE.OFFER:
+        this.onOffer?.(payload.offer, payload.senderId);
+        break;
+
+      case SIGNAL_TYPE.ANSWER:
+        this.onAnswer?.(payload.answer, payload.senderId);
+        break;
+
+      case SIGNAL_TYPE.ICE_CANDIDATE:
+        this.onIceCandidate?.(payload.candidate, payload.senderId);
+        break;
+
+      case SIGNAL_TYPE.END:
+        this.onEnd?.(payload.reason, payload.senderId);
+        break;
+
+      case SIGNAL_TYPE.MUTE:
+      case SIGNAL_TYPE.UNMUTE:
+        this.onMuteChange?.(payload.isMuted, payload.senderId);
+        break;
+
+      case SIGNAL_TYPE.VIDEO_ON:
+      case SIGNAL_TYPE.VIDEO_OFF:
+        this.onVideoChange?.(payload.isVideoOn, payload.senderId);
+        break;
+
+      case SIGNAL_TYPE.BUSY:
+        this.onBusy?.(payload.senderId);
+        break;
+
+      case SIGNAL_TYPE.RECONNECT:
+        this.onReconnect?.(payload.senderId);
+        break;
+
+      default:
+        console.warn('[Signaling] Unknown signal type:', payload.type);
+    }
+  }
+
+  // ========== CLEANUP ==========
+
+  /**
+   * Reset all callbacks
+   */
+  resetCallbacks() {
+    this.onOffer = null;
+    this.onAnswer = null;
+    this.onIceCandidate = null;
+    this.onEnd = null;
+    this.onMuteChange = null;
+    this.onVideoChange = null;
+    this.onBusy = null;
+    this.onReconnect = null;
+  }
+
+  /**
+   * Full cleanup
+   */
+  async cleanup() {
+    await this.unsubscribe();
+    this.resetCallbacks();
+    this.userId = null;
+    console.log('[Signaling] Cleanup complete');
+  }
+}
+
+// Export singleton instance
+export const callSignalingService = new CallSignalingService();
+export default callSignalingService;

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 4.4: Chiến Lược Entry Cho UPD | GEM Trading Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --navy: #112250; --navy-dark: #0a1628; --gold: #FFBD59; --gold-dark: #E5A73D; --cyan: #00F0FF; --purple: #6A5BFF; --burgundy: #9C0612; --burgundy-light: #C41E2A; --success: #00C853; --error: #FF5252; --bg-primary: #0a1628; --bg-card: rgba(17, 34, 80, 0.6); --text-primary: #FFFFFF; --text-secondary: rgba(255, 255, 255, 0.85); --text-muted: rgba(255, 255, 255, 0.6); --glass-bg: rgba(17, 34, 80, 0.4); --glass-border: rgba(255, 189, 89, 0.2); --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 32px; --radius-md: 12px; --radius-lg: 16px; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        img { max-width: 100%; height: auto; display: block; }
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--burgundy); bottom: -50px; right: 20%; }
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; border-bottom: 8px solid var(--bg-primary); } }
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+        .patterns-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .patterns-grid { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .pattern-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); text-align: center; }
+        @media (max-width: 600px) { .pattern-card { border: none; border-radius: 0; padding: var(--space-md); } }
+        .pattern-icon { font-size: 2.5rem; margin-bottom: var(--space-sm); }
+        .pattern-name { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .pattern-desc { font-size: 0.85rem; color: var(--text-muted); }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .stats-grid { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .stat-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); text-align: center; }
+        @media (max-width: 600px) { .stat-card { border: none; border-radius: 0; padding: var(--space-md); } }
+        .stat-value { font-size: 1.75rem; font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        @media (max-width: 600px) { .stat-value { font-size: 1.25rem; } }
+        .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+        .example-box { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); overflow: hidden; margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .example-box { border: none; border-radius: 0; margin: var(--space-md) 0; } }
+        .example-header { background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); padding: var(--space-md) var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); font-weight: 700; }
+        @media (max-width: 600px) { .example-header { padding: var(--space-md) 16px; } }
+        .example-content { padding: var(--space-lg); }
+        @media (max-width: 600px) { .example-content { padding: var(--space-md) 16px; } }
+        .example-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-md); }
+        @media (max-width: 600px) { .example-grid { grid-template-columns: 1fr; gap: var(--space-sm); } }
+        .example-detail-label { font-size: 0.8rem; color: var(--text-muted); }
+        .example-detail-value { font-weight: 700; }
+        .example-detail-value.entry { color: var(--burgundy-light); }
+        .example-detail-value.stop { color: var(--error); }
+        .example-detail-value.target { color: var(--success); }
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+        .quiz-section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-top: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-section { border: none; border-radius: 0; padding: 0; margin-top: 0; border-top: 8px solid var(--bg-primary); } }
+        .quiz-header { text-align: center; margin-bottom: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-header { padding: var(--space-lg) 16px var(--space-md); margin-bottom: 0; } }
+        .quiz-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+        .quiz-question { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-question { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; margin-bottom: 0; border-bottom: 1px solid var(--glass-border); } }
+        .question-number { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; font-weight: 700; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .question-text { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-lg); line-height: 1.6; }
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        @media (max-width: 600px) { .quiz-options { gap: 1px; background: var(--glass-border); margin-left: calc(-16px - 4px); margin-right: -16px; } }
+        .quiz-option { display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; transition: all 0.3s ease; }
+        @media (max-width: 600px) { .quiz-option { border: none; border-radius: 0; border-left: 4px solid transparent; padding: var(--space-md) 16px; } }
+        .quiz-option:hover:not(.disabled) { border-color: var(--gold); }
+        .quiz-option.correct { border-color: var(--success) !important; background: rgba(0, 200, 83, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.correct { border-left-color: var(--success) !important; } }
+        .quiz-option.incorrect { border-color: var(--error) !important; background: rgba(255, 82, 82, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.incorrect { border-left-color: var(--error) !important; } }
+        .quiz-option.disabled { opacity: 0.7; cursor: not-allowed; }
+        .option-marker { width: 28px; height: 28px; min-width: 28px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+        .quiz-option.correct .option-marker { background: var(--success); border-color: var(--success); color: white; }
+        .quiz-option.incorrect .option-marker { background: var(--error); border-color: var(--error); color: white; }
+        .option-text { flex: 1; color: var(--text-secondary); }
+        .question-feedback { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--space-sm); display: none; }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); }
+        .question-feedback.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+        .quiz-result { text-align: center; padding: var(--space-xl); display: none; }
+        .quiz-result.show { display: block; }
+        .result-score { font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: var(--space-md); }
+        .quiz-buttons { display: flex; justify-content: center; padding: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-buttons { padding: var(--space-lg) 16px; } }
+        .quiz-btn { padding: var(--space-md) var(--space-xl); border-radius: var(--radius-md); font-weight: 700; cursor: pointer; border: none; font-family: inherit; background: var(--glass-bg); color: var(--text-primary); border: 2px solid var(--glass-border); }
+        .quiz-btn:hover { border-color: var(--gold); }
+    </style>
+</head>
+<body>
+    <div class="background-container"><div class="bg-layer-base"></div><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="lesson-badge"><span>📉</span><span>Reversal Pattern</span></div>
+            <div class="lesson-chapter">Chapter 4 - UPD Pattern</div>
+            <h1 class="lesson-title">Chiến Lược Entry Cho UPD</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 4.4</span></div>
+                <div class="meta-item"><span>⏱️</span><span>8 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Mục Tiêu Bài Học</h2>
+            <p>Sau khi hoàn thành bài học này, bạn sẽ nắm vững chiến lược entry hoàn chỉnh cho pattern UPD - cách vào lệnh SHORT chính xác.</p>
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Nguyên Tắc Vàng</div>
+                <p><strong>KHÔNG entry khi giá phá vỡ (breakdown).</strong> Luôn đợi giá quay lại kiểm tra vùng HFZ để có điểm SHORT tối ưu.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>📋</span> Quy Trình Entry 5 Bước</h2>
+            <p>Chiến lược entry cho UPD tuân theo quy trình 5 bước nghiêm ngặt:</p>
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Nhận Diện UPD Pattern</div>
+                        <div class="flow-step-desc">Xác nhận 3 phases: UP → PAUSE → DOWN. Vùng PAUSE tạo thành HFZ.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Đợi Giá Retest HFZ</div>
+                        <div class="flow-step-desc">Sau Phase 3, giá thường quay lại kiểm tra vùng HFZ trước khi tiếp tục giảm.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Đợi Nến Xác Nhận Bearish</div>
+                        <div class="flow-step-desc">Khi giá chạm HFZ, đợi xuất hiện nến xác nhận bearish như Pin Bar, Shooting Star, Bearish Engulfing.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Vào Lệnh SHORT</div>
+                        <div class="flow-step-desc">Entry SHORT ngay sau khi nến xác nhận đóng cửa hoàn chỉnh.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Đặt Stop Loss & Target</div>
+                        <div class="flow-step-desc">SL trên HFZ + 0.5%, Target tối thiểu về đáy Phase 3 hoặc 1:2 R:R.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="image-container">
+                <img src="https://placehold.co/800x500/112250/FF5252?text=UPD+Entry+Flow+5+Steps" alt="Entry Flow">
+            </div>
+            <div class="image-caption">Hình 1: Sơ đồ quy trình entry 5 bước cho UPD</div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>🕯️</span> Các Nến Xác Nhận Bearish</h2>
+            <p>Khi giá chạm vùng HFZ, cần đợi một trong các mẫu nến bearish sau:</p>
+            <div class="patterns-grid">
+                <div class="pattern-card">
+                    <div class="pattern-icon">📍</div>
+                    <div class="pattern-name">Bearish Pin Bar</div>
+                    <div class="pattern-desc">Râu trên dài ≥2x thân nến</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">⭐</div>
+                    <div class="pattern-name">Shooting Star</div>
+                    <div class="pattern-desc">Thân nhỏ ở dưới, râu trên dài</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">🔴</div>
+                    <div class="pattern-name">Bearish Engulfing</div>
+                    <div class="pattern-desc">Nến đỏ nuốt hoàn toàn nến xanh</div>
+                </div>
+                <div class="pattern-card">
+                    <div class="pattern-icon">🌙</div>
+                    <div class="pattern-name">Evening Star</div>
+                    <div class="pattern-desc">3 nến đảo chiều giảm</div>
+                </div>
+            </div>
+            <div class="image-container">
+                <img src="https://placehold.co/800x400/112250/FFBD59?text=Bearish+Confirmation+Candles" alt="Bearish Candles">
+            </div>
+            <div class="image-caption">Hình 2: Các mẫu nến xác nhận bearish phổ biến</div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> Entry, SL & TP</h2>
+            <p>Thiết lập vị thế chính xác là chìa khóa quản lý rủi ro hiệu quả:</p>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">1:2</div>
+                    <div class="stat-label">Tối Thiểu R:R</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">0.5%</div>
+                    <div class="stat-label">Buffer SL</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">65%</div>
+                    <div class="stat-label">Win Rate</div>
+                </div>
+            </div>
+            <div class="example-box">
+                <div class="example-header"><span>📉</span><span>Ví Dụ: BTC/USDT H4</span></div>
+                <div class="example-content">
+                    <div class="example-grid">
+                        <div class="example-detail">
+                            <div class="example-detail-label">Entry SHORT</div>
+                            <div class="example-detail-value entry">$67,200</div>
+                        </div>
+                        <div class="example-detail">
+                            <div class="example-detail-label">Stop Loss</div>
+                            <div class="example-detail-value stop">$68,036</div>
+                        </div>
+                        <div class="example-detail">
+                            <div class="example-detail-label">Target 1 (1:1)</div>
+                            <div class="example-detail-value target">$66,364</div>
+                        </div>
+                        <div class="example-detail">
+                            <div class="example-detail-label">Target 2 (1:2)</div>
+                            <div class="example-detail-value target">$65,528</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="image-container">
+                <img src="https://placehold.co/800x500/112250/00F0FF?text=BTC+UPD+Entry+Example" alt="BTC Entry Example">
+            </div>
+            <div class="image-caption">Hình 3: Ví dụ thực tế entry UPD trên BTC/USDT H4</div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>📝</span> Tổng Kết</h2>
+            <div class="summary-box">
+                <div class="summary-title"><span>🎯</span> Điểm Chính</div>
+                <ul class="summary-list">
+                    <li>Quy trình 5 bước: Nhận diện → Retest → Xác Nhận → Entry → Target</li>
+                    <li>4 mẫu nến bearish: Pin Bar, Shooting Star, Bearish Engulfing, Evening Star</li>
+                    <li>Entry SHORT sau nến xác nhận đóng cửa, SL trên HFZ + 0.5%</li>
+                    <li>Target tối thiểu về đáy Phase 3 hoặc 1:2 R:R</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">📝 Kiểm Tra Kiến Thức</h2>
+                <p class="quiz-subtitle">Chọn đáp án để nhận phản hồi ngay lập tức</p>
+            </div>
+            <div class="quiz-question" data-question="1" data-correct="B">
+                <div class="question-number">1</div>
+                <div class="question-text">Khi nào là thời điểm đúng để vào lệnh SHORT với UPD?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A"><span class="option-marker">A</span><span class="option-text">Ngay khi giá chạm HFZ</span></div>
+                    <div class="quiz-option" data-option="B"><span class="option-marker">B</span><span class="option-text">Sau khi nến xác nhận bearish đóng cửa</span></div>
+                    <div class="quiz-option" data-option="C"><span class="option-marker">C</span><span class="option-text">Khi giá phá vỡ đáy Phase 3</span></div>
+                    <div class="quiz-option" data-option="D"><span class="option-marker">D</span><span class="option-text">Ngay sau Phase 2 kết thúc</span></div>
+                </div>
+                <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+            </div>
+            <div class="quiz-question" data-question="2" data-correct="C">
+                <div class="question-number">2</div>
+                <div class="question-text">Stop Loss cho lệnh SHORT từ UPD nên đặt ở đâu?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A"><span class="option-marker">A</span><span class="option-text">Ngay tại đỉnh HFZ</span></div>
+                    <div class="quiz-option" data-option="B"><span class="option-marker">B</span><span class="option-text">Dưới đáy HFZ</span></div>
+                    <div class="quiz-option" data-option="C"><span class="option-marker">C</span><span class="option-text">Trên đỉnh HFZ + 0.5% buffer</span></div>
+                    <div class="quiz-option" data-option="D"><span class="option-marker">D</span><span class="option-text">Tại đỉnh Phase 1</span></div>
+                </div>
+                <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+            </div>
+            <div class="quiz-question" data-question="3" data-correct="D">
+                <div class="question-number">3</div>
+                <div class="question-text">Nến nào KHÔNG phải bearish confirmation?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A"><span class="option-marker">A</span><span class="option-text">Shooting Star</span></div>
+                    <div class="quiz-option" data-option="B"><span class="option-marker">B</span><span class="option-text">Bearish Engulfing</span></div>
+                    <div class="quiz-option" data-option="C"><span class="option-marker">C</span><span class="option-text">Evening Star</span></div>
+                    <div class="quiz-option" data-option="D"><span class="option-marker">D</span><span class="option-text">Hammer</span></div>
+                </div>
+                <div class="question-feedback"><div class="feedback-title"></div><div class="feedback-text"></div></div>
+            </div>
+            <div class="quiz-result"><div class="result-score">0/3</div><div class="result-text">Hoàn thành!</div><div class="result-message"></div></div>
+            <div class="quiz-buttons"><button class="quiz-btn" id="retakeQuiz" style="display: none;">Làm Lại</button></div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const questions = document.querySelectorAll('.quiz-question');
+            const retakeBtn = document.getElementById('retakeQuiz');
+            const resultDiv = document.querySelector('.quiz-result');
+            let answeredCount = 0, correctCount = 0;
+            const totalQuestions = 3;
+            const explanations = {
+                1: { correct: '✓ Chính xác! Luôn đợi nến xác nhận bearish đóng cửa hoàn chỉnh trước khi vào lệnh SHORT.', incorrect: '✗ Sai! Cần đợi nến xác nhận bearish đóng cửa, không entry sớm khi giá mới chạm HFZ.' },
+                2: { correct: '✓ Chính xác! SL đặt trên đỉnh HFZ + 0.5% buffer để tránh bị quét bởi biến động nhỏ.', incorrect: '✗ Sai! SL cần đặt TRÊN đỉnh HFZ + 0.5% buffer cho lệnh SHORT.' },
+                3: { correct: '✓ Chính xác! Hammer là nến bullish (râu dưới dài), dùng cho LFZ, không phải bearish.', incorrect: '✗ Sai! Hammer là nến đảo chiều bullish, không phải bearish confirmation.' }
+            };
+            questions.forEach(q => {
+                const opts = q.querySelectorAll('.quiz-option');
+                opts.forEach(o => {
+                    o.addEventListener('click', function() {
+                        if (q.classList.contains('answered')) return;
+                        q.classList.add('answered'); answeredCount++;
+                        const sel = this.dataset.option, corr = q.dataset.correct, isCor = sel === corr;
+                        opts.forEach(op => op.classList.add('disabled'));
+                        if (isCor) { this.classList.add('correct'); correctCount++; q.querySelector('.question-feedback').classList.add('correct'); }
+                        else { this.classList.add('incorrect'); q.querySelector('.question-feedback').classList.add('incorrect'); opts.forEach(op => { if(op.dataset.option === corr) op.classList.add('correct'); }); }
+                        q.querySelector('.feedback-title').textContent = isCor ? '✓ Chính xác!' : '✗ Sai rồi!';
+                        q.querySelector('.feedback-text').textContent = explanations[q.dataset.question][isCor ? 'correct' : 'incorrect'];
+                        q.querySelector('.question-feedback').classList.add('show');
+                        if (answeredCount === totalQuestions) {
+                            resultDiv.querySelector('.result-score').textContent = `${correctCount}/${totalQuestions}`;
+                            resultDiv.querySelector('.result-message').textContent = correctCount === totalQuestions ? '🎉 Xuất sắc!' : correctCount >= 2 ? '👍 Tốt lắm!' : '📚 Xem lại bài nhé!';
+                            resultDiv.classList.add('show'); retakeBtn.style.display = 'inline-block';
+                        }
+                    });
+                });
+            });
+            retakeBtn.addEventListener('click', function() {
+                answeredCount = 0; correctCount = 0;
+                questions.forEach(q => { q.classList.remove('answered'); q.querySelectorAll('.quiz-option').forEach(o => o.classList.remove('correct', 'incorrect', 'disabled')); q.querySelector('.question-feedback').classList.remove('show', 'correct', 'incorrect'); });
+                resultDiv.classList.remove('show'); retakeBtn.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

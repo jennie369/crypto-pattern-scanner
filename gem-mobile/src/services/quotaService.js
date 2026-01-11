@@ -11,14 +11,17 @@
  * - PRO/TIER1: 15 queries/day
  * - PREMIUM/TIER2: 50 queries/day
  * - VIP/TIER3: Unlimited
+ * - ADMIN/MANAGER: Unlimited (bypass)
  *
  * Scanner:
  * - FREE: 10 scans/day
  * - PRO/TIER1: 20 scans/day
  * - PREMIUM/TIER2: 50 scans/day
  * - VIP/TIER3: Unlimited
+ * - ADMIN/MANAGER: Unlimited (bypass)
  *
- * Updated: December 15, 2025
+ * Updated: December 29, 2025
+ * - Added Manager bypass (unlimited quota like Admin)
  */
 
 import { supabase } from './supabase';
@@ -115,7 +118,10 @@ class QuotaService {
       .eq('id', userId)
       .single();
 
-    const isAdmin = profile?.is_admin || profile?.role === 'admin';
+    // Admin and Manager both get unlimited quota
+    const isAdmin = profile?.is_admin || profile?.role === 'admin' || profile?.role === 'ADMIN';
+    const isManager = profile?.role === 'manager' || profile?.role === 'MANAGER';
+    const hasUnlimitedAccess = isAdmin || isManager;
 
     // Get chatbot usage
     const { data: chatbotData } = await supabase
@@ -136,22 +142,25 @@ class QuotaService {
     const chatbotTier = profile?.chatbot_tier?.toUpperCase() || 'FREE';
     const scannerTier = profile?.scanner_tier?.toUpperCase() || 'FREE';
 
-    const chatbotLimit = isAdmin ? -1 : this.getChatbotLimit(chatbotTier);
-    const scannerLimit = isAdmin ? -1 : this.getScannerLimit(scannerTier);
+    const chatbotLimit = hasUnlimitedAccess ? -1 : this.getChatbotLimit(chatbotTier);
+    const scannerLimit = hasUnlimitedAccess ? -1 : this.getScannerLimit(scannerTier);
 
     const chatbotUsed = chatbotData?.queries_used || 0;
     const scannerUsed = scannerData?.scans_used || 0;
 
+    // Determine display tier
+    const displayTier = isAdmin ? 'ADMIN' : (isManager ? 'MANAGER' : null);
+
     return {
       chatbot: {
-        tier: isAdmin ? 'ADMIN' : chatbotTier,
+        tier: displayTier || chatbotTier,
         limit: chatbotLimit,
         used: chatbotUsed,
         remaining: chatbotLimit === -1 ? -1 : Math.max(0, chatbotLimit - chatbotUsed),
         unlimited: chatbotLimit === -1,
       },
       scanner: {
-        tier: isAdmin ? 'ADMIN' : scannerTier,
+        tier: displayTier || scannerTier,
         limit: scannerLimit,
         used: scannerUsed,
         remaining: scannerLimit === -1 ? -1 : Math.max(0, scannerLimit - scannerUsed),

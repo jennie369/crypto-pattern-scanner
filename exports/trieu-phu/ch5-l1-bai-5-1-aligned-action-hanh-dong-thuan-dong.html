@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 5.1: Aligned Action - Hành Động Thuận Dòng | GEM Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.5rem, 5vw, 2.25rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .definition-box p { color: var(--text-secondary); margin: 0; }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .compare-grid { grid-template-columns: 1fr; gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .compare-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); }
+        @media (max-width: 600px) { .compare-card { border: none; border-radius: 0; padding: var(--space-md) 16px; } }
+        .compare-card.forced { border-left: 4px solid var(--error); }
+        .compare-card.inspired { border-left: 4px solid var(--success); }
+        .compare-title { font-weight: 700; margin-bottom: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); }
+        .compare-card.forced .compare-title { color: var(--error); }
+        .compare-card.inspired .compare-title { color: var(--success); }
+        .compare-list { list-style: none; }
+        .compare-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-sm); color: var(--text-secondary); font-size: 0.9rem; }
+        .compare-list li::before { content: "•"; color: var(--text-muted); }
+
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        @media (min-width: 601px) { .flow-step:hover { border-color: var(--gold); transform: translateX(8px); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .app-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .app-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .app-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); }
+        .app-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .app-box p:last-child { margin-bottom: 0; }
+
+        .nudge-list { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .nudge-list { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .nudge-item { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); }
+        @media (max-width: 600px) { .nudge-item { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; } }
+        .nudge-emoji { font-size: 1.5rem; margin-bottom: var(--space-sm); }
+        @media (max-width: 600px) { .nudge-emoji { display: inline; margin-right: var(--space-sm); font-size: 1.2rem; } }
+        .nudge-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-xs); }
+        @media (max-width: 600px) { .nudge-title { display: inline; } }
+        .nudge-desc { font-size: 0.9rem; color: var(--text-muted); }
+        @media (max-width: 600px) { .nudge-desc { display: block; margin-top: var(--space-xs); } }
+
+        .lesson-footer { text-align: center; padding: var(--space-xl); color: var(--text-muted); font-size: 0.85rem; }
+        .lesson-footer a { color: var(--gold); text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>🚀</span>
+                <span>Module 5</span>
+            </div>
+            <div class="lesson-chapter">Module 5 - Hành Động Thuận Thiên</div>
+            <h1 class="lesson-title">Aligned Action - Hành Động Thuận Dòng</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 5.1</span></div>
+                <div class="meta-item"><span>⏱️</span><span>20 phút đọc</span></div>
+                <div class="meta-item"><span>🎯</span><span>Thực hành</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🌊</span> Tại Sao Bạn Làm Việc Chăm Chỉ Nhưng Vẫn Không Giàu?</h2>
+            <p>Bạn có bao giờ nhìn thấy ai đó dường như làm việc ít hơn bạn nhưng thành công hơn bạn rất nhiều? Họ không stress, không kiệt sức, nhưng tiền cứ tự động chảy về. Trong khi đó, bạn làm việc 12 tiếng mỗi ngày, luôn bận rộn, luôn mệt mỏi - nhưng kết quả tài chính vẫn không như mong đợi. Có gì đó không đúng ở đây phải không?</p>
+
+            <p>Trong 4 module vừa qua, bạn đã học cách thay đổi TƯ DUY - nhận diện niềm tin giới hạn, hóa giải nghiệp tiền bạc, cài đặt tần số thịnh vượng, và xây dựng nghi thức triệu phú. Nhưng có một sự thật quan trọng: TƯ DUY MỚI MÀ KHÔNG CÓ HÀNH ĐỘNG thì vẫn chưa đủ. Ngược lại, HÀNH ĐỘNG MÀ KHÔNG CÓ TƯ DUY ĐÚNG thì chỉ tạo ra kiệt sức chứ không tạo ra thịnh vượng.</p>
+
+            <p>Module 5 sẽ dạy bạn bí quyết của những người thành công thực sự: làm thế nào để HÀNH ĐỘNG ĐÚNG HƯỚNG - ít nỗ lực nhưng nhiều kết quả. Bạn sẽ học cách phân biệt giữa hành động từ sợ hãi và hành động từ cảm hứng, cách nhận ra "nudges" từ vũ trụ, và cách trở thành người đồng sáng tạo với nguồn năng lượng vô hạn thay vì chiến đấu một mình.</p>
+        </section>
+
+        <!-- SECTION 1: TƯ DUY + HÀNH ĐỘNG -->
+        <section class="section">
+            <h2 class="section-title"><span>⚡</span> Tư Duy + Hành Động = Kết Quả Phi Thường</h2>
+            <p>Bạn đã dành 4 module để chuyển hóa TƯ DUY - đó là nền tảng không thể thiếu. Bây giờ là lúc chuyển sang HÀNH ĐỘNG. Nhưng không phải hành động nào cũng giống nhau. Có hành động tạo ra kết quả phi thường, và có hành động chỉ tạo ra mệt mỏi và thất vọng.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🌊</span> Nguyên Lý Thuận Thiên</div>
+                <p>Trong Học Thuyết Chuyển Hóa Nội Tâm, có nguyên lý: <strong>"Đừng bơi ngược dòng, hãy tìm dòng chảy thuận."</strong> Người thịnh vượng không cố gắng nhiều hơn - họ cố gắng ĐÚNG hướng. Họ làm việc VỚI Vũ Trụ, không CHỐNG LẠI nó.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M5_B1_01%0AAligned+Action+Concept" alt="Aligned Action">
+                <div class="image-caption">Hành động thuận dòng: Ít nỗ lực + Nhiều kết quả</div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📊</span> Công Thức Thịnh Vượng</div>
+                <p><strong>Tần Số Cao + Hành Động Đúng = Kết Quả Phi Thường</strong></p>
+                <p style="margin-top: var(--space-sm);">Chỉ có tần số cao (tư duy) mà không hành động = Không có gì xảy ra</p>
+                <p style="margin-top: var(--space-xs);">Chỉ có hành động mà tần số thấp = Kiệt sức, ít kết quả</p>
+                <p style="margin-top: var(--space-xs);">Tần số cao + Hành động thuận = Manifestation nhanh chóng</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: INSPIRED VS FORCED ACTION -->
+        <section class="section">
+            <h2 class="section-title"><span>🔄</span> Inspired vs Forced Action</h2>
+            <p>Đây là sự phân biệt QUAN TRỌNG NHẤT trong Module 5. Hãy học cách nhận ra hai loại hành động này.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x600/0a1628/FFBD59?text=HINH+23%0AInspired+vs+Forced+Action" alt="Hình 23: Inspired vs Forced Action">
+                <div class="image-caption">Hình 23: So Sánh Hành Động Được Truyền Cảm Hứng vs Hành Động Ép Buộc</div>
+            </div>
+
+            <div class="compare-grid">
+                <div class="compare-card forced">
+                    <div class="compare-title"><span>⚡</span> Forced Action</div>
+                    <ul class="compare-list">
+                        <li>Làm vì "phải", vì sợ, vì áp lực</li>
+                        <li>Cảm giác nặng nề, miễn cưỡng</li>
+                        <li>Tốn nhiều năng lượng, ít kết quả</li>
+                        <li>Đẩy, ép, cố gắng quá sức</li>
+                        <li>Dựa trên lo lắng, thiếu hụt</li>
+                        <li>Đi ngược dòng nước</li>
+                        <li>Kết quả: Kiệt sức, burn out</li>
+                    </ul>
+                </div>
+                <div class="compare-card inspired">
+                    <div class="compare-title"><span>✨</span> Inspired Action</div>
+                    <ul class="compare-list">
+                        <li>Làm vì muốn, vì hứng thú, vì calling</li>
+                        <li>Cảm giác nhẹ nhàng, háo hức</li>
+                        <li>Ít năng lượng, nhiều kết quả (flow state)</li>
+                        <li>Thu hút, cho phép, tiếp nhận</li>
+                        <li>Dựa trên tin tưởng, dồi dào</li>
+                        <li>Theo dòng nước</li>
+                        <li>Kết quả: Năng lượng, thịnh vượng</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🧪</span> Test Nhanh: Forced hay Inspired?</div>
+                <p>Trước khi làm bất cứ việc gì liên quan đến tiền bạc/công việc, hỏi: <strong>"Tôi đang làm việc này từ năng lượng gì?"</strong></p>
+                <p style="margin-top: var(--space-sm);">• Nếu từ sợ hãi, lo lắng, "phải làm" → Forced Action</p>
+                <p style="margin-top: var(--space-xs);">• Nếu từ hứng thú, tò mò, "muốn làm" → Inspired Action</p>
+                <p style="margin-top: var(--space-sm);"><em>Lưu ý: Có những việc "phải làm" (như trả hóa đơn). Điều quan trọng là NĂNG LƯỢNG bạn mang khi làm, không phải việc đó là gì.</em></p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: CO-CREATION VỚI VŨ TRỤ -->
+        <section class="section">
+            <h2 class="section-title"><span>🤝</span> Co-Creation Với Vũ Trụ</h2>
+            <p>Người thịnh vượng không làm một mình. Họ <strong>hợp tác với Vũ Trụ</strong>. Họ làm phần của họ (hành động), và để Vũ Trụ làm phần của Vũ Trụ (sắp xếp, đồng bộ, mang cơ hội).</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🌌</span> Nguyên Lý Co-Creation</div>
+                <p><strong>Bạn 50% + Vũ Trụ 50% = 100% Manifestation</strong></p>
+                <p style="margin-top: var(--space-sm);">Phần của bạn: Giữ tần số cao, hành động inspired, mở ra đón nhận.</p>
+                <p style="margin-top: var(--space-xs);">Phần của Vũ Trụ: Sắp xếp người, cơ hội, hoàn cảnh, "trùng hợp".</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M5_B1_02%0ACo-Creation+Universe" alt="Co-Creation với Vũ Trụ">
+                <div class="image-caption">Làm phần của bạn, tin tưởng Vũ Trụ làm phần còn lại</div>
+            </div>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Đặt Ý Định Rõ Ràng</div>
+                        <div class="flow-step-desc">Biết rõ mình muốn gì. Không mơ hồ. "Tôi đặt ý định nhận được [X] hoặc điều gì tốt đẹp hơn."</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Nâng Tần Số</div>
+                        <div class="flow-step-desc">Sử dụng các công cụ đã học: Gratitude, Affirmations, Visualization. Đảm bảo bạn ở tần số cao.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Lắng Nghe Nudges</div>
+                        <div class="flow-step-desc">Chú ý đến trực giác, ý tưởng bất chợt, "coincidences". Đây là Vũ Trụ đang gửi hướng dẫn.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Hành Động Ngay</div>
+                        <div class="flow-step-desc">Khi nhận được nudge, hành động ngay. Đừng chần chừ. Đừng phân tích quá nhiều. Trust and act.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Buông Bỏ Kết Quả</div>
+                        <div class="flow-step-desc">Làm xong, buông. Không bám víu, không lo lắng "khi nào đến". Tin tưởng timing hoàn hảo.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: FOLLOWING THE NUDGES -->
+        <section class="section">
+            <h2 class="section-title"><span>💡</span> Following The Nudges</h2>
+            <p>"Nudges" là những tín hiệu nhỏ mà Vũ Trụ gửi đến để hướng dẫn bạn đến cơ hội. Học cách nhận ra và theo chúng.</p>
+
+            <div class="nudge-list">
+                <div class="nudge-item">
+                    <div class="nudge-emoji">💭</div>
+                    <div class="nudge-title">Ý Tưởng Bất Chợt</div>
+                    <div class="nudge-desc">Đang tắm, đang đi bộ, bất chợt có ý tưởng. Viết xuống ngay! Đây thường là Vũ Trụ gửi hướng dẫn.</div>
+                </div>
+                <div class="nudge-item">
+                    <div class="nudge-emoji">🔄</div>
+                    <div class="nudge-title">Trùng Hợp / Synchronicity</div>
+                    <div class="nudge-desc">Đang nghĩ về ai đó, họ gọi. Thấy số lặp (11:11, 222). Gặp đúng người đúng lúc. Không phải ngẫu nhiên.</div>
+                </div>
+                <div class="nudge-item">
+                    <div class="nudge-emoji">🎯</div>
+                    <div class="nudge-title">Cơ Hội Bất Ngờ</div>
+                    <div class="nudge-desc">Lời mời không mong đợi, cơ hội rơi vào lòng, ai đó giới thiệu bạn cho người khác. Đây là Vũ Trụ làm việc.</div>
+                </div>
+                <div class="nudge-item">
+                    <div class="nudge-emoji">🦋</div>
+                    <div class="nudge-title">Cảm Giác Trong Bụng</div>
+                    <div class="nudge-desc">Gut feeling: "Tôi nên làm điều này." Không giải thích được, nhưng cảm thấy rõ ràng. Trust it.</div>
+                </div>
+                <div class="nudge-item">
+                    <div class="nudge-emoji">📖</div>
+                    <div class="nudge-title">Thông Điệp Lặp Lại</div>
+                    <div class="nudge-desc">Nghe cùng một lời khuyên từ nhiều nguồn khác nhau. Vũ Trụ đang cố nói với bạn điều gì đó quan trọng.</div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>⚠️</span> Sai Lầm Phổ Biến</div>
+                <p><strong>Nhận nudge → Phân tích quá nhiều → Không hành động</strong></p>
+                <p style="margin-top: var(--space-sm);">Nhiều người nhận được nudge nhưng để nỗi sợ, sự nghi ngờ cản trở. Họ hỏi: "Liệu đây có phải là sign thật không?" Quy tắc: Nếu nudge đến với cảm giác nhẹ nhàng, hứng thú (không phải sợ hãi) → Hành động.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 5: THỰC HÀNH -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Thực Hành Aligned Action</h2>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Audit Hành Động Hiện Tại</div>
+                        <div class="flow-step-desc">Liệt kê 5 hành động liên quan đến tiền bạc bạn đang làm. Đánh dấu: Forced (F) hay Inspired (I)? Hành động nào cần thay đổi năng lượng?</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Thực Hành "Check-In" Trước Khi Làm</div>
+                        <div class="flow-step-desc">Mỗi khi bắt đầu làm việc gì, pause 5 giây. Hỏi: "Năng lượng của tôi lúc này là gì?" Nếu thấp, nâng lên trước. Nếu cao, tiếp tục.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Ghi Chép Nudges</div>
+                        <div class="flow-step-desc">Trong 7 ngày tới, ghi lại mọi nudge bạn nhận được. Synchronicities, ý tưởng, cơ hội bất ngờ. Sau đó, review: Bạn đã follow bao nhiêu?</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>📱</span> Tích Hợp GEM App</div>
+                <p><strong>GEM Master → Career:</strong> Hỏi về hành động tiếp theo nên làm. AI sẽ đề xuất dựa trên năng lượng và mục tiêu của bạn.</p>
+                <p><strong>Vision Board → Goals:</strong> Đặt mục tiêu tài chính và theo dõi những inspired actions đã thực hiện.</p>
+                <p><strong>Rituals → Heart Expansion:</strong> Sử dụng khi cảm thấy đang ở trạng thái Forced để chuyển về Inspired.</p>
+            </div>
+        </section>
+
+        <!-- REAL STORIES SECTION -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Câu Chuyện Thực Tế: Inspired vs Forced Action</h2>
+            <p>Hãy cùng xem hai câu chuyện thực tế về sự khác biệt giữa hành động từ sợ hãi và hành động từ cảm hứng. Cùng một mục tiêu "kiếm thêm thu nhập", nhưng hai cách tiếp cận hoàn toàn khác nhau.</p>
+
+            <div class="compare-grid">
+                <div class="compare-card forced">
+                    <div class="compare-title"><span>⚡</span> Câu Chuyện Của Anh Dũng: Forced Action</div>
+                    <p style="color: var(--text-secondary); margin-bottom: var(--space-md);">Dũng, 35 tuổi, nhân viên IT với lương 20 triệu/tháng. Anh muốn kiếm thêm thu nhập vì lo sợ không đủ tiền mua nhà.</p>
+                    <ul class="compare-list">
+                        <li>Đăng ký 3 công việc freelance cùng lúc vì "ai cũng làm thế"</li>
+                        <li>Làm việc 14 tiếng/ngày, cuối tuần cũng không nghỉ</li>
+                        <li>Cảm giác kiệt sức, không có thời gian cho gia đình</li>
+                        <li>Chất lượng công việc chính giảm, bị sếp nhắc nhở</li>
+                        <li>Sau 6 tháng: kiếm thêm 8 triệu/tháng nhưng sức khỏe suy giảm, vợ muốn ly hôn, stress cực độ</li>
+                        <li><strong>Kết quả:</strong> Phải bỏ tất cả freelance, mất 3 tháng hồi phục sức khỏe. Net gain = 0.</li>
+                    </ul>
+                </div>
+                <div class="compare-card inspired">
+                    <div class="compare-title"><span>✨</span> Câu Chuyện Của Chị Hằng: Inspired Action</div>
+                    <p style="color: var(--text-secondary); margin-bottom: var(--space-md);">Hằng, 32 tuổi, nhân viên marketing với lương 18 triệu/tháng. Cô cũng muốn kiếm thêm thu nhập nhưng tiếp cận khác.</p>
+                    <ul class="compare-list">
+                        <li>Dành 1 tuần suy nghĩ: "Điều gì tôi THÍCH làm mà người khác cần?"</li>
+                        <li>Nhận ra passion: viết content về du lịch (hobby 5 năm qua)</li>
+                        <li>Bắt đầu blog về du lịch, viết khi CÓ HỨNG (2-3 bài/tuần)</li>
+                        <li>Sau 6 tháng: Blog có traffic, bắt đầu có affiliate income nhỏ</li>
+                        <li>Sau 1 năm: Được brand mời hợp tác, thu nhập thêm 15 triệu/tháng</li>
+                        <li><strong>Kết quả:</strong> Vẫn có thời gian cho bản thân, sức khỏe tốt, công việc chính không bị ảnh hưởng. Net gain = sustainable income + happiness.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💎</span> Bài Học Từ Hai Câu Chuyện</div>
+                <p>Cả Dũng và Hằng đều có mục tiêu giống nhau: kiếm thêm thu nhập. Nhưng Dũng hành động từ SỢ HÃI (sợ không đủ tiền) - kết quả là burn out. Hằng hành động từ CẢM HỨNG (passion cho du lịch) - kết quả là sustainable success. Bạn thấy mình giống ai hơn? Và bạn muốn thay đổi điều gì?</p>
+            </div>
+        </section>
+
+        <!-- KEY TAKEAWAYS SECTION -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> 3 Điểm Cốt Lõi Cần Nhớ</h2>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tư Duy + Hành Động = Manifestation</div>
+                        <div class="flow-step-desc">Chỉ có tư duy mà không hành động = mơ mộng. Chỉ có hành động mà tư duy sai = kiệt sức. Bạn cần CẢ HAI: tần số cao từ 4 module trước + hành động thuận dòng từ module này. Đây là công thức hoàn chỉnh để manifestation xảy ra nhanh chóng.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Inspired Action vs Forced Action</div>
+                        <div class="flow-step-desc">Trước khi làm bất cứ việc gì, hỏi: "Tôi đang làm từ năng lượng gì?" Nếu từ sợ hãi, lo lắng, "phải làm" = Forced. Nếu từ hứng thú, tò mò, "muốn làm" = Inspired. Hành động Inspired mang lại kết quả với ít nỗ lực hơn rất nhiều.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Follow The Nudges - Lắng Nghe Vũ Trụ</div>
+                        <div class="flow-step-desc">Vũ Trụ gửi hướng dẫn qua nudges: ý tưởng bất chợt, synchronicities, cơ hội bất ngờ, gut feelings. Nhiệm vụ của bạn là NHẬN RA và HÀNH ĐỘNG NGAY khi nhận được nudge. Đừng phân tích quá nhiều - trust and act.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TRANSITION SECTION -->
+        <section class="section">
+            <h2 class="section-title"><span>🔮</span> Bước Tiếp Theo: Tạo Giá Trị</h2>
+            <p>Bạn đã hiểu về Aligned Action - cách hành động thuận dòng thay vì đi ngược dòng. Nhưng có một câu hỏi quan trọng: Bạn nên hành động VÀO ĐIỀU GÌ? Làm sao biết hướng nào là đúng cho riêng bạn?</p>
+
+            <p>Trong Bài 5.2 tiếp theo, chúng ta sẽ khám phá một khái niệm cốt lõi: TIỀN LÀ NĂNG LƯỢNG TRAO ĐỔI. Bạn sẽ học về Ikigai - giao điểm giữa passion, talent, need, và income - và 7 nguồn thu nhập mà người giàu sử dụng. Đây là bài học giúp bạn tìm ra HƯỚNG ĐI CỤ THỂ cho hành động của mình.</p>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>✍️</span> Bài Tập Trước Khi Sang Bài Tiếp</div>
+                <p><strong>Trong 24 giờ tới, thực hiện 3 việc:</strong></p>
+                <p>1. Liệt kê 3 hành động liên quan đến tiền bạc bạn đang làm và đánh dấu: F (Forced) hay I (Inspired)?</p>
+                <p>2. Ghi lại bất kỳ nudge nào bạn nhận được (ý tưởng, synchronicity, cảm giác)</p>
+                <p>3. Thử "check-in" năng lượng trước khi bắt đầu một việc - nếu thấp, nâng lên trước bằng gratitude hoặc breathing</p>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <p>© 2024 GEM Academy | Khóa học: Tái Tạo Tư Duy Triệu Phú</p>
+            <p>Module 5 - Bài 5.1: Aligned Action | <a href="#">Quay về danh sách bài học</a></p>
+        </footer>
+
+    </div>
+</body>
+</html>

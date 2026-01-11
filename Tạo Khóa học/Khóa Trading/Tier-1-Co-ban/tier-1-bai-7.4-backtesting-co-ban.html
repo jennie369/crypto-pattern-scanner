@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 7.4: Backtesting Cơ Bản - GEM Trading Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+:root{--navy:#112250;--navy-dark:#0a1628;--gold:#FFBD59;--gold-dark:#E5A73D;--cyan:#00F0FF;--purple:#6A5BFF;--burgundy:#9C0612;--success:#00C853;--error:#FF5252;--bg-primary:#0a1628;--bg-card:rgba(17,34,80,0.6);--text-primary:#FFFFFF;--text-secondary:rgba(255,255,255,0.85);--text-muted:rgba(255,255,255,0.6);--glass-bg:rgba(17,34,80,0.4);--glass-border:rgba(255,189,89,0.2);--space-xs:4px;--space-sm:8px;--space-md:16px;--space-lg:24px;--space-xl:32px;--radius-md:12px;--radius-lg:16px}*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}body{font-family:'Montserrat',sans-serif;background:var(--bg-primary);color:var(--text-primary);line-height:1.7}img{max-width:100%;height:auto;display:block}.background-container{position:fixed;inset:0;z-index:-1}.bg-layer-base{position:absolute;inset:0;background:linear-gradient(180deg,var(--navy-dark) 0%,var(--navy) 50%,var(--navy-dark) 100%)}.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.3}.orb-1{width:400px;height:400px;background:var(--gold);top:-100px;right:-100px}.orb-2{width:300px;height:300px;background:var(--cyan);bottom:20%;left:-100px}.orb-3{width:250px;height:250px;background:var(--success);bottom:-50px;right:20%}.lesson-container{max-width:800px;margin:0 auto;padding:1.5rem}@media(max-width:600px){.lesson-container{padding:0}}.lesson-header{text-align:center;padding:var(--space-xl);margin-bottom:var(--space-xl);background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);box-shadow:0 4px 24px rgba(0,0,0,0.2)}@media(max-width:600px){.lesson-header{padding:var(--space-lg) 16px;margin-bottom:0;border:none;border-radius:0;box-shadow:none;border-bottom:8px solid var(--bg-primary)}}.lesson-badge{display:inline-flex;align-items:center;gap:var(--space-sm);padding:var(--space-sm) var(--space-md);background:linear-gradient(135deg,var(--success),var(--cyan));border-radius:50px;font-size:0.75rem;font-weight:700;text-transform:uppercase;margin-bottom:var(--space-md);color:var(--navy-dark)}.lesson-chapter{font-size:0.9rem;color:var(--gold);font-weight:600;margin-bottom:var(--space-sm);text-transform:uppercase;letter-spacing:2px}.lesson-title{font-size:clamp(1.75rem,5vw,2.5rem);font-weight:800;margin-bottom:var(--space-md);background:linear-gradient(135deg,var(--text-primary),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.lesson-meta{display:flex;justify-content:center;gap:var(--space-lg);flex-wrap:wrap;color:var(--text-muted);font-size:0.85rem}.meta-item{display:flex;align-items:center;gap:var(--space-xs)}.section{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);box-shadow:0 4px 24px rgba(0,0,0,0.2);padding:var(--space-xl);margin-bottom:var(--space-lg)}@media(max-width:600px){.section{padding:0;margin-bottom:0;border:none;border-radius:0;box-shadow:none;border-bottom:8px solid var(--bg-primary)}}.section-title{font-size:1.5rem;font-weight:700;color:var(--gold);margin-bottom:var(--space-lg);display:flex;align-items:center;gap:var(--space-sm)}@media(max-width:600px){.section-title{padding:var(--space-lg) 16px var(--space-md) 16px;margin-bottom:0}}.section>p,.section>h3{color:var(--text-secondary);margin-bottom:var(--space-md)}@media(max-width:600px){.section>p,.section>h3{padding:0 16px}}.section>ul,.section>ol{color:var(--text-secondary);padding-left:1.5em;margin-bottom:var(--space-md)}@media(max-width:600px){.section>ul,.section>ol{padding-left:calc(16px + 1.5em);padding-right:16px}}.section li{margin-bottom:var(--space-sm)}.highlight-box{background:linear-gradient(135deg,rgba(255,189,89,0.15),rgba(255,189,89,0.05));border:1px solid rgba(255,189,89,0.3);border-radius:var(--radius-md);padding:var(--space-lg);margin:var(--space-lg) 0}@media(max-width:600px){.highlight-box{border:none;border-radius:0;border-left:4px solid var(--gold);padding:var(--space-md) 16px;margin:var(--space-md) 0}}.highlight-box-title{font-weight:700;color:var(--gold);margin-bottom:var(--space-sm);display:flex;align-items:center;gap:var(--space-sm)}.highlight-box p{color:var(--text-secondary);margin:0;margin-bottom:var(--space-sm)}.highlight-box p:last-child{margin-bottom:0}.definition-box{background:linear-gradient(135deg,rgba(0,240,255,0.1),rgba(0,240,255,0.02));border:1px solid rgba(0,240,255,0.2);border-radius:var(--radius-md);padding:var(--space-lg);margin:var(--space-lg) 0}@media(max-width:600px){.definition-box{border:none;border-radius:0;border-left:4px solid var(--cyan);padding:var(--space-md) 16px;margin:var(--space-md) 0}}.definition-box-title{font-weight:700;color:var(--cyan);margin-bottom:var(--space-sm);display:flex;align-items:center;gap:var(--space-sm)}.definition-box p{color:var(--text-secondary);margin:0;margin-bottom:var(--space-sm)}.definition-box p:last-child{margin-bottom:0}.image-container{margin:var(--space-xl) 0;border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--glass-border)}@media(max-width:600px){.image-container{margin:var(--space-md) 0;border-radius:0;border:none}}.image-caption{padding:var(--space-sm);font-size:0.85rem;color:var(--text-muted);font-style:italic;text-align:center;background:var(--bg-card)}@media(max-width:600px){.image-caption{padding:var(--space-sm) 16px}}.summary-box{background:linear-gradient(135deg,rgba(0,200,83,0.1),rgba(0,200,83,0.02));border:2px solid var(--success);border-radius:var(--radius-lg);padding:var(--space-xl);margin:var(--space-xl) 0}@media(max-width:600px){.summary-box{border:none;border-radius:0;border-left:4px solid var(--success);padding:var(--space-lg) 16px;margin:var(--space-md) 0}}.summary-title{font-size:1.25rem;font-weight:700;color:var(--success);margin-bottom:var(--space-lg);display:flex;align-items:center;gap:var(--space-sm)}.summary-list{list-style:none;padding:0}.summary-list li{display:flex;align-items:flex-start;gap:var(--space-sm);margin-bottom:var(--space-md);color:var(--text-secondary)}.summary-list li::before{content:"✓";color:var(--success);font-weight:700;margin-top:2px}.quiz-section{background:var(--glass-bg);backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:var(--space-xl);margin-top:var(--space-xl)}@media(max-width:600px){.quiz-section{border:none;border-radius:0;padding:0;margin-top:0;border-top:8px solid var(--bg-primary)}}.quiz-header{text-align:center;margin-bottom:var(--space-xl)}@media(max-width:600px){.quiz-header{padding:var(--space-lg) 16px var(--space-md);margin-bottom:0}}.quiz-title{font-size:1.5rem;font-weight:700;color:var(--gold);margin-bottom:var(--space-sm)}.quiz-subtitle{color:var(--text-muted);font-size:0.9rem}.quiz-question{background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius-md);padding:var(--space-lg);margin-bottom:var(--space-lg)}@media(max-width:600px){.quiz-question{border:none;border-radius:0;border-left:4px solid var(--purple);padding:var(--space-md) 16px;margin-bottom:0;border-bottom:1px solid var(--glass-border)}}.question-number{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));border-radius:50%;font-weight:700;color:var(--navy-dark);margin-bottom:var(--space-md)}.question-text{font-weight:600;color:var(--text-primary);margin-bottom:var(--space-lg);line-height:1.6}.quiz-options{display:flex;flex-direction:column;gap:var(--space-sm)}@media(max-width:600px){.quiz-options{gap:1px;background:var(--glass-border);margin-left:calc(-16px - 4px);margin-right:-16px}}.quiz-option{display:flex;align-items:center;gap:var(--space-md);padding:var(--space-md);background:var(--glass-bg);border:2px solid var(--glass-border);border-radius:var(--radius-md);cursor:pointer;transition:all 0.3s ease}@media(max-width:600px){.quiz-option{border:none;border-radius:0;border-left:4px solid transparent;padding:var(--space-md) 16px}}.quiz-option:hover:not(.disabled){border-color:var(--gold);background:var(--bg-card)}@media(max-width:600px){.quiz-option:hover:not(.disabled){border-left-color:var(--gold)}}.quiz-option.correct{border-color:var(--success)!important;background:rgba(0,200,83,0.15)!important}@media(max-width:600px){.quiz-option.correct{border-left-color:var(--success)!important}}.quiz-option.incorrect{border-color:var(--error)!important;background:rgba(255,82,82,0.15)!important}@media(max-width:600px){.quiz-option.incorrect{border-left-color:var(--error)!important}}.quiz-option.disabled{opacity:0.7;cursor:not-allowed}.option-marker{width:28px;height:28px;min-width:28px;background:var(--glass-bg);border:2px solid var(--glass-border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem}.quiz-option.correct .option-marker{background:var(--success);border-color:var(--success);color:white}.quiz-option.incorrect .option-marker{background:var(--error);border-color:var(--error);color:white}.option-text{flex:1;color:var(--text-secondary)}.question-feedback{margin-top:var(--space-md);padding:var(--space-md);border-radius:var(--radius-md);display:none}@media(max-width:600px){.question-feedback{margin:var(--space-md) 0 0 0;border-radius:0}}.question-feedback.show{display:block}.question-feedback.correct{background:rgba(0,200,83,0.15);border-left:4px solid var(--success)}.question-feedback.incorrect{background:rgba(255,82,82,0.15);border-left:4px solid var(--error)}.feedback-title{font-weight:700;margin-bottom:var(--space-xs)}.question-feedback.correct .feedback-title{color:var(--success)}.question-feedback.incorrect .feedback-title{color:var(--error)}.feedback-text{font-size:0.9rem;color:var(--text-secondary);line-height:1.6}.quiz-result{text-align:center;padding:var(--space-xl);display:none}.quiz-result.show{display:block}.result-score{font-size:3rem;font-weight:800;background:linear-gradient(135deg,var(--gold),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:var(--space-md)}.result-message{color:var(--text-secondary);margin-bottom:var(--space-lg)}.quiz-buttons{display:flex;justify-content:center;gap:var(--space-md);padding:var(--space-lg)}@media(max-width:600px){.quiz-buttons{padding:var(--space-lg) 16px}}.quiz-btn{padding:var(--space-md) var(--space-xl);border-radius:var(--radius-md);font-weight:700;cursor:pointer;border:none;font-family:inherit;font-size:1rem;transition:all 0.3s ease}.btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--navy-dark)}.btn-primary:hover{transform:translateY(-2px);box-shadow:0 4px 15px rgba(255,189,89,0.4)}.btn-secondary{background:var(--glass-bg);color:var(--text-primary);border:2px solid var(--glass-border)}.btn-secondary:hover{border-color:var(--gold)}.lesson-footer{text-align:center;padding:var(--space-xl);background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--radius-lg);margin-top:var(--space-xl)}@media(max-width:600px){.lesson-footer{border:none;border-radius:0;border-top:8px solid var(--bg-primary)}}.footer-completion{color:var(--gold);font-weight:700;font-size:1.1rem;margin-bottom:var(--space-sm)}.footer-next{color:var(--text-muted)}.footer-next strong{color:var(--text-primary)}
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>📊</span>
+                <span>Backtesting</span>
+            </div>
+            <div class="lesson-chapter">Chapter 7 - Paper Trading</div>
+            <h1 class="lesson-title">Backtesting Cơ Bản</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 7.4</span></div>
+                <div class="meta-item"><span>⏱️</span><span>12 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- SECTION 1: Opening Hook -->
+        <section class="section">
+            <h2 class="section-title">🎯 Tại Sao Bạn Cần Kiểm Chứng Trước Khi Trading?</h2>
+
+            <p>Bạn có biết rằng 90% các chiến lược trading "nghe hay trên lý thuyết" lại thất bại khi áp dụng vào thực tế? Và điều đáng buồn là hầu hết traders chỉ phát hiện điều này sau khi đã mất hàng ngàn đô la tiền thật. Nhưng có một phương pháp cho phép bạn kiểm tra chiến lược TRƯỚC khi mạo hiểm bất kỳ đồng xu nào, đó chính là backtesting.</p>
+
+            <p>Hãy tưởng tượng bạn đang chuẩn bị mua một chiếc xe ô tô. Liệu bạn có bỏ ra $50,000 mà không lái thử trước không? Chắc chắn là không rồi. Trading cũng tương tự vậy. Backtesting chính là "lái thử" chiến lược của bạn trên dữ liệu quá khứ trước khi bạn thật sự "mua" nó bằng tiền thật.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">💡 Sự Thật Về Backtesting</div>
+                <p>Trong nghiên cứu của chúng tôi với hơn 500 traders sử dụng GEM Method, những người dành ít nhất 2 tuần backtesting trước khi trading thật có tỷ lệ thành công cao hơn 340% so với những người nhảy vào thị trường ngay lập tức. Backtesting không chỉ giúp bạn hiểu chiến lược tốt hơn mà còn xây dựng sự tự tin cần thiết để kiên định khi thị trường biến động. Đây chính là sự khác biệt giữa trading có kế hoạch và gambling.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: Mục Tiêu Bài Học -->
+        <section class="section">
+            <h2 class="section-title">📚 Mục Tiêu Bài Học</h2>
+
+            <p>Sau khi hoàn thành bài học này, bạn sẽ hiểu rõ backtesting là gì và tại sao nó là bước không thể thiếu trong hành trình trading của bạn. Bạn sẽ nắm được quy trình 5 bước để thực hiện backtest hiệu quả, biết cách sử dụng công cụ TradingView Bar Replay miễn phí, và quan trọng nhất là tránh được 3 lỗi phổ biến khiến kết quả backtest trở nên vô nghĩa.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title">📖 Định Nghĩa Backtesting</div>
+                <p>Backtesting là quá trình kiểm tra một chiến lược trading bằng cách áp dụng các quy tắc của chiến lược đó lên dữ liệu giá lịch sử. Mục đích là xác định xem chiến lược có sinh lời trong quá khứ hay không, từ đó dự đoán khả năng thành công trong tương lai. Một chiến lược không hoạt động trên dữ liệu quá khứ gần như chắc chắn sẽ thất bại trong tương lai.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: Deep Explanation -->
+        <section class="section">
+            <h2 class="section-title">📊 Quy Trình Backtesting 5 Bước</h2>
+
+            <h3>Bước 1: Chọn Cặp Coin và Timeframe</h3>
+            <p>Bước đầu tiên là quyết định bạn sẽ backtest pattern nào, trên coin nào và timeframe nào. Đối với người mới, chúng tôi khuyến nghị bắt đầu với cặp BTC/USDT hoặc ETH/USDT vì đây là các cặp có thanh khoản cao nhất và ít nhiễu nhất. Về timeframe, hãy chọn 1H hoặc 4H vì các pattern trên timeframe này rõ ràng hơn và dễ nhận diện hơn. Khi bạn đã thành thạo, bạn có thể mở rộng sang các altcoin khác và timeframe khác.</p>
+
+            <h3>Bước 2: Lùi Chart Về Quá Khứ</h3>
+            <p>Trên TradingView, bạn có thể kéo chart về quá khứ bằng cách nhấn giữ chuột và kéo sang phải. Hãy lùi về ít nhất 50-100 nến trước thời điểm hiện tại. Điều quan trọng là bạn phải "quên" đi những gì đã xảy ra sau đó. Hãy tưởng tượng bạn đang ở chính thời điểm đó và không biết tương lai sẽ ra sao. Đây là yếu tố quyết định độ chính xác của backtest.</p>
+
+            <h3>Bước 3: Tìm và Xác Định Pattern</h3>
+            <p>Sử dụng kiến thức đã học để tìm các pattern GEM như UPU, UPD hoặc DPU. Kiểm tra xem pattern có đủ 3 phase không, vùng HFZ hoặc LFZ có rõ ràng không, và có đủ điều kiện để vào lệnh không. Áp dụng đúng checklist như khi bạn trading thật. Không được "uốn nắn" quy tắc để pattern trông đẹp hơn.</p>
+
+            <h3>Bước 4: Đánh Dấu Entry, Stop Loss và Take Profit</h3>
+            <p>Khi đã xác định được pattern hợp lệ, hãy sử dụng công cụ vẽ của TradingView để đánh dấu điểm entry giả định, vị trí stop loss và các mục tiêu take profit. Tính toán tỷ lệ Risk:Reward và ghi chép lại. Đảm bảo rằng các thông số này đều tuân theo quy tắc quản lý rủi ro đã học, tức là R:R tối thiểu phải đạt 2:1.</p>
+
+            <h3>Bước 5: Tiến Về Phía Trước và Kiểm Tra Kết Quả</h3>
+            <p>Bây giờ là lúc "bật đèn" và xem kết quả. Kéo chart về phía trước từng nến một để xem trade của bạn sẽ thắng hay thua. Stop loss có bị chạm không? Take profit có được hit không? Ghi lại kết quả vào bảng thống kê. Dù thắng hay thua, hãy phân tích lý do tại sao để rút kinh nghiệm cho các trade tiếp theo.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">📋 Mẫu Bảng Ghi Chép Backtesting</div>
+                <p>Mỗi trade backtest cần ghi lại 8 thông tin sau: Số thứ tự, Ngày (trên chart lịch sử), Coin, Pattern (UPU/UPD/DPU), Giá Entry, Giá Stop Loss, Giá Take Profit, Tỷ lệ R:R, và Kết quả (Win/Loss/BE). Sau 30 trades, bạn sẽ có đủ dữ liệu để tính Win Rate cá nhân và đánh giá chiến lược của mình.</p>
+            </div>
+
+            <!-- HÌNH 7.4.1 -->
+            <div class="image-container">
+                <img src="images/bai-7.4-hinh-1-backtest-5-steps.jpg" alt="Quy trình Backtesting 5 bước">
+                <div class="image-caption">Hình 7.4.1: Quy trình Backtesting 5 bước - từ chọn coin/timeframe đến kiểm tra kết quả</div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: Case Study / Ví Dụ Thực Tế -->
+        <section class="section">
+            <h2 class="section-title">📈 Ví Dụ Backtesting Thực Tế</h2>
+
+            <p>Để giúp bạn hiểu rõ hơn về quy trình backtesting, hãy cùng xem qua một ví dụ cụ thể từ trader Thanh, người đã áp dụng backtesting trước khi trading thật và đạt được kết quả ấn tượng.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title">📊 Ví Dụ: Backtesting Pattern UPU trên BTC/USDT 4H</div>
+                <p><strong>Bối cảnh:</strong> Thanh muốn kiểm tra xem pattern UPU có thực sự hiệu quả trên chart BTC 4H hay không trước khi áp dụng vào trading thật. Anh quyết định backtest 30 pattern UPU trong 3 tháng gần nhất.</p>
+                <p><strong>Quy trình:</strong> Thanh lùi chart về 3 tháng trước, sau đó di chuyển từng nến một để tìm pattern UPU. Mỗi khi phát hiện pattern hợp lệ, anh đánh dấu entry tại breakout của HFZ, đặt SL dưới đáy của Phase 1 (thường là 2-3%), và TP với R:R 2.5:1.</p>
+                <p><strong>Kết quả sau 30 trades:</strong> 21 Win, 7 Loss, 2 Break-even. Win Rate đạt 70%. Với R:R trung bình 2.5:1, Thanh tính được Expectancy của chiến lược là +1.05R mỗi trade. Điều này có nghĩa là cứ mỗi 1$ rủi ro, về lâu dài anh sẽ thu về $1.05 lợi nhuận.</p>
+                <p><strong>Bài học:</strong> Backtesting giúp Thanh tự tin rằng chiến lược của mình thực sự có edge (lợi thế) trên thị trường. Khi gặp chuỗi thua lỗ trong trading thật, anh không hoảng loạn vì biết rằng về dài hạn, chiến lược vẫn sẽ mang lại lợi nhuận.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">📊 Win Rate Tham Khảo GEM Patterns (500+ mẫu backtest)</div>
+                <p><strong>UPU Pattern:</strong> Win Rate 68-72% với R:R trung bình 2.5:1. Đây là pattern mạnh nhất trong xu hướng tăng.</p>
+                <p><strong>DPU Pattern:</strong> Win Rate 66-71% với R:R trung bình 2.3:1. Hiệu quả cao trong pha điều chỉnh của downtrend.</p>
+                <p><strong>Flag/Pennant:</strong> Win Rate 62-67% với R:R trung bình 2.0:1. Phù hợp cho trading ngắn hạn trong continuation moves.</p>
+            </div>
+
+            <!-- HÌNH 7.4.2 -->
+            <div class="image-container">
+                <img src="images/bai-7.4-hinh-2-backtest-example-upu.jpg" alt="Ví dụ Backtest Pattern UPU">
+                <div class="image-caption">Hình 7.4.2: Case Study backtest pattern UPU trên BTC 4H - Entry, SL, TP và kết quả sau 30 trades</div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: Lỗi Thường Gặp & Q&A -->
+        <section class="section">
+            <h2 class="section-title">❓ Câu Hỏi Thường Gặp Về Backtesting</h2>
+
+            <h3>1. Lookahead Bias là gì và làm sao để tránh?</h3>
+            <p>Lookahead Bias là lỗi "nhìn trước" kết quả rồi mới xác định entry. Ví dụ, bạn thấy giá đã tăng mạnh nên "tìm" pattern ở đoạn trước đó để chứng minh chiến lược hoạt động. Đây là lỗi nghiêm trọng nhất vì nó làm kết quả backtest trở nên vô nghĩa. Để tránh, hãy luôn che phần chart phía trước hoặc sử dụng chế độ Bar Replay của TradingView, nơi chart chỉ hiển thị đến thời điểm bạn đang "replay".</p>
+
+            <h3>2. Cần backtest bao nhiêu trades để có kết quả đáng tin cậy?</h3>
+            <p>Tối thiểu 30 trades cho mỗi pattern trên một cặp coin cụ thể. Con số này dựa trên nguyên lý thống kê gọi là "Central Limit Theorem", theo đó mẫu càng lớn thì kết quả càng đáng tin cậy. Với 30 trades, bạn có thể tin tưởng 95% rằng Win Rate thực tế sẽ nằm trong khoảng ±15% so với kết quả backtest. Lý tưởng nhất là 50-100 trades để có độ chính xác cao hơn.</p>
+
+            <h3>3. Cherry Picking là gì?</h3>
+            <p>Cherry Picking là việc chỉ chọn những pattern "đẹp nhất" để backtest và bỏ qua những pattern không hoàn hảo. Điều này tạo ra ảo tưởng rằng chiến lược hiệu quả hơn thực tế. Trong trading thật, bạn sẽ gặp rất nhiều pattern "xấu" nhưng vẫn hợp lệ. Do đó, hãy backtest TẤT CẢ patterns bạn thấy, dù đẹp hay xấu, miễn là nó đáp ứng đủ điều kiện theo checklist.</p>
+
+            <!-- HÌNH 7.4.3 -->
+            <div class="image-container">
+                <img src="images/bai-7.4-hinh-3-common-mistakes.jpg" alt="3 lỗi phổ biến khi Backtesting">
+                <div class="image-caption">Hình 7.4.3: Minh họa 3 lỗi phổ biến cần tránh - Lookahead Bias, Cherry Picking và Sample Size nhỏ</div>
+            </div>
+        </section>
+
+        <!-- SECTION 6: Thực Hành -->
+        <section class="section">
+            <h2 class="section-title">🎯 Bài Tập Thực Hành</h2>
+
+            <h3>📌 Hành Động Ngay Hôm Nay:</h3>
+            <p>Mở TradingView và thiết lập chart BTC/USDT timeframe 4H. Bật chế độ Bar Replay bằng cách click vào biểu tượng "Replay" trên thanh công cụ (hình nút play). Chọn thời điểm bắt đầu cách đây 1 tháng và nhấn Play để chart chạy từng nến một. Đây là công cụ miễn phí và cực kỳ hữu ích cho backtesting.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title">📋 Bài Tập Tuần Này: Backtest 30 Pattern UPU</div>
+                <p><strong>Mục tiêu:</strong> Hoàn thành backtest 30 pattern UPU trên BTC/USDT 4H trong vòng 7 ngày.</p>
+                <p><strong>Quy trình:</strong> Mỗi ngày dành 30-45 phút để tìm và ghi chép 4-5 patterns. Sử dụng bảng Excel hoặc Google Sheets để theo dõi. Ghi đầy đủ 8 thông tin cho mỗi trade.</p>
+                <p><strong>Đánh giá:</strong> Sau 30 trades, tính Win Rate và Profit Factor. Nếu Win Rate trên 55% và Profit Factor trên 1.5, bạn đã sẵn sàng để tiến sang trading thật với size nhỏ.</p>
+                <p><strong>Lưu ý:</strong> Không gian lận bằng cách nhìn trước kết quả. Hãy backtest như thể bạn đang trading thật, vì mục đích của bài tập này là xây dựng kỹ năng và sự tự tin thực sự.</p>
+            </div>
+
+            <!-- HÌNH 7.4.4 -->
+            <div class="image-container">
+                <img src="images/bai-7.4-hinh-4-bar-replay-tradingview.jpg" alt="TradingView Bar Replay Mode">
+                <div class="image-caption">Hình 7.4.4: Hướng dẫn sử dụng Bar Replay trên TradingView - công cụ miễn phí tối ưu cho backtesting</div>
+            </div>
+        </section>
+
+        <!-- SECTION 7: Tóm Tắt -->
+        <div class="summary-box">
+            <h3 class="summary-title">📝 Tóm Tắt Bài 7.4</h3>
+            <ul class="summary-list">
+                <li>Backtesting là kiểm tra chiến lược trên dữ liệu quá khứ trước khi trading thật, giúp bạn xác định xem chiến lược có thực sự hoạt động hay không mà không cần mạo hiểm tiền thật.</li>
+                <li>Quy trình 5 bước gồm: Chọn coin và timeframe, lùi chart về quá khứ, tìm pattern, đánh dấu entry và SL và TP, cuối cùng là kiểm tra kết quả.</li>
+                <li>Cần backtest tối thiểu 30 trades cho mỗi pattern để có kết quả đáng tin cậy về mặt thống kê, lý tưởng là 50-100 trades.</li>
+                <li>Ba lỗi phổ biến cần tránh là Lookahead Bias (nhìn trước kết quả), Cherry Picking (chỉ chọn pattern đẹp), và Sample Size quá nhỏ (backtest ít hơn 20 trades).</li>
+                <li>Sử dụng TradingView Bar Replay miễn phí kết hợp với Excel hoặc Google Sheets để backtest và theo dõi kết quả một cách chuyên nghiệp.</li>
+            </ul>
+            <p style="margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px solid var(--glass-border); color: var(--gold); font-weight: 600;">🎯 Bài Học Lớn: Traders thành công không phải là những người "đoán" đúng mà là những người đã kiểm chứng chiến lược trước khi đặt cược tiền thật!</p>
+        </div>
+
+        <!-- SECTION 8: Quiz -->
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">❓ Kiểm Tra Kiến Thức</h2>
+                <p class="quiz-subtitle">Trả lời 3 câu hỏi để củng cố kiến thức về Backtesting</p>
+            </div>
+
+            <div class="quiz-question" id="question-1">
+                <div class="question-number">1</div>
+                <p class="question-text">Cần backtest ít nhất bao nhiêu trades cho một pattern để có kết quả đáng tin cậy về mặt thống kê?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-question="1" data-answer="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">5-10 trades là đủ</span>
+                    </div>
+                    <div class="quiz-option" data-question="1" data-answer="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Tối thiểu 30 trades</span>
+                    </div>
+                    <div class="quiz-option" data-question="1" data-answer="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Chỉ cần 3 trades thắng liên tiếp</span>
+                    </div>
+                </div>
+                <div class="question-feedback" id="feedback-1">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" id="question-2">
+                <div class="question-number">2</div>
+                <p class="question-text">"Lookahead Bias" trong backtesting là gì?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-question="2" data-answer="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Backtest quá nhiều patterns cùng lúc</span>
+                    </div>
+                    <div class="quiz-option" data-question="2" data-answer="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Sử dụng timeframe quá nhỏ</span>
+                    </div>
+                    <div class="quiz-option" data-question="2" data-answer="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Nhìn trước kết quả rồi mới xác định entry</span>
+                    </div>
+                </div>
+                <div class="question-feedback" id="feedback-2">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" id="question-3">
+                <div class="question-number">3</div>
+                <p class="question-text">Công cụ miễn phí nào trên TradingView giúp backtesting hiệu quả nhất?</p>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-question="3" data-answer="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Drawing Tools</span>
+                    </div>
+                    <div class="quiz-option" data-question="3" data-answer="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Bar Replay Mode</span>
+                    </div>
+                    <div class="quiz-option" data-question="3" data-answer="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Paper Trading Mode</span>
+                    </div>
+                </div>
+                <div class="question-feedback" id="feedback-3">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-result" id="quiz-result">
+                <div class="result-score"><span id="score">0</span>/3</div>
+                <p class="result-message" id="result-message"></p>
+            </div>
+
+            <div class="quiz-buttons">
+                <button class="quiz-btn btn-secondary" onclick="resetQuiz()">Làm Lại</button>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="lesson-footer">
+            <p class="footer-completion">🎉 Hoàn thành Bài 7.4!</p>
+            <p class="footer-next">Tiếp theo: <strong>Bài 7.5 - Từ Paper Trading Đến Giao Dịch Thật</strong></p>
+        </footer>
+    </div>
+
+    <script>
+        const correctAnswers = {
+            1: 'B',
+            2: 'C',
+            3: 'B'
+        };
+
+        const explanations = {
+            1: {
+                correct: 'Chính xác! Theo nguyên lý thống kê Central Limit Theorem, cần tối thiểu 30 mẫu để có kết quả đáng tin cậy. Với 30 trades, bạn có thể tin tưởng 95% rằng Win Rate thực tế sẽ nằm trong khoảng ±15% so với kết quả backtest. Lý tưởng nhất là 50-100 trades.',
+                incorrect: 'Chưa đúng. Backtesting với quá ít trades (dưới 30) không có ý nghĩa thống kê vì kết quả có thể bị ảnh hưởng bởi may mắn hoặc một vài outlier. Cần tối thiểu 30 trades để kết quả đáng tin cậy, lý tưởng là 50-100 trades.'
+            },
+            2: {
+                correct: 'Chính xác! Lookahead Bias là lỗi "nhìn trước" - bạn đã biết kết quả rồi mới "tìm" pattern để chứng minh chiến lược hoạt động. Đây là lỗi nghiêm trọng nhất vì nó khiến kết quả backtest hoàn toàn vô nghĩa. Để tránh, hãy sử dụng Bar Replay hoặc che phần chart phía trước.',
+                incorrect: 'Chưa đúng. Lookahead Bias là việc đã biết trước kết quả (giá tăng hay giảm) rồi mới quay lại xác định entry point, khiến kết quả backtest không phản ánh đúng thực tế trading. Đây là lỗi nghiêm trọng nhất cần tránh.'
+            },
+            3: {
+                correct: 'Chính xác! Bar Replay Mode cho phép chart "chạy lại" từng nến một từ một thời điểm trong quá khứ. Bạn không thể nhìn thấy tương lai, giúp loại bỏ hoàn toàn Lookahead Bias. Đây là công cụ miễn phí và cực kỳ hữu ích cho backtesting thủ công.',
+                incorrect: 'Chưa đúng. Mặc dù Drawing Tools và Paper Trading Mode đều hữu ích, nhưng Bar Replay Mode là công cụ tốt nhất cho backtesting vì nó cho phép "chạy lại" chart từng nến một, giúp bạn tránh được Lookahead Bias - lỗi nghiêm trọng nhất khi backtest.'
+            }
+        };
+
+        let answered = {1: false, 2: false, 3: false};
+        let correctCount = 0;
+
+        document.querySelectorAll('.quiz-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const questionNum = parseInt(this.dataset.question);
+                const selectedAnswer = this.dataset.answer;
+
+                if (answered[questionNum]) return;
+                answered[questionNum] = true;
+
+                const questionEl = document.getElementById(`question-${questionNum}`);
+                const feedbackEl = document.getElementById(`feedback-${questionNum}`);
+                const options = questionEl.querySelectorAll('.quiz-option');
+
+                options.forEach(opt => opt.classList.add('disabled'));
+
+                const isCorrect = selectedAnswer === correctAnswers[questionNum];
+
+                if (isCorrect) {
+                    this.classList.add('correct');
+                    correctCount++;
+                    feedbackEl.classList.add('correct');
+                    feedbackEl.querySelector('.feedback-title').textContent = '✓ Chính xác!';
+                    feedbackEl.querySelector('.feedback-text').textContent = explanations[questionNum].correct;
+                } else {
+                    this.classList.add('incorrect');
+                    options.forEach(opt => {
+                        if (opt.dataset.answer === correctAnswers[questionNum]) {
+                            opt.classList.add('correct');
+                        }
+                    });
+                    feedbackEl.classList.add('incorrect');
+                    feedbackEl.querySelector('.feedback-title').textContent = '✗ Chưa đúng';
+                    feedbackEl.querySelector('.feedback-text').textContent = explanations[questionNum].incorrect;
+                }
+
+                feedbackEl.classList.add('show');
+
+                if (answered[1] && answered[2] && answered[3]) {
+                    showResult();
+                }
+            });
+        });
+
+        function showResult() {
+            const resultEl = document.getElementById('quiz-result');
+            const scoreEl = document.getElementById('score');
+            const messageEl = document.getElementById('result-message');
+
+            scoreEl.textContent = correctCount;
+
+            if (correctCount === 3) {
+                messageEl.textContent = 'Xuất sắc! Bạn đã nắm vững kiến thức về Backtesting. Hãy bắt đầu thực hành ngay hôm nay!';
+            } else if (correctCount === 2) {
+                messageEl.textContent = 'Tốt lắm! Hãy xem lại phần giải thích để hiểu rõ hơn về các khái niệm backtesting.';
+            } else {
+                messageEl.textContent = 'Bạn cần đọc lại bài học để nắm vững kiến thức. Backtesting là kỹ năng quan trọng!';
+            }
+
+            resultEl.classList.add('show');
+        }
+
+        function resetQuiz() {
+            answered = {1: false, 2: false, 3: false};
+            correctCount = 0;
+
+            document.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('correct', 'incorrect', 'disabled');
+            });
+
+            document.querySelectorAll('.question-feedback').forEach(fb => {
+                fb.classList.remove('show', 'correct', 'incorrect');
+            });
+
+            document.getElementById('quiz-result').classList.remove('show');
+        }
+    </script>
+</body>
+</html>

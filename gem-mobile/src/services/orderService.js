@@ -488,47 +488,150 @@ export const fetchShopifyOrderDetail = async (orderId) => {
   }
 };
 
+// ============================================================
+// SECURE EMAIL VERIFICATION FLOW (V4 - WITH OTP)
+// ============================================================
+
 /**
- * Link email to user's profile
+ * Request verification OTP for email linking
+ * Step 1: Call this to send OTP to email
  * @param {string} userId - User ID
- * @param {string} email - Email to link
- * @returns {Promise<Object>} { success, message }
+ * @param {string} email - Email to verify
+ * @param {string} purpose - 'link_email' or 'link_order'
+ * @param {string} orderNumber - Order number (if linking order)
+ * @returns {Promise<Object>} { success, message, token_id }
  */
-export const linkEmailToAccount = async (userId, email) => {
+export const requestEmailVerification = async (userId, email, purpose = 'link_email', orderNumber = null) => {
   try {
-    // 1. Get current linked_emails
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('linked_emails')
-      .eq('id', userId)
-      .single();
+    // Get current session token for auth
+    const { data: { session } } = await supabase.auth.getSession();
 
-    if (profileError) {
-      throw new Error('Không tìm thấy tài khoản');
+    if (!session?.access_token) {
+      throw new Error('Vui lòng đăng nhập lại');
     }
 
-    const currentEmails = profile?.linked_emails || [];
+    // Call Edge Function to send OTP
+    const response = await fetch(
+      `${supabase.supabaseUrl}/functions/v1/send-verification-email`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          email: email.toLowerCase(),
+          purpose,
+          order_number: orderNumber,
+        }),
+      }
+    );
 
-    // 2. Check if already linked
-    if (currentEmails.includes(email)) {
-      return { success: true, message: 'Email đã được liên kết trước đó' };
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      return {
+        success: false,
+        message: result.message || result.error || 'Không thể gửi mã xác thực',
+      };
     }
 
-    // 3. Add new email
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({ linked_emails: [...currentEmails, email] })
-      .eq('id', userId);
+    return {
+      success: true,
+      message: result.message,
+      token_id: result.token_id,
+      expires_in: result.expires_in,
+    };
+  } catch (error) {
+    console.error('[OrderService] requestEmailVerification error:', error);
+    throw error;
+  }
+};
 
-    if (updateError) {
-      throw updateError;
+/**
+ * Verify OTP and complete email linking
+ * Step 2: Call this after user enters OTP
+ * @param {string} userId - User ID
+ * @param {string} email - Email being verified
+ * @param {string} otp - 6-digit OTP
+ * @param {string} purpose - 'link_email' or 'link_order'
+ * @returns {Promise<Object>} { success, message, order_number }
+ */
+export const verifyEmailOTP = async (userId, email, otp, purpose = 'link_email') => {
+  try {
+    const { data, error } = await supabase.rpc('verify_email_otp', {
+      p_user_id: userId,
+      p_email: email.toLowerCase(),
+      p_otp: otp,
+      p_purpose: purpose,
+    });
+
+    if (error) {
+      console.error('[OrderService] verifyEmailOTP error:', error);
+      throw error;
     }
 
-    // 4. Apply any pending course access for that email
+    const result = data?.[0];
+
+    if (!result?.success) {
+      return {
+        success: false,
+        message: result?.message || 'Mã OTP không hợp lệ',
+      };
+    }
+
+    // If purpose is link_email, apply ALL pending purchases (tiers, gems, courses)
+    if (purpose === 'link_email') {
+      await applyAllPendingPurchases(userId);
+      // Keep legacy course access for backwards compatibility
+      await applyPendingCourseAccess(userId, email);
+    }
+
+    return {
+      success: true,
+      message: result.message,
+      order_number: result.order_number,
+    };
+  } catch (error) {
+    console.error('[OrderService] verifyEmailOTP error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Apply ALL pending purchases (tiers, gems, courses) for user
+ * Uses database function for consistency
+ */
+const applyAllPendingPurchases = async (userId) => {
+  try {
+    const { data, error } = await supabase.rpc('apply_all_pending_purchases', {
+      p_user_id: userId,
+    });
+
+    if (error) {
+      console.error('[OrderService] applyAllPendingPurchases error:', error);
+      // Non-blocking - continue even if this fails
+      return;
+    }
+
+    console.log('[OrderService] Applied pending purchases:', data);
+    return data;
+  } catch (error) {
+    console.error('[OrderService] applyAllPendingPurchases exception:', error);
+    // Non-blocking
+  }
+};
+
+/**
+ * Apply pending course access for email
+ * Called after successful email verification
+ */
+const applyPendingCourseAccess = async (userId, email) => {
+  try {
     const { data: pendingAccess } = await supabase
       .from('pending_course_access')
       .select('*')
-      .eq('email', email)
+      .eq('email', email.toLowerCase())
       .eq('applied', false);
 
     if (pendingAccess && pendingAccess.length > 0) {
@@ -553,29 +656,96 @@ export const linkEmailToAccount = async (userId, email) => {
           .eq('id', pending.id);
       }
     }
-
-    return { success: true, message: 'Đã liên kết email thành công' };
   } catch (error) {
-    console.error('[OrderService] linkEmailToAccount error:', error);
-    throw error;
+    console.error('[OrderService] applyPendingCourseAccess error:', error);
+    // Non-blocking error
   }
 };
 
 /**
- * Link order to user by order number + email
+ * Link email to user's profile (LEGACY - redirects to secure flow)
+ * @deprecated Use requestEmailVerification + verifyEmailOTP instead
+ * @param {string} userId - User ID
+ * @param {string} email - Email to link
+ * @returns {Promise<Object>} { success, message, requiresVerification }
+ */
+export const linkEmailToAccount = async (userId, email) => {
+  // Check if email is already verified for this user
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('email, linked_emails, verified_linked_emails')
+    .eq('id', userId)
+    .single();
+
+  const normalizedEmail = email.toLowerCase();
+
+  // If it's the user's primary email, allow
+  if (profile?.email === normalizedEmail) {
+    return { success: true, message: 'Email chính đã được liên kết' };
+  }
+
+  // If already in verified_linked_emails, allow
+  if (profile?.verified_linked_emails?.includes(normalizedEmail)) {
+    return { success: true, message: 'Email đã được xác thực và liên kết' };
+  }
+
+  // Otherwise, require verification
+  return {
+    success: false,
+    requiresVerification: true,
+    message: 'Vui lòng xác thực email trước khi liên kết. Nhấn "Gửi mã OTP" để nhận mã xác thực.',
+  };
+};
+
+/**
+ * Link order to user by order number + email (SECURE VERSION)
+ * Requires email verification first
  * @param {string} userId - User ID
  * @param {string} orderNumber - Shopify order number
  * @param {string} email - Email used when ordering
- * @returns {Promise<Object>} { success, message }
+ * @returns {Promise<Object>} { success, message, requiresVerification }
  */
 export const linkOrderByNumber = async (userId, orderNumber, email) => {
   try {
-    // 1. Find order in shopify_orders
+    const normalizedEmail = email.toLowerCase();
+
+    // 1. Check if email is verified for this user
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('email, verified_linked_emails')
+      .eq('id', userId)
+      .single();
+
+    const isVerified =
+      profile?.email === normalizedEmail ||
+      profile?.verified_linked_emails?.includes(normalizedEmail);
+
+    if (!isVerified) {
+      // Check if there's a recent verification for this email
+      const { data: recentVerification } = await supabase
+        .from('email_verification_tokens')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('email', normalizedEmail)
+        .eq('is_verified', true)
+        .gt('verified_at', new Date(Date.now() - 30 * 60 * 1000).toISOString()) // 30 minutes
+        .single();
+
+      if (!recentVerification) {
+        return {
+          success: false,
+          requiresVerification: true,
+          message: 'Vui lòng xác thực email trước khi liên kết đơn hàng.',
+        };
+      }
+    }
+
+    // 2. Find order in shopify_orders
     const { data: order, error: findError } = await supabase
       .from('shopify_orders')
       .select('*')
       .eq('order_number', orderNumber)
-      .eq('email', email.toLowerCase())
+      .eq('email', normalizedEmail)
       .single();
 
     if (findError || !order) {
@@ -585,12 +755,12 @@ export const linkOrderByNumber = async (userId, orderNumber, email) => {
       };
     }
 
-    // 2. Check if already linked to this user
+    // 3. Check if already linked to this user
     if (order.user_id === userId) {
       return { success: true, message: 'Đơn hàng đã được liên kết với tài khoản của bạn' };
     }
 
-    // 3. Update order's user_id
+    // 4. Update order's user_id
     const { error: updateError } = await supabase
       .from('shopify_orders')
       .update({ user_id: userId })
@@ -600,12 +770,66 @@ export const linkOrderByNumber = async (userId, orderNumber, email) => {
       throw updateError;
     }
 
-    // 4. Link email to account as well
-    await linkEmailToAccount(userId, email.toLowerCase());
+    // 5. Add email to verified_linked_emails if not already
+    if (!profile?.verified_linked_emails?.includes(normalizedEmail)) {
+      await supabase
+        .from('profiles')
+        .update({
+          linked_emails: supabase.sql`array_append(COALESCE(linked_emails, '{}'), ${normalizedEmail})`,
+          verified_linked_emails: supabase.sql`array_append(COALESCE(verified_linked_emails, '{}'), ${normalizedEmail})`,
+        })
+        .eq('id', userId);
+    }
+
+    // 6. Apply pending course access
+    await applyPendingCourseAccess(userId, normalizedEmail);
 
     return { success: true, message: 'Đã liên kết đơn hàng thành công' };
   } catch (error) {
     console.error('[OrderService] linkOrderByNumber error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Complete order linking after OTP verification
+ * Call this after verifyEmailOTP returns success
+ * @param {string} userId - User ID
+ * @param {string} orderNumber - Shopify order number
+ * @param {string} email - Verified email
+ * @returns {Promise<Object>} { success, message }
+ */
+export const linkOrderAfterVerification = async (userId, orderNumber, email) => {
+  try {
+    const { data, error } = await supabase.rpc('link_order_after_verification', {
+      p_user_id: userId,
+      p_email: email.toLowerCase(),
+      p_order_number: orderNumber,
+    });
+
+    if (error) {
+      console.error('[OrderService] linkOrderAfterVerification error:', error);
+      throw error;
+    }
+
+    const result = data?.[0];
+
+    if (!result?.success) {
+      return {
+        success: false,
+        message: result?.message || 'Không thể liên kết đơn hàng',
+      };
+    }
+
+    // Apply pending course access
+    await applyPendingCourseAccess(userId, email);
+
+    return {
+      success: true,
+      message: result.message,
+    };
+  } catch (error) {
+    console.error('[OrderService] linkOrderAfterVerification error:', error);
     throw error;
   }
 };

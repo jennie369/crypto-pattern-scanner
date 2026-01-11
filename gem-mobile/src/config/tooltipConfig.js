@@ -138,6 +138,862 @@ export const TOOLTIPS = {
   },
 
   // ═══════════════════════════════════════════════════════════════════════
+  // QUASIMODO (QM) PATTERN TOOLTIPS (6 tooltips)
+  // ═══════════════════════════════════════════════════════════════════════
+
+  qm_pattern_intro: {
+    key: 'qm_pattern_intro',
+    title: 'Quasimodo Pattern',
+    message:
+      'Pattern đảo chiều mạnh nhất (5 sao). Bắt đỉnh/đáy với độ chính xác 73-75%. Giống Head & Shoulders nhưng mạnh hơn!',
+    screen: 'PatternDetail',
+    showOnce: true,
+    priority: 1,
+  },
+  qm_structure: {
+    key: 'qm_structure',
+    title: 'Cấu trúc QM',
+    message:
+      'QM gồm 4 phần: LS (Left Shoulder) → HEAD → RS (Right Shoulder) → BOS. RS không vượt được HEAD là dấu hiệu đảo chiều.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  qm_qml_level: {
+    key: 'qm_qml_level',
+    title: 'QML - Entry Point',
+    message:
+      'QML (Quasimodo Level) là điểm entry tối ưu. Đây là Higher Low trước Head (bullish) hoặc Lower High trước Head (bearish).',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  qm_mpl_level: {
+    key: 'qm_mpl_level',
+    title: 'MPL - Stop Level',
+    message:
+      'MPL (Maximum Pain Level) = Head price. Đặt stop loss qua MPL + buffer. Nếu giá vượt MPL, pattern thất bại.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  qm_bos: {
+    key: 'qm_bos',
+    title: 'BOS - Xác nhận',
+    message:
+      'BOS (Break of Structure) là xác nhận cuối cùng. Bearish QM cần Lower Low, Bullish QM cần Higher High.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  qm_trading_rules: {
+    key: 'qm_trading_rules',
+    title: 'Quy tắc giao dịch QM',
+    message:
+      'Entry: Tại QML. Stop: Trên/dưới MPL + buffer. Target: 2-3x risk. Đợi BOS xác nhận trước khi vào lệnh.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // FTR (FAIL TO RETURN) PATTERN TOOLTIPS (6 tooltips)
+  // ═══════════════════════════════════════════════════════════════════════
+
+  ftr_pattern_intro: {
+    key: 'ftr_pattern_intro',
+    title: 'FTR Pattern',
+    message:
+      'FTR = Fail To Return. Pattern continuation mạnh (4 sao). Xảy ra khi giá phá S/R rồi không quay lại được.',
+    screen: 'PatternDetail',
+    showOnce: true,
+    priority: 1,
+  },
+  ftr_structure: {
+    key: 'ftr_structure',
+    title: 'Cấu trúc FTR',
+    message:
+      'FTR gồm: S/R level bị phá → Base zone hình thành → Confirmation với new high/low. Base zone trở thành vùng demand/supply mới.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  ftr_freshness: {
+    key: 'ftr_freshness',
+    title: 'FTB - First Time Back',
+    message:
+      'FTB (First Time Back) = Lần đầu giá quay về zone. Zone chưa test = Fresh (tốt nhất). Mỗi lần test, zone yếu đi.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  ftr_zone: {
+    key: 'ftr_zone',
+    title: 'FTR Zone',
+    message:
+      'Zone là vùng base sau khi phá S/R. Entry tại cạnh gần (near price), Stop tại cạnh xa (far price) + buffer.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  ftr_break_percent: {
+    key: 'ftr_break_percent',
+    title: 'Break Percent',
+    message:
+      'Phần trăm giá di chuyển sau khi phá S/R. Break >1% = mạnh. Break <0.5% = yếu, có thể là fake breakout.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  ftr_return_percent: {
+    key: 'ftr_return_percent',
+    title: 'Return Ratio',
+    message:
+      'Tỷ lệ pullback so với break distance. Return <30% = FTR sạch. Return >50% = deep pullback, giảm độ tin cậy.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // ZONE CONCEPT TOOLTIPS (5 tooltips)
+  // ═══════════════════════════════════════════════════════════════════════
+
+  zone_concept_intro: {
+    key: 'zone_concept_intro',
+    title: 'Zone Trading',
+    message:
+      'Zone là vùng giá quan trọng thay vì level cố định. HFZ = Supply (bán), LFZ = Demand (mua). Entry tại cạnh gần, Stop tại cạnh xa.',
+    screen: 'PatternDetail',
+    showOnce: true,
+    priority: 1,
+  },
+  zone_hfz: {
+    key: 'zone_hfz',
+    title: 'HFZ - Vùng Cung',
+    message:
+      'HFZ (High Flip Zone) = Vùng Supply. Giá từ dưới đi lên sẽ bị chặn. Entry = LOW của zone, Stop = HIGH của zone.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  zone_lfz: {
+    key: 'zone_lfz',
+    title: 'LFZ - Vùng Cầu',
+    message:
+      'LFZ (Low Flip Zone) = Vùng Demand. Giá từ trên đi xuống sẽ được nâng. Entry = HIGH của zone, Stop = LOW của zone.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  zone_width: {
+    key: 'zone_width',
+    title: 'Độ rộng Zone',
+    message:
+      'Zone width = Entry - Stop. Zone hẹp (<1%) = Entry chính xác hơn. Zone rộng (>3%) = Cần scale-in hoặc bỏ qua.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  zone_validation: {
+    key: 'zone_validation',
+    title: 'Kiểm tra Zone',
+    message:
+      'Zone hợp lệ: Width <3%, R:R >1:2, chưa bị test nhiều lần. Zone không hợp lệ có cảnh báo màu vàng.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // ODDS ENHANCERS TOOLTIPS (10 tooltips)
+  // ═══════════════════════════════════════════════════════════════════════
+
+  odds_enhancers_intro: {
+    key: 'odds_enhancers_intro',
+    title: 'Odds Enhancers',
+    message:
+      'Hệ thống 8 tiêu chí chấm điểm zone (0-16). Grade A+ = 14-16 điểm, tăng win rate 10-12%!',
+    screen: 'PatternDetail',
+    showOnce: true,
+    priority: 1,
+  },
+  odds_departure_strength: {
+    key: 'odds_departure_strength',
+    title: 'Sức Mạnh Thoát Ly',
+    message:
+      'Độ mạnh của nến rời khỏi zone. Nến mạnh (body >= 70%, ít wick) = 2 điểm. Nến yếu = 0 điểm.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  odds_time_at_level: {
+    key: 'odds_time_at_level',
+    title: 'Thời Gian Tại Vùng',
+    message:
+      'Số nến trong vùng pause. 1-2 nến = 2 điểm (fresh orders). >6 nến = 0 điểm (orders đã fill).',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  odds_freshness: {
+    key: 'odds_freshness',
+    title: 'Độ Tươi Mới',
+    message:
+      'Số lần zone đã được test. FTB (chưa test) = 2 điểm. 1-2 lần = 1 điểm. 3+ lần = 0 điểm (stale).',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  odds_profit_margin: {
+    key: 'odds_profit_margin',
+    title: 'Biên Lợi Nhuận',
+    message:
+      'Khoảng cách đến opposing zone. >4x zone width = 2 điểm. <2x = 0 điểm (không đủ room).',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  odds_big_picture: {
+    key: 'odds_big_picture',
+    title: 'Xu Hướng Lớn',
+    message:
+      'Zone cùng hướng với HTF trend. LFZ + uptrend = 2 điểm. Ngược trend = 0 điểm.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  odds_zone_origin: {
+    key: 'odds_zone_origin',
+    title: 'Nguồn Gốc Zone',
+    message:
+      'Loại pattern tạo zone. Decision Point/QM = 2 điểm. FTR/FL = 1 điểm. Regular = 0 điểm.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  odds_arrival_speed: {
+    key: 'odds_arrival_speed',
+    title: 'Tốc Độ Tiếp Cận',
+    message:
+      'Giá tiếp cận zone. Chậm, yếu dần (compression) = 2 điểm. Nhanh, mạnh = 0 điểm (có thể break).',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  odds_risk_reward: {
+    key: 'odds_risk_reward',
+    title: 'Tỷ Lệ R:R',
+    message:
+      'Tỷ lệ lợi nhuận/rủi ro. >3:1 = 2 điểm. 2-3:1 = 1 điểm. <2:1 = 0 điểm (không nên trade).',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  odds_grade_meaning: {
+    key: 'odds_grade_meaning',
+    title: 'Ý Nghĩa Grade',
+    message:
+      'A+ (14-16): Full size. A (12-13): 75%. B (10-11): 50%. C (8-9): 25%. D-F: Skip trade.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // FRESHNESS TRACKING TOOLTIPS (5 tooltips)
+  // ═══════════════════════════════════════════════════════════════════════
+
+  freshness_intro: {
+    key: 'freshness_intro',
+    title: 'Zone Freshness',
+    message:
+      'Theo dõi độ "tươi" của zone. Mỗi lần test, ~35% orders được fill. Zone càng fresh càng tốt!',
+    screen: 'PatternDetail',
+    showOnce: true,
+    priority: 1,
+  },
+  freshness_ftb: {
+    key: 'freshness_ftb',
+    title: 'FTB - First Time Back',
+    message:
+      'Lần đầu tiên giá quay về zone. 100% orders còn nguyên. Cơ hội tốt nhất để entry!',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  freshness_orders: {
+    key: 'freshness_orders',
+    title: 'Order Absorption',
+    message:
+      'Mỗi test, ~35% orders bị fill. FTB: 100%. 1 test: ~65%. 2 test: ~42%. 3+ test: <30% (stale).',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  freshness_status: {
+    key: 'freshness_status',
+    title: 'Trạng Thái Zone',
+    message:
+      'Fresh (xanh): 0 test. Tested (vàng): 1-2 test. Stale (đỏ): 3+ test - nên skip.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  freshness_best_practice: {
+    key: 'freshness_best_practice',
+    title: 'Best Practice',
+    message:
+      'Ưu tiên trade FTB zones. Tránh zone đã test 3+ lần. Kết hợp với Odds Enhancers để chọn setup tốt nhất.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // ZONE HIERARCHY TOOLTIPS (8 tooltips)
+  // ═══════════════════════════════════════════════════════════════════════
+
+  hierarchy_intro: {
+    key: 'hierarchy_intro',
+    title: 'Thứ Bậc Zone',
+    message:
+      'Không phải zone nào cũng như nhau! GEM phân loại zones theo thứ bậc: DP > FTR > FL > Regular.',
+    screen: 'PatternDetail',
+    showOnce: true,
+    priority: 1,
+  },
+  hierarchy_decision_point: {
+    key: 'hierarchy_decision_point',
+    title: 'Decision Point (DP)',
+    message:
+      'Origin của major move. Nơi Smart Money bắt đầu accumulate/distribute. Zone mạnh nhất, 5 sao.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  hierarchy_ftr: {
+    key: 'hierarchy_ftr',
+    title: 'Fail To Return (FTR)',
+    message:
+      'Zone sau khi break S/R. Price không quay lại được = Smart Money đang add positions. 4 sao.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  hierarchy_flag_limit: {
+    key: 'hierarchy_flag_limit',
+    title: 'Flag Limit (FL)',
+    message:
+      'UPU/DPD với base chỉ 1-2 nến. Quick pause trong trend. Khi FL bị engulf = Price đến FL tiếp theo. 3 sao.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  hierarchy_regular: {
+    key: 'hierarchy_regular',
+    title: 'Regular Zone',
+    message:
+      'Zone thông thường. Cần thêm confluence (HTF alignment, freshness, odds score) để trade. 2 sao.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  hierarchy_priority: {
+    key: 'hierarchy_priority',
+    title: 'Ưu Tiên Zone',
+    message:
+      'Khi có nhiều zone, ưu tiên: DP > FTR > FL > Regular. DP và FTR là "premium zones" nên trade đầu tiên.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  flag_limit_rules: {
+    key: 'flag_limit_rules',
+    title: 'Quy Tắc FL',
+    message:
+      'FL phải có base 1-2 nến. Pattern: UPU (bullish) hoặc DPD (bearish). Khi FL bị engulf, price di chuyển đến FL tiếp theo.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  decision_point_rules: {
+    key: 'decision_point_rules',
+    title: 'Quy Tắc DP',
+    message:
+      'DP = Origin của move lớn (>3%). Move phải impulsive (>60% nến cùng hướng). Entry tại zone, Target: FL tiếp theo.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // STACKED ZONES + HIDDEN FTR + FTB TOOLTIPS (10 tooltips) - Phase 2B
+  // ═══════════════════════════════════════════════════════════════════════
+
+  stacked_zones_intro: {
+    key: 'stacked_zones_intro',
+    title: 'Stacked Zones',
+    message:
+      'Khi nhiều zones chồng lên nhau tại cùng vùng giá = Confluence CỰC MẠNH! Đây là A+ Setup.',
+    screen: 'PatternDetail',
+    showOnce: true,
+    priority: 1,
+  },
+  stacked_confluence_score: {
+    key: 'stacked_confluence_score',
+    title: 'Confluence Score',
+    message:
+      'Mỗi zone chồng = +1 điểm. Multi-TF = +2. DP/FTR = +2-3. Score ≥15 = A+ Setup. Score ≥10 = A Setup.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  stacked_tightest_zone: {
+    key: 'stacked_tightest_zone',
+    title: 'Entry Tại Zone Hẹp Nhất',
+    message:
+      'Khi có stacked zones, entry tại zone nhỏ nhất (tight zone). SL tại stop của zone lớn nhất = R:R tốt nhất.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  hidden_ftr_intro: {
+    key: 'hidden_ftr_intro',
+    title: 'Hidden FTR',
+    message:
+      'FTR ẩn bên trong HTF zone. Zoom xuống LTF để tìm. Giúp refine entry và giảm stop loss.',
+    screen: 'PatternDetail',
+    showOnce: true,
+    priority: 1,
+  },
+  hidden_ftr_refinement: {
+    key: 'hidden_ftr_refinement',
+    title: 'Zone Refinement',
+    message:
+      'Hidden FTR giảm zone width 30-60%. VD: 1D zone 200 pips → 4H Hidden FTR chỉ 80 pips. R:R tăng 2-3x.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  hidden_ftr_ltf_mapping: {
+    key: 'hidden_ftr_ltf_mapping',
+    title: 'LTF Mapping',
+    message:
+      '1D → 4H/1H. 4H → 1H/30m. 1H → 15m/5m. Luôn check 2 LTF liên tiếp để tìm Hidden FTR.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  ftb_intro: {
+    key: 'ftb_intro',
+    title: 'FTB - First Time Back',
+    message:
+      'Lần ĐẦU TIÊN giá quay về zone sau khi form. Zone còn 100% orders. Entry tốt nhất với win rate cao nhất!',
+    screen: 'PatternDetail',
+    showOnce: true,
+    priority: 1,
+  },
+  ftb_orders_remaining: {
+    key: 'ftb_orders_remaining',
+    title: 'Orders Remaining',
+    message:
+      'FTB: 100% orders. Test 1x: ~70%. Test 2x: ~50%. Test 3+: <30% (stale). Ưu tiên FTB zones!',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  ftb_quality_tiers: {
+    key: 'ftb_quality_tiers',
+    title: 'FTB Quality Tiers',
+    message:
+      'Perfect: Đang trong zone + FTB. Excellent: Gần zone <0.5% + FTB. Good: Đang tiến đến + FTB.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  zone_in_zone: {
+    key: 'zone_in_zone',
+    title: 'Zone-in-Zone (Nested)',
+    message:
+      'LTF zone nằm hoàn toàn bên trong HTF zone. Cùng direction = Double confluence = Entry chính xác.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // COMPRESSION + INDUCEMENT + LOOK RIGHT TOOLTIPS (12 tooltips) - Phase 2C
+  // ═══════════════════════════════════════════════════════════════════════
+
+  compression_intro: {
+    key: 'compression_intro',
+    title: 'Compression Pattern',
+    message:
+      'Khi giá nén lại (triangle/wedge) tiến vào zone = Momentum giảm, năng lượng tích tụ. A+ Setup!',
+    screen: 'PatternDetail',
+    showOnce: true,
+    priority: 1,
+  },
+  compression_types: {
+    key: 'compression_types',
+    title: 'Loại Compression',
+    message:
+      'Descending Triangle vào LFZ = BULLISH. Ascending Triangle vào HFZ = BEARISH. Symmetrical theo zone type.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  compression_quality: {
+    key: 'compression_quality',
+    title: 'Chất Lượng Compression',
+    message:
+      'Excellent: Nén >60%, 5+ waves. Good: Nén 40-60%. Moderate: <40%. Chất lượng cao = Win rate cao.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  compression_wedges: {
+    key: 'compression_wedges',
+    title: 'Falling/Rising Wedge',
+    message:
+      'Falling Wedge vào LFZ = VERY BULLISH. Rising Wedge vào HFZ = VERY BEARISH. Strong reversal setup.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  inducement_intro: {
+    key: 'inducement_intro',
+    title: 'Inducement / Stop Hunt',
+    message:
+      'Smart Money grab liquidity trước khi di chuyển thật. Wick dài + close ngược = Inducement!',
+    screen: 'PatternDetail',
+    showOnce: true,
+    priority: 1,
+  },
+  inducement_mechanism: {
+    key: 'inducement_mechanism',
+    title: 'Cơ Chế Inducement',
+    message:
+      '1. Price break S/R tạm thời. 2. Kích hoạt stop loss. 3. SM absorb liquidity. 4. Price đảo chiều mạnh.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  inducement_bullish: {
+    key: 'inducement_bullish',
+    title: 'Bullish Inducement',
+    message:
+      'Wick dài xuống dưới zone, close trên zone = Stops bị sweep. SM đã accumulate. Tìm điểm BUY.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  inducement_bearish: {
+    key: 'inducement_bearish',
+    title: 'Bearish Inducement',
+    message:
+      'Wick dài lên trên zone, close dưới zone = Stops bị sweep. SM đã distribute. Tìm điểm SELL.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  inducement_reversal: {
+    key: 'inducement_reversal',
+    title: 'Xác Nhận Reversal',
+    message:
+      'Sau inducement, đợi 2+ nến ngược hướng để xác nhận. Reversal confirmed = Entry opportunity.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  look_right_intro: {
+    key: 'look_right_intro',
+    title: 'Look To The Right',
+    message:
+      'Sau khi tìm zone, PHẢI check bên phải chart. Zone đã bị phá = KHÔNG trade. Zone intact = Valid.',
+    screen: 'PatternDetail',
+    showOnce: true,
+    priority: 1,
+  },
+  look_right_validation: {
+    key: 'look_right_validation',
+    title: 'Zone Validation',
+    message:
+      'FRESH: 0 test. TESTED: 1-2 wicks nhưng chưa close qua. BROKEN: 2+ closes beyond zone = SKIP.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  look_right_confidence: {
+    key: 'look_right_confidence',
+    title: 'Confidence Score',
+    message:
+      '100%: Zone chưa bị test. Mỗi wick -5-10%. Mỗi close beyond -30%. <50% = High risk, cân nhắc skip.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // CONFIRMATION PATTERNS TOOLTIPS (12 tooltips) - Phase 3A
+  // ═══════════════════════════════════════════════════════════════════════
+
+  confirmation_intro: {
+    key: 'confirmation_intro',
+    title: 'Confirmation Patterns',
+    message:
+      'Sau khi price vào zone, chờ CONFIRMATION trước khi entry! Confirmation = Nến cho thấy price sẽ reverse.',
+    screen: 'PatternDetail',
+    showOnce: true,
+    priority: 1,
+  },
+  confirmation_engulfing: {
+    key: 'confirmation_engulfing',
+    title: 'Engulfing Pattern',
+    message:
+      'Nến hiện tại "nuốt trọn" nến trước đó. Bullish Engulfing = BUY. Bearish Engulfing = SELL. Engulfing càng lớn = Signal càng mạnh!',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  confirmation_pin_bar: {
+    key: 'confirmation_pin_bar',
+    title: 'Pin Bar / Rejection',
+    message:
+      'Nến có râu dài, body nhỏ. Râu dưới dài = Rejection từ dưới = BUY. Râu trên dài = Rejection từ trên = SELL.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  confirmation_hammer: {
+    key: 'confirmation_hammer',
+    title: 'Hammer & Shooting Star',
+    message:
+      'Hammer = Pin Bar sau downtrend = BUY signal mạnh. Shooting Star = Pin Bar sau uptrend = SELL signal mạnh.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  confirmation_inside_bar: {
+    key: 'confirmation_inside_bar',
+    title: 'Inside Bar',
+    message:
+      'Nến nằm hoàn toàn trong range nến trước = Consolidation. Đợi breakout để xác định hướng. Entry khi break mother bar.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  confirmation_doji: {
+    key: 'confirmation_doji',
+    title: 'Doji Pattern',
+    message:
+      'Open ≈ Close = Indecision. Doji một mình chưa đủ, cần confirmation từ nến tiếp theo. Doji + Engulfing = Strong signal!',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  confirmation_morning_star: {
+    key: 'confirmation_morning_star',
+    title: 'Morning Star',
+    message:
+      '3-candle bullish reversal: Nến giảm mạnh → Doji/nhỏ → Nến tăng mạnh. Signal cực mạnh (4 điểm)!',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  confirmation_evening_star: {
+    key: 'confirmation_evening_star',
+    title: 'Evening Star',
+    message:
+      '3-candle bearish reversal: Nến tăng mạnh → Doji/nhỏ → Nến giảm mạnh. Signal cực mạnh (4 điểm)!',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  confirmation_score: {
+    key: 'confirmation_score',
+    title: 'Confirmation Score',
+    message:
+      'Engulfing/Morning Star: 3-4 điểm. Pin Bar/Hammer: 2-3 điểm. Inside Bar/Doji: 1 điểm. Score ≥3 = Entry với confidence!',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  confirmation_strength: {
+    key: 'confirmation_strength',
+    title: 'Độ Mạnh Confirmation',
+    message:
+      'Strong (≥5 điểm): Full position. Moderate (3-4 điểm): 75% position. Weak (1-2 điểm): 50% hoặc skip.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  confirmation_zone_match: {
+    key: 'confirmation_zone_match',
+    title: 'Zone + Confirmation',
+    message:
+      'LFZ (Demand) → cần Bullish confirmation (Bullish Engulfing, Hammer). HFZ (Supply) → cần Bearish confirmation.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  confirmation_entry_trigger: {
+    key: 'confirmation_entry_trigger',
+    title: 'Entry Trigger',
+    message:
+      'Sau khi có confirmation: Engulfing → entry tại close. Pin Bar → entry break high/low. Inside Bar → entry break mother bar.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // EXTENDED ZONES + MPL + PIN ENGULF COMBO TOOLTIPS (12 tooltips) - Phase 3B
+  // ═══════════════════════════════════════════════════════════════════════
+
+  extended_zone_intro: {
+    key: 'extended_zone_intro',
+    title: 'Extended Zones',
+    message:
+      'Khi giá tạo new high/low trong quá trình accumulate/distribute, zone MỞ RỘNG. Stop loss di chuyển, nhiều orders hơn!',
+    screen: 'PatternDetail',
+    showOnce: true,
+    priority: 1,
+  },
+  extended_zone_hfz: {
+    key: 'extended_zone_hfz',
+    title: 'HFZ Extension',
+    message:
+      'HFZ (Supply) mở rộng khi có new HIGH. Stop loss di chuyển lên. Entry giữ nguyên tại cạnh dưới zone.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  extended_zone_lfz: {
+    key: 'extended_zone_lfz',
+    title: 'LFZ Extension',
+    message:
+      'LFZ (Demand) mở rộng khi có new LOW. Stop loss di chuyển xuống. Entry giữ nguyên tại cạnh trên zone.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  extended_zone_risk: {
+    key: 'extended_zone_risk',
+    title: 'Risk Adjustment',
+    message:
+      'Zone mở rộng = Stop xa hơn = Risk tăng. Giảm position size tương ứng để giữ risk cố định (% của account).',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  mpl_intro: {
+    key: 'mpl_intro',
+    title: 'MPL - Most Penetrated Level',
+    message:
+      'Trong zone có nhiều mức giá. MPL là mức bị "đâm xuyên" nhiều nhất - nơi Smart Money đặt orders nhiều nhất.',
+    screen: 'PatternDetail',
+    showOnce: true,
+    priority: 1,
+  },
+  mpl_entry: {
+    key: 'mpl_entry',
+    title: 'MPL Entry',
+    message:
+      'Dùng MPL làm entry thay vì cạnh zone. Stop nhỏ hơn = R:R cải thiện đáng kể. Excellent MPL = A+ Entry.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  mpl_quality: {
+    key: 'mpl_quality',
+    title: 'MPL Quality',
+    message:
+      'Excellent: 5+ penetrations, vị trí optimal. Good: 3-4 penetrations. Moderate: 2 penetrations - cân nhắc dùng zone edge.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  mpl_calculation: {
+    key: 'mpl_calculation',
+    title: 'Cách Tính MPL',
+    message:
+      'Chia zone thành 10 levels. Đếm số lần wick đâm qua mỗi level rồi close ngược lại. Level nhiều nhất = MPL.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  pin_engulf_combo_intro: {
+    key: 'pin_engulf_combo_intro',
+    title: 'Pin + Engulf Combo',
+    message:
+      'Khi có CẢ Pin Bar VÀ Engulfing tại zone = Signal CỰC MẠNH! Reliability > 85%. A+ Entry opportunity.',
+    screen: 'PatternDetail',
+    showOnce: true,
+    priority: 1,
+  },
+  pin_engulf_types: {
+    key: 'pin_engulf_types',
+    title: 'Loại Combo',
+    message:
+      'Pin → Engulf (phổ biến): +2 bonus. Same candle (hiếm): +3 bonus. Continuation: +1 bonus. Score combo >= 7 = A+ Setup.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  pin_engulf_entry: {
+    key: 'pin_engulf_entry',
+    title: 'Combo Entry',
+    message:
+      'Entry tại close của engulfing candle. Stop tại low/high của cả 2 nến. Full position size cho combo setup.',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+  pin_engulf_vs_single: {
+    key: 'pin_engulf_vs_single',
+    title: 'Combo vs Single Pattern',
+    message:
+      'Combo luôn ưu tiên hơn single pattern. Score cao hơn 3-5 điểm. Reliability cao hơn 10-15%. Đây là setup TỐT NHẤT!',
+    screen: 'PatternDetail',
+    position: 'bottom',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // SMART ALERTS TOOLTIPS (12 tooltips) - Phase 3C
+  // ═══════════════════════════════════════════════════════════════════════
+
+  smart_alerts_intro: {
+    key: 'smart_alerts_intro',
+    title: 'Smart Alerts',
+    message:
+      'Hệ thống cảnh báo thông minh! Không bao giờ miss entry. FTB alerts, Confirmation alerts, Zone broken alerts - tất cả tự động!',
+    screen: 'Scanner',
+    showOnce: true,
+    priority: 1,
+  },
+  alert_ftb: {
+    key: 'alert_ftb',
+    title: 'FTB Alert - Quan Trọng Nhất',
+    message:
+      'Khi price quay lại zone LẦN ĐẦU = FTB. Alert ngay lập tức với priority cao nhất. Đây là entry TỐT NHẤT!',
+    screen: 'AlertPanel',
+    position: 'bottom',
+  },
+  alert_ftb_approaching: {
+    key: 'alert_ftb_approaching',
+    title: 'FTB Approaching',
+    message:
+      'Alert khi price đến gần zone FTB (< 0.5%). Chuẩn bị sẵn sàng entry! Thời gian để analyze và set orders.',
+    screen: 'AlertPanel',
+    position: 'bottom',
+  },
+  alert_zone_approach: {
+    key: 'alert_zone_approach',
+    title: 'Zone Approach Alert',
+    message:
+      'Alert khi price tiến đến gần bất kỳ zone nào. Default: < 1% distance. Có thể customize trong Settings.',
+    screen: 'AlertPanel',
+    position: 'bottom',
+  },
+  alert_confirmation: {
+    key: 'alert_confirmation',
+    title: 'Confirmation Alert',
+    message:
+      'Alert khi có confirmation pattern tại zone: Engulfing, Pin Bar, hoặc Combo. Suggested action BUY/SELL đi kèm!',
+    screen: 'AlertPanel',
+    position: 'bottom',
+  },
+  alert_zone_broken: {
+    key: 'alert_zone_broken',
+    title: 'Zone Broken Alert',
+    message:
+      'Alert khi zone bị phá vỡ (2+ closes beyond). Hủy orders và tìm zone mới! Đừng cố bắt đáy/đỉnh.',
+    screen: 'AlertPanel',
+    position: 'bottom',
+  },
+  alert_pin_engulf_combo: {
+    key: 'alert_pin_engulf_combo',
+    title: 'Combo Alert',
+    message:
+      'Alert khi có Pin + Engulf Combo tại zone = A+ Entry! Priority cao nhất. Full position size!',
+    screen: 'AlertPanel',
+    position: 'bottom',
+  },
+  alert_stacked_zone: {
+    key: 'alert_stacked_zone',
+    title: 'Stacked Zone Alert',
+    message:
+      'Alert khi price tiến đến Stacked Zones (nhiều zones chồng lên nhau). Confluence CỰC MẠNH!',
+    screen: 'AlertPanel',
+    position: 'bottom',
+  },
+  alert_high_score: {
+    key: 'alert_high_score',
+    title: 'High Score Alert',
+    message:
+      'Alert khi zone có Odds Score >= 14 (A+). Setup chất lượng cao nhất. Full position size!',
+    screen: 'AlertPanel',
+    position: 'bottom',
+  },
+  alert_price_level: {
+    key: 'alert_price_level',
+    title: 'Custom Price Alert',
+    message:
+      'Tự đặt alert tại bất kỳ price level nào. VD: "Alert khi BTC = $100,000". Đơn giản và hiệu quả!',
+    screen: 'AlertPanel',
+    position: 'bottom',
+  },
+  alert_settings: {
+    key: 'alert_settings',
+    title: 'Alert Settings',
+    message:
+      'Customize alerts theo ý bạn: Bật/tắt từng loại, set quiet hours, min score để alert, distance threshold.',
+    screen: 'AlertSettings',
+    position: 'bottom',
+  },
+  alert_priority: {
+    key: 'alert_priority',
+    title: 'Alert Priority',
+    message:
+      'Priority 1 (Vàng): FTB, Combo, Stacked. Priority 2 (Cam): Confirmation. Priority 3 (Xanh): Zone approach. Priority 4 (Xám): Thấp.',
+    screen: 'AlertPanel',
+    position: 'bottom',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════
   // VISION BOARD TOOLTIPS (9 tooltips)
   // ═══════════════════════════════════════════════════════════════════════
 
@@ -973,6 +1829,180 @@ export const TOOLTIP_SEQUENCES = {
       'scanner_favorites',
     ],
     completionReward: { type: 'gem', amount: 10 },
+  },
+
+  advanced_patterns_tour: {
+    name: 'Advanced Patterns Tour',
+    description: 'Hướng dẫn Quasimodo & FTR Patterns',
+    steps: [
+      'qm_pattern_intro',
+      'qm_structure',
+      'qm_qml_level',
+      'qm_mpl_level',
+      'qm_bos',
+      'ftr_pattern_intro',
+      'ftr_structure',
+      'ftr_freshness',
+      'zone_concept_intro',
+    ],
+    completionReward: { type: 'gem', amount: 20 },
+  },
+
+  zone_trading_tour: {
+    name: 'Zone Trading Tour',
+    description: 'Hiểu rõ Zone Trading',
+    steps: [
+      'zone_concept_intro',
+      'zone_hfz',
+      'zone_lfz',
+      'zone_width',
+      'zone_validation',
+    ],
+    completionReward: { type: 'gem', amount: 15 },
+  },
+
+  odds_enhancers_tour: {
+    name: 'Odds Enhancers Tour',
+    description: 'Hướng dẫn 8 tiêu chí chấm điểm zone',
+    steps: [
+      'odds_enhancers_intro',
+      'odds_departure_strength',
+      'odds_time_at_level',
+      'odds_freshness',
+      'odds_profit_margin',
+      'odds_big_picture',
+      'odds_zone_origin',
+      'odds_arrival_speed',
+      'odds_risk_reward',
+      'odds_grade_meaning',
+    ],
+    completionReward: { type: 'gem', amount: 25 },
+  },
+
+  freshness_tracking_tour: {
+    name: 'Freshness Tracking Tour',
+    description: 'Hiểu độ tươi mới của zone',
+    steps: [
+      'freshness_intro',
+      'freshness_ftb',
+      'freshness_orders',
+      'freshness_status',
+      'freshness_best_practice',
+    ],
+    completionReward: { type: 'gem', amount: 15 },
+  },
+
+  zone_hierarchy_tour: {
+    name: 'Zone Hierarchy Tour',
+    description: 'Hướng dẫn phân loại zone theo thứ bậc',
+    steps: [
+      'hierarchy_intro',
+      'hierarchy_decision_point',
+      'hierarchy_ftr',
+      'hierarchy_flag_limit',
+      'hierarchy_regular',
+      'hierarchy_priority',
+      'flag_limit_rules',
+      'decision_point_rules',
+    ],
+    completionReward: { type: 'gem', amount: 30 },
+  },
+
+  stacked_zones_tour: {
+    name: 'Stacked Zones & FTB Tour',
+    description: 'Hướng dẫn Stacked Zones, Hidden FTR và FTB Tracking',
+    steps: [
+      'stacked_zones_intro',
+      'stacked_confluence_score',
+      'stacked_tightest_zone',
+      'hidden_ftr_intro',
+      'hidden_ftr_refinement',
+      'hidden_ftr_ltf_mapping',
+      'ftb_intro',
+      'ftb_orders_remaining',
+      'ftb_quality_tiers',
+      'zone_in_zone',
+    ],
+    completionReward: { type: 'gem', amount: 35 },
+  },
+
+  compression_inducement_tour: {
+    name: 'Compression & Inducement Tour',
+    description: 'Hướng dẫn Compression, Stop Hunt và Look Right Rule',
+    steps: [
+      'compression_intro',
+      'compression_types',
+      'compression_quality',
+      'compression_wedges',
+      'inducement_intro',
+      'inducement_mechanism',
+      'inducement_bullish',
+      'inducement_bearish',
+      'inducement_reversal',
+      'look_right_intro',
+      'look_right_validation',
+      'look_right_confidence',
+    ],
+    completionReward: { type: 'gem', amount: 40 },
+  },
+
+  confirmation_patterns_tour: {
+    name: 'Confirmation Patterns Tour',
+    description: 'Hướng dẫn xác nhận entry bằng candlestick patterns',
+    steps: [
+      'confirmation_intro',
+      'confirmation_engulfing',
+      'confirmation_pin_bar',
+      'confirmation_hammer',
+      'confirmation_inside_bar',
+      'confirmation_doji',
+      'confirmation_morning_star',
+      'confirmation_evening_star',
+      'confirmation_score',
+      'confirmation_strength',
+      'confirmation_zone_match',
+      'confirmation_entry_trigger',
+    ],
+    completionReward: { type: 'gem', amount: 45 },
+  },
+
+  extended_zones_mpl_tour: {
+    name: 'Extended Zones & MPL Tour',
+    description: 'Hướng dẫn Extended Zones, MPL và Pin+Engulf Combo',
+    steps: [
+      'extended_zone_intro',
+      'extended_zone_hfz',
+      'extended_zone_lfz',
+      'extended_zone_risk',
+      'mpl_intro',
+      'mpl_entry',
+      'mpl_quality',
+      'mpl_calculation',
+      'pin_engulf_combo_intro',
+      'pin_engulf_types',
+      'pin_engulf_entry',
+      'pin_engulf_vs_single',
+    ],
+    completionReward: { type: 'gem', amount: 50 },
+  },
+
+  smart_alerts_tour: {
+    name: 'Smart Alerts Tour',
+    description: 'Hướng dẫn hệ thống cảnh báo thông minh - FTB, Confirmation, Zone Broken alerts',
+    steps: [
+      'smart_alerts_intro',
+      'alert_ftb',
+      'alert_ftb_approaching',
+      'alert_confirmation',
+      'alert_zone_broken',
+      'alert_pin_engulf_combo',
+      'alert_stacked_zone',
+      'alert_high_score',
+      'alert_price_level',
+      'alert_settings',
+      'alert_priority',
+    ],
+    completionReward: { type: 'gem', amount: 30 },
   },
 
   trading_tour: {

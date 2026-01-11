@@ -37,7 +37,7 @@ export default function CourseDetail() {
   const { courseId } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user, profile, hasCourseAdminAccess } = useAuth();
+  const { user, profile, hasCourseAdminAccess, isAdmin } = useAuth();
 
   const [course, setCourse] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,9 +45,11 @@ export default function CourseDetail() {
   const [enrolling, setEnrolling] = useState(false);
   const [activeTab, setActiveTab] = useState('curriculum');
 
-  // Check if admin preview mode
+  // Check if admin preview mode or admin user
   const isAdminPreview = searchParams.get('preview') === 'admin';
   const canAdminPreview = isAdminPreview && profile && hasCourseAdminAccess();
+  // Check if user is admin (either via isAdmin or hasCourseAdminAccess)
+  const userIsAdmin = typeof isAdmin === 'function' ? isAdmin() : (isAdmin || hasCourseAdminAccess?.());
 
   const userTier = user?.course_tier || 'FREE';
 
@@ -74,9 +76,9 @@ export default function CourseDetail() {
     fetchCourseDetail();
   }, [fetchCourseDetail]);
 
-  // Check access - Admin preview bypasses all restrictions
-  const canAccess = canAdminPreview || (course && hasAccess(userTier, course.tier_required || 'FREE'));
-  const isEnrolled = canAdminPreview || !!course?.enrollment;
+  // Check access - Admin bypasses all restrictions
+  const canAccess = userIsAdmin || canAdminPreview || (course && hasAccess(userTier, course.tier_required || 'FREE'));
+  const isEnrolled = userIsAdmin || canAdminPreview || !!course?.enrollment;
 
   // Handle enrollment
   const handleEnroll = async () => {
@@ -424,8 +426,8 @@ export default function CourseDetail() {
                             isEnrolled={isEnrolled}
                             userProgress={course.progress || []}
                             onLessonClick={(lesson) => {
-                              // Allow preview lessons even if not enrolled
-                              if (lesson.is_preview || (canAccess && isEnrolled)) {
+                              // Admin can access all lessons
+                              if (userIsAdmin || lesson.is_preview || (canAccess && isEnrolled)) {
                                 navigate(`/courses/${courseId}/learn/${lesson.id}`);
                               } else if (!user) {
                                 // Not logged in, redirect to login

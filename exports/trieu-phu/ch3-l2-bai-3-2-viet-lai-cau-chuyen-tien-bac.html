@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 3.2: Viết Lại Câu Chuyện Tiền Bạc | GEM Academy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #112250; --navy-dark: #0a1628; --gold: #FFBD59; --gold-dark: #E5A73D;
+            --cyan: #00F0FF; --purple: #6A5BFF; --burgundy: #9C0612; --burgundy-light: #C41E2A;
+            --success: #00C853; --error: #FF5252; --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6); --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85); --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4); --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 32px;
+            --radius-md: 12px; --radius-lg: 16px;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        img { max-width: 100%; height: auto; display: block; }
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: 20%; }
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.5rem, 5vw, 2.25rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .definition-box p { color: var(--text-secondary); margin: 0; }
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+        .form-section { margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .form-section { padding: 0 16px; margin: var(--space-md) 0; } }
+        .form-group { margin-bottom: var(--space-lg); }
+        .form-label { display: block; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); }
+        .form-textarea { width: 100%; min-height: 150px; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); color: var(--text-primary); font-family: inherit; font-size: 0.95rem; line-height: 1.8; resize: vertical; }
+        .form-textarea:focus { outline: none; border-color: var(--gold); }
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+        .lesson-footer { text-align: center; padding: var(--space-xl); color: var(--text-muted); font-size: 0.85rem; }
+        .lesson-footer a { color: var(--gold); text-decoration: none; }
+        .reframe-table { width: 100%; margin: var(--space-lg) 0; border-collapse: collapse; }
+        @media (max-width: 600px) { .reframe-table { margin: var(--space-md) 0; } }
+        .reframe-table th, .reframe-table td { padding: var(--space-md); text-align: left; border: 1px solid var(--glass-border); }
+        .reframe-table th { background: var(--bg-card); color: var(--gold); font-weight: 700; }
+        .reframe-table td { background: var(--glass-bg); color: var(--text-secondary); font-size: 0.9rem; }
+        .reframe-table .old { color: var(--burgundy-light); }
+        .reframe-table .new { color: var(--success); }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="lesson-badge"><span>✨</span><span>Module 3</span></div>
+            <div class="lesson-chapter">Module 3 - Cài Đặt Tần Số Thịnh Vượng</div>
+            <h1 class="lesson-title">Viết Lại Câu Chuyện Tiền Bạc</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 3.2</span></div>
+                <div class="meta-item"><span>⏱️</span><span>20 phút</span></div>
+                <div class="meta-item"><span>✍️</span><span>Có bài tập viết</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Câu Chuyện Bạn Đang Kể Mỗi Ngày</h2>
+            <p>Bạn có biết rằng mỗi ngày, bạn đang tự kể cho mình hàng trăm câu chuyện về tiền bạc mà không hề hay biết?</p>
+            <p>"Tháng này lại hết tiền sớm thế này..." khi nhìn tài khoản. "Sao lương người ta cao thế?" khi đọc tin tức. "Mình không có số làm giàu đâu..." khi thấy người khác thành công.</p>
+            <p>Những câu chuyện này nghe có vẻ vô hại - chỉ là suy nghĩ thoáng qua. Nhưng thực tế, chúng đang hoạt động như những "lệnh" gửi đến vũ trụ, định hình thực tại tài chính của bạn từng ngày, từng giờ.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Sự Thật Đáng Ngạc Nhiên</div>
+                <p>Các nhà khoa học ước tính rằng một người bình thường có khoảng 60,000-80,000 suy nghĩ mỗi ngày. Và đây là phần đáng lo ngại: <strong>95% trong số đó là suy nghĩ lặp lại từ ngày hôm trước</strong>. Nếu câu chuyện tiền bạc của bạn là tiêu cực, bạn đang "phát sóng" tần số thiếu thốn hàng chục nghìn lần mỗi ngày mà không biết.</p>
+            </div>
+
+            <p>Tin vui là bạn CÓ THỂ viết lại câu chuyện này. Và trong bài học hôm nay, bạn sẽ học cách làm điều đó một cách khoa học và hiệu quả.</p>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Câu Chuyện Tiền Bạc Của Bạn</h2>
+            <p>Mỗi người đều có một "Money Story" - câu chuyện họ tự kể cho mình về tiền bạc. Câu chuyện này được hình thành từ trải nghiệm, niềm tin gia đình, và những gì bạn đã nghe từ nhỏ.</p>
+            <p>Vấn đề là: <strong>Câu chuyện bạn kể = Tần số bạn phát ra = Thực tại bạn thu hút</strong>.</p>
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📖</span> Money Story Là Gì?</div>
+                <p>Money Story là tập hợp các câu nói, niềm tin, và cảm xúc bạn có về tiền bạc. Nó chạy tự động trong vô thức và ảnh hưởng đến mọi quyết định tài chính của bạn.</p>
+            </div>
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x600/0a1628/FFBD59?text=HINH+16%0AChu+Ky+Hinh+Tu+Tuong" alt="Hình 16: Chu Kỳ Hình Tư Tưởng">
+                <div class="image-caption">Hình 16: Chu Kỳ Tư Tưởng → Cảm Xúc → Hành Động → Kết Quả → Tư Tưởng</div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>🔄</span> Công Thức Reframe</h2>
+            <p>Để viết lại câu chuyện, bạn cần biết cách "reframe" - đổi khung cho niềm tin cũ. Đây là công thức 3 bước:</p>
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Nhận Diện Câu Chuyện Cũ</div>
+                        <div class="flow-step-desc">Viết ra những câu bạn thường nói (trong đầu hoặc ngoài miệng) về tiền. Ví dụ: "Tôi không bao giờ đủ tiền", "Tiền khó kiếm lắm".</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tìm Bằng Chứng Ngược Lại</div>
+                        <div class="flow-step-desc">Hỏi: "Có lúc nào điều ngược lại đã xảy ra không?" Ví dụ: Có lúc nào bạn có đủ tiền cho điều quan trọng không? Có ai kiếm tiền dễ dàng không?</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Viết Câu Chuyện Mới</div>
+                        <div class="flow-step-desc">Viết lại theo hướng bạn MUỐN. Không cần "tin 100%" ngay - chỉ cần câu chuyện mới "có thể xảy ra". Sử dụng "đang" thay vì "sẽ".</div>
+                    </div>
+                </div>
+            </div>
+            <table class="reframe-table">
+                <thead>
+                    <tr><th>Câu Chuyện Cũ</th><th>Câu Chuyện Mới</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td class="old">"Tôi không bao giờ đủ tiền"</td><td class="new">"Tiền đang chảy đến tôi từ nhiều nguồn"</td></tr>
+                    <tr><td class="old">"Tiền khó kiếm lắm"</td><td class="new">"Tiền đến với tôi dễ dàng và vui vẻ"</td></tr>
+                    <tr><td class="old">"Nhà mình không có số giàu"</td><td class="new">"Tôi đang tạo ra pattern thịnh vượng mới cho gia đình"</td></tr>
+                    <tr><td class="old">"Người giàu thì xấu xa"</td><td class="new">"Tiền giúp tôi làm nhiều điều tốt đẹp hơn"</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>⏱️</span> Kỹ Thuật "17 Giây"</h2>
+            <p>Theo nghiên cứu, chỉ cần giữ một suy nghĩ thuần khiết trong <strong>17 giây</strong>, nó bắt đầu thu hút suy nghĩ tương tự. Sau <strong>68 giây</strong> (17x4), nó đủ mạnh để tạo ra momentum.</p>
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🎯</span> Thực Hành 17 Giây</div>
+                <p><strong>1.</strong> Chọn một câu chuyện mới về tiền bạc</p>
+                <p style="margin-top: var(--space-xs);"><strong>2.</strong> Đặt timer 68 giây</p>
+                <p style="margin-top: var(--space-xs);"><strong>3.</strong> Lặp đi lặp lại câu chuyện mới, CẢM NHẬN nó là thật</p>
+                <p style="margin-top: var(--space-xs);"><strong>4.</strong> Làm mỗi sáng khi vừa thức dậy (não còn ở trạng thái theta)</p>
+            </div>
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/00F0FF?text=M3_B2_01%0A17+Second+Rule" alt="17 Second Rule">
+                <div class="image-caption">17 giây để bắt đầu momentum, 68 giây để đủ mạnh</div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>✍️</span> Bài Tập: Viết New Money Story</h2>
+            <p>Bây giờ là lúc bạn viết câu chuyện tiền bạc MỚI của mình. Đây là scripting - kỹ thuật mạnh mẽ trong manifestation.</p>
+            <div class="form-section">
+                <div class="form-group">
+                    <label class="form-label">📝 Câu Chuyện Tiền Bạc CŨ của tôi:</label>
+                    <textarea class="form-textarea" placeholder="Viết ra những gì bạn thường nghĩ/nói về tiền. Ví dụ: Tôi luôn hết tiền cuối tháng. Tiền đến rồi đi. Tôi không có số làm giàu..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">✨ Câu Chuyện Tiền Bạc MỚI của tôi:</label>
+                    <textarea class="form-textarea" placeholder="Viết như thể bạn đã là người thịnh vượng. Sử dụng thì hiện tại. Ví dụ:
+
+Tôi là nam châm thu hút tiền bạc. Tiền chảy đến tôi dễ dàng và vui vẻ từ nhiều nguồn khác nhau. Tôi xứng đáng được giàu có. Tôi sử dụng tiền để làm điều tốt đẹp cho bản thân và người khác. Mỗi ngày, tài chính của tôi đang cải thiện..."></textarea>
+                </div>
+            </div>
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📱</span> Tích Hợp Vision Board</div>
+                <p>Sau khi viết xong, copy New Money Story vào <strong>Vision Board → Goals</strong> trong GEM App. Đọc lại mỗi sáng như một phần của morning ritual.</p>
+            </div>
+        </section>
+
+        <!-- REAL STORIES -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Câu Chuyện Chuyển Hóa Thật Sự</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>👤</span> Câu Chuyện Của Linh (31 tuổi, Giáo viên tiểu học)</div>
+                <p><strong>Câu chuyện cũ:</strong> Linh lớn lên trong gia đình giáo viên, nơi câu nói thường xuyên nhất là "Nghề giáo thì đừng mong giàu, chỉ đủ sống thôi." Cô tin điều này suốt 8 năm đi dạy, lương 8 triệu/tháng, không bao giờ đủ tiền tiết kiệm.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Quá trình viết lại:</strong> Sau khi học về Money Story, Linh nhận ra cô đang sống trong câu chuyện của cha mẹ, không phải câu chuyện của mình. Cô viết New Money Story: "Tôi là giáo viên VÀ tôi thịnh vượng. Tôi tạo giá trị cho học sinh và cuộc sống đền đáp tôi xứng đáng. Thu nhập của tôi đến từ nhiều nguồn."</p>
+                <p style="margin-top: var(--space-sm);"><strong>Kết quả sau 4 tháng:</strong> Linh vẫn đi dạy, nhưng cô bắt đầu dạy thêm online (2 triệu/tháng), viết sách bài tập cho trẻ em (royalties 1.5 triệu/tháng), và được một trung tâm Anh ngữ mời làm cố vấn (3 triệu/tháng). Tổng thu nhập hiện tại: 14.5 triệu/tháng - gần gấp đôi so với trước. Điều quan trọng hơn là cô cảm thấy TỰ DO về tài chính lần đầu tiên trong đời.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>👤</span> Câu Chuyện Của Anh Tuấn (38 tuổi, Kỹ sư IT)</div>
+                <p><strong>Câu chuyện cũ:</strong> Anh Tuấn có thu nhập tốt (40 triệu/tháng) nhưng luôn cảm thấy "không đủ". Câu chuyện trong đầu anh là: "Dù kiếm bao nhiêu cũng phải lo lắng. Tiền đến là tiền đi. Phải cày thêm nữa." Anh làm việc 60 giờ/tuần, burn-out nhưng vẫn không yên tâm.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Nhận ra root cause:</strong> Qua bài tập viết Money Story, anh Tuấn phát hiện câu chuyện này đến từ cha anh - một người làm việc đến kiệt sức rồi mất khi mới 55 tuổi. Anh đang sống lại pattern của cha mà không biết.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Sau khi viết lại:</strong> Anh viết New Money Story: "Tiền đến với tôi dễ dàng và BỀN VỮNG. Tôi làm việc smart, không phải hard. Tôi xứng đáng thịnh vượng VÀ khỏe mạnh." Sau 3 tháng, anh giảm giờ làm xuống 45 giờ/tuần, tập thể dục đều đặn, và ngạc nhiên là... lương tăng 15% vì anh có năng lượng tốt hơn để ra quyết định quan trọng.</p>
+            </div>
+
+            <p>Điểm chung của cả hai câu chuyện: Họ không chỉ thay đổi suy nghĩ - họ thay đổi CẢ CẢM XÚC đi kèm với câu chuyện mới. Đây là chìa khóa quan trọng mà bạn sẽ thực hành trong bài tập bên dưới.</p>
+        </section>
+
+        <!-- KEY TAKEAWAYS -->
+        <section class="section">
+            <h2 class="section-title"><span>🔑</span> 3 Điều Quan Trọng Nhất</h2>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Câu Chuyện Là Chương Trình Vô Thức</div>
+                        <div class="flow-step-desc">Money Story của bạn không chỉ là suy nghĩ - nó là một chương trình đang chạy tự động trong vô thức, ảnh hưởng đến mọi quyết định tài chính bạn đưa ra. Bạn không thể có kết quả khác nếu vẫn chạy chương trình cũ. Viết lại câu chuyện = Cài đặt lại chương trình.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Cảm Xúc Quan Trọng Hơn Từ Ngữ</div>
+                        <div class="flow-step-desc">Chỉ lặp lại câu chuyện mới bằng miệng không đủ. Bạn phải CẢM NHẬN câu chuyện mới là thật - phải có cảm xúc đi kèm. Đây là lý do kỹ thuật 17 giây yêu cầu bạn "feel it as true", không chỉ "say it". Cảm xúc là ngôn ngữ của vũ trụ.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Lặp Lại Tạo Thói Quen Mới</div>
+                        <div class="flow-step-desc">Não bạn cần khoảng 21-66 ngày để tạo một neural pathway mới. Đọc New Money Story mỗi sáng trong 49 ngày (chương trình này) sẽ giúp câu chuyện mới trở thành mặc định. Sau đó, bạn không cần cố gắng nữa - nó sẽ chạy tự động như câu chuyện cũ trước đây.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TRANSITION -->
+        <section class="section">
+            <h2 class="section-title"><span>🌉</span> Chuẩn Bị Cho Bài Tiếp Theo</h2>
+            <p>Bạn đã viết New Money Story của riêng mình. Đây là một bước quan trọng - bạn đã có "bản thiết kế" cho tần số thịnh vượng mới.</p>
+            <p>Nhưng một bản thiết kế cần được xây dựng hàng ngày. Trong Bài 3.3, bạn sẽ học về <strong>Affirmations Thịnh Vượng</strong> - những câu khẳng định ngắn, mạnh mẽ giúp củng cố New Money Story của bạn mỗi ngày.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📝</span> Bài Tập Trước Bài 3.3</div>
+                <p><strong>Trong 24 giờ tới:</strong> Đọc New Money Story của bạn ít nhất 3 lần - sáng khi thức dậy, trưa sau ăn, và tối trước ngủ. Mỗi lần đọc, nhắm mắt và CẢM NHẬN như thể câu chuyện đã là thật.</p>
+                <p style="margin-top: var(--space-sm);">Ghi lại: Bạn cảm thấy thế nào sau mỗi lần đọc? Có cảm xúc nào thay đổi không? Có resistance (kháng cự) nào không? Đây là thông tin quan trọng cho bài tiếp theo.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Tổng Kết Bài 3.2</h2>
+            <div class="summary-box">
+                <div class="summary-title"><span>📌</span> Những Điều Bạn Đã Học & Làm</div>
+                <ul class="summary-list">
+                    <li>Hiểu Money Story và cách nó ảnh hưởng đến thực tại tài chính</li>
+                    <li>Học Công Thức Reframe 3 bước</li>
+                    <li>Áp dụng Kỹ Thuật 17 Giây để tạo momentum</li>
+                    <li>Viết New Money Story của riêng bạn</li>
+                </ul>
+            </div>
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>➡️</span> Tiếp Theo: Bài 3.3</div>
+                <p>Trong bài tiếp theo, bạn sẽ học <strong>50 Affirmations Thịnh Vượng</strong> và cách sử dụng chúng hiệu quả để củng cố câu chuyện mới hàng ngày.</p>
+            </div>
+        </section>
+
+        <footer class="lesson-footer">
+            <p>© 2024 GEM Academy | <a href="https://gemral.com">gemral.com</a></p>
+            <p style="margin-top: var(--space-sm);">Tiếp theo: Bài 3.3 - Affirmations Thịnh Vượng →</p>
+        </footer>
+    </div>
+</body>
+</html>

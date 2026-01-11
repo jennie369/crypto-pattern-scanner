@@ -81,6 +81,12 @@ export const COLORS = {
   bgOffWhite: '#F7F8FA',
   bgGray: '#E5E7EB',
   textDark: '#111827',
+
+  // === LEGACY ALIASES (backward compatibility) ===
+  bgCard: 'rgba(15, 16, 48, 0.55)',    // Same as glassBg
+  bgDark: '#05040B',                    // Same as bgDarkest
+  border: 'rgba(106, 91, 255, 0.3)',    // Same as inputBorder
+  textLight: '#FFFFFF',                 // Same as textPrimary
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -166,7 +172,7 @@ export const TYPOGRAPHY = {
 // ═══════════════════════════════════════════════════════════
 export const GLASS = {
   // Background
-  background: 'rgba(15, 16, 48, 0.55)',
+  backgroundColor: 'rgba(15, 16, 48, 0.55)',
 
   // Blur
   blur: 18,         // EXACT: 18px (not 20!)
@@ -229,7 +235,7 @@ export const BUTTON = {
 export const INPUT = {
   borderRadius: 12,
   padding: 18,
-  background: 'rgba(0, 0, 0, 0.3)',
+  backgroundColor: 'rgba(0, 0, 0, 0.3)',
   borderColor: 'rgba(106, 91, 255, 0.3)',
   borderColorFocus: '#6A5BFF',
 
@@ -539,8 +545,193 @@ export const BORDER_RADIUS = {
   full: 9999,
 };
 
+// ═══════════════════════════════════════════════════════════
+// TOKENS - Nested structure for HTMLLessonRenderer compatibility
+// ═══════════════════════════════════════════════════════════
+export const tokens = {
+  colors: {
+    // Legacy aliases
+    brand: COLORS.gold,
+    primary: COLORS.purple,
+    primaryDark: COLORS.purpleGlow,
+    white: COLORS.textPrimary,
+    surface: COLORS.glassBg,
+    surfaceLight: COLORS.glassBgLight,
+    surfaceDark: COLORS.bgDarkest,
+    textPrimary: COLORS.textPrimary,
+    textSecondary: COLORS.textSecondary,
+    textTertiary: COLORS.textMuted,
+    textDisabled: COLORS.textDisabled,
+    // Nested structures
+    accent: {
+      primary: COLORS.gold,
+      bg: 'rgba(255, 189, 89, 0.1)',
+    },
+    success: {
+      text: COLORS.success,
+      bg: 'rgba(58, 247, 166, 0.1)',
+      border: 'rgba(58, 247, 166, 0.3)',
+    },
+    error: {
+      text: COLORS.error,
+      bg: 'rgba(255, 107, 107, 0.1)',
+      border: 'rgba(255, 107, 107, 0.3)',
+    },
+    warning: {
+      text: COLORS.warning,
+      bg: 'rgba(255, 184, 0, 0.1)',
+      border: 'rgba(255, 184, 0, 0.3)',
+    },
+    info: {
+      text: COLORS.info,
+      bg: 'rgba(59, 130, 246, 0.1)',
+      border: 'rgba(59, 130, 246, 0.3)',
+    },
+    bg: {
+      primary: COLORS.bgDarkest,
+      secondary: COLORS.bgMid,
+      tertiary: COLORS.glassBg,
+    },
+    text: {
+      primary: COLORS.textPrimary,
+      secondary: COLORS.textSecondary,
+      muted: COLORS.textMuted,
+      inverse: COLORS.bgDarkest,
+    },
+    border: {
+      primary: 'rgba(106, 91, 255, 0.3)',
+      secondary: 'rgba(255, 255, 255, 0.1)',
+    },
+    icon: COLORS.gold,
+    iconInactive: COLORS.textMuted,
+  },
+  fontSize: {
+    xs: 10,
+    sm: 12,
+    md: 14,
+    lg: 16,
+    xl: 18,
+    xxl: 20,
+    xxxl: 24,
+  },
+  spacing: SPACING,
+  radius: {
+    xs: 4,
+    sm: 8,
+    md: 12,
+    lg: 16,
+    xl: 20,
+    xxl: 24,
+    full: 9999,
+  },
+  fontWeight: {
+    normal: '400',
+    medium: '500',
+    semibold: '600',
+    bold: '700',
+  },
+};
+
+// Colors structure for legacy compatibility
+// Includes both direct color values AND nested structures
+const COLORS_NESTED = {
+  // Direct color values from COLORS (excluding success/error/warning/info which need nested structure)
+  burgundy: COLORS.burgundy,
+  burgundyDark: COLORS.burgundyDark,
+  burgundyLight: COLORS.burgundyLight,
+  gold: COLORS.gold,
+  goldBright: COLORS.goldBright,
+  goldMuted: COLORS.goldMuted,
+  bgDarkest: COLORS.bgDarkest,
+  bgMid: COLORS.bgMid,
+  bgLight: COLORS.bgLight,
+  purple: COLORS.purple,
+  purpleGlow: COLORS.purpleGlow,
+  cyan: COLORS.cyan,
+  textPrimary: COLORS.textPrimary,
+  textSecondary: COLORS.textSecondary,
+  textMuted: COLORS.textMuted,
+  textSubtle: COLORS.textSubtle,
+  textDisabled: COLORS.textDisabled,
+  glassBg: COLORS.glassBg,
+  glassBgLight: COLORS.glassBgLight,
+  glassBgHeavy: COLORS.glassBgHeavy,
+  inputBg: COLORS.inputBg,
+  inputBorder: COLORS.inputBorder,
+  tierFree: COLORS.tierFree,
+  tier1: COLORS.tier1,
+  tier2: COLORS.tier2,
+  tier3: COLORS.tier3,
+  lightBg: COLORS.lightBg,
+  lightCard: COLORS.lightCard,
+  lightText: COLORS.lightText,
+  lightTextSecondary: COLORS.lightTextSecondary,
+  lightBorder: COLORS.lightBorder,
+  bgWhite: COLORS.bgWhite,
+  bgOffWhite: COLORS.bgOffWhite,
+  bgGray: COLORS.bgGray,
+  textDark: COLORS.textDark,
+
+  // Additional direct aliases
+  primary: COLORS.purple,
+  secondary: COLORS.gold,
+  background: COLORS.bgDarkest,
+  card: COLORS.glassBg,
+
+  // Nested accent structure (for tokens.colors.accent.primary)
+  accent: {
+    primary: COLORS.gold,
+    secondary: COLORS.purple,
+  },
+
+  // Nested status structures (for tokens.colors.success.text, tokens.colors.error.bg, etc.)
+  success: {
+    text: COLORS.success,
+    bg: 'rgba(58, 247, 166, 0.1)',
+    border: 'rgba(58, 247, 166, 0.3)',
+  },
+  error: {
+    text: COLORS.error,
+    bg: 'rgba(255, 107, 107, 0.1)',
+    border: 'rgba(255, 107, 107, 0.3)',
+  },
+  warning: {
+    text: COLORS.warning,
+    bg: 'rgba(255, 184, 0, 0.1)',
+    border: 'rgba(255, 184, 0, 0.3)',
+  },
+  info: {
+    text: COLORS.info,
+    bg: 'rgba(59, 130, 246, 0.1)',
+    border: 'rgba(59, 130, 246, 0.3)',
+  },
+
+  // Nested text structure (for tokens.colors.text.primary)
+  text: {
+    primary: COLORS.textPrimary,
+    secondary: COLORS.textSecondary,
+    muted: COLORS.textMuted,
+    inverse: COLORS.bgDarkest,
+  },
+
+  // Nested bg structure (for tokens.colors.bg.primary)
+  bg: {
+    primary: COLORS.bgDarkest,
+    secondary: COLORS.glassBg,
+    tertiary: COLORS.glassBgLight,
+  },
+
+  // Nested border structure (for tokens.colors.border.primary)
+  border: {
+    primary: 'rgba(255, 255, 255, 0.1)',
+    secondary: 'rgba(255, 255, 255, 0.05)',
+  },
+};
+
 // Default export for convenience
+// Includes both UPPERCASE (standard) and lowercase (legacy compatibility) aliases
 export default {
+  // UPPERCASE (standard)
   SPACING,
   COLORS,
   GRADIENTS,
@@ -557,4 +748,24 @@ export default {
   POPUP,
   FONT_SIZES,
   BORDER_RADIUS,
+  // lowercase aliases (for legacy compatibility)
+  spacing: SPACING,
+  colors: COLORS_NESTED,
+  gradients: GRADIENTS,
+  typography: TYPOGRAPHY,
+  glass: GLASS,
+  button: BUTTON,
+  input: INPUT,
+  badge: BADGE,
+  layout: LAYOUT,
+  touch: TOUCH,
+  shadows: SHADOWS,
+  animation: ANIMATION,
+  zIndex: Z_INDEX,
+  popup: POPUP,
+  fontSize: FONT_SIZES,
+  fontSizes: FONT_SIZES,
+  borderRadius: BORDER_RADIUS,
+  radius: BORDER_RADIUS,
+  fontWeight: TYPOGRAPHY.fontWeight,
 };

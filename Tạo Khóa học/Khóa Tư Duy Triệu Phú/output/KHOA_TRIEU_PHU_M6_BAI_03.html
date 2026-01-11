@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 6.3: Cộng Đồng Thịnh Vượng | GEM Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.5rem, 5vw, 2.25rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .definition-box p { color: var(--text-secondary); margin: 0; }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .people-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-sm); margin: var(--space-lg) 0; text-align: center; }
+        @media (max-width: 600px) { .people-grid { grid-template-columns: repeat(5, 1fr); gap: var(--space-xs); margin: var(--space-md) 16px; } }
+        .people-circle { width: 50px; height: 50px; background: var(--bg-card); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto var(--space-xs); }
+        @media (max-width: 600px) { .people-circle { width: 40px; height: 40px; font-size: 1.2rem; } }
+        .people-label { font-size: 0.7rem; color: var(--text-muted); }
+        .people-you { border: 2px solid var(--gold); }
+        .people-high { border: 2px solid var(--success); }
+        .people-low { border: 2px solid var(--error); }
+
+        .community-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .community-grid { grid-template-columns: 1fr; gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .community-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); }
+        @media (max-width: 600px) { .community-card { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; } }
+        .community-emoji { font-size: 2rem; margin-bottom: var(--space-sm); }
+        @media (max-width: 600px) { .community-emoji { font-size: 1.5rem; display: inline-block; margin-right: var(--space-sm); margin-bottom: 0; } }
+        .community-name { font-weight: 700; color: var(--purple); margin-bottom: var(--space-sm); }
+        @media (max-width: 600px) { .community-name { display: inline-block; } }
+        .community-desc { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .partner-box { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05)); border: 2px solid var(--purple); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .partner-box { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .partner-title { font-size: 1.2rem; font-weight: 700; color: var(--purple); margin-bottom: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); }
+        .partner-content { color: var(--text-secondary); font-size: 0.95rem; }
+        .partner-content strong { color: var(--gold); }
+
+        .give-receive { display: grid; grid-template-columns: 1fr auto 1fr; gap: var(--space-md); align-items: center; margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .give-receive { grid-template-columns: 1fr; gap: var(--space-md); margin: var(--space-md) 16px; } }
+        .give-box, .receive-box { background: var(--bg-card); border-radius: var(--radius-md); padding: var(--space-lg); text-align: center; }
+        @media (max-width: 600px) { .give-box, .receive-box { border-radius: 0; } }
+        .give-box { border: 2px solid var(--gold); }
+        .receive-box { border: 2px solid var(--success); }
+        @media (max-width: 600px) { .give-box, .receive-box { border: none; border-left: 4px solid; } .give-box { border-left-color: var(--gold); } .receive-box { border-left-color: var(--success); } }
+        .give-receive-emoji { font-size: 2.5rem; margin-bottom: var(--space-sm); }
+        .give-receive-title { font-weight: 700; margin-bottom: var(--space-sm); }
+        .give-box .give-receive-title { color: var(--gold); }
+        .receive-box .give-receive-title { color: var(--success); }
+        .give-receive-list { font-size: 0.9rem; color: var(--text-muted); text-align: left; }
+        .give-receive-list li { margin-bottom: var(--space-xs); }
+        .arrow { font-size: 2rem; color: var(--gold); }
+        @media (max-width: 600px) { .arrow { display: none; } }
+
+        .app-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .app-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .app-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); }
+        .app-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .app-box p:last-child { margin-bottom: 0; }
+
+        .lesson-footer { text-align: center; padding: var(--space-xl); color: var(--text-muted); font-size: 0.85rem; }
+        .lesson-footer a { color: var(--gold); text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>👥</span>
+                <span>Module 6</span>
+            </div>
+            <div class="lesson-chapter">Module 6 - Nhân Rộng Thịnh Vượng</div>
+            <h1 class="lesson-title">Cộng Đồng Thịnh Vượng - Sức Mạnh Của Kết Nối</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 6.3</span></div>
+                <div class="meta-item"><span>⏱️</span><span>25 phút đọc</span></div>
+                <div class="meta-item"><span>🤝</span><span>Community Power</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🌊</span> Tại Sao Nhiều Người Thất Bại Khi "Đi Một Mình"?</h2>
+            <p>Bạn đã bao giờ có trải nghiệm này chưa: sau một khóa học truyền động lực, bạn cảm thấy tràn đầy năng lượng và quyết tâm thay đổi cuộc sống. Nhưng chỉ sau vài tuần quay về môi trường cũ, gặp lại những người bạn cũ với những câu chuyện tiêu cực quen thuộc, dần dần ngọn lửa trong bạn tắt dần và bạn quay lại đúng con người cũ như chưa có gì xảy ra.</p>
+
+            <p>Đây không phải lỗi của bạn - đây là LUẬT NĂNG LƯỢNG. Một thanh sắt nóng đặt giữa mười thanh sắt lạnh sẽ nhanh chóng nguội đi, không phải ngược lại. Tương tự, khi bạn cố gắng duy trì tần số cao trong một môi trường tần số thấp, bạn đang chiến đấu chống lại lực kéo khổng lồ của cả một hệ thống năng lượng xung quanh.</p>
+
+            <p>Bài học hôm nay sẽ giải đáp câu hỏi quan trọng: Làm thế nào để bạn có thể DUY TRÌ sự chuyển hóa của mình trong dài hạn? Câu trả lời nằm ở hai từ: CỘNG ĐỒNG THỊNH VƯỢNG. Bạn sẽ học cách xây dựng mạng lưới những người nâng đỡ bạn thay vì kéo bạn xuống, và tại sao đây là yếu tố quyết định giữa người duy trì được thay đổi vĩnh viễn và người rơi ngược lại điểm xuất phát.</p>
+        </section>
+
+        <!-- SECTION 1: AVERAGE OF 5 PEOPLE -->
+        <section class="section">
+            <h2 class="section-title"><span>👥</span> "Bạn Là Trung Bình Của 5 Người" - Đây Là Khoa Học, Không Phải Động Lực Suông</h2>
+            <p>Jim Rohn nổi tiếng với câu nói: "Bạn là trung bình của 5 người bạn dành nhiều thời gian nhất." Nhiều người nghe câu này như một quote động lực rồi bỏ qua. Nhưng đây thực sự là một NGUYÊN LÝ VẬT LÝ áp dụng cho năng lượng con người, và nếu bạn không hiểu nó, bạn sẽ mãi tự hỏi tại sao mình không thể thay đổi dù đã cố gắng bao nhiêu.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M6_B3_01%0AAverage+of+5+People" alt="Trung bình của 5 người">
+                <div class="image-caption">Năng lượng lan truyền - Bạn hấp thụ tần số của những người xung quanh</div>
+            </div>
+
+            <div class="people-grid">
+                <div>
+                    <div class="people-circle people-high">🌟</div>
+                    <div class="people-label">High Vibe</div>
+                </div>
+                <div>
+                    <div class="people-circle people-high">✨</div>
+                    <div class="people-label">High Vibe</div>
+                </div>
+                <div>
+                    <div class="people-circle people-you">😊</div>
+                    <div class="people-label">YOU</div>
+                </div>
+                <div>
+                    <div class="people-circle people-low">😔</div>
+                    <div class="people-label">Low Vibe</div>
+                </div>
+                <div>
+                    <div class="people-circle people-low">😞</div>
+                    <div class="people-label">Low Vibe</div>
+                </div>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🔬</span> Khoa Học Về Entrainment</div>
+                <p>Trong vật lý, <strong>entrainment</strong> là hiện tượng hai hệ thống rung động tiến đến đồng bộ với nhau. Con lắc đồng hồ đặt cạnh nhau sẽ dần dần swing cùng nhịp.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Con người cũng vậy.</strong> Khi bạn ở cạnh người có tần số cao, tần số của bạn được "kéo lên". Ngược lại, ở cạnh người tiêu cực, bạn bị "kéo xuống".</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Bài Tập: Audit 5 Người</div>
+                <p>Liệt kê 5 người bạn dành nhiều thời gian nhất (offline hoặc online):</p>
+                <p style="margin-top: var(--space-sm);">1. _______ | Tần số: __/10</p>
+                <p style="margin-top: var(--space-xs);">2. _______ | Tần số: __/10</p>
+                <p style="margin-top: var(--space-xs);">3. _______ | Tần số: __/10</p>
+                <p style="margin-top: var(--space-xs);">4. _______ | Tần số: __/10</p>
+                <p style="margin-top: var(--space-xs);">5. _______ | Tần số: __/10</p>
+                <p style="margin-top: var(--space-md);"><strong>Trung bình: ___/10</strong> → Đây là "môi trường tần số" hiện tại của bạn.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: GEM COMMUNITY -->
+        <section class="section">
+            <h2 class="section-title"><span>💎</span> GEM Community - Cộng Đồng Thịnh Vượng</h2>
+            <p>Đây là lý do tại sao CỘNG ĐỒNG quan trọng. Khi bạn tham gia một cộng đồng của những người cùng hướng đi, cùng mục tiêu nâng tần số, bạn tự động được nâng lên bởi năng lượng tập thể.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x600/0a1628/6A5BFF?text=M6_B3_02%0AGEM+Community" alt="GEM Community">
+                <div class="image-caption">GEM Community - Nơi bạn không bao giờ đơn độc trên hành trình chuyển hóa</div>
+            </div>
+
+            <div class="community-grid">
+                <div class="community-card">
+                    <div class="community-emoji">📱</div>
+                    <div class="community-name">Forum Trong App</div>
+                    <div class="community-desc">Chia sẻ insights, đặt câu hỏi, nhận support từ cộng đồng GEM 24/7 ngay trong app.</div>
+                </div>
+                <div class="community-card">
+                    <div class="community-emoji">🎓</div>
+                    <div class="community-name">Học Viên GEM Academy</div>
+                    <div class="community-desc">Kết nối với những người đang học cùng khóa. Thảo luận bài học, chia sẻ kinh nghiệm thực hành.</div>
+                </div>
+                <div class="community-card">
+                    <div class="community-emoji">🌟</div>
+                    <div class="community-name">Success Stories</div>
+                    <div class="community-desc">Đọc và chia sẻ câu chuyện chuyển hóa. Inspiration từ những người đi trước.</div>
+                </div>
+                <div class="community-card">
+                    <div class="community-emoji">🔮</div>
+                    <div class="community-name">Special Events</div>
+                    <div class="community-desc">Livestreams, workshops, Q&A sessions với Jennie và các instructors.</div>
+                </div>
+            </div>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>📱</span> Tham Gia GEM Community</div>
+                <p>Mở app GEM → Tab "Community" hoặc "Forum"</p>
+                <p>• <strong>Post:</strong> Chia sẻ insights, wins, câu hỏi</p>
+                <p>• <strong>Comment:</strong> Support và encourage người khác</p>
+                <p>• <strong>React:</strong> Gửi năng lượng tích cực qua reactions</p>
+                <p>• <strong>Follow:</strong> Kết nối với những người truyền cảm hứng</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: ACCOUNTABILITY PARTNER -->
+        <section class="section">
+            <h2 class="section-title"><span>🤝</span> Accountability Partner</h2>
+            <p>Một cách mạnh mẽ để duy trì tần số cao là có <strong>Accountability Partner (AP)</strong> - một người đồng hành cùng bạn trên hành trình, check-in với nhau thường xuyên.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/00C853?text=M6_B3_03%0AAccountability+Partner" alt="Accountability Partner">
+                <div class="image-caption">Accountability Partner - Đồng hành cùng nhau, cùng tiến bộ</div>
+            </div>
+
+            <div class="partner-box">
+                <div class="partner-title"><span>🎯</span> Accountability Partner Là Gì?</div>
+                <div class="partner-content">
+                    <p>Đây là một người (hoặc nhóm nhỏ 2-4 người) mà bạn cam kết:</p>
+                    <p style="margin-top: var(--space-sm);">• <strong>Check-in thường xuyên:</strong> Hàng ngày hoặc hàng tuần</p>
+                    <p style="margin-top: var(--space-xs);">• <strong>Chia sẻ mục tiêu:</strong> Nói ra để có trách nhiệm</p>
+                    <p style="margin-top: var(--space-xs);">• <strong>Báo cáo tiến độ:</strong> Đã làm gì, chưa làm gì</p>
+                    <p style="margin-top: var(--space-xs);">• <strong>Support khi khó khăn:</strong> Nâng nhau lên khi tần số rớt</p>
+                    <p style="margin-top: var(--space-xs);">• <strong>Celebrate wins:</strong> Ăn mừng thành công cùng nhau</p>
+                </div>
+            </div>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tìm AP Phù Hợp</div>
+                        <div class="flow-step-desc">Trong GEM Community, tìm người có mục tiêu tương tự, cùng timezone, và năng lượng tích cực. Chất lượng hơn số lượng.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Thiết Lập Kỳ Vọng</div>
+                        <div class="flow-step-desc">Đồng ý về tần suất check-in (daily/weekly), phương thức (text/call/video), và những gì sẽ chia sẻ.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Check-In Format</div>
+                        <div class="flow-step-desc">(1) Tần số hôm nay/tuần này, (2) Wins - điều tốt đẹp, (3) Challenges - khó khăn, (4) Next actions - sẽ làm gì tiếp.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Honest & Supportive</div>
+                        <div class="flow-step-desc">Trung thực về khó khăn (không tỏ ra hoàn hảo), supportive không phán xét (listen, encourage, hold space).</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📊</span> Research: Sức Mạnh của Accountability</div>
+                <p>Nghiên cứu từ American Society of Training and Development:</p>
+                <p style="margin-top: var(--space-sm);">• Có mục tiêu → 10% cơ hội đạt được</p>
+                <p style="margin-top: var(--space-xs);">• Cam kết với người khác → 65% cơ hội đạt được</p>
+                <p style="margin-top: var(--space-xs);">• Có accountability check-in → <strong>95% cơ hội đạt được</strong></p>
+            </div>
+        </section>
+
+        <!-- SECTION: REAL STORIES -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Câu Chuyện Thực Tế: Sức Mạnh Của Cộng Đồng</h2>
+            <p>Hãy cùng xem ba câu chuyện thực tế về cách cộng đồng đã thay đổi hoàn toàn hành trình chuyển hóa của họ. Mỗi câu chuyện sẽ cho bạn thấy sự khác biệt giữa đi một mình và đi cùng những người đúng.</p>
+
+            <div class="partner-box">
+                <div class="partner-title"><span>📌</span> Câu Chuyện 1: Thảo - Từ Cô Đơn Đến Nở Hoa</div>
+                <div class="partner-content">
+                    <p><strong>Tình huống:</strong> Thảo, 29 tuổi, là nhân viên kế toán tại Bình Dương. Cô đã đọc hàng chục cuốn sách về phát triển bản thân và tham gia nhiều khóa học online, nhưng mỗi lần cố gắng áp dụng đều thất bại sau vài tuần. Lý do? Cô hoàn toàn cô đơn trong hành trình - không ai hiểu cô đang làm gì, bạn bè nghĩ cô "bị ảo tưởng", và gia đình thì nói "thôi lo kiếm tiền đi, mơ mộng làm gì".</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Bước ngoặt:</strong> Khi tham gia GEM Community, Thảo lần đầu tiên tìm được những người "nói cùng ngôn ngữ" với cô. Cô tìm được 2 người bạn cùng độ tuổi và mục tiêu tương tự, lập group chat riêng và check-in mỗi sáng trước khi đi làm.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Kết quả sau 6 tháng:</strong> Thảo duy trì morning routine 100% trong 6 tháng liên tục (trước đó chưa bao giờ quá 2 tuần). Cô được tăng lương 30% vì hiệu suất làm việc cải thiện rõ rệt, và bắt đầu side project kinh doanh online. Quan trọng nhất: "Mỗi sáng thức dậy tôi biết có 2 người đang chờ tin nhắn check-in của tôi. Điều đó đủ để tôi vượt qua những ngày khó khăn nhất."</p>
+                </div>
+            </div>
+
+            <div class="partner-box">
+                <div class="partner-title"><span>📌</span> Câu Chuyện 2: Tuấn - Khi Môi Trường Kéo Bạn Xuống</div>
+                <div class="partner-content">
+                    <p><strong>Tình huống:</strong> Tuấn, 36 tuổi, là giám đốc kinh doanh tại một công ty bất động sản ở Hà Nội. Môi trường làm việc của anh cực kỳ toxic - đồng nghiệp ganh đua tiêu cực, sếp hay chỉ trích, và văn hóa công ty xoay quanh stress và than phiền. Mỗi ngày đi làm về, Tuấn cảm thấy kiệt sức và tần số rớt thảm hại dù buổi sáng đã thực hành đầy đủ.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Bước ngoặt:</strong> Tuấn không thể từ bỏ công việc ngay được (vì trách nhiệm tài chính gia đình), nên anh tạo ra "buffer zone" bằng cộng đồng. Anh join một nhóm Accountability Partner gồm 4 người - gọi video call 30 phút mỗi tối để "detox" năng lượng tiêu cực từ công ty và nạp lại năng lượng tích cực.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Kết quả sau 1 năm:</strong> Tuấn duy trì được tần số ổn định dù vẫn làm việc trong môi trường toxic. Anh xây dựng được network và reputation tốt trong ngành, nhận được offer từ công ty khác với mức lương cao hơn và văn hóa tốt hơn. "Nhóm AP của tôi là 'phổi nhân tạo' giúp tôi thở trong môi trường không có oxy. Không có họ, tôi đã burn out từ lâu."</p>
+                </div>
+            </div>
+
+            <div class="partner-box">
+                <div class="partner-title"><span>📌</span> Câu Chuyện 3: Nhóm "Diamond Sisters" - Cùng Nhau Tỏa Sáng</div>
+                <div class="partner-content">
+                    <p><strong>Tình huống:</strong> Bốn phụ nữ - Hương, Lan, Mai, và Thúy - quen nhau qua GEM Community và phát hiện ra họ đều là các bà mẹ bỉm sữa đang cố gắng cân bằng gia đình và phát triển bản thân. Họ thành lập nhóm riêng gọi là "Diamond Sisters" và cam kết đồng hành cùng nhau trong 1 năm.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Cách họ hoạt động:</strong> Check-in 5 phút mỗi sáng qua voice note, video call chung 1 lần/tuần vào tối Chủ Nhật khi các con đã ngủ, celebrate mọi thắng lợi nhỏ, và đặc biệt là support nhau trong những ngày khó khăn (con ốm, chồng không hiểu, áp lực công việc).</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Kết quả sau 1 năm:</strong> Hương mở tiệm nail thành công, Lan được thăng chức, Mai xuất bản sách đầu tay, và Thúy tổ chức được workshop đầu tiên. Nhưng quan trọng hơn cả thành tích: cả bốn người đều nói rằng họ không còn cảm thấy "cô đơn trong việc làm mẹ và phấn đấu" nữa. "Có những người hiểu mình, cổ vũ mình, và không phán xét mình - đó là món quà lớn nhất."</p>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💎</span> Bài Học Từ Ba Câu Chuyện</div>
+                <p>Điểm chung của cả ba câu chuyện là gì? KHÔNG AI THÀNH CÔNG MỘT MÌNH. Dù bạn có ý chí mạnh mẽ đến đâu, môi trường và những người xung quanh sẽ ảnh hưởng sâu sắc đến khả năng duy trì sự thay đổi của bạn. Giải pháp không phải là cách ly khỏi mọi người, mà là CHỦ ĐỘNG xây dựng một cộng đồng nhỏ những người cùng hướng đi, cùng giá trị, và cùng nâng đỡ nhau trên hành trình.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 4: LAN TỎA NĂNG LƯỢNG TỐT -->
+        <section class="section">
+            <h2 class="section-title"><span>✨</span> Lan Tỏa Năng Lượng Tốt</h2>
+            <p>Theo Luật Cho Đi trong Học Thuyết Chuyển Hóa Nội Tâm: <strong>"Năng lượng bạn cho đi sẽ quay lại nhân lên."</strong> Khi bạn lan tỏa năng lượng tốt, bạn không chỉ giúp người khác - bạn cũng NÂNG CHÍNH MÌNH.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M6_B3_04%0AGiving+%26+Receiving" alt="Cho và Nhận">
+                <div class="image-caption">Cho đi = Mở rộng dòng chảy năng lượng</div>
+            </div>
+
+            <div class="give-receive">
+                <div class="give-box">
+                    <div class="give-receive-emoji">🎁</div>
+                    <div class="give-receive-title">GIVE (Cho Đi)</div>
+                    <ul class="give-receive-list">
+                        <li>Comment encourage người khác</li>
+                        <li>Chia sẻ tips, insights hữu ích</li>
+                        <li>Giúp đỡ người mới</li>
+                        <li>Celebrate wins của người khác</li>
+                        <li>Gửi DM support khi thấy ai đang struggle</li>
+                    </ul>
+                </div>
+                <div class="arrow">↔️</div>
+                <div class="receive-box">
+                    <div class="give-receive-emoji">💝</div>
+                    <div class="give-receive-title">RECEIVE (Nhận Về)</div>
+                    <ul class="give-receive-list">
+                        <li>Tần số nâng cao khi giúp người</li>
+                        <li>Được support khi bạn cần</li>
+                        <li>Mở rộng network chất lượng</li>
+                        <li>Cơ hội collaboration</li>
+                        <li>Karma tích cực quay lại</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🌊</span> Nguyên Lý: Dòng Chảy Năng Lượng</div>
+                <p>Năng lượng giống như dòng nước - nó cần CHẢY để tươi mới. Nếu bạn chỉ NHẬN mà không CHO, năng lượng bị tắc nghẽn.</p>
+                <p style="margin-top: var(--space-sm);">Cho đi từ trạng thái dư dả (không phải sacrificing bản thân) → Tạo không gian cho nhiều hơn chảy vào.</p>
+            </div>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Micro-Giving Hàng Ngày</div>
+                        <div class="flow-step-desc">Mỗi ngày, cho đi ít nhất 1 thứ nhỏ: lời khen, nụ cười, tip hữu ích, comment tích cực. Không tốn tiền, chỉ tốn vài giây.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Chia Sẻ Hành Trình</div>
+                        <div class="flow-step-desc">Đừng chờ "thành công" mới chia sẻ. Chia sẻ quá trình, struggles, lessons learned - điều này inspire và giúp người khác.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Be The Lighthouse</div>
+                        <div class="flow-step-desc">Bạn không cần "cố gắng" thay đổi người khác. Chỉ cần TỎA SÁNG - sống đúng với những gì bạn đang học - người khác sẽ bị thu hút.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: ACTION PLAN -->
+        <section class="section">
+            <h2 class="section-title"><span>🚀</span> Action Plan: Xây Dựng Cộng Đồng</h2>
+            <p>Bắt đầu xây dựng "cộng đồng thịnh vượng" của riêng bạn ngay hôm nay:</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">✓</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">1. Audit 5 Người (Ngay Bây Giờ)</div>
+                        <div class="flow-step-desc">Làm bài tập ở section 1. Xác định ai đang nâng bạn lên, ai đang kéo xuống. Quyết định điều chỉnh.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">✓</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">2. Active Trong GEM Community (Tuần Này)</div>
+                        <div class="flow-step-desc">Post 1 bài chia sẻ về hành trình của bạn. Comment encourage 3 người khác. Bắt đầu kết nối.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">✓</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">3. Tìm Accountability Partner (2 Tuần)</div>
+                        <div class="flow-step-desc">Trong community, tìm 1-2 người để trở thành AP. Set up đầu tiên check-in và cam kết format.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">✓</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">4. Micro-Giving Daily (Ongoing)</div>
+                        <div class="flow-step-desc">Mỗi ngày, cho đi ít nhất 1 thứ nhỏ. Track trong 7 ngày và observe cảm giác + kết quả.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Remember</div>
+                <p><strong>"Không ai thành công một mình."</strong></p>
+                <p style="margin-top: var(--space-sm);">Mọi người thành công đều có cộng đồng support: mentors, peers, students. Hành trình thịnh vượng là hành trình TẬP THỂ, không phải cô đơn.</p>
+            </div>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>📱</span> Thực Hành Với App GEM</div>
+                <p><strong>Forum:</strong> Chia sẻ và kết nối với cộng đồng GEM</p>
+                <p><strong>Messages:</strong> DM để kết nối sâu hơn với AP hoặc người cùng hướng đi</p>
+                <p><strong>Profile:</strong> Complete profile để người khác dễ kết nối với bạn</p>
+            </div>
+        </section>
+
+        <!-- COMMON QUESTIONS SECTION -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp</h2>
+
+            <div class="partner-box">
+                <div class="partner-title"><span>🤔</span> "Tôi là người hướng nội và không thích giao lưu nhiều. Cộng đồng có phù hợp với tôi không?"</div>
+                <div class="partner-content">
+                    <p>Hoàn toàn phù hợp! Thực ra, nhiều người hướng nội lại thích các cộng đồng online hơn vì họ có thể kiểm soát mức độ tương tác. Bạn không cần phải giao lưu với hàng trăm người - chỉ cần 1-3 người đúng là đủ. Accountability Partner có thể chỉ là tin nhắn ngắn mỗi sáng, không cần video call dài nếu bạn không thoải mái. Chất lượng kết nối quan trọng hơn số lượng rất nhiều.</p>
+                </div>
+            </div>
+
+            <div class="partner-box">
+                <div class="partner-title"><span>🤔</span> "Gia đình và bạn bè tôi rất tiêu cực, nhưng tôi không thể cắt đứt họ. Phải làm sao?"</div>
+                <div class="partner-content">
+                    <p>Bạn không cần cắt đứt - bạn chỉ cần THÊM những người tích cực vào cuộc sống, thay vì thay thế hoàn toàn. Nghĩ về nó như tạo "buffer zone" năng lượng: mỗi ngày bạn tiếp xúc với năng lượng tiêu cực từ người thân, bạn cũng cần "nạp lại" bằng năng lượng tích cực từ cộng đồng. Theo thời gian, khi tần số của bạn ổn định hơn, bạn cũng sẽ ảnh hưởng ngược lại người thân - nhưng từ vị trí mạnh mẽ, không phải bị kéo xuống.</p>
+                </div>
+            </div>
+
+            <div class="partner-box">
+                <div class="partner-title"><span>🤔</span> "Tôi sợ share trong cộng đồng vì sợ bị phán xét hoặc sợ người khác biết điểm yếu của mình."</div>
+                <div class="partner-content">
+                    <p>Đây là nỗi sợ rất phổ biến và hoàn toàn có thể hiểu được. Điều quan trọng là bạn không cần share mọi thứ ngay lập tức. Bắt đầu nhỏ: comment một vài bài, react, hoặc chia sẻ một thắng lợi nhỏ. Khi bạn cảm thấy an toàn hơn và thấy cộng đồng supportive thay vì phán xét, bạn sẽ tự nhiên muốn chia sẻ nhiều hơn. Trong GEM Community, quy tắc số 1 là "no judgment" - tất cả chúng ta đều đang trên hành trình học hỏi và phát triển.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- KEY TAKEAWAYS SECTION -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> 3 Điểm Cốt Lõi Cần Nhớ</h2>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Bạn Là Trung Bình Của 5 Người - Đây Là Luật Vật Lý</div>
+                        <div class="flow-step-desc">Entrainment là hiện tượng khoa học thực sự: năng lượng của bạn sẽ tự động đồng bộ với những người xung quanh. Nếu bạn muốn duy trì tần số cao, bạn CẦN ở gần những người có tần số cao. Làm bài tập "Audit 5 Người" và xác định ai đang nâng bạn lên, ai đang kéo bạn xuống.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Accountability Partner Tăng Cơ Hội Thành Công Lên 95%</div>
+                        <div class="flow-step-desc">Nghiên cứu cho thấy có AI ĐÓ để check-in thường xuyên làm tăng cơ hội đạt mục tiêu từ 10% lên 95%. Tìm 1-2 người trong cộng đồng có mục tiêu tương tự và cam kết đồng hành cùng nhau. Format đơn giản: chia sẻ tần số, wins, challenges, và next actions.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">CHO ĐI Là Cách Nhanh Nhất Để NHẬN LẠI</div>
+                        <div class="flow-step-desc">Năng lượng cần CHẢY để tươi mới. Khi bạn cho đi (comment encourage, chia sẻ tips, giúp đỡ người mới), bạn không chỉ giúp người khác - bạn cũng nâng tần số của chính mình. Thực hành Micro-Giving mỗi ngày: cho đi ít nhất 1 thứ nhỏ (lời khen, tip hữu ích, comment tích cực).</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TRANSITION SECTION -->
+        <section class="section">
+            <h2 class="section-title"><span>🔮</span> Bước Tiếp Theo: Tổng Kết 49 Ngày Chuyển Hóa</h2>
+            <p>Xin chúc mừng bạn! Khi đọc đến đây, bạn đã gần hoàn thành toàn bộ khóa học "Tái Tạo Tư Duy Triệu Phú". Từ Module 1 đến giờ, bạn đã học cách nhận diện và thay thế niềm tin giới hạn, hóa giải nghiệp tiền bạc từ gia đình, cài đặt tần số thịnh vượng, xây dựng nghi thức triệu phú, hành động thuận thiên, và bây giờ - xây dựng cộng đồng hỗ trợ.</p>
+
+            <p>Trong Bài 6.4 tiếp theo - bài cuối cùng của Module 6 - chúng ta sẽ tổng kết lại TOÀN BỘ hành trình 49 ngày chuyển hóa. Bạn sẽ review những gì đã học, đo lường sự tiến bộ của mình, và chuẩn bị cho giai đoạn tiếp theo của hành trình. Đây cũng là bài có QUIZ để kiểm tra và củng cố kiến thức từ Module 6.</p>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>✍️</span> Bài Tập Trước Khi Sang Bài Tiếp</div>
+                <p><strong>Thực hiện 3 hành động cộng đồng tuần này:</strong></p>
+                <p>1. Post một bài chia sẻ trong GEM Community về hành trình của bạn (có thể là một insight, một thắng lợi nhỏ, hoặc một câu hỏi)</p>
+                <p>2. Comment encourage ít nhất 3 người khác trong cộng đồng</p>
+                <p>3. Gửi DM cho 1-2 người bạn cảm thấy có thể trở thành Accountability Partner tiềm năng</p>
+                <p style="margin-top: var(--space-md);">Đây là bước đầu tiên để bạn bắt đầu xây dựng "cộng đồng thịnh vượng" của riêng mình!</p>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <p>Bài 6.3 Hoàn Tất! 👥</p>
+            <p style="margin-top: var(--space-sm);">Tiếp theo: <a href="KHOA_TRIEU_PHU_M6_BAI_04.html">Bài 6.4: Review 49 Ngày (Quiz) →</a></p>
+            <p style="margin-top: var(--space-lg);">© 2024 GEM Academy by Jennie Uyen Chu</p>
+        </footer>
+
+    </div>
+</body>
+</html>

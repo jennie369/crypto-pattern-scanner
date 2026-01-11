@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 2.2: 7 Hành Vi Tự Yêu Tinh Tấn | Khóa Tần Số Tình Yêu</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--burgundy); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .section > ul, .section > ol { color: var(--text-secondary); padding-left: 1.5em; margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > ul, .section > ol { padding-left: calc(16px + 1.5em); padding-right: 16px; } }
+        .section li { margin-bottom: var(--space-sm); }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+        .highlight-box ul { color: var(--text-secondary); margin-top: var(--space-sm); padding-left: 1.5em; }
+        .highlight-box li { margin-bottom: var(--space-xs); }
+
+        .highlight-box.purple { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05)); border-color: rgba(106, 91, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.purple { border-left-color: var(--purple); } }
+        .highlight-box.purple .highlight-box-title { color: var(--purple); }
+
+        .highlight-box.cyan { background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 240, 255, 0.05)); border-color: rgba(0, 240, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.cyan { border-left-color: var(--cyan); } }
+        .highlight-box.cyan .highlight-box-title { color: var(--cyan); }
+
+        .highlight-box.green { background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05)); border-color: rgba(0, 200, 83, 0.3); }
+        @media (max-width: 600px) { .highlight-box.green { border-left-color: var(--success); } }
+        .highlight-box.green .highlight-box-title { color: var(--success); }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .example-box { background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02)); border: 1px solid rgba(0, 200, 83, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .example-box { border: none; border-radius: 0; border-left: 4px solid var(--success); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .example-box-title { font-weight: 700; color: var(--success); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .behavior-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; transition: all 0.3s ease; }
+        @media (max-width: 600px) { .behavior-card { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        @media (min-width: 601px) { .behavior-card:hover { border-color: var(--gold); transform: translateY(-4px); } }
+        .behavior-header { display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-md); }
+        .behavior-number { width: 48px; height: 48px; min-width: 48px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.25rem; color: var(--navy-dark); }
+        .behavior-title { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); }
+        .behavior-content { color: var(--text-secondary); }
+        .behavior-content p { margin-bottom: var(--space-sm); }
+        .behavior-action { margin-top: var(--space-md); padding: var(--space-md); background: rgba(255, 189, 89, 0.1); border-radius: var(--space-sm); border-left: 3px solid var(--gold); }
+        .behavior-action-title { font-weight: 600; color: var(--gold); margin-bottom: var(--space-xs); }
+
+        .faq-item { margin-bottom: var(--space-lg); }
+        .faq-question { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); }
+        .faq-answer { color: var(--text-secondary); }
+
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>💕</span>
+                <span>Module 2</span>
+            </div>
+            <div class="lesson-chapter">Chapter 2 - Yêu Thương Bản Thân</div>
+            <h1 class="lesson-title">7 Hành Vi Tự Yêu Tinh Tấn</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 2.2</span></div>
+                <div class="meta-item"><span>⏱️</span><span>30 phút đọc</span></div>
+            </div>
+        </header>
+
+        <!-- SECTION 1: Opening Hook -->
+        <section class="section">
+            <h2 class="section-title"><span>💝</span> Tự Yêu Là Hành Động, Không Phải Cảm Xúc</h2>
+
+            <p>Bạn có thể nói "tôi yêu bản thân" hàng nghìn lần, nhưng nếu bạn vẫn thức khuya mỗi đêm scrolling điện thoại, ăn uống qua loa vì "không có thời gian", và nói "có" với mọi yêu cầu của người khác dù kiệt sức - thì bạn đang NÓI một đường và LÀM một nẻo. Tình yêu bản thân không nằm ở lời nói mà nằm ở hành động hàng ngày.</p>
+
+            <p>Hãy nghĩ về cách bạn thể hiện tình yêu với người thân. Bạn nấu cho họ bữa ăn ngon, đảm bảo họ ngủ đủ giấc, lắng nghe khi họ cần, và bảo vệ họ khỏi những điều có hại. Vậy tại sao bạn không làm điều tương tự cho chính mình? Đó chính là điều mà 7 Hành Vi Tinh Tấn sẽ giúp bạn thực hiện - biến tình yêu bản thân từ khái niệm trừu tượng thành những hành động cụ thể mỗi ngày.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>💎</span> Tinh Tấn (Diligence) Là Gì?</div>
+                <p>Trong Phật giáo, Tinh Tấn là một trong Lục Độ Ba La Mật - sự nỗ lực bền bỉ, kiên trì để tu tập và hoàn thiện bản thân. Không phải nỗ lực quá sức một ngày rồi bỏ cuộc, mà là những bước nhỏ đều đặn mỗi ngày. 7 Hành Vi Tinh Tấn là những hành động nhỏ bạn thực hành mỗi ngày để xây dựng nền tảng tự yêu vững chắc.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m2-7-behaviors-intro.png" alt="7 Hành Vi Tự Yêu Tinh Tấn">
+            </div>
+            <div class="image-caption">Hình 1: 7 Hành Vi Tự Yêu - Nền tảng của tình yêu bền vững</div>
+        </section>
+
+        <!-- SECTION 2: Deep Explanation - 7 Behaviors -->
+        <section class="section">
+            <h2 class="section-title"><span>🌟</span> 7 Hành Vi Chi Tiết</h2>
+
+            <p>Mỗi hành vi dưới đây đều chăm sóc một khía cạnh của bạn: thể chất, tinh thần, cảm xúc, và tâm linh. Khi bạn thực hành đều đặn cả 7 hành vi, bạn đang tạo ra một hệ sinh thái nuôi dưỡng toàn diện cho bản thân.</p>
+
+            <div class="behavior-card">
+                <div class="behavior-header">
+                    <div class="behavior-number">1</div>
+                    <div class="behavior-title">Giấc Ngủ Thiêng Liêng</div>
+                </div>
+                <div class="behavior-content">
+                    <p>Giấc ngủ không chỉ là nghỉ ngơi - đó là thời gian não bộ được "dọn dẹp", loại bỏ các chất thải tích tụ trong ngày. Thiếu ngủ khiến cortisol (hormone stress) tăng cao, làm bạn dễ cáu gắt, mất kiên nhẫn, và khó yêu thương bất kỳ ai - kể cả chính mình. Nghiên cứu cho thấy chỉ cần thiếu ngủ 1-2 tiếng trong vài đêm liên tiếp đã đủ làm suy giảm khả năng điều tiết cảm xúc.</p>
+                    <p>Tại sao gọi là "thiêng liêng"? Bởi vì trong giấc ngủ, tiềm thức của bạn xử lý và chữa lành những trải nghiệm trong ngày. Giấc mơ là cách tâm hồn giao tiếp với bạn. Khi bạn tôn trọng giấc ngủ, bạn đang tôn trọng quá trình chữa lành tự nhiên của bản thân.</p>
+                    <div class="behavior-action">
+                        <div class="behavior-action-title">🎯 Hành Động Cụ Thể:</div>
+                        <p>Ngủ đủ 7-8 tiếng mỗi đêm. Tạo ritual trước khi ngủ: không màn hình 1 giờ trước, đọc sách hoặc thiền 15 phút, nói lời cảm ơn với ngày hôm nay. Đặt giờ ngủ cố định - cơ thể cần routine.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="behavior-card">
+                <div class="behavior-header">
+                    <div class="behavior-number">2</div>
+                    <div class="behavior-title">Dinh Dưỡng Có Ý Thức</div>
+                </div>
+                <div class="behavior-content">
+                    <p>Thức ăn là năng lượng bạn đưa vào cơ thể - theo nghĩa đen. Mỗi tế bào trong cơ thể bạn được tạo ra từ những gì bạn ăn. Khi bạn ăn uống có ý thức, bạn đang nói với cơ thể: "Tao trân trọng mày và muốn mày khỏe mạnh." Ngược lại, khi bạn ăn vội vàng, ăn junk food, hay bỏ bữa, bạn đang nói: "Mày không quan trọng đủ để tao chăm sóc."</p>
+                    <p>Ăn có ý thức không có nghĩa là ăn kiêng hay từ bỏ mọi thứ ngon. Nó có nghĩa là HIỆN DIỆN khi ăn - cảm nhận mùi vị, nhai chậm rãi, biết ơn thức ăn. Nó có nghĩa là lắng nghe cơ thể để biết khi nào đói thực sự và khi nào chỉ là ăn vì stress.</p>
+                    <div class="behavior-action">
+                        <div class="behavior-action-title">🎯 Hành Động Cụ Thể:</div>
+                        <p>Uống 2 lít nước mỗi ngày. Ăn ít nhất 1 bữa chậm rãi, không màn hình. Thêm rau xanh vào mỗi bữa. Trước khi ăn, dừng lại 3 giây để cảm ơn thức ăn và những người đã tạo ra nó.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="behavior-card">
+                <div class="behavior-header">
+                    <div class="behavior-number">3</div>
+                    <div class="behavior-title">Vận Động Yêu Thương</div>
+                </div>
+                <div class="behavior-content">
+                    <p>Cơ thể được tạo ra để di chuyển, không phải để ngồi 8-10 tiếng mỗi ngày. Khi bạn vận động, endorphins được giải phóng, tạo cảm giác hạnh phúc tự nhiên. Đây không phải về việc giảm cân hay có body đẹp - đây là về việc cho cơ thể những gì nó cần để hoạt động tối ưu.</p>
+                    <p>Tại sao gọi là "yêu thương"? Bởi vì vận động nên đến từ tình yêu với cơ thể, không phải từ sự ghét bỏ. "Tao phải chạy để giảm cân vì tao béo quá" khác hoàn toàn với "Tao chạy vì cơ thể tao xứng đáng được di chuyển, được mạnh khỏe." Cùng một hành động, nhưng năng lượng khác nhau hoàn toàn.</p>
+                    <div class="behavior-action">
+                        <div class="behavior-action-title">🎯 Hành Động Cụ Thể:</div>
+                        <p>30 phút vận động mỗi ngày - đi bộ, yoga, nhảy, bơi, bất kỳ thứ gì bạn THÍCH. Không cần phải "hardcore" - chỉ cần di chuyển với niềm vui. Nếu bận, chia thành 3 lần 10 phút. Quan trọng là di chuyển, không phải cường độ.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m2-self-care-pyramid.png" alt="Kim tự tháp chăm sóc bản thân">
+            </div>
+            <div class="image-caption">Hình 2: Kim tự tháp chăm sóc bản thân - từ nền tảng đến đỉnh cao</div>
+
+            <div class="behavior-card">
+                <div class="behavior-header">
+                    <div class="behavior-number">4</div>
+                    <div class="behavior-title">Không Gian Thiêng</div>
+                </div>
+                <div class="behavior-content">
+                    <p>Môi trường xung quanh ảnh hưởng trực tiếp đến năng lượng và tâm trạng của bạn. Marie Kondo không phải ngẫu nhiên trở thành hiện tượng toàn cầu - cô chạm đúng vào nhu cầu sâu xa của con người: sống trong không gian nuôi dưỡng tâm hồn. Một không gian bừa bộn tạo ra tâm trí bừa bộn. Một không gian sạch sẽ, gọn gàng, đẹp đẽ tạo ra sự bình an và rõ ràng trong tâm trí.</p>
+                    <p>Bạn xứng đáng sống trong môi trường đẹp đẽ. Không cần phải giàu có hay có nhà lớn - chỉ cần những gì bạn có được chăm sóc và sắp xếp với tình yêu.</p>
+                    <div class="behavior-action">
+                        <div class="behavior-action-title">🎯 Hành Động Cụ Thể:</div>
+                        <p>Dọn dẹp giường ngay khi thức dậy - đây là "chiến thắng nhỏ" đầu tiên trong ngày. Bỏ đi 1 đồ vật không cần thiết mỗi ngày. Tạo một góc thiêng liêng (sacred corner) với nến, hoa, hoặc tinh thể - nơi bạn có thể ngồi thiền hoặc đọc sách.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="behavior-card">
+                <div class="behavior-header">
+                    <div class="behavior-number">5</div>
+                    <div class="behavior-title">Ranh Giới Từ Bi</div>
+                </div>
+                <div class="behavior-content">
+                    <p>Nói "KHÔNG" với những gì drain năng lượng của bạn là hành động yêu thương bản thân mạnh mẽ nhất - và cũng khó khăn nhất với nhiều người. Chúng ta được dạy rằng nói không là ích kỷ, rằng người tốt phải luôn giúp đỡ mọi người. Nhưng sự thật là: bạn không thể đổ nước từ ly rỗng. Nếu bạn không bảo vệ năng lượng của mình, bạn sẽ không có gì để cho ai cả.</p>
+                    <p>Ranh giới từ bi không phải là xây tường để chặn mọi người ra. Đó là biết khi nào nói "có" và khi nào nói "không" - dựa trên giá trị và năng lượng của bạn, không phải dựa trên sự sợ hãi hay cảm giác tội lỗi.</p>
+                    <div class="behavior-action">
+                        <div class="behavior-action-title">🎯 Hành Động Cụ Thể:</div>
+                        <p>Nói "KHÔNG" với 1 điều mỗi tuần mà bạn không thực sự muốn làm. Giảm thời gian với những người khiến bạn cảm thấy tệ. Tắt notifications không cần thiết. Khi ai đó xin bạn điều gì, hãy nói: "Để tôi suy nghĩ và trả lời sau" thay vì đồng ý ngay.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="behavior-card">
+                <div class="behavior-header">
+                    <div class="behavior-number">6</div>
+                    <div class="behavior-title">Thời Gian Một Mình</div>
+                </div>
+                <div class="behavior-content">
+                    <p>Solitude (sự cô độc có chủ đích) khác hoàn toàn với loneliness (sự cô đơn). Dành thời gian một mình với bản thân không phải để trốn tránh xã hội, mà để kết nối sâu với chính mình. Trong sự im lặng, bạn mới nghe được tiếng nói nội tâm - tiếng nói thường bị chìm trong tiếng ồn của cuộc sống hiện đại.</p>
+                    <p>Nhiều người sợ ở một mình vì họ sợ phải đối mặt với những suy nghĩ, cảm xúc của chính mình. Nhưng đây chính là điều cần thiết cho sự trưởng thành tâm linh. Bạn cần biết mình là ai khi không có ai khác xung quanh.</p>
+                    <div class="behavior-action">
+                        <div class="behavior-action-title">🎯 Hành Động Cụ Thể:</div>
+                        <p>15 phút im lặng mỗi ngày - không điện thoại, không nhạc, không sách. Chỉ bạn và hơi thở. Đi dạo một mình. Ngồi với tách trà và không làm gì cả. Lên lịch "solo date" với bản thân mỗi tuần - đi xem phim một mình, ngồi quán cafe một mình.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="behavior-card">
+                <div class="behavior-header">
+                    <div class="behavior-number">7</div>
+                    <div class="behavior-title">Tha Thứ Bản Thân</div>
+                </div>
+                <div class="behavior-content">
+                    <p>Đây là hành vi khó nhất trong 7 hành vi - và cũng quan trọng nhất. Bạn sẽ mắc sai lầm. Bạn sẽ không hoàn hảo. Bạn sẽ có những ngày không thực hành được các hành vi trên. Và điều đó hoàn toàn bình thường. Tự tha thứ không phải là bỏ qua lỗi lầm hay giả vờ như không có gì xảy ra - đó là chấp nhận rằng bạn đang học và trưởng thành, rằng sai lầm là một phần của hành trình.</p>
+                    <p>Người khắc nghiệt nhất với bạn thường là chính bạn. Tiếng nói phê bình nội tâm có thể tàn nhẫn hơn bất kỳ ai. Học cách nói chuyện với bản thân như cách bạn nói với một người bạn thân - với sự thấu hiểu và từ bi.</p>
+                    <div class="behavior-action">
+                        <div class="behavior-action-title">🎯 Hành Động Cụ Thể:</div>
+                        <p>Khi phạm sai lầm, thay vì tự phê bình, hãy nói: "Tao đang học. Mày đã cố gắng hết sức rồi. Tao tha thứ cho mày." Viết 3 điều mình đã làm tốt hôm nay - dù nhỏ đến đâu. Khi tiếng nói phê bình xuất hiện, hỏi: "Tao có nói điều này với bạn thân không? Nếu không, tại sao tao nói với bản thân?"</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m2-7-behaviors-wheel.png" alt="Bánh xe 7 Hành Vi Tinh Tấn">
+            </div>
+            <div class="image-caption">Hình 3: Bánh xe 7 Hành Vi - Cân bằng và hài hòa</div>
+        </section>
+
+        <!-- SECTION 3: Real Examples -->
+        <section class="section">
+            <h2 class="section-title"><span>💫</span> Những Câu Chuyện Thực Tế</h2>
+
+            <div class="example-box">
+                <div class="example-box-title"><span>👩</span> Câu Chuyện Của Trang</div>
+                <p>Trang, 32 tuổi, là mẹ của hai đứa con nhỏ và làm việc full-time. Cô luôn đặt mọi người lên trước - con, chồng, sếp, đồng nghiệp - và bản thân cô luôn xếp cuối. Kết quả: kiệt sức, hay cáu gắt, và cảm giác mất kết nối với chính mình.</p>
+                <p style="margin-top: var(--space-sm);">Cô bắt đầu với chỉ 1 hành vi: Giấc Ngủ Thiêng Liêng. Thay vì thức khuya xem phim sau khi con ngủ (thời gian "me time" duy nhất của cô), cô đi ngủ cùng con lúc 9h30. Ban đầu cô cảm thấy "mất mát" - nhưng sau 2 tuần, cô nhận ra mình tỉnh táo hơn, kiên nhẫn hơn với con, và có thể dậy sớm 30 phút để có thời gian một mình buổi sáng. "Tôi đã tìm được 'me time' tốt hơn - khi tôi thực sự tỉnh táo để tận hưởng nó", cô chia sẻ.</p>
+            </div>
+
+            <div class="example-box">
+                <div class="example-box-title"><span>👨</span> Câu Chuyện Của Đức</div>
+                <p>Đức, 28 tuổi, là người "dễ tính" điển hình - không bao giờ nói không với ai. Kết quả là lịch của anh luôn đầy những cuộc hẹn anh không muốn đến, những dự án anh không muốn làm, và những mối quan hệ anh không thực sự trân trọng. Anh luôn bận nhưng không bao giờ làm được những gì quan trọng với chính mình.</p>
+                <p style="margin-top: var(--space-sm);">Khi bắt đầu thực hành Ranh Giới Từ Bi, Đức sợ mọi người sẽ ghét anh. Anh bắt đầu với những điều nhỏ: từ chối một lời mời đi uống bia khi anh thực sự mệt, nói "để tao suy nghĩ" thay vì "ok" ngay lập tức. Điều bất ngờ là: mọi người tôn trọng anh hơn. "Khi tao nói 'có' bây giờ, mọi người biết đó là 'có' thật sự, không phải 'có' vì không dám từ chối", Đức nói.</p>
+            </div>
+
+            <div class="example-box">
+                <div class="example-box-title"><span>👩‍🦱</span> Câu Chuyện Của Yến</div>
+                <p>Yến, 40 tuổi, là perfectionist điển hình. Cô có tiêu chuẩn cao cho mọi thứ - và đặc biệt khắc nghiệt với bản thân. Mỗi sai lầm nhỏ đều trở thành bằng chứng rằng cô "không đủ tốt". Cô luôn mệt mỏi vì không bao giờ cho phép mình nghỉ ngơi - vì còn quá nhiều thứ chưa hoàn hảo.</p>
+                <p style="margin-top: var(--space-sm);">Hành vi Tha Thứ Bản Thân là thách thức lớn nhất với Yến. Cô bắt đầu bằng việc viết thư cho bản thân mỗi tối - không phải về những gì cần cải thiện, mà về những gì cô đã làm tốt. "Ban đầu tôi phải cố gắng lắm mới nghĩ được 1 điều. Bây giờ tôi viết được 5-7 điều dễ dàng. Không phải vì tôi làm nhiều hơn, mà vì tôi bắt đầu THẤY những gì mình đã làm", Yến chia sẻ.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 4: Common Questions -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Những Thắc Mắc Thường Gặp</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">Tôi bận lắm, làm sao có thời gian cho 7 hành vi này?</div>
+                <div class="faq-answer">Đây chính là tư duy cần thay đổi. Bạn không "tìm" thời gian - bạn "tạo" thời gian cho những gì quan trọng. Và không có gì quan trọng hơn sức khỏe và tinh thần của bạn. Hãy bắt đầu với chỉ 1-2 hành vi. Ngủ sớm hơn 30 phút không làm bạn mất gì - nhưng cho bạn nhiều năng lượng hơn. Đó là cách bạn "tạo" thêm thời gian.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Nếu tôi không thể làm hết 7 hành vi mỗi ngày thì sao?</div>
+                <div class="faq-answer">Đừng cố làm hết! Đó là công thức cho sự thất bại. Bắt đầu với 1-2 hành vi và thực hành đều đặn trong 2-3 tuần. Khi đã thành thói quen, thêm 1 hành vi nữa. Tiến bộ > Hoàn hảo. Và nhớ rằng hành vi thứ 7 (Tha Thứ Bản Thân) áp dụng cho cả quá trình này.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Thiết lập ranh giới có nghĩa là trở nên ích kỷ không?</div>
+                <div class="faq-answer">Hoàn toàn không. Ranh giới lành mạnh thực ra giúp bạn CÓ THỂ yêu thương người khác tốt hơn. Khi bạn không bị kiệt sức, bạn có năng lượng để thực sự hiện diện cho người thân. Người ích kỷ lấy đi của người khác. Người có ranh giới bảo vệ những gì họ có để có thể CHO đi một cách bền vững.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Làm sao để biết tôi đang tiến bộ?</div>
+                <div class="faq-answer">Theo dõi bằng cách ghi chép đơn giản mỗi tối: đánh dấu những hành vi bạn đã làm trong ngày. Sau 1 tuần, nhìn lại và đếm. Sau 1 tháng, so sánh với tuần đầu tiên. Bạn cũng sẽ cảm nhận được: năng lượng cao hơn, ít cáu gắt hơn, cảm giác được kiểm soát cuộc sống hơn.</div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: Practical Application -->
+        <section class="section">
+            <h2 class="section-title"><span>📝</span> Bắt Đầu Thực Hành</h2>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>📋</span> Bước 1: Đánh Giá Hiện Tại</div>
+                <p>Trước khi bắt đầu, hãy đánh giá bản thân (1-10) cho mỗi hành vi. Điều này giúp bạn biết mình đang ở đâu và cần tập trung vào đâu:</p>
+                <ul>
+                    <li>Giấc ngủ: ___ /10</li>
+                    <li>Dinh dưỡng: ___ /10</li>
+                    <li>Vận động: ___ /10</li>
+                    <li>Không gian sống: ___ /10</li>
+                    <li>Thiết lập ranh giới: ___ /10</li>
+                    <li>Thời gian một mình: ___ /10</li>
+                    <li>Tha thứ bản thân: ___ /10</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🎯</span> Bước 2: Chọn Điểm Bắt Đầu</div>
+                <p>Chọn 1-2 hành vi có điểm thấp nhất để tập trung tuần này. Đừng cố làm tất cả cùng lúc - thay đổi nhỏ nhưng bền vững tốt hơn thay đổi lớn nhưng ngắn hạn. Một thói quen mất khoảng 21 ngày để hình thành, vì vậy hãy kiên nhẫn với bản thân.</p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>📊</span> Bước 3: Theo Dõi Hàng Ngày</div>
+                <p>Mỗi tối trước khi ngủ, đánh dấu những hành vi bạn đã thực hiện trong ngày. Dùng emoji đơn giản: ✅ đã làm, ❌ chưa làm, 🔄 làm một phần. Mục tiêu tuần đầu: thực hành ít nhất 4/7 hành vi mỗi ngày. Nhớ: không cần hoàn hảo, chỉ cần tiến bộ.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m2-tracking-template.png" alt="Template tracking 7 hành vi">
+            </div>
+            <div class="image-caption">Hình 4: Template tracking tiến trình hàng tuần</div>
+        </section>
+
+        <!-- SECTION 6: Key Takeaways -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Những Điểm Cốt Lõi</h2>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>💎</span> Ghi Nhớ Từ Bài Học Này</div>
+                <ul class="summary-list">
+                    <li>Tự yêu là HÀNH ĐỘNG có chủ đích, không phải cảm xúc ngẫu nhiên - bạn thể hiện tình yêu với bản thân qua những việc làm cụ thể mỗi ngày</li>
+                    <li>7 Hành Vi Tinh Tấn chăm sóc toàn diện: thể chất (ngủ, ăn, vận động), tinh thần (không gian, ranh giới), và cảm xúc (thời gian một mình, tha thứ)</li>
+                    <li>Không cần làm hết 7 hành vi ngay - bắt đầu với 1-2, xây dựng thói quen, rồi thêm dần dần. Tiến bộ quan trọng hơn hoàn hảo</li>
+                    <li>Thiết lập ranh giới không phải ích kỷ - đó là cách bạn bảo vệ năng lượng để có thể cho đi một cách bền vững</li>
+                    <li>Tha thứ bản thân là hành vi quan trọng nhất - áp dụng cho cả quá trình thực hành. Bạn sẽ không hoàn hảo, và điều đó hoàn toàn ok</li>
+                    <li>Khi bạn yêu thương bản thân tốt hơn, bạn có nhiều tình yêu hơn để cho người khác - tự yêu không làm giảm tình yêu, mà nhân rộng nó</li>
+                </ul>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m2-start-small.png" alt="Bắt đầu từ những bước nhỏ">
+            </div>
+            <div class="image-caption">Hình 5: Bắt đầu nhỏ, tiến bộ đều - chìa khóa của sự thay đổi bền vững</div>
+        </section>
+
+        <!-- SECTION 7: Transition -->
+        <section class="section">
+            <h2 class="section-title"><span>🌟</span> Bước Tiếp Theo</h2>
+
+            <p>7 Hành Vi Tinh Tấn giúp bạn xây dựng nền tảng yêu thương bản thân từ bên trong. Nhưng để bảo vệ năng lượng này, bạn cần học cách thiết lập ranh giới rõ ràng với thế giới bên ngoài. Trong bài học tiếp theo, chúng ta sẽ đi sâu vào nghệ thuật thiết lập ranh giới lành mạnh - cách nói "không" mà không cảm thấy tội lỗi, cách bảo vệ không gian cá nhân, và cách phân biệt giữa ranh giới từ bi và tường rào phòng thủ.</p>
+
+            <div class="highlight-box green">
+                <div class="highlight-box-title"><span>✨</span> Bài Tập Thực Hành Hôm Nay</div>
+                <p>Ngay bây giờ, hãy lấy giấy bút và đánh giá bản thân cho 7 hành vi (1-10). Sau đó, chọn 1 hành vi có điểm thấp nhất và cam kết thực hành nó trong 7 ngày tới. Đặt reminder trên điện thoại. Ghi chép mỗi tối. Đây là bước đầu tiên để biến tình yêu bản thân từ ý tưởng thành hành động thực tế.</p>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>

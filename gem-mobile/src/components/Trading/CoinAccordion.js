@@ -200,7 +200,7 @@ const PatternItem = ({
       <View style={styles.rrRow}>
         <Text style={styles.rrLabel}>Tỷ Lệ R:R</Text>
         <Text style={[styles.rrValue, rr >= 2 ? styles.greenText : styles.yellowText]}>
-          1:{rr.toFixed(1)}
+          1:{rr.toFixed(1).replace('.', ',')}
         </Text>
       </View>
 

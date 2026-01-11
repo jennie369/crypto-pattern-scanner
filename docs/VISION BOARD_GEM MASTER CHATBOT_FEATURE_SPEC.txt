@@ -229,6 +229,297 @@ GEM Mobile - Vision Board & GemMaster Chatbot - COMPLETE HANDOFF DOCUMENT
   PAPER_COLOR = '#FCE2BF'
 
   ---
+  AI SƯ PHỤ (AI TRADING MENTOR) - COMPLETE FEATURE SPEC
+  Implemented: December 15, 2025
+
+  File Structure
+
+  gem-mobile/src/services/
+  ├── karmaService.js           # Karma management
+  ├── gemMasterAIService.js     # AI Sư Phụ logic
+  ├── binanceApiService.js      # READ-ONLY Binance API
+  └── shadowModeService.js      # Paper vs Real comparison
+
+  gem-mobile/src/components/AITrader/
+  ├── index.js
+  ├── AIAvatarOrb.js            # Animated AI orb with mood
+  ├── AIMessageBubble.js        # AI message with typing effect
+  ├── UnlockOptionsCard.js      # Unlock options (meditation, journal...)
+  └── TradeBlockBanner.js       # Block warning banner
+
+  gem-mobile/src/components/Karma/
+  ├── index.js
+  ├── KarmaBar.js               # Animated progress bar
+  ├── KarmaLevelBadge.js        # Level icon badge
+  ├── KarmaHistoryItem.js       # History item
+  ├── KarmaStatCard.js          # Stat display card
+  └── KarmaLeaderboardItem.js   # Leaderboard item
+
+  gem-mobile/src/components/Trading/
+  └── AITradeGuard.js           # Modal for AI intervention
+
+  gem-mobile/src/hooks/
+  └── useAITradeAnalysis.js     # Hook for AI trade analysis
+
+  gem-mobile/src/screens/Karma/
+  ├── index.js
+  └── KarmaDashboardScreen.js   # Main karma dashboard
+
+  gem-mobile/src/screens/ShadowMode/
+  ├── index.js
+  ├── ShadowModeScreen.js       # Shadow mode dashboard
+  ├── ConnectBinanceScreen.js   # Connect Binance API
+  └── ShadowReportScreen.js     # View shadow reports
+
+  AI Moods (gemMasterAIService.js)
+
+  AI_MOODS = {
+    calm:    { color: '#00D9FF', animation: 'pulse_slow' },
+    warning: { color: '#FF6B6B', animation: 'pulse_fast', vibration: [100,50,100] },
+    angry:   { color: '#DC2626', animation: 'shake', vibration: [200,100,200,100,200] },
+    proud:   { color: '#FFD700', animation: 'glow' },
+    silent:  { color: '#4A4A4A', animation: 'fade' },
+  }
+
+  AI Scenarios
+
+  SCENARIO_TYPES:
+  - FOMO_BUY: RSI > 70 OR priceChange1h > 5%
+  - FOMO_RETRY: User retries after FOMO warning
+  - REVENGE_TRADE: loseStreak >= 3 AND sizeIncreased
+  - NO_STOPLOSS: trade.stopLoss is null
+  - SL_MOVED_WIDER: newSL > originalSL (for LONG)
+  - WIN_BIG_CAUTION: bigWin with caution message
+  - DISCIPLINE_WIN: Win with proper discipline
+  - DISCIPLINE_LOSS: Loss but followed rules
+  - ACCOUNT_FROZEN: Karma = 0
+  - OVERTRADE: tradesCount > 10/day
+  - STREAK_BROKEN: discipline streak broken
+
+  Unlock Options
+
+  UNLOCK_OPTIONS = [
+    { id: 'meditation', icon: Brain, label: 'Thiền 5 phút', duration: 300, karmaBonus: 5 },
+    { id: 'journal', icon: BookOpen, label: 'Viết nhật ký', karmaBonus: 10 },
+    { id: 'rest', icon: Coffee, label: 'Nghỉ 15 phút', duration: 900, karmaBonus: 3 },
+    { id: 'wait', icon: Clock, label: 'Chờ 1 giờ', duration: 3600, karmaBonus: 0 },
+  ]
+
+  ---
+  KARMA SYSTEM - COMPLETE FEATURE SPEC
+  Implemented: December 15, 2025
+
+  Karma Levels (karmaService.js)
+
+  KARMA_LEVEL_THRESHOLDS = {
+    novice:   { min: 0,    max: 199,  name: 'Tập sự',    icon: 'UserX',        color: '#6B7280' },
+    student:  { min: 200,  max: 499,  name: 'Học viên',  icon: 'GraduationCap', color: '#3B82F6' },
+    warrior:  { min: 500,  max: 799,  name: 'Chiến binh', icon: 'Sword',        color: '#F59E0B' },
+    master:   { min: 800,  max: 999,  name: 'Bậc thầy',  icon: 'Crown',        color: '#8B5CF6' },
+    guardian: { min: 1000, max: 9999, name: 'Bảo hộ',    icon: 'Shield',       color: '#FFD700' },
+  }
+
+  Level Benefits
+
+  novice (0-199):
+    - daily_trade_limit: 3
+    - ai_monitoring: 'strict'
+    - daily_signals: 0
+
+  student (200-499):
+    - daily_trade_limit: 10
+    - ai_monitoring: 'normal'
+    - daily_signals: 3
+
+  warrior (500-799):
+    - ai_monitoring: 'light'
+    - group_chat: true
+    - daily_signals: unlimited
+
+  master (800-999):
+    - vip_group: true
+    - secret_course: true
+    - ai_monitoring: 'minimal'
+
+  guardian (1000+):
+    - private_mentorship: true
+    - can_mentor: true
+    - ai_monitoring: 'trusted'
+
+  Karma Actions
+
+  Trading Positive:
+  - trade_discipline_win: +25 (win với SL, không dời SL)
+  - trade_discipline_loss: +10 (thua nhưng đúng kỷ luật)
+  - win_streak_3: +30
+  - win_streak_7: +100
+  - patience_bonus: +10 (tránh FOMO thành công)
+
+  Trading Violations:
+  - fomo_trade: -30 (bỏ qua cảnh báo)
+  - revenge_trade: -50
+  - no_stoploss: -10
+  - sl_moved_wider: -20
+  - ignore_warning_loss: -40
+  - overtrade: -15
+
+  Learning:
+  - lesson_complete: +10
+  - module_complete: +30
+  - quiz_perfect: +20
+  - course_complete: +100
+
+  Wellness:
+  - meditation: +5
+  - journal_entry: +5
+  - weekly_review: +15
+  - tarot_reading: +3
+  - iching_reading: +3
+
+  Social:
+  - refer_signup: +50
+  - refer_subscribe: +100
+  - helpful_comment: +5
+  - quality_post: +10
+
+  Inactivity:
+  - inactive_3_days: -10
+  - inactive_7_days: -30
+  - inactive_14_days: -50
+  - streak_break: -20
+
+  KarmaDashboard Features
+
+  1. Karma Progress Bar - Animated với level gradient
+  2. Next Level Info - Còn bao nhiêu Karma
+  3. Stats Grid (2x2):
+     - Tổng tích lũy
+     - Đã mất
+     - Chuỗi kỷ luật
+     - Kỷ lục
+  4. Benefits Section - Quyền lợi cấp bậc
+  5. Recent History - 5 hoạt động gần đây
+  6. Leaderboard - Top 5 karma
+
+  ---
+  SHADOW MODE - COMPLETE FEATURE SPEC
+  Implemented: December 15, 2025
+
+  Purpose: So sánh Paper Trade vs Real Trade để phát hiện vấn đề tâm lý
+
+  Features
+
+  1. Connect Binance API (READ-ONLY only!)
+     - Mã hóa API keys với AES
+     - Chỉ cho phép Enable Reading
+     - Không thể trade/withdraw
+
+  2. Sync Trades
+     - Đồng bộ giao dịch thực từ Binance
+     - So sánh với Paper Trade trong cùng kỳ
+
+  3. Comparison Stats (30 ngày)
+     - PnL gap %
+     - Win rate gap %
+     - Số lệnh
+
+  4. AI Analysis
+     - Phát hiện vấn đề (FOMO thực > paper, v.v.)
+     - Khuyến nghị cải thiện
+     - Karma adjustment dựa trên gap
+
+  5. Shadow Reports (Weekly/Monthly)
+     - Báo cáo chi tiết
+     - Issues với severity levels
+     - AI recommendations
+
+  Security Notes
+
+  - CHỈ CHẤP NHẬN API READ-ONLY
+  - API keys được mã hóa
+  - Không lưu credentials thô
+  - User có thể disconnect bất cứ lúc nào
+
+  ---
+  DATABASE TABLES (Supabase)
+
+  AI Master System (20251215_ai_master_system.sql)
+
+  ai_master_interactions:
+    - id, user_id, scenario_type, trade_id
+    - trigger_conditions (JSONB)
+    - ai_message, ai_mood
+    - user_action, karma_change
+
+  ai_master_config:
+    - id (PK), scenario_category
+    - message_template, mood
+    - karma_impact, block_trade
+    - block_duration_minutes, require_unlock
+
+  user_trade_blocks:
+    - user_id, block_reason
+    - blocked_at, blocked_until
+    - unlock_method, is_active
+
+  Karma System (20251215_karma_system.sql)
+
+  user_karma:
+    - user_id, karma_points (0-9999), karma_level
+    - total_earned, total_lost
+    - highest_karma, lowest_karma
+    - current_discipline_streak, best_discipline_streak
+    - karma_earned_today, karma_lost_today
+    - trades_today, daily_trade_limit
+    - is_frozen, frozen_until
+
+  karma_history:
+    - user_id, change_amount, new_total
+    - action_type, action_detail
+    - related_trade_id, level_changed
+
+  karma_levels:
+    - id (novice/student/warrior/master/guardian)
+    - name_vi, name_en, min_karma, max_karma
+    - benefits (JSONB), restrictions (JSONB)
+    - icon, color
+
+  karma_actions:
+    - id, category, name_vi
+    - karma_change, is_positive
+    - conditions (JSONB), daily_limit
+
+  Shadow Mode (20251215_shadow_mode.sql)
+
+  user_exchange_connections:
+    - user_id, exchange
+    - api_key_encrypted, api_secret_encrypted
+    - is_read_only (MUST be true)
+    - is_verified, last_sync_at
+
+  real_trades:
+    - user_id, connection_id, exchange_trade_id
+    - symbol, side, entry_price, exit_price
+    - quantity, realized_pnl, trade_time
+
+  shadow_reports:
+    - user_id, report_type (weekly/monthly)
+    - period_start, period_end
+    - paper vs real stats
+    - pnl_gap_percent, win_rate_gap
+    - ai_analysis, ai_issues, ai_recommendations
+
+  RPC Functions
+
+  - check_all_quotas(p_user_id)
+  - increment_chatbot_quota(p_user_id)
+  - increment_scanner_quota(p_user_id)
+  - get_karma_level(p_points)
+  - update_user_karma(p_user_id, p_change, p_action_type, ...)
+  - get_user_karma_full(p_user_id)
+  - is_user_trade_blocked(p_user_id)
+
+  ---
   NAVIGATION (AccountStack.js)
 
   VisionBoard screens in Account tab:
@@ -240,5 +531,11 @@ GEM Mobile - Vision Board & GemMaster Chatbot - COMPLETE HANDOFF DOCUMENT
   <Stack.Screen name="RitualPlayground" component={RitualPlaygroundScreen}
     options={{ animation: 'slide_from_bottom', presentation: 'modal' }} />
   <Stack.Screen name="RitualHistory" component={RitualHistoryScreen} />
+
+  Karma & Shadow Mode screens:
+  <Stack.Screen name="KarmaDashboard" component={KarmaDashboardScreen} />
+  <Stack.Screen name="ShadowMode" component={ShadowModeScreen} />
+  <Stack.Screen name="ConnectBinance" component={ConnectBinanceScreen} />
+  <Stack.Screen name="ShadowReport" component={ShadowReportScreen} />
 
   ---

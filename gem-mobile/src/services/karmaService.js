@@ -355,7 +355,7 @@ class KarmaService {
       if (data?.streak_bonus > 0) {
         const streakAction = `win_streak_${data.new_streak}`;
         await this.updateKarma(userId, data.streak_bonus, streakAction, {
-          actionDetail: `Chuỗi kỷ luật ${data.new_streak} ngày`,
+          actionDetail: `Kỷ luật ${data.new_streak} ngày liên tiếp`,
           metadata: { streak: data.new_streak },
         });
       }
@@ -363,7 +363,7 @@ class KarmaService {
       // If streak broken, apply penalty
       if (data?.streak_broken) {
         await this.updateKarma(userId, -20, 'streak_break', {
-          actionDetail: `Mất chuỗi kỷ luật ${data.previous_streak} ngày`,
+          actionDetail: `Phá vỡ chuỗi ${data.previous_streak} ngày kỷ luật`,
           metadata: { previous_streak: data.previous_streak },
         });
       }
@@ -542,9 +542,16 @@ class KarmaService {
 
   /**
    * Get daily trade limit
+   * IMPORTANT: Paid tiers (TIER1, TIER2, TIER3) bypass karma limits
+   * @param {Object} karma - Karma data
+   * @param {string} scannerTier - User's paid scanner tier (FREE, TIER1, TIER2, TIER3)
    */
-  getDailyTradeLimit(karma) {
-    return karma?.daily_trade_limit || null; // null = unlimited
+  getDailyTradeLimit(karma, scannerTier = 'FREE') {
+    // Paid users bypass karma daily trade limits
+    if (scannerTier && scannerTier !== 'FREE') {
+      return null; // null = unlimited for paid users
+    }
+    return karma?.daily_trade_limit || null;
   }
 
   /**
@@ -570,9 +577,17 @@ class KarmaService {
 
   /**
    * Check if user can trade today
+   * IMPORTANT: Paid tiers bypass karma limits
+   * @param {Object} karma - Karma data
+   * @param {string} scannerTier - User's paid scanner tier
    */
-  canTradeToday(karma) {
-    const limit = this.getDailyTradeLimit(karma);
+  canTradeToday(karma, scannerTier = 'FREE') {
+    // Paid users always can trade (bypass karma limits)
+    if (scannerTier && scannerTier !== 'FREE') {
+      return true;
+    }
+
+    const limit = this.getDailyTradeLimit(karma, scannerTier);
     if (!limit) return true; // No limit
 
     const tradesToday = karma?.trades_today ?? 0;
@@ -581,9 +596,16 @@ class KarmaService {
 
   /**
    * Get remaining trades today
+   * @param {Object} karma - Karma data
+   * @param {string} scannerTier - User's paid scanner tier
    */
-  getRemainingTrades(karma) {
-    const limit = this.getDailyTradeLimit(karma);
+  getRemainingTrades(karma, scannerTier = 'FREE') {
+    // Paid users have unlimited trades
+    if (scannerTier && scannerTier !== 'FREE') {
+      return Infinity;
+    }
+
+    const limit = this.getDailyTradeLimit(karma, scannerTier);
     if (!limit) return Infinity;
 
     const tradesToday = karma?.trades_today ?? 0;

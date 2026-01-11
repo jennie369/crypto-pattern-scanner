@@ -21,6 +21,49 @@ const PENDING_DEEP_LINK_KEY = '@gem_pending_deep_link';
 const PENDING_AFFILIATE_KEY = '@gem_pending_affiliate_link';
 const CHECKOUT_AFFILIATE_KEY = '@gem_checkout_affiliate';
 
+// ========== WEB URL PATTERNS ==========
+// Patterns for universal links from gemral.com
+const WEB_URL_PATTERNS = [
+  {
+    // https://gemral.com/courses/{courseId}
+    pattern: /^https?:\/\/(?:www\.)?gemral\.com\/courses\/([^\/?\s]+)(?:\/lessons\/([^\/?\s]+))?/i,
+    handler: (matches) => {
+      if (matches[2]) {
+        // Has lessonId: /courses/{courseId}/lessons/{lessonId}
+        return {
+          stack: 'Courses',
+          screen: 'LessonPlayer',
+          params: { courseId: matches[1], lessonId: matches[2] },
+        };
+      }
+      // Just courseId: /courses/{courseId}
+      return {
+        stack: 'Courses',
+        screen: 'CourseDetail',
+        params: { courseId: matches[1] },
+      };
+    },
+  },
+  {
+    // https://gemral.com/forum/thread/{postId}
+    pattern: /^https?:\/\/(?:www\.)?gemral\.com\/forum\/thread\/([^\/?\s]+)/i,
+    handler: (matches) => ({
+      stack: 'Home',
+      screen: 'PostDetail',
+      params: { postId: matches[1] },
+    }),
+  },
+  {
+    // https://gemral.com/shop/product/{productId}
+    pattern: /^https?:\/\/(?:www\.)?gemral\.com\/shop\/product\/([^\/?\s]+)/i,
+    handler: (matches) => ({
+      stack: 'Shop',
+      screen: 'ProductDetail',
+      params: { productId: matches[1] },
+    }),
+  },
+];
+
 // ========== AFFILIATE URL PATTERNS ==========
 const AFFILIATE_URL_PATTERNS = {
   // https://link.gemral.app/p/{shortCode}?ref={code}&pid={productId}
@@ -38,7 +81,7 @@ const DEEP_LINK_ROUTES = {
   '/scanner': { stack: 'Home', screen: 'Scanner' },
   '/visionboard': { stack: 'Account', screen: 'VisionBoard' },
   '/shop': { stack: 'Shop', screen: 'ShopHome' },
-  '/courses': { stack: 'Courses', screen: 'CoursesList' },
+  '/courses': { stack: 'Courses', screen: 'CourseList' },
   '/forum': { stack: 'Home', screen: 'Forum' },
   '/tarot': { stack: 'Home', screen: 'GemMaster', params: { action: 'tarot_reading' } },
   '/iching': { stack: 'Home', screen: 'GemMaster', params: { action: 'iching_reading' } },
@@ -49,6 +92,56 @@ const DEEP_LINK_ROUTES = {
   '/affiliate': { stack: 'Account', screen: 'AffiliateDashboard' },
   '/product': { stack: 'Shop', screen: 'ProductDetail' },
 };
+
+// ========== DYNAMIC DEEP LINK PATTERNS ==========
+// Patterns for deep links with parameters (e.g., /courses/123)
+const DYNAMIC_DEEP_LINK_PATTERNS = [
+  {
+    // gem://courses/{courseId}
+    pattern: /^\/courses\/([^\/]+)$/,
+    handler: (matches) => ({
+      stack: 'Courses',
+      screen: 'CourseDetail',
+      params: { courseId: matches[1] },
+    }),
+  },
+  {
+    // gem://courses/{courseId}/lessons/{lessonId}
+    pattern: /^\/courses\/([^\/]+)\/lessons\/([^\/]+)$/,
+    handler: (matches) => ({
+      stack: 'Courses',
+      screen: 'LessonPlayer',
+      params: { courseId: matches[1], lessonId: matches[2] },
+    }),
+  },
+  {
+    // gem://courses/{courseId}/modules/{moduleId}
+    pattern: /^\/courses\/([^\/]+)\/modules\/([^\/]+)$/,
+    handler: (matches) => ({
+      stack: 'Courses',
+      screen: 'CourseDetail',
+      params: { courseId: matches[1], moduleId: matches[2], scrollToModule: true },
+    }),
+  },
+  {
+    // gem://forum/thread/{postId}
+    pattern: /^\/forum\/thread\/([^\/]+)$/,
+    handler: (matches) => ({
+      stack: 'Home',
+      screen: 'PostDetail',
+      params: { postId: matches[1] },
+    }),
+  },
+  {
+    // gem://shop/product/{productId}
+    pattern: /^\/shop\/product\/([^\/]+)$/,
+    handler: (matches) => ({
+      stack: 'Shop',
+      screen: 'ProductDetail',
+      params: { productId: matches[1] },
+    }),
+  },
+];
 
 class DeepLinkHandler {
   constructor() {
@@ -149,6 +242,52 @@ class DeepLinkHandler {
   // ========== EXTERNAL URL HANDLING ==========
 
   /**
+   * Check if URL is a gemral.com web URL
+   */
+  isGemralWebUrl(url) {
+    if (!url) return false;
+    return /^https?:\/\/(?:www\.)?gemral\.com\//i.test(url);
+  }
+
+  /**
+   * Match web URL against WEB_URL_PATTERNS
+   * @param {string} url - Full web URL
+   * @returns {Object|null} - Route config if matched
+   */
+  matchWebUrlPattern(url) {
+    for (const { pattern, handler } of WEB_URL_PATTERNS) {
+      const matches = url.match(pattern);
+      if (matches) {
+        console.log('[DeepLinkHandler] Matched web URL pattern:', pattern, 'with:', matches);
+        return handler(matches);
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Handle gemral.com web URL (Universal Link)
+   * @param {string} url - Web URL like https://gemral.com/courses/123
+   */
+  async handleWebUrl(url) {
+    console.log('[DeepLinkHandler] handleWebUrl:', url);
+
+    const route = this.matchWebUrlPattern(url);
+    if (!route) {
+      console.warn('[DeepLinkHandler] No matching route for web URL:', url);
+      return;
+    }
+
+    const { stack, screen, params } = route;
+
+    if (this._navigationRef?.isReady()) {
+      this.navigateToStackScreen(stack, screen, params);
+    } else {
+      await this.storePendingDeepLink({ stack, screen, params });
+    }
+  }
+
+  /**
    * Handle external URL (Universal Link / App Link / Custom Scheme)
    * @param {string} url - The URL that opened the app
    */
@@ -157,13 +296,19 @@ class DeepLinkHandler {
 
     if (!url) return;
 
+    // Check if it's a gemral.com web URL (Universal Link)
+    if (this.isGemralWebUrl(url)) {
+      await this.handleWebUrl(url);
+      return;
+    }
+
     // Check if it's an affiliate link
     if (this.isAffiliateUrl(url)) {
       await this.handleAffiliateUrl(url);
       return;
     }
 
-    // Handle other URLs (notifications, etc.)
+    // Handle other URLs (notifications, gem:// scheme, etc.)
     await this.processDeepLink(url);
   }
 
@@ -470,7 +615,12 @@ class DeepLinkHandler {
    */
   cleanup() {
     if (this._responseListener) {
-      Notifications.removeNotificationSubscription(this._responseListener);
+      // Use .remove() method on subscription object (expo-notifications v15+)
+      if (typeof this._responseListener.remove === 'function') {
+        this._responseListener.remove();
+      } else if (typeof Notifications.removeNotificationSubscription === 'function') {
+        Notifications.removeNotificationSubscription(this._responseListener);
+      }
     }
   }
 
@@ -560,23 +710,36 @@ class DeepLinkHandler {
    * @param {Object} notificationData - Original notification data
    */
   async processDeepLink(deepLink, notificationData = {}) {
-    let screen, params;
+    let screen, params, stack;
 
-    // Handle string deep links (e.g., "/gemmaster", "/tarot")
+    // Handle string deep links (e.g., "/gemmaster", "/tarot", "/courses/123")
     if (typeof deepLink === 'string') {
-      const route = DEEP_LINK_ROUTES[deepLink.toLowerCase()];
+      const path = deepLink.toLowerCase();
+
+      // First, check static routes
+      const route = DEEP_LINK_ROUTES[path];
 
       if (route) {
         screen = route.screen;
+        stack = route.stack;
         params = { ...route.params, ...notificationData };
+      } else {
+        // Check dynamic patterns (e.g., /courses/{id}, /forum/thread/{id})
+        const dynamicRoute = this.matchDynamicPattern(path);
 
-        // Handle nested stack navigation
-        if (route.stack) {
-          this.navigateToStackScreen(route.stack, screen, params);
+        if (dynamicRoute) {
+          screen = dynamicRoute.screen;
+          stack = dynamicRoute.stack;
+          params = { ...dynamicRoute.params, ...notificationData };
+        } else {
+          console.warn('[DeepLinkHandler] Unknown deep link path:', deepLink);
           return;
         }
-      } else {
-        console.warn('[DeepLinkHandler] Unknown deep link path:', deepLink);
+      }
+
+      // Handle nested stack navigation
+      if (stack) {
+        this.navigateToStackScreen(stack, screen, params);
         return;
       }
     } else {
@@ -592,6 +755,22 @@ class DeepLinkHandler {
       // Store for later processing
       await this.storePendingDeepLink({ screen, params });
     }
+  }
+
+  /**
+   * Match a path against dynamic deep link patterns
+   * @param {string} path - The path to match (e.g., "/courses/123")
+   * @returns {Object|null} - Route config if matched, null otherwise
+   */
+  matchDynamicPattern(path) {
+    for (const { pattern, handler } of DYNAMIC_DEEP_LINK_PATTERNS) {
+      const matches = path.match(pattern);
+      if (matches) {
+        console.log('[DeepLinkHandler] Matched dynamic pattern:', pattern, 'with:', matches);
+        return handler(matches);
+      }
+    }
+    return null;
   }
 
   /**

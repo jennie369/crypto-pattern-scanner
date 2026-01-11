@@ -8,10 +8,49 @@ import presenceService from '../services/presenceService';
 import biometricService from '../services/biometricService';
 import notificationScheduler from '../services/notificationScheduler';
 import QuotaService from '../services/quotaService';
+import paperTradeService from '../services/paperTradeService';
 
 const AuthContext = createContext({});
 
 export const useAuth = () => useContext(AuthContext);
+
+// Helper: Auto-enable biometric on login if device supports it
+const autoEnableBiometric = async (session) => {
+  try {
+    // Check if already enabled
+    const isAlreadyEnabled = await biometricService.isEnabled();
+    if (isAlreadyEnabled) {
+      console.log('[AuthContext] Biometric already enabled');
+      return;
+    }
+
+    // Check if device supports biometric
+    const support = await biometricService.checkSupport();
+    if (!support.supported) {
+      console.log('[AuthContext] Device does not support biometric');
+      return;
+    }
+
+    // Auto-enable biometric silently (store credentials without prompting)
+    const email = session?.user?.email;
+    const refreshToken = session?.refresh_token;
+
+    if (!email || !refreshToken) {
+      console.warn('[AuthContext] Missing email or refresh token for biometric');
+      return;
+    }
+
+    // Use autoEnable instead of enable (no authentication prompt)
+    const result = await biometricService.autoEnable(email, refreshToken, support.typeName);
+    if (result.success) {
+      console.log('[AuthContext] ✅ Biometric auto-enabled:', support.typeName);
+    } else {
+      console.warn('[AuthContext] Biometric auto-enable failed:', result.error);
+    }
+  } catch (err) {
+    console.error('[AuthContext] autoEnableBiometric error:', err);
+  }
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -64,6 +103,12 @@ export const AuthProvider = ({ children }) => {
           }).catch((err) => {
             console.warn('[AuthContext] Quota refresh failed:', err?.message);
           });
+
+          // =====================================================
+          // START PAPER TRADE MONITORING (Auto-close TP/SL)
+          // Checks positions every 5 seconds even when app is backgrounded
+          // =====================================================
+          paperTradeService.startGlobalMonitoring(user.id, 5000);
         }
       } catch (error) {
         console.error('Error loading session:', error);
@@ -130,6 +175,71 @@ export const AuthProvider = ({ children }) => {
             }).catch((err) => {
               console.warn('[AuthContext] Quota refresh failed:', err?.message);
             });
+
+            // AUTO-ENABLE BIOMETRIC ON LOGIN (if device supports and not already enabled)
+            autoEnableBiometric(session).catch((err) => {
+              console.warn('[AuthContext] Auto biometric failed:', err?.message);
+            });
+
+            // START PAPER TRADE MONITORING on login
+            paperTradeService.startGlobalMonitoring(session.user.id, 5000);
+
+            // APPLY PENDING PURCHASES ON LOGIN
+            // This handles the case where user bought via Shopify before creating GEM account
+            supabase.rpc('apply_all_pending_purchases', { p_user_id: session.user.id })
+              .then(({ data, error }) => {
+                if (data?.success) {
+                  console.log('[AuthContext] Pending purchases applied:', data);
+                  // Refresh profile to get updated tiers
+                  if (data.tier_upgrades?.applied_count > 0 || data.gem_credits?.credits_claimed > 0) {
+                    getUserProfile(session.user.id).then(({ data: newProfile }) => {
+                      setProfile(newProfile);
+                      console.log('[AuthContext] Profile refreshed after pending claims');
+                    });
+                  }
+                } else if (error) {
+                  console.warn('[AuthContext] Apply pending failed (non-critical):', error?.message);
+                }
+              })
+              .catch((err) => {
+                console.warn('[AuthContext] Apply pending error (non-critical):', err?.message);
+              });
+
+            // LINK WAITLIST ENTRY ON SIGNUP
+            // Links Early Bird waitlist registration to user account
+            // Also applies Early Bird benefits (discount code + scanner trial)
+            supabase.rpc('link_user_to_waitlist', {
+              p_user_id: session.user.id,
+              p_email: session.user.email,
+              p_phone: session.user.user_metadata?.phone || null
+            })
+              .then(({ data, error }) => {
+                if (data?.success) {
+                  console.log('[AuthContext] Waitlist linked:', data);
+                  // Refresh profile to get queue_number, referral_code, and scanner_tier
+                  getUserProfile(session.user.id).then(({ data: newProfile }) => {
+                    setProfile(newProfile);
+                    console.log('[AuthContext] Profile refreshed with Early Bird benefits:', {
+                      queue_number: newProfile?.queue_number,
+                      scanner_tier: newProfile?.scanner_tier,
+                      scanner_trial_ends_at: newProfile?.scanner_trial_ends_at,
+                      early_bird_discount_code: newProfile?.early_bird_discount_code,
+                    });
+                  });
+                  // Note: Welcome notification will be shown by the signup screen
+                  // Store the waitlist info for display (includes is_top_100 flag)
+                  if (global.onWaitlistLinked) {
+                    global.onWaitlistLinked(data);
+                  }
+                } else if (error) {
+                  // Non-critical - user just wasn't on waitlist
+                  console.log('[AuthContext] Waitlist link skipped:', error?.message || 'No waitlist entry');
+                }
+              })
+              .catch((err) => {
+                // Non-blocking - failures don't break signup
+                console.log('[AuthContext] Waitlist link skipped:', err?.message);
+              });
           }
         } else {
           setUser(null);
@@ -140,6 +250,9 @@ export const AuthProvider = ({ children }) => {
 
           // Clear quota cache on logout
           QuotaService.clearCache();
+
+          // STOP PAPER TRADE MONITORING on logout
+          paperTradeService.stopGlobalMonitoring();
         }
         setLoading(false);
       }
@@ -157,21 +270,19 @@ export const AuthProvider = ({ children }) => {
                   profile?.scanner_tier === 'ADMIN' ||
                   profile?.chatbot_tier === 'ADMIN';
 
-  // ⚡ DEBUG: Log isAdmin result whenever profile changes
+  // ⚡ MANAGER CHECK - Manager has limited admin access (Content, Courses only)
+  // Manager gets unlimited Scanner, Chatbot, Vision Board but restricted Admin sections
+  const isManager = profile?.role === 'manager' || profile?.role === 'MANAGER';
+
+  // ⚡ DEBUG: Log isAdmin/isManager result whenever profile changes
   useEffect(() => {
     if (profile) {
-      console.log('[AuthContext] ⚡ isAdmin check:', isAdmin, {
-        'role=admin': profile?.role === 'admin',
-        'role=ADMIN': profile?.role === 'ADMIN',
-        'is_admin=true': profile?.is_admin === true,
-        'scanner_tier=ADMIN': profile?.scanner_tier === 'ADMIN',
-        'chatbot_tier=ADMIN': profile?.chatbot_tier === 'ADMIN',
-      });
+      console.log('[AuthContext] ⚡ Role check:', { isAdmin, isManager, role: profile?.role });
     }
-  }, [profile, isAdmin]);
+  }, [profile, isAdmin, isManager]);
 
-  // Get highest tier (admin gets unlimited)
-  const userTier = isAdmin ? 'ADMIN' : (profile?.scanner_tier || profile?.chatbot_tier || 'FREE');
+  // Get highest tier (admin/manager gets unlimited)
+  const userTier = (isAdmin || isManager) ? 'ADMIN' : (profile?.scanner_tier || profile?.chatbot_tier || 'FREE');
 
   const value = {
     user,
@@ -182,6 +293,7 @@ export const AuthProvider = ({ children }) => {
     tier: profile?.scanner_tier || 'FREE',  // Always uppercase per DATABASE_SCHEMA.md
     userTier, // Normalized tier (uppercase)
     isAdmin,  // Admin flag for bypassing restrictions
+    isManager, // Manager flag for limited admin access
   };
 
   return (

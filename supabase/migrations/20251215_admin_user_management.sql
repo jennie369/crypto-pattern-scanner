@@ -83,6 +83,12 @@ ALTER TABLE user_activity_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_bans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tier_grants ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies first (for idempotent migration)
+DROP POLICY IF EXISTS "Admins view activity logs" ON user_activity_logs;
+DROP POLICY IF EXISTS "System insert activity logs" ON user_activity_logs;
+DROP POLICY IF EXISTS "Admins manage bans" ON user_bans;
+DROP POLICY IF EXISTS "Admins manage tier grants" ON tier_grants;
+
 -- Activity logs - only admins can view
 CREATE POLICY "Admins view activity logs" ON user_activity_logs
   FOR SELECT USING (

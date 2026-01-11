@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 4.3: Crystals Cho Tình Yêu | Khóa Tần Số Tình Yêu</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --pink: #FF69B4;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--pink); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .highlight-box.purple { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05)); border-color: rgba(106, 91, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.purple { border-left-color: var(--purple); } }
+        .highlight-box.purple .highlight-box-title { color: var(--purple); }
+
+        .highlight-box.cyan { background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 240, 255, 0.05)); border-color: rgba(0, 240, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.cyan { border-left-color: var(--cyan); } }
+        .highlight-box.cyan .highlight-box-title { color: var(--cyan); }
+
+        .highlight-box.pink { background: linear-gradient(135deg, rgba(255, 105, 180, 0.15), rgba(255, 105, 180, 0.05)); border-color: rgba(255, 105, 180, 0.3); }
+        @media (max-width: 600px) { .highlight-box.pink { border-left-color: var(--pink); } }
+        .highlight-box.pink .highlight-box-title { color: var(--pink); }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .crystal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .crystal-grid { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+
+        .crystal-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .crystal-card { border: none; border-radius: 0; border-left: 4px solid var(--pink); padding: var(--space-md) 16px; } }
+        @media (min-width: 601px) { .crystal-card:hover { border-color: var(--pink); transform: translateY(-4px); } }
+        .crystal-emoji { font-size: 2.5rem; text-align: center; margin-bottom: var(--space-sm); }
+        .crystal-name { font-size: 1.1rem; font-weight: 700; color: var(--pink); text-align: center; margin-bottom: var(--space-sm); }
+        .crystal-desc { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .crystal-use { font-size: 0.85rem; color: var(--text-muted); font-style: italic; }
+
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        @media (min-width: 601px) { .flow-step:hover { border-color: var(--gold); transform: translateX(8px); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .checklist { list-style: none; margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .checklist { margin: var(--space-md) 0; padding: 0 16px; } }
+        .checklist li { display: flex; align-items: flex-start; gap: var(--space-sm); padding: var(--space-sm) 0; border-bottom: 1px solid var(--glass-border); color: var(--text-secondary); }
+        .checklist li:last-child { border-bottom: none; }
+        .checklist li::before { content: "💎"; font-size: 1rem; }
+
+        .faq-item { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .faq-item { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin-bottom: 1px; } }
+        .faq-question { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); }
+        .faq-answer { color: var(--text-secondary); font-size: 0.95rem; }
+
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>💕</span>
+                <span>Module 4</span>
+            </div>
+            <div class="lesson-chapter">Chapter 4 - Sẵn Sàng Đón Tri Kỷ</div>
+            <h1 class="lesson-title">Crystals Cho Tình Yêu</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 4.3</span></div>
+                <div class="meta-item"><span>⏱️</span><span>25 phút đọc</span></div>
+            </div>
+        </header>
+
+        <!-- SECTION 1: Opening Hook -->
+        <section class="section">
+            <h2 class="section-title"><span>💎</span> Sức Mạnh Huyền Bí Của Tinh Thể</h2>
+
+            <p>Bạn có biết rằng Cleopatra - nữ hoàng quyền lực nhất Ai Cập cổ đại - luôn đeo Rose Quartz để duy trì vẻ đẹp và thu hút tình yêu? Hay rằng các pharaoh Ai Cập được chôn cùng tinh thể vì tin rằng chúng chứa đựng năng lượng vũ trụ? Từ hàng ngàn năm trước, con người đã nhận ra một điều mà khoa học hiện đại đang dần chứng minh: tinh thể không chỉ là đá đẹp - chúng là những "bộ khuếch đại năng lượng" tự nhiên.</p>
+
+            <p>Trong bài học này, bạn sẽ khám phá cách sử dụng tinh thể như một công cụ hỗ trợ trong hành trình thu hút tình yêu. Đây không phải là phép thuật hay mê tín - đây là sự kết hợp giữa khoa học về năng lượng, tâm lý học về ý định, và trí tuệ cổ xưa đã được thử nghiệm qua nhiều thế hệ.</p>
+
+            <div class="highlight-box pink">
+                <div class="highlight-box-title"><span>💗</span> Học Thuyết Chuyển Hóa Nội Tâm</div>
+                <p>Tinh thể hoạt động theo nguyên lý "Năng Lượng Rung Động" - mọi thứ trong vũ trụ đều rung động ở tần số riêng. Khi bạn làm việc với tinh thể có tần số cao, bạn đang tạo hiện tượng "cộng hưởng" - giúp nâng cao tần số năng lượng của chính mình. Đây không phải tinh thể "làm" điều gì cho bạn - mà là tinh thể "hỗ trợ" bạn duy trì tần số cao hơn.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m4-crystals-intro.png" alt="Crystals cho tình yêu">
+            </div>
+            <div class="image-caption">Hình 1: Tinh thể - Công cụ cổ xưa nâng cao tần số tình yêu</div>
+        </section>
+
+        <!-- SECTION 2: Khoa Học Về Tinh Thể -->
+        <section class="section">
+            <h2 class="section-title"><span>🔬</span> Khoa Học Đằng Sau Tinh Thể</h2>
+
+            <p>Trước khi đi vào thực hành, hãy hiểu TẠI SAO tinh thể có thể ảnh hưởng đến năng lượng. Đây không phải chỉ là niềm tin - có cơ sở khoa học thật sự.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>⚡</span> Hiệu Ứng Piezoelectric</div>
+                <p>Thạch anh (quartz) có tính chất piezoelectric - khi bị nén, nó tạo ra điện tích. Đây là lý do thạch anh được dùng trong đồng hồ, thiết bị điện tử, và công nghệ siêu âm y tế. Cơ thể người cũng tạo ra điện trường - và theo nguyên lý vật lý, hai trường điện có thể tương tác và ảnh hưởng lẫn nhau.</p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>🧲</span> Cấu Trúc Tinh Thể Hoàn Hảo</div>
+                <p>Tinh thể có cấu trúc phân tử ổn định nhất trong tự nhiên - các nguyên tử sắp xếp theo mô hình lặp lại hoàn hảo. Đây là lý do tinh thể rung động ở tần số nhất quán và ổn định. Khi bạn tiếp xúc với tinh thể, cơ thể bạn có xu hướng "đồng bộ hóa" với tần số ổn định này - tương tự như khi hai đồng hồ quả lắc đặt gần nhau sẽ dần đồng bộ.</p>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>🧠</span> Tâm Lý Học Về Ý Định</div>
+                <p>Ngoài yếu tố năng lượng, tinh thể còn hoạt động như một "anchor" (neo) tâm lý. Khi bạn chọn một viên tinh thể cho mục đích cụ thể, bạn đang tạo một liên kết thần kinh trong não. Mỗi lần nhìn thấy hoặc chạm vào tinh thể, não bạn được nhắc nhở về ý định - kích hoạt RAS (Reticular Activating System) tìm kiếm cơ hội phù hợp.</p>
+            </div>
+
+            <p>Điều quan trọng cần hiểu: tinh thể không phải "phép thuật" sẽ mang tình yêu đến cho bạn. Tinh thể là công cụ hỗ trợ - giúp bạn duy trì tần số cao, nhắc nhở ý định, và tạo không gian năng lượng thuận lợi. Công việc thực sự vẫn nằm ở BẠN - chữa lành, yêu bản thân, và mở lòng đón nhận.</p>
+        </section>
+
+        <!-- SECTION 3: 5 Tinh Thể Cho Tình Yêu -->
+        <section class="section">
+            <h2 class="section-title"><span>💗</span> 5 Tinh Thể Quyền Năng Cho Tình Yêu</h2>
+
+            <p>Đây là 5 loại tinh thể được khuyến khích nhất cho việc thu hút và nuôi dưỡng tình yêu. Mỗi loại có đặc tính riêng - chọn loại phù hợp với giai đoạn hiện tại của bạn:</p>
+
+            <div class="crystal-grid">
+                <div class="crystal-card">
+                    <div class="crystal-emoji">🌸</div>
+                    <div class="crystal-name">Rose Quartz (Thạch Anh Hồng)</div>
+                    <div class="crystal-desc">"Viên đá của Tình Yêu Vô Điều Kiện" - mở chakra tim, chữa lành vết thương cảm xúc, thu hút tình yêu mới. Đây là tinh thể "must-have" cho bất kỳ ai muốn làm việc với năng lượng tình yêu.</div>
+                    <div class="crystal-use">💡 Đặt dưới gối khi ngủ, mang theo bên người, hoặc đặt ở góc Đông Nam phòng ngủ.</div>
+                </div>
+
+                <div class="crystal-card">
+                    <div class="crystal-emoji">💜</div>
+                    <div class="crystal-name">Amethyst (Thạch Anh Tím)</div>
+                    <div class="crystal-desc">Thanh lọc năng lượng tiêu cực, tăng cường trực giác, giúp bạn nhận ra đâu là tình yêu thật. Tốt cho những ai cần sự sáng suốt để phân biệt red flags và green flags.</div>
+                    <div class="crystal-use">💡 Thiền với amethyst để nhận thông điệp từ trực giác về tình yêu.</div>
+                </div>
+
+                <div class="crystal-card">
+                    <div class="crystal-emoji">💚</div>
+                    <div class="crystal-name">Green Aventurine (Thạch Anh Xanh Lá)</div>
+                    <div class="crystal-desc">"Viên đá của May Mắn" - thu hút cơ hội mới, tăng sự tự tin, mở cửa cho tình yêu bất ngờ. Đặc biệt tốt cho những ai cảm thấy "không gặp may" trong tình yêu.</div>
+                    <div class="crystal-use">💡 Mang theo khi ra ngoài gặp gỡ người mới hoặc đi events xã hội.</div>
+                </div>
+
+                <div class="crystal-card">
+                    <div class="crystal-emoji">🧡</div>
+                    <div class="crystal-name">Carnelian (Mã Não Cam)</div>
+                    <div class="crystal-desc">Kích hoạt chakra Sacral - tăng sự quyến rũ, thu hút, và đam mê. Tốt cho những ai muốn tăng sức hút và "nóng bỏng" hơn trong mắt người khác.</div>
+                    <div class="crystal-use">💡 Đeo như trang sức gần vùng bụng dưới hoặc cổ tay.</div>
+                </div>
+
+                <div class="crystal-card">
+                    <div class="crystal-emoji">💖</div>
+                    <div class="crystal-name">Rhodonite (Đá Hồng Đen)</div>
+                    <div class="crystal-desc">Chữa lành vết thương từ quá khứ, tha thứ, và cân bằng cảm xúc. Tốt cho những ai từng bị tổn thương sâu và cần healing trước khi mở lòng yêu lại.</div>
+                    <div class="crystal-use">💡 Thiền với rhodonite khi làm các bài tập tha thứ và buông bỏ từ Module 1.</div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m4-5-crystals-love.png" alt="5 tinh thể cho tình yêu">
+            </div>
+            <div class="image-caption">Hình 2: 5 tinh thể quyền năng cho việc thu hút và chữa lành tình yêu</div>
+        </section>
+
+        <!-- SECTION 4: Ví Dụ Thực Tế -->
+        <section class="section">
+            <h2 class="section-title"><span>👥</span> Câu Chuyện Thực Tế</h2>
+
+            <p>Tinh thể hoạt động như thế nào trong thực tế? Đây là hai câu chuyện từ học viên đã áp dụng thành công:</p>
+
+            <div class="highlight-box pink">
+                <div class="highlight-box-title"><span>🌸</span> Trang - 34 Tuổi, Nhân Viên Ngân Hàng</div>
+                <p>Trang ban đầu rất hoài nghi về tinh thể - cô là người làm tài chính, tin vào số liệu và logic. Nhưng sau khi chia tay mối quan hệ 5 năm, cô quyết định thử mọi thứ. "Tôi mua một viên Rose Quartz nhỏ, đeo như mặt dây chuyền. Ban đầu chỉ nghĩ đẹp thôi. Nhưng điều kỳ lạ là mỗi khi chạm vào viên đá, tôi lại nhớ phải yêu bản thân. Như một lời nhắc nhở liên tục. Sau 4 tháng, tôi nhận ra mình đã thay đổi - không còn tuyệt vọng tìm kiếm ai đó, mà tập trung vào bản thân. Và đúng lúc đó, tôi gặp anh ấy - ở một buổi workshop về mindfulness mà tôi tham gia vì muốn phát triển bản thân."</p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>💎</span> Minh - 39 Tuổi, Chủ Doanh Nghiệp</div>
+                <p>Minh đã độc thân 7 năm sau ly hôn. Anh có sự nghiệp thành công nhưng luôn cảm thấy thiếu vắng. "Tôi đã thử hẹn hò online, được mai mối nhiều lần, nhưng không có gì 'click'. Khi biết về tinh thể, tôi quyết định tạo một Crystal Grid trong phòng làm việc - với Rose Quartz ở giữa và 4 viên Clear Quartz xung quanh. Mỗi sáng trước khi làm việc, tôi ngồi trước grid 5 phút, hình dung về cuộc sống có người bạn đời. Điều tôi nhận ra là năng lượng của mình thay đổi - đồng nghiệp nói tôi 'mềm mại' hơn, dễ gần hơn. 6 tháng sau, tôi gặp cô ấy - bạn của đối tác kinh doanh. Cô ấy nói ấn tượng đầu tiên là 'anh có năng lượng ấm áp khác biệt'."</p>
+            </div>
+
+            <p>Điểm chung của cả hai câu chuyện: tinh thể không "mang" tình yêu đến - tinh thể giúp họ THAY ĐỔI năng lượng bản thân. Và khi năng lượng thay đổi, cách người khác nhìn nhận họ cũng thay đổi.</p>
+        </section>
+
+        <!-- SECTION 5: Cách Sử Dụng -->
+        <section class="section">
+            <h2 class="section-title"><span>✨</span> 5 Cách Sử Dụng Tinh Thể Hiệu Quả</h2>
+
+            <p>Đây là 5 phương pháp phổ biến và hiệu quả nhất để làm việc với tinh thể trong việc thu hút tình yêu:</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Thiền Với Tinh Thể</div>
+                        <div class="flow-step-desc">Ngồi yên, cầm tinh thể trong tay (hoặc đặt lên tim), hít thở sâu và hình dung năng lượng hồng hoặc xanh ngọc tỏa ra từ tinh thể vào cơ thể bạn. Làm 10-15 phút mỗi ngày. Kết hợp với Heart Coherence từ Bài 3.4 để nhân đôi hiệu quả.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Mang Theo Bên Người</div>
+                        <div class="flow-step-desc">Đeo như trang sức (vòng tay, mặt dây chuyền) hoặc bỏ trong túi/ví. Tinh thể sẽ liên tục phát ra năng lượng và ảnh hưởng đến aura của bạn. Quan trọng hơn, nó là lời nhắc nhở thường xuyên về ý định thu hút tình yêu.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Đặt Trong Phòng Ngủ</div>
+                        <div class="flow-step-desc">Đặt Rose Quartz ở góc Đông Nam phòng ngủ (góc tình yêu theo phong thủy). Hoặc đặt hai viên Rose Quartz cạnh nhau trên bàn đầu giường - tượng trưng cho cặp đôi. Có thể đặt dưới gối để ảnh hưởng tiềm thức trong giấc ngủ.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tạo Crystal Grid</div>
+                        <div class="flow-step-desc">Sắp xếp nhiều tinh thể theo hình học thiêng (Sacred Geometry) - ví dụ: hình hoa của sự sống (Flower of Life). Đặt ý định viết trên giấy ở trung tâm grid. Crystal Grid khuếch đại năng lượng nhiều lần so với một viên đơn lẻ.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Nước Tinh Thể</div>
+                        <div class="flow-step-desc">Đặt tinh thể (đã được làm sạch) trong bình nước qua đêm để nước hấp thụ năng lượng. Uống nước này mỗi sáng. Lưu ý: chỉ dùng tinh thể an toàn với nước (Rose Quartz, Clear Quartz, Amethyst OK; Malachite, Selenite KHÔNG).</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m4-crystal-usage.png" alt="Cách sử dụng tinh thể">
+            </div>
+            <div class="image-caption">Hình 3: 5 cách sử dụng tinh thể để thu hút tình yêu</div>
+        </section>
+
+        <!-- SECTION 6: Làm Sạch & Nạp Năng Lượng -->
+        <section class="section">
+            <h2 class="section-title"><span>🌙</span> Làm Sạch & Nạp Năng Lượng Tinh Thể</h2>
+
+            <p>Tinh thể hấp thụ năng lượng từ môi trường - bạn cần làm sạch chúng định kỳ và nạp lại năng lượng. Đây là bước quan trọng nhiều người bỏ qua:</p>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>🧹</span> Các Cách Làm Sạch Tinh Thể</div>
+                <ul class="checklist">
+                    <li>Ngâm trong nước muối biển 4-8 tiếng (chỉ với tinh thể cứng, không tan)</li>
+                    <li>Xông khói sage, palo santo, hoặc trầm hương - để khói bao quanh tinh thể</li>
+                    <li>Để dưới ánh trăng tròn qua đêm - cách làm sạch nhẹ nhàng nhất</li>
+                    <li>Vùi trong đất hoặc muối hồng Himalaya 24 giờ</li>
+                    <li>Dùng âm thanh (chuông singing bowl, âm thoa 528Hz) - rung động xua tan năng lượng cũ</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box pink">
+                <div class="highlight-box-title"><span>⚡</span> Các Cách Nạp Năng Lượng</div>
+                <ul class="checklist">
+                    <li>Để dưới ánh mặt trời buổi sáng 15-30 phút (tránh nắng gắt - có thể phai màu)</li>
+                    <li>Đặt lên cluster thạch anh hoặc selenite plate - chúng tự động nạp năng lượng</li>
+                    <li>Để dưới ánh trăng tròn - đặc biệt mạnh cho tinh thể tình yêu</li>
+                    <li>Thiền và gửi ý định yêu thương vào tinh thể</li>
+                    <li>Đặt cùng các tinh thể khác có năng lượng cao (clear quartz khuếch đại)</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>⚠️</span> Lưu Ý Quan Trọng</div>
+                <p>Khi mới mua tinh thể về, LUÔN làm sạch trước khi sử dụng - tinh thể đã đi qua nhiều tay và hấp thụ nhiều năng lượng khác nhau. Làm sạch ít nhất 1 lần/tuần hoặc sau khi dùng cho công việc nặng (chữa lành, buông bỏ). Nếu tinh thể bỗng nhiên cảm thấy "nặng" hoặc "đục" - đó là dấu hiệu cần làm sạch ngay.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m4-crystal-cleansing.png" alt="Làm sạch tinh thể">
+            </div>
+            <div class="image-caption">Hình 4: Làm sạch và nạp năng lượng cho tinh thể</div>
+        </section>
+
+        <!-- SECTION 7: Lập Trình Tinh Thể -->
+        <section class="section">
+            <h2 class="section-title"><span>🔮</span> Lập Trình Tinh Thể Cho Tình Yêu</h2>
+
+            <p>"Lập trình" tinh thể là cách bạn gửi ý định cụ thể vào tinh thể. Đây là quy trình 5 bước tương tự như "nạp" thư tri kỷ từ Bài 4.2:</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Làm Sạch Tinh Thể</div>
+                        <div class="flow-step-desc">Đảm bảo tinh thể đã được làm sạch hoàn toàn, không còn năng lượng cũ. Tinh thể "trống" sẽ tiếp nhận ý định tốt hơn.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Thiền & Làm Rõ Ý Định</div>
+                        <div class="flow-step-desc">Ngồi yên, thực hành Heart Coherence 2-3 phút. Làm rõ trong đầu: bạn muốn tinh thể này giúp bạn điều gì? Ví dụ: "Thu hút tình yêu lành mạnh và đích thực vào cuộc sống" hoặc "Mở tim đón nhận tri kỷ của tôi."</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Cầm Tinh Thể & Gửi Ý Định</div>
+                        <div class="flow-step-desc">Cầm tinh thể trong hai tay, nâng lên ngang tim hoặc chakra thứ ba (giữa trán). Nói to hoặc trong đầu ý định của bạn 3 lần. Cảm nhận năng lượng chạy từ trái tim qua tay vào tinh thể.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Hình Dung & Cảm Nhận</div>
+                        <div class="flow-step-desc">Hình dung ý định của bạn đã thành hiện thực - bạn đang ở bên người yêu thương, cảm nhận hạnh phúc, bình an. "Nạp" những cảm xúc này vào tinh thể. Tinh thể bây giờ chứa đựng "bản thiết kế năng lượng" của tình yêu bạn mong muốn.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Cảm Ơn & Hoàn Tất</div>
+                        <div class="flow-step-desc">Nói "Cảm ơn" với tinh thể và vũ trụ. Tinh thể của bạn đã được lập trình - bây giờ hãy mang nó theo hoặc đặt ở nơi thích hợp. Mỗi khi chạm vào hoặc nhìn thấy tinh thể, ý định được củng cố.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Thời Điểm Lập Trình Tối Ưu</div>
+                <p>Lập trình tinh thể vào những thời điểm mạnh: trăng mới (ý định mới), trăng tròn (khuếch đại năng lượng), hoặc khi bạn cảm thấy tràn đầy năng lượng tích cực sau thiền hoặc tập thể dục. Tránh lập trình khi đang buồn, giận, hoặc kiệt sức - tinh thể sẽ hấp thụ năng lượng đó.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m4-crystal-programming.png" alt="Lập trình tinh thể">
+            </div>
+            <div class="image-caption">Hình 5: Quy trình 5 bước lập trình tinh thể cho tình yêu</div>
+        </section>
+
+        <!-- SECTION 8: FAQ & Summary -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">Tinh thể có thật sự hiệu quả hay chỉ là placebo?</div>
+                <div class="faq-answer">Cả hai đều đúng - và đó không phải điều xấu. Về mặt khoa học, tinh thể có tần số rung động thật sự (hiệu ứng piezoelectric). Về mặt tâm lý, tinh thể hoạt động như một "anchor" nhắc nhở ý định - và điều này có giá trị thực sự. Placebo effect cũng là effect - nếu tinh thể giúp bạn duy trì tần số cao và tập trung vào mục tiêu, đó là kết quả thực tế.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Tôi nên mua tinh thể ở đâu? Làm sao biết là thật?</div>
+                <div class="faq-answer">Mua ở các cửa hàng uy tín chuyên về tinh thể hoặc wellness. Tinh thể thật thường có vân tự nhiên không đều, có trọng lượng (không nhẹ như nhựa), và khi chạm vào cảm giác mát lạnh. Quan trọng hơn, hãy tin vào cảm nhận của bạn - tinh thể "đúng" sẽ có sự thu hút đặc biệt khi bạn cầm lên.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Có thể dùng nhiều loại tinh thể cùng lúc không?</div>
+                <div class="faq-answer">Hoàn toàn có thể. Nhiều tinh thể có năng lượng bổ sung cho nhau. Ví dụ: Rose Quartz (mở tim) + Clear Quartz (khuếch đại) + Amethyst (trực giác) là combo phổ biến. Tuy nhiên, khi mới bắt đầu, nên tập trung vào 1-2 viên để cảm nhận rõ năng lượng từng loại trước.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Nếu tinh thể bị vỡ hoặc mất thì sao?</div>
+                <div class="faq-answer">Trong truyền thống, tinh thể vỡ có thể có nhiều ý nghĩa: nó đã hoàn thành sứ mệnh, nó đã hấp thụ năng lượng tiêu cực thay bạn, hoặc đơn giản là bạn cần tinh thể mới cho giai đoạn tiếp theo. Đừng lo lắng - cảm ơn tinh thể cũ và chôn nó xuống đất (trả về tự nhiên), sau đó chọn viên mới.</div>
+            </div>
+
+            <div class="summary-box">
+                <h3 class="summary-title"><span>📌</span> Tóm Tắt Bài Học</h3>
+                <ul class="summary-list">
+                    <li>Tinh thể có tần số rung động thật sự - có thể tương tác và hỗ trợ nâng cao năng lượng của bạn</li>
+                    <li>5 tinh thể cho tình yêu: Rose Quartz, Amethyst, Green Aventurine, Carnelian, Rhodonite</li>
+                    <li>5 cách sử dụng: Thiền, Mang theo, Đặt phòng ngủ, Crystal Grid, Nước tinh thể</li>
+                    <li>Làm sạch định kỳ: nước muối, khói sage, ánh trăng, âm thanh</li>
+                    <li>Nạp năng lượng: ánh mặt trời sáng, trăng tròn, selenite plate</li>
+                    <li>Lập trình tinh thể: Làm sạch → Làm rõ ý định → Gửi ý định → Hình dung → Cảm ơn</li>
+                    <li>Tinh thể là công cụ hỗ trợ - công việc thực sự vẫn nằm ở sự chuyển hóa của BẠN</li>
+                </ul>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>

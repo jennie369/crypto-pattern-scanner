@@ -14,6 +14,7 @@
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
   transition: transform 0.3s ease-in-out;
   transform: translateY(0);
+  overflow: visible; /* Allow hover animations to show above navbar */
 }
 
 /* Auto-hide when scrolling down */
@@ -25,11 +26,12 @@
 .nav-container {
   max-width: 1920px;
   margin: 0 auto;
-  padding: 12px 24px;
+  padding: 16px 24px; /* Increased top padding for hover animation space */
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  overflow: visible; /* Allow hover animations to show */
 }
 
 /* ===== LOGO ===== */
@@ -90,9 +92,10 @@
   justify-content: flex-start;
   flex-wrap: nowrap;
   overflow-x: auto;
-  overflow-y: hidden;
+  overflow-y: visible; /* Allow vertical overflow for hover animations */
   scrollbar-width: none;
   -ms-overflow-style: none;
+  padding: 4px 0; /* Add vertical padding for hover animation space */
 }
 
 .nav-main::-webkit-scrollbar {
@@ -404,6 +407,8 @@
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+  overflow: visible; /* Allow hover animations */
+  padding: 4px 0; /* Vertical padding for hover animation space */
 }
 
 .nav-item-desktop {

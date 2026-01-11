@@ -420,9 +420,9 @@ const TicketDetailScreen = () => {
           disabled={!message.trim() || sending}
         >
           {sending ? (
-            <ActivityIndicator size="small" color={COLORS.bgDark} />
+            <ActivityIndicator size="small" color={COLORS.bgDarkest} />
           ) : (
-            <Send size={20} color={COLORS.bgDark} />
+            <Send size={20} color={COLORS.bgDarkest} />
           )}
         </TouchableOpacity>
       </View>
@@ -463,7 +463,7 @@ const TicketDetailScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.bgDark,
+    backgroundColor: COLORS.bgDarkest,
   },
   keyboardView: {
     flex: 1,

@@ -19,7 +19,6 @@ ON CONFLICT (badge_id) DO UPDATE SET
   bg_gradient = EXCLUDED.bg_gradient,
   animation = EXCLUDED.animation,
   requirement = EXCLUDED.requirement;
-
 -- Verify tier badges were added
 DO $$
 DECLARE

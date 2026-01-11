@@ -42,6 +42,7 @@ const MessageActionSheet = memo(({
   isOwn,
   isPinned,
   isStarred,
+  canRecall, // Can this message be recalled
   onClose,
   onReply,
   onCopy,
@@ -53,6 +54,7 @@ const MessageActionSheet = memo(({
   onEdit,
   onStar,
   onTranslate,
+  onRecall, // Recall message handler
 }) => {
   // Animation refs
   const translateY = useRef(new Animated.Value(SHEET_HEIGHT)).current;
@@ -196,6 +198,13 @@ const MessageActionSheet = memo(({
     onTranslate?.();
   };
 
+  // Handle recall
+  const handleRecall = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    handleClose();
+    onRecall?.();
+  };
+
   // Actions list
   const actions = [
     {
@@ -240,6 +249,14 @@ const MessageActionSheet = memo(({
       label: 'Edit',
       onPress: handleEdit,
       show: isOwn && message?.message_type === 'text',
+    },
+    {
+      id: 'recall',
+      icon: 'refresh-outline',
+      label: 'Thu hồi',
+      onPress: handleRecall,
+      show: isOwn && canRecall,
+      color: COLORS.gold,
     },
     {
       id: 'translate',

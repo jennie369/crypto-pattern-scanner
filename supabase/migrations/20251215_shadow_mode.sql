@@ -33,6 +33,12 @@ CREATE TABLE IF NOT EXISTS public.user_exchange_connections (
 -- Enable RLS
 ALTER TABLE public.user_exchange_connections ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies first (for idempotent migration)
+DROP POLICY IF EXISTS "Users can view own connections" ON public.user_exchange_connections;
+DROP POLICY IF EXISTS "Users can insert own connections" ON public.user_exchange_connections;
+DROP POLICY IF EXISTS "Users can update own connections" ON public.user_exchange_connections;
+DROP POLICY IF EXISTS "Users can delete own connections" ON public.user_exchange_connections;
+
 -- RLS policies
 CREATE POLICY "Users can view own connections"
   ON public.user_exchange_connections FOR SELECT
@@ -90,6 +96,11 @@ CREATE TABLE IF NOT EXISTS public.real_trades (
 
 -- Enable RLS
 ALTER TABLE public.real_trades ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies first (for idempotent migration)
+DROP POLICY IF EXISTS "Users can view own real trades" ON public.real_trades;
+DROP POLICY IF EXISTS "Service can insert real trades" ON public.real_trades;
+DROP POLICY IF EXISTS "Service can update real trades" ON public.real_trades;
 
 -- RLS policies
 CREATE POLICY "Users can view own real trades"
@@ -164,6 +175,11 @@ CREATE TABLE IF NOT EXISTS public.shadow_reports (
 
 -- Enable RLS
 ALTER TABLE public.shadow_reports ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies first (for idempotent migration)
+DROP POLICY IF EXISTS "Users can view own shadow reports" ON public.shadow_reports;
+DROP POLICY IF EXISTS "Service can insert shadow reports" ON public.shadow_reports;
+DROP POLICY IF EXISTS "Users can update own shadow reports" ON public.shadow_reports;
 
 -- RLS policies
 CREATE POLICY "Users can view own shadow reports"

@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 13: Final CTA & Footer - GEM Academy</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Noto+Sans+Display:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ═══════════════════════════════════════════════════════════
+           CSS VARIABLES - GEM Design System
+           ═══════════════════════════════════════════════════════════ */
+        :root {
+            --primary-navy: #112250;
+            --primary-burgundy: #9C0612;
+            --deep-burgundy: #1E0104;
+            --gold-accent: #FFBD59;
+            --gold-light: #DEBC81;
+            --cyan-accent: #00F0FF;
+            --green-success: #10B981;
+            --text-light: #FFFFFF;
+            --text-cream: #F5E6D3;
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            color: var(--text-light);
+            line-height: 1.7;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           SECTION 13: FINAL CTA + FOOTER - Deepest Burgundy → Navy
+           ═══════════════════════════════════════════════════════════ */
+        .section-13 {
+            background: linear-gradient(180deg,
+                #1E0104 0%,
+                #1A0308 10%,
+                #16050C 20%,
+                #120710 30%,
+                #0E0914 40%,
+                #0C0B18 50%,
+                #0A0D1C 60%,
+                #091020 70%,
+                #0A1328 80%,
+                #0C1630 90%,
+                #112250 100%
+            );
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Background Stars Effect */
+        .section-13::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.3), transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.2), transparent),
+                radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.3), transparent),
+                radial-gradient(2px 2px at 130px 80px, rgba(255,255,255,0.2), transparent),
+                radial-gradient(1px 1px at 160px 120px, rgba(255,255,255,0.4), transparent);
+            background-size: 200px 150px;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        /* Glow Effects */
+        .section-13::after {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255, 189, 89, 0.15) 0%, transparent 70%);
+            filter: blur(150px);
+            pointer-events: none;
+        }
+
+        /* Container */
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           FINAL CTA SECTION
+           ═══════════════════════════════════════════════════════════ */
+        .final-cta {
+            padding: 80px 16px;
+            text-align: center;
+        }
+
+        .cta-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, rgba(255,189,89,0.3), rgba(16,185,129,0.2));
+            border: 2px solid var(--green-success);
+            color: var(--green-success);
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); }
+        }
+
+        .cta-badge svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .cta-title {
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            color: var(--text-light);
+            line-height: 1.2;
+            margin-bottom: 24px;
+        }
+
+        .cta-title .highlight {
+            color: var(--gold-accent);
+            display: block;
+        }
+
+        .cta-subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            color: var(--text-cream);
+            max-width: 700px;
+            margin: 0 auto 40px;
+            line-height: 1.8;
+        }
+
+        /* Value Summary */
+        .value-summary {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            max-width: 500px;
+            margin: 0 auto 40px;
+        }
+
+        .value-item {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 189, 89, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .value-number {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--gold-accent);
+        }
+
+        .value-label {
+            font-size: 0.8rem;
+            color: var(--text-cream);
+            margin-top: 4px;
+        }
+
+        /* Main CTA Button */
+        .btn-main-cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 20px 48px;
+            background: linear-gradient(135deg, var(--gold-accent), var(--gold-light));
+            color: var(--primary-navy);
+            font-family: var(--font-heading);
+            font-size: 1.1rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.4s ease;
+            box-shadow: 0 15px 50px rgba(255, 189, 89, 0.4);
+        }
+
+        .btn-main-cta:hover {
+            transform: translateY(-6px) scale(1.03);
+            box-shadow: 0 25px 80px rgba(255, 189, 89, 0.6);
+        }
+
+        .btn-main-cta svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .cta-guarantee {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: var(--text-cream);
+        }
+
+        .cta-guarantee svg {
+            width: 18px;
+            height: 18px;
+            color: var(--green-success);
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           RELATED COURSES
+           ═══════════════════════════════════════════════════════════ */
+        .related-courses {
+            padding: 60px 16px;
+            border-top: 1px solid rgba(255, 189, 89, 0.1);
+        }
+
+        .related-title {
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .course-card {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 189, 89, 0.15);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .course-card:hover {
+            border-color: rgba(255, 189, 89, 0.4);
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .course-icon {
+            width: 56px;
+            height: 56px;
+            min-width: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .course-card:nth-child(1) .course-icon {
+            background: linear-gradient(135deg, #FF6B9D, #C44569);
+        }
+
+        .course-card:nth-child(2) .course-icon {
+            background: linear-gradient(135deg, #4ECDC4, #44A08D);
+        }
+
+        .course-card:nth-child(3) .course-icon {
+            background: linear-gradient(135deg, #667EEA, #764BA2);
+        }
+
+        .course-icon svg {
+            width: 28px;
+            height: 28px;
+            color: var(--text-light);
+        }
+
+        .course-info {
+            flex: 1;
+        }
+
+        .course-name {
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+
+        .course-desc {
+            font-size: 0.85rem;
+            color: var(--text-cream);
+            line-height: 1.5;
+        }
+
+        .course-arrow {
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 189, 89, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .course-card:hover .course-arrow {
+            background: var(--gold-accent);
+        }
+
+        .course-arrow svg {
+            width: 18px;
+            height: 18px;
+            color: var(--gold-accent);
+            transition: all 0.3s ease;
+        }
+
+        .course-card:hover .course-arrow svg {
+            color: var(--primary-navy);
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           FOOTER
+           ═══════════════════════════════════════════════════════════ */
+        .footer {
+            padding: 60px 16px 40px;
+            border-top: 1px solid rgba(255, 189, 89, 0.1);
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* Brand Column */
+        .footer-brand {
+            text-align: center;
+        }
+
+        .footer-logo {
+            font-family: var(--font-heading);
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--gold-accent);
+            margin-bottom: 16px;
+        }
+
+        .footer-tagline {
+            font-size: 0.95rem;
+            color: var(--text-cream);
+            line-height: 1.7;
+            max-width: 300px;
+            margin: 0 auto 20px;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .social-link {
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 189, 89, 0.1);
+            border: 1px solid rgba(255, 189, 89, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .social-link:hover {
+            background: var(--gold-accent);
+            border-color: var(--gold-accent);
+        }
+
+        .social-link svg {
+            width: 20px;
+            height: 20px;
+            color: var(--gold-accent);
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover svg {
+            color: var(--primary-navy);
+        }
+
+        /* Links Columns */
+        .footer-links {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+        }
+
+        .links-column h4 {
+            font-family: var(--font-heading);
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .links-column ul {
+            list-style: none;
+        }
+
+        .links-column li {
+            margin-bottom: 10px;
+        }
+
+        .links-column a {
+            font-size: 0.9rem;
+            color: var(--text-cream);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .links-column a:hover {
+            color: var(--gold-accent);
+            transform: translateX(4px);
+        }
+
+        .links-column a svg {
+            width: 14px;
+            height: 14px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .links-column a:hover svg {
+            opacity: 1;
+        }
+
+        /* Footer Bottom */
+        .footer-bottom {
+            margin-top: 40px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .footer-copyright {
+            font-size: 0.85rem;
+            color: var(--text-cream);
+            opacity: 0.7;
+            margin-bottom: 12px;
+        }
+
+        .footer-legal {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .footer-legal a {
+            font-size: 0.8rem;
+            color: var(--text-cream);
+            text-decoration: none;
+            opacity: 0.6;
+            transition: all 0.3s ease;
+        }
+
+        .footer-legal a:hover {
+            color: var(--gold-accent);
+            opacity: 1;
+        }
+
+        /* Responsive */
+        @media (min-width: 600px) {
+            .final-cta {
+                padding: 100px 40px;
+            }
+
+            .related-courses {
+                padding: 80px 40px;
+            }
+
+            .footer {
+                padding: 80px 40px 40px;
+            }
+
+            .courses-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .value-summary {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (min-width: 768px) {
+            .footer-content {
+                grid-template-columns: 1fr 2fr;
+                text-align: left;
+            }
+
+            .footer-brand {
+                text-align: left;
+            }
+
+            .footer-tagline {
+                margin: 0 0 20px;
+            }
+
+            .social-links {
+                justify-content: flex-start;
+            }
+
+            .footer-links {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .final-cta {
+                padding: 120px 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 13: FINAL CTA + FOOTER
+     Gradient: Deepest Burgundy #1E0104 → Navy #112250
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<section class="section-13" id="final-cta">
+    <div class="container">
+        
+        <!-- Final CTA Section -->
+        <div class="final-cta">
+            <div class="cta-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/>
+                </svg>
+                BẮT ĐẦU NGAY HÔM NAY
+            </div>
+
+            <h2 class="cta-title">
+                Đây Là Lúc Bạn 
+                <span class="highlight">Viết Lại Câu Chuyện Tài Chính</span>
+            </h2>
+
+            <p class="cta-subtitle">
+                Hàng nghìn người đã thay đổi cuộc đời nhờ phương pháp này. Bạn đã đọc đến đây, 
+                điều đó chứng tỏ bạn đã sẵn sàng. Đừng để một ngày nào nữa trôi qua trong vòng xoáy 
+                lo âu về tiền bạc. Hành trình triệu phú của bạn bắt đầu từ bước đầu tiên này.
+            </p>
+
+            <!-- Value Summary -->
+            <div class="value-summary">
+                <div class="value-item">
+                    <div class="value-number">28</div>
+                    <div class="value-label">Bài học</div>
+                </div>
+                <div class="value-item">
+                    <div class="value-number">49</div>
+                    <div class="value-label">Ngày chuyển hóa</div>
+                </div>
+                <div class="value-item">
+                    <div class="value-number">30+</div>
+                    <div class="value-label">Hình minh họa</div>
+                </div>
+                <div class="value-item">
+                    <div class="value-number">∞</div>
+                    <div class="value-label">Truy cập trọn đời</div>
+                </div>
+            </div>
+
+            <!-- Main CTA Button -->
+            <a href="#register" class="btn-main-cta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                Đăng Ký Ngay - Chỉ ₫499,000
+            </a>
+
+            <div class="cta-guarantee">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    <polyline points="9 12 11 14 15 10"/>
+                </svg>
+                Cam kết hoàn tiền 100% trong 7 ngày nếu không hài lòng
+            </div>
+        </div>
+
+        <!-- Related Courses -->
+        <div class="related-courses">
+            <h3 class="related-title">Khám Phá Thêm Các Khóa Học Khác</h3>
+            
+            <div class="courses-grid">
+                <a href="#" class="course-card">
+                    <div class="course-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                    </div>
+                    <div class="course-info">
+                        <div class="course-name">Tái Tạo Tình Yêu</div>
+                        <div class="course-desc">Chữa lành vết thương tình cảm và thu hút mối quan hệ đích thực</div>
+                    </div>
+                    <div class="course-arrow">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                            <polyline points="12 5 19 12 12 19"/>
+                        </svg>
+                    </div>
+                </a>
+
+                <a href="#" class="course-card">
+                    <div class="course-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                    </div>
+                    <div class="course-info">
+                        <div class="course-name">7 Ngày Khởi Đầu</div>
+                        <div class="course-desc">Khóa học miễn phí giúp bạn làm quen với phương pháp GEM</div>
+                    </div>
+                    <div class="course-arrow">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                            <polyline points="12 5 19 12 12 19"/>
+                        </svg>
+                    </div>
+                </a>
+
+                <a href="#" class="course-card">
+                    <div class="course-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                            <polyline points="17 6 23 6 23 12"/>
+                        </svg>
+                    </div>
+                    <div class="course-info">
+                        <div class="course-name">GEM Trading</div>
+                        <div class="course-desc">Phương pháp giao dịch crypto với GEM Frequency Method</div>
+                    </div>
+                    <div class="course-arrow">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                            <polyline points="12 5 19 12 12 19"/>
+                        </svg>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                
+                <!-- Brand Column -->
+                <div class="footer-brand">
+                    <div class="footer-logo">Gemral</div>
+                    <p class="footer-tagline">
+                        Nền tảng chuyển hóa tư duy và phát triển bản thân hàng đầu Việt Nam.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" class="social-link" title="Facebook">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link" title="Instagram">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link" title="YouTube">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link" title="TikTok">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Links -->
+                <div class="footer-links">
+                    <div class="links-column">
+                        <h4>Khóa Học</h4>
+                        <ul>
+                            <li><a href="#">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                Tái Tạo Tư Duy Triệu Phú
+                            </a></li>
+                            <li><a href="#">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                Tái Tạo Tình Yêu
+                            </a></li>
+                            <li><a href="#">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                GEM Trading
+                            </a></li>
+                            <li><a href="#">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                7 Ngày Khởi Đầu (Miễn phí)
+                            </a></li>
+                        </ul>
+                    </div>
+
+                    <div class="links-column">
+                        <h4>Đối Tác</h4>
+                        <ul>
+                            <li><a href="#">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                Chương trình CTV
+                            </a></li>
+                            <li><a href="#">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                KOL Affiliate
+                            </a></li>
+                            <li><a href="#">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                Giảng viên Partner
+                            </a></li>
+                            <li><a href="#">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                Enterprise B2B
+                            </a></li>
+                        </ul>
+                    </div>
+
+                    <div class="links-column">
+                        <h4>Hỗ Trợ</h4>
+                        <ul>
+                            <li><a href="#">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                Câu hỏi thường gặp
+                            </a></li>
+                            <li><a href="#">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                Liên hệ hỗ trợ
+                            </a></li>
+                            <li><a href="#">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                Chính sách hoàn tiền
+                            </a></li>
+                            <li><a href="#">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                                Điều khoản sử dụng
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer Bottom -->
+            <div class="footer-bottom">
+                <p class="footer-copyright">
+                    © 2025 GEM Academy by Gemral. All rights reserved.
+                </p>
+                <div class="footer-legal">
+                    <a href="#">Chính sách bảo mật</a>
+                    <a href="#">Điều khoản dịch vụ</a>
+                    <a href="#">Chính sách cookie</a>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+</section>
+
+</body>
+</html>

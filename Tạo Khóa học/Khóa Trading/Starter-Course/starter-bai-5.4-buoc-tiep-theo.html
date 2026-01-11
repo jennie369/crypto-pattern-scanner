@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 5.4: Bước Tiếp Theo Của Bạn</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Noto+Sans+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-navy: #112250;
+            --color-navy-light: #1a3070;
+            --color-navy-dark: #0a1535;
+            --color-gold: #FFBD59;
+            --color-gold-light: #FFD993;
+            --color-gold-dark: #E5A030;
+            --color-cyan: #00F0FF;
+            --color-purple: #6A5BFF;
+            --color-purple-light: #8B7FFF;
+            --color-green: #10B981;
+            --color-green-light: #34D399;
+            --color-red: #EF4444;
+
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.65);
+
+            --bg-glass: rgba(255, 255, 255, 0.08);
+            --bg-card-solid: #1a2d5a;
+            --border-glass: rgba(255, 255, 255, 0.15);
+            --border-gold: rgba(255, 189, 89, 0.4);
+
+            --shadow-gold: 0 4px 20px rgba(255, 189, 89, 0.25);
+
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            --space-2xl: 3rem;
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-body);
+            background: linear-gradient(135deg, var(--color-navy-dark) 0%, var(--color-navy) 50%, var(--color-navy-light) 100%);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+            font-size: 16px;
+        }
+
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: var(--space-lg);
+            padding-top: var(--space-xl);
+            padding-bottom: var(--space-2xl);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-container {
+                padding: 0;
+                padding-top: var(--space-md);
+                padding-bottom: var(--space-xl);
+            }
+        }
+
+        .lesson-header {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+            padding: var(--space-xl);
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-xl);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-header {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+                padding: var(--space-lg) var(--space-md);
+            }
+        }
+
+        .badge-container { display: flex; justify-content: center; gap: var(--space-sm); flex-wrap: wrap; margin-bottom: var(--space-md); }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            color: var(--color-navy);
+            font-family: var(--font-heading);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-radius: 50px;
+        }
+
+        .badge.chapter-badge { background: linear-gradient(135deg, var(--color-green) 0%, var(--color-green-light) 100%); }
+        .badge.final-badge { background: linear-gradient(135deg, var(--color-purple) 0%, var(--color-purple-light) 100%); }
+
+        .lesson-title {
+            font-family: var(--font-heading);
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+        }
+
+        .lesson-title .highlight {
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .lesson-subtitle { font-size: 1.1rem; color: var(--text-secondary); max-width: 600px; margin: 0 auto; }
+
+        .section { margin-bottom: var(--space-xl); }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            margin-bottom: var(--space-lg);
+            padding: 0 var(--space-md);
+        }
+
+        @media (min-width: 601px) { .section-header { padding: 0; } }
+
+        .section-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .section-title { font-family: var(--font-heading); font-size: clamp(1.25rem, 4vw, 1.5rem); font-weight: 700; }
+
+        .text-content { padding: 0 var(--space-md); }
+        @media (min-width: 601px) { .text-content { padding: 0; } }
+        .text-content p { margin-bottom: var(--space-md); color: var(--text-secondary); line-height: 1.8; }
+
+        .lesson-image {
+            width: 100%;
+            margin: var(--space-lg) 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 2px solid var(--border-glass);
+        }
+
+        @media (max-width: 600px) {
+            .lesson-image { border-radius: 0; border-left: none; border-right: none; }
+        }
+
+        .image-placeholder {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: linear-gradient(135deg, var(--bg-card-solid) 0%, var(--color-navy-dark) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-sm);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            padding: var(--space-lg);
+            text-align: center;
+        }
+
+        .image-placeholder-icon { font-size: 3rem; opacity: 0.5; }
+        .image-caption { text-align: center; padding: var(--space-sm); background: var(--bg-glass); color: var(--text-muted); font-size: 0.85rem; font-style: italic; }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border: 1px solid var(--border-gold);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+
+        @media (max-width: 600px) {
+            .highlight-box { border-radius: 0; border-left: 4px solid var(--color-gold); border-right: none; }
+        }
+
+        .highlight-box.cyan { background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(0, 240, 255, 0.05) 100%); border-color: rgba(0, 240, 255, 0.4); }
+        @media (max-width: 600px) { .highlight-box.cyan { border-left-color: var(--color-cyan); } }
+
+        .highlight-box.green { background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%); border-color: rgba(16, 185, 129, 0.4); }
+        @media (max-width: 600px) { .highlight-box.green { border-left-color: var(--color-green); } }
+
+        .highlight-box.purple { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15) 0%, rgba(106, 91, 255, 0.05) 100%); border-color: rgba(106, 91, 255, 0.4); }
+        @media (max-width: 600px) { .highlight-box.purple { border-left-color: var(--color-purple); } }
+
+        .highlight-box-title { font-family: var(--font-heading); font-size: 1rem; font-weight: 700; color: var(--color-gold); margin-bottom: var(--space-sm); }
+        .highlight-box.cyan .highlight-box-title { color: var(--color-cyan); }
+        .highlight-box.green .highlight-box-title { color: var(--color-green); }
+        .highlight-box.purple .highlight-box-title { color: var(--color-purple); }
+        .highlight-box p { color: var(--text-secondary); font-size: 0.95rem; margin: 0; }
+
+        /* PATH CARDS */
+        .path-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+            position: relative;
+        }
+
+        @media (max-width: 600px) { .path-card { border-radius: 0; border-right: none; } }
+
+        .path-card.upgrade { border-left: 4px solid var(--color-cyan); }
+        .path-card.partner { border: 2px solid var(--color-gold); background: linear-gradient(135deg, rgba(255, 189, 89, 0.1) 0%, var(--bg-glass) 100%); }
+        .path-card.wait { border-left: 4px solid var(--color-green); }
+
+        .path-card.partner::before {
+            content: '🌟 RECOMMENDED';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--color-gold);
+            color: var(--color-navy);
+            font-family: var(--font-heading);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 4px 16px;
+            border-radius: 50px;
+        }
+
+        .path-header { display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-lg); flex-wrap: wrap; }
+        .path-icon { font-size: 2.5rem; }
+        .path-title-group { flex: 1; }
+        .path-label { font-family: var(--font-heading); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: var(--space-xs); }
+        .path-card.upgrade .path-label { color: var(--color-cyan); }
+        .path-card.partner .path-label { color: var(--color-gold); }
+        .path-card.wait .path-label { color: var(--color-green); }
+        .path-title { font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; }
+
+        .path-steps { margin: var(--space-lg) 0; }
+        .path-step { display: flex; gap: var(--space-md); margin-bottom: var(--space-md); align-items: flex-start; }
+        .step-number { width: 28px; height: 28px; background: var(--color-gold); color: var(--color-navy); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 0.8rem; font-weight: 700; flex-shrink: 0; }
+        .path-card.upgrade .step-number { background: var(--color-cyan); }
+        .path-card.wait .step-number { background: var(--color-green); }
+        .step-content { flex: 1; color: var(--text-secondary); font-size: 0.95rem; }
+
+        .cta-buttons { display: grid; gap: var(--space-sm); margin-top: var(--space-lg); }
+        @media (min-width: 601px) { .cta-buttons.grid-3 { grid-template-columns: repeat(3, 1fr); } }
+
+        .cta-button {
+            display: block;
+            padding: var(--space-md) var(--space-lg);
+            background: var(--bg-card-solid);
+            border: 2px solid var(--border-glass);
+            border-radius: var(--radius-md);
+            text-align: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover { background: var(--bg-glass); border-color: var(--color-gold); }
+
+        .cta-button.primary { background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%); border-color: var(--color-gold); color: var(--color-navy); }
+        .cta-button.primary:hover { box-shadow: var(--shadow-gold); transform: translateY(-2px); }
+
+        .cta-emoji { font-size: 1.5rem; display: block; margin-bottom: var(--space-xs); }
+        .cta-text { font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700; color: var(--text-primary); }
+        .cta-button.primary .cta-text { color: var(--color-navy); }
+        .cta-subtext { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+        .cta-button.primary .cta-subtext { color: var(--color-navy); opacity: 0.7; }
+
+        .path-note { margin-top: var(--space-lg); padding: var(--space-md); background: var(--bg-card-solid); border-radius: var(--radius-sm); }
+        .path-note p { font-size: 0.9rem; color: var(--text-muted); margin: 0; display: flex; align-items: center; gap: var(--space-sm); }
+
+        /* SUPPORT SECTION */
+        .support-card {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.1) 0%, var(--bg-glass) 100%);
+            border: 2px solid var(--color-purple);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+
+        @media (max-width: 600px) { .support-card { border-radius: 0; border-left: 4px solid var(--color-purple); border-right: none; } }
+
+        .support-title { font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: var(--color-purple); margin-bottom: var(--space-lg); text-align: center; }
+
+        .support-grid { display: grid; gap: var(--space-md); }
+        @media (min-width: 601px) { .support-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        .support-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--bg-card-solid);
+            border-radius: var(--radius-sm);
+        }
+
+        .support-icon { font-size: 1.5rem; }
+        .support-info { flex: 1; }
+        .support-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .support-value { font-family: var(--font-heading); font-size: 0.9rem; font-weight: 600; color: var(--text-primary); }
+
+        /* FINAL MESSAGE */
+        .final-message {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.2) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border: 2px solid var(--color-gold);
+            border-radius: var(--radius-xl);
+            padding: var(--space-2xl);
+            margin: var(--space-xl) 0;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) { .final-message { border-radius: 0; border-left: 4px solid var(--color-gold); border-right: none; padding: var(--space-xl) var(--space-lg); } }
+
+        .final-quote {
+            font-family: var(--font-body);
+            font-size: 1.1rem;
+            font-style: italic;
+            color: var(--text-primary);
+            line-height: 1.8;
+            margin-bottom: var(--space-lg);
+        }
+
+        .final-signature {
+            font-family: var(--font-heading);
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--color-gold);
+        }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.2) 0%, rgba(255, 189, 89, 0.05) 100%);
+            border: 2px solid var(--color-gold);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) { .summary-box { border-radius: 0; border-left: 4px solid var(--color-gold); border-right: none; } }
+        .summary-title { font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; color: var(--color-gold); margin-bottom: var(--space-md); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-sm); color: var(--text-secondary); font-size: 0.95rem; }
+        .summary-list li::before { content: '✓'; color: var(--color-gold); font-weight: bold; }
+
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) { .lesson-footer { border-radius: 0; border-left: none; border-right: none; } }
+        .footer-badge { display: inline-block; padding: 8px 20px; background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%); color: var(--color-navy); font-family: var(--font-heading); font-size: 0.85rem; font-weight: 700; border-radius: 50px; margin-bottom: var(--space-md); }
+        .footer-text { color: var(--text-muted); font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="lesson-container">
+        <header class="lesson-header">
+            <div class="badge-container">
+                <span class="badge">STARTER</span>
+                <span class="badge chapter-badge">MODULE B</span>
+                <span class="badge final-badge">BÀI CUỐI</span>
+            </div>
+            <h1 class="lesson-title">Bước Tiếp Theo <span class="highlight">Của Bạn</span></h1>
+            <p class="lesson-subtitle">3 lựa chọn rõ ràng - Bạn quyết định con đường của mình</p>
+        </header>
+
+        <!-- INTRO -->
+        <section class="section">
+            <div class="text-content">
+                <p>Chúc mừng bạn đã hoàn thành khóa học GEM Trading Starter! Bạn đã có một cái nhìn tổng quan về phương pháp GEM Frequency, trải nghiệm các công cụ Scanner và Chatbot, và hiểu rõ các lựa chọn có sẵn.</p>
+
+                <p>Bây giờ, đến lúc bạn quyết định bước tiếp theo. Dưới đây là 3 lựa chọn rõ ràng - <strong>không có lựa chọn nào sai, chỉ có lựa chọn phù hợp với bạn nhất lúc này.</strong></p>
+            </div>
+        </section>
+
+        <!-- LỰA CHỌN 1: UPGRADE TIER -->
+        <section class="section">
+            <div class="section-header">
+                <div class="section-icon">🎯</div>
+                <h2 class="section-title">3 Lựa Chọn Cho Bạn</h2>
+            </div>
+
+            <div class="path-card upgrade">
+                <div class="path-header">
+                    <div class="path-icon">🚀</div>
+                    <div class="path-title-group">
+                        <div class="path-label">Lựa Chọn 1</div>
+                        <div class="path-title">Upgrade Lên TIER Cao Hơn</div>
+                    </div>
+                </div>
+
+                <div class="path-steps">
+                    <div class="path-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">Chọn tier phù hợp với mục tiêu và ngân sách (TIER 1/2/3)</div>
+                    </div>
+                    <div class="path-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">Click nút "Upgrade" tương ứng bên dưới</div>
+                    </div>
+                    <div class="path-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">Hoàn tất thanh toán an toàn</div>
+                    </div>
+                    <div class="path-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">Truy cập ngay các bài học và công cụ mới</div>
+                    </div>
+                </div>
+
+                <div class="cta-buttons grid-3">
+                    <a href="#" class="cta-button">
+                        <span class="cta-emoji">🎯</span>
+                        <span class="cta-text">TIER 1</span>
+                        <span class="cta-subtext">11M VND</span>
+                    </a>
+                    <a href="#" class="cta-button primary">
+                        <span class="cta-emoji">⭐</span>
+                        <span class="cta-text">TIER 2</span>
+                        <span class="cta-subtext">21M VND - PHỔ BIẾN</span>
+                    </a>
+                    <a href="#" class="cta-button">
+                        <span class="cta-emoji">👑</span>
+                        <span class="cta-text">TIER 3</span>
+                        <span class="cta-subtext">68M VND</span>
+                    </a>
+                </div>
+
+                <div class="path-note">
+                    <p>💬 Chưa chắc chọn tier nào? Chat với chúng tôi để được tư vấn miễn phí!</p>
+                </div>
+            </div>
+
+            <div class="lesson-image">
+                <div class="image-placeholder">
+                    <span class="image-placeholder-icon">🖼️</span>
+                    <span>Hình 1: Path 1 CTA Card - Upgrade Products</span>
+                    <span style="font-size: 0.8rem; opacity: 0.7;">Canva: upgrade-cta-card.png (1200x675)</span>
+                </div>
+                <div class="image-caption">Upgrade lên TIER cao hơn để unlock full potential</div>
+            </div>
+
+            <!-- LỰA CHỌN 2: PARTNERSHIP -->
+            <div class="path-card partner">
+                <div class="path-header">
+                    <div class="path-icon">🌟</div>
+                    <div class="path-title-group">
+                        <div class="path-label">Lựa Chọn 2</div>
+                        <div class="path-title">Trở Thành Partner</div>
+                    </div>
+                </div>
+
+                <div class="highlight-box green" style="margin-top: 0; margin-bottom: var(--space-lg);">
+                    <div class="highlight-box-title">💰 Ưu Đãi Đặc Biệt</div>
+                    <p>Commission lên đến 30% cho products digital + Thu nhập từ sub-affiliate dài hạn</p>
+                </div>
+
+                <div class="path-steps">
+                    <div class="path-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">Click "Đăng Ký Partnership" phù hợp với bạn</div>
+                    </div>
+                    <div class="path-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">Điền form đăng ký đơn giản</div>
+                    </div>
+                    <div class="path-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">Chờ duyệt (CTV: 3 ngày | KOL: 5-7 ngày)</div>
+                    </div>
+                    <div class="path-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">Nhận affiliate link + training materials</div>
+                    </div>
+                </div>
+
+                <div class="cta-buttons grid-3">
+                    <a href="#" class="cta-button primary">
+                        <span class="cta-emoji">🤝</span>
+                        <span class="cta-text">ĐĂNG KÝ CTV</span>
+                        <span class="cta-subtext">Miễn phí - Ai cũng có thể</span>
+                    </a>
+                    <a href="#" class="cta-button">
+                        <span class="cta-emoji">⭐</span>
+                        <span class="cta-text">ĐĂNG KÝ KOL</span>
+                        <span class="cta-subtext">20K+ followers</span>
+                    </a>
+                    <a href="#" class="cta-button">
+                        <span class="cta-emoji">🎓</span>
+                        <span class="cta-text">ỨNG TUYỂN INSTRUCTOR</span>
+                        <span class="cta-subtext">Tạo khóa học riêng</span>
+                    </a>
+                </div>
+
+                <div class="path-note">
+                    <p>💰 Muốn tính thu nhập tiềm năng? Dùng Income Calculator trong app!</p>
+                </div>
+            </div>
+
+            <div class="lesson-image">
+                <div class="image-placeholder">
+                    <span class="image-placeholder-icon">🖼️</span>
+                    <span>Hình 2: Path 2 CTA Card - Partnership (Featured)</span>
+                    <span style="font-size: 0.8rem; opacity: 0.7;">Canva: partnership-cta-card.png (1200x675)</span>
+                </div>
+                <div class="image-caption">Partnership - Vừa học vừa kiếm thêm thu nhập</div>
+            </div>
+
+            <!-- LỰA CHỌN 3: CHƯA SẴN SÀNG -->
+            <div class="path-card wait">
+                <div class="path-header">
+                    <div class="path-icon">🌱</div>
+                    <div class="path-title-group">
+                        <div class="path-label">Lựa Chọn 3</div>
+                        <div class="path-title">Chưa Sẵn Sàng - Totally Okay!</div>
+                    </div>
+                </div>
+
+                <div class="text-content" style="padding: 0;">
+                    <p>Không sao cả! Chúng tôi hoàn toàn hiểu. Mỗi người có timeline riêng của mình và đó là điều hoàn toàn bình thường. Bạn có thể tiếp tục sử dụng những gì đang có:</p>
+                </div>
+
+                <div class="path-steps">
+                    <div class="path-step">
+                        <div class="step-number">✓</div>
+                        <div class="step-content">Tiếp tục với gói STARTER hiện tại</div>
+                    </div>
+                    <div class="path-step">
+                        <div class="step-number">✓</div>
+                        <div class="step-content">Tham gia forum cộng đồng GEM</div>
+                    </div>
+                    <div class="path-step">
+                        <div class="step-number">✓</div>
+                        <div class="step-content">Sử dụng Scanner (5/ngày) và Chatbot (10/ngày)</div>
+                    </div>
+                    <div class="path-step">
+                        <div class="step-number">✓</div>
+                        <div class="step-content">Quay lại bất cứ khi nào bạn sẵn sàng</div>
+                    </div>
+                </div>
+
+                <div class="cta-buttons grid-3">
+                    <a href="#" class="cta-button">
+                        <span class="cta-emoji">💬</span>
+                        <span class="cta-text">THAM GIA FORUM</span>
+                        <span class="cta-subtext">Miễn phí</span>
+                    </a>
+                    <a href="#" class="cta-button">
+                        <span class="cta-emoji">📧</span>
+                        <span class="cta-text">ĐĂNG KÝ NEWSLETTER</span>
+                        <span class="cta-subtext">Tips hàng tuần</span>
+                    </a>
+                    <a href="#" class="cta-button">
+                        <span class="cta-emoji">📱</span>
+                        <span class="cta-text">FOLLOW SOCIAL</span>
+                        <span class="cta-subtext">Updates mới nhất</span>
+                    </a>
+                </div>
+
+                <div class="path-note">
+                    <p>💚 "Chúng tôi vẫn ở đây khi bạn cần - không pressure, không judgment."</p>
+                </div>
+            </div>
+
+            <div class="lesson-image">
+                <div class="image-placeholder">
+                    <span class="image-placeholder-icon">🖼️</span>
+                    <span>Hình 3: Path 3 CTA Card - Not Ready</span>
+                    <span style="font-size: 0.8rem; opacity: 0.7;">Canva: not-ready-cta-card.png (1200x675)</span>
+                </div>
+                <div class="image-caption">Chưa sẵn sàng? Không sao - chúng tôi vẫn ở đây</div>
+            </div>
+        </section>
+
+        <!-- SUPPORT SECTION -->
+        <section class="section">
+            <div class="support-card">
+                <div class="support-title">🛠️ Cần Hỗ Trợ?</div>
+
+                <div class="support-grid">
+                    <div class="support-item">
+                        <div class="support-icon">📧</div>
+                        <div class="support-info">
+                            <div class="support-label">Email</div>
+                            <div class="support-value">support@gemral.com</div>
+                        </div>
+                    </div>
+
+                    <div class="support-item">
+                        <div class="support-icon">💬</div>
+                        <div class="support-info">
+                            <div class="support-label">Live Chat</div>
+                            <div class="support-value">Trong app GEM</div>
+                        </div>
+                    </div>
+
+                    <div class="support-item">
+                        <div class="support-icon">📱</div>
+                        <div class="support-info">
+                            <div class="support-label">Zalo / Telegram</div>
+                            <div class="support-value">@GEMTradingVN</div>
+                        </div>
+                    </div>
+
+                    <div class="support-item">
+                        <div class="support-icon">❓</div>
+                        <div class="support-info">
+                            <div class="support-label">FAQ</div>
+                            <div class="support-value">gemral.com/faq</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-content" style="padding: 0; margin-top: var(--space-lg); text-align: center;">
+                    <p style="margin: 0; color: var(--text-muted); font-style: italic;">"Đội ngũ GEM sẵn sàng hỗ trợ bạn 24/7"</p>
+                </div>
+            </div>
+
+            <div class="lesson-image">
+                <div class="image-placeholder">
+                    <span class="image-placeholder-icon">🖼️</span>
+                    <span>Hình 4: Contact/Support Card</span>
+                    <span style="font-size: 0.8rem; opacity: 0.7;">Canva: support-contact-card.png (1200x675)</span>
+                </div>
+                <div class="image-caption">Các kênh hỗ trợ - Chúng tôi luôn sẵn sàng giúp đỡ</div>
+            </div>
+        </section>
+
+        <!-- FINAL MESSAGE -->
+        <div class="final-message">
+            <div class="final-quote">
+                "Dù bạn chọn con đường nào, chúng tôi đều chúc bạn thành công.<br>
+                Trading là hành trình, không phải đích đến.<br>
+                Và bạn không đi một mình."
+            </div>
+            <div class="final-signature">— Đội ngũ GEM Trading Academy</div>
+        </div>
+
+        <div class="lesson-image">
+            <div class="image-placeholder">
+                <span class="image-placeholder-icon">🖼️</span>
+                <span>Hình 5: Final Encouragement Visual</span>
+                <span style="font-size: 0.8rem; opacity: 0.7;">Canva: final-encouragement.png (1200x675)</span>
+            </div>
+            <div class="image-caption">Cảm ơn bạn đã hoàn thành khóa học Starter!</div>
+        </div>
+
+        <div class="summary-box">
+            <div class="summary-title">🎉 Chúc Mừng Hoàn Thành Khóa Học!</div>
+            <ul class="summary-list">
+                <li>Bạn đã tìm hiểu về phương pháp GEM Frequency Trading</li>
+                <li>Đã trải nghiệm Scanner, Chatbot và Forum</li>
+                <li>Hiểu rõ các lựa chọn: Upgrade, Partnership, hoặc tiếp tục Starter</li>
+                <li>Có đầy đủ thông tin để đưa ra quyết định phù hợp</li>
+                <li>Biết cách liên hệ support khi cần hỗ trợ</li>
+            </ul>
+        </div>
+
+        <div class="highlight-box purple">
+            <div class="highlight-box-title">💜 Lời Cuối</div>
+            <p>Cảm ơn bạn đã tin tưởng và dành thời gian cho GEM Trading Starter Course. Dù bạn chọn con đường nào tiếp theo, chúng tôi hy vọng những gì bạn học được ở đây sẽ giúp ích cho hành trình trading của bạn. Chúc bạn thành công!</p>
+        </div>
+
+        <footer class="lesson-footer">
+            <span class="footer-badge">HOÀN THÀNH</span>
+            <p class="footer-text">Bài 5.4: Bước Tiếp Theo Của Bạn | GEM Frequency Trading</p>
+        </footer>
+    </div>
+</body>
+</html>

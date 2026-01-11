@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import forumService from '../../../services/forum';
 import { ReactionPicker } from '../../../components/forum/ReactionPicker';
+import { forumLinks } from '../../../utils/linkUtils';
 import './PostCard.css';
 
 /**
@@ -143,7 +144,7 @@ export default function PostCard({
    */
   const handleShare = async (e) => {
     e.stopPropagation();
-    const url = `${window.location.origin}/forum/thread/${post.id}`;
+    const url = forumLinks.thread(post.id);
 
     if (navigator.share) {
       try {

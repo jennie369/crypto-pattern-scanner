@@ -12,7 +12,7 @@
  * - Glass-morphism styling
  */
 
-import React, { useRef, useState, memo, useCallback } from 'react';
+import React, { useRef, useState, memo, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -30,10 +30,15 @@ import { Audio } from 'expo-av';
 // Components
 import ImageViewer from './ImageViewer';
 import VideoPlayer from './VideoPlayer';
-import ReactionPicker from './ReactionPicker';
+import MessageContextMenu from './MessageContextMenu';
 import ReadReceiptIndicator, { MESSAGE_STATUS } from './ReadReceiptIndicator';
 import LinkPreview, { extractUrls } from './LinkPreview';
 import GroupReadReceipts from './GroupReadReceipts';
+import { StickerMessage } from '../../../components/Stickers';
+import VoicePlayerEnhanced from '../../../components/Messages/VoicePlayerEnhanced';
+import MentionHighlight from '../../../components/Messages/MentionHighlight';
+import QuotedMessageBubble from '../../../components/Messages/QuotedMessageBubble';
+import RecalledMessagePlaceholder from '../../../components/Messages/RecalledMessagePlaceholder';
 
 // Tokens
 import {
@@ -52,25 +57,59 @@ const MessageBubble = memo(({
   isOwn,
   showAvatar,
   onDoubleTap,
-  onLongPress,
   onReply,
   onDelete,
   onReaction,
+  onCopy,
+  onForward,
+  onPin,
+  onStar,
+  onEdit,
+  onTranslate,
+  onRecall,
+  onReport,
+  isPinned = false,
+  isStarred = false,
+  canRecall = false,
   currentUserId,
   isGroupChat,
   totalParticipants,
+  onScrollToMessage, // Scroll to original quoted message
+  isHighlighted = false, // Highlight when scrolled to
 }) => {
   // Animation refs
   const heartScale = useRef(new Animated.Value(0)).current;
   const heartOpacity = useRef(new Animated.Value(0)).current;
   const translateX = useRef(new Animated.Value(0)).current;
+  const highlightOpacity = useRef(new Animated.Value(0)).current;
   const lastTap = useRef(0);
+
+  // Highlight animation when scrolled to
+  useEffect(() => {
+    if (isHighlighted) {
+      // Flash highlight effect
+      Animated.sequence([
+        Animated.timing(highlightOpacity, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(highlightOpacity, {
+          toValue: 0,
+          duration: 1500,
+          delay: 500,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [isHighlighted, highlightOpacity]);
 
   // State
   const [showImageViewer, setShowImageViewer] = useState(false);
-  const [showReactionPicker, setShowReactionPicker] = useState(false);
+  const [showContextMenu, setShowContextMenu] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const soundRef = useRef(null);
+  const bubbleRef = useRef(null);
 
   // Double-tap detection
   const handlePress = useCallback(() => {
@@ -182,6 +221,8 @@ const MessageBubble = memo(({
   const hasVideo = message.message_type === 'video' && message.attachment_url;
   const hasAudio = message.message_type === 'audio' && message.attachment_url;
   const hasFile = message.message_type === 'file' && message.attachment_url;
+  const hasSticker = message.message_type === 'sticker' && (message.sticker_id || message.attachment_url);
+  const hasGif = message.message_type === 'gif' && (message.giphy_url || message.attachment_url);
 
   // Extract URLs from message content for link preview
   const urls = message.content ? extractUrls(message.content) : [];
@@ -190,15 +231,14 @@ const MessageBubble = memo(({
   // Optimistic message styling
   const isOptimistic = message._isOptimistic;
 
-  // Handle long press to show reaction picker
+  // Handle long press to show context menu (Facebook style)
   const handleLongPress = useCallback(() => {
-    setShowReactionPicker(true);
-    onLongPress?.();
-  }, [onLongPress]);
+    setShowContextMenu(true);
+  }, []);
 
-  // Handle reaction selection
+  // Handle reaction selection from context menu
   const handleReactionSelect = useCallback((emoji) => {
-    setShowReactionPicker(false);
+    setShowContextMenu(false);
     onReaction?.(emoji);
   }, [onReaction]);
 
@@ -245,6 +285,21 @@ const MessageBubble = memo(({
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
+
+  // If message is recalled, show placeholder
+  if (message?.is_recalled) {
+    return (
+      <View style={[
+        styles.container,
+        isOwn ? styles.containerOwn : styles.containerOther,
+      ]}>
+        <RecalledMessagePlaceholder
+          isOwnMessage={isOwn}
+          senderName={sender?.display_name}
+        />
+      </View>
+    );
+  }
 
   return (
     <View
@@ -295,19 +350,13 @@ const MessageBubble = memo(({
           onLongPress={handleLongPress}
           activeOpacity={0.9}
         >
-          {/* Reply Quote */}
+          {/* Reply Quote - Enhanced with QuotedMessageBubble */}
           {message.reply_to && (
-            <View style={styles.replyQuote}>
-              <View style={styles.replyBar} />
-              <View style={styles.replyContent}>
-                <Text style={styles.replyAuthor}>
-                  {message.reply_to.users?.display_name || 'User'}
-                </Text>
-                <Text style={styles.replyText} numberOfLines={1}>
-                  {message.reply_to.content || 'Media message'}
-                </Text>
-              </View>
-            </View>
+            <QuotedMessageBubble
+              originalMessage={message.reply_to}
+              isOwnReply={isOwn}
+              onPress={() => onScrollToMessage?.(message.reply_to?.id)}
+            />
           )}
 
           {/* Image Attachment */}
@@ -331,37 +380,19 @@ const MessageBubble = memo(({
             />
           )}
 
-          {/* Audio Message */}
+          {/* Caption for Media (Phase 1C) */}
+          {(hasImage || hasVideo) && message.caption && (
+            <Text style={styles.mediaCaption}>{message.caption}</Text>
+          )}
+
+          {/* Audio Message - Enhanced with Speed Control */}
           {hasAudio && (
-            <TouchableOpacity
-              style={styles.audioAttachment}
-              onPress={handleAudioPlay}
-              activeOpacity={0.7}
-            >
-              <View style={styles.audioPlayButton}>
-                <Ionicons
-                  name={isPlayingAudio ? 'pause' : 'play'}
-                  size={20}
-                  color={COLORS.textPrimary}
-                />
-              </View>
-              <View style={styles.audioWaveform}>
-                {/* Simple waveform visualization */}
-                {[...Array(15)].map((_, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.audioBar,
-                      { height: 4 + Math.random() * 16 },
-                      isPlayingAudio && styles.audioBarActive,
-                    ]}
-                  />
-                ))}
-              </View>
-              <Text style={styles.audioDuration}>
-                {formatDuration(message.attachment_duration)}
-              </Text>
-            </TouchableOpacity>
+            <VoicePlayerEnhanced
+              uri={message.attachment_url}
+              duration={message.attachment_duration}
+              waveform={message.waveform}
+              isCurrentUser={isOwn}
+            />
           )}
 
           {/* File Attachment */}
@@ -374,11 +405,35 @@ const MessageBubble = memo(({
             </View>
           )}
 
-          {/* Message Text */}
+          {/* Sticker */}
+          {hasSticker && (
+            <StickerMessage
+              stickerId={message.sticker_id}
+              url={message.attachment_url || message.sticker?.image_url}
+              format={message.sticker?.format}
+              lottieUrl={message.sticker?.lottie_url}
+              onLongPress={handleLongPress}
+            />
+          )}
+
+          {/* GIF */}
+          {hasGif && (
+            <StickerMessage
+              giphyId={message.giphy_id}
+              url={message.giphy_url || message.attachment_url}
+              format="gif"
+              onLongPress={handleLongPress}
+            />
+          )}
+
+          {/* Message Text with Mention Highlighting */}
           {message.content ? (
-            <Text style={[styles.text, isOwn ? styles.textOwn : styles.textOther]}>
-              {message.content}
-            </Text>
+            <MentionHighlight
+              text={message.content}
+              mentions={message.mentions || []}
+              isCurrentUser={isOwn}
+              textStyle={isOwn ? styles.textOwn : styles.textOther}
+            />
           ) : null}
 
           {/* Link Preview */}
@@ -446,6 +501,17 @@ const MessageBubble = memo(({
         >
           <Ionicons name="heart" size={60} color={COLORS.burgundy} />
         </Animated.View>
+
+        {/* Highlight Overlay (when scrolled to from quote) */}
+        <Animated.View
+          style={[
+            styles.highlightOverlay,
+            {
+              opacity: highlightOpacity,
+            },
+          ]}
+          pointerEvents="none"
+        />
       </Animated.View>
 
       {/* Reply indicator (when swiping) */}
@@ -462,11 +528,28 @@ const MessageBubble = memo(({
         />
       )}
 
-      {/* Reaction Picker Modal */}
-      <ReactionPicker
-        visible={showReactionPicker}
-        onSelect={handleReactionSelect}
-        onClose={() => setShowReactionPicker(false)}
+      {/* Facebook-style Context Menu */}
+      <MessageContextMenu
+        visible={showContextMenu}
+        message={message}
+        isOwn={isOwn}
+        isPinned={isPinned}
+        isStarred={isStarred}
+        canRecall={canRecall}
+        senderName={sender?.display_name}
+        senderAvatar={sender?.avatar_url}
+        onClose={() => setShowContextMenu(false)}
+        onReply={onReply}
+        onCopy={onCopy}
+        onForward={onForward}
+        onDelete={onDelete}
+        onReaction={handleReactionSelect}
+        onReport={onReport}
+        onPin={onPin}
+        onEdit={onEdit}
+        onStar={onStar}
+        onTranslate={onTranslate}
+        onRecall={onRecall}
       />
     </View>
   );
@@ -672,6 +755,14 @@ const styles = StyleSheet.create({
     marginTop: SPACING.xs,
     maxWidth: 200,
   },
+  // Media Caption (Phase 1C)
+  mediaCaption: {
+    fontSize: TYPOGRAPHY.fontSize.base,
+    color: COLORS.textPrimary,
+    marginTop: SPACING.xs,
+    marginBottom: SPACING.xs,
+    lineHeight: 20,
+  },
 
   // Reactions
   reactions: {
@@ -715,6 +806,17 @@ const styles = StyleSheet.create({
     left: '50%',
     marginLeft: -30,
     marginTop: -30,
+  },
+
+  // Highlight Overlay (when scrolled to)
+  highlightOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(254, 199, 78, 0.25)',
+    borderRadius: 18,
   },
 
   // Swipe Indicator

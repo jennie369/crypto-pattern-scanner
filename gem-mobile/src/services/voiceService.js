@@ -14,7 +14,8 @@
  */
 
 import { Audio } from 'expo-av';
-import * as FileSystem from 'expo-file-system';
+// Use legacy API to avoid deprecation errors in Expo SDK 54+
+import * as FileSystem from 'expo-file-system/legacy';
 import { Platform } from 'react-native';
 import { supabase } from './supabase';
 import TierService from './tierService';
@@ -433,9 +434,11 @@ class VoiceService {
   async getVoiceQuotaInfo(userId, userTier) {
     const normalizedTier = TierService.normalizeTier(userTier);
 
+    // TIER1+ and ADMIN have unlimited voice
     if (normalizedTier !== 'FREE') {
       return {
         isUnlimited: true,
+        canUse: true, // CRITICAL: VoiceInputButton checks this field
         used: 0,
         limit: -1,
         remaining: -1,
@@ -443,12 +446,14 @@ class VoiceService {
       };
     }
 
+    // FREE tier: 3 voice messages/day
     const FREE_VOICE_LIMIT = 3;
     const todayCount = await this.getTodayVoiceCount(userId);
     const remaining = Math.max(0, FREE_VOICE_LIMIT - todayCount);
 
     return {
       isUnlimited: false,
+      canUse: remaining > 0, // CRITICAL: VoiceInputButton checks this field
       used: todayCount,
       limit: FREE_VOICE_LIMIT,
       remaining: remaining,

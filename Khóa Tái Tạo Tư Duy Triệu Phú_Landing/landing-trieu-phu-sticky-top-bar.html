@@ -1,0 +1,301 @@
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     STICKY TOP BAR - Ưu đãi có hạn với Countdown
+     Dán vào đầu <body> hoặc tạo section riêng trong Shopify
+     ═══════════════════════════════════════════════════════════════════════════ -->
+
+<style>
+    /* Sticky Top Bar */
+    .sticky-top-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 9999;
+        background: linear-gradient(90deg, #9C0612 0%, #640A0C 50%, #9C0612 100%);
+        background-size: 200% 100%;
+        animation: gradientShift 3s ease-in-out infinite;
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        font-family: 'Montserrat', sans-serif;
+    }
+
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    .sticky-top-bar .promo-text {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #FFFFFF;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .sticky-top-bar .promo-text svg {
+        width: 16px;
+        height: 16px;
+        color: #FFBD59;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+    }
+
+    .sticky-top-bar .highlight {
+        color: #FFBD59;
+        font-weight: 700;
+    }
+
+    /* Countdown */
+    .sticky-countdown {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .countdown-unit {
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 4px;
+        padding: 4px 6px;
+        min-width: 28px;
+        text-align: center;
+    }
+
+    .countdown-number {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: #FFBD59;
+        display: block;
+        line-height: 1;
+    }
+
+    .countdown-label {
+        font-size: 0.55rem;
+        color: rgba(255, 255, 255, 0.7);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .countdown-separator {
+        color: #FFBD59;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    /* CTA Button */
+    .sticky-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: linear-gradient(135deg, #FFBD59, #DEBC81);
+        color: #640A0C;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 8px 16px;
+        border-radius: 50px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+
+    .sticky-cta:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(255, 189, 89, 0.4);
+    }
+
+    .sticky-cta svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    /* Close Button */
+    .sticky-close {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .sticky-close:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .sticky-close svg {
+        width: 14px;
+        height: 14px;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* Spacer for content below */
+    .sticky-spacer {
+        height: 50px;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+        .sticky-top-bar {
+            padding: 8px 40px 8px 12px;
+            gap: 8px;
+        }
+
+        .sticky-top-bar .promo-text {
+            font-size: 0.75rem;
+        }
+
+        .countdown-unit {
+            padding: 3px 5px;
+            min-width: 24px;
+        }
+
+        .countdown-number {
+            font-size: 0.8rem;
+        }
+
+        .sticky-cta {
+            font-size: 0.7rem;
+            padding: 6px 12px;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .sticky-top-bar .promo-text span:not(.highlight) {
+            display: none;
+        }
+
+        .sticky-top-bar .promo-text .highlight {
+            display: inline;
+        }
+    }
+</style>
+
+<!-- Sticky Top Bar HTML -->
+<div class="sticky-top-bar" id="stickyTopBar">
+    <div class="promo-text">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <span>Ưu đãi <span class="highlight">₫499,000</span> kết thúc trong:</span>
+    </div>
+
+    <div class="sticky-countdown" id="stickyCountdown">
+        <div class="countdown-unit">
+            <span class="countdown-number" id="countdown-days">02</span>
+            <span class="countdown-label">Ngày</span>
+        </div>
+        <span class="countdown-separator">:</span>
+        <div class="countdown-unit">
+            <span class="countdown-number" id="countdown-hours">14</span>
+            <span class="countdown-label">Giờ</span>
+        </div>
+        <span class="countdown-separator">:</span>
+        <div class="countdown-unit">
+            <span class="countdown-number" id="countdown-mins">37</span>
+            <span class="countdown-label">Phút</span>
+        </div>
+        <span class="countdown-separator">:</span>
+        <div class="countdown-unit">
+            <span class="countdown-number" id="countdown-secs">52</span>
+            <span class="countdown-label">Giây</span>
+        </div>
+    </div>
+
+    <a href="#pricing" class="sticky-cta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+        Đăng Ký Ngay
+    </a>
+
+    <button class="sticky-close" onclick="closeStickyBar()" aria-label="Đóng">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+    </button>
+</div>
+
+<!-- Spacer to prevent content overlap -->
+<div class="sticky-spacer" id="stickySpacer"></div>
+
+<script>
+    // Countdown Timer
+    function initCountdown() {
+        // Set end date (2 days from now for demo, adjust as needed)
+        const endDate = new Date();
+        endDate.setDate(endDate.getDate() + 2);
+        endDate.setHours(endDate.getHours() + 14);
+        endDate.setMinutes(endDate.getMinutes() + 37);
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = endDate.getTime() - now;
+
+            if (distance < 0) {
+                // Countdown finished - restart with new date
+                endDate.setDate(endDate.getDate() + 3);
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById('countdown-days').textContent = String(days).padStart(2, '0');
+            document.getElementById('countdown-hours').textContent = String(hours).padStart(2, '0');
+            document.getElementById('countdown-mins').textContent = String(minutes).padStart(2, '0');
+            document.getElementById('countdown-secs').textContent = String(seconds).padStart(2, '0');
+        }
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+    }
+
+    // Close sticky bar
+    function closeStickyBar() {
+        const stickyBar = document.getElementById('stickyTopBar');
+        const spacer = document.getElementById('stickySpacer');
+        
+        stickyBar.style.transform = 'translateY(-100%)';
+        stickyBar.style.transition = 'transform 0.3s ease';
+        spacer.style.height = '0';
+        spacer.style.transition = 'height 0.3s ease';
+
+        // Save to session storage
+        sessionStorage.setItem('stickyBarClosed', 'true');
+    }
+
+    // Check if already closed
+    document.addEventListener('DOMContentLoaded', function() {
+        if (sessionStorage.getItem('stickyBarClosed') === 'true') {
+            document.getElementById('stickyTopBar').style.display = 'none';
+            document.getElementById('stickySpacer').style.height = '0';
+        } else {
+            initCountdown();
+        }
+    });
+</script>

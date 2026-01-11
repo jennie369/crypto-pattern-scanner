@@ -1,8 +1,8 @@
 # 📱 PHASE 7: GEM iOS APP - COMPLETE IMPLEMENTATION STATUS
 
-**Version:** 4.0 - COMPREHENSIVE DOCUMENTATION
-**Ngày cập nhật:** December 9, 2025
-**Status:** 🚀 IN PRODUCTION - All Major Features Complete
+**Version:** 5.0 - COMPREHENSIVE DOCUMENTATION
+**Ngày cập nhật:** December 26, 2025
+**Status:** 🚀 IN PRODUCTION - All Major Features Complete + Course Page Enhanced
 
 ---
 
@@ -1647,15 +1647,151 @@ gem-mobile/src/
 
 ---
 
+---
+
+## 📚 COURSES PAGE ENHANCEMENTS (December 26, 2025)
+
+### **Implementation Status: ✅ COMPLETE**
+
+### **New Components Created:**
+
+#### Course Components (`src/components/courses/`)
+```
+├─ HeroBannerCarousel.js     ✅ Complete - Auto-sliding promo banners
+├─ CourseCategoryGrid.js     ✅ Complete - 2-row scrollable category icons
+├─ CourseFlashSaleSection.js ✅ Complete - Flash sale with countdown timer
+├─ CourseSection.js          ✅ Complete - Horizontal course card scroll
+├─ CourseCardVertical.js     ✅ Complete - Vertical course card layout
+├─ CourseFilterSheet.js      ✅ Complete - Bottom sheet filter modal
+├─ HighlightedCourseSection.js ✅ Complete - Featured course highlight
+├─ HTMLLessonRenderer.js     ✅ Complete - HTML content renderer
+└─ index.js                  ✅ Complete - Component exports
+```
+
+#### Database Tables Created:
+```sql
+-- promo_bar_config: Dismissible promotional bar at top of pages
+-- promo_banners: Hero banner carousel items for course page
+-- course_flash_sales: Flash sale campaigns with countdown timer
+```
+
+### **CoursesScreen Enhanced Features:**
+
+#### Layout Components ✅
+- ✅ **PromoBar** - Dismissible promo bar with voucher code
+- ✅ **HeroBannerCarousel** - Auto-sliding promotional banners (5s interval)
+- ✅ **CourseCategoryGrid** - 2-row, 8 categories (Trading, Tarot, Chiêm Tinh, Thiền, Đá Quý, Phân Tích, Tâm Linh, Xem thêm)
+- ✅ **CourseFlashSaleSection** - Flash sale with countdown timer
+- ✅ **SponsorBannerSection** - Distributed sponsor banners
+- ✅ **GamificationStatsStrip** - XP and stats display
+- ✅ **DailyQuestsPreview** - Daily quests widget
+- ✅ **CourseSection** - Multiple sections (Popular, New, Trading, Free)
+- ✅ **HighlightedCourseSection** - Featured course section
+
+#### Filter System ✅
+- ✅ **Filter Tabs** - All, Enrolled, Completed with counts
+- ✅ **Quick Filter Pills** - Miễn phí, Phổ biến, Mới nhất, Trading, Tâm linh
+- ✅ **CourseFilterSheet** - Full filter modal with:
+  - Sort options (Popular, Newest, Price Low-High, Rating)
+  - Category filter
+  - Difficulty filter (Beginner, Intermediate, Advanced)
+  - Price range slider
+  - Rating filter (1-5 stars)
+  - Toggles: Free, Has Quiz, Has Certificate
+
+#### Header Auto-Hide ✅
+- ✅ **Scroll-based auto-hide** - Header hides on scroll down
+- ✅ **Animated transitions** - Smooth 200ms animations
+- ✅ **Tab bar integration** - Synced with bottom tab bar
+
+### **Category Grid Configuration:**
+```javascript
+COURSE_CATEGORIES = [
+  { id: 'trading', name: 'Trading', icon: TrendingUp, color: '#00F0FF' },
+  { id: 'tarot', name: 'Tarot', icon: Sparkles, color: '#FF9800' },
+  { id: 'astrology', name: 'Chiêm Tinh', icon: Compass, color: '#9C27B0' },
+  { id: 'meditation', name: 'Thiền', icon: Flower2, color: '#00BCD4' },
+  { id: 'crystals', name: 'Đá Quý', icon: Gem, color: '#E91E63' },
+  { id: 'analysis', name: 'Phân Tích', icon: BarChart3, color: '#4CAF50' },
+  { id: 'spiritual', name: 'Tâm Linh', icon: Star, color: '#FFBD59' },
+  { id: 'all', name: 'Xem thêm', icon: MoreHorizontal, color: '#9E9E9E' },
+]
+```
+
+### **Flash Sale Features:**
+- ✅ **Countdown Timer** - Real-time countdown to sale end
+- ✅ **Discount Badge** - Shows discount percentage
+- ✅ **Sale Price Calculation** - Auto-calculates discounted price
+- ✅ **Course Cards** - Compact horizontal scroll cards
+- ✅ **See All Button** - Navigate to full list
+
+---
+
+## 🛒 SHOP CATEGORY TAGS MAPPING (December 26, 2025)
+
+### **Implementation Status: ✅ COMPLETE**
+
+### **Files Updated:**
+```
+├─ AllCategoriesScreen.js    ✅ Updated - Uses tags instead of collection
+├─ CategoryGrid.js           ✅ Updated - Uses tags instead of collection
+└─ docs/SHOPIFY_CATEGORY_TAGS_MAPPING.md  ✅ Created - Full documentation
+```
+
+### **Category → Tags Mapping:**
+
+| Category | Vietnamese | Tags |
+|----------|------------|------|
+| Crystals | Đá Quý | Thạch Anh Tím, Thạch Anh Hồng, Obsidian, Citrine, Tiger Eye, Fluorite, Clear Quartz, Labradorite |
+| Books | Sách | Sách Tâm Linh, Sách Trading, Sách Self-Help, Tarot Book, Astrology Book |
+| Tools | Dụng Cụ | Singing Bowl, Incense, Candle, Crystal Grid, Pendulum, Sage, Meditation |
+| Jewelry | Trang Sức | Vòng Tay, Dây Chuyền, Nhẫn, Bông Tai, Crystal Jewelry |
+| Gems Token | Gems Token | Gem Pack, Gem Bundle, Virtual Currency, In-App Purchase |
+| VIP Packages | Gói VIP | Membership, Subscription, VIP Access, Premium |
+| Accessories | Phụ Kiện | Phone Case, Keychain, Bag, Wallet, Crystal Holder |
+| Gift Sets | Bộ Quà Tặng | Gift Set, Bundle, Combo, Special Edition |
+
+### **Navigation Flow:**
+```javascript
+// AllCategoriesScreen.js
+handleCategoryPress = (category) => {
+  navigation.navigate('ProductList', {
+    tags: category.tags,  // Array of Shopify tags
+    title: category.name,
+  });
+};
+```
+
+---
+
 ## 🎯 PENDING ITEMS
 
-### **Completed:**
+### **Completed (December 26, 2025):**
 - ✅ All 6 tabs fully implemented
 - ✅ 40+ screens across all tabs
 - ✅ Sponsor banner distribution system
 - ✅ Tier format mismatch fix (TIER1 vs TIER_1)
 - ✅ Banner injection in forum feed
 - ✅ Category filtering in Shop
+- ✅ **NEW: Course page enhanced with multiple sections**
+- ✅ **NEW: Hero Banner Carousel for courses**
+- ✅ **NEW: Course Category Grid (8 categories)**
+- ✅ **NEW: Flash Sale section with countdown**
+- ✅ **NEW: Full filter system (FilterSheet, FilterPills)**
+- ✅ **NEW: Shop category tags mapping (collection → tags)**
+- ✅ **NEW: Database tables for promo system**
+
+### **Database Tables to Run:**
+```sql
+-- Run in Supabase SQL Editor:
+supabase/RUN_THIS_courses_complete_setup.sql
+
+-- Creates:
+-- - promo_bar_config
+-- - promo_banners
+-- - course_flash_sales
+-- With RLS policies and seed data
+```
 
 ### **Low Priority (Future):**
 - ⏳ Push notifications setup (Expo Notifications)
@@ -1745,7 +1881,8 @@ gem-mobile/src/
 
 ---
 
-**📝 Last Updated:** December 9, 2025
-**📊 Total Screens:** 65+
-**📦 Total Services:** 45+
-**🎨 Total Components:** 80+
+**📝 Last Updated:** December 26, 2025
+**📊 Total Screens:** 70+
+**📦 Total Services:** 50+
+**🎨 Total Components:** 95+
+**🗄️ New Database Tables:** 3 (promo_bar_config, promo_banners, course_flash_sales)

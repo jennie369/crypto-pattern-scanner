@@ -164,6 +164,76 @@ export const XPGoalTrackerCompact = ({
   );
 };
 
+// Inline compact version - single row with all info, minimal height
+export const XPGoalTrackerInline = ({
+  totalXP = 0,
+  currentLevel = 1,
+  levelTitle = 'Người Mới Bắt Đầu',
+  levelBadge = 'seedling',
+  xpForCurrentLevel = 0,
+  xpForNextLevel = 100,
+  showWeeklyXP = false,
+  weeklyXP = 0,
+  style,
+}) => {
+  // Calculate progress
+  const xpInLevel = totalXP - xpForCurrentLevel;
+  const xpNeededForLevel = xpForNextLevel - xpForCurrentLevel;
+  const progress = xpNeededForLevel > 0
+    ? Math.min(100, (xpInLevel / xpNeededForLevel) * 100)
+    : 100;
+
+  // Get icon
+  const iconMap = {
+    seedling: 'Leaf',
+    sprout: 'Sprout',
+    tree: 'TreeDeciduous',
+    star: 'Star',
+    sword: 'Sword',
+    shield: 'Shield',
+    crown: 'Crown',
+    gem: 'Gem',
+    trident: 'Trident',
+    galaxy: 'Sparkles',
+    sparkles: 'Sparkles',
+  };
+  const iconName = iconMap[levelBadge] || 'Star';
+  const IconComponent = Icons[iconName] || Icons.Star;
+
+  return (
+    <View style={[styles.inlineContainer, style]}>
+      {/* Badge + Level Info */}
+      <View style={styles.inlineBadge}>
+        <IconComponent size={16} color={COLORS.gold} />
+      </View>
+
+      <View style={styles.inlineInfo}>
+        <View style={styles.inlineLevelRow}>
+          <Text style={styles.inlineLevelText}>Level {currentLevel}</Text>
+          <Text style={styles.inlineTitleText}>{levelTitle}</Text>
+        </View>
+        <View style={styles.inlineProgressRow}>
+          <View style={styles.inlineProgressBar}>
+            <View style={[styles.inlineProgressFill, { width: `${progress}%` }]} />
+          </View>
+          <Text style={styles.inlineXPText}>{xpInLevel}/{xpNeededForLevel}</Text>
+        </View>
+      </View>
+
+      {/* Total XP */}
+      <View style={styles.inlineXPContainer}>
+        <Text style={styles.inlineXPValue}>{totalXP}</Text>
+        {showWeeklyXP && weeklyXP > 0 && (
+          <View style={styles.inlineWeeklyXP}>
+            <Icons.TrendingUp size={10} color={COLORS.success} />
+            <Text style={styles.inlineWeeklyText}>+{weeklyXP}</Text>
+          </View>
+        )}
+      </View>
+    </View>
+  );
+};
+
 // Mini badge display
 export const LevelBadge = ({
   level = 1,
@@ -367,6 +437,89 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     fontWeight: TYPOGRAPHY.fontWeight.medium,
     marginTop: SPACING.xxs,
+  },
+
+  // Inline compact styles
+  inlineContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.glassBg,
+    borderRadius: SPACING.md,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    borderWidth: 1,
+    borderColor: 'rgba(106, 91, 255, 0.2)',
+  },
+  inlineBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 189, 89, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: SPACING.sm,
+  },
+  inlineInfo: {
+    flex: 1,
+  },
+  inlineLevelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
+  inlineLevelText: {
+    color: COLORS.textMuted,
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
+  },
+  inlineTitleText: {
+    color: COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  },
+  inlineProgressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: SPACING.xxs,
+    gap: SPACING.xs,
+  },
+  inlineProgressBar: {
+    flex: 1,
+    height: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  inlineProgressFill: {
+    height: '100%',
+    backgroundColor: COLORS.gold,
+    borderRadius: 2,
+  },
+  inlineXPText: {
+    color: COLORS.textMuted,
+    fontSize: TYPOGRAPHY.fontSize.xxs,
+    minWidth: 50,
+    textAlign: 'right',
+  },
+  inlineXPContainer: {
+    alignItems: 'flex-end',
+    marginLeft: SPACING.sm,
+  },
+  inlineXPValue: {
+    color: COLORS.gold,
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontWeight: TYPOGRAPHY.fontWeight.bold,
+  },
+  inlineWeeklyXP: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    marginTop: 2,
+  },
+  inlineWeeklyText: {
+    color: COLORS.success,
+    fontSize: TYPOGRAPHY.fontSize.xxs,
+    fontWeight: TYPOGRAPHY.fontWeight.medium,
   },
 });
 

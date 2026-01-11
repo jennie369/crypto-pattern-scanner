@@ -71,17 +71,21 @@ class LessonService {
    */
   async getLesson(lessonId) {
     try {
+      console.log('[LessonService] getLesson called with id:', lessonId);
+
+      // First try simple query without relations (more reliable)
       const { data, error } = await supabase
         .from('course_lessons')
-        .select(`
-          *,
-          module:course_modules(id, title, course_id),
-          attachments:lesson_attachments(*)
-        `)
+        .select('*')
         .eq('id', lessonId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('[LessonService] getLesson query error:', error);
+        throw error;
+      }
+
+      console.log('[LessonService] getLesson result:', data ? 'Found' : 'Not found');
       return data;
     } catch (error) {
       console.error('[LessonService] getLesson error:', error);

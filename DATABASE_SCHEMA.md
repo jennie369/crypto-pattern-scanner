@@ -4401,9 +4401,363 @@ record_learning_update(p_feedback_id, p_update_type, p_feature, p_description, .
 
 ---
 
-## 62. UPDATED DATE
+## 62. PAPER TRADES TABLE (Dual Mode - Migration 2025-12-18)
 
-**Last Updated**: 2025-12-15
+Paper trading system for simulated trades with GEM Pattern and Custom Mode support.
+
+### 62.1 `paper_trades`
+
+```sql
+CREATE TABLE paper_trades (
+  -- Primary Key
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  -- User Reference
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+
+  -- Trade Info
+  symbol VARCHAR(50) NOT NULL,             -- 'BTCUSDT', 'ETHUSDT'
+  direction VARCHAR(10) NOT NULL,          -- 'LONG', 'SHORT'
+  pattern_type VARCHAR(100),               -- 'Head & Shoulders', 'Double Bottom'
+  timeframe VARCHAR(20),                   -- '15m', '1h', '4h', '1d'
+
+  -- Entry/Exit Prices (Actual used in trade)
+  entry_price DECIMAL(20, 8) NOT NULL,
+  stop_loss DECIMAL(20, 8),
+  take_profit DECIMAL(20, 8),
+  exit_price DECIMAL(20, 8),
+
+  -- Position Details
+  position_size DECIMAL(20, 8) NOT NULL,   -- Margin amount (USDT)
+  leverage INT DEFAULT 1,                   -- Leverage multiplier
+  position_value DECIMAL(20, 8),            -- position_size * leverage
+  quantity DECIMAL(20, 8),                  -- Coin quantity
+
+  -- P&L
+  pnl DECIMAL(20, 8) DEFAULT 0,
+  pnl_percent DECIMAL(10, 4) DEFAULT 0,
+  roe_percent DECIMAL(10, 4) DEFAULT 0,    -- Return on Equity
+
+  -- Status
+  status VARCHAR(20) DEFAULT 'open',        -- 'open', 'closed', 'stopped', 'target_hit'
+  exit_reason VARCHAR(50),                  -- 'manual', 'stop_loss', 'take_profit', 'liquidated'
+
+  -- Timestamps
+  opened_at TIMESTAMPTZ DEFAULT NOW(),
+  closed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+  -- ═══════════════════════════════════════════════════════════════
+  -- DUAL MODE COLUMNS (Migration 2025-12-18)
+  -- ═══════════════════════════════════════════════════════════════
+
+  -- Trade Mode
+  trade_mode VARCHAR(20) DEFAULT 'pattern',  -- 'pattern' | 'custom'
+
+  -- Original Pattern Values (for comparison in Custom Mode)
+  pattern_entry DECIMAL(20, 8),             -- Original pattern entry price
+  pattern_sl DECIMAL(20, 8),                -- Original pattern stop loss
+  pattern_tp DECIMAL(20, 8),                -- Original pattern take profit
+
+  -- Deviation Tracking (Custom Mode)
+  entry_deviation_percent DECIMAL(10, 4) DEFAULT 0,  -- % deviation from pattern entry
+  sl_deviation_percent DECIMAL(10, 4) DEFAULT 0,     -- % deviation from pattern SL
+  tp_deviation_percent DECIMAL(10, 4) DEFAULT 0,     -- % deviation from pattern TP
+
+  -- AI Assessment (Custom Mode)
+  ai_score INTEGER DEFAULT 0,               -- AI score 0-100
+  ai_feedback JSONB                         -- { warnings: [], successes: [], recommendations: [] }
+);
+
+-- Indexes
+CREATE INDEX idx_paper_trades_user ON paper_trades(user_id);
+CREATE INDEX idx_paper_trades_status ON paper_trades(status);
+CREATE INDEX idx_paper_trades_symbol ON paper_trades(symbol);
+CREATE INDEX idx_paper_trades_mode ON paper_trades(trade_mode);
+CREATE INDEX idx_paper_trades_user_mode_date ON paper_trades(user_id, trade_mode, created_at);
+```
+
+### 62.2 Trade Mode Values
+
+| Mode | Description | Entry/SL/TP |
+|------|-------------|-------------|
+| `pattern` | GEM Pattern Mode (Default) | Locked từ pattern scan |
+| `custom` | Custom Mode | User tự chỉnh |
+
+### 62.3 Daily Limits (Custom Mode)
+
+| User Type | Pattern Mode | Custom Mode |
+|-----------|--------------|-------------|
+| FREE + Novice Karma | Unlimited | 3/ngày |
+| FREE + Student Karma | Unlimited | 10/ngày |
+| TIER1/TIER2/TIER3 (Paid) | Unlimited | Unlimited |
+
+### 62.4 AI Feedback Structure (Custom Mode)
+
+```json
+{
+  "score": 85,
+  "blocked": false,
+  "blockReason": null,
+  "warnings": [
+    "Entry lệch 2.5% so với pattern",
+    "Đòn bẩy 50x cao"
+  ],
+  "successes": [
+    "Có Stop Loss đầy đủ",
+    "Tỷ lệ R:R 1.5 - Tốt"
+  ],
+  "recommendations": [
+    "Cân nhắc entry gần pattern hơn",
+    "Khuyến nghị leverage ≤ 20x"
+  ],
+  "rrRatio": 1.5,
+  "deviations": {
+    "entry": 2.5,
+    "sl": -1.2,
+    "tp": 3.1
+  }
+}
+```
+
+### 62.5 AI Score Calculation
+
+| Condition | Score Impact |
+|-----------|--------------|
+| No Stop Loss | BLOCKED (score = 0) |
+| R:R < 1:1 | -20 points |
+| Entry deviation > 2% | -15 points |
+| SL wider than pattern | -15 points |
+| TP further than pattern | -10 points |
+| Leverage > 50x | -20 points |
+| Leverage > 20x | -10 points |
+
+---
+
+## 63. LINK PREVIEWS SYSTEM (2025-12-28)
+
+### 63.1 `link_previews` (URL Metadata Cache)
+
+> Server-side cache for Open Graph metadata extracted from URLs.
+
+```sql
+CREATE TABLE IF NOT EXISTS public.link_previews (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+
+  -- URL information
+  url TEXT NOT NULL,                           -- Normalized URL (canonical)
+  original_url TEXT,                           -- Original URL before normalization
+  domain TEXT NOT NULL,                        -- Extracted domain (e.g., 'youtube.com')
+
+  -- Open Graph metadata
+  title TEXT,
+  description TEXT,
+  image_url TEXT,
+  image_width INTEGER,
+  image_height INTEGER,
+
+  -- Site information
+  site_name TEXT,
+  favicon_url TEXT,
+  locale TEXT DEFAULT 'vi_VN',
+
+  -- Content type
+  og_type TEXT DEFAULT 'website',              -- 'website', 'article', 'video', 'file'
+  content_type TEXT,                           -- HTTP Content-Type header
+
+  -- Video support (YouTube, Vimeo, etc.)
+  video_url TEXT,
+  video_secure_url TEXT,
+  video_type TEXT,
+  video_width INTEGER,
+  video_height INTEGER,
+  is_video BOOLEAN DEFAULT FALSE,
+
+  -- Twitter Cards metadata
+  twitter_card TEXT,
+  twitter_title TEXT,
+  twitter_description TEXT,
+  twitter_image TEXT,
+
+  -- Status & error handling
+  status TEXT DEFAULT 'success',               -- 'success', 'error', 'timeout', 'no_og', 'blocked'
+  error_message TEXT,
+
+  -- Cache management
+  fetched_at TIMESTAMPTZ DEFAULT NOW(),
+  expires_at TIMESTAMPTZ DEFAULT (NOW() + INTERVAL '7 days'),
+  fetch_count INTEGER DEFAULT 1,
+  last_accessed_at TIMESTAMPTZ DEFAULT NOW(),
+
+  -- Timestamps
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+  CONSTRAINT link_previews_unique_url UNIQUE(url)
+);
+
+-- Indexes
+CREATE INDEX idx_link_previews_url ON public.link_previews(url);
+CREATE INDEX idx_link_previews_domain ON public.link_previews(domain);
+CREATE INDEX idx_link_previews_expires_at ON public.link_previews(expires_at);
+CREATE INDEX idx_link_previews_status ON public.link_previews(status);
+CREATE INDEX idx_link_previews_created_at ON public.link_previews(created_at DESC);
+CREATE INDEX idx_link_previews_last_accessed ON public.link_previews(last_accessed_at);
+```
+
+### 63.2 `forum_posts` Link Preview Columns
+
+```sql
+-- Add to forum_posts table
+ALTER TABLE public.forum_posts
+ADD COLUMN IF NOT EXISTS link_preview JSONB;
+
+ALTER TABLE public.forum_posts
+ADD COLUMN IF NOT EXISTS extracted_urls TEXT[];
+
+-- Indexes
+CREATE INDEX idx_forum_posts_link_preview ON public.forum_posts USING GIN (link_preview);
+CREATE INDEX idx_forum_posts_extracted_urls ON public.forum_posts USING GIN (extracted_urls);
+```
+
+### 63.3 Link Preview RLS Policies
+
+```sql
+-- Enable RLS
+ALTER TABLE public.link_previews ENABLE ROW LEVEL SECURITY;
+
+-- Anyone can view (public cache)
+CREATE POLICY "Anyone can view link previews"
+  ON public.link_previews FOR SELECT USING (true);
+
+-- Only service role can write
+CREATE POLICY "Service role can insert link previews"
+  ON public.link_previews FOR INSERT WITH CHECK (auth.role() = 'service_role');
+
+CREATE POLICY "Service role can update link previews"
+  ON public.link_previews FOR UPDATE USING (auth.role() = 'service_role');
+
+CREATE POLICY "Service role can delete link previews"
+  ON public.link_previews FOR DELETE USING (auth.role() = 'service_role');
+```
+
+### 63.4 Link Preview Status Values
+
+| Status | Description |
+|--------|-------------|
+| `success` | OG tags extracted successfully |
+| `no_og` | No OG tags found, used fallbacks |
+| `error` | HTTP error or network failure |
+| `timeout` | Request timeout (>8s) |
+| `blocked` | Domain in blocklist |
+
+### 63.5 Helper Functions
+
+```sql
+-- Get cached preview
+CREATE OR REPLACE FUNCTION get_cached_link_preview(p_url TEXT)
+RETURNS TABLE (
+  id UUID, url TEXT, domain TEXT, title TEXT, description TEXT,
+  image_url TEXT, site_name TEXT, favicon_url TEXT, og_type TEXT,
+  is_video BOOLEAN, status TEXT, cached BOOLEAN, expires_at TIMESTAMPTZ
+);
+
+-- Upsert link preview
+CREATE OR REPLACE FUNCTION upsert_link_preview(
+  p_url TEXT, p_domain TEXT, p_title TEXT, p_description TEXT,
+  p_image_url TEXT, p_site_name TEXT, p_favicon_url TEXT,
+  p_og_type TEXT, p_is_video BOOLEAN, p_video_url TEXT,
+  p_twitter_card TEXT, p_twitter_image TEXT, p_status TEXT,
+  p_error_message TEXT, p_content_type TEXT
+) RETURNS UUID;
+
+-- Cleanup expired previews
+CREATE OR REPLACE FUNCTION cleanup_expired_link_previews() RETURNS INTEGER;
+
+-- Auto-extract URLs from post content (trigger)
+CREATE OR REPLACE FUNCTION auto_extract_post_urls() RETURNS TRIGGER;
+```
+
+### 63.6 Edge Function: `fetch-link-preview`
+
+**Endpoint**: `POST /functions/v1/fetch-link-preview`
+
+**Request**:
+```json
+{
+  "url": "https://example.com/article",
+  "force_refresh": false
+}
+```
+
+**Response**:
+```json
+{
+  "url": "https://example.com/article",
+  "domain": "example.com",
+  "title": "Article Title",
+  "description": "Article description...",
+  "image_url": "https://example.com/og-image.jpg",
+  "site_name": "Example Site",
+  "favicon_url": "https://example.com/favicon.ico",
+  "og_type": "article",
+  "is_video": false,
+  "status": "success",
+  "cached": true
+}
+```
+
+### 63.7 Data Flow
+
+```
+Client Request (URL)
+       │
+       ▼
+┌─────────────────┐
+│  Edge Function  │
+│  fetch-link-    │
+│  preview        │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐     HIT     ┌─────────────────┐
+│ Check Cache     │────────────►│ Return cached   │
+│ (link_previews) │             │ + update access │
+└────────┬────────┘             └─────────────────┘
+         │ MISS
+         ▼
+┌─────────────────┐
+│ Fetch URL       │
+│ (8s timeout)    │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Parse HTML      │
+│ - OG tags       │
+│ - Twitter Cards │
+│ - Fallbacks     │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Upsert to DB    │
+│ link_previews   │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│ Return Response │
+│ {data, cached}  │
+└─────────────────┘
+```
+
+---
+
+## 64. UPDATED DATE
+
+**Last Updated**: 2025-12-28
 
 **Changes in this update**:
 1. Added Section 49: AI Master System Tables (ai_master_interactions, ai_master_config, user_trade_blocks)
@@ -4423,3 +4777,258 @@ record_learning_update(p_feedback_id, p_update_type, p_feature, p_description, .
    - Section 59: User Behavior Intelligence (event tracking, profiles)
    - Section 60: Error Tracking (bug detection, patterns)
    - Section 61: Feedback & Continuous Learning (thumbs up/down, improvements)
+10. **NEW**: Section 62: Paper Trades Table (Dual Mode - 2025-12-18)
+    - trade_mode: 'pattern' | 'custom'
+    - pattern_entry, pattern_sl, pattern_tp (original values)
+    - Deviation tracking (entry/sl/tp deviation percentages)
+    - AI assessment (ai_score, ai_feedback JSONB)
+    - Daily limits for Custom Mode (FREE: 3-10/day, Paid: unlimited)
+11. **NEW**: Section 63: Link Previews System (2025-12-28)
+    - `link_previews` table for server-side URL metadata caching
+    - `forum_posts.link_preview` JSONB column for inline preview data
+    - `forum_posts.extracted_urls` TEXT[] for detected URLs
+    - Updated `fetch-link-preview` edge function with database integration
+    - Auto URL extraction trigger for posts
+12. **NEW**: Section 65: Zone Visualization System (2026-01-02)
+    - `detected_zones` table for zone display on charts
+    - `zone_test_history` for tracking zone tests
+    - `mtf_alignment_cache` for multi-timeframe alignment
+    - `zone_visualization_preferences` for user settings
+    - `zone_alerts` for zone-specific notifications
+    - Tier-based zone limits (FREE: 1, TIER1: 3, TIER2: 10, TIER3: 20)
+
+---
+
+## 65. ZONE VISUALIZATION SYSTEM (Migration 2026-01-02)
+
+### 65.1 `detected_zones` (Zone Storage & Lifecycle)
+
+Stores all detected trading zones for chart visualization. Multiple zones per symbol/timeframe.
+Tracks lifecycle: FRESH → TESTED_1X → TESTED_2X → TESTED_3X_PLUS → BROKEN
+
+```sql
+CREATE TABLE detected_zones (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+
+  -- Zone identification
+  symbol VARCHAR(20) NOT NULL,           -- 'BTCUSDT'
+  timeframe VARCHAR(10) NOT NULL,        -- '4h', '1d'
+  zone_type VARCHAR(10) NOT NULL,        -- 'HFZ' or 'LFZ'
+
+  -- Zone boundaries (for drawing rectangles)
+  zone_high DECIMAL(20, 8) NOT NULL,     -- Top of zone
+  zone_low DECIMAL(20, 8) NOT NULL,      -- Bottom of zone
+  entry_price DECIMAL(20, 8) NOT NULL,   -- Entry level
+  stop_price DECIMAL(20, 8) NOT NULL,    -- Stop level
+
+  -- Time boundaries
+  start_time BIGINT NOT NULL,            -- Unix timestamp (ms)
+  end_time BIGINT,                       -- NULL = extend right
+  start_candle_index INT,
+
+  -- Pattern that created this zone
+  pattern_type VARCHAR(30) NOT NULL,     -- 'DPD', 'UPU', etc.
+  pattern_confidence DECIMAL(5, 2),      -- 0-100
+  pattern_grade VARCHAR(2),              -- 'A+', 'A', 'B', etc.
+
+  -- Zone lifecycle
+  status VARCHAR(20) DEFAULT 'FRESH',    -- FRESH, TESTED_1X, TESTED_2X, TESTED_3X_PLUS, BROKEN, EXPIRED
+  test_count INT DEFAULT 0,
+  strength INT DEFAULT 100,              -- 0-100, decreases on tests
+
+  -- Scoring
+  odds_score INT DEFAULT 0,              -- 0-16 from Odds Enhancers
+  hierarchy_rank INT DEFAULT 0,          -- 1=DP, 2=FTR, 3=FL, 4=Regular
+  targets JSONB DEFAULT '[]'::jsonb,     -- Array of target prices
+
+  -- Timestamps
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  last_tested_at TIMESTAMPTZ,
+  broken_at TIMESTAMPTZ,
+
+  -- Soft delete
+  is_deleted BOOLEAN DEFAULT FALSE,
+  deleted_at TIMESTAMPTZ
+);
+```
+
+**Zone Type Values:**
+- `HFZ` = High Frequency Zone (Supply/Resistance) - SELL zones
+- `LFZ` = Low Frequency Zone (Demand/Support) - BUY zones
+
+**Status Values:**
+- `FRESH` = New zone, never tested (100% strength)
+- `TESTED_1X` = Tested once (80% strength)
+- `TESTED_2X` = Tested twice (60% strength)
+- `TESTED_3X_PLUS` = Tested 3+ times (40% strength)
+- `BROKEN` = Zone broken by price (0% strength)
+- `EXPIRED` = Zone too old (30+ days)
+
+**Hierarchy Rank:**
+| Rank | Type | Description |
+|------|------|-------------|
+| 1 | Decision Point | Strongest zone type |
+| 2 | FTR | Fail To Return |
+| 3 | Flag Limit | Flag boundary |
+| 4 | Regular | Standard zone |
+
+### 65.2 `zone_test_history` (Zone Test Events)
+
+Records each time a zone is tested by price.
+
+```sql
+CREATE TABLE zone_test_history (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  zone_id UUID NOT NULL REFERENCES detected_zones(id) ON DELETE CASCADE,
+
+  test_time BIGINT NOT NULL,             -- Unix timestamp (ms)
+  test_price DECIMAL(20, 8) NOT NULL,
+  penetration_depth DECIMAL(5, 2),       -- % into zone
+
+  result VARCHAR(20) NOT NULL,           -- 'BOUNCED', 'PENETRATED', 'BROKEN'
+  candle_pattern VARCHAR(30),            -- Confirmation pattern if any
+
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+**Result Values:**
+- `BOUNCED` = Price touched zone and reversed
+- `PENETRATED` = Price went partially into zone
+- `BROKEN` = Price broke through zone completely
+
+### 65.3 `mtf_alignment_cache` (Multi-Timeframe Alignment)
+
+Caches multi-timeframe alignment calculations.
+
+```sql
+CREATE TABLE mtf_alignment_cache (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  symbol VARCHAR(20) NOT NULL,
+
+  -- Zone references
+  htf_zone_id UUID REFERENCES detected_zones(id),  -- 1D/1W
+  itf_zone_id UUID REFERENCES detected_zones(id),  -- 4H
+  ltf_zone_id UUID REFERENCES detected_zones(id),  -- 1H/15m
+
+  -- Cached zone data
+  htf_timeframe VARCHAR(10),
+  htf_zone_type VARCHAR(10),
+  htf_zone_high DECIMAL(20, 8),
+  htf_zone_low DECIMAL(20, 8),
+  -- ... similar for ITF and LTF
+
+  -- Alignment score
+  confluence_score INT DEFAULT 0,        -- 0-10
+  alignment_type VARCHAR(20),            -- 'FULL', 'PARTIAL', 'NONE'
+  recommendation VARCHAR(50),            -- 'HIGH_PROBABILITY', 'NORMAL', 'SKIP'
+  direction VARCHAR(10),                 -- 'LONG', 'SHORT', 'NEUTRAL'
+
+  calculated_at TIMESTAMPTZ DEFAULT NOW(),
+  expires_at TIMESTAMPTZ,
+
+  UNIQUE(user_id, symbol)
+);
+```
+
+### 65.4 `zone_visualization_preferences` (User Settings)
+
+User settings for zone display colors, visibility, notifications.
+
+```sql
+CREATE TABLE zone_visualization_preferences (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE,
+
+  -- Display settings
+  show_hfz BOOLEAN DEFAULT TRUE,
+  show_lfz BOOLEAN DEFAULT TRUE,
+  show_labels BOOLEAN DEFAULT TRUE,
+  show_historical BOOLEAN DEFAULT TRUE,
+  max_zones_displayed INT DEFAULT 10,
+
+  -- Colors
+  hfz_fill_color VARCHAR(30) DEFAULT 'rgba(156, 6, 18, 0.3)',
+  hfz_border_color VARCHAR(20) DEFAULT '#9C0612',
+  lfz_fill_color VARCHAR(30) DEFAULT 'rgba(14, 203, 129, 0.3)',
+  lfz_border_color VARCHAR(20) DEFAULT '#0ECB81',
+
+  -- Notifications
+  notify_on_retest BOOLEAN DEFAULT TRUE,
+  notify_on_broken BOOLEAN DEFAULT TRUE,
+  notify_on_new_zone BOOLEAN DEFAULT FALSE,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 65.5 `zone_alerts` (Zone-Specific Alerts)
+
+User-configured alerts for specific zones.
+
+```sql
+CREATE TABLE zone_alerts (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  zone_id UUID NOT NULL REFERENCES detected_zones(id) ON DELETE CASCADE,
+
+  alert_type VARCHAR(20) NOT NULL,       -- 'RETEST', 'BROKEN', 'APPROACH'
+  threshold_percent DECIMAL(5, 2),       -- Distance % for APPROACH
+
+  is_active BOOLEAN DEFAULT TRUE,
+  triggered_at TIMESTAMPTZ,
+  trigger_count INT DEFAULT 0,
+
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 65.6 Zone Tier Limits
+
+| Tier | Max Zones | Rectangles | Labels | Lifecycle | Historical | MTF TFs | Alerts/Coin |
+|------|-----------|------------|--------|-----------|------------|---------|-------------|
+| FREE | 1 | No | No | No | No | 0 | 0 |
+| TIER1 | 3 | Yes | Yes | No | No | 0 | 3 |
+| TIER2 | 10 | Yes | Yes | Yes | Yes | 3 | 10 |
+| TIER3 | 20 | Yes | Yes | Yes | Yes | 5 | Unlimited |
+| ADMIN | 50 | Yes | Yes | Yes | Yes | 12 | Unlimited |
+
+### 65.7 Zone RPC Functions
+
+```sql
+-- Get user max zones based on tier
+get_user_max_zones(p_user_id UUID) RETURNS INT
+
+-- Count active zones for user/symbol/timeframe
+count_user_active_zones(p_user_id UUID, p_symbol VARCHAR, p_timeframe VARCHAR) RETURNS INT
+
+-- Cleanup old broken/expired zones (30+ days)
+cleanup_old_zones() RETURNS void
+```
+
+### 65.8 Zone Triggers
+
+```sql
+-- Auto-update zone status when test is recorded
+trigger_update_zone_on_test
+  ON zone_test_history AFTER INSERT
+  → Updates detected_zones: test_count++, strength-=20, status change
+
+-- Auto-update updated_at timestamp
+trigger_zones_updated_at
+  ON detected_zones BEFORE UPDATE
+```
+
+### 65.9 Zone Tables Quick Reference
+
+| Table | Purpose |
+|-------|---------|
+| `detected_zones` | Store detected zones with boundaries, lifecycle |
+| `zone_test_history` | Track each zone test event |
+| `mtf_alignment_cache` | Cache MTF alignment calculations |
+| `zone_visualization_preferences` | User display settings |
+| `zone_alerts` | Zone-specific notifications |

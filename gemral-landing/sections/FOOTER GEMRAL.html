@@ -1,0 +1,782 @@
+<!-- ============================================
+     SECTION 14: FOOTER
+     GEMRAL Landing Page
+     Logo + Links + Social + Legal
+     ============================================ -->
+
+
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEMRAL - Footer</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&amp;family=Noto+Sans+Display:wght@400;500;600&amp;display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1632;
+            --navy-darker: #060d1f;
+            --burgundy: #9C0612;
+            --gold: #FFBD59;
+            --gold-dark: #C88F2F;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --pink: #FF6B9D;
+            --green: #10B981;
+            --white: #ffffff;
+            --white-90: rgba(255, 255, 255, 0.9);
+            --white-80: rgba(255, 255, 255, 0.8);
+            --white-60: rgba(255, 255, 255, 0.6);
+            --white-40: rgba(255, 255, 255, 0.4);
+            --white-20: rgba(255, 255, 255, 0.2);
+            --white-10: rgba(255, 255, 255, 0.1);
+            --black-50: rgba(0, 0, 0, 0.5);
+            
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: var(--font-body);
+            background: var(--navy-dark);
+            color: var(--white);
+            line-height: 1.6;
+        }
+        
+        /* Footer */
+        .footer {
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy-darker) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Top Gradient Line */
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                var(--burgundy) 0%, 
+                var(--gold) 25%, 
+                var(--cyan) 50%, 
+                var(--purple) 75%, 
+                var(--burgundy) 100%
+            );
+        }
+        
+        /* Background Glow */
+        .footer-glow {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 400px;
+            background: radial-gradient(ellipse, rgba(255, 189, 89, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Footer Main */
+        .footer-main {
+            padding: 80px 0 50px;
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr 1fr 1.2fr;
+            gap: 40px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Brand Column */
+        .footer-brand {
+            padding-right: 30px;
+        }
+        
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.2), rgba(255, 189, 89, 0.1));
+            border: 2px solid rgba(255, 189, 89, 0.3);
+            border-radius: 14px;
+        }
+        
+        .logo-icon svg {
+            width: 28px;
+            height: 28px;
+            fill: var(--gold);
+        }
+        
+        .logo-text {
+            font-family: var(--font-heading);
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .footer-tagline {
+            font-size: 14px;
+            color: var(--white-60);
+            line-height: 1.8;
+            margin-bottom: 25px;
+        }
+        
+        /* Social Links */
+        .social-links {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .social-link {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--white-10);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .social-link:hover {
+            background: rgba(255, 189, 89, 0.1);
+            border-color: rgba(255, 189, 89, 0.3);
+            transform: translateY(-3px);
+        }
+        
+        .social-link svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--white-60);
+            transition: fill 0.3s ease;
+        }
+        
+        .social-link:hover svg {
+            fill: var(--gold);
+        }
+        
+        /* Footer Columns */
+        .footer-column h4 {
+            font-family: var(--font-heading);
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+        
+        .footer-links a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--white-60);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: var(--white);
+            transform: translateX(5px);
+        }
+        
+        .footer-links a svg {
+            width: 14px;
+            height: 14px;
+            stroke: var(--white-40);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .footer-links a:hover svg {
+            opacity: 1;
+            stroke: var(--gold);
+        }
+        
+        /* Contact Column */
+        .footer-contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .contact-icon {
+            width: 36px;
+            height: 36px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        .contact-icon svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--gold);
+        }
+        
+        .contact-text {
+            flex: 1;
+        }
+        
+        .contact-text strong {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--white-40);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        
+        .contact-text span,
+        .contact-text a {
+            font-size: 14px;
+            color: var(--white-80);
+            text-decoration: none;
+        }
+        
+        .contact-text a:hover {
+            color: var(--gold);
+        }
+        
+        /* Newsletter */
+        .newsletter-form {
+            margin-top: 20px;
+        }
+        
+        .newsletter-input-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .newsletter-input {
+            flex: 1;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--white-10);
+            border-radius: 10px;
+            font-family: var(--font-body);
+            font-size: 14px;
+            color: var(--white);
+        }
+        
+        .newsletter-input::placeholder {
+            color: var(--white-40);
+        }
+        
+        .newsletter-input:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+        
+        .newsletter-btn {
+            padding: 12px 18px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .newsletter-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .newsletter-btn svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--navy-dark);
+        }
+        
+        /* Footer Divider */
+        .footer-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--white-10), transparent);
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Footer Bottom */
+        .footer-bottom {
+            padding: 30px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .copyright {
+            font-size: 13px;
+            color: var(--white-40);
+        }
+        
+        .copyright a {
+            color: var(--gold);
+            text-decoration: none;
+        }
+        
+        .copyright a:hover {
+            text-decoration: underline;
+        }
+        
+        .legal-links {
+            display: flex;
+            gap: 25px;
+        }
+        
+        .legal-links a {
+            font-size: 13px;
+            color: var(--white-40);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .legal-links a:hover {
+            color: var(--white-80);
+        }
+        
+        /* Payment Methods */
+        .payment-methods {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .payment-label {
+            font-size: 12px;
+            color: var(--white-40);
+        }
+        
+        .payment-icons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .payment-icon {
+            width: 40px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        
+        .payment-icon svg {
+            width: 24px;
+            height: 16px;
+            fill: var(--white-60);
+        }
+        
+        /* Back to Top */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(255, 189, 89, 0.3);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(255, 189, 89, 0.4);
+        }
+        
+        .back-to-top svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--navy-dark);
+        }
+        
+        /* Disclaimer */
+        .disclaimer {
+            padding: 25px 0;
+            background: var(--navy-darker);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .disclaimer-text {
+            font-size: 11px;
+            color: var(--white-40);
+            text-align: center;
+            line-height: 1.8;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+            .footer-main {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 40px 30px;
+            }
+            .footer-brand { grid-column: span 2; text-align: center; padding-right: 0; }
+            .social-links { justify-content: center; }
+        }
+        
+        @media (max-width: 768px) {
+            .footer-main {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .footer-brand { grid-column: auto; }
+            .footer-links a { justify-content: center; }
+            .footer-contact-item { justify-content: center; }
+            .newsletter-input-group { flex-direction: column; max-width: 300px; margin: 0 auto; }
+            .footer-bottom { flex-direction: column; gap: 20px; text-align: center; }
+            .legal-links { flex-wrap: wrap; justify-content: center; }
+            .payment-methods { flex-direction: column; gap: 10px; }
+        }
+        
+        @media (max-width: 480px) {
+            .footer-main { padding: 60px 0 40px; }
+            .logo-text { font-size: 24px; }
+            .back-to-top { bottom: 20px; right: 20px; width: 45px; height: 45px; }
+        }
+    </style>
+
+
+    <footer class="footer">
+        <div class="footer-glow"></div>
+        
+        <div class="container">
+            <!-- Footer Main -->
+            <div class="footer-main">
+                <!-- Brand Column -->
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <div class="logo-icon">
+                            <svg viewBox="0 0 24 24">
+                                <polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5"></polygon>
+                            </svg>
+                        </div>
+                        <span class="logo-text">GEMRAL</span>
+                    </div>
+                    <p class="footer-tagline selected-for-delete">
+                        Hệ sinh thái kết hợp công nghệ hiện đại và trí tuệ phương Đông, giúp bạn nâng cao tần số 
+                        cuộc sống thông qua giao dịch tài chính có ý thức và phát triển bản thân toàn diện.
+                    </p>
+                    <div class="social-links">
+                        <!-- Facebook -->
+                        <a href="#" class="social-link" aria-label="Facebook">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                            </svg>
+                        </a>
+                        <!-- YouTube -->
+                        <a href="#" class="social-link" aria-label="YouTube">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path>
+                                <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="#0a1632"></polygon>
+                            </svg>
+                        </a>
+                        <!-- TikTok -->
+                        <a href="#" class="social-link" aria-label="TikTok">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"></path>
+                            </svg>
+                        </a>
+                        <!-- Instagram -->
+                        <a href="#" class="social-link" aria-label="Instagram">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" fill="#0a1632"></path>
+                                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" stroke="#0a1632" stroke-width="2"></line>
+                            </svg>
+                        </a>
+                        <!-- Zalo -->
+                        <a href="#" class="social-link" aria-label="Zalo">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <text x="12" y="16" text-anchor="middle" font-size="10" font-weight="bold" fill="#0a1632">Z</text>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Products Column -->
+                <div class="footer-column">
+                    <h4>Sản Phẩm</h4>
+                    <ul class="footer-links">
+                        <li>
+                            <a href="#">
+                                GEM Scanner
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                GEM Master AI
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                Khóa Học Trading
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                Khóa Học Tư Duy
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                Crystal &amp; Đá Năng Lượng
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Company Column -->
+                <div class="footer-column">
+                    <h4>Về GEMRAL</h4>
+                    <ul class="footer-links">
+                        <li>
+                            <a href="#">
+                                Giới Thiệu
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                Đội Ngũ
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                Blog &amp; Tin Tức
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                Partnership
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                Tuyển Dụng
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Support Column -->
+                <div class="footer-column">
+                    <h4>Hỗ Trợ</h4>
+                    <ul class="footer-links">
+                        <li>
+                            <a href="#">
+                                Trung Tâm Trợ Giúp
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                Hướng Dẫn Sử Dụng
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                FAQ
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                Liên Hệ
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                Báo Lỗi
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Contact Column -->
+                <div class="footer-column">
+                    <h4>Liên Hệ</h4>
+                    
+                    <div class="footer-contact-item">
+                        <div class="contact-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                        </div>
+                        <div class="contact-text">
+                            <strong>Email</strong>
+                            info<a href="mailto:support@gemral.com" class="">@gemral.com</a>
+                        </div>
+                    </div>
+                    
+                    <div class="footer-contact-item">
+                        <div class="contact-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                        </div>
+                        <div class="contact-text">
+                            <strong>Hotline</strong>
+                            0787238002</div>
+                    </div>
+                    
+                    <div class="footer-contact-item">
+                        <div class="contact-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                        </div>
+                        <div class="contact-text"><span style="color: rgba(255, 255, 255, 0.6); font-size: 15.2px; background-color: rgb(10, 20, 48);" class=""><div class="contact-text"><a href="mailto:invest@gemcapital.vn" class="" style="scrollbar-color: rgb(156, 6, 18) rgb(26, 26, 46); color: rgba(255, 255, 255, 0.6); transition: color 0.3s; font-size: 15.2px; --button-color: rgb(255 255 255 / 1.0); text-underline-offset: 0.125em;">Công ty TNHH Gem Capital Holding</a></div>MST: 0319056208</span></div>
+                    </div>
+                    
+                    <!-- Newsletter -->
+                    <form class="newsletter-form">
+                        <div class="newsletter-input-group">
+                            <input type="email" class="newsletter-input" placeholder="Email của bạn">
+                            <button type="submit" class="newsletter-btn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                </svg>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Divider -->
+            <div class="footer-divider"></div>
+            
+            <!-- Footer Bottom -->
+            <div class="footer-bottom">
+                <div class="copyright">
+                    © 2025 <a href="https://gemral.com">GEMRAL</a>. Bảo lưu mọi quyền.
+                </div>
+                
+                <div class="legal-links">
+                    <a href="#">Điều Khoản Sử Dụng</a>
+                    <a href="#">Chính Sách Bảo Mật</a>
+                    <a href="#">Chính Sách Hoàn Tiền</a>
+                    <a href="#">Sitemap</a>
+                </div>
+                
+                <div class="payment-methods">
+                    <span class="payment-label">Thanh toán:</span>
+                    <div class="payment-icons">
+                        <!-- Visa -->
+                        <div class="payment-icon">
+                            <svg viewBox="0 0 48 32">
+                                <text x="24" y="20" text-anchor="middle" font-size="10" font-weight="bold">VISA</text>
+                            </svg>
+                        </div>
+                        <!-- Mastercard -->
+                        <div class="payment-icon">
+                            <svg viewBox="0 0 48 32">
+                                <circle cx="18" cy="16" r="8" fill="#EB001B"></circle>
+                                <circle cx="30" cy="16" r="8" fill="#F79E1B"></circle>
+                            </svg>
+                        </div>
+                        <!-- MoMo -->
+                        <div class="payment-icon">
+                            <svg viewBox="0 0 48 32">
+                                <text x="24" y="20" text-anchor="middle" font-size="8" font-weight="bold">MoMo</text>
+                            </svg>
+                        </div>
+                        <!-- VNPay -->
+                        <div class="payment-icon">
+                            <svg viewBox="0 0 48 32">
+                                <text x="24" y="20" text-anchor="middle" font-size="7" font-weight="bold">VNPay</text>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Disclaimer -->
+        <div class="disclaimer">
+            <div class="container">
+                <p class="disclaimer-text">
+                    <strong>Tuyên bố miễn trừ trách nhiệm:</strong> 
+                    Giao dịch tiền điện tử có rủi ro cao và có thể không phù hợp với tất cả nhà đầu tư. 
+                    Hiệu suất trong quá khứ không đảm bảo kết quả tương lai. 
+                    Các thông tin trên website chỉ mang tính chất tham khảo, không phải là lời khuyên đầu tư. 
+                    Bạn nên tìm hiểu kỹ và tự chịu trách nhiệm cho mọi quyết định giao dịch của mình.
+                </p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Back to Top Button -->
+    <button class="back-to-top" aria-label="Về đầu trang">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+    </button>

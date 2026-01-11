@@ -1,0 +1,779 @@
+================================================================================
+                          TIER 3 - ELITE (37 bài)
+                    PROMPTS HÌNH ẢNH CHI TIẾT ĐẦY ĐỦ
+================================================================================
+
+═══════════════════════════════════════════════════════════════════════════════
+CHƯƠNG 1: FLAG & PENNANT MASTERY
+═══════════════════════════════════════════════════════════════════════════════
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 1.1: BULL FLAG PATTERN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: BULL FLAG ANATOMY
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+⚠️ ENFORCE: Vẽ BIỂU ĐỒ NẾN CANDLESTICK thực tế
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Nến xanh      | Green solid   | #00C853
+Nến đỏ        | Red solid     | #EF4444
+Flagpole      | Green         | #10B981
+Flag channel  | Gold trans    | #FFBD59 (30%)
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+⚠️ QUY TẮC VẼ NẾN CANDLESTICK - BẮT BUỘC:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  • NẾN XANH (Bullish): FILL MÀU XANH ĐẶC (#00C853), opacity 100%           │
+│  • NẾN ĐỎ (Bearish): FILL MÀU ĐỎ ĐẶC (#EF4444), opacity 100%               │
+│  • CẢ HAI đều là hình chữ nhật SOLID FILLED, không outline rỗng            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "TIER 3"
+- Màu nền: Gold (#FFBD59)
+- Text: Navy (#112250)
+
+Tiêu đề: "BULL FLAG - CỜ TĂNG GIÁ"
+
+═══════════════════════════════════════════════════════════════
+ANATOMY DIAGRAM với biểu đồ nến candlestick:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│                              ↗ Breakout Target               │
+│                           ↗     (= Flagpole height)          │
+│                        ↗                                     │
+│                  ╔═══════════════╗                           │
+│                  ║   FLAG        ║ ← Flag (Kênh dốc xuống)   │
+│                  ║   PATTERN     ║                           │
+│                  ╚═══════════════╝                           │
+│               ↗                                              │
+│            ↗    ← FLAGPOLE                                   │
+│         ↗       (Cột cờ - Move mạnh)                         │
+│      ↗                                                       │
+│   Start                                                      │
+│                                                              │
+│  [Nến xanh solid thẳng đứng - Flagpole]                     │
+│  [Nến nhỏ sideway/dốc xuống - Flag]                         │
+│  [Nến xanh solid breakout]                                   │
+│                                                              │
+│  📊 ĐẶC ĐIỂM:                                               │
+│  • Flagpole: Move mạnh +5% đến +20%                         │
+│  • Flag: Consolidation dốc xuống 5-15 nến                   │
+│  • Volume: Cao ở pole, thấp ở flag                          │
+│  • Target: Chiều cao flagpole                               │
+│  • Win Rate: 78%                                            │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: BULL FLAG ENTRY STRATEGY
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+⚠️ ENFORCE: Vẽ BIỂU ĐỒ NẾN CANDLESTICK thực tế
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+⚠️ QUY TẮC VẼ NẾN CANDLESTICK - BẮT BUỘC:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  • NẾN XANH (Bullish): FILL MÀU XANH ĐẶC (#00C853), opacity 100%           │
+│  • NẾN ĐỎ (Bearish): FILL MÀU ĐỎ ĐẶC (#EF4444), opacity 100%               │
+│  • CẢ HAI đều là hình chữ nhật SOLID FILLED, không outline rỗng            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+NỘI DUNG HÌNH:
+HEADER: Badge "ENTRY", Tiêu đề "CHIẾN LƯỢC ENTRY BULL FLAG"
+
+ENTRY STRATEGIES với biểu đồ nến candlestick:
+┌─────────────────────────────────────────────────────────────┐
+│  STRATEGY 1: BREAKOUT ENTRY                                 │
+│  ═══════════════════════════════════════════════════════    │
+│  [Biểu đồ nến với Bull Flag pattern]                        │
+│                                                              │
+│  📍 Entry: Khi nến đóng TRÊN upper trendline của flag       │
+│  📍 Confirmation: Volume tăng đột biến                       │
+│  📍 SL: Dưới đáy flag gần nhất                              │
+│  📍 TP1: 50% flagpole height                                │
+│  📍 TP2: 100% flagpole height                               │
+│                                                              │
+│  STRATEGY 2: RETEST ENTRY (An toàn hơn)                     │
+│  ═══════════════════════════════════════════════════════    │
+│  📍 Entry: Sau breakout + giá quay lại test flag            │
+│  📍 Confirmation: Rejection candle / Hammer                 │
+│  📍 SL: Nhỏ hơn, R:R tốt hơn                                │
+│  📍 Risk: Có thể miss nếu không retest                      │
+│                                                              │
+│  📊 EXAMPLE với số liệu:                                    │
+│  • Flagpole: $40,000 → $45,000 (+$5,000)                    │
+│  • Flag: $45,000 → $43,500                                  │
+│  • Breakout: $45,500                                        │
+│  • SL: $42,800                                              │
+│  • TP: $50,500 ($45,500 + $5,000)                           │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: BULL FLAG REAL EXAMPLE
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+⚠️ ENFORCE: Vẽ BIỂU ĐỒ NẾN CANDLESTICK thực tế
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+⚠️ QUY TẮC VẼ NẾN CANDLESTICK - BẮT BUỘC:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  • NẾN XANH (Bullish): FILL MÀU XANH ĐẶC (#00C853), opacity 100%           │
+│  • NẾN ĐỎ (Bearish): FILL MÀU ĐỎ ĐẶC (#EF4444), opacity 100%               │
+│  • CẢ HAI đều là hình chữ nhật SOLID FILLED, không outline rỗng            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+NỘI DUNG HÌNH:
+HEADER: Badge "VÍ DỤ", Tiêu đề "BULL FLAG - BTC/USDT H4"
+
+REAL CHART với biểu đồ nến candlestick đầy đủ:
+- Trục giá bên trái
+- Flagpole highlighted
+- Flag channel với trendlines
+- Entry, SL, TP markers
+- Volume bars
+
+INFO BOX:
+┌─────────────────────────────────────────────────────────────┐
+│  📊 TRADE INFO:                                             │
+│  • Coin: BTC/USDT                                           │
+│  • Timeframe: H4                                            │
+│  • Flagpole: $41,000 → $45,200 (+10.2%)                     │
+│  • Flag Duration: 12 nến (2 ngày)                           │
+│  • Breakout: $45,500                                        │
+│  • SL: $44,200                                              │
+│  • TP: $49,700                                              │
+│  • R:R: 1:3.2                                               │
+│  • Result: ✅ WIN (+9.2%)                                   │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 1.2: BEAR FLAG PATTERN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: BEAR FLAG ANATOMY
+📐 HÌNH 2: BEAR FLAG ENTRY STRATEGY
+📐 HÌNH 3: BEAR FLAG REAL EXAMPLE
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 1.3: PENNANT PATTERNS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: BULL PENNANT ANATOMY
+📐 HÌNH 2: BEAR PENNANT ANATOMY
+📐 HÌNH 3: PENNANT VS FLAG COMPARISON
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 1.4-1.5: FLAG & PENNANT ADVANCED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BÀI 1.4: FLAG + GEM ZONES CONFLUENCE
+📐 HÌNH 1: Flag at LFZ Zone
+📐 HÌNH 2: Flag at HFZ Zone
+📐 HÌNH 3: Multi-Signal Confluence
+
+BÀI 1.5: FLAG PATTERNS TỔNG HỢP
+📐 HÌNH 1: All Flag Patterns Comparison
+📐 HÌNH 2: Common Mistakes
+📐 HÌNH 3: Trading Checklist
+
+
+═══════════════════════════════════════════════════════════════════════════════
+CHƯƠNG 2: CANDLESTICK MASTERY
+═══════════════════════════════════════════════════════════════════════════════
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 2.1: CANDLESTICK FUNDAMENTALS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: CANDLESTICK ANATOMY
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+⚠️ ENFORCE: Vẽ NẾN CANDLESTICK chi tiết với annotations
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Nến xanh      | Green solid   | #00C853
+Nến đỏ        | Red solid     | #EF4444
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+
+⚠️ QUY TẮC VẼ NẾN CANDLESTICK - BẮT BUỘC:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  • NẾN XANH (Bullish): FILL MÀU XANH ĐẶC (#00C853), opacity 100%           │
+│  • NẾN ĐỎ (Bearish): FILL MÀU ĐỎ ĐẶC (#EF4444), opacity 100%               │
+│  • CẢ HAI đều là hình chữ nhật SOLID FILLED, không outline rỗng            │
+│  • Upper Wick = Đường thẳng mỏng phía trên body                            │
+│  • Lower Wick = Đường thẳng mỏng phía dưới body                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+NỘI DUNG HÌNH:
+HEADER: Badge "CƠ BẢN", Tiêu đề "GIẢI PHẪU NẾN CANDLESTICK"
+
+ANATOMY DIAGRAM:
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│  ┌────────────────────────┐  ┌────────────────────────┐     │
+│  │    NẾN XANH (Bullish)  │  │    NẾN ĐỎ (Bearish)    │     │
+│  │    ════════════════    │  │    ════════════════     │     │
+│  │                        │  │                         │     │
+│  │          │ ← High      │  │          │ ← High       │     │
+│  │          │             │  │    ┌─────┴─────┐        │     │
+│  │    ┌─────┴─────┐       │  │    │    BODY   │← Open  │     │
+│  │    │    BODY   │← Close│  │    │   (Đỏ)    │        │     │
+│  │    │   (Xanh)  │       │  │    └─────┬─────┘← Close │     │
+│  │    └─────┬─────┘← Open │  │          │              │     │
+│  │          │             │  │          │ ← Low        │     │
+│  │          │ ← Low       │  │                         │     │
+│  │                        │  │                         │     │
+│  │  Close > Open          │  │  Open > Close           │     │
+│  │  = Bullish             │  │  = Bearish              │     │
+│  │  Màu: #00C853 SOLID    │  │  Màu: #EF4444 SOLID     │     │
+│  └────────────────────────┘  └────────────────────────┘     │
+│                                                              │
+│  📊 THÔNG TIN NẾN:                                          │
+│  • Body (Thân): Phần giữa Open và Close                     │
+│  • Upper Wick: Phần trên body đến High                      │
+│  • Lower Wick: Phần dưới body đến Low                       │
+│  • Body dài = Momentum mạnh                                 │
+│  • Wick dài = Rejection mạnh                                │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: SINGLE CANDLESTICK PATTERNS
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+⚠️ ENFORCE: Vẽ các nến CANDLESTICK riêng lẻ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+⚠️ QUY TẮC VẼ NẾN CANDLESTICK - BẮT BUỘC:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  • NẾN XANH (Bullish): FILL MÀU XANH ĐẶC (#00C853), opacity 100%           │
+│  • NẾN ĐỎ (Bearish): FILL MÀU ĐỎ ĐẶC (#EF4444), opacity 100%               │
+│  • CẢ HAI đều là hình chữ nhật SOLID FILLED, không outline rỗng            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+NỘI DUNG HÌNH:
+HEADER: Badge "PATTERNS", Tiêu đề "CÁC MẪU NẾN ĐƠN QUAN TRỌNG"
+
+8 SINGLE PATTERNS với hình vẽ nến thực tế:
+┌─────────────────────────────────────────────────────────────┐
+│  BULLISH PATTERNS (Tăng giá):                               │
+│  ═══════════════════════════════════════════════════════    │
+│  ┌────────┐  ┌────────┐  ┌────────┐  ┌────────┐            │
+│  │HAMMER  │  │INVERTED│  │BULLISH │  │DOJI    │            │
+│  │        │  │HAMMER  │  │MARUBOZU│  │STAR    │            │
+│  │  │     │  │  ┌─┐   │  │ ┌────┐ │  │   │    │            │
+│  │ ┌┴┐    │  │  │ │   │  │ │    │ │  │  ─┼─   │            │
+│  │ │█│    │  │  │ │   │  │ │████│ │  │   │    │            │
+│  │ └─┘    │  │  │ │   │  │ │████│ │  │        │            │
+│  │  │     │  │  └─┘   │  │ └────┘ │  │        │            │
+│  │        │  │  │     │  │        │  │        │            │
+│  │Xanh    │  │ Xanh   │  │ Xanh   │  │ Xanh   │            │
+│  └────────┘  └────────┘  └────────┘  └────────┘            │
+│                                                              │
+│  BEARISH PATTERNS (Giảm giá):                               │
+│  ═══════════════════════════════════════════════════════    │
+│  ┌────────┐  ┌────────┐  ┌────────┐  ┌────────┐            │
+│  │SHOOTING│  │HANGING │  │BEARISH │  │GRAVEST │            │
+│  │STAR    │  │MAN     │  │MARUBOZU│  │DOJI    │            │
+│  │  │     │  │        │  │ ┌────┐ │  │   │    │            │
+│  │ ┌┴┐    │  │  │     │  │ │████│ │  │  ─┼─   │            │
+│  │ │█│    │  │ ┌┴┐    │  │ │████│ │  │        │            │
+│  │ └─┘    │  │ │█│    │  │ │    │ │  │   │    │            │
+│  │        │  │ └─┘    │  │ └────┘ │  │        │            │
+│  │        │  │  │     │  │        │  │        │            │
+│  │  Đỏ    │  │  Đỏ    │  │  Đỏ    │  │  Đỏ    │            │
+│  └────────┘  └────────┘  └────────┘  └────────┘            │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: CANDLESTICK READING SKILLS
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+HEADER: Badge "ĐỌC NẾN", Tiêu đề "CÁCH ĐỌC HIỂU NẾN"
+
+READING GUIDE:
+┌─────────────────────────────────────────────────────────────┐
+│  📊 BODY SIZE (Kích thước thân):                            │
+│  ═══════════════════════════════════════════════════════    │
+│  • Body dài = Momentum mạnh, quyết đoán                     │
+│  • Body ngắn = Thiếu quyết đoán, do dự                      │
+│  • Body rất nhỏ (Doji) = Cân bằng, đảo chiều tiềm năng      │
+│                                                              │
+│  📊 WICK SIZE (Độ dài bóng):                                │
+│  ═══════════════════════════════════════════════════════    │
+│  • Wick dài phía trên = Selling pressure, rejection         │
+│  • Wick dài phía dưới = Buying pressure, support            │
+│  • Không có wick = Rất bullish/bearish (Marubozu)           │
+│                                                              │
+│  📊 POSITION MATTERS (Vị trí quan trọng):                   │
+│  ═══════════════════════════════════════════════════════    │
+│  • Hammer ở đáy = Reversal bullish mạnh                     │
+│  • Hammer ở giữa = Yếu, không đáng tin                      │
+│  • Shooting star ở đỉnh = Reversal bearish mạnh             │
+│                                                              │
+│  💡 NGUYÊN TẮC: "Nến chỉ có ý nghĩa trong BỐI CẢNH"         │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 2.2-2.6: CANDLESTICK PATTERNS ADVANCED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BÀI 2.2: DOUBLE CANDLESTICK PATTERNS
+📐 HÌNH 1: Bullish Engulfing
+📐 HÌNH 2: Bearish Engulfing
+📐 HÌNH 3: Tweezer Tops/Bottoms
+
+BÀI 2.3: TRIPLE CANDLESTICK PATTERNS
+📐 HÌNH 1: Morning Star
+📐 HÌNH 2: Evening Star
+📐 HÌNH 3: Three White Soldiers / Three Black Crows
+
+BÀI 2.4: CANDLESTICKS AT ZONES
+📐 HÌNH 1: Confirmation Candles at LFZ
+📐 HÌNH 2: Confirmation Candles at HFZ
+📐 HÌNH 3: False Signal Recognition
+
+BÀI 2.5: CANDLESTICK + VOLUME
+📐 HÌNH 1: Volume Confirmation
+📐 HÌNH 2: Divergence Signals
+📐 HÌNH 3: High Volume Rejection
+
+BÀI 2.6: CANDLESTICK MASTERY SUMMARY
+📐 HÌNH 1: All Patterns Cheat Sheet
+📐 HÌNH 2: Pattern Priority Guide
+📐 HÌNH 3: Trading with Candlesticks Checklist
+
+
+═══════════════════════════════════════════════════════════════════════════════
+CHƯƠNG 3: AI SIGNALS & TỰ ĐỘNG HÓA
+═══════════════════════════════════════════════════════════════════════════════
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 3.1: AI SIGNALS INTRODUCTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: AI SIGNALS OVERVIEW
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+AI indicator  | Green         | #10B981
+Alert         | Gold          | #FFBD59
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+
+NỘI DUNG HÌNH:
+HEADER: Badge "AI SIGNALS", Tiêu đề "TÍN HIỆU AI THỜI GIAN THỰC"
+
+AI SYSTEM DIAGRAM:
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│                    ┌──────────────────┐                      │
+│                    │  🤖 GEM AI ENGINE │                      │
+│                    └────────┬─────────┘                      │
+│                             │                                │
+│         ┌───────────────────┼───────────────────┐           │
+│         ↓                   ↓                   ↓           │
+│    ┌─────────┐        ┌─────────┐        ┌─────────┐       │
+│    │ PATTERN │        │  ZONE   │        │ VOLUME  │       │
+│    │DETECTION│        │ANALYSIS │        │ANALYSIS │       │
+│    └────┬────┘        └────┬────┘        └────┬────┘       │
+│         │                   │                   │           │
+│         └───────────────────┼───────────────────┘           │
+│                             ↓                                │
+│                    ┌──────────────────┐                      │
+│                    │  📊 AI SCORING   │                      │
+│                    │  Confidence: 85% │                      │
+│                    └────────┬─────────┘                      │
+│                             ↓                                │
+│                    ┌──────────────────┐                      │
+│                    │  🔔 SIGNAL       │                      │
+│                    │  NOTIFICATION    │                      │
+│                    └──────────────────┘                      │
+│                                                              │
+│  📊 TIER 3 AI SIGNALS:                                      │
+│  • Real-time pattern detection trên 437+ coins              │
+│  • Multi-timeframe scanning (5 TFs)                         │
+│  • Confidence scoring (0-100%)                              │
+│  • Entry/SL/TP recommendations                              │
+│  • Push notification + Telegram                             │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: AI SIGNAL FORMAT
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+HEADER: Badge "FORMAT", Tiêu đề "ĐỊNH DẠNG TÍN HIỆU AI"
+
+SIGNAL CARD EXAMPLE:
+┌─────────────────────────────────────────────────────────────┐
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │  🤖 GEM AI SIGNAL                                       │ │
+│  │  ════════════════════════════════════════════════════  │ │
+│  │                                                          │ │
+│  │  📊 BTC/USDT - H4                                        │ │
+│  │  📈 Pattern: UPU (Bullish Continuation)                  │ │
+│  │  💪 Confidence: 87%                                      │ │
+│  │  ═════════════════════════════════════════════════════  │ │
+│  │                                                          │ │
+│  │  🎯 TRADING SETUP:                                       │ │
+│  │  ───────────────────                                     │ │
+│  │  Entry: $43,250 (Current: $43,180)                       │ │
+│  │  Stop Loss: $42,500 (-1.7%)                              │ │
+│  │  Take Profit 1: $44,500 (+2.9%)                          │ │
+│  │  Take Profit 2: $45,800 (+5.9%)                          │ │
+│  │  R:R: 1:2.9                                              │ │
+│  │                                                          │ │
+│  │  📍 Zone: LFZ $42,800 - $43,300 (Fresh)                  │ │
+│  │  📊 Multi-TF: D1 ✅ H4 ✅ H1 ⚠️                          │ │
+│  │  📈 Trend: Bullish (aligned)                             │ │
+│  │                                                          │ │
+│  │  ⏰ Signal Time: 14:35 UTC | Valid: 24 hours             │ │
+│  │                                                          │ │
+│  │  [📊 View Chart] [✅ Take Signal] [❌ Skip]              │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: AI CONFIDENCE SCORING
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+HEADER: Badge "SCORING", Tiêu đề "HỆ THỐNG CHẤM ĐIỂM AI"
+
+SCORING BREAKDOWN:
+┌─────────────────────────────────────────────────────────────┐
+│  📊 AI CONFIDENCE = Tổng điểm 6 yếu tố (0-100%)             │
+│  ════════════════════════════════════════════════════════   │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │ YẾU TỐ                    │ TRỌNG SỐ │ ĐIỂM (0-100)     ││
+│  │════════════════════════════│══════════│══════════════════││
+│  │ ① Pattern Clarity          │   20%    │ Rõ ràng = 100    ││
+│  │ ② Zone Quality             │   20%    │ Fresh A-Grade    ││
+│  │ ③ Multi-TF Alignment       │   20%    │ 3/3 TF = 100     ││
+│  │ ④ Volume Confirmation      │   15%    │ Above avg = 100  ││
+│  │ ⑤ Trend Alignment          │   15%    │ With trend = 100 ││
+│  │ ⑥ Market Conditions        │   10%    │ Low vol = 100    ││
+│  │════════════════════════════│══════════│══════════════════││
+│  │ TỔNG                       │  100%    │ Weighted Average ││
+│  └─────────────────────────────────────────────────────────┘│
+│                                                              │
+│  📊 CONFIDENCE LEVELS:                                      │
+│  ⭐ 80-100%: HIGH (Trade ngay) - Green                       │
+│  ✅ 60-79%: MEDIUM (Chờ xác nhận) - Cyan                     │
+│  ⚠️ 40-59%: LOW (Cân nhắc kỹ) - Gold                         │
+│  ❌ < 40%: SKIP (Không trade) - Red                          │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 3.2-3.5: AI SIGNALS ADVANCED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BÀI 3.2: USING AI SIGNALS EFFECTIVELY
+📐 HÌNH 1: Signal Filtering Strategy
+📐 HÌNH 2: Personal Rules for AI Signals
+📐 HÌNH 3: Signal vs Manual Analysis
+
+BÀI 3.3: AI SIGNAL AUTOMATION
+📐 HÌNH 1: Automation Workflow
+📐 HÌNH 2: Alert Setup Guide
+📐 HÌNH 3: Integration with Trading Platforms
+
+BÀI 3.4: AI SIGNAL PERFORMANCE
+📐 HÌNH 1: Historical Win Rate by Confidence
+📐 HÌNH 2: Performance by Pattern Type
+📐 HÌNH 3: Tracking Your AI Signal Results
+
+BÀI 3.5: AI SIGNALS BEST PRACTICES
+📐 HÌNH 1: Do's and Don'ts
+📐 HÌNH 2: Risk Management with AI
+📐 HÌNH 3: Combining AI with Manual Skills
+
+
+═══════════════════════════════════════════════════════════════════════════════
+CHƯƠNG 4: WHALE TRACKING & ORDER FLOW
+═══════════════════════════════════════════════════════════════════════════════
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 4.1: WHALE TRACKING INTRODUCTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: WHAT IS WHALE TRACKING?
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Whale         | Gold          | #FFBD59
+Alert         | Green         | #10B981
+Text body     | Trắng         | #FFFFFF
+
+NỘI DUNG HÌNH:
+HEADER: Badge "WHALE", Tiêu đề "WHALE TRACKING - THEO DÕI CÁ VOI"
+
+WHALE CONCEPT:
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│  🐋 WHALE LÀ AI?                                            │
+│  ════════════════════════════════════════════════════════   │
+│  • Tài khoản giao dịch > $10 triệu USD                      │
+│  • Tổ chức: Quỹ đầu tư, Market Makers, Institutions         │
+│  • Cá nhân giàu: Early adopters, Founders                   │
+│                                                              │
+│  📊 TẠI SAO THEO DÕI WHALE?                                 │
+│  ════════════════════════════════════════════════════════   │
+│                                                              │
+│  ┌───────────────────┐       ┌───────────────────┐         │
+│  │  🐋 WHALE BUYS    │       │  📈 GIÁ TĂNG     │         │
+│  │  Large orders     │  ───→ │  Market impact    │         │
+│  │  at specific      │       │  Retail follows   │         │
+│  │  price levels     │       │                   │         │
+│  └───────────────────┘       └───────────────────┘         │
+│                                                              │
+│  💡 NGUYÊN TẮC:                                             │
+│  "Theo dõi tiền thông minh, không theo dõi giá"             │
+│                                                              │
+│  📊 GEM WHALE TRACKING FEATURES:                            │
+│  • Large order detection (> $100K)                          │
+│  • Exchange inflow/outflow                                  │
+│  • Wallet activity monitoring                               │
+│  • Whale accumulation zones                                 │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: ORDER FLOW BASICS
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+HEADER: Badge "ORDER FLOW", Tiêu đề "DÒNG LỆNH - CƠ BẢN"
+
+ORDER FLOW DIAGRAM:
+┌─────────────────────────────────────────────────────────────┐
+│  📊 ORDER FLOW = Dòng chảy của lệnh mua/bán                 │
+│  ════════════════════════════════════════════════════════   │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │            ORDER BOOK (Sổ lệnh)                          ││
+│  │  ═══════════════════════════════════════════════════    ││
+│  │                                                          ││
+│  │  BID (Lệnh mua)        │  ASK (Lệnh bán)                ││
+│  │  ─────────────────────  │  ─────────────────────        ││
+│  │  $42,500: 50 BTC      │  $42,600: 30 BTC               ││
+│  │  $42,400: 80 BTC ← BID│  $42,700: 45 BTC               ││
+│  │  $42,300: 120 BTC WALL│  $42,800: 100 BTC ← ASK WALL   ││
+│  │  $42,200: 40 BTC      │  $42,900: 25 BTC               ││
+│  │                                                          ││
+│  │  💡 BID WALL = Lực mua mạnh (Support)                   ││
+│  │  💡 ASK WALL = Lực bán mạnh (Resistance)                ││
+│  └─────────────────────────────────────────────────────────┘│
+│                                                              │
+│  📊 ORDER FLOW INDICATORS:                                  │
+│  • Volume Delta = Buy Volume - Sell Volume                  │
+│  • CVD (Cumulative Volume Delta)                            │
+│  • Large Order Detection                                    │
+│  • Imbalance Zones                                          │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: WHALE ALERT TYPES
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+HEADER: Badge "ALERTS", Tiêu đề "CÁC LOẠI CẢNH BÁO WHALE"
+
+ALERT TYPES:
+┌─────────────────────────────────────────────────────────────┐
+│  ① 🐋 LARGE TRANSACTION ALERT                               │
+│     ════════════════════════════════════════════════════    │
+│     • Giao dịch > $10M USD                                  │
+│     • Whale di chuyển coin giữa các ví                      │
+│     • Signal: Có thể dump/pump sắp tới                      │
+│     Viền: Gold                                              │
+├─────────────────────────────────────────────────────────────┤
+│  ② 📥 EXCHANGE INFLOW ALERT                                 │
+│     ════════════════════════════════════════════════════    │
+│     • Whale gửi coin VÀO sàn                                │
+│     • Signal: Có thể muốn BÁN                               │
+│     • Bearish warning                                       │
+│     Viền: Red                                               │
+├─────────────────────────────────────────────────────────────┤
+│  ③ 📤 EXCHANGE OUTFLOW ALERT                                │
+│     ════════════════════════════════════════════════════    │
+│     • Whale rút coin RA khỏi sàn                            │
+│     • Signal: HODL, không muốn bán                          │
+│     • Bullish signal                                        │
+│     Viền: Green                                             │
+├─────────────────────────────────────────────────────────────┤
+│  ④ 🔔 ACCUMULATION ZONE ALERT                               │
+│     ════════════════════════════════════════════════════    │
+│     • Nhiều whale mua ở cùng một vùng giá                   │
+│     • Signal: Strong demand zone                            │
+│     • Very bullish                                          │
+│     Viền: Cyan                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BÀI 4.2-4.5: WHALE TRACKING ADVANCED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BÀI 4.2: READING WHALE ACTIVITY
+📐 HÌNH 1: Whale Accumulation Patterns
+📐 HÌNH 2: Whale Distribution Patterns
+📐 HÌNH 3: False Signals Recognition
+
+BÀI 4.3: ORDER FLOW ANALYSIS
+📐 HÌNH 1: Volume Delta Interpretation
+📐 HÌNH 2: CVD Divergence
+📐 HÌNH 3: Imbalance Trading
+
+BÀI 4.4: WHALE + ZONES CONFLUENCE
+📐 HÌNH 1: Whale Activity at LFZ
+📐 HÌNH 2: Whale Activity at HFZ
+📐 HÌNH 3: Multi-Signal Confluence
+
+BÀI 4.5: WHALE TRACKING PRACTICE
+📐 HÌNH 1: Real Case Studies
+📐 HÌNH 2: Alert Setup Guide
+📐 HÌNH 3: Whale Tracking Checklist
+
+
+═══════════════════════════════════════════════════════════════════════════════
+CHƯƠNG 5: QUẢN LÝ RỦI RO & DANH MỤC NÂNG CAO
+═══════════════════════════════════════════════════════════════════════════════
+
+(5 bài với 15 hình - Focus on elite-level risk management, portfolio allocation,
+psychology for professional traders)
+
+BÀI 5.1: PORTFOLIO MANAGEMENT
+📐 HÌNH 1: Portfolio Allocation Strategy
+📐 HÌNH 2: Position Sizing by Portfolio %
+📐 HÌNH 3: Rebalancing Schedule
+
+BÀI 5.2: ADVANCED RISK METRICS
+📐 HÌNH 1: Sharpe Ratio Explained
+📐 HÌNH 2: Max Drawdown Limits
+📐 HÌNH 3: Risk Dashboard
+
+BÀI 5.3: PSYCHOLOGY FOR ELITE TRADERS
+📐 HÌNH 1: Mindset of Top 1%
+📐 HÌNH 2: Handling Large Positions
+📐 HÌNH 3: Stress Management
+
+BÀI 5.4: TRADING AS A BUSINESS
+📐 HÌNH 1: Trading Plan Template
+📐 HÌNH 2: Monthly Review Process
+📐 HÌNH 3: Tax Considerations
+
+BÀI 5.5: ELITE TRADER HABITS
+📐 HÌNH 1: Daily Routine
+📐 HÌNH 2: Continuous Improvement
+📐 HÌNH 3: Community Leadership
+
+
+═══════════════════════════════════════════════════════════════════════════════
+CHƯƠNG 6-7: MODULE A & B (TIER 3)
+═══════════════════════════════════════════════════════════════════════════════
+
+CHƯƠNG 6: MODULE A - TIER 3 (HÀNH TRÌNH CHUYỂN HÓA)
+📐 HÌNH 1: Elite Trader Identity
+📐 HÌNH 2: 24 Patterns Mastery
+📐 HÌNH 3: AI + Whale Skills Acquired
+📐 HÌNH 4: Top 1% Achievement
+
+CHƯƠNG 7: MODULE B - TIER 3 (CƠ HỘI & LỰA CHỌN)
+📐 HÌNH 1: Elite Status Benefits
+📐 HÌNH 2: Instructor Opportunities
+📐 HÌNH 3: Legacy & Community Impact
+📐 HÌNH 4: Continue the Journey CTA
+
+================================================================================
+                              END OF TIER 3 PROMPTS
+================================================================================

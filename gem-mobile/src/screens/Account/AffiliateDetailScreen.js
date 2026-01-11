@@ -1,6 +1,7 @@
 /**
- * GEM Mobile - Affiliate Detail Screen
+ * GEM Mobile - Affiliate Detail Screen v3.0
  * Full affiliate dashboard with stats, commission history, tier progress
+ * Reference: GEM_PARTNERSHIP_OFFICIAL_POLICY_V3.md
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -33,30 +34,53 @@ import {
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../services/supabase';
+import {
+  CTV_TIER_CONFIG,
+  CTV_TIER_ORDER,
+  KOL_CONFIG,
+  getTierConfig,
+  calculateTierProgress,
+  formatTierDisplay,
+} from '../../constants/partnershipConstants';
 
-// Tier thresholds
+// v3.0 Tier thresholds (VND)
 const TIER_THRESHOLDS = {
-  beginner: 0,
-  growing: 100000000,    // 100M
-  master: 300000000,     // 300M
-  grand: 600000000,      // 600M
+  bronze: 0,           // 0
+  silver: 50000000,    // 50M
+  gold: 150000000,     // 150M
+  platinum: 400000000, // 400M
+  diamond: 800000000,  // 800M
 };
 
+// v3.0 Tier colors from constants
 const TIER_COLORS = {
-  beginner: COLORS.textMuted,
-  growing: COLORS.info,
-  master: COLORS.gold,
-  grand: COLORS.burgundy,
+  bronze: '#CD7F32',
+  silver: '#C0C0C0',
+  gold: '#FFD700',
+  platinum: '#E5E4E2',
+  diamond: '#00F0FF',
 };
 
+// v3.0 Commission rates
 const COMMISSION_RATES = {
-  affiliate: { digital: 3, physical: 3 },
+  kol: { digital: 20, physical: 20 },
   ctv: {
-    beginner: { digital: 10, physical: 5 },
-    growing: { digital: 15, physical: 7 },
-    master: { digital: 20, physical: 10 },
-    grand: { digital: 30, physical: 15 },
+    bronze: { digital: 10, physical: 6 },
+    silver: { digital: 15, physical: 8 },
+    gold: { digital: 20, physical: 10 },
+    platinum: { digital: 25, physical: 12 },
+    diamond: { digital: 30, physical: 15 },
   },
+};
+
+// v3.0 Sub-affiliate rates
+const SUB_AFFILIATE_RATES = {
+  kol: 3.5,
+  bronze: 2,
+  silver: 2.5,
+  gold: 3,
+  platinum: 3.5,
+  diamond: 4,
 };
 
 export default function AffiliateDetailScreen({ route, navigation }) {
@@ -220,10 +244,26 @@ export default function AffiliateDetailScreen({ route, navigation }) {
     const role = profile?.role || 'affiliate';
     const tier = getCurrentTier();
 
-    if (role === 'affiliate') {
-      return COMMISSION_RATES.affiliate;
+    // Map tier names to commission keys (beginner/growing/master/grand → bronze/silver/gold/platinum)
+    const tierMapping = {
+      beginner: 'bronze',
+      growing: 'silver',
+      master: 'gold',
+      grand: 'platinum',
+      // Also support direct tier names
+      bronze: 'bronze',
+      silver: 'silver',
+      gold: 'gold',
+      platinum: 'platinum',
+      diamond: 'diamond',
+    };
+
+    if (role === 'kol') {
+      return COMMISSION_RATES.kol;
     }
-    return COMMISSION_RATES.ctv[tier] || COMMISSION_RATES.ctv.beginner;
+
+    const mappedTier = tierMapping[tier] || 'bronze';
+    return COMMISSION_RATES.ctv[mappedTier] || COMMISSION_RATES.ctv.bronze;
   };
 
   if (loading) {

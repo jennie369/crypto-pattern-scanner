@@ -630,7 +630,7 @@ const styles = StyleSheet.create({
   submitButtonText: {
     fontSize: TYPOGRAPHY.fontSize.lg,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.bgDark,
+    color: COLORS.bgDarkest,
   },
   noteText: {
     fontSize: TYPOGRAPHY.fontSize.sm,

@@ -7,7 +7,15 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Pressable, ToastAndroid, Platform } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import * as Haptics from 'expo-haptics';
-import { User, Sparkles, Download, Copy, Check } from 'lucide-react-native';
+import {
+  User, Sparkles, Download, Copy, Check,
+  // Icons for FAQ content
+  Zap, Star, Crown, Shield, Heart, Coins, TrendingUp, TrendingDown,
+  Target, Award, BookOpen, GraduationCap, Brain, Gem, Diamond,
+  ChartLine, BarChart2, Activity, Wallet, Lock, Unlock, AlertTriangle,
+  CheckCircle, XCircle, Info, HelpCircle, ArrowUp, ArrowDown,
+  Clock, Calendar, Users, Gift, ShoppingBag, CreditCard,
+} from 'lucide-react-native';
 import { COLORS, SPACING, TYPOGRAPHY, GLASS } from '../../../utils/tokens';
 import ExportPreview from '../../../components/GemMaster/ExportPreview';
 import exportService from '../../../services/exportService';
@@ -15,8 +23,27 @@ import ProductCard from '../../../components/GemMaster/ProductCard';
 import DivinationResultCard from '../../../components/GemMaster/DivinationResultCard';
 
 /**
+ * Icon mapping for [icon:Name] syntax
+ */
+const ICON_MAP = {
+  // Tier icons
+  Zap, Star, Crown, Shield,
+  // Topic icons
+  Heart, Coins, TrendingUp, TrendingDown,
+  Target, Award, BookOpen, GraduationCap, Brain, Gem, Diamond,
+  ChartLine, BarChart2, Activity, Wallet, Lock, Unlock,
+  // Status icons
+  AlertTriangle, CheckCircle, XCircle, Info, HelpCircle,
+  ArrowUp, ArrowDown, Clock, Calendar, Users, Gift, ShoppingBag, CreditCard,
+  Sparkles, Check, Copy,
+};
+
+const ICON_SIZE = 16;
+const ICON_COLOR = COLORS.primary;
+
+/**
  * Simple markdown text renderer
- * Supports: **bold**, *italic*, bullet points
+ * Supports: **bold**, *italic*, bullet points, [icon:Name]
  */
 const renderMarkdownText = (text, baseStyle) => {
   if (!text) return null;
@@ -49,7 +76,8 @@ const renderMarkdownText = (text, baseStyle) => {
 };
 
 /**
- * Render inline markdown (bold, italic)
+ * Render inline markdown (bold, italic, icons)
+ * Supports: **bold**, [icon:Name]
  */
 const renderInlineMarkdown = (text, baseStyle) => {
   if (!text) return null;
@@ -58,23 +86,63 @@ const renderInlineMarkdown = (text, baseStyle) => {
   let remaining = text;
   let key = 0;
 
-  // Pattern for **bold** and *italic*
+  // Combined pattern for **bold** and [icon:Name]
   const boldPattern = /\*\*([^*]+)\*\*/;
+  const iconPattern = /\[icon:([A-Za-z]+)\]/;
 
   while (remaining.length > 0) {
     const boldMatch = remaining.match(boldPattern);
+    const iconMatch = remaining.match(iconPattern);
 
-    if (boldMatch) {
-      const beforeBold = remaining.slice(0, boldMatch.index);
-      if (beforeBold) {
-        parts.push(<Text key={key++}>{beforeBold}</Text>);
+    // Find which match comes first
+    let firstMatch = null;
+    let matchType = null;
+
+    if (boldMatch && iconMatch) {
+      if (boldMatch.index <= iconMatch.index) {
+        firstMatch = boldMatch;
+        matchType = 'bold';
+      } else {
+        firstMatch = iconMatch;
+        matchType = 'icon';
       }
-      parts.push(
-        <Text key={key++} style={{ fontWeight: '700' }}>
-          {boldMatch[1]}
-        </Text>
-      );
-      remaining = remaining.slice(boldMatch.index + boldMatch[0].length);
+    } else if (boldMatch) {
+      firstMatch = boldMatch;
+      matchType = 'bold';
+    } else if (iconMatch) {
+      firstMatch = iconMatch;
+      matchType = 'icon';
+    }
+
+    if (firstMatch) {
+      // Add text before the match
+      const beforeMatch = remaining.slice(0, firstMatch.index);
+      if (beforeMatch) {
+        parts.push(<Text key={key++}>{beforeMatch}</Text>);
+      }
+
+      if (matchType === 'bold') {
+        parts.push(
+          <Text key={key++} style={{ fontWeight: '700', color: COLORS.textPrimary }}>
+            {firstMatch[1]}
+          </Text>
+        );
+      } else if (matchType === 'icon') {
+        const iconName = firstMatch[1];
+        const IconComponent = ICON_MAP[iconName];
+        if (IconComponent) {
+          parts.push(
+            <View key={key++} style={{ marginRight: 4, marginTop: 2 }}>
+              <IconComponent size={ICON_SIZE} color={ICON_COLOR} strokeWidth={2} />
+            </View>
+          );
+        } else {
+          // Icon not found, just render the text
+          parts.push(<Text key={key++}>{firstMatch[0]}</Text>);
+        }
+      }
+
+      remaining = remaining.slice(firstMatch.index + firstMatch[0].length);
     } else {
       parts.push(<Text key={key++}>{remaining}</Text>);
       break;
@@ -107,14 +175,11 @@ const MessageBubble = ({ message, userTier = 'FREE', onExport, recommendations, 
     setSelectedOption(option.id);
 
     // Haptic feedback
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-    // Call parent handler with the selected option
+    // Call parent handler immediately (no delay for faster response)
     if (onOptionSelect) {
-      // Small delay for visual feedback
-      setTimeout(() => {
-        onOptionSelect(option);
-      }, 200);
+      onOptionSelect(option);
     }
   }, [selectedOption, onOptionSelect]);
 

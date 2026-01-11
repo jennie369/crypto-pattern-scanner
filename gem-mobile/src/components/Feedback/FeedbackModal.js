@@ -225,7 +225,7 @@ const FeedbackModal = ({
                         onPress={handleSubmit}
                         disabled={submitting}
                       >
-                        <Send size={18} color={COLORS.bgDark} />
+                        <Send size={18} color={COLORS.bgDarkest} />
                         <Text style={styles.submitText}>Gửi</Text>
                       </TouchableOpacity>
                     </View>
@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
   submitText: {
     fontSize: TYPOGRAPHY.fontSize.md,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.bgDark,
+    color: COLORS.bgDarkest,
   },
   doneButton: {
     paddingVertical: SPACING.md,
@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
   doneText: {
     fontSize: TYPOGRAPHY.fontSize.md,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.bgDark,
+    color: COLORS.bgDarkest,
   },
 });
 

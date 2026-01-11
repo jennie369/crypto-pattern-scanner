@@ -17,6 +17,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowLeft, Zap, Eye, TrendingUp, Clock, Target, Users, MousePointer } from 'lucide-react-native';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
+import { CONTENT_BOTTOM_PADDING } from '../../constants/layout';
+import boostService from '../../services/boostService';
 
 export default function BoostAnalyticsScreen({ navigation, route }) {
   const { campaignId } = route.params || {};
@@ -29,27 +31,12 @@ export default function BoostAnalyticsScreen({ navigation, route }) {
 
   const loadCampaign = async () => {
     try {
-      // TODO: Replace with actual API call
-      // const result = await boostService.getCampaignAnalytics(campaignId);
-      // setCampaign(result.data);
-
-      // Mock data
-      setCampaign({
-        id: campaignId,
-        status: 'active',
-        package_name: 'Tiêu Chuẩn',
-        start_date: new Date().toISOString(),
-        end_date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
-        impressions: 1234,
-        clicks: 89,
-        reach: 856,
-        engagement_rate: 7.2,
-        daily_stats: [
-          { date: 'T2', impressions: 400, clicks: 28 },
-          { date: 'T3', impressions: 450, clicks: 32 },
-          { date: 'T4', impressions: 384, clicks: 29 },
-        ],
-      });
+      const result = await boostService.getCampaignAnalytics(campaignId);
+      if (result.success) {
+        setCampaign(result.data);
+      } else {
+        console.error('[BoostAnalytics] Error:', result.error);
+      }
     } catch (error) {
       console.error('[BoostAnalytics] Load error:', error);
     } finally {
@@ -137,17 +124,17 @@ export default function BoostAnalyticsScreen({ navigation, route }) {
               <Text style={styles.statLabel}>Lượt xem</Text>
             </View>
             <View style={styles.statCard}>
-              <MousePointer size={24} color={COLORS.success} />
+              <MousePointer size={24} color={COLORS.gold} />
               <Text style={styles.statValue}>{campaign?.clicks?.toLocaleString() || 0}</Text>
               <Text style={styles.statLabel}>Lượt click</Text>
             </View>
             <View style={styles.statCard}>
-              <Users size={24} color={COLORS.purple} />
+              <Users size={24} color={COLORS.gold} />
               <Text style={styles.statValue}>{campaign?.reach?.toLocaleString() || 0}</Text>
               <Text style={styles.statLabel}>Reach</Text>
             </View>
             <View style={styles.statCard}>
-              <TrendingUp size={24} color={COLORS.cyan} />
+              <TrendingUp size={24} color={COLORS.gold} />
               <Text style={styles.statValue}>{campaign?.engagement_rate || 0}%</Text>
               <Text style={styles.statLabel}>Engagement</Text>
             </View>
@@ -189,7 +176,7 @@ export default function BoostAnalyticsScreen({ navigation, route }) {
             </Text>
           </View>
 
-          <View style={{ height: 100 }} />
+          <View style={{ height: CONTENT_BOTTOM_PADDING }} />
         </ScrollView>
       </SafeAreaView>
     </LinearGradient>

@@ -1,9 +1,10 @@
 # 📱 GEM MOBILE - BÁO CÁO TÍNH NĂNG CHI TIẾT
 
 ## 📅 Thông tin scan
-- **Ngày scan:** 2025-12-01
+- **Ngày scan:** 2025-12-26
 - **Phương pháp:** Đọc từng file, verify code thực tế qua automated agents
-- **Tổng thời gian scan:** ~45 phút
+- **Tổng thời gian scan:** ~60 phút
+- **Cập nhật lần cuối:** December 26, 2025
 
 ---
 
@@ -11,12 +12,12 @@
 
 | Metric | Số lượng |
 |--------|----------|
-| Tổng số Screen files | **108** |
-| Tổng số Component files | **85+** |
-| Tổng số Service files | **76** |
-| Tổng số tính năng | **150+** |
-| ✅ Hoàn thành | **102** (94.4%) |
-| ⏳ Đang phát triển | **5** (4.6%) |
+| Tổng số Screen files | **112** |
+| Tổng số Component files | **95+** |
+| Tổng số Service files | **80** |
+| Tổng số tính năng | **165+** |
+| ✅ Hoàn thành | **108** (96.4%) |
+| ⏳ Đang phát triển | **3** (2.7%) |
 | ❌ Chưa có | **1** (0.9%) |
 
 ---
@@ -86,6 +87,20 @@
 | 8 | Order Tracking | ✅ | ✅ | orderService | ✅ |
 | 9 | Reviews (Judge.me) | ✅ | ✅ | reviewService | ✅ |
 | 10 | Affiliate Links | ✅ | ✅ | affiliateService | ✅ |
+| 11 | **Category Tags Mapping (NEW)** | ✅ | ✅ | Shopify tags | ✅ |
+
+### Shop Category Tags Mapping (NEW - December 2025)
+
+| Category | Vietnamese | Shopify Tags |
+|----------|------------|--------------|
+| Crystals | Đá Quý | Thạch Anh Tím, Thạch Anh Hồng, Obsidian, Citrine, Tiger Eye, Fluorite |
+| Books | Sách | Sách Tâm Linh, Sách Trading, Sách Self-Help, Tarot Book |
+| Tools | Dụng Cụ | Singing Bowl, Incense, Candle, Crystal Grid, Pendulum, Sage |
+| Jewelry | Trang Sức | Vòng Tay, Dây Chuyền, Nhẫn, Bông Tai, Crystal Jewelry |
+| Gems Token | Gems Token | Gem Pack, Gem Bundle, Virtual Currency, In-App Purchase |
+| VIP Packages | Gói VIP | Membership, Subscription, VIP Access, Premium |
+| Accessories | Phụ Kiện | Phone Case, Keychain, Bag, Wallet, Crystal Holder |
+| Gift Sets | Bộ Quà Tặng | Gift Set, Bundle, Combo, Special Edition |
 
 ---
 
@@ -225,11 +240,41 @@
 
 | # | Screen Name | File Path | Tồn tại | UI | Handlers | API/Data | States | Status | Ghi chú |
 |---|-------------|-----------|---------|-----|----------|----------|--------|--------|---------|
-| 1 | CoursesScreen | screens/Courses/CoursesScreen.js | ✅ | ✅ | ✅ | courseService | ✅ | ✅ | Filter tabs, search |
+| 1 | CoursesScreen | screens/Courses/CoursesScreen.js | ✅ | ✅ | ✅ | courseService | ✅ | ✅ | **ENHANCED**: Multiple sections, filters, banners |
 | 2 | CourseDetailScreen | screens/Courses/CourseDetailScreen.js | ✅ | ✅ | ✅ | Supabase | ✅ | ✅ | Modules, enroll button |
 | 3 | LessonPlayerScreen | screens/Courses/LessonPlayerScreen.js | ✅ | ✅ | ✅ | Supabase | ✅ | ✅ | Video/HTML player |
 | 4 | QuizScreen | screens/Courses/QuizScreen.js | ✅ | ✅ | ✅ | Supabase | ✅ | ✅ | Timer, results |
 | 5 | CertificateScreen | screens/Courses/CertificateScreen.js | ✅ | ✅ | ✅ | Supabase | ✅ | ✅ | Completion certificate |
+
+### Course Components (NEW - December 2025)
+
+| # | Component | File Path | Status | Description |
+|---|-----------|-----------|--------|-------------|
+| 1 | HeroBannerCarousel | components/courses/HeroBannerCarousel.js | ✅ | Auto-sliding promo banners, 5s interval |
+| 2 | CourseCategoryGrid | components/courses/CourseCategoryGrid.js | ✅ | 2-row, 8 categories with icons |
+| 3 | CourseFlashSaleSection | components/courses/CourseFlashSaleSection.js | ✅ | Flash sale with countdown timer |
+| 4 | CourseSection | components/courses/CourseSection.js | ✅ | Horizontal course card scroll |
+| 5 | CourseCardVertical | components/courses/CourseCardVertical.js | ✅ | Vertical course card layout |
+| 6 | CourseFilterSheet | components/courses/CourseFilterSheet.js | ✅ | Bottom sheet filter modal |
+| 7 | HighlightedCourseSection | components/courses/HighlightedCourseSection.js | ✅ | Featured course highlight |
+| 8 | HTMLLessonRenderer | components/courses/HTMLLessonRenderer.js | ✅ | HTML content renderer |
+
+### CoursesScreen Enhanced Features (December 2025)
+
+| # | Tính năng | UI có | Logic có | Data source | Status |
+|---|-----------|-------|----------|-------------|--------|
+| 1 | PromoBar | ✅ | ✅ | promo_bar_config table | ✅ |
+| 2 | HeroBannerCarousel | ✅ | ✅ | promo_banners table | ✅ |
+| 3 | CourseCategoryGrid (8 categories) | ✅ | ✅ | Hardcoded | ✅ |
+| 4 | CourseFlashSaleSection | ✅ | ✅ | course_flash_sales table | ✅ |
+| 5 | Filter Tabs (All/Enrolled/Completed) | ✅ | ✅ | Local state | ✅ |
+| 6 | Quick Filter Pills | ✅ | ✅ | Local state | ✅ |
+| 7 | CourseFilterSheet | ✅ | ✅ | Local state | ✅ |
+| 8 | Header Auto-Hide | ✅ | ✅ | Animated | ✅ |
+| 9 | GamificationStatsStrip | ✅ | ✅ | Supabase | ✅ |
+| 10 | DailyQuestsPreview | ✅ | ✅ | Supabase | ✅ |
+| 11 | Multiple CourseSection (Popular/New/Trading/Free) | ✅ | ✅ | courseService | ✅ |
+| 12 | SponsorBannerSection | ✅ | ✅ | sponsorBannerService | ✅ |
 
 ---
 
@@ -310,6 +355,11 @@
 | 13 | orderService.js | ✅ | 13 | Shopify + Local | ✅ Strong | ✅ |
 | 14 | quotaService.js | ✅ | 9 | Supabase | ✅ Strong | ✅ |
 | 15 | tierService.js | ✅ | 10+ | Supabase | ✅ Good | ✅ |
+| 16 | promoBannerService.js | ✅ | 3 | Supabase | ✅ Good | ✅ (NEW) |
+| 17 | courseImageService.js | ✅ | 5+ | Supabase | ✅ Good | ✅ (NEW) |
+| 18 | learningGamificationService.js | ✅ | 8+ | Supabase | ✅ Good | ✅ (NEW) |
+| 19 | drawingService.js | ✅ | 10+ | Supabase | ✅ Good | ✅ (NEW) |
+| 20 | alertManager.js | ✅ | 12+ | Supabase | ✅ Good | ✅ (NEW) |
 
 ---
 
@@ -405,12 +455,12 @@
 
 | Category | Count | Percentage |
 |----------|-------|------------|
-| **Total Screens** | 108 | 100% |
-| **✅ Completed** | 102 | 94.4% |
-| **⏳ In Progress** | 5 | 4.6% |
+| **Total Screens** | 112 | 100% |
+| **✅ Completed** | 108 | 96.4% |
+| **⏳ In Progress** | 3 | 2.7% |
 | **❌ Not Started** | 1 | 0.9% |
 
-### Overall Assessment: **🟢 PRODUCTION READY (94%+)**
+### Overall Assessment: **🟢 PRODUCTION READY (96%+)**
 
 GEM Mobile app đã đạt trạng thái sẵn sàng production với:
 - 6 main tabs hoạt động đầy đủ
@@ -420,11 +470,25 @@ GEM Mobile app đã đạt trạng thái sẵn sàng production với:
 - API integrations đầy đủ (Supabase, Shopify, Binance, Gemini)
 - Tier-based access control
 - Admin panel hoàn chỉnh
+- **NEW: Enhanced Course page với multiple sections**
+- **NEW: Shop category tags mapping**
+- **NEW: Promo banner system**
 
-**Chỉ cần fix 1 screen (NotificationSettingsScreen) và verify 4 screens khác trước launch.**
+### New Database Tables (December 2025)
+
+| Table | Purpose | Status |
+|-------|---------|--------|
+| promo_bar_config | Dismissible promo bar config | ✅ Ready |
+| promo_banners | Hero banner carousel items | ✅ Ready |
+| course_flash_sales | Flash sale campaigns | ✅ Ready |
+
+**SQL Migration:** `supabase/RUN_THIS_courses_complete_setup.sql`
+
+**Chỉ cần fix 1 screen (NotificationSettingsScreen) và verify 2 screens khác trước launch.**
 
 ---
 
 **Report generated by Claude Code**
-**Total scan time: ~45 minutes**
+**Last updated: December 26, 2025**
+**Total scan time: ~60 minutes**
 **Methodology: Automated agents + Manual verification**

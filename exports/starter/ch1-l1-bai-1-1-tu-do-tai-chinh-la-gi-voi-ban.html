@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bài 1.1: Tự Do Tài Chính Là Gì Với BẠN? | GEM Trading Academy</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Noto+Sans+Display:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================
+       GEM DESIGN SYSTEM - V5.4 DESIGN TOKENS
+       Facebook-Style Full-Width Layout
+       ========================================== */
+
+    :root {
+      /* ========== COLORS - GEM BRAND ========== */
+      --color-navy: #112250;
+      --color-navy-dark: #0A0F1A;
+      --color-navy-light: #1a3a6e;
+      --color-gold: #FFBD59;
+      --color-gold-dark: #E5A84D;
+      --color-burgundy: #9C0612;
+      --color-cyan: #00F0FF;
+      --color-purple: #6A5BFF;
+      --color-green: #10B981;
+      --color-red: #EF4444;
+      --color-white: #FFFFFF;
+
+      /* ========== TEXT COLORS ========== */
+      --color-text: #E8E8E8;
+      --color-text-secondary: rgba(255, 255, 255, 0.7);
+      --color-text-muted: rgba(255, 255, 255, 0.5);
+
+      /* ========== BACKGROUNDS ========== */
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.06);
+      --bg-glass: rgba(255, 255, 255, 0.03);
+      --color-bg-dark: #0A0F1A;
+
+      /* ========== BORDERS ========== */
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --border-gold: rgba(255, 189, 89, 0.3);
+      --border-cyan: rgba(0, 240, 255, 0.3);
+      --border-green: rgba(16, 185, 129, 0.3);
+      --border-purple: rgba(106, 91, 255, 0.3);
+      --glass-border: rgba(255, 255, 255, 0.08);
+
+      /* V5.4 CRITICAL: TEXT-ONLY PADDING */
+      --text-padding: 16px;
+
+      /* V5.4 CRITICAL: CONTAINER PADDING = 0 */
+      --container-padding: 0;
+
+      /* ========== SPACING ========== */
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 12px;
+      --space-lg: 16px;
+      --space-xl: 20px;
+      --space-2xl: 24px;
+      --space-3xl: 32px;
+
+      /* ========== CARD PADDING ========== */
+      --card-padding: 12px;
+      --table-padding: 6px;
+
+      /* ========== BORDER RADIUS ========== */
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+
+      /* ========== SHADOWS ========== */
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+      --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.3);
+      --shadow-glow-gold: 0 0 15px rgba(255, 189, 89, 0.3);
+      --shadow-glow-cyan: 0 0 15px rgba(0, 240, 255, 0.3);
+      --shadow-glow-green: 0 0 15px rgba(16, 185, 129, 0.3);
+      --shadow-glow-purple: 0 0 15px rgba(106, 91, 255, 0.3);
+
+      /* ========== GLASSMORPHISM ========== */
+      --glass-blur: blur(40px);
+
+      /* ========== TYPOGRAPHY ========== */
+      --font-heading: 'Montserrat', sans-serif;
+      --font-body: 'Noto Sans Display', sans-serif;
+      --text-xs: 0.75rem;
+      --text-sm: 0.85rem;
+      --text-base: 0.95rem;
+      --text-lg: 1.1rem;
+      --text-xl: 1.25rem;
+      --text-2xl: 1.5rem;
+    }
+
+    /* DESKTOP BREAKPOINT (600px+) */
+    @media (min-width: 600px) {
+      :root {
+        --text-padding: 0;
+        --container-padding: 1.5rem;
+        --card-padding: 16px;
+        --table-padding: 12px;
+
+        --space-sm: 10px;
+        --space-md: 16px;
+        --space-lg: 20px;
+        --space-xl: 24px;
+        --space-2xl: 32px;
+        --space-3xl: 48px;
+
+        --text-xs: 0.8rem;
+        --text-sm: 0.9rem;
+        --text-base: 1rem;
+        --text-lg: 1.15rem;
+        --text-xl: 1.3rem;
+        --text-2xl: 1.6rem;
+      }
+    }
+
+    /* ========== RESET & BASE ========== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--color-bg-dark);
+      color: var(--color-text);
+      line-height: 1.6;
+      min-height: 100vh;
+      font-size: var(--text-base);
+    }
+
+    /* ========== BOKEH BACKGROUND ========== */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        linear-gradient(180deg,
+          rgba(10, 15, 26, 1) 0%,
+          rgba(17, 34, 80, 0.8) 30%,
+          rgba(17, 34, 80, 0.8) 70%,
+          rgba(10, 15, 26, 1) 100%
+        ),
+        radial-gradient(ellipse 600px 600px at 20% 20%,
+          rgba(255, 189, 89, 0.08), transparent 70%),
+        radial-gradient(ellipse 500px 500px at 80% 80%,
+          rgba(0, 240, 255, 0.06), transparent 70%),
+        radial-gradient(ellipse 400px 400px at 50% 50%,
+          rgba(106, 91, 255, 0.04), transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* ========== CONTAINER ========== */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: var(--container-padding);
+    }
+
+    @media (min-width: 600px) {
+      .container {
+        padding: var(--container-padding);
+      }
+    }
+
+    /* ========== LESSON HEADER ========== */
+    .lesson-header {
+      text-align: center;
+      padding: var(--space-lg) var(--text-padding);
+      background: var(--bg-card);
+      border-radius: 0;
+      border: none;
+      border-bottom: 1px solid var(--border-subtle);
+      backdrop-filter: var(--glass-blur);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 1px;
+    }
+
+    .lesson-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg,
+        var(--color-gold),
+        var(--color-cyan),
+        var(--color-gold)
+      );
+    }
+
+    @media (min-width: 600px) {
+      .lesson-header {
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-subtle);
+        padding: var(--space-xl) var(--card-padding);
+        margin-bottom: var(--space-lg);
+      }
+    }
+
+    .lesson-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));
+      color: var(--color-navy);
+      padding: var(--space-xs) var(--space-md);
+      border-radius: 20px;
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: var(--space-sm);
+    }
+
+    .lesson-title {
+      font-family: var(--font-heading);
+      font-size: var(--text-2xl);
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--color-gold), var(--color-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: var(--space-sm);
+      line-height: 1.3;
+    }
+
+    .lesson-subtitle {
+      color: var(--color-text-secondary);
+      font-size: var(--text-sm);
+    }
+
+    /* ========== SECTION ========== */
+    .section {
+      background: var(--bg-glass);
+      border: none;
+      border-bottom: 1px solid var(--glass-border);
+      border-radius: 0;
+      padding: var(--card-padding) 0;
+      margin-bottom: 1px;
+      backdrop-filter: var(--glass-blur);
+    }
+
+    @media (min-width: 600px) {
+      .section {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-lg);
+        padding: var(--card-padding);
+        margin-bottom: var(--space-lg);
+      }
+    }
+
+    .section > p,
+    .section > h2,
+    .section > h3,
+    .section > ul,
+    .section > ol {
+      padding-left: var(--text-padding);
+      padding-right: var(--text-padding);
+    }
+
+    @media (min-width: 600px) {
+      .section > p,
+      .section > h2,
+      .section > h3,
+      .section > ul,
+      .section > ol {
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+
+    .section-title {
+      font-family: var(--font-heading);
+      font-size: var(--text-xl);
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .section-title .icon {
+      font-size: 1.2em;
+    }
+
+    .section p {
+      margin-bottom: var(--space-md);
+      line-height: 1.7;
+    }
+
+    .section p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* ========== HIGHLIGHT BOX ========== */
+    .highlight-box {
+      padding: var(--card-padding);
+      padding-left: calc(var(--text-padding) - 4px);
+      padding-right: var(--text-padding);
+      border-radius: 0;
+      margin: var(--space-md) 0;
+      border: none;
+      border-left: 4px solid var(--color-gold);
+      background: linear-gradient(135deg,
+        rgba(255, 189, 89, 0.1),
+        rgba(0, 240, 255, 0.05)
+      );
+    }
+
+    @media (min-width: 600px) {
+      .highlight-box {
+        border: 1px solid var(--border-gold);
+        border-left: 4px solid var(--color-gold);
+        border-radius: var(--radius-md);
+        padding: var(--card-padding);
+      }
+    }
+
+    .highlight-box.cyan {
+      border-left-color: var(--color-cyan);
+      background: linear-gradient(135deg,
+        rgba(0, 240, 255, 0.1),
+        rgba(106, 91, 255, 0.05)
+      );
+    }
+
+    @media (min-width: 600px) {
+      .highlight-box.cyan {
+        border-color: var(--border-cyan);
+        border-left-color: var(--color-cyan);
+      }
+    }
+
+    .highlight-box.green {
+      border-left-color: var(--color-green);
+      background: linear-gradient(135deg,
+        rgba(16, 185, 129, 0.1),
+        rgba(0, 240, 255, 0.05)
+      );
+    }
+
+    @media (min-width: 600px) {
+      .highlight-box.green {
+        border-color: var(--border-green);
+        border-left-color: var(--color-green);
+      }
+    }
+
+    .highlight-box.purple {
+      border-left-color: var(--color-purple);
+      background: linear-gradient(135deg,
+        rgba(106, 91, 255, 0.1),
+        rgba(0, 240, 255, 0.05)
+      );
+    }
+
+    @media (min-width: 600px) {
+      .highlight-box.purple {
+        border-color: var(--border-purple);
+        border-left-color: var(--color-purple);
+      }
+    }
+
+    .highlight-box p {
+      margin: 0;
+      font-size: var(--text-sm);
+    }
+
+    .highlight-box strong {
+      color: var(--color-gold);
+    }
+
+    .highlight-box.cyan strong {
+      color: var(--color-cyan);
+    }
+
+    .highlight-box.green strong {
+      color: var(--color-green);
+    }
+
+    .highlight-box.purple strong {
+      color: var(--color-purple);
+    }
+
+    /* ========== OBJECTIVE LIST ========== */
+    .objective-list {
+      list-style: none;
+      padding: 0;
+      margin: var(--space-md) 0;
+      background: var(--glass-border);
+    }
+
+    @media (min-width: 600px) {
+      .objective-list {
+        background: transparent;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-sm);
+      }
+    }
+
+    .objective-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      padding: var(--space-md) var(--text-padding);
+      background: var(--bg-glass);
+      border: none;
+      border-left: 4px solid var(--color-gold);
+      margin-bottom: 1px;
+      font-size: var(--text-sm);
+    }
+
+    @media (min-width: 600px) {
+      .objective-list li {
+        border: 1px solid var(--border-gold);
+        border-left: 4px solid var(--color-gold);
+        border-radius: var(--radius-sm);
+        padding: var(--space-md);
+        margin-bottom: 0;
+      }
+    }
+
+    .objective-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    .objective-list .bullet {
+      color: var(--color-gold);
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    /* ========== STATS GRID ========== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      margin: var(--space-md) 0;
+      background: var(--glass-border);
+    }
+
+    @media (min-width: 600px) {
+      .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-md);
+        background: transparent;
+      }
+    }
+
+    .stat-card {
+      background: var(--bg-glass);
+      border: none;
+      border-radius: 0;
+      padding: var(--space-lg) var(--space-md);
+      text-align: center;
+    }
+
+    @media (min-width: 600px) {
+      .stat-card {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+        padding: var(--card-padding);
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-glow-cyan);
+      }
+    }
+
+    .stat-icon {
+      font-size: 2rem;
+      margin-bottom: var(--space-xs);
+    }
+
+    .stat-value {
+      font-family: var(--font-heading);
+      font-size: var(--text-lg);
+      font-weight: 800;
+      color: var(--color-cyan);
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+      margin-bottom: var(--space-xs);
+    }
+
+    .stat-label {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-card.green .stat-value {
+      color: var(--color-green);
+      text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+    }
+
+    .stat-card.gold .stat-value {
+      color: var(--color-gold);
+      text-shadow: 0 0 10px rgba(255, 189, 89, 0.5);
+    }
+
+    /* ========== IMAGE CONTAINER ========== */
+    .image-container {
+      margin: var(--space-md) 0;
+      text-align: center;
+    }
+
+    .image-container img {
+      width: 100%;
+      height: auto;
+      border-radius: 0;
+      display: block;
+      box-shadow: var(--shadow-md);
+    }
+
+    @media (min-width: 600px) {
+      .image-container img {
+        border-radius: var(--radius-md);
+        border: 2px solid var(--glass-border);
+      }
+    }
+
+    .image-caption {
+      margin-top: var(--space-sm);
+      padding: 0 var(--text-padding);
+      color: var(--color-text-muted);
+      font-size: var(--text-xs);
+      font-style: italic;
+      text-align: center;
+    }
+
+    @media (min-width: 600px) {
+      .image-caption {
+        padding: 0;
+        font-size: var(--text-sm);
+      }
+    }
+
+    /* ========== SUMMARY BOX ========== */
+    .summary-box {
+      background: linear-gradient(135deg,
+        rgba(255, 189, 89, 0.1),
+        rgba(0, 240, 255, 0.05)
+      );
+      border: none;
+      border-left: 4px solid var(--color-gold);
+      border-radius: 0;
+      padding: var(--card-padding) 0;
+      margin: var(--space-lg) 0;
+    }
+
+    @media (min-width: 600px) {
+      .summary-box {
+        border: 2px solid var(--color-gold);
+        border-radius: var(--radius-lg);
+        padding: var(--card-padding);
+      }
+    }
+
+    .summary-box.green {
+      border-left-color: var(--color-green);
+      background: linear-gradient(135deg,
+        rgba(16, 185, 129, 0.1),
+        rgba(0, 240, 255, 0.05)
+      );
+    }
+
+    @media (min-width: 600px) {
+      .summary-box.green {
+        border-color: var(--color-green);
+      }
+    }
+
+    .summary-title {
+      font-family: var(--font-heading);
+      font-size: var(--text-lg);
+      font-weight: 700;
+      color: var(--color-gold);
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: 0 var(--text-padding);
+    }
+
+    .summary-box.green .summary-title {
+      color: var(--color-green);
+    }
+
+    @media (min-width: 600px) {
+      .summary-title {
+        padding: 0;
+      }
+    }
+
+    .key-points {
+      padding: 0 var(--text-padding);
+    }
+
+    @media (min-width: 600px) {
+      .key-points {
+        padding: 0;
+      }
+    }
+
+    .key-point {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-sm);
+      font-size: var(--text-sm);
+      line-height: 1.5;
+    }
+
+    .key-point:last-child {
+      margin-bottom: 0;
+    }
+
+    .key-point .number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark));
+      color: var(--color-navy);
+      border-radius: 50%;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: var(--text-xs);
+      flex-shrink: 0;
+    }
+
+    .summary-box.green .key-point .number {
+      background: linear-gradient(135deg, var(--color-green), var(--color-cyan));
+    }
+
+    /* ========== QUIZ SECTION ========== */
+    .quiz-section {
+      background: linear-gradient(135deg,
+        rgba(106, 91, 255, 0.15),
+        rgba(0, 240, 255, 0.05)
+      );
+      border: none;
+      border-left: 4px solid var(--color-purple);
+      border-radius: 0;
+      padding: var(--card-padding) 0;
+      margin: var(--space-lg) 0;
+    }
+
+    @media (min-width: 600px) {
+      .quiz-section {
+        border: 2px solid var(--color-purple);
+        border-radius: var(--radius-lg);
+        padding: var(--card-padding);
+      }
+    }
+
+    .quiz-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-lg);
+      padding: 0 var(--text-padding);
+    }
+
+    @media (min-width: 600px) {
+      .quiz-header {
+        padding: 0;
+      }
+    }
+
+    .quiz-icon {
+      font-size: 1.3rem;
+    }
+
+    .quiz-title {
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: var(--text-lg);
+      color: var(--color-purple);
+      margin: 0;
+    }
+
+    .quiz-question {
+      background: var(--bg-glass);
+      border: none;
+      border-radius: 0;
+      border-bottom: 1px solid var(--glass-border);
+      padding: var(--card-padding) var(--text-padding);
+      margin-bottom: 1px;
+    }
+
+    @media (min-width: 600px) {
+      .quiz-question {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+        padding: var(--card-padding);
+        margin-bottom: var(--space-lg);
+      }
+    }
+
+    .question-header {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+    }
+
+    .question-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
+      background: linear-gradient(135deg, var(--color-purple), #8B5CF6);
+      color: white;
+      border-radius: 50%;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: var(--text-xs);
+    }
+
+    @media (min-width: 600px) {
+      .question-number {
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        font-size: var(--text-sm);
+      }
+    }
+
+    .question-text {
+      font-weight: 600;
+      color: var(--color-white);
+      font-size: var(--text-sm);
+      line-height: 1.5;
+    }
+
+    @media (min-width: 600px) {
+      .question-text {
+        font-size: var(--text-base);
+      }
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      background: var(--glass-border);
+      margin: 0 calc(-1 * var(--text-padding));
+    }
+
+    @media (min-width: 600px) {
+      .quiz-options {
+        gap: var(--space-sm);
+        background: transparent;
+        margin: 0;
+      }
+    }
+
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.02);
+      border: none;
+      border-radius: 0;
+      padding: var(--space-md) var(--text-padding);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: var(--text-sm);
+    }
+
+    @media (min-width: 600px) {
+      .quiz-option {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-sm);
+        padding: var(--space-md);
+        font-size: var(--text-base);
+      }
+
+      .quiz-option:hover:not(.disabled):not(.correct):not(.incorrect) {
+        background: rgba(0, 240, 255, 0.1);
+        border-color: var(--color-cyan);
+      }
+    }
+
+    .quiz-option.disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .quiz-option.correct {
+      background: rgba(16, 185, 129, 0.2);
+      border-left: 4px solid var(--color-green);
+      pointer-events: none;
+    }
+
+    @media (min-width: 600px) {
+      .quiz-option.correct {
+        border: 1px solid var(--color-green);
+        border-left: 4px solid var(--color-green);
+      }
+    }
+
+    .quiz-option.incorrect {
+      background: rgba(239, 68, 68, 0.2);
+      border-left: 4px solid var(--color-red);
+      pointer-events: none;
+    }
+
+    @media (min-width: 600px) {
+      .quiz-option.incorrect {
+        border: 1px solid var(--color-red);
+        border-left: 4px solid var(--color-red);
+      }
+    }
+
+    .quiz-option.show-correct {
+      border-left: 4px solid var(--color-green);
+    }
+
+    @media (min-width: 600px) {
+      .quiz-option.show-correct {
+        border-color: var(--color-green);
+      }
+    }
+
+    .option-letter {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
+      background: rgba(106, 91, 255, 0.2);
+      color: var(--color-purple);
+      border-radius: 50%;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: var(--text-xs);
+    }
+
+    @media (min-width: 600px) {
+      .option-letter {
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+        font-size: var(--text-sm);
+      }
+    }
+
+    .option-text {
+      flex: 1;
+      color: var(--color-text);
+    }
+
+    .option-result {
+      font-weight: 700;
+      font-size: var(--text-xs);
+      min-width: 50px;
+      text-align: right;
+    }
+
+    @media (min-width: 600px) {
+      .option-result {
+        font-size: var(--text-sm);
+        min-width: 60px;
+      }
+    }
+
+    .quiz-option.correct .option-result {
+      color: var(--color-green);
+    }
+
+    .quiz-option.incorrect .option-result {
+      color: var(--color-red);
+    }
+
+    .quiz-explanation {
+      display: none;
+      margin-top: var(--space-md);
+      padding: var(--space-md);
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 0;
+      font-size: var(--text-xs);
+      line-height: 1.6;
+      color: var(--color-text-muted);
+    }
+
+    @media (min-width: 600px) {
+      .quiz-explanation {
+        border-radius: var(--radius-sm);
+        font-size: var(--text-sm);
+      }
+    }
+
+    .quiz-explanation.show {
+      display: block;
+    }
+
+    .quiz-explanation.correct {
+      border-left: 3px solid var(--color-green);
+    }
+
+    .quiz-explanation.incorrect {
+      border-left: 3px solid var(--color-red);
+    }
+
+    .retake-btn {
+      display: none;
+      margin-top: var(--space-lg);
+      margin-left: var(--text-padding);
+      margin-right: var(--text-padding);
+      padding: var(--space-sm) var(--space-lg);
+      background: linear-gradient(135deg, var(--color-purple), #8B5CF6);
+      color: white;
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font-heading);
+      font-size: var(--text-sm);
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    @media (min-width: 600px) {
+      .retake-btn {
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+      .retake-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(106, 91, 255, 0.4);
+      }
+    }
+
+    .retake-btn.show {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    /* ========== FOOTER ========== */
+    .lesson-footer {
+      text-align: center;
+      padding: var(--space-lg) var(--text-padding);
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-subtle);
+      margin-top: 0;
+    }
+
+    @media (min-width: 600px) {
+      .lesson-footer {
+        background: transparent;
+        border-top: none;
+        margin-top: var(--space-lg);
+        padding: var(--space-lg) 0;
+      }
+    }
+
+    .footer-brand {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      color: var(--color-gold);
+      font-size: var(--text-sm);
+    }
+
+    .footer-url {
+      color: var(--color-text-muted);
+      font-size: var(--text-xs);
+      margin-top: var(--space-xs);
+    }
+
+    .footer-url a {
+      color: var(--color-cyan);
+      text-decoration: none;
+    }
+
+    .footer-url a:hover {
+      text-decoration: underline;
+    }
+
+    /* ========== ADDITIONAL STYLES ========== */
+    .question-prompt {
+      font-style: italic;
+      color: var(--color-cyan);
+      font-size: var(--text-lg);
+      text-align: center;
+      margin: var(--space-lg) 0;
+      padding: 0 var(--text-padding);
+    }
+
+    @media (min-width: 600px) {
+      .question-prompt {
+        padding: 0;
+      }
+    }
+
+    .level-card {
+      background: var(--bg-glass);
+      border: none;
+      border-left: 4px solid var(--color-gold);
+      border-radius: 0;
+      padding: var(--card-padding) var(--text-padding);
+      margin-bottom: 1px;
+    }
+
+    @media (min-width: 600px) {
+      .level-card {
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+        padding: var(--card-padding);
+        margin-bottom: var(--space-md);
+        transition: transform 0.3s, box-shadow 0.3s;
+      }
+
+      .level-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-glow-gold);
+      }
+    }
+
+    .level-card.level-1 {
+      border-left-color: var(--color-gold);
+    }
+
+    .level-card.level-2 {
+      border-left-color: var(--color-cyan);
+    }
+
+    .level-card.level-3 {
+      border-left-color: var(--color-green);
+    }
+
+    .level-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-sm);
+    }
+
+    .level-icon {
+      font-size: 1.5rem;
+    }
+
+    .level-title {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: var(--text-base);
+      color: var(--color-gold);
+    }
+
+    .level-card.level-2 .level-title {
+      color: var(--color-cyan);
+    }
+
+    .level-card.level-3 .level-title {
+      color: var(--color-green);
+    }
+
+    .level-desc {
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    .reflection-box {
+      background: linear-gradient(135deg,
+        rgba(0, 240, 255, 0.1),
+        rgba(106, 91, 255, 0.05)
+      );
+      border: none;
+      border-left: 4px solid var(--color-cyan);
+      border-radius: 0;
+      padding: var(--card-padding) var(--text-padding);
+      margin: var(--space-lg) 0;
+    }
+
+    @media (min-width: 600px) {
+      .reflection-box {
+        border: 1px solid var(--border-cyan);
+        border-radius: var(--radius-lg);
+        padding: var(--card-padding);
+      }
+    }
+
+    .reflection-title {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: var(--text-lg);
+      color: var(--color-cyan);
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .reflection-questions {
+      list-style: none;
+      padding: 0;
+    }
+
+    .reflection-questions li {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+    }
+
+    .reflection-questions li:last-child {
+      margin-bottom: 0;
+    }
+
+    .reflection-questions .q-icon {
+      color: var(--color-cyan);
+      font-weight: bold;
+    }
+
+    .levels-container {
+      background: var(--glass-border);
+      margin: var(--space-md) 0;
+    }
+
+    @media (min-width: 600px) {
+      .levels-container {
+        background: transparent;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- ============================================
+         LESSON HEADER
+         ============================================ -->
+    <header class="lesson-header">
+      <span class="lesson-badge">STARTER - Bai 1.1</span>
+      <h1 class="lesson-title">Tu Do Tai Chinh La Gi Voi BAN?</h1>
+      <p class="lesson-subtitle">Khoi goi uoc mo va xac dinh muc tieu ca nhan</p>
+    </header>
+
+    <!-- ============================================
+         SECTION: MUC TIEU BAI HOC
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">🎯</span>
+        Muc Tieu Bai Hoc
+      </h2>
+
+      <ul class="objective-list">
+        <li>
+          <span class="bullet">✓</span>
+          <span>Hieu duoc y nghia thuc su cua tu do tai chinh voi chinh ban</span>
+        </li>
+        <li>
+          <span class="bullet">✓</span>
+          <span>Nhan dien 3 cap do tu do tai chinh va xac dinh vi tri hien tai</span>
+        </li>
+        <li>
+          <span class="bullet">✓</span>
+          <span>Xay dung tam nhin ro rang ve cuoc song ma ban mong muon</span>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ============================================
+         SECTION: OPENING HOOK
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">💭</span>
+        Hay Thu Tuong Tuong...
+      </h2>
+
+      <p class="question-prompt">"Neu tien khong con la van de, ban se song nhu the nao?"</p>
+
+      <p>Day la mot cau hoi don gian, nhung cau tra loi lai mang y nghia vo cung sau sac. Hay danh mot phut de nghi ve dieu nay: <strong>Ban se danh thoi gian cho ai?</strong> <strong>Ban se lam gi vao moi buoi sang?</strong> <strong>Ban se song o dau?</strong></p>
+
+      <p>Nhieu nguoi chung ta bi cuon vao guong quay cua cuoc song hang ngay - di lam, tra hoa don, lo lang ve tuong lai - den noi quen mat rằng <strong>cuoc song co the khac di</strong>. Chung ta quen mat uoc mo cua chinh minh.</p>
+
+      <div class="highlight-box cyan">
+        <p><strong>💡 Bai tap nho:</strong> Truoc khi doc tiep, hay nham mat lai 30 giay va tuong tuong mot ngay trong cuoc song mo uoc cua ban. Ban thuc day luc may gio? Ban lam gi dau tien? Ai o ben canh ban?</p>
+      </div>
+    </section>
+
+    <!-- ============================================
+         🖼️ HINH 1: LIFESTYLE COMPARISON
+         ============================================ -->
+    <div class="image-container">
+      <img
+        src="https://via.placeholder.com/800x600/112250/FFBD59?text=1.1-lifestyle-comparison.png"
+        alt="So sanh cuoc song stressed vs tu do tai chinh"
+        loading="lazy"
+      />
+    </div>
+    <p class="image-caption">Hinh 1: Su khac biet giua cuoc song stressed va cuoc song tu do</p>
+
+    <!-- ============================================
+         SECTION: DINH NGHIA TU DO TAI CHINH
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">📚</span>
+        Tu Do Tai Chinh Thuc Su La Gi?
+      </h2>
+
+      <p>Nhieu nguoi nghi tu do tai chinh la <strong>co thật nhieu tien</strong> - la trieu phu, ty phu. Nhung su that khong phai vay. Tu do tai chinh khong phai la mot con so cu the trong tai khoan ngan hang.</p>
+
+      <p>Tu do tai chinh la mot <strong>TRANG THAI</strong> - mot cam giac, mot cach song. Day la khi ban:</p>
+
+      <div class="stats-grid">
+        <div class="stat-card gold">
+          <div class="stat-icon">🛡️</div>
+          <div class="stat-value">An Toan</div>
+          <div class="stat-label">Khong lo lang ve chi phi co ban</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🎯</div>
+          <div class="stat-value">Tu Chu</div>
+          <div class="stat-label">Lam chu thoi gian cua minh</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon">✨</div>
+          <div class="stat-value">Lua Chon</div>
+          <div class="stat-label">Song theo cach ban muon</div>
+        </div>
+      </div>
+
+      <p>Quan trong nhat, tu do tai chinh la kha nang <strong>NOI KHONG</strong> voi nhung gi ban khong muon - cong viec doc hai, moi quan he tieu cuc, hay bat ky dieu gi lam ban khong hanh phuc.</p>
+
+      <div class="highlight-box green">
+        <p><strong>✅ Dinh nghia GEM:</strong> Tu do tai chinh = Khi tien lam viec cho ban, thay vi ban lam viec vi tien. Day la khi ban co quyen lua chon - lam gi, voi ai, o dau, khi nao.</p>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SECTION: 3 CAP DO TU DO
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">📊</span>
+        3 Cap Do Tu Do Tai Chinh
+      </h2>
+
+      <p>Tu do tai chinh khong phai la dich den ma la <strong>hanh trinh</strong>. Co 3 cap do ma ban co the huong den:</p>
+
+      <div class="levels-container">
+        <div class="level-card level-1">
+          <div class="level-header">
+            <span class="level-icon">🌱</span>
+            <span class="level-title">CAP DO 1: SURVIVAL - TON TAI</span>
+          </div>
+          <div class="level-desc">
+            Thu nhap thu dong du de trang trai <strong>chi phi co ban</strong>: nha o, an uong, di lai, hoa don. Ban khong can lam them gio, khong lo bi mat viec. Day la nen tang an toan dau tien.
+          </div>
+        </div>
+
+        <div class="level-card level-2">
+          <div class="level-header">
+            <span class="level-icon">🌿</span>
+            <span class="level-title">CAP DO 2: COMFORT - THOAI MAI</span>
+          </div>
+          <div class="level-desc">
+            Thu nhap thu dong du cho cuoc song <strong>thoai mai + tiet kiem</strong>. Ban co the di du lich, an nha hang, mua sam ma khong can tinh toan qua nhieu. Van con du de dau tu cho tuong lai.
+          </div>
+        </div>
+
+        <div class="level-card level-3">
+          <div class="level-header">
+            <span class="level-icon">🌳</span>
+            <span class="level-title">CAP DO 3: ABUNDANCE - THINH VUONG</span>
+          </div>
+          <div class="level-desc">
+            Thu nhap thu dong <strong>vuot xa nhu cau</strong>. Ban co the giup do nguoi than, dau tu vao dam me, tao impact cho cong dong. Day la khi ban thuc su TU DO ve moi mat.
+          </div>
+        </div>
+      </div>
+
+      <div class="highlight-box purple">
+        <p><strong>📝 Luu y:</strong> Khong phai ai cung can den cap do 3. Voi nhieu nguoi, cap do 1 hoac 2 da la du de hanh phuc. Dieu quan trong la <strong>BAN</strong> muon o dau, khong phai xa hoi noi ban nen o dau.</p>
+      </div>
+    </section>
+
+    <!-- ============================================
+         🖼️ HINH 2: 3 CAP DO TU DO
+         ============================================ -->
+    <div class="image-container">
+      <img
+        src="https://via.placeholder.com/800x600/112250/00F0FF?text=1.1-3-cap-do-tu-do.png"
+        alt="Infographic 3 cap do tu do tai chinh"
+        loading="lazy"
+      />
+    </div>
+    <p class="image-caption">Hinh 2: 3 Cap Do Tu Do Tai Chinh - Survival, Comfort, Abundance</p>
+
+    <!-- ============================================
+         SECTION: BAI TAP REFLECTION
+         ============================================ -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="icon">🔍</span>
+        Tu Van Ban Than
+      </h2>
+
+      <p>Bay gio, hay danh vai phut de tu van ban than. Tra loi trung thuc - khong ai phan xet ban o day.</p>
+
+      <div class="reflection-box">
+        <h3 class="reflection-title">
+          <span>✍️</span>
+          Cau Hoi Reflection
+        </h3>
+        <ul class="reflection-questions">
+          <li>
+            <span class="q-icon">❓</span>
+            <span><strong>Ban dang o cap do nao?</strong> Hien tai, thu nhap cua ban dang o dau trong 3 cap do tren? Hay trung thuc voi chinh minh.</span>
+          </li>
+          <li>
+            <span class="q-icon">❓</span>
+            <span><strong>Cap do nao la "du" voi ban?</strong> Khong phai ai cung can trieu do. Voi ban, cuoc song nhu the nao la du?</span>
+          </li>
+          <li>
+            <span class="q-icon">❓</span>
+            <span><strong>Dieu gi dang can tro ban?</strong> La thieu kien thuc? Thieu thoi gian? Thieu von? Hay thieu mot he thong ro rang?</span>
+          </li>
+        </ul>
+      </div>
+
+      <p>Neu ban chua co cau tra loi ro rang, <strong>khong sao ca</strong>. Day chi la buoc dau tien. Trong hanh trinh sap toi, chung ta se cung nhau kham pha va tim ra con duong phu hop voi ban.</p>
+    </section>
+
+    <!-- ============================================
+         🖼️ HINH 3: QUOTE CARD
+         ============================================ -->
+    <div class="image-container">
+      <img
+        src="https://via.placeholder.com/800x600/112250/6A5BFF?text=1.1-quote-tu-do.png"
+        alt="Quote card ve tu do tai chinh"
+        loading="lazy"
+      />
+    </div>
+    <p class="image-caption">Hinh 3: "Tu do tai chinh khong phai ve viec co nhieu tien - ma la ve viec co nhieu lua chon"</p>
+
+    <!-- ============================================
+         🖼️ HINH 4: REFLECTION WORKSHEET
+         ============================================ -->
+    <div class="image-container">
+      <img
+        src="https://via.placeholder.com/800x600/112250/10B981?text=1.1-reflection-worksheet.png"
+        alt="Reflection worksheet template"
+        loading="lazy"
+      />
+    </div>
+    <p class="image-caption">Hinh 4: Template Reflection - Hay tu in ra va viet ra cau tra loi cua ban</p>
+
+    <!-- ============================================
+         SUMMARY BOX
+         ============================================ -->
+    <div class="summary-box green">
+      <h3 class="summary-title">
+        <span>📝</span>
+        Tom Tat Bai Hoc
+      </h3>
+      <div class="key-points">
+        <div class="key-point">
+          <span class="number">1</span>
+          <span>Tu do tai chinh la mot <strong>TRANG THAI</strong>, khong phai con so cu the - la cam giac an toan, tu chu va co quyen lua chon.</span>
+        </div>
+        <div class="key-point">
+          <span class="number">2</span>
+          <span>Co <strong>3 cap do</strong> tu do: Survival (ton tai), Comfort (thoai mai), Abundance (thinh vuong) - moi nguoi co muc tieu khac nhau.</span>
+        </div>
+        <div class="key-point">
+          <span class="number">3</span>
+          <span>Dieu quan trong nhat la xac dinh <strong>BAN muon gi</strong>, khong phai xa hoi noi ban nen muon gi.</span>
+        </div>
+        <div class="key-point">
+          <span class="number">4</span>
+          <span>Hanh trinh bat dau bang viec <strong>tu van ban than</strong> - hieu ro vi tri hien tai va dich den mong muon.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================
+         QUIZ SECTION - INSTANT FEEDBACK
+         ============================================ -->
+    <section class="quiz-section" id="quizSection">
+      <div class="quiz-header">
+        <span class="quiz-icon">📝</span>
+        <h2 class="quiz-title">KIEM TRA KIEN THUC</h2>
+      </div>
+
+      <!-- Cau 1 -->
+      <div class="quiz-question" id="question1">
+        <div class="question-header">
+          <span class="question-number">1</span>
+          <span class="question-text">Tu do tai chinh dung nghia nhat la gi?</span>
+        </div>
+
+        <div class="quiz-options">
+          <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 1)">
+            <span class="option-letter">A</span>
+            <span class="option-text">Co it nhat 1 ty dong trong tai khoan ngan hang</span>
+            <span class="option-result"></span>
+          </div>
+          <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 1)">
+            <span class="option-letter">B</span>
+            <span class="option-text">Khong can di lam, ngoi nha huong thu cuoc song</span>
+            <span class="option-result"></span>
+          </div>
+          <div class="quiz-option" data-correct="true" onclick="checkAnswer(this, 1)">
+            <span class="option-letter">C</span>
+            <span class="option-text">Co quyen lua chon song theo cach minh muon, khong bi ap luc tai chinh</span>
+            <span class="option-result"></span>
+          </div>
+          <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 1)">
+            <span class="option-letter">D</span>
+            <span class="option-text">Kiem duoc nhieu tien hon nguoi khac</span>
+            <span class="option-result"></span>
+          </div>
+        </div>
+
+        <div class="quiz-explanation" id="explanation1">
+          <strong>Giai thich:</strong> Tu do tai chinh khong phai ve con so cu the, ma la ve viec co quyen lua chon - lam gi, voi ai, o dau, khi nao. Day la khi tien lam viec cho ban, thay vi ban lam viec chi vi tien.
+        </div>
+      </div>
+
+      <!-- Cau 2 -->
+      <div class="quiz-question" id="question2">
+        <div class="question-header">
+          <span class="question-number">2</span>
+          <span class="question-text">Cap do "COMFORT" trong tu do tai chinh co nghia la:</span>
+        </div>
+
+        <div class="quiz-options">
+          <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 2)">
+            <span class="option-letter">A</span>
+            <span class="option-text">Chi du tien trang trai chi phi co ban hang thang</span>
+            <span class="option-result"></span>
+          </div>
+          <div class="quiz-option" data-correct="true" onclick="checkAnswer(this, 2)">
+            <span class="option-letter">B</span>
+            <span class="option-text">Song thoai mai, co the di du lich, an ngon, va van con du de tiet kiem</span>
+            <span class="option-result"></span>
+          </div>
+          <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 2)">
+            <span class="option-letter">C</span>
+            <span class="option-text">Thu nhap vuot xa moi nhu cau, co the giup do nhieu nguoi</span>
+            <span class="option-result"></span>
+          </div>
+          <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 2)">
+            <span class="option-letter">D</span>
+            <span class="option-text">Lam viec it hon 4 tieng moi ngay</span>
+            <span class="option-result"></span>
+          </div>
+        </div>
+
+        <div class="quiz-explanation" id="explanation2">
+          <strong>Giai thich:</strong> Cap do COMFORT (Cap do 2) la khi thu nhap thu dong du cho cuoc song thoai mai - an ngon, di du lich, mua sam ma khong can tinh toan qua nhieu, va van con du de dau tu cho tuong lai. Day la cap do ma nhieu nguoi huong den.
+        </div>
+      </div>
+
+      <!-- Retake Button -->
+      <button class="retake-btn" id="retakeBtn" onclick="retakeQuiz()">
+        🔄 Lam Lai Quiz
+      </button>
+    </section>
+
+    <!-- ============================================
+         FOOTER
+         ============================================ -->
+    <footer class="lesson-footer">
+      <div class="footer-brand">GEM Trading Academy</div>
+      <div class="footer-url">
+        <a href="https://gemral.com" target="_blank">gemral.com</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- QUIZ JAVASCRIPT -->
+  <script>
+    // Track cau da tra loi
+    const answeredQuestions = {};
+
+    // Tong so cau quiz
+    const totalQuestions = 2;
+
+    function checkAnswer(selectedOption, questionNumber) {
+      // Neu da tra loi roi thi khong lam gi
+      if (answeredQuestions[questionNumber]) {
+        return;
+      }
+
+      // Danh dau da tra loi
+      answeredQuestions[questionNumber] = true;
+
+      const questionDiv = document.getElementById('question' + questionNumber);
+      const options = questionDiv.querySelectorAll('.quiz-option');
+      const explanation = document.getElementById('explanation' + questionNumber);
+      const isCorrect = selectedOption.getAttribute('data-correct') === 'true';
+
+      // Disable tat ca options
+      options.forEach(option => {
+        option.classList.add('disabled');
+
+        // Hien thi dap an dung
+        if (option.getAttribute('data-correct') === 'true') {
+          option.classList.add('show-correct');
+          if (option === selectedOption) {
+            option.classList.add('correct');
+            option.querySelector('.option-result').textContent = '✓ Dung!';
+          }
+        }
+
+        // Danh dau lua chon sai
+        if (option === selectedOption && !isCorrect) {
+          option.classList.add('incorrect');
+          option.querySelector('.option-result').textContent = '✗ Sai';
+        }
+      });
+
+      // Hien thi giai thich
+      explanation.classList.add('show');
+      explanation.classList.add(isCorrect ? 'correct' : 'incorrect');
+
+      // Kiem tra neu da tra loi het -> hien nut Lam Lai
+      if (Object.keys(answeredQuestions).length === totalQuestions) {
+        document.getElementById('retakeBtn').classList.add('show');
+      }
+    }
+
+    // Lam Lai Quiz
+    function retakeQuiz() {
+      // Reset tracking
+      for (let key in answeredQuestions) {
+        delete answeredQuestions[key];
+      }
+
+      // Reset tat ca cau hoi
+      for (let i = 1; i <= totalQuestions; i++) {
+        const questionDiv = document.getElementById('question' + i);
+        const options = questionDiv.querySelectorAll('.quiz-option');
+        const explanation = document.getElementById('explanation' + i);
+
+        // Reset options
+        options.forEach(option => {
+          option.classList.remove('disabled', 'correct', 'incorrect', 'show-correct');
+          option.querySelector('.option-result').textContent = '';
+        });
+
+        // An giai thich
+        explanation.classList.remove('show', 'correct', 'incorrect');
+      }
+
+      // An nut Lam Lai
+      document.getElementById('retakeBtn').classList.remove('show');
+
+      // Scroll len dau quiz
+      document.getElementById('quizSection').scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>

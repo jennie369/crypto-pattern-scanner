@@ -90,31 +90,31 @@ const KarmaHistoryItem = ({
     // Use action_detail if available
     if (action_detail) return action_detail;
 
-    // Map action types to labels
+    // Map action types to labels - AI Sư Phụ tone
     const labels = {
-      trade_discipline_win: 'Win trade đúng kỷ luật',
-      trade_discipline_loss: 'Thua đúng kỷ luật',
-      fomo_trade: 'FOMO trade',
-      revenge_trade: 'Revenge trade',
-      no_stoploss: 'Trade không Stoploss',
-      sl_moved_wider: 'Dời Stoploss ra xa',
-      lesson_complete: 'Hoàn thành lesson',
+      trade_discipline_win: 'Thắng có kỷ luật',
+      trade_discipline_loss: 'Thua có kỷ luật - đúng đường',
+      fomo_trade: 'FOMO - thiếu kiên nhẫn',
+      revenge_trade: 'Revenge trade - tâm loạn',
+      no_stoploss: 'Trade không SL - liều lĩnh',
+      sl_moved_wider: 'Dời SL ra xa - phá luật',
+      lesson_complete: 'Hoàn thành bài học',
       module_complete: 'Hoàn thành module',
       course_complete: 'Hoàn thành khóa học',
-      quiz_perfect: 'Quiz đạt 100%',
+      quiz_perfect: 'Quiz 100% - xuất sắc',
       quiz_pass: 'Quiz đạt >= 80%',
-      meditation: 'Nghe bài thiền',
-      journal_entry: 'Viết trading journal',
+      meditation: 'Thiền định',
+      journal_entry: 'Nhật ký giao dịch',
       weekly_review: 'Review tuần',
-      tarot_reading: 'Đọc bài Tarot',
-      iching_reading: 'Bói quẻ Kinh Dịch',
-      refer_signup: 'Giới thiệu bạn đăng ký',
-      refer_subscribe: 'Bạn giới thiệu mua gói',
-      inactive_3_days: 'Không hoạt động 3 ngày',
-      inactive_7_days: 'Không hoạt động 7 ngày',
-      streak_break: 'Mất chuỗi kỷ luật',
-      win_streak_3: 'Chuỗi kỷ luật 3 ngày',
-      win_streak_7: 'Chuỗi kỷ luật 7 ngày',
+      tarot_reading: 'Bói Tarot',
+      iching_reading: 'Bói Kinh Dịch',
+      refer_signup: 'Giới thiệu thành viên mới',
+      refer_subscribe: 'Giới thiệu mua gói',
+      inactive_3_days: 'Bỏ bê luyện tập 3 ngày',
+      inactive_7_days: 'Bỏ bê luyện tập 7 ngày',
+      streak_break: 'Phá vỡ chuỗi kỷ luật',
+      win_streak_3: 'Kỷ luật 3 ngày liên tiếp',
+      win_streak_7: 'Kỷ luật 7 ngày liên tiếp',
     };
 
     return labels[action_type] || action_type?.replace(/_/g, ' ') || 'Thay đổi Karma';

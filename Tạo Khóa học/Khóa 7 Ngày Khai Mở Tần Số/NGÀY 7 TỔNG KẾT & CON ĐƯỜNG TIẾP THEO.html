@@ -1,0 +1,2211 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NGÀY 7: TỔNG KẾT & CON ĐƯỜNG TIẾP THEO | 7 Ngày Khai Mở Tần Số Gốc</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Noto+Sans+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ===== V5.4 DESIGN TOKENS - DARK THEME ===== */
+        :root {
+            /* === CTA BUTTONS === */
+            --cta-certification: '#certification';
+            --cta-partner: '#partner';
+            --cta-corporate: '#corporate';
+            --cta-prev-day: 'https://yinyangmasters.com/a/members/9d135b73-32b5-4397-9c58-900e26d5d42e/1b5d2261-631b-4eb5-b518-6c28c89044bc';
+
+            /* === V5.4 COLORS (Primary) === */
+            --color-navy: #112250;
+            --color-navy-dark: #0A0F1A;
+            --color-gold: #FFBD59;
+            --color-cyan: #00F0FF;
+            --color-purple: #6A5BFF;
+            --color-green: #10B981;
+            --color-red: #EF4444;
+            --color-bg-dark: #0A0F1A;
+            --color-text: #F1F5F9;
+            --color-text-muted: #94A3B8;
+
+            /* === V5.4 Derived Colors === */
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --bg-card-solid: #112250;
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --border-gold: rgba(255, 189, 89, 0.3);
+            --border-cyan: rgba(0, 240, 255, 0.3);
+
+            /* === V5.4 SPACING === */
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+            --space-2xl: 3rem;
+            --text-padding: 16px;
+            --container-padding: 0;
+            --card-padding: 1.5rem;
+
+            /* === V5.4 RADIUS === */
+            --radius-none: 0;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --radius-full: 9999px;
+
+            /* === LEGACY COMPATIBILITY === */
+            --primary-burgundy: #9C0612;
+            --primary-dark: #640A0C;
+            --secondary-red: #761E0B;
+            --gold-accent: #FFBD59;
+            --gold-light: #DEBC81;
+            --bg-navy: #112250;
+            --bg-light: var(--color-bg-dark);
+            --text-dark: var(--color-text);
+            --text-light: #FFFFFF;
+
+            /* === FONT === */
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+
+            /* === HÌNH ẢNH === */
+            --hero-image: url('https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=1200&q=80');
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            line-height: 1.7;
+            color: var(--color-text);
+            background: var(--color-bg-dark);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* V5.4 Bokeh Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 20% 40%, rgba(106, 91, 255, 0.15), transparent 50%),
+                radial-gradient(ellipse 60% 40% at 80% 60%, rgba(0, 240, 255, 0.1), transparent 50%),
+                radial-gradient(ellipse 50% 30% at 50% 80%, rgba(255, 189, 89, 0.08), transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 1rem;
+            color: var(--color-text);
+        }
+
+        p {
+            margin-bottom: 1.2rem;
+            color: var(--color-text);
+        }
+
+        /* V5.4 Container - Edge-to-Edge Mobile */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--container-padding);
+        }
+
+        @media (min-width: 600px) {
+            .container {
+                padding: var(--space-lg);
+            }
+        }
+
+        .content-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* V5.4 Text Padding for Mobile */
+        .content-section > p,
+        .content-section > h2,
+        .content-section > h3,
+        .content-section > ul,
+        .content-section > ol {
+            padding-left: var(--text-padding);
+            padding-right: var(--text-padding);
+        }
+
+        @media (min-width: 600px) {
+            .content-section > p,
+            .content-section > h2,
+            .content-section > h3,
+            .content-section > ul,
+            .content-section > ol {
+                padding-left: 0;
+                padding-right: 0;
+            }
+        }
+        
+        /* ===== NAVIGATION ===== */
+        .course-nav {
+            background: linear-gradient(135deg, var(--bg-navy) 0%, var(--primary-dark) 100%);
+            padding: 1.5rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .course-title {
+            color: var(--gold-accent);
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        
+        .day-indicator {
+            color: var(--text-light);
+            font-size: 1rem;
+            padding: 0.5rem 1.5rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50px;
+            border: 2px solid var(--gold-accent);
+        }
+        
+        .completion-badge {
+            color: var(--gold-light);
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255,189,89,0.2);
+            border-radius: 25px;
+        }
+        
+        /* ===== HERO SECTION ===== */
+        .hero-section {
+            background: linear-gradient(135deg, 
+                rgba(17, 34, 80, 0.95) 0%, 
+                rgba(100, 10, 12, 0.9) 100%),
+                var(--hero-image);
+            background-size: cover;
+            background-position: center;
+            padding: 6rem 2rem 4rem;
+            text-align: center;
+            color: var(--text-light);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,189,89,0.15) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .day-number {
+            font-size: 1.5rem;
+            color: var(--gold-accent);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: 3px;
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+        }
+        
+        .hero-subtitle {
+            font-size: 1.4rem;
+            color: var(--gold-light);
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            line-height: 1.8;
+        }
+        
+        .completion-celebration {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--gold-accent), var(--gold-light));
+            color: var(--primary-dark);
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-top: 1rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* ===== V5.4 CONTENT SECTIONS ===== */
+        .content-section {
+            padding: var(--space-xl) 0;
+        }
+
+        @media (min-width: 600px) {
+            .content-section {
+                padding: var(--space-2xl) var(--space-lg);
+            }
+        }
+
+        .content-section:nth-child(even) {
+            background: rgba(17, 34, 80, 0.3);
+        }
+
+        .section-title {
+            font-size: 2rem;
+            color: var(--color-gold);
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--color-gold), var(--color-cyan));
+            border-radius: 2px;
+        }
+
+        .subsection-title {
+            font-size: 1.6rem;
+            color: var(--color-gold);
+            margin: 2rem 0 1.5rem;
+            padding-left: 1rem;
+            border-left: 5px solid var(--color-gold);
+        }
+        
+        /* ===== JOURNEY RECAP ===== */
+        .journey-recap {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 3rem 0;
+        }
+        
+        .day-recap-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border-top: 4px solid var(--gold-accent);
+        }
+        
+        .day-recap-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .day-recap-number {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-burgundy), var(--secondary-red));
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .day-recap-card h4 {
+            color: var(--primary-burgundy);
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* ===== 3 TYPES OF PEOPLE ===== */
+        .people-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .people-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            position: relative;
+            border: 3px solid transparent;
+        }
+        
+        .people-card.type-1 {
+            border-color: #E0E0E0;
+        }
+        
+        .people-card.type-2 {
+            border-color: #FFC107;
+        }
+        
+        .people-card.type-3 {
+            border-color: #4CAF50;
+            background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%);
+        }
+        
+        .people-percentage {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+        }
+        
+        .people-card h4 {
+            color: var(--primary-burgundy);
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+        
+        .people-card ul {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+        }
+        
+        .people-card ul li {
+            padding: 0.5rem 0 0.5rem 1.5rem;
+            position: relative;
+        }
+        
+        .people-card ul li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            font-weight: 700;
+        }
+        
+        /* ===== 49 DAYS ROADMAP ===== */
+        .roadmap-49 {
+            background: linear-gradient(135deg, #112250 0%, #640A0C 100%);
+            color: white;
+            padding: 4rem 2rem;
+            border-radius: 20px;
+            margin: 3rem 0;
+        }
+        
+        .roadmap-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .roadmap-header h3 {
+            color: var(--gold-accent);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .weeks-grid {
+            display: grid;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .week-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 15px;
+            border-left: 5px solid var(--gold-accent);
+        }
+        
+        .week-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .week-title {
+            color: var(--gold-accent);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .week-days {
+            background: rgba(255,189,89,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .week-goal {
+            background: rgba(255,189,89,0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            font-style: italic;
+            border-left: 3px solid var(--gold-accent);
+        }
+        
+        .week-tasks {
+            margin: 1rem 0;
+        }
+        
+        .week-tasks h5 {
+            color: var(--gold-light);
+            margin-bottom: 0.5rem;
+        }
+        
+        .week-tasks ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .week-tasks ul li {
+            padding: 0.5rem 0 0.5rem 1.5rem;
+            position: relative;
+        }
+        
+        .week-tasks ul li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--gold-accent);
+            font-weight: 700;
+        }
+        
+        .week-kpi {
+            background: rgba(76, 175, 80, 0.2);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+        }
+        
+        .week-kpi h5 {
+            color: #4CAF50;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* ===== 3 PATHS FORWARD ===== */
+        .paths-section {
+            margin: 4rem 0;
+        }
+        
+        .paths-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .path-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border-top: 5px solid var(--gold-accent);
+        }
+        
+        .path-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        }
+        
+        .path-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .path-card h3 {
+            color: var(--primary-burgundy);
+            font-size: 1.6rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .path-description {
+            margin: 1.5rem 0;
+        }
+        
+        .path-pros {
+            background: #E8F5E9;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            border-left: 3px solid #4CAF50;
+        }
+        
+        .path-pros h5 {
+            color: #2E7D32;
+            margin-bottom: 0.5rem;
+        }
+        
+        .path-cons {
+            background: #FFF3E0;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            border-left: 3px solid #FF9800;
+        }
+        
+        .path-cons h5 {
+            color: #E65100;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* ===== CTA SECTIONS ===== */
+        .cta-section {
+            background: linear-gradient(135deg, var(--primary-burgundy), var(--secondary-red));
+            color: white;
+            padding: 4rem 2rem;
+            border-radius: 20px;
+            margin: 3rem 0;
+            text-align: center;
+        }
+        
+        .cta-section h3 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: #FFBD59;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
+        }
+        
+        .cta-section p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            line-height: 1.8;
+        }
+        
+        .cta-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+            text-align: left;
+        }
+        
+        .cta-feature {
+            background: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+        }
+        
+        .cta-feature h5 {
+            color: var(--gold-accent);
+            margin-bottom: 0.5rem;
+        }
+        
+        .cta-btn {
+            display: inline-block;
+            background: var(--gold-accent);
+            color: var(--primary-dark);
+            padding: 1.2rem 3rem;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-decoration: none;
+            margin-top: 2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(255,189,89,0.4);
+        }
+        
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(255,189,89,0.6);
+        }
+        
+        /* ===== GRADUATION RITUAL ===== */
+        .ritual-section {
+            background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%);
+            padding: 4rem 2rem;
+            border-radius: 20px;
+            margin: 3rem 0;
+            border: 3px solid #4CAF50;
+        }
+        
+        .ritual-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .ritual-header h3 {
+            color: var(--primary-burgundy);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .ritual-steps {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .ritual-step {
+            background: white;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            border-radius: 15px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid var(--gold-accent);
+        }
+        
+        .ritual-step h4 {
+            color: var(--primary-burgundy);
+            margin-bottom: 1rem;
+        }
+        
+        .ritual-oath {
+            background: linear-gradient(135deg, #FFF8E0 0%, #FFE8E8 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+            border: 3px solid var(--gold-accent);
+            font-style: italic;
+            font-size: 1.1rem;
+            line-height: 2;
+        }
+        
+        /* ===== QUIZ SECTION ===== */
+        .quiz-section {
+            background: white;
+            padding: 4rem 2rem;
+            margin: 4rem 0;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .quiz-header h2 {
+            color: var(--primary-burgundy);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .quiz-intro {
+            background: #FFF8E0;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 2rem 0;
+            text-align: center;
+            border: 2px dashed var(--gold-accent);
+        }
+        
+        .question-card {
+            background: #F8F9FA;
+            padding: 2rem;
+            margin: 2rem 0;
+            border-radius: 15px;
+            border-left: 5px solid var(--primary-burgundy);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .question-number {
+            display: inline-block;
+            background: var(--primary-burgundy);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: white;
+            border: 2px solid #E0E0E0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .option:hover {
+            border-color: var(--gold-accent);
+            background: #FFFBF0;
+        }
+        
+        .option input[type="radio"] {
+            margin-right: 1rem;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        
+        .option label {
+            cursor: pointer;
+            flex: 1;
+            font-size: 1.05rem;
+        }
+        
+        .option.correct {
+            border-color: #4CAF50;
+            background: #E8F5E9;
+        }
+        
+        .option.incorrect {
+            border-color: #F44336;
+            background: #FFEBEE;
+        }
+        
+        .submit-quiz-btn {
+            display: block;
+            width: 100%;
+            max-width: 400px;
+            margin: 3rem auto;
+            padding: 1.2rem 3rem;
+            background: linear-gradient(135deg, var(--primary-burgundy), var(--secondary-red));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(156, 6, 18, 0.3);
+        }
+        
+        .submit-quiz-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(156, 6, 18, 0.4);
+        }
+        
+        .submit-quiz-btn:disabled {
+            background: #CCCCCC;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .quiz-result {
+            display: none;
+            background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            margin: 2rem 0;
+            border: 3px solid #4CAF50;
+        }
+        
+        .quiz-result.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .result-score {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--primary-burgundy);
+            margin: 1rem 0;
+        }
+        
+        .result-message {
+            font-size: 1.3rem;
+            color: var(--text-dark);
+            margin: 1rem 0;
+        }
+        
+        .result-feedback {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            text-align: left;
+        }
+        
+        /* ===== FINAL MESSAGE ===== */
+        .final-message {
+            background: linear-gradient(135deg, var(--bg-navy) 0%, var(--primary-burgundy) 100%);
+            color: white;
+            padding: 5rem 2rem;
+            text-align: center;
+            margin: 4rem 0 0;
+        }
+        
+        .final-message h2 {
+            font-size: 3rem;
+            color: var(--gold-accent);
+            margin-bottom: 2rem;
+        }
+        
+        .final-message blockquote {
+            font-size: 1.5rem;
+            font-style: italic;
+            max-width: 700px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: rgba(255,255,255,0.1);
+            border-left: 5px solid var(--gold-accent);
+            border-radius: 10px;
+        }
+        
+        /* ===== NAVIGATION BUTTONS ===== */
+        .lesson-navigation {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 4rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .nav-btn {
+            flex: 1;
+            min-width: 200px;
+            max-width: 300px;
+            padding: 1.5rem 2rem;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .nav-btn.prev {
+            background: white;
+            color: var(--primary-burgundy);
+            border: 3px solid var(--primary-burgundy);
+        }
+        
+        .nav-btn.prev:hover {
+            background: var(--primary-burgundy);
+            color: white;
+        }
+        
+        /* ===== FOOTER ===== */
+        .course-footer {
+            background: var(--bg-navy);
+            color: white;
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+        
+        .footer-message {
+            font-size: 1.3rem;
+            color: var(--gold-light);
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+        
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.2rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .section-title {
+                font-size: 1.8rem;
+            }
+            
+            .subsection-title {
+                font-size: 1.4rem;
+            }
+            
+            .journey-recap,
+            .people-types,
+            .paths-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .final-message h2 {
+                font-size: 2rem;
+            }
+            
+            .final-message blockquote {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== NAVIGATION ===== -->
+    <nav class="course-nav">
+        <div class="container">
+            <div class="nav-content">
+                <div class="course-title">7 NGÀY KHAI MỞ TẦN SỐ GỐC</div>
+                <div class="day-indicator">NGÀY 7/7</div>
+                <div class="completion-badge">🎉 HOÀN THÀNH!</div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== HERO SECTION ===== -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <div class="day-number">✨ NGÀY 7 - NGÀY CUỐI CÙNG ✨</div>
+            <h1 class="hero-title">TỔNG KẾT &<br>CON ĐƯỜNG TIẾP THEO</h1>
+            <p class="hero-subtitle">
+                Nhìn lại hành trình 7 ngày đầy kỳ diệu của bạn<br>
+                Và khám phá 3 con đường tiếp theo để tiếp tục chuyển hóa
+            </p>
+            <div class="completion-celebration">
+                🏆 CHÚC MỪNG BẠN ĐÃ HOÀN THÀNH! 🏆
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== BÀI 7.1: NHÌN LẠI HÀNH TRÌNH ===== -->
+    <section class="content-section">
+        <div class="content-container">
+            <h2 class="section-title">🌟 Bài 7.1: Nhìn Lại Hành Trình 7 Ngày</h2>
+            
+            <p style="font-size: 1.2rem; text-align: center; color: var(--primary-burgundy); font-weight: 600; margin-bottom: 3rem;">
+                Chào mừng đến ngày cuối cùng! Hãy dừng lại và nhìn lại những gì bạn đã đi qua:
+            </p>
+
+            <div class="journey-recap">
+                <div class="day-recap-card">
+                    <div class="day-recap-number">NGÀY 1</div>
+                    <h4>Thức Tỉnh Người Chứng Kiến</h4>
+                    <p>Bạn đã thức tỉnh Người Chứng Kiến - phần ý thức cao hơn trong bạn. Thoát khỏi chế độ Auto-Pilot.</p>
+                </div>
+
+                <div class="day-recap-card">
+                    <div class="day-recap-number">NGÀY 2</div>
+                    <h4>Nhận Bản Đồ Tần Số</h4>
+                    <p>Bạn đã nhận được Bản Đồ - biết mình đang ở tần số nào, nguyên mẫu nào. Hiểu rõ vị trí hiện tại.</p>
+                </div>
+
+                <div class="day-recap-card">
+                    <div class="day-recap-number">NGÀY 3</div>
+                    <h4>5 Nguyên Lý Vận Hành</h4>
+                    <p>Bạn đã học 5 Nguyên Lý Vận Hành - quy luật của vũ trụ. Hiểu cách thế giới hoạt động.</p>
+                </div>
+
+                <div class="day-recap-card">
+                    <div class="day-recap-number">NGÀY 4</div>
+                    <h4>7 Nghi Thức Hàng Ngày</h4>
+                    <p>Bạn đã có 7 Nghi Thức Hàng Ngày - công cụ nâng tần số thực tế, áp dụng được ngay.</p>
+                </div>
+
+                <div class="day-recap-card">
+                    <div class="day-recap-number">NGÀY 5</div>
+                    <h4>5 Quy Trình Chuyên Sâu</h4>
+                    <p>Bạn đã nhận 5 Quy Trình Chuyên Sâu - để xử lý vấn đề gốc rễ, chuyển hóa sâu từng tầng.</p>
+                </div>
+
+                <div class="day-recap-card">
+                    <div class="day-recap-number">NGÀY 6</div>
+                    <h4>Nghiệp & Luân Hồi</h4>
+                    <p>Bạn đã hiểu về Nghiệp & Luân Hồi - bức tranh toàn cảnh. Nhìn thấy ý nghĩa cuộc đời.</p>
+                </div>
+            </div>
+
+            <div style="background: linear-gradient(135deg, #FFF8E0 0%, #FFE8E8 100%); padding: 2rem; border-radius: 15px; margin: 3rem 0; border: 3px solid var(--gold-accent);">
+                <h3 style="color: var(--primary-burgundy); margin-bottom: 1.5rem; text-align: center;">📝 Viết Vào Sổ: "Hành Trình 7 Ngày Của Tôi"</h3>
+                <div style="background: white; padding: 2rem; border-radius: 10px; line-height: 2.5;">
+                    <p><em>"Điều thay đổi lớn nhất sau 7 ngày: ___"</em></p>
+                    <p><em>"Bài học quan trọng nhất: ___"</em></p>
+                    <p><em>"Nghi thức/Quy trình tôi yêu thích nhất: ___"</em></p>
+                    <p><em>"Điều tôi sẽ tiếp tục làm: ___"</em></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== BÀI 7.2: TỪ TRI THỨC ĐẾN SỐNG ===== -->
+    <section class="content-section">
+        <div class="content-container">
+            <h2 class="section-title">💡 Bài 7.2: Từ Tri Thức Đến Sống</h2>
+            
+            <div style="background: linear-gradient(135deg, #FFEBEE 0%, #FFF0F0 100%); padding: 2rem; border-radius: 15px; border: 3px solid var(--secondary-red); margin: 2rem 0;">
+                <h3 style="color: var(--secondary-red); text-align: center; font-size: 1.8rem;">⚠️ Sự Thật Khó Chịu</h3>
+                <p style="font-size: 1.3rem; text-align: center; font-weight: 700; color: var(--primary-burgundy); margin: 1.5rem 0;">
+                    Tri thức KHÔNG thay đổi bạn.<br>
+                    Chỉ có THỰC HÀNH mới thay đổi.
+                </p>
+                <p style="font-size: 1.1rem; text-align: center;">
+                    Bạn có thể đọc 100 cuốn sách về bơi,<br>
+                    nhưng không nhảy xuống nước = không biết bơi.
+                </p>
+            </div>
+
+            <div style="background: #E8F5E9; padding: 2rem; border-radius: 15px; margin: 2rem 0;">
+                <h4 style="color: #2E7D32; text-align: center; font-size: 1.5rem; margin-bottom: 1rem;">Giờ đây bạn có:</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; text-align: center;">
+                    <div>
+                        <div style="font-size: 3rem; margin-bottom: 0.5rem;">🗺️</div>
+                        <strong style="font-size: 1.2rem;">Bản đồ</strong>
+                        <p>(Triết Học & Tâm Lý)</p>
+                    </div>
+                    <div>
+                        <div style="font-size: 3rem; margin-bottom: 0.5rem;">🛠️</div>
+                        <strong style="font-size: 1.2rem;">Công cụ</strong>
+                        <p>(Thực Hành)</p>
+                    </div>
+                </div>
+            </div>
+
+            <p style="font-size: 1.4rem; text-align: center; font-weight: 700; color: var(--primary-burgundy); margin: 3rem 0;">
+                Câu hỏi duy nhất còn lại:<br>
+                <span style="font-size: 1.8rem; color: var(--secondary-red);">Bạn có CAM KẾT thực hành không?</span>
+            </p>
+
+            <h3 class="subsection-title">👥 3 Loại Người Sau Khóa Học</h3>
+            
+            <div class="people-types">
+                <div class="people-card type-1">
+                    <div class="people-percentage" style="color: #757575;">20%</div>
+                    <h4>Người Biết</h4>
+                    <ul>
+                        <li>Học xong, khen hay</li>
+                        <li>Không làm gì</li>
+                        <li>Cuộc sống không thay đổi</li>
+                        <li>Sau 1 năm quên hết</li>
+                    </ul>
+                </div>
+
+                <div class="people-card type-2">
+                    <div class="people-percentage" style="color: #FF9800;">60%</div>
+                    <h4>Người Làm Một Chút</h4>
+                    <ul>
+                        <li>Thử vài nghi thức</li>
+                        <li>Làm được 1-2 tuần</li>
+                        <li>Bỏ khi gặp khó khăn</li>
+                        <li>Có thay đổi nhỏ nhưng không bền</li>
+                    </ul>
+                </div>
+
+                <div class="people-card type-3">
+                    <div class="people-percentage" style="color: #4CAF50;">20%</div>
+                    <h4>Người Cam Kết</h4>
+                    <ul>
+                        <li>Quyết tâm làm đủ 49 ngày</li>
+                        <li>Vượt qua khó khăn</li>
+                        <li>Tần số tăng rõ rệt</li>
+                        <li>Cuộc sống thay đổi căn bản</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 3rem 0; padding: 2rem; background: linear-gradient(135deg, #FFF8E0 0%, #FFE8E8 100%); border-radius: 15px;">
+                <p style="font-size: 1.5rem; font-weight: 700; color: var(--primary-burgundy);">
+                    ❓ Bạn muốn là người nào?
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== BÀI 7.3: LỘ TRÌNH 49 NGÀY ===== -->
+    <section class="content-section">
+        <div class="content-container">
+            <h2 class="section-title">📅 Bài 7.3: Lộ Trình 49 Ngày Tiếp Theo</h2>
+            
+            <p style="font-size: 1.2rem; text-align: center; font-weight: 600; color: var(--primary-burgundy); margin-bottom: 2rem;">
+                7 ngày vừa rồi chỉ là KHỞI ĐẦU.<br>
+                Để thay đổi bền vững, bạn cần ít nhất <strong>49 ngày</strong>.
+            </p>
+
+            <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); margin: 2rem 0;">
+                <h4 style="color: var(--primary-burgundy); text-align: center; margin-bottom: 1.5rem;">🎯 Tại Sao 49 Ngày?</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; text-align: center;">
+                    <div>
+                        <div style="font-size: 2.5rem; font-weight: 900; color: var(--primary-burgundy);">21</div>
+                        <strong>Hình thành thói quen</strong>
+                    </div>
+                    <div>
+                        <div style="font-size: 2.5rem; font-weight: 900; color: var(--secondary-red);">49</div>
+                        <strong>Thói quen trở thành BẢN CHẤT</strong>
+                    </div>
+                    <div>
+                        <div style="font-size: 2.5rem; font-weight: 900; color: var(--gold-accent);">100</div>
+                        <strong>Master hoàn toàn</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="roadmap-49">
+                <div class="roadmap-header">
+                    <h3>🗺️ Cấu Trúc 7 Tuần (49 Ngày)</h3>
+                    <p style="font-size: 1.1rem;">Từ Nền Tảng đến Ổn Định - Một hành trình hoàn chỉnh</p>
+                </div>
+
+                <div class="weeks-grid">
+                    <!-- TUẦN 1-2 -->
+                    <div class="week-card">
+                        <div class="week-header">
+                            <div class="week-title">TUẦN 1-2: NỀN TẢNG</div>
+                            <div class="week-days">Ngày 1-14</div>
+                        </div>
+                        <div class="week-goal">
+                            <strong>Mục tiêu:</strong> Nền tảng lý thuyết và thực hành cơ bản
+                        </div>
+                        <div class="week-tasks">
+                            <ul>
+                                <li>Đã học lý thuyết qua 7 ngày</li>
+                                <li>Đã thử các nghi thức</li>
+                                <li>✅ Hoàn thành</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- TUẦN 3-4 -->
+                    <div class="week-card">
+                        <div class="week-header">
+                            <div class="week-title">TUẦN 3-4: TÍCH HỢP</div>
+                            <div class="week-days">Ngày 15-28</div>
+                        </div>
+                        <div class="week-goal">
+                            <strong>Mục tiêu:</strong> Làm quen với 7 Nghi Thức, biến thành tự động
+                        </div>
+                        <div class="week-tasks">
+                            <h5>Nhiệm vụ mỗi ngày:</h5>
+                            <ul>
+                                <li>Làm ít nhất 3/7 nghi thức (Báo Thức, Biết Ơn, Tổng Kết)</li>
+                                <li>Viết Nhật Ký Tần Số</li>
+                                <li>1 lần/tuần: Sử dụng 1 Quy Trình (nếu cần)</li>
+                            </ul>
+                        </div>
+                        <div class="week-kpi">
+                            <h5>KPI:</h5>
+                            <ul>
+                                <li>Không bỏ quá 1 ngày/tuần</li>
+                                <li>Tần số trung bình: 4-5/10</li>
+                                <li>Cảm thấy quen với các nghi thức</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- TUẦN 5-6 -->
+                    <div class="week-card">
+                        <div class="week-header">
+                            <div class="week-title">TUẦN 5-6: CHUYỂN HÓA</div>
+                            <div class="week-days">Ngày 29-42</div>
+                        </div>
+                        <div class="week-goal">
+                            <strong>Mục tiêu:</strong> Thấy thay đổi rõ rệt, đào sâu thực hành
+                        </div>
+                        <div class="week-tasks">
+                            <h5>Nhiệm vụ mỗi ngày:</h5>
+                            <ul>
+                                <li>Làm 5-7/7 nghi thức</li>
+                                <li>Chọn 1 Quy Trình làm đầy đủ (VD: Nam Châm 49 ngày)</li>
+                                <li>Áp dụng 5 Nguyên Lý vào tình huống thực tế</li>
+                            </ul>
+                            <h5 style="margin-top: 1rem;">Dấu hiệu tiến bộ:</h5>
+                            <ul>
+                                <li>Ít bị kích hoạt hơn</li>
+                                <li>Phản ứng lành mạnh hơn</li>
+                                <li>Synchronicity bắt đầu xảy ra</li>
+                                <li>Người khác nhận xét bạn khác</li>
+                            </ul>
+                        </div>
+                        <div class="week-kpi">
+                            <h5>KPI:</h5>
+                            <ul>
+                                <li>Tần số trung bình: 5-6/10</li>
+                                <li>Ít nhất 1 pattern cũ đã phá vỡ</li>
+                                <li>Cảm thấy nhẹ nhõm hơn</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- TUẦN 7 -->
+                    <div class="week-card">
+                        <div class="week-header">
+                            <div class="week-title">TUẦN 7: ỔN ĐỊNH</div>
+                            <div class="week-days">Ngày 43-49</div>
+                        </div>
+                        <div class="week-goal">
+                            <strong>Mục tiêu:</strong> Tổng kết, ổn định, chuẩn bị giai đoạn tiếp
+                        </div>
+                        <div class="week-tasks">
+                            <h5>Ngày 43-45: So Sánh</h5>
+                            <ul>
+                                <li>Làm lại bài test "Thang Đo Tần Số" (như Ngày 2)</li>
+                                <li>So với lần đầu - Tần số tăng bao nhiêu?</li>
+                            </ul>
+                            <h5 style="margin-top: 1rem;">Ngày 46-48: Viết Thư & Lên Kế Hoạch</h5>
+                            <ul>
+                                <li>Viết thư cho bản thân 49 ngày trước</li>
+                                <li>Lên kế hoạch 100 ngày tiếp theo</li>
+                            </ul>
+                            <h5 style="margin-top: 1rem;">Ngày 49: NGHI LỄ TỐT NGHIỆP</h5>
+                            <ul>
+                                <li>Celebrate thành tựu của bạn!</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== NGHI LỄ TỐT NGHIỆP NGÀY 49 ===== -->
+    <section class="content-section">
+        <div class="content-container">
+            <div class="ritual-section">
+                <div class="ritual-header">
+                    <h3>🎓 Nghi Lễ Tốt Nghiệp - Ngày 49</h3>
+                    <p style="font-size: 1.1rem;">Một nghi lễ đặc biệt để celebrate thành tựu của bạn</p>
+                </div>
+
+                <div style="background: white; padding: 2rem; border-radius: 15px; margin: 2rem 0; text-align: center;">
+                    <h4 style="color: var(--primary-burgundy); margin-bottom: 1rem;">🔮 Chuẩn Bị:</h4>
+                    <p style="font-size: 1.1rem; line-height: 2;">
+                        • Cả 7 viên đá từ bộ kit<br>
+                        • Nến<br>
+                        • Sổ tay<br>
+                        • Hoa/nhang (nếu thích)
+                    </p>
+                </div>
+
+                <div class="ritual-steps">
+                    <div class="ritual-step">
+                        <h4>Bước 1: Tạo không gian thiêng (5 phút)</h4>
+                        <ul style="list-style: none; padding: 0;">
+                            <li>✓ Dọn dẹp sạch sẽ</li>
+                            <li>✓ Đốt nến</li>
+                            <li>✓ Xếp 7 viên đá thành vòng tròn</li>
+                        </ul>
+                    </div>
+
+                    <div class="ritual-step">
+                        <h4>Bước 2: Ngồi giữa vòng tròn đá (10 phút)</h4>
+                        <ul style="list-style: none; padding: 0;">
+                            <li>✓ Nhắm mắt</li>
+                            <li>✓ Cảm ơn bản thân đã kiên trì 49 ngày</li>
+                            <li>✓ Cảm ơn vũ trụ đã hỗ trợ</li>
+                        </ul>
+                    </div>
+
+                    <div class="ritual-step">
+                        <h4>Bước 3: Đọc lời cam kết (5 phút)</h4>
+                        <div class="ritual-oath">
+                            "Tôi, [tên bạn], hôm nay đã hoàn thành 49 ngày chuyển hóa.<br><br>
+                            Tôi đã nâng tần số từ ___ lên ___.<br><br>
+                            Tôi đã phá vỡ pattern ___.<br><br>
+                            Tôi đã chuyển hóa cảm xúc ___.<br><br>
+                            Từ giờ, tôi cam kết tiếp tục sống có ý thức, nâng tần số, phục vụ người khác.<br><br>
+                            Tôi là ánh sáng. Tôi là tình yêu. Tôi là sự thay đổi.<br><br>
+                            Cảm ơn. Cảm ơn. Cảm ơn."
+                        </div>
+                    </div>
+
+                    <div class="ritual-step">
+                        <h4>Bước 4: Thổi tắt nến</h4>
+                        <p>Cảm nhận sự hoàn thành. Mỉm cười.</p>
+                    </div>
+
+                    <div class="ritual-step">
+                        <h4>Bước 5: Ăn mừng! 🎉</h4>
+                        <p>Làm gì đó vui: mua quà cho mình, đi ăn, gặp bạn bè.<br>
+                        <strong>Bạn xứng đáng!</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== BÀI 7.4: 3 CON ĐƯỜNG TIẾP THEO ===== -->
+    <section class="content-section">
+        <div class="content-container">
+            <h2 class="section-title">🛤️ Bài 7.4: 3 Con Đường Tiếp Theo</h2>
+            
+            <p style="font-size: 1.2rem; text-align: center; font-weight: 600; margin-bottom: 3rem;">
+                Sau 49 ngày, bạn sẽ có 3 lựa chọn:
+            </p>
+
+            <div class="paths-grid">
+                <!-- CON ĐƯỜNG 1 -->
+                <div class="path-card">
+                    <div class="path-icon">🧘</div>
+                    <h3>Con Đường 1:<br>TỰ THỰC HÀNH SÂU</h3>
+                    <p style="text-align: center; color: #666; font-style: italic;">Dành cho người thích độc lập</p>
+                    
+                    <div class="path-description">
+                        <h5 style="color: var(--primary-burgundy); margin: 1rem 0;">Làm gì:</h5>
+                        <ul style="line-height: 2;">
+                            <li>Tiếp tục 7 Nghi Thức 100 ngày nữa</li>
+                            <li>Đọc sách nâng cao về tâm linh, tần số</li>
+                            <li>Tham gia Community online (nếu có)</li>
+                            <li>Thực hành một mình</li>
+                        </ul>
+                    </div>
+
+                    <div class="path-pros">
+                        <h5>✅ Ưu điểm:</h5>
+                        <ul style="list-style: none; padding: 0;">
+                            <li>• Tự do, linh hoạt</li>
+                            <li>• Không phụ thuộc ai</li>
+                            <li>• Chi phí thấp</li>
+                        </ul>
+                    </div>
+
+                    <div class="path-cons">
+                        <h5>⚠️ Nhược điểm:</h5>
+                        <ul style="list-style: none; padding: 0;">
+                            <li>• Dễ bỏ cuộc khi gặp khó</li>
+                            <li>• Không có ai hỏi khi vướng mắc</li>
+                            <li>• Tiến bộ chậm hơn</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- CON ĐƯỜNG 2 -->
+                <div class="path-card" style="border-top-color: var(--primary-burgundy); border-width: 5px;">
+                    <div class="path-icon">🎓</div>
+                    <h3>Con Đường 2:<br>CERTIFICATION PROGRAM</h3>
+                    <p style="text-align: center; color: var(--primary-burgundy); font-weight: 700;">⭐ ĐƯỢC ĐỀ XUẤT ⭐</p>
+                    
+                    <div class="path-description">
+                        <h5 style="color: var(--primary-burgundy); margin: 1rem 0;">Chương trình chuyên sâu để bạn:</h5>
+                        <ul style="line-height: 2;">
+                            <li>Đi sâu hơn 10 lần so với khóa 7 ngày</li>
+                            <li>Được hướng dẫn trực tiếp bởi mentor</li>
+                            <li>Tham gia Weekly Circles</li>
+                            <li>Có Accountability Partner</li>
+                            <li>Nhận Advanced Teachings</li>
+                            <li>Được cấp chứng chỉ Practitioner</li>
+                            <li>Có khả năng dẫn dắt circles cho người khác</li>
+                        </ul>
+                    </div>
+
+                    <div style="background: #FFF8E0; padding: 1rem; border-radius: 10px; margin: 1rem 0; text-align: center;">
+                        <strong>⏰ Thời gian:</strong> 6 tháng
+                    </div>
+
+                    <div class="path-pros">
+                        <h5>✅ Lợi ích vượt trội:</h5>
+                        <ul style="list-style: none; padding: 0;">
+                            <li>✅ Chuyển hóa nhanh gấp 5-10 lần</li>
+                            <li>✅ Được support trực tiếp</li>
+                            <li>✅ Kết nối cộng đồng thực hành</li>
+                            <li>✅ Có chứng chỉ chính thức</li>
+                            <li>✅ Mở ra nghề nghiệp mới (nếu muốn)</li>
+                        </ul>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 1.5rem;">
+                        <p style="font-size: 0.95rem; color: #666; margin-bottom: 1rem;">
+                            <strong>Phù hợp cho:</strong> Người muốn trở thành master, dạy/hướng dẫn người khác, chuyển hóa toàn diện
+                        </p>
+                    </div>
+                </div>
+
+                <!-- CON ĐƯỜNG 3 -->
+                <div class="path-card">
+                    <div class="path-icon">👥</div>
+                    <h3>Con Đường 3:<br>MASTERMIND & COMMUNITY</h3>
+                    <p style="text-align: center; color: #666; font-style: italic;">Dành cho người thích học nhóm</p>
+                    
+                    <div class="path-description">
+                        <h5 style="color: var(--primary-burgundy); margin: 1rem 0;">Làm gì:</h5>
+                        <ul style="line-height: 2;">
+                            <li>Tham gia Weekly Circles (nhóm thực hành hàng tuần)</li>
+                            <li>Có Accountability Partners (bạn đồng hành)</li>
+                            <li>Access advanced teachings (bài học nâng cao)</li>
+                            <li>Q&A trực tiếp với mentors</li>
+                        </ul>
+                    </div>
+
+                    <div class="path-pros">
+                        <h5>✅ Ưu điểm:</h5>
+                        <ul style="list-style: none; padding: 0;">
+                            <li>• Có động lực cao (nhóm giữ bạn accountable)</li>
+                            <li>• Học từ kinh nghiệm người khác</li>
+                            <li>• Hỗ trợ khi gặp khó</li>
+                            <li>• Tiến bộ nhanh hơn nhiều</li>
+                        </ul>
+                    </div>
+
+                    <div class="path-cons">
+                        <h5>⚠️ Nhược điểm:</h5>
+                        <ul style="list-style: none; padding: 0;">
+                            <li>• Phải cam kết giờ giấc</li>
+                            <li>• Có chi phí (nhưng xứng đáng)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CTA 1: CERTIFICATION ===== -->
+    <section class="content-section">
+        <div class="content-container">
+            <div class="cta-section" id="certification">
+                <h3>🎓 CHƯƠNG TRÌNH CHUYỂN HÓA NỘI TÂM<br>PRACTITIONER CERTIFICATION</h3>
+                <p>
+                    Bạn muốn trở thành master? Bạn muốn dạy/hướng dẫn người khác?<br>
+                    Bạn muốn chuyển hóa sâu và toàn diện nhất?
+                </p>
+
+                <div class="cta-features">
+                    <div class="cta-feature">
+                        <h5>📚 6 Tháng Đào Tạo Chuyên Sâu</h5>
+                        <p>Học từ nền tảng đến nâng cao, từ lý thuyết đến thực hành sâu</p>
+                    </div>
+                    <div class="cta-feature">
+                        <h5>👨‍🏫 Hướng Dẫn Trực Tiếp</h5>
+                        <p>Được mentor 1-1 và theo dõi tiến độ cá nhân hóa</p>
+                    </div>
+                    <div class="cta-feature">
+                        <h5>👥 Weekly Circles</h5>
+                        <p>Nhóm thực hành hàng tuần với accountability partners</p>
+                    </div>
+                    <div class="cta-feature">
+                        <h5>📜 Chứng Chỉ Chính Thức</h5>
+                        <p>Được cấp chứng chỉ Practitioner sau khi hoàn thành</p>
+                    </div>
+                    <div class="cta-feature">
+                        <h5>💼 Cơ Hội Nghề Nghiệp</h5>
+                        <p>Có khả năng dẫn dắt circles, trở thành giảng viên</p>
+                    </div>
+                    <div class="cta-feature">
+                        <h5>🌟 Advanced Teachings</h5>
+                        <p>Truy cập bài học nâng cao không có ở khóa cơ bản</p>
+                    </div>
+                </div>
+
+                <a href="#" class="cta-btn">TÌM HIỂU CERTIFICATION PROGRAM</a>
+                <p style="margin-top: 1rem; font-size: 0.9rem;">
+                    💎 Đầu tư vào bản thân là đầu tư sinh lời nhất
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CTA 2: HỆ THỐNG PARTNERSHIP GEM ===== -->
+    <section class="content-section">
+        <div class="content-container">
+            <div class="cta-section" id="partner" style="background: linear-gradient(135deg, #4CAF50, #2E7D32);">
+                <h3>💼 HỆ THỐNG PARTNERSHIP GEM<br>3 CON ĐƯỜNG TẠO THU NHẬP</h3>
+                <p>
+                    Nếu bạn muốn mang ánh sáng này đến nhiều người hơn,<br>
+                    hãy chọn con đường phù hợp với bạn và xây dựng thu nhập thụ động!
+                </p>
+
+                <!-- TIER 1: CTV -->
+                <div style="background: rgba(255,255,255,0.15); padding: 2rem; border-radius: 15px; margin: 2rem 0;">
+                    <h4 style="color: var(--gold-accent); margin-bottom: 1.5rem; font-size: 1.5rem;">
+                        🏆 TIER 1: CTV - CỘNG TÁC VIÊN (5 Cấp Bậc)
+                    </h4>
+                    <p style="margin-bottom: 1.5rem; font-style: italic;">
+                        Dành cho TẤT CẢ - Ai cũng có thể đăng ký, không cần điều kiện!
+                    </p>
+
+                    <!-- Bảng hoa hồng CTV -->
+                    <div style="overflow-x: auto; margin: 1.5rem 0;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">
+                            <thead>
+                                <tr style="background: rgba(255,189,89,0.3);">
+                                    <th style="padding: 0.8rem; text-align: left; border-bottom: 2px solid var(--gold-accent);">Cấp Bậc</th>
+                                    <th style="padding: 0.8rem; text-align: center; border-bottom: 2px solid var(--gold-accent);">Ngưỡng Doanh Số</th>
+                                    <th style="padding: 0.8rem; text-align: center; border-bottom: 2px solid var(--gold-accent);">Digital</th>
+                                    <th style="padding: 0.8rem; text-align: center; border-bottom: 2px solid var(--gold-accent);">Physical</th>
+                                    <th style="padding: 0.8rem; text-align: center; border-bottom: 2px solid var(--gold-accent);">Sub-Aff</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="background: rgba(255,255,255,0.05);">
+                                    <td style="padding: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.1);">🥉 <strong>Bronze</strong> (Đồng)</td>
+                                    <td style="padding: 0.8rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">0</td>
+                                    <td style="padding: 0.8rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); color: #4CAF50; font-weight: 700;">10%</td>
+                                    <td style="padding: 0.8rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">6%</td>
+                                    <td style="padding: 0.8rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">2%</td>
+                                </tr>
+                                <tr style="background: rgba(255,255,255,0.1);">
+                                    <td style="padding: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.1);">🥈 <strong>Silver</strong> (Bạc)</td>
+                                    <td style="padding: 0.8rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">50M</td>
+                                    <td style="padding: 0.8rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); color: #4CAF50; font-weight: 700;">15%</td>
+                                    <td style="padding: 0.8rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">8%</td>
+                                    <td style="padding: 0.8rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">2.5%</td>
+                                </tr>
+                                <tr style="background: rgba(255,255,255,0.05);">
+                                    <td style="padding: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.1);">🥇 <strong>Gold</strong> (Vàng)</td>
+                                    <td style="padding: 0.8rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">150M</td>
+                                    <td style="padding: 0.8rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); color: #4CAF50; font-weight: 700;">20%</td>
+                                    <td style="padding: 0.8rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">10%</td>
+                                    <td style="padding: 0.8rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">3%</td>
+                                </tr>
+                                <tr style="background: rgba(255,255,255,0.1);">
+                                    <td style="padding: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.1);">💎 <strong>Platinum</strong> (Bạch Kim)</td>
+                                    <td style="padding: 0.8rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">400M</td>
+                                    <td style="padding: 0.8rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); color: #4CAF50; font-weight: 700;">25%</td>
+                                    <td style="padding: 0.8rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">12%</td>
+                                    <td style="padding: 0.8rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1);">3.5%</td>
+                                </tr>
+                                <tr style="background: rgba(255,189,89,0.2);">
+                                    <td style="padding: 0.8rem;">👑 <strong>Diamond</strong> (Kim Cương)</td>
+                                    <td style="padding: 0.8rem; text-align: center;">800M</td>
+                                    <td style="padding: 0.8rem; text-align: center; color: #FFD700; font-weight: 700;">30%</td>
+                                    <td style="padding: 0.8rem; text-align: center; font-weight: 700;">15%</td>
+                                    <td style="padding: 0.8rem; text-align: center; font-weight: 700;">4%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                        <p style="margin: 0; font-size: 0.9rem;">
+                            <strong>💡 Lưu ý:</strong> Digital = Khóa học, subscription, ebook | Physical = Đá phong thủy, trang sức<br>
+                            <strong>Sub-Aff:</strong> Hoa hồng từ đối tác bạn giới thiệu (1 cấp)
+                        </p>
+                    </div>
+                </div>
+
+                <!-- TIER 2: KOL -->
+                <div style="background: rgba(255,255,255,0.15); padding: 2rem; border-radius: 15px; margin: 2rem 0;">
+                    <h4 style="color: #00F0FF; margin-bottom: 1.5rem; font-size: 1.5rem;">
+                        ⭐ TIER 2: KOL AFFILIATE
+                    </h4>
+                    <p style="margin-bottom: 1rem;">
+                        Dành cho <strong>INFLUENCERS</strong> - Yêu cầu BẮT BUỘC: <span style="color: #FFD700; font-weight: 700;">20,000+ followers</span> (không có ngoại lệ)
+                    </p>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin: 1.5rem 0;">
+                        <div style="background: rgba(0,240,255,0.2); padding: 1.5rem; border-radius: 10px; text-align: center;">
+                            <div style="font-size: 2rem; font-weight: 900; color: #00F0FF;">20%</div>
+                            <div style="font-size: 0.85rem; margin-top: 0.5rem;">Digital Products</div>
+                        </div>
+                        <div style="background: rgba(0,240,255,0.2); padding: 1.5rem; border-radius: 10px; text-align: center;">
+                            <div style="font-size: 2rem; font-weight: 900; color: #00F0FF;">20%</div>
+                            <div style="font-size: 0.85rem; margin-top: 0.5rem;">Physical Products</div>
+                        </div>
+                        <div style="background: rgba(0,240,255,0.2); padding: 1.5rem; border-radius: 10px; text-align: center;">
+                            <div style="font-size: 2rem; font-weight: 900; color: #00F0FF;">3.5%</div>
+                            <div style="font-size: 0.85rem; margin-top: 0.5rem;">Sub-Affiliate</div>
+                        </div>
+                    </div>
+
+                    <p style="font-size: 0.9rem; font-style: italic; margin-top: 1rem;">
+                        ⚡ Thanh toán: 2 lần/tháng (ngày 1 và 15)
+                    </p>
+                </div>
+
+                <!-- TIER 3: INSTRUCTOR -->
+                <div style="background: rgba(255,255,255,0.15); padding: 2rem; border-radius: 15px; margin: 2rem 0;">
+                    <h4 style="color: #FFD700; margin-bottom: 1.5rem; font-size: 1.5rem;">
+                        🎓 TIER 3: INSTRUCTOR (Giảng Viên)
+                    </h4>
+                    <p style="margin-bottom: 1rem;">
+                        Dành cho những người muốn <strong>TẠO KHÓA HỌC</strong> và chia sẻ chuyên môn của mình
+                    </p>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin: 1.5rem 0;">
+                        <div style="background: rgba(255,215,0,0.2); padding: 1.5rem; border-radius: 10px; text-align: center;">
+                            <div style="font-size: 2.5rem; font-weight: 900; color: #FFD700;">40-60%</div>
+                            <div style="font-size: 0.95rem; margin-top: 0.5rem;">Revenue Share</div>
+                        </div>
+                        <div style="background: rgba(255,215,0,0.2); padding: 1.5rem; border-radius: 10px;">
+                            <h5 style="color: #FFD700; margin-bottom: 0.8rem;">💰 Thu Nhập Đa Nguồn:</h5>
+                            <ul style="list-style: none; padding: 0; font-size: 0.9rem; line-height: 1.8;">
+                                <li>✓ Doanh thu bán khóa học</li>
+                                <li>✓ Affiliate commission</li>
+                                <li>✓ Sub-affiliate từ học viên</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cta-features">
+                    <div class="cta-feature">
+                        <h5>🚀 Bắt Đầu Ngay</h5>
+                        <p>Đăng ký CTV miễn phí, không cần điều kiện</p>
+                    </div>
+                    <div class="cta-feature">
+                        <h5>📈 Thăng Cấp Tự Động</h5>
+                        <p>Đạt ngưỡng doanh số → tự động lên cấp</p>
+                    </div>
+                    <div class="cta-feature">
+                        <h5>💳 Thanh Toán Nhanh</h5>
+                        <p>Bronze/Silver: Monthly | Gold+: Bi-weekly/Weekly</p>
+                    </div>
+                    <div class="cta-feature">
+                        <h5>🎁 Hỗ Trợ Marketing</h5>
+                        <p>Kits, banners, content templates miễn phí</p>
+                    </div>
+                </div>
+
+                <a href="#" class="cta-btn">ĐĂNG KÝ PARTNERSHIP NGAY</a>
+                <p style="margin-top: 1rem; font-size: 0.9rem;">
+                    💚 Xây dựng thu nhập thụ động, lan tỏa giá trị
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CTA 3: CORPORATE ===== -->
+    <section class="content-section">
+        <div class="content-container">
+            <div class="cta-section" id="corporate" style="background: linear-gradient(135deg, #112250, #640A0C);">
+                <h3>🏢 CHUYỂN HÓA NỘI TÂM FOR CORPORATE</h3>
+                <p>
+                    Bạn là lãnh đạo doanh nghiệp?<br>
+                    Bạn muốn xây dựng một "Tổ chức Tỉnh Thức"?
+                </p>
+
+                <div style="background: rgba(255,255,255,0.1); padding: 2rem; border-radius: 15px; margin: 2rem 0;">
+                    <h4 style="color: var(--gold-accent); margin-bottom: 1.5rem;">🎁 BỘ CÔNG CỤ MIỄN PHÍ cho doanh nghiệp bao gồm:</h4>
+                </div>
+
+                <div class="cta-features">
+                    <div class="cta-feature">
+                        <h5>📊 Đánh Giá Văn Hóa Tổ Chức</h5>
+                        <p>Organizational Frequency Assessment - Đo lường tần số doanh nghiệp</p>
+                    </div>
+                    <div class="cta-feature">
+                        <h5>🎯 Workshop 3 Giờ</h5>
+                        <p>Dành cho Leadership Team - Trải nghiệm trực tiếp</p>
+                    </div>
+                    <div class="cta-feature">
+                        <h5>🗺️ Lộ Trình 6 Tháng</h5>
+                        <p>Xây dựng "Tổ chức Tỉnh Thức" từng bước cụ thể</p>
+                    </div>
+                    <div class="cta-feature">
+                        <h5>🛠️ Template & Tools</h5>
+                        <p>Công cụ áp dụng ngay vào doanh nghiệp</p>
+                    </div>
+                </div>
+
+                <div style="background: rgba(255,189,89,0.2); padding: 2rem; border-radius: 15px; margin: 2rem 0;">
+                    <h5 style="color: var(--gold-accent); margin-bottom: 1rem;">📈 Lợi Ích Cho Doanh Nghiệp:</h5>
+                    <ul style="list-style: none; padding: 0; text-align: left; max-width: 700px; margin: 0 auto; line-height: 2;">
+                        <li>✓ Nâng cao năng suất nhân viên 30-40%</li>
+                        <li>✓ Giảm xung đột nội bộ</li>
+                        <li>✓ Tăng sự gắn kết và hạnh phúc</li>
+                        <li>✓ Văn hóa doanh nghiệp lành mạnh</li>
+                    </ul>
+                </div>
+
+                <a href="#" class="cta-btn">NHẬN BỘ CÔNG CỤ MIỄN PHÍ</a>
+                <p style="margin-top: 1rem; font-size: 0.9rem;">
+                    🏆 Dành cho lãnh đạo có tầm nhìn xa
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== BÀI 7.5: LỜI CUỐI ===== -->
+    <section class="content-section">
+        <div class="content-container">
+            <h2 class="section-title">💝 Bài 7.5: Lời Cuối - Bạn Không Cần Tôi Nữa</h2>
+            
+            <div style="background: linear-gradient(135deg, #FFF8E0 0%, #FFE8E8 100%); padding: 3rem; border-radius: 20px; border: 3px solid var(--gold-accent); text-align: center;">
+                <p style="font-size: 1.4rem; line-height: 2; color: var(--primary-burgundy);">
+                    <strong>Bạn không cần tôi nữa.<br>
+                    Bạn đã có MỌI THỨ bên trong.</strong>
+                </p>
+                
+                <p style="font-size: 1.1rem; margin-top: 2rem; line-height: 1.8;">
+                    7 ngày vừa qua, tôi không HÈ "dạy" bạn gì mới.<br>
+                    Tôi chỉ NHẮC bạn nhớ lại những gì bạn vốn đã biết - ở tầng linh hồn sâu nhất.
+                </p>
+
+                <div style="background: white; padding: 2rem; border-radius: 15px; margin: 2rem 0; text-align: left;">
+                    <p style="font-size: 1.05rem; line-height: 2;">
+                        <strong>Người Chứng Kiến?</strong> Bạn luôn có. Chỉ là đã quên.<br>
+                        <strong>7 Nghi Thức?</strong> Bạn có thể tự tạo ra. Đây chỉ là gợi ý.<br>
+                        <strong>5 Nguyên Lý?</strong> Bạn luôn biết. Đời đã dạy bạn rồi.
+                    </p>
+                </div>
+
+                <p style="font-size: 1.5rem; font-weight: 700; color: var(--secondary-red); margin: 2rem 0;">
+                    Giờ đây, bạn TỰ MÌNH đi tiếp.
+                </p>
+
+                <p style="font-size: 1.1rem;">
+                    Tôi chỉ là người chỉ đường. Con đường, bạn phải tự bước.
+                </p>
+            </div>
+
+            <div style="margin: 3rem 0;">
+                <h3 style="color: var(--primary-burgundy); text-align: center; margin-bottom: 2rem;">🚪 Nhưng nếu muốn đi sâu hơn, cửa luôn mở:</h3>
+                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                    <ul style="list-style: none; padding: 0; font-size: 1.1rem; line-height: 2.5;">
+                        <li>💬 <strong>Nếu muốn support:</strong> Tham gia Community</li>
+                        <li>🎓 <strong>Nếu muốn master:</strong> Đăng ký Certification</li>
+                        <li>🤝 <strong>Nếu muốn chia sẻ:</strong> Trở thành Practitioner/Đối Tác</li>
+                        <li>🏢 <strong>Nếu muốn đưa vào DN:</strong> Nhận bộ công cụ miễn phí</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== BÀI 7.6: NHỚ RẰNG... ===== -->
+    <section class="content-section">
+        <div class="content-container">
+            <h2 class="section-title">🌟 Bài 7.6: Nhớ Rằng...</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin: 3rem 0;">
+                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); border-top: 4px solid var(--gold-accent);">
+                    <div style="font-size: 2.5rem; text-align: center; margin-bottom: 1rem;">🌊</div>
+                    <p style="font-size: 1.1rem; text-align: center; line-height: 1.8;">
+                        <strong>Chuyển hóa là hành trình, không phải điểm đến.</strong><br>
+                        Không có "xong". Chỉ có tiếp tục lớn.
+                    </p>
+                </div>
+
+                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); border-top: 4px solid var(--gold-accent);">
+                    <div style="font-size: 2.5rem; text-align: center; margin-bottom: 1rem;">🌅</div>
+                    <p style="font-size: 1.1rem; text-align: center; line-height: 1.8;">
+                        <strong>Mỗi ngày là cơ hội mới.</strong><br>
+                        Dù hôm qua thất bại, hôm nay bạn có thể chọn lại.
+                    </p>
+                </div>
+
+                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); border-top: 4px solid var(--gold-accent);">
+                    <div style="font-size: 2.5rem; text-align: center; margin-bottom: 1rem;">🤝</div>
+                    <p style="font-size: 1.1rem; text-align: center; line-height: 1.8;">
+                        <strong>Bạn không đơn độc.</strong><br>
+                        Có hàng ngàn người đang đi cùng con đường này.
+                    </p>
+                </div>
+
+                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); border-top: 4px solid var(--gold-accent);">
+                    <div style="font-size: 2.5rem; text-align: center; margin-bottom: 1rem;">🙏</div>
+                    <p style="font-size: 1.1rem; text-align: center; line-height: 1.8;">
+                        <strong>Mỗi bước chân là một cầu kinh.</strong><br>
+                        Không cần chùa chiền. Cuộc sống là đạo tràng.
+                    </p>
+                </div>
+
+                <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); border-top: 4px solid var(--gold-accent);">
+                    <div style="font-size: 2.5rem; text-align: center; margin-bottom: 1rem;">💡</div>
+                    <p style="font-size: 1.1rem; text-align: center; line-height: 1.8;">
+                        <strong>Bạn là ánh sáng.</strong><br>
+                        Chỉ cần bật lên thôi.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== QUIZ SECTION ===== -->
+    <section class="quiz-section">
+        <div class="content-container">
+            <div class="quiz-header">
+                <h2>📝 Quiz Ngày 7: Kiểm Tra Hiểu Biết Cuối Cùng</h2>
+                <div class="quiz-intro">
+                    <p style="font-size: 1.1rem; font-weight: 600;">
+                        🎯 Làm quiz để kiểm tra sự hiểu biết tổng thể của bạn<br>
+                        Điểm tối đa: 100 điểm (5 câu x 20 điểm)
+                    </p>
+                </div>
+            </div>
+
+            <form id="quizForm">
+                <!-- Câu 1 -->
+                <div class="question-card">
+                    <div class="question-number">Câu 1</div>
+                    <div class="question-text">Sau 7 ngày học, điều quan trọng nhất là:</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" id="q1a" name="q1" value="a">
+                            <label for="q1a">A. Đọc lại nhiều lần</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q1b" name="q1" value="b">
+                            <label for="q1b">B. Cam kết thực hành</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q1c" name="q1" value="c">
+                            <label for="q1c">C. Kể cho người khác</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q1d" name="q1" value="d">
+                            <label for="q1d">D. Quên đi</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Câu 2 -->
+                <div class="question-card">
+                    <div class="question-number">Câu 2</div>
+                    <div class="question-text">Lộ Trình 49 ngày bao gồm:</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" id="q2a" name="q2" value="a">
+                            <label for="q2a">A. 1 giai đoạn</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q2b" name="q2" value="b">
+                            <label for="q2b">B. 3 giai đoạn</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q2c" name="q2" value="c">
+                            <label for="q2c">C. 7 giai đoạn (7 tuần)</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q2d" name="q2" value="d">
+                            <label for="q2d">D. Không có lộ trình</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Câu 3 -->
+                <div class="question-card">
+                    <div class="question-number">Câu 3</div>
+                    <div class="question-text">Sau 49 ngày thực hành nghiêm túc, bạn sẽ:</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" id="q3a" name="q3" value="a">
+                            <label for="q3a">A. Giác ngộ ngay</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q3b" name="q3" value="b">
+                            <label for="q3b">B. Tần số tăng 2-3 điểm, cuộc sống thay đổi</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q3c" name="q3" value="c">
+                            <label for="q3c">C. Không thay đổi gì</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q3d" name="q3" value="d">
+                            <label for="q3d">D. Trở thành bậc thầy</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Câu 4 -->
+                <div class="question-card">
+                    <div class="question-number">Câu 4</div>
+                    <div class="question-text">"Teaching is learning twice" có nghĩa:</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" id="q4a" name="q4" value="a">
+                            <label for="q4a">A. Dạy người khác giúp bạn học sâu hơn</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q4b" name="q4" value="b">
+                            <label for="q4b">B. Phải học 2 lần mới dạy được</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q4c" name="q4" value="c">
+                            <label for="q4c">C. Dạy khó hơn học</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q4d" name="q4" value="d">
+                            <label for="q4d">D. Không nên dạy</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Câu 5 -->
+                <div class="question-card">
+                    <div class="question-number">Câu 5</div>
+                    <div class="question-text">"Mỗi bước chân là một cầu kinh" có nghĩa:</div>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" id="q5a" name="q5" value="a">
+                            <label for="q5a">A. Phải đi bộ nhiều</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q5b" name="q5" value="b">
+                            <label for="q5b">B. Sống có ý thức từng khoảnh khắc, cuộc sống là tu hành</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q5c" name="q5" value="c">
+                            <label for="q5c">C. Phải cầu nguyện liên tục</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q5d" name="q5" value="d">
+                            <label for="q5d">D. Không có nghĩa gì</label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" class="submit-quiz-btn" onclick="submitQuiz()">
+                    🎯 NỘP BÀI & XEM ĐIỂM
+                </button>
+            </form>
+
+            <div id="quizResult" class="quiz-result">
+                <h3 style="color: var(--primary-burgundy); font-size: 2rem; margin-bottom: 1rem;">
+                    🎉 KẾT QUẢ QUIZ CUỐI CÙNG
+                </h3>
+                <div class="result-score" id="scoreDisplay">0/100</div>
+                <div class="result-message" id="resultMessage"></div>
+                <div class="result-feedback" id="resultFeedback"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FINAL MESSAGE ===== -->
+    <section class="final-message">
+        <div class="content-container">
+            <h2>🎊 CHÚC MỪNG!<br>BẠN ĐÃ HOÀN THÀNH 7 NGÀY KHAI MỞ TẦN SỐ GỐC!</h2>
+            
+            <p style="font-size: 1.2rem; margin: 2rem 0;">
+                Hãy dành 1 phút im lặng, đặt tay lên tim, và nói:
+            </p>
+
+            <div style="background: rgba(255,255,255,0.15); padding: 3rem; border-radius: 20px; margin: 2rem 0; backdrop-filter: blur(10px); border: 3px solid var(--gold-accent);">
+                <p style="font-size: 1.3rem; font-style: italic; line-height: 2.2;">
+                    "Tôi tự hào về bản thân. Tôi đã hoàn thành. Tôi đã thay đổi.<br><br>
+                    Từ giờ, tôi cam kết sống có ý thức, nâng tần số, và là ánh sáng cho người khác.<br><br>
+                    Cảm ơn tôi. Cảm ơn vũ trụ. Cảm ơn hành trình này.<br><br>
+                    Tôi sẵn sàng cho chương tiếp theo."
+                </p>
+            </div>
+
+            <blockquote>
+                "Ánh sáng đã luôn ở trong bạn.<br>
+                Bạn chỉ cần nhớ cách bật nó lên."
+            </blockquote>
+
+            <p style="font-size: 1.2rem; margin-top: 3rem;">
+                Với tình yêu và ánh sáng,<br>
+                <strong style="color: var(--gold-accent);">Đội ngũ Chuyển Hóa Nội Tâm</strong>
+            </p>
+
+            <div style="margin-top: 3rem; padding: 2rem; background: rgba(255,189,89,0.2); border-radius: 15px;">
+                <h4 style="color: var(--gold-accent); margin-bottom: 1rem;">📋 BƯỚC TIẾP THEO CỦA BẠN:</h4>
+                <ul style="list-style: none; padding: 0; text-align: left; max-width: 600px; margin: 0 auto; line-height: 2.5;">
+                    <li>□ Hoàn thành Quiz Ngày 7</li>
+                    <li>□ Viết nhật ký tổng kết 7 ngày</li>
+                    <li>□ Lên kế hoạch 49 ngày tiếp theo</li>
+                    <li>□ Chọn 1 trong 3 con đường</li>
+                    <li>□ [Nếu quan tâm] Tìm hiểu Certification</li>
+                    <li>□ [Nếu quan tâm] Đăng ký Đối Tác Thịnh Vượng</li>
+                    <li>□ [Nếu là lãnh đạo] Nhận bộ công cụ cho DN</li>
+                </ul>
+            </div>
+
+            <p style="font-size: 1.5rem; font-weight: 700; color: var(--gold-accent); margin-top: 3rem;">
+                NAMASTE 🙏
+            </p>
+        </div>
+    </section>
+
+    <!-- ===== NAVIGATION ===== -->
+    <section class="content-section">
+        <div class="content-container">
+            <div class="lesson-navigation">
+                <a href="#ngay-6" class="nav-btn prev">
+                    ← NGÀY 6: NGHIỆP & LUÂN HỒI
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="course-footer">
+        <div class="content-container">
+            <p class="footer-message">
+                Dù bạn chọn con đường nào, hãy nhớ:<br>
+                "Ánh sáng đã luôn ở trong bạn. Bạn chỉ cần nhớ cách bật nó lên."
+            </p>
+            <p style="margin-top: 2rem; font-size: 1.1rem;">
+                Hẹn gặp lại trong 49 ngày tiếp theo 🌟<br>
+                Hoặc trong chương trình Certification 🎓<br>
+                Hoặc như Đối Tác Thịnh Vượng 💼
+            </p>
+            <p style="margin-top: 2rem; color: var(--gold-accent);">
+                Dù ở đâu, bạn luôn là một phần của ánh sáng này ✨
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Quiz Logic với chấm điểm tự động
+        const correctAnswers = {
+            q1: 'b',  // Cam kết thực hành
+            q2: 'c',  // 7 giai đoạn (7 tuần)
+            q3: 'b',  // Tần số tăng 2-3 điểm
+            q4: 'a',  // Dạy người khác giúp bạn học sâu hơn
+            q5: 'b'   // Sống có ý thức từng khoảnh khắc
+        };
+
+        const feedbackMessages = {
+            100: {
+                title: "🏆 HOÀN HẢO!",
+                message: "Bạn đã thấu hiểu sâu sắc toàn bộ khóa học! Bạn sẵn sàng cho hành trình 49 ngày và hơn thế nữa!",
+                color: "#4CAF50"
+            },
+            80: {
+                title: "🌟 XUẤT SẮC!",
+                message: "Bạn đã nắm vững hầu hết kiến thức. Hãy xem lại những câu sai để hoàn thiện hơn.",
+                color: "#8BC34A"
+            },
+            60: {
+                title: "👍 TỐT LẮM!",
+                message: "Bạn đã hiểu được những điểm quan trọng. Hãy ôn lại toàn bộ để sẵn sàng cho 49 ngày tiếp theo.",
+                color: "#FFC107"
+            },
+            0: {
+                title: "💪 TIẾP TỤC CỐ GẮNG!",
+                message: "Hãy đọc lại các bài học cẩn thận. Mỗi lần ôn tập là một bước tiến. Bạn làm được!",
+                color: "#FF9800"
+            }
+        };
+
+        function submitQuiz() {
+            const form = document.getElementById('quizForm');
+            let score = 0;
+            let totalQuestions = 5;
+            let answeredAll = true;
+            let detailedFeedback = [];
+
+            // Reset all options styling
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('correct', 'incorrect');
+            });
+
+            // Check each question
+            for (let i = 1; i <= totalQuestions; i++) {
+                const questionName = 'q' + i;
+                const selectedOption = form.querySelector(`input[name="${questionName}"]:checked`);
+                
+                if (!selectedOption) {
+                    answeredAll = false;
+                    continue;
+                }
+
+                const userAnswer = selectedOption.value;
+                const correctAnswer = correctAnswers[questionName];
+                const questionCard = selectedOption.closest('.question-card');
+                const allOptions = questionCard.querySelectorAll('.option');
+
+                // Highlight correct and incorrect answers
+                allOptions.forEach(opt => {
+                    const radio = opt.querySelector('input[type="radio"]');
+                    if (radio.value === correctAnswer) {
+                        opt.classList.add('correct');
+                    }
+                    if (radio.checked && radio.value !== correctAnswer) {
+                        opt.classList.add('incorrect');
+                    }
+                });
+
+                if (userAnswer === correctAnswer) {
+                    score += 20;
+                    detailedFeedback.push(`<p style="color: #4CAF50;">✓ Câu ${i}: <strong>Đúng</strong></p>`);
+                } else {
+                    detailedFeedback.push(`<p style="color: #F44336;">✗ Câu ${i}: <strong>Sai</strong> - Đáp án đúng đã được đánh dấu màu xanh</p>`);
+                }
+            }
+
+            if (!answeredAll) {
+                alert('⚠️ Vui lòng trả lời tất cả các câu hỏi!');
+                return;
+            }
+
+            // Display results
+            const resultDiv = document.getElementById('quizResult');
+            const scoreDisplay = document.getElementById('scoreDisplay');
+            const resultMessage = document.getElementById('resultMessage');
+            const resultFeedback = document.getElementById('resultFeedback');
+
+            scoreDisplay.textContent = score + '/100 điểm';
+            
+            // Get appropriate feedback
+            let feedback;
+            if (score === 100) feedback = feedbackMessages[100];
+            else if (score >= 80) feedback = feedbackMessages[80];
+            else if (score >= 60) feedback = feedbackMessages[60];
+            else feedback = feedbackMessages[0];
+
+            resultMessage.innerHTML = `<strong style="font-size: 1.5rem; color: ${feedback.color}">${feedback.title}</strong><br>${feedback.message}`;
+            resultFeedback.innerHTML = `<h4 style="color: var(--primary-burgundy); margin-bottom: 1rem;">📊 Chi Tiết:</h4>${detailedFeedback.join('')}`;
+
+            resultDiv.classList.add('show');
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Disable submit button
+            const submitBtn = document.querySelector('.submit-quiz-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '✅ ĐÃ NỘP BÀI';
+
+            // Show celebration if perfect score
+            if (score === 100) {
+                setTimeout(() => {
+                    alert('🎉 CHÚC MỪNG! Điểm số hoàn hảo!\n\nBạn đã sẵn sàng cho hành trình 49 ngày và các bước tiếp theo!\n\nHãy chọn con đường phù hợp với bạn và tiếp tục chuyển hóa! 🌟');
+                }, 1000);
+            }
+        }
+
+        // Scroll to top when page loads
+        window.addEventListener('load', function() {
+            window.scrollTo(0, 0);
+        });
+
+        // Add confetti effect on page load
+        window.addEventListener('load', function() {
+            // Simple confetti effect (you can enhance this)
+            console.log('🎉 Chúc mừng bạn đã hoàn thành khóa học! 🎉');
+        });
+    </script>
+</body>
+</html>

@@ -4,7 +4,7 @@
  * Dark glass theme
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -21,34 +21,32 @@ import { ArrowLeft, Zap, Clock, Eye, Target, Check, Gem } from 'lucide-react-nat
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { useAuth } from '../../contexts/AuthContext';
 import { CONTENT_BOTTOM_PADDING, ACTION_BUTTON_BOTTOM_PADDING } from '../../constants/layout';
+import gemEconomyService from '../../services/gemEconomyService';
+import boostService from '../../services/boostService';
 
-const BOOST_PACKAGES = [
-  {
-    id: 'basic',
-    name: 'Cơ Bản',
-    duration: '1 ngày',
-    reach: '~500 lượt',
-    gems: 50,
-    color: COLORS.textSecondary,
-  },
-  {
-    id: 'standard',
-    name: 'Tiêu Chuẩn',
-    duration: '3 ngày',
-    reach: '~2,000 lượt',
-    gems: 120,
-    color: COLORS.gold,
-    popular: true,
-  },
-  {
-    id: 'premium',
-    name: 'Cao Cấp',
-    duration: '7 ngày',
-    reach: '~5,000 lượt',
-    gems: 250,
-    color: COLORS.purple,
-  },
-];
+// Package colors for display
+const PACKAGE_COLORS = {
+  basic: COLORS.textSecondary,
+  standard: COLORS.gold,
+  premium: COLORS.purple,
+  ultra: COLORS.burgundy,
+};
+
+// Get display info for each package
+const getPackageDisplayInfo = (pkg) => {
+  const durationText = pkg.duration_hours >= 24
+    ? `${Math.floor(pkg.duration_hours / 24)} ngày`
+    : `${pkg.duration_hours} giờ`;
+  const reachText = `~${pkg.reach_multiplier * 500} lượt`;
+
+  return {
+    ...pkg,
+    duration: durationText,
+    reach: reachText,
+    gems: pkg.price_gems,
+    color: PACKAGE_COLORS[pkg.id] || COLORS.textSecondary,
+  };
+};
 
 export default function BoostPostScreen({ navigation, route }) {
   const { postId } = route.params || {};
@@ -56,13 +54,57 @@ export default function BoostPostScreen({ navigation, route }) {
   const { alert, AlertComponent } = useCustomAlert();
   const [selectedPackage, setSelectedPackage] = useState('standard');
   const [loading, setLoading] = useState(false);
+  const [userGems, setUserGems] = useState(0);
+  const [loadingBalance, setLoadingBalance] = useState(true);
 
-  const userGems = user?.gems_balance || 0;
+  // Get packages from boostService (source of truth)
+  const rawPackages = boostService.getBoostPackages();
+  // Only show first 3 packages (basic, standard, premium) - skip ultra for simpler UI
+  const BOOST_PACKAGES = rawPackages.slice(0, 3).map(getPackageDisplayInfo);
+
+  // Load gems balance from profiles.gems (single source of truth)
+  const loadGemBalance = useCallback(async () => {
+    if (!user?.id) {
+      setLoadingBalance(false);
+      return;
+    }
+
+    try {
+      const balance = await gemEconomyService.getGemBalance(user.id);
+      setUserGems(balance || 0);
+    } catch (error) {
+      console.error('[BoostPost] Load balance error:', error);
+      setUserGems(0);
+    } finally {
+      setLoadingBalance(false);
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    loadGemBalance();
+  }, [loadGemBalance]);
 
   const handleBoost = async () => {
-    const pkg = BOOST_PACKAGES.find(p => p.id === selectedPackage);
-    if (!pkg) return;
+    console.log('[BoostPost] handleBoost called, postId:', postId, 'package:', selectedPackage);
 
+    // Validate postId
+    if (!postId) {
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Không tìm thấy bài viết để boost. Vui lòng thử lại.',
+        buttons: [{ text: 'OK', onPress: () => navigation.goBack() }],
+      });
+      return;
+    }
+
+    const pkg = BOOST_PACKAGES.find(p => p.id === selectedPackage);
+    if (!pkg) {
+      console.error('[BoostPost] Package not found:', selectedPackage);
+      return;
+    }
+
+    // Check gems balance
     if (userGems < pkg.gems) {
       alert({
         type: 'warning',
@@ -78,18 +120,53 @@ export default function BoostPostScreen({ navigation, route }) {
 
     setLoading(true);
     try {
-      // TODO: Replace with actual API call
-      // await boostService.createCampaign(postId, selectedPackage);
+      // Call actual boostService
+      const result = await boostService.boostPost(postId, selectedPackage);
+      console.log('[BoostPost] Boost result:', result);
 
-      alert({
-        type: 'success',
-        title: 'Thành công!',
-        message: `Bài viết của bạn đã được boost với gói ${pkg.name}`,
-        buttons: [{ text: 'OK', onPress: () => navigation.goBack() }],
-      });
+      if (result.success) {
+        // Refresh balance after successful boost
+        await loadGemBalance();
+
+        alert({
+          type: 'success',
+          title: 'Thành công!',
+          message: `Bài viết của bạn đã được boost với gói ${pkg.name}. Bạn đã sử dụng ${pkg.gems} Gems.`,
+          buttons: [{ text: 'OK', onPress: () => navigation.goBack() }],
+        });
+      } else if (result.needGems) {
+        alert({
+          type: 'warning',
+          title: 'Không đủ Gems',
+          message: `Bạn cần thêm Gems để boost bài viết này.`,
+          buttons: [
+            { text: 'Hủy', style: 'cancel' },
+            { text: 'Nạp Gems', onPress: () => navigation.navigate('Wallet') },
+          ],
+        });
+      } else if (result.existingBoost) {
+        alert({
+          type: 'info',
+          title: 'Đang được boost',
+          message: 'Bài viết này đang được boost. Vui lòng đợi hết hạn trước khi boost lại.',
+          buttons: [{ text: 'OK' }],
+        });
+      } else {
+        alert({
+          type: 'error',
+          title: 'Lỗi',
+          message: result.error || 'Không thể tạo chiến dịch boost. Vui lòng thử lại.',
+          buttons: [{ text: 'OK' }],
+        });
+      }
     } catch (error) {
       console.error('[BoostPost] Error:', error);
-      alert({ type: 'error', title: 'Lỗi', message: 'Không thể tạo chiến dịch boost' });
+      alert({
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Không thể tạo chiến dịch boost. Vui lòng thử lại sau.',
+        buttons: [{ text: 'OK' }],
+      });
     } finally {
       setLoading(false);
     }
@@ -126,7 +203,11 @@ export default function BoostPostScreen({ navigation, route }) {
               <Text style={styles.balanceLabel}>Số dư Gems</Text>
               <View style={styles.balanceRow}>
                 <Gem size={20} color={COLORS.gold} />
-                <Text style={styles.balanceValue}>{userGems.toLocaleString()}</Text>
+                {loadingBalance ? (
+                  <ActivityIndicator size="small" color={COLORS.gold} />
+                ) : (
+                  <Text style={styles.balanceValue}>{userGems.toLocaleString()}</Text>
+                )}
               </View>
             </View>
             <TouchableOpacity

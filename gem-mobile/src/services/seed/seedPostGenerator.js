@@ -19,6 +19,7 @@ import {
 } from './seedDatasets';
 import { logGeneration } from './seedContentService';
 import { getPremiumSeedUsers, getSeedUsersByPersona } from './seedUserGenerator';
+import { GENDER_POST_IMAGES, FEMALE_AVATAR_PATTERNS } from './genderPostImages';
 
 // Batch size for database inserts
 const BATCH_SIZE = 20;
@@ -33,6 +34,19 @@ const sanitizeText = (text) => {
   // Remove unpaired surrogates (invalid unicode)
   // eslint-disable-next-line no-control-regex
   return text.replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, '');
+};
+
+/**
+ * Detect gender from avatar URL
+ * Uses FEMALE_AVATAR_PATTERNS to identify female users
+ * @param {string} avatarUrl - User's avatar URL
+ * @returns {'male' | 'female'}
+ */
+const detectGenderFromAvatar = (avatarUrl) => {
+  if (!avatarUrl) return 'male';
+  // Check if avatar URL contains any female avatar pattern
+  const isFemale = FEMALE_AVATAR_PATTERNS.some(pattern => avatarUrl.includes(pattern));
+  return isFemale ? 'female' : 'male';
 };
 
 /**
@@ -5017,7 +5031,7 @@ const TOPIC_FALLBACK = {
 };
 
 /**
- * Generate images for a post - WITH DEDUPLICATION + QUALITY FILTER + SMART FALLBACK
+ * Generate images for a post - WITH DEDUPLICATION + QUALITY FILTER + SMART FALLBACK + GENDER
  * Every post has at least 1 image, some have 2-4 images
  *
  * CRITICAL RULE for topic-specific images:
@@ -5026,14 +5040,19 @@ const TOPIC_FALLBACK = {
  * - loa/education/affiliate: can fallback to wealth images
  *
  * @param {string} topic - Post topic
+ * @param {'male' | 'female'} gender - User's gender (detected from avatar)
  * @returns {Array<string>}
  */
-const generatePostImages = (topic) => {
+const generatePostImages = (topic, gender = 'male') => {
   // Normalize topic
   const normalizedTopic = (topic || 'wealth').toLowerCase();
+  const normalizedGender = gender === 'female' ? 'female' : 'male';
 
-  // Filter for high quality images only from the topic's own category
-  const rawTopicImages = SAMPLE_IMAGES[normalizedTopic] || [];
+  // Use GENDER_POST_IMAGES as primary source (gender-specific images)
+  const genderImages = GENDER_POST_IMAGES[normalizedTopic]?.[normalizedGender] || [];
+
+  // Fallback to SAMPLE_IMAGES if gender-specific images not available
+  const rawTopicImages = genderImages.length > 0 ? genderImages : (SAMPLE_IMAGES[normalizedTopic] || []);
   let topicImages = rawTopicImages.filter(isHighQualityImage);
 
   // STRICT MODE: trading and crystal NEVER fall back to other categories
@@ -5044,11 +5063,13 @@ const generatePostImages = (topic) => {
   if (topicImages.length < 5 && !isStrictTopic) {
     const fallbackTopic = TOPIC_FALLBACK[normalizedTopic] || 'wealth';
     if (fallbackTopic !== normalizedTopic) {
-      const rawFallbackImages = SAMPLE_IMAGES[fallbackTopic] || [];
+      // Try gender-specific fallback first, then SAMPLE_IMAGES
+      const genderFallbackImages = GENDER_POST_IMAGES[fallbackTopic]?.[normalizedGender] || [];
+      const rawFallbackImages = genderFallbackImages.length > 0 ? genderFallbackImages : (SAMPLE_IMAGES[fallbackTopic] || []);
       const fallbackImages = rawFallbackImages.filter(isHighQualityImage);
       // Combine topic images with fallback images
       topicImages = [...topicImages, ...fallbackImages];
-      console.log(`[SeedPostGenerator] ${normalizedTopic} has few images, using ${fallbackTopic} as fallback (${topicImages.length} total)`);
+      console.log(`[SeedPostGenerator] ${normalizedTopic} (${normalizedGender}) has few images, using ${fallbackTopic} as fallback (${topicImages.length} total)`);
     }
   }
 
@@ -5082,8 +5103,12 @@ const generatePostImages = (topic) => {
       console.warn(`[SeedPostGenerator] WARNING: ${normalizedTopic} has NO images! Posts will have no images.`);
       imagePool = [];
     } else {
-      console.log('[SeedPostGenerator] No images for topic, using wealth images');
-      const wealthImages = (SAMPLE_IMAGES.wealth || []).filter(isHighQualityImage);
+      console.log(`[SeedPostGenerator] No images for topic (${normalizedGender}), using wealth images`);
+      // Try gender-specific wealth images first
+      const genderWealthImages = GENDER_POST_IMAGES.wealth?.[normalizedGender] || [];
+      const wealthImages = genderWealthImages.length > 0
+        ? genderWealthImages.filter(isHighQualityImage)
+        : (SAMPLE_IMAGES.wealth || []).filter(isHighQualityImage);
       imagePool = wealthImages.length > 0 ? wealthImages : Object.values(SAMPLE_IMAGES).flat().filter(isHighQualityImage);
     }
   }
@@ -5118,13 +5143,21 @@ const generatePostImages = (topic) => {
 /**
  * Generate post data
  * @param {Object} options - Options
+ * @param {string} options.authorId - User ID of post author
+ * @param {string} options.topic - Post topic
+ * @param {Date} options.createdAt - Post creation date
+ * @param {string} [options.avatarUrl] - Author's avatar URL (for gender detection)
  * @returns {Object}
  */
 const generatePostData = ({
   authorId,
   topic,
   createdAt,
+  avatarUrl,
 }) => {
+  // Detect gender from avatar URL for gender-specific images
+  const gender = detectGenderFromAvatar(avatarUrl);
+
   // Use SAMPLE_POSTS (new content from category files) instead of POST_TEMPLATES
   const posts = SAMPLE_POSTS[topic] || SAMPLE_POSTS.trading;
   const post = getRandomItem(posts);
@@ -5138,8 +5171,8 @@ const generatePostData = ({
   // Sanitize content to remove invalid unicode surrogates
   const content = sanitizeText(fullContent);
 
-  // All posts have at least 1 image (some have 2-4 images)
-  const images = generatePostImages(topic);
+  // All posts have at least 1 image (some have 2-4 images) - gender-matched
+  const images = generatePostImages(topic, gender);
 
   // Use image_url for single image or media_urls for multiple
   // Matching actual forum_posts table structure
@@ -5252,6 +5285,7 @@ export const generate = async ({
         authorId: user.id,
         topic,
         createdAt,
+        avatarUrl: user.avatar_url, // For gender-specific image selection
       }));
 
       // Move to next user (cycle through all users)

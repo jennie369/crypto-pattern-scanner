@@ -1,12 +1,14 @@
 /**
  * Gemral - Cart Context
- * Global cart state management with AsyncStorage persistence
+ * CLOUD SYNC: Cart synced via Shopify + Supabase for cross-device consistency
+ * Updated: 2024-12-25
  */
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { shopifyService } from '../services/shopifyService';
 import { useAuth } from './AuthContext';
+import { supabase } from '../services/supabase';
 
 const CartContext = createContext(null);
 
@@ -41,27 +43,49 @@ export const CartProvider = ({ children }) => {
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-  // Load cart from storage on mount
+  // Load cart from storage on mount and when user changes
   useEffect(() => {
     loadCartFromStorage();
-  }, []);
+  }, [user?.id]);
 
-  // Load cart from AsyncStorage
+  // Load cart - CLOUD FIRST for logged-in users
   const loadCartFromStorage = async () => {
     try {
+      let cloudCartId = null;
+
+      // Try cloud first if logged in
+      if (user?.id) {
+        const { data, error } = await supabase
+          .from('user_cart_sync')
+          .select('shopify_cart_id, items')
+          .eq('user_id', user.id)
+          .single();
+
+        if (data && !error) {
+          cloudCartId = data.shopify_cart_id;
+          if (data.items && Array.isArray(data.items)) {
+            setItems(data.items);
+          }
+        }
+      }
+
+      // Load from local storage
       const [storedItems, storedCartId] = await Promise.all([
         AsyncStorage.getItem(CART_STORAGE_KEY),
         AsyncStorage.getItem(CART_ID_KEY),
       ]);
 
-      if (storedItems) {
+      // Use cloud cart ID if available, otherwise local
+      const finalCartId = cloudCartId || storedCartId;
+
+      if (storedItems && !cloudCartId) {
         setItems(JSON.parse(storedItems));
       }
 
-      if (storedCartId) {
-        setCartId(storedCartId);
-        // Optionally sync with Shopify
-        const shopifyCart = await shopifyService.getCart(storedCartId);
+      if (finalCartId) {
+        setCartId(finalCartId);
+        // Sync with Shopify
+        const shopifyCart = await shopifyService.getCart(finalCartId);
         if (shopifyCart) {
           setCart(shopifyCart);
         }
@@ -71,12 +95,28 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Save cart to AsyncStorage
+  // Save cart - Local + Cloud sync
   const saveCartToStorage = async (newItems, newCartId = null) => {
     try {
       await AsyncStorage.setItem(CART_STORAGE_KEY, JSON.stringify(newItems));
       if (newCartId) {
         await AsyncStorage.setItem(CART_ID_KEY, newCartId);
+      }
+
+      // Sync to Supabase if logged in
+      if (user?.id) {
+        await supabase
+          .from('user_cart_sync')
+          .upsert({
+            user_id: user.id,
+            shopify_cart_id: newCartId || cartId,
+            items: newItems,
+            item_count: newItems.reduce((sum, item) => sum + item.quantity, 0),
+            subtotal: newItems.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+            updated_at: new Date().toISOString(),
+          }, {
+            onConflict: 'user_id',
+          });
       }
     } catch (err) {
       console.error('[Cart] Error saving to storage:', err);

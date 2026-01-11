@@ -209,7 +209,7 @@ const AIMessageBubble = ({
           {/* Typing indicator */}
           {isTypingActive && displayedText.length === 0 && (
             <View style={styles.typingIndicator}>
-              <Text style={styles.typingText}>Sư Phụ đang trả lời</Text>
+              <Text style={styles.typingText}>Ta đang suy ngẫm</Text>
               <View style={styles.dotsContainer}>
                 <Animated.View
                   style={[

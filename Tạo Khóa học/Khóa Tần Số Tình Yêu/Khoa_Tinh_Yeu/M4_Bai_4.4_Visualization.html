@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 4.4: Visualization - Hình Dung Tình Yêu | Khóa Tần Số Tình Yêu</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --pink: #FF69B4;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--burgundy); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .highlight-box.purple { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05)); border-color: rgba(106, 91, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.purple { border-left-color: var(--purple); } }
+        .highlight-box.purple .highlight-box-title { color: var(--purple); }
+
+        .highlight-box.cyan { background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 240, 255, 0.05)); border-color: rgba(0, 240, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.cyan { border-left-color: var(--cyan); } }
+        .highlight-box.cyan .highlight-box-title { color: var(--cyan); }
+
+        .highlight-box.pink { background: linear-gradient(135deg, rgba(255, 105, 180, 0.15), rgba(255, 105, 180, 0.05)); border-color: rgba(255, 105, 180, 0.3); }
+        @media (max-width: 600px) { .highlight-box.pink { border-left-color: var(--pink); } }
+        .highlight-box.pink .highlight-box-title { color: var(--pink); }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        @media (min-width: 601px) { .flow-step:hover { border-color: var(--gold); transform: translateX(8px); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .checklist { list-style: none; margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .checklist { margin: var(--space-md) 0; padding: 0 16px; } }
+        .checklist li { display: flex; align-items: flex-start; gap: var(--space-sm); padding: var(--space-sm) 0; border-bottom: 1px solid var(--glass-border); color: var(--text-secondary); }
+        .checklist li:last-child { border-bottom: none; }
+        .checklist li::before { content: "💕"; font-size: 1rem; }
+
+        .visualization-box { background: linear-gradient(135deg, rgba(106, 91, 255, 0.1), rgba(106, 91, 255, 0.02)); border: 2px dashed rgba(106, 91, 255, 0.4); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-lg) 0; font-style: italic; }
+        @media (max-width: 600px) { .visualization-box { border-radius: 0; padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .visualization-box p { color: var(--text-secondary); margin-bottom: var(--space-md); line-height: 1.8; }
+        .visualization-box .pause { color: var(--purple); font-weight: 600; text-align: center; margin: var(--space-md) 0; }
+
+        .faq-item { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .faq-item { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin-bottom: 1px; } }
+        .faq-question { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); }
+        .faq-answer { color: var(--text-secondary); font-size: 0.95rem; }
+
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+
+        .module-summary { background: linear-gradient(135deg, rgba(255, 105, 180, 0.1), rgba(106, 91, 255, 0.1)); border: 2px solid var(--pink); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .module-summary { border: none; border-radius: 0; border-left: 4px solid var(--pink); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .module-summary-title { font-size: 1.25rem; font-weight: 700; color: var(--pink); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+
+        /* Quiz Styles */
+        .quiz-section { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(156, 6, 18, 0.1)); border: 2px solid var(--purple); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .quiz-section { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .quiz-title { font-size: 1.5rem; font-weight: 700; color: var(--purple); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .quiz-question { margin-bottom: var(--space-xl); }
+        .question-text { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-md); font-size: 1.1rem; }
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        .quiz-option { padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; transition: all 0.3s ease; color: var(--text-secondary); }
+        .quiz-option:hover { border-color: var(--gold); background: rgba(255, 189, 89, 0.1); }
+        .quiz-option.selected { border-color: var(--cyan); background: rgba(0, 240, 255, 0.1); }
+        .quiz-option.correct { border-color: var(--success); background: rgba(0, 200, 83, 0.2); color: var(--success); }
+        .quiz-option.incorrect { border-color: var(--error); background: rgba(255, 82, 82, 0.2); color: var(--error); }
+        .quiz-option.disabled { pointer-events: none; opacity: 0.7; }
+        .quiz-feedback { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--radius-md); display: none; }
+        .quiz-feedback.correct { background: rgba(0, 200, 83, 0.15); border: 1px solid var(--success); color: var(--success); display: block; }
+        .quiz-feedback.incorrect { background: rgba(255, 82, 82, 0.15); border: 1px solid var(--error); color: var(--error); display: block; }
+        .quiz-result { text-align: center; padding: var(--space-xl); display: none; }
+        .quiz-result.show { display: block; }
+        .quiz-score { font-size: 2rem; font-weight: 800; color: var(--gold); margin-bottom: var(--space-md); }
+        .quiz-message { color: var(--text-secondary); margin-bottom: var(--space-lg); }
+        .retake-btn { padding: var(--space-md) var(--space-xl); background: linear-gradient(135deg, var(--purple), var(--burgundy)); border: none; border-radius: 50px; color: white; font-weight: 700; cursor: pointer; transition: all 0.3s ease; }
+        .retake-btn:hover { transform: scale(1.05); box-shadow: 0 4px 20px rgba(106, 91, 255, 0.4); }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>💕</span>
+                <span>Module 4</span>
+            </div>
+            <div class="lesson-chapter">Chapter 4 - Sẵn Sàng Đón Tri Kỷ</div>
+            <h1 class="lesson-title">Visualization - Hình Dung Tình Yêu</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 4.4</span></div>
+                <div class="meta-item"><span>⏱️</span><span>30 phút thực hành</span></div>
+            </div>
+        </header>
+
+        <!-- SECTION 1: Opening Hook -->
+        <section class="section">
+            <h2 class="section-title"><span>🎬</span> Sức Mạnh Huyền Diệu Của Hình Dung</h2>
+
+            <p>Michael Phelps - vận động viên bơi lội giành nhiều huy chương Olympic nhất lịch sử - có một bí mật: mỗi đêm trước khi ngủ, anh hình dung chi tiết cuộc đua hoàn hảo - từng cú vẫy tay, từng nhịp thở, từng giây đồng hồ. Khi đến cuộc thi thật, não anh đã "sống" khoảnh khắc đó hàng trăm lần - cơ thể chỉ làm theo những gì đã được "lập trình".</p>
+
+            <p>Jim Carrey nổi tiếng với câu chuyện viết séc 10 triệu USD cho chính mình năm 1985, ghi ngày 1995 - và năm đó anh thật sự nhận được 10 triệu USD từ phim Dumb and Dumber. Nhưng ít ai biết rằng mỗi đêm, anh ngồi trên đồi Hollywood hình dung chi tiết cuộc sống thành công - cảm nhận như đã có rồi.</p>
+
+            <p>Visualization không chỉ dành cho vận động viên hay người nổi tiếng. Đây là kỹ thuật bạn có thể sử dụng ngay bây giờ để thu hút tình yêu - và trong bài học này, bạn sẽ học cách làm đúng.</p>
+
+            <div class="highlight-box pink">
+                <div class="highlight-box-title"><span>💗</span> Học Thuyết Chuyển Hóa Nội Tâm</div>
+                <p>Visualization hoạt động theo nguyên lý "Ý Thức Kiến Tạo Thực Tại". Khi bạn hình dung sống động với cảm xúc mãnh liệt, bạn đang tạo ra một "Hình Tư Tưởng" trong trường năng lượng. Hình Tư Tưởng này được nuôi dưỡng bởi sự lặp lại và cảm xúc - cho đến khi nó đủ mạnh để hiển hóa vào thực tại vật chất.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m4-visualization-intro.png" alt="Sức mạnh visualization">
+            </div>
+            <div class="image-caption">Hình 1: Visualization - Kỹ thuật manifestation hàng đầu của các chuyên gia</div>
+        </section>
+
+        <!-- SECTION 2: Khoa Học Về Visualization -->
+        <section class="section">
+            <h2 class="section-title"><span>🧠</span> Khoa Học Não Bộ Về Visualization</h2>
+
+            <p>Visualization không phải "mê tín" - đây là kỹ thuật có nền tảng khoa học thần kinh vững chắc. Hiểu được CƠ CHẾ sẽ giúp bạn thực hành hiệu quả hơn.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🔬</span> Não Không Phân Biệt Thực Và Ảo</div>
+                <p>Nghiên cứu fMRI cho thấy: khi bạn HÌNH DUNG một hành động, não kích hoạt các vùng TƯƠNG TỰ như khi bạn THỰC SỰ làm hành động đó. Điều này giải thích tại sao vận động viên có thể cải thiện thành tích chỉ bằng việc hình dung tập luyện - não họ đã "luyện tập" trong khi cơ thể nghỉ ngơi.</p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>🎯</span> Kích Hoạt RAS (Reticular Activating System)</div>
+                <p>RAS là bộ lọc của não - quyết định thông tin nào được chú ý. Khi bạn visualization về tình yêu, bạn đang "lập trình" RAS tìm kiếm những cơ hội, dấu hiệu, và người phù hợp. Đột nhiên bạn sẽ "thấy" những điều trước đây bị bỏ qua - như khi mua xe mới, bạn bắt đầu thấy xe giống mình khắp nơi.</p>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>⚡</span> Thay Đổi Sóng Não</div>
+                <p>Visualization đưa não vào trạng thái Alpha/Theta - sóng não của sáng tạo và tiềm thức. Ở trạng thái này, các rào cản logic tạm thời giảm xuống, cho phép tiềm thức tiếp nhận "chương trình mới" hiệu quả hơn. Đây là lý do thời điểm tốt nhất là khi vừa thức dậy hoặc sắp ngủ - não tự nhiên ở trạng thái này.</p>
+            </div>
+
+            <p>Điểm quan trọng: không chỉ hình ảnh, mà CẢM XÚC mới là yếu tố quyết định. Não ghi nhớ sự kiện theo cảm xúc - một visualization không có cảm xúc chỉ là "xem phim" và không tạo thay đổi thực sự.</p>
+        </section>
+
+        <!-- SECTION 3: 5 Nguyên Tắc Visualization -->
+        <section class="section">
+            <h2 class="section-title"><span>💫</span> 5 Nguyên Tắc Visualization Hiệu Quả</h2>
+
+            <p>Để visualization có sức mạnh thực sự, bạn cần tuân theo 5 nguyên tắc vàng sau:</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Chi Tiết & Sống Động (Vivid)</div>
+                        <div class="flow-step-desc">Hình dung càng chi tiết càng tốt: màu sắc, âm thanh, mùi hương, kết cấu. Bạn ngửi thấy mùi nước hoa của họ. Bạn nghe tiếng cười của họ. Bạn cảm nhận bàn tay họ nắm tay bạn. Càng sống động, não càng "tin" đây là thật và phản ứng tương ứng.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">CẢM XÚC Là Chìa Khóa (Emotion)</div>
+                        <div class="flow-step-desc">Quan trọng nhất: CẢM NHẬN những cảm xúc tích cực - không chỉ "xem" mà phải "sống" trong cảnh đó. Cảm giác hạnh phúc, biết ơn, yêu thương, an toàn là "nhiên liệu" của manifestation. 5 phút với cảm xúc mãnh liệt > 1 tiếng không có cảm xúc.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Góc Nhìn Thứ Nhất (First Person)</div>
+                        <div class="flow-step-desc">Hình dung từ góc nhìn của BẠN - như thể bạn đang nhìn qua đôi mắt của mình trong khoảnh khắc đó, không phải đang xem bản thân từ bên ngoài như xem phim. "Tôi đang nắm tay họ" chứ không phải "Tôi thấy mình đang nắm tay họ".</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Thực Hành Đều Đặn (Consistency)</div>
+                        <div class="flow-step-desc">Visualization hiệu quả nhất khi làm mỗi ngày - 5-15 phút vào buổi sáng (khi vừa thức dậy) hoặc tối (trước khi ngủ). Lúc này tiềm thức dễ tiếp nhận nhất. Ít nhất 21 ngày liên tục để tạo "đường mòn thần kinh" mới.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Buông Bỏ Sau Khi Xong (Detachment)</div>
+                        <div class="flow-step-desc">Sau khi visualization, BUÔNG BỎ hoàn toàn - không ám ảnh hay lo lắng "sao chưa đến?". Tin rằng vũ trụ đã nhận được "đơn hàng" và đang xử lý. Lo lắng = năng lượng thiếu hụt = đẩy điều mong muốn xa ra.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m4-visualization-principles.png" alt="5 nguyên tắc visualization">
+            </div>
+            <div class="image-caption">Hình 2: 5 nguyên tắc visualization hiệu quả cho tình yêu</div>
+        </section>
+
+        <!-- SECTION 4: Ví Dụ Thực Tế -->
+        <section class="section">
+            <h2 class="section-title"><span>👥</span> Câu Chuyện Thực Tế</h2>
+
+            <p>Visualization đã giúp nhiều người thu hút tình yêu như thế nào? Đây là hai câu chuyện từ học viên:</p>
+
+            <div class="highlight-box pink">
+                <div class="highlight-box-title"><span>🌸</span> Lan - 36 Tuổi, Bác Sĩ</div>
+                <p>Lan đã 36 tuổi và bắt đầu lo lắng về việc tìm bạn đời. "Tôi thử mọi thứ - ứng dụng hẹn hò, được giới thiệu, đi events - nhưng không có gì đúng. Khi bắt đầu visualization, tôi không tưởng tượng một người cụ thể, mà tập trung vào CẢM GIÁC. Mỗi tối trước khi ngủ, tôi hình dung mình đang ngồi bên cạnh ai đó, cảm thấy an toàn, được yêu thương. Tôi cảm nhận bàn tay ấm áp nắm tay mình. Tôi thấy mình cười hạnh phúc. Sau 3 tháng thực hành đều đặn, tôi gặp anh ấy - ở phòng khám của tôi! Anh ấy là bệnh nhân, nhưng sau khi điều trị xong, anh quay lại hỏi thăm và mời tôi đi cà phê. Điều kỳ lạ là - cảm giác khi ngồi cạnh anh ấy CHÍNH XÁC như những gì tôi đã visualization."</p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>💙</span> Hùng - 41 Tuổi, Kỹ Sư IT</div>
+                <p>Hùng từng rất hoài nghi về những thứ "tâm linh". "Tôi là dân kỹ thuật, tin vào logic và dữ liệu. Nhưng sau khi đọc về khoa học thần kinh đằng sau visualization, tôi quyết định thử như một 'thí nghiệm'. Mỗi sáng thức dậy, trước khi mở mắt, tôi hình dung 5 phút về cuộc sống với người bạn đời. Tôi không hình dung ngoại hình - mà tập trung vào những hoạt động: cùng nấu ăn sáng Chủ nhật, cùng đi hiking, cùng đọc sách mỗi tối. Điều tôi nhận ra sau 2 tháng là TÔI thay đổi - tôi chủ động hơn, mở lòng hơn, bớt 'khô khan' theo lời đồng nghiệp. Và tôi gặp cô ấy ở một buổi hiking - chính xác như những gì tôi đã hình dung hàng trăm lần."</p>
+            </div>
+
+            <p>Cả hai câu chuyện có điểm chung: họ không hình dung một người CỤ THỂ, mà tập trung vào CẢM XÚC và TRẢI NGHIỆM. Và điều quan trọng - visualization thay đổi NĂNG LƯỢNG của họ trước, rồi mới thu hút được người phù hợp.</p>
+        </section>
+
+        <!-- SECTION 5: Bài Visualization Có Hướng Dẫn -->
+        <section class="section">
+            <h2 class="section-title"><span>🌹</span> Bài Visualization "Gặp Gỡ Tri Kỷ"</h2>
+
+            <p>Đây là bài visualization có hướng dẫn để bạn thực hành. Bạn có thể đọc chậm, hoặc thu âm lại giọng của mình để nghe khi thiền. Kết hợp với nhạc 528Hz hoặc 639Hz ở background:</p>
+
+            <div class="visualization-box">
+                <p>Nhắm mắt lại... Hít một hơi thật sâu vào bụng... Thở ra từ từ qua miệng... Để cơ thể thư giãn hoàn toàn... Vai buông xuống... Mặt thư giãn... Tay chân nặng trĩu...</p>
+
+                <p class="pause">〰️ Dừng lại 30 giây - hít thở sâu 〰️</p>
+
+                <p>Hình dung bạn đang đứng trong một khu vườn tuyệt đẹp... Ánh nắng hoàng hôn ấm áp chiếu xuống... Bạn ngửi thấy mùi hương của hoa hồng và hoa nhài... Tiếng chim hót nhẹ nhàng quanh bạn... Làn gió mát lướt qua da...</p>
+
+                <p>Bạn nhìn thấy một con đường nhỏ lát đá dẫn về phía trước... Hai bên là những bông hoa rực rỡ... Bạn biết rằng tri kỷ của bạn đang chờ ở cuối con đường này... Tim bạn đập nhẹ nhàng với niềm háo hức...</p>
+
+                <p class="pause">〰️ Dừng lại 30 giây - đi trên con đường 〰️</p>
+
+                <p>Bạn bước đi từng bước... Mỗi bước chân, bạn cảm thấy năng lượng yêu thương dâng lên trong lòng... Bạn BIẾT người đó đang ở đây... Bạn có thể cảm nhận được sự hiện diện của họ...</p>
+
+                <p>Và rồi bạn nhìn thấy họ... Họ quay lại... Mắt họ gặp mắt bạn... Bạn cảm nhận được sự kết nối mãnh liệt ngay lập tức... Như hai linh hồn đã chờ đợi nhau từ rất lâu...</p>
+
+                <p class="pause">〰️ Dừng lại 1 phút - nhìn vào mắt họ 〰️</p>
+
+                <p>Họ mỉm cười và bước đến gần bạn... Bạn cảm nhận được năng lượng ấm áp, an toàn tỏa ra từ họ... Họ nắm lấy tay bạn... Bàn tay ấm áp, vừa vặn... Bạn cảm thấy được yêu thương hoàn toàn, được chấp nhận hoàn toàn, được là chính mình...</p>
+
+                <p>Hãy ở trong khoảnh khắc này... Cảm nhận sự hạnh phúc tràn ngập trong tim... Cảm nhận sự biết ơn vì tình yêu này đã đến với bạn... Cảm nhận sự bình an vì biết rằng bạn không còn cô đơn...</p>
+
+                <p class="pause">〰️ Dừng lại 2-3 phút - sống trong khoảnh khắc 〰️</p>
+
+                <p>Bây giờ, từ từ quay trở lại... Mang theo cảm giác hạnh phúc và biết ơn này... Biết rằng tình yêu này đang trên đường đến với bạn... Hít thở sâu... Nhẹ nhàng cử động các ngón tay... Mở mắt khi bạn sẵn sàng...</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🎧</span> Mẹo Thực Hành Tốt Nhất</div>
+                <p>Thu âm bài visualization này bằng giọng của bạn, hoặc nhờ người có giọng êm ái đọc. Nghe với tai nghe, đèn tắt hoặc nến, kết hợp nhạc 528Hz (tình yêu) hoặc 639Hz (kết nối) ở background. Thực hành mỗi tối trước khi ngủ trong 21 ngày liên tục. Đừng skip ngày nào - sự nhất quán là chìa khóa.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m4-guided-visualization.png" alt="Bài visualization có hướng dẫn">
+            </div>
+            <div class="image-caption">Hình 3: Hành trình visualization "Gặp Gỡ Tri Kỷ"</div>
+        </section>
+
+        <!-- SECTION 6: Kỹ Thuật Bổ Sung -->
+        <section class="section">
+            <h2 class="section-title"><span>✨</span> 4 Kỹ Thuật Visualization Bổ Sung</h2>
+
+            <p>Ngoài bài visualization có hướng dẫn, đây là 4 kỹ thuật khác bạn có thể áp dụng để đa dạng hóa thực hành:</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Vision Board</div>
+                        <div class="flow-step-desc">Tạo một bảng hình ảnh với những hình đại diện cho tình yêu bạn muốn: cặp đôi hạnh phúc, đám cưới, ngôi nhà ấm áp, những chuyến du lịch cùng nhau... Đặt Vision Board ở nơi bạn nhìn thấy mỗi ngày. Khi nhìn vào, CẢM NHẬN như thể đã có rồi.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Mental Rehearsal</div>
+                        <div class="flow-step-desc">Hình dung những khoảnh khắc cụ thể trong cuộc sống với tri kỷ: buổi hẹn đầu tiên (ngồi ở đâu, nói gì, cười thế nào), cuộc trò chuyện sâu sắc ban đêm, cùng nấu ăn buổi tối, cùng đi dạo trong công viên... Càng chi tiết, càng mạnh mẽ.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">"End Result" Technique</div>
+                        <div class="flow-step-desc">Thay vì hình dung quá trình gặp gỡ, hình dung KẾT QUẢ CUỐI: bạn và tri kỷ đã ở bên nhau hạnh phúc nhiều năm, kỷ niệm 1 năm yêu nhau, đám cưới, sinh nhật con... Hình dung từ tương lai nhìn về "quá khứ" khi gặp nhau.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Gratitude Visualization</div>
+                        <div class="flow-step-desc">Mỗi sáng thức dậy, hình dung và NÓI TO: "Con biết ơn vì tình yêu tuyệt vời đã đến với con. Con biết ơn vì được yêu thương và yêu thương lại. Cảm ơn vũ trụ." Cảm nhận sự biết ơn sâu sắc trong tim như thể đã có rồi.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m4-visualization-techniques.png" alt="Các kỹ thuật visualization">
+            </div>
+            <div class="image-caption">Hình 4: 4 kỹ thuật visualization bổ sung cho tình yêu</div>
+        </section>
+
+        <!-- SECTION 7: Sai Lầm Thường Gặp -->
+        <section class="section">
+            <h2 class="section-title"><span>⚠️</span> Sai Lầm Cần Tránh</h2>
+
+            <div class="highlight-box" style="background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05)); border-color: rgba(255, 82, 82, 0.3);">
+                <div class="highlight-box-title" style="color: var(--error);"><span>❌</span> 5 Sai Lầm Phổ Biến</div>
+                <ul class="checklist" style="list-style: none;">
+                    <li style="color: var(--text-muted);"><strong>Hình dung người cụ thể:</strong> Đừng ám ảnh vào một người cụ thể (crush, người yêu cũ). Điều này vi phạm quyền tự do của họ và giới hạn vũ trụ. Để vũ trụ gửi đến người PHÙ HỢP NHẤT - có thể tuyệt vời hơn những gì bạn tưởng tượng.</li>
+                    <li style="color: var(--text-muted);"><strong>Chỉ "xem" không "cảm":</strong> Nếu bạn chỉ tưởng tượng như xem phim mà không có cảm xúc, hiệu quả gần như bằng không. CẢM XÚC là nhiên liệu - không có cảm xúc, động cơ không chạy.</li>
+                    <li style="color: var(--text-muted);"><strong>Không nhất quán:</strong> Thực hành 1-2 ngày rồi bỏ sẽ không tạo thay đổi gì. Visualization cần sự đều đặn - ít nhất 21 ngày để tạo "đường mòn thần kinh" mới trong não.</li>
+                    <li style="color: var(--text-muted);"><strong>Ám ảnh kết quả:</strong> Sau khi visualization xong, bạn liên tục lo lắng "sao chưa đến?" - đây là năng lượng thiếu hụt, phát ra tần số "chưa có", đẩy tình yêu xa ra thay vì kéo đến.</li>
+                    <li style="color: var(--text-muted);"><strong>Visualization với tâm trạng xấu:</strong> Nếu đang buồn, giận, hoặc tuyệt vọng - đừng visualization. Bạn sẽ "nạp" năng lượng tiêu cực vào hình ảnh. Làm sạch năng lượng trước bằng Heart Coherence hoặc thiền.</li>
+                </ul>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m4-visualization-mistakes.png" alt="Sai lầm visualization">
+            </div>
+            <div class="image-caption">Hình 5: 5 sai lầm cần tránh khi thực hành visualization</div>
+        </section>
+
+        <!-- SECTION 8: FAQ -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">Tôi không "thấy" gì khi nhắm mắt - có phải tôi không thể visualization?</div>
+                <div class="faq-answer">Không sao cả! Không phải ai cũng có khả năng tạo hình ảnh sống động trong đầu (gọi là "aphantasia"). Điều quan trọng không phải "thấy" mà là CẢM NHẬN. Bạn có thể tập trung vào cảm xúc, cảm giác trên cơ thể, âm thanh, mùi hương thay vì hình ảnh. Visualization thành công khi bạn có CẢM XÚC mãnh liệt - không nhất thiết phải "thấy" rõ ràng.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Nên visualization bao lâu mỗi ngày?</div>
+                <div class="faq-answer">Chất lượng quan trọng hơn số lượng. 5-10 phút với cảm xúc mãnh liệt hiệu quả hơn 30 phút không tập trung. Thời điểm tốt nhất: ngay khi vừa thức dậy (não ở trạng thái Alpha) và ngay trước khi ngủ (tiềm thức xử lý suốt đêm). Thực hành ít nhất 21 ngày liên tục để tạo thói quen.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Visualization có "ép buộc" ai đó yêu tôi không?</div>
+                <div class="faq-answer">Không. Visualization không can thiệp vào quyền tự do của bất kỳ ai. Bạn không visualization về một người CỤ THỂ - bạn visualization về CẢM XÚC và TRẢI NGHIỆM của tình yêu lý tưởng. Vũ trụ sẽ gửi đến người PHÙ HỢP - người cũng đang tìm kiếm tình yêu như bạn. Đây là sự "bắt cặp" tự nhiên, không phải ép buộc.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Tôi đã thực hành 1 tháng mà chưa thấy gì - nên bỏ cuộc?</div>
+                <div class="faq-answer">Đừng bỏ cuộc! Manifestation có "time lag" (độ trễ) - điều bạn đang tạo trong trường năng lượng cần thời gian để hiển hóa vào thực tế. Kiểm tra lại: bạn có thực hành đều đặn không? Có cảm xúc mãnh liệt không? Có buông bỏ sau khi xong không? Quan trọng nhất - bạn có HÀNH ĐỘNG trong cuộc sống thực không? Visualization mở cửa, nhưng bạn vẫn cần bước qua.</div>
+            </div>
+        </section>
+
+        <!-- MODULE SUMMARY -->
+        <section class="section">
+            <div class="module-summary">
+                <h3 class="module-summary-title"><span>🎯</span> Tổng Kết Module 4: Sẵn Sàng Đón Tri Kỷ</h3>
+                <p style="color: var(--text-secondary); margin-bottom: var(--space-lg);">Xin chúc mừng! Bạn đã hoàn thành Module 4 - module quan trọng nhất trong việc chuẩn bị năng lượng thu hút tri kỷ. Đây là những gì bạn đã học:</p>
+                <ul class="summary-list">
+                    <li><strong>Bài 4.1:</strong> Phân biệt Soulmate và Twin Flame - hiểu các loại kết nối tâm hồn</li>
+                    <li><strong>Bài 4.2:</strong> Viết thư cho tri kỷ tương lai - kỹ thuật Scripting để làm rõ ý định</li>
+                    <li><strong>Bài 4.3:</strong> Sử dụng tinh thể cho tình yêu - công cụ hỗ trợ nâng tần số</li>
+                    <li><strong>Bài 4.4:</strong> Visualization - hình dung sống động để "lập trình" tiềm thức</li>
+                </ul>
+                <p style="color: var(--text-secondary); margin-top: var(--space-lg);"><strong>Bài tập tổng hợp:</strong> Thực hành bài Visualization "Gặp Gỡ Tri Kỷ" mỗi tối trong 21 ngày liên tiếp. Kết hợp với thư tri kỷ và tinh thể Rose Quartz để tạo ritual hoàn chỉnh.</p>
+            </div>
+
+            <div class="summary-box">
+                <h3 class="summary-title"><span>📌</span> Tóm Tắt Bài Học</h3>
+                <ul class="summary-list">
+                    <li>Visualization hoạt động theo khoa học thần kinh - não không phân biệt hoàn toàn thực tế và tưởng tượng sống động</li>
+                    <li>5 nguyên tắc vàng: Chi tiết sống động, Cảm xúc là chìa khóa, Góc nhìn thứ nhất, Đều đặn 21 ngày, Buông bỏ sau khi xong</li>
+                    <li>Thực hành bài visualization "Gặp Gỡ Tri Kỷ" mỗi tối trước khi ngủ</li>
+                    <li>4 kỹ thuật bổ sung: Vision Board, Mental Rehearsal, End Result, Gratitude Visualization</li>
+                    <li>Tránh 5 sai lầm: Hình dung người cụ thể, Chỉ xem không cảm, Không nhất quán, Ám ảnh kết quả, Visualization khi tâm trạng xấu</li>
+                    <li>Thời điểm tốt nhất: Vừa thức dậy hoặc trước khi ngủ - khi não ở trạng thái Alpha/Theta</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- QUIZ SECTION -->
+        <section class="section">
+            <div class="quiz-section">
+                <h3 class="quiz-title"><span>📝</span> Quiz Module 4: Sẵn Sàng Đón Tri Kỷ</h3>
+
+                <div id="quiz-container">
+                    <!-- Question 1 -->
+                    <div class="quiz-question" data-question="1">
+                        <p class="question-text">1. Khi viết thư cho tri kỷ tương lai, điều gì QUAN TRỌNG NHẤT cần tập trung?</p>
+                        <div class="quiz-options">
+                            <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 1)">A. Mô tả ngoại hình chi tiết (cao, da trắng, đẹp trai/xinh gái)</div>
+                            <div class="quiz-option" data-correct="true" onclick="checkAnswer(this, 1)">B. Phẩm chất tính cách và CẢM XÚC bạn muốn trải nghiệm</div>
+                            <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 1)">C. Điều kiện tài chính (giàu, có nhà, có xe)</div>
+                            <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 1)">D. Deadline cụ thể (phải gặp trong 3 tháng)</div>
+                        </div>
+                        <div class="quiz-feedback" id="feedback-1"></div>
+                    </div>
+
+                    <!-- Question 2 -->
+                    <div class="quiz-question" data-question="2">
+                        <p class="question-text">2. Rose Quartz được gọi là "Viên đá của Tình Yêu Vô Điều Kiện" vì nó có công dụng gì?</p>
+                        <div class="quiz-options">
+                            <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 2)">A. Tăng thu nhập và may mắn tài chính</div>
+                            <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 2)">B. Bảo vệ khỏi năng lượng xấu và người độc hại</div>
+                            <div class="quiz-option" data-correct="true" onclick="checkAnswer(this, 2)">C. Mở chakra tim, chữa lành vết thương cảm xúc, thu hút tình yêu</div>
+                            <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 2)">D. Tăng cường trí tuệ và khả năng học tập</div>
+                        </div>
+                        <div class="quiz-feedback" id="feedback-2"></div>
+                    </div>
+
+                    <!-- Question 3 -->
+                    <div class="quiz-question" data-question="3">
+                        <p class="question-text">3. Trong visualization, yếu tố nào là "chìa khóa" quan trọng nhất để manifestation thành công?</p>
+                        <div class="quiz-options">
+                            <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 3)">A. Thời gian thực hành càng lâu càng tốt (2-3 tiếng/ngày)</div>
+                            <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 3)">B. Hình dung một người cụ thể mà bạn đang thích</div>
+                            <div class="quiz-option" data-correct="true" onclick="checkAnswer(this, 3)">C. CẢM NHẬN cảm xúc tích cực như đã có rồi</div>
+                            <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 3)">D. Lặp lại liên tục suốt cả ngày, không ngừng nghỉ</div>
+                        </div>
+                        <div class="quiz-feedback" id="feedback-3"></div>
+                    </div>
+                </div>
+
+                <!-- Quiz Result -->
+                <div class="quiz-result" id="quiz-result">
+                    <div class="quiz-score" id="quiz-score">0/3</div>
+                    <p class="quiz-message" id="quiz-message"></p>
+                    <button class="retake-btn" onclick="retakeQuiz()">Làm Lại Quiz</button>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        const explanations = {
+            1: {
+                correct: '✅ Chính xác! Khi viết thư cho tri kỷ, hãy tập trung vào PHẨM CHẤT (tử tế, chín chắn, tôn trọng) và CẢM XÚC (an toàn, được yêu thương). Vũ trụ sẽ gửi đến người phù hợp - có thể tuyệt vời hơn những gì bạn tưởng tượng về ngoại hình!',
+                incorrect: '❌ Sai rồi! Đáp án đúng là B - Phẩm chất tính cách và cảm xúc. Đừng giới hạn vũ trụ bằng những yêu cầu về ngoại hình hay điều kiện vật chất. Tập trung vào CẢM GIÁC bạn muốn trải nghiệm trong mối quan hệ.'
+            },
+            2: {
+                correct: '✅ Đúng rồi! Rose Quartz là tinh thể của tình yêu vô điều kiện - nó mở chakra tim, chữa lành những vết thương cảm xúc từ quá khứ, và thu hút tình yêu mới vào cuộc sống. Đây là tinh thể #1 cho những ai muốn thu hút tình yêu.',
+                incorrect: '❌ Chưa đúng! Đáp án đúng là C - Mở chakra tim, chữa lành vết thương cảm xúc, thu hút tình yêu. Rose Quartz là tinh thể chuyên về tình yêu và cảm xúc, không phải tài chính hay bảo vệ.'
+            },
+            3: {
+                correct: '✅ Tuyệt vời! CẢM XÚC là "nhiên liệu" của manifestation. Khi bạn visualization mà THỰC SỰ cảm nhận được niềm vui, hạnh phúc, biết ơn như thể đã có rồi - bạn đang phát ra tần số thu hút điều đó vào thực tế.',
+                incorrect: '❌ Sai rồi! Đáp án đúng là C - CẢM NHẬN cảm xúc tích cực như đã có rồi. Visualization hiệu quả không phải về thời gian hay số lần lặp lại - mà về CHẤT LƯỢNG cảm xúc. 5 phút với cảm xúc mãnh liệt > 2 tiếng không có cảm xúc.'
+            }
+        };
+
+        let answeredQuestions = 0;
+        let correctAnswers = 0;
+        const totalQuestions = 3;
+
+        function checkAnswer(selectedOption, questionNum) {
+            const question = document.querySelector(`.quiz-question[data-question="${questionNum}"]`);
+            const options = question.querySelectorAll('.quiz-option');
+            const feedback = document.getElementById(`feedback-${questionNum}`);
+
+            // Disable all options
+            options.forEach(opt => {
+                opt.classList.add('disabled');
+                if (opt.dataset.correct === 'true') {
+                    opt.classList.add('correct');
+                }
+            });
+
+            // Check if selected answer is correct
+            const isCorrect = selectedOption.dataset.correct === 'true';
+            if (isCorrect) {
+                correctAnswers++;
+                feedback.className = 'quiz-feedback correct';
+                feedback.textContent = explanations[questionNum].correct;
+            } else {
+                selectedOption.classList.add('incorrect');
+                feedback.className = 'quiz-feedback incorrect';
+                feedback.textContent = explanations[questionNum].incorrect;
+            }
+
+            answeredQuestions++;
+
+            // Check if all questions answered
+            if (answeredQuestions === totalQuestions) {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            const resultDiv = document.getElementById('quiz-result');
+            const scoreDiv = document.getElementById('quiz-score');
+            const messageDiv = document.getElementById('quiz-message');
+
+            scoreDiv.textContent = `${correctAnswers}/${totalQuestions}`;
+
+            if (correctAnswers === totalQuestions) {
+                messageDiv.textContent = '🎉 Xuất sắc! Bạn đã sẵn sàng hoàn toàn để đón tri kỷ! Module 4 hoàn thành!';
+            } else if (correctAnswers >= 2) {
+                messageDiv.textContent = '👍 Tốt lắm! Bạn đã hiểu phần lớn nội dung. Hãy xem lại những phần còn thiếu nhé!';
+            } else {
+                messageDiv.textContent = '📚 Bạn cần ôn lại Module 4. Hãy đọc lại các bài học về viết thư, tinh thể, và visualization.';
+            }
+
+            resultDiv.classList.add('show');
+        }
+
+        function retakeQuiz() {
+            answeredQuestions = 0;
+            correctAnswers = 0;
+
+            document.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('disabled', 'correct', 'incorrect', 'selected');
+            });
+
+            document.querySelectorAll('.quiz-feedback').forEach(fb => {
+                fb.className = 'quiz-feedback';
+                fb.textContent = '';
+            });
+
+            document.getElementById('quiz-result').classList.remove('show');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,737 @@
+<!-- ============================================
+     SECTION 9: AI LÀ NGƯỜI DÀNH CHO?
+     GEMRAL Landing Page
+     7 Personas Cards
+     ============================================ -->
+
+
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEMRAL - Dành Cho Ai?</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&amp;family=Noto+Sans+Display:wght@400;500;600&amp;display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1632;
+            --burgundy: #9C0612;
+            --burgundy-dark: #6B0F1A;
+            --gold: #FFBD59;
+            --gold-dark: #C88F2F;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --pink: #FF6B9D;
+            --green: #10B981;
+            --orange: #F59E0B;
+            --white: #ffffff;
+            --white-80: rgba(255, 255, 255, 0.8);
+            --white-60: rgba(255, 255, 255, 0.6);
+            --white-40: rgba(255, 255, 255, 0.4);
+            --white-20: rgba(255, 255, 255, 0.2);
+            --white-10: rgba(255, 255, 255, 0.1);
+            --black-40: rgba(0, 0, 0, 0.4);
+            --black-50: rgba(0, 0, 0, 0.5);
+            
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            background: var(--navy-dark);
+            color: var(--white);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Section */
+        .section-personas {
+            padding: 100px 0;
+            background: linear-gradient(180deg, 
+                var(--navy-dark) 0%,
+                var(--navy) 30%,
+                #1a1033 60%,
+                var(--navy-dark) 100%
+            );
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .section-personas::before {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: -100px;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(ellipse, rgba(106, 91, 255, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        .section-personas::after {
+            content: '';
+            position: absolute;
+            bottom: 20%;
+            right: -100px;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(ellipse, rgba(255, 189, 89, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        /* Section Header */
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 28px;
+            border-radius: 30px;
+            font-family: var(--font-heading);
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 25px;
+        }
+        
+        .badge-purple {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.2), rgba(106, 91, 255, 0.1));
+            border: 1px solid rgba(106, 91, 255, 0.4);
+            color: var(--purple);
+        }
+        
+        .badge svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: 42px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+        
+        .section-subtitle {
+            font-size: 18px;
+            color: var(--white-80);
+            max-width: 750px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+        
+        .text-gold { color: var(--gold); }
+        .text-cyan { color: var(--cyan); }
+        .text-pink { color: var(--pink); }
+        .text-purple { color: var(--purple); }
+        .text-green { color: var(--green); }
+        .text-orange { color: var(--orange); }
+        
+        /* Personas Grid */
+        .personas-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Persona Card */
+        .persona-card {
+            background: var(--black-50);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 2px solid var(--white-10);
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .persona-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+        }
+        
+        .persona-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            border-radius: 20px 20px 0 0;
+        }
+        
+        /* Card Colors */
+        .persona-card.cyan { border-color: rgba(0, 240, 255, 0.3); }
+        .persona-card.cyan:hover { border-color: var(--cyan); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 0 0 30px rgba(0, 240, 255, 0.1); }
+        .persona-card.cyan::before { background: var(--cyan); }
+        
+        .persona-card.gold { border-color: rgba(255, 189, 89, 0.3); }
+        .persona-card.gold:hover { border-color: var(--gold); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 0 0 30px rgba(255, 189, 89, 0.1); }
+        .persona-card.gold::before { background: var(--gold); }
+        
+        .persona-card.pink { border-color: rgba(255, 107, 157, 0.3); }
+        .persona-card.pink:hover { border-color: var(--pink); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 0 0 30px rgba(255, 107, 157, 0.1); }
+        .persona-card.pink::before { background: var(--pink); }
+        
+        .persona-card.purple { border-color: rgba(106, 91, 255, 0.3); }
+        .persona-card.purple:hover { border-color: var(--purple); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 0 0 30px rgba(106, 91, 255, 0.1); }
+        .persona-card.purple::before { background: var(--purple); }
+        
+        .persona-card.green { border-color: rgba(16, 185, 129, 0.3); }
+        .persona-card.green:hover { border-color: var(--green); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 0 0 30px rgba(16, 185, 129, 0.1); }
+        .persona-card.green::before { background: var(--green); }
+        
+        .persona-card.orange { border-color: rgba(245, 158, 11, 0.3); }
+        .persona-card.orange:hover { border-color: var(--orange); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 0 0 30px rgba(245, 158, 11, 0.1); }
+        .persona-card.orange::before { background: var(--orange); }
+        
+        .persona-card.burgundy { border-color: rgba(156, 6, 18, 0.3); }
+        .persona-card.burgundy:hover { border-color: var(--burgundy); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 0 0 30px rgba(156, 6, 18, 0.1); }
+        .persona-card.burgundy::before { background: var(--burgundy); }
+        
+        /* Card Header */
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            border: 1px solid var(--white-10);
+        }
+        
+        .card-icon svg {
+            width: 30px;
+            height: 30px;
+        }
+        
+        .card-title-group {
+            flex: 1;
+        }
+        
+        .card-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--white-60);
+            margin-bottom: 4px;
+        }
+        
+        .card-title {
+            font-family: var(--font-heading);
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--white);
+        }
+        
+        /* Card Content */
+        .card-quote {
+            font-size: 15px;
+            font-style: italic;
+            color: var(--white-60);
+            margin-bottom: 20px;
+            padding-left: 15px;
+            border-left: 3px solid var(--white-20);
+            line-height: 1.7;
+        }
+        
+        .card-description {
+            font-size: 14px;
+            color: var(--white-80);
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+        
+        /* Pain Points */
+        .pain-points {
+            margin-bottom: 20px;
+        }
+        
+        .pain-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--white-60);
+            margin-bottom: 10px;
+        }
+        
+        .pain-list {
+            list-style: none;
+        }
+        
+        .pain-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 6px 0;
+            font-size: 13px;
+            color: var(--white-80);
+        }
+        
+        .pain-list li svg {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+            margin-top: 3px;
+            stroke: var(--pink);
+        }
+        
+        /* Solution Tag */
+        .solution-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .solution-tag svg {
+            width: 16px;
+            height: 16px;
+            stroke: var(--green);
+        }
+        
+        /* Full Width Card (Last) */
+        .persona-card.full-width {
+            grid-column: span 3;
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+        
+        .persona-card.full-width .card-content {
+            flex: 1;
+        }
+        
+        .persona-card.full-width .card-cta {
+            min-width: 250px;
+            text-align: center;
+        }
+        
+        /* CTA Button */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-family: var(--font-heading);
+            font-size: 15px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .btn svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: var(--navy-dark);
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(255, 189, 89, 0.4);
+        }
+        
+        /* Section Footer */
+        .section-footer {
+            text-align: center;
+            margin-top: 60px;
+            font-size: 13px;
+            color: var(--white-60);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+            .personas-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .persona-card.full-width {
+                grid-column: span 2;
+                flex-direction: column;
+                text-align: center;
+            }
+            .persona-card.full-width .card-content {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .section-personas { padding: 80px 0; }
+            .section-title { font-size: 32px; }
+            .personas-grid {
+                grid-template-columns: 1fr;
+            }
+            .persona-card.full-width {
+                grid-column: span 1;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .section-title { font-size: 26px; }
+            .card-header { flex-direction: column; text-align: center; }
+            .card-quote { border-left: none; padding-left: 0; text-align: center; }
+        }
+    </style>
+
+
+    <section class="section-personas">
+        <div class="container selected-for-delete">
+            <!-- Section Header -->
+            <div class="section-header">
+                <span class="badge badge-purple">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    Dành Cho Ai?
+                </span>
+                <h2 class="section-title">
+                    GEMRAL ĐƯỢC TẠO RA<br>
+                    <span class="text-purple">DÀNH RIÊNG CHO BẠN</span>
+                </h2>
+                <p class="section-subtitle">
+                    Dù bạn là ai, ở đâu trên hành trình cuộc sống — nếu bạn khao khát sự chuyển hóa 
+                    thực sự từ bên trong, GEMRAL có giải pháp phù hợp với bạn.</p><img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk41rftx-08q037/1767798537559_8fsryj_gemral-landing-01.webp" alt="gemral-landing-01-lb5w">
+            </div>
+            
+            <!-- Personas Grid -->
+            <div class="personas-grid">
+                <!-- Persona 1: Gen Z Trader -->
+                <div class="persona-card cyan">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#00F0FF" stroke-width="2">
+                                <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"></path>
+                            </svg>
+                        </div>
+                        <div class="card-title-group">
+                            <span class="card-label">18-25 tuổi</span>
+                            <h3 class="card-title text-cyan">Gen Z Trader</h3>
+                        </div>
+                    </div>
+                    <p class="card-quote">
+                        "Em muốn kiếm tiền từ crypto nhưng không biết bắt đầu từ đâu, sợ mất tiền lắm."
+                    </p>
+                    <p class="card-description">
+                        Bạn trẻ năng động muốn tạo thu nhập từ thị trường crypto nhưng chưa có kinh nghiệm, 
+                        dễ bị cuốn vào FOMO và thường mua đỉnh bán đáy vì thiếu phương pháp rõ ràng.
+                    </p>
+                    <div class="pain-points">
+                        <span class="pain-title">Nỗi đau</span>
+                        <ul class="pain-list">
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                                <span>FOMO mua theo đám đông rồi bị kẹt hàng ở đỉnh</span>
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                                <span>Không có hệ thống, giao dịch theo cảm xúc</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="solution-tag">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <span>GEM Scanner + Khóa Starter</span>
+                    </div>
+                </div>
+                
+                <!-- Persona 2: Trader Thua Lỗ -->
+                <div class="persona-card gold">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#FFBD59" stroke-width="2">
+                                <path d="M3 3v18h18"></path>
+                                <path d="m19 9-5 5-4-4-3 3"></path>
+                            </svg>
+                        </div>
+                        <div class="card-title-group">
+                            <span class="card-label">Đã có kinh nghiệm</span>
+                            <h3 class="card-title text-gold">Trader Thua Lỗ</h3>
+                        </div>
+                    </div>
+                    <p class="card-quote">
+                        "Tôi đã mất rất nhiều tiền vào crypto. Cần một phương pháp có hệ thống thật sự."
+                    </p>
+                    <p class="card-description">
+                        Trader đã có kinh nghiệm nhưng vẫn chưa tìm được phương pháp hiệu quả, 
+                        từng trải qua những lần thua lỗ đau thương và đang tìm kiếm cách giao dịch bền vững hơn.
+                    </p>
+                    <div class="pain-points">
+                        <span class="pain-title">Nỗi đau</span>
+                        <ul class="pain-list">
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                                <span>Đã mất tiền vì không có hệ thống rõ ràng</span>
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                                <span>Thiếu kỷ luật, không tuân thủ kế hoạch</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="solution-tag">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <span>Khóa Tier 1/2 + Scanner PRO</span>
+                    </div>
+                </div>
+                
+                <!-- Persona 3: Người Tìm Kiếm Tâm Linh -->
+                <div class="persona-card purple">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#6A5BFF" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
+                                <path d="M2 12h20"></path>
+                            </svg>
+                        </div>
+                        <div class="card-title-group">
+                            <span class="card-label">Quan tâm phát triển bản thân</span>
+                            <h3 class="card-title text-purple">Người Tìm Kiếm</h3>
+                        </div>
+                    </div>
+                    <p class="card-quote">
+                        "Tôi tin vào năng lượng và luật hấp dẫn, muốn hiểu sâu hơn để áp dụng vào cuộc sống."
+                    </p>
+                    <p class="card-description">
+                        Người quan tâm đến phát triển bản thân và các phương pháp nâng cao nhận thức, 
+                        tin vào sức mạnh của năng lượng nhưng chưa tìm được hệ thống có cơ sở rõ ràng.
+                    </p>
+                    <div class="pain-points">
+                        <span class="pain-title">Nỗi đau</span>
+                        <ul class="pain-list">
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                                <span>Thông tin rời rạc, thiếu hệ thống hóa</span>
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                                <span>Chưa biết cách áp dụng vào thực tế</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="solution-tag">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <span>GEM Master + Khóa Tần Số Gốc</span>
+                    </div>
+                </div>
+                
+                <!-- Persona 4: Phụ Nữ Khao Khát Tình Yêu -->
+                <div class="persona-card pink">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#FF6B9D" stroke-width="2">
+                                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
+                            </svg>
+                        </div>
+                        <div class="card-title-group">
+                            <span class="card-label">25-40 tuổi</span>
+                            <h3 class="card-title text-pink">Phụ Nữ Khao Khát Tình Yêu</h3>
+                        </div>
+                    </div>
+                    <p class="card-quote">
+                        "Tôi cứ mãi gặp sai người, không biết làm sao để thu hút tình yêu đích thực."
+                    </p>
+                    <p class="card-description">
+                        Phụ nữ đã trải qua những mối quan hệ không như ý, cảm thấy mình không xứng đáng 
+                        được yêu thương hoặc sợ bị tổn thương nên vô tình đẩy tình yêu ra xa.
+                    </p>
+                    <div class="pain-points">
+                        <span class="pain-title">Nỗi đau</span>
+                        <ul class="pain-list">
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                                <span>Pattern lặp lại trong các mối quan hệ</span>
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                                <span>Cảm giác không xứng đáng được yêu</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="solution-tag">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <span>Khóa Tần Số Tình Yêu + GEM Master</span>
+                    </div>
+                </div>
+                
+                <!-- Persona 5: Doanh Nhân Tìm Thịnh Vượng -->
+                <div class="persona-card green">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2">
+                                <line x1="12" y1="1" x2="12" y2="23"></line>
+                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                            </svg>
+                        </div>
+                        <div class="card-title-group">
+                            <span class="card-label">30-50 tuổi</span>
+                            <h3 class="card-title text-green">Doanh Nhân</h3>
+                        </div>
+                    </div>
+                    <p class="card-quote">
+                        "Kinh doanh thành công nhưng luôn có cảm giác thiếu thốn, sợ mất những gì đang có."
+                    </p>
+                    <p class="card-description">
+                        Người đã có sự nghiệp nhất định nhưng vẫn cảm thấy thiếu thốn, lo lắng về tài chính 
+                        dù có thu nhập tốt, muốn xây dựng tư duy thịnh vượng bền vững từ bên trong.
+                    </p>
+                    <div class="pain-points">
+                        <span class="pain-title">Nỗi đau</span>
+                        <ul class="pain-list">
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                                <span>Tư duy thiếu thốn dù đã có tiền</span>
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                                <span>Sợ mất những gì đang có</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="solution-tag">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <span>Khóa Tư Duy Triệu Phú + Trading</span>
+                    </div>
+                </div>
+                
+                <!-- Persona 6: Người Mất Phương Hướng -->
+                <div class="persona-card orange">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M12 16v-4"></path>
+                                <path d="M12 8h.01"></path>
+                            </svg>
+                        </div>
+                        <div class="card-title-group">
+                            <span class="card-label">Mọi lứa tuổi</span>
+                            <h3 class="card-title text-orange">Người Mất Phương Hướng</h3>
+                        </div>
+                    </div>
+                    <p class="card-quote">
+                        "Tôi cảm thấy cuộc sống cứ trôi đi mà không biết mình thực sự muốn gì."
+                    </p>
+                    <p class="card-description">
+                        Người đang ở giai đoạn chuyển đổi trong cuộc sống, cảm thấy mất phương hướng, 
+                        không biết mình muốn gì và cần một người bạn đồng hành để tìm lại chính mình.
+                    </p>
+                    <div class="pain-points">
+                        <span class="pain-title">Nỗi đau</span>
+                        <ul class="pain-list">
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                                <span>Không biết mục đích sống của mình là gì</span>
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                                <span>Cảm thấy trống rỗng và mất kết nối</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="solution-tag">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <span>GEM Master + Vision Board</span>
+                    </div>
+                </div>
+                
+                <!-- Persona 7: Người Muốn Tất Cả (Full Width) -->
+                <div class="persona-card burgundy full-width">
+                    <div class="card-content">
+                        <div class="card-header">
+                            <div class="card-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="#FFBD59" stroke-width="2">
+                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                </svg>
+                            </div>
+                            <div class="card-title-group">
+                                <span class="card-label">Khao Khát Chuyển Hóa Toàn Diện</span>
+                                <h3 class="card-title text-gold">Người Muốn Tất Cả</h3>
+                            </div>
+                        </div>
+                        <p class="card-quote">
+                            "Tôi muốn cả tài chính tự do, tình yêu viên mãn và sự bình an trong tâm hồn — tôi tin mình xứng đáng có tất cả."
+                        </p>
+                        <p class="card-description">
+                            Bạn không chỉ muốn thành công trong một lĩnh vực mà khao khát sự thịnh vượng toàn diện — tài chính, 
+                            tình yêu, sức khỏe và sự bình an nội tâm. GEMRAL được tạo ra chính xác dành cho những người như bạn, 
+                            những người tin rằng mình xứng đáng có được cuộc sống trọn vẹn và đang sẵn sàng hành động để đạt được điều đó.
+                        </p>
+                        <div class="solution-tag">
+                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <span>Trọn Bộ GEMRAL — Trading + Mindset + GEM Master + Vision Board</span>
+                        </div>
+                    </div>
+                    <div class="card-cta">
+                        <a href="#waitlist" class="btn btn-primary">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path>
+                                <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path>
+                            </svg>
+                            Bắt Đầu Hành Trình
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section Footer -->
+            <div class="section-footer">gemral.com</div>
+        </div>
+    </section>

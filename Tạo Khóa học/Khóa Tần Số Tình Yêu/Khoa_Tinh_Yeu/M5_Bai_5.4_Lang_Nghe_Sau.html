@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 5.4: Lắng Nghe Sâu | Khóa Tần Số Tình Yêu</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--burgundy); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .highlight-box.purple { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05)); border-color: rgba(106, 91, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.purple { border-left-color: var(--purple); } }
+        .highlight-box.purple .highlight-box-title { color: var(--purple); }
+
+        .highlight-box.cyan { background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 240, 255, 0.05)); border-color: rgba(0, 240, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.cyan { border-left-color: var(--cyan); } }
+        .highlight-box.cyan .highlight-box-title { color: var(--cyan); }
+
+        .highlight-box.green { background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05)); border-color: rgba(0, 200, 83, 0.3); }
+        @media (max-width: 600px) { .highlight-box.green { border-left-color: var(--success); } }
+        .highlight-box.green .highlight-box-title { color: var(--success); }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .comparison-table { margin: var(--space-lg) 0; border-radius: var(--radius-md); overflow: hidden; }
+        @media (max-width: 600px) { .comparison-table { margin: var(--space-md) 0; border-radius: 0; } }
+        .comparison-row { display: grid; grid-template-columns: 1fr 1fr; }
+        @media (max-width: 600px) { .comparison-row { grid-template-columns: 1fr; } }
+        .comparison-header { background: linear-gradient(135deg, var(--navy), var(--navy-dark)); padding: var(--space-md); font-weight: 700; text-align: center; border-bottom: 2px solid var(--glass-border); }
+        .comparison-header.good { border-bottom-color: var(--success); color: var(--success); }
+        .comparison-header.bad { border-bottom-color: var(--error); color: var(--error); }
+        .comparison-cell { padding: var(--space-md); background: var(--bg-card); border-bottom: 1px solid var(--glass-border); color: var(--text-secondary); font-size: 0.9rem; }
+        @media (max-width: 600px) { .comparison-cell { padding: var(--space-sm) 16px; } }
+
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        @media (min-width: 601px) { .flow-step:hover { border-color: var(--gold); transform: translateX(8px); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+
+        /* Quiz Styles */
+        .quiz-section { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(156, 6, 18, 0.1)); border: 2px solid var(--purple); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .quiz-section { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .quiz-title { font-size: 1.5rem; font-weight: 700; color: var(--purple); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .quiz-question { margin-bottom: var(--space-xl); }
+        .question-text { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-md); font-size: 1.1rem; }
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        .quiz-option { padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; transition: all 0.3s ease; color: var(--text-secondary); }
+        .quiz-option:hover { border-color: var(--gold); background: rgba(255, 189, 89, 0.1); }
+        .quiz-option.correct { border-color: var(--success); background: rgba(0, 200, 83, 0.2); color: var(--success); }
+        .quiz-option.incorrect { border-color: var(--error); background: rgba(255, 82, 82, 0.2); color: var(--error); }
+        .quiz-option.disabled { pointer-events: none; opacity: 0.7; }
+        .quiz-feedback { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--radius-md); display: none; }
+        .quiz-feedback.correct { background: rgba(0, 200, 83, 0.15); border: 1px solid var(--success); color: var(--success); display: block; }
+        .quiz-feedback.incorrect { background: rgba(255, 82, 82, 0.15); border: 1px solid var(--error); color: var(--error); display: block; }
+        .quiz-result { text-align: center; padding: var(--space-xl); display: none; }
+        .quiz-result.show { display: block; }
+        .quiz-score { font-size: 2rem; font-weight: 800; color: var(--gold); margin-bottom: var(--space-md); }
+        .quiz-message { color: var(--text-secondary); margin-bottom: var(--space-lg); }
+        .retake-btn { padding: var(--space-md) var(--space-xl); background: linear-gradient(135deg, var(--purple), var(--burgundy)); border: none; border-radius: 50px; color: white; font-weight: 700; cursor: pointer; transition: all 0.3s ease; }
+        .retake-btn:hover { transform: scale(1.05); box-shadow: 0 4px 20px rgba(106, 91, 255, 0.4); }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>💕</span>
+                <span>Module 5</span>
+            </div>
+            <div class="lesson-chapter">Chapter 5 - Nghệ Thuật Quan Hệ Lành Mạnh</div>
+            <h1 class="lesson-title">Lắng Nghe Sâu - Deep Listening</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 5.4</span></div>
+                <div class="meta-item"><span>⏱️</span><span>25 phút đọc</span></div>
+            </div>
+        </header>
+
+        <!-- SECTION 1: Opening Hook -->
+        <section class="section">
+            <h2 class="section-title"><span>👂</span> Khi Im Lặng Nói Nhiều Hơn Lời</h2>
+
+            <p><em>"Em nói chuyện với anh mà như nói với bức tường."</em> - Đây là lời phàn nàn phổ biến nhất trong các cặp đôi đến tư vấn hôn nhân. Không phải vì họ không yêu nhau, mà vì họ không LẮNG NGHE nhau.</p>
+
+            <p>Nghiên cứu của Đại học Harvard cho thấy: <strong>Trung bình, chúng ta chỉ nhớ 25-50%</strong> những gì người khác nói. Điều này có nghĩa - một nửa cuộc trò chuyện "bay" đi đâu mất! Và tệ hơn, nghiên cứu từ International Listening Association phát hiện: <strong>85% những gì chúng ta học được trong cuộc sống đến từ việc lắng nghe</strong>, nhưng chúng ta chỉ dành <strong>2% thời gian đào tạo</strong> để rèn kỹ năng này.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>💎</span> Hearing vs Deep Listening</div>
+                <p><strong>Hearing (Nghe):</strong> Tiếp nhận âm thanh một cách thụ động. Bạn nghe lời họ nói, nhưng đầu óc đang nghĩ: <em>"Mình sẽ nói gì tiếp theo?"</em><br><br>
+                <strong>Deep Listening (Lắng Nghe Sâu):</strong> Sự HIỆN DIỆN TRỌN VẸN - tập trung 100% vào người nói. Bạn nghe không chỉ lời nói, mà cả <strong>cảm xúc</strong> đằng sau, <strong>ngôn ngữ cơ thể</strong>, và cả những điều họ <strong>KHÔNG nói</strong>.</p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>🧠</span> Góc Nhìn Khoa Học Năng Lượng</div>
+                <p>Từ góc độ Học Thuyết Chuyển Hóa Nội Tâm, lắng nghe sâu là <strong>hành động của tình yêu vô điều kiện</strong> - tần số 540Hz. Khi bạn lắng nghe ai đó trọn vẹn, bạn đang trao cho họ năng lượng "acceptance" (chấp nhận) - một trong những năng lượng cao nhất trong thang Hawkins. Người được lắng nghe cảm thấy được <strong>THẤY</strong> và được <strong>HIỂU</strong> - đó là nhu cầu cơ bản nhất của con người.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m5-deep-listening-intro.png" alt="Lắng nghe sâu">
+            </div>
+            <div class="image-caption">Hình 1: Deep Listening - Nghệ thuật hiện diện trọn vẹn</div>
+        </section>
+
+        <!-- SECTION 2: Rào Cản -->
+        <section class="section">
+            <h2 class="section-title"><span>🚧</span> 5 Rào Cản Khiến Chúng Ta Không Lắng Nghe</h2>
+
+            <p>Để lắng nghe sâu, trước hết bạn cần nhận ra những gì đang CHẶN bạn:</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Chuẩn Bị Câu Trả Lời</div>
+                        <div class="flow-step-desc">Thay vì lắng nghe, bạn đang nghĩ: "Mình sẽ nói gì tiếp theo?" Đầu óc bận rộn với câu trả lời thay vì tiếp nhận.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Phán Xét & Đánh Giá</div>
+                        <div class="flow-step-desc">Trong đầu bạn đang đánh giá: "Họ sai rồi", "Họ đang làm quá lên", "Họ không nên cảm thấy thế." Phán xét chặn sự đồng cảm.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Muốn Giải Quyết Vấn Đề Ngay</div>
+                        <div class="flow-step-desc">Bạn vội vàng đưa ra giải pháp: "Em phải làm thế này..." - trong khi họ chỉ muốn được NGHE, không phải được "fix".</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Chuyển Về Bản Thân</div>
+                        <div class="flow-step-desc">"Anh biết rồi, anh cũng từng..." - Bạn chuyển cuộc trò chuyện về mình. Điều này khiến họ cảm thấy không được lắng nghe.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Phân Tâm Bởi Điện Thoại/Môi Trường</div>
+                        <div class="flow-step-desc">Mắt liếc điện thoại, đầu óc nghĩ đến công việc. Cơ thể ở đây nhưng tâm trí ở nơi khác.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m5-listening-barriers.png" alt="5 rào cản lắng nghe">
+            </div>
+            <div class="image-caption">Hình 2: 5 rào cản khiến chúng ta không thể lắng nghe sâu</div>
+        </section>
+
+        <!-- SECTION 3: Kỹ Thuật RASA -->
+        <section class="section">
+            <h2 class="section-title"><span>✨</span> Kỹ Thuật RASA - 4 Bước Lắng Nghe Sâu</h2>
+
+            <p>RASA là kỹ thuật lắng nghe được phát triển bởi Julian Treasure - chuyên gia về âm thanh và giao tiếp. RASA trong tiếng Sanskrit có nghĩa là "tinh túy" hoặc "nước ép":</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">R</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Receive - Tiếp Nhận</div>
+                        <div class="flow-step-desc">Hướng sự chú ý 100% về phía người nói. Nhìn vào mắt họ. Đặt điện thoại xuống, tắt tiếng. Mở cơ thể về phía họ (không khoanh tay).</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">A</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Appreciate - Thể Hiện Tiếp Nhận</div>
+                        <div class="flow-step-desc">Dùng những tín hiệu nhỏ để cho họ biết bạn đang nghe: "Ừ", "Ồ", "Anh hiểu", gật đầu, biểu cảm khuôn mặt phù hợp.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">S</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Summarize - Tóm Tắt Lại</div>
+                        <div class="flow-step-desc">Sau khi họ nói xong, tóm tắt lại bằng lời của bạn: "Nếu anh hiểu đúng, em đang cảm thấy X vì Y, đúng không?" Điều này xác nhận bạn đã hiểu.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">A</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Ask - Hỏi Thêm</div>
+                        <div class="flow-step-desc">Hỏi những câu mở để hiểu sâu hơn: "Em có thể nói thêm về điều đó không?", "Lúc đó em cảm thấy thế nào?" Tránh câu hỏi Yes/No.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box green">
+                <div class="highlight-box-title"><span>💡</span> Mẹo Quan Trọng</div>
+                <p><strong>Đừng vội đưa ra giải pháp!</strong> Khi ai đó chia sẻ vấn đề, thường họ muốn được NGHE trước, được "fix" sau (hoặc không cần fix). Hãy hỏi: "Em muốn anh chỉ lắng nghe, hay em muốn anh góp ý?" - Câu hỏi đơn giản này thay đổi mọi thứ!</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m5-rasa-technique.png" alt="Kỹ thuật RASA">
+            </div>
+            <div class="image-caption">Hình 3: RASA - 4 bước lắng nghe sâu hiệu quả</div>
+        </section>
+
+        <!-- SECTION 4: Nghe Vs Không Nghe -->
+        <section class="section">
+            <h2 class="section-title"><span>⚖️</span> So Sánh: Lắng Nghe vs Không Lắng Nghe</h2>
+
+            <p>Hãy xem sự khác biệt giữa hai phong cách phản hồi:</p>
+
+            <div class="comparison-table">
+                <div class="comparison-row">
+                    <div class="comparison-header bad">❌ Không Lắng Nghe</div>
+                    <div class="comparison-header good">✅ Lắng Nghe Sâu</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-cell">"Em phải làm thế này..." (đưa ra giải pháp ngay)</div>
+                    <div class="comparison-cell">"Điều đó nghe có vẻ khó khăn. Em cảm thấy thế nào?" (hỏi thêm)</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-cell">"Anh biết rồi, anh cũng từng..." (chuyển về mình)</div>
+                    <div class="comparison-cell">"Anh nghe thấy em nói... Kể thêm cho anh nghe đi." (giữ focus)</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-cell">"Em đừng có làm quá lên..." (phán xét)</div>
+                    <div class="comparison-cell">"Anh hiểu tại sao em cảm thấy như vậy." (công nhận)</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-cell">"Ừ, ừ..." (vừa nhìn điện thoại)</div>
+                    <div class="comparison-cell">Đặt điện thoại xuống, nhìn vào mắt, gật đầu</div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m5-listening-comparison.png" alt="So sánh lắng nghe">
+            </div>
+            <div class="image-caption">Hình 4: Sự khác biệt giữa "nghe" và "lắng nghe sâu"</div>
+        </section>
+
+        <!-- SECTION 5: Ví Dụ Thực Tế -->
+        <section class="section">
+            <h2 class="section-title"><span>💑</span> Câu Chuyện Thực Tế</h2>
+
+            <p>Lắng nghe sâu không chỉ là kỹ năng - nó có thể cứu vãn mối quan hệ. Đây là hai câu chuyện từ các học viên của GEM:</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>👩</span> Tuyết, 38 tuổi - Dược sĩ, TP.HCM</div>
+                <p><strong>Tình huống:</strong> Tuyết và chồng (Hải) tranh cãi liên tục về việc nhà. Mỗi khi cô chia sẻ áp lực, Hải lập tức đưa ra giải pháp: <em>"Thì em thuê giúp việc đi!"</em> hoặc <em>"Anh sẽ rửa chén mỗi tối."</em> Tuyết càng nói càng tức: <em>"Anh không hiểu gì cả!"</em><br><br>
+
+                <strong>Vấn đề:</strong> Hải đang mắc rào cản #3 - <strong>Muốn giải quyết vấn đề ngay</strong>. Anh nghĩ cô cần "fix", nhưng thực ra cô chỉ cần được NGHE, được công nhận sự mệt mỏi.<br><br>
+
+                <strong>Giải pháp:</strong> Sau khi học về Deep Listening, Hải thử cách tiếp cận mới. Khi Tuyết chia sẻ, anh đặt điện thoại xuống, nhìn cô, và nói: <em>"Nghe có vẻ em rất mệt mỏi. Kể cho anh nghe thêm đi."</em> Sau đó anh hỏi: <em>"Em muốn anh chỉ lắng nghe, hay em muốn anh góp ý?"</em><br><br>
+
+                <strong>Kết quả:</strong> Tuyết bật khóc và nói: <em>"Đây là lần đầu tiên trong 10 năm em cảm thấy anh thực sự NGHE em."</em> Họ không cần thuê giúp việc - chỉ cần Hải LẮNG NGHE. Sự kết nối giữa họ sâu hơn bao giờ hết.</p>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>👨</span> Khôi, 45 tuổi - Giám đốc kinh doanh, Hà Nội</div>
+                <p><strong>Tình huống:</strong> Con gái 16 tuổi của Khôi (Linh) ngày càng xa cách. Mỗi khi nói chuyện, cô ấy chỉ trả lời ngắn gọn rồi vào phòng. Khôi lo lắng và thường hỏi dồn: <em>"Hôm nay ở trường thế nào? Con có bạn trai chưa? Con đang học gì?"</em><br><br>
+
+                <strong>Vấn đề:</strong> Khôi đang phạm lỗi <strong>hỏi Yes/No</strong> và <strong>hỏi như thẩm vấn</strong>. Con gái cảm thấy bị kiểm tra, không được lắng nghe.<br><br>
+
+                <strong>Giải pháp:</strong> Khôi học kỹ thuật RASA. Thay vì hỏi dồn, anh chỉ ngồi cạnh Linh khi cô xem TV, không nói gì. Khi Linh bắt đầu chia sẻ, anh chỉ gật đầu, nói "Ồ, thú vị nhỉ", và hỏi câu mở: <em>"Con cảm thấy thế nào về chuyện đó?"</em> Không phán xét, không đưa ra lời khuyên.<br><br>
+
+                <strong>Kết quả:</strong> Sau 2 tháng, Linh bắt đầu chủ động tìm bố để nói chuyện. Cô thậm chí hỏi ý kiến bố về một bạn trai ở trường. <em>"Con gái tôi không cần tôi giải quyết vấn đề của con - con chỉ cần một người lắng nghe mà không phán xét."</em></p>
+            </div>
+        </section>
+
+        <!-- SECTION 6: Thực Hành -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Bài Tập Thực Hành Hàng Ngày</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📝</span> Bài Tập 1: 3 Phút Im Lặng</div>
+                <p>Trong cuộc trò chuyện tiếp theo với người thân, hãy thử IM LẶNG trong 3 phút đầu. Chỉ lắng nghe, gật đầu, và nói "Ừ, anh/em nghe." Không đưa ra ý kiến, không kể chuyện mình. Quan sát điều gì xảy ra.</p>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>📝</span> Bài Tập 2: Tóm Tắt & Xác Nhận</div>
+                <p>Sau khi người yêu/bạn bè chia sẻ điều gì đó, hãy tóm tắt lại: "Nếu anh/em hiểu đúng, em/anh đang cảm thấy [X] vì [Y]. Đúng không?" Hỏi họ xem bạn hiểu có đúng không. Thực hành mỗi ngày.</p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>📝</span> Bài Tập 3: Hỏi "Lắng Nghe Hay Góp Ý?"</div>
+                <p>Khi ai đó bắt đầu chia sẻ vấn đề, hãy hỏi ngay: "Em/anh muốn mình chỉ lắng nghe, hay em/anh muốn mình góp ý?" Câu hỏi này cho họ quyền lựa chọn và bạn biết họ cần gì.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m5-listening-practice.png" alt="Bài tập thực hành">
+            </div>
+            <div class="image-caption">Hình 5: 3 bài tập lắng nghe sâu hàng ngày</div>
+        </section>
+
+        <!-- SECTION 7: FAQ -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🤔</span> Tôi không biết nói gì sau khi lắng nghe. Làm sao?</div>
+                <p>Bạn không cần phải nói gì "hay ho"! Những câu đơn giản nhất lại hiệu quả nhất:<br><br>
+                <em>"Anh/em hiểu."</em><br>
+                <em>"Điều đó nghe có vẻ khó khăn."</em><br>
+                <em>"Cảm ơn em/anh đã chia sẻ với anh/em."</em><br><br>
+                Đôi khi im lặng + một cái ôm còn có ý nghĩa hơn bất kỳ lời nào.</p>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>🤔</span> Nếu họ muốn tôi góp ý nhưng tôi không biết nói gì?</div>
+                <p>Bạn có thể hỏi lại: <em>"Em/anh nghĩ nên làm gì?"</em> hoặc <em>"Em/anh đã thử cách nào rồi?"</em> Thường người ta đã có câu trả lời - họ chỉ cần ai đó giúp họ <strong>tự tìm ra</strong>. Việc bạn hỏi câu hỏi đúng có giá trị hơn việc đưa ra lời khuyên.</p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>🤔</span> Đối tác hay phàn nàn nhưng không muốn thay đổi - nên làm gì?</div>
+                <p>Đây là tình huống khó. Có hai khả năng:<br><br>
+                1. <strong>Họ chưa sẵn sàng thay đổi</strong> - và đó là quyền của họ. Bạn có thể lắng nghe nhưng không cần phải "fix" họ.<br>
+                2. <strong>Họ chỉ cần được nghe</strong> - đôi khi người ta phàn nàn không phải để giải quyết, mà để xả stress. Hãy hỏi: <em>"Em muốn anh lắng nghe hay góp ý?"</em><br><br>
+                Tuy nhiên, nếu họ phàn nàn liên tục về một điều mà không bao giờ thay đổi, bạn có quyền đặt ranh giới: <em>"Anh sẵn sàng hỗ trợ em khi em sẵn sàng hành động."</em></p>
+            </div>
+
+            <div class="highlight-box green">
+                <div class="highlight-box-title"><span>🤔</span> Lắng nghe sâu có liên quan gì đến tần số tình yêu?</div>
+                <p>Trong Học Thuyết Chuyển Hóa Nội Tâm, lắng nghe sâu là một trong những <strong>hành động cao nhất của tình yêu</strong>. Khi bạn lắng nghe ai đó trọn vẹn - không phán xét, không vội vàng - bạn đang rung động ở tần số <strong>540Hz (acceptance)</strong> hoặc cao hơn. Bạn đang trao cho họ năng lượng của sự chấp nhận vô điều kiện - điều mà mọi người đều khao khát.</p>
+            </div>
+        </section>
+
+        <!-- SUMMARY BÀI HỌC -->
+        <section class="section">
+            <div class="summary-box">
+                <h3 class="summary-title"><span>📌</span> Tóm Tắt Bài Học</h3>
+                <ul class="summary-list">
+                    <li><strong>Deep Listening:</strong> Sự HIỆN DIỆN TRỌN VẸN - tập trung 100% vào người nói, không chỉ lời nói mà cả cảm xúc và ngôn ngữ cơ thể</li>
+                    <li><strong>5 rào cản:</strong> Chuẩn bị câu trả lời, Phán xét, Giải quyết ngay, Chuyển về mình, Phân tâm bởi điện thoại</li>
+                    <li><strong>RASA:</strong> Receive (Tiếp nhận 100%) → Appreciate (Thể hiện tiếp nhận) → Summarize (Tóm tắt lại) → Ask (Hỏi thêm)</li>
+                    <li><strong>Câu hỏi vàng:</strong> "Em/anh muốn mình lắng nghe, hay muốn mình góp ý?" - thay đổi mọi cuộc trò chuyện</li>
+                    <li><strong>Tóm tắt:</strong> "Nếu anh hiểu đúng, em đang cảm thấy X vì Y, đúng không?" - xác nhận đã hiểu</li>
+                    <li><strong>Thực hành:</strong> Lắng nghe là kỹ năng - cần rèn luyện mỗi ngày với 3 bài tập đã học</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- MODULE 5 SUMMARY -->
+        <section class="section">
+            <div class="summary-box" style="background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(156, 6, 18, 0.1)); border-color: var(--purple);">
+                <h3 class="summary-title" style="color: var(--purple);"><span>🎓</span> Tổng Kết Module 5: Nghệ Thuật Quan Hệ Lành Mạnh</h3>
+                <ul class="summary-list">
+                    <li><strong>Bài 5.1 - 4 Phong Cách Giao Tiếp:</strong> Passive, Aggressive, Passive-Aggressive, và Assertive. I-Statement là công cụ giao tiếp assertive: Hành vi → Cảm xúc → Nhu cầu → Đề xuất</li>
+                    <li><strong>Bài 5.2 - 5 Ngôn Ngữ Tình Yêu:</strong> Words, Quality Time, Gifts, Acts of Service, Physical Touch. Nguyên tắc vàng: YÊU BẰNG NGÔN NGỮ CỦA HỌ</li>
+                    <li><strong>Bài 5.3 - Red & Green Flags:</strong> 10 dấu hiệu cảnh báo (kiểm soát, gaslighting, love bombing...) và 10 dấu hiệu tích cực (nhất quán, tôn trọng ranh giới, nhận lỗi...)</li>
+                    <li><strong>Bài 5.4 - Lắng Nghe Sâu:</strong> Kỹ thuật RASA, 5 rào cản lắng nghe, và câu hỏi "Lắng nghe hay góp ý?"</li>
+                </ul>
+                <p style="color: var(--text-secondary); margin-top: var(--space-lg);"><strong>Thông điệp Module 5:</strong> Mối quan hệ lành mạnh không đến từ việc tìm đúng người - mà từ việc BẠN trở thành đúng người. Giao tiếp assertive, hiểu ngôn ngữ tình yêu, nhận biết flags, và lắng nghe sâu - đây là 4 kỹ năng sẽ biến đổi mọi mối quan hệ trong cuộc sống của bạn.</p>
+            </div>
+        </section>
+
+        <!-- QUIZ SECTION -->
+        <section class="section">
+            <div class="quiz-section">
+                <h3 class="quiz-title"><span>📝</span> Quiz Module 5: Nghệ Thuật Quan Hệ Lành Mạnh</h3>
+
+                <div id="quiz-container">
+                    <!-- Question 1 -->
+                    <div class="quiz-question" data-question="1">
+                        <p class="question-text">1. Trong phong cách giao tiếp Assertive, "I-Statement" bắt đầu bằng điều gì?</p>
+                        <div class="quiz-options">
+                            <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 1)">A. "Anh/Em lúc nào cũng..." (đổ lỗi cho đối phương)</div>
+                            <div class="quiz-option" data-correct="true" onclick="checkAnswer(this, 1)">B. "Khi... em cảm thấy... vì em cần..." (mô tả cảm xúc của mình)</div>
+                            <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 1)">C. "Tại sao anh/em không bao giờ..." (câu hỏi buộc tội)</div>
+                            <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 1)">D. "Mọi người đều nghĩ anh/em..." (đem người khác vào)</div>
+                        </div>
+                        <div class="quiz-feedback" id="feedback-1"></div>
+                    </div>
+
+                    <!-- Question 2 -->
+                    <div class="quiz-question" data-question="2">
+                        <p class="question-text">2. Người có ngôn ngữ tình yêu "Quality Time" cảm thấy được yêu nhất khi:</p>
+                        <div class="quiz-options">
+                            <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 2)">A. Nhận được quà tặng bất ngờ</div>
+                            <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 2)">B. Được nghe những lời khen ngợi</div>
+                            <div class="quiz-option" data-correct="true" onclick="checkAnswer(this, 2)">C. Được dành thời gian 1-1, chú ý 100%, không phân tâm</div>
+                            <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 2)">D. Được người yêu giúp làm việc nhà</div>
+                        </div>
+                        <div class="quiz-feedback" id="feedback-2"></div>
+                    </div>
+
+                    <!-- Question 3 -->
+                    <div class="quiz-question" data-question="3">
+                        <p class="question-text">3. Trong kỹ thuật RASA, chữ "S" là viết tắt của điều gì?</p>
+                        <div class="quiz-options">
+                            <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 3)">A. Silent - Im lặng hoàn toàn khi người khác nói</div>
+                            <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 3)">B. Solve - Đưa ra giải pháp ngay lập tức</div>
+                            <div class="quiz-option" data-correct="true" onclick="checkAnswer(this, 3)">C. Summarize - Tóm tắt lại những gì họ nói</div>
+                            <div class="quiz-option" data-correct="false" onclick="checkAnswer(this, 3)">D. Share - Chia sẻ câu chuyện tương tự của bạn</div>
+                        </div>
+                        <div class="quiz-feedback" id="feedback-3"></div>
+                    </div>
+                </div>
+
+                <!-- Quiz Result -->
+                <div class="quiz-result" id="quiz-result">
+                    <div class="quiz-score" id="quiz-score">0/3</div>
+                    <p class="quiz-message" id="quiz-message"></p>
+                    <button class="retake-btn" onclick="retakeQuiz()">Làm Lại Quiz</button>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        const explanations = {
+            1: {
+                correct: '✅ Chính xác! I-Statement bắt đầu bằng việc mô tả hành vi (Khi...), rồi cảm xúc của bạn (em cảm thấy...), nhu cầu đằng sau (vì em cần...), và đề xuất giải pháp. Đây là cách giao tiếp assertive - tôn trọng cả bạn và đối phương.',
+                incorrect: '❌ Sai rồi! Đáp án đúng là B. I-Statement tập trung vào CẢM XÚC CỦA BẠN, không đổ lỗi cho đối phương. Công thức: "Khi [hành vi] → Em cảm thấy [cảm xúc] → Vì em cần [nhu cầu] → Đề xuất [giải pháp]".'
+            },
+            2: {
+                correct: '✅ Đúng rồi! Người có ngôn ngữ Quality Time cần sự HIỆN DIỆN TRỌN VẸN của bạn. Không phải chỉ ở cạnh nhau - mà là chú ý 100%, không điện thoại, không phân tâm. Họ cảm thấy được yêu khi bạn dành thời gian chất lượng cho họ.',
+                incorrect: '❌ Chưa đúng! Đáp án đúng là C - Thời gian chất lượng với sự chú ý 100%. Quà tặng là Receiving Gifts, lời khen là Words of Affirmation, giúp việc nhà là Acts of Service.'
+            },
+            3: {
+                correct: '✅ Tuyệt vời! S = Summarize - Tóm tắt lại những gì họ nói bằng lời của bạn: "Nếu anh hiểu đúng, em đang cảm thấy X vì Y, đúng không?" Điều này xác nhận bạn đã lắng nghe và hiểu đúng.',
+                incorrect: '❌ Sai rồi! Đáp án đúng là C - Summarize (Tóm tắt lại). RASA = Receive (Tiếp nhận) → Appreciate (Thể hiện tiếp nhận) → Summarize (Tóm tắt) → Ask (Hỏi thêm). Đừng vội đưa ra giải pháp hay chia sẻ chuyện của mình!'
+            }
+        };
+
+        let answeredQuestions = 0;
+        let correctAnswers = 0;
+        const totalQuestions = 3;
+
+        function checkAnswer(selectedOption, questionNum) {
+            const question = document.querySelector(`.quiz-question[data-question="${questionNum}"]`);
+            const options = question.querySelectorAll('.quiz-option');
+            const feedback = document.getElementById(`feedback-${questionNum}`);
+
+            // Disable all options
+            options.forEach(opt => {
+                opt.classList.add('disabled');
+                if (opt.dataset.correct === 'true') {
+                    opt.classList.add('correct');
+                }
+            });
+
+            // Check if selected answer is correct
+            const isCorrect = selectedOption.dataset.correct === 'true';
+            if (isCorrect) {
+                correctAnswers++;
+                feedback.className = 'quiz-feedback correct';
+                feedback.textContent = explanations[questionNum].correct;
+            } else {
+                selectedOption.classList.add('incorrect');
+                feedback.className = 'quiz-feedback incorrect';
+                feedback.textContent = explanations[questionNum].incorrect;
+            }
+
+            answeredQuestions++;
+
+            // Check if all questions answered
+            if (answeredQuestions === totalQuestions) {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            const resultDiv = document.getElementById('quiz-result');
+            const scoreDiv = document.getElementById('quiz-score');
+            const messageDiv = document.getElementById('quiz-message');
+
+            scoreDiv.textContent = `${correctAnswers}/${totalQuestions}`;
+
+            if (correctAnswers === totalQuestions) {
+                messageDiv.textContent = '🎉 Xuất sắc! Bạn đã thành thạo các kỹ năng quan hệ lành mạnh! Module 5 hoàn thành!';
+            } else if (correctAnswers >= 2) {
+                messageDiv.textContent = '👍 Tốt lắm! Bạn đã hiểu phần lớn nội dung. Hãy ôn lại những phần còn thiếu nhé!';
+            } else {
+                messageDiv.textContent = '📚 Bạn cần ôn lại Module 5. Hãy đọc lại các bài về giao tiếp, ngôn ngữ tình yêu, và lắng nghe sâu.';
+            }
+
+            resultDiv.classList.add('show');
+        }
+
+        function retakeQuiz() {
+            answeredQuestions = 0;
+            correctAnswers = 0;
+
+            document.querySelectorAll('.quiz-option').forEach(opt => {
+                opt.classList.remove('disabled', 'correct', 'incorrect', 'selected');
+            });
+
+            document.querySelectorAll('.quiz-feedback').forEach(fb => {
+                fb.className = 'quiz-feedback';
+                fb.textContent = '';
+            });
+
+            document.getElementById('quiz-result').classList.remove('show');
+        }
+    </script>
+</body>
+</html>

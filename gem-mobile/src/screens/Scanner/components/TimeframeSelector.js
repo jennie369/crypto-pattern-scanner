@@ -1,7 +1,8 @@
 /**
  * GEM Mobile - Timeframe Selector
- * All timeframes with dropdown + customizable favorites
+ * CLOUD SYNC: Syncs to Supabase for cross-device consistency
  * Design tokens v3.0 compliant
+ * Updated: 2024-12-25
  */
 
 import React, { useState, useEffect } from 'react';
@@ -16,6 +17,8 @@ import {
 import { ChevronDown, Settings, Check, X, RotateCcw } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS, SPACING, TYPOGRAPHY, BUTTON, GLASS } from '../../../utils/tokens';
+import { useAuth } from '../../../contexts/AuthContext';
+import { supabase } from '../../../services/supabase';
 
 // All available timeframes
 const ALL_TIMEFRAMES = [
@@ -37,17 +40,36 @@ const DEFAULT_VISIBLE = ['1h', '4h', '1d', '1w'];
 const STORAGE_KEY = '@gem_scanner_visible_timeframes';
 
 const TimeframeSelector = ({ selected, onSelect }) => {
+  const { user } = useAuth();
   const [visibleTimeframes, setVisibleTimeframes] = useState(DEFAULT_VISIBLE);
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [settingsVisible, setSettingsVisible] = useState(false);
 
-  // Load saved preferences
+  // Load saved preferences with CLOUD SYNC
   useEffect(() => {
     loadPreferences();
-  }, []);
+  }, [user?.id]);
 
   const loadPreferences = async () => {
     try {
+      // Try cloud first if logged in
+      if (user?.id) {
+        const { data, error } = await supabase
+          .from('user_timeframe_preferences')
+          .select('selected_timeframes')
+          .eq('user_id', user.id)
+          .single();
+
+        if (data && !error) {
+          const cloudPrefs = data.selected_timeframes || DEFAULT_VISIBLE;
+          setVisibleTimeframes(cloudPrefs);
+          // Cache locally
+          await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(cloudPrefs));
+          return;
+        }
+      }
+
+      // Fallback to local
       const saved = await AsyncStorage.getItem(STORAGE_KEY);
       if (saved) {
         setVisibleTimeframes(JSON.parse(saved));
@@ -59,8 +81,22 @@ const TimeframeSelector = ({ selected, onSelect }) => {
 
   const savePreferences = async (timeframes) => {
     try {
+      // Save locally
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(timeframes));
       setVisibleTimeframes(timeframes);
+
+      // Sync to cloud if logged in
+      if (user?.id) {
+        await supabase
+          .from('user_timeframe_preferences')
+          .upsert({
+            user_id: user.id,
+            selected_timeframes: timeframes,
+            updated_at: new Date().toISOString(),
+          }, {
+            onConflict: 'user_id',
+          });
+      }
     } catch (error) {
       console.error('[Timeframe] Save preferences error:', error);
     }

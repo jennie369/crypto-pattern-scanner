@@ -164,6 +164,13 @@ CREATE INDEX IF NOT EXISTS idx_ai_prompt_improvements_status ON ai_prompt_improv
 -- 5. RPC FUNCTIONS
 -- ═══════════════════════════════════════════════════════════════════════════
 
+-- Drop existing functions first (for idempotent migration)
+DROP FUNCTION IF EXISTS submit_ai_feedback(UUID, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, BOOLEAN, TEXT[], BOOLEAN, TEXT, JSONB);
+DROP FUNCTION IF EXISTS get_feedback_stats(TEXT, INT);
+DROP FUNCTION IF EXISTS get_negative_feedback_for_review(TEXT, INT);
+DROP FUNCTION IF EXISTS review_feedback(UUID, UUID, TEXT, TEXT);
+DROP FUNCTION IF EXISTS record_learning_update(UUID, TEXT, TEXT, TEXT, TEXT, JSONB, JSONB, UUID);
+
 -- Submit feedback
 CREATE OR REPLACE FUNCTION submit_ai_feedback(
   p_user_id UUID,
@@ -385,6 +392,14 @@ ALTER TABLE ai_learning_updates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_feedback_daily_stats ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_prompt_improvements ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies first (for idempotent migration)
+DROP POLICY IF EXISTS "Users can view own feedback" ON ai_response_feedback;
+DROP POLICY IF EXISTS "Users can submit feedback" ON ai_response_feedback;
+DROP POLICY IF EXISTS "Admin can manage all feedback" ON ai_response_feedback;
+DROP POLICY IF EXISTS "Admin can manage learning updates" ON ai_learning_updates;
+DROP POLICY IF EXISTS "Admin can view feedback stats" ON ai_feedback_daily_stats;
+DROP POLICY IF EXISTS "Admin can manage prompts" ON ai_prompt_improvements;
+
 -- Users can see their own feedback
 CREATE POLICY "Users can view own feedback"
   ON ai_response_feedback FOR SELECT
@@ -442,6 +457,10 @@ CREATE POLICY "Admin can manage prompts"
 -- ═══════════════════════════════════════════════════════════════════════════
 -- 7. TRIGGERS
 -- ═══════════════════════════════════════════════════════════════════════════
+
+-- Drop existing trigger and function first
+DROP TRIGGER IF EXISTS trigger_ai_response_feedback_updated ON ai_response_feedback;
+DROP FUNCTION IF EXISTS update_ai_response_feedback_timestamp();
 
 CREATE OR REPLACE FUNCTION update_ai_response_feedback_timestamp()
 RETURNS TRIGGER AS $$

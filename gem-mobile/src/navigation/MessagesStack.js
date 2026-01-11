@@ -19,6 +19,7 @@ import BlockedUsersScreen from '../screens/Messages/BlockedUsersScreen';
 import PinnedMessagesScreen from '../screens/Messages/PinnedMessagesScreen';
 import ScheduledMessagesScreen from '../screens/Messages/ScheduledMessagesScreen';
 import StarredMessagesScreen from '../screens/Messages/StarredMessagesScreen';
+import ArchivedChatsScreen from '../screens/Messages/ArchivedChatsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -130,6 +131,15 @@ export default function MessagesStack() {
       <Stack.Screen
         name="StarredMessages"
         component={StarredMessagesScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+
+      {/* Archived chats */}
+      <Stack.Screen
+        name="ArchivedChats"
+        component={ArchivedChatsScreen}
         options={{
           animation: 'slide_from_right',
         }}

@@ -20,8 +20,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
-import { BlurView } from 'expo-blur';
-import { LinearGradient } from 'expo-linear-gradient';
+// BlurView and LinearGradient removed - using solid backgrounds
 import {
   X,
   Copy,
@@ -32,7 +31,7 @@ import {
   ExternalLink,
 } from 'lucide-react-native';
 
-import { COLORS, GLASS, SPACING, TYPOGRAPHY, BUTTON, SHADOWS, GRADIENTS } from '../../utils/tokens';
+import { COLORS, SPACING, TYPOGRAPHY, BUTTON, SHADOWS } from '../../utils/tokens';
 import affiliateService from '../../services/affiliateService';
 import CustomAlert, { useCustomAlert } from '../CustomAlert';
 
@@ -112,6 +111,7 @@ export default function ProductAffiliateLinkSheet({
       name: getProductName(),
       price: getProductPrice(),
       image: getProductImage(),
+      productType, // <-- THIS IS THE KEY - what productType is passed?
     });
 
     if (!productId) {
@@ -225,14 +225,9 @@ export default function ProductAffiliateLinkSheet({
           { transform: [{ translateY: slideAnim }] },
         ]}
       >
-        <BlurView intensity={80} tint="dark" style={styles.blurContainer}>
-          {/* Gradient Border */}
-          <LinearGradient
-            colors={GRADIENTS.glassBorder}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.borderGradient}
-          />
+        <View style={styles.sheetContainer}>
+          {/* Subtle top border */}
+          <View style={styles.borderGradient} />
 
           {/* Content */}
           <View style={[styles.content, { paddingBottom: Math.max(insets.bottom, 24) + SPACING.lg }]}>
@@ -355,13 +350,10 @@ export default function ProductAffiliateLinkSheet({
                       onPress={handleShare}
                       activeOpacity={0.8}
                     >
-                      <LinearGradient
-                        colors={GRADIENTS.primaryButton}
-                        style={styles.shareGradient}
-                      >
-                        <Share2 size={18} color={COLORS.textPrimary} />
+                      <View style={styles.shareGradient}>
+                        <Share2 size={16} color="#FFFFFF" />
                         <Text style={styles.actionText}>Chia sẻ</Text>
-                      </LinearGradient>
+                      </View>
                     </TouchableOpacity>
                   </View>
 
@@ -376,7 +368,7 @@ export default function ProductAffiliateLinkSheet({
               )}
             </ScrollView>
           </View>
-        </BlurView>
+        </View>
       </Animated.View>
       {AlertComponent}
     </Modal>
@@ -386,7 +378,7 @@ export default function ProductAffiliateLinkSheet({
 const styles = StyleSheet.create({
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
   },
   backdropInner: {
     flex: 1,
@@ -397,23 +389,22 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: SHEET_HEIGHT,
-    borderTopLeftRadius: GLASS.borderRadius,
-    borderTopRightRadius: GLASS.borderRadius,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     overflow: 'hidden',
     ...SHADOWS.glass,
   },
-  blurContainer: {
+  sheetContainer: {
     flex: 1,
-    backgroundColor: GLASS.background,
+    backgroundColor: '#0F1030', // Dark blue consistent with app theme
   },
   borderGradient: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    height: GLASS.borderWidth,
-    borderTopLeftRadius: GLASS.borderRadius,
-    borderTopRightRadius: GLASS.borderRadius,
+    height: 1,
+    backgroundColor: 'rgba(255, 189, 89, 0.3)',
   },
   content: {
     flex: 1,
@@ -428,9 +419,9 @@ const styles = StyleSheet.create({
     paddingVertical: SPACING.md,
   },
   handle: {
-    width: 40,
+    width: 36,
     height: 4,
-    backgroundColor: COLORS.textMuted,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 2,
   },
   header: {
@@ -445,9 +436,9 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   headerTitle: {
-    fontSize: TYPOGRAPHY.fontSize.display,
-    fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: 'rgba(255, 255, 255, 0.9)',
   },
 
   // Loading
@@ -490,33 +481,33 @@ const styles = StyleSheet.create({
 
   // Product Card
   productCard: {
-    backgroundColor: 'rgba(156, 6, 18, 0.15)',
+    backgroundColor: 'rgba(15, 16, 48, 0.8)',
     padding: SPACING.lg,
-    borderRadius: BUTTON.primary.borderRadius,
+    borderRadius: 12,
     marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: 'rgba(156, 6, 18, 0.3)',
+    borderColor: 'rgba(255, 189, 89, 0.2)',
   },
   productName: {
-    fontSize: TYPOGRAPHY.fontSize.xxl,
+    fontSize: TYPOGRAPHY.fontSize.lg,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
+    color: 'rgba(255, 255, 255, 0.9)',
     marginBottom: SPACING.xs,
   },
   productPrice: {
-    fontSize: TYPOGRAPHY.fontSize.xxxl,
+    fontSize: TYPOGRAPHY.fontSize.xxl,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.gold,
+    color: '#FFBD59', // App gold color
   },
 
   // Commission Card
   commissionCard: {
-    backgroundColor: 'rgba(255, 189, 89, 0.1)',
+    backgroundColor: 'rgba(15, 16, 48, 0.6)',
     padding: SPACING.lg,
-    borderRadius: BUTTON.primary.borderRadius,
+    borderRadius: 12,
     marginBottom: SPACING.lg,
     borderWidth: 1,
-    borderColor: 'rgba(255, 189, 89, 0.2)',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   commissionRow: {
     flexDirection: 'row',
@@ -525,18 +516,18 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xs,
   },
   commissionLabel: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    color: COLORS.textSecondary,
+    fontSize: TYPOGRAPHY.fontSize.base,
+    color: 'rgba(255, 255, 255, 0.6)',
   },
   commissionRate: {
-    fontSize: TYPOGRAPHY.fontSize.xxl,
+    fontSize: TYPOGRAPHY.fontSize.xl,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.gold,
+    color: '#FFBD59', // App gold color
   },
   commissionAmount: {
-    fontSize: TYPOGRAPHY.fontSize.xxl,
+    fontSize: TYPOGRAPHY.fontSize.xl,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.success,
+    color: '#22C55E',
   },
 
   // Link Section
@@ -544,23 +535,23 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.lg,
   },
   linkLabel: {
-    fontSize: TYPOGRAPHY.fontSize.base,
-    color: COLORS.textMuted,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: 'rgba(255, 255, 255, 0.5)',
     marginBottom: SPACING.sm,
   },
   linkBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(17, 34, 80, 0.6)',
+    backgroundColor: 'rgba(15, 16, 48, 0.8)',
     padding: SPACING.md,
-    borderRadius: SPACING.sm,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: 'rgba(106, 91, 255, 0.2)',
+    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   linkText: {
     flex: 1,
-    fontSize: TYPOGRAPHY.fontSize.base,
-    color: COLORS.textPrimary,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: 'rgba(255, 255, 255, 0.8)',
     marginRight: SPACING.md,
   },
 
@@ -579,11 +570,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: COLORS.glassBgHeavy,
-    padding: SPACING.lg,
+    backgroundColor: 'rgba(15, 16, 48, 0.8)',
+    padding: SPACING.md,
     gap: SPACING.sm,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 10,
   },
   shareButton: {
     overflow: 'hidden',
@@ -592,28 +584,30 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: SPACING.lg,
+    padding: SPACING.md,
     gap: SPACING.sm,
+    borderRadius: 10,
+    backgroundColor: '#9C0612',
   },
   actionText: {
-    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontSize: TYPOGRAPHY.fontSize.base,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.textPrimary,
+    color: '#FFFFFF',
   },
 
   // Tip
   tipContainer: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    backgroundColor: 'rgba(255, 189, 89, 0.05)',
+    backgroundColor: 'rgba(255, 189, 89, 0.08)',
     padding: SPACING.md,
-    borderRadius: SPACING.sm,
+    borderRadius: 8,
     gap: SPACING.sm,
   },
   tipText: {
     flex: 1,
-    fontSize: TYPOGRAPHY.fontSize.base,
-    color: COLORS.textMuted,
-    lineHeight: TYPOGRAPHY.fontSize.base * TYPOGRAPHY.lineHeight.relaxed,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: 'rgba(255, 255, 255, 0.5)',
+    lineHeight: TYPOGRAPHY.fontSize.sm * TYPOGRAPHY.lineHeight.relaxed,
   },
 });

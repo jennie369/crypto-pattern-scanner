@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 7.1: Identity Transformation | GEM Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--purple), #8B7DFF); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: white; margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--purple); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.5rem, 5vw, 2.25rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .definition-box p { color: var(--text-secondary); margin: 0; }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .data-box { background: var(--bg-card); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .data-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .data-title { font-size: 1.2rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .data-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-lg); }
+        @media (max-width: 600px) { .data-grid { grid-template-columns: 1fr; gap: var(--space-md); } }
+        .data-item { text-align: center; padding: var(--space-md); background: var(--glass-bg); border-radius: var(--radius-md); }
+        @media (max-width: 600px) { .data-item { border-radius: 0; text-align: left; display: flex; justify-content: space-between; align-items: center; } }
+        .data-value { font-size: 2rem; font-weight: 800; color: var(--gold); margin-bottom: var(--space-xs); }
+        @media (max-width: 600px) { .data-value { font-size: 1.5rem; margin-bottom: 0; } }
+        .data-label { font-size: 0.85rem; color: var(--text-muted); }
+
+        .path-grid { display: flex; flex-direction: column; gap: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .path-grid { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .path-card { background: var(--bg-card); border-radius: var(--radius-lg); padding: var(--space-xl); position: relative; overflow: hidden; }
+        @media (max-width: 600px) { .path-card { border-radius: 0; padding: var(--space-lg) 16px; } }
+        .path-card.path-1 { border: 2px solid var(--success); }
+        .path-card.path-2 { border: 2px solid var(--gold); }
+        .path-card.path-3 { border: 2px solid var(--purple); }
+        @media (max-width: 600px) {
+            .path-card.path-1, .path-card.path-2, .path-card.path-3 { border: none; }
+            .path-card.path-1 { border-left: 4px solid var(--success); }
+            .path-card.path-2 { border-left: 4px solid var(--gold); }
+            .path-card.path-3 { border-left: 4px solid var(--purple); }
+        }
+        .path-badge { position: absolute; top: var(--space-md); right: var(--space-md); padding: var(--space-xs) var(--space-sm); border-radius: 50px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+        .path-card.path-1 .path-badge { background: var(--success); color: white; }
+        .path-card.path-2 .path-badge { background: var(--gold); color: var(--navy-dark); }
+        .path-card.path-3 .path-badge { background: var(--purple); color: white; }
+        .path-header { display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-md); }
+        .path-emoji { font-size: 2.5rem; }
+        .path-title { font-size: 1.3rem; font-weight: 700; }
+        .path-card.path-1 .path-title { color: var(--success); }
+        .path-card.path-2 .path-title { color: var(--gold); }
+        .path-card.path-3 .path-title { color: var(--purple); }
+        .path-desc { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        .path-result { background: var(--glass-bg); border-radius: var(--radius-md); padding: var(--space-md); }
+        @media (max-width: 600px) { .path-result { border-radius: 0; } }
+        .path-result-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: var(--space-xs); }
+        .path-result-value { font-weight: 700; font-size: 1.1rem; }
+        .path-card.path-1 .path-result-value { color: var(--success); }
+        .path-card.path-2 .path-result-value { color: var(--gold); }
+        .path-card.path-3 .path-result-value { color: var(--purple); }
+
+        .question-grid { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .question-grid { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .question-item { display: flex; gap: var(--space-md); padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); }
+        @media (max-width: 600px) { .question-item { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--cyan); } }
+        .question-number { width: 32px; height: 32px; min-width: 32px; background: var(--cyan); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; color: var(--navy-dark); }
+        .question-text { color: var(--text-secondary); flex: 1; }
+
+        .app-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .app-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .app-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); }
+        .app-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .app-box p:last-child { margin-bottom: 0; }
+
+        .lesson-footer { text-align: center; padding: var(--space-xl); color: var(--text-muted); font-size: 0.85rem; }
+        .lesson-footer a { color: var(--gold); text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>🦋</span>
+                <span>Module 7 - Conversion</span>
+            </div>
+            <div class="lesson-chapter">Module 7 - Sứ Mệnh Phụng Sự</div>
+            <h1 class="lesson-title">Identity Transformation - Bạn Không Còn Như Trước</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 7.1</span></div>
+                <div class="meta-item"><span>⏱️</span><span>35 phút đọc</span></div>
+                <div class="meta-item"><span>🔮</span><span>3 Con Đường</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🌊</span> Bạn Đã Thay Đổi - Nhưng Sự Thay Đổi Có Tồn Tại?</h2>
+            <p>Hãy thật lòng với chính mình: trong 49 ngày qua, bạn đã cảm nhận được sự thay đổi bên trong mình. Bạn nhìn tiền bạc khác đi, phản ứng với stress khác đi, thức dậy mỗi sáng với tâm trạng khác đi. Nhưng có một câu hỏi quan trọng mà hầu hết học viên không dám đối mặt: "Sự thay đổi này có BỀN VỮNG không, hay chỉ là 'high' tạm thời rồi sẽ phai nhạt theo thời gian?"</p>
+
+            <p>Đây là câu hỏi mà tôi - Jennie - đã trăn trở nhiều năm khi xây dựng các khóa học. Tôi đã thấy quá nhiều người học xong các chương trình phát triển bản thân rồi quay về đúng lối mòn cũ chỉ sau vài tháng. Họ có kiến thức, họ hiểu lý thuyết, nhưng họ thiếu một thứ: HỆ THỐNG để duy trì sự chuyển hóa trong dài hạn.</p>
+
+            <p>Bài học hôm nay sẽ thẳng thắn chia sẻ với bạn DATA THỰC TẾ từ hàng ngàn học viên GEM Academy - ai duy trì được kết quả, ai quay về điểm xuất phát, và ĐIỀU GÌ tạo nên sự khác biệt. Sau đó, bạn sẽ đứng trước NGÃ BA ĐƯỜNG với 3 con đường rõ ràng để lựa chọn. Không có áp lực, không có manipulation - chỉ có thông tin và sự lựa chọn thuộc về bạn.</p>
+        </section>
+
+        <!-- SECTION 1: SỰ THẬT VỀ CHUYỂN HÓA -->
+        <section class="section">
+            <h2 class="section-title"><span>📊</span> Sự Thật Về Chuyển Hóa - Data Không Nói Dối</h2>
+            <p>Sau 49 ngày học và thực hành, bạn đã trải qua một quá trình chuyển hóa sâu sắc. Nhưng có một sự thật quan trọng mà tôi cần chia sẻ với bạn dựa trên dữ liệu từ hàng ngàn học viên đã hoàn thành khóa học này trước bạn...</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/6A5BFF?text=M7_B1_01%0ATransformation+Data" alt="Transformation Data">
+                <div class="image-caption">Dữ liệu từ hàng ngàn học viên GEM Academy</div>
+            </div>
+
+            <div class="data-box">
+                <div class="data-title"><span>📈</span> Data Từ Học Viên GEM Academy</div>
+                <div class="data-grid">
+                    <div class="data-item">
+                        <div class="data-value">73%</div>
+                        <div class="data-label">Học viên cảm thấy thay đổi mindset</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-value">45%</div>
+                        <div class="data-label">Có cải thiện tài chính thực sự</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-value">2 Nhóm</div>
+                        <div class="data-label">Sự khác biệt giữa nhóm A và B</div>
+                    </div>
+                    <div class="data-item">
+                        <div class="data-value">HỆ THỐNG</div>
+                        <div class="data-label">Yếu tố quyết định thành công</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🔍</span> 2 Nhóm Học Viên</div>
+                <p><strong>Nhóm A - "Học xong rồi quên":</strong></p>
+                <p style="margin-top: var(--space-sm);">• Học xong khóa nhưng không có HỆ THỐNG duy trì</p>
+                <p style="margin-top: var(--space-xs);">• Tần số nâng lên rồi từ từ rớt xuống</p>
+                <p style="margin-top: var(--space-xs);">• 6 tháng sau quay về gần như cũ</p>
+                <p style="margin-top: var(--space-xs);">• Cải thiện: 20-30%</p>
+                <p style="margin-top: var(--space-md);"><strong>Nhóm B - "Có hệ thống":</strong></p>
+                <p style="margin-top: var(--space-sm);">• Tiếp tục sử dụng app GEM hàng ngày</p>
+                <p style="margin-top: var(--space-xs);">• Tham gia cộng đồng active</p>
+                <p style="margin-top: var(--space-xs);">• Có accountability hoặc tiếp tục học</p>
+                <p style="margin-top: var(--space-xs);">• Cải thiện: 50-80% hoặc hơn</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🔑</span> Key Insight</div>
+                <p><strong>"Kiến thức không đủ. HỆ THỐNG mới quyết định."</strong></p>
+                <p style="margin-top: var(--space-sm);">Bạn đã có KIẾN THỨC. Câu hỏi bây giờ là: Bạn sẽ xây dựng HỆ THỐNG gì để duy trì và nhân rộng kết quả?</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: BẠN ĐÃ THAY ĐỔI -->
+        <section class="section">
+            <h2 class="section-title"><span>🦋</span> Bạn Đã Thay Đổi</h2>
+            <p>Dù là nhóm A hay B trong tương lai, HIỆN TẠI bạn đã không còn như trước. Hãy acknowledge những thay đổi đã xảy ra:</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M7_B1_02%0AYou+Have+Changed" alt="Bạn đã thay đổi">
+                <div class="image-caption">Sự chuyển hóa bên trong tạo nên thay đổi bên ngoài</div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>✨</span> Bạn Bây Giờ Biết...</div>
+                <p>✅ Tiền bạc là NĂNG LƯỢNG, không phải mục tiêu cuối cùng</p>
+                <p style="margin-top: var(--space-sm);">✅ Limiting beliefs có thể được REFRAME</p>
+                <p style="margin-top: var(--space-xs);">✅ Nghiệp tiền bạc có thể được HÓA GIẢI</p>
+                <p style="margin-top: var(--space-xs);">✅ Tần số quyết định những gì bạn THU HÚT</p>
+                <p style="margin-top: var(--space-xs);">✅ Nghi thức hàng ngày TẠO NÊN số phận</p>
+                <p style="margin-top: var(--space-xs);">✅ Inspired action hiệu quả hơn forced action</p>
+                <p style="margin-top: var(--space-xs);">✅ Cộng đồng là SỨC MẠNH nhân rộng</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🧠</span> Identity Shift</div>
+                <p>Quan trọng hơn kiến thức là <strong>IDENTITY SHIFT</strong> - sự thay đổi trong cách bạn nhìn CHÍNH MÌNH.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Trước:</strong> "Tôi là người không giỏi về tiền"</p>
+                <p style="margin-top: var(--space-xs);"><strong>Sau:</strong> "Tôi đang trên hành trình làm chủ tài chính"</p>
+                <p style="margin-top: var(--space-md);"><strong>Trước:</strong> "Tiền khó kiếm, cần vất vả"</p>
+                <p style="margin-top: var(--space-xs);"><strong>Sau:</strong> "Tiền chảy đến khi tôi ở đúng tần số"</p>
+                <p style="margin-top: var(--space-md);"><strong>Trước:</strong> "Tôi là nạn nhân của hoàn cảnh"</p>
+                <p style="margin-top: var(--space-xs);"><strong>Sau:</strong> "Tôi là người sáng tạo thực tại của mình"</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: NGÃ BA ĐƯỜNG - 3 CON ĐƯỜNG -->
+        <section class="section">
+            <h2 class="section-title"><span>🔀</span> Ngã Ba Đường - 3 Con Đường</h2>
+            <p>Bạn đang đứng trước ngã ba đường. Mỗi con đường đều valid, nhưng sẽ dẫn đến kết quả khác nhau. Hãy chọn con đường PHÙ HỢP với bạn nhất:</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x600/0a1628/FFBD59?text=HINH+28%0A3+Con+Duong" alt="Hình 28: 3 Con Đường">
+                <div class="image-caption">Hình 28: 3 Con Đường Tiếp Theo Sau Khóa Học</div>
+            </div>
+
+            <div class="path-grid">
+                <!-- Path 1 -->
+                <div class="path-card path-1">
+                    <div class="path-badge">Tự Do</div>
+                    <div class="path-header">
+                        <div class="path-emoji">🌱</div>
+                        <div class="path-title">Con Đường 1: Tự Tiếp Tục</div>
+                    </div>
+                    <div class="path-desc">
+                        <p>Bạn đã có đầy đủ kiến thức và công cụ từ khóa học. Tiếp tục tự thực hành với những gì đã học.</p>
+                        <p style="margin-top: var(--space-sm);"><strong>Phù hợp nếu:</strong></p>
+                        <ul style="margin-top: var(--space-xs); margin-left: var(--space-lg); color: var(--text-muted);">
+                            <li>Bạn có kỷ luật cao, tự motivated</li>
+                            <li>Đã có môi trường hỗ trợ tốt</li>
+                            <li>Không cần thêm công cụ hay guidance</li>
+                        </ul>
+                    </div>
+                    <div class="path-result">
+                        <div class="path-result-label">Kết quả dự kiến</div>
+                        <div class="path-result-value">20-30% cải thiện so với trước khóa học</div>
+                    </div>
+                </div>
+
+                <!-- Path 2 -->
+                <div class="path-card path-2">
+                    <div class="path-badge">⭐ Recommended</div>
+                    <div class="path-header">
+                        <div class="path-emoji">🚀</div>
+                        <div class="path-title">Con Đường 2: Nâng Cấp Công Cụ</div>
+                    </div>
+                    <div class="path-desc">
+                        <p>Đầu tư thêm vào công cụ và hệ thống hỗ trợ để tăng tốc và duy trì kết quả lâu dài.</p>
+                        <p style="margin-top: var(--space-sm);"><strong>Bao gồm:</strong></p>
+                        <ul style="margin-top: var(--space-xs); margin-left: var(--space-lg); color: var(--text-muted);">
+                            <li>Crystals hỗ trợ thịnh vượng (Citrine, Pyrite, Green Aventurine...)</li>
+                            <li>Khóa học nâng cao (Crystal Healing, Tarot, Meditation...)</li>
+                            <li>Gói Premium app GEM với đầy đủ tính năng</li>
+                        </ul>
+                    </div>
+                    <div class="path-result">
+                        <div class="path-result-label">Kết quả dự kiến</div>
+                        <div class="path-result-value">50-80% cải thiện + hệ thống duy trì bền vững</div>
+                    </div>
+                </div>
+
+                <!-- Path 3 -->
+                <div class="path-card path-3">
+                    <div class="path-badge">Ultimate</div>
+                    <div class="path-header">
+                        <div class="path-emoji">🌟</div>
+                        <div class="path-title">Con Đường 3: Trở Thành Đối Tác</div>
+                    </div>
+                    <div class="path-desc">
+                        <p>Không chỉ chuyển hóa bản thân, mà còn lan tỏa thịnh vượng và tạo thu nhập từ việc giúp người khác.</p>
+                        <p style="margin-top: var(--space-sm);"><strong>GEM Partnership Program:</strong></p>
+                        <ul style="margin-top: var(--space-xs); margin-left: var(--space-lg); color: var(--text-muted);">
+                            <li>CTV (Cộng Tác Viên) - Bắt đầu từ 0, ai cũng được</li>
+                            <li>KOL Affiliate - Dành cho người có 20K+ followers</li>
+                            <li>Instructor - Giảng viên với chuyên môn đặc biệt</li>
+                        </ul>
+                    </div>
+                    <div class="path-result">
+                        <div class="path-result-label">Kết quả dự kiến</div>
+                        <div class="path-result-value">100%+ cải thiện + nguồn thu nhập mới + sứ mệnh</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: KHUNG QUYẾT ĐỊNH -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Khung Quyết Định - 4 Câu Hỏi</h2>
+            <p>Để chọn con đường phù hợp, hãy tự hỏi 4 câu hỏi sau:</p>
+
+            <div class="question-grid">
+                <div class="question-item">
+                    <div class="question-number">1</div>
+                    <div class="question-text">
+                        <strong>"Tôi có đủ kỷ luật tự thực hành mỗi ngày KHÔNG CÓ hệ thống hỗ trợ?"</strong>
+                        <br><span style="font-size: 0.85rem; color: var(--text-muted);">Nếu KHÔNG → Con đường 2 hoặc 3</span>
+                    </div>
+                </div>
+                <div class="question-item">
+                    <div class="question-number">2</div>
+                    <div class="question-text">
+                        <strong>"Tôi có sẵn sàng đầu tư thêm để tăng tốc kết quả?"</strong>
+                        <br><span style="font-size: 0.85rem; color: var(--text-muted);">Nếu CÓ → Con đường 2 hoặc 3</span>
+                    </div>
+                </div>
+                <div class="question-item">
+                    <div class="question-number">3</div>
+                    <div class="question-text">
+                        <strong>"Tôi có muốn tạo thu nhập từ việc giúp người khác chuyển hóa?"</strong>
+                        <br><span style="font-size: 0.85rem; color: var(--text-muted);">Nếu CÓ → Con đường 3</span>
+                    </div>
+                </div>
+                <div class="question-item">
+                    <div class="question-number">4</div>
+                    <div class="question-text">
+                        <strong>"Tôi có tin vào sứ mệnh lan tỏa thịnh vượng?"</strong>
+                        <br><span style="font-size: 0.85rem; color: var(--text-muted);">Nếu CÓ → Con đường 3 là perfect fit</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Lưu Ý Quan Trọng</div>
+                <p>Không có con đường nào SAI. Mỗi con đường phù hợp với giai đoạn và hoàn cảnh khác nhau.</p>
+                <p style="margin-top: var(--space-sm);">Bạn có thể bắt đầu với Con đường 1, sau đó chuyển sang Con đường 2, rồi Con đường 3. Hoặc nhảy thẳng vào Con đường 3 nếu cảm thấy aligned.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Quan trọng là: CHỌN và CAM KẾT.</strong></p>
+            </div>
+        </section>
+
+        <!-- SECTION 5: LUẬT CHO ĐI -->
+        <section class="section">
+            <h2 class="section-title"><span>🎁</span> Luật Cho Đi - Giới Thiệu Partnership</h2>
+            <p>Trong Học Thuyết Chuyển Hóa Nội Tâm, có một nguyên lý quan trọng: <strong>"Năng lượng bạn cho đi sẽ quay lại nhân lên."</strong></p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/6A5BFF?text=M7_B1_03%0ALaw+of+Giving" alt="Luật Cho Đi">
+                <div class="image-caption">Cho đi = Mở rộng dòng chảy thịnh vượng</div>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🔄</span> Vòng Xoáy Thịnh Vượng</div>
+                <p>1. Bạn CHUYỂN HÓA bản thân → Nâng tần số</p>
+                <p style="margin-top: var(--space-sm);">2. Bạn CHIA SẺ với người khác → Lan tỏa năng lượng</p>
+                <p style="margin-top: var(--space-xs);">3. Người khác CHUYỂN HÓA → Tạo ripple effect</p>
+                <p style="margin-top: var(--space-xs);">4. Năng lượng tốt QUAY LẠI bạn → Nhiều hơn trước</p>
+                <p style="margin-top: var(--space-xs);">5. Bạn CHUYỂN HÓA sâu hơn → Vòng xoáy tiếp tục</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🌟</span> GEM Partnership - Cơ Hội Phụng Sự</div>
+                <p>Nếu bạn cảm thấy calling để giúp người khác trên hành trình chuyển hóa, GEM Partnership Program là cơ hội để:</p>
+                <p style="margin-top: var(--space-sm);">• <strong>Làm điều có ý nghĩa:</strong> Giúp người khác thoát khỏi limiting beliefs</p>
+                <p style="margin-top: var(--space-xs);">• <strong>Tạo thu nhập:</strong> Commission từ việc giới thiệu products/khóa học</p>
+                <p style="margin-top: var(--space-xs);">• <strong>Phát triển bản thân:</strong> Dạy là cách học tốt nhất</p>
+                <p style="margin-top: var(--space-xs);">• <strong>Xây dựng community:</strong> Tạo cộng đồng thịnh vượng của riêng bạn</p>
+            </div>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>📱</span> Bài Tiếp Theo</div>
+                <p>Bài 7.2 sẽ đi chi tiết vào:</p>
+                <p>• <strong>Con Đường 2:</strong> Products & Khóa học nâng cao</p>
+                <p>• <strong>Con Đường 3:</strong> Chi tiết các cấp Partnership (CTV, KOL, Instructor)</p>
+                <p>• <strong>Next Steps:</strong> Cách đăng ký và bắt đầu ngay</p>
+            </div>
+        </section>
+
+        <!-- SECTION: REAL STORIES -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> 3 Câu Chuyện - 3 Con Đường Khác Nhau</h2>
+            <p>Hãy cùng xem ba câu chuyện thực tế của ba học viên đã hoàn thành khóa học và chọn ba con đường khác nhau. Mỗi câu chuyện sẽ giúp bạn hình dung rõ hơn con đường nào phù hợp với mình.</p>
+
+            <div class="path-card path-1">
+                <div class="path-badge">Con Đường 1</div>
+                <div class="path-header">
+                    <div class="path-emoji">🌱</div>
+                    <div class="path-title">Câu Chuyện Của Anh Đức: Tự Tiếp Tục</div>
+                </div>
+                <div class="path-desc">
+                    <p><strong>Background:</strong> Đức, 40 tuổi, giám đốc IT tại một công ty lớn ở TP.HCM. Anh có kỷ luật cao (đã chạy marathon 10 năm) và môi trường làm việc khá tích cực với sếp và đồng nghiệp supportive.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Lựa chọn:</strong> Sau khóa học, Đức quyết định tự tiếp tục với những gì đã học. Anh duy trì morning routine 15 phút, sử dụng app GEM để track daily score, và check-in với vợ (cũng học khóa này) mỗi tối.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Kết quả sau 1 năm:</strong> Đức duy trì được khoảng 70% những gì đã học. Tần số ổn định ở mức 7/10 (trước khóa học là 5/10). Anh được thăng chức và tăng lương 40%. "Tôi không cần thêm tools hay courses nào cả - tôi chỉ cần consistency. Nhưng tôi cũng nhận ra con đường này đòi hỏi kỷ luật rất cao - không phải ai cũng làm được."</p>
+                </div>
+            </div>
+
+            <div class="path-card path-2">
+                <div class="path-badge">Con Đường 2</div>
+                <div class="path-header">
+                    <div class="path-emoji">🚀</div>
+                    <div class="path-title">Câu Chuyện Của Chị Hạnh: Nâng Cấp Công Cụ</div>
+                </div>
+                <div class="path-desc">
+                    <p><strong>Background:</strong> Hạnh, 33 tuổi, freelance designer sống một mình tại Đà Nẵng. Cô nhận ra mình cần thêm công cụ và hỗ trợ để duy trì động lực vì không có ai bên cạnh để check-in hàng ngày.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Lựa chọn:</strong> Hạnh đầu tư thêm vào: Premium GEM (full features), set crystal cho thịnh vượng (Citrine + Pyrite), và đăng ký khóa "Manifestation Mastery" nâng cao. Cô cũng tham gia nhóm Accountability trong community.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Kết quả sau 1 năm:</strong> Hạnh tăng thu nhập gấp đôi - từ 30 triệu/tháng lên 65 triệu/tháng từ freelance. Cô attract được 3 clients lớn "như thể họ tự tìm đến". Tần số ổn định 8/10. "Crystals là reminder vật lý mỗi ngày. Premium app cho tôi access đến GEM Master 24/7 khi cần guidance. Nhóm AP không cho tôi cơ hội bỏ cuộc."</p>
+                </div>
+            </div>
+
+            <div class="path-card path-3">
+                <div class="path-badge">Con Đường 3</div>
+                <div class="path-header">
+                    <div class="path-emoji">🌟</div>
+                    <div class="path-title">Câu Chuyện Của Chị Thanh: Trở Thành Đối Tác</div>
+                </div>
+                <div class="path-desc">
+                    <p><strong>Background:</strong> Thanh, 28 tuổi, nhân viên ngân hàng nhưng luôn cảm thấy công việc không có ý nghĩa. Cô có passion về giúp đỡ người khác và đã từng muốn làm coach nhưng không biết bắt đầu từ đâu.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Lựa chọn:</strong> Thanh đăng ký làm CTV ngay sau khóa học. Cô bắt đầu share journey trên Facebook cá nhân, giới thiệu app GEM cho bạn bè và đồng nghiệp. Sau 3 tháng, cô upgrade lên KOL khi đạt 20K followers từ nội dung về phát triển bản thân.</p>
+                    <p style="margin-top: var(--space-sm);"><strong>Kết quả sau 1 năm:</strong> Thanh có thu nhập thụ động 15-25 triệu/tháng từ commission, chưa kể lương chính. Quan trọng hơn, cô cảm thấy có SỨ MỆNH mỗi ngày. "Khi tôi giúp ai đó vượt qua limiting belief, tôi cảm nhận được ý nghĩa sống. Và kỳ lạ là, càng cho đi, tôi càng nhận về nhiều hơn - cả về tinh thần lẫn vật chất."</p>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💎</span> Bạn Thuộc Nhóm Nào?</div>
+                <p>Đức có kỷ luật cao và môi trường tốt - Con đường 1 phù hợp. Hạnh cần thêm công cụ và support - Con đường 2 giúp cô duy trì. Thanh có passion giúp người - Con đường 3 cho cô cả ý nghĩa lẫn thu nhập. Không có con đường nào tốt hơn con đường nào - chỉ có con đường nào PHÙ HỢP VỚI BẠN hơn.</p>
+            </div>
+        </section>
+
+        <!-- KEY TAKEAWAYS SECTION -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> 3 Điểm Cốt Lõi Cần Nhớ</h2>
+
+            <div class="question-grid">
+                <div class="question-item">
+                    <div class="question-number">1</div>
+                    <div class="question-text">
+                        <strong>Kiến Thức Không Đủ - Hệ Thống Mới Quyết Định</strong>
+                        <br><span style="color: var(--text-secondary);">Data cho thấy 73% học viên cảm thấy thay đổi mindset, nhưng chỉ 45% có cải thiện tài chính thực sự. Sự khác biệt nằm ở việc có HỆ THỐNG duy trì (app, cộng đồng, accountability) hay không.</span>
+                    </div>
+                </div>
+                <div class="question-item">
+                    <div class="question-number">2</div>
+                    <div class="question-text">
+                        <strong>Identity Shift Quan Trọng Hơn Kiến Thức</strong>
+                        <br><span style="color: var(--text-secondary);">Thay đổi thực sự xảy ra khi bạn thay đổi cách NHÌN CHÍNH MÌNH - từ "người không giỏi về tiền" thành "người đang làm chủ tài chính", từ "nạn nhân của hoàn cảnh" thành "người sáng tạo thực tại".</span>
+                    </div>
+                </div>
+                <div class="question-item">
+                    <div class="question-number">3</div>
+                    <div class="question-text">
+                        <strong>3 Con Đường - Mỗi Con Đường Đều Valid</strong>
+                        <br><span style="color: var(--text-secondary);">Con đường 1 (Tự Tiếp Tục) cho người có kỷ luật cao. Con đường 2 (Nâng Cấp Công Cụ) cho người cần thêm support. Con đường 3 (Partnership) cho người có passion lan tỏa. Chọn dựa trên hoàn cảnh của BẠN, không phải người khác.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TRANSITION SECTION -->
+        <section class="section">
+            <h2 class="section-title"><span>🔮</span> Bước Tiếp Theo: Chi Tiết Từng Con Đường</h2>
+            <p>Trong bài học này, bạn đã hiểu rõ sự thật về chuyển hóa và 3 con đường trước mặt. Bây giờ bạn cần thông tin chi tiết để đưa ra quyết định: Con đường 2 bao gồm những products và khóa học nào? Con đường 3 có những cấp bậc partnership ra sao và commission thế nào?</p>
+
+            <p>Trong Bài 7.2 - bài cuối cùng của toàn bộ khóa học - chúng ta sẽ đi vào CHI TIẾT CỤ THỂ: danh sách products với giá và công dụng, các khóa học nâng cao, và đặc biệt là chương trình GEM Partnership với 3 tiers (CTV, KOL, Instructor) cùng mức commission và điều kiện cụ thể. Bạn sẽ có đầy đủ thông tin để đưa ra quyết định sáng suốt cho bước tiếp theo của mình.</p>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>✍️</span> Bài Tập Trước Khi Sang Bài Tiếp</div>
+                <p><strong>Trả lời 4 câu hỏi "Khung Quyết Định":</strong></p>
+                <p>1. Tôi có đủ kỷ luật tự thực hành mỗi ngày KHÔNG CÓ hệ thống hỗ trợ không?</p>
+                <p>2. Tôi có sẵn sàng đầu tư thêm để tăng tốc kết quả không?</p>
+                <p>3. Tôi có muốn tạo thu nhập từ việc giúp người khác chuyển hóa không?</p>
+                <p>4. Tôi có tin vào sứ mệnh lan tỏa thịnh vượng không?</p>
+                <p style="margin-top: var(--space-md);">Viết câu trả lời thành thật vào sổ - đây sẽ là compass cho quyết định ở bài tiếp theo.</p>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <p>Bài 7.1 Hoàn Tất! 🦋</p>
+            <p style="margin-top: var(--space-sm);">Tiếp theo: <a href="KHOA_TRIEU_PHU_M7_BAI_02.html">Bài 7.2: Cơ Hội & Lựa Chọn →</a></p>
+            <p style="margin-top: var(--space-lg);">© 2024 GEM Academy by Jennie Uyen Chu</p>
+        </footer>
+
+    </div>
+</body>
+</html>

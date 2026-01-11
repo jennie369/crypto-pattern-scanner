@@ -96,52 +96,38 @@ const OptimizedImage = memo(({
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const shimmerAnim = useRef(new Animated.Value(0)).current;
 
   // Resolve image source
   const imageUri = uri || (typeof source === 'object' ? source.uri : source);
 
-  // Shimmer animation for placeholder
-  useEffect(() => {
-    if (isLoading && showPlaceholder) {
-      const shimmer = Animated.loop(
-        Animated.sequence([
-          Animated.timing(shimmerAnim, {
-            toValue: 1,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-          Animated.timing(shimmerAnim, {
-            toValue: 0,
-            duration: 800,
-            useNativeDriver: true,
-          }),
-        ])
-      );
-      shimmer.start();
-      return () => shimmer.stop();
-    }
-  }, [isLoading, showPlaceholder]);
+  // Check if image was already prefetched - skip loading state if so
+  const wasPrefetched = imageUri && prefetchedUrls.has(imageUri);
 
-  // Prefetch this image if not already done
+  // Initialize fade value to 1 if already prefetched
   useEffect(() => {
-    if (imageUri && !prefetchedUrls.has(imageUri)) {
-      Image.prefetch(imageUri)
-        .then(() => prefetchedUrls.add(imageUri))
-        .catch(() => {});
+    if (wasPrefetched) {
+      fadeAnim.setValue(1);
+      setIsLoading(false);
     }
-  }, [imageUri]);
+  }, [wasPrefetched]);
 
   const handleLoad = (event) => {
     setIsLoading(false);
     setHasError(false);
 
-    // Fade in animation
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 200,
-      useNativeDriver: true,
-    }).start();
+    // Only animate fade-in if not already visible
+    if (fadeAnim._value < 1) {
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }).start();
+    }
+
+    // Mark as prefetched for future renders
+    if (imageUri) {
+      prefetchedUrls.add(imageUri);
+    }
 
     onLoad?.(event);
   };
@@ -155,44 +141,20 @@ const OptimizedImage = memo(({
   // If no valid URI or error, show placeholder
   if (!imageUri || hasError) {
     return (
-      <View style={[styles.placeholder, style]}>
-        <Animated.View
-          style={[
-            styles.shimmer,
-            {
-              opacity: shimmerAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0.2, 0.4],
-              }),
-            },
-          ]}
-        />
-      </View>
+      <View style={[styles.placeholder, style]} />
     );
   }
 
   return (
     <View style={[styles.container, style]}>
-      {/* Shimmer placeholder - shows while loading */}
+      {/* Static placeholder - shows while loading (no animation to save resources) */}
       {isLoading && showPlaceholder && (
-        <View style={[StyleSheet.absoluteFill, styles.placeholder]}>
-          <Animated.View
-            style={[
-              styles.shimmer,
-              {
-                opacity: shimmerAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0.2, 0.5],
-                }),
-              },
-            ]}
-          />
-        </View>
+        <View style={[StyleSheet.absoluteFill, styles.placeholder]} />
       )}
 
       {/* Actual image with fade-in */}
       <Animated.Image
-        source={{ uri: imageUri }}
+        source={{ uri: imageUri, cache: 'force-cache' }}
         style={[
           StyleSheet.absoluteFill,
           { opacity: fadeAnim },
@@ -217,10 +179,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
-  },
-  shimmer: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
 });
 

@@ -2,29 +2,22 @@
  * GEM Mobile - Sponsor Banner Section Component
  * Reusable component for displaying sponsor banners across screens
  *
- * NEW: Supports distributed banner display - banners can be spread throughout
- * the page content instead of all clustered at the top.
+ * NEW: Now uses SponsorBanner wrapper to support all layout types:
+ * - 'compact': Small card-style banner with image on left
+ * - 'post': Post-style banner that mimics a regular forum post
+ * - 'featured': Premium hero-style banner with gradient overlay
  *
  * Usage:
- * - Old way (all banners at top): <SponsorBannerSection screenName="shop" />
- * - New way (distributed): Use useSponsorBanners hook + SponsorBannerCard
+ * - Simple way: <SponsorBannerSection screenName="shop" />
+ * - Distributed: Use useSponsorBanners hook + SponsorBanner component
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  Linking,
-} from 'react-native';
-import { X, Sparkles, ChevronRight } from 'lucide-react-native';
-import { COLORS, SPACING } from '../utils/tokens';
+import { View, StyleSheet } from 'react-native';
+import { SPACING } from '../utils/tokens';
 import { useAuth } from '../contexts/AuthContext';
 import { sponsorBannerService } from '../services/sponsorBannerService';
-import deepLinkHandler from '../services/deepLinkHandler';
-import { navigateToScreen } from '../utils/navigationHelper';
+import SponsorBanner from './SponsorBanner';
 
 /**
  * Custom hook to fetch banners for a screen
@@ -142,55 +135,12 @@ export default function SponsorBannerSection({
   }, [refreshTrigger, loadBanners]);
 
 
-  const handleBannerClick = async (banner) => {
-    console.log('[SponsorBanner] handleBannerClick called!', {
-      bannerId: banner.id,
-      title: banner.title,
-      action_type: banner.action_type,
-      action_value: banner.action_value,
-      hasNavigation: !!navigation,
-    });
-
-    await sponsorBannerService.recordClick(banner.id);
-
-    if (banner.action_type === 'screen' && banner.action_value) {
-      console.log('[SponsorBanner] Navigating to screen:', banner.action_value);
-      navigateToScreen(navigation, banner.action_value);
-    } else if (banner.action_type === 'url' && banner.action_value) {
-      Linking.openURL(banner.action_value);
-    } else if (banner.action_type === 'deeplink' && banner.action_value) {
-      try {
-        let deepLink;
-        if (banner.action_value.startsWith('{')) {
-          deepLink = JSON.parse(banner.action_value);
-        } else if (banner.action_value.startsWith('gem://')) {
-          const url = banner.action_value.replace('gem://', '');
-          const [screen, queryString] = url.split('?');
-          const params = {};
-          if (queryString) {
-            queryString.split('&').forEach(param => {
-              const [key, value] = param.split('=');
-              params[key] = decodeURIComponent(value);
-            });
-          }
-          deepLink = { screen, params };
-        } else {
-          deepLink = { screen: banner.action_value };
-        }
-        deepLinkHandler.processDeepLink(deepLink);
-      } catch (error) {
-        console.error('[SponsorBanner] Deep link parse error:', error);
-        navigateToScreen(navigation, banner.action_value);
-      }
-    }
-  };
-
-  const handleDismissBanner = async (bannerId) => {
+  const handleDismissBanner = useCallback(async (bannerId) => {
     if (user?.id) {
       await sponsorBannerService.dismissBanner(user.id, bannerId);
       setBanners(prev => prev.filter(b => b.id !== bannerId));
     }
-  };
+  }, [user?.id]);
 
   // Expose refresh method
   useEffect(() => {
@@ -203,56 +153,17 @@ export default function SponsorBannerSection({
     return null;
   }
 
+  // Use SponsorBanner wrapper to render each banner with proper layout_type
   return (
     <View style={styles.container}>
       {banners.map((banner) => (
-        <TouchableOpacity
+        <SponsorBanner
           key={banner.id}
-          style={[styles.banner, { backgroundColor: banner.background_color || '#1a0b2e' }]}
-          onPress={() => handleBannerClick(banner)}
-          activeOpacity={0.9}
-        >
-          {banner.is_dismissible && (
-            <TouchableOpacity
-              style={styles.dismissButton}
-              onPress={() => handleDismissBanner(banner.id)}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            >
-              <X size={16} color={COLORS.textMuted} />
-            </TouchableOpacity>
-          )}
-          <View style={styles.content}>
-            <View style={styles.textContent}>
-              <View style={styles.titleRow}>
-                <Sparkles size={18} color={banner.accent_color || COLORS.gold} />
-                <Text style={[styles.title, { color: banner.text_color || '#FFFFFF' }]}>
-                  {banner.title}
-                </Text>
-              </View>
-              {banner.subtitle && (
-                <Text
-                  style={[styles.subtitle, { color: banner.text_color || '#FFFFFF' }]}
-                  numberOfLines={2}
-                >
-                  {banner.subtitle}
-                </Text>
-              )}
-              {banner.action_label && (
-                <View style={[styles.button, { backgroundColor: banner.accent_color || COLORS.gold }]}>
-                  <Text style={styles.buttonText}>{banner.action_label}</Text>
-                  <ChevronRight size={14} color="#000" />
-                </View>
-              )}
-            </View>
-            {banner.image_url && (
-              <Image
-                source={{ uri: banner.image_url }}
-                style={styles.image}
-                resizeMode="cover"
-              />
-            )}
-          </View>
-        </TouchableOpacity>
+          banner={banner}
+          navigation={navigation}
+          userId={user?.id}
+          onDismiss={handleDismissBanner}
+        />
       ))}
     </View>
   );
@@ -260,63 +171,7 @@ export default function SponsorBannerSection({
 
 const styles = StyleSheet.create({
   container: {
-    padding: SPACING.lg,
-    gap: SPACING.md,
-  },
-  banner: {
-    borderRadius: 16,
-    overflow: 'hidden',
-    padding: SPACING.lg,
-    position: 'relative',
-  },
-  dismissButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    padding: 4,
-    zIndex: 10,
-  },
-  content: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  textContent: {
-    flex: 1,
-    paddingRight: SPACING.md,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 6,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  subtitle: {
-    fontSize: 13,
-    opacity: 0.9,
-    marginBottom: SPACING.sm,
-  },
-  button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    gap: 4,
-  },
-  buttonText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#000',
-  },
-  image: {
-    width: 80,
-    height: 80,
-    borderRadius: 12,
+    paddingVertical: SPACING.sm,
+    gap: SPACING.sm,
   },
 });

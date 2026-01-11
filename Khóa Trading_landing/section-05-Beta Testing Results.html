@@ -1,0 +1,1007 @@
+
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 5 - Beta Testing Results | GEM Trading Academy (Isolated) </title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&amp;family=Noto+Sans+Display:wght@300;400;600;700&amp;display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    
+    <style>
+        /* ==================== 
+           CẤU HÌNH DỄ CHỈNH SỬA - ĐẶT Ở ĐẦU FILE
+           Chỉnh sửa các giá trị này để customize section
+        ==================== */
+        :root {
+            /* COLORS - Dark Gradient Section 5 (Burgundy → Dark Navy) */
+            --section-5-start: #5C0A14;     /* USP ending - seamless */
+            --section-5-trans-1: #4A0A12;   /* Darker burgundy */
+            --section-5-trans-2: #3D0A10;   /* Deep burgundy */
+            --section-5-mid-1: #30090E;     /* Very dark burgundy */
+            --section-5-mid-2: #25080C;     /* Burgundy to dark */
+            --section-5-mid-3: #1A0608;     /* Dark transition */
+            --section-5-bronze: #150510;    /* Deep dark */
+            --section-5-light: #12051A;     /* Dark purple hint */
+            --section-5-peak: #0F0820;      /* Navy purple */
+            --section-5-medium: #0D0A25;    /* Deep navy */
+            --section-5-end: #0A0D2A;       /* Dark navy ending */
+            
+            /* Brand Colors */
+            --primary-burgundy: #9C0612;
+            --primary-dark: #640A0C;
+            --gold-accent: #FFBD59;
+            --gold-light: #DEBC81;
+            --text-light: #FFFFFF;
+            --text-cream: #F5E6D3;
+            --text-dark: #2D3748;
+            
+            /* Typography */
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+            
+            /* SECTION CONTENT - Dễ chỉnh sửa */
+            --section-badge: '<i data-lucide="check-circle" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 5px;"></i> BETA TESTING RESULTS';
+            --section-title: '50 Người Thử, 78% Chính Xác';
+            --section-subtitle: 'Từ tháng 8 đến tháng 10/2024, chúng tôi đã thử nghiệm Frequency Trading Method với 50 traders. Kết quả vượt mọi kỳ vọng.';
+            
+            /* STATISTICS */
+            --stat-accuracy: '78%';
+            --stat-participants: '50';
+            --stat-profitable: '39/50';
+            --stat-avg-return: '+24.8%';
+            --stat-best-trader: '+187%';
+            --stat-win-trades: '892/1142';
+            
+            /* IMAGES - Thay đổi URL ở đây */
+            --bg-pattern: 'https://via.placeholder.com/1920x1080/CB9B67/FFFFFF?text=Gold+Background+Pattern';
+            --testimonial-avatar-1: 'https://via.placeholder.com/100x100/9C0612/FFFFFF?text=HV1';
+            --testimonial-avatar-2: 'https://via.placeholder.com/100x100/9C0612/FFFFFF?text=HV2';
+            --testimonial-avatar-3: 'https://via.placeholder.com/100x100/9C0612/FFFFFF?text=HV3';
+            --testimonial-avatar-4: 'https://via.placeholder.com/100x100/9C0612/FFFFFF?text=HV4';
+            --pnl-screenshot-1: 'https://via.placeholder.com/600x400/1A1A1A/FFBD59?text=P%26L+Screenshot+1';
+            --pnl-screenshot-2: 'https://via.placeholder.com/600x400/1A1A1A/FFBD59?text=P%26L+Screenshot+2';
+            --pnl-screenshot-3: 'https://via.placeholder.com/600x400/1A1A1A/FFBD59?text=P%26L+Screenshot+3';
+            
+            /* VIDEO EMBEDS - Thêm URL video thật */
+            --video-embed-1: 'https://www.youtube.com/embed/dQw4w9WgXcQ';
+            --video-embed-2: 'https://www.youtube.com/embed/dQw4w9WgXcQ';
+            --video-embed-3: 'https://www.youtube.com/embed/dQw4w9WgXcQ';
+            
+            /* LINKS */
+            --cta-link: '#register';
+            --telegram-link: 'https://t.me/gemtrading';
+        }
+        
+        /* ==================== 
+           BASE STYLES
+        ==================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            color: var(--text-light);
+            overflow-x: hidden;
+        }
+        
+        /* ==================== 
+           SECTION 5 - GRADIENT BACKGROUND
+           Direction: 180deg (Top to Bottom)
+           Min-height: 90vh
+        ==================== */
+        .section-5 {
+            position: relative;
+            min-height: 90vh;
+            padding: 100px 20px;
+            background: linear-gradient(180deg,
+                #5C0A14 0%,         /* USP ending color - SEAMLESS TRANSITION */
+                #4A0A12 10%,        /* Darker burgundy */
+                #3D0A10 20%,        /* Deep burgundy */
+                #30090E 30%,        /* Very dark burgundy */
+                #25080C 40%,        /* Burgundy to dark */
+                #1A0608 50%,        /* Dark transition */
+                #150510 60%,        /* Deep dark */
+                #12051A 70%,        /* Dark purple hint */
+                #0F0820 80%,        /* Navy purple */
+                #0D0A25 90%,        /* Deep navy */
+                #0A0D2A 100%        /* Dark navy ending */
+            );
+            overflow: hidden;
+        }
+        
+        /* Background Pattern Overlay */
+        .section-5::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url(var(--bg-pattern));
+            background-size: cover;
+            background-position: center;
+            opacity: 0.05;
+            pointer-events: none;
+        }
+        
+        /* Glow Effects */
+        .section-5::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(255, 189, 89, 0.3) 0%, transparent 70%);
+            filter: blur(120px);
+            pointer-events: none;
+            animation: pulseGlow 8s ease-in-out infinite;
+        }
+        
+        @keyframes pulseGlow {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.5; }
+        }
+        
+        /* Container */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* ==================== 
+           SECTION HEADER
+        ==================== */
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+            animation: fadeInUp 1s ease-out;
+        }
+        
+        .section-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.5));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--gold-accent);
+            color: var(--gold-accent);
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 900;
+            color: var(--gold-accent);
+            line-height: 1.2;
+            margin-bottom: 25px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .section-subtitle {
+            font-size: clamp(1.1rem, 2vw, 1.3rem);
+            color: var(--text-cream);
+            font-weight: 400;
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.8;
+            opacity: 0.95;
+        }
+        
+        /* ==================== 
+           STATISTICS OVERVIEW
+        ==================== */
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-bottom: 80px;
+            animation: fadeInUp 1s ease-out 0.3s backwards;
+        }
+        
+        .stat-card {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(22px);
+            border: 3px solid rgba(255, 189, 89, 0.4);
+            border-radius: 30px;
+            padding: 40px 30px;
+            text-align: center;
+            transition: all 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            border-color: var(--gold-accent);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 
+                        0 0 40px rgba(255, 189, 89, 0.5);
+        }
+        
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+        
+        .stat-number {
+            font-family: var(--font-heading);
+            font-size: clamp(2.5rem, 4vw, 3.5rem);
+            font-weight: 900;
+            color: var(--gold-accent);
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px rgba(255, 189, 89, 0.5);
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            color: var(--text-light);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .stat-description {
+            font-size: 0.9rem;
+            color: var(--text-cream);
+            margin-top: 10px;
+            opacity: 0.8;
+        }
+        
+        /* ==================== 
+           BETA STORY
+        ==================== */
+        .beta-story {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(22px);
+            border: 3px solid rgba(255, 189, 89, 0.3);
+            border-radius: 30px;
+            padding: 60px 50px;
+            margin-bottom: 80px;
+            animation: fadeInUp 1s ease-out 0.5s backwards;
+        }
+        
+        .beta-story-title {
+            font-family: var(--font-heading);
+            font-size: clamp(1.8rem, 3vw, 2.5rem);
+            font-weight: 800;
+            color: var(--gold-accent);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .beta-story-content {
+            font-size: 1.1rem;
+            line-height: 2;
+            color: var(--text-cream);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .beta-story-content p {
+            margin-bottom: 20px;
+        }
+        
+        .highlight {
+            color: var(--gold-accent);
+            font-weight: 700;
+        }
+        
+        /* ==================== 
+           P&L SCREENSHOTS GRID
+        ==================== */
+        .pnl-section {
+            margin-bottom: 80px;
+        }
+        
+        .pnl-section-title {
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 3.5vw, 3rem);
+            font-weight: 800;
+            color: var(--gold-accent);
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeInUp 1s ease-out 0.7s backwards;
+        }
+        
+        .pnl-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            animation: fadeInUp 1s ease-out 0.9s backwards;
+        }
+        
+        .pnl-card {
+            background: rgba(0, 0, 0, 0.9);
+            border: 3px solid rgba(255, 189, 89, 0.4);
+            border-radius: 20px;
+            padding: 20px;
+            transition: all 0.5s ease;
+            overflow: hidden;
+        }
+        
+        .pnl-card:hover {
+            transform: translateY(-15px) scale(1.03);
+            border-color: var(--gold-accent);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8),
+                        0 0 50px rgba(255, 189, 89, 0.6);
+        }
+        
+        /* HÌNH ẢNH: P&L Screenshot */
+        /* Kích thước khuyến nghị: 600x400px */
+        /* Format: JPG/PNG/WebP, <200KB */
+        .pnl-image {
+            width: 100%;
+            height: auto;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            transition: transform 0.5s ease;
+        }
+        
+        .pnl-card:hover .pnl-image {
+            transform: scale(1.05);
+        }
+        
+        .pnl-info {
+            padding: 10px 0;
+        }
+        
+        .pnl-trader-name {
+            font-family: var(--font-heading);
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            margin-bottom: 10px;
+        }
+        
+        .pnl-stats {
+            font-size: 0.95rem;
+            color: var(--text-cream);
+            line-height: 1.8;
+        }
+        
+        .pnl-stats strong {
+            color: var(--gold-accent);
+        }
+        
+        /* ==================== 
+           VIDEO TESTIMONIALS
+        ==================== */
+        .testimonials-section {
+            margin-bottom: 80px;
+        }
+        
+        .testimonials-title {
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 3.5vw, 3rem);
+            font-weight: 800;
+            color: var(--gold-accent);
+            text-align: center;
+            margin-bottom: 20px;
+            animation: fadeInUp 1s ease-out 1.1s backwards;
+        }
+
+        .testimonials-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-cream);
+            text-align: center;
+            margin-bottom: 50px;
+            opacity: 0.95;
+        }
+        
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 40px;
+            animation: fadeInUp 1s ease-out 1.3s backwards;
+        }
+        
+        .testimonial-card {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(22px);
+            border: 3px solid rgba(255, 189, 89, 0.3);
+            border-radius: 30px;
+            padding: 30px;
+            transition: all 0.5s ease;
+        }
+        
+        .testimonial-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            border-color: var(--gold-accent);
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8),
+                        0 0 60px rgba(255, 189, 89, 0.5);
+        }
+        
+        /* Video Container */
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            margin-bottom: 20px;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #000;
+        }
+        
+        /* HÌNH ẢNH/VIDEO: Testimonial Video Embed */
+        /* Kích thước: 16:9 aspect ratio */
+        /* Thay URL video trong :root variables */
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .testimonial-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        /* HÌNH ẢNH: Avatar học viên */
+        /* Kích thước khuyến nghị: 100x100px */
+        /* Format: JPG/PNG, <50KB */
+        .testimonial-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid var(--gold-accent);
+            object-fit: cover;
+        }
+        
+        .testimonial-name {
+            font-family: var(--font-heading);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+        }
+        
+        .testimonial-role {
+            font-size: 0.9rem;
+            color: var(--text-cream);
+            opacity: 0.8;
+        }
+        
+        .testimonial-quote {
+            font-size: 1rem;
+            color: var(--text-cream);
+            line-height: 1.8;
+            font-style: italic;
+            padding-left: 20px;
+            border-left: 3px solid var(--gold-accent);
+        }
+        
+        /* ==================== 
+           INTERACTIVE STATS DASHBOARD
+        ==================== */
+        .stats-dashboard {
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(30px);
+            border: 4px solid rgba(255, 189, 89, 0.5);
+            border-radius: 30px;
+            padding: 60px 50px;
+            margin-bottom: 80px;
+            animation: fadeInUp 1s ease-out 1.5s backwards;
+        }
+        
+        .dashboard-title {
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 3.5vw, 3rem);
+            font-weight: 800;
+            color: var(--gold-accent);
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+        
+        .dashboard-item {
+            background: linear-gradient(135deg, rgba(156, 6, 18, 0.3), rgba(100, 10, 12, 0.2));
+            border: 2px solid rgba(255, 189, 89, 0.3);
+            border-radius: 20px;
+            padding: 30px 25px;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .dashboard-item::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 189, 89, 0.2), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        
+        .dashboard-item:hover {
+            transform: scale(1.05);
+            border-color: var(--gold-accent);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6),
+                        0 0 30px rgba(255, 189, 89, 0.4);
+        }
+        
+        .dashboard-item:hover::before {
+            opacity: 1;
+        }
+        
+        .dashboard-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 0 10px rgba(255, 189, 89, 0.5));
+        }
+        
+        .dashboard-metric {
+            font-family: var(--font-heading);
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--gold-accent);
+            margin-bottom: 10px;
+        }
+        
+        .dashboard-label {
+            font-size: 1rem;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+        
+        .dashboard-detail {
+            font-size: 0.85rem;
+            color: var(--text-cream);
+            margin-top: 10px;
+            opacity: 0.8;
+            line-height: 1.6;
+        }
+        
+        /* ==================== 
+           FINAL CTA
+        ==================== */
+        .final-cta {
+            text-align: center;
+            padding: 60px 30px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            border: 3px solid rgba(255, 189, 89, 0.4);
+            border-radius: 30px;
+            animation: fadeInUp 1s ease-out 1.7s backwards;
+        }
+        
+        .cta-title {
+            font-family: var(--font-heading);
+            font-size: clamp(1.8rem, 3vw, 2.5rem);
+            font-weight: 800;
+            color: var(--gold-accent);
+            margin-bottom: 25px;
+        }
+        
+        .cta-description {
+            font-size: 1.1rem;
+            color: var(--text-cream);
+            margin-bottom: 40px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.8;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold-accent), var(--gold-light));
+            color: var(--text-dark);
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 20px 50px;
+            border: none;
+            border-radius: 50px;
+            text-transform: uppercase;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6),
+                        0 0 40px rgba(255, 189, 89, 0.8);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--gold-accent);
+            border: 2px solid var(--gold-accent);
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 18px 50px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.4s ease;
+        }
+        
+        .btn-secondary:hover {
+            background: var(--gold-accent);
+            color: var(--text-dark);
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* ==================== 
+           ANIMATIONS
+        ==================== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* ==================== 
+           RESPONSIVE DESIGN
+        ==================== */
+        @media (max-width: 968px) {
+            .section-5 {
+                padding: 80px 20px;
+            }
+            
+            .stats-overview {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .pnl-grid,
+            .testimonials-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .beta-story,
+            .stats-dashboard,
+            .final-cta {
+                padding: 40px 30px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .section-5 {
+                padding: 60px 15px;
+                min-height: auto;
+            }
+            
+            .stats-overview,
+            .pnl-grid,
+            .testimonials-grid,
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+            
+            .section-badge {
+                font-size: 0.75rem;
+                padding: 10px 25px;
+            }
+            
+            .beta-story,
+            .stats-dashboard,
+            .final-cta {
+                padding: 30px 20px;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+
+
+    <!-- ==================== 
+         SECTION 5: BETA TESTING RESULTS
+         
+         CHỈNH SỬA:
+         - Text: Thay đổi content trong các thẻ HTML
+         - Images: Thay URL trong :root variables ở đầu file
+         - Stats: Cập nhật số liệu trong :root variables
+         - Links: Thay đổi --cta-link và --telegram-link trong :root
+         - Colors: Điều chỉnh gradient colors nếu cần
+         - Videos: Thay URL video embed trong :root variables
+    ==================== -->
+    
+    <section class="section-5">
+        <div class="container">
+            
+            <!-- Section Header -->
+            <div class="section-header">
+                <div class="section-badge"><i data-lucide="check-circle" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle; margin-right: 5px;"></i> KẾT QUẢ THỬ NGHIỆM</div>
+                <h2 class="section-title">50 Người Thử, 78% Chính Xác</h2>
+                <p class="section-subtitle">
+                    Từ tháng 8 đến tháng 10/2024, chúng tôi đã thử nghiệm Frequency Trading Method với 50 traders. 
+                    Kết quả vượt mọi kỳ vọng - đây là những con số thật, từ những người thật.
+                </p>
+            </div>
+            
+            <!-- Statistics Overview -->
+            <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk857d2c-qftm5a/1768123635774_zc2b4s_sec10-01.jpg.webp" alt="sec10-01-jpg-63t2" style="width: 100%; max-width: 800px; height: auto; display: block; margin: 0px auto; padding: 0px; border-radius: 12px; box-shadow: rgba(0, 0, 0, 0.3) 0px 4px 20px, rgba(0, 0, 0, 0.2) 0px 8px 32px; cursor: grab;"><div class="stats-overview">
+                <div class="stat-card">
+                    <div class="stat-number">78%</div>
+                    <div class="stat-label">Win Rate Trung Bình</div>
+                    <div class="stat-description">Cao hơn 28% so với mục tiêu ban đầu (50%)</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">50</div>
+                    <div class="stat-label">Người Tham Gia</div>
+                    <div class="stat-description">Từ người mới đến trader 3+ năm kinh nghiệm</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">39/50</div>
+                    <div class="stat-label">Trader Có Lãi</div>
+                    <div class="stat-description">78% học viên có lãi sau 90 ngày</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">+24.8%</div>
+                    <div class="stat-label">ROI Trung Bình</div>
+                    <div class="stat-description">Trong 90 ngày thử nghiệm</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">+187%</div>
+                    <div class="stat-label">Trader Xuất Sắc Nhất</div>
+                    <div class="stat-description">Anh Minh T. - từ $500 lên $1,435 trong 90 ngày</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">892/1142</div>
+                    <div class="stat-label">Win/Total Trades</div>
+                    <div class="stat-description">Tổng cộng 1,142 trades thực hiện bởi 50 người</div>
+                </div>
+            </div>
+            
+            <!-- Beta Story -->
+            <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk857d2c-qftm5a/1768124500977_bihqgp_sec05-02.jpg.webp" alt="sec05-02-jpg-y5br" style="width: 100%; max-width: 800px; height: auto; display: block; margin: 0px auto; padding: 0px; border-radius: 12px; box-shadow: rgba(0, 0, 0, 0.3) 0px 4px 20px, rgba(0, 0, 0, 0.2) 0px 8px 32px;"><div class="beta-story">
+                <h3 class="beta-story-title">🧪 Câu Chuyện Beta Testing</h3>
+                <div class="beta-story-content">
+                    <p>
+                        <span class="highlight">Tháng 8/2024</span>, chúng tôi mở đợt beta testing đầu tiên với 50 traders. 
+                        Không marketing, không hứa hẹn gì lớn lao - chỉ là lời mời: 
+                        <em>"Dùng thử method này, báo cáo kết quả thật, và cho chúng tôi biết nó có work hay không."</em>
+                    </p>
+                    
+                    <p>
+                        50 người tham gia đến từ <span class="highlight">khắp Việt Nam</span>: Hà Nội, Sài Gòn, Đà Nẵng, Nha Trang. 
+                        Có người chưa bao giờ trade, có người đã 3 năm kinh nghiệm nhưng vẫn lỗ. 
+                        Có người vốn $200, có người vốn $5,000. 
+                    </p>
+                    
+                    <p>
+                        Trong <span class="highlight">90 ngày</span>, họ thực hiện <span class="highlight">1,142 trades</span>. 
+                        Mỗi trade được ghi chép, screenshot, review. 
+                        Không có gian lận, không chọn lọc - chỉ là giao dịch thật với tiền thật.
+                    </p>
+                    
+                    <p>
+                        Kết quả? <span class="highlight">78% win rate</span> trung bình. 
+                        39/50 traders profitable. 
+                        ROI trung bình +24.8%. 
+                        Best performer: +187% trong 90 ngày.
+                    </p>
+                    
+                    <p>
+                        <strong>Đây không phải là "kết quả quảng cáo". Đây là bằng chứng thực tế.</strong> 
+                        Và đây là lý do tại sao chúng tôi tự tin mở ra khóa học này cho mọi người.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- P&L Screenshots -->
+            <div class="pnl-section">
+                
+                
+            </div>
+            
+            <!-- Video Testimonials -->
+            <div class="testimonials-section">
+                <h3 class="testimonials-title">🎥 Lời Chứng Thực Từ Người Thử Nghiệm</h3>
+                <p class="testimonials-subtitle">
+                    Họ nói gì về Frequency Trading Method? Nghe từ chính họ.
+                </p>
+                
+                <div class="testimonials-grid">
+                    <!-- Testimonial 1 -->
+                    <div class="testimonial-card">
+                        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk857d2c-qftm5a/1768124102637_ycyl8h_gemral_20260111_163448_01.webp" alt="gemral-20260111-163448-01-gjb7" style="width: 100%; max-width: 800px; height: auto; display: block; margin: 0px auto; padding: 0px; border-radius: 12px; box-shadow: rgba(0, 0, 0, 0.3) 0px 4px 20px, rgba(0, 0, 0, 0.2) 0px 8px 32px; cursor: grab;">
+                        <div class="testimonial-info">
+                            <!-- HÌNH ẢNH: Avatar học viên -->
+                            <!-- Thay đổi: Cập nhật --testimonial-avatar-1 trong :root -->
+                            
+                            <div>
+                                <div class="testimonial-name">Anh Minh T.</div>
+                                <div class="testimonial-role">Beta Tester - Hà Nội</div>
+                            </div>
+                        </div>
+                        <p class="testimonial-quote">
+                            "Từ lỗ 60% tài khoản 3 năm liền, đến có lãi 82% win rate trong 90 ngày.
+                            Phương Pháp Tần Số đã thay đổi cách tôi nhìn về giao dịch. Không còn đoán mò,
+                            chỉ là theo tín hiệu và thực thi."
+                        </p>
+                    </div>
+                    
+                    <!-- Testimonial 2 -->
+                    <div class="testimonial-card">
+                        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk857d2c-qftm5a/1768124103969_bm6j8s_gemral_20260111_163448_02.webp" alt="gemral-20260111-163448-02-9zu5" style="width: 100%; max-width: 800px; height: auto; display: block; margin: 0px auto; padding: 0px; border-radius: 12px; box-shadow: rgba(0, 0, 0, 0.3) 0px 4px 20px, rgba(0, 0, 0, 0.2) 0px 8px 32px; cursor: grab;">
+                        <div class="testimonial-info">
+                            
+                            <div>
+                                <div class="testimonial-name">Chị Linh N.</div>
+                                <div class="testimonial-role">Beta Tester - TP.HCM</div>
+                            </div>
+                        </div>
+                        <p class="testimonial-quote">
+                            "Tôi là người hoàn toàn mới với crypto. 90 ngày trước tôi không biết gì
+                            về mẫu hình, tần số, hội tụ. Giờ tôi có lãi 76% win rate.
+                            Phương pháp này không cần thiên tài - chỉ cần kiên nhẫn và làm theo hệ thống."
+                        </p>
+                    </div>
+                    
+                    <!-- Testimonial 3 -->
+                    <div class="testimonial-card">
+                        <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk857d2c-qftm5a/1768124101058_6ch135_gemral_20260111_163448_03.webp" alt="gemral-20260111-163448-03-weea" style="width: 100%; max-width: 800px; height: auto; display: block; margin: 0px auto; padding: 0px; border-radius: 12px; box-shadow: rgba(0, 0, 0, 0.3) 0px 4px 20px, rgba(0, 0, 0, 0.2) 0px 8px 32px; cursor: grab;">
+                        <div class="testimonial-info">
+                            
+                            <div>
+                                <div class="testimonial-name">Anh Tuấn P.</div>
+                                <div class="testimonial-role">Beta Tester - Đà Nẵng</div>
+                            </div>
+                        </div>
+                        <p class="testimonial-quote">
+                            "Điều tuyệt nhất? Cộng đồng hỗ trợ. Khi tôi bối rối với một pattern, 
+                            có 49 người khác và mentor team giúp đỡ. Beta testing không chỉ là 
+                            học trading - là tìm được một gia đình trader."
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Interactive Stats Dashboard -->
+            <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk857d2c-qftm5a/1768124779298_amr1ht_sec05-01.jpg.webp" alt="sec05-01-jpg-2504" style="width: 100%; max-width: 800px; height: auto; display: block; margin: 0px auto; padding: 0px; border-radius: 12px; box-shadow: rgba(0, 0, 0, 0.3) 0px 4px 20px, rgba(0, 0, 0, 0.2) 0px 8px 32px;"><div class="stats-dashboard">
+                <h3 class="dashboard-title"><i data-lucide="trending-up" style="width: 28px; height: 28px; display: inline-block; vertical-align: middle; margin-right: 10px;"></i> Chi Tiết Thống Kê Beta Testing</h3>
+                <div class="dashboard-grid">
+                    <div class="dashboard-item">
+                        <i data-lucide="target" class="dashboard-icon" style="width: 64px; height: 64px; display: block; margin: 0 auto; color: var(--gold-accent);"></i>
+                        <div class="dashboard-metric">78%</div>
+                        <div class="dashboard-label">Win Rate Trung Bình</div>
+                        <div class="dashboard-detail">
+                            Cao hơn 28% so với mục tiêu.
+                            Khoảng: 62% (thấp nhất) - 87% (cao nhất)
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-item">
+                        <i data-lucide="dollar-sign" class="dashboard-icon" style="width: 64px; height: 64px; display: block; margin: 0 auto; color: var(--gold-accent);"></i>
+                        <div class="dashboard-metric">+24.8%</div>
+                        <div class="dashboard-label">ROI Trung Bình 90 Ngày</div>
+                        <div class="dashboard-detail">
+                            Tốt nhất: +187% (Anh Minh T.)
+                            Kém nhất: -8% (2 trader không theo hệ thống)
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-item">
+                        <div class="dashboard-icon">👥</div>
+                        <div class="dashboard-metric">39/50</div>
+                        <div class="dashboard-label">Trader Có Lãi</div>
+                        <div class="dashboard-detail">
+                            78% tỷ lệ có lãi.
+                            11 trader hòa vốn hoặc nhẹ lỗ (do không theo đúng phương pháp)
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-item">
+                        <i data-lucide="bar-chart-3" class="dashboard-icon" style="width: 64px; height: 64px; display: block; margin: 0 auto; color: var(--gold-accent);"></i>
+                        <div class="dashboard-metric">1,142</div>
+                        <div class="dashboard-label">Tổng Số Lệnh</div>
+                        <div class="dashboard-detail">
+                            Thắng: 892 | Thua: 250
+                            TB 22.8 lệnh/trader trong 90 ngày
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-item">
+                        <div class="dashboard-icon">⏱️</div>
+                        <div class="dashboard-metric">2.4h</div>
+                        <div class="dashboard-label">Thời Gian Màn Hình TB/Ngày</div>
+                        <div class="dashboard-detail">
+                            Phương pháp không cần nhìn vào biểu đồ cả ngày.
+                            Máy quét + tín hiệu = làm ít, kiếm nhiều
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-item">
+                        <i data-lucide="flame" class="dashboard-icon" style="width: 64px; height: 64px; display: block; margin: 0 auto; color: var(--gold-accent);"></i>
+                        <div class="dashboard-metric">92%</div>
+                        <div class="dashboard-label">Tỷ Lệ Hoàn Thành</div>
+                        <div class="dashboard-detail">
+                            46/50 hoàn thành đầy đủ hành trình 90 ngày.
+                            4 người bỏ cuộc do lý do cá nhân (không phải phương pháp)
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Final CTA -->
+            <div class="final-cta">
+                <h3 class="cta-title">Bạn Muốn Là Người Tiếp Theo Với 78% Win Rate?</h3>
+                <p class="cta-description">
+                    Beta testing đã kết thúc. Bây giờ là lượt của bạn. 
+                    Tham gia Frequency Trading Method và trở thành trader có lãi trong 90 ngày.
+                </p>
+                <div class="cta-buttons">
+                    <a href="#pricing" class="btn-primary">Xem Bảng Giá Khóa Học</a>
+                    <a href="https://t.me/gemtrading" class="btn-secondary">Tham Gia Cộng Đồng Telegram</a>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+    
+<script style="max-height: 2000px;" class="">
+        lucide.createIcons();
+    </script>
+

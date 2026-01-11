@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 0.1: Chào Mừng - Hành Trình Về Với Tình Yêu | Khóa Tần Số Tình Yêu</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==================== VARIABLES ==================== */
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        /* ==================== BACKGROUND ==================== */
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--burgundy); bottom: -50px; right: 20%; }
+
+        /* ==================== CONTAINER ==================== */
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container {
+                padding: 0;
+            }
+        }
+
+        /* ==================== HEADER ==================== */
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+        }
+        .lesson-chapter {
+            font-size: 0.9rem;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-lg);
+            flex-wrap: wrap;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        /* ==================== SECTION ==================== */
+        .section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section {
+                padding: 0;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .section-title {
+                padding: var(--space-lg) 16px var(--space-md) 16px;
+                margin-bottom: 0;
+            }
+        }
+
+        .section > p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .section > p {
+                padding: 0 16px;
+            }
+        }
+
+        .section > ul, .section > ol {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .section > ul, .section > ol {
+                padding-left: calc(16px + 1.5em);
+                padding-right: 16px;
+            }
+        }
+        .section li { margin-bottom: var(--space-sm); }
+
+        /* ==================== HIGHLIGHT BOXES ==================== */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box-title {
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .highlight-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .highlight-box p:last-child { margin-bottom: 0; }
+        .highlight-box ul { color: var(--text-secondary); padding-left: 1.5em; margin-top: var(--space-sm); }
+        .highlight-box li { margin-bottom: var(--space-xs); }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .definition-box-title {
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .definition-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .definition-box p:last-child { margin-bottom: 0; }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(156, 6, 18, 0.05));
+            border: 1px solid rgba(156, 6, 18, 0.4);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .warning-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--burgundy);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .warning-box-title {
+            font-weight: 700;
+            color: var(--burgundy-light);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .warning-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .warning-box p:last-child { margin-bottom: 0; }
+        .warning-box ul { color: var(--text-secondary); padding-left: 1.5em; margin-top: var(--space-sm); }
+
+        .success-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05));
+            border: 1px solid rgba(0, 200, 83, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .success-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .success-box-title {
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .success-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .success-box p:last-child { margin-bottom: 0; }
+
+        .quote-box {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05));
+            border: 1px solid rgba(106, 91, 255, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .quote-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .quote-box-title {
+            font-weight: 700;
+            color: var(--purple);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .quote-box blockquote {
+            color: var(--text-secondary);
+            font-style: italic;
+            font-size: 1.1rem;
+            margin-bottom: var(--space-sm);
+        }
+        .quote-box .quote-author {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* ==================== IMAGE CONTAINER ==================== */
+        .image-container {
+            margin: var(--space-xl) 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-container {
+                margin: var(--space-md) 0;
+                border-radius: 0;
+                border: none;
+            }
+        }
+        .image-caption {
+            padding: var(--space-sm);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .image-caption {
+                padding: var(--space-sm) 16px;
+            }
+        }
+
+        /* ==================== FLOW STEPS ==================== */
+        .flow-steps {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .flow-steps {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .flow-step {
+            display: flex;
+            gap: var(--space-md);
+            align-items: flex-start;
+            padding: var(--space-md);
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .flow-step {
+                padding: var(--space-md) 16px;
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+            }
+        }
+        @media (min-width: 601px) {
+            .flow-step:hover {
+                border-color: var(--gold);
+                transform: translateX(8px);
+            }
+        }
+        .flow-step-number {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--navy-dark);
+        }
+        .flow-step-content { flex: 1; }
+        .flow-step-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+        }
+        .flow-step-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* ==================== STATS GRID ==================== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .stats-grid {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .stat-card {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-md);
+            }
+        }
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--gold), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        @media (max-width: 600px) {
+            .stat-value { font-size: 1.25rem; }
+        }
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        /* ==================== FORMULA BOX ==================== */
+        .formula-box {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05));
+            border: 2px solid var(--purple);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .formula-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .formula-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--purple);
+            margin-bottom: var(--space-md);
+        }
+        .formula-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .formula-item {
+            background: var(--bg-card);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--space-sm);
+            border: 1px solid var(--glass-border);
+            font-weight: 600;
+        }
+        .formula-operator {
+            color: var(--gold);
+            font-size: 1.25rem;
+        }
+
+        /* ==================== CHECKLIST ==================== */
+        .checklist {
+            list-style: none;
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .checklist {
+                margin: var(--space-md) 0;
+                background: var(--glass-border);
+            }
+        }
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .checklist-item {
+                padding: var(--space-md) 16px;
+                border: none;
+                border-radius: 0;
+                margin-bottom: 0;
+                border-left: 4px solid var(--gold);
+            }
+        }
+        .checklist-icon {
+            width: 24px;
+            height: 24px;
+            min-width: 24px;
+            background: var(--glass-bg);
+            border: 2px solid var(--gold);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gold);
+            font-size: 0.8rem;
+        }
+        .checklist-text { color: var(--text-secondary); flex: 1; }
+
+        /* ==================== SUMMARY BOX ==================== */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02));
+            border: 2px solid var(--gold);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .summary-list { list-style: none; }
+        .summary-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-list li::before {
+            content: "✓";
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        /* ==================== QA SECTION ==================== */
+        .qa-item {
+            margin-bottom: var(--space-lg);
+        }
+        .qa-question {
+            color: var(--cyan);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+        }
+        .qa-answer {
+            color: var(--text-secondary);
+            padding-left: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .qa-item {
+                padding: 0 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>💕</span>
+                <span>Module 0</span>
+            </div>
+            <div class="lesson-chapter">Chapter 0 - Khởi Đầu Tình Yêu Đích Thực</div>
+            <h1 class="lesson-title">Chào Mừng - Hành Trình Về Với Tình Yêu</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 0.1</span></div>
+                <div class="meta-item"><span>⏱️</span><span>12 phút đọc</span></div>
+            </div>
+        </header>
+
+        <!-- PHẦN 1: OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>💝</span> Bạn Có Từng Cảm Thấy Như Vậy?</h2>
+
+            <p>Bạn đã bao giờ tự hỏi tại sao những người xung quanh dường như dễ dàng tìm được tình yêu hạnh phúc, trong khi bạn lại liên tục gặp những mối quan hệ không đi đến đâu? Bạn đã bao giờ nằm thao thức giữa đêm khuya, tự hỏi liệu có ai ngoài kia thực sự hiểu và yêu thương bạn không?</p>
+
+            <p>Nếu bạn đang đọc những dòng này, có lẽ bạn đã từng trải qua những nỗi đau trong tình yêu - có thể là một cuộc chia tay đau lòng, một mối quan hệ độc hại, hoặc cảm giác cô đơn dù đang ở giữa đám đông. Và tôi muốn bạn biết rằng: <strong>bạn không đơn độc trong hành trình này.</strong></p>
+
+            <p>Trong bài học mở đầu này, chúng ta sẽ cùng nhau khám phá một góc nhìn hoàn toàn mới về tình yêu - không phải từ bên ngoài, mà từ chính bên trong bạn. Đến cuối bài, bạn sẽ hiểu tại sao tình yêu thực sự bắt đầu từ chính mình, và bạn sẽ có được lộ trình 42 ngày để chuyển hóa hoàn toàn cách bạn yêu và được yêu.</p>
+
+            <div class="image-container">
+                <img src="images/m0-opening-hanh-trinh-tinh-yeu.png" alt="Hành trình về với tình yêu đích thực">
+            </div>
+            <div class="image-caption">Hình 1: Hành trình chuyển hóa tình yêu bắt đầu từ chính bạn</div>
+        </section>
+
+        <!-- PHẦN 2: CONCEPT INTRODUCTION -->
+        <section class="section">
+            <h2 class="section-title"><span>🌟</span> Giới Thiệu: Học Thuyết Chuyển Hóa Nội Tâm</h2>
+
+            <p>Xin chào, tôi là <strong>Jennie Uyen Chu</strong> - người sáng lập Học Thuyết Chuyển Hóa Nội Tâm và cũng là người từng trải qua những vết thương sâu sắc nhất trong tình yêu. Năm 28 tuổi, sau 3 mối tình tan vỡ đau đớn, tôi từng tin rằng mình "không xứng đáng được yêu thương". Nhưng hành trình chữa lành của tôi đã thay đổi tất cả.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📖</span> Học Thuyết Chuyển Hóa Nội Tâm Là Gì?</div>
+                <p>Đây là một hệ thống kiến thức kết hợp giữa tâm lý học hiện đại, khoa học năng lượng, và trí tuệ tâm linh phương Đông. Học thuyết này dựa trên một nguyên tắc cốt lõi: <strong>Mọi thứ trong cuộc sống - bao gồm tình yêu - đều là năng lượng, và bạn có thể thay đổi thực tại bằng cách thay đổi năng lượng bên trong.</strong></p>
+                <p>Khác với những lời khuyên tình yêu thông thường như "cứ yêu đi rồi sẽ gặp người tốt" hay "đừng nghĩ nhiều quá", học thuyết này đi sâu vào gốc rễ của vấn đề - chính là tâm thức và năng lượng của bạn.</p>
+            </div>
+
+            <p>Bạn có thể đang nghĩ: "Năng lượng thì liên quan gì đến tình yêu?" Đây là một quan niệm sai lầm phổ biến. Thực tế, <strong>tình yêu chính là năng lượng cao nhất trong vũ trụ</strong>. Theo thang đo tần số cảm xúc của nhà nghiên cứu David R. Hawkins, tình yêu vô điều kiện rung động ở mức 540 Hz - cao hơn cả niềm vui, sự biết ơn, và bình an.</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">540 Hz</div>
+                    <div class="stat-label">Tình Yêu Vô Điều Kiện</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">500 Hz</div>
+                    <div class="stat-label">Yêu Thương</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">350 Hz</div>
+                    <div class="stat-label">Chấp Nhận</div>
+                </div>
+            </div>
+
+            <p>Điều này có ý nghĩa quan trọng với bạn vì: khi bạn nâng cao tần số năng lượng của mình, bạn sẽ tự nhiên thu hút những người có tần số tương đồng. Nói cách khác, <strong>để tìm được tình yêu đích thực, bạn cần trở thành tình yêu trước.</strong></p>
+
+            <div class="image-container">
+                <img src="images/m0-tan-so-540hz-tinh-yeu.png" alt="Thang tần số cảm xúc và tình yêu">
+            </div>
+            <div class="image-caption">Hình 2: Tần số 540 Hz - Mức năng lượng của tình yêu vô điều kiện</div>
+        </section>
+
+        <!-- PHẦN 3: DEEP EXPLANATION -->
+        <section class="section">
+            <h2 class="section-title"><span>🔮</span> Hiểu Sâu: 5 Nguyên Lý Cốt Lõi</h2>
+
+            <p>Để bạn thực sự nắm vững nền tảng của khóa học này, hãy cùng đi sâu vào 5 Nguyên Lý Cốt Lõi của Học Thuyết Chuyển Hóa Nội Tâm và cách chúng áp dụng vào tình yêu.</p>
+
+            <h3 style="color: var(--cyan); margin: var(--space-lg) 0 var(--space-md) 0; padding: 0 16px;">A. CÁI GÌ - 5 Nguyên Lý</h3>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Nguyên Lý Kham Nhẫn</div>
+                        <div class="flow-step-desc">Đón nhận mọi trải nghiệm trong tình yêu - cả vui lẫn buồn - như những bài học cần thiết. Thay vì kháng cự nỗi đau, bạn học cách ở lại với nó để hiểu thông điệp mà nó mang đến. Mỗi mối quan hệ, dù thành công hay thất bại, đều đang dạy bạn điều gì đó quan trọng về bản thân.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Nguyên Lý Chuyển Hóa</div>
+                        <div class="flow-step-desc">Bạn có khả năng chuyển hóa năng lượng tiêu cực (sợ hãi, ghen tuông, bám víu) thành năng lượng tích cực (tin tưởng, tự do, tình yêu vô điều kiện). Điều này không xảy ra tự động - nó đòi hỏi nhận thức có ý thức và thực hành hàng ngày.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Nguyên Lý Hiện Diện</div>
+                        <div class="flow-step-desc">Sống trọn vẹn trong khoảnh khắc hiện tại thay vì nuối tiếc quá khứ hay lo lắng tương lai. Khi bạn hiện diện hoàn toàn, bạn có thể thực sự kết nối với người yêu - không phải với hình ảnh lý tưởng hóa hay nỗi sợ hãi về họ.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Nguyên Lý Phản Chiếu</div>
+                        <div class="flow-step-desc">Người yêu của bạn là tấm gương phản chiếu nội tâm bạn. Nếu bạn luôn thu hút những người không tôn trọng bạn, có thể bạn chưa thực sự tôn trọng chính mình. Nếu bạn gặp người hay kiểm soát, hãy xem xét liệu bạn có đang cố kiểm soát cuộc sống của chính mình không.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Nguyên Lý Buông Bỏ</div>
+                        <div class="flow-step-desc">Tình yêu đích thực không bám víu. Khi bạn buông bỏ kỳ vọng, sợ hãi mất mát, và nhu cầu kiểm soát, bạn tạo ra không gian cho tình yêu tự nhiên chảy vào cuộc sống. Nghịch lý là: bạn càng buông, bạn càng nhận được nhiều hơn.</div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="color: var(--cyan); margin: var(--space-lg) 0 var(--space-md) 0; padding: 0 16px;">B. TẠI SAO - Cơ Chế Hoạt Động</h3>
+
+            <p>Tại sao những nguyên lý này lại hiệu quả? Có một cơ chế khoa học đằng sau. Theo nghiên cứu của HeartMath Institute, tim người tạo ra trường điện từ mạnh gấp 60 lần não bộ, và trường này có thể được cảm nhận bởi những người xung quanh trong phạm vi vài mét.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Khoa Học Về Năng Lượng Tim</div>
+                <p>Khi bạn cảm thấy tình yêu, biết ơn, hoặc bình an, nhịp tim của bạn trở nên nhất quán (coherent), tạo ra sóng năng lượng hài hòa. Những người có trạng thái tim nhất quán thường được mô tả là "có sức hút" hoặc "toát lên năng lượng tích cực". Đây không phải là điều huyền bí - đây là vật lý học thuần túy.</p>
+                <p><strong>Ứng dụng thực tế:</strong> Khi bạn chữa lành vết thương bên trong và nâng cao tần số, trường năng lượng của bạn thay đổi. Bạn bắt đầu thu hút những người có tần số tương đồng - và đẩy xa những người không phù hợp.</p>
+            </div>
+
+            <h3 style="color: var(--cyan); margin: var(--space-lg) 0 var(--space-md) 0; padding: 0 16px;">C. NHƯ THẾ NÀO - Lộ Trình 42 Ngày</h3>
+
+            <p>Bây giờ bạn đã hiểu lý thuyết, hãy xem cụ thể cách khóa học này sẽ giúp bạn áp dụng. Trong 42 ngày, bạn sẽ đi qua 7 giai đoạn chuyển hóa:</p>
+
+            <div class="image-container">
+                <img src="images/m0-roadmap-42-ngay.png" alt="Roadmap 42 ngày chuyển hóa tình yêu">
+            </div>
+            <div class="image-caption">Hình 3: Lộ trình 42 ngày - Hành trình từ chữa lành đến thu hút tri kỷ</div>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">0</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Module 0: Khởi Đầu (Ngày 1-2)</div>
+                        <div class="flow-step-desc">Đánh giá tần số tình yêu hiện tại của bạn, hiểu về 7 tầng tâm thức trong tình yêu, và đưa ra cam kết thiêng liêng với trái tim. Đây là bước nền tảng để biết bạn đang ở đâu trước khi bắt đầu hành trình.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Module 1: Chữa Lành Quá Khứ (Ngày 3-9)</div>
+                        <div class="flow-step-desc">Khám phá bản đồ các mối quan hệ quá khứ, thực hành Inner Child Healing để chữa lành đứa trẻ bên trong, học nghệ thuật tha thứ với Ho'oponopono, và thực hiện nghi thức đốt bỏ ký ức đau buồn.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Module 2: Yêu Bản Thân (Ngày 10-16)</div>
+                        <div class="flow-step-desc">Thực hành Mirror Work mỗi sáng, xây dựng 7 hành vi tinh tấn để nuôi dưỡng bản thân, học cách thiết lập ranh giới lành mạnh, và trải nghiệm Solo Date để yêu vô điều kiện chính mình.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Module 3: Nâng Tần Số (Ngày 17-23)</div>
+                        <div class="flow-step-desc">Hiểu thang cảm xúc trong tình yêu, chuyển hóa những niềm tin giới hạn thành niềm tin nâng đỡ, thực hành affirmations hàng ngày, và học kỹ thuật Heart Coherence để đồng điệu trái tim.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Module 4: Sẵn Sàng Tri Kỷ (Ngày 24-30)</div>
+                        <div class="flow-step-desc">Phân biệt giữa Soulmate và Twin Flame, viết thư gửi tri kỷ tương lai theo phương pháp scripting, tìm hiểu về các loại tinh thể hỗ trợ tình yêu, và thực hành visualization để thấy trước cuộc sống bên cạnh người ấy.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Module 5: Nghệ Thuật Quan Hệ (Ngày 31-37)</div>
+                        <div class="flow-step-desc">Nhận diện 4 phong cách giao tiếp và học cách giao tiếp quyết đoán, khám phá 5 ngôn ngữ tình yêu của bản thân và người yêu, học cách nhận biết red flags và green flags, và thực hành lắng nghe sâu với kỹ thuật RASA.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">6</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Module 6: Sứ Giả Tình Yêu (Ngày 38-42)</div>
+                        <div class="flow-step-desc">Trở thành người lan tỏa năng lượng yêu thương đến cộng đồng, khám phá các cơ hội phát triển tiếp theo với GEM Academy - từ việc trở thành đối tác CTV, KOL Affiliate, đến Instructor.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PHẦN 4: REAL-WORLD EXAMPLES -->
+        <section class="section">
+            <h2 class="section-title"><span>✨</span> Câu Chuyện Thực Tế</h2>
+
+            <p>Lý thuyết sẽ trở nên sống động hơn khi bạn thấy cách nó hoạt động trong cuộc sống thực. Hãy cùng xem một số câu chuyện từ những học viên đã đi qua hành trình này.</p>
+
+            <div class="success-box">
+                <div class="success-box-title"><span>✨</span> Câu Chuyện 1: Lan - Từ "Không Xứng Đáng" Đến Tìm Được Tri Kỷ</div>
+                <p>Lan, 32 tuổi, nhân viên marketing tại Sài Gòn, đã trải qua 3 mối tình thất bại liên tiếp với những người đàn ông "không available về cảm xúc". Cô liên tục gặp những người hứa hẹn nhiều nhưng không bao giờ cam kết thực sự.</p>
+                <p><strong>Điều Lan khám phá:</strong> Thông qua bài tập Inner Child Healing trong Module 1, Lan nhận ra mình đang vô thức lặp lại pattern từ mối quan hệ với cha - người luôn vắng mặt trong tuổi thơ của cô. Cô đã "học" từ nhỏ rằng tình yêu = chờ đợi và hy vọng ai đó sẽ quay về.</p>
+                <p><strong>Kết quả sau 42 ngày:</strong> Lan chữa lành vết thương "bị bỏ rơi", thiết lập ranh giới rõ ràng trong dating, và 3 tháng sau hoàn thành khóa học, cô gặp và đang trong mối quan hệ lành mạnh với một người đàn ông biết trân trọng và hiện diện.</p>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>⚠️</span> Câu Chuyện 2: Sai Lầm Cần Tránh - Minh</div>
+                <p>Minh, 28 tuổi, đọc rất nhiều sách self-help về tình yêu nhưng không bao giờ thực sự thực hành. Anh nghĩ rằng chỉ cần "hiểu" là đủ, và bỏ qua các bài tập thực hành như Mirror Work hay viết nhật ký cảm xúc.</p>
+                <p><strong>Lỗi Minh mắc phải:</strong> Minh cố gắng "nghĩ" ra cách thoát khỏi pattern cũ thay vì "cảm nhận" và "trải nghiệm" sự chuyển hóa. Kiến thức ở trong đầu không tạo ra thay đổi thực sự - chỉ có hành động mới làm được điều đó.</p>
+                <p><strong>Bài học:</strong> Khóa học này không phải để đọc và hiểu - nó là để sống và thực hành. Mỗi bài tập, dù nhỏ, đều có ý nghĩa quan trọng trong việc "rewire" lại não bộ và năng lượng của bạn.</p>
+            </div>
+
+            <div class="success-box">
+                <div class="success-box-title"><span>✨</span> Câu Chuyện 3: Hương - Chữa Lành Sau Ly Hôn</div>
+                <p>Hương, 38 tuổi, vừa trải qua cuộc ly hôn sau 10 năm chung sống. Cô cảm thấy mình đã "quá già" để bắt đầu lại và tin rằng hạnh phúc đã qua mất rồi.</p>
+                <p><strong>Điều thay đổi:</strong> Thông qua Module 2 về Yêu Bản Thân, Hương lần đầu tiên học cách solo date - tự đưa mình đi ăn, xem phim, du lịch một mình. Cô khám phá ra rằng mình đã dành cả đời để làm hài lòng người khác mà quên mất bản thân.</p>
+                <p><strong>Kết quả:</strong> Sau 42 ngày, Hương không còn tìm kiếm ai đó để "hoàn thiện" mình. Cô tìm thấy sự bình an nội tại và mở lòng với khả năng yêu lại - nhưng lần này từ trạng thái đầy đủ chứ không phải thiếu thốn.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m0-before-after-chuyen-hoa.png" alt="Trước và sau chuyển hóa tình yêu">
+            </div>
+            <div class="image-caption">Hình 4: Sự chuyển hóa từ bên trong tạo ra thay đổi ở bên ngoài</div>
+        </section>
+
+        <!-- PHẦN 5: COMMON QUESTIONS -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp</h2>
+
+            <p>Trước khi bắt đầu, hãy cùng giải đáp một số thắc mắc phổ biến mà nhiều học viên có:</p>
+
+            <div class="qa-item">
+                <div class="qa-question"><span>❓</span> "Tôi đã cố gắng thay đổi nhiều lần nhưng vẫn thất bại. Lần này có gì khác?"</div>
+                <div class="qa-answer">Đây là câu hỏi rất hay. Hầu hết các phương pháp thay đổi tập trung vào <strong>hành vi bên ngoài</strong> (cách cư xử, cách nói chuyện, cách dating). Nhưng khóa học này đi vào <strong>gốc rễ bên trong</strong> - những vết thương, niềm tin, và năng lượng đang tạo ra những pattern đó. Khi bạn thay đổi gốc rễ, những hành vi mới sẽ tự nhiên xuất hiện mà không cần cố gắng.</div>
+            </div>
+
+            <div class="qa-item">
+                <div class="qa-question"><span>❓</span> "Tôi không tin vào những thứ tâm linh hay năng lượng. Khóa học có phù hợp với tôi không?"</div>
+                <div class="qa-answer">Hoàn toàn phù hợp! Mặc dù chúng ta sử dụng khái niệm "năng lượng" và "tần số", những nguyên lý này đều có nền tảng khoa học từ tâm lý học, khoa học thần kinh, và vật lý. Bạn không cần "tin" vào bất cứ điều gì - chỉ cần thực hành và quan sát kết quả trên chính bạn. Nhiều học viên ban đầu hoài nghi đã trở thành những người ủng hộ nhiệt tình nhất sau khi trải nghiệm sự thay đổi thực sự.</div>
+            </div>
+
+            <div class="qa-item">
+                <div class="qa-question"><span>❓</span> "42 ngày có đủ để thay đổi không? Tôi đã mang những vết thương này cả đời."</div>
+                <div class="qa-answer">42 ngày là đủ để bắt đầu một sự chuyển hóa sâu sắc - nhưng đây là khởi đầu, không phải kết thúc. Nghiên cứu cho thấy cần khoảng 21 ngày để hình thành thói quen mới, và 21 ngày nữa để củng cố nó. Sau 42 ngày, bạn sẽ có những công cụ và thực hành để tiếp tục phát triển suốt đời. Nhiều học viên chia sẻ rằng những thay đổi lớn nhất đến sau 2-3 tháng tiếp tục thực hành.</div>
+            </div>
+        </section>
+
+        <!-- PHẦN 6: PRACTICAL APPLICATION -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Áp Dụng Ngay Bây Giờ</h2>
+
+            <p>Bây giờ hãy đưa những gì bạn vừa học vào thực hành. Đây là những điều bạn nên làm ngay sau khi hoàn thành bài học này:</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🎯</span> Hành Động Ngay Bây Giờ</div>
+                <p>Dành 5 phút để viết ra câu trả lời cho câu hỏi này vào sổ tay hoặc app ghi chú của bạn: <strong>"Điều gì là pattern lặp đi lặp lại trong các mối quan hệ của tôi?"</strong></p>
+                <p>Không cần phân tích hay tìm giải pháp ngay - chỉ cần quan sát và ghi nhận. Sự nhận thức là bước đầu tiên của mọi sự thay đổi.</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📝</span> Bài Tập: Cam Kết Với Trái Tim</div>
+                <p>Hãy viết lời cam kết sau đây vào sổ tay của bạn (hoặc in ra và dán ở nơi bạn nhìn thấy mỗi ngày):</p>
+                <p><em>"Tôi, _________________, cam kết dành 42 ngày tới để chữa lành, yêu thương bản thân và mở lòng đón nhận tình yêu đích thực. Tôi tin rằng tôi xứng đáng được yêu thương. Tôi sẵn sàng yêu và được yêu."</em></p>
+                <p>Đây không phải là bài tập hình thức - đây là bước gửi tín hiệu đến tiềm thức của bạn rằng bạn đã sẵn sàng cho sự thay đổi.</p>
+            </div>
+
+            <ul class="checklist">
+                <li class="checklist-item">
+                    <div class="checklist-icon">□</div>
+                    <div class="checklist-text"><strong>Sáng:</strong> Đọc lại lời cam kết khi vừa thức dậy, trước khi check điện thoại</div>
+                </li>
+                <li class="checklist-item">
+                    <div class="checklist-icon">□</div>
+                    <div class="checklist-text"><strong>Tối:</strong> Ghi nhận 1 điều bạn biết ơn về bản thân vào sổ trước khi ngủ</div>
+                </li>
+                <li class="checklist-item">
+                    <div class="checklist-icon">□</div>
+                    <div class="checklist-text"><strong>Trong tuần:</strong> Hoàn thành bài tiếp theo để đánh giá tần số tình yêu hiện tại</div>
+                </li>
+            </ul>
+
+            <p><strong>💡 Mẹo:</strong> Đặt reminder trên điện thoại lúc 7h sáng và 10h tối để nhắc bạn thực hành. Sự nhất quán quan trọng hơn cường độ!</p>
+
+            <div class="image-container">
+                <img src="images/m0-app-gem-rituals.png" alt="App GEM hỗ trợ thực hành">
+            </div>
+            <div class="image-caption">Hình 5: Sử dụng App GEM để hỗ trợ thực hành hàng ngày</div>
+        </section>
+
+        <!-- PHẦN 7: KEY TAKEAWAYS -->
+        <section class="section">
+            <h2 class="section-title"><span>📝</span> Điểm Chính Cần Nhớ</h2>
+
+            <p>Trước khi chuyển sang bài tiếp theo, hãy đảm bảo bạn nắm vững những điểm cốt lõi này:</p>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>🎯</span> 5 Điểm Chính Từ Bài Học</div>
+                <ul class="summary-list">
+                    <li><strong>Tình yêu bắt đầu từ bên trong:</strong> Bạn không thể nhận từ người khác thứ bạn không cho chính mình. Để tìm tình yêu, bạn cần trở thành tình yêu trước.</li>
+                    <li><strong>Tần số 540 Hz:</strong> Tình yêu vô điều kiện rung động ở tần số cao nhất. Khi bạn nâng tần số, bạn tự động thu hút những người có tần số tương đồng.</li>
+                    <li><strong>5 Nguyên Lý Cốt Lõi:</strong> Kham Nhẫn, Chuyển Hóa, Hiện Diện, Phản Chiếu, và Buông Bỏ - đây là nền tảng cho mọi sự chuyển hóa trong tình yêu.</li>
+                    <li><strong>42 ngày = Chuyển hóa hoàn chỉnh:</strong> 7 modules từ chữa lành quá khứ, yêu bản thân, nâng tần số, đến sẵn sàng đón nhận tri kỷ và trở thành sứ giả tình yêu.</li>
+                    <li><strong>Thực hành > Hiểu biết:</strong> Kiến thức chỉ có giá trị khi được áp dụng. Hãy cam kết thực hành mỗi ngày, dù chỉ 10 phút.</li>
+                </ul>
+            </div>
+
+            <div class="quote-box">
+                <div class="quote-box-title"><span>💜</span> Lời Nhắn Từ Jennie</div>
+                <blockquote>"Tình yêu đích thực không bắt đầu khi bạn tìm được người hoàn hảo, mà bắt đầu khi bạn học cách nhìn thấy sự hoàn hảo trong một người không hoàn hảo - và người đầu tiên bạn cần làm điều đó là chính bạn."</blockquote>
+                <p class="quote-author">— Jennie Uyen Chu, Founder GEM Academy</p>
+            </div>
+        </section>
+
+        <!-- PHẦN 8: TRANSITION -->
+        <section class="section">
+            <h2 class="section-title"><span>🚀</span> Bước Tiếp Theo</h2>
+
+            <p>Bây giờ bạn đã hiểu nền tảng của hành trình này, bạn đã sẵn sàng cho bước tiếp theo quan trọng. Trong bài học tiếp theo - <strong>Bài 0.2: Đánh Giá Tần Số Tình Yêu</strong> - bạn sẽ làm một bài đánh giá 15 câu hỏi để biết chính xác tần số tình yêu hiện tại của mình.</p>
+
+            <p>Điều này rất quan trọng vì bạn không thể đi đến đích nếu không biết mình đang ở đâu. Bài đánh giá sẽ cho bạn thấy bạn đang ở tầng tâm thức nào trong 7 tầng, và những gì bạn cần tập trung trong 42 ngày tới.</p>
+
+            <p>Hãy dành vài phút để hoàn thành bài tập cam kết, và khi sẵn sàng, chúng ta sẽ tiếp tục hành trình cùng nhau!</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>✨</span> Hẹn Gặp Bạn Ở Bài Tiếp Theo!</div>
+                <p>Nhớ rằng: mỗi bước nhỏ bạn thực hiện hôm nay đều đang đưa bạn đến gần hơn với tình yêu đích thực mà bạn xứng đáng nhận được. Tôi rất hào hứng được đồng hành cùng bạn trong hành trình 42 ngày này! 💕</p>
+            </div>
+        </section>
+
+    </div>
+</body>
+</html>

@@ -361,7 +361,7 @@ const PaperTradeModal = ({
                       <Text style={styles.pnlProfit}>+${pnl.profit}</Text>
                     </View>
                     <View style={styles.pnlItem}>
-                      <Text style={styles.pnlLabel}>Lỗ tối đa</Text>
+                      <Text style={styles.pnlLabel}>Lỗ ước tính</Text>
                       <Text style={styles.pnlLoss}>-${pnl.loss}</Text>
                     </View>
                     <View style={styles.pnlItem}>

@@ -64,19 +64,20 @@ export const SCENARIO_TYPES = {
 };
 
 // Unlock options for blocked users
+// AI Sư Phụ tone: NGẮN GỌN - ĐANH THÉP - CÓ TÍNH GIÁO DỤC
 export const UNLOCK_OPTIONS = [
   {
     id: 'meditation',
-    label: 'Thiền 5 phút',
-    description: 'Nghe bài thiền ngắn để lấy lại bình tĩnh',
+    label: 'Thiền định 5 phút',
+    description: 'Tĩnh tâm. Hơi thở điều hòa tâm trí.',
     duration: 5, // minutes
     karmaBonus: 5,
     icon: 'Brain',
   },
   {
     id: 'journal',
-    label: 'Viết nhật ký',
-    description: 'Ghi lại cảm xúc và phân tích sai lầm',
+    label: 'Viết nhật ký giao dịch',
+    description: 'Phân tích sai lầm. Không nhận ra lỗi thì sẽ lặp lại.',
     duration: 10,
     karmaBonus: 10,
     icon: 'BookOpen',
@@ -84,15 +85,15 @@ export const UNLOCK_OPTIONS = [
   {
     id: 'rest',
     label: 'Nghỉ ngơi 15 phút',
-    description: 'Tạm dừng và thư giãn',
+    description: 'Rời khỏi màn hình. Chiến binh cần thời gian hồi phục.',
     duration: 15,
     karmaBonus: 0,
     icon: 'Coffee',
   },
   {
     id: 'wait',
-    label: 'Đợi hết thời gian',
-    description: 'Chờ đợi tự động mở khóa',
+    label: 'Chờ hết thời gian khóa',
+    description: 'Kiên nhẫn. Thời gian là bài học.',
     duration: null, // Uses block duration
     karmaBonus: 0,
     icon: 'Clock',
@@ -165,10 +166,16 @@ class GemMasterAIService {
   /**
    * Analyze trade before execution
    * Returns: { allowed, scenario, message, mood, karmaChange, blockDuration, requireUnlock }
+   *
+   * IMPORTANT: Paid tiers (TIER1, TIER2, TIER3) get softer enforcement:
+   * - Daily trade limits: BYPASSED
+   * - FOMO/Revenge: WARNING only (not blocked)
+   * - No Stoploss: Still blocked (critical safety)
    */
   async analyzeBeforeTrade(userId, trade, context = {}) {
     try {
-      const { marketData = {}, userStats = {} } = context;
+      const { marketData = {}, userStats = {}, scannerTier = 'FREE' } = context;
+      const isPaidUser = scannerTier && scannerTier !== 'FREE';
 
       // Check if user is already blocked
       const blockStatus = await this.checkUserBlocked(userId);
@@ -176,7 +183,7 @@ class GemMasterAIService {
         return {
           allowed: false,
           scenario: 'account_blocked',
-          message: blockStatus.message || 'Tài khoản đang bị khóa giao dịch.',
+          message: blockStatus.message || 'Bạn đang bị khóa giao dịch. Hoàn thành bài tập mở khóa hoặc chờ hết thời gian.',
           mood: 'silent',
           blockInfo: blockStatus,
         };
@@ -191,7 +198,7 @@ class GemMasterAIService {
         return {
           allowed: false,
           scenario: SCENARIO_TYPES.ACCOUNT_FROZEN,
-          message: this.formatMessage(config?.message_template || 'Tài khoản bị đóng băng do karma = 0.', {}),
+          message: this.formatMessage(config?.message_template || 'Karma về 0. Tài khoản đóng băng. Bạn đã vi phạm quá nhiều quy tắc. Hoàn thành Recovery Quest để khôi phục.', {}),
           mood: 'silent',
           karmaChange: 0,
           requireUnlock: true,
@@ -199,13 +206,13 @@ class GemMasterAIService {
         };
       }
 
-      // Check daily trade limit
-      if (!karmaService.canTradeToday(karma)) {
-        const limit = karmaService.getDailyTradeLimit(karma);
+      // Check daily trade limit - BYPASSED for paid users
+      if (!karmaService.canTradeToday(karma, scannerTier)) {
+        const limit = karmaService.getDailyTradeLimit(karma, scannerTier);
         return {
           allowed: false,
           scenario: 'daily_limit',
-          message: `Bạn đã đạt giới hạn ${limit} lệnh/ngày cho level ${karma?.level_name_vi || 'hiện tại'}.\n\nHãy quay lại ngày mai hoặc nâng cấp Karma để tăng giới hạn.`,
+          message: `Đủ rồi. ${limit} lệnh/ngày là giới hạn của level ${karma?.level_name_vi || 'hiện tại'}.\n\nMuốn giao dịch nhiều hơn? Nâng Karma hoặc mua gói Scanner.`,
           mood: 'warning',
         };
       }
@@ -215,6 +222,18 @@ class GemMasterAIService {
       // 1. FOMO Check - RSI overbought or big price increase
       const fomoResult = this.checkFOMOConditions(trade, marketData);
       if (fomoResult.triggered) {
+        // Paid users: SOFT WARNING only (allowed but warned)
+        if (isPaidUser) {
+          const config = this.getScenarioConfig(SCENARIO_TYPES.FOMO_BUY);
+          return {
+            allowed: true, // Allow but warn
+            scenario: SCENARIO_TYPES.FOMO_BUY,
+            message: config?.message_template?.replace('{rsi}', marketData.rsi?.toFixed(0) || 'N/A') || 'FOMO detected. Cân nhắc kỹ trước khi vào lệnh.',
+            mood: 'warning',
+            karmaChange: config?.karma_impact || 0,
+            softWarning: true, // Flag for UI to show warning but allow
+          };
+        }
         return await this.handleScenario(userId, SCENARIO_TYPES.FOMO_BUY, {
           trade,
           marketData,
@@ -228,6 +247,18 @@ class GemMasterAIService {
       // 2. Revenge Trade Check
       const revengeResult = this.checkRevengeConditions(userStats);
       if (revengeResult.triggered) {
+        // Paid users: SOFT WARNING only
+        if (isPaidUser) {
+          const config = this.getScenarioConfig(SCENARIO_TYPES.REVENGE_TRADE);
+          return {
+            allowed: true, // Allow but warn
+            scenario: SCENARIO_TYPES.REVENGE_TRADE,
+            message: `Bạn đang thua ${userStats.loseStreak || 3} lệnh liên tiếp. Tâm trí không ổn định. Cân nhắc nghỉ ngơi.`,
+            mood: 'warning',
+            karmaChange: config?.karma_impact || 0,
+            softWarning: true,
+          };
+        }
         return await this.handleScenario(userId, SCENARIO_TYPES.REVENGE_TRADE, {
           trade,
           userStats,
@@ -237,16 +268,25 @@ class GemMasterAIService {
         });
       }
 
-      // 3. No Stoploss Check
+      // 3. No Stoploss Check - ALWAYS BLOCKED (critical safety, even for paid users)
       if (!trade?.stopLoss || trade.stopLoss === 0) {
         return await this.handleScenario(userId, SCENARIO_TYPES.NO_STOPLOSS, {
           trade,
         });
       }
 
-      // 4. Overtrade Check
+      // 4. Overtrade Check - Soft warning for paid users
       const tradesToday = karma?.trades_today ?? 0;
       if (tradesToday >= 10) {
+        if (isPaidUser) {
+          return {
+            allowed: true, // Allow but warn
+            scenario: SCENARIO_TYPES.OVERTRADE,
+            message: `Bạn đã giao dịch ${tradesToday} lệnh hôm nay. Số lượng không bằng chất lượng.`,
+            mood: 'warning',
+            softWarning: true,
+          };
+        }
         return await this.handleScenario(userId, SCENARIO_TYPES.OVERTRADE, {
           variables: {
             tradesCount: tradesToday,
@@ -440,7 +480,7 @@ class GemMasterAIService {
 
         await karmaService.updateKarma(userId, config?.karma_impact || 25, SCENARIO_TYPES.DISCIPLINE_WIN, {
           tradeId: trade?.id,
-          actionDetail: 'Win trade đúng kỷ luật',
+          actionDetail: 'Thắng có kỷ luật',
         });
 
         await karmaService.updateDisciplineStreak(userId, true);
@@ -467,7 +507,7 @@ class GemMasterAIService {
 
         await karmaService.updateKarma(userId, config?.karma_impact || 10, SCENARIO_TYPES.DISCIPLINE_LOSS, {
           tradeId: trade?.id,
-          actionDetail: 'Thua đúng kỷ luật',
+          actionDetail: 'Thua có kỷ luật - vẫn đúng đường',
         });
 
         await karmaService.updateDisciplineStreak(userId, true);
@@ -569,7 +609,7 @@ class GemMasterAIService {
       const option = UNLOCK_OPTIONS.find(o => o.id === unlockMethod);
       if (option?.karmaBonus > 0) {
         await karmaService.updateKarma(userId, option.karmaBonus, `unlock_${unlockMethod}`, {
-          actionDetail: `Hoàn thành: ${option.label}`,
+          actionDetail: `Hoàn thành bài tập: ${option.label}`,
         });
       }
 

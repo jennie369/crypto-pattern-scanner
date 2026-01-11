@@ -37,6 +37,15 @@ import {
   Clock,
   BellOff,
   X,
+  Target,
+  AlertTriangle,
+  XCircle,
+  DollarSign,
+  ShieldAlert,
+  Zap,
+  Heart,
+  ShoppingBag,
+  Tag,
 } from 'lucide-react-native';
 
 import { COLORS, GRADIENTS, SPACING, GLASS, TYPOGRAPHY } from '../../utils/tokens';
@@ -48,6 +57,14 @@ const DEFAULT_SETTINGS = {
   push_enabled: true,
   trading_pattern: true,
   trading_price: true,
+  // Paper Trading Notifications
+  paper_order_filled: true,
+  paper_order_cancelled: true,
+  paper_tp_hit: true,
+  paper_sl_hit: true,
+  paper_liquidation_warning: true,
+  paper_position_closed: true,
+  // Community
   community_comment: true,
   community_like: true,
   community_follow: true,
@@ -55,6 +72,12 @@ const DEFAULT_SETTINGS = {
   affiliate_commission: true,
   orders_status: true,
   orders_delivery: true,
+  // Shop Notifications (V2)
+  shop_flash_sale: true,
+  shop_wishlist_price_drop: true,
+  shop_back_in_stock: true,
+  shop_promo_offers: false,
+  // Email
   email_weekly: true,
   email_marketing: false,
 };
@@ -582,6 +605,55 @@ export default function NotificationSettingsScreen({ navigation }) {
             </View>
           </View>
 
+          {/* Paper Trading Notifications */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Paper Trading</Text>
+            <View style={styles.sectionCard}>
+              {renderToggle(
+                'paper_order_filled',
+                'Lệnh đã khớp',
+                'Thông báo khi lệnh chờ được khớp',
+                CheckCircle2,
+                COLORS.success
+              )}
+              {renderToggle(
+                'paper_tp_hit',
+                'Chốt lời (TP)',
+                'Thông báo khi vị thế chạm Take Profit',
+                Target,
+                COLORS.gold
+              )}
+              {renderToggle(
+                'paper_sl_hit',
+                'Cắt lỗ (SL)',
+                'Thông báo khi vị thế chạm Stop Loss',
+                XCircle,
+                COLORS.error
+              )}
+              {renderToggle(
+                'paper_position_closed',
+                'Đóng vị thế',
+                'Thông báo khi vị thế được đóng',
+                DollarSign,
+                COLORS.cyan
+              )}
+              {renderToggle(
+                'paper_liquidation_warning',
+                'Cảnh báo thanh lý',
+                'Cảnh báo khi vị thế gần bị thanh lý',
+                ShieldAlert,
+                COLORS.warning
+              )}
+              {renderToggle(
+                'paper_order_cancelled',
+                'Lệnh đã hủy',
+                'Thông báo khi lệnh chờ bị hủy',
+                AlertTriangle,
+                COLORS.textMuted
+              )}
+            </View>
+          </View>
+
           {/* Community Notifications */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Cộng Đồng</Text>
@@ -648,6 +720,41 @@ export default function NotificationSettingsScreen({ navigation }) {
                 'Đơn hàng đang được giao',
                 Package,
                 COLORS.success
+              )}
+            </View>
+          </View>
+
+          {/* Shop Notifications (V2) */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Shop</Text>
+            <View style={styles.sectionCard}>
+              {renderToggle(
+                'shop_flash_sale',
+                'Flash Sale',
+                'Thông báo khi Flash Sale bắt đầu',
+                Zap,
+                COLORS.warning
+              )}
+              {renderToggle(
+                'shop_wishlist_price_drop',
+                'Giảm giá Wishlist',
+                'Thông báo khi sản phẩm yêu thích giảm giá',
+                Heart,
+                COLORS.error
+              )}
+              {renderToggle(
+                'shop_back_in_stock',
+                'Có hàng trở lại',
+                'Thông báo khi sản phẩm hết hàng có lại',
+                ShoppingBag,
+                COLORS.success
+              )}
+              {renderToggle(
+                'shop_promo_offers',
+                'Khuyến mãi Shop',
+                'Nhận thông tin khuyến mãi từ Shop',
+                Tag,
+                COLORS.gold
               )}
             </View>
           </View>

@@ -1,0 +1,24 @@
+# MuseTalk API Server Requirements
+# For GEMRAL AI Livestream Avatar Generation
+
+# Web Framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+
+# Async HTTP
+aiohttp>=3.9.0
+aiofiles>=23.2.1
+
+# MuseTalk Dependencies (install separately with conda)
+# torch>=2.0.0  # Install with CUDA: pip install torch --index-url https://download.pytorch.org/whl/cu121
+# torchvision>=0.15.0
+# torchaudio>=2.0.0
+
+# Image Processing
+Pillow>=10.0.0
+opencv-python>=4.8.0
+
+# Utilities
+pydantic>=2.0.0
+python-dotenv>=1.0.0

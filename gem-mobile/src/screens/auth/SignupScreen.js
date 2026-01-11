@@ -2,7 +2,7 @@
  * Gemral - Signup Screen
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,16 +16,48 @@ import {
 import CustomAlert, { useCustomAlert } from '../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Gem } from 'lucide-react-native';
+import { Gem, Phone } from 'lucide-react-native';
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, INPUT, BUTTON } from '../../utils/tokens';
 import { signUp } from '../../services/supabase';
 
 export default function SignupScreen({ navigation }) {
   const { alert, AlertComponent } = useCustomAlert();
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Listen for waitlist linking callback from AuthContext
+  useEffect(() => {
+    global.onWaitlistLinked = (waitlistData) => {
+      if (waitlistData?.success && waitlistData?.queue_number) {
+        // Build benefits message based on queue position
+        const isTop100 = waitlistData.is_top_100 || waitlistData.queue_number <= 100;
+        let benefitsText = '';
+
+        if (isTop100) {
+          benefitsText = '\n\n🎁 Ưu đãi của bạn:\n• Giảm 10% khóa học Premium\n• Scanner TIER2 miễn phí 14 ngày\n• Tặng Crystal năng lượng';
+        } else {
+          benefitsText = '\n\n🎁 Ưu đãi của bạn:\n• Scanner TIER2 miễn phí 14 ngày\n• Quyền truy cập sớm';
+        }
+
+        // Show Early Bird welcome notification
+        setTimeout(() => {
+          alert({
+            type: 'success',
+            title: '🎉 Chào mừng Early Bird!',
+            message: (waitlistData.message || `Bạn là thành viên #${waitlistData.queue_number}!`) + benefitsText,
+            buttons: [{ text: 'Tuyệt vời!' }],
+          });
+        }, 1500); // Delay to show after account created message
+      }
+    };
+
+    return () => {
+      global.onWaitlistLinked = null;
+    };
+  }, [alert]);
 
   const handleSignup = async () => {
     if (!email || !password || !confirmPassword) {
@@ -44,7 +76,10 @@ export default function SignupScreen({ navigation }) {
     }
 
     setLoading(true);
-    const { data, error } = await signUp(email, password);
+    // Pass phone in user_metadata for waitlist linking
+    const { data, error } = await signUp(email, password, {
+      phone: phone.trim() || null,
+    });
     setLoading(false);
 
     if (error) {
@@ -95,6 +130,25 @@ export default function SignupScreen({ navigation }) {
                     autoCapitalize="none"
                     keyboardType="email-address"
                   />
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <View style={styles.labelRow}>
+                    <Text style={styles.label}>Số điện thoại</Text>
+                    <Text style={styles.optionalLabel}>(không bắt buộc)</Text>
+                  </View>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="0912345678"
+                    placeholderTextColor="rgba(255, 255, 255, 0.4)"
+                    value={phone}
+                    onChangeText={setPhone}
+                    keyboardType="phone-pad"
+                    maxLength={11}
+                  />
+                  <Text style={styles.hintText}>
+                    Nhập SĐT đã đăng ký waitlist để nhận ưu đãi Early Bird
+                  </Text>
                 </View>
 
                 <View style={styles.inputGroup}>
@@ -194,10 +248,25 @@ const styles = StyleSheet.create({
   inputGroup: {
     gap: SPACING.sm,
   },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
   label: {
     fontSize: TYPOGRAPHY.fontSize.lg,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
     color: COLORS.textSecondary,
+  },
+  optionalLabel: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    fontStyle: 'italic',
+  },
+  hintText: {
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    color: COLORS.textMuted,
+    marginTop: SPACING.xs,
   },
   input: {
     backgroundColor: INPUT.background,

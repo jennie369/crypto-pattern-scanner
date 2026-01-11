@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 10.3: Cơ Hội Đối Tác - GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--success); bottom: -50px; right: 20%; }
+
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container {
+                padding: 0;
+            }
+        }
+
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--success), var(--cyan));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: var(--space-md);
+            color: var(--navy-dark);
+        }
+        .lesson-chapter {
+            font-size: 0.9rem;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .lesson-title {
+            font-size: clamp(1.75rem, 5vw, 2.5rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-lg);
+            flex-wrap: wrap;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        .section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section {
+                padding: 0;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .section-title {
+                padding: var(--space-lg) 16px var(--space-md) 16px;
+                margin-bottom: 0;
+            }
+        }
+
+        .section > p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .section > p {
+                padding: 0 16px;
+            }
+        }
+
+        .section > ul, .section > ol {
+            color: var(--text-secondary);
+            padding-left: 1.5em;
+            margin-bottom: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .section > ul, .section > ol {
+                padding-left: calc(16px + 1.5em);
+                padding-right: 16px;
+            }
+        }
+        .section li { margin-bottom: var(--space-sm); }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box-title {
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .definition-box-title {
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .image-container {
+            margin: var(--space-xl) 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-container {
+                margin: var(--space-md) 0;
+                border-radius: 0;
+                border: none;
+            }
+        }
+        .image-caption {
+            padding: var(--space-sm);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .image-caption {
+                padding: var(--space-sm) 16px;
+            }
+        }
+
+        .pattern-flow {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .pattern-flow {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .flow-phase {
+            display: flex;
+            gap: var(--space-md);
+            align-items: flex-start;
+            padding: var(--space-md);
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .flow-phase {
+                padding: var(--space-md) 16px;
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+            }
+        }
+        .flow-phase.up { border-left-color: var(--success); }
+        .flow-phase.pause { border-left-color: var(--gold); }
+        .phase-icon {
+            font-size: 2rem;
+            min-width: 50px;
+            text-align: center;
+        }
+        .phase-content { flex: 1; }
+        .phase-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+        }
+        .flow-phase.up .phase-title { color: var(--success); }
+        .flow-phase.pause .phase-title { color: var(--gold); }
+        .phase-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .stats-grid {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .stat-card {
+                border: none;
+                border-radius: 0;
+                padding: var(--space-md);
+            }
+        }
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--cyan), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        @media (max-width: 600px) {
+            .stat-value { font-size: 1.25rem; }
+        }
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        .stat-card.green .stat-value {
+            background: linear-gradient(135deg, var(--success), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-card.gold .stat-value {
+            background: linear-gradient(135deg, var(--gold), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02));
+            border: 2px solid var(--success);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--success);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .summary-list { list-style: none; }
+        .summary-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-list li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .quiz-section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin-top: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-section {
+                border: none;
+                border-radius: 0;
+                padding: 0;
+                margin-top: 0;
+                border-top: 8px solid var(--bg-primary);
+            }
+        }
+        .quiz-header {
+            text-align: center;
+            margin-bottom: var(--space-xl);
+        }
+        @media (max-width: 600px) {
+            .quiz-header {
+                padding: var(--space-lg) 16px var(--space-md);
+                margin-bottom: 0;
+            }
+        }
+        .quiz-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+        }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+        .quiz-question {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-question {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-md) 16px;
+                margin-bottom: 0;
+                border-bottom: 1px solid var(--glass-border);
+            }
+        }
+        .question-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50%;
+            font-weight: 700;
+            color: var(--navy-dark);
+            margin-bottom: var(--space-md);
+        }
+        .question-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-lg);
+            line-height: 1.6;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .quiz-options {
+                gap: 1px;
+                background: var(--glass-border);
+                margin-left: -16px;
+                margin-right: -16px;
+                margin-left: calc(-16px - 4px);
+            }
+        }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            padding: var(--space-md);
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .quiz-option {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid transparent;
+                padding: var(--space-md) 16px;
+            }
+        }
+        .quiz-option:hover:not(.disabled) {
+            border-color: var(--gold);
+            background: var(--bg-card);
+        }
+        @media (max-width: 600px) {
+            .quiz-option:hover:not(.disabled) {
+                border-left-color: var(--gold);
+            }
+        }
+        .quiz-option.correct {
+            border-color: var(--success) !important;
+            background: rgba(0, 200, 83, 0.15) !important;
+        }
+        @media (max-width: 600px) {
+            .quiz-option.correct {
+                border-left-color: var(--success) !important;
+            }
+        }
+        .quiz-option.incorrect {
+            border-color: var(--error) !important;
+            background: rgba(255, 82, 82, 0.15) !important;
+        }
+        @media (max-width: 600px) {
+            .quiz-option.incorrect {
+                border-left-color: var(--error) !important;
+            }
+        }
+        .quiz-option.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .option-marker {
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            background: var(--glass-bg);
+            border: 2px solid var(--glass-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+        .quiz-option.correct .option-marker {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+        .quiz-option.incorrect .option-marker {
+            background: var(--error);
+            border-color: var(--error);
+            color: white;
+        }
+        .option-text { flex: 1; color: var(--text-secondary); }
+
+        .question-feedback {
+            margin-top: var(--space-md);
+            padding: var(--space-md);
+            border-radius: var(--space-sm);
+            display: none;
+        }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct {
+            background: rgba(0, 200, 83, 0.15);
+            border-left: 4px solid var(--success);
+        }
+        .question-feedback.incorrect {
+            background: rgba(255, 82, 82, 0.15);
+            border-left: 4px solid var(--error);
+        }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .quiz-result {
+            text-align: center;
+            padding: var(--space-xl);
+            display: none;
+        }
+        .quiz-result.show { display: block; }
+        .result-score {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--gold), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--space-md);
+        }
+
+        .quiz-buttons {
+            display: flex;
+            justify-content: center;
+            padding: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .quiz-buttons { padding: var(--space-lg) 16px; }
+        }
+        .quiz-btn {
+            padding: var(--space-md) var(--space-xl);
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+            background: var(--glass-bg);
+            color: var(--text-primary);
+            border: 2px solid var(--glass-border);
+        }
+        .quiz-btn:hover { border-color: var(--gold); }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="container">
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>🤝</span>
+                <span>Module B</span>
+            </div>
+            <div class="lesson-chapter">Chapter 10 - Cơ Hội & Lựa Chọn</div>
+            <h1 class="lesson-title">Cơ Hội Đối Tác</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 10.3</span></div>
+                <div class="meta-item"><span>⏱️</span><span>10 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <section class="content-section">
+            <div class="section-icon">🤝</div>
+            <h2 class="section-title">Chương Trình Đối Tác GEM</h2>
+            <p>Ngoài trading, GEM còn có <strong style="color: #FFBD59;">Chương Trình Đối Tác</strong> giúp bạn tạo thu nhập thụ động bằng cách giới thiệu học viên mới.</p>
+
+            <div class="highlight-box">
+                <p style="margin-bottom: 0;"><strong>💡 Ý Tưởng:</strong> Bạn đã học phương pháp GEM, thấy nó hiệu quả. Tại sao không chia sẻ với người khác đang tìm kiếm giải pháp trading và được thưởng cho điều đó?</p>
+            </div>
+
+            <p>GEM có <strong>2 chương trình</strong> chính:</p>
+            <ul>
+                <li><strong>CTV (Cộng Tác Viên):</strong> Ai cũng có thể đăng ký, không yêu cầu đặc biệt</li>
+                <li><strong>KOL Affiliate:</strong> Dành cho influencers có 20,000+ followers</li>
+            </ul>
+
+            <div class="image-placeholder">
+                <img src="https://placehold.co/700x400/112250/FFBD59?text=GEM+Partnership+Programs" alt="Partnership Programs">
+                <p class="image-caption">Hai chương trình đối tác của GEM</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-icon">🥇</div>
+            <h2 class="section-title">Chương Trình CTV - 5 Cấp Bậc</h2>
+            <p>Chương trình CTV có <strong>5 cấp bậc</strong> với hoa hồng tăng dần theo doanh số tích lũy:</p>
+
+            <table class="tier-table">
+                <thead>
+                    <tr>
+                        <th>Cấp Bậc</th>
+                        <th>Ngưỡng</th>
+                        <th>Digital</th>
+                        <th>Physical</th>
+                        <th>Sub-Aff</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="tier-icon">🥉</span> Bronze (Đồng)</td>
+                        <td>0</td>
+                        <td><strong style="color: #10B981;">10%</strong></td>
+                        <td>6%</td>
+                        <td>2%</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tier-icon">🥈</span> Silver (Bạc)</td>
+                        <td>50M</td>
+                        <td><strong style="color: #10B981;">15%</strong></td>
+                        <td>8%</td>
+                        <td>2.5%</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tier-icon">🥇</span> Gold (Vàng)</td>
+                        <td>150M</td>
+                        <td><strong style="color: #10B981;">20%</strong></td>
+                        <td>10%</td>
+                        <td>3%</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tier-icon">💎</span> Platinum (Bạch Kim)</td>
+                        <td>400M</td>
+                        <td><strong style="color: #10B981;">25%</strong></td>
+                        <td>12%</td>
+                        <td>3.5%</td>
+                    </tr>
+                    <tr>
+                        <td><span class="tier-icon">👑</span> Diamond (Kim Cương)</td>
+                        <td>800M</td>
+                        <td><strong style="color: #10B981;">30%</strong></td>
+                        <td>15%</td>
+                        <td>4%</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="highlight-box">
+                <p style="margin-bottom: 0;"><strong>📝 Giải thích:</strong><br>
+                • <strong>Digital:</strong> Hoa hồng cho sản phẩm số (khóa học, subscription)<br>
+                • <strong>Physical:</strong> Hoa hồng cho sản phẩm vật lý (crystal, jewelry)<br>
+                • <strong>Sub-Aff:</strong> Hoa hồng từ doanh số của CTV bạn giới thiệu</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-icon">⭐</div>
+            <h2 class="section-title">Chương Trình KOL Affiliate</h2>
+            <p>Dành cho những người có ảnh hưởng trên mạng xã hội:</p>
+
+            <div class="partner-card" style="border-color: #8B5CF6;">
+                <h4 style="color: #8B5CF6;">⭐ KOL Affiliate</h4>
+                <p><strong>Yêu cầu:</strong> 20,000+ followers (YouTube, Facebook, TikTok, Instagram...)</p>
+                <div class="benefit-list">
+                    <div class="benefit-item"><span class="check">✓</span> Digital: <strong style="color: #10B981;">20%</strong></div>
+                    <div class="benefit-item"><span class="check">✓</span> Physical: <strong style="color: #10B981;">20%</strong></div>
+                    <div class="benefit-item"><span class="check">✓</span> Sub-Affiliate: <strong style="color: #10B981;">3.5%</strong></div>
+                    <div class="benefit-item"><span class="check">✓</span> Thanh toán: 2 lần/tháng (ngày 1 và 15)</div>
+                </div>
+                <p style="margin-top: 1rem; margin-bottom: 0; color: #a1a1aa; font-size: 0.9rem;"><em>⚠️ Lưu ý: Yêu cầu 20K+ followers là BẮT BUỘC, không có ngoại lệ.</em></p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-icon">📊</div>
+            <h2 class="section-title">Ví Dụ Thu Nhập</h2>
+            <p>Dưới đây là ví dụ thu nhập từ chương trình CTV:</p>
+
+            <div class="partner-card">
+                <h4>💰 Ví Dụ: CTV Bronze bán 1 khóa Tier 2 (2,000,000đ)</h4>
+                <div class="benefit-list">
+                    <div class="benefit-item"><span class="check">→</span> Commission: 2,000,000 × 10% = <strong style="color: #10B981;">200,000đ</strong></div>
+                </div>
+            </div>
+
+            <div class="partner-card" style="border-color: #10B981;">
+                <h4 style="color: #10B981;">💰 Ví Dụ: CTV Gold bán 5 khóa Tier 2/tháng</h4>
+                <div class="benefit-list">
+                    <div class="benefit-item"><span class="check">→</span> Commission: 5 × 2,000,000 × 20% = <strong style="color: #10B981;">2,000,000đ/tháng</strong></div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <p style="margin-bottom: 0;"><strong>📈 Tiềm năng:</strong> CTV Diamond có thể kiếm <strong>5-20 triệu/tháng</strong> hoặc hơn tùy thuộc vào network và nỗ lực của bạn.</p>
+            </div>
+
+            <div class="image-placeholder">
+                <img src="https://placehold.co/700x400/112250/10B981?text=Income+Examples" alt="Income Examples">
+                <p class="image-caption">Ví dụ thu nhập từ chương trình CTV</p>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-icon">🚀</div>
+            <h2 class="section-title">Cách Đăng Ký</h2>
+            <p>Quy trình đăng ký CTV đơn giản:</p>
+
+            <ul>
+                <li><strong>Bước 1:</strong> Mở app GEM Mobile → Account → Affiliate</li>
+                <li><strong>Bước 2:</strong> Điền form đăng ký CTV</li>
+                <li><strong>Bước 3:</strong> Chờ duyệt (tự động sau 3 ngày hoặc Admin duyệt sớm hơn)</li>
+                <li><strong>Bước 4:</strong> Nhận link giới thiệu và bắt đầu chia sẻ</li>
+            </ul>
+
+            <div class="highlight-box">
+                <p style="margin-bottom: 0;"><strong>💡 Mẹo:</strong> Đừng "bán hàng" trực tiếp. Hãy chia sẻ trải nghiệm thật, kết quả thật. Người khác sẽ tự tìm đến bạn.</p>
+            </div>
+        </section>
+
+        <section class="quiz-section">
+            <h2 class="quiz-title">🎯 Kiểm Tra Kiến Thức</h2>
+
+            <div class="quiz-question" data-correct="0">
+                <p>1. Chương trình CTV có bao nhiêu cấp bậc?</p>
+                <button class="quiz-option" data-index="0">A. 5 cấp (Bronze, Silver, Gold, Platinum, Diamond)</button>
+                <button class="quiz-option" data-index="1">B. 3 cấp (Bronze, Silver, Gold)</button>
+                <button class="quiz-option" data-index="2">C. 4 cấp (Starter, Pro, Elite, VIP)</button>
+                <button class="quiz-option" data-index="3">D. 2 cấp (CTV và KOL)</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="2">
+                <p>2. Hoa hồng Digital cao nhất của CTV Diamond là bao nhiêu?</p>
+                <button class="quiz-option" data-index="0">A. 20%</button>
+                <button class="quiz-option" data-index="1">B. 25%</button>
+                <button class="quiz-option" data-index="2">C. 30%</button>
+                <button class="quiz-option" data-index="3">D. 40%</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-question" data-correct="1">
+                <p>3. Yêu cầu để đăng ký KOL Affiliate là gì?</p>
+                <button class="quiz-option" data-index="0">A. Hoàn thành Tier 3</button>
+                <button class="quiz-option" data-index="1">B. 20,000+ followers trên mạng xã hội</button>
+                <button class="quiz-option" data-index="2">C. Đóng phí 5 triệu</button>
+                <button class="quiz-option" data-index="3">D. Không có yêu cầu</button>
+                <div class="quiz-result"></div>
+            </div>
+
+            <div class="quiz-score">
+                <h3>🎉 Hoàn thành!</h3>
+                <p>Bạn trả lời đúng <span id="correct-count">0</span>/3 câu hỏi</p>
+                <button class="retake-btn" onclick="location.reload()">Làm lại Quiz</button>
+            </div>
+        </section>
+
+        <footer class="section" style="text-align: center; padding: var(--space-xl);">
+            <p style="color: var(--gold); font-weight: 600;">Hoàn thành Bài 10.3</p>
+            <p style="color: var(--text-muted);">Tiếp theo: <strong style="color: var(--text-primary);">Bài 10.4 - Câu Chuyện Thành Công</strong></p>
+        </footer>
+    </div>
+
+    <script>
+        const totalQuestions = 3;
+        let answeredCount = 0;
+        let correctCount = 0;
+        document.querySelectorAll('.quiz-question').forEach(q => {
+            const ci = parseInt(q.dataset.correct);
+            const opts = q.querySelectorAll('.quiz-option');
+            const res = q.querySelector('.quiz-result');
+            opts.forEach(o => {
+                o.addEventListener('click', function() {
+                    if (q.classList.contains('answered')) return;
+                    q.classList.add('answered');
+                    answeredCount++;
+                    const si = parseInt(this.dataset.index);
+                    if (si === ci) {
+                        this.classList.add('correct');
+                        res.textContent = '✓ Chính xác!';
+                        res.className = 'quiz-result show correct';
+                        correctCount++;
+                    } else {
+                        this.classList.add('incorrect');
+                        opts[ci].classList.add('correct');
+                        res.textContent = '✗ Chưa đúng.';
+                        res.className = 'quiz-result show incorrect';
+                    }
+                    if (answeredCount === totalQuestions) {
+                        document.getElementById('correct-count').textContent = correctCount;
+                        document.querySelector('.quiz-score').classList.add('show');
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

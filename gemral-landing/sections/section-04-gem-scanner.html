@@ -1,0 +1,552 @@
+<!-- ============================================
+     SECTION 4: GEM SCANNER (ĐÃ CẬP NHẬT)
+     GEMRAL Landing Page
+     6 Feature Cards với SVG Icons
+     + Công thức độc quyền + Paper Trading
+     ============================================ -->
+
+
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEMRAL - GEM Scanner Section</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&amp;family=Noto+Sans+Display:wght@400;500;600&amp;display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1632;
+            --burgundy: #9C0612;
+            --burgundy-dark: #6B0F1A;
+            --gold: #FFBD59;
+            --gold-dark: #C88F2F;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --pink: #FF6B9D;
+            --green: #10B981;
+            --white: #ffffff;
+            --white-80: rgba(255, 255, 255, 0.8);
+            --white-60: rgba(255, 255, 255, 0.6);
+            --white-20: rgba(255, 255, 255, 0.2);
+            --white-10: rgba(255, 255, 255, 0.1);
+            --black-40: rgba(0, 0, 0, 0.4);
+            
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            background: var(--navy-dark);
+            color: var(--white);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .section-scanner {
+            padding: 100px 0;
+            background: linear-gradient(180deg, 
+                var(--navy) 0%,
+                #0D1B3F 50%,
+                var(--navy-dark) 100%
+            );
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .section-scanner::before {
+            content: '';
+            position: absolute;
+            top: -100px;
+            right: -200px;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(0, 240, 255, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        .section-scanner::after {
+            content: '';
+            position: absolute;
+            bottom: -100px;
+            left: -200px;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255, 189, 89, 0.06) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-family: var(--font-heading);
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 25px;
+        }
+        
+        .badge-green {
+            background: linear-gradient(135deg, var(--green), #059669);
+            color: var(--white);
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+        }
+        
+        .exclusive-tag {
+            display: inline-block;
+            background: var(--burgundy);
+            color: var(--white);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(156, 6, 18, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(156, 6, 18, 0.8); }
+        }
+        
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: 42px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+        
+        .section-subtitle {
+            font-size: 18px;
+            color: var(--white-80);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+        
+        .text-gold { color: var(--gold); }
+        .text-cyan { color: var(--cyan); }
+        .text-pink { color: var(--pink); }
+        .text-green { color: var(--green); }
+        
+        /* Scanner Preview */
+        .scanner-preview {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 189, 89, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 60px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--white-10);
+        }
+        
+        .preview-title {
+            font-family: var(--font-heading);
+            font-size: 18px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .preview-title svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--cyan);
+        }
+        
+        .confidence-badge {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid var(--green);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--green);
+        }
+        
+        .preview-image {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, rgba(17, 34, 80, 0.8), rgba(10, 22, 50, 0.9));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed var(--white-20);
+        }
+        
+        .preview-placeholder {
+            text-align: center;
+            color: var(--white-60);
+        }
+        
+        .preview-placeholder svg {
+            width: 60px;
+            height: 60px;
+            stroke: var(--gold);
+            margin-bottom: 15px;
+        }
+        
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .feature-card {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 189, 89, 0.2);
+            border-radius: 20px;
+            padding: 35px 25px;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--cyan), var(--gold));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(255, 189, 89, 0.5);
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.3),
+                0 0 30px rgba(0, 240, 255, 0.1);
+        }
+        
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+        
+        .card-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 240, 255, 0.1);
+            border-radius: 50%;
+            border: 2px solid rgba(0, 240, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover .card-icon {
+            background: rgba(0, 240, 255, 0.2);
+            border-color: var(--cyan);
+            transform: scale(1.1);
+        }
+        
+        .card-icon svg {
+            width: 36px;
+            height: 36px;
+            stroke: var(--cyan);
+        }
+        
+        .feature-card h3 {
+            font-family: var(--font-heading);
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .feature-card p {
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--white-80);
+        }
+        
+        /* Stats Row */
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 60px;
+            padding: 40px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid var(--white-10);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            display: block;
+            font-family: var(--font-heading);
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: var(--white-60);
+        }
+        
+        .section-footer {
+            text-align: center;
+            margin-top: 60px;
+            font-size: 13px;
+            color: var(--white-60);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 1100px) {
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .stats-row { gap: 40px; }
+        }
+        
+        @media (max-width: 768px) {
+            .section-scanner { padding: 80px 0; }
+            .section-title { font-size: 32px; }
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .feature-card { padding: 30px 20px; }
+            .stats-row {
+                flex-direction: column;
+                gap: 30px;
+            }
+            .stat-number { font-size: 32px; }
+        }
+        
+        @media (max-width: 480px) {
+            .section-title { font-size: 26px; }
+            .preview-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+    </style>
+
+
+    <section class="section-scanner">
+        <div class="container">
+            <!-- Section Header -->
+            <div class="section-header">
+                <span class="badge badge-green">&nbsp;Công Cụ Phân Tích Tần Số Thị Trường</span>
+                <div class="exclusive-tag">🇻🇳 ĐỘC QUYỀN TẠI VIỆT NAM</div>
+                <h2 class="section-title">
+                    <span class="text-gold">GEM SCANNER</span>
+                </h2>
+                <p class="section-subtitle">
+                    Scanner tự động phát hiện <strong>6 công thức tần số độc quyền của Gem Trading</strong> — 
+                    duy nhất tại Việt Nam. Giúp bạn đưa ra quyết định từ dữ liệu thay vì cảm xúc. 
+                    Không còn hoảng loạn, không còn đoán mò — chỉ có hệ thống và kỷ luật.
+                </p>
+            </div>
+            
+            <!-- Scanner Preview -->
+            <div class="scanner-preview">
+                <div class="preview-header">
+                    <div class="preview-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                            <path d="M3 3v18h18"></path>
+                            <path d="m19 9-5 5-4-4-3 3"></path>
+                        </svg>
+                        GEM Pattern Scanner Interface
+                    </div>
+                    <div class="confidence-badge">Confidence: 89.7%</div>
+                </div><img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk41rftx-08q037/1767797543898_k4efcq_gemral-landing-03.webp" alt="gemral-landing-03-b90f" style="width: 100%; max-width: 100%; height: auto; display: block; margin: 0; padding: 0;">
+                
+            </div>
+            
+            <!-- Features Grid: 6 Cards -->
+            <div class="features-grid">
+                <!-- Card 1: Quét Tự Động -->
+                <div class="feature-card">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                    </div>
+                    <h3>Quét Tự Động 24/7</h3>
+                    <p>
+                        Scanner hoạt động không ngừng nghỉ, phân tích hàng trăm cặp coin mỗi giờ 
+                        để tìm ra những setup có xác suất cao nhất. Bạn không cần ngồi trước màn hình 
+                        cả ngày — hệ thống làm việc đó cho bạn.
+                    </p>
+                </div>
+                
+                <!-- Card 2: 6 Pattern Độc Quyền -->
+                <div class="feature-card">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <circle cx="12" cy="12" r="6"></circle>
+                            <circle cx="12" cy="12" r="2"></circle>
+                        </svg>
+                    </div>
+                    <h3>6 Pattern Độc Quyền</h3>
+                    <p>
+                        Phát hiện tự động <strong>6 công thức Frequency độc quyền của Gem Trading</strong>, 
+                        duy nhất tại Việt Nam. Đã được backtest qua 5 năm dữ liệu với win rate từ 68% đến 85% 
+                        khi áp dụng đúng điều kiện.
+                    </p>
+                </div>
+                
+                <!-- Card 3: Entry/Stop/Target -->
+                <div class="feature-card">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                            <path d="M3 3v18h18"></path>
+                            <path d="m19 9-5 5-4-4-3 3"></path>
+                        </svg>
+                    </div>
+                    <h3>Entry / Stop / Target</h3>
+                    <p>
+                        Không còn phải đoán mò. Mỗi signal đều đi kèm điểm Entry chính xác, 
+                        Stop Loss để bảo vệ vốn, và Take Profit targets theo từng mức. 
+                        Bạn chỉ cần thực thi theo hệ thống.
+                    </p>
+                </div>
+                
+                <!-- Card 4: Paper Trading -->
+                <div class="feature-card">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                            <path d="M12 2v4"></path>
+                            <path d="M12 18v4"></path>
+                            <path d="m4.93 4.93 2.83 2.83"></path>
+                            <path d="m16.24 16.24 2.83 2.83"></path>
+                            <path d="M2 12h4"></path>
+                            <path d="M18 12h4"></path>
+                            <circle cx="12" cy="12" r="4"></circle>
+                        </svg>
+                    </div>
+                    <h3>Paper Trading</h3>
+                    <p>
+                        Thực hành giao dịch với tiền ảo trước khi dùng tiền thật. 
+                        Luyện tập không giới hạn, hoàn toàn miễn phí, không rủi ro — 
+                        cho đến khi bạn tự tin 100% với phương pháp GEM Frequency.
+                    </p>
+                </div>
+                
+                <!-- Card 5: Thông Báo Real-time -->
+                <div class="feature-card">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                            <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"></path>
+                        </svg>
+                    </div>
+                    <h3>Thông Báo Real-time</h3>
+                    <p>
+                        Nhận alert ngay lập tức khi có pattern mới xuất hiện qua Telegram hoặc app. 
+                        Bạn có thể đang làm việc khác mà vẫn không bỏ lỡ cơ hội — 
+                        hệ thống sẽ báo cho bạn khi cần hành động.
+                    </p>
+                </div>
+                
+                <!-- Card 6: Backtest 5 Năm -->
+                <div class="feature-card">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <h3>Backtest 5+ Năm Data</h3>
+                    <p>
+                        Tất cả công thức đều được kiểm chứng qua hơn 5 năm dữ liệu lịch sử 
+                        với hàng nghìn giao dịch. Đây không phải lý thuyết — 
+                        đây là kết quả thực tế đã được chứng minh qua thời gian.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Stats Row -->
+            <div class="stats-row">
+                <div class="stat-item">
+                    <span class="stat-number text-cyan">68-85%</span>
+                    <span class="stat-label">Win Rate Backtest</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number text-gold">6</span>
+                    <span class="stat-label">Pattern Độc Quyền</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number text-pink">500+</span>
+                    <span class="stat-label">Cặp Coin Theo Dõi</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number text-cyan">24/7</span>
+                    <span class="stat-label">Hoạt Động Liên Tục</span>
+                </div>
+            </div>
+            
+            <!-- Section Footer -->
+            <div class="section-footer">gemral.com</div>
+        </div>
+    </section>

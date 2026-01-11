@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 1.2: Bullish vs Bearish Flag | GEM Trading Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #8B5CF6;
+            --purple-dark: #6D28D9;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--purple); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--gold); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, #8B5CF6, #6D28D9); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); color: white; }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+        .highlight-box ul { color: var(--text-secondary); margin: 0.5rem 0 0 1.5rem; }
+        .highlight-box li { margin-bottom: var(--space-xs); }
+
+        .highlight-box.green { background: linear-gradient(135deg, rgba(0, 200, 83, 0.15), rgba(0, 200, 83, 0.05)); border: 1px solid rgba(0, 200, 83, 0.3); }
+        @media (max-width: 600px) { .highlight-box.green { border: none; border-left: 4px solid var(--success); } }
+        .highlight-box.green .highlight-box-title { color: var(--success); }
+
+        .highlight-box.red { background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(255, 82, 82, 0.05)); border: 1px solid rgba(255, 82, 82, 0.3); }
+        @media (max-width: 600px) { .highlight-box.red { border: none; border-left: 4px solid var(--error); } }
+        .highlight-box.red .highlight-box-title { color: var(--error); }
+
+        .highlight-box.purple { background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.05)); border: 1px solid rgba(139, 92, 246, 0.3); }
+        @media (max-width: 600px) { .highlight-box.purple { border: none; border-left: 4px solid var(--purple); } }
+        .highlight-box.purple .highlight-box-title { color: var(--purple); }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .step-list { list-style: none; margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .step-list { margin: var(--space-md) 0; } }
+        .step-list li { padding: var(--space-md); margin: var(--space-sm) 0; background: var(--bg-card); border-radius: var(--radius-md); border-left: 4px solid var(--purple); color: var(--text-secondary); }
+        @media (max-width: 600px) { .step-list li { margin: 0; border-radius: 0; border-bottom: 1px solid var(--glass-border); } }
+
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .grid-item { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); }
+        @media (max-width: 600px) { .grid-item { border: none; border-radius: 0; padding: var(--space-md) 16px; border-left: 4px solid var(--glass-border); } }
+        .grid-item.green { border-left-color: var(--success); }
+        .grid-item.red { border-left-color: var(--error); }
+        .grid-item h4 { margin-bottom: var(--space-sm); }
+        .grid-item ul { color: var(--text-secondary); font-size: 0.9rem; margin-left: 1rem; }
+
+        .comparison-table { width: 100%; border-collapse: collapse; margin: var(--space-lg) 0; font-size: 0.9rem; }
+        @media (max-width: 600px) { .comparison-table { margin: var(--space-md) 0; } }
+        .comparison-table th { background: var(--bg-card); padding: var(--space-md); text-align: left; font-weight: 600; color: var(--gold); border: 1px solid var(--glass-border); }
+        .comparison-table th:nth-child(2) { color: var(--success); }
+        .comparison-table th:nth-child(3) { color: var(--error); }
+        .comparison-table td { padding: var(--space-md); border: 1px solid var(--glass-border); color: var(--text-secondary); }
+
+        .summary-box { background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(0, 200, 83, 0.02)); border: 2px solid var(--success); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--success); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--success); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--success); font-weight: 700; }
+
+        .quiz-section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-top: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-section { border: none; border-radius: 0; padding: 0; margin-top: 0; border-top: 8px solid var(--bg-primary); } }
+        .quiz-header { text-align: center; margin-bottom: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-header { padding: var(--space-lg) 16px var(--space-md); margin-bottom: 0; } }
+        .quiz-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+        .quiz-question { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-question { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; margin-bottom: 0; border-bottom: 1px solid var(--glass-border); } }
+        .question-number { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; font-weight: 700; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .question-text { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-lg); line-height: 1.6; }
+
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        @media (max-width: 600px) { .quiz-options { gap: 1px; background: var(--glass-border); margin-left: calc(-16px - 4px); margin-right: -16px; } }
+        .quiz-option { display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; transition: all 0.3s ease; }
+        @media (max-width: 600px) { .quiz-option { border: none; border-radius: 0; border-left: 4px solid transparent; padding: var(--space-md) 16px; } }
+        .quiz-option:hover:not(.disabled) { border-color: var(--gold); background: var(--bg-card); }
+        .quiz-option.correct { border-color: var(--success) !important; background: rgba(0, 200, 83, 0.15) !important; }
+        .quiz-option.incorrect { border-color: var(--error) !important; background: rgba(255, 82, 82, 0.15) !important; }
+        .quiz-option.disabled { opacity: 0.7; cursor: not-allowed; }
+        .option-marker { width: 28px; height: 28px; min-width: 28px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+        .quiz-option.correct .option-marker { background: var(--success); border-color: var(--success); color: white; }
+        .quiz-option.incorrect .option-marker { background: var(--error); border-color: var(--error); color: white; }
+        .option-text { flex: 1; color: var(--text-secondary); }
+
+        .question-feedback { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--space-sm); display: none; }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); }
+        .question-feedback.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .quiz-result { text-align: center; padding: var(--space-xl); display: none; }
+        .quiz-result.show { display: block; }
+        .result-score { font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: var(--space-md); }
+
+        .quiz-buttons { display: flex; justify-content: center; padding: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-buttons { padding: var(--space-lg) 16px; } }
+        .quiz-btn { padding: var(--space-md) var(--space-xl); border-radius: var(--radius-md); font-weight: 700; cursor: pointer; border: none; font-family: inherit; background: linear-gradient(135deg, var(--purple), var(--purple-dark)); color: var(--text-primary); }
+        .quiz-btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>Tier 3 Elite</span>
+            </div>
+            <div class="lesson-chapter">Chapter 1 - Flag & Pennant Patterns</div>
+            <h1 class="lesson-title">Bullish vs Bearish Flag</h1>
+            <div class="lesson-meta">
+                <span>Bài 1.2</span>
+                <span>10 phút đọc</span>
+                <span>2 câu quiz</span>
+            </div>
+        </header>
+
+        <section class="section">
+            <h2 class="section-title"><span>📈</span> Bullish Flag - Cờ Tăng</h2>
+
+            <div class="highlight-box green">
+                <div class="highlight-box-title"><span>🟢</span> Đặc điểm Bullish Flag</div>
+                <ul>
+                    <li>Xuất hiện trong uptrend (xu hướng tăng)</li>
+                    <li>Flagpole: Giá tăng mạnh với volume cao</li>
+                    <li>Flag: Nghiêng xuống nhẹ (correction nhẹ)</li>
+                    <li>Breakout: Phá vỡ lên trên với volume tăng</li>
+                </ul>
+            </div>
+
+            <div class="image-container">
+                <img src="https://placehold.co/800x350/112250/10B981?text=Bullish+Flag+-+Anatomy" alt="Bullish Flag">
+                <p class="image-caption">Hình 1.2.1: Cấu trúc Bullish Flag Pattern</p>
+            </div>
+
+            <ul class="step-list">
+                <li><strong>Entry Point:</strong> Khi giá breakout lên trên đường trendline trên của Flag</li>
+                <li><strong>Stop Loss:</strong> Dưới đáy của Flag hoặc dưới đường trendline dưới</li>
+                <li><strong>Take Profit:</strong> Entry + Chiều cao Flagpole</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>📉</span> Bearish Flag - Cờ Giảm</h2>
+
+            <div class="highlight-box red">
+                <div class="highlight-box-title"><span>🔴</span> Đặc điểm Bearish Flag</div>
+                <ul>
+                    <li>Xuất hiện trong downtrend (xu hướng giảm)</li>
+                    <li>Flagpole: Giá giảm mạnh với volume cao</li>
+                    <li>Flag: Nghiêng lên nhẹ (bounce nhẹ)</li>
+                    <li>Breakout: Phá vỡ xuống dưới với volume tăng</li>
+                </ul>
+            </div>
+
+            <div class="image-container">
+                <img src="https://placehold.co/800x350/112250/FF5252?text=Bearish+Flag+-+Anatomy" alt="Bearish Flag">
+                <p class="image-caption">Hình 1.2.2: Cấu trúc Bearish Flag Pattern</p>
+            </div>
+
+            <ul class="step-list">
+                <li><strong>Entry Point:</strong> Khi giá breakout xuống dưới đường trendline dưới của Flag</li>
+                <li><strong>Stop Loss:</strong> Trên đỉnh của Flag hoặc trên đường trendline trên</li>
+                <li><strong>Take Profit:</strong> Entry - Chiều cao Flagpole</li>
+            </ul>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>⚖️</span> Bảng So Sánh Chi Tiết</h2>
+
+            <table class="comparison-table">
+                <tr>
+                    <th>Tiêu Chí</th>
+                    <th>Bullish Flag</th>
+                    <th>Bearish Flag</th>
+                </tr>
+                <tr>
+                    <td>Trend chính</td>
+                    <td>Uptrend</td>
+                    <td>Downtrend</td>
+                </tr>
+                <tr>
+                    <td>Flagpole</td>
+                    <td>Tăng mạnh</td>
+                    <td>Giảm mạnh</td>
+                </tr>
+                <tr>
+                    <td>Flag nghiêng</td>
+                    <td>Nghiêng xuống</td>
+                    <td>Nghiêng lên</td>
+                </tr>
+                <tr>
+                    <td>Breakout</td>
+                    <td>Phá vỡ lên</td>
+                    <td>Phá vỡ xuống</td>
+                </tr>
+                <tr>
+                    <td>Lệnh</td>
+                    <td>Long (Buy)</td>
+                    <td>Short (Sell)</td>
+                </tr>
+                <tr>
+                    <td>Volume</td>
+                    <td>Tăng khi breakout</td>
+                    <td>Tăng khi breakout</td>
+                </tr>
+            </table>
+
+            <div class="image-container">
+                <img src="https://placehold.co/800x350/112250/8B5CF6?text=Bullish+vs+Bearish+Flag+-+Side+by+Side" alt="Comparison">
+                <p class="image-caption">Hình 1.2.3: So sánh song song 2 loại Flag</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>⚠️</span> Những Điểm Cần Lưu Ý</h2>
+
+            <div class="grid-2">
+                <div class="grid-item green">
+                    <h4 style="color: var(--success);">✓ Dấu Hiệu Tốt</h4>
+                    <ul>
+                        <li>Volume giảm trong Flag</li>
+                        <li>Flag ngắn (1-3 tuần)</li>
+                        <li>Độ dốc Flag vừa phải</li>
+                        <li>Breakout với volume cao</li>
+                    </ul>
+                </div>
+                <div class="grid-item red">
+                    <h4 style="color: var(--error);">✗ Dấu Hiệu Xấu</h4>
+                    <ul>
+                        <li>Volume tăng trong Flag</li>
+                        <li>Flag kéo dài quá lâu</li>
+                        <li>Flag quá dốc (có thể là reversal)</li>
+                        <li>Breakout thiếu volume</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Pro Tip</div>
+                <p>Nếu Flag retrace quá 50% của Flagpole, đó có thể không còn là Flag Pattern nữa. Hãy cẩn thận và chờ xác nhận thêm.</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Cách Tính Price Target</h2>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>📐</span> Công thức</div>
+                <p style="font-size: 1.1rem; color: var(--purple); margin-top: 0.5rem;"><strong>Target = Breakout Point ± Chiều cao Flagpole</strong></p>
+                <ul>
+                    <li>Bullish: Target = Breakout + Flagpole height</li>
+                    <li>Bearish: Target = Breakout - Flagpole height</li>
+                </ul>
+            </div>
+
+            <div class="image-container">
+                <img src="https://placehold.co/800x350/112250/FFBD59?text=Price+Target+Calculation" alt="Price Target">
+                <p class="image-caption">Hình 1.2.4: Cách tính mục tiêu giá cho Flag Pattern</p>
+            </div>
+        </section>
+
+        <div class="summary-box">
+            <div class="summary-title"><span>📋</span> Tóm Tắt Bài Học</div>
+            <ul class="summary-list">
+                <li>Bullish Flag: Uptrend - Flag nghiêng xuống - Breakout lên</li>
+                <li>Bearish Flag: Downtrend - Flag nghiêng lên - Breakout xuống</li>
+                <li>Volume giảm trong Flag, tăng mạnh khi breakout</li>
+                <li>Price Target = Breakout ± Chiều cao Flagpole</li>
+                <li>Flag không nên retrace quá 50% của Flagpole</li>
+            </ul>
+        </div>
+
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">Kiểm Tra Kiến Thức</h2>
+                <p class="quiz-subtitle">Chọn đáp án để nhận phản hồi ngay lập tức</p>
+            </div>
+
+            <div class="quiz-question" data-question="1" data-correct="A">
+                <div class="question-number">1</div>
+                <div class="question-text">Trong Bearish Flag, phần Flag nghiêng theo hướng nào?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Nghiêng lên (ngược hướng trend giảm)</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Nghiêng xuống (cùng hướng trend giảm)</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Đi ngang</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="2" data-correct="C">
+                <div class="question-number">2</div>
+                <div class="question-text">Khi nào Flag Pattern có thể không còn hợp lệ?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Khi Flag retrace 20% của Flagpole</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Khi Flag kéo dài 1 tuần</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Khi Flag retrace quá 50% của Flagpole</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-result">
+                <div class="result-score">0/2</div>
+                <div class="result-text">Hoàn thành!</div>
+                <div class="result-message"></div>
+            </div>
+
+            <div class="quiz-buttons">
+                <button class="quiz-btn" id="retakeQuiz" style="display: none;">Làm Lại</button>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const questions = document.querySelectorAll('.quiz-question');
+            const retakeBtn = document.getElementById('retakeQuiz');
+            const resultDiv = document.querySelector('.quiz-result');
+
+            let answeredCount = 0;
+            let correctCount = 0;
+            const totalQuestions = 2;
+
+            const explanations = {
+                1: {
+                    correct: 'Chính xác! Trong Bearish Flag, phần Flag nghiêng lên (ngược hướng trend giảm).',
+                    incorrect: 'Sai! Flag luôn nghiêng ngược hướng với trend - Bearish Flag nghiêng lên.'
+                },
+                2: {
+                    correct: 'Chính xác! Khi Flag retrace quá 50% của Flagpole, pattern có thể không còn hợp lệ.',
+                    incorrect: 'Sai! Flag không nên retrace quá 50% của Flagpole.'
+                }
+            };
+
+            questions.forEach(question => {
+                const options = question.querySelectorAll('.quiz-option');
+                const correctAnswer = question.dataset.correct;
+                const questionNum = question.dataset.question;
+                const feedbackDiv = question.querySelector('.question-feedback');
+                const feedbackTitle = feedbackDiv.querySelector('.feedback-title');
+                const feedbackText = feedbackDiv.querySelector('.feedback-text');
+
+                options.forEach(option => {
+                    option.addEventListener('click', function() {
+                        if (question.classList.contains('answered')) return;
+
+                        question.classList.add('answered');
+                        answeredCount++;
+
+                        const selectedOption = this.dataset.option;
+                        const isCorrect = selectedOption === correctAnswer;
+
+                        options.forEach(opt => opt.classList.add('disabled'));
+
+                        if (isCorrect) {
+                            this.classList.add('correct');
+                            correctCount++;
+                            feedbackDiv.classList.add('correct');
+                            feedbackTitle.textContent = 'Chính xác!';
+                            feedbackText.textContent = explanations[questionNum].correct;
+                        } else {
+                            this.classList.add('incorrect');
+                            feedbackDiv.classList.add('incorrect');
+                            feedbackTitle.textContent = 'Sai rồi!';
+                            feedbackText.textContent = explanations[questionNum].incorrect;
+                            options.forEach(opt => {
+                                if (opt.dataset.option === correctAnswer) {
+                                    opt.classList.add('correct');
+                                }
+                            });
+                        }
+
+                        feedbackDiv.classList.add('show');
+
+                        if (answeredCount === totalQuestions) {
+                            const scoreDiv = resultDiv.querySelector('.result-score');
+                            const messageDiv = resultDiv.querySelector('.result-message');
+                            scoreDiv.textContent = correctCount + '/' + totalQuestions;
+
+                            if (correctCount === totalQuestions) {
+                                messageDiv.textContent = 'Xuất sắc!';
+                            } else if (correctCount >= 1) {
+                                messageDiv.textContent = 'Tốt lắm!';
+                            } else {
+                                messageDiv.textContent = 'Xem lại bài học nhé!';
+                            }
+
+                            resultDiv.classList.add('show');
+                            retakeBtn.style.display = 'inline-block';
+                        }
+                    });
+                });
+            });
+
+            retakeBtn.addEventListener('click', function() {
+                answeredCount = 0;
+                correctCount = 0;
+
+                questions.forEach(question => {
+                    question.classList.remove('answered');
+                    const options = question.querySelectorAll('.quiz-option');
+                    const feedbackDiv = question.querySelector('.question-feedback');
+
+                    options.forEach(opt => {
+                        opt.classList.remove('correct', 'incorrect', 'disabled');
+                    });
+                    feedbackDiv.classList.remove('show', 'correct', 'incorrect');
+                });
+
+                resultDiv.classList.remove('show');
+                retakeBtn.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -464,7 +464,7 @@ const SupportTicketsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.bgDark,
+    backgroundColor: COLORS.bgDarkest,
   },
   header: {
     flexDirection: 'row',

@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5 Sticky FOMO Components (Isolated) | GEM Trading</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Noto+Sans+Display:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+/* ==================== ISOLATED FOMO - NO CONFLICTS ==================== */
+.fomo-wrapper{
+--burgundy:#9C0612;
+--gold:#FFBD59;
+--font-heading:'Montserrat',sans-serif;
+--font-body:'Noto Sans Display',sans-serif;
+}
+.fomo-countdown-timer{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:45px;
+background:rgba(0,0,0,0.95);
+backdrop-filter:blur(15px);
+border-bottom:2px solid var(--gold);
+display:flex;
+align-items:center;
+justify-content:center;
+gap:15px;
+z-index:9999;
+box-shadow:0 2px 20px rgba(0,0,0,0.5);
+}
+.fomo-cd-text{
+font-family:var(--font-heading);
+font-size:9px;
+font-weight:700;
+color:var(--gold);
+letter-spacing:1px;
+text-transform:uppercase;
+}
+.fomo-cd-boxes{
+display:flex;
+gap:6px;
+}
+.fomo-cd-box{
+display:flex;
+flex-direction:column;
+align-items:center;
+background:rgba(156,6,18,0.3);
+border:1px solid var(--gold);
+border-radius:6px;
+padding:3px 6px;
+min-width:38px;
+}
+.fomo-cd-number{
+font-family:var(--font-heading);
+font-size:12px;
+font-weight:900;
+color:#fff;
+line-height:1;
+}
+.fomo-cd-label{
+font-size:6px;
+color:var(--gold);
+text-transform:uppercase;
+margin-top:2px;
+}
+.fomo-cd-cta{
+font-family:var(--font-heading);
+font-size:9px;
+font-weight:700;
+color:var(--burgundy);
+background:linear-gradient(135deg,var(--gold),#FFD700);
+border:none;
+padding:6px 14px;
+border-radius:20px;
+cursor:pointer;
+transition:all 0.3s ease;
+text-decoration:none;
+}
+.fomo-cd-cta:hover{
+transform:scale(1.05);
+box-shadow:0 4px 15px rgba(255,189,89,0.5);
+}
+.fomo-seat-counter{
+position:fixed;
+right:15px;
+top:80px;
+width:180px;
+background:rgba(0,0,0,0.95);
+backdrop-filter:blur(20px);
+border:2px solid var(--gold);
+border-radius:15px;
+padding:15px 12px;
+z-index:9998;
+box-shadow:0 8px 30px rgba(0,0,0,0.6);
+}
+.fomo-seat-icon{
+width:40px;
+height:40px;
+margin:0 auto 10px;
+display:flex;
+align-items:center;
+justify-content:center;
+animation:fomo-pulse 2s ease-in-out infinite;
+}
+@keyframes fomo-pulse{
+0%,100%{transform:scale(1);}
+50%{transform:scale(1.1);}
+}
+.fomo-seat-title{
+font-family:var(--font-heading);
+font-size:12px;
+font-weight:700;
+color:var(--gold);
+text-align:center;
+margin-bottom:10px;
+text-transform:uppercase;
+letter-spacing:1px;
+}
+.fomo-seat-stats{
+text-align:center;
+margin-bottom:12px;
+}
+.fomo-seat-large{
+font-family:var(--font-heading);
+font-size:28px;
+font-weight:900;
+color:#fff;
+line-height:1;
+text-shadow:0 0 15px rgba(255,189,89,0.6);
+}
+.fomo-seat-sep{
+font-size:20px;
+color:var(--gold);
+margin:0 5px;
+}
+.fomo-seat-small{
+font-family:var(--font-heading);
+font-size:20px;
+font-weight:700;
+color:rgba(255,255,255,0.5);
+}
+.fomo-seat-progress{
+width:100%;
+height:12px;
+background:rgba(255,255,255,0.1);
+border-radius:6px;
+overflow:hidden;
+margin-bottom:12px;
+}
+.fomo-seat-bar{
+height:100%;
+background:linear-gradient(90deg,var(--burgundy),var(--gold));
+transition:width 1s ease;
+position:relative;
+}
+.fomo-seat-bar::after{
+content:'';
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);
+animation:fomo-shimmer 2s infinite;
+}
+@keyframes fomo-shimmer{
+0%{transform:translateX(-100%);}
+100%{transform:translateX(100%);}
+}
+.fomo-seat-warning{
+font-size:9px;
+color:#ff4757;
+text-align:center;
+margin-bottom:10px;
+font-weight:600;
+}
+.fomo-seat-cta{
+display:block;
+width:100%;
+font-family:var(--font-heading);
+font-size:11px;
+font-weight:700;
+color:var(--burgundy);
+background:linear-gradient(135deg,var(--gold),#FFD700);
+border:none;
+padding:10px;
+border-radius:10px;
+cursor:pointer;
+transition:all 0.3s ease;
+text-decoration:none;
+text-align:center;
+}
+.fomo-seat-cta:hover{
+transform:translateY(-2px);
+box-shadow:0 6px 15px rgba(255,189,89,0.5);
+}
+.fomo-ticker{
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
+height:36px;
+background:rgba(0,0,0,0.95);
+backdrop-filter:blur(15px);
+border-top:2px solid var(--gold);
+z-index:9997;
+overflow:hidden;
+}
+.fomo-ticker-wrap{
+display:flex;
+animation:fomo-scroll 30s linear infinite;
+}
+.fomo-ticker-item{
+display:flex;
+align-items:center;
+gap:8px;
+padding:0 25px;
+font-size:12px;
+color:#fff;
+white-space:nowrap;
+}
+.fomo-ticker-icon{
+font-size:14px;
+}
+.fomo-ticker-name{
+color:var(--gold);
+font-weight:600;
+}
+.fomo-ticker-action{
+color:rgba(255,255,255,0.8);
+}
+.fomo-ticker-time{
+color:rgba(255,255,255,0.5);
+font-size:10px;
+}
+@keyframes fomo-scroll{
+0%{transform:translateX(0);}
+100%{transform:translateX(-50%);}
+}
+.fomo-mobile-cta{
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
+height:65px;
+background:rgba(0,0,0,0.95);
+backdrop-filter:blur(20px);
+border-top:2px solid var(--gold);
+z-index:9997;
+display:none;
+padding:10px 12px;
+}
+.fomo-mobile-content{
+display:grid;
+grid-template-columns:1fr auto;
+gap:12px;
+align-items:center;
+}
+.fomo-mobile-text{
+display:flex;
+flex-direction:column;
+gap:3px;
+}
+.fomo-mobile-title{
+font-family:var(--font-heading);
+font-size:12px;
+font-weight:700;
+color:#fff;
+}
+.fomo-mobile-subtitle{
+font-size:9px;
+color:var(--gold);
+}
+.fomo-mobile-btn{
+font-family:var(--font-heading);
+font-size:12px;
+font-weight:700;
+color:var(--burgundy);
+background:linear-gradient(135deg,var(--gold),#FFD700);
+border:none;
+padding:10px 20px;
+border-radius:20px;
+cursor:pointer;
+text-decoration:none;
+white-space:nowrap;
+}
+.fomo-exit-overlay{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.85);
+backdrop-filter:blur(10px);
+z-index:10000;
+display:none;
+align-items:center;
+justify-content:center;
+padding:20px;
+}
+.fomo-exit-overlay.active{
+display:flex;
+}
+.fomo-exit-popup{
+position:relative;
+max-width:500px;
+width:100%;
+background:linear-gradient(180deg,var(--burgundy),#2d0a0e);
+border:3px solid var(--gold);
+border-radius:20px;
+padding:40px 30px;
+text-align:center;
+box-shadow:0 20px 60px rgba(0,0,0,0.8);
+animation:fomo-popIn 0.5s ease-out;
+}
+@keyframes fomo-popIn{
+from{opacity:0;transform:scale(0.8);}
+to{opacity:1;transform:scale(1);}
+}
+.fomo-exit-close{
+position:absolute;
+top:12px;
+right:12px;
+width:30px;
+height:30px;
+border:2px solid rgba(255,255,255,0.3);
+border-radius:50%;
+background:rgba(0,0,0,0.3);
+color:#fff;
+font-size:18px;
+display:flex;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+transition:all 0.3s ease;
+}
+.fomo-exit-close:hover{
+background:rgba(255,255,255,0.2);
+border-color:#fff;
+}
+.fomo-exit-icon{
+font-size:60px;
+margin-bottom:15px;
+animation:fomo-bounce 1s ease-in-out infinite;
+}
+@keyframes fomo-bounce{
+0%,100%{transform:translateY(0);}
+50%{transform:translateY(-10px);}
+}
+.fomo-exit-title{
+font-family:var(--font-heading);
+font-size:28px;
+font-weight:900;
+color:#fff;
+margin-bottom:12px;
+}
+.fomo-exit-subtitle{
+font-size:16px;
+color:var(--gold);
+margin-bottom:20px;
+}
+.fomo-exit-gifts{
+text-align:left;
+margin-bottom:20px;
+}
+.fomo-exit-gift{
+display:flex;
+align-items:center;
+gap:10px;
+padding:12px;
+background:rgba(0,0,0,0.4);
+border-left:3px solid var(--gold);
+border-radius:8px;
+margin-bottom:10px;
+}
+.fomo-exit-gift-icon{
+width:20px;
+height:20px;
+color:var(--gold);
+flex-shrink:0;
+}
+.fomo-exit-gift-text{
+font-size:13px;
+color:#fff;
+line-height:1.4;
+}
+.fomo-exit-form{
+display:flex;
+gap:8px;
+margin-bottom:12px;
+}
+.fomo-exit-input{
+flex:1;
+padding:12px 15px;
+border:2px solid rgba(255,189,89,0.3);
+border-radius:10px;
+background:rgba(0,0,0,0.5);
+color:#fff;
+font-size:14px;
+font-family:var(--font-body);
+}
+.fomo-exit-input:focus{
+outline:none;
+border-color:var(--gold);
+}
+.fomo-exit-submit{
+font-family:var(--font-heading);
+font-size:14px;
+font-weight:700;
+color:var(--burgundy);
+background:linear-gradient(135deg,var(--gold),#FFD700);
+border:none;
+padding:12px 28px;
+border-radius:10px;
+cursor:pointer;
+transition:all 0.3s ease;
+white-space:nowrap;
+}
+.fomo-exit-submit:hover{
+transform:translateY(-2px);
+box-shadow:0 6px 15px rgba(255,189,89,0.5);
+}
+.fomo-exit-note{
+font-size:11px;
+color:rgba(255,255,255,0.6);
+}
+@media (max-width:1024px){
+.fomo-seat-counter{
+width:160px;
+right:10px;
+padding:12px 10px;
+}
+.fomo-seat-large{
+font-size:24px;
+}
+.fomo-seat-small{
+font-size:18px;
+}
+}
+@media (max-width:767px){
+.fomo-cd-text{
+display:none;
+}
+.fomo-seat-counter{
+display:none;
+}
+.fomo-ticker{
+display:none;
+}
+.fomo-mobile-cta{
+display:block;
+}
+.fomo-exit-popup{
+padding:30px 20px;
+}
+.fomo-exit-title{
+font-size:24px;
+}
+.fomo-exit-form{
+flex-direction:column;
+}
+}
+</style>
+</head>
+<body style="margin:0;padding:0;">
+<div class="fomo-wrapper">
+<!-- 1. Countdown Timer (Top) -->
+<div class="fomo-countdown-timer">
+<span class="fomo-cd-text">ƯU ĐÃI KẾT THÚC:</span>
+<div class="fomo-cd-boxes">
+<div class="fomo-cd-box"><div class="fomo-cd-number" id="fomo-days">05</div><div class="fomo-cd-label">NGÀY</div></div>
+<div class="fomo-cd-box"><div class="fomo-cd-number" id="fomo-hours">12</div><div class="fomo-cd-label">GIỜ</div></div>
+<div class="fomo-cd-box"><div class="fomo-cd-number" id="fomo-minutes">34</div><div class="fomo-cd-label">PHÚT</div></div>
+<div class="fomo-cd-box"><div class="fomo-cd-number" id="fomo-seconds">56</div><div class="fomo-cd-label">GIÂY</div></div>
+</div>
+<a href="#pricing" class="fomo-cd-cta">XEM GIÁ</a>
+</div>
+
+<!-- 2. Seat Counter (Right) -->
+<div class="fomo-seat-counter">
+<div class="fomo-seat-icon"><i data-lucide="users" style="width:40px;height:40px;color:var(--gold);"></i></div>
+<div class="fomo-seat-title">CÒN LẠI</div>
+<div class="fomo-seat-stats">
+<span class="fomo-seat-large" id="fomo-seats">12</span>
+<span class="fomo-seat-sep">/</span>
+<span class="fomo-seat-small">50</span>
+</div>
+<div class="fomo-seat-progress"><div class="fomo-seat-bar" id="fomo-bar" style="width:24%;"></div></div>
+<p class="fomo-seat-warning">⚠️ Số lượng có hạn!</p>
+<a href="#pricing" class="fomo-seat-cta">XEM GIÁ</a>
+</div>
+
+<!-- 3. Activity Ticker (Bottom Desktop) -->
+<div class="fomo-ticker">
+<div class="fomo-ticker-wrap">
+<div class="fomo-ticker-item"><span class="fomo-ticker-icon">✅</span><span class="fomo-ticker-name">Minh N.</span><span class="fomo-ticker-action">vừa đăng ký</span><span class="fomo-ticker-time">• 3p</span></div>
+<div class="fomo-ticker-item"><span class="fomo-ticker-icon">🎓</span><span class="fomo-ticker-name">Thu Hà</span><span class="fomo-ticker-action">hoàn thành Cấp 1</span><span class="fomo-ticker-time">• 8p</span></div>
+<div class="fomo-ticker-item"><span class="fomo-ticker-icon">💰</span><span class="fomo-ticker-name">Tuấn Anh</span><span class="fomo-ticker-action">lợi nhuận +24.5%</span><span class="fomo-ticker-time">• 12p</span></div>
+<div class="fomo-ticker-item"><span class="fomo-ticker-icon">🎯</span><span class="fomo-ticker-name">Lan H.</span><span class="fomo-ticker-action">upgrade Cấp 3</span><span class="fomo-ticker-time">• 18p</span></div>
+<div class="fomo-ticker-item"><span class="fomo-ticker-icon">✅</span><span class="fomo-ticker-name">Đức M.</span><span class="fomo-ticker-action">tham gia Cộng đồng</span><span class="fomo-ticker-time">• 25p</span></div>
+<div class="fomo-ticker-item"><span class="fomo-ticker-icon">✅</span><span class="fomo-ticker-name">Minh N.</span><span class="fomo-ticker-action">vừa đăng ký</span><span class="fomo-ticker-time">• 3p</span></div>
+<div class="fomo-ticker-item"><span class="fomo-ticker-icon">🎓</span><span class="fomo-ticker-name">Thu Hà</span><span class="fomo-ticker-action">hoàn thành Cấp 2</span><span class="fomo-ticker-time">• 8p</span></div>
+<div class="fomo-ticker-item"><span class="fomo-ticker-icon">💰</span><span class="fomo-ticker-name">Tuấn Anh</span><span class="fomo-ticker-action">lợi nhuận +24.5%</span><span class="fomo-ticker-time">• 12p</span></div>
+<div class="fomo-ticker-item"><span class="fomo-ticker-icon">🎯</span><span class="fomo-ticker-name">Lan H.</span><span class="fomo-ticker-action">upgrade Cấp 3</span><span class="fomo-ticker-time">• 18p</span></div>
+<div class="fomo-ticker-item"><span class="fomo-ticker-icon">✅</span><span class="fomo-ticker-name">Đức M.</span><span class="fomo-ticker-action">tham gia Cộng đồng</span><span class="fomo-ticker-time">• 25p</span></div>
+</div>
+</div>
+
+<!-- 4. Mobile CTA (Bottom Mobile) -->
+<div class="fomo-mobile-cta">
+<div class="fomo-mobile-content">
+<div class="fomo-mobile-text">
+<div class="fomo-mobile-title">CHỈ CÒN <span id="fomo-mobile-seats">12</span> CHỖ</div>
+<div class="fomo-mobile-subtitle">Kết thúc trong <span id="fomo-mobile-days">5</span> ngày</div>
+</div>
+<a href="#pricing" class="fomo-mobile-btn">XEM GIÁ</a>
+</div>
+</div>
+
+<!-- 5. Exit Intent Popup -->
+<div class="fomo-exit-overlay" id="fomoExit">
+<div class="fomo-exit-popup">
+<div class="fomo-exit-close" id="fomoClose">×</div>
+<div class="fomo-exit-icon">🎁</div>
+<h2 class="fomo-exit-title">ĐỢI! ĐỪNG BỎ LỠ</h2>
+<p class="fomo-exit-subtitle">Nhận <strong>500K</strong> voucher + quà độc quyền</p>
+<div class="fomo-exit-gifts">
+<div class="fomo-exit-gift"><i data-lucide="gift" class="fomo-exit-gift-icon"></i><span class="fomo-exit-gift-text">Voucher 500K cho khóa học</span></div>
+<div class="fomo-exit-gift"><i data-lucide="book-open" class="fomo-exit-gift-icon"></i><span class="fomo-exit-gift-text">eBook "7 Sai Lầm Trader" (299K)</span></div>
+<div class="fomo-exit-gift"><i data-lucide="users" class="fomo-exit-gift-icon"></i><span class="fomo-exit-gift-text">VIP Telegram 30 ngày</span></div>
+</div>
+<form class="fomo-exit-form" id="fomoForm">
+<input type="email" class="fomo-exit-input" placeholder="Email của bạn..." required>
+<button type="submit" class="fomo-exit-submit">NHẬN</button>
+</form>
+<p class="fomo-exit-note">* Chỉ 50 người đầu tiên</p>
+</div>
+</div>
+</div>
+<script>
+lucide.createIcons();
+function initFomoCountdown(){
+let endTime=localStorage.getItem('fomoCountdownEnd');
+if(!endTime){endTime=Date.now()+(5*24*60*60*1000);localStorage.setItem('fomoCountdownEnd',endTime);}else{endTime=Number(endTime);}
+setInterval(()=>{
+const now=Date.now();
+const diff=endTime-now;
+if(diff<=0)return;
+const days=Math.floor(diff/(1000*60*60*24));
+const hours=Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+const minutes=Math.floor((diff%(1000*60*60))/(1000*60));
+const seconds=Math.floor((diff%(1000*60))/1000);
+document.getElementById('fomo-days').textContent=String(days).padStart(2,'0');
+document.getElementById('fomo-hours').textContent=String(hours).padStart(2,'0');
+document.getElementById('fomo-minutes').textContent=String(minutes).padStart(2,'0');
+document.getElementById('fomo-seconds').textContent=String(seconds).padStart(2,'0');
+if(document.getElementById('fomo-mobile-days'))document.getElementById('fomo-mobile-days').textContent=days;
+},1000);
+}
+initFomoCountdown();
+let fomoSeats=parseInt(localStorage.getItem('fomoSeatsLeft')||'12');
+const fomoTotal=50;
+function updateFomoSeats(){
+fomoSeats=Math.max(1,fomoSeats-1);
+localStorage.setItem('fomoSeatsLeft',fomoSeats);
+document.getElementById('fomo-seats').textContent=fomoSeats;
+if(document.getElementById('fomo-mobile-seats'))document.getElementById('fomo-mobile-seats').textContent=fomoSeats;
+document.getElementById('fomo-bar').style.width=(fomoSeats/fomoTotal)*100+'%';
+}
+setInterval(updateFomoSeats,15000);
+document.getElementById('fomo-seats').textContent=fomoSeats;
+if(document.getElementById('fomo-mobile-seats'))document.getElementById('fomo-mobile-seats').textContent=fomoSeats;
+document.getElementById('fomo-bar').style.width=(fomoSeats/fomoTotal)*100+'%';
+let fomoExitShown=sessionStorage.getItem('fomoExitShown');
+document.addEventListener('mouseleave',(e)=>{
+if(e.clientY<0&&!fomoExitShown&&window.innerWidth>768){
+document.getElementById('fomoExit').classList.add('active');
+sessionStorage.setItem('fomoExitShown','true');
+fomoExitShown=true;
+}
+});
+document.getElementById('fomoClose').addEventListener('click',()=>{
+document.getElementById('fomoExit').classList.remove('active');
+});
+document.getElementById('fomoExit').addEventListener('click',(e)=>{
+if(e.target===document.getElementById('fomoExit')){
+document.getElementById('fomoExit').classList.remove('active');
+}
+});
+document.getElementById('fomoForm').addEventListener('submit',(e)=>{
+e.preventDefault();
+alert('Cảm ơn! Check email trong 5 phút.');
+document.getElementById('fomoExit').classList.remove('active');
+});
+</script>
+</body>
+</html>

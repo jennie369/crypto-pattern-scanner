@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 2.4: Hẹn Hò Với Chính Mình (Solo Date) | Khóa Tần Số Tình Yêu</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--burgundy); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .section > ul, .section > ol { color: var(--text-secondary); padding-left: 1.5em; margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > ul, .section > ol { padding-left: calc(16px + 1.5em); padding-right: 16px; } }
+        .section li { margin-bottom: var(--space-sm); }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .highlight-box.purple { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05)); border-color: rgba(106, 91, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.purple { border-left-color: var(--purple); } }
+        .highlight-box.purple .highlight-box-title { color: var(--purple); }
+
+        .highlight-box.cyan { background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 240, 255, 0.05)); border-color: rgba(0, 240, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.cyan { border-left-color: var(--cyan); } }
+        .highlight-box.cyan .highlight-box-title { color: var(--cyan); }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .example-box { background: linear-gradient(135deg, rgba(106, 91, 255, 0.1), rgba(106, 91, 255, 0.02)); border: 1px solid rgba(106, 91, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .example-box { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .example-box-title { font-weight: 700; color: var(--purple); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .date-card { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-md) 0; transition: all 0.3s ease; }
+        @media (max-width: 600px) { .date-card { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-sm) 0; } }
+        @media (min-width: 601px) { .date-card:hover { border-color: var(--gold); transform: translateY(-4px); } }
+        .date-card-icon { font-size: 2rem; margin-bottom: var(--space-sm); }
+        .date-card-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .date-card-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        @media (min-width: 601px) { .flow-step:hover { border-color: var(--gold); transform: translateX(8px); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .faq-item { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-md) 0; }
+        @media (max-width: 600px) { .faq-item { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; } }
+        .faq-question { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); }
+        .faq-answer { font-size: 0.95rem; color: var(--text-secondary); }
+
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+
+        /* ==================== QUIZ SECTION ==================== */
+        .quiz-section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: var(--space-xl); margin-top: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-section { border: none; border-radius: 0; padding: 0; margin-top: 0; border-top: 8px solid var(--bg-primary); } }
+        .quiz-header { text-align: center; margin-bottom: var(--space-xl); }
+        @media (max-width: 600px) { .quiz-header { padding: var(--space-lg) 16px var(--space-md); margin-bottom: 0; } }
+        .quiz-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); }
+        .quiz-subtitle { color: var(--text-muted); font-size: 0.9rem; }
+
+        .quiz-question { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-question { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; margin-bottom: 0; border-bottom: 1px solid var(--glass-border); } }
+        .question-number { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; font-weight: 700; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .question-text { font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-lg); line-height: 1.6; }
+
+        .quiz-options { display: flex; flex-direction: column; gap: var(--space-sm); }
+        @media (max-width: 600px) { .quiz-options { gap: 1px; background: var(--glass-border); margin-left: -16px; margin-right: -16px; margin-left: calc(-16px - 4px); } }
+        .quiz-option { display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: var(--radius-md); cursor: pointer; transition: all 0.3s ease; }
+        @media (max-width: 600px) { .quiz-option { border: none; border-radius: 0; border-left: 4px solid transparent; padding: var(--space-md) 16px; } }
+        .quiz-option:hover:not(.disabled) { border-color: var(--gold); background: var(--bg-card); }
+        @media (max-width: 600px) { .quiz-option:hover:not(.disabled) { border-left-color: var(--gold); } }
+        .quiz-option.selected { border-color: var(--gold); background: rgba(255, 189, 89, 0.1); }
+        @media (max-width: 600px) { .quiz-option.selected { border-left-color: var(--gold); } }
+        .quiz-option.correct { border-color: var(--success) !important; background: rgba(0, 200, 83, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.correct { border-left-color: var(--success) !important; } }
+        .quiz-option.incorrect { border-color: var(--error) !important; background: rgba(255, 82, 82, 0.15) !important; }
+        @media (max-width: 600px) { .quiz-option.incorrect { border-left-color: var(--error) !important; } }
+        .quiz-option.disabled { opacity: 0.7; cursor: not-allowed; }
+        .option-marker { width: 28px; height: 28px; min-width: 28px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+        .quiz-option.selected .option-marker { background: var(--gold); border-color: var(--gold); color: var(--navy-dark); }
+        .quiz-option.correct .option-marker { background: var(--success); border-color: var(--success); color: white; }
+        .quiz-option.incorrect .option-marker { background: var(--error); border-color: var(--error); color: white; }
+        .option-text { flex: 1; color: var(--text-secondary); }
+
+        .question-feedback { margin-top: var(--space-md); padding: var(--space-md); border-radius: var(--space-sm); display: none; }
+        .question-feedback.show { display: block; }
+        .question-feedback.correct { background: rgba(0, 200, 83, 0.15); border-left: 4px solid var(--success); }
+        .question-feedback.incorrect { background: rgba(255, 82, 82, 0.15); border-left: 4px solid var(--error); }
+        .feedback-title { font-weight: 700; margin-bottom: var(--space-xs); }
+        .question-feedback.correct .feedback-title { color: var(--success); }
+        .question-feedback.incorrect .feedback-title { color: var(--error); }
+        .feedback-text { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .quiz-result { text-align: center; padding: var(--space-xl); display: none; }
+        .quiz-result.show { display: block; }
+        .result-score { font-size: 3rem; font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: var(--space-md); }
+        .result-text { font-size: 1.25rem; font-weight: 700; margin-bottom: var(--space-sm); }
+        .result-message { color: var(--text-muted); }
+
+        .quiz-buttons { display: flex; justify-content: center; padding: var(--space-lg); }
+        @media (max-width: 600px) { .quiz-buttons { padding: var(--space-lg) 16px; } }
+        .quiz-btn { padding: var(--space-md) var(--space-xl); border-radius: var(--radius-md); font-weight: 700; cursor: pointer; border: none; font-family: inherit; background: var(--glass-bg); color: var(--text-primary); border: 2px solid var(--glass-border); }
+        .quiz-btn:hover { border-color: var(--gold); }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>💕</span>
+                <span>Module 2</span>
+            </div>
+            <div class="lesson-chapter">Chapter 2 - Yêu Thương Bản Thân</div>
+            <h1 class="lesson-title">Hẹn Hò Với Chính Mình (Solo Date)</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 2.4</span></div>
+                <div class="meta-item"><span>⏱️</span><span>25 phút đọc</span></div>
+                <div class="meta-item"><span>📝</span><span>3 câu quiz</span></div>
+            </div>
+        </header>
+
+        <!-- SECTION 1: Opening Hook -->
+        <section class="section">
+            <h2 class="section-title"><span>💐</span> Bạn Có Từng Chờ Đợi Ai Đó?</h2>
+
+            <p>Bạn có từng muốn đi ăn ở nhà hàng đẹp nhưng nghĩ "để có người yêu rồi đi"? Có bao nhiêu lần bạn muốn xem bộ phim mới nhưng cảm thấy ngại vì không có ai đi cùng? Bạn có đang đặt cuộc sống của mình "on hold" - chờ đợi một người nào đó xuất hiện để bạn mới được phép tận hưởng những trải nghiệm đẹp?</p>
+
+            <p>Nếu câu trả lời là có, bạn không đơn độc. Hàng triệu người đang làm điều tương tự - họ chờ đợi một nửa kia để bắt đầu sống thực sự. Nhưng hôm nay, tôi muốn giới thiệu với bạn một thực hành có thể thay đổi hoàn toàn cách bạn nhìn nhận bản thân và mối quan hệ với chính mình: Solo Date - nghệ thuật hẹn hò với người quan trọng nhất trong cuộc đời bạn.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💝</span> Câu Hỏi Thức Tỉnh</div>
+                <p>Nếu bạn không xứng đáng được chính mình hẹn hò, làm sao bạn tin rằng ai đó khác sẽ thấy bạn xứng đáng để yêu thương?</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m2-solo-date-intro.png" alt="Solo Date là gì">
+            </div>
+            <div class="image-caption">Hình 1: Solo Date - Nghệ thuật hẹn hò với chính mình</div>
+        </section>
+
+        <!-- SECTION 2: Concept Introduction -->
+        <section class="section">
+            <h2 class="section-title"><span>✨</span> Solo Date Là Gì?</h2>
+
+            <p>Solo Date không chỉ đơn giản là "dành thời gian một mình" - đó là một hành động có chủ đích, có kế hoạch, và được thực hiện với sự tôn trọng như cách bạn sẽ làm với người yêu. Đây là nghệ thuật hẹn hò với chính mình, nơi bạn chủ động tạo ra những trải nghiệm đặc biệt để nuôi dưỡng mối quan hệ sâu sắc nhất - mối quan hệ với bản thân.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📖</span> Định Nghĩa Chính Xác</div>
+                <p><strong>Solo Date</strong> là buổi hẹn bạn LÊN KẾ HOẠCH, CHUẨN BỊ, và THỰC HIỆN cho một người duy nhất - chính bạn. Đây không phải là thời gian "rảnh rỗi" hay "không có gì làm". Đây là thời gian THIÊNG LIÊNG bạn dành riêng để khám phá bản thân, làm những điều bạn yêu thích, và nuôi dưỡng tình yêu với chính mình.</p>
+            </div>
+
+            <p>Điểm khác biệt quan trọng: Solo Date KHÔNG PHẢI là ngồi nhà một mình lướt điện thoại hay xem Netflix thụ động. Dù đôi khi những hoạt động đó cũng cần thiết, nhưng Solo Date đòi hỏi sự CHỦ ĐỘNG - bạn là người tổ chức buổi hẹn, bạn quyết định trải nghiệm, và bạn hoàn toàn hiện diện trong khoảnh khắc đó.</p>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>💜</span> Tại Sao Solo Date Quan Trọng?</div>
+                <p>Trong Học Thuyết Chuyển Hóa Nội Tâm, chúng ta hiểu rằng mối quan hệ với người khác là sự phản chiếu mối quan hệ với bản thân. Nếu bạn không dành thời gian chất lượng cho chính mình, bạn đang gửi tín hiệu đến tiềm thức rằng bạn không xứng đáng được quan tâm. Solo Date là cách bạn tuyên bố: "Tôi quan trọng. Thời gian của tôi quan trọng. Trải nghiệm của tôi quan trọng."</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: Deep Explanation - 5 Benefits -->
+        <section class="section">
+            <h2 class="section-title"><span>🌟</span> 5 Lợi Ích Sâu Xa Của Solo Date</h2>
+
+            <p>Solo Date không chỉ là hoạt động thư giãn - đây là công cụ chuyển hóa mạnh mẽ giúp bạn nâng cao tần số tình yêu từ bên trong. Dưới đây là 5 lợi ích sâu xa mà bạn sẽ nhận được khi thực hành Solo Date thường xuyên.</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Khám Phá Bản Thân Thật Sự</div>
+                        <div class="flow-step-desc">Khi một mình, không có áp lực phải làm hài lòng ai, bạn bắt đầu khám phá những gì BẠN thực sự thích. Nhiều người nhận ra họ đã sống theo sở thích của gia đình, bạn bè, hoặc xã hội mà quên mất bản thân mình muốn gì. Solo Date là cơ hội để bạn làm quen lại với chính mình.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Xây Dựng Sự Tự Tin Thực Sự</div>
+                        <div class="flow-step-desc">Ngồi một mình ở quán cà phê, xem phim một mình ở rạp, ăn tối một mình ở nhà hàng - những điều này ban đầu có thể khiến bạn ngại ngùng. Nhưng khi bạn làm được, bạn đang chứng minh cho chính mình rằng bạn không cần ai để cảm thấy đủ. Sự tự tin này không thể mua được - nó phải được xây dựng qua trải nghiệm.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Thoát Khỏi Nỗi Sợ Cô Đơn</div>
+                        <div class="flow-step-desc">Nhiều người sợ ở một mình đến mức họ chấp nhận những mối quan hệ độc hại chỉ để không phải đối diện với sự cô đơn. Solo Date dạy bạn rằng một mình không đồng nghĩa với cô đơn - đó là thời gian quý giá để kết nối với bản thân. Khi bạn biết cách tận hưởng sự đơn độc, bạn không còn vào mối quan hệ từ sự sợ hãi.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Chuẩn Bị Cho Mối Quan Hệ Lành Mạnh</div>
+                        <div class="flow-step-desc">Người biết yêu thương bản thân sẽ không đòi hỏi partner lấp đầy khoảng trống trong lòng. Bạn vào mối quan hệ từ sự đầy đủ, muốn CHIA SẺ cuộc sống với ai đó - không phải từ sự thiếu thốn, CẦN ai đó để cảm thấy hoàn chỉnh. Đây là nền tảng của mối quan hệ 540 Hz mà chúng ta đang hướng tới.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Nạp Lại Năng Lượng Tinh Tế</div>
+                        <div class="flow-step-desc">Thời gian một mình là lúc năng lượng của bạn không bị pha trộn với năng lượng người khác. Bạn có thể xử lý cảm xúc, làm sạch trường năng lượng, và kết nối lại với nguồn sáng bên trong. Đây là self-care ở mức cao nhất - chăm sóc không chỉ thể xác mà cả tâm hồn.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m2-solo-date-benefits.png" alt="Lợi ích của Solo Date">
+            </div>
+            <div class="image-caption">Hình 2: 5 lợi ích sâu xa của việc hẹn hò với chính mình</div>
+        </section>
+
+        <!-- SECTION 4: Real Examples -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Câu Chuyện Thực Tế</h2>
+
+            <p>Để bạn hiểu rõ hơn sức mạnh của Solo Date, hãy cùng nghe những câu chuyện thật từ những người đã thực hành và chuyển hóa.</p>
+
+            <div class="example-box">
+                <div class="example-box-title"><span>👩</span> Câu Chuyện Của Trâm (29 tuổi) - Vượt Qua Nỗi Sợ Ở Một Mình</div>
+                <p>Trâm từng là người luôn cần có bạn bè xung quanh. Cô sợ đi ăn một mình, sợ xem phim một mình, thậm chí sợ ngồi quán cà phê một mình. "Tôi cảm thấy mọi người sẽ nhìn và nghĩ tôi không có bạn," Trâm chia sẻ.</p>
+                <p style="margin-top: var(--space-sm);">Sau khi tham gia khóa học, Trâm bắt đầu thử Solo Date nhỏ: chỉ 30 phút coffee date mỗi tuần. Ban đầu rất ngại, nhưng dần dần cô nhận ra một điều: không ai quan tâm đến cô cả - mọi người đều bận với cuộc sống của họ.</p>
+                <p style="margin-top: var(--space-sm);">Sau 2 tháng thực hành, Trâm đã có thể đi du lịch một mình đến Đà Lạt 3 ngày. "Đó là chuyến đi thay đổi cuộc đời tôi. Tôi nhận ra mình có thể hoàn toàn hạnh phúc một mình. Và kỳ lạ là sau đó, tôi gặp người yêu hiện tại của mình - có lẽ vì năng lượng tôi đã khác đi."</p>
+            </div>
+
+            <div class="example-box">
+                <div class="example-box-title"><span>👨</span> Câu Chuyện Của Minh (34 tuổi) - Thoát Khỏi Mối Quan Hệ Độc Hại</div>
+                <p>Minh vừa kết thúc một mối quan hệ 5 năm đầy sóng gió. Anh nhận ra mình đã ở lại quá lâu vì sợ cô đơn. "Tôi thà chịu đựng còn hơn phải đối diện với sự trống vắng," Minh thú nhận.</p>
+                <p style="margin-top: var(--space-sm);">Sau chia tay, thay vì nhảy vào mối quan hệ mới ngay, Minh quyết định dành 6 tháng thực hành Solo Date. Mỗi tuần, anh tự thưởng cho mình một trải nghiệm: đi hiking, thử nhà hàng mới, học vẽ tranh, đi xem triển lãm nghệ thuật.</p>
+                <p style="margin-top: var(--space-sm);">"Solo Date dạy tôi rằng tôi không cần ai để cảm thấy đầy đủ. Bây giờ, khi nghĩ về mối quan hệ, tôi biết mình muốn CHIA SẺ cuộc sống với ai đó - không phải CẦN ai đó để lấp đầy khoảng trống. Đó là sự khác biệt hoàn toàn."</p>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m2-solo-date-stories.png" alt="Câu chuyện Solo Date">
+            </div>
+            <div class="image-caption">Hình 3: Những câu chuyện thật về sức mạnh của Solo Date</div>
+        </section>
+
+        <!-- SECTION 5: 12 Ideas -->
+        <section class="section">
+            <h2 class="section-title"><span>💡</span> 12 Ý Tưởng Solo Date Cho Bạn</h2>
+
+            <p>Dưới đây là 12 ý tưởng Solo Date cho bạn thử nghiệm. Bắt đầu với những gì cảm thấy thoải mái nhất, sau đó dần dần mở rộng vùng comfort zone của bạn!</p>
+
+            <div class="date-card">
+                <div class="date-card-icon">☕</div>
+                <div class="date-card-title">1. Coffee Date</div>
+                <div class="date-card-desc">Đến quán cà phê yêu thích, gọi đồ uống, ngồi đọc sách hoặc viết journal. Tắt điện thoại và hoàn toàn hiện diện với khoảnh khắc.</div>
+            </div>
+
+            <div class="date-card">
+                <div class="date-card-icon">🎬</div>
+                <div class="date-card-title">2. Movie Solo</div>
+                <div class="date-card-desc">Xem phim một mình ở rạp. Mua popcorn lớn vì không cần chia. Chọn phim BẠN thực sự muốn xem, không phải phim "dễ xem chung".</div>
+            </div>
+
+            <div class="date-card">
+                <div class="date-card-icon">🍽️</div>
+                <div class="date-card-title">3. Restaurant Date</div>
+                <div class="date-card-desc">Đặt bàn cho một người ở nhà hàng đẹp. Mặc đồ đẹp như đi hẹn hò. Thưởng thức bữa ăn không vội vàng, nhấm nháp từng miếng.</div>
+            </div>
+
+            <div class="date-card">
+                <div class="date-card-icon">🎨</div>
+                <div class="date-card-title">4. Museum/Gallery Visit</div>
+                <div class="date-card-desc">Khám phá triển lãm nghệ thuật theo tốc độ của riêng bạn. Dừng lại lâu ở những tác phẩm thu hút bạn mà không cần giải thích cho ai.</div>
+            </div>
+
+            <div class="date-card">
+                <div class="date-card-icon">🌳</div>
+                <div class="date-card-title">5. Nature Walk</div>
+                <div class="date-card-desc">Đi dạo trong công viên hoặc leo núi một mình. Không tai nghe. Chỉ bạn và thiên nhiên. Lắng nghe tiếng chim, cảm nhận gió trên da.</div>
+            </div>
+
+            <div class="date-card">
+                <div class="date-card-icon">🛁</div>
+                <div class="date-card-title">6. Spa Day</div>
+                <div class="date-card-desc">Book massage hoặc facial tại spa. Hoặc tự tạo spa day tại nhà với mặt nạ, tắm nước nóng, nến thơm, và nhạc thư giãn.</div>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>💡</span> Thêm 6 Ý Tưởng Nữa</div>
+                <p>7. Bookstore Exploration - lang thang trong hiệu sách • 8. Concert/Live Music một mình • 9. Cooking Class • 10. Picnic trong công viên • 11. Sunrise/Sunset watching • 12. Art class (vẽ tranh, làm gốm)</p>
+            </div>
+        </section>
+
+        <!-- SECTION 6: How To Plan -->
+        <section class="section">
+            <h2 class="section-title"><span>📅</span> 5 Bước Lên Kế Hoạch Solo Date Hoàn Hảo</h2>
+
+            <p>Để Solo Date thực sự có ý nghĩa, hãy đối xử với nó như một cuộc hẹn thật sự - có kế hoạch, chuẩn bị, và tôn trọng thời gian. Đây là 5 bước bạn nên thực hiện.</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Đặt Lịch Cố Định</div>
+                        <div class="flow-step-desc">Chọn ngày và giờ cố định mỗi tuần. Viết vào calendar như một cuộc hẹn quan trọng: "Date với [Tên bạn]". Không được hủy trừ trường hợp khẩn cấp thực sự - bạn có hủy hẹn với người yêu vì "lười" không?</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Lên Kế Hoạch Cụ Thể</div>
+                        <div class="flow-step-desc">Chọn hoạt động, địa điểm, đặt chỗ nếu cần. Đừng để đến lúc mới nghĩ "làm gì bây giờ" - đó là lúc bạn sẽ cancel vì không có động lực. Sự chuẩn bị tạo ra sự cam kết.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Chuẩn Bị Như Đi Hẹn</div>
+                        <div class="flow-step-desc">Tắm rửa, mặc đồ đẹp, trang điểm nếu muốn. Đừng nghĩ "chỉ có một mình thì cần gì". Bạn xứng đáng với nỗ lực đó - cho CHÍNH MÌNH, không phải cho ai khác.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tắt Điện Thoại</div>
+                        <div class="flow-step-desc">Hoặc ít nhất là tắt notifications và để ở chế độ im lặng. Đây là thời gian của BẠN - đừng để thế giới bên ngoài interrupt. Bạn có check điện thoại liên tục khi đi date với người yêu không?</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Reflection Sau Solo Date</div>
+                        <div class="flow-step-desc">Sau mỗi Solo Date, dành 5 phút viết journal: Mình cảm thấy thế nào? Khám phá được gì về bản thân? Lần sau muốn thử gì? Sự reflection giúp bạn hiểu bản thân sâu hơn theo thời gian.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m2-solo-date-planning.png" alt="Lên kế hoạch Solo Date">
+            </div>
+            <div class="image-caption">Hình 4: 5 bước lên kế hoạch Solo Date hoàn hảo</div>
+        </section>
+
+        <!-- SECTION 7: FAQ -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">Q: Tôi cảm thấy ngại khi ngồi một mình ở nơi công cộng. Phải làm sao?</div>
+                <div class="faq-answer">A: Đây là cảm giác hoàn toàn bình thường khi mới bắt đầu. Bí quyết là bắt đầu nhỏ - coffee date 20 phút ở quán quen thuộc. Mang theo sách hoặc journal để có "công việc" khi ngồi. Dần dần, bạn sẽ nhận ra: không ai quan tâm đến bạn đâu - mọi người đều đang bận với cuộc sống của họ. Và ngay cả khi họ có nhìn, đó là vấn đề của họ, không phải của bạn.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Q: Solo Date có phải chỉ dành cho người độc thân không?</div>
+                <div class="faq-answer">A: Hoàn toàn không! Ngay cả khi bạn đang trong mối quan hệ, việc duy trì thời gian một mình là cực kỳ quan trọng. Solo Date giúp bạn giữ kết nối với bản thân, không bị "mất mình" trong mối quan hệ. Nhiều cặp đôi lành mạnh thực hành Solo Date thường xuyên như một cách chăm sóc bản thân và nuôi dưỡng mối quan hệ.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Q: Tôi không có nhiều tiền. Có cần Solo Date đắt tiền không?</div>
+                <div class="faq-answer">A: Không hề! Solo Date không cần tốn tiền. Đi dạo trong công viên, ngồi đọc sách ở thư viện, picnic với đồ ăn tự làm, ngắm hoàng hôn, viết journal ở ban công - tất cả đều miễn phí. Quan trọng là bạn dành thời gian CHẤT LƯỢNG cho bản thân, không phải số tiền bạn chi.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Q: Bao lâu nên Solo Date một lần?</div>
+                <div class="faq-answer">A: Lý tưởng là mỗi tuần một lần, tối thiểu 1-2 tiếng. Nếu bạn mới bắt đầu, hãy cố gắng ít nhất 2 lần/tháng. Quan trọng là sự nhất quán - một Solo Date nhỏ hàng tuần tốt hơn một Solo Date lớn mỗi vài tháng. Hãy coi đây là thói quen chăm sóc bản thân, không phải sự kiện đặc biệt.</div>
+            </div>
+        </section>
+
+        <!-- SECTION 8: Summary & Transition -->
+        <section class="section">
+            <h2 class="section-title"><span>🎓</span> Tổng Kết Module 2</h2>
+
+            <p>Chúc mừng bạn đã hoàn thành Module 2 - Yêu Thương Bản Thân! Đây là nền tảng vững chắc cho toàn bộ hành trình nâng tần số tình yêu của bạn. Bạn đã học được 4 công cụ mạnh mẽ để xây dựng mối quan hệ sâu sắc với chính mình.</p>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>📋</span> Những Gì Bạn Đã Học Trong Module 2</div>
+                <ul class="summary-list">
+                    <li><strong>Bài 2.1 - Mirror Work:</strong> Kỹ thuật nhìn vào gương và nói lời yêu thương với bản thân của Louise Hay - thay đổi cách bạn nhìn nhận và đối thoại với chính mình</li>
+                    <li><strong>Bài 2.2 - 7 Hành Vi Tinh Tấn:</strong> 7 hành động cụ thể để yêu thương bản thân mỗi ngày - từ giấc ngủ, dinh dưỡng, vận động đến tha thứ bản thân</li>
+                    <li><strong>Bài 2.3 - Thiết Lập Ranh Giới:</strong> 4 loại ranh giới (thể chất, cảm xúc, thời gian, tài chính) và cách bảo vệ năng lượng để cho đi từ sự tràn đầy</li>
+                    <li><strong>Bài 2.4 - Solo Date:</strong> Nghệ thuật hẹn hò với chính mình - dành thời gian chất lượng để khám phá và yêu thương bản thân</li>
+                </ul>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🎯</span> Cam Kết Tuần Này</div>
+                <p>Thực hiện ít nhất 1 Solo Date trong tuần này. Bắt đầu nhỏ nếu cần - một buổi coffee date 30 phút cũng đủ. Quan trọng là bạn BẮT ĐẦU thực hành việc dành thời gian chất lượng cho bản thân. Đặt lịch ngay bây giờ trước khi đọc tiếp!</p>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>🚀</span> Chuẩn Bị Cho Module 3</div>
+                <p>Bạn đã hoàn thành việc chữa lành (Module 1) và học cách yêu thương bản thân (Module 2). Trong Module 3 - Nâng Tần Số Tình Yêu, chúng ta sẽ đi sâu vào việc NÂNG CAO tần số rung động của bạn. Bạn sẽ học về Thang Cảm Xúc Tình Yêu, cách chuyển hóa niềm tin giới hạn, và kỹ thuật Heart Coherence từ HeartMath Institute. Đây là lúc bạn bắt đầu phát ra tần số cao hơn để thu hút tình yêu xứng đáng!</p>
+            </div>
+        </section>
+
+        <!-- QUIZ SECTION - Module 2 -->
+        <section class="quiz-section">
+            <div class="quiz-header">
+                <h2 class="quiz-title">📝 Kiểm Tra Kiến Thức Module 2</h2>
+                <p class="quiz-subtitle">Chọn đáp án để nhận phản hồi ngay lập tức</p>
+            </div>
+
+            <div class="quiz-question" data-question="1" data-correct="B">
+                <div class="question-number">1</div>
+                <div class="question-text">Kỹ thuật Mirror Work được phát triển bởi ai?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Brené Brown</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Louise Hay</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Oprah Winfrey</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Deepak Chopra</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="2" data-correct="D">
+                <div class="question-number">2</div>
+                <div class="question-text">Trong 7 Hành Vi Tinh Tấn, hành vi nào KHÔNG được đề cập trong bài học?</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Giấc ngủ thiêng liêng</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Vận động yêu thương</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Tha thứ bản thân</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Học ngoại ngữ mới</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-question" data-question="3" data-correct="A">
+                <div class="question-number">3</div>
+                <div class="question-text">Ranh giới lành mạnh giúp bạn...</div>
+                <div class="quiz-options">
+                    <div class="quiz-option" data-option="A">
+                        <span class="option-marker">A</span>
+                        <span class="option-text">Cho đi từ sự tràn đầy, không phải cạn kiệt</span>
+                    </div>
+                    <div class="quiz-option" data-option="B">
+                        <span class="option-marker">B</span>
+                        <span class="option-text">Tránh xa tất cả mọi người</span>
+                    </div>
+                    <div class="quiz-option" data-option="C">
+                        <span class="option-marker">C</span>
+                        <span class="option-text">Kiểm soát hành vi người khác</span>
+                    </div>
+                    <div class="quiz-option" data-option="D">
+                        <span class="option-marker">D</span>
+                        <span class="option-text">Luôn nói "không" với mọi yêu cầu</span>
+                    </div>
+                </div>
+                <div class="question-feedback">
+                    <div class="feedback-title"></div>
+                    <div class="feedback-text"></div>
+                </div>
+            </div>
+
+            <div class="quiz-result">
+                <div class="result-score">0/3</div>
+                <div class="result-text">Hoàn thành!</div>
+                <div class="result-message"></div>
+            </div>
+
+            <div class="quiz-buttons">
+                <button class="quiz-btn" id="retakeQuiz" style="display: none;">Làm Lại</button>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const questions = document.querySelectorAll('.quiz-question');
+            const retakeBtn = document.getElementById('retakeQuiz');
+            const resultDiv = document.querySelector('.quiz-result');
+
+            let answeredCount = 0;
+            let correctCount = 0;
+            const totalQuestions = questions.length;
+
+            const explanations = {
+                1: {
+                    correct: 'Chính xác! Louise Hay là người phát triển kỹ thuật Mirror Work và là tác giả của cuốn sách "You Can Heal Your Life".',
+                    incorrect: 'Sai rồi! Kỹ thuật Mirror Work được phát triển bởi Louise Hay - người tiên phong trong lĩnh vực self-help và affirmations.'
+                },
+                2: {
+                    correct: 'Chính xác! "Học ngoại ngữ mới" không nằm trong 7 Hành Vi Tinh Tấn. 7 hành vi bao gồm: Giấc ngủ, Dinh dưỡng, Vận động, Không gian, Ranh giới, Thời gian một mình, và Tha thứ bản thân.',
+                    incorrect: 'Sai rồi! Đây là một trong 7 Hành Vi Tinh Tấn. Hành vi KHÔNG được đề cập là "Học ngoại ngữ mới".'
+                },
+                3: {
+                    correct: 'Chính xác! Ranh giới lành mạnh giúp bạn cho đi từ sự tràn đầy - vì bạn không còn bị drain năng lượng bởi những điều không phục vụ mình.',
+                    incorrect: 'Sai rồi! Ranh giới không phải để xa lánh hay kiểm soát người khác. Ranh giới giúp bạn bảo vệ năng lượng để có thể cho đi từ sự tràn đầy.'
+                }
+            };
+
+            questions.forEach(question => {
+                const options = question.querySelectorAll('.quiz-option');
+                const correctAnswer = question.dataset.correct;
+                const questionNum = question.dataset.question;
+                const feedbackDiv = question.querySelector('.question-feedback');
+                const feedbackTitle = feedbackDiv.querySelector('.feedback-title');
+                const feedbackText = feedbackDiv.querySelector('.feedback-text');
+
+                options.forEach(option => {
+                    option.addEventListener('click', function() {
+                        if (question.classList.contains('answered')) return;
+
+                        question.classList.add('answered');
+                        answeredCount++;
+
+                        const selectedOption = this.dataset.option;
+                        const isCorrect = selectedOption === correctAnswer;
+
+                        options.forEach(opt => opt.classList.add('disabled'));
+                        this.classList.add('selected');
+
+                        if (isCorrect) {
+                            this.classList.add('correct');
+                            correctCount++;
+                            feedbackDiv.classList.add('correct');
+                            feedbackTitle.textContent = '✓ Chính xác!';
+                            feedbackText.textContent = explanations[questionNum].correct;
+                        } else {
+                            this.classList.add('incorrect');
+                            feedbackDiv.classList.add('incorrect');
+                            feedbackTitle.textContent = '✗ Sai rồi!';
+                            feedbackText.textContent = explanations[questionNum].incorrect;
+                            options.forEach(opt => {
+                                if (opt.dataset.option === correctAnswer) {
+                                    opt.classList.add('correct');
+                                }
+                            });
+                        }
+
+                        feedbackDiv.classList.add('show');
+
+                        if (answeredCount === totalQuestions) {
+                            const scoreDiv = resultDiv.querySelector('.result-score');
+                            const messageDiv = resultDiv.querySelector('.result-message');
+                            scoreDiv.textContent = `${correctCount}/${totalQuestions}`;
+
+                            if (correctCount === totalQuestions) {
+                                messageDiv.textContent = '🎉 Xuất sắc! Bạn đã sẵn sàng cho Module 3 - Nâng Tần Số Tình Yêu!';
+                            } else if (correctCount >= 2) {
+                                messageDiv.textContent = '👍 Tốt lắm! Xem lại các bài học trong Module 2 để nắm vững kiến thức nhé!';
+                            } else {
+                                messageDiv.textContent = '📚 Hãy đọc lại các bài học trong Module 2 để hiểu sâu hơn!';
+                            }
+
+                            resultDiv.classList.add('show');
+                            retakeBtn.style.display = 'inline-block';
+                        }
+                    });
+                });
+            });
+
+            retakeBtn.addEventListener('click', function() {
+                answeredCount = 0;
+                correctCount = 0;
+
+                questions.forEach(question => {
+                    question.classList.remove('answered');
+                    const options = question.querySelectorAll('.quiz-option');
+                    const feedbackDiv = question.querySelector('.question-feedback');
+
+                    options.forEach(opt => {
+                        opt.classList.remove('selected', 'correct', 'incorrect', 'disabled');
+                    });
+                    feedbackDiv.classList.remove('show', 'correct', 'incorrect');
+                });
+
+                resultDiv.classList.remove('show');
+                retakeBtn.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

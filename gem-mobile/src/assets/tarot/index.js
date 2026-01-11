@@ -4,6 +4,12 @@
  * 78 cards total: 22 Major Arcana + 56 Minor Arcana
  */
 
+// Card Back Image - YinYang Masters design
+export const CARD_BACK = require('./card_back.jpg.png');
+
+// Tarot Background - Dark blue silk with amethyst crystals
+export const TAROT_BACKGROUND = require('./tarot_background.jpg.jpeg');
+
 // Major Arcana (22 cards)
 export const MAJOR_ARCANA = {
   0: require('./major/MW_The_Fool.jpg'),
@@ -121,10 +127,24 @@ const COURT_CARD_MAP = {
  * - String IDs with court names: 'cups-king', 'pentacles-queen', 'wands-page', 'swords-knight'
  */
 export const getCardImage = (cardId) => {
-  console.log('[getCardImage] Input cardId:', cardId, 'type:', typeof cardId);
-
   // Handle string IDs from Minor Arcana data
   if (typeof cardId === 'string') {
+    // First check if it's a pure numeric string (Major Arcana ID stored as string)
+    if (/^\d+$/.test(cardId)) {
+      const numericId = parseInt(cardId, 10);
+      if (numericId >= 0 && numericId <= 21) {
+        return MAJOR_ARCANA[numericId] || null;
+      } else if (numericId >= 22 && numericId <= 77) {
+        // Extended numeric range for Minor Arcana
+        if (numericId <= 35) return WANDS[numericId - 21] || null;
+        if (numericId <= 49) return CUPS[numericId - 35] || null;
+        if (numericId <= 63) return SWORDS[numericId - 49] || null;
+        if (numericId <= 77) return PENTACLES[numericId - 63] || null;
+      }
+      return null;
+    }
+
+    // Handle suit-number format (e.g., 'wands-01', 'cups-king')
     const parts = cardId.split('-');
     if (parts.length === 2) {
       const suit = parts[0].toLowerCase();
@@ -138,57 +158,41 @@ export const getCardImage = (cardId) => {
         number = parseInt(numberOrCourt, 10);
       }
 
-      console.log('[getCardImage] Parsed:', { suit, numberOrCourt, number });
-
       if (isNaN(number)) {
-        console.log('[getCardImage] Number is NaN, returning null');
         return null;
       }
 
-      let result = null;
       switch (suit) {
         case 'wands':
-          result = WANDS[number] || null;
-          break;
+          return WANDS[number] || null;
         case 'cups':
-          result = CUPS[number] || null;
-          break;
+          return CUPS[number] || null;
         case 'swords':
-          result = SWORDS[number] || null;
-          break;
+          return SWORDS[number] || null;
         case 'pentacles':
-          result = PENTACLES[number] || null;
-          break;
+          return PENTACLES[number] || null;
         default:
-          result = null;
+          return null;
       }
-
-      console.log('[getCardImage] Result for', suit, number, ':', result ? 'FOUND' : 'NOT FOUND');
-      return result;
     }
-    console.log('[getCardImage] Invalid string format');
     return null;
   }
 
   // Handle numeric IDs (0-77)
   if (typeof cardId === 'number') {
-    let result = null;
     if (cardId >= 0 && cardId <= 21) {
-      result = MAJOR_ARCANA[cardId];
-      console.log('[getCardImage] Major Arcana', cardId, ':', result ? 'FOUND' : 'NOT FOUND');
+      return MAJOR_ARCANA[cardId] || null;
     } else if (cardId >= 22 && cardId <= 35) {
-      result = WANDS[cardId - 21]; // 22 -> 1, 35 -> 14
+      return WANDS[cardId - 21] || null; // 22 -> 1, 35 -> 14
     } else if (cardId >= 36 && cardId <= 49) {
-      result = CUPS[cardId - 35]; // 36 -> 1, 49 -> 14
+      return CUPS[cardId - 35] || null; // 36 -> 1, 49 -> 14
     } else if (cardId >= 50 && cardId <= 63) {
-      result = SWORDS[cardId - 49]; // 50 -> 1, 63 -> 14
+      return SWORDS[cardId - 49] || null; // 50 -> 1, 63 -> 14
     } else if (cardId >= 64 && cardId <= 77) {
-      result = PENTACLES[cardId - 63]; // 64 -> 1, 77 -> 14
+      return PENTACLES[cardId - 63] || null; // 64 -> 1, 77 -> 14
     }
-    return result;
   }
 
-  console.log('[getCardImage] Unknown cardId type, returning null');
   return null;
 };
 

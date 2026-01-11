@@ -1,0 +1,1192 @@
+═══════════════════════════════════════════════════════════════════════════════
+CHƯƠNG 9: HÀNH TRÌNH CHUYỂN HÓA (MODULE A)
+═══════════════════════════════════════════════════════════════════════════════
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 9.1: CON NGƯỜI CŨ VÀ CON NGƯỜI MỚI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: BEFORE & AFTER COMPARISON
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Negative      | Red           | #EF4444
+Positive      | Green         | #10B981
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+Footer        | GEM TRADING   | Căn giữa
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "CHUYỂN HÓA"
+- Màu nền: Purple (#6A5BFF)
+
+Tiêu đề: "CON NGƯỜI CŨ VS CON NGƯỜI MỚI"
+
+═══════════════════════════════════════════════════════════════
+COMPARISON LAYOUT:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│  ┌──────────────────────┐  →  ┌──────────────────────┐      │
+│  │  ❌ TRƯỚC KHÓA HỌC   │     │  ✅ SAU KHÓA HỌC     │      │
+│  │  ════════════════════ │     │  ════════════════════ │      │
+│  │                       │     │                       │      │
+│  │  😰 Bối rối, lạc lõng │     │  😊 Rõ ràng, tự tin  │      │
+│  │  😟 Sợ hãi quyết định │     │  💪 Tự tin ra lệnh   │      │
+│  │  😢 Cô đơn, không ai  │     │  👥 Cộng đồng trader │      │
+│  │     hiểu              │     │     cùng tư duy      │      │
+│  │  🤔 Nghi ngờ bản thân │     │  🎯 Tin vào hệ thống │      │
+│  │  📉 Thua lỗ liên tục  │     │  📈 Win Rate 65-73%  │      │
+│  │  ❓ Không hiểu Smart  │     │  💡 Hiểu Smart Money │      │
+│  │     Money             │     │                       │      │
+│  │                       │     │                       │      │
+│  │  Viền: Red (#EF4444)  │     │  Viền: Green (#10B981)│      │
+│  └──────────────────────┘     └──────────────────────┘      │
+│                                                              │
+│  ════════════════════════════════════════════════════════   │
+│  💎 "Đây không chỉ là kiến thức bạn học được.               │
+│      Đây là CON NGƯỜI BẠN ĐÃ TRỞ THÀNH."                    │
+│  ════════════════════════════════════════════════════════   │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: TRANSFORMATION JOURNEY
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "HÀNH TRÌNH"
+- Màu nền: Gold (#FFBD59)
+
+Tiêu đề: "HÀNH TRÌNH CHUYỂN HÓA CỦA BẠN"
+
+═══════════════════════════════════════════════════════════════
+JOURNEY MAP (Timeline):
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│  📍 START                                    🏆 NOW         │
+│  ───●───────────────────────────────────────────●───        │
+│     │                                            │          │
+│     ↓                                            ↓          │
+│  ┌────────┐  ┌────────┐  ┌────────┐  ┌────────┐  ┌────────┐ │
+│  │ CH 1-2 │→ │ CH 3-4 │→ │ CH 5-6 │→ │ CH 7-8 │→ │ NOW!   │ │
+│  │ Nền    │  │ UPU    │  │ DPU    │  │ Paper  │  │ 🎉     │ │
+│  │ tảng   │  │ UPD    │  │ Classic│  │ + AI   │  │        │ │
+│  └────────┘  └────────┘  └────────┘  └────────┘  └────────┘ │
+│                                                              │
+│  🏆 CÁC CỘT MỐC ĐÃ ĐẠT:                                     │
+│  ════════════════════════════════════════════════════════   │
+│  ✅ Hoàn thành 8 chapters kỹ thuật                          │
+│  ✅ Thành thạo 7 patterns (4 GEM + 3 Classic)               │
+│  ✅ Thực hành backtesting với dữ liệu thực                  │
+│  ✅ Xây dựng nhật ký giao dịch cá nhân                      │
+│  ✅ Sử dụng GEM Master AI thành thạo                        │
+│  ✅ SẴN SÀNG cho giao dịch thực tế!                         │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: MINDSET SHIFT
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "TƯ DUY"
+- Màu nền: Cyan (#00F0FF)
+
+Tiêu đề: "SỰ THAY ĐỔI NHẬN THỨC"
+
+═══════════════════════════════════════════════════════════════
+MINDSET COMPARISONS:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│  ❌ BẠN KHÔNG CÒN LÀ:           ✅ BẠN ĐÃ LÀ:               │
+│  ═════════════════════          ═════════════════════        │
+│                                                              │
+│  "Người muốn học trading"   →   "Trader có hệ thống"        │
+│                                                              │
+│  "Người đuổi theo giá"      →   "Người chờ đợi cơ hội"      │
+│                                                              │
+│  "Người mua đỉnh, bán đáy"  →   "Người hiểu Smart Money"    │
+│                                                              │
+│  "Người giao dịch cảm tính" →   "Người giao dịch kỷ luật"   │
+│                                                              │
+│  "Người thua lỗ liên tục"   →   "Người có Win Rate ổn định" │
+│                                                              │
+│  ════════════════════════════════════════════════════════   │
+│                                                              │
+│  💡 INSIGHT BOX:                                            │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │ "Khi bạn thay đổi CON NGƯỜI BẠN LÀ AI                  │ │
+│  │  (không chỉ những gì bạn biết),                        │ │
+│  │  thành công trở nên TẤT YẾU."                          │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 9.2: BẢN ĐỒ HÀNH TRÌNH CỦA BẠN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: JOURNEY MAP COMPLETE
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Success       | Green         | #10B981
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "BẢN ĐỒ"
+- Màu nền: Purple (#6A5BFF)
+
+Tiêu đề: "BẢN ĐỒ HÀNH TRÌNH TIER 1"
+
+═══════════════════════════════════════════════════════════════
+COMPLETE JOURNEY MAP:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│  📍 NƠI BẠN BẮT ĐẦU:                                        │
+│  ───────────────────                                         │
+│  • Mới tham gia thị trường crypto                           │
+│  • Chưa có hệ thống giao dịch                               │
+│  • Thiếu kiến thức phân tích kỹ thuật                       │
+│                                                              │
+│  🗺️ CON ĐƯỜNG ĐÃ ĐI QUA:                                    │
+│  ───────────────────────────                                 │
+│  ┌─────┐  ┌─────┐  ┌─────┐  ┌─────┐                         │
+│  │ CH1 │→ │ CH2 │→ │ CH3 │→ │ CH4 │                         │
+│  │ ✅  │  │ ✅  │  │ ✅  │  │ ✅  │                         │
+│  │Intro│  │ DPD │  │ UPU │  │ UPD │                         │
+│  └─────┘  └─────┘  └─────┘  └─────┘                         │
+│      ↓                                                       │
+│  ┌─────┐  ┌─────┐  ┌─────┐  ┌─────┐                         │
+│  │ CH5 │→ │ CH6 │→ │ CH7 │→ │ CH8 │                         │
+│  │ ✅  │  │ ✅  │  │ ✅  │  │ ✅  │                         │
+│  │ DPU │  │Class│  │Paper│  │ AI  │                         │
+│  └─────┘  └─────┘  └─────┘  └─────┘                         │
+│                                                              │
+│  🏆 ĐÍCH ĐẾN:                                                │
+│  ─────────────                                               │
+│  ★ TRADER CÓ HỆ THỐNG VỚI WIN RATE 67.8%                    │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: SKILLS ACQUIRED
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "KỸ NĂNG"
+- Màu nền: Green (#10B981)
+
+Tiêu đề: "NHỮNG KỸ NĂNG BẠN ĐÃ CÓ"
+
+═══════════════════════════════════════════════════════════════
+SKILLS RADAR/GRID:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│  📊 PATTERNS MASTERY:          📈 ZONE SKILLS:              │
+│  ─────────────────────          ─────────────────────        │
+│  ✅ DPD (Win Rate 68%)         ✅ Vẽ HFZ chính xác          │
+│  ✅ UPU (Win Rate 71%)         ✅ Vẽ LFZ chính xác          │
+│  ✅ UPD (Win Rate 65%)         ✅ Xác định zone strength    │
+│  ✅ DPU (Win Rate 69%)         ✅ Entry tại zone            │
+│  ✅ Head & Shoulders                                        │
+│  ✅ Double Top/Bottom                                       │
+│                                                              │
+│  💼 TRADING SKILLS:            🤖 AI TOOLS:                 │
+│  ─────────────────────          ─────────────────────        │
+│  ✅ Paper Trading              ✅ Chatbot hỏi đáp           │
+│  ✅ Backtesting                ✅ Scanner patterns          │
+│  ✅ Nhật ký giao dịch          ✅ Thiết lập alerts          │
+│  ✅ Risk Management            ✅ Telegram integration      │
+│  ✅ Position sizing                                         │
+│                                                              │
+│  ════════════════════════════════════════════════════════   │
+│  💎 TỔNG GIÁ TRỊ KỸ NĂNG: 11.000.000 VNĐ                    │
+│  ════════════════════════════════════════════════════════   │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: PROGRESS CELEBRATION
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "CHÚC MỪNG"
+- Màu nền: Gold (#FFBD59)
+
+Tiêu đề: "CHÚC MỪNG BẠN ĐÃ HOÀN THÀNH!"
+
+═══════════════════════════════════════════════════════════════
+CELEBRATION CONTENT:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                          🎉                                  │
+│                         🏆🏆🏆                               │
+│                                                              │
+│  ═══════════════════════════════════════════════════════    │
+│              TIER 1 COMPLETION CERTIFICATE                   │
+│  ═══════════════════════════════════════════════════════    │
+│                                                              │
+│               Xác nhận học viên đã hoàn thành:              │
+│                                                              │
+│  📚 8 Chapters | 50+ Bài học | ~8 giờ học                   │
+│  📊 7 Patterns với Win Rate 65-73%                          │
+│  💼 Paper Trading & Backtesting                             │
+│  🤖 GEM Master AI Operations                                │
+│                                                              │
+│  ═══════════════════════════════════════════════════════    │
+│                                                              │
+│          "Bạn đã sẵn sàng cho hành trình tiếp theo!"        │
+│                                                              │
+│                     GEM TRADING ACADEMY                      │
+│                          🌟🌟🌟                              │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 9.3: SỰ THAY ĐỔI THỰC SỰ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: DEEPER THAN SKILLS
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "SÂU HƠN"
+- Màu nền: Purple (#6A5BFF)
+
+Tiêu đề: "KHÔNG CHỈ LÀ KỸ NĂNG..."
+
+═══════════════════════════════════════════════════════════════
+ICEBERG DIAGRAM:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│                    🏔️ KIẾN THỨC BỀ MẶT                      │
+│               ╱────────────────────────────╲                │
+│              ╱   • 7 Patterns              ╲               │
+│             ╱    • Zone Drawing             ╲              │
+│  ~~~~~~~~~~╱~~~~~• Entry Strategies~~~~~~~~~~~╲~~~~~~~~~~~~ │
+│           ╲      • Risk Management            ╱            │
+│            ╲     • AI Tools                  ╱             │
+│             ╲                               ╱              │
+│              ╲   💎 CHUYỂN HÓA SÂU:       ╱               │
+│               ╲                           ╱                │
+│                ╲  • Tư duy Trader        ╱                 │
+│                 ╲ • Kỷ luật giao dịch   ╱                  │
+│                  ╲• Kiên nhẫn chờ đợi  ╱                   │
+│                   ╲• Tin vào hệ thống ╱                    │
+│                    ╲• Mindset thắng  ╱                     │
+│                     ╲• Identity mới ╱                      │
+│                      ╲            ╱                        │
+│                       ╲  90%    ╱                          │
+│                        ╲      ╱                            │
+│                         ╲    ╱                             │
+│                          ╲  ╱                              │
+│                           ╲╱                               │
+│                                                              │
+│  💡 "Phần chìm mới là thứ tạo nên sự khác biệt thực sự"     │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: IDENTITY TRANSFORMATION
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "NHẬN THỨC"
+- Màu nền: Cyan (#00F0FF)
+
+Tiêu đề: "BẠN ĐÃ THAY ĐỔI NHẬN THỨC"
+
+═══════════════════════════════════════════════════════════════
+IDENTITY SHIFTS:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│  🔄 5 CHUYỂN ĐỔI NHẬN THỨC QUAN TRỌNG:                      │
+│  ════════════════════════════════════════════════════════   │
+│                                                              │
+│  ① TỪ REACTIVE → PROACTIVE                                  │
+│     • Trước: Phản ứng theo thị trường                       │
+│     • Sau: Lên kế hoạch và chờ đợi                          │
+│     Viền: Purple                                            │
+│                                                              │
+│  ② TỪ EMOTIONAL → SYSTEMATIC                                │
+│     • Trước: Giao dịch theo cảm xúc                         │
+│     • Sau: Giao dịch theo hệ thống                          │
+│     Viền: Cyan                                              │
+│                                                              │
+│  ③ TỪ FOLLOWER → INDEPENDENT                                │
+│     • Trước: Theo signals người khác                        │
+│     • Sau: Tự phân tích và quyết định                       │
+│     Viền: Green                                             │
+│                                                              │
+│  ④ TỪ GAMBLER → PROFESSIONAL                                │
+│     • Trước: Đánh bạc với thị trường                        │
+│     • Sau: Trading như một nghề                             │
+│     Viền: Gold                                              │
+│                                                              │
+│  ⑤ TỪ LOSER → WINNER MINDSET                                │
+│     • Trước: "Tôi luôn thua"                                │
+│     • Sau: "Tôi có edge để thắng"                           │
+│     Viền: Green                                             │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: POWER OF TRANSFORMATION
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "SỨC MẠNH"
+- Màu nền: Gold (#FFBD59)
+
+Tiêu đề: "SỨC MẠNH CỦA SỰ CHUYỂN HÓA"
+
+═══════════════════════════════════════════════════════════════
+POWER CONCEPT:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │                                                          │ │
+│  │  💡 "Khi bạn thay đổi CON NGƯỜI BẠN LÀ AI               │ │
+│  │      (không chỉ những gì bạn biết),                     │ │
+│  │      thành công trở nên TẤT YẾU.                        │ │
+│  │                                                          │ │
+│  │      Bạn không 'cố gắng' thành công -                   │ │
+│  │      Bạn đơn giản HÀNH ĐỘNG từ nhận thức mới."          │ │
+│  │                                                          │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                                                              │
+│  ═══════════════════════════════════════════════════════    │
+│                                                              │
+│  📊 NGHIÊN CỨU CHO THẤY:                                    │
+│  ─────────────────────────                                   │
+│  • 95% traders thất bại vì KHÔNG thay đổi tư duy            │
+│  • Top 5% traders có IDENTITY khác biệt                     │
+│  • Kỹ năng chỉ chiếm 20%, Mindset chiếm 80%                 │
+│                                                              │
+│  ✨ BẠN KHÔNG CÒN LÀ NGƯỜI BẮT ĐẦU CHAPTER 1                │
+│     BẠN LÀ TRADER CÓ HỆ THỐNG!                              │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 9.4: ĐIỀU KHIẾN BẠN KHÁC BIỆT BÂY GIỜ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: YOUR UNIQUE ADVANTAGES
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "LỢI THẾ"
+- Màu nền: Gold (#FFBD59)
+
+Tiêu đề: "6 LỢI THẾ ĐỘC ĐÁO CỦA BẠN"
+
+═══════════════════════════════════════════════════════════════
+6 ADVANTAGES GRID:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│  ┌────────────────────┐  ┌────────────────────┐             │
+│  │ 1. HỆ THỐNG GEM    │  │ 2. CỘNG ĐỒNG       │             │
+│  │ ══════════════════  │  │ ══════════════════  │             │
+│  │ • 6 Công Thức      │  │ • Hàng nghìn       │             │
+│  │   Frequency        │  │   thành viên       │             │
+│  │ • Win Rate 67.8%   │  │ • Hỗ trợ 24/7      │             │
+│  │ • Giá trị: 11M VNĐ │  │ • Wisdom tập thể   │             │
+│  │ Viền: Purple       │  │ Viền: Cyan         │             │
+│  └────────────────────┘  └────────────────────┘             │
+│                                                              │
+│  ┌────────────────────┐  ┌────────────────────┐             │
+│  │ 3. KIẾN THỨC ĐỘC   │  │ 4. TỰ TIN + RÕ    │             │
+│  │    QUYỀN           │  │    RÀNG            │             │
+│  │ ══════════════════  │  │ ══════════════════  │             │
+│  │ • 6 Công Thức      │  │ • Quyết định từ   │             │
+│  │   95% traders      │  │   kiến thức       │             │
+│  │   không biết       │  │ • Không do dự     │             │
+│  │ • Competitive edge │  │ • Tin vào quy     │             │
+│  │ Viền: Green        │  │   trình           │             │
+│  └────────────────────┘  │ Viền: Gold         │             │
+│                          └────────────────────┘             │
+│  ┌────────────────────┐  ┌────────────────────┐             │
+│  │ 5. TOÀN BỘ HỆ     │  │ 6. LỰA CHỌN       │             │
+│  │    SINH THÁI      │  │    PHÁT TRIỂN     │             │
+│  │ ══════════════════  │  │ ══════════════════  │             │
+│  │ • Sản phẩm GEM    │  │ • Học viên HOẶC   │             │
+│  │ • Ưu tiên thành   │  │   Đối tác         │             │
+│  │   viên            │  │ • Hoa hồng 10-30% │             │
+│  │ • Combo độc quyền │  │ • Thu nhập passive│             │
+│  │ Viền: Purple      │  │ Viền: Cyan        │             │
+│  └────────────────────┘  └────────────────────┘             │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: GEM ECOSYSTEM ACCESS
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "HỆ SINH THÁI"
+- Màu nền: Purple (#6A5BFF)
+
+Tiêu đề: "QUYỀN TRUY CẬP HỆ SINH THÁI GEM"
+
+═══════════════════════════════════════════════════════════════
+ECOSYSTEM DIAGRAM:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│                    ┌───────────────────┐                    │
+│                    │    💎 GEM        │                    │
+│                    │   ECOSYSTEM       │                    │
+│                    └─────────┬─────────┘                    │
+│                              │                               │
+│       ┌──────────────────────┼──────────────────────┐       │
+│       │                      │                      │       │
+│       ↓                      ↓                      ↓       │
+│  ┌─────────┐           ┌─────────┐           ┌─────────┐   │
+│  │ TRADING │           │ WELLNESS│           │  SHOP   │   │
+│  │ ACADEMY │           │ COURSES │           │ CRYSTAL │   │
+│  │ (Bạn ở  │           │ (7 Ngày │           │ (Tinh   │   │
+│  │  đây!)  │           │ Tĩnh Tâm│           │  thể)   │   │
+│  └─────────┘           └─────────┘           └─────────┘   │
+│                                                              │
+│       ┌──────────────────────┼──────────────────────┐       │
+│       │                      │                      │       │
+│       ↓                      ↓                      ↓       │
+│  ┌─────────┐           ┌─────────┐           ┌─────────┐   │
+│  │ AI TOOLS│           │COMMUNITY│           │PARTNER  │   │
+│  │ GEM     │           │ FORUM   │           │PROGRAM  │   │
+│  │ Master  │           │ Kết nối │           │ 10-30%  │   │
+│  └─────────┘           └─────────┘           └─────────┘   │
+│                                                              │
+│  💡 BẠN CÓ QUYỀN TRUY CẬP TẤT CẢ VỚI TƯ CÁCH HỌC VIÊN      │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: WHAT SETS YOU APART
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "KHÁC BIỆT"
+- Màu nền: Green (#10B981)
+
+Tiêu đề: "ĐIỀU KHIẾN BẠN KHÁC 95% TRADERS"
+
+═══════════════════════════════════════════════════════════════
+COMPARISON:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │  ❌ 95% TRADERS:                                      │   │
+│  │  ─────────────────                                    │   │
+│  │  • Giao dịch cảm tính                                │   │
+│  │  • Không có hệ thống                                 │   │
+│  │  • Theo signals người khác                           │   │
+│  │  • Không hiểu Smart Money                            │   │
+│  │  • Thua lỗ liên tục                                  │   │
+│  │  Viền: Red (#EF4444)                                 │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                                                              │
+│                           ↕️                                 │
+│                                                              │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │  ✅ BẠN (HỌC VIÊN GEM):                              │   │
+│  │  ─────────────────────────                            │   │
+│  │  • Có hệ thống GEM Frequency                         │   │
+│  │  • 7 patterns với Win Rate 65-73%                    │   │
+│  │  • Tự phân tích và quyết định                        │   │
+│  │  • Hiểu cách Smart Money vận hành                    │   │
+│  │  • Trading có kỷ luật và kế hoạch                    │   │
+│  │  Viền: Green (#10B981)                               │   │
+│  └──────────────────────────────────────────────────────┘   │
+│                                                              │
+│  💎 "Bạn có những gì hầu hết traders không có!"             │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+═══════════════════════════════════════════════════════════════════════════════
+CHƯƠNG 10: CƠ HỘI & LỰA CHỌN (MODULE B)
+═══════════════════════════════════════════════════════════════════════════════
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 10.1: NGÃ BA ĐƯỜNG - BẠN ĐANG ĐỨNG Ở ĐÂU
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: THREE PATHS DIAGRAM
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL:
+Thành phần    | Màu           | HEX Code
+--------------|---------------|----------
+Background    | Navy đậm      | #112250
+Tiêu đề chính | Vàng Gold     | #FFBD59
+Data/Numbers  | Cyan          | #00F0FF
+Accent        | Purple        | #6A5BFF
+Path 1        | Blue          | #3B82F6
+Path 2        | Gold          | #FFBD59
+Path 3        | Green         | #10B981
+Text body     | Trắng         | #FFFFFF
+Font          | Montserrat    | Bold/Regular
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "NGÃ BA"
+- Màu nền: Purple (#6A5BFF)
+
+Tiêu đề: "3 CON ĐƯỜNG PHÍA TRƯỚC"
+
+═══════════════════════════════════════════════════════════════
+THREE PATHS VISUAL:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│                         📍 BẠN                              │
+│                          │                                   │
+│                          │                                   │
+│            ╱─────────────┼─────────────╲                    │
+│           ╱              │              ╲                   │
+│          ╱               │               ╲                  │
+│         ↓                ↓                ↓                 │
+│                                                              │
+│    ┌─────────┐      ┌─────────┐      ┌─────────┐           │
+│    │ 🚶 CON  │      │ 🚀 CON  │      │ 🌟 CON  │           │
+│    │ ĐƯỜNG 1 │      │ ĐƯỜNG 2 │      │ ĐƯỜNG 3 │           │
+│    │ ═══════ │      │ ═══════ │      │ ═══════ │           │
+│    │ TỰ THỰC │      │ TĂNG TỐC│      │ HỆ SINH │           │
+│    │ HÀNH    │      │  ⭐⭐⭐  │      │ THÁI    │           │
+│    │         │      │         │      │         │           │
+│    │ Tự học  │      │ TIER 2  │      │ Đối tác │           │
+│    │ từ từ   │      │ TIER 3  │      │ + Income│           │
+│    │         │      │         │      │         │           │
+│    │ Viền:   │      │ Viền:   │      │ Viền:   │           │
+│    │ Blue    │      │ Gold    │      │ Green   │           │
+│    └─────────┘      └─────────┘      └─────────┘           │
+│                                                              │
+│  💡 "Con đường TỐT NHẤT là con đường PHÙ HỢP với BẠN"       │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: PATH 1 - SELF PRACTICE
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "CON ĐƯỜNG 1"
+- Màu nền: Blue (#3B82F6)
+
+Tiêu đề: "🚶 TỰ THỰC HÀNH (Chỉ Kiến Thức)"
+
+═══════════════════════════════════════════════════════════════
+PATH 1 DETAILS:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│  📋 ĐIỀU NÀY TRÔNG NHƯ THẾ NÀO:                             │
+│  ────────────────────────────────                            │
+│  • Lấy những gì đã học và tự áp dụng                        │
+│  • Sử dụng tài nguyên miễn phí + cộng đồng                  │
+│  • Tự tìm hiểu mọi thứ qua thử và sai                       │
+│  • Tiến bộ theo tốc độ tự nhiên                             │
+│                                                              │
+│  📊 KẾT QUẢ THỰC TẾ (12 tháng):                             │
+│  ────────────────────────────────                            │
+│  • Có tiến bộ, có thất bại                                  │
+│  • Học qua sai lầm (tốn kém trong trading)                  │
+│  • 20% xuất sắc | 50% dừng lại | 30% bỏ cuộc                │
+│  • Thu nhập tiềm năng: 0-30%                                │
+│                                                              │
+│  👤 PHÙ HỢP VỚI:                                            │
+│  ────────────────────────────────                            │
+│  ✅ Người tự kỷ luật cao                                    │
+│  ✅ Ngân sách hạn chế                                       │
+│  ✅ Người thích tự học                                      │
+│  ✅ Có NHIỀU thời gian để thử nghiệm                        │
+│                                                              │
+│  ⚠️ "Con đường này hoàn toàn hợp lệ.                        │
+│      Nhiều người thành công theo cách này."                 │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: PATH 2 - ACCELERATION
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "CON ĐƯỜNG 2"
+- Màu nền: Gold (#FFBD59)
+
+Tiêu đề: "🚀 TĂNG TỐC (Công Cụ & Đào Tạo Nâng Cao)"
+Subtitle: "⭐ PHỔ BIẾN NHẤT"
+
+═══════════════════════════════════════════════════════════════
+PATH 2 DETAILS:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│  📋 ĐIỀU NÀY TRÔNG NHƯ THẾ NÀO:                             │
+│  ────────────────────────────────                            │
+│  • Công cụ, mẫu và hệ thống đã chứng minh                   │
+│  • Đào tạo nâng cao vượt ngoài nền tảng                     │
+│  • Chương trình có cấu trúc với giám sát                    │
+│  • Đẩy nhanh tiến độ qua hướng dẫn                          │
+│                                                              │
+│  📦 NHỮNG GÌ CÓ SẴN:                                        │
+│  ────────────────────────────────                            │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │ 📊 TIER 2 (21M VNĐ/12 tháng)                           │ │
+│  │ • 6/6 Công Thức đầy đủ + HFZ, LFZ Detection            │ │
+│  │ • 15 patterns tổng | Scanner unlimited                 │ │
+│  ├────────────────────────────────────────────────────────┤ │
+│  │ 👑 TIER 3 (68M VNĐ/24 tháng)                           │ │
+│  │ • 24 patterns | AI Signals | Whale Tracking            │ │
+│  │ • Hỗ trợ ưu tiên | 437+ coins                          │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                                                              │
+│  📊 KẾT QUẢ THỰC TẾ (12 tháng):                             │
+│  ────────────────────────────────                            │
+│  • Kết quả nhanh hơn (3-6 tháng vs 12-24 tháng)             │
+│  • Ít sai lầm tốn kém | 60% đạt mục tiêu                    │
+│  • Thu nhập tiềm năng: 50-80%                               │
+│                                                              │
+│  👤 PHÙ HỢP VỚI: Người đi làm coi trọng thời gian          │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 4: PATH 3 - ECOSYSTEM BUILDER
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "CON ĐƯỜNG 3"
+- Màu nền: Green (#10B981)
+
+Tiêu đề: "🌟 XÂY DỰNG HỆ SINH THÁI (Đối Tác + Thu Nhập)"
+
+═══════════════════════════════════════════════════════════════
+PATH 3 DETAILS:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│  📋 ĐIỀU NÀY TRÔNG NHƯ THẾ NÀO:                             │
+│  ────────────────────────────────                            │
+│  • Tham gia GEM với tư cách đối tác                         │
+│  • Giúp người khác chuyển hóa + xây dựng thu nhập           │
+│  • Cộng đồng tập trung phát triển                           │
+│  • Biến sự chuyển hóa thành công việc kinh doanh            │
+│                                                              │
+│  📦 CÁC CHƯƠNG TRÌNH:                                       │
+│  ────────────────────────────────                            │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │ 🔗 AFFILIATE: Hoa hồng 3%, chia sẻ tự nhiên            │ │
+│  ├────────────────────────────────────────────────────────┤ │
+│  │ 🤝 ĐỐI TÁC CTV: Hoa hồng 10-30%, 4 cấp độ              │ │
+│  ├────────────────────────────────────────────────────────┤ │
+│  │ 🎓 GIẢNG VIÊN: Giảng dạy + nhiều nguồn thu nhập        │ │
+│  └────────────────────────────────────────────────────────┘ │
+│                                                              │
+│  📊 KẾT QUẢ THỰC TẾ (12 tháng):                             │
+│  ────────────────────────────────                            │
+│  • Chuyển hóa cá nhân + THU NHẬP                            │
+│  • 10-150M VNĐ thu nhập bổ sung/năm (tùy cấp độ)            │
+│  • Mạng lưới đối tác cùng chí hướng                         │
+│  • Thu nhập tiềm năng: 100%+ (hiệu ứng cộng hưởng)          │
+│                                                              │
+│  👤 PHÙ HỢP VỚI: Người thích giúp đỡ + dạy người khác      │
+│                                                              │
+│  💡 "Bạn chuyển hóa VÀ kiếm tiền từ chuyển hóa người khác" │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 10.2: CÔNG CỤ TĂNG TỐC CÓ SẴN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: TIER 2 PRODUCT CARD
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "TIER 2"
+- Màu nền: Purple (#6A5BFF)
+
+Tiêu đề: "TẦN SỐ TRADER THỊNH VƯỢNG"
+Price: "21.000.000 VNĐ (12 tháng)"
+
+═══════════════════════════════════════════════════════════════
+PRODUCT FEATURES:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│  📚 BẠN SẼ NHẬN ĐƯỢC:                                       │
+│  ════════════════════════════════════════════════════════   │
+│                                                              │
+│  ✅ 6/6 Công Thức Frequency đầy đủ                          │
+│     • Thêm HFZ, LFZ Zone Detection                          │
+│                                                              │
+│  ✅ 15 Patterns Tổng                                        │
+│     • Triangles, Wedges, Inverse H&S, Rounding              │
+│                                                              │
+│  ✅ Phân tích đa khung thời gian                            │
+│     • Confluence signals                                    │
+│     • Zone stacking                                         │
+│                                                              │
+│  ✅ Scanner nâng cao                                        │
+│     • Unlimited scans                                       │
+│     • 200 coins                                             │
+│     • 3 timeframes                                          │
+│                                                              │
+│  ✅ 50 cảnh báo đang hoạt động                              │
+│                                                              │
+│  ✅ Quản lý rủi ro nâng cao                                 │
+│     • Position sizing                                       │
+│     • Portfolio allocation                                  │
+│                                                              │
+│           [🛒 NÂNG CẤP TIER 2]                              │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: TIER 3 PRODUCT CARD
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "TIER 3"
+- Màu nền: Gold (#FFBD59)
+
+Tiêu đề: "ĐẾ CHẾ TRADER BẬC THẦY"
+Price: "68.000.000 VNĐ (24 tháng)"
+Label: "👑 ELITE"
+
+═══════════════════════════════════════════════════════════════
+PRODUCT FEATURES:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│  📚 BẠN SẼ NHẬN ĐƯỢC:                                       │
+│  ════════════════════════════════════════════════════════   │
+│                                                              │
+│  ✅ 24 Patterns Tổng                                        │
+│     • Flags, Pennants, Candlesticks                         │
+│     • Cup & Handle, và nhiều hơn nữa                        │
+│                                                              │
+│  ✅ AI Signals thời gian thực                               │
+│     • Entry/Exit notifications                              │
+│     • Confidence scoring                                    │
+│                                                              │
+│  ✅ Whale Tracking & Order Flow                             │
+│     • Large orders detection                                │
+│     • Institutional activity                                │
+│                                                              │
+│  ✅ Scanner Elite                                           │
+│     • 437+ coins                                            │
+│     • 5 timeframes                                          │
+│     • Unlimited alerts                                      │
+│                                                              │
+│  ✅ Hỗ trợ ưu tiên qua cộng đồng                            │
+│                                                              │
+│  ✅ Quản lý danh mục nâng cao                               │
+│     • Portfolio analytics                                   │
+│     • Risk dashboard                                        │
+│                                                              │
+│           [👑 NÂNG CẤP TIER 3]                              │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: WELLNESS PRODUCTS
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "WELLNESS"
+- Màu nền: Cyan (#00F0FF)
+
+Tiêu đề: "GÓI TƯ DUY & SỨC KHỎE"
+
+═══════════════════════════════════════════════════════════════
+WELLNESS PRODUCTS:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│  🧘 7 NGÀY TĨNH TÂM, TÌM LẠI TỰ NGÃ                         │
+│  ════════════════════════════════════════════════════════   │
+│  💰 1.990.000 VNĐ                                           │
+│                                                              │
+│  • Cân bằng căng thẳng trading với sự bình yên              │
+│  • Thiền định & Điều chỉnh năng lượng                       │
+│  • Mindfulness cho traders                                  │
+│                                                              │
+│  🎁 GÓI COMBO: Trading + 7 Ngày = 13M (Tiết kiệm 2.5M)      │
+│                                                              │
+│  ────────────────────────────────────────────────────────   │
+│                                                              │
+│  💎 TÁI TẠO TƯ DUY                                          │
+│  ════════════════════════════════════════════════════════   │
+│  💰 499.000 VNĐ                                             │
+│                                                              │
+│  • Tư duy triệu phú cho traders                             │
+│  • Lập trình lại niềm tin giới hạn                          │
+│  • Bổ sung hoàn hảo cho kỹ năng kỹ thuật                    │
+│                                                              │
+│  ────────────────────────────────────────────────────────   │
+│                                                              │
+│  💎 TINH THỂ & PHONG THỦY                                   │
+│  ════════════════════════════════════════════════════════   │
+│  💰 2.000.000 - 20.000.000 VNĐ                              │
+│                                                              │
+│  • Tinh thể thể hiện sự thịnh vượng                         │
+│  • Trang sức phong thủy cao cấp                             │
+│  • Năng lượng cho trading                                   │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 10.3-10.7: PARTNER PROGRAM & NEXT STEPS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📐 HÌNH 1: PARTNER PROGRAM OVERVIEW
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "ĐỐI TÁC"
+- Màu nền: Green (#10B981)
+
+Tiêu đề: "CHƯƠNG TRÌNH ĐỐI TÁC GEM"
+
+═══════════════════════════════════════════════════════════════
+PARTNER LEVELS:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│  📊 3 CẤP ĐỘ ĐỐI TÁC:                                       │
+│  ════════════════════════════════════════════════════════   │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │ 🔗 AFFILIATE (Cấp 1)                                     ││
+│  │ ───────────────────────                                   ││
+│  │ • Hoa hồng: 3% mỗi đơn hàng                              ││
+│  │ • Yêu cầu: Là học viên GEM                               ││
+│  │ • Cách thức: Chia sẻ link tự nhiên                       ││
+│  │ • Thu nhập tiềm năng: 3-10M VNĐ/năm                      ││
+│  │ Viền: Blue                                               ││
+│  └─────────────────────────────────────────────────────────┘│
+│                                                              │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │ 🤝 CTV (Cấp 2-3)                                         ││
+│  │ ───────────────────────                                   ││
+│  │ • Hoa hồng: 10-20%                                       ││
+│  │ • Yêu cầu: Có kỹ năng tư vấn                             ││
+│  │ • Đào tạo: Được training chuyên sâu                      ││
+│  │ • Thu nhập tiềm năng: 20-80M VNĐ/năm                     ││
+│  │ Viền: Gold                                               ││
+│  └─────────────────────────────────────────────────────────┘│
+│                                                              │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │ 🎓 GIẢNG VIÊN (Cấp 4)                                    ││
+│  │ ───────────────────────                                   ││
+│  │ • Hoa hồng: 25-30%                                       ││
+│  │ • Yêu cầu: Kinh nghiệm + Kết quả                         ││
+│  │ • Vai trò: Giảng dạy + Mentoring                         ││
+│  │ • Thu nhập tiềm năng: 80-150M VNĐ/năm                    ││
+│  │ Viền: Green                                              ││
+│  └─────────────────────────────────────────────────────────┘│
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 2: DECISION FRAMEWORK
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "QUYẾT ĐỊNH"
+- Màu nền: Purple (#6A5BFF)
+
+Tiêu đề: "CHỌN CON ĐƯỜNG PHÙ HỢP VỚI BẠN"
+
+═══════════════════════════════════════════════════════════════
+DECISION FLOWCHART:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│  🤔 HÃY TỰ HỎI:                                             │
+│  ════════════════════════════════════════════════════════   │
+│                                                              │
+│  ① Tôi muốn ở đâu trong 12 tháng?                           │
+│     ┌───────────────────────────────────────────────────┐   │
+│     │ □ Tự học từ từ → Con đường 1                      │   │
+│     │ □ Kết quả nhanh → Con đường 2                     │   │
+│     │ □ Xây dựng thu nhập → Con đường 3                 │   │
+│     └───────────────────────────────────────────────────┘   │
+│                                                              │
+│  ② Hoàn cảnh tài chính hiện tại?                            │
+│     ┌───────────────────────────────────────────────────┐   │
+│     │ □ Hạn chế → Con đường 1                           │   │
+│     │ □ Có thể đầu tư → Con đường 2                     │   │
+│     │ □ Muốn kiếm thêm → Con đường 3                    │   │
+│     └───────────────────────────────────────────────────┘   │
+│                                                              │
+│  ③ Tôi có thể cam kết bao nhiêu thời gian?                  │
+│     ┌───────────────────────────────────────────────────┐   │
+│     │ □ Nhiều (tự học) → Con đường 1                    │   │
+│     │ □ Ít (cần nhanh) → Con đường 2                    │   │
+│     │ □ Linh hoạt (kinh doanh) → Con đường 3            │   │
+│     └───────────────────────────────────────────────────┘   │
+│                                                              │
+│  ④ Điều gì khiến tôi hào hứng nhất?                         │
+│     ┌───────────────────────────────────────────────────┐   │
+│     │ □ Tự mình làm → Con đường 1                       │   │
+│     │ □ Học nhanh hơn → Con đường 2                     │   │
+│     │ □ Giúp người khác → Con đường 3                   │   │
+│     └───────────────────────────────────────────────────┘   │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"
+
+
+📐 HÌNH 3: NEXT STEPS CTA
+Prompt Canva/Gemini:
+⚠️ ENFORCE: Hình ảnh size ratio 9:16 (dọc) hoặc 1:1 (vuông)
+⚠️ ENFORCE: Dùng font tiếng Việt có dấu đầy đủ
+📋 DESIGN SYSTEM GENERAL: [Same as above]
+
+NỘI DUNG HÌNH:
+═══════════════════════════════════════════════════════════════
+HEADER:
+═══════════════════════════════════════════════════════════════
+Badge: "HÀNH ĐỘNG"
+- Màu nền: Gold (#FFBD59)
+
+Tiêu đề: "BƯỚC TIẾP THEO CỦA BẠN"
+
+═══════════════════════════════════════════════════════════════
+CALL TO ACTION:
+═══════════════════════════════════════════════════════════════
+┌─────────────────────────────────────────────────────────────┐
+│                                                              │
+│  🎯 3 BƯỚC ĐỂ TIẾP TỤC HÀNH TRÌNH:                          │
+│  ════════════════════════════════════════════════════════   │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │ BƯỚC 1: Hoàn thành Paper Trading                        ││
+│  │ ────────────────────────────────                         ││
+│  │ 📍 100 lệnh paper trading                                ││
+│  │ 📍 Win Rate > 55%                                        ││
+│  │ 📍 Nhật ký giao dịch đầy đủ                              ││
+│  └─────────────────────────────────────────────────────────┘│
+│                          ↓                                   │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │ BƯỚC 2: Chọn con đường phù hợp                          ││
+│  │ ────────────────────────────────                         ││
+│  │ 📍 Tự thực hành? Tiếp tục với TIER 1                     ││
+│  │ 📍 Tăng tốc? Nâng cấp TIER 2/3                           ││
+│  │ 📍 Đối tác? Đăng ký Partner Program                      ││
+│  └─────────────────────────────────────────────────────────┘│
+│                          ↓                                   │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │ BƯỚC 3: Liên hệ hỗ trợ                                  ││
+│  │ ────────────────────────────────                         ││
+│  │ 📱 App: Nhắn tin qua GEM Master                          ││
+│  │ 💬 Community: Đặt câu hỏi trong Forum                    ││
+│  │ 📧 Email: support@gemtrading.com                         ││
+│  └─────────────────────────────────────────────────────────┘│
+│                                                              │
+│  ════════════════════════════════════════════════════════   │
+│  💎 "Bất kể bạn chọn con đường nào,                         │
+│      hành trình chuyển hóa của bạn đã bắt đầu!"            │
+│  ════════════════════════════════════════════════════════   │
+│                                                              │
+│              CẢM ƠN BẠN ĐÃ ĐỒNG HÀNH!                       │
+│                   GEM TRADING ACADEMY                        │
+│                        🌟🌟🌟                                │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+
+FOOTER: "GEM TRADING"

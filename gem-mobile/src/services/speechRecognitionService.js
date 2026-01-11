@@ -17,7 +17,7 @@
 
 import { Platform } from 'react-native';
 import * as Speech from 'expo-speech';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase';
 
 // Native voice recognition (FREE!)
@@ -53,57 +53,62 @@ class SpeechRecognitionService {
   _initNativeVoice() {
     if (!Voice) return;
 
-    Voice.onSpeechStart = () => {
-      console.log('[SpeechRecognition] Native speech started');
-      this.isListening = true;
-    };
+    try {
+      Voice.onSpeechStart = () => {
+        console.log('[SpeechRecognition] Native speech started');
+        this.isListening = true;
+      };
 
-    Voice.onSpeechEnd = () => {
-      console.log('[SpeechRecognition] Native speech ended');
-      this.isListening = false;
-      if (this.onEndCallback) {
-        this.onEndCallback();
-      }
-    };
+      Voice.onSpeechEnd = () => {
+        console.log('[SpeechRecognition] Native speech ended');
+        this.isListening = false;
+        if (this.onEndCallback) {
+          this.onEndCallback();
+        }
+      };
 
-    Voice.onSpeechResults = (event) => {
-      const results = event.value || [];
-      const finalText = results[0] || '';
-      console.log('[SpeechRecognition] Native results:', finalText);
+      Voice.onSpeechResults = (event) => {
+        const results = event.value || [];
+        const finalText = results[0] || '';
+        console.log('[SpeechRecognition] Native results:', finalText);
 
-      if (this.onResultCallback && finalText) {
-        this.onResultCallback({
-          finalTranscript: finalText,
-          interimTranscript: '',
-          isFinal: true
-        });
-      }
-    };
+        if (this.onResultCallback && finalText) {
+          this.onResultCallback({
+            finalTranscript: finalText,
+            interimTranscript: '',
+            isFinal: true
+          });
+        }
+      };
 
-    Voice.onSpeechPartialResults = (event) => {
-      const results = event.value || [];
-      const partialText = results[0] || '';
-      this.partialResults = partialText;
+      Voice.onSpeechPartialResults = (event) => {
+        const results = event.value || [];
+        const partialText = results[0] || '';
+        this.partialResults = partialText;
 
-      if (this.onResultCallback && partialText) {
-        this.onResultCallback({
-          finalTranscript: '',
-          interimTranscript: partialText,
-          isFinal: false
-        });
-      }
-    };
+        if (this.onResultCallback && partialText) {
+          this.onResultCallback({
+            finalTranscript: '',
+            interimTranscript: partialText,
+            isFinal: false
+          });
+        }
+      };
 
-    Voice.onSpeechError = (event) => {
-      console.error('[SpeechRecognition] Native error:', event.error);
-      this.isListening = false;
+      Voice.onSpeechError = (event) => {
+        console.error('[SpeechRecognition] Native error:', event.error);
+        this.isListening = false;
 
-      if (this.onErrorCallback) {
-        this.onErrorCallback({ error: event.error?.message || event.error });
-      }
-    };
+        if (this.onErrorCallback) {
+          this.onErrorCallback({ error: event.error?.message || event.error });
+        }
+      };
 
-    console.log('[SpeechRecognition] Native voice initialized');
+      console.log('[SpeechRecognition] Native voice initialized');
+    } catch (e) {
+      // Expected in Expo Go - native module event handlers may not work
+      console.log('[SpeechRecognition] Native voice init skipped (Expo Go)');
+    }
   }
 
   /**
@@ -125,9 +130,15 @@ class SpeechRecognitionService {
   async isNativeAvailable() {
     if (!Voice) return false;
     try {
+      // Check if the isAvailable method exists and is callable
+      if (typeof Voice.isAvailable !== 'function') {
+        return false;
+      }
       const available = await Voice.isAvailable();
       return available === 1 || available === true;
     } catch (e) {
+      // Expected in Expo Go - native module not linked
+      console.log('[SpeechRecognition] isNativeAvailable check failed (expected in Expo Go)');
       return false;
     }
   }
@@ -192,14 +203,24 @@ class SpeechRecognitionService {
    */
   async _startNativeListening() {
     if (!Voice) {
-      console.error('[SpeechRecognition] Native voice not available');
+      console.log('[SpeechRecognition] Native voice module not available (expected in Expo Go)');
       if (this.onErrorCallback) {
-        this.onErrorCallback({ error: 'Native voice recognition not available' });
+        this.onErrorCallback({ error: 'Native voice recognition not available in Expo Go' });
       }
       return false;
     }
 
     try {
+      // Check if native module is truly available (not just the JS wrapper)
+      const isAvailable = await this.isNativeAvailable();
+      if (!isAvailable) {
+        console.log('[SpeechRecognition] Native voice not available on this device/environment');
+        if (this.onErrorCallback) {
+          this.onErrorCallback({ error: 'Native voice recognition not supported in this environment' });
+        }
+        return false;
+      }
+
       // Check if already listening
       if (this.isListening) {
         await this.stopListening();
@@ -214,9 +235,10 @@ class SpeechRecognitionService {
       return true;
 
     } catch (error) {
-      console.error('[SpeechRecognition] Start native listening error:', error);
+      // Handle gracefully - this is expected in Expo Go
+      console.log('[SpeechRecognition] Native voice not available:', error.message || error);
       if (this.onErrorCallback) {
-        this.onErrorCallback({ error: error.message });
+        this.onErrorCallback({ error: 'Voice recognition requires a development build' });
       }
       return false;
     }

@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
     maxHeight: SCREEN_HEIGHT * 0.82,
     paddingTop: SPACING.lg,
     borderWidth: 1,
-    borderColor: 'rgba(100, 150, 200, 0.25)',
+    borderColor: 'rgba(255, 189, 89, 0.3)',
   },
   header: {
     flexDirection: 'row',
@@ -483,7 +483,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     marginTop: SPACING.md,
-    backgroundColor: 'rgba(245, 245, 245, 0.95)',
+    backgroundColor: '#FFBD59',
     borderRadius: 22,
   },
   dismissText: {

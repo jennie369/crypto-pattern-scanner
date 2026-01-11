@@ -31,6 +31,15 @@ export { default as ChatbotPricingModal } from './ChatbotPricingModal';
 export { default as QuickBuyModal } from './QuickBuyModal';
 export { default as UpsellModal } from './UpsellModal';
 
+// Binance-style FAQ Panel (Quick Select Topics)
+export { default as FAQPanel } from './FAQPanel';
+export {
+  FAQ_TOPICS,
+  FAQ_QUESTIONS,
+  getTopicById,
+  getQuestionsForTopic,
+} from './FAQPanelData';
+
 // Export Image Components
 export { default as ExportButton } from './ExportButton';
 export { default as ExportTemplateSelector } from './ExportTemplateSelector';
@@ -93,3 +102,22 @@ export {
   isGreeting,
   getResponseContext,
 } from '../../utils/intentDetector';
+
+// Tarot Spread Components (Phase 1 Enhancement)
+export { default as CardFlip } from './CardFlip';
+export { default as ShuffleAnimation } from './ShuffleAnimation';
+export { default as SpreadLayout } from './SpreadLayout';
+export { default as SpreadCard } from './SpreadCard';
+export { default as SpreadInfoModal } from './SpreadInfoModal';
+
+// Reading History Components (Phase 2 Enhancement)
+export { default as ReadingHistoryItem } from './ReadingHistoryItem';
+export { default as QuestionPrompts } from './QuestionPrompts';
+
+// I-Ching Animation Components (Phase 2 Enhancement)
+export { default as CoinCastAnimation } from './CoinCastAnimation';
+export { default as HexagramBuilder } from './HexagramBuilder';
+
+// Tarot Onboarding & Settings (Phase 2-3)
+export { default as TarotOnboarding } from './TarotOnboarding';
+export { default as DeckSelector } from './DeckSelector';

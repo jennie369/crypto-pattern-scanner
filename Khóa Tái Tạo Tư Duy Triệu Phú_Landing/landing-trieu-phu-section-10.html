@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 10: Chương Trình CTV/Affiliate - GEM Academy</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Noto+Sans+Display:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ═══════════════════════════════════════════════════════════
+           CSS VARIABLES - GEM Design System
+           ═══════════════════════════════════════════════════════════ */
+        :root {
+            --primary-burgundy: #9C0612;
+            --dark-burgundy: #4A0108;
+            --gold-accent: #FFBD59;
+            --gold-light: #DEBC81;
+            --bronze: #CD7F32;
+            --silver: #C0C0C0;
+            --gold: #FFD700;
+            --platinum: #E5E4E2;
+            --diamond: #B9F2FF;
+            --cyan-accent: #00F0FF;
+            --green-success: #10B981;
+            --text-light: #FFFFFF;
+            --text-cream: #F5E6D3;
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            color: var(--text-light);
+            line-height: 1.7;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           SECTION 10: PARTNERSHIP 1 - Burgundy → Dark Burgundy
+           ═══════════════════════════════════════════════════════════ */
+        .section-10 {
+            background: linear-gradient(180deg,
+                #4A0108 0%,
+                #420107 15%,
+                #3A0106 30%,
+                #320105 45%,
+                #2A0104 60%,
+                #220103 75%,
+                #1A0102 90%,
+                #120101 100%
+            );
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+            padding: 80px 0;
+        }
+
+        /* Background Glow */
+        .section-10::before {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: -200px;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255, 189, 89, 0.15) 0%, transparent 70%);
+            filter: blur(120px);
+            pointer-events: none;
+        }
+
+        .section-10::after {
+            content: '';
+            position: absolute;
+            bottom: 10%;
+            right: -150px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(156, 6, 18, 0.2) 0%, transparent 70%);
+            filter: blur(100px);
+            pointer-events: none;
+        }
+
+        /* Container */
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Section Header */
+        .section-header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 0 16px;
+        }
+
+        .section-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, rgba(255,189,89,0.2), rgba(156,6,18,0.2));
+            border: 2px solid var(--gold-accent);
+            color: var(--gold-accent);
+            padding: 10px 24px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .section-badge svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: clamp(1.8rem, 4.5vw, 3rem);
+            font-weight: 900;
+            color: var(--text-light);
+            line-height: 1.2;
+            margin-bottom: 16px;
+        }
+
+        .section-title .highlight {
+            color: var(--gold-accent);
+        }
+
+        .section-subtitle {
+            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            color: var(--text-cream);
+            font-weight: 400;
+            max-width: 750px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        /* Intro Box */
+        .intro-box {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 189, 89, 0.2);
+            border-radius: 20px;
+            padding: 32px 24px;
+            margin: 40px 16px;
+            text-align: center;
+        }
+
+        .intro-icon {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, var(--gold-accent), var(--primary-burgundy));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+
+        .intro-icon svg {
+            width: 36px;
+            height: 36px;
+            color: var(--text-light);
+        }
+
+        .intro-title {
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            margin-bottom: 16px;
+        }
+
+        .intro-text {
+            font-size: 1rem;
+            color: var(--text-cream);
+            line-height: 1.8;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* 5 Tiers Grid */
+        .tiers-section {
+            margin: 50px 0;
+        }
+
+        .tiers-title {
+            font-family: var(--font-heading);
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            text-align: center;
+            margin-bottom: 32px;
+            padding: 0 16px;
+        }
+
+        .tiers-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            padding: 0 16px;
+        }
+
+        .tier-card {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            border: 2px solid;
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tier-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .tier-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Tier Colors */
+        .tier-bronze {
+            border-color: var(--bronze);
+        }
+        .tier-bronze::before {
+            background: linear-gradient(90deg, var(--bronze), #8B4513);
+        }
+
+        .tier-silver {
+            border-color: var(--silver);
+        }
+        .tier-silver::before {
+            background: linear-gradient(90deg, var(--silver), #A8A8A8);
+        }
+
+        .tier-gold {
+            border-color: var(--gold);
+        }
+        .tier-gold::before {
+            background: linear-gradient(90deg, var(--gold), #FFA500);
+        }
+
+        .tier-platinum {
+            border-color: var(--platinum);
+        }
+        .tier-platinum::before {
+            background: linear-gradient(90deg, var(--platinum), #A0A0A0);
+        }
+
+        .tier-diamond {
+            border-color: var(--diamond);
+        }
+        .tier-diamond::before {
+            background: linear-gradient(90deg, var(--diamond), #87CEEB);
+        }
+
+        /* Tier Header */
+        .tier-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .tier-icon {
+            width: 56px;
+            height: 56px;
+            min-width: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tier-bronze .tier-icon {
+            background: linear-gradient(135deg, var(--bronze), #8B4513);
+        }
+        .tier-silver .tier-icon {
+            background: linear-gradient(135deg, var(--silver), #A8A8A8);
+        }
+        .tier-gold .tier-icon {
+            background: linear-gradient(135deg, var(--gold), #FFA500);
+        }
+        .tier-platinum .tier-icon {
+            background: linear-gradient(135deg, var(--platinum), #A0A0A0);
+        }
+        .tier-diamond .tier-icon {
+            background: linear-gradient(135deg, var(--diamond), #87CEEB);
+        }
+
+        .tier-icon svg {
+            width: 28px;
+            height: 28px;
+            color: #1A1A1A;
+        }
+
+        .tier-info h3 {
+            font-family: var(--font-heading);
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .tier-bronze .tier-info h3 { color: var(--bronze); }
+        .tier-silver .tier-info h3 { color: var(--silver); }
+        .tier-gold .tier-info h3 { color: var(--gold); }
+        .tier-platinum .tier-info h3 { color: var(--platinum); }
+        .tier-diamond .tier-info h3 { color: var(--diamond); }
+
+        .tier-info .threshold {
+            font-size: 0.85rem;
+            color: var(--text-cream);
+        }
+
+        /* Commission Grid */
+        .commission-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .commission-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 12px 8px;
+            text-align: center;
+        }
+
+        .commission-label {
+            font-size: 0.7rem;
+            color: var(--text-cream);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .commission-value {
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: var(--gold-accent);
+        }
+
+        .tier-desc {
+            font-size: 0.9rem;
+            color: var(--text-cream);
+            line-height: 1.6;
+        }
+
+        /* How It Works */
+        .how-section {
+            margin: 60px 0;
+        }
+
+        .how-title {
+            font-family: var(--font-heading);
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            text-align: center;
+            margin-bottom: 32px;
+            padding: 0 16px;
+        }
+
+        .how-steps {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            padding: 0 16px;
+        }
+
+        .how-step {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            background: linear-gradient(135deg, var(--gold-accent), var(--primary-burgundy));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-heading);
+            font-size: 1.2rem;
+            font-weight: 900;
+            color: var(--text-light);
+        }
+
+        .step-content h4 {
+            font-family: var(--font-heading);
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 6px;
+        }
+
+        .step-content p {
+            font-size: 0.95rem;
+            color: var(--text-cream);
+            line-height: 1.6;
+        }
+
+        /* Success Story */
+        .success-story {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 189, 89, 0.2);
+            border-radius: 20px;
+            padding: 32px 24px;
+            margin: 50px 16px;
+        }
+
+        .story-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .story-avatar {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--gold-accent), var(--primary-burgundy));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid var(--gold-accent);
+        }
+
+        .story-avatar svg {
+            width: 32px;
+            height: 32px;
+            color: var(--text-light);
+        }
+
+        .story-info h4 {
+            font-family: var(--font-heading);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+
+        .story-info span {
+            font-size: 0.85rem;
+            color: var(--gold-accent);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .story-info span svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .story-quote {
+            font-size: 1rem;
+            color: var(--text-cream);
+            line-height: 1.8;
+            font-style: italic;
+            padding-left: 16px;
+            border-left: 3px solid var(--gold-accent);
+            margin-bottom: 20px;
+        }
+
+        .story-results {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .result-item {
+            background: rgba(255, 189, 89, 0.1);
+            border-radius: 10px;
+            padding: 16px 12px;
+            text-align: center;
+        }
+
+        .result-value {
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: var(--gold-accent);
+            display: block;
+        }
+
+        .result-label {
+            font-size: 0.75rem;
+            color: var(--text-cream);
+            margin-top: 4px;
+        }
+
+        /* Benefits Grid */
+        .benefits-section {
+            margin: 50px 0;
+        }
+
+        .benefits-title {
+            font-family: var(--font-heading);
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            text-align: center;
+            margin-bottom: 32px;
+            padding: 0 16px;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            padding: 0 16px;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .benefit-item:hover {
+            background: rgba(255, 189, 89, 0.1);
+            transform: translateX(4px);
+        }
+
+        .benefit-icon {
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            background: linear-gradient(135deg, rgba(255,189,89,0.2), rgba(156,6,18,0.2));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .benefit-icon svg {
+            width: 22px;
+            height: 22px;
+            color: var(--gold-accent);
+        }
+
+        .benefit-text {
+            font-size: 0.95rem;
+            color: var(--text-cream);
+            line-height: 1.5;
+        }
+
+        /* CTA Section */
+        .section-cta {
+            text-align: center;
+            padding: 40px 16px;
+        }
+
+        .cta-text {
+            font-size: 1.1rem;
+            color: var(--text-cream);
+            margin-bottom: 24px;
+            line-height: 1.8;
+        }
+
+        .btn-cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px 36px;
+            background: linear-gradient(135deg, var(--gold-accent), var(--gold-light));
+            color: var(--primary-burgundy);
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 40px rgba(255, 189, 89, 0.3);
+        }
+
+        .btn-cta:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(255, 189, 89, 0.5);
+        }
+
+        .btn-cta svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 28px;
+            background: transparent;
+            color: var(--gold-accent);
+            border: 2px solid var(--gold-accent);
+            font-family: var(--font-heading);
+            font-size: 0.95rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            text-decoration: none;
+            margin-top: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 189, 89, 0.1);
+        }
+
+        /* Responsive */
+        @media (min-width: 600px) {
+            .section-10 {
+                padding: 100px 40px;
+            }
+
+            .intro-box {
+                margin: 40px 0;
+            }
+
+            .tiers-grid {
+                padding: 0;
+            }
+
+            .how-steps {
+                padding: 0;
+            }
+
+            .success-story {
+                margin: 50px 0;
+            }
+
+            .benefits-grid {
+                padding: 0;
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 768px) {
+            .tiers-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .how-steps {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .section-10 {
+                padding: 100px 60px;
+            }
+
+            .tiers-grid {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 12px;
+            }
+
+            .tier-card {
+                padding: 20px 16px;
+            }
+
+            .commission-grid {
+                grid-template-columns: 1fr;
+                gap: 6px;
+            }
+
+            .how-steps {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .benefits-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 10: PARTNERSHIP 1 - CTV/AFFILIATE
+     Gradient: Burgundy #4A0108 → Dark Burgundy #120101
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<section class="section-10" id="partnership-ctv">
+    <div class="container">
+        
+        <!-- Section Header -->
+        <div class="section-header">
+            <div class="section-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                CƠ HỘI ĐỐI TÁC
+            </div>
+            <h2 class="section-title">
+                Kiếm Thu Nhập Thụ Động Cùng <span class="highlight">GEM Academy</span>
+            </h2>
+            <p class="section-subtitle">
+                Trở thành Cộng Tác Viên và nhận hoa hồng hấp dẫn từ 10% đến 30% cho mỗi khóa học bạn giới thiệu. 
+                Đây là cơ hội tuyệt vời để vừa lan tỏa giá trị vừa tạo nguồn thu nhập thụ động bền vững.
+            </p>
+        </div>
+
+        <!-- Intro Box -->
+        <div class="intro-box">
+            <div class="intro-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="1" x2="12" y2="23"/>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+            </div>
+            <h3 class="intro-title">Chương Trình CTV 5 Cấp Bậc</h3>
+            <p class="intro-text">
+                Hệ thống hoa hồng được thiết kế để thưởng xứng đáng cho những đối tác có đóng góp lớn. 
+                Bạn càng giới thiệu nhiều, cấp bậc càng cao, hoa hồng càng hấp dẫn. Không giới hạn thu nhập, 
+                không cần bỏ vốn, chỉ cần chia sẻ giá trị và nhận thưởng xứng đáng.
+            </p>
+        </div>
+
+        <!-- 5 Tiers Grid -->
+        <div class="tiers-section">
+            <h3 class="tiers-title">5 Cấp Bậc Hoa Hồng CTV</h3>
+            
+            <div class="tiers-grid">
+                
+                <!-- Bronze -->
+                <div class="tier-card tier-bronze">
+                    <div class="tier-header">
+                        <div class="tier-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="8" r="7"/>
+                                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+                            </svg>
+                        </div>
+                        <div class="tier-info">
+                            <h3>Bronze</h3>
+                            <span class="threshold">Cấp 1</span>
+                        </div>
+                    </div>
+                    <div class="commission-grid">
+                        <div class="commission-item">
+                            <div class="commission-label">Digital</div>
+                            <div class="commission-value">10%</div>
+                        </div>
+                        <div class="commission-item">
+                            <div class="commission-label">Physical</div>
+                            <div class="commission-value">6%</div>
+                        </div>
+                        <div class="commission-item">
+                            <div class="commission-label">Sub-Aff</div>
+                            <div class="commission-value">2%</div>
+                        </div>
+                    </div>
+                    <p class="tier-desc">Cấp bậc khởi đầu cho tất cả CTV khi tham gia chương trình.</p>
+                </div>
+
+                <!-- Silver -->
+                <div class="tier-card tier-silver">
+                    <div class="tier-header">
+                        <div class="tier-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="8" r="7"/>
+                                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+                            </svg>
+                        </div>
+                        <div class="tier-info">
+                            <h3>Silver</h3>
+                            <span class="threshold">Cấp 2</span>
+                        </div>
+                    </div>
+                    <div class="commission-grid">
+                        <div class="commission-item">
+                            <div class="commission-label">Digital</div>
+                            <div class="commission-value">15%</div>
+                        </div>
+                        <div class="commission-item">
+                            <div class="commission-label">Physical</div>
+                            <div class="commission-value">8%</div>
+                        </div>
+                        <div class="commission-item">
+                            <div class="commission-label">Sub-Aff</div>
+                            <div class="commission-value">2.5%</div>
+                        </div>
+                    </div>
+                    <p class="tier-desc">Cấp bậc thứ hai với hoa hồng cao hơn cho CTV hoạt động tích cực.</p>
+                </div>
+
+                <!-- Gold -->
+                <div class="tier-card tier-gold">
+                    <div class="tier-header">
+                        <div class="tier-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="8" r="7"/>
+                                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+                            </svg>
+                        </div>
+                        <div class="tier-info">
+                            <h3>Gold</h3>
+                            <span class="threshold">Cấp 3</span>
+                        </div>
+                    </div>
+                    <div class="commission-grid">
+                        <div class="commission-item">
+                            <div class="commission-label">Digital</div>
+                            <div class="commission-value">20%</div>
+                        </div>
+                        <div class="commission-item">
+                            <div class="commission-label">Physical</div>
+                            <div class="commission-value">10%</div>
+                        </div>
+                        <div class="commission-item">
+                            <div class="commission-label">Sub-Aff</div>
+                            <div class="commission-value">3%</div>
+                        </div>
+                    </div>
+                    <p class="tier-desc">Cấp bậc dành cho CTV có thành tích nổi bật trong cộng đồng.</p>
+                </div>
+
+                <!-- Platinum -->
+                <div class="tier-card tier-platinum">
+                    <div class="tier-header">
+                        <div class="tier-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="8" r="7"/>
+                                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+                            </svg>
+                        </div>
+                        <div class="tier-info">
+                            <h3>Platinum</h3>
+                            <span class="threshold">Cấp 4</span>
+                        </div>
+                    </div>
+                    <div class="commission-grid">
+                        <div class="commission-item">
+                            <div class="commission-label">Digital</div>
+                            <div class="commission-value">25%</div>
+                        </div>
+                        <div class="commission-item">
+                            <div class="commission-label">Physical</div>
+                            <div class="commission-value">12%</div>
+                        </div>
+                        <div class="commission-item">
+                            <div class="commission-label">Sub-Aff</div>
+                            <div class="commission-value">3.5%</div>
+                        </div>
+                    </div>
+                    <p class="tier-desc">Cấp bậc cao cấp với quyền lợi đặc biệt cho CTV ưu tú.</p>
+                </div>
+
+                <!-- Diamond -->
+                <div class="tier-card tier-diamond">
+                    <div class="tier-header">
+                        <div class="tier-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2z"/>
+                            </svg>
+                        </div>
+                        <div class="tier-info">
+                            <h3>Diamond</h3>
+                            <span class="threshold">Cấp 5</span>
+                        </div>
+                    </div>
+                    <div class="commission-grid">
+                        <div class="commission-item">
+                            <div class="commission-label">Digital</div>
+                            <div class="commission-value">30%</div>
+                        </div>
+                        <div class="commission-item">
+                            <div class="commission-label">Physical</div>
+                            <div class="commission-value">15%</div>
+                        </div>
+                        <div class="commission-item">
+                            <div class="commission-label">Sub-Aff</div>
+                            <div class="commission-value">4%</div>
+                        </div>
+                    </div>
+                    <p class="tier-desc">Cấp bậc cao nhất dành cho những CTV xuất sắc nhất.</p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="how-section">
+            <h3 class="how-title">Cách Thức Hoạt Động</h3>
+            
+            <div class="how-steps">
+                <div class="how-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Đăng Ký Miễn Phí</h4>
+                        <p>Điền form đăng ký và nhận link giới thiệu cá nhân của bạn trong vòng 24 giờ.</p>
+                    </div>
+                </div>
+                <div class="how-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Chia Sẻ Link</h4>
+                        <p>Chia sẻ link giới thiệu trên mạng xã hội, blog, hoặc trực tiếp với người quen.</p>
+                    </div>
+                </div>
+                <div class="how-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Theo Dõi Doanh Số</h4>
+                        <p>Hệ thống tự động tracking mọi đơn hàng và hiển thị trên dashboard của bạn.</p>
+                    </div>
+                </div>
+                <div class="how-step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Nhận Hoa Hồng</h4>
+                        <p>Hoa hồng được thanh toán vào ngày 15 và 30 hàng tháng qua chuyển khoản.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Story -->
+        <div class="success-story">
+            <div class="story-header">
+                <div class="story-avatar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </div>
+                <div class="story-info">
+                    <h4>Phạm Thị Hồng Nhung</h4>
+                    <span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="8" r="7"/>
+                            <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+                        </svg>
+                        CTV Gold Level • Giáo viên Tiếng Anh
+                    </span>
+                </div>
+            </div>
+            <p class="story-quote">
+                "Tôi bắt đầu làm CTV từ khi còn là học viên của khóa học. Ban đầu chỉ chia sẻ vì thấy 
+                khóa học hay, không ngờ sau 6 tháng đã có thu nhập thụ động gần 20 triệu mỗi tháng. 
+                Giờ tôi đã lên cấp Gold và đang hướng tới Platinum trong năm nay."
+            </p>
+            <div class="story-results">
+                <div class="result-item">
+                    <span class="result-value">6 tháng</span>
+                    <span class="result-label">Thời gian</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-value">187</span>
+                    <span class="result-label">Học viên giới thiệu</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-value">~20M/th</span>
+                    <span class="result-label">Thu nhập thụ động</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Benefits -->
+        <div class="benefits-section">
+            <h3 class="benefits-title">Quyền Lợi Khi Làm CTV</h3>
+            
+            <div class="benefits-grid">
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="1" x2="12" y2="23"/>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                        </svg>
+                    </div>
+                    <span class="benefit-text">Hoa hồng cao nhất thị trường lên đến 30% cho sản phẩm digital</span>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                    </div>
+                    <span class="benefit-text">Cookie 90 ngày giúp bạn nhận hoa hồng ngay cả khi khách mua sau</span>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </div>
+                    <span class="benefit-text">Hoa hồng 2 tầng từ Sub-Affiliate giúp tăng thu nhập thụ động</span>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                            <line x1="8" y1="21" x2="16" y2="21"/>
+                            <line x1="12" y1="17" x2="12" y2="21"/>
+                        </svg>
+                    </div>
+                    <span class="benefit-text">Dashboard chuyên nghiệp theo dõi doanh số và hoa hồng realtime</span>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                    </div>
+                    <span class="benefit-text">Marketing kit đầy đủ với banner, video, caption sẵn sàng sử dụng</span>
+                </div>
+                <div class="benefit-item">
+                    <div class="benefit-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                    </div>
+                    <span class="benefit-text">Hỗ trợ 1-1 từ team GEM Academy để tối ưu chiến lược bán hàng</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="section-cta">
+            <p class="cta-text">
+                Bắt đầu ngay hôm nay và tạo nguồn thu nhập thụ động cho bản thân. Không cần vốn, không rủi ro.
+            </p>
+            <a href="#register-ctv" class="btn-cta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="8.5" cy="7" r="4"/>
+                    <line x1="20" y1="8" x2="20" y2="14"/>
+                    <line x1="23" y1="11" x2="17" y2="11"/>
+                </svg>
+                Đăng Ký Làm CTV Ngay
+            </a>
+            <a href="#partnership-kol" class="btn-secondary">
+                Xem Chương Trình KOL & Giảng Viên
+            </a>
+        </div>
+
+    </div>
+</section>
+
+</body>
+</html>

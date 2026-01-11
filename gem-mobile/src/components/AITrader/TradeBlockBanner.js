@@ -83,15 +83,15 @@ const TradeBlockBanner = ({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Get reason text
+  // Get reason text - AI Sư Phụ tone
   const getReasonText = () => {
     const reasonMap = {
-      'fomo_buy_overbought': 'FOMO - Thị trường quá nóng',
-      'fomo_retry_penalty': 'Bỏ qua cảnh báo FOMO',
-      'revenge_trade_block': 'Revenge trade - Tâm lý bất ổn',
-      'no_stoploss': 'Không có Stoploss',
-      'overtrade_warning': 'Giao dịch quá nhiều',
-      'account_frozen': 'Tài khoản bị đóng băng',
+      'fomo_buy_overbought': 'FOMO - Thị trường quá nóng. Đừng đuổi theo nến.',
+      'fomo_retry_penalty': 'Bỏ qua cảnh báo. Cần thời gian suy ngẫm.',
+      'revenge_trade_block': 'Tâm trí hỗn loạn. Nghỉ ngơi trước khi chiến đấu.',
+      'no_stoploss': 'Không có Stoploss = Không có kỷ luật.',
+      'overtrade_warning': 'Quá nhiều lệnh. Số lượng không bằng chất lượng.',
+      'account_frozen': 'Karma cạn kiệt. Cần phục hồi.',
     };
     return reasonMap[reason] || reason || 'Vi phạm kỷ luật giao dịch';
   };
@@ -114,7 +114,7 @@ const TradeBlockBanner = ({
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Lock size={20} color={COLORS.error} strokeWidth={2} />
-            <Text style={styles.title}>Giao dịch bị khóa</Text>
+            <Text style={styles.title}>Đã khóa giao dịch</Text>
           </View>
           {onDismiss && (
             <TouchableOpacity onPress={onDismiss} style={styles.closeBtn}>
@@ -133,7 +133,7 @@ const TradeBlockBanner = ({
         {showCountdown && blocked_until && remainingSeconds > 0 && (
           <View style={styles.countdownContainer}>
             <Clock size={16} color={COLORS.textMuted} strokeWidth={2} />
-            <Text style={styles.countdownLabel}>Tự động mở khóa sau:</Text>
+            <Text style={styles.countdownLabel}>Mở khóa sau:</Text>
             <Text style={styles.countdownTime}>{formatTime(remainingSeconds)}</Text>
           </View>
         )}
@@ -151,7 +151,7 @@ const TradeBlockBanner = ({
               end={{ x: 1, y: 0 }}
               style={styles.unlockButtonGradient}
             >
-              <Text style={styles.unlockButtonText}>Mở khóa ngay</Text>
+              <Text style={styles.unlockButtonText}>Hoàn thành bài tập</Text>
             </LinearGradient>
           </TouchableOpacity>
         )}
@@ -159,7 +159,7 @@ const TradeBlockBanner = ({
         {/* No unlock required - just wait */}
         {!require_unlock && remainingSeconds > 0 && (
           <Text style={styles.waitText}>
-            Vui lòng chờ đợi hoặc thực hiện hành động thiền định
+            Chờ đợi hoặc thiền định. Kiên nhẫn là kỷ luật.
           </Text>
         )}
       </LinearGradient>

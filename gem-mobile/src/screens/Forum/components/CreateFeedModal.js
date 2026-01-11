@@ -447,7 +447,7 @@ const styles = StyleSheet.create({
   selectedChipText: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     fontWeight: TYPOGRAPHY.fontWeight.semibold,
-    color: COLORS.bgDark,
+    color: COLORS.bgDarkest,
   },
 
   // Suggested Section
@@ -532,7 +532,7 @@ const styles = StyleSheet.create({
     color: COLORS.gold,
   },
   addButtonTextActive: {
-    color: COLORS.bgDark,
+    color: COLORS.bgDarkest,
   },
 
   // Bottom Section
@@ -553,7 +553,7 @@ const styles = StyleSheet.create({
   createButtonText: {
     fontSize: TYPOGRAPHY.fontSize.lg,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
-    color: COLORS.bgDark,
+    color: COLORS.bgDarkest,
   },
 });
 

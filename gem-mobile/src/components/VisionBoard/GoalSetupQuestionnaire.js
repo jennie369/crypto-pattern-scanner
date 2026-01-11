@@ -39,6 +39,12 @@ import {
   Shield,
   Check,
   Loader,
+  Flame,
+  Wind,
+  Moon,
+  Mail,
+  Droplets,
+  Play,
 } from 'lucide-react-native';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -66,6 +72,111 @@ const SPACING = {
   lg: 16,
   xl: 20,
   xxl: 24,
+};
+
+/**
+ * Goal suggestions by life area - Vietnamese
+ * User can quick-select these for their goal description
+ */
+const GOAL_SUGGESTIONS_BY_AREA = {
+  finance: [
+    'Tiết kiệm 100 triệu trong 6 tháng',
+    'Xây dựng quỹ khẩn cấp 6 tháng chi tiêu',
+    'Tăng thu nhập thụ động lên 10tr/tháng',
+    'Đầu tư crypto có lợi nhuận ổn định',
+    'Thanh toán hết nợ trong năm nay',
+    'Mua nhà/đất đầu tiên',
+  ],
+  crypto: [
+    'Học phân tích kỹ thuật chuyên sâu',
+    'Xây dựng portfolio đa dạng hóa',
+    'Đạt lợi nhuận 50% trong 6 tháng',
+    'Paper trade 100 lệnh trước khi real',
+    'Kiểm soát FOMO và FUD khi trading',
+    'Tìm hiểu on-chain data và whale movements',
+    'Quản lý vốn và risk management',
+    'Tham gia cộng đồng trader chuyên nghiệp',
+  ],
+  career: [
+    'Thăng tiến lên vị trí quản lý',
+    'Tăng lương 30% trong năm nay',
+    'Học thêm kỹ năng mới (AI, Data)',
+    'Chuyển đổi ngành nghề thành công',
+    'Xây dựng thương hiệu cá nhân',
+    'Khởi nghiệp kinh doanh riêng',
+  ],
+  health: [
+    'Giảm 10kg và duy trì cân nặng',
+    'Tập gym đều đặn 4 buổi/tuần',
+    'Ngủ đủ 7-8 tiếng mỗi đêm',
+    'Ăn uống lành mạnh, ít đường',
+    'Chạy bộ 5km không nghỉ',
+    'Thiền định 15 phút mỗi ngày',
+  ],
+  relationships: [
+    'Cải thiện mối quan hệ với gia đình',
+    'Tìm được người bạn đời phù hợp',
+    'Dành thời gian chất lượng với con',
+    'Mở rộng mạng lưới quan hệ',
+    'Hàn gắn mối quan hệ đã xa cách',
+    'Học cách giao tiếp hiệu quả hơn',
+  ],
+  personal: [
+    'Học ngoại ngữ mới (Anh/Trung)',
+    'Đọc 24 cuốn sách trong năm',
+    'Phát triển tư duy tích cực',
+    'Vượt qua nỗi sợ và lo âu',
+    'Xây dựng thói quen tốt mỗi ngày',
+    'Du lịch trải nghiệm 3 nơi mới',
+  ],
+  spiritual: [
+    'Thiền định sâu 30 phút mỗi ngày',
+    'Kết nối với bản ngã cao hơn',
+    'Sống mindful và hiện tại',
+    'Phát triển trực giác và năng lượng',
+    'Thực hành biết ơn mỗi ngày',
+    'Cân bằng chakra và năng lượng',
+  ],
+};
+
+// Ritual suggestions by life area
+const RITUAL_SUGGESTIONS = {
+  crypto: [
+    { id: 'cleansing-breath', title: 'Thở Thanh Lọc', subtitle: 'Giữ bình tĩnh khi trading', icon: Wind, color: '#667EEA' },
+    { id: 'burn-release', title: 'Đốt & Giải Phóng', subtitle: 'Buông bỏ FOMO/FUD', icon: Flame, color: '#FF6B6B' },
+    { id: 'letter-to-universe', title: 'Thư Gửi Vũ Trụ', subtitle: 'Gửi mục tiêu trading', icon: Mail, color: '#9D4EDD' },
+  ],
+  finance: [
+    { id: 'gratitude-flow', title: 'Dòng Chảy Biết Ơn', subtitle: 'Thu hút sự giàu có', icon: Sparkles, color: '#FFB800' },
+    { id: 'burn-release', title: 'Đốt & Giải Phóng', subtitle: 'Buông bỏ lo lắng tiền bạc', icon: Flame, color: '#FF6B6B' },
+    { id: 'water-manifest', title: 'Nghi Thức Nước', subtitle: 'Cầu nguyện tài chính', icon: Droplets, color: '#00BCD4' },
+  ],
+  career: [
+    { id: 'letter-to-universe', title: 'Thư Gửi Vũ Trụ', subtitle: 'Gửi ước nguyện sự nghiệp', icon: Mail, color: '#9D4EDD' },
+    { id: 'cleansing-breath', title: 'Thở Thanh Lọc', subtitle: 'Giảm stress công việc', icon: Wind, color: '#667EEA' },
+    { id: 'moon-ritual', title: 'Nghi Thức Trăng', subtitle: 'Thiết lập ý định sự nghiệp', icon: Moon, color: '#8B5CF6' },
+  ],
+  health: [
+    { id: 'cleansing-breath', title: 'Thở Thanh Lọc', subtitle: 'Thanh lọc cơ thể', icon: Wind, color: '#667EEA' },
+    { id: 'water-manifest', title: 'Nghi Thức Nước', subtitle: 'Cầu nguyện sức khỏe', icon: Droplets, color: '#00BCD4' },
+    { id: 'gratitude-flow', title: 'Dòng Chảy Biết Ơn', subtitle: 'Biết ơn cơ thể', icon: Sparkles, color: '#FFB800' },
+  ],
+  relationships: [
+    { id: 'heart-opening', title: 'Mở Rộng Trái Tim', subtitle: 'Mở lòng yêu thương', icon: Heart, color: '#EC4899' },
+    { id: 'letter-to-universe', title: 'Thư Gửi Vũ Trụ', subtitle: 'Gửi tình yêu đến ai đó', icon: Mail, color: '#9D4EDD' },
+    { id: 'gratitude-flow', title: 'Dòng Chảy Biết Ơn', subtitle: 'Biết ơn người thân', icon: Sparkles, color: '#FFB800' },
+  ],
+  personal: [
+    { id: 'burn-release', title: 'Đốt & Giải Phóng', subtitle: 'Buông bỏ giới hạn', icon: Flame, color: '#FF6B6B' },
+    { id: 'cleansing-breath', title: 'Thở Thanh Lọc', subtitle: 'Làm mới bản thân', icon: Wind, color: '#667EEA' },
+    { id: 'moon-ritual', title: 'Nghi Thức Trăng', subtitle: 'Thiết lập ý định mới', icon: Moon, color: '#8B5CF6' },
+  ],
+  spiritual: [
+    { id: 'moon-ritual', title: 'Nghi Thức Trăng', subtitle: 'Kết nối năng lượng', icon: Moon, color: '#8B5CF6' },
+    { id: 'gratitude-flow', title: 'Dòng Chảy Biết Ơn', subtitle: 'Biết ơn vũ trụ', icon: Sparkles, color: '#FFB800' },
+    { id: 'water-manifest', title: 'Nghi Thức Nước', subtitle: 'Thanh tẩy tâm linh', icon: Droplets, color: '#00BCD4' },
+    { id: 'letter-to-universe', title: 'Thư Gửi Vũ Trụ', subtitle: 'Giao tiếp với vũ trụ', icon: Mail, color: '#9D4EDD' },
+  ],
 };
 
 // Questionnaire steps configuration
@@ -143,6 +254,16 @@ const QUESTIONNAIRE_STEPS = [
       'Chưa biết bắt đầu từ đâu',
     ],
   },
+  {
+    id: 'ritual',
+    icon: Flame,
+    color: '#FF6B6B',
+    title: 'Nghi thức',
+    question: 'Chọn nghi thức hỗ trợ mục tiêu (tuỳ chọn)',
+    subtitle: 'Nghi thức giúp tăng năng lượng và duy trì động lực',
+    inputType: 'rituals',
+    optional: true,
+  },
 ];
 
 /**
@@ -167,6 +288,7 @@ const GoalSetupQuestionnaire = ({
     deadline: 90,
     emotion: '',
     challenge: '',
+    ritual: [], // Array of selected ritual IDs
   });
   const [isGenerating, setIsGenerating] = useState(false);
   const slideAnim = useRef(new Animated.Value(0)).current;
@@ -250,6 +372,26 @@ const GoalSetupQuestionnaire = ({
         lifeArea
       );
 
+      // Get selected rituals with full details
+      // Auto-select first ritual if none selected (so goals always have at least 1 ritual)
+      const ritualSuggestions = RITUAL_SUGGESTIONS[lifeArea] || RITUAL_SUGGESTIONS.spiritual || [];
+      const ritualsToUse = (answers.ritual || []).length > 0
+        ? (answers.ritual || [])
+        : ritualSuggestions.length > 0 ? [ritualSuggestions[0].id] : [];
+
+      const selectedRitualDetails = ritualsToUse.map(ritualId => {
+        const ritual = ritualSuggestions.find(r => r.id === ritualId);
+        return ritual ? { id: ritual.id, title: ritual.title, subtitle: ritual.subtitle, color: ritual.color } : null;
+      }).filter(Boolean);
+
+      // Debug: Log selected rituals
+      console.log('[GoalSetupQuestionnaire] Generating with rituals:', {
+        answersRitual: answers.ritual,
+        autoSelected: (answers.ritual || []).length === 0,
+        selectedRitualDetails,
+        lifeArea,
+      });
+
       // Callback with all data
       onComplete({
         goalTitle: answers.confirm,
@@ -258,6 +400,7 @@ const GoalSetupQuestionnaire = ({
         questionnaire: answers,
         affirmations: personalizedAffirmations,
         actionSteps: personalizedActions,
+        rituals: selectedRitualDetails, // Include selected rituals
         originalScenario: scenario,
       });
     } catch (error) {
@@ -271,6 +414,11 @@ const GoalSetupQuestionnaire = ({
   const isCurrentStepValid = useCallback(() => {
     const step = QUESTIONNAIRE_STEPS[currentStep];
     const answer = answers[step.id];
+
+    // Ritual step is optional - always valid
+    if (step.inputType === 'rituals' || step.optional) {
+      return true;
+    }
 
     if (step.inputType === 'options') {
       return answer !== null && answer !== undefined;
@@ -301,14 +449,41 @@ const GoalSetupQuestionnaire = ({
 
         {/* Input based on type */}
         {step.inputType === 'text' && (
-          <TextInput
-            style={styles.textInput}
-            value={answer}
-            onChangeText={(text) => updateAnswer(step.id, text)}
-            placeholder={step.placeholder}
-            placeholderTextColor={COLORS.textMuted}
-            multiline={false}
-          />
+          <>
+            <TextInput
+              style={styles.textInput}
+              value={answer}
+              onChangeText={(text) => updateAnswer(step.id, text)}
+              placeholder={step.placeholder}
+              placeholderTextColor={COLORS.textMuted}
+              multiline={false}
+            />
+            {/* Dynamic suggestions for goal description based on life area */}
+            {step.id === 'confirm' && lifeArea && GOAL_SUGGESTIONS_BY_AREA[lifeArea] && (
+              <View style={styles.suggestionsContainer}>
+                <Text style={styles.suggestionsLabel}>Gợi ý nhanh:</Text>
+                <View style={styles.suggestionsList}>
+                  {GOAL_SUGGESTIONS_BY_AREA[lifeArea].map((suggestion, i) => (
+                    <TouchableOpacity
+                      key={i}
+                      style={[
+                        styles.suggestionChip,
+                        answer === suggestion && styles.suggestionChipSelected,
+                      ]}
+                      onPress={() => updateAnswer(step.id, suggestion)}
+                    >
+                      <Text style={[
+                        styles.suggestionText,
+                        answer === suggestion && styles.suggestionTextSelected,
+                      ]}>
+                        {suggestion}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            )}
+          </>
         )}
 
         {step.inputType === 'textarea' && (
@@ -366,9 +541,63 @@ const GoalSetupQuestionnaire = ({
             ))}
           </View>
         )}
+
+        {/* Ritual Selection */}
+        {step.inputType === 'rituals' && (
+          <View style={styles.ritualsContainer}>
+            {/* Debug: Log ritual step state */}
+            {console.log('[GoalSetupQuestionnaire] Ritual step:', {
+              lifeArea,
+              ritualSuggestions: RITUAL_SUGGESTIONS[lifeArea]?.map(r => r.id),
+              selectedRituals: answer,
+            })}
+            {(RITUAL_SUGGESTIONS[lifeArea] || RITUAL_SUGGESTIONS.spiritual || []).map((ritual) => {
+              const RitualIcon = ritual.icon;
+              const isSelected = Array.isArray(answer) && answer.includes(ritual.id);
+
+              return (
+                <TouchableOpacity
+                  key={ritual.id}
+                  style={[
+                    styles.ritualCard,
+                    { borderColor: isSelected ? ritual.color : 'rgba(255,255,255,0.1)' },
+                    isSelected && { backgroundColor: `${ritual.color}15` },
+                  ]}
+                  onPress={() => {
+                    const currentRituals = Array.isArray(answer) ? answer : [];
+                    if (isSelected) {
+                      updateAnswer(step.id, currentRituals.filter(id => id !== ritual.id));
+                    } else {
+                      updateAnswer(step.id, [...currentRituals, ritual.id]);
+                    }
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <View style={[styles.ritualIconWrapper, { backgroundColor: `${ritual.color}20` }]}>
+                    <RitualIcon size={22} color={ritual.color} />
+                  </View>
+                  <View style={styles.ritualInfo}>
+                    <Text style={[styles.ritualTitle, isSelected && { color: ritual.color }]}>
+                      {ritual.title}
+                    </Text>
+                    <Text style={styles.ritualSubtitle}>{ritual.subtitle}</Text>
+                  </View>
+                  {isSelected && (
+                    <View style={[styles.ritualCheck, { backgroundColor: ritual.color }]}>
+                      <Check size={14} color="#fff" />
+                    </View>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+            <Text style={styles.ritualSkipHint}>
+              Bạn có thể bỏ qua bước này nếu không muốn chọn nghi thức
+            </Text>
+          </View>
+        )}
       </View>
     );
-  }, [answers, updateAnswer]);
+  }, [answers, updateAnswer, lifeArea]);
 
   // Reset when modal closes
   const handleClose = useCallback(() => {
@@ -380,6 +609,7 @@ const GoalSetupQuestionnaire = ({
       deadline: 90,
       emotion: '',
       challenge: '',
+      ritual: [],
     });
     onClose();
   }, [onClose]);
@@ -461,18 +691,18 @@ const GoalSetupQuestionnaire = ({
             >
               {isGenerating ? (
                 <>
-                  <Loader size={20} color={COLORS.bgDark} />
+                  <Loader size={20} color={COLORS.bgDarkest} />
                   <Text style={styles.nextButtonText}>Đang tạo...</Text>
                 </>
               ) : currentStep === QUESTIONNAIRE_STEPS.length - 1 ? (
                 <>
-                  <Sparkles size={20} color={COLORS.bgDark} />
+                  <Sparkles size={20} color={COLORS.bgDarkest} />
                   <Text style={styles.nextButtonText}>Tạo mục tiêu</Text>
                 </>
               ) : (
                 <>
                   <Text style={styles.nextButtonText}>Tiếp tục</Text>
-                  <ArrowRight size={20} color={COLORS.bgDark} />
+                  <ArrowRight size={20} color={COLORS.bgDarkest} />
                 </>
               )}
             </TouchableOpacity>
@@ -756,9 +986,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
   },
+  suggestionChipSelected: {
+    backgroundColor: 'rgba(255, 189, 89, 0.2)',
+    borderColor: COLORS.gold,
+  },
   suggestionText: {
     fontSize: 13,
     color: COLORS.textSecondary,
+  },
+  suggestionTextSelected: {
+    color: COLORS.gold,
+    fontWeight: '600',
   },
 
   // Options
@@ -793,6 +1031,54 @@ const styles = StyleSheet.create({
   },
   optionCheck: {
     marginLeft: SPACING.sm,
+  },
+
+  // Rituals
+  ritualsContainer: {
+    gap: SPACING.sm,
+  },
+  ritualCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 14,
+    padding: SPACING.md,
+    borderWidth: 1.5,
+    gap: SPACING.md,
+  },
+  ritualIconWrapper: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ritualInfo: {
+    flex: 1,
+    gap: 2,
+  },
+  ritualTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+  },
+  ritualSubtitle: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+  },
+  ritualCheck: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ritualSkipHint: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    textAlign: 'center',
+    marginTop: SPACING.md,
+    fontStyle: 'italic',
   },
 
   // Navigation
@@ -834,7 +1120,7 @@ const styles = StyleSheet.create({
   nextButtonText: {
     fontSize: 15,
     fontWeight: '600',
-    color: COLORS.bgDark,
+    color: COLORS.bgDarkest,
   },
 });
 

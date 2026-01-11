@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 3.3: Khẳng Định Tự Yêu (Affirmations) | Khóa Tần Số Tình Yêu</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--burgundy); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--burgundy), var(--burgundy-light)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .highlight-box.purple { background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05)); border-color: rgba(106, 91, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.purple { border-left-color: var(--purple); } }
+        .highlight-box.purple .highlight-box-title { color: var(--purple); }
+
+        .highlight-box.cyan { background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 240, 255, 0.05)); border-color: rgba(0, 240, 255, 0.3); }
+        @media (max-width: 600px) { .highlight-box.cyan { border-left-color: var(--cyan); } }
+        .highlight-box.cyan .highlight-box-title { color: var(--cyan); }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .affirmation-card { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border-left: 4px solid var(--gold); padding: var(--space-md) var(--space-lg); margin: var(--space-md) 0; font-style: italic; color: var(--text-secondary); font-size: 1.1rem; }
+        @media (max-width: 600px) { .affirmation-card { padding: var(--space-md) 16px; margin: var(--space-sm) 0; } }
+
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); transition: all 0.3s ease; }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        @media (min-width: 601px) { .flow-step:hover { border-color: var(--gold); transform: translateX(8px); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .summary-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02)); border: 2px solid var(--gold); border-radius: var(--radius-lg); padding: var(--space-xl); margin: var(--space-xl) 0; }
+        @media (max-width: 600px) { .summary-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-lg) 16px; margin: var(--space-md) 0; } }
+        .summary-title { font-size: 1.25rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        .summary-list { list-style: none; }
+        .summary-list li { display: flex; align-items: flex-start; gap: var(--space-sm); margin-bottom: var(--space-md); color: var(--text-secondary); }
+        .summary-list li::before { content: "✓"; color: var(--gold); font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>💕</span>
+                <span>Module 3</span>
+            </div>
+            <div class="lesson-chapter">Chapter 3 - Nâng Tần Số Tình Yêu</div>
+            <h1 class="lesson-title">Khẳng Định Tự Yêu (Affirmations)</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 3.3</span></div>
+                <div class="meta-item"><span>⏱️</span><span>25 phút đọc</span></div>
+            </div>
+        </header>
+
+        <!-- SECTION 1: Opening Hook -->
+        <section class="section">
+            <h2 class="section-title"><span>💬</span> Giọng Nói Trong Đầu Bạn Đang Nói Gì?</h2>
+
+            <p>Bạn có bao giờ để ý đến cuộc đối thoại liên tục diễn ra trong đầu mình không? Theo nghiên cứu của Đại học Queen's, mỗi ngày chúng ta có khoảng 6,000 suy nghĩ – và đáng lo ngại hơn, nghiên cứu của Viện Tâm lý Cleveland cho thấy 80% trong số đó là tiêu cực, đặc biệt khi liên quan đến tình yêu và mối quan hệ.</p>
+
+            <p>"Mình không đủ đẹp." "Chẳng ai thực sự yêu mình." "Mình sẽ cô đơn mãi thôi." Những câu này có quen không? Chúng chính là "affirmations ngược" – những lời khẳng định tiêu cực mà bạn vô thức lặp đi lặp lại hàng ngày, và chúng đang định hình tần số năng lượng cũng như thực tại tình yêu của bạn.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🧠</span> Affirmations Là Gì?</div>
+                <p>Affirmations (câu khẳng định tích cực) là những câu nói có chủ đích mà bạn lặp đi lặp lại để lập trình lại tiềm thức. Trong Học Thuyết Chuyển Hóa Nội Tâm, affirmations là công cụ thay thế các "Hình Tư Tưởng" cũ bằng những tần số mới cao hơn. Khi bạn nói một điều gì đó đủ nhiều lần với đủ cảm xúc, não bộ bắt đầu tin đó là sự thật và hành xử theo – và theo nguyên lý Trong-Ngoài Tương Ứng, thực tại bên ngoài cũng sẽ thay đổi theo.</p>
+            </div>
+
+            <p>Nhưng nếu affirmations hiệu quả đến vậy, tại sao nhiều người thử và thất bại? Tại sao bạn nói "Tôi yêu bản thân" hàng trăm lần mà vẫn không tin? Bí mật nằm ở cách bạn thiết kế và thực hành chúng – và bài học này sẽ hướng dẫn bạn phương pháp khoa học để affirmations thực sự hoạt động.</p>
+
+            <div class="image-container">
+                <img src="images/m3-affirmations-science.png" alt="Khoa học về Affirmations">
+            </div>
+            <div class="image-caption">Hình 1: Affirmations tạo ra đường dẫn neural mới trong não bộ</div>
+        </section>
+
+        <!-- SECTION 2: Khoa Học Về Affirmations -->
+        <section class="section">
+            <h2 class="section-title"><span>🔬</span> Khoa Học Não Bộ Đằng Sau Affirmations</h2>
+
+            <p>Để hiểu tại sao affirmations hoạt động, chúng ta cần hiểu một khái niệm quan trọng trong thần kinh học: Neuroplasticity – khả năng tự tổ chức lại và tạo kết nối mới của não bộ.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🧬</span> Nguyên Lý "Neurons That Fire Together, Wire Together"</div>
+                <p>Nhà thần kinh học Donald Hebb phát hiện rằng khi hai tế bào thần kinh kích hoạt cùng lúc lặp đi lặp lại, kết nối giữa chúng trở nên mạnh mẽ hơn. Điều này có nghĩa là: mỗi lần bạn nghĩ một suy nghĩ, bạn đang củng cố "con đường neural" cho suy nghĩ đó. Suy nghĩ tiêu cực lặp lại → đường neural tiêu cực mạnh lên. Affirmations tích cực lặp lại → đường neural tích cực mới được tạo ra và dần thay thế đường cũ.</p>
+            </div>
+
+            <p>Nghiên cứu fMRI của Carnegie Mellon University (2016) cho thấy khi tham gia viên thực hành self-affirmations, các vùng não liên quan đến xử lý giá trị bản thân (ventral prefrontal cortex và ventral striatum) hoạt động mạnh hơn, giảm phản ứng với thông tin đe dọa lòng tự trọng. Nói cách khác, affirmations không chỉ là "positive thinking" – chúng thực sự thay đổi cách não bộ hoạt động.</p>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>⚠️</span> Tại Sao Affirmations Đôi Khi Không Hiệu Quả?</div>
+                <p>Nghiên cứu tại Wake Forest University phát hiện một hiện tượng thú vị: khi những người có lòng tự trọng thấp nói "Tôi là người đáng yêu", họ thực sự cảm thấy TỆ HƠN. Tại sao? Vì tiềm thức nhận ra khoảng cách quá lớn giữa affirmation và niềm tin hiện tại, tạo ra "cognitive dissonance" (bất hòa nhận thức). Giải pháp: bắt đầu với những affirmations "có thể tin được" và dần nâng cấp.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: 5 Nguyên Tắc Vàng -->
+        <section class="section">
+            <h2 class="section-title"><span>✏️</span> 5 Nguyên Tắc Viết Affirmations Hiệu Quả</h2>
+
+            <p>Không phải mọi affirmation đều được tạo ra như nhau. Dưới đây là 5 nguyên tắc khoa học để viết những câu khẳng định thực sự có sức mạnh chuyển hóa:</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Viết Ở Thì Hiện Tại</div>
+                        <div class="flow-step-desc">✓ "Tôi xứng đáng được yêu" • ✗ "Tôi SẼ xứng đáng được yêu". Tiềm thức không hiểu thì tương lai – nó chỉ nhận ra "bây giờ". Khi bạn dùng thì tương lai, não bộ hiểu đó là điều "chưa xảy ra" và giữ nó ở trạng thái "chưa".</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Viết Dạng Khẳng Định (Không Phủ Định)</div>
+                        <div class="flow-step-desc">✓ "Tôi mở lòng đón nhận tình yêu" • ✗ "Tôi KHÔNG sợ tình yêu". Tiềm thức bỏ qua chữ "không" và tập trung vào "sợ". Nghiên cứu cho thấy khi nghe "Đừng nghĩ về con voi màu hồng", não ngay lập tức hình dung... con voi màu hồng.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Có Thể Tin Được (Believability)</div>
+                        <div class="flow-step-desc">Nếu "Tôi yêu bản thân vô điều kiện" quá xa vời, hãy dùng "stepping stones" (bước đệm): "Tôi đang học cách yêu thương bản thân" → "Tôi sẵn sàng yêu bản thân" → "Tôi bắt đầu yêu bản thân" → "Tôi yêu bản thân".</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Kèm Cảm Xúc Mạnh Mẽ</div>
+                        <div class="flow-step-desc">Cảm xúc là "nhiên liệu" cho affirmations. Khi nói affirmation, hãy CẢM NHẬN nó trong cơ thể – tim ấm lên, cơ thể thư giãn, nụ cười tự nhiên. Tưởng tượng bạn đã có điều đó. Không cảm xúc = không tác dụng.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Cụ Thể & Cá Nhân Hóa</div>
+                        <div class="flow-step-desc">Affirmations hiệu quả nhất khi được thiết kế cho VẤN ĐỀ CỤ THỂ của bạn. Không chỉ copy từ sách – hãy điều chỉnh cho phù hợp. Ví dụ: thay vì "Tôi xứng đáng được yêu" chung chung, hãy thử "Tôi xứng đáng được một người đàn ông tử tế và chân thành yêu thương".</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m3-affirmation-rules.png" alt="5 nguyên tắc viết affirmations">
+            </div>
+            <div class="image-caption">Hình 2: 5 nguyên tắc vàng để viết affirmations hiệu quả</div>
+        </section>
+
+        <!-- SECTION 4: Ví Dụ Thực Tế -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Câu Chuyện Chuyển Hóa Thực Tế</h2>
+
+            <p>Để hiểu rõ hơn sức mạnh của affirmations khi được thực hành đúng cách, hãy cùng theo dõi hành trình của hai học viên:</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💝</span> Phương, 35 tuổi – Từ "Mình không xứng đáng" đến tình yêu trọn vẹn</div>
+                <p>Phương đã trải qua 3 mối quan hệ thất bại liên tiếp, tất cả đều kết thúc bằng sự phản bội. Suy nghĩ thường trực của cô là: "Mình không xứng đáng được yêu thương trọn vẹn. Đàn ông nào rồi cũng phản bội mình."</p>
+                <p style="margin-top: 12px;">Khi bắt đầu thực hành affirmations, cô không thể nói "Tôi xứng đáng được yêu" vì nó cảm thấy như một lời dối. Thay vào đó, cô bắt đầu với: "Tôi sẵn sàng TIN rằng tôi có thể được yêu thương." Sau 2 tuần, cô chuyển sang: "Tôi đang học cách nhận ra giá trị của mình." Sau 1 tháng: "Tôi bắt đầu tin mình xứng đáng." Và sau 3 tháng: "Tôi xứng đáng được yêu thương trọn vẹn bởi một người đàn ông chung thủy."</p>
+                <p style="margin-top: 12px;">6 tháng sau, Phương gặp một người đàn ông hoàn toàn khác những người trước – anh là người chung thủy, tôn trọng và yêu thương cô đúng như cô xứng đáng. "Điều thay đổi lớn nhất không phải là tôi gặp được người đàn ông tốt," Phương chia sẻ, "mà là tôi cuối cùng đã TIN mình xứng đáng với anh ấy."</p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>💙</span> Đức, 42 tuổi – Vượt qua nỗi sợ bị từ chối</div>
+                <p>Sau cuộc ly hôn đau đớn ở tuổi 38, Đức hoàn toàn đóng lòng. Suy nghĩ thống trị tâm trí anh: "Mình đã thất bại một lần, không nên thử lại. Ai mà muốn yêu một người đàn ông ly hôn có 2 con?"</p>
+                <p style="margin-top: 12px;">Affirmation ban đầu của Đức là: "Tôi sẵn sàng cởi mở với khả năng được yêu lại." Đơn giản, nhưng đã rất khó khăn với anh. Anh thực hành mỗi sáng trước gương, kết hợp với Mirror Work. Dần dần, câu affirmation phát triển thành: "Ly hôn không định nghĩa tôi. Tôi là người cha tốt, người đàn ông chân thành, và tôi xứng đáng với tình yêu mới."</p>
+                <p style="margin-top: 12px;">Sau 8 tháng kiên trì, Đức không chỉ vượt qua nỗi sợ mà còn bắt đầu hẹn hò trở lại. "Affirmations không mang đến tình yêu cho tôi," anh nói, "nhưng chúng đã mở cửa trái tim tôi – và đó là điều kiện tiên quyết."</p>
+            </div>
+        </section>
+
+        <!-- SECTION 5: 30 Affirmations Cho Tình Yêu -->
+        <section class="section">
+            <h2 class="section-title"><span>💕</span> 30 Affirmations Cho Tình Yêu (3 Cấp Độ)</h2>
+
+            <p>Dưới đây là 30 affirmations được chia thành 3 cấp độ theo nguyên tắc "stepping stones" – bắt đầu từ những câu dễ tin nhất, rồi dần nâng lên. Hãy chọn câu phù hợp với bạn NGAY BÂY GIỜ, không phải câu bạn muốn tin.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🌱</span> Cấp Độ 1: Stepping Stones (Bước Đệm)</div>
+                <p>Dành cho người mới bắt đầu hoặc có lòng tự trọng thấp:</p>
+            </div>
+
+            <div class="affirmation-card">"Tôi sẵn sàng tin rằng tôi có thể được yêu thương."</div>
+            <div class="affirmation-card">"Tôi đang học cách yêu thương và chấp nhận bản thân."</div>
+            <div class="affirmation-card">"Tôi mở lòng với khả năng được hạnh phúc trong tình yêu."</div>
+            <div class="affirmation-card">"Mỗi ngày, tôi tiến gần hơn đến việc yêu thương bản thân."</div>
+            <div class="affirmation-card">"Tôi cho phép bản thân khám phá giá trị của mình."</div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>🌿</span> Cấp Độ 2: Building (Xây Dựng)</div>
+                <p>Khi bạn bắt đầu cảm thấy những câu Cấp 1 là sự thật:</p>
+            </div>
+
+            <div class="affirmation-card">"Tôi xứng đáng với tình yêu, sự tôn trọng, và hạnh phúc."</div>
+            <div class="affirmation-card">"Tôi thu hút những người yêu thương và tôn trọng tôi."</div>
+            <div class="affirmation-card">"Tôi tha thứ cho bản thân về những sai lầm trong quá khứ."</div>
+            <div class="affirmation-card">"Tôi là nguồn hạnh phúc của chính mình."</div>
+            <div class="affirmation-card">"Tôi tin tưởng bản thân và trực giác của mình trong tình yêu."</div>
+            <div class="affirmation-card">"Tôi giải phóng quá khứ với tình yêu và lòng biết ơn."</div>
+            <div class="affirmation-card">"Tôi sẵn sàng cho một mối quan hệ lành mạnh, nuôi dưỡng."</div>
+            <div class="affirmation-card">"Mỗi kết thúc là một khởi đầu mới đẹp hơn."</div>
+            <div class="affirmation-card">"Tôi chọn tình yêu thay vì nỗi sợ."</div>
+            <div class="affirmation-card">"Trái tim tôi đang chữa lành và mạnh mẽ hơn mỗi ngày."</div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>🌳</span> Cấp Độ 3: Mastery (Làm Chủ)</div>
+                <p>Khi bạn thực sự tin và cảm nhận những câu Cấp 2:</p>
+            </div>
+
+            <div class="affirmation-card">"Tôi yêu thương và chấp nhận bản thân vô điều kiện."</div>
+            <div class="affirmation-card">"Tình yêu đích thực đang chảy vào cuộc sống tôi."</div>
+            <div class="affirmation-card">"Tôi là nam châm thu hút tình yêu lành mạnh và trọn vẹn."</div>
+            <div class="affirmation-card">"Tôi rung động ở tần số 540 Hz – tần số tình yêu vô điều kiện."</div>
+            <div class="affirmation-card">"Tôi tự do để yêu và được yêu một cách hoàn toàn."</div>
+            <div class="affirmation-card">"Người tri kỷ đang trên đường đến với tôi."</div>
+            <div class="affirmation-card">"Tôi tỏa sáng năng lượng tình yêu thuần khiết."</div>
+            <div class="affirmation-card">"Tim tôi mở rộng vô hạn để đón nhận và cho đi tình yêu."</div>
+            <div class="affirmation-card">"Tôi hiện thân tình yêu trong mọi suy nghĩ, lời nói và hành động."</div>
+            <div class="affirmation-card">"Tôi và tình yêu là một – tôi LÀ tình yêu."</div>
+
+            <div class="image-container">
+                <img src="images/m3-30-affirmations.png" alt="30 Affirmations cho tình yêu">
+            </div>
+            <div class="image-caption">Hình 3: 30 affirmations theo 3 cấp độ tiến hóa</div>
+        </section>
+
+        <!-- SECTION 6: Phương Pháp Thực Hành -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> 5 Phương Pháp Thực Hành Hiệu Quả Nhất</h2>
+
+            <p>Affirmations không hiệu quả nếu bạn chỉ đọc qua một lần. Dưới đây là 5 phương pháp đã được chứng minh giúp affirmations thấm sâu vào tiềm thức:</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Mirror Work + Affirmations (Mạnh Nhất)</div>
+                        <div class="flow-step-desc">Đứng trước gương, nhìn thẳng vào mắt mình (không phải mặt, mà MẮT), và nói affirmations. Louise Hay – người phát minh phương pháp này – nói: "Gương phản chiếu sự thật và sự kháng cự. Nếu bạn không thể nhìn vào mắt mình khi nói 'Tôi yêu bạn', đó là dấu hiệu cần chữa lành."</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Morning Power Hour (6-7 AM)</div>
+                        <div class="flow-step-desc">Trong 30-60 phút đầu tiên sau khi thức dậy, não ở trạng thái Alpha-Theta – cửa ngõ vào tiềm thức đang mở. Đây là "thời điểm vàng" để affirmations thấm sâu nhất. Ngay khi mở mắt, TRƯỚC KHI check điện thoại, hãy nói 3-5 affirmations.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Viết Tay (Scripting)</div>
+                        <div class="flow-step-desc">Viết mỗi affirmation 3-10 lần mỗi ngày. Viết tay kích hoạt Reticular Activating System (RAS) trong não – hệ thống lọc thông tin – giúp bạn bắt đầu "nhìn thấy" cơ hội phù hợp với affirmations. Viết, KHÔNG đánh máy.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Audio Thụ Động (Khi Ngủ)</div>
+                        <div class="flow-step-desc">Ghi âm affirmations bằng chính giọng của bạn (não tin giọng mình nhất) và nghe khi ngủ với volume rất nhỏ. Tiềm thức vẫn tiếp nhận trong giấc ngủ, đặc biệt trong giai đoạn REM.</div>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Kiên Trì 66 Ngày (Minimum)</div>
+                        <div class="flow-step-desc">Nghiên cứu của University College London cho thấy trung bình cần 66 ngày để một hành vi trở thành thói quen tự động. Không phải 21 ngày như nhiều người nghĩ. Commit ít nhất 66 ngày – đừng bỏ cuộc sau vài tuần không thấy kết quả.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="images/m3-practice-methods.png" alt="Cách thực hành affirmations">
+            </div>
+            <div class="image-caption">Hình 4: 5 phương pháp thực hành affirmations hiệu quả</div>
+        </section>
+
+        <!-- SECTION 7: FAQ -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🤔</span> "Tôi không tin những gì mình nói. Affirmations có còn hiệu quả không?"</div>
+                <p>Đây là vấn đề phổ biến nhất. Giải pháp: bắt đầu với "stepping stones" – những affirmations dễ tin hơn. Thay vì "Tôi yêu bản thân", hãy thử "Tôi sẵn sàng học cách yêu bản thân" hoặc "Tôi đang tiến bộ mỗi ngày trong việc yêu thương bản thân". Khi câu đó cảm thấy tự nhiên, nâng lên level tiếp theo.</p>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>🤔</span> "Tôi đã làm affirmations 2 tuần mà không thấy gì thay đổi?"</div>
+                <p>2 tuần là quá sớm để đánh giá. Hãy nhớ: bạn đã "affirm" những niềm tin tiêu cực trong NHIỀU NĂM – không thể đảo ngược trong 2 tuần. Nghiên cứu cho thấy cần 66 ngày trung bình để tạo thói quen mới. Hãy kiên trì ít nhất 3 tháng trước khi đánh giá. Và hãy chú ý đến những thay đổi NHỎCON – cách bạn phản ứng với sự kiện, cách bạn nói chuyện với bản thân. Đó là những dấu hiệu đầu tiên.</p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>🤔</span> "Nên nói affirmations bao nhiêu lần mỗi ngày?"</div>
+                <p>Chất lượng quan trọng hơn số lượng. 3-5 affirmations được nói với CẢM XÚC MẠNH MẼ hiệu quả hơn 50 câu đọc như vẹt. Khuyến nghị: chọn 3-5 affirmations phù hợp nhất, nói 10 lần mỗi câu vào buổi sáng (trước gương nếu có thể), và 10 lần trước ngủ. Viết thêm 3 lần mỗi câu vào sổ tay.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🤔</span> "Affirmations có thể 'manifest' người cụ thể không?"</div>
+                <p>Affirmations không phải là công cụ để thao túng người khác – đó vi phạm quyền tự do ý chí. Thay vào đó, hãy affirm những PHẨM CHẤT bạn muốn trong một mối quan hệ: "Tôi thu hút người đàn ông/phụ nữ chung thủy, tử tế và yêu thương tôi đúng như tôi là." Khi bạn rung động ở tần số cao, người phù hợp sẽ tự nhiên xuất hiện – có thể là hoặc không phải là người bạn đang nghĩ đến.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 8: Bài Tập & Tổng Kết -->
+        <section class="section">
+            <h2 class="section-title"><span>✍️</span> Bài Tập & Cam Kết 66 Ngày</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📝</span> Bài Tập 1: Tạo Affirmations Cá Nhân Hóa</div>
+                <p>Dựa trên những niềm tin giới hạn bạn đã xác định ở Bài 3.2, viết 5 affirmations đối nghịch theo công thức: Niềm tin cũ → Stepping Stone → Affirmation đích. Ví dụ: "Tôi không đủ tốt" → "Tôi đang khám phá giá trị của mình" → "Tôi hoàn hảo trong sự không hoàn hảo của mình."</p>
+            </div>
+
+            <div class="highlight-box purple">
+                <div class="highlight-box-title"><span>📋</span> Bài Tập 2: Thử Thách 7 Ngày Mirror Work</div>
+                <p>Chọn 3 affirmations phù hợp nhất. Mỗi sáng trong 7 ngày, đứng trước gương, nhìn vào MẮT mình, và nói mỗi affirmation 10 lần với cảm xúc. Ghi chép: (1) Điểm khó khăn (level 1-10), (2) Cảm xúc xuất hiện, (3) Thay đổi nhận thấy.</p>
+            </div>
+
+            <div class="highlight-box cyan">
+                <div class="highlight-box-title"><span>🎧</span> Bài Tập 3: Ghi Âm Voice Affirmations</div>
+                <p>Dùng điện thoại ghi âm 5 affirmations của bạn với giọng chậm rãi, yêu thương. Nghe mỗi tối trước ngủ (volume nhỏ, có thể nghe cả khi ngủ). Làm liên tục 21 ngày.</p>
+            </div>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>💎</span> Tóm Tắt Bài Học</div>
+                <ul class="summary-list">
+                    <li>Affirmations hoạt động dựa trên Neuroplasticity – não bộ có thể tạo đường neural mới thông qua lặp lại</li>
+                    <li>5 nguyên tắc vàng: Thì hiện tại, dạng khẳng định, có thể tin được, kèm cảm xúc, cá nhân hóa</li>
+                    <li>Dùng "stepping stones" nếu affirmation cảm thấy quá xa vời – dần nâng cấp theo thời gian</li>
+                    <li>Mirror Work + Morning Power Hour là 2 phương pháp mạnh nhất</li>
+                    <li>Cam kết ít nhất 66 ngày – sự kiên trì là chìa khóa</li>
+                    <li>Cảm xúc là nhiên liệu – nói với sự tin tưởng và cảm nhận, không chỉ đọc suông</li>
+                </ul>
+            </div>
+
+            <p>Affirmations không phải là "magic words" – chúng là công cụ để bạn dần thay thế những chương trình cũ trong tiềm thức bằng những chương trình mới phục vụ bạn. Ở bài tiếp theo, chúng ta sẽ học về Heart Coherence – kỹ thuật đồng bộ hóa tim và não để khuếch đại sức mạnh của affirmations lên gấp nhiều lần.</p>
+        </section>
+
+    </div>
+</body>
+</html>

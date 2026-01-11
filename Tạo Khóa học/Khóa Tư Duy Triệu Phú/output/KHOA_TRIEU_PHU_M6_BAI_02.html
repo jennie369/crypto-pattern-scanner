@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 6.2: Xử Lý Khi Tần Số Rớt | GEM Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        img { max-width: 100%; height: auto; display: block; }
+
+        .background-container { position: fixed; inset: 0; z-index: -1; }
+        .bg-layer-base { position: absolute; inset: 0; background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%); }
+        .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.3; }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: 20%; }
+
+        .lesson-container { max-width: 800px; margin: 0 auto; padding: 1.5rem; }
+        @media (max-width: 600px) { .lesson-container { padding: 0; } }
+
+        .lesson-header { text-align: center; padding: var(--space-xl); margin-bottom: var(--space-xl); background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); }
+        @media (max-width: 600px) { .lesson-header { padding: var(--space-lg) 16px; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .lesson-badge { display: inline-flex; align-items: center; gap: var(--space-sm); padding: var(--space-sm) var(--space-md); background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--navy-dark); margin-bottom: var(--space-md); }
+        .lesson-chapter { font-size: 0.9rem; color: var(--gold); font-weight: 600; margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 2px; }
+        .lesson-title { font-size: clamp(1.5rem, 5vw, 2.25rem); font-weight: 800; margin-bottom: var(--space-md); background: linear-gradient(135deg, var(--text-primary), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .lesson-meta { display: flex; justify-content: center; gap: var(--space-lg); flex-wrap: wrap; color: var(--text-muted); font-size: 0.85rem; }
+        .meta-item { display: flex; align-items: center; gap: var(--space-xs); }
+
+        .section { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: var(--space-xl); margin-bottom: var(--space-lg); }
+        @media (max-width: 600px) { .section { padding: 0; margin-bottom: 0; border: none; border-radius: 0; box-shadow: none; border-bottom: 8px solid var(--bg-primary); } }
+        .section-title { font-size: 1.5rem; font-weight: 700; color: var(--gold); margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-sm); }
+        @media (max-width: 600px) { .section-title { padding: var(--space-lg) 16px var(--space-md) 16px; margin-bottom: 0; } }
+        .section > p { color: var(--text-secondary); margin-bottom: var(--space-md); }
+        @media (max-width: 600px) { .section > p { padding: 0 16px; } }
+
+        .highlight-box { background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05)); border: 1px solid rgba(255, 189, 89, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .highlight-box { border: none; border-radius: 0; border-left: 4px solid var(--gold); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .highlight-box-title { font-weight: 700; color: var(--gold); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.2); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .definition-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .definition-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-sm); display: flex; align-items: center; gap: var(--space-sm); }
+        .definition-box p { color: var(--text-secondary); margin: 0; }
+
+        .image-container { margin: var(--space-xl) 0; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--glass-border); }
+        @media (max-width: 600px) { .image-container { margin: var(--space-md) 0; border-radius: 0; border: none; } }
+        .image-caption { padding: var(--space-sm); font-size: 0.85rem; color: var(--text-muted); font-style: italic; text-align: center; }
+        @media (max-width: 600px) { .image-caption { padding: var(--space-sm) 16px; } }
+
+        .sboc-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .sboc-grid { grid-template-columns: 1fr; gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .sboc-card { background: var(--bg-card); border: 2px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); text-align: center; }
+        @media (max-width: 600px) { .sboc-card { border: none; border-radius: 0; padding: var(--space-md) 16px; text-align: left; display: flex; align-items: flex-start; gap: var(--space-md); } }
+        .sboc-card.stop { border-color: var(--error); }
+        .sboc-card.breathe { border-color: var(--cyan); }
+        .sboc-card.observe { border-color: var(--gold); }
+        .sboc-card.choose { border-color: var(--success); }
+        @media (max-width: 600px) {
+            .sboc-card.stop { border-left: 4px solid var(--error); }
+            .sboc-card.breathe { border-left: 4px solid var(--cyan); }
+            .sboc-card.observe { border-left: 4px solid var(--gold); }
+            .sboc-card.choose { border-left: 4px solid var(--success); }
+        }
+        .sboc-letter { font-size: 3rem; font-weight: 800; margin-bottom: var(--space-sm); }
+        @media (max-width: 600px) { .sboc-letter { font-size: 2rem; margin-bottom: 0; min-width: 50px; } }
+        .sboc-card.stop .sboc-letter { color: var(--error); }
+        .sboc-card.breathe .sboc-letter { color: var(--cyan); }
+        .sboc-card.observe .sboc-letter { color: var(--gold); }
+        .sboc-card.choose .sboc-letter { color: var(--success); }
+        .sboc-word { font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-sm); }
+        @media (max-width: 600px) { .sboc-word { font-size: 1rem; } }
+        .sboc-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .technique-grid { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .technique-grid { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .technique-card { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-lg); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); }
+        @media (max-width: 600px) { .technique-card { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--success); } }
+        .technique-icon { font-size: 2rem; min-width: 50px; text-align: center; }
+        .technique-content { flex: 1; }
+        .technique-name { font-weight: 700; color: var(--success); margin-bottom: var(--space-xs); }
+        .technique-time { font-size: 0.8rem; color: var(--gold); margin-bottom: var(--space-sm); }
+        .technique-steps { font-size: 0.9rem; color: var(--text-secondary); }
+        .technique-steps li { margin-bottom: var(--space-xs); }
+
+        .scenario-box { background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-md) 0; }
+        @media (max-width: 600px) { .scenario-box { border: none; border-radius: 0; border-left: 4px solid var(--purple); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .scenario-title { font-weight: 700; color: var(--purple); margin-bottom: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); }
+        .scenario-situation { font-size: 0.95rem; color: var(--text-secondary); margin-bottom: var(--space-md); padding-bottom: var(--space-md); border-bottom: 1px solid var(--glass-border); }
+        .scenario-response { font-size: 0.9rem; color: var(--text-muted); }
+        .scenario-response strong { color: var(--gold); }
+
+        .flow-steps { display: flex; flex-direction: column; gap: var(--space-md); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .flow-steps { gap: 1px; background: var(--glass-border); margin: var(--space-md) 0; } }
+        .flow-step { display: flex; gap: var(--space-md); align-items: flex-start; padding: var(--space-md); background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md); }
+        @media (max-width: 600px) { .flow-step { padding: var(--space-md) 16px; border: none; border-radius: 0; border-left: 4px solid var(--gold); } }
+        .flow-step-number { width: 40px; height: 40px; min-width: 40px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; color: var(--navy-dark); }
+        .flow-step-content { flex: 1; }
+        .flow-step-title { font-weight: 700; color: var(--text-primary); margin-bottom: var(--space-xs); }
+        .flow-step-desc { font-size: 0.9rem; color: var(--text-muted); }
+
+        .app-box { background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02)); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: var(--radius-md); padding: var(--space-lg); margin: var(--space-lg) 0; }
+        @media (max-width: 600px) { .app-box { border: none; border-radius: 0; border-left: 4px solid var(--cyan); padding: var(--space-md) 16px; margin: var(--space-md) 0; } }
+        .app-box-title { font-weight: 700; color: var(--cyan); margin-bottom: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); }
+        .app-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .app-box p:last-child { margin-bottom: 0; }
+
+        .lesson-footer { text-align: center; padding: var(--space-xl); color: var(--text-muted); font-size: 0.85rem; }
+        .lesson-footer a { color: var(--gold); text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>🆘</span>
+                <span>Module 6</span>
+            </div>
+            <div class="lesson-chapter">Module 6 - Nhân Rộng Thịnh Vượng</div>
+            <h1 class="lesson-title">Xử Lý Khi Tần Số Rớt - Emergency Reset</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 6.2</span></div>
+                <div class="meta-item"><span>⏱️</span><span>25 phút đọc</span></div>
+                <div class="meta-item"><span>🔄</span><span>Quick Recovery</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🌊</span> Khi Mọi Thứ Đang Tốt... Rồi Bỗng Dưng Sụp Đổ</h2>
+            <p>Bạn đã thực hành đều đặn suốt 3 tuần qua và mọi thứ đang đi đúng hướng - bạn cảm thấy tràn đầy năng lượng, công việc thuận lợi, các mối quan hệ hài hòa, tiền bạc bắt đầu flow đến dễ dàng hơn. Rồi một buổi sáng, bạn nhận được một email từ sếp với những lời phê bình gay gắt, hoặc đối tác bất ngờ hủy hợp đồng quan trọng, hoặc có xung đột với người thân trong gia đình.</p>
+
+            <p>Trong tích tắc, tất cả những gì bạn đã xây dựng dường như tan biến vào hư không. Cảm giác tức giận, lo lắng, hoặc thất vọng dâng lên mãnh liệt. Bạn tự hỏi: "Tại sao lại là mình? Tại sao đúng lúc này? Có phải mình đã làm gì sai không?"</p>
+
+            <p>Đây là khoảnh khắc quyết định toàn bộ hành trình chuyển hóa của bạn. Bạn sẽ để tần số rớt kéo bạn xuống vực sâu, hay bạn sẽ dùng công cụ đã học để nhanh chóng lấy lại thăng bằng? Bài học hôm nay sẽ trang bị cho bạn "bộ kit cấp cứu tần số" - những kỹ thuật thực tế và hiệu quả để biến khoảnh khắc khủng hoảng thành cơ hội chứng minh bạn đã thực sự trưởng thành về mặt năng lượng.</p>
+        </section>
+
+        <!-- SECTION 1: SETBACKS LÀ BÌNH THƯỜNG -->
+        <section class="section">
+            <h2 class="section-title"><span>💔</span> Setbacks Là Bình Thường - Và Đó Là Tin Tốt</h2>
+            <p>Trước khi đi vào các kỹ thuật, chúng ta cần hiểu một sự thật quan trọng: dù bạn thực hành tốt đến đâu, SẼ CÓ những lúc tần số rớt. Một tin xấu bất ngờ. Conflict với ai đó. Stress công việc. Thất bại trong dự án. Bệnh tật bất ngờ. Mất mát người thân. Đây là BÌNH THƯỜNG - không phải bạn đã làm sai, cũng không phải bạn đang bị "trừng phạt" bởi vũ trụ.</p>
+
+            <p>Tại sao đây là tin tốt? Bởi vì setbacks là PHÉP THỬ để bạn chứng minh mình đã tiến bộ thực sự. Trước đây, khi gặp khó khăn, bạn có thể mất hàng tuần hoặc hàng tháng để hồi phục - giờ đây, với những công cụ bạn sắp học, bạn có thể quay lại trạng thái cân bằng chỉ trong vài phút hoặc vài giờ. Đó chính là sự khác biệt giữa người BIẾT về tần số và người SỐNG trong tần số cao.</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M6_B2_01%0ASetbacks+Are+Normal" alt="Setbacks là bình thường">
+                <div class="image-caption">Setbacks không phải thất bại - chúng là cơ hội để chứng minh bạn đã tiến bộ</div>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>🌊</span> Sóng Biển vs Mực Nước</div>
+                <p>Hãy nghĩ tần số như mực nước biển. Có sóng (dao động) là bình thường. Điều quan trọng là <strong>BASELINE</strong> (mực nước trung bình) của bạn có đang tăng không.</p>
+                <p style="margin-top: var(--space-sm);">Trước khóa học: Baseline = 3/10</p>
+                <p style="margin-top: var(--space-xs);">Sau Module 5: Baseline = 6/10</p>
+                <p style="margin-top: var(--space-xs);">Dù có lúc rớt xuống 4, bạn vẫn cao hơn trước. Và bạn BIẾT CÁCH quay lại 6.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Mindset Shift</div>
+                <p><strong>Cũ:</strong> "Tần số rớt = Thất bại. Tôi đã làm hỏng mọi thứ."</p>
+                <p style="margin-top: var(--space-sm);"><strong>Mới:</strong> "Tần số rớt = Cơ hội thực hành. Tôi sẽ dùng các công cụ đã học để quay lại."</p>
+                <p style="margin-top: var(--space-sm);">Đây là sự khác biệt giữa người BỎ CUỘC và người TIẾN BỘ.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: STOP-BREATHE-OBSERVE-CHOOSE -->
+        <section class="section">
+            <h2 class="section-title"><span>🛑</span> Emergency Reset: S.B.O.C.</h2>
+            <p>Khi tần số rớt, ĐỪNG phản ứng ngay. Thay vào đó, dùng công thức <strong>S.B.O.C.</strong> - 4 bước giúp bạn reset nhanh:</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x600/0a1628/FFBD59?text=HINH+27%0ASTOP-BREATHE-OBSERVE-CHOOSE" alt="Hình 27: STOP-BREATHE-OBSERVE-CHOOSE">
+                <div class="image-caption">Hình 27: Quy Trình S.B.O.C. - Emergency Reset Khi Tần Số Rớt</div>
+            </div>
+
+            <div class="sboc-grid">
+                <div class="sboc-card stop">
+                    <div class="sboc-letter">S</div>
+                    <div class="sboc-info">
+                        <div class="sboc-word">STOP</div>
+                        <div class="sboc-desc">Dừng lại. Đừng phản ứng. Đừng hành động từ trạng thái thấp. Chỉ cần PAUSE - 10 giây.</div>
+                    </div>
+                </div>
+                <div class="sboc-card breathe">
+                    <div class="sboc-letter">B</div>
+                    <div class="sboc-info">
+                        <div class="sboc-word">BREATHE</div>
+                        <div class="sboc-desc">Thở sâu. 3-5 hơi thở chậm, sâu. Hít vào 4 giây, giữ 4 giây, thở ra 6 giây. Điều này kích hoạt hệ thần kinh đối giao cảm.</div>
+                    </div>
+                </div>
+                <div class="sboc-card observe">
+                    <div class="sboc-letter">O</div>
+                    <div class="sboc-info">
+                        <div class="sboc-word">OBSERVE</div>
+                        <div class="sboc-desc">Quan sát. "Tôi đang cảm thấy gì? Suy nghĩ gì đang chạy? Điều gì trigger tôi?" Không phán xét, chỉ observe.</div>
+                    </div>
+                </div>
+                <div class="sboc-card choose">
+                    <div class="sboc-letter">C</div>
+                    <div class="sboc-info">
+                        <div class="sboc-word">CHOOSE</div>
+                        <div class="sboc-desc">Chọn phản ứng. "Tôi CHỌN cảm thấy khác. Tôi CHỌN hành động khác." Đây là khoảnh khắc TỰ DO ý chí.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scenario-box">
+                <div class="scenario-title"><span>📌</span> Ví Dụ Thực Tế</div>
+                <div class="scenario-situation">
+                    <strong>Tình huống:</strong> Bạn vừa nhận email sếp phê bình gay gắt về dự án của bạn. Tim đập nhanh, mặt nóng bừng, muốn reply ngay để giải thích.
+                </div>
+                <div class="scenario-response">
+                    <strong>S - STOP:</strong> "Dừng lại. Không reply ngay. Đặt điện thoại xuống."
+                    <br><strong>B - BREATHE:</strong> "5 hơi thở sâu. Hít... 1, 2, 3, 4... Giữ... Thở ra... 1, 2, 3, 4, 5, 6..."
+                    <br><strong>O - OBSERVE:</strong> "Tôi đang cảm thấy bị tấn công, tức giận, muốn defend. Suy nghĩ: 'Sếp không công bằng'. Cơ thể: căng cơ, tim nhanh."
+                    <br><strong>C - CHOOSE:</strong> "Tôi CHỌN nhìn đây là feedback, không phải attack. Tôi sẽ đọc lại email khi đã bình tĩnh, rồi phản hồi professionally trong 24 giờ."
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>⏱️</span> S.B.O.C. Chỉ Mất 60 Giây</div>
+                <p>Toàn bộ quy trình này chỉ mất khoảng 60 giây. Nhưng 60 giây đó có thể cứu bạn khỏi quyết định tồi tệ, conflict không cần thiết, và tuần tần số thấp. Nhiều học viên chia sẻ rằng S.B.O.C. đã cứu hôn nhân, công việc, và các mối quan hệ quan trọng của họ - chỉ bằng cách TẠM DỪNG 60 giây trước khi phản ứng.</p>
+            </div>
+        </section>
+
+        <!-- SECTION: REAL STORIES -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Câu Chuyện Thực Tế: Họ Đã Vượt Qua Như Thế Nào</h2>
+            <p>Hãy cùng xem ba câu chuyện thực tế từ những người đã áp dụng S.B.O.C. và các kỹ thuật nâng tần số trong những tình huống thực sự khó khăn. Mỗi câu chuyện sẽ cho bạn thấy sức mạnh của việc CHỌN phản ứng thay vì phản ứng theo bản năng.</p>
+
+            <div class="scenario-box">
+                <div class="scenario-title"><span>📌</span> Câu Chuyện 1: Trang - Khi Sự Nghiệp Đổ Vỡ</div>
+                <div class="scenario-situation">
+                    <strong>Tình huống:</strong> Trang, 34 tuổi, là quản lý marketing tại một công ty lớn ở Hà Nội. Sau 8 năm cống hiến và đạt nhiều thành tích xuất sắc, cô bất ngờ nhận thông báo bị sa thải do công ty tái cấu trúc. Cảm giác shock, tức giận và lo lắng về tương lai bao trùm lấy cô. Trong quá khứ, Trang sẽ khóc cả tuần, rơi vào trầm cảm và mất hàng tháng để hồi phục.
+                </div>
+                <div class="scenario-response">
+                    <strong>Cách Trang áp dụng S.B.O.C.:</strong><br>
+                    <strong>S - STOP:</strong> Thay vì gọi ngay cho bạn bè để than phiền hoặc đăng status tiêu cực, Trang rời khỏi phòng họp và ngồi yên trong xe 10 phút.<br>
+                    <strong>B - BREATHE:</strong> Cô làm 10 hơi thở box breathing (hít 4 - giữ 4 - thở 4 - giữ 4), cho đến khi tim đập chậm lại.<br>
+                    <strong>O - OBSERVE:</strong> "Tôi đang cảm thấy bị phản bội, không được công nhận. Suy nghĩ: 'Tôi không đủ giỏi'. Nhưng đợi đã - đây có đúng không? Công ty tái cấu trúc ảnh hưởng 30 người, không chỉ mình tôi."<br>
+                    <strong>C - CHOOSE:</strong> "Tôi CHỌN nhìn đây như cơ hội được giải phóng. Tôi đã muốn tự kinh doanh 3 năm nay nhưng không dám. Đây là dấu hiệu!"<br><br>
+                    <strong>Kết quả:</strong> Sau 6 tháng, Trang mở agency marketing của riêng mình với 5 nhân viên và thu nhập gấp đôi mức lương cũ. Cô chia sẻ: "Nếu hôm đó tôi phản ứng theo cách cũ - khóc lóc, oán trách, nằm nhà cả tháng - có lẽ tôi đã miss cơ hội vàng đó."
+                </div>
+            </div>
+
+            <div class="scenario-box">
+                <div class="scenario-title"><span>📌</span> Câu Chuyện 2: Hoàng - Khi Hôn Nhân Rạn Nứt</div>
+                <div class="scenario-situation">
+                    <strong>Tình huống:</strong> Hoàng, 42 tuổi, phát hiện vợ đang chat thân mật với đồng nghiệp nam. Cơn giận dữ bùng phát - anh muốn gọi ngay cho người kia, đánh ghen, hoặc pack đồ đi luôn trong đêm. Tim đập như búa, mặt nóng bừng, tay run khi cầm điện thoại.
+                </div>
+                <div class="scenario-response">
+                    <strong>Cách Hoàng áp dụng S.B.O.C.:</strong><br>
+                    <strong>S - STOP:</strong> "Dừng lại. Đặt điện thoại xuống. Không làm gì trong 5 phút." Anh ra balcony, đóng cửa lại.<br>
+                    <strong>B - BREATHE:</strong> 20 hơi thở sâu, tập trung vào việc thở ra thật dài. Cảm nhận cơn sóng emotion dâng lên rồi rút đi.<br>
+                    <strong>O - OBSERVE:</strong> "Tôi đang cảm thấy bị phản bội, tức giận, đau đớn. Suy nghĩ: 'Mình không đủ tốt', 'Cô ấy không yêu mình'. Nhưng mình chưa biết full story. Chat thân mật chưa chắc là ngoại tình."<br>
+                    <strong>C - CHOOSE:</strong> "Tôi CHỌN nói chuyện bình tĩnh với vợ vào ngày mai. Tôi CHỌN nghe trước khi kết luận. Tôi CHỌN bảo vệ 15 năm hôn nhân thay vì phá hủy nó trong một đêm."<br><br>
+                    <strong>Kết quả:</strong> Cuộc nói chuyện hôm sau tiết lộ vợ Hoàng đang stress vì công việc và người đồng nghiệp chỉ là bạn lắng nghe. Họ nhận ra cả hai đã thiếu connection và quyết định đi tư vấn hôn nhân. Một năm sau, hôn nhân của họ mạnh mẽ hơn bao giờ hết. Hoàng nói: "Nếu đêm đó tôi làm theo cơn giận, tôi đã mất vợ, mất con, mất gia đình - tất cả vì một hiểu lầm."
+                </div>
+            </div>
+
+            <div class="scenario-box">
+                <div class="scenario-title"><span>📌</span> Câu Chuyện 3: Linh - Khi Mất Tiền Lớn</div>
+                <div class="scenario-situation">
+                    <strong>Tình huống:</strong> Linh, 28 tuổi, đầu tư hết tiền tiết kiệm 500 triệu vào crypto theo lời khuyên của bạn. Thị trường crash, tài khoản giảm còn 80 triệu. Cô rơi vào panic, mất ngủ cả đêm, và cảm giác như cuộc đời đã kết thúc.
+                </div>
+                <div class="scenario-response">
+                    <strong>Cách Linh áp dụng S.B.O.C. + Quick Uplift:</strong><br>
+                    <strong>S - STOP:</strong> Linh nhận ra cô đang muốn bán tháo tất cả ngay trong đêm vì sợ hãi. "Dừng lại. Không quyết định tài chính quan trọng khi đang panic."<br>
+                    <strong>B - BREATHE:</strong> 5 phút breathwork nhanh - 20 hơi thở mạnh + giữ 15 giây. Lặp lại 3 rounds.<br>
+                    <strong>O - OBSERVE:</strong> "Tôi đang sợ hãi vì nghĩ mình đã mất TẤT CẢ. Nhưng thực tế: 80 triệu vẫn là tiền. Tôi vẫn có thu nhập. Tôi vẫn có sức khỏe. Và thị trường có thể phục hồi."<br>
+                    <strong>C - CHOOSE:</strong> "Tôi CHỌN nhìn đây là bài học đắt giá về quản lý rủi ro. Tôi sẽ không bán panic. Tôi sẽ nghiên cứu kỹ hơn."<br><br>
+                    <strong>Quick Uplift bổ sung:</strong> Linh áp dụng Cold Water Reset (tắm nước lạnh 30 giây) + Gratitude Flooding (viết 10 điều biết ơn) + Nature Reset (đi bộ trong công viên sáng hôm sau).<br><br>
+                    <strong>Kết quả:</strong> 18 tháng sau, thị trường phục hồi và tài khoản Linh quay lại 450 triệu. Quan trọng hơn, cô học được về phân bổ rủi ro và không bao giờ "all-in" nữa. "Nếu đêm đó tôi bán panic, tôi đã thực sự mất 420 triệu. S.B.O.C. đã cứu tôi theo nghĩa đen."
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💎</span> Điểm Chung Của Ba Câu Chuyện</div>
+                <p>Cả ba người đều đối mặt với tình huống có thể phá hủy cuộc sống của họ - sự nghiệp, hôn nhân, tài chính. Nhưng điểm khác biệt là họ KHÔNG phản ứng theo bản năng. Họ DỪNG LẠI, HÍT THỞ, QUAN SÁT, và CHỌN PHẢN ỨNG có ý thức. Kết quả? Thay vì mất hàng tháng hoặc hàng năm để hồi phục, họ quay lại trạng thái cân bằng trong vài giờ hoặc vài ngày - và thậm chí biến khủng hoảng thành cơ hội phát triển.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 3: QUICK UPLIFT TECHNIQUES -->
+        <section class="section">
+            <h2 class="section-title"><span>⚡</span> 7 Kỹ Thuật Nâng Tần Số Nhanh</h2>
+            <p>Sau khi dùng S.B.O.C. để ổn định, đây là 7 kỹ thuật giúp bạn NÂNG tần số lên nhanh chóng:</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x600/0a1628/00C853?text=M6_B2_02%0A7+Quick+Uplift+Techniques" alt="7 Kỹ Thuật Nâng Tần Số Nhanh">
+                <div class="image-caption">7 Kỹ Thuật Nâng Tần Số Trong 5-15 Phút</div>
+            </div>
+
+            <div class="technique-grid">
+                <div class="technique-card">
+                    <div class="technique-icon">🌬️</div>
+                    <div class="technique-content">
+                        <div class="technique-name">1. Breathwork Nhanh</div>
+                        <div class="technique-time">⏱️ 3 phút</div>
+                        <div class="technique-steps">
+                            <li>20 hơi thở nhanh, mạnh qua miệng</li>
+                            <li>Hít sâu, giữ 15 giây</li>
+                            <li>Thở ra từ từ, thả lỏng</li>
+                            <li>Lặp lại 3 rounds</li>
+                        </div>
+                    </div>
+                </div>
+                <div class="technique-card">
+                    <div class="technique-icon">💧</div>
+                    <div class="technique-content">
+                        <div class="technique-name">2. Cold Water Reset</div>
+                        <div class="technique-time">⏱️ 1 phút</div>
+                        <div class="technique-steps">
+                            <li>Rửa mặt bằng nước lạnh</li>
+                            <li>Hoặc: tắm nước lạnh 30 giây</li>
+                            <li>Hoặc: ngâm tay trong đá 30 giây</li>
+                            <li>Kích hoạt hệ thần kinh, tỉnh táo ngay lập tức</li>
+                        </div>
+                    </div>
+                </div>
+                <div class="technique-card">
+                    <div class="technique-icon">🚶</div>
+                    <div class="technique-content">
+                        <div class="technique-name">3. Movement Break</div>
+                        <div class="technique-time">⏱️ 5-10 phút</div>
+                        <div class="technique-steps">
+                            <li>Đi bộ nhanh ra ngoài</li>
+                            <li>Nhảy dây 50 cái</li>
+                            <li>Làm 10 squats + 10 jumping jacks</li>
+                            <li>Vận động giải phóng cortisol và tăng endorphins</li>
+                        </div>
+                    </div>
+                </div>
+                <div class="technique-card">
+                    <div class="technique-icon">🎵</div>
+                    <div class="technique-content">
+                        <div class="technique-name">4. High-Vibe Music</div>
+                        <div class="technique-time">⏱️ 5 phút</div>
+                        <div class="technique-steps">
+                            <li>Bật playlist nâng năng lượng</li>
+                            <li>Đeo tai nghe, nhắm mắt</li>
+                            <li>Cho phép bản thân feel the music</li>
+                            <li>Nhảy nhẹ theo nhạc nếu có thể</li>
+                        </div>
+                    </div>
+                </div>
+                <div class="technique-card">
+                    <div class="technique-icon">🙏</div>
+                    <div class="technique-content">
+                        <div class="technique-name">5. Gratitude Flooding</div>
+                        <div class="technique-time">⏱️ 3 phút</div>
+                        <div class="technique-steps">
+                            <li>Liệt kê nhanh 10 điều biết ơn</li>
+                            <li>Không suy nghĩ, viết liên tục</li>
+                            <li>Từ nhỏ nhất đến lớn nhất</li>
+                            <li>Gratitude = tần số cao nhất</li>
+                        </div>
+                    </div>
+                </div>
+                <div class="technique-card">
+                    <div class="technique-icon">🌳</div>
+                    <div class="technique-content">
+                        <div class="technique-name">6. Nature Reset</div>
+                        <div class="technique-time">⏱️ 10-15 phút</div>
+                        <div class="technique-steps">
+                            <li>Ra ngoài trời, nhìn cây xanh</li>
+                            <li>Đi chân trần trên cỏ/đất (grounding)</li>
+                            <li>Ngồi dưới gốc cây, thở sâu</li>
+                            <li>Thiên nhiên tự động balance năng lượng</li>
+                        </div>
+                    </div>
+                </div>
+                <div class="technique-card">
+                    <div class="technique-icon">📞</div>
+                    <div class="technique-content">
+                        <div class="technique-name">7. High-Vibe Call</div>
+                        <div class="technique-time">⏱️ 10-15 phút</div>
+                        <div class="technique-steps">
+                            <li>Gọi cho người có tần số cao</li>
+                            <li>Không than phiền, chỉ connect</li>
+                            <li>Hoặc: voice note cho bạn thân</li>
+                            <li>Connection nâng tần số cả hai</li>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📋</span> Chọn Kỹ Thuật Phù Hợp</div>
+                <p><strong>Có ít thời gian (1-3 phút):</strong> Cold Water, Breathwork, Gratitude Flooding</p>
+                <p style="margin-top: var(--space-sm);"><strong>Cần vận động:</strong> Movement Break, Nature Reset</p>
+                <p style="margin-top: var(--space-sm);"><strong>Cần connection:</strong> High-Vibe Call, Music</p>
+                <p style="margin-top: var(--space-sm);"><strong>Có thể kết hợp:</strong> Music + Movement, Nature + Breathwork...</p>
+            </div>
+        </section>
+
+        <!-- SECTION 4: KHI NÀO CẦN SUPPORT -->
+        <section class="section">
+            <h2 class="section-title"><span>🆘</span> Khi Nào Cần Thêm Support?</h2>
+            <p>Đôi khi setback quá lớn hoặc kéo dài, bạn không thể tự recover bằng các kỹ thuật trên. Đây là lúc cần TÌM KIẾM HỖ TRỢ:</p>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/6A5BFF?text=M6_B2_03%0AWhen+To+Seek+Support" alt="Khi nào cần support">
+                <div class="image-caption">Tìm kiếm hỗ trợ KHÔNG phải yếu đuối - đó là khôn ngoan</div>
+            </div>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tần số thấp kéo dài > 3 ngày</div>
+                        <div class="flow-step-desc">Dù đã thử các kỹ thuật, tần số vẫn không lên. Cần nhờ mentor, coach, hoặc cộng đồng hỗ trợ.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Patterns cũ quay lại mạnh mẽ</div>
+                        <div class="flow-step-desc">Limiting beliefs cũ trỗi dậy, self-sabotage xuất hiện. Cần làm lại work từ Module 1-2 với sự hướng dẫn.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Khủng hoảng lớn (loss, trauma mới)</div>
+                        <div class="flow-step-desc">Mất mát lớn, trauma xảy ra. Đây không phải lúc "tự cố gắng" - cần chuyên gia (therapist, counselor).</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Cảm giác cô đơn trong journey</div>
+                        <div class="flow-step-desc">Chuyển hóa là hành trình dài. Cần cộng đồng đồng hành. GEM Community là nơi bạn không bao giờ đơn độc.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>📱</span> GEM Master - AI Support 24/7</div>
+                <p>Bạn có thể chat với GEM Master bất cứ lúc nào khi cần support:</p>
+                <p><strong>"Tôi đang cảm thấy tần số rớt, giúp tôi..."</strong></p>
+                <p><strong>"Tôi vừa gặp tình huống này... Làm sao để xử lý?"</strong></p>
+                <p><strong>"Cho tôi affirmation để nâng năng lượng ngay bây giờ"</strong></p>
+                <p>GEM Master sẽ hướng dẫn bạn qua các kỹ thuật phù hợp với tình huống cụ thể.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 5: PREVENTION IS BETTER -->
+        <section class="section">
+            <h2 class="section-title"><span>🛡️</span> Phòng Bệnh Hơn Chữa Bệnh</h2>
+            <p>Cách tốt nhất để xử lý setbacks là... ít setbacks hơn. Đây là checklist để PHÒNG NGỪA tần số rớt:</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">✓</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Morning Routine Không Bỏ</div>
+                        <div class="flow-step-desc">Dù bận đến đâu, 15 phút morning routine là "vaccine" cho cả ngày. Skip = dễ bị tấn công.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">✓</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Ngủ Đủ Giấc</div>
+                        <div class="flow-step-desc">7-8 tiếng ngủ. Thiếu ngủ = năng lượng thấp = dễ reactive = tần số rớt nhanh hơn.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">✓</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Giới Hạn Negative Input</div>
+                        <div class="flow-step-desc">News, drama, people tiêu cực - giới hạn tối đa. Curated feed, boundaries với energy vampires.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">✓</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Buffer Time</div>
+                        <div class="flow-step-desc">Đừng pack lịch quá kín. Để buffer time giữa các meetings/tasks. Rushed = stressed = tần số thấp.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">✓</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Weekly Reset</div>
+                        <div class="flow-step-desc">Mỗi tuần có 1 buổi "reset": nature time, spa, meditation dài, hoặc simply do nothing.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Remember</div>
+                <p><strong>"Bạn không thể ngăn sóng, nhưng bạn có thể học cách lướt sóng."</strong></p>
+                <p style="margin-top: var(--space-sm);">Setbacks sẽ đến. Câu hỏi không phải "làm sao tránh hoàn toàn?" mà là "làm sao recover nhanh hơn?"</p>
+                <p style="margin-top: var(--space-sm);">Với S.B.O.C. và 7 Quick Uplift Techniques, bạn có CÔNG CỤ để recover trong hitches thay vì hours hay days.</p>
+            </div>
+        </section>
+
+        <!-- COMMON QUESTIONS SECTION -->
+        <section class="section">
+            <h2 class="section-title"><span>❓</span> Câu Hỏi Thường Gặp</h2>
+
+            <div class="scenario-box">
+                <div class="scenario-title"><span>🤔</span> "Nếu tần số rớt quá nhanh và mạnh, tôi không kịp nghĩ đến S.B.O.C. thì sao?"</div>
+                <div class="scenario-response">
+                    <p>Đây là tình huống rất phổ biến, đặc biệt với những người mới bắt đầu thực hành. Giải pháp là tạo "triggers nhắc nhở" trong môi trường của bạn: dán note "STOP - BREATHE" trên màn hình máy tính, đặt reminder trên điện thoại mỗi 2 giờ, hoặc đeo vòng tay có ý nghĩa đặc biệt như "pause reminder". Theo thời gian, não bộ sẽ tự động hóa phản ứng S.B.O.C. - giống như bạn không cần nghĩ khi đạp phanh xe khi thấy đèn đỏ vậy.</p>
+                </div>
+            </div>
+
+            <div class="scenario-box">
+                <div class="scenario-title"><span>🤔</span> "Các kỹ thuật Quick Uplift có thể thay thế việc giải quyết vấn đề gốc rễ không?"</div>
+                <div class="scenario-response">
+                    <p>Không, và đây là điểm rất quan trọng cần hiểu rõ. Quick Uplift giống như thuốc giảm đau cấp tốc - nó giúp bạn thoát khỏi trạng thái panic để có thể TƯ DUY SÁNG SUỐT hơn, nhưng nó không giải quyết vấn đề gốc. Sau khi đã ổn định tần số bằng các kỹ thuật này, bạn vẫn cần XỬ LÝ tình huống thực tế - có cuộc nói chuyện khó khăn, đưa ra quyết định quan trọng, hoặc xây dựng kế hoạch hành động. Điểm khác biệt là bạn giờ đây làm điều đó từ trạng thái năng lượng cao thay vì từ sự hoảng loạn.</p>
+                </div>
+            </div>
+
+            <div class="scenario-box">
+                <div class="scenario-title"><span>🤔</span> "Tần số của tôi rớt mỗi ngày, tôi mệt mỏi vì phải liên tục recovery. Có cách nào tốt hơn không?"</div>
+                <div class="scenario-response">
+                    <p>Nếu bạn thấy mình phải dùng "kit cấp cứu" mỗi ngày, đó là dấu hiệu cho thấy có vấn đề cấu trúc trong cuộc sống cần được thay đổi - không chỉ là xử lý triệu chứng. Có thể bạn đang trong môi trường làm việc toxic, trong mối quan hệ không lành mạnh, hoặc có lối sống đang liên tục hạ tần số (thiếu ngủ, thiếu vận động, dinh dưỡng kém). Trong trường hợp này, bạn cần quay lại Bài 6.1 về việc duy trì tần số cao và xem xét những thay đổi lớn hơn ở cấp độ lifestyle và environment.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- KEY TAKEAWAYS SECTION -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> 3 Điểm Cốt Lõi Cần Nhớ</h2>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Setbacks Là Bình Thường - Không Phải Thất Bại</div>
+                        <div class="flow-step-desc">Dù bạn thực hành tốt đến đâu, tần số VẪN SẼ rớt đôi khi. Đây không phải dấu hiệu bạn đã làm sai hay vũ trụ "trừng phạt" bạn. Điều quan trọng là BASELINE của bạn - mức tần số trung bình - đang tăng lên theo thời gian. Setbacks là cơ hội để chứng minh bạn đã thực sự tiến bộ bằng cách recovery nhanh hơn so với trước.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">S.B.O.C. Là Công Thức Cấp Cứu - Chỉ 60 Giây</div>
+                        <div class="flow-step-desc">Khi tần số rớt, ĐỪNG phản ứng theo bản năng. Áp dụng S.B.O.C.: STOP (dừng lại 10 giây), BREATHE (3-5 hơi thở sâu), OBSERVE (quan sát cảm xúc và suy nghĩ không phán xét), CHOOSE (chọn phản ứng có ý thức). 60 giây này có thể cứu hôn nhân, sự nghiệp, và tài chính của bạn khỏi những quyết định tồi tệ.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">7 Quick Uplift - Công Cụ Nâng Tần Số Nhanh</div>
+                        <div class="flow-step-desc">Sau khi ổn định với S.B.O.C., dùng một trong 7 kỹ thuật để nâng tần số: Breathwork Nhanh, Cold Water Reset, Movement Break, High-Vibe Music, Gratitude Flooding, Nature Reset, hoặc High-Vibe Call. Chọn kỹ thuật phù hợp với thời gian và hoàn cảnh của bạn. Phòng bệnh hơn chữa bệnh - Morning Routine đều đặn là "vaccine" tốt nhất để giảm tần suất setbacks.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TRANSITION SECTION -->
+        <section class="section">
+            <h2 class="section-title"><span>🔮</span> Bước Tiếp Theo: Sức Mạnh Của Cộng Đồng</h2>
+            <p>Trong bài học này, bạn đã có được "bộ kit cấp cứu tần số" với S.B.O.C. và 7 Quick Uplift Techniques. Nhưng có một sự thật quan trọng: hành trình chuyển hóa sẽ khó khăn hơn nhiều nếu bạn đi một mình. Chúng ta là những sinh vật xã hội, và năng lượng của những người xung quanh có ảnh hưởng sâu sắc đến tần số của bạn.</p>
+
+            <p>Trong Bài 6.3 tiếp theo, chúng ta sẽ khám phá sức mạnh của CỘNG ĐỒNG THỊNH VƯỢNG - làm thế nào để xây dựng mạng lưới những người cùng tần số, làm thế nào để bảo vệ năng lượng của bạn trong các mối quan hệ, và làm thế nào để tạo ra môi trường hỗ trợ cho sự phát triển liên tục. Bạn sẽ hiểu tại sao "bạn là trung bình cộng của 5 người bạn dành nhiều thời gian nhất" không chỉ là câu nói sáo rỗng, mà là LUẬT NĂNG LƯỢNG thực sự.</p>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>✍️</span> Bài Tập Trước Khi Sang Bài Tiếp</div>
+                <p><strong>Tạo "Emergency Card" cá nhân:</strong> Viết ra một thẻ nhỏ (hoặc note trên điện thoại) gồm: (1) Công thức S.B.O.C. ngắn gọn, (2) Top 3 kỹ thuật Quick Uplift bạn thấy phù hợp nhất, (3) Số điện thoại của 1-2 người có tần số cao bạn có thể gọi khi cần. Mang theo thẻ này bên mình - đây là "bảo hiểm năng lượng" của bạn cho mọi tình huống bất ngờ.</p>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <p>Bài 6.2 Hoàn Tất! 🆘</p>
+            <p style="margin-top: var(--space-sm);">Tiếp theo: <a href="KHOA_TRIEU_PHU_M6_BAI_03.html">Bài 6.3: Cộng Đồng Thịnh Vượng →</a></p>
+            <p style="margin-top: var(--space-lg);">© 2024 GEM Academy by Jennie Uyen Chu</p>
+        </footer>
+
+    </div>
+</body>
+</html>

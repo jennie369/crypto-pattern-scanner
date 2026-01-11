@@ -48,6 +48,10 @@ export const TYPE_TO_CATEGORY = {
   breakout: 'trading',
   stop_loss: 'trading',
   take_profit: 'trading',
+  limit_order_filled: 'trading',  // Pending order filled
+  position_opened: 'trading',     // Position opened (market order)
+  position_sl_hit: 'trading',     // Stop loss hit
+  position_tp_hit: 'trading',     // Take profit hit
   // Social
   forum_like: 'social',
   forum_comment: 'social',
@@ -158,7 +162,7 @@ class NotificationService {
    */
   async registerPushToken() {
     try {
-      if (!Device.isDevice) {
+      if (Device?.isDevice === false) {
         console.log('[Notifications] Push notifications only work on physical devices');
         return null;
       }
@@ -211,7 +215,7 @@ class NotificationService {
   async savePushTokenToDatabase(userId, pushToken) {
     try {
       const deviceType = Platform.OS;
-      const deviceName = Device.modelName || Device.deviceName || 'Unknown Device';
+      const deviceName = Device?.modelName || Device?.deviceName || 'Unknown Device';
 
       // Upsert token (insert or update if exists)
       const { error } = await supabase
@@ -658,6 +662,272 @@ class NotificationService {
       console.log('[Notifications] Market alert sent:', title);
     } catch (error) {
       console.error('[Notifications] sendMarketAlertNotification error:', error);
+    }
+  }
+
+  /**
+   * Send limit order filled notification (pending order executed)
+   * Also saves to database for Notification tab display
+   */
+  async sendLimitOrderFilledNotification(order, userId) {
+    if (!this._settings.tradeAlerts) return;
+
+    const { symbol, direction, entryPrice, positionSize } = order;
+    const directionEmoji = direction === 'LONG' ? '📈' : '📉';
+    const directionText = direction === 'LONG' ? 'LONG' : 'SHORT';
+
+    // Format price with appropriate decimals
+    const formatPrice = (price) => {
+      if (!price) return '0';
+      if (price >= 1000) return price.toFixed(2);
+      if (price >= 1) return price.toFixed(4);
+      return price.toFixed(6);
+    };
+
+    const title = `${directionEmoji} Lệnh Chờ Đã Khớp!`;
+    const body = `${symbol.replace('USDT', '')} ${directionText} đã khớp tại $${formatPrice(entryPrice)}`;
+
+    try {
+      // 1. Send local push notification
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title,
+          body,
+          data: {
+            type: 'limit_order_filled',
+            symbol,
+            direction,
+            entryPrice,
+            positionSize,
+            orderId: order.id,
+          },
+          sound: true,
+        },
+        trigger: null, // Immediate
+      });
+
+      // 2. Save to database for Notification tab
+      if (userId) {
+        await supabase.from('notifications').insert({
+          user_id: userId,
+          title,
+          message: body,
+          type: 'limit_order_filled',
+          data: {
+            symbol,
+            direction,
+            entryPrice,
+            positionSize,
+            orderId: order.id,
+          },
+          read: false,
+        });
+      }
+
+      console.log('[Notifications] Limit order filled notification sent:', symbol, direction);
+    } catch (error) {
+      console.error('[Notifications] sendLimitOrderFilledNotification error:', error);
+    }
+  }
+
+  /**
+   * Send position opened notification (market order executed)
+   * Also saves to database for Notification tab display
+   */
+  async sendPositionOpenedNotification(position, userId) {
+    if (!this._settings.tradeAlerts) return;
+
+    const { symbol, direction, entryPrice, positionSize } = position;
+    const directionEmoji = direction === 'LONG' ? '📈' : '📉';
+    const directionText = direction === 'LONG' ? 'LONG' : 'SHORT';
+
+    // Format price with appropriate decimals
+    const formatPriceLocal = (price) => {
+      if (!price) return '0';
+      if (price >= 1000) return price.toFixed(2);
+      if (price >= 1) return price.toFixed(4);
+      return price.toFixed(6);
+    };
+
+    const title = `${directionEmoji} Đã Mở Lệnh ${directionText}`;
+    const body = `${symbol.replace('USDT', '')} vào tại $${formatPriceLocal(entryPrice)} | Ký quỹ: $${positionSize?.toFixed(2) || '0'}`;
+
+    try {
+      // 1. Send local push notification
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title,
+          body,
+          data: {
+            type: 'position_opened',
+            symbol,
+            direction,
+            entryPrice,
+            positionSize,
+            positionId: position.id,
+          },
+          sound: true,
+        },
+        trigger: null,
+      });
+
+      // 2. Save to database for Notification tab
+      if (userId) {
+        await supabase.from('notifications').insert({
+          user_id: userId,
+          title,
+          message: body,
+          type: 'position_opened',
+          data: {
+            symbol,
+            direction,
+            entryPrice,
+            positionSize,
+            positionId: position.id,
+          },
+          read: false,
+        });
+      }
+
+      console.log('[Notifications] Position opened notification sent:', symbol, direction);
+    } catch (error) {
+      console.error('[Notifications] sendPositionOpenedNotification error:', error);
+    }
+  }
+
+  /**
+   * Send Stop Loss hit notification
+   * Also saves to database for Notification tab display
+   */
+  async sendStopLossHitNotification(position, userId) {
+    if (!this._settings.tradeAlerts) return;
+
+    const { symbol, direction, entryPrice, currentPrice, realizedPnL, realizedPnLPercent } = position;
+
+    // Format price with appropriate decimals
+    const formatPriceLocal = (price) => {
+      if (!price) return '0';
+      if (price >= 1000) return price.toFixed(2);
+      if (price >= 1) return price.toFixed(4);
+      return price.toFixed(6);
+    };
+
+    const pnlText = realizedPnL >= 0 ? `+$${realizedPnL?.toFixed(2)}` : `-$${Math.abs(realizedPnL)?.toFixed(2)}`;
+    const pnlPercent = realizedPnLPercent?.toFixed(2) || '0';
+
+    const title = `🛑 Chạm Cắt Lỗ - ${symbol.replace('USDT', '')}`;
+    const body = `${direction} đóng tại $${formatPriceLocal(currentPrice)} | P/L: ${pnlText} (${pnlPercent}%)`;
+
+    try {
+      // 1. Send local push notification
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title,
+          body,
+          data: {
+            type: 'position_sl_hit',
+            symbol,
+            direction,
+            entryPrice,
+            exitPrice: currentPrice,
+            realizedPnL,
+            positionId: position.id,
+          },
+          sound: true,
+        },
+        trigger: null,
+      });
+
+      // 2. Save to database for Notification tab
+      if (userId) {
+        await supabase.from('notifications').insert({
+          user_id: userId,
+          title,
+          message: body,
+          type: 'position_sl_hit',
+          data: {
+            symbol,
+            direction,
+            entryPrice,
+            exitPrice: currentPrice,
+            realizedPnL,
+            positionId: position.id,
+          },
+          read: false,
+        });
+      }
+
+      console.log('[Notifications] Stop loss hit notification sent:', symbol);
+    } catch (error) {
+      console.error('[Notifications] sendStopLossHitNotification error:', error);
+    }
+  }
+
+  /**
+   * Send Take Profit hit notification
+   * Also saves to database for Notification tab display
+   */
+  async sendTakeProfitHitNotification(position, userId) {
+    if (!this._settings.tradeAlerts) return;
+
+    const { symbol, direction, entryPrice, currentPrice, realizedPnL, realizedPnLPercent } = position;
+
+    // Format price with appropriate decimals
+    const formatPriceLocal = (price) => {
+      if (!price) return '0';
+      if (price >= 1000) return price.toFixed(2);
+      if (price >= 1) return price.toFixed(4);
+      return price.toFixed(6);
+    };
+
+    const pnlText = realizedPnL >= 0 ? `+$${realizedPnL?.toFixed(2)}` : `-$${Math.abs(realizedPnL)?.toFixed(2)}`;
+    const pnlPercent = realizedPnLPercent?.toFixed(2) || '0';
+
+    const title = `🎯 Chạm Chốt Lời - ${symbol.replace('USDT', '')}`;
+    const body = `${direction} đóng tại $${formatPriceLocal(currentPrice)} | P/L: ${pnlText} (+${pnlPercent}%)`;
+
+    try {
+      // 1. Send local push notification
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title,
+          body,
+          data: {
+            type: 'position_tp_hit',
+            symbol,
+            direction,
+            entryPrice,
+            exitPrice: currentPrice,
+            realizedPnL,
+            positionId: position.id,
+          },
+          sound: true,
+        },
+        trigger: null,
+      });
+
+      // 2. Save to database for Notification tab
+      if (userId) {
+        await supabase.from('notifications').insert({
+          user_id: userId,
+          title,
+          message: body,
+          type: 'position_tp_hit',
+          data: {
+            symbol,
+            direction,
+            entryPrice,
+            exitPrice: currentPrice,
+            realizedPnL,
+            positionId: position.id,
+          },
+          read: false,
+        });
+      }
+
+      console.log('[Notifications] Take profit hit notification sent:', symbol);
+    } catch (error) {
+      console.error('[Notifications] sendTakeProfitHitNotification error:', error);
     }
   }
 
@@ -1824,4 +2094,112 @@ class NotificationService {
 }
 
 export const notificationService = new NotificationService();
+
+// ==========================================
+// PHASE 3C: ALERT SYSTEM EXPORTS
+// ==========================================
+
+/**
+ * Send local notification (direct export for alertManager)
+ * @param {Object} options - Notification options
+ * @returns {Promise<string>} Notification ID
+ */
+export const sendLocalNotification = async (options) => {
+  try {
+    const { title, body, data = {}, channelId = 'alerts' } = options;
+
+    const notificationId = await Notifications.scheduleNotificationAsync({
+      content: {
+        title,
+        body,
+        data,
+        sound: 'default',
+        priority: Notifications.AndroidNotificationPriority.HIGH,
+      },
+      trigger: null, // Immediate
+    });
+
+    console.log('[Notifications] Sent local notification:', notificationId);
+    return notificationId;
+  } catch (error) {
+    console.error('[Notifications] Send local error:', error);
+    return null;
+  }
+};
+
+/**
+ * Send push notification via server (direct export for alertManager)
+ * @param {string} userId - Target user ID
+ * @param {Object} options - Notification options
+ */
+export const sendPushNotification = async (userId, options) => {
+  try {
+    const { title, body, data = {} } = options;
+
+    // Use local notification as implementation
+    await sendLocalNotification({ title, body, data });
+
+    return { success: true };
+  } catch (error) {
+    console.error('[Notifications] Send push error:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Send FTB notification (high priority)
+ * @param {Object} alert - FTB alert data
+ */
+export const sendFTBNotification = async (alert) => {
+  const emoji = '⭐';
+  const title = `${emoji} ${alert.title || alert.titleVi}`;
+  const body = alert.message;
+
+  return await sendLocalNotification({
+    title,
+    body,
+    data: {
+      type: alert.type,
+      symbol: alert.zone?.symbol,
+      alertId: alert.id,
+      actionRequired: alert.actionRequired,
+      suggestedAction: alert.suggestedAction,
+    },
+    channelId: 'ftb',
+  });
+};
+
+/**
+ * Create alert-specific notification content
+ * @param {Object} alert - Alert object
+ * @returns {Object} Notification content
+ */
+export const createAlertNotificationContent = (alert) => {
+  const emojis = {
+    ftb: '⭐',
+    ftb_approaching: '🌟',
+    zone_approach: '🎯',
+    confirmation: '✅',
+    zone_broken: '⚠️',
+    price_level: '💰',
+    stacked_zone: '📊',
+    high_score: '🏆',
+    pin_engulf_combo: '⚡',
+  };
+
+  const emoji = emojis[alert.type] || '🔔';
+
+  return {
+    title: `${emoji} ${alert.title || alert.titleVi}`,
+    body: alert.message,
+    data: {
+      type: alert.type,
+      symbol: alert.zone?.symbol || alert.symbol,
+      alertId: alert.id,
+      actionRequired: alert.actionRequired,
+      suggestedAction: alert.suggestedAction,
+    },
+  };
+};
+
 export default notificationService;

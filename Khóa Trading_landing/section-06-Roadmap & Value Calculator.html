@@ -1,0 +1,1226 @@
+
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section 6 - Roadmap &amp; Value Calculator | GEM Trading Academy</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&amp;family=Noto+Sans+Display:wght@300;400;600;700&amp;display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    
+    <style>
+        /* ==================== 
+           CẤU HÌNH DỄ CHỈNH SỬA - ĐẶT Ở ĐẦU FILE
+           Chỉnh sửa các giá trị này để customize section
+        ==================== */
+        :root {
+            /* COLORS - Dark Gradient Section 6 (Dark Navy → Deep Dark) */
+            --section-6-start: #0A0D2A;     /* Dark navy - MATCHES Section 5 ending */
+            --section-6-mid-1: #0C1035;     /* Deeper navy */
+            --section-6-mid-2: #0E1340;     /* Navy blue */
+            --section-6-mid-3: #10154A;     /* Rich navy */
+            --section-6-mid-4: #0D1238;     /* Dark blue */
+            --section-6-mid-5: #0A0E2D;     /* Very dark navy */
+            --section-6-mid-6: #080B22;     /* Deep dark */
+            --section-6-end: #050718;       /* Near black */
+            
+            /* Brand Colors */
+            --primary-burgundy: #9C0612;
+            --gold-accent: #FFBD59;
+            --gold-light: #DEBC81;
+            --text-light: #FFFFFF;
+            --text-cream: #F5E6D3;
+            --text-dark: #2D3748;
+            
+            /* Typography */
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+            
+            /* SECTION CONTENT */
+            --section-badge: '🗺️ ROADMAP & VALUE';
+            --section-title: 'Hành Trình 90 Ngày Của Bạn';
+            --section-subtitle: 'Từ newbie đến profitable trader - đây là lộ trình chi tiết bạn sẽ đi qua. Không gian lận, không shortcut, chỉ là hành trình thật với kết quả thật.';
+            
+            /* ROADMAP PHASES */
+            --phase-1-days: 'Ngày 1-7';
+            --phase-1-title: 'Foundation Setup';
+            --phase-2-days: 'Ngày 8-21';
+            --phase-2-title: 'Pattern Recognition Training';
+            --phase-3-days: 'Ngày 22-49';
+            --phase-3-title: 'Live Trading với Mentorship';
+            --phase-4-days: 'Ngày 50-90';
+            --phase-4-title: 'Independent Profitable Trading';
+            
+            /* IMAGES - Thay đổi URL ở đây */
+            --bg-pattern: 'https://via.placeholder.com/1920x1080/C88F2F/FFFFFF?text=Dark+Gold+Background';
+            --roadmap-icon-1: 'https://via.placeholder.com/150x150/9C0612/FFFFFF?text=Phase+1';
+            --roadmap-icon-2: 'https://via.placeholder.com/150x150/9C0612/FFFFFF?text=Phase+2';
+            --roadmap-icon-3: 'https://via.placeholder.com/150x150/9C0612/FFFFFF?text=Phase+3';
+            --roadmap-icon-4: 'https://via.placeholder.com/150x150/9C0612/FFFFFF?text=Phase+4';
+            --calculator-bg: 'https://via.placeholder.com/800x600/1A1A1A/FFBD59?text=Calculator+Background';
+            
+            /* CALCULATOR DEFAULT VALUES */
+            --default-capital: '50';
+            --default-winrate: '70';
+            --default-trades: '3';
+            
+            /* LINKS */
+            --cta-link: '#register';
+        }
+        
+        /* ==================== 
+           BASE STYLES
+        ==================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            color: var(--text-light);
+            overflow-x: hidden;
+        }
+        
+        /* ==================== 
+           SECTION 6 - GRADIENT BACKGROUND
+           Direction: 180deg (Top to Bottom)
+           Min-height: 100vh
+           Theme: Gold fading to Dark Brown
+        ==================== */
+        .section-6 {
+            position: relative;
+            min-height: 100vh;
+            padding: 100px 20px;
+            background: linear-gradient(180deg,
+                #0A0D2A 0%,         /* Dark navy - MATCHES Section 5 ending */
+                #0C1035 15%,        /* Deeper navy */
+                #0E1340 30%,        /* Navy blue */
+                #10154A 45%,        /* Rich navy */
+                #0D1238 60%,        /* Dark blue */
+                #0A0E2D 75%,        /* Very dark navy */
+                #080B22 90%,        /* Deep dark */
+                #050718 100%        /* Near black */
+            );
+            overflow: hidden;
+        }
+        
+        /* Background Pattern Overlay */
+        .section-6::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url(var(--bg-pattern));
+            background-size: cover;
+            background-position: center;
+            opacity: 0.03;
+            pointer-events: none;
+        }
+        
+        /* Glow Effects - Darker tone */
+        .section-6::after {
+            content: '';
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(156, 6, 18, 0.2) 0%, transparent 70%);
+            filter: blur(120px);
+            pointer-events: none;
+            animation: darkPulse 10s ease-in-out infinite;
+        }
+        
+        @keyframes darkPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.2; }
+            50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.35; }
+        }
+        
+        /* Container */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* ==================== 
+           SECTION HEADER
+        ==================== */
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+            animation: fadeInUp 1s ease-out;
+        }
+        
+        .section-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(156, 6, 18, 0.5), rgba(100, 10, 12, 0.3));
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--gold-light);
+            color: var(--gold-light);
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 900;
+            color: var(--gold-accent);
+            line-height: 1.2;
+            margin-bottom: 25px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+        }
+        
+        .section-subtitle {
+            font-size: clamp(1.1rem, 2vw, 1.3rem);
+            color: var(--text-cream);
+            font-weight: 400;
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.8;
+            opacity: 0.95;
+        }
+        
+        /* ==================== 
+           ROADMAP TIMELINE
+        ==================== */
+        .roadmap-container {
+            margin-bottom: 100px;
+        }
+        
+        .roadmap-title {
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 3.5vw, 3rem);
+            font-weight: 800;
+            color: var(--gold-light);
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeInUp 1s ease-out 0.3s backwards;
+        }
+        
+        .roadmap-timeline {
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 50px;
+            animation: fadeInUp 1s ease-out 0.5s backwards;
+        }
+        
+        /* Timeline connector line */
+        .roadmap-timeline::before {
+            content: '';
+            position: absolute;
+            top: 80px;
+            left: 10%;
+            right: 10%;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                var(--gold-accent) 0%, 
+                var(--gold-light) 50%, 
+                var(--gold-accent) 100%);
+            opacity: 0.3;
+            z-index: 0;
+        }
+        
+        .roadmap-phase {
+            position: relative;
+            background: rgba(156, 6, 18, 0.25);
+            backdrop-filter: blur(22px);
+            border: 2px solid rgba(222, 188, 129, 0.4);
+            border-radius: 30px;
+            padding: 40px 30px;
+            text-align: center;
+            transition: all 0.5s ease;
+            z-index: 1;
+        }
+        
+        .roadmap-phase:hover {
+            transform: translateY(-15px) scale(1.03);
+            border-color: var(--gold-light);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8),
+                        0 0 50px rgba(222, 188, 129, 0.5);
+        }
+        
+        /* HÌNH ẢNH: Phase Icon */
+        /* Kích thước khuyến nghị: 150x150px */
+        /* Format: PNG với background transparent hoặc JPG, <100KB */
+        .phase-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 25px;
+            border-radius: 50%;
+            border: 3px solid var(--gold-light);
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: all 0.5s ease;
+        }
+        
+        .phase-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        
+        .roadmap-phase:hover .phase-icon {
+            transform: rotate(360deg) scale(1.1);
+            border-color: var(--gold-accent);
+            box-shadow: 0 0 30px rgba(255, 189, 89, 0.6);
+        }
+        
+        .phase-number {
+            font-family: var(--font-heading);
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--gold-accent);
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+        
+        .phase-days {
+            font-size: 0.9rem;
+            color: var(--gold-light);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 15px;
+        }
+        
+        .phase-title {
+            font-family: var(--font-heading);
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-light);
+            margin-bottom: 20px;
+            line-height: 1.3;
+        }
+        
+        .phase-description {
+            font-size: 1rem;
+            color: var(--text-cream);
+            line-height: 1.8;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+        
+        .phase-checklist {
+            text-align: left;
+            padding-left: 20px;
+        }
+        
+        .phase-checklist li {
+            font-size: 0.95rem;
+            color: var(--text-cream);
+            margin-bottom: 10px;
+            line-height: 1.6;
+            list-style: none;
+            position: relative;
+            padding-left: 25px;
+        }
+        
+        .phase-checklist li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--gold-accent);
+            font-weight: 900;
+            font-size: 1.2rem;
+        }
+        
+        /* ====================
+           TIER COMPARISON TABLE
+        ==================== */
+        .tier-comparison {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(25px);
+            border: 3px solid rgba(222, 188, 129, 0.5);
+            border-radius: 30px;
+            padding: 50px 40px;
+            margin-bottom: 80px;
+        }
+
+        .tier-comparison-title {
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 3.5vw, 2.8rem);
+            font-weight: 800;
+            color: var(--gold-accent);
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .tier-comparison-subtitle {
+            text-align: center;
+            font-size: 1.1rem;
+            color: var(--text-cream);
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        .tier-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+        }
+
+        .tier-card {
+            background: rgba(156, 6, 18, 0.2);
+            border: 2px solid rgba(222, 188, 129, 0.3);
+            border-radius: 25px;
+            padding: 30px 20px;
+            text-align: center;
+            transition: all 0.4s ease;
+        }
+
+        .tier-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--gold-light);
+            box-shadow: 0 15px 40px rgba(255, 189, 89, 0.4);
+        }
+
+        .tier-card.featured {
+            border: 3px solid var(--gold-accent);
+            transform: scale(1.02);
+            background: rgba(156, 6, 18, 0.4);
+        }
+
+        .tier-card.featured:hover {
+            transform: translateY(-10px) scale(1.02);
+        }
+
+        .tier-card.starter {
+            border-color: rgba(0, 240, 255, 0.4);
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .tier-card.starter .tier-price {
+            color: #00F0FF;
+        }
+
+        .tier-label {
+            display: inline-block;
+            background: rgba(0, 0, 0, 0.7);
+            color: var(--gold-light);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 6px 16px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .tier-popular {
+            position: absolute;
+            top: -12px;
+            right: 15px;
+            background: linear-gradient(135deg, var(--gold-accent), #FFD700);
+            color: #000;
+            font-family: var(--font-heading);
+            font-weight: 800;
+            font-size: 0.65rem;
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+
+        .tier-name {
+            font-family: var(--font-heading);
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+
+        .tier-price {
+            font-family: var(--font-heading);
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--gold-accent);
+            margin-bottom: 5px;
+        }
+
+        .tier-value {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: line-through;
+            margin-bottom: 15px;
+        }
+
+        .tier-winrate {
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--gold-light);
+            margin-bottom: 20px;
+        }
+
+        .tier-features {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+        }
+
+        .tier-features li {
+            font-size: 0.85rem;
+            color: var(--text-cream);
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tier-features li:last-child {
+            border-bottom: none;
+        }
+
+        .tier-features strong {
+            color: var(--gold-accent);
+        }
+
+        @media (max-width: 1200px) {
+            .tier-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .tier-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tier-comparison {
+                padding: 30px 20px;
+            }
+        }
+
+        /* ====================
+           VALUE CALCULATOR
+        ==================== */
+        .calculator-section {
+            background: rgba(156, 6, 18, 0.3);
+            backdrop-filter: blur(30px);
+            border: 3px solid rgba(222, 188, 129, 0.5);
+            border-radius: 30px;
+            padding: 60px 50px;
+            margin-bottom: 80px;
+            animation: fadeInUp 1s ease-out 0.7s backwards;
+        }
+        
+        .calculator-title {
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 3.5vw, 3rem);
+            font-weight: 800;
+            color: var(--gold-accent);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .calculator-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-cream);
+            text-align: center;
+            margin-bottom: 50px;
+            opacity: 0.9;
+        }
+        
+        .calculator-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: start;
+        }
+        
+        /* Input Section */
+        .calculator-inputs {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(222, 188, 129, 0.3);
+            border-radius: 25px;
+            padding: 40px 35px;
+        }
+        
+        .input-group {
+            margin-bottom: 30px;
+        }
+        
+        .input-label {
+            display: block;
+            font-family: var(--font-heading);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--gold-light);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .input-field {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid rgba(222, 188, 129, 0.4);
+            border-radius: 15px;
+            padding: 18px 20px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gold-accent);
+            font-family: var(--font-heading);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: var(--gold-accent);
+            box-shadow: 0 0 20px rgba(255, 189, 89, 0.4);
+        }
+        
+        .input-unit {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-cream);
+            margin-top: 8px;
+            opacity: 0.8;
+        }
+        
+        .calculate-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--gold-accent), var(--gold-light));
+            color: var(--text-dark);
+            font-family: var(--font-heading);
+            font-weight: 800;
+            font-size: 1.2rem;
+            padding: 20px;
+            border: none;
+            border-radius: 50px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            margin-top: 20px;
+        }
+        
+        .calculate-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7),
+                        0 0 40px rgba(255, 189, 89, 0.8);
+        }
+        
+        /* Output Section */
+        .calculator-results {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(100, 10, 12, 0.6));
+            border: 3px solid var(--gold-accent);
+            border-radius: 25px;
+            padding: 40px 35px;
+            min-height: 500px;
+        }
+        
+        .results-title {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--gold-accent);
+            margin-bottom: 30px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+        
+        .result-item {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(222, 188, 129, 0.3);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .result-item:hover {
+            border-color: var(--gold-light);
+            transform: translateX(10px);
+        }
+        
+        .result-label {
+            font-size: 0.9rem;
+            color: var(--text-cream);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .result-value {
+            font-family: var(--font-heading);
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--gold-accent);
+            line-height: 1;
+            text-shadow: 0 0 20px rgba(255, 189, 89, 0.5);
+        }
+        
+        .result-description {
+            font-size: 0.85rem;
+            color: var(--text-cream);
+            margin-top: 8px;
+            opacity: 0.8;
+            line-height: 1.5;
+        }
+        
+        .comparison-chart {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(222, 188, 129, 0.3);
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+        
+        .comparison-title {
+            font-family: var(--font-heading);
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--gold-light);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .comparison-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .comparison-bar {
+            position: relative;
+        }
+        
+        .bar-label {
+            font-size: 0.9rem;
+            color: var(--text-cream);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .bar-container {
+            width: 100%;
+            height: 30px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold-accent), var(--gold-light));
+            border-radius: 15px;
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 15px;
+        }
+        
+        .bar-value {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+        
+        /* ==================== 
+           CALL TO ACTION
+        ==================== */
+        .cta-section {
+            text-align: center;
+            padding: 60px 40px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(25px);
+            border: 3px solid rgba(222, 188, 129, 0.4);
+            border-radius: 30px;
+            animation: fadeInUp 1s ease-out 0.9s backwards;
+        }
+        
+        .cta-title {
+            font-family: var(--font-heading);
+            font-size: clamp(1.8rem, 3vw, 2.5rem);
+            font-weight: 800;
+            color: var(--gold-accent);
+            margin-bottom: 25px;
+        }
+        
+        .cta-description {
+            font-size: 1.1rem;
+            color: var(--text-cream);
+            margin-bottom: 40px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.8;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold-accent), var(--gold-light));
+            color: var(--text-dark);
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 20px 50px;
+            border: none;
+            border-radius: 50px;
+            text-transform: uppercase;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7),
+                        0 0 40px rgba(255, 189, 89, 0.8);
+        }
+        
+        /* ==================== 
+           ANIMATIONS
+        ==================== */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* ==================== 
+           RESPONSIVE DESIGN
+        ==================== */
+        @media (max-width: 1024px) {
+            .calculator-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 968px) {
+            .section-6 {
+                padding: 80px 20px;
+            }
+            
+            .roadmap-timeline::before {
+                display: none;
+            }
+            
+            .roadmap-timeline {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .section-6 {
+                padding: 60px 15px;
+                min-height: auto;
+            }
+            
+            .roadmap-timeline {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .calculator-section,
+            .calculator-inputs,
+            .calculator-results,
+            .cta-section {
+                padding: 30px 20px;
+            }
+            
+            .result-value {
+                font-size: 2rem;
+            }
+        }
+    </style>
+
+
+    <!-- ==================== 
+         SECTION 6: ROADMAP & VALUE CALCULATOR
+         
+         CHỈNH SỬA:
+         - Text: Thay đổi content trong các thẻ HTML
+         - Images: Thay URL trong :root variables ở đầu file
+         - Roadmap phases: Cập nhật content cho 4 phases
+         - Calculator: Thay default values trong :root
+         - Links: Thay đổi --cta-link trong :root
+         - Colors: Điều chỉnh gradient colors nếu cần
+    ==================== -->
+    
+    <section class="section-6">
+        <div class="container">
+            
+            <!-- Section Header -->
+            <div class="section-header">
+                <div class="section-badge">🗺️ ROADMAP &amp; VALUE</div>
+                <h2 class="section-title">Hành Trình 90 Ngày Của Bạn</h2>
+                
+            </div>
+            
+            <!-- Roadmap Timeline -->
+            <div class="roadmap-container">
+                <h3 class="roadmap-title"><i data-lucide="rocket" style="width: 32px; height: 32px; display: inline-block; vertical-align: middle; margin-right: 10px;"></i> Lộ Trình 4 Giai Đoạn</h3>
+                
+                <div class="roadmap-timeline">
+                    <!-- Phase 1 -->
+                    <div class="roadmap-phase">
+                        
+                        <div class="phase-number">01</div>
+                        <div class="phase-days">Ngày 1-7</div>
+                        <h4 class="phase-title">Thiết Lập Nền Tảng</h4>
+                        <p class="phase-description">
+                            Tuần đầu tiên là nền tảng. Bạn học cách setup công cụ tự động, 
+                            hiểu về 6 Frequency Zones, và làm quen với GEM Scanner.
+                        </p>
+                        <ul class="phase-checklist">
+                            <li class="">Setup tài khoản Binance &amp; wallet</li>
+                            <li class="">Cài đặt GEM Scanner &amp; tín hiệu</li>
+                            <li>Học 6 Frequency Zones lý thuyết</li>
+                            <li>Thực hành với dữ liệu lịch sử</li>
+                            <li>Tham gia cộng đồng Telegram</li>
+                            <li>Hoàn thành Quiz Module 1</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Phase 2 -->
+                    <div class="roadmap-phase">
+                        
+                        <div class="phase-number">02</div>
+                        <div class="phase-days">Ngày 8-21</div>
+                        <h4 class="phase-title">Huấn Luyện Nhận Diện Mẫu Hình</h4>
+                        <p class="phase-description">
+                            2 tuần đào tạo chuyên sâu. Bạn học nhận diện 4 patterns 
+                            (DPD, UPU, UPD, DPU) và hiểu 5/5 Confluence system.
+                        </p>
+                        <ul class="phase-checklist">
+                            <li class="">Hiểu sâu 4 Mẫu Nến: DPD, UPU, UPD, DPU</li>
+                            <li>Master 5/5 Confluence validation</li>
+                            <li>Thực hành giả lập 30+ lệnh</li>
+                            <li>Analyze 50+ historical patterns</li>
+                            <li>Buổi phát hiện mẫu hình trực tiếp</li>
+                            <li class="">Win rate target: 60%+ paper trades</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Phase 3 -->
+                    <div class="roadmap-phase">
+                        
+                        <div class="phase-number">03</div>
+                        <div class="phase-days">Ngày 22-49</div>
+                        <h4 class="phase-title">Live Trading với Mentorship</h4>
+                        <p class="phase-description">
+                            4 tuần thực chiến với tiền thật. Bắt đầu nhỏ, có mentorship, 
+                            học risk management và tâm lý trading.
+                        </p>
+                        <ul class="phase-checklist">
+                            <li>Bắt đầu live trading với vốn nhỏ</li>
+                            <li>Follow GEM signals + tự analyze</li>
+                            <li class="">Quản lí rủi ro: 1-2% per trade</li>
+                            <li>Journal mỗi trade: setup, kết quả, cảm xúc</li>
+                            <li>Weekly review với mentors</li>
+                            <li class="">Target: 70%+ win rate, huề vốn hoặc lời nhẹ</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Phase 4 -->
+                    <div class="roadmap-phase">
+                        
+                        <div class="phase-number">04</div>
+                        <div class="phase-days">Ngày 50-90</div>
+                        <h4 class="phase-title">Trading Có Lãi Độc Lập</h4>
+                        <p class="phase-description">
+                            6 tuần cuối - bạn đã độc lập. Scanner chỉ là công cụ,
+                            bạn là trader. Tập trung vào sự ổn định và mở rộng quy mô.
+                        </p>
+                        <ul class="phase-checklist">
+                            <li class="">Trade độc lập, không phụ thuộc tín hiệu</li>
+                            <li class="">Tự phát hiện mẫu nến patterns với GEM Scanner</li>
+                            <li>Mở rộng quy mô lệnh với sự tự tin</li>
+                            <li class="">Duy trì 75-80% win rate&nbsp;</li>
+                            <li>Có lãi mỗi tuần (mục tiêu)</li>
+                            <li>Tốt nghiệp: Chứng nhận trader có lãi</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tier Comparison Section -->
+            <img src="https://pgfkbcnzqozzkohwbgbk.supabase.co/storage/v1/object/public/course-images/lesson-mk857d2c-qftm5a/1768061109131_8vkm9x_sec06-01.jpg.webp" alt="sec06-01-jpg-9ykx" style="width: 100%; max-width: 800px; height: auto; display: block; margin: 0px auto; padding: 0px; border-radius: 12px; box-shadow: rgba(0, 0, 0, 0.3) 0px 4px 20px, rgba(0, 0, 0, 0.2) 0px 8px 32px;"><div class="tier-comparison">
+                <h3 class="tier-comparison-title">
+                    <i data-lucide="layers" style="width: 32px; height: 32px; display: inline-block; vertical-align: middle; margin-right: 10px;"></i>
+                    4 Cấp Độ Khóa Học
+                </h3>
+                <p class="tier-comparison-subtitle">
+                    Chọn cấp độ phù hợp với mục tiêu và ngân sách của bạn
+                </p>
+
+                <div class="tier-grid">
+                    <!-- TIER STARTER - 299K -->
+                    <div class="tier-card starter">
+                        <div class="tier-label">STARTER</div>
+                        <h4 class="tier-name">Starter</h4>
+                        <div class="tier-price">299K</div>
+                        <div class="tier-value">&nbsp;</div>
+                        <div class="tier-winrate">Trải nghiệm</div>
+                        <ul class="tier-features">
+                            <li>✅ Basic Course Trading</li>
+                            <li>✅ Forum Access - Cộng đồng GEM</li>
+                            <li>✅ Pattern Scanner - 5 lần/ngày</li>
+                            <li>✅ GEM Master Chatbot - 10 câu/ngày</li>
+                            <li><strong>❌ 0 công thức Tần Số</strong></li>
+                        </ul>
+                    </div>
+
+                    <!-- TIER 1 - 11M -->
+                    <div class="tier-card">
+                        <div class="tier-label">CẤP 1</div>
+                        <h4 class="tier-name">Nền Tảng</h4>
+                        <div class="tier-price">11M</div>
+                        <div class="tier-value">Giá trị: 36.4M</div>
+                        <div class="tier-winrate">Win rate 50-55%</div>
+                        <ul class="tier-features">
+                            <li>✅ 5 modules / 17 chapters</li>
+                            <li>✅ 7 mẫu hình nến (70% cơ hội)</li>
+                            <li>✅ Scanner 12 tháng</li>
+                            <li>✅ AI Sư Phụ 12 tháng</li>
+                            <li>✅ Telegram Bot</li>
+                            <li>✅ Cộng đồng 12 tháng</li>
+                            <li><strong>❌ 0 công thức Tần Số</strong></li>
+                        </ul>
+                    </div>
+
+                    <!-- TIER 2 - 21M (Featured) -->
+                    <div class="tier-card featured" style="position: relative;">
+                        <div class="tier-popular">🔥 78% CHỌN</div>
+                        <div class="tier-label">CẤP 2</div>
+                        <h4 class="tier-name">Tần Số Trader ⭐</h4>
+                        <div class="tier-price">21M</div>
+                        <div class="tier-value">Giá trị: 73.1M</div>
+                        <div class="tier-winrate">Win rate 70-75%</div>
+                        <ul class="tier-features">
+                            <li>✅ 10 modules / 30 chapters</li>
+                            <li>✅ 15 mẫu hình nến (95% cơ hội)</li>
+                            <li><strong>🔥 6 CÔNG THỨC TẦN SỐ</strong></li>
+                            <li>✅ Scanner PREMIUM 12 tháng</li>
+                            <li>✅ AI Sư Phụ PREMIUM 12 tháng</li>
+                            <li>✅ 8 công cụ chuyên nghiệp</li>
+                            <li>✅ Cộng đồng VIP 12 tháng</li>
+                        </ul>
+                    </div>
+
+                    <!-- TIER 3 - 68M -->
+                    <div class="tier-card">
+                        <div class="tier-label">CẤP 3</div>
+                        <h4 class="tier-name">Đế Chế 💎</h4>
+                        <div class="tier-price">68M</div>
+                        <div class="tier-value">Giá trị: 322.3M</div>
+                        <div class="tier-winrate">Win rate 80-90%</div>
+                        <ul class="tier-features">
+                            <li>✅ 14 modules / 38 chapters</li>
+                            <li>✅ 15 mẫu hình thành thạo</li>
+                            <li><strong>🔥 11 CÔNG THỨC TẦN SỐ</strong></li>
+                            <li>✅ Scanner ELITE 24 tháng + AI Prediction</li>
+                            <li>✅ AI Sư Phụ ELITE 24 tháng</li>
+                            <li>✅ 11 công cụ Elite</li>
+                            <li>✅ Signals 5-8 lệnh/ngày</li>
+                            <li>✅ Whale Tracker</li>
+                            <li>✅ Mastermind Elite trọn đời</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Value Calculator -->
+            <div class="calculator-section">
+                <h3 class="calculator-title"><i data-lucide="calculator" style="width: 32px; height: 32px; display: inline-block; vertical-align: middle; margin-right: 10px;"></i> Tính Giá Trị Hành Trình Của Bạn</h3>
+                <p class="calculator-subtitle">
+                    Xem lợi nhuận tiềm năng của bạn sau 90 ngày với Frequency Trading Method
+                </p>
+                
+                <div class="calculator-container">
+                    <!-- Input Form -->
+                    <div class="calculator-inputs">
+                        <div class="input-group">
+                            <label class="input-label" for="capital">Vốn Hiện Tại</label>
+                            <input type="number" id="capital" class="input-field" value="50" min="1" max="10000" placeholder="50">
+                            <span class="input-unit">triệu VND</span>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label" for="winrate">Target Win Rate</label>
+                            <input type="number" id="winrate" class="input-field" value="70" min="50" max="90" placeholder="70">
+                            <span class="input-unit">% (Realistic: 65-80%)</span>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label class="input-label" for="trades">Trades Mỗi Tuần</label>
+                            <input type="number" id="trades" class="input-field" value="3" min="1" max="20" placeholder="3">
+                            <span class="input-unit">trades/tuần (Recommended: 2-5)</span>
+                        </div>
+                        
+                        <button class="calculate-btn" onclick="calculateValue()">
+                            Tính Toán Ngay
+                        </button>
+                    </div>
+                    
+                    <!-- Results Display -->
+                    <div class="calculator-results">
+                        <div class="results-title"><i data-lucide="bar-chart-3" style="width: 28px; height: 28px; display: inline-block; vertical-align: middle; margin-right: 10px;"></i> Dự Đoán Kết Quả</div>
+                        
+                        <div class="result-item">
+                            <div class="result-label">Lợi Nhuận Tiềm Năng Sau 90 Ngày</div>
+                            <div class="result-value" id="profit">+0 triệu</div>
+                            <div class="result-description" id="profit-desc">
+                                Nhập thông tin và nhấn "Tính Toán Ngay"
+                            </div>
+                        </div>
+                        
+                        <div class="result-item">
+                            <div class="result-label">Dự Đoán Lợi Nhuận Đầu Tư</div>
+                            <div class="result-value" id="roi">0%</div>
+                            <div class="result-description" id="roi-desc">
+                                Tỷ lệ lợi nhuận trên vốn đầu tư trong 90 ngày
+                            </div>
+                        </div>
+                        
+                        <div class="result-item">
+                            <div class="result-label">Tổng Vốn Sau 90 Ngày</div>
+                            <div class="result-value" id="total">0 triệu</div>
+                            <div class="result-description">
+                                Vốn ban đầu + Profit tích lũy
+                            </div>
+                        </div>
+                        
+                        <!-- Comparison Chart -->
+                        <div class="comparison-chart">
+                            <div class="comparison-title">So Sánh: Có GEM vs Không GEM</div>
+                            <div class="comparison-bars">
+                                <div class="comparison-bar">
+                                    <div class="bar-label">Với GEM Method (70-80% win rate)</div>
+                                    <div class="bar-container">
+                                        <div class="bar-fill" id="bar-with-gem" style="width: 0%">
+                                            <span class="bar-value" id="value-with-gem">0 triệu</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="comparison-bar">
+                                    <div class="bar-label">Không GEM (40-50% win rate - mò mẫm)</div>
+                                    <div class="bar-container">
+                                        <div class="bar-fill" id="bar-without-gem" style="width: 0%; background: linear-gradient(90deg, #640A0C, #9C0612);">
+                                            <span class="bar-value" id="value-without-gem">0 triệu</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Call to Action -->
+            <div class="cta-section">
+                <h3 class="cta-title">Sẵn Sàng Bắt Đầu Hành Trình 90 Ngày?</h3>
+                <p class="cta-description">
+                    Mỗi ngày bạn chờ là một ngày bỏ lỡ lợi nhuận tiềm năng.
+                    Tham gia ngay để bắt đầu lộ trình từ Nền Tảng → Trader Có Lãi.
+                </p>
+                <a href="#pricing" class="btn-primary">Xem Bảng Giá Khóa Học</a>
+            </div>
+            
+        </div>
+    </section>
+    
+    <!-- Calculator JavaScript -->
+    <script>
+        function calculateValue() {
+            // Get input values
+            const capital = parseFloat(document.getElementById('capital').value) || 50;
+            const winrate = parseFloat(document.getElementById('winrate').value) || 70;
+            const tradesPerWeek = parseFloat(document.getElementById('trades').value) || 3;
+            
+            // Constants
+            const weeks = 12.86; // 90 days / 7
+            const avgRiskPerTrade = 0.02; // 2% risk per trade
+            const avgRewardRatio = 2; // 1:2 risk-reward
+            
+            // Calculate total trades
+            const totalTrades = Math.round(tradesPerWeek * weeks);
+            
+            // Calculate wins and losses
+            const winTrades = Math.round(totalTrades * (winrate / 100));
+            const lossTrades = totalTrades - winTrades;
+            
+            // Calculate profit/loss
+            const avgWinAmount = capital * avgRiskPerTrade * avgRewardRatio;
+            const avgLossAmount = capital * avgRiskPerTrade;
+            
+            const totalWinAmount = avgWinAmount * winTrades;
+            const totalLossAmount = avgLossAmount * lossTrades;
+            
+            const netProfit = totalWinAmount - totalLossAmount;
+            const roi = (netProfit / capital) * 100;
+            const totalCapital = capital + netProfit;
+            
+            // Calculate "without GEM" scenario (40% win rate)
+            const winrateWithoutGEM = 40;
+            const winTradesNoGEM = Math.round(totalTrades * (winrateWithoutGEM / 100));
+            const lossTradesNoGEM = totalTrades - winTradesNoGEM;
+            const totalWinNoGEM = avgWinAmount * winTradesNoGEM;
+            const totalLossNoGEM = avgLossAmount * lossTradesNoGEM;
+            const netProfitNoGEM = totalWinNoGEM - totalLossNoGEM;
+            
+            // Update display
+            document.getElementById('profit').textContent = netProfit > 0 
+                ? `+${netProfit.toFixed(1)} triệu` 
+                : `${netProfit.toFixed(1)} triệu`;
+            document.getElementById('profit-desc').textContent = 
+                `Dựa trên ${totalTrades} trades với ${winrate}% win rate trong 90 ngày`;
+            
+            document.getElementById('roi').textContent = `${roi > 0 ? '+' : ''}${roi.toFixed(1)}%`;
+            document.getElementById('roi-desc').textContent = 
+                `${winTrades} wins, ${lossTrades} losses - Conservative estimate`;
+            
+            document.getElementById('total').textContent = `${totalCapital.toFixed(1)} triệu`;
+            
+            // Update comparison bars
+            const maxValue = Math.max(totalCapital, capital + netProfitNoGEM);
+            const withGEMPercent = (totalCapital / maxValue) * 100;
+            const withoutGEMPercent = ((capital + netProfitNoGEM) / maxValue) * 100;
+            
+            document.getElementById('bar-with-gem').style.width = `${withGEMPercent}%`;
+            document.getElementById('value-with-gem').textContent = `${totalCapital.toFixed(1)}M`;
+            
+            document.getElementById('bar-without-gem').style.width = `${withoutGEMPercent}%`;
+            document.getElementById('value-without-gem').textContent = `${(capital + netProfitNoGEM).toFixed(1)}M`;
+        }
+        
+        // Auto-calculate on page load
+        window.addEventListener('load', function() {
+            setTimeout(calculateValue, 500);
+        });
+    </script>
+    
+<script>
+        lucide.createIcons();
+    </script>
+

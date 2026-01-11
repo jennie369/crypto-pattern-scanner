@@ -113,7 +113,7 @@ class NotificationScheduler {
    * Request notification permissions
    */
   async requestPermissions() {
-    if (!Device.isDevice) {
+    if (Device?.isDevice === false) {
       console.warn('[NotificationScheduler] Must use physical device for notifications');
       return false;
     }
@@ -141,7 +141,9 @@ class NotificationScheduler {
       await AsyncStorage.setItem(PUSH_TOKEN_KEY, token);
       return token;
     } catch (error) {
-      console.error('[NotificationScheduler] Error getting push token:', error);
+      // Firebase not configured - expected in development without FCM setup
+      // Push notifications will not work until Firebase is configured
+      console.warn('[NotificationScheduler] Push notifications not available (Firebase not configured)');
       return null;
     }
   }

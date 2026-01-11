@@ -39,8 +39,8 @@ export default function ChatbotScreen() {
           <View style={styles.messageRow}>
             <View style={styles.messageBubbleAI}>
               <Text style={styles.messageText}>
-                Xin chào! Tôi là GEM AI Assistant. Tôi có thể giúp bạn phân tích patterns,
-                xem bói Tarot/I Ching, và trả lời các câu hỏi về trading.
+                Ta là GEM Master. Ta có thể hướng dẫn bạn phân tích patterns,
+                xem quẻ Kinh Dịch, đọc bài Tarot, và trả lời câu hỏi về trading.
               </Text>
             </View>
           </View>

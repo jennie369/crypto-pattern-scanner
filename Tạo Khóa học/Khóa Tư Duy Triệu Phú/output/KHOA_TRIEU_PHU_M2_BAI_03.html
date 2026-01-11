@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài 2.3: Nghi Thức Tha Thứ - Cắt Dây Nghiệp | GEM Academy</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==================== VARIABLES ==================== */
+        :root {
+            --navy: #112250;
+            --navy-dark: #0a1628;
+            --gold: #FFBD59;
+            --gold-dark: #E5A73D;
+            --cyan: #00F0FF;
+            --purple: #6A5BFF;
+            --burgundy: #9C0612;
+            --burgundy-light: #C41E2A;
+            --success: #00C853;
+            --error: #FF5252;
+            --bg-primary: #0a1628;
+            --bg-card: rgba(17, 34, 80, 0.6);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --glass-bg: rgba(17, 34, 80, 0.4);
+            --glass-border: rgba(255, 189, 89, 0.2);
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        img { max-width: 100%; height: auto; display: block; }
+
+        /* ==================== BACKGROUND ==================== */
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+        .bg-layer-base {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-dark) 100%);
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--gold); top: -100px; right: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: var(--cyan); bottom: 20%; left: -100px; }
+        .orb-3 { width: 250px; height: 250px; background: var(--purple); bottom: -50px; right: 20%; }
+
+        /* ==================== CONTAINER ==================== */
+        .lesson-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        @media (max-width: 600px) {
+            .lesson-container {
+                padding: 0;
+            }
+        }
+
+        /* ==================== HEADER ==================== */
+        .lesson-header {
+            text-align: center;
+            padding: var(--space-xl);
+            margin-bottom: var(--space-xl);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .lesson-header {
+                padding: var(--space-lg) 16px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+        .lesson-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--navy-dark);
+            margin-bottom: var(--space-md);
+        }
+        .lesson-chapter {
+            font-size: 0.9rem;
+            color: var(--gold);
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .lesson-title {
+            font-size: clamp(1.5rem, 5vw, 2.25rem);
+            font-weight: 800;
+            margin-bottom: var(--space-md);
+            background: linear-gradient(135deg, var(--text-primary), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .lesson-meta {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-lg);
+            flex-wrap: wrap;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        /* ==================== SECTION ==================== */
+        .section {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: var(--space-xl);
+            margin-bottom: var(--space-lg);
+        }
+        @media (max-width: 600px) {
+            .section {
+                padding: 0;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+                border-bottom: 8px solid var(--bg-primary);
+            }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        @media (max-width: 600px) {
+            .section-title {
+                padding: var(--space-lg) 16px var(--space-md) 16px;
+                margin-bottom: 0;
+            }
+        }
+
+        .section > p {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-md);
+        }
+        @media (max-width: 600px) {
+            .section > p {
+                padding: 0 16px;
+            }
+        }
+
+        /* ==================== HIGHLIGHT BOXES ==================== */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.15), rgba(255, 189, 89, 0.05));
+            border: 1px solid rgba(255, 189, 89, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .highlight-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .highlight-box-title {
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .highlight-box p { color: var(--text-secondary); margin: 0; }
+
+        .definition-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .definition-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .definition-box-title {
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .definition-box p { color: var(--text-secondary); margin: 0; }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(156, 6, 18, 0.2), rgba(156, 6, 18, 0.05));
+            border: 1px solid rgba(196, 30, 42, 0.4);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .warning-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--burgundy-light);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .warning-box-title {
+            font-weight: 700;
+            color: var(--burgundy-light);
+            margin-bottom: var(--space-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .warning-box p { color: var(--text-secondary); margin: 0; }
+
+        /* ==================== IMAGE CONTAINER ==================== */
+        .image-container {
+            margin: var(--space-xl) 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+        @media (max-width: 600px) {
+            .image-container {
+                margin: var(--space-md) 0;
+                border-radius: 0;
+                border: none;
+            }
+        }
+        .image-caption {
+            padding: var(--space-sm);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .image-caption {
+                padding: var(--space-sm) 16px;
+            }
+        }
+
+        /* ==================== FLOW STEPS ==================== */
+        .flow-steps {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-md);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .flow-steps {
+                gap: 1px;
+                background: var(--glass-border);
+                margin: var(--space-md) 0;
+            }
+        }
+        .flow-step {
+            display: flex;
+            gap: var(--space-md);
+            align-items: flex-start;
+            padding: var(--space-md);
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+        }
+        @media (max-width: 600px) {
+            .flow-step {
+                padding: var(--space-md) 16px;
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+            }
+        }
+        @media (min-width: 601px) {
+            .flow-step:hover {
+                border-color: var(--gold);
+                transform: translateX(8px);
+            }
+        }
+        .flow-step-number {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--navy-dark);
+        }
+        .flow-step-content { flex: 1; }
+        .flow-step-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
+        }
+        .flow-step-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* ==================== LETTER TEMPLATE ==================== */
+        .letter-box {
+            background: linear-gradient(135deg, rgba(106, 91, 255, 0.15), rgba(106, 91, 255, 0.05));
+            border: 2px solid rgba(106, 91, 255, 0.4);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .letter-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--purple);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .letter-title {
+            font-weight: 700;
+            color: var(--purple);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            font-size: 1.1rem;
+        }
+        .letter-content {
+            color: var(--text-secondary);
+            font-style: italic;
+            line-height: 1.8;
+        }
+        .letter-content p {
+            margin-bottom: var(--space-md);
+        }
+        .letter-blank {
+            display: inline-block;
+            min-width: 150px;
+            border-bottom: 1px dashed var(--purple);
+            color: var(--purple);
+            font-style: normal;
+            padding: 0 var(--space-sm);
+        }
+        .letter-textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: var(--space-lg);
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.95rem;
+            line-height: 1.8;
+            resize: vertical;
+            margin-top: var(--space-md);
+        }
+        .letter-textarea:focus {
+            outline: none;
+            border-color: var(--purple);
+        }
+
+        /* ==================== APP BOX ==================== */
+        .app-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.02));
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin: var(--space-lg) 0;
+        }
+        @media (max-width: 600px) {
+            .app-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--cyan);
+                padding: var(--space-md) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .app-box-title {
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .app-box p { color: var(--text-secondary); margin-bottom: var(--space-sm); }
+        .app-box p:last-child { margin-bottom: 0; }
+
+        /* ==================== RITUAL SCRIPT ==================== */
+        .ritual-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02));
+            border: 2px solid var(--gold);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .ritual-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .ritual-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .ritual-script {
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+        .ritual-script p {
+            margin-bottom: var(--space-md);
+        }
+        .ritual-instruction {
+            color: var(--cyan);
+            font-weight: 600;
+            font-style: italic;
+        }
+        .ritual-affirmation {
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        /* ==================== SUMMARY BOX ==================== */
+        .summary-box {
+            background: linear-gradient(135deg, rgba(255, 189, 89, 0.1), rgba(255, 189, 89, 0.02));
+            border: 2px solid var(--gold);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            margin: var(--space-xl) 0;
+        }
+        @media (max-width: 600px) {
+            .summary-box {
+                border: none;
+                border-radius: 0;
+                border-left: 4px solid var(--gold);
+                padding: var(--space-lg) 16px;
+                margin: var(--space-md) 0;
+            }
+        }
+        .summary-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        .summary-list { list-style: none; }
+        .summary-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            color: var(--text-secondary);
+        }
+        .summary-list li::before {
+            content: "✓";
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        /* ==================== FOOTER ==================== */
+        .lesson-footer {
+            text-align: center;
+            padding: var(--space-xl);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .lesson-footer a {
+            color: var(--gold);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="bg-layer-base"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <div class="lesson-container">
+
+        <!-- HEADER -->
+        <header class="lesson-header">
+            <div class="lesson-badge">
+                <span>🔥</span>
+                <span>Module 2</span>
+            </div>
+            <div class="lesson-chapter">Module 2 - Hóa Giải Nghiệp Tiền Bạc</div>
+            <h1 class="lesson-title">Nghi Thức Tha Thứ - Cắt Dây Nghiệp</h1>
+            <div class="lesson-meta">
+                <div class="meta-item"><span>📚</span><span>Bài 2.3</span></div>
+                <div class="meta-item"><span>⏱️</span><span>25 phút</span></div>
+                <div class="meta-item"><span>🙏</span><span>Nghi thức chữa lành</span></div>
+            </div>
+        </header>
+
+        <!-- OPENING HOOK -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Nếu Tha Thứ Đơn Giản, Ai Cũng Giàu Rồi</h2>
+            <p>"Con thù bà ngoại vì lúc ba mẹ ly dị, bà nói với mẹ rằng 'đàn bà không có tiền thì không có quyền lên tiếng'. Con đã nghe câu đó lúc 8 tuổi và ghét nó suốt 25 năm qua."</p>
+            <p>Đây là lời chia sẻ của một học viên trong khóa. Cô ấy 33 tuổi, thu nhập tốt, nhưng mỗi khi có tiền là cô chi tiêu hết - như thể vô thức muốn chứng minh rằng "có tiền hay không cũng không quan trọng".</p>
+            <p>Cho đến khi cô thực hiện nghi thức Tha Thứ và Cắt Dây trong bài này. Cô đã khóc 30 phút khi viết thư cho bà ngoại - không phải khóc vì tức giận, mà khóc vì nhận ra bà ngoại cũng chỉ là nạn nhân của thế hệ trước bà.</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Sự Thật Quan Trọng</div>
+                <p>Tha thứ không phải để người kia "được tha bổng". Tha thứ là để BẠN được tự do. Khi bạn ôm giữ sự oán giận, hận thù - dù là về tiền bạc hay điều gì khác - bạn đang "uống thuốc độc và chờ người kia chết".</p>
+                <p style="margin-top: var(--space-sm);">Nghi thức trong bài này là một trong những nghi thức mạnh mẽ nhất của khóa học. Nhiều học viên báo cáo sự thay đổi trong vòng 24-48 giờ sau khi thực hiện.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 1: GIỚI THIỆU -->
+        <section class="section">
+            <h2 class="section-title"><span>✂️</span> Cắt Dây Nghiệp Là Gì?</h2>
+            <p>Trong bài trước, bạn đã vẽ Bản Đồ Nghiệp Tiền và nhận ra các pattern từ gia đình. Bây giờ là lúc để <strong>giải phóng</strong> những sợi dây năng lượng đang ràng buộc bạn với quá khứ.</p>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>📖</span> Cord Cutting (Cắt Dây Năng Lượng)</div>
+                <p><strong>Cord Cutting</strong> là một nghi thức tâm linh cổ xưa được thực hành trong nhiều nền văn hóa. Theo quan điểm năng lượng, khi chúng ta có mối quan hệ hoặc trải nghiệm cảm xúc mạnh với ai đó, một "sợi dây năng lượng" được hình thành, kết nối chúng ta với họ.</p>
+                <p style="margin-top: var(--space-sm);">Những sợi dây này có thể là tích cực (tình yêu, hỗ trợ) hoặc tiêu cực (nghiệp, trauma, niềm tin giới hạn). Cắt dây là giải phóng các kết nối tiêu cực, KHÔNG phải cắt đứt tình cảm.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x600/0a1628/FFBD59?text=HINH+12%0ACord+Cutting+Visualization" alt="Hình 12: Cord Cutting Visualization">
+                <div class="image-caption">Hình 12: Hình dung các sợi dây năng lượng kết nối bạn với gia đình và quá khứ</div>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>💜</span> Làm Rõ Quan Trọng</div>
+                <p>Cắt dây nghiệp tiền KHÔNG có nghĩa là cắt đứt quan hệ với cha mẹ hay gia đình. Bạn chỉ đang giải phóng những <strong>pattern năng lượng tiêu cực</strong> về tiền bạc. Tình yêu và kết nối thực sự không bao giờ bị cắt.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 2: TẠI SAO CẦN THA THỨ -->
+        <section class="section">
+            <h2 class="section-title"><span>🙏</span> Tại Sao Tha Thứ Là Chìa Khóa?</h2>
+            <p>Theo <strong>Nguyên Lý Buông Bỏ</strong> trong Học Thuyết Chuyển Hóa Nội Tâm, tha thứ không phải vì người kia xứng đáng. Tha thứ là để <strong>BẠN được tự do</strong>.</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tha Thứ Cho Cha Mẹ</div>
+                        <div class="flow-step-desc">Họ đã dạy bạn những gì họ biết, từ những gì họ được dạy. Họ không cố ý làm bạn tổn thương về tiền bạc. Họ cũng là nạn nhân của nghiệp từ thế hệ trước.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tha Thứ Cho Ông Bà, Tổ Tiên</div>
+                        <div class="flow-step-desc">Họ đã sống trong hoàn cảnh khó khăn hơn bạn nhiều. Chiến tranh, đói kém, mất mát đã tạo nên những pattern sinh tồn. Đó là cách họ bảo vệ bản thân và gia đình.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tha Thứ Cho Bản Thân</div>
+                        <div class="flow-step-desc">Tha thứ cho bản thân vì đã tin vào những niềm tin giới hạn. Tha thứ vì đã lặp lại các pattern cũ. Tha thứ vì đã tự phán xét mình về chuyện tiền bạc.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>💡</span> Sức Mạnh Của Tha Thứ</div>
+                <p>"Không tha thứ giống như uống thuốc độc và chờ người kia chết." Khi bạn tha thứ, năng lượng bị "khóa" trong quá khứ được giải phóng. Tần số của bạn tự động nâng lên. Đây là Nguyên Lý Chuyển Hóa đang hoạt động.</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/6A5BFF?text=M2_B3_01%0AForgiveness+Power" alt="Sức Mạnh Tha Thứ">
+                <div class="image-caption">Tha thứ là món quà bạn tặng cho chính mình, không phải cho người kia</div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: THƯ THA THỨ -->
+        <section class="section">
+            <h2 class="section-title"><span>✍️</span> Viết Thư Tha Thứ</h2>
+            <p>Đây là bước quan trọng nhất trong nghi thức. Bạn sẽ viết một lá thư tha thứ - KHÔNG gửi đi, chỉ để giải phóng năng lượng.</p>
+
+            <div class="letter-box">
+                <div class="letter-title"><span>💌</span> Template Thư Tha Thứ</div>
+                <div class="letter-content">
+                    <p>Gửi <span class="letter-blank">[Tên: Ba/Mẹ/Ông/Bà/Bản thân...]</span>,</p>
+                    <p>Con/Tôi viết lá thư này để giải phóng những gì đã ràng buộc giữa chúng ta về vấn đề tiền bạc.</p>
+                    <p>Con/Tôi nhớ khi <span class="letter-blank">[Mô tả kỷ niệm/sự kiện cụ thể]</span>. Lúc đó, con/tôi cảm thấy <span class="letter-blank">[Cảm xúc: xấu hổ/sợ hãi/tức giận/đau buồn...]</span>.</p>
+                    <p>Từ đó, con/tôi đã vô thức tin rằng: "<span class="letter-blank">[Niềm tin giới hạn đã hình thành]</span>".</p>
+                    <p>Hôm nay, con/tôi chọn tha thứ. Con/Tôi tha thứ cho <span class="letter-blank">[Tên]</span> vì <span class="letter-blank">[Điều cần tha thứ]</span>.</p>
+                    <p>Con/Tôi hiểu rằng <span class="letter-blank">[Tên]</span> đã làm những gì tốt nhất có thể với những gì họ biết lúc đó.</p>
+                    <p>Con/Tôi giải phóng sợi dây nghiệp này. Con/Tôi tự do. <span class="letter-blank">[Tên]</span> cũng tự do.</p>
+                    <p>Con/Tôi chọn một niềm tin mới: "<span class="letter-blank">[Niềm tin mới thịnh vượng]</span>".</p>
+                    <p>Với lòng biết ơn và tình yêu,<br><span class="letter-blank">[Tên của bạn]</span></p>
+                </div>
+            </div>
+
+            <p>Bây giờ, hãy viết thư của riêng bạn. Bạn có thể viết cho nhiều người (mỗi người một thư):</p>
+
+            <div class="letter-box">
+                <div class="letter-title"><span>✏️</span> Viết Thư Tha Thứ Của Bạn</div>
+                <textarea class="letter-textarea" placeholder="Gửi [Tên]...
+
+Con/Tôi viết lá thư này để giải phóng những gì đã ràng buộc giữa chúng ta về vấn đề tiền bạc...
+
+(Viết tự do, để cảm xúc chảy ra. Không ai đọc thư này ngoài bạn)"></textarea>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/00F0FF?text=M2_B3_02%0AWriting+Letter" alt="Viết Thư Tha Thứ">
+                <div class="image-caption">Viết thư là cách để đưa những gì ẩn trong vô thức lên ý thức</div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: NGHI THỨC CẮT DÂY -->
+        <section class="section">
+            <h2 class="section-title"><span>🔮</span> Nghi Thức Cắt Dây Nghiệp</h2>
+            <p>Sau khi viết thư, thực hiện nghi thức này để hoàn tất việc cắt dây. Bạn có thể làm ngay hoặc vào thời điểm yên tĩnh hơn.</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Chuẩn Bị Không Gian</div>
+                        <div class="flow-step-desc">Tìm một nơi yên tĩnh. Thắp nến hoặc đèn nhẹ. Tắt điện thoại. Ngồi thoải mái với lá thư trước mặt.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Hít Thở Thanh Lọc (3-5 phút)</div>
+                        <div class="flow-step-desc">Hít vào 4 giây → Giữ 7 giây → Thở ra 8 giây. Lặp lại cho đến khi cơ thể thư giãn. (Hoặc dùng Cleansing Breath trong GEM App)</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Đọc Thư Thành Tiếng</div>
+                        <div class="flow-step-desc">Đọc lá thư một cách chậm rãi, cho phép bản thân cảm nhận từng từ. Nếu khóc, hãy khóc. Cảm xúc đang được giải phóng.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">4</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Hình Dung Cắt Dây</div>
+                        <div class="flow-step-desc">Nhắm mắt. Hình dung sợi dây năng lượng nối từ bạn đến người trong thư. Thấy nó đang ràng buộc bạn. Rồi hình dung một ánh sáng vàng kim cắt đứt sợi dây. Đầu dây tan biến thành ánh sáng.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">5</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tuyên Bố Giải Phóng</div>
+                        <div class="flow-step-desc">Nói to: "Tôi tha thứ và giải phóng. Sợi dây nghiệp này đã được cắt. Tôi tự do. [Tên] cũng tự do. Xin cảm ơn."</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">6</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Đốt Hoặc Xé Thư</div>
+                        <div class="flow-step-desc">Nếu an toàn, đốt lá thư và xem nó biến thành tro. Nếu không thể đốt, xé thành mảnh nhỏ và vứt đi. Hành động vật lý này hoàn tất nghi thức.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ritual-box">
+                <div class="ritual-title"><span>🙏</span> Script Nghi Thức Cắt Dây</div>
+                <div class="ritual-script">
+                    <p class="ritual-instruction">[Sau khi đọc thư, nhắm mắt và nói:]</p>
+                    <p class="ritual-affirmation">"Tôi kêu gọi ánh sáng chữa lành đến với tôi bây giờ.</p>
+                    <p class="ritual-affirmation">Tôi thấy sợi dây năng lượng nối tôi với [Tên].</p>
+                    <p class="ritual-affirmation">Sợi dây này mang theo nghiệp tiền bạc từ quá khứ.</p>
+                    <p class="ritual-affirmation">Hôm nay, tôi chọn tha thứ và giải phóng.</p>
+                    <p class="ritual-affirmation">Tôi cắt sợi dây này bằng tình yêu, không bằng sự tức giận.</p>
+                    <p class="ritual-affirmation">Ánh sáng vàng kim cắt đứt sợi dây...</p>
+                    <p class="ritual-instruction">[Hình dung sợi dây bị cắt, hai đầu tan biến thành ánh sáng]</p>
+                    <p class="ritual-affirmation">Tôi tự do. [Tên] tự do.</p>
+                    <p class="ritual-affirmation">Tôi gửi đến [Tên] tình yêu và lời chúc phúc.</p>
+                    <p class="ritual-affirmation">Tôi đón nhận năng lượng thịnh vượng mới vào cuộc đời tôi.</p>
+                    <p class="ritual-affirmation">Xin cảm ơn. Nghi thức này hoàn tất."</p>
+                </div>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x500/0a1628/FFBD59?text=M2_B3_03%0ACord+Cutting+Ritual" alt="Nghi Thức Cắt Dây">
+                <div class="image-caption">Nghi thức cắt dây giải phóng năng lượng bị mắc kẹt trong quá khứ</div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: TÍCH HỢP APP -->
+        <section class="section">
+            <h2 class="section-title"><span>📱</span> Thực Hành Trong GEM App</h2>
+            <p>Sử dụng các tính năng trong GEM App để tăng cường hiệu quả nghi thức:</p>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>✉️</span> Rituals → Letter to Universe</div>
+                <p>Viết thư tha thứ trong tính năng này. Thư sẽ được "gửi đi" một cách tượng trưng và xóa khỏi thiết bị của bạn - hoàn tất nghi thức giải phóng.</p>
+            </div>
+
+            <div class="app-box">
+                <div class="app-box-title"><span>🌬️</span> Rituals → Cleansing Breath</div>
+                <p>Sử dụng bài tập hít thở có hướng dẫn (4-7-8 breathing) để chuẩn bị trước nghi thức cắt dây. Timer tự động giúp bạn giữ nhịp chuẩn xác.</p>
+            </div>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>🔁</span> Lặp Lại Nếu Cần</div>
+                <p>Bạn có thể cần làm nghi thức này nhiều lần cho cùng một người hoặc pattern. Mỗi lần làm, một lớp nghiệp sẽ được gỡ bỏ. Đừng nản lòng nếu cảm xúc vẫn còn - tiếp tục cho đến khi bạn cảm thấy nhẹ nhàng hoàn toàn.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 6: SAU NGHI THỨC -->
+        <section class="section">
+            <h2 class="section-title"><span>🌈</span> Sau Nghi Thức - Điều Gì Xảy Ra?</h2>
+            <p>Sau khi thực hiện nghi thức cắt dây, bạn có thể trải qua một số điều sau:</p>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">✨</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Cảm Giác Nhẹ Nhàng</div>
+                        <div class="flow-step-desc">Như trút được gánh nặng. Vai thẳng hơn. Thở dễ hơn. Đây là dấu hiệu nghi thức thành công.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">😢</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Cảm Xúc Dâng Trào</div>
+                        <div class="flow-step-desc">Có thể khóc, buồn, hoặc cảm thấy trống rỗng trong 1-2 ngày. Đây là phản ứng bình thường - năng lượng cũ đang được giải phóng.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">💭</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Giấc Mơ Về Người Đó</div>
+                        <div class="flow-step-desc">Đôi khi bạn sẽ mơ về người trong thư. Đây là cách vô thức xử lý sự giải phóng. Ghi chép lại giấc mơ nếu có thể.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">🔄</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Thay Đổi Trong Mối Quan Hệ</div>
+                        <div class="flow-step-desc">Bạn có thể thấy mối quan hệ với người đó thay đổi - tự nhiên hơn, ít căng thẳng hơn về chủ đề tiền bạc.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-box-title"><span>⚠️</span> Lưu Ý Quan Trọng</div>
+                <p>Nếu sau nghi thức bạn cảm thấy quá nặng nề, buồn bã kéo dài hơn 3 ngày, hoặc có suy nghĩ tiêu cực, hãy tìm đến chuyên gia tâm lý để được hỗ trợ. Nghi thức này là công cụ hỗ trợ, không thay thế trị liệu chuyên nghiệp khi cần.</p>
+            </div>
+        </section>
+
+        <!-- REAL STORIES -->
+        <section class="section">
+            <h2 class="section-title"><span>📖</span> Câu Chuyện Từ Những Người Đã Thực Hiện Nghi Thức</h2>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>👤</span> Câu Chuyện Của Hoàng (39 tuổi, Kế toán trưởng)</div>
+                <p><strong>Vấn đề:</strong> Hoàng luôn sợ tiền. Dù có thu nhập 45 triệu/tháng, anh không dám mua gì cho bản thân, không dám đầu tư, và luôn lo lắng "nếu mất việc sẽ sao". Anh sống như thể không có tiền dù thực tế khá giả.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Khi viết thư:</strong> Anh viết thư cho cha - người đã mất 10 năm trước. Trong thư, anh nhắc lại ký ức: Năm 12 tuổi, cha phá sản và la hét suốt đêm "Hết rồi! Mất hết rồi!" Từ đó, Hoàng luôn sợ một ngày mọi thứ sẽ "mất hết" như cha.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Sau nghi thức:</strong> Hoàng khóc rất nhiều - lần đầu tiên sau 10 năm anh khóc về cha. Anh tha thứ cho cha và cho bản thân vì đã sống trong nỗi sợ quá lâu. 2 tuần sau, anh mua chiếc xe máy đầu tiên cho bản thân - điều anh muốn làm 5 năm nhưng không dám. Anh nói: "Tôi cảm thấy như được phép sống rồi."</p>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>👤</span> Câu Chuyện Của Chị Thảo (46 tuổi, Giáo viên)</div>
+                <p><strong>Vấn đề:</strong> Chị Thảo không thể nói "không" với bất kỳ ai xin tiền. Họ hàng vay không trả, bạn bè xin giúp đỡ, chị luôn đưa dù biết sẽ không nhận lại. Thu nhập 20 triệu nhưng lúc nào cũng thiếu vì cho mượn.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Khi vẽ bản đồ và viết thư:</strong> Chị nhận ra pattern này đến từ bà nội. Bà hay nói: "Cho đi mới được nhận lại. Không cho là có tội." Chị viết thư tha thứ cho bà vì đã "cài đặt" niềm tin này, dù biết bà chỉ dạy những gì bà biết.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Sau nghi thức:</strong> Lần đầu tiên trong đời, chị Thảo từ chối cho một người họ hàng mượn tiền. Cô ấy nói: "Chị rất xin lỗi nhưng lần này chị không thể." Cô run khi nói nhưng cảm thấy MẠNH MẼ. 3 tháng sau, chị đã tiết kiệm được 15 triệu - con số lớn nhất từ trước đến nay.</p>
+            </div>
+
+            <p>Cả hai câu chuyện đều cho thấy: Nghi thức tha thứ và cắt dây không chỉ là "ritual" - nó tạo ra SỰ THAY ĐỔI THỰC SỰ trong hành vi và kết quả tài chính. Điều quan trọng là phải làm với TÂM THÀNH - không phải làm cho có.</p>
+        </section>
+
+        <!-- KEY TAKEAWAYS -->
+        <section class="section">
+            <h2 class="section-title"><span>🔑</span> 3 Điều Quan Trọng Nhất</h2>
+
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <div class="flow-step-number">1</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Tha Thứ Là Tự Do Cho BẠN, Không Phải Cho Họ</div>
+                        <div class="flow-step-desc">Khi bạn ôm giữ sự oán giận, bạn là người bị "nhốt" - không phải họ. Tha thứ không có nghĩa là chấp nhận hành vi sai trái hay quên đi quá khứ. Tha thứ là CHỌN không để quá khứ kiểm soát hiện tại và tương lai của bạn nữa.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">2</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Viết Thư Là Đưa Vô Thức Lên Ý Thức</div>
+                        <div class="flow-step-desc">Nhiều cảm xúc và niềm tin về tiền bạc đang "ẩn" trong vô thức của bạn. Việc viết thư - đặc biệt là viết tay - giúp đưa những gì ẩn lên bề mặt. Khi bạn THẤY nó bằng chữ, bạn có thể CHỌN giải phóng nó.</div>
+                    </div>
+                </div>
+                <div class="flow-step">
+                    <div class="flow-step-number">3</div>
+                    <div class="flow-step-content">
+                        <div class="flow-step-title">Cắt Dây Năng Lượng, Không Phải Cắt Tình Cảm</div>
+                        <div class="flow-step-desc">Nhiều người sợ rằng cắt dây sẽ làm mất mối quan hệ với cha mẹ. Nhưng thực tế ngược lại: Khi bạn cắt những sợi dây TIÊU CỰC (nghiệp, oán giận, kỳ vọng không lành mạnh), mối quan hệ THỰC SỰ sẽ tốt hơn vì không còn "nhiễu" năng lượng cũ.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TRANSITION -->
+        <section class="section">
+            <h2 class="section-title"><span>🌉</span> Chuẩn Bị Cho Bài Cuối Module 2</h2>
+            <p>Bạn đã làm được điều rất dũng cảm: tha thứ và cắt dây nghiệp tiền bạc. Đây không phải điều dễ dàng, và bạn xứng đáng được khen ngợi vì đã đối mặt với quá khứ.</p>
+            <p>Bài 2.4 là bài cuối của Module 2. Bạn sẽ học <strong>5 Bước Chuyển Hóa Nghiệp Thành Phước</strong> - cách biến những gì đã học được từ quá khứ thành sức mạnh cho tương lai. Bài này cũng có Quiz để củng cố kiến thức toàn Module!</p>
+
+            <div class="highlight-box">
+                <div class="highlight-box-title"><span>📝</span> Bài Tập Trước Bài 2.4</div>
+                <p><strong>Hoàn thành nghi thức:</strong> Nếu chưa thực hiện nghi thức cắt dây, hãy làm ngay tối nay. Đừng để quá 24 giờ sau khi học bài này.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Ghi nhận cảm xúc:</strong> Sau nghi thức, ghi lại bạn cảm thấy thế nào. Có gì khác không? Nhẹ hơn? Buồn? Trống rỗng? Tất cả đều bình thường.</p>
+                <p style="margin-top: var(--space-sm);"><strong>Sẵn sàng cho Quiz:</strong> Bài 2.4 có Quiz cuối Module. Hãy nhớ lại các khái niệm chính: Nghiệp = Tần số, 2 loại nghiệp, 10 dấu hiệu, Bản đồ 3 thế hệ, Nghi thức cắt dây.</p>
+            </div>
+        </section>
+
+        <!-- SECTION 7: TỔNG KẾT -->
+        <section class="section">
+            <h2 class="section-title"><span>🎯</span> Tổng Kết Bài 2.3</h2>
+
+            <div class="summary-box">
+                <div class="summary-title"><span>📌</span> Những Điều Bạn Đã Học & Làm</div>
+                <ul class="summary-list">
+                    <li>Hiểu khái niệm <strong>Cord Cutting</strong> và tại sao cần cắt dây nghiệp tiền</li>
+                    <li>Học tại sao <strong>tha thứ</strong> là chìa khóa để giải phóng (tha thứ cho cha mẹ, ông bà, bản thân)</li>
+                    <li>Viết <strong>Thư Tha Thứ</strong> theo template hướng dẫn</li>
+                    <li>Thực hiện <strong>Nghi Thức Cắt Dây</strong> 6 bước</li>
+                    <li>Tích hợp với GEM App: Letter to Universe, Cleansing Breath</li>
+                </ul>
+            </div>
+
+            <div class="definition-box">
+                <div class="definition-box-title"><span>➡️</span> Tiếp Theo: Bài 2.4</div>
+                <p>Trong bài cuối Module 2, bạn sẽ học <strong>5 Bước Chuyển Hóa Nghiệp Thành Phước</strong> - cách biến những gì đã học được từ quá khứ thành sức mạnh cho tương lai. Bài này cũng có Quiz để củng cố kiến thức Module 2!</p>
+            </div>
+
+            <div class="image-container">
+                <img src="https://via.placeholder.com/800x400/0a1628/00C853?text=M2_B3_04%0AYou+Are+Free" alt="Bạn Đã Tự Do">
+                <div class="image-caption">Mỗi sợi dây nghiệp được cắt, bạn càng thêm tự do và nhẹ nhàng</div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="lesson-footer">
+            <p>© 2024 GEM Academy | <a href="https://gemral.com">gemral.com</a></p>
+            <p style="margin-top: var(--space-sm);">Tiếp theo: Bài 2.4 - Chuyển Hóa Nghiệp Thành Phước (Quiz) →</p>
+        </footer>
+
+    </div>
+</body>
+</html>

@@ -240,8 +240,8 @@ class MindsetAdvisorService {
    */
   async calculateHistoryScore(userId) {
     try {
-      // Initialize paper trade service if needed
-      await paperTradeService.init();
+      // Initialize paper trade service with CLOUD SYNC
+      await paperTradeService.init(userId);
 
       // Get stats and recent history
       const stats = paperTradeService.getStats(userId);

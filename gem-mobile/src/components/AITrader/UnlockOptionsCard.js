@@ -58,9 +58,9 @@ const UnlockOptionsCard = ({
 
   return (
     <View style={[styles.container, style]}>
-      <Text style={styles.title}>Chọn hành động để mở khóa</Text>
+      <Text style={styles.title}>Bài tập mở khóa</Text>
       <Text style={styles.subtitle}>
-        Hoàn thành một trong các hành động sau để tiếp tục giao dịch
+        Hoàn thành một trong các bài tập sau để tiếp tục
       </Text>
 
       <View style={styles.optionsGrid}>
@@ -146,7 +146,7 @@ const UnlockOptionsCard = ({
 
       {/* Info text */}
       <Text style={styles.infoText}>
-        Thiền và Viết nhật ký giúp bạn nhận được Karma bonus
+        Thiền định và nhật ký giao dịch tăng Karma
       </Text>
     </View>
   );

@@ -6,7 +6,9 @@
  * - Shows replied message preview
  * - Dismiss button to cancel reply
  * - Slide-in animation
- * - Different styling for own vs other's messages
+ * - Media thumbnails for images/videos
+ * - Icons for audio/file/sticker messages
+ * - Gold accent bar design
  */
 
 import React, { useEffect, useRef, memo } from 'react';
@@ -16,6 +18,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Animated,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from '../../../utils/haptics';
@@ -72,24 +75,53 @@ const MessageReplyPreview = memo(({
     });
   };
 
-  // Get message preview content
+  // Get message preview content with icon/thumbnail info
   const getPreviewContent = () => {
-    if (message?.attachment_url) {
-      switch (message.message_type) {
-        case 'image':
-          return '📷 Photo';
-        case 'video':
-          return '🎥 Video';
-        case 'voice':
-          return '🎤 Voice message';
-        case 'file':
-          return '📎 File';
-        default:
-          return message.content || 'Attachment';
-      }
+    const messageType = message?.message_type || 'text';
+
+    switch (messageType) {
+      case 'image':
+        return {
+          text: message.caption || 'Photo',
+          icon: 'image-outline',
+          thumbnail: message.attachment_url,
+        };
+      case 'video':
+        return {
+          text: message.caption || 'Video',
+          icon: 'videocam-outline',
+          thumbnail: message.thumbnail_url || message.attachment_url,
+        };
+      case 'audio':
+      case 'voice':
+        return {
+          text: 'Voice message',
+          icon: 'mic-outline',
+        };
+      case 'file':
+        return {
+          text: message.attachment_name || 'File',
+          icon: 'document-outline',
+        };
+      case 'sticker':
+        return {
+          text: 'Sticker',
+          icon: 'happy-outline',
+        };
+      case 'gif':
+        return {
+          text: 'GIF',
+          icon: 'images-outline',
+        };
+      default:
+        return {
+          text: message?.content || '',
+          icon: null,
+        };
     }
-    return message?.content || '';
   };
+
+  const preview = getPreviewContent();
 
   if (!message) return null;
 
@@ -103,33 +135,42 @@ const MessageReplyPreview = memo(({
         },
       ]}
     >
-      {/* Reply indicator bar */}
-      <View style={[
-        styles.indicatorBar,
-        isOwnMessage ? styles.indicatorBarOwn : styles.indicatorBarOther,
-      ]} />
+      {/* Gold accent bar */}
+      <View style={styles.accentBar} />
 
       {/* Content */}
       <View style={styles.content}>
-        {/* Reply icon and sender */}
-        <View style={styles.header}>
-          <Ionicons
-            name="arrow-undo"
-            size={14}
-            color={isOwnMessage ? COLORS.purple : COLORS.cyan}
-          />
-          <Text style={[
-            styles.senderName,
-            isOwnMessage ? styles.senderNameOwn : styles.senderNameOther,
-          ]}>
-            {isOwnMessage ? 'You' : senderName || 'Unknown'}
+        {/* Header with sender name */}
+        <Text style={styles.header}>
+          Replying to{' '}
+          <Text style={styles.senderName}>
+            {isOwnMessage ? 'yourself' : senderName || 'User'}
+          </Text>
+        </Text>
+
+        {/* Preview row with thumbnail/icon */}
+        <View style={styles.previewRow}>
+          {/* Thumbnail for media */}
+          {preview.thumbnail && (
+            <Image
+              source={{ uri: preview.thumbnail }}
+              style={styles.thumbnail}
+              resizeMode="cover"
+            />
+          )}
+
+          {/* Icon for non-text messages */}
+          {preview.icon && !preview.thumbnail && (
+            <View style={styles.iconContainer}>
+              <Ionicons name={preview.icon} size={16} color={COLORS.gold} />
+            </View>
+          )}
+
+          {/* Text preview */}
+          <Text style={styles.preview} numberOfLines={1}>
+            {preview.text}
           </Text>
         </View>
-
-        {/* Message preview */}
-        <Text style={styles.preview} numberOfLines={1}>
-          {getPreviewContent()}
-        </Text>
       </View>
 
       {/* Dismiss button */}
@@ -137,8 +178,9 @@ const MessageReplyPreview = memo(({
         style={styles.dismissButton}
         onPress={handleDismiss}
         activeOpacity={0.7}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
-        <Ionicons name="close" size={20} color={COLORS.textMuted} />
+        <Ionicons name="close" size={22} color={COLORS.textMuted} />
       </TouchableOpacity>
     </Animated.View>
   );
@@ -151,59 +193,65 @@ export default MessageReplyPreview;
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'stretch',
     backgroundColor: 'rgba(15, 16, 48, 0.95)',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(106, 91, 255, 0.2)',
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
+    borderTopColor: 'rgba(106, 91, 255, 0.3)',
+    minHeight: 56,
   },
 
-  // Indicator bar (colored left border)
-  indicatorBar: {
-    width: 3,
-    height: '100%',
-    borderRadius: 2,
-    marginRight: SPACING.sm,
-  },
-  indicatorBarOwn: {
-    backgroundColor: COLORS.purple,
-  },
-  indicatorBarOther: {
-    backgroundColor: COLORS.cyan,
+  // Gold accent bar
+  accentBar: {
+    width: 4,
+    backgroundColor: COLORS.gold,
   },
 
   // Content
   content: {
     flex: 1,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    justifyContent: 'center',
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 2,
-    gap: SPACING.xs,
-  },
-  senderName: {
-    fontSize: TYPOGRAPHY.fontSize.sm,
-    fontWeight: TYPOGRAPHY.fontWeight.semibold,
-  },
-  senderNameOwn: {
-    color: COLORS.purple,
-  },
-  senderNameOther: {
-    color: COLORS.cyan,
-  },
-  preview: {
     fontSize: TYPOGRAPHY.fontSize.sm,
     color: COLORS.textMuted,
+    marginBottom: 2,
+  },
+  senderName: {
+    color: COLORS.gold,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+  },
+  previewRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  thumbnail: {
+    width: 32,
+    height: 32,
+    borderRadius: 4,
+    marginRight: SPACING.sm,
+    backgroundColor: COLORS.glassBg,
+  },
+  iconContainer: {
+    width: 28,
+    height: 28,
+    borderRadius: 4,
+    backgroundColor: 'rgba(106, 91, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: SPACING.sm,
+  },
+  preview: {
+    flex: 1,
+    fontSize: TYPOGRAPHY.fontSize.base,
+    color: COLORS.textSecondary,
   },
 
   // Dismiss button
   dismissButton: {
-    width: 32,
-    height: 32,
+    width: 44,
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: SPACING.sm,
   },
 });

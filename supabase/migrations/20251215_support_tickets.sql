@@ -170,6 +170,15 @@ CREATE TRIGGER trigger_on_ticket_message
 ALTER TABLE support_tickets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ticket_messages ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies first
+DROP POLICY IF EXISTS "Users create tickets" ON support_tickets;
+DROP POLICY IF EXISTS "Users view own tickets" ON support_tickets;
+DROP POLICY IF EXISTS "Users update own tickets" ON support_tickets;
+DROP POLICY IF EXISTS "Admins manage tickets" ON support_tickets;
+DROP POLICY IF EXISTS "Users view own messages" ON ticket_messages;
+DROP POLICY IF EXISTS "Users create messages" ON ticket_messages;
+DROP POLICY IF EXISTS "Admins manage messages" ON ticket_messages;
+
 -- Tickets - Users can view and create their own
 CREATE POLICY "Users create tickets" ON support_tickets
   FOR INSERT WITH CHECK (user_id = auth.uid() OR user_id IS NULL);

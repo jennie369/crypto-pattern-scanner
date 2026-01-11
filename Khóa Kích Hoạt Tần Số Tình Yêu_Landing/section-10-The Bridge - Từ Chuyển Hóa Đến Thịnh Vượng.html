@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Section: The Bridge - Từ Chuyển Hóa Đến Thịnh Vượng</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800;900&family=Noto+Sans+Display:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ============================================
+           🎨 PHẦN CẤU HÌNH - DỄ CHỈNH SỬA
+        ============================================ */
+        :root {
+            /* Màu sắc chính */
+            --primary-burgundy: #9C0612;
+            --primary-dark: #640A0C;
+            --gold-accent: #FFBD59;
+            --gold-light: #DEBC81;
+            --bg-navy: #112250;
+            --text-light: #FFFFFF;
+            --text-cream: #F5E6D3;
+            --text-gold: #DEBC81;
+            
+            /* Gradient Section - Dark to Gold transition */
+            --gradient-start: #15101B;  /* Almost black purple từ Testimonials */
+            --gradient-mid-1: #2A1B52;  /* Purple sang tím đậm */
+            --gradient-mid-2: #4A1A4F;  /* Tím burgundy */
+            --gradient-mid-3: #640A0C;  /* Burgundy */
+            --gradient-end: #7A0E15;    /* Dark red - chuẩn bị gold */
+            
+            /* Font chữ */
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body: 'Noto Sans Display', sans-serif;
+            
+            /* CTA Links - THAY ĐỔI URL TẠI ĐÂY */
+            --ctv-url: '#affiliate-program';
+            --kol-url: '#kol-program';
+            --instructor-url: '#instructor-program';
+        }
+
+        /* ============================================
+           🎨 GLOBAL STYLES
+        ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            color: var(--text-light);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+        }
+
+        /* ============================================
+           📐 SECTION BRIDGE CONTAINER
+        ============================================ */
+        #bridge-section {
+            background: linear-gradient(180deg,
+                var(--gradient-start) 0%,
+                var(--gradient-mid-1) 20%,
+                var(--gradient-mid-2) 40%,
+                var(--gradient-mid-3) 70%,
+                var(--gradient-end) 100%
+            );
+            padding: 140px 20px 140px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ============================================
+           ✨ ANIMATED BACKGROUND
+        ============================================ */
+        
+        /* Golden rays shooting from center */
+        .bridge-ray {
+            position: absolute;
+            width: 3px;
+            height: 150%;
+            background: linear-gradient(to bottom,
+                transparent 0%,
+                var(--gold-accent) 30%,
+                var(--gold-accent) 70%,
+                transparent 100%
+            );
+            opacity: 0.12;
+            top: -25%;
+            transform-origin: center bottom;
+            animation: rayRotate 25s linear infinite;
+        }
+
+        .bridge-ray:nth-child(1) { left: 30%; animation-delay: 0s; }
+        .bridge-ray:nth-child(2) { left: 50%; animation-delay: 8s; }
+        .bridge-ray:nth-child(3) { left: 70%; animation-delay: 16s; }
+
+        @keyframes rayRotate {
+            from {
+                transform: rotate(-10deg);
+                opacity: 0.08;
+            }
+            50% {
+                opacity: 0.18;
+            }
+            to {
+                transform: rotate(10deg);
+                opacity: 0.08;
+            }
+        }
+
+        /* Ambient glow */
+        .bridge-glow {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(150px);
+            opacity: 0.1;
+            animation: bridgeGlowPulse 18s ease-in-out infinite;
+        }
+
+        .bridge-glow-1 {
+            width: 900px;
+            height: 900px;
+            background: var(--gold-accent);
+            top: 10%;
+            right: -350px;
+        }
+
+        .bridge-glow-2 {
+            width: 800px;
+            height: 800px;
+            background: var(--primary-burgundy);
+            bottom: 15%;
+            left: -300px;
+            animation-delay: 6s;
+        }
+
+        @keyframes bridgeGlowPulse {
+            0%, 100% {
+                opacity: 0.08;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.15;
+                transform: scale(1.25);
+            }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ============================================
+           🎯 HEADER
+        ============================================ */
+        .bridge-header {
+            text-align: center;
+            margin-bottom: 80px;
+            animation: fadeInDown 1.2s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-70px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .bridge-icon {
+            font-size: 6rem;
+            margin-bottom: 40px;
+            display: inline-block;
+            filter: drop-shadow(0 0 45px var(--gold-accent));
+            animation: bridgeIconFloat 4s ease-in-out infinite;
+        }
+
+        @keyframes bridgeIconFloat {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+            }
+            50% {
+                transform: translateY(-20px) scale(1.1);
+            }
+        }
+
+        .bridge-title {
+            font-family: var(--font-heading);
+            font-size: clamp(2.5rem, 6vw, 5.5rem);
+            font-weight: 900;
+            background: linear-gradient(135deg,
+                var(--gold-accent) 0%,
+                var(--gold-light) 50%,
+                var(--gold-accent) 100%
+            );
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 35px;
+            line-height: 1.2;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            animation: titleGlow 4s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% {
+                filter: drop-shadow(0 0 45px rgba(255, 189, 89, 0.7));
+            }
+            50% {
+                filter: drop-shadow(0 0 75px rgba(255, 189, 89, 1));
+            }
+        }
+
+        .bridge-subtitle {
+            font-family: var(--font-body);
+            font-size: clamp(1.2rem, 2.8vw, 2rem);
+            color: var(--text-cream);
+            max-width: 1000px;
+            margin: 0 auto 50px;
+            line-height: 1.7;
+        }
+
+        /* ============================================
+           📊 STATS SECTION
+        ============================================ */
+        .stats-intro {
+            background: linear-gradient(135deg,
+                rgba(255, 189, 89, 0.08) 0%,
+                rgba(156, 6, 18, 0.12) 100%
+            );
+            border: 2px solid rgba(255, 189, 89, 0.4);
+            border-radius: 30px;
+            padding: 60px 50px;
+            margin-bottom: 100px;
+            animation: statsAppear 1s ease 0.5s both;
+        }
+
+        @keyframes statsAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .stats-title {
+            font-family: var(--font-heading);
+            font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+            font-weight: 800;
+            color: var(--gold-accent);
+            text-align: center;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: var(--font-heading);
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--gold-accent);
+            margin-bottom: 10px;
+            animation: statCount 2s ease-out;
+        }
+
+        @keyframes statCount {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .stat-label {
+            font-size: 1.05rem;
+            color: var(--text-cream);
+            line-height: 1.5;
+        }
+
+        .stats-insight {
+            text-align: center;
+            font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+            color: var(--text-light);
+            line-height: 1.7;
+            padding-top: 40px;
+            border-top: 2px solid rgba(255, 189, 89, 0.3);
+        }
+
+        .stats-insight strong {
+            color: var(--gold-accent);
+            font-weight: 700;
+        }
+
+        /* ============================================
+           🛤️ 3 PATHS GRID
+        ============================================ */
+        .paths-title {
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 4.5vw, 3.5rem);
+            font-weight: 800;
+            color: var(--gold-accent);
+            text-align: center;
+            margin-bottom: 80px;
+            text-transform: uppercase;
+        }
+
+        .paths-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 50px;
+            margin-bottom: 100px;
+        }
+
+        /* Path Card */
+        .path-card {
+            background: linear-gradient(135deg,
+                rgba(255, 189, 89, 0.1) 0%,
+                rgba(156, 6, 18, 0.15) 100%
+            );
+            border: 3px solid var(--gold-accent);
+            border-radius: 30px;
+            padding: 50px 40px;
+            position: relative;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: translateY(80px);
+            animation: pathAppear 0.9s ease forwards;
+        }
+
+        .path-card:nth-child(1) { animation-delay: 0.3s; }
+        .path-card:nth-child(2) { animation-delay: 0.5s; }
+        .path-card:nth-child(3) { animation-delay: 0.7s; }
+
+        @keyframes pathAppear {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .path-card:hover {
+            transform: translateY(-15px) scale(1.03);
+            border-color: var(--gold-light);
+            box-shadow:
+                0 35px 90px rgba(255, 189, 89, 0.5),
+                0 0 160px rgba(255, 189, 89, 0.3);
+        }
+
+        .path-number {
+            font-family: var(--font-heading);
+            font-size: 4.5rem;
+            font-weight: 900;
+            color: var(--gold-accent);
+            opacity: 0.25;
+            position: absolute;
+            top: 25px;
+            right: 35px;
+        }
+
+        .path-icon {
+            font-size: 5rem;
+            margin-bottom: 30px;
+            display: inline-block;
+            filter: drop-shadow(0 0 30px rgba(255, 189, 89, 0.9));
+            animation: pathIconPulse 3.5s ease-in-out infinite;
+        }
+
+        @keyframes pathIconPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.12);
+            }
+        }
+
+        .path-title {
+            font-family: var(--font-heading);
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--gold-accent);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .path-subtitle {
+            font-size: 1.1rem;
+            color: var(--gold-light);
+            margin-bottom: 25px;
+            font-weight: 600;
+            font-style: italic;
+        }
+
+        .path-benefits {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 35px;
+        }
+
+        .path-benefits li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 1.05rem;
+            color: var(--text-cream);
+            line-height: 1.7;
+        }
+
+        .path-benefits li::before {
+            content: '✓';
+            color: var(--gold-accent);
+            font-size: 1.5rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* CTA Button với glow effect */
+        .path-cta {
+            display: block;
+            width: 100%;
+            padding: 18px 35px;
+            background: linear-gradient(135deg,
+                var(--gold-accent) 0%,
+                var(--gold-light) 100%
+            );
+            color: var(--primary-dark);
+            border: none;
+            border-radius: 50px;
+            font-family: var(--font-heading);
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .path-cta::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .path-cta:hover {
+            transform: scale(1.05);
+            box-shadow:
+                0 15px 40px rgba(255, 189, 89, 0.6),
+                0 0 80px rgba(255, 189, 89, 0.4);
+        }
+
+        .path-cta:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* ============================================
+           💎 FINAL MESSAGE
+        ============================================ */
+        .bridge-footer {
+            text-align: center;
+            padding: 90px 70px;
+            background: linear-gradient(135deg,
+                rgba(255, 189, 89, 0.15) 0%,
+                rgba(156, 6, 18, 0.25) 100%
+            );
+            border: 4px solid var(--gold-accent);
+            border-radius: 40px;
+            position: relative;
+            overflow: hidden;
+            animation: footerAppear 1s ease 1.5s both;
+        }
+
+        @keyframes footerAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.92);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .bridge-footer::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg,
+                transparent 40%,
+                rgba(255, 189, 89, 0.12) 50%,
+                transparent 60%
+            );
+            animation: footerShine 5s linear infinite;
+        }
+
+        @keyframes footerShine {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .footer-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-icon {
+            font-size: 6rem;
+            margin-bottom: 40px;
+            filter: drop-shadow(0 0 50px var(--gold-accent));
+            animation: footerIconFloat 4s ease-in-out infinite;
+        }
+
+        @keyframes footerIconFloat {
+            0%, 100% {
+                transform: translateY(0) rotate(-5deg);
+            }
+            50% {
+                transform: translateY(-25px) rotate(5deg);
+            }
+        }
+
+        .footer-message {
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 5vw, 4.5rem);
+            font-weight: 900;
+            color: var(--gold-accent);
+            line-height: 1.3;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+
+        .footer-submessage {
+            font-size: clamp(1.1rem, 2.5vw, 1.8rem);
+            color: var(--text-cream);
+            line-height: 1.7;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* ============================================
+           📱 RESPONSIVE
+        ============================================ */
+        @media (max-width: 1024px) {
+            #bridge-section {
+                padding: 100px 20px 100px;
+            }
+
+            .paths-grid {
+                grid-template-columns: 1fr;
+                gap: 45px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            #bridge-section {
+                padding: 80px 15px 80px;
+            }
+
+            .bridge-header {
+                margin-bottom: 60px;
+            }
+
+            .stats-intro {
+                padding: 45px 35px;
+                margin-bottom: 70px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 35px;
+            }
+
+            .paths-title {
+                margin-bottom: 60px;
+            }
+
+            .path-card {
+                padding: 40px 30px;
+            }
+
+            .bridge-footer {
+                padding: 70px 40px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-intro {
+                padding: 35px 25px;
+            }
+
+            .path-card {
+                padding: 35px 25px;
+            }
+
+            .path-number {
+                font-size: 3.5rem;
+                top: 20px;
+                right: 25px;
+            }
+
+            .bridge-footer {
+                padding: 60px 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!--
+    ============================================
+    SECTION: THE BRIDGE
+    Từ Chuyển Hóa → Thịnh Vượng → Cơ Hội Kinh Doanh
+    
+    📍 VỊ TRÍ: Sau Testimonials, trước FOMO/CTA
+    
+    🔗 CTA LINKS: Line 42-44 trong :root
+    --affiliate-url: URL đăng ký affiliate
+    --gem-capital-url: URL tìm hiểu Gem Capital
+    --trading-academy-url: URL Trading Academy
+    
+    ✏️ CUSTOMIZE:
+    - Line 42-44: Thay URL cho 3 paths
+    - Line 550-750: Chỉnh stats numbers
+    - Line 800-1100: Chỉnh 3 path cards content
+    ============================================
+    -->
+    <section id="bridge-section">
+        
+        <!-- Animated Background -->
+        <div class="bridge-ray"></div>
+        <div class="bridge-ray"></div>
+        <div class="bridge-ray"></div>
+        
+        <div class="bridge-glow bridge-glow-1"></div>
+        <div class="bridge-glow bridge-glow-2"></div>
+        
+        <div class="container">
+            
+            <!-- Header -->
+            <div class="bridge-header">
+                <div class="bridge-icon">🌉</div>
+                <h2 class="bridge-title">
+                    Từ Tần Số Cao<br>
+                    Đến Thịnh Vượng Thật
+                </h2>
+                <p class="bridge-subtitle">
+                    Không chỉ học - hãy kiếm thu nhập từ việc chia sẻ giá trị.<br>
+                    3 cấp độ Partnership với mức hoa hồng từ 10% đến 60%.
+                </p>
+            </div>
+
+            <!-- Stats Section: Ví Dụ Tính Hoa Hồng -->
+            <div class="stats-intro">
+                <h3 class="stats-title">Ví Dụ: Bán Khóa Tần Số Tình Yêu (3.000.000đ)</h3>
+
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">300K</div>
+                        <div class="stat-label">🥉 CTV Bronze<br>(10% × 3 triệu)</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">600K</div>
+                        <div class="stat-label">🥇 CTV Gold<br>(20% × 3 triệu)</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">900K</div>
+                        <div class="stat-label">👑 CTV Diamond<br>(30% × 3 triệu)</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">600K</div>
+                        <div class="stat-label">⭐ KOL Affiliate<br>(20% × 3 triệu)</div>
+                    </div>
+                </div>
+
+                <div class="stats-insight">
+                    <strong>+ Thu nhập từ Sub-Affiliate (2-4%):</strong><br>
+                    Mỗi khi người bạn giới thiệu bán hàng, bạn nhận thêm 2-4% từ đơn hàng của họ.<br>
+                    <strong>Ví dụ:</strong> Bạn (Gold) giới thiệu A đăng ký CTV. A bán 10 triệu → Bạn nhận thêm 300K (3%).
+                </div>
+            </div>
+
+            <!-- 3 Paths -->
+            <h3 class="paths-title">3 Cấp Độ Partnership - Đối Tác Cùng GEM</h3>
+            
+            <div class="paths-grid">
+                
+                <!-- Path 1: CTV - Đối Tác Phát Triển (5 Cấp Bậc) -->
+                <div class="path-card">
+                    <div class="path-number">01</div>
+                    <div class="path-icon">🤝</div>
+                    <h4 class="path-title">CTV - Đối Tác Phát Triển</h4>
+                    <p class="path-subtitle">5 Cấp Bậc: Bronze → Silver → Gold → Platinum → Diamond</p>
+                    <ul class="path-benefits">
+                        <li>🥉 <strong>Bronze (Mới bắt đầu):</strong> 10% khóa học, 6% sản phẩm vật lý</li>
+                        <li>🥈 <strong>Silver (50 triệu):</strong> 15% khóa học, 8% vật lý</li>
+                        <li>🥇 <strong>Gold (150 triệu):</strong> 20% khóa học, 10% vật lý</li>
+                        <li>💎 <strong>Platinum (400 triệu):</strong> 25% khóa học, 12% vật lý</li>
+                        <li>👑 <strong>Diamond (800 triệu):</strong> 30% khóa học, 15% vật lý</li>
+                        <li>+ Sub-affiliate 2-4% từ người bạn giới thiệu</li>
+                        <li>Ai cũng đăng ký được - Tự động duyệt sau 3 ngày</li>
+                    </ul>
+                    <a href="#affiliate-program" class="path-cta">
+                        Đăng Ký CTV Ngay
+                    </a>
+                </div>
+
+                <!-- Path 2: KOL Affiliate -->
+                <div class="path-card">
+                    <div class="path-number">02</div>
+                    <div class="path-icon">⭐</div>
+                    <h4 class="path-title">KOL Affiliate</h4>
+                    <p class="path-subtitle">Dành Cho Người Có Ảnh Hưởng (20K+ Followers)</p>
+                    <ul class="path-benefits">
+                        <li><strong>20% hoa hồng</strong> cho cả khóa học và sản phẩm vật lý</li>
+                        <li><strong>3.5% Sub-affiliate</strong> từ đối tác bạn giới thiệu</li>
+                        <li>Thanh toán 2 lần/tháng (nhanh hơn CTV)</li>
+                        <li>⚠️ <strong>Yêu cầu:</strong> Tối thiểu 20,000 followers (bắt buộc)</li>
+                        <li>Hỗ trợ content & marketing từ GEM</li>
+                        <li>Ví dụ: Khóa 3 triệu → bạn nhận 600,000đ</li>
+                    </ul>
+                    <a href="#kol-program" class="path-cta">
+                        Đăng Ký KOL Affiliate
+                    </a>
+                </div>
+
+                <!-- Path 3: Instructor -->
+                <div class="path-card">
+                    <div class="path-number">03</div>
+                    <div class="path-icon">🎓</div>
+                    <h4 class="path-title">Instructor - Giảng Viên</h4>
+                    <p class="path-subtitle">Tạo Khóa Học Riêng & Nhận 40-60% Doanh Thu</p>
+                    <ul class="path-benefits">
+                        <li><strong>40-60% doanh thu</strong> từ khóa học bạn tạo ra</li>
+                        <li>Đa nguồn thu nhập: Khóa học + Coaching + Workshop</li>
+                        <li>Nền tảng công nghệ GEM hỗ trợ toàn bộ</li>
+                        <li>Xây dựng thương hiệu cá nhân bền vững</li>
+                        <li>Điều kiện: CTV cấp cao + Interview với GEM</li>
+                        <li>Ví dụ: Khóa 5 triệu × 100 học viên = 200-300 triệu/năm</li>
+                    </ul>
+                    <a href="#instructor-program" class="path-cta">
+                        Tìm Hiểu Instructor
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- Footer Message -->
+            <div class="bridge-footer">
+                <div class="footer-content">
+                    <div class="footer-icon">💎</div>
+                    <p class="footer-message">
+                        Từ Học Viên → Đối Tác → Thu Nhập Thụ Động
+                    </p>
+                    <p class="footer-submessage">
+                        CTV: Bắt đầu 10% → Thăng cấp lên 30% (Diamond)<br>
+                        KOL: 20% ngay (cần 20K followers)<br>
+                        Instructor: 40-60% doanh thu từ khóa học của bạn<br>
+                        <strong>Bạn muốn bắt đầu ở cấp độ nào?</strong>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- JavaScript: Scroll animations + Button interactions -->
+    <script>
+        (function() {
+            'use strict';
+            
+            // Intersection Observer
+            const observerOptions = {
+                threshold: 0.15,
+                rootMargin: '0px 0px -70px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, observerOptions);
+
+            // Observe path cards
+            document.querySelectorAll('.path-card').forEach(card => {
+                observer.observe(card);
+            });
+
+            // Observe stats section
+            const statsIntro = document.querySelector('.stats-intro');
+            if (statsIntro) {
+                observer.observe(statsIntro);
+            }
+
+            // Observe footer
+            const footer = document.querySelector('.bridge-footer');
+            if (footer) {
+                observer.observe(footer);
+            }
+
+            // Button glow effect on hover
+            document.querySelectorAll('.path-cta').forEach(btn => {
+                btn.addEventListener('mouseenter', function() {
+                    this.style.boxShadow = '0 20px 50px rgba(255, 189, 89, 0.7), 0 0 100px rgba(255, 189, 89, 0.5)';
+                });
+                
+                btn.addEventListener('mouseleave', function() {
+                    this.style.boxShadow = '';
+                });
+            });
+
+            console.log('✅ The Bridge section initialized');
+            
+        })();
+    </script>
+
+</body>
+</html>
