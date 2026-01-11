@@ -2856,9 +2856,11 @@ export default function LessonEditor() {
                                 if (elementToSelect && elementToSelect !== container) {
                                   elementToSelect.classList.add('selected-for-delete');
                                   selectedElementPathRef.current = getElementPath(elementToSelect, container);
+                                  console.log('[Selection] Selected:', elementToSelect.tagName, elementToSelect.className, 'path:', selectedElementPathRef.current);
                                 }
                               } else {
                                 selectedElementPathRef.current = null;
+                                console.log('[Selection] Cleared - clicked on container');
                               }
                             }}
                             onDragStart={(e) => {
@@ -3157,6 +3159,14 @@ export default function LessonEditor() {
                               e.preventDefault();
                               e.stopPropagation();
                               setIsDraggingOverEditor(true);
+                              // Restore selection class if it was lost during re-render
+                              if (selectedElementPathRef.current && !e.currentTarget.querySelector('.selected-for-delete')) {
+                                const selectedEl = getElementByPath(selectedElementPathRef.current, e.currentTarget);
+                                if (selectedEl) {
+                                  selectedEl.classList.add('selected-for-delete');
+                                  console.log('[DragEnter] Restored selection:', selectedEl.tagName, selectedEl.className);
+                                }
+                              }
                             }}
                             onDragLeave={(e) => {
                               e.preventDefault();
@@ -3171,7 +3181,9 @@ export default function LessonEditor() {
                               setIsDraggingOverEditor(false);
 
                               const editorElement = e.currentTarget;
-                              console.log('[Drop] Received drop event, types:', e.dataTransfer.types);
+                              console.log('[Drop] Received drop event, types:', Array.from(e.dataTransfer.types));
+                              console.log('[Drop] selectedElementPathRef:', selectedElementPathRef.current);
+                              console.log('[Drop] Selected elements in DOM:', editorElement.querySelectorAll('.selected-for-delete').length);
 
                               // ═══ 0. Check for Internal Element Move ═══
                               const isInternalMove = e.dataTransfer.getData('application/x-internal-element');
@@ -3278,11 +3290,13 @@ export default function LessonEditor() {
                               let altText = '';
 
                               const imageData = e.dataTransfer.getData('application/json');
+                              console.log('[Drop] imageData from JSON:', imageData ? imageData.substring(0, 100) : 'null');
                               if (imageData) {
                                 try {
                                   const img = JSON.parse(imageData);
                                   imageUrl = img.image_url;
                                   altText = img.alt_text || img.position_id;
+                                  console.log('[Drop] Parsed image - URL:', imageUrl?.substring(0, 50));
                                 } catch (err) {
                                   console.error('Error parsing image data:', err);
                                 }
@@ -3333,9 +3347,12 @@ export default function LessonEditor() {
                                 // ═══ PRIORITY 1: Check for selected element first (user clicked to highlight) ═══
                                 // Try to find by class first, then by stored path (in case class was lost on re-render)
                                 let selectedEl = editorElement.querySelector('.selected-for-delete');
+                                console.log('[Drop] selectedEl by class:', selectedEl?.tagName, selectedEl?.className);
                                 if (!selectedEl && selectedElementPathRef.current) {
                                   selectedEl = getElementByPath(selectedElementPathRef.current, editorElement);
+                                  console.log('[Drop] selectedEl by path:', selectedEl?.tagName, selectedEl?.className);
                                 }
+                                console.log('[Drop] Final selectedEl:', selectedEl ? `${selectedEl.tagName}.${selectedEl.className}` : 'null');
                                 if (selectedEl) {
                                   const newImg = createNewImg();
 
@@ -4423,6 +4440,14 @@ export default function LessonEditor() {
                           e.preventDefault();
                           e.stopPropagation();
                           setIsDraggingOverEditor(true);
+                          // Restore selection class if it was lost during re-render
+                          if (selectedElementPathRef.current && !e.currentTarget.querySelector('.selected-for-delete')) {
+                            const selectedEl = getElementByPath(selectedElementPathRef.current, e.currentTarget);
+                            if (selectedEl) {
+                              selectedEl.classList.add('selected-for-delete');
+                              console.log('[DragEnter Normal] Restored selection:', selectedEl.tagName, selectedEl.className);
+                            }
+                          }
                         }}
                         onDragLeave={(e) => {
                           e.preventDefault();
@@ -4436,7 +4461,9 @@ export default function LessonEditor() {
                           setIsDraggingOverEditor(false);
 
                           const editorElement = e.currentTarget;
-                          console.log('[Drop Normal] Received drop, types:', e.dataTransfer.types);
+                          console.log('[Drop Normal] Received drop, types:', Array.from(e.dataTransfer.types));
+                          console.log('[Drop Normal] selectedElementPathRef:', selectedElementPathRef.current);
+                          console.log('[Drop Normal] Selected elements in DOM:', editorElement.querySelectorAll('.selected-for-delete').length);
                           let imageUrl = '';
                           let altText = '';
 
@@ -4534,11 +4561,13 @@ export default function LessonEditor() {
                           }
 
                           const imageData = e.dataTransfer.getData('application/json');
+                          console.log('[Drop Normal] imageData:', imageData ? imageData.substring(0, 100) : 'null');
                           if (imageData) {
                             try {
                               const img = JSON.parse(imageData);
                               imageUrl = img.image_url;
                               altText = img.alt_text || img.position_id;
+                              console.log('[Drop Normal] Parsed image URL:', imageUrl?.substring(0, 50));
                             } catch (err) {
                               console.error('Error parsing image data:', err);
                             }
@@ -4586,9 +4615,12 @@ export default function LessonEditor() {
                             // ═══ PRIORITY 1: Check for selected element first ═══
                             // Try to find by class first, then by stored path (in case class was lost on re-render)
                             let selectedEl = editorElement.querySelector('.selected-for-delete');
+                            console.log('[Drop Normal] selectedEl by class:', selectedEl?.tagName, selectedEl?.className);
                             if (!selectedEl && selectedElementPathRef.current) {
                               selectedEl = getElementByPath(selectedElementPathRef.current, editorElement);
+                              console.log('[Drop Normal] selectedEl by path:', selectedEl?.tagName, selectedEl?.className);
                             }
+                            console.log('[Drop Normal] Final selectedEl:', selectedEl ? `${selectedEl.tagName}.${selectedEl.className}` : 'null');
                             if (selectedEl) {
                               const newImg = createNewImg();
 

@@ -11,6 +11,9 @@ const BACKEND_WS_URL = __DEV__
   ? 'ws://localhost:8000/ws/chat'
   : 'wss://gem-backend.railway.app/ws/chat';
 
+// In DEV mode, suppress WebSocket errors if backend not running
+const SUPPRESS_DEV_ERRORS = __DEV__;
+
 // Connection states
 export const ConnectionState = {
   DISCONNECTED: 'disconnected',
@@ -234,7 +237,12 @@ class WebSocketService {
    * Handle WebSocket error
    */
   handleError(error) {
-    console.error('[WebSocket] Error:', error);
+    // In DEV mode, use console.warn instead of console.error to avoid red box
+    if (SUPPRESS_DEV_ERRORS) {
+      console.warn('[WebSocket] Connection failed (backend not running?)');
+    } else {
+      console.error('[WebSocket] Error:', error);
+    }
     this.setState(ConnectionState.ERROR);
     this.emit('onError', { code: 'WS_ERROR', message: 'Lỗi kết nối' });
   }

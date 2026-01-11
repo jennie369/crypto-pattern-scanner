@@ -2154,7 +2154,8 @@ export default function DraggableBlockEditor({
                     boxSizing: 'border-box',
                     overflow: 'visible', // Allow resize handles to show outside
                     backgroundColor: typeof block.width === 'number' ? 'rgba(106, 91, 255, 0.05)' : undefined,
-                    border: typeof block.width === 'number' ? '2px dashed rgba(106, 91, 255, 0.5)' : undefined,
+                    // ALWAYS have 2px border to prevent layout shift - just change color
+                    border: `2px dashed ${typeof block.width === 'number' ? 'rgba(106, 91, 255, 0.5)' : 'transparent'}`,
                   }}
                 >
                   {/* Block type label */}

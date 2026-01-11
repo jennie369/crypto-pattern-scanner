@@ -26,6 +26,9 @@ const CONFIG = {
   // Fallback behavior
   USE_HTTP_FALLBACK: true, // Use Edge Function when WS fails
   AUTO_CONNECT_ON_ONLINE: true, // Auto-connect WS when coming online
+
+  // DEV mode: Skip WebSocket if backend not available (use HTTP fallback only)
+  SKIP_WS_IN_DEV: __DEV__, // Set to false if you have backend running locally
 };
 
 class HybridChatService {
@@ -62,9 +65,11 @@ class HybridChatService {
     // Setup offline queue listeners
     this.setupOfflineQueueListeners();
 
-    // Attempt WebSocket connection if online
-    if (offlineQueueService.checkOnline()) {
+    // Attempt WebSocket connection if online (skip in DEV mode if configured)
+    if (offlineQueueService.checkOnline() && !CONFIG.SKIP_WS_IN_DEV) {
       this.connectWebSocket();
+    } else if (CONFIG.SKIP_WS_IN_DEV) {
+      console.log('[HybridChat] Skipping WebSocket in DEV mode (using HTTP fallback)');
     }
 
     this.initialized = true;
