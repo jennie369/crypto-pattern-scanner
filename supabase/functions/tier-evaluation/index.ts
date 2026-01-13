@@ -240,8 +240,43 @@ async function handleWeeklyUpgrade(supabase: any) {
             continue;
           }
 
-          // Send notification
+          // Send notification to USER
           await sendTierChangeNotification(supabase, profile.user_id, 'upgrade', currentTier, newTier, totalSales);
+
+          // ========== NOTIFY ADMINS ==========
+          // Get user's name for notification
+          const { data: userProfile } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', profile.user_id)
+            .single();
+
+          const userName = userProfile?.full_name || 'CTV';
+
+          // Create in-app notification for admins
+          await createAdminInAppNotification(supabase, 'notify_admins_ctv_tier_upgraded', {
+            p_user_id: profile.user_id,
+            p_full_name: userName,
+            p_from_tier: currentTier,
+            p_to_tier: newTier,
+            p_total_sales: totalSales,
+          });
+
+          // Send push notification to admins
+          await notifyAllAdmins(
+            supabase,
+            '🚀 CTV thăng cấp tự động',
+            `${userName} thăng từ ${TIER_NAMES[currentTier]} lên ${TIER_NAMES[newTier]}. Doanh số: ${formatCurrency(totalSales)}`,
+            {
+              type: 'ctv_tier_upgraded',
+              user_id: profile.user_id,
+              from_tier: currentTier,
+              to_tier: newTier,
+              total_sales: totalSales,
+              screen: 'AdminPartners',
+            }
+          );
+          // ====================================
 
           upgrades.push({
             user_id: profile.user_id,
@@ -339,8 +374,45 @@ async function handleMonthlyDowngrade(supabase: any) {
             continue;
           }
 
-          // Send notification
+          // Send notification to USER
           await sendTierChangeNotification(supabase, profile.user_id, 'downgrade', currentTier, newTier, monthlySales, minMonthlySales);
+
+          // ========== NOTIFY ADMINS ==========
+          // Get user's name for notification
+          const { data: userProfile } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', profile.user_id)
+            .single();
+
+          const userName = userProfile?.full_name || 'CTV';
+
+          // Create in-app notification for admins
+          await createAdminInAppNotification(supabase, 'notify_admins_ctv_tier_downgraded', {
+            p_user_id: profile.user_id,
+            p_full_name: userName,
+            p_from_tier: currentTier,
+            p_to_tier: newTier,
+            p_monthly_sales: monthlySales,
+            p_required_sales: minMonthlySales,
+          });
+
+          // Send push notification to admins
+          await notifyAllAdmins(
+            supabase,
+            '📉 CTV hạ cấp tự động',
+            `${userName} hạ từ ${TIER_NAMES[currentTier]} xuống ${TIER_NAMES[newTier]}. Doanh số: ${formatCurrency(monthlySales)}/${formatCurrency(minMonthlySales)}`,
+            {
+              type: 'ctv_tier_downgraded',
+              user_id: profile.user_id,
+              from_tier: currentTier,
+              to_tier: newTier,
+              monthly_sales: monthlySales,
+              required_sales: minMonthlySales,
+              screen: 'AdminPartners',
+            }
+          );
+          // ====================================
 
           downgrades.push({
             user_id: profile.user_id,
@@ -510,6 +582,29 @@ async function handleCTVAutoApprove(supabase: any) {
 
         console.log(`[TierEvaluation] Auto-approved CTV: ${app.user_id}, code: ${referralCode}`);
 
+        // ========== NOTIFY ADMINS ==========
+        // Create in-app notification for admins
+        await createAdminInAppNotification(supabase, 'notify_admins_ctv_auto_approved', {
+          p_user_id: app.user_id,
+          p_full_name: app.full_name || 'Người dùng',
+          p_referral_code: referralCode,
+          p_application_id: app.id,
+        });
+
+        // Send push notification to admins
+        await notifyAllAdmins(
+          supabase,
+          '✅ CTV được tự động duyệt',
+          `${app.full_name || 'Người dùng'} đã được auto-approve thành CTV. Mã: ${referralCode}`,
+          {
+            type: 'ctv_auto_approved',
+            user_id: app.user_id,
+            referral_code: referralCode,
+            screen: 'AdminPartners',
+          }
+        );
+        // ====================================
+
         approved.push({
           user_id: app.user_id,
           referral_code: referralCode,
@@ -578,6 +673,122 @@ async function handleResetMonthlySales(supabase: any) {
 // ============================================================
 // HELPER FUNCTIONS
 // ============================================================
+
+/**
+ * Get all admin push tokens for sending notifications
+ */
+async function getAdminPushTokens(supabase: any): Promise<{ user_id: string; push_token: string; full_name: string }[]> {
+  try {
+    // Get admin users from profiles
+    const { data: admins, error } = await supabase
+      .from('profiles')
+      .select('id, push_token, full_name, expo_push_token')
+      .or('role.eq.admin,is_admin.eq.true');
+
+    if (error) {
+      console.error('[TierEvaluation] Error fetching admin tokens:', error);
+      return [];
+    }
+
+    // Filter admins with valid push tokens
+    return (admins || [])
+      .filter((a: any) => a.push_token || a.expo_push_token)
+      .map((a: any) => ({
+        user_id: a.id,
+        push_token: a.push_token || a.expo_push_token,
+        full_name: a.full_name || 'Admin',
+      }));
+  } catch (err) {
+    console.error('[TierEvaluation] Error in getAdminPushTokens:', err);
+    return [];
+  }
+}
+
+/**
+ * Send push notification to all admins
+ */
+async function notifyAllAdmins(
+  supabase: any,
+  title: string,
+  body: string,
+  data?: Record<string, unknown>
+): Promise<number> {
+  try {
+    const adminTokens = await getAdminPushTokens(supabase);
+
+    if (adminTokens.length === 0) {
+      console.log('[TierEvaluation] No admin push tokens found');
+      return 0;
+    }
+
+    console.log(`[TierEvaluation] Sending push to ${adminTokens.length} admins`);
+
+    // Build messages for all admins
+    const messages = adminTokens.map((admin) => ({
+      to: admin.push_token,
+      title,
+      body,
+      data: {
+        ...data,
+        target_admin: admin.user_id,
+      },
+      sound: 'default',
+      badge: 1,
+      channelId: 'admin',
+    }));
+
+    // Send in batches (Expo allows up to 100 per request)
+    const batchSize = 100;
+    let sentCount = 0;
+
+    for (let i = 0; i < messages.length; i += batchSize) {
+      const batch = messages.slice(i, i + batchSize);
+
+      const response = await fetch(EXPO_PUSH_URL, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(batch),
+      });
+
+      const result = await response.json();
+
+      if (result.data) {
+        sentCount += result.data.filter((r: any) => r.status === 'ok').length;
+      }
+    }
+
+    console.log(`[TierEvaluation] Sent ${sentCount}/${adminTokens.length} admin notifications`);
+    return sentCount;
+
+  } catch (err) {
+    console.error('[TierEvaluation] Error notifying admins:', err);
+    return 0;
+  }
+}
+
+/**
+ * Call SQL function to create in-app notifications for admins
+ */
+async function createAdminInAppNotification(
+  supabase: any,
+  functionName: string,
+  params: Record<string, unknown>
+): Promise<void> {
+  try {
+    const { error } = await supabase.rpc(functionName, params);
+
+    if (error) {
+      console.error(`[TierEvaluation] Error calling ${functionName}:`, error);
+    } else {
+      console.log(`[TierEvaluation] In-app notification created via ${functionName}`);
+    }
+  } catch (err) {
+    console.error(`[TierEvaluation] Error in createAdminInAppNotification:`, err);
+  }
+}
 
 /**
  * Generate unique referral code
