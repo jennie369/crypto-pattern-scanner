@@ -308,6 +308,79 @@ export default function LessonEditor() {
   const [newModuleTitle, setNewModuleTitle] = useState('');
   const [isCreatingModule, setIsCreatingModule] = useState(false);
 
+  // ═══════════════════════════════════════════════════════════════════
+  // SANITIZE HTML FOR EDITOR DISPLAY
+  // Removes/modifies problematic CSS that doesn't work in containers
+  // ═══════════════════════════════════════════════════════════════════
+  const sanitizeHtmlForEditor = useCallback((html) => {
+    if (!html || typeof html !== 'string') return html;
+
+    // If no <style> tags, return as-is
+    if (!html.includes('<style')) return html;
+
+    try {
+      // Parse HTML
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+
+      // Remove decorative elements that cause layout issues
+      const decorativeSelectors = [
+        '.background-container', '.bg-container', '.bg-layer', '.bg-layer-base',
+        '.orb', '.orb-1', '.orb-2', '.orb-3',
+        '[class*="orb-"]', '[class*="glow-"]', '[class*="blob-"]'
+      ];
+      decorativeSelectors.forEach(selector => {
+        try {
+          doc.querySelectorAll(selector).forEach(el => el.remove());
+        } catch (e) {
+          // Skip invalid selectors
+        }
+      });
+
+      // Sanitize CSS in <style> tags
+      const styleTags = doc.querySelectorAll('style');
+      styleTags.forEach(styleTag => {
+        let cssText = styleTag.textContent || '';
+
+        // Skip decorative element rules
+        const skipPatterns = [
+          /\.background-container[^{]*\{[^}]*\}/gi,
+          /\.bg-container[^{]*\{[^}]*\}/gi,
+          /\.bg-layer[^{]*\{[^}]*\}/gi,
+          /\.orb[^{]*\{[^}]*\}/gi,
+          /\[class\*="orb-"\][^{]*\{[^}]*\}/gi,
+          /\[class\*="glow-"\][^{]*\{[^}]*\}/gi,
+          /\[class\*="blob-"\][^{]*\{[^}]*\}/gi,
+        ];
+        skipPatterns.forEach(pattern => {
+          cssText = cssText.replace(pattern, '');
+        });
+
+        // Sanitize problematic CSS properties
+        cssText = cssText
+          .replace(/position\s*:\s*fixed/gi, 'position: relative')
+          .replace(/inset\s*:\s*0/gi, '')
+          .replace(/z-index\s*:\s*-\d+/gi, 'z-index: 1')
+          .replace(/min-height\s*:\s*100vh/gi, 'min-height: auto')
+          .replace(/height\s*:\s*100vh/gi, 'height: auto')
+          .replace(/backdrop-filter\s*:[^;]+;?/gi, '')
+          .replace(/-webkit-backdrop-filter\s*:[^;]+;?/gi, '');
+
+        styleTag.textContent = cssText;
+      });
+
+      // Get body content if full HTML document
+      const body = doc.body;
+      if (body) {
+        return body.innerHTML;
+      }
+      return html;
+    } catch (err) {
+      console.error('[LessonEditor] Error sanitizing HTML:', err);
+      return html;
+    }
+  }, []);
+
   // Fetch lesson for editing
   const fetchLesson = useCallback(async () => {
     if (!isEditing) {
@@ -336,13 +409,16 @@ export default function LessonEditor() {
       }
 
       // Map from DB field names - check ALL possible content columns
-      const htmlContent =
+      const rawHtmlContent =
         lesson.content ||
         lesson.content_html ||
         lesson.html_content ||
         lesson.article_content ||
         lesson.parsed_content ||
         '';
+
+      // Sanitize HTML for editor display (fix position:fixed, orbs, etc.)
+      const htmlContent = sanitizeHtmlForEditor(rawHtmlContent);
 
       setFormData({
         title: lesson.title || '',
@@ -364,7 +440,7 @@ export default function LessonEditor() {
     } finally {
       setIsLoading(false);
     }
-  }, [courseId, moduleId, lessonId, isEditing]);
+  }, [courseId, moduleId, lessonId, isEditing, sanitizeHtmlForEditor]);
 
   useEffect(() => {
     fetchLesson();

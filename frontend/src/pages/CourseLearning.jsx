@@ -518,11 +518,32 @@ export default function CourseLearning() {
         let inlineStyles = '';
 
         // Helper function to scope ALL CSS selectors to .article-html-content
+        // Also sanitizes problematic CSS properties that don't work in containers
         const scopeCSS = (cssText) => {
           if (!cssText) return '';
 
           // Remove comments first
           let css = cssText.replace(/\/\*[\s\S]*?\*\//g, '');
+
+          // Helper function to sanitize CSS properties
+          // Removes/modifies properties that cause layout issues in containers
+          const sanitizeProperties = (props) => {
+            return props
+              // Remove position: fixed (causes elements to escape container)
+              .replace(/position\s*:\s*fixed\s*;?/gi, 'position: relative;')
+              // Remove inset: 0 (causes full-screen overlays)
+              .replace(/inset\s*:\s*0\s*;?/gi, '')
+              // Remove negative z-index (hides elements behind container)
+              .replace(/z-index\s*:\s*-\d+\s*;?/gi, 'z-index: 1;')
+              // Remove 100vh heights (don't work in containers)
+              .replace(/min-height\s*:\s*100vh\s*;?/gi, 'min-height: auto;')
+              .replace(/height\s*:\s*100vh\s*;?/gi, 'height: auto;')
+              // Remove backdrop-filter (can cause rendering issues)
+              .replace(/backdrop-filter\s*:[^;]+;?/gi, '')
+              .replace(/-webkit-backdrop-filter\s*:[^;]+;?/gi, '')
+              // Remove overflow: hidden on containers (clips content)
+              .replace(/overflow\s*:\s*hidden\s*;?/gi, 'overflow: visible;');
+          };
 
           // Split by rules (find each selector { ... } block)
           const scopedRules = [];
@@ -531,7 +552,7 @@ export default function CourseLearning() {
 
           while ((match = ruleRegex.exec(css)) !== null) {
             let selector = match[1].trim();
-            const properties = match[2];
+            let properties = match[2];
 
             // Skip @rules (media queries, keyframes, etc.) - they need special handling
             if (selector.startsWith('@')) {
@@ -547,6 +568,20 @@ export default function CourseLearning() {
 
             // Handle closing braces for @rules
             if (selector === '') continue;
+
+            // Skip decorative elements entirely (orbs, glow effects, backgrounds)
+            const skipSelectors = [
+              '.background-container', '.bg-container', '.bg-layer',
+              '.orb', '.orb-1', '.orb-2', '.orb-3',
+              '[class*="orb-"]', '[class*="glow-"]', '[class*="blob-"]'
+            ];
+            const shouldSkip = skipSelectors.some(skip =>
+              selector.includes(skip.replace('[class*="', '.').replace('"]', ''))
+            );
+            if (shouldSkip) continue;
+
+            // Sanitize CSS properties
+            properties = sanitizeProperties(properties);
 
             // Scope each selector in a comma-separated list
             const scopedSelectors = selector.split(',').map(sel => {
@@ -572,7 +607,7 @@ export default function CourseLearning() {
               return `.article-html-content ${sel}`;
             }).filter(Boolean).join(', ');
 
-            if (scopedSelectors) {
+            if (scopedSelectors && properties.trim()) {
               scopedRules.push(`${scopedSelectors} { ${properties} }`);
             }
           }
