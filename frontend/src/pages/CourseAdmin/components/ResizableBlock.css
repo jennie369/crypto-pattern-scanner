@@ -3,6 +3,149 @@
  * Draggable resizable block wrapper for lesson editor
  */
 
+/* ═══════════════════════════════════════════════════════════
+   FIX LAYOUT SHIFT - CRITICAL RULES
+   These styles prevent layout shift when selecting/resizing blocks
+   ═══════════════════════════════════════════════════════════ */
+
+/* Resize handles wrapper - ALWAYS present in DOM, visibility controlled */
+.resize-handles-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  /* Don't capture events unless selected */
+  pointer-events: none;
+
+  /* Hidden by default via opacity (maintains DOM structure) */
+  opacity: 0;
+
+  /* Smooth transition */
+  transition: opacity 0.15s ease;
+}
+
+.draggable-block-item.selected .resize-handles-wrapper {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+/* Resize toolbar container - positioned outside block flow */
+.resize-toolbar-container {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 100;
+
+  /* Transform for positioning without affecting layout */
+  transform: translateY(5px);
+
+  /* Hidden by default */
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+
+  /* Smooth appearance */
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+.draggable-block-item.selected .resize-toolbar-container {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DRAGGABLE BLOCK ITEM - Base styles & Selection
+   CRITICAL: Use outline instead of box-shadow to prevent reflow
+   ═══════════════════════════════════════════════════════════ */
+
+/* Base block item - no selection styling */
+.draggable-block-item {
+  position: relative;
+  box-sizing: border-box;
+  /* GPU acceleration - creates isolated layer */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  /* Hint to browser what will change (NOT layout properties) */
+  will-change: outline-color, background-color;
+  /* CRITICAL: Use outline for selection - it doesn't cause reflow */
+  outline: 2px solid transparent;
+  outline-offset: -2px;
+  /* Smooth transitions for visual-only properties */
+  transition: outline-color 0.15s ease, background-color 0.15s ease;
+}
+
+/* Selected state - ONLY use outline, NO box-shadow, NO margin/padding changes */
+.draggable-block-item.selected {
+  outline-color: #FFBD59 !important;
+  background-color: rgba(255, 189, 89, 0.03) !important;
+  /* Force outline to show */
+  outline-style: solid !important;
+  outline-width: 2px !important;
+}
+
+/* Dragging state */
+.draggable-block-item.is-dragging {
+  opacity: 0.5;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PERFORMANCE: Disable transitions during drag operations
+   This prevents lag and jank when dragging blocks
+   ═══════════════════════════════════════════════════════════ */
+
+/* When ANY block is being dragged, disable transitions on all blocks */
+.blocks-list.is-dragging .draggable-block-item,
+.blocks-list.is-dragging .draggable-block-item *,
+.draggable-block-editor.is-dragging .draggable-block-item,
+.draggable-block-editor.is-dragging .draggable-block-item * {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Disable hover effects during drag */
+.blocks-list.is-dragging .draggable-block-item:hover,
+.draggable-block-editor.is-dragging .draggable-block-item:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FIX LAYOUT SHIFT - Override global focus styles
+   ═══════════════════════════════════════════════════════════ */
+
+/* Prevent ALL focus-related layout shifts in block content */
+.block-html-content,
+.block-html-content *,
+.block-content-wrapper,
+.block-content-wrapper *,
+.draggable-block-item,
+.draggable-block-item * {
+  outline-offset: 0 !important;
+}
+
+.block-html-content:focus,
+.block-html-content:focus-visible,
+.block-html-content:focus-within,
+.block-html-content *:focus,
+.block-html-content *:focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Ensure no border/margin/padding changes on focus */
+.block-html-content *:focus {
+  margin: inherit !important;
+  padding: inherit !important;
+}
+
+/* ═══════════════════════════════════════════════════════════ */
+
 .resizable-block {
   position: relative;
   display: inline-block;

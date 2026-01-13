@@ -252,6 +252,67 @@
   animation-iteration-count: 1 !important;
 }
 
+/* ═══ FIX POSITION FIXED - Convert to relative in phone preview ═══ */
+.phone-content [style*="position: fixed"],
+.phone-content [style*="position:fixed"] {
+  position: relative !important;
+  inset: auto !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: auto !important;
+  height: auto !important;
+  z-index: auto !important;
+}
+
+/* ═══ FIX BACKGROUND CONTAINERS ═══ */
+.phone-content .background-container,
+.phone-content .bg-container,
+.phone-content .bg-layer,
+.phone-content .bg-layer-base,
+.phone-content [class*="background-"],
+.phone-content [class*="bg-layer"] {
+  display: none !important;
+}
+
+/* ═══ FIX ORB/GLOW DECORATIONS ═══ */
+.phone-content .orb,
+.phone-content [class*="orb-"],
+.phone-content [class*="glow-"],
+.phone-content [class*="blob-"] {
+  display: none !important;
+}
+
+/* ═══ FIX INSET AND Z-INDEX ═══ */
+.phone-content [style*="inset: 0"],
+.phone-content [style*="inset:0"] {
+  position: relative !important;
+  inset: auto !important;
+}
+
+.phone-content [style*="z-index: -"],
+.phone-content [style*="z-index:-"] {
+  z-index: auto !important;
+}
+
+/* ═══ FIX 100VH HEIGHTS ═══ */
+.phone-content [style*="min-height: 100vh"],
+.phone-content [style*="min-height:100vh"],
+.phone-content [style*="height: 100vh"],
+.phone-content [style*="height:100vh"] {
+  min-height: auto !important;
+  height: auto !important;
+}
+
+/* ═══ FIX OVERFLOW HIDDEN ═══ */
+.phone-content section,
+.phone-content [class*="section"],
+.phone-content [class*="container"],
+.phone-content [class*="wrapper"] {
+  overflow: visible !important;
+}
+
 .phone-content::-webkit-scrollbar {
   width: 4px;
 }

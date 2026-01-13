@@ -303,7 +303,7 @@ console.log(example);</code></pre>`,
         label: 'Image Placeholder',
         icon: Image,
         description: 'Vị trí cho hình ảnh - sẽ được thay thế hoàn toàn',
-        html: `<div class="image-placeholder" style="margin-top: 16px; margin-left: auto; margin-right: auto; margin-bottom: 40px; padding: 1.5rem 1rem; width: 100%; max-width: 800px; background: rgba(255,255,255,0.02); border: 2px dashed rgba(255,255,255,0.15); border-radius: 12px; text-align: center; min-height: 80px; box-sizing: border-box; display: block;">
+        html: `<div class="image-placeholder" style="margin: 1rem auto; padding: 1.5rem 1rem; width: 100%; max-width: 800px; background: rgba(255,255,255,0.02); border: 2px dashed rgba(255,255,255,0.15); border-radius: 12px; text-align: center; min-height: 80px; box-sizing: border-box;">
   <span style="font-size: 2rem; opacity: 0.3; display: block; margin-bottom: 8px;">🖼️</span>
   <p style="margin: 0; color: rgba(255,255,255,0.3); font-size: 13px;">Kéo thả hình ảnh vào đây</p>
 </div>`,

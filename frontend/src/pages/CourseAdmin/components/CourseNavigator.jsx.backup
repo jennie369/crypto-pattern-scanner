@@ -21,7 +21,6 @@ import {
   PlayCircle,
   PanelLeft,
   PanelLeftClose,
-  Trash2,
 } from 'lucide-react';
 import { courseService } from '../../../services/courseService';
 import { lessonService } from '../../../services/lessonService';
@@ -414,66 +413,6 @@ export default function CourseNavigator({
     setDragInsertPosition(null);
   };
 
-  // =======================
-  // DELETE HANDLERS
-  // =======================
-  const handleDeleteModule = async (moduleId, moduleTitle) => {
-    if (!window.confirm(`Bạn có chắc muốn xóa chương "${moduleTitle}"?\n\nTất cả bài học trong chương này cũng sẽ bị xóa.`)) {
-      return;
-    }
-
-    try {
-      const result = await courseService.deleteModule(moduleId);
-      if (result.success) {
-        // Update local state
-        setCourseDetail(prev => ({
-          ...prev,
-          modules: prev.modules.filter(m => m.id !== moduleId)
-        }));
-        showMessage('success', 'Đã xóa chương');
-        onDataChange?.();
-      } else {
-        showMessage('error', result.error || 'Không thể xóa chương');
-      }
-    } catch (err) {
-      console.error('[CourseNavigator] Error deleting module:', err);
-      showMessage('error', 'Lỗi khi xóa chương');
-    }
-  };
-
-  const handleDeleteLesson = async (lessonId, lessonTitle, moduleId) => {
-    if (!window.confirm(`Bạn có chắc muốn xóa bài học "${lessonTitle}"?`)) {
-      return;
-    }
-
-    try {
-      const result = await lessonService.deleteLesson(lessonId);
-      if (result.success) {
-        // Update local state
-        setCourseDetail(prev => ({
-          ...prev,
-          modules: prev.modules.map(m =>
-            m.id === moduleId
-              ? { ...m, lessons: m.lessons.filter(l => l.id !== lessonId) }
-              : m
-          )
-        }));
-        showMessage('success', 'Đã xóa bài học');
-        onDataChange?.();
-
-        // If deleting current lesson, navigate to module page
-        if (lessonId === currentLessonId) {
-          navigate(`/courses/admin/edit/${currentCourseId}/modules`);
-        }
-      } else {
-        showMessage('error', result.error || 'Không thể xóa bài học');
-      }
-    } catch (err) {
-      console.error('[CourseNavigator] Error deleting lesson:', err);
-      showMessage('error', 'Lỗi khi xóa bài học');
-    }
-  };
-
   // Filter courses by search term
   const filteredCourses = courses.filter(course =>
     course.title?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -521,18 +460,6 @@ export default function CourseNavigator({
         <span className="module-number">{modIndex + 1}</span>
         <span className="module-title">{mod.title}</span>
         <span className="lesson-count">{mod.lessons?.length || 0}</span>
-        {mode === 'full' && (
-          <button
-            className="btn-delete-item"
-            title="Xóa chương"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDeleteModule(mod.id, mod.title);
-            }}
-          >
-            <Trash2 size={12} />
-          </button>
-        )}
       </div>
 
       {/* Lessons */}
@@ -575,18 +502,6 @@ export default function CourseNavigator({
               )}
               <span className="lesson-number">{modIndex + 1}.{lessonIndex + 1}</span>
               <span className="lesson-title">{lesson.title}</span>
-              {mode === 'full' && (
-                <button
-                  className="btn-delete-item"
-                  title="Xóa bài học"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteLesson(lesson.id, lesson.title, mod.id);
-                  }}
-                >
-                  <Trash2 size={10} />
-                </button>
-              )}
             </div>
           ))}
 

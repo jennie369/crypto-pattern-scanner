@@ -577,6 +577,73 @@
   /* Styles only affect inside this container */
 }
 
+/* ═══ FIX POSITION FIXED - Convert to relative in course viewer ═══ */
+/* position:fixed elements escape the content container */
+.article-html-content [style*="position: fixed"],
+.article-html-content [style*="position:fixed"] {
+  position: relative !important;
+  inset: auto !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: auto !important;
+  height: auto !important;
+  z-index: auto !important;
+}
+
+/* ═══ FIX BACKGROUND CONTAINERS - Common in landing pages ═══ */
+/* Hide decorative backgrounds that use fixed positioning */
+.article-html-content .background-container,
+.article-html-content .bg-container,
+.article-html-content .bg-layer,
+.article-html-content .bg-layer-base,
+.article-html-content [class*="background-"],
+.article-html-content [class*="bg-layer"] {
+  display: none !important;
+}
+
+/* ═══ FIX ORB/GLOW DECORATIONS - Hide large blur decorations ═══ */
+.article-html-content .orb,
+.article-html-content .orb-1,
+.article-html-content .orb-2,
+.article-html-content .orb-3,
+.article-html-content [class*="orb-"],
+.article-html-content [class*="glow-"],
+.article-html-content [class*="blob-"] {
+  display: none !important;
+}
+
+/* ═══ FIX INSET PROPERTY - Causes full-screen overlays ═══ */
+.article-html-content [style*="inset: 0"],
+.article-html-content [style*="inset:0"] {
+  position: relative !important;
+  inset: auto !important;
+}
+
+/* ═══ FIX NEGATIVE Z-INDEX - Makes content invisible ═══ */
+.article-html-content [style*="z-index: -"],
+.article-html-content [style*="z-index:-"] {
+  z-index: auto !important;
+}
+
+/* ═══ FIX 100VH HEIGHTS - Don't work inside container ═══ */
+.article-html-content [style*="min-height: 100vh"],
+.article-html-content [style*="min-height:100vh"],
+.article-html-content [style*="height: 100vh"],
+.article-html-content [style*="height:100vh"] {
+  min-height: auto !important;
+  height: auto !important;
+}
+
+/* ═══ FIX OVERFLOW HIDDEN - Clips content ═══ */
+.article-html-content section,
+.article-html-content [class*="section"],
+.article-html-content [class*="container"],
+.article-html-content [class*="wrapper"] {
+  overflow: visible !important;
+}
+
 .article-html {
   color: var(--text-primary, #FFFFFF);
   line-height: 1.8;

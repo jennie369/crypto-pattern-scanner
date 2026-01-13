@@ -345,6 +345,91 @@
 
 .article-html-block {
   margin: 24px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ═══ FIX POSITION FIXED - Convert to relative ═══ */
+.article-html-block [style*="position: fixed"],
+.article-html-block [style*="position:fixed"],
+.article-html [style*="position: fixed"],
+.article-html [style*="position:fixed"] {
+  position: relative !important;
+  inset: auto !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: auto !important;
+  height: auto !important;
+  z-index: auto !important;
+}
+
+/* ═══ FIX BACKGROUND CONTAINERS ═══ */
+.article-html-block .background-container,
+.article-html-block .bg-container,
+.article-html-block .bg-layer,
+.article-html-block .bg-layer-base,
+.article-html-block [class*="background-"],
+.article-html-block [class*="bg-layer"],
+.article-html .background-container,
+.article-html .bg-container,
+.article-html [class*="background-"],
+.article-html [class*="bg-layer"] {
+  display: none !important;
+}
+
+/* ═══ FIX ORB/GLOW DECORATIONS ═══ */
+.article-html-block .orb,
+.article-html-block [class*="orb-"],
+.article-html-block [class*="glow-"],
+.article-html-block [class*="blob-"],
+.article-html .orb,
+.article-html [class*="orb-"],
+.article-html [class*="glow-"],
+.article-html [class*="blob-"] {
+  display: none !important;
+}
+
+/* ═══ FIX INSET AND Z-INDEX ═══ */
+.article-html-block [style*="inset: 0"],
+.article-html-block [style*="inset:0"],
+.article-html [style*="inset: 0"],
+.article-html [style*="inset:0"] {
+  position: relative !important;
+  inset: auto !important;
+}
+
+.article-html-block [style*="z-index: -"],
+.article-html-block [style*="z-index:-"],
+.article-html [style*="z-index: -"],
+.article-html [style*="z-index:-"] {
+  z-index: auto !important;
+}
+
+/* ═══ FIX 100VH HEIGHTS ═══ */
+.article-html-block [style*="min-height: 100vh"],
+.article-html-block [style*="min-height:100vh"],
+.article-html-block [style*="height: 100vh"],
+.article-html-block [style*="height:100vh"],
+.article-html [style*="min-height: 100vh"],
+.article-html [style*="min-height:100vh"],
+.article-html [style*="height: 100vh"],
+.article-html [style*="height:100vh"] {
+  min-height: auto !important;
+  height: auto !important;
+}
+
+/* ═══ FIX OVERFLOW HIDDEN ═══ */
+.article-html-block section,
+.article-html-block [class*="section"],
+.article-html-block [class*="container"],
+.article-html-block [class*="wrapper"],
+.article-html section,
+.article-html [class*="section"],
+.article-html [class*="container"],
+.article-html [class*="wrapper"] {
+  overflow: visible !important;
 }
 
 /* ============================================

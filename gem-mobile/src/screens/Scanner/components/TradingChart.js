@@ -319,7 +319,21 @@ const TradingChart = ({
 
     const injectZones = () => {
       if (zones.length > 0) {
-        console.log('[TradingChart] Injecting zones:', zones.length, 'First zone:', JSON.stringify(zones[0], null, 2));
+        // 🔴 DEBUG: Log ALL zone data being injected (including entry/sl/tp)
+        console.log('[TradingChart] 🔴 Injecting zones:', zones.length);
+        zones.forEach((z, i) => {
+          console.log(`[TradingChart] 🔴 ZONE[${i}]:`, {
+            pattern_type: z.pattern_type,
+            direction: z.direction,
+            entry_price: z.entry_price,
+            stop_price: z.stop_price,
+            target_1: z.target_1,
+            zone_high: z.zone_high,
+            zone_low: z.zone_low,
+            start_time: z.start_time,
+            end_time: z.end_time,
+          });
+        });
         webViewRef.current?.injectJavaScript(`
           if (window.updateZones) {
             console.log('[Chart] Received zones:', ${JSON.stringify(zones)}.length);
@@ -463,6 +477,18 @@ const TradingChart = ({
       // Debug logs from WebView
       if (data.type === 'debug_log') {
         console.log('[WebView]', data.message, data.data);
+        return;
+      }
+
+      // 🔴 Zone position debug from WebView
+      if (data.type === 'zone_position_debug') {
+        console.log(`[WebView] 🔴 ZONE[${data.index}] X-POSITION:`, {
+          startTime: data.input_startTime,
+          startTime_date: data.startTime_date,
+          startX_pixels: data.output_startX,
+          startX_is_null: data.startX_is_null,
+          startX_is_NaN: data.startX_is_NaN,
+        });
         return;
       }
 
@@ -817,6 +843,8 @@ const TradingChart = ({
           width: container.clientWidth,
           height: container.clientHeight,
         });
+        // Resize zone canvas to match
+        resizeZoneCanvas();
       });
     }
 
@@ -944,6 +972,12 @@ const TradingChart = ({
             });
 
             console.log('Initial chart setup: rightWhitespace =', defaultRightWhitespace);
+          }
+
+          // ✅ Canvas-based zones auto-update via requestAnimationFrame loop
+          // No manual repositioning needed - zones will redraw on next frame
+          if (activeZones && activeZones.length > 0) {
+            console.log('[Chart] ✅ Zones will auto-update on canvas (', activeZones.length, 'zones)');
           }
         }, 100);
 
@@ -1335,6 +1369,12 @@ const TradingChart = ({
       }
 
       debugLog('=== TIMEFRAME CHANGE COMPLETE ===', { interval });
+
+      // 🔴 CRITICAL: Reposition zones after timeframe change
+      if (typeof updateAllZonePositions === 'function') {
+        console.log('[Chart] Repositioning zones after timeframe change');
+        setTimeout(() => updateAllZonePositions(), 50);
+      }
 
       // Hide loading
       document.getElementById('loading').style.display = 'none';
@@ -1908,280 +1948,282 @@ const TradingChart = ({
     };
 
     // ==========================================
-    // ZONE VISUALIZATION - FILLED RECTANGLES
-    // Like Swift Algo: filled zones that move with chart
+    // ZONE VISUALIZATION - CANVAS-BASED (STICKY WITH CHART)
+    // Zones are drawn on canvas and move with chart pan/scroll
     // ==========================================
-    let zoneElements = [];  // Store zone DOM elements
-    let zoneData = [];      // Store zone data for position updates
-    let zoneContainer = null;
-    let positionUpdateSetup = false;
+    let activeZones = [];        // Store zone data
+    let zoneCanvas = null;       // Canvas overlay for zones
+    let zoneCtx = null;          // Canvas 2D context
+    let zoneAnimationId = null;  // Animation frame ID
 
-    // Create zone container
-    function createZoneContainer() {
-      if (zoneContainer) return;
-      zoneContainer = document.createElement('div');
-      zoneContainer.id = 'zone-container';
-      zoneContainer.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:5;overflow:hidden;';
+    // Create zone canvas overlay
+    function createZoneCanvas() {
+      if (zoneCanvas) return;
+
       const chartEl = document.getElementById('chart-container');
-      if (chartEl) chartEl.appendChild(zoneContainer);
+      if (!chartEl) return;
+
+      zoneCanvas = document.createElement('canvas');
+      zoneCanvas.id = 'zone-canvas';
+      zoneCanvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:3;';
+
+      // Get chart dimensions
+      const rect = chartEl.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      zoneCanvas.width = rect.width * dpr;
+      zoneCanvas.height = rect.height * dpr;
+      zoneCanvas.style.width = rect.width + 'px';
+      zoneCanvas.style.height = rect.height + 'px';
+
+      zoneCtx = zoneCanvas.getContext('2d');
+      zoneCtx.scale(dpr, dpr);
+
+      chartEl.appendChild(zoneCanvas);
+      console.log('[Zone] Canvas created:', rect.width, 'x', rect.height);
     }
 
-    // Render a single filled zone rectangle
-    function renderFilledZone(zone, index) {
-      console.log('[Zone.render] Starting zone', index, zone);
+    // Resize zone canvas when chart resizes
+    function resizeZoneCanvas() {
+      if (!zoneCanvas) return;
 
-      if (!chart || !candleSeries) {
-        console.log('[Zone.render] ERROR: chart or candleSeries not ready');
-        return null;
-      }
-      if (!zoneContainer) {
-        console.log('[Zone.render] Creating zone container...');
-        createZoneContainer();
-      }
+      const chartEl = document.getElementById('chart-container');
+      if (!chartEl) return;
 
-      const zoneType = zone.type || zone.zone_type || 'LFZ';
-      const isLong = zoneType === 'LFZ';
-      const high = parseFloat(zone.zone_high || zone.zoneHigh || zone.high);
-      const low = parseFloat(zone.zone_low || zone.zoneLow || zone.low);
+      const rect = chartEl.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      zoneCanvas.width = rect.width * dpr;
+      zoneCanvas.height = rect.height * dpr;
+      zoneCanvas.style.width = rect.width + 'px';
+      zoneCanvas.style.height = rect.height + 'px';
 
-      // Get start_time and end_time for X positioning (timestamp in ms or seconds)
-      let startTime = zone.start_time || zone.startTime || zone.formation_time || zone.time;
-      let endTime = zone.end_time || zone.endTime || null;
-
-      // Convert ms to seconds if needed (Lightweight Charts uses seconds)
-      if (startTime && startTime > 9999999999) {
-        startTime = Math.floor(startTime / 1000);
-      }
-      if (endTime && endTime > 9999999999) {
-        endTime = Math.floor(endTime / 1000);
-      }
-
-      console.log('[Zone.render] Zone', index, ': type=' + zoneType + ' high=' + high + ' low=' + low + ' startTime=' + startTime + ' endTime=' + endTime);
-
-      if (!high || !low || isNaN(high) || isNaN(low)) {
-        console.log('[Zone.render] ERROR: Invalid zone prices');
-        return null;
-      }
-
-      // Colors like Swift Algo
-      const fillColor = isLong
-        ? 'rgba(14, 203, 129, 0.25)'   // Green/teal for Buy zones
-        : 'rgba(139, 69, 89, 0.35)';   // Dark red/maroon for Sell zones
-      const borderColor = isLong ? '#0ECB81' : '#8B4559';
-      const labelBg = isLong ? '#0ECB81' : '#F6465D';
-      const labelText = isLong ? 'Buy' : 'Sell';
-
-      // Create zone element - initially hidden until positioned
-      const el = document.createElement('div');
-      el.className = 'zone-rect';
-      el.style.cssText = 'position:absolute;display:none;' +
-        'background:' + fillColor + ';' +
-        'border-top:2px solid ' + borderColor + ';' +
-        'border-bottom:2px solid ' + borderColor + ';' +
-        'border-left:2px solid ' + borderColor + ';' +
-        'border-right:2px solid ' + borderColor + ';' +
-        'border-radius:4px;' +
-        'transition:opacity 0.2s;cursor:pointer;pointer-events:auto;';
-
-      // Add label (positioned inside the zone)
-      const label = document.createElement('div');
-      label.style.cssText = 'position:absolute;' + (isLong ? 'bottom' : 'top') + ':4px;left:8px;' +
-        'background:' + labelBg + ';color:#fff;font-size:10px;font-weight:bold;' +
-        'padding:2px 6px;border-radius:3px;white-space:nowrap;';
-      label.textContent = labelText + ' Zone';
-      el.appendChild(label);
-
-      // Create tooltip element (hidden by default)
-      const tooltip = document.createElement('div');
-      tooltip.className = 'zone-tooltip';
-      tooltip.style.cssText = 'display:none;position:absolute;top:-80px;left:50%;transform:translateX(-50%);' +
-        'background:rgba(20,20,30,0.95);border:1px solid ' + borderColor + ';border-radius:8px;' +
-        'padding:10px 14px;color:#fff;font-size:11px;z-index:100;min-width:140px;' +
-        'box-shadow:0 4px 12px rgba(0,0,0,0.4);';
-
-      const patternName = zone.pattern_type || zone.patternType || zone.name || 'Pattern';
-      const grade = zone.pattern_grade || zone.grade || 'N/A';
-      const confidence = zone.pattern_confidence || zone.confidence || zone.odds_score || 'N/A';
-      tooltip.innerHTML = '<div style="font-weight:bold;margin-bottom:6px;color:' + labelBg + ';">' + patternName + '</div>' +
-        '<div style="display:flex;justify-content:space-between;gap:12px;">' +
-        '<span style="color:#888;">Grade:</span><span style="font-weight:600;">' + grade + '</span></div>' +
-        '<div style="display:flex;justify-content:space-between;gap:12px;">' +
-        '<span style="color:#888;">Confidence:</span><span style="font-weight:600;">' + confidence + '%</span></div>' +
-        '<div style="display:flex;justify-content:space-between;gap:12px;">' +
-        '<span style="color:#888;">High:</span><span style="font-weight:600;">' + high.toFixed(2) + '</span></div>' +
-        '<div style="display:flex;justify-content:space-between;gap:12px;">' +
-        '<span style="color:#888;">Low:</span><span style="font-weight:600;">' + low.toFixed(2) + '</span></div>';
-      el.appendChild(tooltip);
-
-      // Show/hide tooltip on tap
-      el.addEventListener('click', function(e) {
-        e.stopPropagation();
-        const isVisible = tooltip.style.display === 'block';
-        // Hide all other tooltips first
-        document.querySelectorAll('.zone-tooltip').forEach(t => t.style.display = 'none');
-        tooltip.style.display = isVisible ? 'none' : 'block';
-      });
-
-      zoneContainer.appendChild(el);
-      console.log('[Zone.render] Element added to container');
-
-      // Store for position updates - include BOTH startTime and endTime for X positioning & width
-      const zoneInfo = { el, high, low, zone, index, startTime, endTime, tooltip };
-      zoneElements.push(zoneInfo);
-      zoneData.push(zoneInfo);
-
-      // Initial position update
-      updateZonePosition(zoneInfo);
-
-      console.log('[Zone.render] ✅ Zone', index, 'created successfully! Container children:', zoneContainer.childNodes.length);
-      return el;
+      zoneCtx = zoneCanvas.getContext('2d');
+      zoneCtx.scale(dpr, dpr);
     }
 
-    // Update single zone position based on price scale and time scale
-    function updateZonePosition(zoneInfo) {
-      if (!candleSeries || !chart) {
-        console.log('[Zone.position] No candleSeries or chart');
-        return;
-      }
+    // Draw all zones on canvas - called every frame
+    // ✅ UPDATED: Renders separate SL/Entry/TP zones with proper colors
+    function drawZonesOnCanvas() {
+      if (!zoneCanvas || !zoneCtx || !chart || !candleSeries) return;
+      if (activeZones.length === 0) return;
 
-      // Y positioning (price)
-      const yTop = candleSeries.priceToCoordinate(zoneInfo.high);
-      const yBottom = candleSeries.priceToCoordinate(zoneInfo.low);
+      const chartEl = document.getElementById('chart-container');
+      if (!chartEl) return;
 
-      if (yTop === null || yBottom === null) {
-        zoneInfo.el.style.display = 'none';
-        return;
-      }
-
-      const top = Math.min(yTop, yBottom);
-      const height = Math.abs(yBottom - yTop);
-
-      // Only show if zone is visible (reasonable height)
-      if (height < 2 || height > 2000) {
-        zoneInfo.el.style.display = 'none';
-        return;
-      }
-
-      // X positioning (time) - use BOTH start_time AND end_time for accurate width
-      let left = 0;
-      let width = 100; // Default minimum width in pixels
-
+      const rect = chartEl.getBoundingClientRect();
       const timeScale = chart.timeScale();
-      const chartWidth = zoneContainer ? zoneContainer.clientWidth : 400;
-      const priceScaleWidth = 48; // Right price scale width
+      const priceScaleWidth = 55; // Right price scale width
 
-      if (zoneInfo.startTime && timeScale) {
-        // Convert start timestamp to X coordinate
-        const startX = timeScale.timeToCoordinate(zoneInfo.startTime);
+      // Clear canvas
+      zoneCtx.clearRect(0, 0, rect.width, rect.height);
 
-        if (startX !== null && !isNaN(startX)) {
-          // Position zone starting at pattern formation time
-          left = startX;
+      // Draw each zone with Entry/SL/TP
+      activeZones.forEach((zone, idx) => {
+        // 🔍 DEBUG: Log zone data (check all naming conventions)
+        console.log('🔴 [DRAW] Zone[' + idx + ']:', {
+          pattern_type: zone.pattern_type || zone.patternType,
+          direction: zone.direction,
+          entry_price: zone.entry_price,
+          entryPrice: zone.entryPrice,
+          entry: zone.entry,
+          stop_loss: zone.stop_loss,
+          stop_price: zone.stop_price,
+          take_profit: zone.take_profit,
+          target_1: zone.target_1,
+          zone_high: zone.zone_high,
+          zone_low: zone.zone_low
+        });
 
-          // ⚠️ CRITICAL: Calculate width from end_time if available
-          if (zoneInfo.endTime) {
-            const endX = timeScale.timeToCoordinate(zoneInfo.endTime);
-            if (endX !== null && !isNaN(endX)) {
-              // Width is the distance between start and end candles
-              width = Math.max(endX - startX, 50); // Min 50px
-            } else {
-              // end_time exists but coordinate failed - use fallback
-              const visibleRange = timeScale.getVisibleLogicalRange();
-              if (visibleRange) {
-                const barsVisible = visibleRange.to - visibleRange.from;
-                const pixelsPerBar = (chartWidth - priceScaleWidth) / barsVisible;
-                width = Math.max(pixelsPerBar * 10, 80); // ~10 candles fallback
-              }
-            }
-          } else {
-            // No end_time: use dynamic width based on visible candles (~10 candles)
-            const visibleRange = timeScale.getVisibleLogicalRange();
-            if (visibleRange) {
-              const barsVisible = visibleRange.to - visibleRange.from;
-              const pixelsPerBar = (chartWidth - priceScaleWidth) / barsVisible;
-              width = Math.max(pixelsPerBar * 10, 80);
-            }
-          }
+        // Get time values
+        let startTime = zone.start_time || zone.startTime || zone.formation_time;
+        let endTime = zone.end_time || zone.endTime;
 
-          // Clamp width - don't extend past price scale
-          const maxRight = chartWidth - priceScaleWidth;
-          if (left + width > maxRight) {
-            width = maxRight - left;
-          }
+        // Convert ms to seconds if needed
+        if (startTime && startTime > 9999999999) startTime = Math.floor(startTime / 1000);
+        if (endTime && endTime > 9999999999) endTime = Math.floor(endTime / 1000);
 
-          // If zone is completely off screen left, hide it
-          if (left + width < 0) {
-            zoneInfo.el.style.display = 'none';
-            return;
-          }
+        // Get X coordinates
+        const x1 = timeScale.timeToCoordinate(startTime);
+        const x2 = endTime ? timeScale.timeToCoordinate(endTime) : null;
 
-          // If zone starts off screen left, clip it
-          if (left < 0) {
-            width = width + left; // Reduce width by negative left amount
-            left = 0;
-          }
-        } else {
-          // Fallback: position from right side (recent pattern)
-          left = Math.max(chartWidth - priceScaleWidth - width, 0);
+        if (x1 === null) {
+          console.log('🔴 [DRAW] Zone[' + idx + '] - X coordinate null, skipping');
+          return;
         }
-      } else {
-        // No start_time: default to right side of chart (near current candles)
-        left = Math.max(chartWidth - priceScaleWidth - width, 0);
+
+        // Calculate zone width (limit max width)
+        let left = x1;
+        let right = x2 !== null ? x2 : (rect.width - priceScaleWidth);
+        let width = Math.min(right - left, 200); // Max 200px width
+        if (width < 30) width = 30; // Min 30px
+
+        // Clip to chart area
+        if (left + width > rect.width - priceScaleWidth) {
+          width = rect.width - priceScaleWidth - left;
+        }
+        if (left < 0) {
+          width = width + left;
+          left = 0;
+        }
+        if (width <= 0) return;
+
+        // Determine SHORT vs LONG based on pattern_type or direction
+        const patternType = zone.pattern_type || zone.patternType || '';
+        const shortPatterns = ['UPD', 'DPD', 'Double Top', 'Head and Shoulders', 'HFZ', 'Bearish'];
+        const isShort = zone.direction === 'BEARISH' ||
+                        zone.direction === 'SHORT' ||
+                        zone.direction === 'sell' ||
+                        shortPatterns.some(p => patternType.toUpperCase().includes(p.toUpperCase()));
+
+        // Get price levels (check multiple naming conventions)
+        const entryPrice = parseFloat(zone.entry_price || zone.entryPrice || zone.entry || zone.price_level || 0);
+        const stopLoss = parseFloat(zone.stop_loss || zone.stopLoss || zone.stop_price || zone.sl || 0);
+        const takeProfit = parseFloat(zone.take_profit || zone.takeProfit || zone.target_1 || zone.tp || 0);
+
+        console.log('🔴 [DRAW] Zone[' + idx + '] levels:', {
+          isShort,
+          entryPrice,
+          stopLoss,
+          takeProfit
+        });
+
+        // Skip if missing entry price
+        if (!entryPrice || entryPrice <= 0) {
+          // Fallback to old zone_high/zone_low rendering
+          const high = parseFloat(zone.zone_high || zone.zoneHigh || zone.high || 0);
+          const low = parseFloat(zone.zone_low || zone.zoneLow || zone.low || 0);
+          if (high > 0 && low > 0) {
+            const y1 = candleSeries.priceToCoordinate(high);
+            const y2 = candleSeries.priceToCoordinate(low);
+            if (y1 !== null && y2 !== null) {
+              const top = Math.min(y1, y2);
+              const height = Math.abs(y2 - y1);
+              zoneCtx.fillStyle = isShort
+                ? 'rgba(220, 53, 69, 0.30)'
+                : 'rgba(14, 203, 129, 0.30)';
+              zoneCtx.fillRect(left, top, width, Math.max(height, 5));
+            }
+          }
+          return;
+        }
+
+        // Convert prices to Y coordinates
+        const entryY = candleSeries.priceToCoordinate(entryPrice);
+        const slY = stopLoss > 0 ? candleSeries.priceToCoordinate(stopLoss) : null;
+        const tpY = takeProfit > 0 ? candleSeries.priceToCoordinate(takeProfit) : null;
+
+        if (entryY === null) {
+          console.log('🔴 [DRAW] Zone[' + idx + '] - Entry Y null, skipping');
+          return;
+        }
+
+        // ========== DRAW ZONES ==========
+        const RED = 'rgba(220, 53, 69, 0.35)';
+        const GREEN = 'rgba(14, 203, 129, 0.35)';
+        const RED_SOLID = 'rgba(220, 53, 69, 0.8)';
+        const GREEN_SOLID = 'rgba(14, 203, 129, 0.8)';
+
+        if (isShort) {
+          // === SHORT/SELL Pattern ===
+          // SL above entry (RED), TP below entry (GREEN)
+
+          // 1. STOP LOSS Zone (RED - above entry)
+          if (slY !== null && slY < entryY) {
+            zoneCtx.fillStyle = RED;
+            const slTop = slY;
+            const slHeight = entryY - slY;
+            zoneCtx.fillRect(left, slTop, width, Math.max(slHeight, 3));
+
+            // SL Label
+            zoneCtx.fillStyle = 'rgba(220, 53, 69, 0.9)';
+            zoneCtx.font = '10px Arial';
+            zoneCtx.fillText('SL', left + 4, slTop + 12);
+          }
+
+          // 2. ENTRY LINE (Red solid line)
+          zoneCtx.fillStyle = RED_SOLID;
+          zoneCtx.fillRect(left, entryY - 2, width, 4);
+
+          // Entry Label
+          zoneCtx.fillStyle = '#ffffff';
+          zoneCtx.font = 'bold 11px Arial';
+          zoneCtx.fillText('Entry', left + 4, entryY - 6);
+
+          // 3. TAKE PROFIT Zone (GREEN - below entry)
+          if (tpY !== null && tpY > entryY) {
+            zoneCtx.fillStyle = GREEN;
+            const tpHeight = tpY - entryY;
+            zoneCtx.fillRect(left, entryY, width, Math.max(tpHeight, 3));
+
+            // TP Label
+            zoneCtx.fillStyle = 'rgba(14, 203, 129, 0.9)';
+            zoneCtx.font = '10px Arial';
+            zoneCtx.fillText('TP', left + 4, entryY + tpHeight / 2 + 4);
+          }
+
+        } else {
+          // === LONG/BUY Pattern ===
+          // TP above entry (GREEN), SL below entry (RED)
+
+          // 1. TAKE PROFIT Zone (GREEN - above entry)
+          if (tpY !== null && tpY < entryY) {
+            zoneCtx.fillStyle = GREEN;
+            const tpTop = tpY;
+            const tpHeight = entryY - tpY;
+            zoneCtx.fillRect(left, tpTop, width, Math.max(tpHeight, 3));
+
+            // TP Label
+            zoneCtx.fillStyle = 'rgba(14, 203, 129, 0.9)';
+            zoneCtx.font = '10px Arial';
+            zoneCtx.fillText('TP', left + 4, tpTop + 12);
+          }
+
+          // 2. ENTRY LINE (Green solid line)
+          zoneCtx.fillStyle = GREEN_SOLID;
+          zoneCtx.fillRect(left, entryY - 2, width, 4);
+
+          // Entry Label
+          zoneCtx.fillStyle = '#ffffff';
+          zoneCtx.font = 'bold 11px Arial';
+          zoneCtx.fillText('Entry', left + 4, entryY - 6);
+
+          // 3. STOP LOSS Zone (RED - below entry)
+          if (slY !== null && slY > entryY) {
+            zoneCtx.fillStyle = RED;
+            const slHeight = slY - entryY;
+            zoneCtx.fillRect(left, entryY, width, Math.max(slHeight, 3));
+
+            // SL Label
+            zoneCtx.fillStyle = 'rgba(220, 53, 69, 0.9)';
+            zoneCtx.font = '10px Arial';
+            zoneCtx.fillText('SL', left + 4, entryY + slHeight / 2 + 4);
+          }
+        }
+      });
+    }
+
+    // Start zone animation loop
+    function startZoneAnimation() {
+      function animate() {
+        drawZonesOnCanvas();
+        zoneAnimationId = requestAnimationFrame(animate);
       }
+      animate();
+    }
 
-      // Minimum width check
-      if (width < 50) {
-        zoneInfo.el.style.display = 'none';
-        return;
-      }
-
-      // Apply position
-      zoneInfo.el.style.display = 'block';
-      zoneInfo.el.style.top = top + 'px';
-      zoneInfo.el.style.height = Math.max(height, 20) + 'px'; // Min height for visibility
-      zoneInfo.el.style.left = left + 'px';
-      zoneInfo.el.style.width = width + 'px';
-
-      // Update tooltip position if it's showing (keep it centered on zone)
-      if (zoneInfo.tooltip && zoneInfo.tooltip.style.display === 'block') {
-        // Tooltip is already positioned relative to zone element, no change needed
+    // Stop zone animation
+    function stopZoneAnimation() {
+      if (zoneAnimationId) {
+        cancelAnimationFrame(zoneAnimationId);
+        zoneAnimationId = null;
       }
     }
 
-    // Update ALL zone positions (called on chart movement)
-    function updateAllZonePositions() {
-      zoneData.forEach(updateZonePosition);
-    }
+    // ✅ Canvas-based zone animation is handled by drawZonesOnCanvas()
+    // No DOM-based position updates needed - zones automatically follow chart coordinates
 
-    // Setup chart event listeners for position sync
-    function setupPositionSync() {
-      if (positionUpdateSetup || !chart) return;
-      positionUpdateSetup = true;
-
-      // Update on price scale changes (zoom, scroll)
-      chart.priceScale('right').subscribeVisiblePriceRangeChange(() => {
-        requestAnimationFrame(updateAllZonePositions);
-      });
-
-      // Update on time scale changes (horizontal scroll)
-      chart.timeScale().subscribeVisibleLogicalRangeChange(() => {
-        requestAnimationFrame(updateAllZonePositions);
-      });
-
-      // Update on crosshair move (continuous sync)
-      chart.subscribeCrosshairMove(() => {
-        requestAnimationFrame(updateAllZonePositions);
-      });
-
-      console.log('[Zone] Position sync listeners setup');
-    }
-
-    // Update zones from React Native
+    // ✅ Update zones from React Native - CANVAS-BASED VERSION
     window.updateZones = function(zones, preferences) {
-      console.log('[Chart.updateZones] Called with', zones?.length || 0, 'zones');
-
-      // Create container if needed
-      createZoneContainer();
+      console.log('[Chart.updateZones] ✅ Canvas-based rendering with', zones?.length || 0, 'zones');
 
       // Clear existing zones first
       window.clearZones();
@@ -2191,11 +2233,14 @@ const TradingChart = ({
         return;
       }
 
+      // Create canvas overlay if needed
+      createZoneCanvas();
+
       // Get current price for proximity sorting
       const lastCandle = lastCandleData && lastCandleData.length > 0
         ? lastCandleData[lastCandleData.length - 1]
         : null;
-      const currentPrice = lastCandle ? lastCandle.close : 90000; // Default BTC price as fallback
+      const currentPrice = lastCandle ? lastCandle.close : 90000;
 
       // Sort zones by proximity to current price (closest first)
       const sortedZones = [...zones].sort((a, b) => {
@@ -2212,41 +2257,54 @@ const TradingChart = ({
 
       console.log('[Chart.updateZones] Showing', zonesToRender.length, 'zones closest to price', currentPrice);
 
-      // Render filled zone rectangles
-      zonesToRender.forEach((zone, idx) => {
-        try {
-          renderFilledZone(zone, idx);
-        } catch (e) {
-          console.error('[Chart.updateZones] Error rendering zone ' + idx + ':', e.message);
-        }
+      // Store zones in activeZones array for canvas rendering
+      activeZones = zonesToRender.map((zone, idx) => ({
+        ...zone,
+        index: idx,
+      }));
+
+      // Debug: Log zones being rendered
+      activeZones.forEach((z, i) => {
+        console.log('[Chart.updateZones] Zone ' + i + ':', {
+          type: z.zone_type || z.type || 'LFZ',
+          high: z.zone_high || z.high,
+          low: z.zone_low || z.low,
+          start_time: z.start_time || z.startTime,
+          pattern_type: z.pattern_type || z.patternType
+        });
       });
 
-      // Setup position sync if not done
-      setupPositionSync();
+      // Start animation loop (zones now move with chart pan/scroll)
+      startZoneAnimation();
 
-      console.log('[Chart.updateZones] Done! Zones will sync with chart movement.');
+      console.log('[Chart.updateZones] ✅ Done! Zones will move with chart (canvas-based).');
     };
 
-    // Clear all zone rectangles
+    // ✅ Clear all zones - CANVAS-BASED VERSION
     window.clearZones = function() {
-      // Remove all zone DOM elements
-      zoneElements.forEach(info => {
-        try {
-          if (info.el && info.el.parentNode) {
-            info.el.parentNode.removeChild(info.el);
-          }
-        } catch (e) {}
-      });
-      zoneElements = [];
-      zoneData = [];
-      console.log('[Chart.clearZones] Cleared all zone rectangles');
+      // Stop animation loop
+      stopZoneAnimation();
+
+      // Clear canvas
+      if (zoneCanvas && zoneCtx) {
+        const rect = zoneCanvas.getBoundingClientRect();
+        zoneCtx.clearRect(0, 0, rect.width, rect.height);
+      }
+
+      // Clear zone data
+      activeZones = [];
+      console.log('[Chart.clearZones] ✅ Cleared all zones (canvas)');
     };
 
-    // Update a single zone - just re-render all zones
+    // Update a single zone - triggers re-render on next animation frame
     window.updateSingleZone = function(zoneId, updates) {
-      console.log('[Chart.updateSingleZone] Re-render requested for zone:', zoneId);
-      // For price lines, we just clear and re-add all zones
-      // The React Native side should call updateZones with the updated array
+      console.log('[Chart.updateSingleZone] Update requested for zone:', zoneId);
+      // Canvas-based system auto-updates on each animation frame
+      // Just update the zone data in activeZones array
+      const zoneIndex = activeZones.findIndex(z => z.id === zoneId);
+      if (zoneIndex >= 0) {
+        activeZones[zoneIndex] = { ...activeZones[zoneIndex], ...updates };
+      }
     };
 
     // Render a single drawing

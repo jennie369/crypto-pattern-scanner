@@ -362,11 +362,86 @@ class MessagingService {
           table: 'messages',
           filter: `conversation_id=eq.${conversationId}`
         },
-        (payload) => {
-          callback(payload.new);
+        async (payload) => {
+          // CRITICAL FIX: payload.new only contains raw message data
+          // We need to fetch full message with user data for proper display
+          try {
+            const { data: fullMessage, error } = await supabase
+              .from('messages')
+              .select(`
+                *,
+                users:sender_id(
+                  id,
+                  display_name,
+                  avatar_url
+                ),
+                message_reactions(
+                  id,
+                  emoji,
+                  user_id
+                )
+              `)
+              .eq('id', payload.new.id)
+              .single();
+
+            if (error) {
+              console.error('[MessagingService] Error fetching full message:', error);
+              callback(payload.new);
+              return;
+            }
+
+            callback(fullMessage);
+          } catch (err) {
+            console.error('[MessagingService] subscribeToMessages error:', err);
+            callback(payload.new);
+          }
         }
       )
-      .subscribe();
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'messages',
+          filter: `conversation_id=eq.${conversationId}`
+        },
+        async (payload) => {
+          // Handle message updates (reactions, soft deletes)
+          try {
+            const { data: fullMessage, error } = await supabase
+              .from('messages')
+              .select(`
+                *,
+                users:sender_id(
+                  id,
+                  display_name,
+                  avatar_url
+                ),
+                message_reactions(
+                  id,
+                  emoji,
+                  user_id
+                )
+              `)
+              .eq('id', payload.new.id)
+              .single();
+
+            if (error) {
+              console.error('[MessagingService] Error fetching updated message:', error);
+              callback(payload.new, 'update');
+              return;
+            }
+
+            callback(fullMessage, 'update');
+          } catch (err) {
+            console.error('[MessagingService] subscribeToMessages update error:', err);
+            callback(payload.new, 'update');
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log(`[MessagingService] Message subscription status for ${conversationId}:`, status);
+      });
 
     return channel;
   }

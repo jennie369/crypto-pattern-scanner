@@ -521,6 +521,48 @@
   padding: var(--space-4);
   max-height: 400px;
   overflow-y: auto;
+  position: relative;
+}
+
+/* ═══ FIX HTML CONTENT IN LESSON PREVIEW ═══ */
+.lesson-preview-content [style*="position: fixed"],
+.lesson-preview-content [style*="position:fixed"] {
+  position: relative !important;
+  inset: auto !important;
+  width: auto !important;
+  height: auto !important;
+  z-index: auto !important;
+}
+
+.lesson-preview-content .background-container,
+.lesson-preview-content .bg-container,
+.lesson-preview-content [class*="background-"],
+.lesson-preview-content [class*="bg-layer"],
+.lesson-preview-content .orb,
+.lesson-preview-content [class*="orb-"],
+.lesson-preview-content [class*="glow-"],
+.lesson-preview-content [class*="blob-"] {
+  display: none !important;
+}
+
+.lesson-preview-content [style*="z-index: -"],
+.lesson-preview-content [style*="z-index:-"] {
+  z-index: auto !important;
+}
+
+.lesson-preview-content [style*="height: 100vh"],
+.lesson-preview-content [style*="height:100vh"],
+.lesson-preview-content [style*="min-height: 100vh"],
+.lesson-preview-content [style*="min-height:100vh"] {
+  height: auto !important;
+  min-height: auto !important;
+}
+
+.lesson-preview-content section,
+.lesson-preview-content [class*="section"],
+.lesson-preview-content [class*="container"],
+.lesson-preview-content [class*="wrapper"] {
+  overflow: visible !important;
 }
 
 .video-preview {
@@ -537,6 +579,8 @@
 .article-preview {
   color: var(--text-primary);
   line-height: 1.8;
+  position: relative;
+  overflow: hidden;
 }
 
 .article-preview h1,
@@ -544,6 +588,67 @@
 .article-preview h3 {
   margin-top: 1em;
   margin-bottom: 0.5em;
+}
+
+/* ═══ FIX POSITION FIXED - Convert to relative in preview ═══ */
+.article-preview [style*="position: fixed"],
+.article-preview [style*="position:fixed"] {
+  position: relative !important;
+  inset: auto !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: auto !important;
+  height: auto !important;
+  z-index: auto !important;
+}
+
+/* ═══ FIX BACKGROUND CONTAINERS ═══ */
+.article-preview .background-container,
+.article-preview .bg-container,
+.article-preview .bg-layer,
+.article-preview .bg-layer-base,
+.article-preview [class*="background-"],
+.article-preview [class*="bg-layer"] {
+  display: none !important;
+}
+
+/* ═══ FIX ORB/GLOW DECORATIONS ═══ */
+.article-preview .orb,
+.article-preview [class*="orb-"],
+.article-preview [class*="glow-"],
+.article-preview [class*="blob-"] {
+  display: none !important;
+}
+
+/* ═══ FIX INSET AND Z-INDEX ═══ */
+.article-preview [style*="inset: 0"],
+.article-preview [style*="inset:0"] {
+  position: relative !important;
+  inset: auto !important;
+}
+
+.article-preview [style*="z-index: -"],
+.article-preview [style*="z-index:-"] {
+  z-index: auto !important;
+}
+
+/* ═══ FIX 100VH HEIGHTS ═══ */
+.article-preview [style*="min-height: 100vh"],
+.article-preview [style*="min-height:100vh"],
+.article-preview [style*="height: 100vh"],
+.article-preview [style*="height:100vh"] {
+  min-height: auto !important;
+  height: auto !important;
+}
+
+/* ═══ FIX OVERFLOW HIDDEN ═══ */
+.article-preview section,
+.article-preview [class*="section"],
+.article-preview [class*="container"],
+.article-preview [class*="wrapper"] {
+  overflow: visible !important;
 }
 
 .quiz-preview {

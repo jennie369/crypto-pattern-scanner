@@ -2172,6 +2172,96 @@ body.editor-fullscreen-active > nav {
   opacity: 0 !important;
 }
 
+/* ═══ FIX CLIPPED CONTENT - Override overflow:hidden and min-height:100vh from landing pages ═══ */
+/* Landing page sections often use overflow:hidden which clips content in the editor */
+/* Also 100vh heights don't work well inside the editor container */
+.html-preview.wysiwyg-editor section,
+.html-preview.wysiwyg-editor [class*="section"],
+.html-preview.wysiwyg-editor [class*="container"],
+.html-preview.wysiwyg-editor [class*="wrapper"],
+.html-preview.wysiwyg-editor [class*="content"],
+.html-preview.wysiwyg-editor [style*="overflow: hidden"],
+.html-preview.wysiwyg-editor [style*="overflow:hidden"],
+.html-preview.wysiwyg-editor [style*="overflow: clip"],
+.html-preview.wysiwyg-editor > div,
+.html-preview.wysiwyg-editor > div > div {
+  overflow: visible !important;
+}
+
+/* Override 100vh heights that don't work inside editor */
+.html-preview.wysiwyg-editor [style*="min-height: 100vh"],
+.html-preview.wysiwyg-editor [style*="min-height:100vh"],
+.html-preview.wysiwyg-editor [style*="height: 100vh"],
+.html-preview.wysiwyg-editor [style*="height:100vh"],
+.html-preview.wysiwyg-editor [style*="100vh"] {
+  min-height: auto !important;
+  height: auto !important;
+}
+
+/* ═══ FIX POSITION FIXED - Convert to relative in editor ═══ */
+/* position:fixed elements escape the editor container and cause layout issues */
+/* Convert them to position:relative so they stay within the content flow */
+.html-preview.wysiwyg-editor [style*="position: fixed"],
+.html-preview.wysiwyg-editor [style*="position:fixed"] {
+  position: relative !important;
+  inset: auto !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  width: auto !important;
+  height: auto !important;
+  z-index: auto !important;
+}
+
+/* ═══ FIX BACKGROUND CONTAINERS - Common in landing pages ═══ */
+/* These often use position:fixed with inset:0 and z-index:-1 */
+/* Hide them entirely in editor as they're just decorative backgrounds */
+.html-preview.wysiwyg-editor .background-container,
+.html-preview.wysiwyg-editor .bg-container,
+.html-preview.wysiwyg-editor .bg-layer,
+.html-preview.wysiwyg-editor .bg-layer-base,
+.html-preview.wysiwyg-editor [class*="background-"],
+.html-preview.wysiwyg-editor [class*="bg-layer"] {
+  display: none !important;
+}
+
+/* ═══ FIX ORB/GLOW DECORATIONS - Hide large blur decorations ═══ */
+/* Orbs with large blur filters cause performance issues and overlap content */
+.html-preview.wysiwyg-editor .orb,
+.html-preview.wysiwyg-editor .orb-1,
+.html-preview.wysiwyg-editor .orb-2,
+.html-preview.wysiwyg-editor .orb-3,
+.html-preview.wysiwyg-editor [class*="orb-"],
+.html-preview.wysiwyg-editor [class*="glow-"],
+.html-preview.wysiwyg-editor [class*="blob-"] {
+  display: none !important;
+}
+
+/* ═══ FIX INSET PROPERTY - Causes full-screen overlays ═══ */
+/* inset: 0 makes elements cover the entire viewport */
+.html-preview.wysiwyg-editor [style*="inset: 0"],
+.html-preview.wysiwyg-editor [style*="inset:0"] {
+  position: relative !important;
+  inset: auto !important;
+}
+
+/* ═══ FIX NEGATIVE Z-INDEX - Makes content invisible ═══ */
+/* z-index: -1 hides elements behind the editor container */
+.html-preview.wysiwyg-editor [style*="z-index: -"],
+.html-preview.wysiwyg-editor [style*="z-index:-"] {
+  z-index: auto !important;
+}
+
+/* ═══ FIX BACKDROP-FILTER - Can cause rendering issues ═══ */
+/* backdrop-filter requires a specific stacking context to work */
+/* In editor, it can cause blurry/invisible content */
+.html-preview.wysiwyg-editor [style*="backdrop-filter"],
+.html-preview.wysiwyg-editor [class*="glass"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
 /* ═══ SPACER COMPONENTS - Visible in editor, transparent in Shopify ═══ */
 /* Simple div with height - Shopify keeps the height, editor shows visual indicator */
 .html-preview.wysiwyg-editor .spacer {
