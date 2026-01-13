@@ -890,6 +890,99 @@ const ADMIN_PARTNERSHIP_SERVICE = {
         return new Date(now.setMonth(now.getMonth() - 1));
     }
   },
+
+  // ============================================================
+  // REAL-TIME SUBSCRIPTIONS
+  // ============================================================
+
+  /**
+   * Subscribe to real-time updates for partnership applications
+   * @param {Function} callback - Callback function for updates
+   * @returns {Object} Subscription object (call .unsubscribe() to stop)
+   */
+  subscribeToApplications(callback) {
+    console.log('[AdminPartnershipService] Subscribing to applications...');
+    return supabase
+      .channel('admin_partnership_applications')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'partnership_applications',
+        },
+        (payload) => {
+          console.log('[Realtime] Applications change:', payload.eventType);
+          callback(payload);
+        }
+      )
+      .subscribe((status) => {
+        console.log('[Realtime] Applications subscription status:', status);
+      });
+  },
+
+  /**
+   * Subscribe to real-time updates for affiliate profiles
+   * @param {Function} callback - Callback function for updates
+   * @returns {Object} Subscription object
+   */
+  subscribeToPartners(callback) {
+    console.log('[AdminPartnershipService] Subscribing to partners...');
+    return supabase
+      .channel('admin_affiliate_profiles')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'affiliate_profiles',
+        },
+        (payload) => {
+          console.log('[Realtime] Partners change:', payload.eventType);
+          callback(payload);
+        }
+      )
+      .subscribe((status) => {
+        console.log('[Realtime] Partners subscription status:', status);
+      });
+  },
+
+  /**
+   * Subscribe to real-time updates for commissions
+   * @param {Function} callback - Callback function for updates
+   * @returns {Object} Subscription object
+   */
+  subscribeToCommissions(callback) {
+    console.log('[AdminPartnershipService] Subscribing to commissions...');
+    return supabase
+      .channel('admin_affiliate_commissions')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'affiliate_commissions',
+        },
+        (payload) => {
+          console.log('[Realtime] Commissions change:', payload.eventType);
+          callback(payload);
+        }
+      )
+      .subscribe((status) => {
+        console.log('[Realtime] Commissions subscription status:', status);
+      });
+  },
+
+  /**
+   * Unsubscribe from a real-time subscription
+   * @param {Object} subscription - Subscription to unsubscribe from
+   */
+  unsubscribe(subscription) {
+    if (subscription) {
+      console.log('[AdminPartnershipService] Unsubscribing...');
+      supabase.removeChannel(subscription);
+    }
+  },
 };
 
 export default ADMIN_PARTNERSHIP_SERVICE;

@@ -1,8 +1,10 @@
 /**
- * InstructionText - Glowing instruction text with animations
+ * InstructionText - PERFORMANCE OPTIMIZED
+ * Replaced setTimeout with Reanimated callbacks
+ * Smooth 60fps text animations
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { Text, StyleSheet, View } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -11,12 +13,12 @@ import Animated, {
   withRepeat,
   withSequence,
   withDelay,
+  runOnJS,
+  Easing,
 } from 'react-native-reanimated';
 
 import {
   COSMIC_COLORS,
-  COSMIC_TYPOGRAPHY,
-  COSMIC_SPACING,
 } from '../../../theme/cosmicTokens';
 import { COSMIC_TIMING } from '../../../utils/cosmicAnimations';
 
@@ -31,7 +33,6 @@ const InstructionText = ({
   glowColor = null,
   animate = true, // Fade in animation
   pulse = false, // Continuous pulse
-  typewriter = false, // Typewriter effect
   delay = 0,
   align = 'center',
   style,
@@ -147,7 +148,8 @@ const InstructionText = ({
 };
 
 // ============================================
-// ANIMATED INSTRUCTION (with phase changes)
+// ANIMATED INSTRUCTION (with phase changes) - OPTIMIZED
+// Uses Reanimated callbacks instead of setTimeout
 // ============================================
 
 export const AnimatedInstruction = ({
@@ -159,29 +161,48 @@ export const AnimatedInstruction = ({
   style,
 }) => {
   const [currentIndex, setCurrentIndex] = React.useState(0);
-  const [isVisible, setIsVisible] = React.useState(true);
-
   const opacity = useSharedValue(1);
+  const isTransitioning = React.useRef(false);
+
+  // Move to next instruction (called from animation callback)
+  const moveToNext = useCallback(() => {
+    isTransitioning.current = false;
+    setCurrentIndex(prev => prev + 1);
+    opacity.value = withTiming(1, { duration: 300 });
+  }, []);
+
+  // Handle completion
+  const handleComplete = useCallback(() => {
+    onComplete?.();
+  }, [onComplete]);
+
+  // Schedule transition using Reanimated
+  const scheduleTransition = useCallback((duration) => {
+    if (isTransitioning.current) return;
+    isTransitioning.current = true;
+
+    // Use a "hold" animation that triggers callback after duration
+    opacity.value = withSequence(
+      // Hold at current opacity for duration
+      withTiming(1, { duration: duration - 300 }),
+      // Then fade out
+      withTiming(0, { duration: 300 }, (finished) => {
+        if (finished) {
+          runOnJS(moveToNext)();
+        }
+      })
+    );
+  }, [moveToNext]);
 
   React.useEffect(() => {
     if (currentIndex >= instructions.length) {
-      onComplete?.();
+      handleComplete();
       return;
     }
 
     const instruction = instructions[currentIndex];
-    const timer = setTimeout(() => {
-      // Fade out
-      opacity.value = withTiming(0, { duration: 300 }, () => {
-        // Move to next
-        setCurrentIndex(prev => prev + 1);
-        // Fade in
-        opacity.value = withTiming(1, { duration: 300 });
-      });
-    }, instruction.duration);
-
-    return () => clearTimeout(timer);
-  }, [currentIndex, instructions]);
+    scheduleTransition(instruction.duration);
+  }, [currentIndex, instructions, scheduleTransition, handleComplete]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,

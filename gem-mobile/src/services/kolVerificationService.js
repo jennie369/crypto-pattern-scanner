@@ -205,12 +205,13 @@ const kolVerificationService = {
           .eq('id', verification.id);
       }
 
-      // Notify admins
+      // Notify admins (in-app + push)
       await this.notifyAdminsNewKOLApplication({
         applicationId: application.id,
         fullName: data.full_name,
         totalFollowers,
         userId,
+        email: data.email,
       });
 
       return {
@@ -230,8 +231,9 @@ const kolVerificationService = {
 
   /**
    * Notify admins about new KOL application
+   * Creates in-app notifications AND sends push notifications via Edge Function
    */
-  async notifyAdminsNewKOLApplication({ applicationId, fullName, totalFollowers, userId }) {
+  async notifyAdminsNewKOLApplication({ applicationId, fullName, totalFollowers, userId, email }) {
     try {
       const { data: admins } = await supabase
         .from('profiles')
@@ -243,11 +245,12 @@ const kolVerificationService = {
         return;
       }
 
+      // Create in-app notifications for each admin
       const notifications = admins.map((admin) => ({
         user_id: admin.id,
         type: 'admin_kol_application',
-        title: 'Don dang ky KOL moi',
-        message: `${fullName} (${totalFollowers.toLocaleString()} followers) da dang ky KOL. Vui long xem xet.`,
+        title: '🌟 Đơn đăng ký KOL mới!',
+        message: `${fullName} (${totalFollowers.toLocaleString()} followers) đã đăng ký KOL. Vui lòng xem xét.`,
         data: JSON.stringify({
           application_id: applicationId,
           applicant_id: userId,
@@ -257,7 +260,38 @@ const kolVerificationService = {
       }));
 
       await supabase.from('forum_notifications').insert(notifications);
-      console.log('[KOLVerificationService] Admin notifications sent:', admins.length);
+      console.log('[KOLVerificationService] Admin in-app notifications sent:', admins.length);
+
+      // ========== SEND PUSH NOTIFICATIONS VIA EDGE FUNCTION ==========
+      try {
+        const { data: pushResult, error: pushError } = await supabase.functions.invoke(
+          'notify-admins-partnership',
+          {
+            body: {
+              event_type: 'new_application',
+              data: {
+                application_id: applicationId,
+                application_type: 'kol',
+                user_id: userId,
+                full_name: fullName,
+                email: email,
+                total_followers: totalFollowers,
+              },
+            },
+          }
+        );
+
+        if (pushError) {
+          console.error('[KOLVerificationService] Push notification error:', pushError);
+        } else {
+          console.log('[KOLVerificationService] Push notifications sent:', pushResult);
+        }
+      } catch (pushErr) {
+        console.error('[KOLVerificationService] Edge function error:', pushErr);
+        // Don't fail the whole operation if push fails
+      }
+      // ================================================================
+
     } catch (err) {
       console.error('[KOLVerificationService] notifyAdminsNewKOLApplication error:', err);
     }

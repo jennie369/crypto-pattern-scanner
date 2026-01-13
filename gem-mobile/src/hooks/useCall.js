@@ -2,22 +2,16 @@
  * useCall Hook
  * Main hook for call state management
  *
- * NOTE: WebRTC is optional. If react-native-webrtc is not installed,
- * call features will be disabled.
+ * REQUIREMENTS:
+ * - react-native-webrtc must be installed
+ * - App must be built with expo-dev-client (not Expo Go)
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Vibration } from 'react-native';
 import { callSignalingService } from '../services/callSignalingService';
 import { callService } from '../services/callService';
-
-// Import webrtcService - it handles missing dependency internally
-let webrtcService = null;
-try {
-  webrtcService = require('../services/webrtcService').webrtcService;
-} catch (error) {
-  console.log('[useCall] WebRTC service not available');
-}
+import { webrtcService } from '../services/webrtcService';
 import {
   CALL_STATUS,
   CALL_TYPE,
@@ -61,6 +55,11 @@ export const useCall = ({ call, isCaller = false, onCallEnded }) => {
     try {
       console.log('[useCall] Initializing call...');
 
+      // Check if WebRTC is available
+      if (!webrtcService.isAvailable) {
+        throw new Error('Tính năng gọi điện chưa khả dụng. Vui lòng cập nhật ứng dụng.');
+      }
+
       // Get current user
       const { data: { user } } = await (await import('../services/supabase')).supabase.auth.getUser();
       if (!user) throw new Error('Chưa đăng nhập');
@@ -81,7 +80,6 @@ export const useCall = ({ call, isCaller = false, onCallEnded }) => {
 
       webrtcService.onConnectionStateChange = (state) => {
         console.log('[useCall] Connection state changed:', state);
-
         switch (state) {
           case 'connected':
             setCallState(CALL_STATUS.CONNECTED);
@@ -106,6 +104,10 @@ export const useCall = ({ call, isCaller = false, onCallEnded }) => {
       webrtcService.onError = (type, message) => {
         console.error('[useCall] WebRTC error:', type, message);
         setError(message);
+      };
+
+      webrtcService.onIceCandidate = async (candidate) => {
+        await callSignalingService.sendIceCandidate(candidate);
       };
 
       // Subscribe to signaling channel
@@ -148,11 +150,6 @@ export const useCall = ({ call, isCaller = false, onCallEnded }) => {
         console.log('[useCall] Remote user is busy');
         setCallState(CALL_STATUS.BUSY);
         setError('Người nhận đang bận');
-      };
-
-      // Setup ICE candidate handler
-      webrtcService.onIceCandidate = async (candidate) => {
-        await callSignalingService.sendIceCandidate(candidate);
       };
 
       // If caller, create and send offer

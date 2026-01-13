@@ -347,7 +347,13 @@ class PatternDetectionService {
       );
 
       if (!zone) {
-        // Return pattern with just patternConfig enrichment if zone calc fails
+        // ⚠️ CRITICAL FIX: Even if zone calc fails, STILL extract time data for positioning!
+        const startTime = this._extractPatternStartTime(pattern, candles);
+        const endTime = this._extractPatternEndTime(pattern, candles);
+
+        console.log(`[enrichWithZoneData] Zone calc failed for ${pattern.patternType}, but extracted times: startTime=${startTime}, endTime=${endTime}`);
+
+        // Return pattern with patternConfig enrichment AND time data
         return {
           ...pattern,
           patternConfig: {
@@ -367,6 +373,12 @@ class PatternDetectionService {
             vietnameseName: zoneTypeConfig.vietnameseName,
             color: zoneTypeConfig.color,
           },
+          // ⚠️ CRITICAL: ALWAYS include time data for zone positioning
+          startTime,
+          endTime,
+          startCandleIndex: this._extractPatternStartIndex(pattern, candles),
+          endCandleIndex: this._extractPatternEndIndex(pattern, candles),
+          hasZoneData: false, // Zone boundaries failed, but time data is available
         };
       }
 
@@ -422,13 +434,193 @@ class PatternDetectionService {
         // For UI display - use zone entry instead of old entry
         zoneEntry: zone.entryPrice,
         zoneStop: zone.stopPrice,
+        // ⚠️ CRITICAL: Time fields for zone positioning on chart
+        startTime: (() => {
+          const st = this._extractPatternStartTime(pattern, candles);
+          console.log(`[enrichWithZoneData] ${pattern.patternType} startTime: ${st} (${st ? new Date(st * 1000).toISOString() : 'NULL'})`);
+          return st;
+        })(),
+        endTime: (() => {
+          const et = this._extractPatternEndTime(pattern, candles);
+          console.log(`[enrichWithZoneData] ${pattern.patternType} endTime: ${et}`);
+          return et;
+        })(),
+        startCandleIndex: this._extractPatternStartIndex(pattern, candles),
+        endCandleIndex: this._extractPatternEndIndex(pattern, candles),
         // Flags
         hasZoneData: true,
       };
     } catch (error) {
       console.warn('[PatternDetection] Zone enrichment error:', error.message);
-      return pattern;
+      // ⚠️ Try to at least extract time data even if enrichment failed
+      try {
+        const startTime = this._extractPatternStartTime(pattern, candles);
+        const endTime = this._extractPatternEndTime(pattern, candles);
+        return {
+          ...pattern,
+          startTime,
+          endTime,
+          hasZoneData: false,
+        };
+      } catch (timeError) {
+        console.warn('[PatternDetection] Time extraction also failed:', timeError.message);
+        return pattern;
+      }
     }
+  }
+
+  /**
+   * Extract start time from pattern points
+   * Uses timestamp DIRECTLY from points if available (more reliable than index lookup)
+   * @private
+   */
+  _extractPatternStartTime(pattern, candles) {
+    // PRIORITY 1: Get timestamps directly from pattern.points
+    const timestamps = this._getPatternTimestamps(pattern);
+    if (timestamps.length > 0) {
+      const minTimestamp = Math.min(...timestamps);
+      // Convert ms to seconds for lightweight-charts
+      const result = minTimestamp > 9999999999 ? Math.floor(minTimestamp / 1000) : minTimestamp;
+      console.log(`[PatternDetection] startTime from points: ${result} (${new Date(result * 1000).toISOString()})`);
+      return result;
+    }
+
+    // PRIORITY 2: Fallback to candle lookup by index
+    const indexes = this._getPatternIndexes(pattern);
+    if (indexes.length === 0) {
+      console.log(`[PatternDetection] No indexes found for ${pattern.patternType}`);
+      return null;
+    }
+    const startIdx = Math.min(...indexes);
+    const candle = candles[startIdx];
+    if (candle?.timestamp) {
+      const result = candle.timestamp > 9999999999 ? Math.floor(candle.timestamp / 1000) : candle.timestamp;
+      console.log(`[PatternDetection] startTime from candle[${startIdx}]: ${result}`);
+      return result;
+    }
+    console.log(`[PatternDetection] No timestamp in candle[${startIdx}]`);
+    return null;
+  }
+
+  /**
+   * Extract end time from pattern points
+   * Uses timestamp DIRECTLY from points if available
+   * @private
+   */
+  _extractPatternEndTime(pattern, candles) {
+    // PRIORITY 1: Get timestamps directly from pattern.points
+    const timestamps = this._getPatternTimestamps(pattern);
+    if (timestamps.length > 0) {
+      const maxTimestamp = Math.max(...timestamps);
+      const result = maxTimestamp > 9999999999 ? Math.floor(maxTimestamp / 1000) : maxTimestamp;
+      console.log(`[PatternDetection] endTime from points: ${result}`);
+      return result;
+    }
+
+    // PRIORITY 2: Fallback to candle lookup by index
+    const indexes = this._getPatternIndexes(pattern);
+    if (indexes.length === 0) return null;
+    const endIdx = Math.max(...indexes);
+    const candle = candles[endIdx];
+    if (candle?.timestamp) {
+      return candle.timestamp > 9999999999 ? Math.floor(candle.timestamp / 1000) : candle.timestamp;
+    }
+    return null;
+  }
+
+  /**
+   * Extract start candle index
+   * @private
+   */
+  _extractPatternStartIndex(pattern, candles) {
+    const indexes = this._getPatternIndexes(pattern);
+    return indexes.length > 0 ? Math.min(...indexes) : null;
+  }
+
+  /**
+   * Extract end candle index
+   * @private
+   */
+  _extractPatternEndIndex(pattern, candles) {
+    const indexes = this._getPatternIndexes(pattern);
+    return indexes.length > 0 ? Math.max(...indexes) : null;
+  }
+
+  /**
+   * Get all TIMESTAMPS directly from pattern points
+   * This is more reliable than looking up candles by index
+   * Handles both single points and arrays of points
+   * @private
+   */
+  _getPatternTimestamps(pattern) {
+    const timestamps = [];
+
+    // 🔴 DEBUG: Show raw points structure
+    console.log(`[PatternDetection] 🔴 _getPatternTimestamps input for ${pattern.patternType}:`, {
+      hasPoints: !!pattern.points,
+      pointKeys: pattern.points ? Object.keys(pattern.points) : [],
+      firstPointSample: pattern.points ? Object.entries(pattern.points)[0] : null,
+    });
+
+    if (pattern.points) {
+      Object.entries(pattern.points).forEach(([key, point]) => {
+        // 🔴 DEBUG: Show each point
+        console.log(`[PatternDetection] 🔴 Point "${key}":`, {
+          isArray: Array.isArray(point),
+          hasTimestamp: point?.timestamp !== undefined,
+          timestamp: point?.timestamp,
+          type: typeof point,
+        });
+
+        if (Array.isArray(point)) {
+          // Handle arrays of points (e.g., cluster: [point1, point2, ...])
+          point.forEach(p => {
+            if (p?.timestamp !== undefined && p.timestamp !== null) {
+              timestamps.push(p.timestamp);
+            }
+          });
+        } else if (point?.timestamp !== undefined && point.timestamp !== null) {
+          // Handle single point object
+          timestamps.push(point.timestamp);
+        }
+      });
+    }
+
+    console.log(`[PatternDetection] Extracted ${timestamps.length} timestamps for ${pattern.patternType}:`, timestamps.slice(0, 3));
+    return timestamps;
+  }
+
+  /**
+   * Get all candle indexes from pattern points
+   * Handles both single points and arrays of points
+   * @private
+   */
+  _getPatternIndexes(pattern) {
+    const indexes = [];
+
+    // Get from pattern.points
+    if (pattern.points) {
+      Object.entries(pattern.points).forEach(([key, point]) => {
+        if (Array.isArray(point)) {
+          // Handle arrays of points (e.g., cluster: [point1, point2, ...])
+          point.forEach(p => {
+            if (p?.index !== undefined && p.index !== null) {
+              indexes.push(p.index);
+            }
+          });
+        } else if (point?.index !== undefined && point.index !== null) {
+          // Handle single point object
+          indexes.push(point.index);
+        }
+      });
+    }
+
+    // Fallback to other index fields
+    if (pattern.startIndex !== undefined) indexes.push(pattern.startIndex);
+    if (pattern.endIndex !== undefined) indexes.push(pattern.endIndex);
+    if (pattern.formationIndex !== undefined) indexes.push(pattern.formationIndex);
+
+    return indexes;
   }
 
   /**
@@ -895,6 +1087,7 @@ class PatternDetectionService {
       winRate: signal.expectedWinRate,
       detectedAt: Date.now(),
       currentPrice,
+      points: { low1, low2, peak }, // Added for zone positioning
     };
   }
 
@@ -962,6 +1155,7 @@ class PatternDetectionService {
       winRate: signal.expectedWinRate,
       detectedAt: Date.now(),
       currentPrice,
+      points: { high1, high2, trough }, // Added for zone positioning
     };
   }
 
@@ -1015,6 +1209,11 @@ class PatternDetectionService {
     const patternHeight = head.price - neckline;
     const target = neckline - patternHeight;
 
+    // Get neckline lows with proper index reference
+    const necklineLowPoints = swingLows.filter(l =>
+      l.index > leftShoulder.index && l.index < rightShoulder.index
+    );
+
     return {
       id: `HS-${symbol}-${timeframe}-${Date.now()}`,
       patternType: 'Head & Shoulders',
@@ -1033,6 +1232,7 @@ class PatternDetectionService {
       detectedAt: Date.now(),
       currentPrice,
       neckline,
+      points: { leftShoulder, head, rightShoulder, necklineLow: necklineLowPoints[0] }, // Added for zone positioning
     };
   }
 
@@ -1219,6 +1419,7 @@ class PatternDetectionService {
         detectedAt: Date.now(),
         currentPrice,
         neckline,
+        points: { leftShoulder, head, rightShoulder }, // Added for zone positioning
       };
     }
     return null;
@@ -1247,6 +1448,10 @@ class PatternDetectionService {
       const support = recentLows[recentLows.length - 1].price;
       const signal = PATTERN_SIGNALS['Ascending Triangle'];
 
+      // Get first and last swing points for time positioning
+      const firstPoint = recentHighs[0];
+      const lastPoint = recentLows[recentLows.length - 1];
+
       return {
         id: `AT-${symbol}-${timeframe}-${Date.now()}`,
         patternType: 'Ascending Triangle',
@@ -1264,6 +1469,7 @@ class PatternDetectionService {
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice,
+        points: { firstHigh: firstPoint, lastLow: lastPoint, resistance: recentHighs[recentHighs.length - 1] }, // Added for zone positioning
       };
     }
     return null;
@@ -1292,6 +1498,10 @@ class PatternDetectionService {
       const resistance = recentHighs[recentHighs.length - 1].price;
       const signal = PATTERN_SIGNALS['Descending Triangle'];
 
+      // Get first and last swing points for time positioning
+      const firstPoint = recentLows[0];
+      const lastPoint = recentHighs[recentHighs.length - 1];
+
       return {
         id: `DT2-${symbol}-${timeframe}-${Date.now()}`,
         patternType: 'Descending Triangle',
@@ -1309,6 +1519,7 @@ class PatternDetectionService {
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice,
+        points: { firstLow: firstPoint, lastHigh: lastPoint, support: recentLows[recentLows.length - 1] }, // Added for zone positioning
       };
     }
     return null;
@@ -1350,6 +1561,7 @@ class PatternDetectionService {
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice,
+        points: { high1: recentHighs[0], high2: recentHighs[1], low1: recentLows[0], low2: recentLows[1] }, // Added for zone positioning
       };
     }
     return null;
@@ -1372,6 +1584,10 @@ class PatternDetectionService {
       const currentPrice = candles[candles.length - 1].close;
       const signal = PATTERN_SIGNALS['HFZ'];
 
+      // Get first and last swing high for time positioning
+      const firstHigh = recentHighs[0];
+      const lastHigh = recentHighs[recentHighs.length - 1];
+
       return {
         id: `HFZ-${symbol}-${timeframe}-${Date.now()}`,
         patternType: 'HFZ',
@@ -1390,6 +1606,7 @@ class PatternDetectionService {
         detectedAt: Date.now(),
         currentPrice,
         zone: { top: avgHigh * 1.005, bottom: avgHigh * 0.995, mid: avgHigh },
+        points: { firstHigh, lastHigh, cluster: recentHighs }, // Added for zone positioning
       };
     }
     return null;
@@ -1412,6 +1629,10 @@ class PatternDetectionService {
       const currentPrice = candles[candles.length - 1].close;
       const signal = PATTERN_SIGNALS['LFZ'];
 
+      // Get first and last swing low for time positioning
+      const firstLow = recentLows[0];
+      const lastLow = recentLows[recentLows.length - 1];
+
       return {
         id: `LFZ-${symbol}-${timeframe}-${Date.now()}`,
         patternType: 'LFZ',
@@ -1430,6 +1651,7 @@ class PatternDetectionService {
         detectedAt: Date.now(),
         currentPrice,
         zone: { top: avgLow * 1.005, bottom: avgLow * 0.995, mid: avgLow },
+        points: { firstLow, lastLow, cluster: recentLows }, // Added for zone positioning
       };
     }
     return null;
@@ -1455,6 +1677,13 @@ class PatternDetectionService {
       const currentPrice = candles[candles.length - 1].close;
       const signal = PATTERN_SIGNALS['Rounding Bottom'];
 
+      // Calculate pattern start/end indexes for time positioning
+      const windowStartIndex = candles.length - 30;
+      const bottomIndex = windowStartIndex + lows.indexOf(Math.min(...lows));
+      const startCandle = candles[windowStartIndex];
+      const bottomCandle = candles[bottomIndex];
+      const endCandle = candles[candles.length - 1];
+
       return {
         id: `RB-${symbol}-${timeframe}-${Date.now()}`,
         patternType: 'Rounding Bottom',
@@ -1472,6 +1701,11 @@ class PatternDetectionService {
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice,
+        points: {
+          start: { index: windowStartIndex, price: startCandle.low, timestamp: startCandle.timestamp },
+          bottom: { index: bottomIndex, price: bottomPrice, timestamp: bottomCandle.timestamp },
+          end: { index: candles.length - 1, price: endCandle.close, timestamp: endCandle.timestamp },
+        }, // Added for zone positioning
       };
     }
     return null;
@@ -1497,6 +1731,13 @@ class PatternDetectionService {
       const currentPrice = candles[candles.length - 1].close;
       const signal = PATTERN_SIGNALS['Rounding Top'];
 
+      // Calculate pattern start/end indexes for time positioning
+      const windowStartIndex = candles.length - 30;
+      const topIndex = windowStartIndex + highs.indexOf(Math.max(...highs));
+      const startCandle = candles[windowStartIndex];
+      const topCandle = candles[topIndex];
+      const endCandle = candles[candles.length - 1];
+
       return {
         id: `RT-${symbol}-${timeframe}-${Date.now()}`,
         patternType: 'Rounding Top',
@@ -1514,6 +1755,11 @@ class PatternDetectionService {
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice,
+        points: {
+          start: { index: windowStartIndex, price: startCandle.high, timestamp: startCandle.timestamp },
+          top: { index: topIndex, price: topPrice, timestamp: topCandle.timestamp },
+          end: { index: candles.length - 1, price: endCandle.close, timestamp: endCandle.timestamp },
+        }, // Added for zone positioning
       };
     }
     return null;
@@ -1542,6 +1788,10 @@ class PatternDetectionService {
         const currentPrice = candles[candles.length - 1].close;
         const signal = PATTERN_SIGNALS['Bull Flag'];
 
+        // Get pole and flag candles for time positioning
+        const poleStartCandle = candles[poleStart];
+        const flagEndCandle = candles[candles.length - 1];
+
         return {
           id: `BF-${symbol}-${timeframe}-${Date.now()}`,
           patternType: 'Bull Flag',
@@ -1559,6 +1809,10 @@ class PatternDetectionService {
           winRate: signal.expectedWinRate,
           detectedAt: Date.now(),
           currentPrice,
+          points: {
+            poleStart: { index: poleStart, price: poleStartCandle.close, timestamp: poleStartCandle.timestamp },
+            flagEnd: { index: candles.length - 1, price: flagEndCandle.close, timestamp: flagEndCandle.timestamp },
+          }, // Added for zone positioning
         };
       }
     }
@@ -1584,6 +1838,10 @@ class PatternDetectionService {
         const currentPrice = candles[candles.length - 1].close;
         const signal = PATTERN_SIGNALS['Bear Flag'];
 
+        // Get pole and flag candles for time positioning
+        const poleStartCandle = candles[poleStart];
+        const flagEndCandle = candles[candles.length - 1];
+
         return {
           id: `BRF-${symbol}-${timeframe}-${Date.now()}`,
           patternType: 'Bear Flag',
@@ -1601,6 +1859,10 @@ class PatternDetectionService {
           winRate: signal.expectedWinRate,
           detectedAt: Date.now(),
           currentPrice,
+          points: {
+            poleStart: { index: poleStart, price: poleStartCandle.close, timestamp: poleStartCandle.timestamp },
+            flagEnd: { index: candles.length - 1, price: flagEndCandle.close, timestamp: flagEndCandle.timestamp },
+          }, // Added for zone positioning
         };
       }
     }
@@ -1649,6 +1911,7 @@ class PatternDetectionService {
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice,
+        points: { high1: recentHighs[0], high2: recentHighs[1], low1: recentLows[0], low2: recentLows[1] }, // Added for zone positioning
       };
     }
     return null;
@@ -1668,6 +1931,10 @@ class PatternDetectionService {
       if (curr.open <= prev.close && curr.close >= prev.open) {
         const signal = PATTERN_SIGNALS['Engulfing'];
 
+        // Get candle indexes for time positioning
+        const prevIndex = candles.length - 2;
+        const currIndex = candles.length - 1;
+
         return {
           id: `ENG-${symbol}-${timeframe}-${Date.now()}`,
           patternType: 'Engulfing',
@@ -1686,6 +1953,10 @@ class PatternDetectionService {
           winRate: signal.expectedWinRate,
           detectedAt: Date.now(),
           currentPrice: curr.close,
+          points: {
+            prev: { index: prevIndex, price: prev.close, timestamp: prev.timestamp },
+            curr: { index: currIndex, price: curr.close, timestamp: curr.timestamp },
+          }, // Added for zone positioning
         };
       }
     }
@@ -1694,6 +1965,10 @@ class PatternDetectionService {
     if (prev.close > prev.open && curr.close < curr.open) {
       if (curr.open >= prev.close && curr.close <= prev.open) {
         const signal = PATTERN_SIGNALS['Engulfing'];
+
+        // Get candle indexes for time positioning
+        const prevIndex = candles.length - 2;
+        const currIndex = candles.length - 1;
 
         return {
           id: `ENG-${symbol}-${timeframe}-${Date.now()}`,
@@ -1713,6 +1988,10 @@ class PatternDetectionService {
           winRate: signal.expectedWinRate,
           detectedAt: Date.now(),
           currentPrice: curr.close,
+          points: {
+            prev: { index: prevIndex, price: prev.close, timestamp: prev.timestamp },
+            curr: { index: currIndex, price: curr.close, timestamp: curr.timestamp },
+          }, // Added for zone positioning
         };
       }
     }
@@ -1737,6 +2016,10 @@ class PatternDetectionService {
       if (c3.close > (c1.open + c1.close) / 2) {
         const signal = PATTERN_SIGNALS['Morning Star'];
 
+        // Get candle indexes for time positioning
+        const idx1 = candles.length - 3;
+        const idx3 = candles.length - 1;
+
         return {
           id: `MS-${symbol}-${timeframe}-${Date.now()}`,
           patternType: 'Morning Star',
@@ -1754,6 +2037,10 @@ class PatternDetectionService {
           winRate: signal.expectedWinRate,
           detectedAt: Date.now(),
           currentPrice: c3.close,
+          points: {
+            candle1: { index: idx1, price: c1.close, timestamp: c1.timestamp },
+            candle3: { index: idx3, price: c3.close, timestamp: c3.timestamp },
+          }, // Added for zone positioning
         };
       }
     }
@@ -1762,6 +2049,10 @@ class PatternDetectionService {
     if (c1.close > c1.open && body2 < body1 * 0.3 && c3.close < c3.open) {
       if (c3.close < (c1.open + c1.close) / 2) {
         const signal = PATTERN_SIGNALS['Evening Star'];
+
+        // Get candle indexes for time positioning
+        const idx1 = candles.length - 3;
+        const idx3 = candles.length - 1;
 
         return {
           id: `ES-${symbol}-${timeframe}-${Date.now()}`,
@@ -1780,6 +2071,10 @@ class PatternDetectionService {
           winRate: signal.expectedWinRate,
           detectedAt: Date.now(),
           currentPrice: c3.close,
+          points: {
+            candle1: { index: idx1, price: c1.close, timestamp: c1.timestamp },
+            candle3: { index: idx3, price: c3.close, timestamp: c3.timestamp },
+          }, // Added for zone positioning
         };
       }
     }
@@ -1805,6 +2100,14 @@ class PatternDetectionService {
       const currentPrice = candles[candles.length - 1].close;
       const signal = PATTERN_SIGNALS['Cup Handle'];
 
+      // Get cup and handle indexes for time positioning
+      const cupStartIndex = candles.length - 40;
+      const handleEndIndex = candles.length - 1;
+      const cupBottomIndex = cupStartIndex + cupLows.indexOf(cupBottom);
+      const cupStartCandle = candles[cupStartIndex];
+      const cupBottomCandle = candles[cupBottomIndex];
+      const handleEndCandle = candles[handleEndIndex];
+
       return {
         id: `CH-${symbol}-${timeframe}-${Date.now()}`,
         patternType: 'Cup Handle',
@@ -1822,6 +2125,11 @@ class PatternDetectionService {
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice,
+        points: {
+          cupStart: { index: cupStartIndex, price: cupStartCandle.close, timestamp: cupStartCandle.timestamp },
+          cupBottom: { index: cupBottomIndex, price: cupBottom, timestamp: cupBottomCandle.timestamp },
+          handleEnd: { index: handleEndIndex, price: handleEndCandle.close, timestamp: handleEndCandle.timestamp },
+        }, // Added for zone positioning
       };
     }
     return null;
@@ -1842,6 +2150,10 @@ class PatternDetectionService {
     if (c1Up && middle3Down && c5Up) {
       const signal = PATTERN_SIGNALS['Three Methods'];
 
+      // Get candle indexes for time positioning
+      const startIdx = candles.length - 5;
+      const endIdx = candles.length - 1;
+
       return {
         id: `TM-${symbol}-${timeframe}-${Date.now()}`,
         patternType: 'Three Methods',
@@ -1860,6 +2172,10 @@ class PatternDetectionService {
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice: candles5[4].close,
+        points: {
+          start: { index: startIdx, price: candles5[0].close, timestamp: candles5[0].timestamp },
+          end: { index: endIdx, price: candles5[4].close, timestamp: candles5[4].timestamp },
+        }, // Added for zone positioning
       };
     }
 
@@ -1870,6 +2186,10 @@ class PatternDetectionService {
 
     if (c1Down && middle3Up && c5Down) {
       const signal = PATTERN_SIGNALS['Three Methods'];
+
+      // Get candle indexes for time positioning
+      const startIdx = candles.length - 5;
+      const endIdx = candles.length - 1;
 
       return {
         id: `TM-${symbol}-${timeframe}-${Date.now()}`,
@@ -1889,6 +2209,10 @@ class PatternDetectionService {
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice: candles5[4].close,
+        points: {
+          start: { index: startIdx, price: candles5[0].close, timestamp: candles5[0].timestamp },
+          end: { index: endIdx, price: candles5[4].close, timestamp: candles5[4].timestamp },
+        }, // Added for zone positioning
       };
     }
     return null;
@@ -1912,6 +2236,9 @@ class PatternDetectionService {
     if (isDowntrend && lowerShadow > body * 2 && upperShadow < body * 0.5) {
       const signal = PATTERN_SIGNALS['Hammer'];
 
+      // Get current candle index for time positioning
+      const currIndex = candles.length - 1;
+
       return {
         id: `HMR-${symbol}-${timeframe}-${Date.now()}`,
         patternType: 'Hammer',
@@ -1930,12 +2257,18 @@ class PatternDetectionService {
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice: curr.close,
+        points: {
+          hammer: { index: currIndex, price: curr.close, timestamp: curr.timestamp },
+        }, // Added for zone positioning
       };
     }
 
     // Inverted Hammer (bullish)
     if (isDowntrend && upperShadow > body * 2 && lowerShadow < body * 0.5) {
       const signal = PATTERN_SIGNALS['Hammer'];
+
+      // Get current candle index for time positioning
+      const currIndex = candles.length - 1;
 
       return {
         id: `HMR-${symbol}-${timeframe}-${Date.now()}`,
@@ -1955,6 +2288,9 @@ class PatternDetectionService {
         winRate: signal.expectedWinRate,
         detectedAt: Date.now(),
         currentPrice: curr.close,
+        points: {
+          hammer: { index: currIndex, price: curr.close, timestamp: curr.timestamp },
+        }, // Added for zone positioning
       };
     }
     return null;
@@ -1981,6 +2317,17 @@ class PatternDetectionService {
         console.log('[PatternDetection] Not enough candle data:', candles?.length);
         return [];
       }
+
+      // 🔴 DEBUG: Verify candles have timestamp property
+      const firstCandle = candles[0];
+      const lastCandle = candles[candles.length - 1];
+      console.log(`[PatternDetection] 🔴 CANDLES CHECK for ${symbol}:`, {
+        count: candles.length,
+        firstCandle_hasTimestamp: 'timestamp' in firstCandle,
+        firstCandle_timestamp: firstCandle.timestamp,
+        lastCandle_timestamp: lastCandle.timestamp,
+        firstCandleKeys: Object.keys(firstCandle),
+      });
 
       const patterns = [];
       const tier = this.userTier;
@@ -2080,6 +2427,18 @@ class PatternDetectionService {
       );
 
       console.log(`[PatternDetection] Zone enriched ${zoneEnrichedPatterns.filter(p => p.hasZoneData).length}/${patterns.length} patterns`);
+
+      // 🔴 DEBUG: Log startTime/endTime for ALL enriched patterns
+      zoneEnrichedPatterns.forEach((p, i) => {
+        console.log(`[PatternDetection] 🔴 ENRICHED[${i}] ${p.patternType}:`, {
+          hasPoints: !!p.points,
+          pointKeys: p.points ? Object.keys(p.points) : [],
+          startTime: p.startTime,
+          endTime: p.endTime,
+          startCandleIndex: p.startCandleIndex,
+          endCandleIndex: p.endCandleIndex,
+        });
+      });
 
       // Apply TIER2/3 enhancements if user has access
       const enhancedPatterns = zoneEnrichedPatterns.map(pattern =>
@@ -2198,4 +2557,126 @@ class PatternDetectionService {
 }
 
 export const patternDetection = new PatternDetectionService();
+
+/**
+ * Standalone function to detect all patterns from candles
+ * Used by multiPatternScanner which fetches candles separately
+ * @param {Array} candles - Candle data array
+ * @param {Object} options - Detection options
+ * @returns {Promise<Array>} Detected patterns
+ */
+export async function detectAllPatterns(candles, options = {}) {
+  const { symbol = 'UNKNOWN', timeframe = '4h', tier = 'FREE', patternTypes = null, includeEnhancements = true } = options;
+
+  if (!candles || candles.length < 30) {
+    console.log('[detectAllPatterns] Not enough candles:', candles?.length);
+    return [];
+  }
+
+  // Set tier
+  patternDetection.setUserTier(tier);
+
+  const patterns = [];
+  const userTier = tier;
+
+  try {
+    // ============================================
+    // FREE TIER PATTERNS (3 patterns)
+    // ============================================
+    const dpd = patternDetection.detectDPD(candles, symbol, timeframe);
+    if (dpd) patterns.push(dpd);
+
+    const upu = patternDetection.detectUPU(candles, symbol, timeframe);
+    if (upu) patterns.push(upu);
+
+    const hs = patternDetection.detectHeadAndShoulders(candles, symbol, timeframe);
+    if (hs) patterns.push(hs);
+
+    // ============================================
+    // TIER 1 PATTERNS (+4 = 7 total)
+    // ============================================
+    if (['TIER1', 'TIER2', 'TIER3', 'ADMIN'].includes(userTier)) {
+      const dpu = patternDetection.detectDPU(candles, symbol, timeframe);
+      if (dpu) patterns.push(dpu);
+
+      const upd = patternDetection.detectUPD(candles, symbol, timeframe);
+      if (upd) patterns.push(upd);
+
+      const dt = patternDetection.detectDoubleTop(candles, symbol, timeframe);
+      if (dt) patterns.push(dt);
+
+      const db = patternDetection.detectDoubleBottom(candles, symbol, timeframe);
+      if (db) patterns.push(db);
+    }
+
+    // ============================================
+    // TIER 2 PATTERNS (+8 = 15 total)
+    // ============================================
+    if (['TIER2', 'TIER3', 'ADMIN'].includes(userTier)) {
+      const ihs = patternDetection.detectInverseHeadShoulders(candles, symbol, timeframe);
+      if (ihs) patterns.push(ihs);
+
+      const at = patternDetection.detectAscendingTriangle(candles, symbol, timeframe);
+      if (at) patterns.push(at);
+
+      const dt2 = patternDetection.detectDescendingTriangle(candles, symbol, timeframe);
+      if (dt2) patterns.push(dt2);
+
+      const st = patternDetection.detectSymmetricalTriangle(candles, symbol, timeframe);
+      if (st) patterns.push(st);
+
+      const hfz = patternDetection.detectHFZ(candles, symbol, timeframe);
+      if (hfz) patterns.push(hfz);
+
+      const lfz = patternDetection.detectLFZ(candles, symbol, timeframe);
+      if (lfz) patterns.push(lfz);
+
+      const rb = patternDetection.detectRoundingBottom(candles, symbol, timeframe);
+      if (rb) patterns.push(rb);
+
+      const rt = patternDetection.detectRoundingTop(candles, symbol, timeframe);
+      if (rt) patterns.push(rt);
+    }
+
+    // ============================================
+    // TIER 3 PATTERNS (+7 = 22 total)
+    // ============================================
+    if (['TIER3', 'ADMIN'].includes(userTier)) {
+      const bf = patternDetection.detectBullFlag(candles, symbol, timeframe);
+      if (bf) patterns.push(bf);
+
+      const brf = patternDetection.detectBearFlag(candles, symbol, timeframe);
+      if (brf) patterns.push(brf);
+
+      const wdg = patternDetection.detectWedge(candles, symbol, timeframe);
+      if (wdg) patterns.push(wdg);
+
+      const eng = patternDetection.detectEngulfing(candles, symbol, timeframe);
+      if (eng) patterns.push(eng);
+
+      const mes = patternDetection.detectMorningEveningStar(candles, symbol, timeframe);
+      if (mes) patterns.push(mes);
+
+      const cup = patternDetection.detectCupHandle(candles, symbol, timeframe);
+      if (cup) patterns.push(cup);
+
+      const hm = patternDetection.detectHammer(candles, symbol, timeframe);
+      if (hm) patterns.push(hm);
+    }
+
+    // Filter by patternTypes if provided
+    let filteredPatterns = patterns;
+    if (patternTypes && patternTypes.length > 0) {
+      filteredPatterns = patterns.filter(p => patternTypes.includes(p.type) || patternTypes.includes(p.name));
+    }
+
+    console.log(`[detectAllPatterns] Found ${filteredPatterns.length} patterns for ${symbol} ${timeframe}`);
+    return filteredPatterns;
+
+  } catch (error) {
+    console.error('[detectAllPatterns] Error:', error);
+    return [];
+  }
+}
+
 export default patternDetection;

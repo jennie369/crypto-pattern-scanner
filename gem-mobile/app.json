@@ -33,9 +33,10 @@
           "fbshareextension"
         ],
         "NSPhotoLibraryUsageDescription": "Cho phép truy cập thư viện ảnh để chia sẻ hình ảnh",
-        "NSCameraUsageDescription": "Cho phép sử dụng camera để chụp ảnh chia sẻ",
-        "NSMicrophoneUsageDescription": "Cho phép sử dụng microphone để nhập liệu bằng giọng nói",
-        "NSSpeechRecognitionUsageDescription": "Cho phép nhận dạng giọng nói để chuyển đổi thành văn bản"
+        "NSCameraUsageDescription": "Cho phép sử dụng camera để thực hiện cuộc gọi video và chụp ảnh",
+        "NSMicrophoneUsageDescription": "Cho phép sử dụng microphone để thực hiện cuộc gọi và nhập liệu bằng giọng nói",
+        "NSSpeechRecognitionUsageDescription": "Cho phép nhận dạng giọng nói để chuyển đổi thành văn bản",
+        "UIBackgroundModes": ["audio", "voip"]
       }
     },
     "android": {
@@ -45,6 +46,14 @@
       },
       "package": "com.gemral.mobile",
       "softwareKeyboardLayoutMode": "pan",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.BLUETOOTH",
+        "android.permission.BLUETOOTH_CONNECT"
+      ],
       "intentFilters": [
         {
           "action": "VIEW",
@@ -112,6 +121,9 @@
             "compileSdkVersion": 35,
             "targetSdkVersion": 35,
             "buildToolsVersion": "35.0.0"
+          },
+          "ios": {
+            "useFrameworks": "static"
           }
         }
       ]

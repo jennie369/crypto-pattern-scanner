@@ -71,3 +71,6 @@ export { default as ZoneRectangle } from './ZoneRectangle';
 export { default as MultiZoneOverlay } from './MultiZoneOverlay';
 export { default as ZoneFeatureGuard, useZoneFeatureAccess, getRequiredTierForFeature } from './ZoneFeatureGuard';
 export { default as ZonePreferencesModal } from './ZonePreferencesModal';
+
+// Trading Leads Benefit Components
+export { default as ProScannerBenefitModal } from './ProScannerBenefitModal';

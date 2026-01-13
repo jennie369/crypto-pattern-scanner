@@ -171,6 +171,18 @@ class ZoneManager {
     this._updateCache(symbol, timeframe, userId, zones);
 
     console.log(`[ZoneManager] Created ${zones.length} zones for ${symbol} ${timeframe}`);
+
+    // 🔴 DEBUG: Log start_time/end_time for ALL created zones
+    zones.forEach((z, i) => {
+      console.log(`[ZoneManager] 🔴 ZONE[${i}] ${z.pattern_type}:`, {
+        start_time: z.start_time,
+        end_time: z.end_time,
+        start_candle_index: z.start_candle_index,
+        zone_high: z.zone_high,
+        zone_low: z.zone_low,
+      });
+    });
+
     return zones;
   }
 
@@ -206,10 +218,22 @@ class ZoneManager {
       : entryPrice - (riskAmount * 3);
 
     // ⚠️ CRITICAL: Extract time and candle index data for zone width calculation
-    const startTime = pattern.startTime || pattern.formationTime || Date.now();
+    // Don't fallback to Date.now() - if no time data, let chart handle positioning
+    const startTime = pattern.startTime || pattern.formationTime || null;
     const endTime = pattern.endTime || null;
     const startCandleIndex = pattern.startCandleIndex ?? null;
     const endCandleIndex = pattern.endCandleIndex ?? null;
+
+    // Debug: Log what time data we received from pattern
+    console.log(`[ZoneManager] Pattern ${pattern.patternType || pattern.name}:`, {
+      'pattern.startTime': pattern.startTime,
+      'pattern.endTime': pattern.endTime,
+      'pattern.startCandleIndex': pattern.startCandleIndex,
+      'pattern.endCandleIndex': pattern.endCandleIndex,
+      'pattern.points': pattern.points ? Object.keys(pattern.points) : 'NO POINTS',
+      'extracted startTime': startTime,
+      'extracted endTime': endTime,
+    });
 
     return {
       user_id: userId,
@@ -295,6 +319,9 @@ class ZoneManager {
    */
   async _saveZoneToDb(zone) {
     try {
+      // Debug: Log what we're saving
+      console.log(`[ZoneManager] Saving zone to DB: start_time=${zone.start_time}, end_time=${zone.end_time}`);
+
       const { data, error } = await supabase
         .from('detected_zones')
         .insert({
@@ -306,8 +333,8 @@ class ZoneManager {
           zone_low: zone.zone_low,
           entry_price: zone.entry_price,
           stop_price: zone.stop_price,
-          // ⚠️ CRITICAL: Zone time bounds for width calculation
-          start_time: zone.start_time || Date.now(),
+          // ⚠️ CRITICAL: Zone time bounds - keep null if not available, don't fallback to Date.now()
+          start_time: zone.start_time || null,
           end_time: zone.end_time || null,
           start_candle_index: zone.start_candle_index ?? null,
           // end_candle_index not in current schema - use end_time instead

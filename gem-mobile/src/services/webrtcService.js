@@ -1,22 +1,12 @@
 /**
  * WebRTC Service
  * Manages peer connection and media streams for audio/video calls
- *
- * INSTALLATION REQUIRED:
- * npm install react-native-webrtc
- * cd ios && pod install
- *
- * NOTE: This service is OPTIONAL. If react-native-webrtc is not installed,
- * the service will be disabled and return stub implementations.
  */
 
-let RTCPeerConnection = null;
-let RTCIceCandidate = null;
-let RTCSessionDescription = null;
-let mediaDevices = null;
+// Conditional import - WebRTC is optional and requires native module
+let RTCPeerConnection, RTCIceCandidate, RTCSessionDescription, mediaDevices;
 let WEBRTC_AVAILABLE = false;
 
-// Try to import react-native-webrtc (optional dependency)
 try {
   const webrtc = require('react-native-webrtc');
   RTCPeerConnection = webrtc.RTCPeerConnection;
@@ -26,8 +16,12 @@ try {
   WEBRTC_AVAILABLE = true;
   console.log('[WebRTC] Module loaded successfully');
 } catch (error) {
-  console.log('[WebRTC] Module not installed - service will be disabled');
-  console.log('[WebRTC] To enable: npm install react-native-webrtc');
+  console.log('[WebRTC] Module not available - calls disabled:', error.message);
+  // Mock classes for type safety
+  RTCPeerConnection = class { close() {} };
+  RTCIceCandidate = class {};
+  RTCSessionDescription = class {};
+  mediaDevices = { getUserMedia: () => Promise.reject(new Error('WebRTC not available')) };
 }
 
 import { Audio } from 'expo-av';
@@ -62,7 +56,7 @@ class WebRTCService {
     this.statsInterval = null;
     this.lastStats = null;
 
-    // Check if WebRTC is available
+    // Check if WebRTC native module is available
     this.isAvailable = WEBRTC_AVAILABLE;
   }
 
@@ -72,7 +66,7 @@ class WebRTCService {
    */
   checkAvailable() {
     if (!WEBRTC_AVAILABLE) {
-      console.warn('[WebRTC] Service not available - react-native-webrtc not installed');
+      console.warn('[WebRTC] Service not available - need to build with expo-dev-client');
       return false;
     }
     return true;
@@ -86,9 +80,8 @@ class WebRTCService {
    * @returns {Promise<MediaStream>}
    */
   async initLocalStream(withVideo = false) {
-    // Check if WebRTC is available
     if (!this.checkAvailable()) {
-      throw new Error('WebRTC not available - please install react-native-webrtc');
+      throw new Error('WebRTC không khả dụng. Vui lòng build app với expo-dev-client.');
     }
 
     try {
@@ -126,11 +119,6 @@ class WebRTCService {
    * @returns {RTCPeerConnection}
    */
   createPeerConnection() {
-    // Check if WebRTC is available
-    if (!this.checkAvailable()) {
-      throw new Error('WebRTC not available - please install react-native-webrtc');
-    }
-
     try {
       console.log('[WebRTC] Creating peer connection');
 

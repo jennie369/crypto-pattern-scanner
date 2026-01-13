@@ -5,8 +5,8 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useCall } from './useCall';
-import { webrtcService } from '../services/webrtcService';
 import { callService } from '../services/callService';
+import { webrtcService } from '../services/webrtcService';
 
 /**
  * useVideoCall Hook
@@ -52,6 +52,8 @@ export const useVideoCall = (options = {}) => {
 
   // Listen for remote video changes
   useEffect(() => {
+    if (!webrtcService) return;
+
     const originalOnRemoteStream = webrtcService.onRemoteStream;
 
     webrtcService.onRemoteStream = (stream) => {
@@ -66,7 +68,9 @@ export const useVideoCall = (options = {}) => {
     };
 
     return () => {
-      webrtcService.onRemoteStream = originalOnRemoteStream;
+      if (webrtcService) {
+        webrtcService.onRemoteStream = originalOnRemoteStream;
+      }
     };
   }, []);
 

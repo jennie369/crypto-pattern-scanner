@@ -1,10 +1,10 @@
 /**
- * GlowingOrb - Central ritual orb with multi-layer glow and animations
- * Features pulse, glow, press feedback, and ripple effects
+ * GlowingOrb - PERFORMANCE OPTIMIZED
+ * Single animation driver, removed setTimeout, simplified glow
  */
 
-import React, { useEffect, useCallback } from 'react';
-import { View, StyleSheet, Pressable } from 'react-native';
+import React, { useEffect, useCallback, memo, useMemo } from 'react';
+import { View, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
@@ -12,41 +12,28 @@ import Animated, {
   withTiming,
   withSpring,
   withRepeat,
-  withSequence,
+  Easing,
   runOnJS,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
 
-import { COSMIC_COLORS, COSMIC_SHADOWS } from '../../../theme/cosmicTokens';
-import { COSMIC_TIMING, ANIMATION_PRESETS } from '../../../utils/cosmicAnimations';
+import { COSMIC_COLORS } from '../../../theme/cosmicTokens';
 
-const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
+// Simplified single ripple
+const Ripple = memo(({ size, color, driver, index }) => {
+  const animatedStyle = useAnimatedStyle(() => {
+    // Use driver to create wave effect with offset per ring
+    const phase = driver.value + (index * 2);
+    const progress = (phase % (Math.PI * 2)) / (Math.PI * 2);
+    const scale = 1 + progress * 1.5;
+    const opacity = 0.4 * (1 - progress);
 
-// ============================================
-// RIPPLE COMPONENT
-// ============================================
-
-const Ripple = React.memo(({ size, color, index, active }) => {
-  const scale = useSharedValue(1);
-  const opacity = useSharedValue(0);
-
-  useEffect(() => {
-    if (active) {
-      const delay = index * 200;
-      setTimeout(() => {
-        scale.value = 1;
-        opacity.value = 0.4;
-        scale.value = withTiming(2.5, { duration: 1000, easing: COSMIC_TIMING.easing.smoothOut });
-        opacity.value = withTiming(0, { duration: 1000, easing: COSMIC_TIMING.easing.smoothOut });
-      }, delay);
-    }
-  }, [active]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-    opacity: opacity.value,
-  }));
+    return {
+      transform: [{ scale }],
+      opacity,
+    };
+  }, [driver, index]);
 
   return (
     <Animated.View
@@ -64,14 +51,12 @@ const Ripple = React.memo(({ size, color, index, active }) => {
   );
 });
 
-// ============================================
-// GLOW LAYER COMPONENT
-// ============================================
-
-const GlowLayer = React.memo(({ size, color, blur, animatedOpacity }) => {
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: animatedOpacity.value,
-  }));
+// Simple glow layer
+const GlowLayer = memo(({ size, color, blur, driver, baseOpacity }) => {
+  const animatedStyle = useAnimatedStyle(() => {
+    const opacity = baseOpacity + 0.15 * Math.sin(driver.value);
+    return { opacity };
+  }, [driver, baseOpacity]);
 
   return (
     <Animated.View
@@ -83,7 +68,7 @@ const GlowLayer = React.memo(({ size, color, blur, animatedOpacity }) => {
           borderRadius: size / 2,
           backgroundColor: color,
           shadowColor: color,
-          shadowOpacity: 0.8,
+          shadowOpacity: 0.6,
           shadowRadius: blur,
         },
         animatedStyle,
@@ -92,16 +77,12 @@ const GlowLayer = React.memo(({ size, color, blur, animatedOpacity }) => {
   );
 });
 
-// ============================================
-// MAIN COMPONENT
-// ============================================
-
 const GlowingOrb = ({
   size = 150,
   color = COSMIC_COLORS.ritualThemes.heart.primary,
   secondaryColor = null,
-  gradient = null, // Array of colors for gradient
-  icon = null, // React element (e.g., Lucide icon)
+  gradient = null,
+  icon = null,
   iconSize = 60,
   pulseSpeed = 2000,
   glowIntensity = 1,
@@ -113,54 +94,26 @@ const GlowingOrb = ({
   showRipples = true,
   style,
 }) => {
-  // Animation values
-  const scale = useSharedValue(1);
-  const pulseScale = useSharedValue(1);
-  const glowOpacity = useSharedValue(0.6);
-  const outerGlowOpacity = useSharedValue(0.3);
-  const rippleActive = useSharedValue(false);
-  const isLongPressing = useSharedValue(false);
+  // SINGLE animation driver
+  const animationDriver = useSharedValue(0);
+  const pressScale = useSharedValue(1);
 
-  // Secondary color fallback
   const secondary = secondaryColor || color;
-
-  // Gradient colors fallback
   const gradientColors = gradient || [color, secondary, color];
 
-  // Start pulse animation
+  // Single continuous pulse animation
   useEffect(() => {
     if (!disabled) {
-      // Pulse scale
-      pulseScale.value = withRepeat(
-        withSequence(
-          withTiming(1.08, { duration: pulseSpeed / 2, easing: COSMIC_TIMING.easing.cosmic }),
-          withTiming(1, { duration: pulseSpeed / 2, easing: COSMIC_TIMING.easing.cosmic })
-        ),
+      animationDriver.value = withRepeat(
+        withTiming(Math.PI * 2, {
+          duration: pulseSpeed,
+          easing: Easing.linear,
+        }),
         -1,
-        true
-      );
-
-      // Glow intensity animation
-      glowOpacity.value = withRepeat(
-        withSequence(
-          withTiming(0.8 * glowIntensity, { duration: pulseSpeed / 2, easing: COSMIC_TIMING.easing.gentle }),
-          withTiming(0.5 * glowIntensity, { duration: pulseSpeed / 2, easing: COSMIC_TIMING.easing.gentle })
-        ),
-        -1,
-        true
-      );
-
-      // Outer glow animation
-      outerGlowOpacity.value = withRepeat(
-        withSequence(
-          withTiming(0.4 * glowIntensity, { duration: pulseSpeed / 2, easing: COSMIC_TIMING.easing.gentle }),
-          withTiming(0.2 * glowIntensity, { duration: pulseSpeed / 2, easing: COSMIC_TIMING.easing.gentle })
-        ),
-        -1,
-        true
+        false
       );
     }
-  }, [disabled, pulseSpeed, glowIntensity]);
+  }, [disabled, pulseSpeed]);
 
   // Haptic feedback
   const triggerHaptic = useCallback((type = 'light') => {
@@ -168,8 +121,6 @@ const GlowingOrb = ({
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     } else if (type === 'medium') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    } else if (type === 'heavy') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     }
   }, []);
 
@@ -177,14 +128,11 @@ const GlowingOrb = ({
   const tapGesture = Gesture.Tap()
     .enabled(!disabled)
     .onStart(() => {
-      scale.value = withTiming(0.95, { duration: 100 });
+      pressScale.value = withTiming(0.95, { duration: 80 });
       runOnJS(triggerHaptic)('light');
     })
     .onEnd(() => {
-      scale.value = withSpring(1, COSMIC_TIMING.spring.bouncy);
-      if (showRipples) {
-        rippleActive.value = !rippleActive.value;
-      }
+      pressScale.value = withSpring(1, { damping: 15, stiffness: 300 });
       if (onPress) {
         runOnJS(onPress)();
       }
@@ -194,16 +142,14 @@ const GlowingOrb = ({
     .enabled(!disabled && !!onLongPress)
     .minDuration(300)
     .onStart(() => {
-      isLongPressing.value = true;
-      scale.value = withTiming(1.15, { duration: 500, easing: COSMIC_TIMING.easing.smoothOut });
+      pressScale.value = withTiming(1.1, { duration: 300 });
       runOnJS(triggerHaptic)('medium');
       if (onLongPressStart) {
         runOnJS(onLongPressStart)();
       }
     })
     .onEnd(() => {
-      isLongPressing.value = false;
-      scale.value = withSpring(1, COSMIC_TIMING.spring.bouncy);
+      pressScale.value = withSpring(1, { damping: 15, stiffness: 300 });
       if (onLongPress) {
         runOnJS(onLongPress)();
       }
@@ -212,59 +158,58 @@ const GlowingOrb = ({
       }
     })
     .onFinalize(() => {
-      isLongPressing.value = false;
-      scale.value = withSpring(1, COSMIC_TIMING.spring.bouncy);
-      if (onLongPressEnd) {
-        runOnJS(onLongPressEnd)();
-      }
+      pressScale.value = withSpring(1, { damping: 15, stiffness: 300 });
     });
 
   const composedGestures = Gesture.Exclusive(longPressGesture, tapGesture);
 
-  // Animated styles
-  const containerStyle = useAnimatedStyle(() => ({
-    transform: [
-      { scale: scale.value * pulseScale.value },
-    ],
-  }));
+  // Animated container style
+  const containerStyle = useAnimatedStyle(() => {
+    const pulseScale = 1 + 0.05 * Math.sin(animationDriver.value);
+    return {
+      transform: [{ scale: pressScale.value * pulseScale }],
+    };
+  }, [animationDriver, pressScale]);
 
   // Sizes
-  const outerGlowSize = size * 1.6;
-  const midGlowSize = size * 1.3;
+  const outerGlowSize = size * 1.5;
+  const midGlowSize = size * 1.25;
   const innerSize = size;
 
   return (
     <View style={[styles.container, { width: outerGlowSize, height: outerGlowSize }, style]}>
-      {/* Ripple effects */}
-      {showRipples && [0, 1, 2].map((index) => (
+      {/* Ripples - only 2 instead of 3 */}
+      {showRipples && [0, 1].map((index) => (
         <Ripple
           key={index}
           size={innerSize}
           color={color}
+          driver={animationDriver}
           index={index}
-          active={rippleActive.value}
         />
       ))}
 
       <GestureDetector gesture={composedGestures}>
         <Animated.View style={[styles.orbContainer, containerStyle]}>
-          {/* Outer glow layer */}
+          {/* Outer glow */}
           <GlowLayer
             size={outerGlowSize}
             color={color}
-            blur={40}
-            animatedOpacity={outerGlowOpacity}
+            blur={30}
+            driver={animationDriver}
+            baseOpacity={0.25 * glowIntensity}
           />
 
-          {/* Mid glow layer */}
+          {/* Mid glow */}
           <GlowLayer
             size={midGlowSize}
             color={secondary}
-            blur={25}
-            animatedOpacity={glowOpacity}
+            blur={20}
+            driver={animationDriver}
+            baseOpacity={0.4 * glowIntensity}
           />
 
-          {/* Inner orb with gradient */}
+          {/* Inner orb */}
           <View style={[styles.innerOrb, { width: innerSize, height: innerSize, borderRadius: innerSize / 2 }]}>
             <LinearGradient
               colors={gradientColors}
@@ -276,13 +221,10 @@ const GlowingOrb = ({
             {/* Highlight */}
             <LinearGradient
               colors={['rgba(255, 255, 255, 0.3)', 'transparent']}
-              style={[StyleSheet.absoluteFill, { opacity: 0.6 }]}
+              style={[StyleSheet.absoluteFill, { opacity: 0.5 }]}
               start={{ x: 0.3, y: 0 }}
               end={{ x: 0.7, y: 0.5 }}
             />
-
-            {/* Inner shadow */}
-            <View style={styles.innerShadow} />
 
             {/* Icon */}
             {icon && (
@@ -301,10 +243,6 @@ const GlowingOrb = ({
   );
 };
 
-// ============================================
-// STYLES
-// ============================================
-
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
@@ -322,23 +260,11 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
-    // iOS shadow
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
-    // Android elevation
     elevation: 8,
-  },
-  innerShadow: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: 999,
-    borderWidth: 2,
-    borderColor: 'rgba(0, 0, 0, 0.1)',
   },
   iconContainer: {
     position: 'absolute',
@@ -351,4 +277,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default React.memo(GlowingOrb);
+export default memo(GlowingOrb);

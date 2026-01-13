@@ -257,11 +257,11 @@ export default function ChatScreen({ route, navigation }) {
   // TYPING INDICATOR
   // =====================================================
 
-  const handleTyping = useCallback(() => {
+  const handleTyping = useCallback(async () => {
     if (!typingSubscription.current?.broadcastTyping) return;
 
-    // Broadcast typing status
-    typingSubscription.current.broadcastTyping(true, profile?.display_name || 'User');
+    // Broadcast typing status (now async)
+    await typingSubscription.current.broadcastTyping(true, profile?.display_name || 'User');
 
     // Clear previous timeout
     if (typingTimeoutRef.current) {
@@ -270,8 +270,8 @@ export default function ChatScreen({ route, navigation }) {
 
     // Set timeout to stop typing
     // CRITICAL: Timeout MUST be 2000ms to match web
-    typingTimeoutRef.current = setTimeout(() => {
-      typingSubscription.current?.broadcastTyping(false);
+    typingTimeoutRef.current = setTimeout(async () => {
+      await typingSubscription.current?.broadcastTyping(false);
     }, TYPING_TIMEOUT);
   }, [profile?.display_name]);
 

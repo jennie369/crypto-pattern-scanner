@@ -1,50 +1,49 @@
 /**
- * CosmicBackground - Animated starry background for rituals
- * Features multi-layer gradients, twinkling stars, nebula clouds
+ * CosmicBackground - PERFORMANCE OPTIMIZED
+ * Uses single animation driver for all stars
+ * Reduced particle count, eliminated individual animations
  */
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, memo } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withRepeat,
-  withSequence,
   withTiming,
-  withDelay,
   Easing,
+  useDerivedValue,
+  interpolate,
 } from 'react-native-reanimated';
 
-import { COSMIC_COLORS, COSMIC_GRADIENTS, PARTICLE_CONFIGS } from '../../../theme/cosmicTokens';
-import { COSMIC_TIMING } from '../../../utils/cosmicAnimations';
+import { COSMIC_COLORS, COSMIC_GRADIENTS } from '../../../theme/cosmicTokens';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
-// ============================================
-// STAR COMPONENT
-// ============================================
+// Pre-calculate star positions once
+const generateStars = (count) => {
+  const stars = [];
+  for (let i = 0; i < count; i++) {
+    stars.push({
+      id: i,
+      x: Math.random() * SCREEN_WIDTH,
+      y: Math.random() * SCREEN_HEIGHT,
+      size: 1 + Math.random() * 2, // 1-3px
+      phase: Math.random() * Math.PI * 2, // Random phase offset
+      speed: 0.5 + Math.random() * 0.5, // Speed multiplier
+    });
+  }
+  return stars;
+};
 
-const Star = React.memo(({ x, y, size, delay, duration }) => {
-  const opacity = useSharedValue(0.3);
-
-  useEffect(() => {
-    opacity.value = withDelay(
-      delay,
-      withRepeat(
-        withSequence(
-          withTiming(1, { duration: duration / 2, easing: COSMIC_TIMING.easing.gentle }),
-          withTiming(0.3, { duration: duration / 2, easing: COSMIC_TIMING.easing.gentle })
-        ),
-        -1,
-        true
-      )
-    );
-  }, []);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-  }));
+// Single animated star using shared driver
+const AnimatedStar = memo(({ x, y, size, phase, speed, driver }) => {
+  const animatedStyle = useAnimatedStyle(() => {
+    // Use sine wave with phase offset for twinkle
+    const opacity = 0.3 + 0.7 * ((Math.sin((driver.value * speed) + phase) + 1) / 2);
+    return { opacity };
+  }, [driver, phase, speed]);
 
   return (
     <Animated.View
@@ -56,7 +55,6 @@ const Star = React.memo(({ x, y, size, delay, duration }) => {
           width: size,
           height: size,
           borderRadius: size / 2,
-          backgroundColor: COSMIC_COLORS.particles.star,
         },
         animatedStyle,
       ]}
@@ -64,84 +62,30 @@ const Star = React.memo(({ x, y, size, delay, duration }) => {
   );
 });
 
-// ============================================
-// NEBULA CLOUD COMPONENT
-// ============================================
+// Static nebula - no animation needed for ambient clouds
+const StaticNebula = memo(({ x, y, size, color }) => (
+  <View
+    style={[
+      styles.nebula,
+      {
+        left: x - size / 2,
+        top: y - size / 2,
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        backgroundColor: color,
+        opacity: 0.15,
+      },
+    ]}
+  />
+));
 
-const NebulaCloud = React.memo(({ x, y, size, color, delay }) => {
-  const opacity = useSharedValue(0.1);
-  const scale = useSharedValue(1);
-
-  useEffect(() => {
-    opacity.value = withDelay(
-      delay,
-      withRepeat(
-        withSequence(
-          withTiming(0.25, { duration: 8000, easing: COSMIC_TIMING.easing.gentle }),
-          withTiming(0.1, { duration: 8000, easing: COSMIC_TIMING.easing.gentle })
-        ),
-        -1,
-        true
-      )
-    );
-
-    scale.value = withDelay(
-      delay,
-      withRepeat(
-        withSequence(
-          withTiming(1.1, { duration: 10000, easing: COSMIC_TIMING.easing.gentle }),
-          withTiming(1, { duration: 10000, easing: COSMIC_TIMING.easing.gentle })
-        ),
-        -1,
-        true
-      )
-    );
-  }, []);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-    transform: [{ scale: scale.value }],
-  }));
-
-  return (
-    <Animated.View
-      style={[
-        styles.nebula,
-        {
-          left: x - size / 2,
-          top: y - size / 2,
-          width: size,
-          height: size,
-          borderRadius: size / 2,
-          backgroundColor: color,
-        },
-        animatedStyle,
-      ]}
-    />
-  );
-});
-
-// ============================================
-// SPOTLIGHT COMPONENT
-// ============================================
-
-const Spotlight = React.memo(({ color, intensity }) => {
-  const opacity = useSharedValue(intensity * 0.3);
-
-  useEffect(() => {
-    opacity.value = withRepeat(
-      withSequence(
-        withTiming(intensity * 0.5, { duration: 4000, easing: COSMIC_TIMING.easing.gentle }),
-        withTiming(intensity * 0.3, { duration: 4000, easing: COSMIC_TIMING.easing.gentle })
-      ),
-      -1,
-      true
-    );
-  }, [intensity]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-  }));
+// Simple spotlight with single animation
+const AnimatedSpotlight = memo(({ color, intensity, driver }) => {
+  const animatedStyle = useAnimatedStyle(() => {
+    const opacity = intensity * (0.3 + 0.1 * Math.sin(driver.value * 0.5));
+    return { opacity };
+  }, [driver, intensity]);
 
   return (
     <Animated.View style={[styles.spotlightContainer, animatedStyle]}>
@@ -155,21 +99,32 @@ const Spotlight = React.memo(({ color, intensity }) => {
   );
 });
 
-// ============================================
-// MAIN COMPONENT
-// ============================================
-
 const CosmicBackground = ({
-  variant = 'default', // 'default' | 'heart' | 'gratitude' | 'breath' | 'water' | 'letter' | 'burn' | 'star'
-  accentColor = null, // Override color for spotlight
-  starDensity = 'medium', // 'low' | 'medium' | 'high'
+  variant = 'default',
+  accentColor = null,
+  starDensity = 'medium',
   showNebula = true,
   showSpotlight = true,
   animateStars = true,
   spotlightIntensity = 0.5,
   children,
 }) => {
-  // Get theme colors based on variant
+  // SINGLE animation driver for entire background
+  const animationDriver = useSharedValue(0);
+
+  useEffect(() => {
+    // Single continuous animation - runs on UI thread
+    animationDriver.value = withRepeat(
+      withTiming(Math.PI * 2, {
+        duration: 6000,
+        easing: Easing.linear,
+      }),
+      -1, // Infinite
+      false // No reverse
+    );
+  }, []);
+
+  // Theme colors
   const themeColors = useMemo(() => {
     const themes = {
       default: { spotlight: COSMIC_COLORS.glow.purple, nebula: COSMIC_COLORS.particles.nebula },
@@ -184,30 +139,19 @@ const CosmicBackground = ({
     return themes[variant] || themes.default;
   }, [variant]);
 
-  // Generate stars based on density - OPTIMIZED: reduced counts significantly
+  // REDUCED star count - max 12 stars
   const stars = useMemo(() => {
-    const counts = { low: 15, medium: 25, high: 40 }; // Reduced from 30/60/100
-    const count = counts[starDensity] || 25;
-
-    return Array.from({ length: count }, (_, i) => ({
-      id: i,
-      x: Math.random() * SCREEN_WIDTH,
-      y: Math.random() * SCREEN_HEIGHT,
-      size: Math.random() * 2 + 1, // 1-3px
-      delay: Math.random() * 3000,
-      duration: 3000 + Math.random() * 2000, // 3-5s (slower = less CPU)
-    }));
+    const counts = { low: 6, medium: 10, high: 12 };
+    return generateStars(counts[starDensity] || 10);
   }, [starDensity]);
 
-  // Generate nebula clouds
+  // Static nebula positions
   const nebulaClouds = useMemo(() => {
     if (!showNebula) return [];
-
     return [
-      { id: 0, x: SCREEN_WIDTH * 0.2, y: SCREEN_HEIGHT * 0.15, size: 200, delay: 0 },
-      { id: 1, x: SCREEN_WIDTH * 0.8, y: SCREEN_HEIGHT * 0.3, size: 180, delay: 2000 },
-      { id: 2, x: SCREEN_WIDTH * 0.5, y: SCREEN_HEIGHT * 0.7, size: 220, delay: 4000 },
-      { id: 3, x: SCREEN_WIDTH * 0.1, y: SCREEN_HEIGHT * 0.85, size: 160, delay: 1000 },
+      { id: 0, x: SCREEN_WIDTH * 0.2, y: SCREEN_HEIGHT * 0.15, size: 200 },
+      { id: 1, x: SCREEN_WIDTH * 0.8, y: SCREEN_HEIGHT * 0.3, size: 180 },
+      { id: 2, x: SCREEN_WIDTH * 0.5, y: SCREEN_HEIGHT * 0.75, size: 220 },
     ];
   }, [showNebula]);
 
@@ -215,7 +159,7 @@ const CosmicBackground = ({
 
   return (
     <View style={styles.container}>
-      {/* Base gradient - Deep space */}
+      {/* Base gradient */}
       <LinearGradient
         colors={COSMIC_GRADIENTS.deepSpace}
         style={StyleSheet.absoluteFill}
@@ -223,7 +167,7 @@ const CosmicBackground = ({
         end={{ x: 0.5, y: 1 }}
       />
 
-      {/* Secondary gradient - Cosmic overlay */}
+      {/* Secondary gradient overlay */}
       <LinearGradient
         colors={COSMIC_GRADIENTS.cosmicBg}
         style={[StyleSheet.absoluteFill, { opacity: 0.5 }]}
@@ -231,36 +175,40 @@ const CosmicBackground = ({
         end={{ x: 1, y: 1 }}
       />
 
-      {/* Nebula clouds layer */}
-      {showNebula && nebulaClouds.map((cloud) => (
-        <NebulaCloud
+      {/* Static nebula clouds */}
+      {nebulaClouds.map((cloud) => (
+        <StaticNebula
           key={cloud.id}
           x={cloud.x}
           y={cloud.y}
           size={cloud.size}
           color={themeColors.nebula}
-          delay={cloud.delay}
         />
       ))}
 
-      {/* Stars layer */}
+      {/* Stars - all driven by single animation */}
       {animateStars && stars.map((star) => (
-        <Star
+        <AnimatedStar
           key={star.id}
           x={star.x}
           y={star.y}
           size={star.size}
-          delay={star.delay}
-          duration={star.duration}
+          phase={star.phase}
+          speed={star.speed}
+          driver={animationDriver}
         />
       ))}
 
-      {/* Spotlight effect from top */}
+      {/* Spotlight */}
       {showSpotlight && (
-        <Spotlight color={spotlightColor} intensity={spotlightIntensity} />
+        <AnimatedSpotlight
+          color={spotlightColor}
+          intensity={spotlightIntensity}
+          driver={animationDriver}
+        />
       )}
 
-      {/* Vignette effect */}
+      {/* Vignette */}
       <LinearGradient
         colors={['transparent', 'rgba(0, 0, 0, 0.3)', 'rgba(0, 0, 0, 0.6)']}
         style={[StyleSheet.absoluteFill, { pointerEvents: 'none' }]}
@@ -268,15 +216,10 @@ const CosmicBackground = ({
         end={{ x: 0.5, y: 1 }}
       />
 
-      {/* Content */}
       {children}
     </View>
   );
 };
-
-// ============================================
-// STYLES
-// ============================================
 
 const styles = StyleSheet.create({
   container: {
@@ -285,14 +228,10 @@ const styles = StyleSheet.create({
   },
   star: {
     position: 'absolute',
-    shadowColor: COSMIC_COLORS.particles.star,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
+    backgroundColor: COSMIC_COLORS.particles.star,
   },
   nebula: {
     position: 'absolute',
-    // Blur effect approximation - OPTIMIZED: removed shadow for performance
   },
   spotlightContainer: {
     position: 'absolute',
@@ -307,4 +246,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default React.memo(CosmicBackground);
+export default memo(CosmicBackground);

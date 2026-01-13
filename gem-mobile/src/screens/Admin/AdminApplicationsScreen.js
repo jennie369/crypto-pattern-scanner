@@ -3,7 +3,7 @@
  * Review and manage partnership applications (Affiliate & CTV)
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -30,11 +30,13 @@ import {
   ChevronDown,
   ChevronUp,
   Filter,
+  Wifi,
 } from 'lucide-react-native';
 
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY, GLASS } from '../../utils/tokens';
 import { supabase } from '../../services/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import ADMIN_PARTNERSHIP_SERVICE from '../../services/adminPartnershipService';
 
 const AdminApplicationsScreen = ({ navigation }) => {
   const { user, isAdmin } = useAuth();
@@ -43,6 +45,10 @@ const AdminApplicationsScreen = ({ navigation }) => {
   const [applications, setApplications] = useState([]);
   const [filter, setFilter] = useState('pending'); // pending, approved, rejected, all
   const [expandedId, setExpandedId] = useState(null);
+  const [realtimeConnected, setRealtimeConnected] = useState(false);
+
+  // Real-time subscription ref
+  const applicationsSubRef = useRef(null);
 
   // Rejection modal
   const [showRejectModal, setShowRejectModal] = useState(false);
@@ -67,11 +73,34 @@ const AdminApplicationsScreen = ({ navigation }) => {
     setAlertConfig((prev) => ({ ...prev, visible: false }));
   };
 
+  // Initial load
   useEffect(() => {
     if (isAdmin) {
       loadApplications();
     }
   }, [isAdmin, filter]);
+
+  // Real-time subscription for applications
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    console.log('[AdminApplicationsScreen] Setting up real-time subscription...');
+
+    applicationsSubRef.current = ADMIN_PARTNERSHIP_SERVICE.subscribeToApplications((payload) => {
+      console.log('[AdminApplicationsScreen] Applications update:', payload.eventType);
+      // Auto-reload list when data changes
+      loadApplications();
+      setRealtimeConnected(true);
+    });
+
+    setRealtimeConnected(true);
+
+    return () => {
+      console.log('[AdminApplicationsScreen] Cleaning up subscription...');
+      ADMIN_PARTNERSHIP_SERVICE.unsubscribe(applicationsSubRef.current);
+      applicationsSubRef.current = null;
+    };
+  }, [isAdmin]);
 
   const loadApplications = async () => {
     try {

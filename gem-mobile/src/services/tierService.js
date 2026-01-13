@@ -793,6 +793,146 @@ class TierService {
       return { tier: 'FREE', expiresAt: null, isExpired: false, daysRemaining: null };
     }
   }
+
+  // ========================================
+  // TRADING LEADS PRO SCANNER BENEFIT
+  // ========================================
+
+  /**
+   * Get scanner tier with trading leads benefit check
+   * First 50 registrants from trading course landing page get 30 days PRO Scanner
+   * @param {string} userId
+   * @param {string} email - User's email to check trading_leads table
+   * @returns {Promise<Object>} - { tier, hasTradingLeadsBenefit, expiresAt, daysRemaining }
+   */
+  static async getScannerTierWithTradingLeads(userId, email) {
+    try {
+      // First get the regular scanner tier
+      const regularTierInfo = await this.getUserTierWithExpiration(userId);
+
+      // If already PRO or higher, no need to check trading leads
+      if (regularTierInfo.tier !== 'FREE') {
+        return {
+          ...regularTierInfo,
+          hasTradingLeadsBenefit: false,
+          tradingLeadsInfo: null,
+        };
+      }
+
+      // Check trading_leads table for this email
+      if (!email) {
+        return {
+          ...regularTierInfo,
+          hasTradingLeadsBenefit: false,
+          tradingLeadsInfo: null,
+        };
+      }
+
+      const normalizedEmail = email.toLowerCase().trim();
+      const { data: leadData, error: leadError } = await supabase
+        .from('trading_leads')
+        .select('queue_number, scanner_activated_at, scanner_expires_at, scanner_days')
+        .eq('email', normalizedEmail)
+        .single();
+
+      if (leadError || !leadData) {
+        return {
+          ...regularTierInfo,
+          hasTradingLeadsBenefit: false,
+          tradingLeadsInfo: null,
+        };
+      }
+
+      // Check if in first 50 and activated
+      if (leadData.queue_number > 50 || !leadData.scanner_activated_at) {
+        return {
+          ...regularTierInfo,
+          hasTradingLeadsBenefit: false,
+          tradingLeadsInfo: {
+            queueNumber: leadData.queue_number,
+            isEligible: leadData.queue_number <= 50,
+            isActivated: !!leadData.scanner_activated_at,
+          },
+        };
+      }
+
+      // Check if benefit is still active
+      const expiresAt = new Date(leadData.scanner_expires_at);
+      const now = new Date();
+
+      if (expiresAt < now) {
+        // Benefit expired
+        return {
+          ...regularTierInfo,
+          hasTradingLeadsBenefit: false,
+          tradingLeadsInfo: {
+            queueNumber: leadData.queue_number,
+            isExpired: true,
+            expiredAt: leadData.scanner_expires_at,
+          },
+        };
+      }
+
+      // Active trading leads benefit!
+      const daysRemaining = Math.ceil((expiresAt - now) / (1000 * 60 * 60 * 24));
+
+      console.log(`[TierService] User has active Trading Leads PRO Scanner: ${daysRemaining} days remaining`);
+
+      return {
+        tier: 'TIER1', // PRO tier
+        originalTier: 'FREE',
+        hasTradingLeadsBenefit: true,
+        expiresAt: leadData.scanner_expires_at,
+        isExpired: false,
+        daysRemaining,
+        warningLevel: daysRemaining <= 3 ? 'critical' :
+                      daysRemaining <= 7 ? 'warning' :
+                      daysRemaining <= 14 ? 'notice' : null,
+        tradingLeadsInfo: {
+          queueNumber: leadData.queue_number,
+          activatedAt: leadData.scanner_activated_at,
+          expiresAt: leadData.scanner_expires_at,
+          daysTotal: leadData.scanner_days,
+          daysRemaining,
+          source: 'trading_course_landing',
+        },
+      };
+    } catch (error) {
+      console.error('[TierService] Error checking trading leads benefit:', error);
+      return {
+        tier: 'FREE',
+        hasTradingLeadsBenefit: false,
+        tradingLeadsInfo: null,
+      };
+    }
+  }
+
+  /**
+   * Check if user has active trading leads scanner benefit
+   * @param {string} email
+   * @returns {Promise<boolean>}
+   */
+  static async hasTradingLeadsScannerBenefit(email) {
+    try {
+      if (!email) return false;
+
+      const normalizedEmail = email.toLowerCase().trim();
+      const { data, error } = await supabase
+        .from('trading_leads')
+        .select('queue_number, scanner_activated_at, scanner_expires_at')
+        .eq('email', normalizedEmail)
+        .single();
+
+      if (error || !data) return false;
+      if (data.queue_number > 50) return false;
+      if (!data.scanner_activated_at) return false;
+
+      const expiresAt = new Date(data.scanner_expires_at);
+      return expiresAt > new Date();
+    } catch {
+      return false;
+    }
+  }
 }
 
 export default TierService;

@@ -22,14 +22,26 @@ import { useSponsorBanners } from '../../components/SponsorBannerSection';
 import SponsorBanner from '../../components/SponsorBanner';
 import { UpgradeBanner } from '../../components/upgrade';
 import useScrollToTop from '../../hooks/useScrollToTop';
+import useTradingLeadsBenefit from '../../hooks/useTradingLeadsBenefit';
+import { ProScannerBenefitModal } from '../../components/Scanner';
 
 export default function HomeScreen({ navigation }) {
   const { user, profile } = useAuth();
 
   const [refreshing, setRefreshing] = useState(false);
 
+  // Trading Leads Pro Scanner benefit check
+  const {
+    benefitInfo,
+    showBenefitModal,
+    closeBenefitModal,
+    onBenefitActivated,
+    userEmail,
+    userId: tradingLeadsUserId,
+  } = useTradingLeadsBenefit();
+
   // Sponsor banners - use hook to fetch ALL banners for distribution
-  const { banners: sponsorBanners, dismissBanner, userId, refresh: refreshBanners } = useSponsorBanners('home', refreshing);
+  const { banners: sponsorBanners, dismissBanner, userId: sponsorUserId, refresh: refreshBanners } = useSponsorBanners('home', refreshing);
 
   // Double-tap to scroll to top and refresh
   const { scrollViewRef } = useScrollToTop('Home', async () => {
@@ -85,7 +97,7 @@ export default function HomeScreen({ navigation }) {
               key={banner.id}
               banner={banner}
               navigation={navigation}
-              userId={userId}
+              userId={sponsorUserId}
               onDismiss={dismissBanner}
             />
           ))}
@@ -97,6 +109,16 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.placeholderDesc}>Forum & Community features coming soon</Text>
           </View>
         </ScrollView>
+
+        {/* Pro Scanner Benefit Modal - Trading Leads */}
+        <ProScannerBenefitModal
+          visible={showBenefitModal}
+          onClose={closeBenefitModal}
+          onActivated={onBenefitActivated}
+          benefitInfo={benefitInfo}
+          userEmail={userEmail}
+          userId={tradingLeadsUserId}
+        />
       </SafeAreaView>
     </LinearGradient>
   );

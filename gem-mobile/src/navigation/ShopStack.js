@@ -37,6 +37,9 @@ import PaymentStatusScreen from '../screens/Shop/PaymentStatusScreen';
 import PaymentSuccessScreen from '../screens/Shop/PaymentSuccessScreen';
 import PaymentExpiredScreen from '../screens/Shop/PaymentExpiredScreen';
 
+// Digital Products Screen
+import DigitalProductsScreen from '../screens/Shop/DigitalProductsScreen';
+
 const Stack = createNativeStackNavigator();
 
 const ShopStack = () => {
@@ -50,6 +53,7 @@ const ShopStack = () => {
       <Stack.Screen name="ShopMain" component={ShopScreen} />
       <Stack.Screen name="ProductSearch" component={ProductSearchScreen} />
       <Stack.Screen name="ProductList" component={ProductListScreen} />
+      <Stack.Screen name="DigitalProducts" component={DigitalProductsScreen} />
       <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
 
       {/* Shop Enhancement Screens */}

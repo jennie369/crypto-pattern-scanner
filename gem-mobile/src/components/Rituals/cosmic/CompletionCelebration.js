@@ -1,6 +1,7 @@
 /**
- * CompletionCelebration - Success celebration screen for ritual completion
- * Features XP animation, streak display, confetti, and action buttons
+ * CompletionCelebration - PERFORMANCE OPTIMIZED
+ * Reduced confetti count, replaced setInterval with Reanimated
+ * Simplified animations for smooth 60fps
  */
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -9,6 +10,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
+  useAnimatedReaction,
   withTiming,
   withSpring,
   withDelay,
@@ -17,13 +19,12 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { CheckCircle, Award, Flame, Star, Sparkles, PenLine, Plus } from 'lucide-react-native';
+import { CheckCircle, Flame, Star, Sparkles, PenLine, Plus } from 'lucide-react-native';
 
 import {
   COSMIC_COLORS,
   COSMIC_SPACING,
   COSMIC_RADIUS,
-  COSMIC_TYPOGRAPHY,
 } from '../../../theme/cosmicTokens';
 import { COSMIC_TIMING } from '../../../utils/cosmicAnimations';
 import GlassCard from './GlassCard';
@@ -81,26 +82,19 @@ const RITUAL_THEMES = {
 };
 
 // ============================================
-// CONFETTI PARTICLE
+// CONFETTI - OPTIMIZED (reduced count, simpler animation)
 // ============================================
 
-const ConfettiParticle = React.memo(({ index, color, delay }) => {
+const ConfettiParticle = React.memo(({ index, color, delay, startX, endX, size }) => {
   const translateY = useSharedValue(-50);
-  const translateX = useSharedValue(0);
+  const translateX = useSharedValue(startX);
   const rotate = useSharedValue(0);
   const opacity = useSharedValue(0);
-  const scale = useSharedValue(0);
-
-  const startX = useMemo(() => (Math.random() - 0.5) * SCREEN_WIDTH, []);
-  const endX = useMemo(() => startX + (Math.random() - 0.5) * 100, [startX]);
-  const size = useMemo(() => 8 + Math.random() * 8, []);
 
   useEffect(() => {
-    const particleDelay = delay + index * 50;
+    const particleDelay = delay + index * 80; // Slower stagger
 
     opacity.value = withDelay(particleDelay, withTiming(1, { duration: 200 }));
-    scale.value = withDelay(particleDelay, withSpring(1, COSMIC_TIMING.spring.bouncy));
-    translateX.value = startX;
     translateX.value = withDelay(
       particleDelay,
       withTiming(endX, { duration: 2000, easing: Easing.out(Easing.quad) })
@@ -111,7 +105,7 @@ const ConfettiParticle = React.memo(({ index, color, delay }) => {
     );
     rotate.value = withDelay(
       particleDelay,
-      withTiming(Math.random() * 720 - 360, { duration: 2500, easing: Easing.linear })
+      withTiming(Math.random() * 360, { duration: 2500, easing: Easing.linear })
     );
     opacity.value = withDelay(
       particleDelay + 2000,
@@ -124,7 +118,6 @@ const ConfettiParticle = React.memo(({ index, color, delay }) => {
       { translateX: translateX.value },
       { translateY: translateY.value },
       { rotate: `${rotate.value}deg` },
-      { scale: scale.value },
     ],
     opacity: opacity.value,
   }));
@@ -145,16 +138,28 @@ const ConfettiParticle = React.memo(({ index, color, delay }) => {
   );
 });
 
+// Pre-generate confetti data for consistent renders
+const generateConfettiData = (count, colors) => {
+  return Array.from({ length: count }, (_, i) => ({
+    id: i,
+    color: colors[i % colors.length],
+    startX: (Math.random() - 0.5) * SCREEN_WIDTH,
+    endX: (Math.random() - 0.5) * SCREEN_WIDTH + (Math.random() - 0.5) * 100,
+    size: 8 + Math.random() * 8,
+  }));
+};
+
 // ============================================
-// SPARKLE BURST
+// SPARKLE BURST - SIMPLIFIED
 // ============================================
 
 const SparkleBurst = React.memo(({ color, delay }) => {
+  // Reduced to 8 sparkles instead of 12
   const sparkles = useMemo(() =>
-    Array.from({ length: 12 }, (_, i) => ({
+    Array.from({ length: 8 }, (_, i) => ({
       id: i,
-      angle: (i / 12) * Math.PI * 2,
-      distance: 80 + Math.random() * 40,
+      angle: (i / 8) * Math.PI * 2,
+      distance: 60 + Math.random() * 30,
     })),
   []);
 
@@ -173,7 +178,7 @@ const SparkleBurst = React.memo(({ color, delay }) => {
   );
 });
 
-const SparkleParticle = ({ angle, distance, color, delay }) => {
+const SparkleParticle = React.memo(({ angle, distance, color, delay }) => {
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const opacity = useSharedValue(0);
@@ -185,12 +190,12 @@ const SparkleParticle = ({ angle, distance, color, delay }) => {
 
     opacity.value = withDelay(delay, withTiming(1, { duration: 100 }));
     scale.value = withDelay(delay, withSequence(
-      withSpring(1.5, COSMIC_TIMING.spring.bouncy),
-      withTiming(0, { duration: 500 })
+      withSpring(1.2, { damping: 12, stiffness: 200 }),
+      withTiming(0, { duration: 400 })
     ));
-    translateX.value = withDelay(delay, withTiming(targetX, { duration: 600, easing: COSMIC_TIMING.easing.smoothOut }));
-    translateY.value = withDelay(delay, withTiming(targetY, { duration: 600, easing: COSMIC_TIMING.easing.smoothOut }));
-    opacity.value = withDelay(delay + 400, withTiming(0, { duration: 200 }));
+    translateX.value = withDelay(delay, withTiming(targetX, { duration: 500, easing: Easing.out(Easing.quad) }));
+    translateY.value = withDelay(delay, withTiming(targetY, { duration: 500, easing: Easing.out(Easing.quad) }));
+    opacity.value = withDelay(delay + 300, withTiming(0, { duration: 200 }));
   }, []);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -204,43 +209,50 @@ const SparkleParticle = ({ angle, distance, color, delay }) => {
 
   return (
     <Animated.View style={[styles.sparkle, animatedStyle]}>
-      <Sparkles size={16} color={color} strokeWidth={2} />
+      <Sparkles size={14} color={color} strokeWidth={2} />
     </Animated.View>
   );
-};
+});
 
 // ============================================
-// XP COUNTER
+// XP COUNTER - OPTIMIZED (no setInterval)
 // ============================================
 
 const XPCounter = React.memo(({ xp, delay }) => {
   const [displayXP, setDisplayXP] = useState(0);
   const scale = useSharedValue(0);
   const opacity = useSharedValue(0);
+  const xpProgress = useSharedValue(0);
+
+  // Trigger haptic when complete
+  const onCountComplete = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  };
 
   useEffect(() => {
     opacity.value = withDelay(delay, withTiming(1, { duration: 300 }));
     scale.value = withDelay(delay, withSpring(1, COSMIC_TIMING.spring.bouncy));
 
-    // Animate counter
-    const startTime = Date.now();
-    const duration = 1500;
-    const interval = setInterval(() => {
-      const elapsed = Date.now() - startTime - delay;
-      if (elapsed < 0) return;
-
-      const progress = Math.min(elapsed / duration, 1);
-      const easedProgress = 1 - Math.pow(1 - progress, 3); // Ease out cubic
-      setDisplayXP(Math.round(xp * easedProgress));
-
-      if (progress >= 1) {
-        clearInterval(interval);
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    // Use Reanimated to animate XP counter
+    xpProgress.value = withDelay(delay, withTiming(1, {
+      duration: 1200,
+      easing: Easing.out(Easing.cubic),
+    }, (finished) => {
+      if (finished) {
+        runOnJS(onCountComplete)();
       }
-    }, 16);
-
-    return () => clearInterval(interval);
+    }));
   }, [xp, delay]);
+
+  // Update display value from animation
+  useAnimatedReaction(
+    () => xpProgress.value,
+    (progress) => {
+      const currentXP = Math.round(xp * progress);
+      runOnJS(setDisplayXP)(currentXP);
+    },
+    [xp]
+  );
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -305,7 +317,7 @@ const StreakBadge = React.memo(({ streak, isNewRecord, delay }) => {
 // ============================================
 
 const CompletionCelebration = ({
-  ritualType = 'heart', // 'heart' | 'gratitude' | 'breath' | 'water' | 'letter' | 'burn' | 'star'
+  ritualType = 'heart',
   xpEarned = 50,
   streakCount = 0,
   isNewRecord = false,
@@ -318,7 +330,6 @@ const CompletionCelebration = ({
   visible = true,
   style,
 }) => {
-  // Get theme
   const theme = RITUAL_THEMES[ritualType] || RITUAL_THEMES.heart;
 
   // Animation values
@@ -327,37 +338,39 @@ const CompletionCelebration = ({
   const contentOpacity = useSharedValue(0);
   const buttonsOpacity = useSharedValue(0);
 
-  // Confetti colors
-  const confettiColors = useMemo(() => [
-    theme.color,
-    COSMIC_COLORS.glow.gold,
-    COSMIC_COLORS.glow.cyan,
-    COSMIC_COLORS.glow.pink,
-    '#FFFFFF',
-  ], [theme.color]);
+  // Pre-generate confetti data (REDUCED to 15 particles)
+  const confettiData = useMemo(() => {
+    const colors = [
+      theme.color,
+      COSMIC_COLORS.glow.gold,
+      COSMIC_COLORS.glow.cyan,
+      COSMIC_COLORS.glow.pink,
+      '#FFFFFF',
+    ];
+    return generateConfettiData(15, colors);
+  }, [theme.color]);
+
+  // Haptic trigger
+  const triggerHaptic = () => {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  };
 
   // Animation sequence
   useEffect(() => {
     if (visible) {
-      // Background fade in
       containerOpacity.value = withTiming(1, { duration: 300 });
 
-      // Icon zoom + glow burst
       iconScale.value = withDelay(200, withSequence(
         withSpring(1.3, COSMIC_TIMING.spring.bouncy),
         withTiming(1, { duration: 200 })
-      ));
+      ), (finished) => {
+        if (finished) {
+          runOnJS(triggerHaptic)();
+        }
+      });
 
-      // Content fade in
       contentOpacity.value = withDelay(600, withTiming(1, { duration: 400 }));
-
-      // Buttons fade in
       buttonsOpacity.value = withDelay(1800, withTiming(1, { duration: 400 }));
-
-      // Haptic feedback
-      setTimeout(() => {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      }, 200);
     }
   }, [visible]);
 
@@ -388,13 +401,16 @@ const CompletionCelebration = ({
         style={StyleSheet.absoluteFill}
       />
 
-      {/* Confetti */}
+      {/* Confetti - REDUCED COUNT */}
       <View style={styles.confettiContainer} pointerEvents="none">
-        {Array.from({ length: 50 }).map((_, i) => (
+        {confettiData.map((particle) => (
           <ConfettiParticle
-            key={i}
-            index={i}
-            color={confettiColors[i % confettiColors.length]}
+            key={particle.id}
+            index={particle.id}
+            color={particle.color}
+            startX={particle.startX}
+            endX={particle.endX}
+            size={particle.size}
             delay={200}
           />
         ))}

@@ -287,13 +287,23 @@ class MultiPatternScanner {
         ? this._calculateZoneBoundaries(pattern, candles)
         : {};
 
+      // Get timestamps from candles (candles use 'timestamp' property, not 'time')
+      const startCandle = candles[candleIndexes.start];
+      const endCandle = candles[candleIndexes.end];
+
+      // Convert to seconds for lightweight-charts (it uses Unix seconds, not milliseconds)
+      const startTime = startCandle?.timestamp ? Math.floor(startCandle.timestamp / 1000) : null;
+      const endTime = endCandle?.timestamp ? Math.floor(endCandle.timestamp / 1000) : null;
+
+      console.log(`[MultiPatternScanner] Pattern ${pattern.patternType}: startIdx=${candleIndexes.start}, endIdx=${candleIndexes.end}, startTime=${startTime}, endTime=${endTime}`);
+
       return {
         ...pattern,
         ...zoneData,
         startCandleIndex: candleIndexes.start,
         endCandleIndex: candleIndexes.end,
-        startTime: candles[candleIndexes.start]?.time || null,
-        endTime: candles[candleIndexes.end]?.time || null,
+        startTime,
+        endTime,
       };
     });
   }

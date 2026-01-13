@@ -4,7 +4,7 @@
  * Reference: GEM_PARTNERSHIP_IMPLEMENTATION_PHASE4.md
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -31,6 +31,7 @@ import {
   RefreshCw,
   Settings,
   FileText,
+  Wifi,
 } from 'lucide-react-native';
 
 import { COLORS, GRADIENTS, SPACING, TYPOGRAPHY } from '../../utils/tokens';
@@ -48,7 +49,14 @@ const AdminPartnershipDashboard = () => {
   const [stats, setStats] = useState(null);
   const [pendingApplications, setPendingApplications] = useState([]);
   const [triggeringJob, setTriggeringJob] = useState(null);
+  const [realtimeConnected, setRealtimeConnected] = useState(false);
 
+  // Real-time subscription refs
+  const applicationsSubRef = useRef(null);
+  const partnersSubRef = useRef(null);
+  const commissionsSubRef = useRef(null);
+
+  // Initial load on focus
   useFocusEffect(
     useCallback(() => {
       if (isAdmin) {
@@ -56,6 +64,49 @@ const AdminPartnershipDashboard = () => {
       }
     }, [isAdmin])
   );
+
+  // Real-time subscriptions
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    console.log('[AdminPartnershipDashboard] Setting up real-time subscriptions...');
+
+    // Subscribe to applications changes
+    applicationsSubRef.current = ADMIN_PARTNERSHIP_SERVICE.subscribeToApplications((payload) => {
+      console.log('[AdminPartnershipDashboard] Applications update received:', payload.eventType);
+      // Auto-reload dashboard on any change
+      loadDashboard();
+      setRealtimeConnected(true);
+    });
+
+    // Subscribe to partners changes
+    partnersSubRef.current = ADMIN_PARTNERSHIP_SERVICE.subscribeToPartners((payload) => {
+      console.log('[AdminPartnershipDashboard] Partners update received:', payload.eventType);
+      // Auto-reload dashboard on any change
+      loadDashboard();
+      setRealtimeConnected(true);
+    });
+
+    // Subscribe to commissions changes (for monthly commissions stat)
+    commissionsSubRef.current = ADMIN_PARTNERSHIP_SERVICE.subscribeToCommissions((payload) => {
+      console.log('[AdminPartnershipDashboard] Commissions update received:', payload.eventType);
+      loadDashboard();
+      setRealtimeConnected(true);
+    });
+
+    setRealtimeConnected(true);
+
+    // Cleanup subscriptions on unmount
+    return () => {
+      console.log('[AdminPartnershipDashboard] Cleaning up real-time subscriptions...');
+      ADMIN_PARTNERSHIP_SERVICE.unsubscribe(applicationsSubRef.current);
+      ADMIN_PARTNERSHIP_SERVICE.unsubscribe(partnersSubRef.current);
+      ADMIN_PARTNERSHIP_SERVICE.unsubscribe(commissionsSubRef.current);
+      applicationsSubRef.current = null;
+      partnersSubRef.current = null;
+      commissionsSubRef.current = null;
+    };
+  }, [isAdmin]);
 
   const loadDashboard = async () => {
     try {
@@ -145,7 +196,15 @@ const AdminPartnershipDashboard = () => {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <ArrowLeft size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Quan Ly Partnership</Text>
+          <View style={styles.headerCenter}>
+            <Text style={styles.headerTitle}>Quan Ly Partnership</Text>
+            {realtimeConnected && (
+              <View style={styles.liveBadge}>
+                <Wifi size={10} color={COLORS.success} />
+                <Text style={styles.liveBadgeText}>Live</Text>
+              </View>
+            )}
+          </View>
           <TouchableOpacity onPress={onRefresh}>
             <RefreshCw size={20} color={COLORS.gold} />
           </TouchableOpacity>
@@ -428,10 +487,29 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
+  headerCenter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+  },
   headerTitle: {
     fontSize: TYPOGRAPHY.fontSize.lg,
     fontWeight: TYPOGRAPHY.fontWeight.bold,
     color: COLORS.textPrimary,
+  },
+  liveBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.success + '20',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 10,
+    gap: 3,
+  },
+  liveBadgeText: {
+    fontSize: 10,
+    fontWeight: TYPOGRAPHY.fontWeight.semibold,
+    color: COLORS.success,
   },
   loadingContainer: {
     flex: 1,

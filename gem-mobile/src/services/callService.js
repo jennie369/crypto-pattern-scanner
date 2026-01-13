@@ -2,20 +2,15 @@
  * Call Service
  * Handles call lifecycle management, database operations, and push notifications
  *
- * NOTE: WebRTC is optional. If react-native-webrtc is not installed,
- * call features will be disabled.
+ * REQUIREMENTS:
+ * - react-native-webrtc must be installed
+ * - App must be built with expo-dev-client (not Expo Go)
+ * - Proper permissions for camera/microphone
  */
 
 import { supabase } from './supabase';
 import { callSignalingService } from './callSignalingService';
-
-// Import webrtcService - it handles missing dependency internally
-let webrtcService = null;
-try {
-  webrtcService = require('./webrtcService').webrtcService;
-} catch (error) {
-  console.log('[CallService] WebRTC service not available');
-}
+import { webrtcService } from './webrtcService';
 import { Platform } from 'react-native';
 import {
   CALL_STATUS,
@@ -46,6 +41,15 @@ class CallService {
    */
   async initiateCall(conversationId, calleeId, callType = CALL_TYPE.AUDIO) {
     try {
+      // Check if WebRTC is available
+      if (!webrtcService.isAvailable) {
+        console.error('[CallService] WebRTC not available');
+        return {
+          success: false,
+          error: 'Tính năng gọi điện chưa khả dụng. Vui lòng cập nhật ứng dụng.'
+        };
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Chưa đăng nhập');
 
@@ -787,6 +791,14 @@ class CallService {
     webrtcService.cleanup();
     await callSignalingService.cleanup();
     this._cleanup();
+  }
+
+  /**
+   * Check if calls are available (WebRTC installed)
+   * @returns {boolean}
+   */
+  isCallsAvailable() {
+    return webrtcService.isAvailable;
   }
 }
 

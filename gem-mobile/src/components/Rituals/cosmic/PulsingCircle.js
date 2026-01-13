@@ -1,17 +1,17 @@
 /**
- * PulsingCircle - Breathing indicator with multiple patterns
- * Supports box breathing (4-4-4-4), relaxing (4-7-8), and custom patterns
+ * PulsingCircle - PERFORMANCE OPTIMIZED
+ * Removed setInterval/setTimeout, uses Reanimated callbacks
+ * Single animation driver for smooth 60fps
  */
 
-import React, { useEffect, useRef, useCallback, useState } from 'react';
+import React, { useEffect, useRef, useCallback, useState, useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
+  useAnimatedReaction,
   withTiming,
-  withSequence,
-  withDelay,
   Easing,
   runOnJS,
   cancelAnimation,
@@ -20,7 +20,6 @@ import * as Haptics from 'expo-haptics';
 
 import {
   COSMIC_COLORS,
-  COSMIC_TYPOGRAPHY,
 } from '../../../theme/cosmicTokens';
 import { COSMIC_TIMING } from '../../../utils/cosmicAnimations';
 
@@ -29,14 +28,12 @@ import { COSMIC_TIMING } from '../../../utils/cosmicAnimations';
 // ============================================
 
 const BREATH_PATTERNS = {
-  // Simple inhale-exhale
   'inhale-exhale': {
     phases: [
       { name: 'inhale', label: 'Hít vào', duration: 4000, scale: 1.3 },
       { name: 'exhale', label: 'Thở ra', duration: 4000, scale: 1 },
     ],
   },
-  // Box breathing: 4-4-4-4
   'box': {
     phases: [
       { name: 'inhale', label: 'Hít vào', duration: 4000, scale: 1.3 },
@@ -45,7 +42,6 @@ const BREATH_PATTERNS = {
       { name: 'rest', label: 'Nghỉ', duration: 4000, scale: 1 },
     ],
   },
-  // Relaxing breath: 4-7-8
   'relaxing': {
     phases: [
       { name: 'inhale', label: 'Hít vào', duration: 4000, scale: 1.3 },
@@ -53,7 +49,6 @@ const BREATH_PATTERNS = {
       { name: 'exhale', label: 'Thở ra', duration: 8000, scale: 1 },
     ],
   },
-  // Energizing breath: 2-2-2
   'energizing': {
     phases: [
       { name: 'inhale', label: 'Hít vào', duration: 2000, scale: 1.2 },
@@ -62,7 +57,6 @@ const BREATH_PATTERNS = {
   },
 };
 
-// Phase colors
 const PHASE_COLORS = {
   inhale: COSMIC_COLORS.ritualThemes.breath.phases.inhale,
   hold: COSMIC_COLORS.ritualThemes.breath.phases.hold,
@@ -71,53 +65,49 @@ const PHASE_COLORS = {
 };
 
 // ============================================
-// GLOW RING COMPONENT
+// GLOW RING - Static, no animation
 // ============================================
 
-const GlowRing = React.memo(({ size, color, opacity, blur }) => {
-  return (
-    <View
-      style={[
-        styles.glowRing,
-        {
-          width: size,
-          height: size,
-          borderRadius: size / 2,
-          backgroundColor: color,
-          opacity,
-          shadowColor: color,
-          shadowOpacity: 0.8,
-          shadowRadius: blur,
-        },
-      ]}
-    />
-  );
-});
+const GlowRing = React.memo(({ size, color, opacity, blur }) => (
+  <View
+    style={[
+      styles.glowRing,
+      {
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        backgroundColor: color,
+        opacity,
+        shadowColor: color,
+        shadowOpacity: 0.8,
+        shadowRadius: blur,
+      },
+    ]}
+  />
+));
 
 // ============================================
-// PHASE INDICATOR DOTS
+// PHASE INDICATOR DOTS - Static render
 // ============================================
 
-const PhaseIndicatorDots = React.memo(({ phases, currentPhaseIndex }) => {
-  return (
-    <View style={styles.dotsContainer}>
-      {phases.map((phase, index) => (
-        <View
-          key={index}
-          style={[
-            styles.dot,
-            {
-              backgroundColor: index === currentPhaseIndex
-                ? PHASE_COLORS[phase.name]
-                : 'rgba(255, 255, 255, 0.2)',
-              transform: [{ scale: index === currentPhaseIndex ? 1.3 : 1 }],
-            },
-          ]}
-        />
-      ))}
-    </View>
-  );
-});
+const PhaseIndicatorDots = React.memo(({ phases, currentPhaseIndex }) => (
+  <View style={styles.dotsContainer}>
+    {phases.map((phase, index) => (
+      <View
+        key={index}
+        style={[
+          styles.dot,
+          {
+            backgroundColor: index === currentPhaseIndex
+              ? PHASE_COLORS[phase.name]
+              : 'rgba(255, 255, 255, 0.2)',
+            transform: [{ scale: index === currentPhaseIndex ? 1.3 : 1 }],
+          },
+        ]}
+      />
+    ))}
+  </View>
+));
 
 // ============================================
 // MAIN COMPONENT
@@ -125,8 +115,8 @@ const PhaseIndicatorDots = React.memo(({ phases, currentPhaseIndex }) => {
 
 const PulsingCircle = ({
   size = 200,
-  pattern = 'box', // 'inhale-exhale' | 'box' | 'relaxing' | 'energizing' | custom
-  customPattern = null, // { phases: [...] }
+  pattern = 'box',
+  customPattern = null,
   cycles = 4,
   color = COSMIC_COLORS.ritualThemes.breath.primary,
   showGuide = true,
@@ -140,26 +130,32 @@ const PulsingCircle = ({
   autoStart = true,
   style,
 }) => {
-  // Animation values
+  // Animation values - MINIMAL shared values
   const scale = useSharedValue(1);
   const glowOpacity = useSharedValue(0.3);
-  const currentColor = useSharedValue(color);
+  const phaseProgress = useSharedValue(0); // 0-1 progress within current phase
 
-  // State
+  // State - only for UI display
   const [isActive, setIsActive] = useState(autoStart);
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
   const [currentCycle, setCurrentCycle] = useState(1);
-  const [phaseTimeRemaining, setPhaseTimeRemaining] = useState(0);
   const [phaseLabel, setPhaseLabel] = useState('');
+  const [phaseDuration, setPhaseDuration] = useState(0);
 
-  // Refs
-  const timerRef = useRef(null);
+  // Refs for tracking
   const cycleRef = useRef(1);
   const phaseIndexRef = useRef(0);
+  const isRunningRef = useRef(false);
 
   // Get pattern
   const breathPattern = customPattern || BREATH_PATTERNS[pattern] || BREATH_PATTERNS['box'];
   const phases = breathPattern.phases;
+
+  // Calculate time remaining from progress (0-1) and duration
+  const timeRemaining = useMemo(() => {
+    if (!phaseDuration) return 0;
+    return Math.ceil(phaseDuration * (1 - phaseProgress.value) / 1000);
+  }, [phaseDuration]);
 
   // Haptic feedback
   const triggerHaptic = useCallback((type) => {
@@ -173,110 +169,121 @@ const PulsingCircle = ({
     }
   }, [hapticFeedback]);
 
-  // Update phase info
-  const updatePhaseInfo = useCallback((phase, index) => {
-    setCurrentPhaseIndex(index);
-    setPhaseLabel(phase.label);
-    setPhaseTimeRemaining(Math.ceil(phase.duration / 1000));
+  // Phase change handler (called from animation callback)
+  const handlePhaseComplete = useCallback(() => {
+    if (!isRunningRef.current) return;
 
-    if (onPhaseChange) {
-      onPhaseChange(phase.name, index, cycleRef.current);
+    const nextPhaseIndex = (phaseIndexRef.current + 1) % phases.length;
+
+    // Check if cycle completed
+    if (nextPhaseIndex === 0) {
+      cycleRef.current += 1;
+      setCurrentCycle(cycleRef.current);
+
+      if (onCycleComplete) {
+        onCycleComplete(cycleRef.current - 1);
+      }
+
+      // Check if all cycles completed
+      if (cycles > 0 && cycleRef.current > cycles) {
+        isRunningRef.current = false;
+        setIsActive(false);
+        if (onComplete) {
+          onComplete();
+        }
+        return;
+      }
     }
-  }, [onPhaseChange]);
 
-  // Run animation for a single phase
-  const runPhase = useCallback((phase, index) => {
-    'worklet';
+    // Start next phase
+    phaseIndexRef.current = nextPhaseIndex;
+    startPhase(nextPhaseIndex);
+  }, [phases, cycles, onCycleComplete, onComplete]);
+
+  // Start a single phase animation
+  const startPhase = useCallback((phaseIndex) => {
+    if (!isRunningRef.current) return;
+
+    const phase = phases[phaseIndex];
     const easing = COSMIC_TIMING.easing.breath;
 
-    // Scale animation
+    // Update UI state
+    setCurrentPhaseIndex(phaseIndex);
+    setPhaseLabel(phase.label);
+    setPhaseDuration(phase.duration);
+
+    // Trigger haptic
+    triggerHaptic(phase.name);
+
+    // Notify phase change
+    if (onPhaseChange) {
+      onPhaseChange(phase.name, phaseIndex, cycleRef.current);
+    }
+
+    // Reset progress
+    phaseProgress.value = 0;
+
+    // Animate scale
     scale.value = withTiming(phase.scale, {
       duration: phase.duration,
       easing,
     });
 
-    // Glow animation
+    // Animate glow
     const targetGlow = phase.scale > 1 ? 0.6 : 0.3;
     glowOpacity.value = withTiming(targetGlow, {
       duration: phase.duration,
       easing,
     });
-  }, []);
 
-  // Run breathing cycle
-  const runBreathingCycle = useCallback(() => {
-    if (!isActive) return;
+    // Animate progress (for timer display) with callback for next phase
+    phaseProgress.value = withTiming(1, {
+      duration: phase.duration,
+      easing: Easing.linear,
+    }, (finished) => {
+      if (finished) {
+        runOnJS(handlePhaseComplete)();
+      }
+    });
+  }, [phases, triggerHaptic, onPhaseChange, handlePhaseComplete]);
 
-    const runNextPhase = (phaseIndex) => {
-      if (!isActive) return;
+  // Start breathing cycle
+  const startBreathing = useCallback(() => {
+    isRunningRef.current = true;
+    cycleRef.current = 1;
+    phaseIndexRef.current = 0;
+    setCurrentCycle(1);
+    startPhase(0);
+  }, [startPhase]);
 
-      const phase = phases[phaseIndex];
-      phaseIndexRef.current = phaseIndex;
-
-      // Update UI
-      runOnJS(updatePhaseInfo)(phase, phaseIndex);
-      runOnJS(triggerHaptic)(phase.name);
-
-      // Run animation
-      runPhase(phase, phaseIndex);
-
-      // Start countdown timer
-      let timeLeft = Math.ceil(phase.duration / 1000);
-      clearInterval(timerRef.current);
-      timerRef.current = setInterval(() => {
-        timeLeft -= 1;
-        setPhaseTimeRemaining(Math.max(0, timeLeft));
-      }, 1000);
-
-      // Schedule next phase
-      setTimeout(() => {
-        clearInterval(timerRef.current);
-
-        const nextPhaseIndex = (phaseIndex + 1) % phases.length;
-
-        // Check if cycle completed
-        if (nextPhaseIndex === 0) {
-          cycleRef.current += 1;
-          setCurrentCycle(cycleRef.current);
-
-          if (onCycleComplete) {
-            onCycleComplete(cycleRef.current - 1);
-          }
-
-          // Check if all cycles completed
-          if (cycles > 0 && cycleRef.current > cycles) {
-            setIsActive(false);
-            if (onComplete) {
-              onComplete();
-            }
-            return;
-          }
-        }
-
-        // Run next phase
-        runNextPhase(nextPhaseIndex);
-      }, phase.duration);
-    };
-
-    // Start from first phase
-    runNextPhase(0);
-  }, [isActive, phases, cycles, onCycleComplete, onComplete, runPhase, updatePhaseInfo, triggerHaptic]);
-
-  // Start/stop effect
+  // Effect to start/stop
   useEffect(() => {
-    if (isActive) {
-      cycleRef.current = 1;
-      phaseIndexRef.current = 0;
-      setCurrentCycle(1);
-      runBreathingCycle();
+    if (isActive && !isRunningRef.current) {
+      startBreathing();
+    } else if (!isActive) {
+      isRunningRef.current = false;
+      cancelAnimation(scale);
+      cancelAnimation(glowOpacity);
+      cancelAnimation(phaseProgress);
     }
 
     return () => {
-      clearInterval(timerRef.current);
+      isRunningRef.current = false;
       cancelAnimation(scale);
       cancelAnimation(glowOpacity);
+      cancelAnimation(phaseProgress);
     };
-  }, [isActive]);
+  }, [isActive, startBreathing]);
+
+  // Animated reaction to update timer display
+  useAnimatedReaction(
+    () => phaseProgress.value,
+    (progress) => {
+      // This runs on UI thread, we use it to track progress
+      // Timer is calculated in the render based on phaseDuration
+    },
+    [phaseProgress]
+  );
 
   // Animated styles
   const circleStyle = useAnimatedStyle(() => ({
@@ -292,7 +299,14 @@ const PulsingCircle = ({
     ? PHASE_COLORS[phases[currentPhaseIndex].name]
     : color;
 
-  // Calculate sizes
+  // Calculate display time (derived from progress shared value)
+  const displayTime = useMemo(() => {
+    if (!phaseDuration) return 0;
+    // We use phaseDuration and approximate based on phase index change
+    return Math.ceil(phaseDuration / 1000);
+  }, [phaseDuration, currentPhaseIndex]);
+
+  // Sizes
   const outerSize = size * 1.4;
   const innerSize = size;
 
@@ -310,7 +324,6 @@ const PulsingCircle = ({
 
       {/* Main pulsing circle */}
       <Animated.View style={[styles.circleContainer, circleStyle]}>
-        {/* Background circle */}
         <View
           style={[
             styles.circle,
@@ -343,9 +356,10 @@ const PulsingCircle = ({
                 </Text>
               )}
               {showTimer && (
-                <Text style={styles.timer}>
-                  {phaseTimeRemaining}s
-                </Text>
+                <AnimatedTimer
+                  duration={phaseDuration}
+                  progress={phaseProgress}
+                />
               )}
             </View>
           )}
@@ -373,7 +387,39 @@ const PulsingCircle = ({
 };
 
 // ============================================
-// CONTROL METHODS (for external control)
+// ANIMATED TIMER - Uses shared value for smooth update
+// ============================================
+
+const AnimatedTimer = React.memo(({ duration, progress }) => {
+  const animatedStyle = useAnimatedStyle(() => {
+    // Calculate remaining seconds based on progress
+    const remaining = Math.ceil((duration * (1 - progress.value)) / 1000);
+    return {
+      // We can't directly render text in worklet, but we use this for potential future optimization
+    };
+  });
+
+  // For now, use derived value approach
+  const [displayTime, setDisplayTime] = useState(Math.ceil(duration / 1000));
+
+  useAnimatedReaction(
+    () => progress.value,
+    (prog) => {
+      const remaining = Math.max(0, Math.ceil((duration * (1 - prog)) / 1000));
+      runOnJS(setDisplayTime)(remaining);
+    },
+    [duration]
+  );
+
+  return (
+    <Text style={styles.timer}>
+      {displayTime}s
+    </Text>
+  );
+});
+
+// ============================================
+// CONTROL METHODS
 // ============================================
 
 export const usePulsingCircleControl = () => {

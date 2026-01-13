@@ -436,8 +436,40 @@ class MessagingService {
           table: 'messages',
           filter: `conversation_id=eq.${conversationId}`
         },
-        (payload) => {
-          callback(payload.new);
+        async (payload) => {
+          // CRITICAL FIX: payload.new only contains raw message data
+          // We need to fetch full message with user data for proper display
+          try {
+            const { data: fullMessage, error } = await supabase
+              .from('messages')
+              .select(`
+                *,
+                users:sender_id(
+                  id,
+                  display_name,
+                  avatar_url
+                ),
+                message_reactions(
+                  id,
+                  emoji,
+                  user_id
+                )
+              `)
+              .eq('id', payload.new.id)
+              .single();
+
+            if (error) {
+              console.error('[messagingService] Error fetching full message:', error);
+              // Fallback to raw payload if fetch fails
+              callback(payload.new);
+              return;
+            }
+
+            callback(fullMessage);
+          } catch (err) {
+            console.error('[messagingService] subscribeToMessages error:', err);
+            callback(payload.new);
+          }
         }
       )
       .on(
@@ -448,12 +480,43 @@ class MessagingService {
           table: 'messages',
           filter: `conversation_id=eq.${conversationId}`
         },
-        (payload) => {
-          // Handle message updates (reactions, soft deletes)
-          callback(payload.new, 'update');
+        async (payload) => {
+          // Handle message updates (reactions, soft deletes, recalls)
+          try {
+            const { data: fullMessage, error } = await supabase
+              .from('messages')
+              .select(`
+                *,
+                users:sender_id(
+                  id,
+                  display_name,
+                  avatar_url
+                ),
+                message_reactions(
+                  id,
+                  emoji,
+                  user_id
+                )
+              `)
+              .eq('id', payload.new.id)
+              .single();
+
+            if (error) {
+              console.error('[messagingService] Error fetching updated message:', error);
+              callback(payload.new, 'update');
+              return;
+            }
+
+            callback(fullMessage, 'update');
+          } catch (err) {
+            console.error('[messagingService] subscribeToMessages update error:', err);
+            callback(payload.new, 'update');
+          }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log(`[messagingService] Message subscription status for ${conversationId}:`, status);
+      });
 
     return channel;
   }
@@ -477,6 +540,9 @@ class MessagingService {
       }
     });
 
+    // Track if channel is subscribed
+    let isSubscribed = false;
+
     channel
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState();
@@ -487,7 +553,27 @@ class MessagingService {
 
         onTypingChange(typingUsers);
       })
-      .subscribe();
+      .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+        console.log(`[messagingService] Presence join: ${key}`, newPresences);
+      })
+      .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+        console.log(`[messagingService] Presence leave: ${key}`, leftPresences);
+        // When a user leaves, they are no longer typing
+        onTypingChange([]);
+      })
+      .subscribe(async (status) => {
+        console.log(`[messagingService] Typing subscription status for ${conversationId}:`, status);
+        if (status === 'SUBSCRIBED') {
+          isSubscribed = true;
+          // Track initial presence (not typing)
+          await channel.track({
+            user_id: userId,
+            typing: false,
+            display_name: '',
+            online_at: new Date().toISOString()
+          });
+        }
+      });
 
     // Return channel and helper function to broadcast typing
     return {
@@ -496,12 +582,21 @@ class MessagingService {
        * Broadcast typing status
        * CRITICAL: Timeout MUST be 2000ms to match web
        */
-      broadcastTyping: (isTyping, displayName) => {
-        channel.track({
-          user_id: userId,
-          typing: isTyping,
-          display_name: displayName
-        });
+      broadcastTyping: async (isTyping, displayName = '') => {
+        if (!isSubscribed) {
+          console.warn('[messagingService] Channel not subscribed yet, cannot broadcast typing');
+          return;
+        }
+        try {
+          await channel.track({
+            user_id: userId,
+            typing: isTyping,
+            display_name: displayName,
+            online_at: new Date().toISOString()
+          });
+        } catch (err) {
+          console.error('[messagingService] Error broadcasting typing:', err);
+        }
       }
     };
   }

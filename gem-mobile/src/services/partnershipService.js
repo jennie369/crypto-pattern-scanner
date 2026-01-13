@@ -219,8 +219,9 @@ export const partnershipService = {
 
   /**
    * Notify admins about new partnership application
+   * Creates in-app notifications AND sends push notifications via Edge Function
    */
-  async notifyAdminsNewApplication({ applicationId, applicationType, fullName, userId }) {
+  async notifyAdminsNewApplication({ applicationId, applicationType, fullName, userId, email }) {
     try {
       // Get all admin users
       const { data: admins } = await supabase
@@ -233,13 +234,14 @@ export const partnershipService = {
         return;
       }
 
-      const typeText = applicationType === 'ctv' ? 'CTV' : 'Affiliate';
+      const typeText = applicationType === 'ctv' ? 'CTV' : 'KOL Affiliate';
+      const isKOL = applicationType === 'kol';
 
-      // Create notifications for each admin
+      // Create in-app notifications for each admin
       const notifications = admins.map(admin => ({
         user_id: admin.id,
         type: 'admin_partnership_application',
-        title: `Đơn đăng ký ${typeText} mới`,
+        title: isKOL ? '🌟 Đơn đăng ký KOL mới!' : '📋 Đơn đăng ký CTV mới!',
         message: `${fullName} vừa đăng ký làm ${typeText}. Vui lòng xem xét và duyệt đơn.`,
         data: JSON.stringify({
           application_id: applicationId,
@@ -258,8 +260,38 @@ export const partnershipService = {
         // Try 'notifications' table as fallback
         await supabase.from('notifications').insert(notifications);
       } else {
-        console.log('[Partnership] Admin notifications sent:', admins.length);
+        console.log('[Partnership] Admin in-app notifications sent:', admins.length);
       }
+
+      // ========== SEND PUSH NOTIFICATIONS VIA EDGE FUNCTION ==========
+      try {
+        const { data: pushResult, error: pushError } = await supabase.functions.invoke(
+          'notify-admins-partnership',
+          {
+            body: {
+              event_type: 'new_application',
+              data: {
+                application_id: applicationId,
+                application_type: applicationType,
+                user_id: userId,
+                full_name: fullName,
+                email: email,
+              },
+            },
+          }
+        );
+
+        if (pushError) {
+          console.error('[Partnership] Push notification error:', pushError);
+        } else {
+          console.log('[Partnership] Push notifications sent:', pushResult);
+        }
+      } catch (pushErr) {
+        console.error('[Partnership] Edge function error:', pushErr);
+        // Don't fail the whole operation if push fails
+      }
+      // ================================================================
+
     } catch (error) {
       console.error('[Partnership] notifyAdminsNewApplication error:', error);
     }
@@ -638,12 +670,13 @@ export const partnershipService = {
 
       if (error) throw error;
 
-      // Notify admins
+      // Notify admins (in-app + push)
       await this.notifyAdminsNewApplication({
         applicationId: application.id,
         applicationType: 'ctv',
         fullName: data.full_name,
         userId,
+        email: data.email,
       });
 
       return {

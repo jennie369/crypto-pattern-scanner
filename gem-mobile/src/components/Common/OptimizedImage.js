@@ -6,15 +6,20 @@
  * - React Native Image.prefetch for caching
  * - Shimmer placeholder effect while loading
  * - Fade-in animation when loaded
- * - Automatic retry on failure
+ * - Automatic retry on failure (up to 3 times)
  * - Memory-efficient prefetching queue
+ * - Fallback to placeholder on error
  *
  * Created: December 14, 2025
+ * Updated: January 11, 2026 - Added retry logic and better fallback handling
  */
 
 import React, { useState, useEffect, useRef, memo } from 'react';
 import { View, Image, StyleSheet, Animated } from 'react-native';
 import { COLORS } from '../../utils/tokens';
+
+// Default fallback image
+const DEFAULT_PLACEHOLDER = 'https://via.placeholder.com/400x400/1a0b2e/FFBD59?text=GEM';
 
 // In-memory cache to track which images have been prefetched
 const prefetchedUrls = new Set();
@@ -32,6 +37,7 @@ export const prefetchImages = async (urls) => {
   const validUrls = urls.filter(url =>
     url &&
     typeof url === 'string' &&
+    url.startsWith('http') &&
     !prefetchedUrls.has(url)
   );
 
@@ -89,19 +95,35 @@ const OptimizedImage = memo(({
   style,
   resizeMode = 'cover',
   showPlaceholder = true,
+  fallbackUri = DEFAULT_PLACEHOLDER,
+  maxRetries = 2,
   onLoad,
   onError,
   ...props
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const [currentUri, setCurrentUri] = useState(null);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   // Resolve image source
-  const imageUri = uri || (typeof source === 'object' ? source.uri : source);
+  const imageUri = uri || (typeof source === 'object' ? source?.uri : source);
+
+  // Initialize current URI
+  useEffect(() => {
+    if (imageUri && typeof imageUri === 'string' && imageUri.startsWith('http')) {
+      setCurrentUri(imageUri);
+      setHasError(false);
+      setRetryCount(0);
+    } else {
+      // Invalid URI, use fallback
+      setCurrentUri(fallbackUri);
+    }
+  }, [imageUri, fallbackUri]);
 
   // Check if image was already prefetched - skip loading state if so
-  const wasPrefetched = imageUri && prefetchedUrls.has(imageUri);
+  const wasPrefetched = currentUri && prefetchedUrls.has(currentUri);
 
   // Initialize fade value to 1 if already prefetched
   useEffect(() => {
@@ -109,7 +131,7 @@ const OptimizedImage = memo(({
       fadeAnim.setValue(1);
       setIsLoading(false);
     }
-  }, [wasPrefetched]);
+  }, [wasPrefetched, currentUri]);
 
   const handleLoad = (event) => {
     setIsLoading(false);
@@ -125,36 +147,53 @@ const OptimizedImage = memo(({
     }
 
     // Mark as prefetched for future renders
-    if (imageUri) {
-      prefetchedUrls.add(imageUri);
+    if (currentUri) {
+      prefetchedUrls.add(currentUri);
     }
 
     onLoad?.(event);
   };
 
   const handleError = (event) => {
-    setIsLoading(false);
-    setHasError(true);
-    onError?.(event);
+    // Try to retry if we haven't exceeded max retries
+    if (retryCount < maxRetries && currentUri !== fallbackUri) {
+      setRetryCount(prev => prev + 1);
+      // Small delay before retry
+      setTimeout(() => {
+        setIsLoading(true);
+        fadeAnim.setValue(0);
+      }, 500);
+    } else {
+      // All retries failed, use fallback
+      setIsLoading(false);
+      setHasError(true);
+      setCurrentUri(fallbackUri);
+      onError?.(event);
+    }
   };
 
-  // If no valid URI or error, show placeholder
-  if (!imageUri || hasError) {
+  // If no valid URI, show placeholder
+  if (!currentUri) {
     return (
-      <View style={[styles.placeholder, style]} />
+      <View style={[styles.placeholder, style]}>
+        <View style={styles.placeholderIcon} />
+      </View>
     );
   }
 
   return (
     <View style={[styles.container, style]}>
-      {/* Static placeholder - shows while loading (no animation to save resources) */}
+      {/* Static placeholder - shows while loading */}
       {isLoading && showPlaceholder && (
-        <View style={[StyleSheet.absoluteFill, styles.placeholder]} />
+        <View style={[StyleSheet.absoluteFill, styles.placeholder]}>
+          <View style={styles.loadingDot} />
+        </View>
       )}
 
       {/* Actual image with fade-in */}
       <Animated.Image
-        source={{ uri: imageUri, cache: 'force-cache' }}
+        key={`${currentUri}-${retryCount}`} // Force re-render on retry
+        source={{ uri: currentUri, cache: 'force-cache' }}
         style={[
           StyleSheet.absoluteFill,
           { opacity: fadeAnim },
@@ -164,6 +203,13 @@ const OptimizedImage = memo(({
         onError={handleError}
         {...props}
       />
+
+      {/* Error state - show fallback indicator */}
+      {hasError && currentUri === fallbackUri && (
+        <View style={[StyleSheet.absoluteFill, styles.errorOverlay]}>
+          <View style={styles.errorIcon} />
+        </View>
+      )}
     </View>
   );
 });
@@ -173,12 +219,36 @@ OptimizedImage.displayName = 'OptimizedImage';
 const styles = StyleSheet.create({
   container: {
     overflow: 'hidden',
+    backgroundColor: COLORS.glassBgHeavy || 'rgba(30, 32, 80, 0.7)',
   },
   placeholder: {
     backgroundColor: COLORS.glassBgHeavy || 'rgba(30, 32, 80, 0.7)',
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
+  },
+  placeholderIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: 'rgba(106, 91, 255, 0.2)',
+  },
+  loadingDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255, 189, 89, 0.4)',
+  },
+  errorOverlay: {
+    backgroundColor: 'rgba(15, 16, 48, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(156, 6, 18, 0.3)',
   },
 });
 

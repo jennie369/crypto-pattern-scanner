@@ -21,7 +21,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Search, ShoppingCart, ShoppingBag, Heart } from 'lucide-react-native';
-import { ProductCard, CategoryFilter } from './components';
+import { ProductCard, CategoryFilter, DigitalProductsSection } from './components';
 import ProductSection from './components/ProductSection';
 import ShopCategoryTabs from './components/ShopCategoryTabs';
 import CourseSection from './components/CourseSection';
@@ -494,6 +494,15 @@ const ShopScreen = ({ navigation }) => {
 
               {/* Hero Banner Carousel */}
               <HeroBannerCarousel style={{ marginTop: SPACING.md }} />
+
+              {/* Digital Products Section */}
+              <DigitalProductsSection
+                title="Sản Phẩm Số"
+                subtitle="Khóa học & Công cụ Premium"
+                limit={4}
+                showHero={true}
+                showCategories={true}
+              />
 
               {/* Category Grid */}
               <CategoryGrid />
