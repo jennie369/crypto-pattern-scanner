@@ -2165,6 +2165,20 @@ body.editor-fullscreen-active > nav {
   animation-fill-mode: forwards !important;
 }
 
+/* ═══ FIX LANDING PAGE TEMPLATES - Hide decorative backgrounds ═══ */
+/* These elements use position:fixed/absolute with z-index:-1 which breaks editor layout */
+/* MUST come AFTER opacity:1 rule and use higher specificity to override it */
+.html-preview.wysiwyg-editor > .background-container,
+.html-preview.wysiwyg-editor .background-container,
+.html-preview.wysiwyg-editor .bg-layer-base,
+.html-preview.wysiwyg-editor .bg-container,
+.html-preview.wysiwyg-editor .orb,
+.html-preview.wysiwyg-editor .orb-1,
+.html-preview.wysiwyg-editor .orb-2,
+.html-preview.wysiwyg-editor .orb-3 {
+  display: none !important;
+}
+
 /* But keep actual hidden elements hidden */
 .html-preview.wysiwyg-editor [hidden],
 .html-preview.wysiwyg-editor [style*="display: none"],
